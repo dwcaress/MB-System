@@ -132,8 +132,8 @@ by MBprocess.";
 	char	swathfile[MB_PATH_MAXLINE];
 	char	amptablefile[MB_PATH_MAXLINE];
 	char	sstablefile[MB_PATH_MAXLINE];
-	FILE	*atfp;
-	FILE	*stfp;
+	FILE	*atfp = NULL;
+	FILE	*stfp = NULL;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -167,12 +167,12 @@ by MBprocess.";
 	/* slope calculation variables */
 	int	nsmooth = 5;
 	int	ndepths;
-	double	*depths;
-	double	*depthsmooth;
-	double	*depthacrosstrack;
+	double	*depths = NULL;
+	double	*depthsmooth = NULL;
+	double	*depthacrosstrack = NULL;
 	int	nslopes;
-	double	*slopes;
-	double	*slopeacrosstrack;
+	double	*slopes = NULL;
+	double	*slopeacrosstrack = NULL;
 
 	/* topography parameters */
 	struct mbba_grid_struct grid;

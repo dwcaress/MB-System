@@ -107,6 +107,18 @@ int main (int argc, char **argv)
 	int	obeams_amp;
 	int	opixels_ss;
 
+	/* data record source types */
+	int platform_source;
+	int	nav_source;
+	int	heading_source;
+	int	vru_source;
+	int	svp_source;
+
+	/* platform definition file */
+	char	platform_file[MB_PATH_MAXLINE];
+	int	use_platform_file = MB_NO;
+	struct mb_platform_struct *platform = NULL;
+
 	/* MBIO read values */
 	void	*imbio_ptr = NULL;
 	struct mb_io_struct *imb_io_ptr = NULL;
@@ -120,12 +132,13 @@ int main (int argc, char **argv)
 	double	navlon;
 	double	navlat;
 	double	speed;
-	double	heading;
+	double	heading, beamheading;
 	double	distance;
 	double	altitude;
 	double	sonardepth;
-	double	roll;
-	double	pitch;
+	double	roll, beamroll;
+	double	pitch, beampitch;
+	double	heave;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -221,24 +234,39 @@ int main (int argc, char **argv)
 	double	*timelag_model = NULL;
 
 	/* sensor offset parameters */
+	int		offset_sonar_mode = MB_NO;
 	double	offset_sonar_roll = 0.0;
 	double	offset_sonar_pitch = 0.0;
 	double	offset_sonar_heading = 0.0;
 	double	offset_sonar_x = 0.0;
 	double	offset_sonar_y = 0.0;
 	double	offset_sonar_z = 0.0;
-	double	offset_sonar_t = 0.0;
+	int		offset_mru_mode = MB_NO;
 	double	offset_mru_x = 0.0;
 	double	offset_mru_y = 0.0;
 	double	offset_mru_z = 0.0;
-	double	offset_mru_t = 0.0;
+	int		offset_nav_mode = MB_NO;
 	double	offset_nav_x = 0.0;
 	double	offset_nav_y = 0.0;
 	double	offset_nav_z = 0.0;
-	double	offset_nav_t = 0.0;
 
 	/* processing kluge modes */
 	int	klugemode;
+	int kluge_force_attitude_compensation = MB_NO;
+	int kluge_flip_attitude_sign = MB_NO;
+	
+	/* variables for beam angle calculation */
+	mb_3D_orientation tx_align;
+	mb_3D_orientation tx_orientation;
+	double tx_steer;
+	mb_3D_orientation rx_align;
+	mb_3D_orientation rx_orientation;
+	double rx_steer;
+	double reference_heading;
+	double beamAzimuth;
+	double beamDepression;
+	//double rollbias = 0.0;
+	//double pitchbias = 0.0;
 
 	int	interp_status;
 	double	alpha, beta, theta, phi;
@@ -259,7 +287,7 @@ int main (int argc, char **argv)
 	int	type;
 	double	offset_roll, offset_pitch, offset_heading;
 	double	offset_x, offset_y, offset_z, offset_t;
-	double	lever_x, lever_y, lever_z;
+	//double	lever_x, lever_y, lever_z;
 	int	i, j;
 
 	/* get current default values */
@@ -270,7 +298,7 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:D:d:F:f:I:i:J:j:K:k:LlM:m:N:n:O:o:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:D:d:F:f:G:g:I:i:J:j:K:k:LlM:m:N:n:O:o:T:t:VvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -285,28 +313,28 @@ int main (int argc, char **argv)
 		case 'a':
 			nscan = sscanf (optarg,"%d/%lf/%lf/%lf/%lf",
 					&type, &offset_x, &offset_y, &offset_z, &offset_t);
-			if (nscan == 5)
+			if (nscan >= 4)
 				{
 				if (type == MBHYSWEEPPREPROCESS_SONAR_OFFSET_SONAR)
 					{
+					offset_sonar_mode = MB_YES;
 					offset_sonar_x = offset_x;
 					offset_sonar_y = offset_y;
 					offset_sonar_z = offset_z;
-					offset_sonar_t = offset_t;
 					}
 				else if (type == MBHYSWEEPPREPROCESS_SONAR_OFFSET_MRU)
 					{
+					offset_mru_mode = MB_YES;
 					offset_mru_x = offset_x;
 					offset_mru_y = offset_y;
 					offset_mru_z = offset_z;
-					offset_mru_t = offset_t;
 					}
 				else if (type == MBHYSWEEPPREPROCESS_SONAR_OFFSET_NAVIGATION)
 					{
+					offset_nav_mode = MB_YES;
 					offset_nav_x = offset_x;
 					offset_nav_y = offset_y;
 					offset_nav_z = offset_z;
-					offset_nav_t = offset_t;
 					}
 				}
 			flag++;
@@ -317,6 +345,7 @@ int main (int argc, char **argv)
 					&offset_roll, &offset_pitch, &offset_heading);
 			if (nscan == 3)
 				{
+				offset_sonar_mode = MB_YES;
 				offset_sonar_roll = offset_roll;
 				offset_sonar_pitch = offset_pitch;
 				offset_sonar_heading = offset_heading;
@@ -339,6 +368,12 @@ int main (int argc, char **argv)
 			sscanf (optarg,"%d", &format);
 			flag++;
 			break;
+		case 'G':
+		case 'g':
+			sscanf (optarg,"%s", platform_file);
+			use_platform_file = MB_YES;
+			flag++;
+			break;
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", read_file);
@@ -353,6 +388,10 @@ int main (int argc, char **argv)
 		case 'K':
 		case 'k':
 			sscanf (optarg,"%d", &klugemode);
+			if (klugemode == 1)
+				kluge_force_attitude_compensation = MB_YES;
+			else if (klugemode == 2)
+				kluge_flip_attitude_sign = MB_YES;
 			flag++;
 			break;
 		case 'L':
@@ -426,68 +465,70 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Control Parameters:\n");
-		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
-		fprintf(stderr,"dbg2       help:                %d\n",help);
-		fprintf(stderr,"dbg2       format:              %d\n",format);
-		fprintf(stderr,"dbg2       pings:               %d\n",pings);
-		fprintf(stderr,"dbg2       lonflip:             %d\n",lonflip);
-		fprintf(stderr,"dbg2       bounds[0]:           %f\n",bounds[0]);
-		fprintf(stderr,"dbg2       bounds[1]:           %f\n",bounds[1]);
-		fprintf(stderr,"dbg2       bounds[2]:           %f\n",bounds[2]);
-		fprintf(stderr,"dbg2       bounds[3]:           %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       btime_i[0]:          %d\n",btime_i[0]);
-		fprintf(stderr,"dbg2       btime_i[1]:          %d\n",btime_i[1]);
-		fprintf(stderr,"dbg2       btime_i[2]:          %d\n",btime_i[2]);
-		fprintf(stderr,"dbg2       btime_i[3]:          %d\n",btime_i[3]);
-		fprintf(stderr,"dbg2       btime_i[4]:          %d\n",btime_i[4]);
-		fprintf(stderr,"dbg2       btime_i[5]:          %d\n",btime_i[5]);
-		fprintf(stderr,"dbg2       btime_i[6]:          %d\n",btime_i[6]);
-		fprintf(stderr,"dbg2       etime_i[0]:          %d\n",etime_i[0]);
-		fprintf(stderr,"dbg2       etime_i[1]:          %d\n",etime_i[1]);
-		fprintf(stderr,"dbg2       etime_i[2]:          %d\n",etime_i[2]);
-		fprintf(stderr,"dbg2       etime_i[3]:          %d\n",etime_i[3]);
-		fprintf(stderr,"dbg2       etime_i[4]:          %d\n",etime_i[4]);
-		fprintf(stderr,"dbg2       etime_i[5]:          %d\n",etime_i[5]);
-		fprintf(stderr,"dbg2       etime_i[6]:          %d\n",etime_i[6]);
-		fprintf(stderr,"dbg2       speedmin:            %f\n",speedmin);
-		fprintf(stderr,"dbg2       timegap:             %f\n",timegap);
-		fprintf(stderr,"dbg2       read_file:           %s\n",read_file);
-		fprintf(stderr,"dbg2       ofile:               %s\n",ofile);
-		fprintf(stderr,"dbg2       ofile_set:           %d\n",ofile_set);
-		fprintf(stderr,"dbg2       projection_set:      %d\n",projection_set);
-		fprintf(stderr,"dbg2       proj4command:        %s\n",proj4command);
-		fprintf(stderr,"dbg2       navfile:             %s\n",navfile);
-		fprintf(stderr,"dbg2       navdata:             %d\n",navdata);
-		fprintf(stderr,"dbg2       sonardepthfile:      %s\n",sonardepthfile);
-		fprintf(stderr,"dbg2       sonardepthdata:      %d\n",sonardepthdata);
-		fprintf(stderr,"dbg2       timelagmode:         %d\n",timelagmode);
+		fprintf(stderr,"dbg2       verbose:               %d\n",verbose);
+		fprintf(stderr,"dbg2       help:                  %d\n",help);
+		fprintf(stderr,"dbg2       format:                %d\n",format);
+		fprintf(stderr,"dbg2       pings:                 %d\n",pings);
+		fprintf(stderr,"dbg2       lonflip:               %d\n",lonflip);
+		fprintf(stderr,"dbg2       bounds[0]:             %f\n",bounds[0]);
+		fprintf(stderr,"dbg2       bounds[1]:             %f\n",bounds[1]);
+		fprintf(stderr,"dbg2       bounds[2]:             %f\n",bounds[2]);
+		fprintf(stderr,"dbg2       bounds[3]:             %f\n",bounds[3]);
+		fprintf(stderr,"dbg2       btime_i[0]:            %d\n",btime_i[0]);
+		fprintf(stderr,"dbg2       btime_i[1]:            %d\n",btime_i[1]);
+		fprintf(stderr,"dbg2       btime_i[2]:            %d\n",btime_i[2]);
+		fprintf(stderr,"dbg2       btime_i[3]:            %d\n",btime_i[3]);
+		fprintf(stderr,"dbg2       btime_i[4]:            %d\n",btime_i[4]);
+		fprintf(stderr,"dbg2       btime_i[5]:            %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:            %d\n",btime_i[6]);
+		fprintf(stderr,"dbg2       etime_i[0]:            %d\n",etime_i[0]);
+		fprintf(stderr,"dbg2       etime_i[1]:            %d\n",etime_i[1]);
+		fprintf(stderr,"dbg2       etime_i[2]:            %d\n",etime_i[2]);
+		fprintf(stderr,"dbg2       etime_i[3]:            %d\n",etime_i[3]);
+		fprintf(stderr,"dbg2       etime_i[4]:            %d\n",etime_i[4]);
+		fprintf(stderr,"dbg2       etime_i[5]:            %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:            %d\n",etime_i[6]);
+		fprintf(stderr,"dbg2       speedmin:              %f\n",speedmin);
+		fprintf(stderr,"dbg2       timegap:               %f\n",timegap);
+		fprintf(stderr,"dbg2       read_file:             %s\n",read_file);
+		fprintf(stderr,"dbg2       use_platform_file:     %d\n",use_platform_file);
+		fprintf(stderr,"dbg2       platform_file:         %s\n",platform_file);
+		fprintf(stderr,"dbg2       ofile:                 %s\n",ofile);
+		fprintf(stderr,"dbg2       ofile_set:             %d\n",ofile_set);
+		fprintf(stderr,"dbg2       projection_set:        %d\n",projection_set);
+		fprintf(stderr,"dbg2       proj4command:          %s\n",proj4command);
+		fprintf(stderr,"dbg2       navfile:               %s\n",navfile);
+		fprintf(stderr,"dbg2       navdata:               %d\n",navdata);
+		fprintf(stderr,"dbg2       sonardepthfile:        %s\n",sonardepthfile);
+		fprintf(stderr,"dbg2       sonardepthdata:        %d\n",sonardepthdata);
+		fprintf(stderr,"dbg2       timelagmode:           %d\n",timelagmode);
 		if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL)
 			{
-			fprintf(stderr,"dbg2       timelagfile:         %s\n",timelagfile);
-			fprintf(stderr,"dbg2       ntimelag:            %d\n",ntimelag);
+			fprintf(stderr,"dbg2       timelagfile:           %s\n",timelagfile);
+			fprintf(stderr,"dbg2       ntimelag:              %d\n",ntimelag);
 			for (i=0;i<ntimelag;i++)
-				fprintf(stderr,"dbg2       timelag[%d]:         %f %f\n",
+				fprintf(stderr,"dbg2       timelag[%d]:           %f   %f\n",
 					i, timelag_time_d[i], timelag_model[i]);
 			}
 		else
 			{
-			fprintf(stderr,"dbg2       timelag:             %f\n",timelag);
+			fprintf(stderr,"dbg2       timelag:               %f\n",timelag);
 			}
-		fprintf(stderr,"dbg2       offset_sonar_roll:   %f\n",offset_sonar_roll);
-		fprintf(stderr,"dbg2       offset_sonar_pitch:  %f\n",offset_sonar_pitch);
-		fprintf(stderr,"dbg2       offset_sonar_heading:%f\n",offset_sonar_heading);
-		fprintf(stderr,"dbg2       offset_sonar_x:      %f\n",offset_sonar_x);
-		fprintf(stderr,"dbg2       offset_sonar_y:      %f\n",offset_sonar_y);
-		fprintf(stderr,"dbg2       offset_sonar_z:      %f\n",offset_sonar_z);
-		fprintf(stderr,"dbg2       offset_sonar_t:      %f\n",offset_sonar_t);
-		fprintf(stderr,"dbg2       offset_mru_x:        %f\n",offset_mru_x);
-		fprintf(stderr,"dbg2       offset_mru_y:        %f\n",offset_mru_y);
-		fprintf(stderr,"dbg2       offset_mru_z:        %f\n",offset_mru_z);
-		fprintf(stderr,"dbg2       offset_mru_t:        %f\n",offset_mru_t);
-		fprintf(stderr,"dbg2       offset_nav_x:        %f\n",offset_nav_x);
-		fprintf(stderr,"dbg2       offset_nav_y:        %f\n",offset_nav_y);
-		fprintf(stderr,"dbg2       offset_nav_z:        %f\n",offset_nav_z);
-		fprintf(stderr,"dbg2       offset_nav_t:        %f\n",offset_nav_t);
+		fprintf(stderr,"dbg2       offset_sonar_mode:     %d\n",offset_sonar_mode);
+		fprintf(stderr,"dbg2       offset_sonar_roll:     %f\n",offset_sonar_roll);
+		fprintf(stderr,"dbg2       offset_sonar_pitch:    %f\n",offset_sonar_pitch);
+		fprintf(stderr,"dbg2       offset_sonar_heading:  %f\n",offset_sonar_heading);
+		fprintf(stderr,"dbg2       offset_sonar_x:        %f\n",offset_sonar_x);
+		fprintf(stderr,"dbg2       offset_sonar_y:        %f\n",offset_sonar_y);
+		fprintf(stderr,"dbg2       offset_sonar_z:        %f\n",offset_sonar_z);
+		fprintf(stderr,"dbg2       offset_mru_mode:       %d\n",offset_sonar_mode);
+		fprintf(stderr,"dbg2       offset_mru_x:          %f\n",offset_mru_x);
+		fprintf(stderr,"dbg2       offset_mru_y:          %f\n",offset_mru_y);
+		fprintf(stderr,"dbg2       offset_mru_z:          %f\n",offset_mru_z);
+		fprintf(stderr,"dbg2       offset_nav_mode:       %d\n",offset_sonar_mode);
+		fprintf(stderr,"dbg2       offset_nav_x:          %f\n",offset_nav_x);
+		fprintf(stderr,"dbg2       offset_nav_y:          %f\n",offset_nav_y);
+		fprintf(stderr,"dbg2       offset_nav_z:          %f\n",offset_nav_z);
 		}
 
 	/* if help desired then print it and exit */
@@ -744,26 +785,220 @@ int main (int argc, char **argv)
 		    }
 		fclose(tfp);
 		}
+	
+	/* load platform definition if specified or if offsets otherwise specified create a platform structure */
+	if (use_platform_file == MB_YES)
+		{
+		status = mb_platform_read(verbose, platform_file,  (void **)&platform, &error);
+		if (status == MB_FAILURE)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open and parse platform file: %s\n", platform_file);
+			fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+			exit(error);				
+			}
+		}
+	else if (offset_sonar_mode == MB_YES || offset_mru_mode == MB_YES || offset_nav_mode == MB_YES)
+		{
+		status = mb_platform_init(verbose, (void **)&platform, &error);
+			
+		/* set sensor 0 (multibeam)
+				for a single first offsets are for transmit array, second for receive array */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose,  (void *)platform,
+					MB_SENSOR_TYPE_SONAR_MULTIBEAM,
+					NULL,
+					"Multibeam data recorded by Hysweep",
+					NULL,
+					MB_SENSOR_CAPABILITY1_NONE, 
+					MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM,
+					2, 0,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose,  (void *)platform,
+					0, 0,
+					offset_sonar_mode,
+					offset_sonar_x,
+					offset_sonar_y,
+					offset_sonar_z,   
+					offset_sonar_mode,
+					offset_sonar_heading,
+					offset_sonar_roll,
+					offset_sonar_pitch,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose,  (void *)platform,
+					0, 1,
+					offset_sonar_mode,
+					offset_sonar_x,
+					offset_sonar_y,
+					offset_sonar_z,   
+					offset_sonar_mode,
+					offset_sonar_heading,
+					offset_sonar_roll,
+					offset_sonar_pitch,
+					&error);
+			
+		/* set sensor 1 (position sensor) */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose,  (void *)platform,
+					MB_SENSOR_TYPE_POSITION,
+					NULL,
+					NULL,
+					NULL,
+					0, 0,
+					1, ntimelag,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose,  (void *)platform,
+					1, 0,
+					offset_nav_mode,
+					offset_nav_x,
+					offset_nav_y,
+					offset_nav_z,   
+					MB_NO,
+					0.0,
+					0.0,
+					0.0,
+					&error);
+		if (status == MB_SUCCESS && ntimelag > 0)
+			status = mb_platform_set_sensor_timelatency(verbose,  (void *)platform,
+					1, 
+					timelagmode,
+					timelagconstant,
+					ntimelag,
+					timelag_time_d,
+					timelag_model,
+					&error);
+			
+		/* set sensor 2 (heading sensor) */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose,  (void *)platform,
+					MB_SENSOR_TYPE_COMPASS,
+					NULL,
+					NULL,
+					NULL,
+					0, 0,
+					1, ntimelag,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose,  (void *)platform,
+					2, 0,
+					offset_mru_mode,
+					offset_mru_x,
+					offset_mru_y,
+					offset_mru_z,   
+					MB_NO,
+					0.0,
+					0.0,
+					0.0,
+					&error);
+		if (status == MB_SUCCESS && ntimelag > 0)
+			status = mb_platform_set_sensor_timelatency(verbose,  (void *)platform,
+					2, 
+					timelagmode,
+					timelagconstant,
+					ntimelag,
+					timelag_time_d,
+					timelag_model,
+					&error);
+			
+		/* set sensor 3 (rollpitch sensor) */
+		if (status == MB_SUCCESS)
+			status = mb_platform_add_sensor(verbose,  (void *)platform,
+					MB_SENSOR_TYPE_VRU,
+					NULL,
+					NULL,
+					NULL,
+					0, 0,
+					1, ntimelag,
+					&error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_sensor_offset(verbose,  (void *)platform,
+					3, 0,
+					offset_mru_mode,
+					offset_mru_x,
+					offset_mru_y,
+					offset_mru_z,   
+					MB_NO,
+					0.0,
+					0.0,
+					0.0,
+					&error);
+		if (status == MB_SUCCESS && ntimelag > 0)
+			status = mb_platform_set_sensor_timelatency(verbose,  (void *)platform,
+					3, 
+					timelagmode,
+					timelagconstant,
+					ntimelag,
+					timelag_time_d,
+					timelag_model,
+					&error);
+			
+		/* set data source sensors */
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_BATHYMETRY, 0, &error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_BACKSCATTER, 0, &error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_POSITION, 1, &error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_DEPTH, 1, &error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_HEADING, 2, &error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_ROLLPITCH, 3, &error);
+		if (status == MB_SUCCESS)
+			status = mb_platform_set_source_sensor(verbose,  (void *)platform,
+					MB_PLATFORM_SOURCE_HEAVE1, 3, &error);
+		
+		/* deal with error */
+		if (status == MB_FAILURE)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to initialize platform offset structure\n");
+			fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+			exit(error);				
+			}
+		}
+	
+	/* else derive platform file from the header of the HYSWEEP format data
+		later when the first file header is read */
 
 	/* output counts */
 	fprintf(stdout, "\nData available for merging:\n");
 	fprintf(stdout, "     Navigation (northing easting sonardepth altitude heading): %d\n", nnav);
 	fprintf(stdout, "     Sonar depth (sonardepth):                                  %d\n", nsonardepth);
 	fprintf(stdout, "     Time lag:                                                  %d\n", ntimelag);
-	fprintf(stdout, "\nOffsets to be applied:\n");
-	fprintf(stdout, "     Roll bias:    %8.3f\n", offset_sonar_roll);
-	fprintf(stdout, "     Pitch bias:   %8.3f\n", offset_sonar_pitch);
-	fprintf(stdout, "     Heading bias: %8.3f\n", offset_sonar_heading);
-	fprintf(stdout, "               X (m)   Y (m)   Z (m)   T (sec)\n");
-	fprintf(stdout, "     Sonar: %8.3f %8.3f %8.3f %8.3f\n",
-				offset_sonar_x, offset_sonar_y,
-				offset_sonar_z, offset_sonar_t);
-	fprintf(stdout, "     MRU:   %8.3f %8.3f %8.3f %8.3f\n",
-				offset_mru_x, offset_mru_y,
-				offset_mru_z, offset_mru_t);
-	fprintf(stdout, "     Nav:   %8.3f %8.3f %8.3f %8.3f\n",
-				offset_nav_x, offset_nav_y,
-				offset_nav_z, offset_nav_t);
+	if (offset_sonar_mode == MB_YES
+		|| offset_mru_mode == MB_YES
+		|| offset_nav_mode == MB_YES)
+		fprintf(stdout, "\nOffsets to be applied:\n");
+	if (offset_sonar_mode == MB_YES)
+		{
+		fprintf(stdout, "     Roll bias:    %8.3f\n", offset_sonar_roll);
+		fprintf(stdout, "     Pitch bias:   %8.3f\n", offset_sonar_pitch);
+		fprintf(stdout, "     Heading bias: %8.3f\n", offset_sonar_heading);
+		fprintf(stdout, "               X (m)   Y (m)   Z (m)   T (sec)\n");
+		fprintf(stdout, "     Sonar: %8.3f %8.3f %8.3f\n",
+					offset_sonar_x, offset_sonar_y, offset_sonar_z);
+		}
+	if (offset_mru_mode == MB_YES)
+		{
+		fprintf(stdout, "     MRU:   %8.3f %8.3f %8.3f\n",
+					offset_mru_x, offset_mru_y, offset_mru_z);
+		}
+	if (offset_nav_mode == MB_YES)
+		{
+		fprintf(stdout, "     Nav:   %8.3f %8.3f %8.3f\n",
+					offset_nav_x, offset_nav_y, offset_nav_z);
+		}
 
 	nrec_POS_tot = 0;
 	nrec_POSunused_tot = 0;
@@ -787,20 +1022,20 @@ int main (int argc, char **argv)
 	    {
 	    if ((status = mb_datalist_open(verbose,&datalist,
 					    read_file,look_processed,&error)) != MB_SUCCESS)
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to open data list file: %s\n",
-			read_file);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open data list file: %s\n",
+				read_file);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 	    if ((status = mb_datalist_read(verbose,datalist,
 			    ifile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
-		read_data = MB_YES;
+			read_data = MB_YES;
 	    else
-		read_data = MB_NO;
+			read_data = MB_NO;
 	    }
 	/* else copy single filename to be read */
 	else
@@ -811,413 +1046,454 @@ int main (int argc, char **argv)
 
 	/* loop over all files to be read */
 	while (read_data == MB_YES && format == MBF_HYSWEEP1)
-	{
-
-	/* initialize reading the swath file */
-	if ((status = mb_read_init(
-		verbose,ifile,format,pings,lonflip,bounds,
-		btime_i,etime_i,speedmin,timegap,
-		&imbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* get pointers to data storage */
-	imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
-	istore_ptr = imb_io_ptr->store_data;
-	istore = (struct mbsys_hysweep_struct *) istore_ptr;
-
-	/* set projection if specified */
-	if (projection_set == MB_YES)
-		{
-		strcpy(istore->PRJ_proj4_command,proj4command);
-		}
-
-	if (error == MB_ERROR_NO_ERROR)
-		{
-		beamflag = NULL;
-		bath = NULL;
-		amp = NULL;
-		bathacrosstrack = NULL;
-		bathalongtrack = NULL;
-		ss = NULL;
-		ssacrosstrack = NULL;
-		ssalongtrack = NULL;
-		}
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(char), (void **)&beamflag, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bath, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
-						sizeof(double), (void **)&amp, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bathacrosstrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bathalongtrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
-						sizeof(double), (void **)&ss, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
-						sizeof(double), (void **)&ssacrosstrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
-						sizeof(double), (void **)&ssalongtrack, &error);
-
-	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-			message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* reset file record counters */
-	nrec_POS = 0;
-	nrec_POSunused = 0;
-	nrec_GYR = 0;
-	nrec_HCP = 0;
-	nrec_EC1 = 0;
-	nrec_DFT = 0;
-	nrec_RMB = 0;
-	nrec_other = 0;
-
-	/* read and print data */
-	while (error <= MB_ERROR_NO_ERROR)
-		{
-		/* reset error */
-		error = MB_ERROR_NO_ERROR;
-
-		/* read next data record */
-		status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
-				    time_i,&time_d,&navlon,&navlat,
-				    &speed,&heading,
-				    &distance,&altitude,&sonardepth,
-				    &beams_bath,&beams_amp,&pixels_ss,
-				    beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-				    ss,ssacrosstrack,ssalongtrack,
-				    comment,&error);
-
-		/* some nonfatal errors do not matter */
-		if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE)
+	
+		/* initialize reading the swath file */
+		if ((status = mb_read_init(
+			verbose,ifile,format,pings,lonflip,bounds,
+			btime_i,etime_i,speedmin,timegap,
+			&imbio_ptr,&btime_d,&etime_d,
+			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+			fprintf(stderr,"\nMultibeam File <%s_> not initialized for reading\n",ifile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+	
+		/* get pointers to data storage */
+		imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
+		istore_ptr = imb_io_ptr->store_data;
+		istore = (struct mbsys_hysweep_struct *) istore_ptr;
+	
+		/* check format and get data sources */
+		if ((status = mb_format_source(verbose, &format,
+				&platform_source, &nav_source, &heading_source,
+				&vru_source, &svp_source,
+				&error)) == MB_FAILURE)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error returned from function <mb_format_source>:\n%s\n",message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+	
+		/* set projection if specified */
+		if (projection_set == MB_YES)
+			{
+			strcpy(istore->PRJ_proj4_command,proj4command);
+			}
+	
+		if (error == MB_ERROR_NO_ERROR)
+			{
+			beamflag = NULL;
+			bath = NULL;
+			amp = NULL;
+			bathacrosstrack = NULL;
+			bathalongtrack = NULL;
+			ss = NULL;
+			ssacrosstrack = NULL;
+			ssalongtrack = NULL;
+			}
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(char), (void **)&beamflag, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bath, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							sizeof(double), (void **)&amp, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathalongtrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							sizeof(double), (void **)&ss, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							sizeof(double), (void **)&ssacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							sizeof(double), (void **)&ssalongtrack, &error);
+	
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
+				message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+	
+		/* reset file record counters */
+		nrec_POS = 0;
+		nrec_POSunused = 0;
+		nrec_GYR = 0;
+		nrec_HCP = 0;
+		nrec_EC1 = 0;
+		nrec_DFT = 0;
+		nrec_RMB = 0;
+		nrec_other = 0;
+	
+		/* read and print data */
+		while (error <= MB_ERROR_NO_ERROR)
+			{
+			/* reset error */
 			error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-			}
-
-	   	/* handle multibeam data */
-		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
-			{
-			nrec_RMB++;
-			}
-
-	   	/* save primary navigation data */
-		else if (status == MB_SUCCESS
-			&& (istore->kind == MB_DATA_NAV
-				|| istore->kind == MB_DATA_NAV1
-				|| istore->kind == MB_DATA_NAV2))
-			{
-			/* check device for being enabled */
-			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->POS_device_number]);
-			if (device->DV2_enabled == MB_YES)
+	
+			/* read next data record */
+			status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
+						time_i,&time_d,&navlon,&navlat,
+						&speed,&heading,
+						&distance,&altitude,&sonardepth,
+						&beams_bath,&beams_amp,&pixels_ss,
+						beamflag,bath,amp,bathacrosstrack,bathalongtrack,
+						ss,ssacrosstrack,ssalongtrack,
+						comment,&error);
+	
+			/* some nonfatal errors do not matter */
+			if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE)
 				{
-				nrec_POS++;
-
-				/* add latest fix */
-				if (imb_io_ptr->projection_initialized == MB_YES)
+				error = MB_ERROR_NO_ERROR;
+				status = MB_SUCCESS;
+				}
+	
+			/* if not platform defined and if platform_source kind then
+				extract platform definition */
+			if (platform == NULL
+				&& error <= MB_ERROR_NO_ERROR
+				&& kind == platform_source
+				&& platform_source != MB_DATA_NONE)
+				{
+				/* extract platform */
+				status = mb_extract_platform(verbose, imbio_ptr, istore_ptr,
+											&kind, (void **) &platform, &error);
+					
+				/* deal with error */
+				if (status == MB_FAILURE)
 					{
-					mb_proj_inverse(verbose, imb_io_ptr->pjptr,
-									istore->POS_x,
-									istore->POS_y,
-									&navlon, &navlat,
-									&error);
+					error = MB_ERROR_OPEN_FAIL;
+					fprintf(stderr,"\nUnable to initialize platform offset structure\n");
+					fprintf(stderr,"\nProgram <%s> Terminated\n", program_name);
+					exit(error);				
+					}
+				}
+	
+			/* handle multibeam data */
+			if (status == MB_SUCCESS && kind == MB_DATA_DATA)
+				{
+				nrec_RMB++;
+				}
+	
+			/* save primary navigation data */
+			else if (status == MB_SUCCESS
+				&& (istore->kind == MB_DATA_NAV
+					|| istore->kind == MB_DATA_NAV1
+					|| istore->kind == MB_DATA_NAV2))
+				{
+				/* check device for being enabled */
+				device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->POS_device_number]);
+				if (device->DV2_enabled == MB_YES)
+					{
+					nrec_POS++;
+	
+					/* add latest fix */
+					if (imb_io_ptr->projection_initialized == MB_YES)
+						{
+						mb_proj_inverse(verbose, imb_io_ptr->pjptr,
+										istore->POS_x,
+										istore->POS_y,
+										&navlon, &navlat,
+										&error);
+						}
+					else
+						{
+						navlon = istore->POS_x;
+						navlat = istore->POS_y;
+						}
+	
+					if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == MB_YES)
+						fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d POS record:%d\n",
+							istore->time_i[0],istore->time_i[1],istore->time_i[2],
+							istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],nrec_POS);
+	
+					/* allocate memory for position arrays if needed */
+					if (ndat_nav + 1 >= ndat_nav_alloc)
+						{
+						ndat_nav_alloc +=  MBHYSWEEPPREPROCESS_ALLOC_CHUNK;
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_time_d,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lon,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lat,&error);
+						if (error != MB_ERROR_NO_ERROR)
+							{
+							mb_error(verbose,error,&message);
+							fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+							fprintf(stderr,"\nProgram <%s> Terminated\n",
+								program_name);
+							exit(error);
+							}
+						}
+	
+					/* store the position data */
+					if (ndat_nav == 0 || dat_nav_time_d[ndat_nav-1] < istore->time_d)
+						{
+						dat_nav_time_d[ndat_nav] = istore->time_d;
+						dat_nav_lon[ndat_nav] = navlon;
+						dat_nav_lat[ndat_nav] = navlat;
+						ndat_nav++;
+						}
 					}
 				else
 					{
-					navlon = istore->POS_x;
-					navlat = istore->POS_y;
+					nrec_POSunused++;
 					}
-
-				if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == MB_YES)
-					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d POS record:%d\n",
-						istore->time_i[0],istore->time_i[1],istore->time_i[2],
-						istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],nrec_POS);
-
-				/* allocate memory for position arrays if needed */
-				if (ndat_nav + 1 >= ndat_nav_alloc)
+	
+				}
+	
+			/* save primary attitude data */
+			if (status == MB_SUCCESS && kind == MB_DATA_ATTITUDE)
+				{
+				/* flip attitude sign */
+				if (kluge_flip_attitude_sign == MB_YES)
 					{
-					ndat_nav_alloc +=  MBHYSWEEPPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_time_d,&error);
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lon,&error);
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lat,&error);
-					if (error != MB_ERROR_NO_ERROR)
+					istore->HCP_roll *= -1;
+					istore->HCP_pitch *= -1;
+					}
+					
+				/* check device for being enabled */
+				device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->HCP_device_number]);
+				if (device->DV2_enabled == MB_YES)
+					{
+					nrec_HCP++;
+	
+	
+					if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == MB_YES)
+						fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d HCP record:%d\n",
+							istore->time_i[0],istore->time_i[1],istore->time_i[2],
+							istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],nrec_HCP);
+	
+					/* allocate memory for position arrays if needed */
+					if (ndat_rph + 1 >= ndat_rph_alloc)
 						{
-						mb_error(verbose,error,&message);
-						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-						fprintf(stderr,"\nProgram <%s> Terminated\n",
-						    program_name);
-						exit(error);
+						ndat_rph_alloc +=  MBHYSWEEPPREPROCESS_ALLOC_CHUNK;
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_time_d,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_roll,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_pitch,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_heave,&error);
+						if (error != MB_ERROR_NO_ERROR)
+							{
+							mb_error(verbose,error,&message);
+							fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+							fprintf(stderr,"\nProgram <%s> Terminated\n",
+								program_name);
+							exit(error);
+							}
+						}
+	
+					/* store the attitude data */
+					if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < istore->time_d)
+						{
+						dat_rph_time_d[ndat_rph] = istore->time_d;
+						dat_rph_roll[ndat_rph] = -istore->HCP_roll;
+						dat_rph_pitch[ndat_rph] = istore->HCP_pitch;
+						dat_rph_heave[ndat_rph] = istore->HCP_heave;
+						ndat_rph++;
 						}
 					}
-
-				/* store the position data */
-				if (ndat_nav == 0 || dat_nav_time_d[ndat_nav-1] < istore->time_d)
+				}
+	
+			/* save primary heading data */
+			if (status == MB_SUCCESS && kind == MB_DATA_HEADING)
+				{
+				/* check device for being enabled */
+				device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->GYR_device_number]);
+				if (device->DV2_enabled == MB_YES)
 					{
-					dat_nav_time_d[ndat_nav] = istore->time_d;
-					dat_nav_lon[ndat_nav] = navlon;
-					dat_nav_lat[ndat_nav] = navlat;
-					ndat_nav++;
+					nrec_GYR++;
+	
+					if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == MB_YES)
+						fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d GYR record:%d\n",
+							istore->time_i[0],istore->time_i[1],istore->time_i[2],
+							istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],nrec_GYR);
+	
+					/* allocate memory for position arrays if needed */
+					if (ndat_heading + 1 >= ndat_heading_alloc)
+						{
+						ndat_heading_alloc +=  MBHYSWEEPPREPROCESS_ALLOC_CHUNK;
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_time_d,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_heading,&error);
+						if (error != MB_ERROR_NO_ERROR)
+							{
+							mb_error(verbose,error,&message);
+							fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+							fprintf(stderr,"\nProgram <%s> Terminated\n",
+								program_name);
+							exit(error);
+							}
+						}
+	
+					/* store the heading data */
+					if (ndat_heading == 0 || dat_heading_time_d[ndat_heading-1] < istore->time_d)
+						{
+						dat_heading_time_d[ndat_heading] = istore->time_d;
+						dat_heading_heading[ndat_heading] = istore->GYR_heading;
+						ndat_heading++;
+						}
 					}
 				}
+	
+			/* save primary sonardepth data */
+			if (status == MB_SUCCESS && kind == MB_DATA_SONARDEPTH)
+				{
+				/* check device for being enabled */
+				device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->DFT_device_number]);
+				if (device->DV2_enabled == MB_YES)
+					{
+					nrec_DFT++;
+	
+					if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == MB_YES)
+						fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d DFT record:%d\n",
+							istore->time_i[0],istore->time_i[1],istore->time_i[2],
+							istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],nrec_DFT);
+	
+					/* allocate memory for position arrays if needed */
+					if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc)
+						{
+						ndat_sonardepth_alloc +=  MBHYSWEEPPREPROCESS_ALLOC_CHUNK;
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
+						if (error != MB_ERROR_NO_ERROR)
+							{
+							mb_error(verbose,error,&message);
+							fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+							fprintf(stderr,"\nProgram <%s> Terminated\n",
+								program_name);
+							exit(error);
+							}
+						}
+	
+					/* store the sonardepth data */
+					if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < istore->time_d)
+						{
+						dat_sonardepth_time_d[ndat_sonardepth] = istore->time_d;
+						dat_sonardepth_sonardepth[ndat_sonardepth] = istore->DFT_draft;
+						ndat_sonardepth++;
+						}
+					}
+				}
+	
+			/* save primary altitude data */
+			if (status == MB_SUCCESS && kind == MB_DATA_ALTITUDE)
+				{
+				/* check device for being enabled */
+				device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->GYR_device_number]);
+				if (device->DV2_enabled == MB_YES)
+					{
+					nrec_EC1++;
+	
+					if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == MB_YES)
+						fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d EC1 record:%d\n",
+							istore->time_i[0],istore->time_i[1],istore->time_i[2],
+							istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],nrec_EC1);
+	
+					/* allocate memory for position arrays if needed */
+					if (ndat_altitude + 1 >= ndat_altitude_alloc)
+						{
+						ndat_altitude_alloc +=  MBHYSWEEPPREPROCESS_ALLOC_CHUNK;
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_altitude_alloc*sizeof(double),(void **)&dat_altitude_time_d,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_altitude_alloc*sizeof(double),(void **)&dat_altitude_altitude,&error);
+						if (error != MB_ERROR_NO_ERROR)
+							{
+							mb_error(verbose,error,&message);
+							fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+							fprintf(stderr,"\nProgram <%s> Terminated\n",
+								program_name);
+							exit(error);
+							}
+						}
+	
+					/* store the altitude data */
+					if (ndat_altitude == 0 || dat_altitude_time_d[ndat_altitude-1] < istore->time_d)
+						{
+						dat_altitude_time_d[ndat_altitude] = istore->time_d;
+						dat_altitude_altitude[ndat_altitude] = istore->EC1_rawdepth;
+						ndat_altitude++;
+						}
+					}
+				}
+	
+			/* handle unknown data */
+			else  if (status == MB_SUCCESS)
+				{
+	/*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
+				nrec_other++;
+				}
+	
+			/* handle read error */
 			else
 				{
-				nrec_POSunused++;
+	/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
 				}
-
-			}
-
-	   	/* save primary attitude data */
-		if (status == MB_SUCCESS && kind == MB_DATA_ATTITUDE)
-			{
-			/* check device for being enabled */
-			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->HCP_device_number]);
-			if (device->DV2_enabled == MB_YES)
+	
+			/* print debug statements */
+			if (verbose >= 2)
 				{
-				nrec_HCP++;
-
-
-				if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == MB_YES)
-					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d HCP record:%d\n",
-						istore->time_i[0],istore->time_i[1],istore->time_i[2],
-						istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],nrec_HCP);
-
-				/* allocate memory for position arrays if needed */
-				if (ndat_rph + 1 >= ndat_rph_alloc)
-					{
-					ndat_rph_alloc +=  MBHYSWEEPPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_time_d,&error);
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_roll,&error);
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_pitch,&error);
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_heave,&error);
-					if (error != MB_ERROR_NO_ERROR)
-						{
-						mb_error(verbose,error,&message);
-						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-						fprintf(stderr,"\nProgram <%s> Terminated\n",
-						    program_name);
-						exit(error);
-						}
-					}
-
-				/* store the attitude data */
-				if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < istore->time_d)
-					{
-					dat_rph_time_d[ndat_rph] = istore->time_d;
-					dat_rph_roll[ndat_rph] = -istore->HCP_roll;
-					dat_rph_pitch[ndat_rph] = istore->HCP_pitch;
-					dat_rph_heave[ndat_rph] = -istore->HCP_heave;
-					ndat_rph++;
-					}
+				fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",
+					program_name);
+				fprintf(stderr,"dbg2       kind:           %d\n",kind);
+				fprintf(stderr,"dbg2       error:          %d\n",error);
+				fprintf(stderr,"dbg2       status:         %d\n",status);
 				}
 			}
-
-	   	/* save primary heading data */
-		if (status == MB_SUCCESS && kind == MB_DATA_HEADING)
-			{
-			/* check device for being enabled */
-			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->GYR_device_number]);
-			if (device->DV2_enabled == MB_YES)
-				{
-				nrec_GYR++;
-
-				if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == MB_YES)
-					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d GYR record:%d\n",
-						istore->time_i[0],istore->time_i[1],istore->time_i[2],
-						istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],nrec_GYR);
-
-				/* allocate memory for position arrays if needed */
-				if (ndat_heading + 1 >= ndat_heading_alloc)
+	
+		/* close the swath file */
+		status = mb_close(verbose,&imbio_ptr,&error);
+	
+		/* output counts */
+		fprintf(stdout, "\nData records read from: %s\n", ifile);
+		fprintf(stdout, "     Positions (POS):                   %d\n", nrec_POS);
+		fprintf(stdout, "     Positions ignored (POS):           %d\n", nrec_POSunused);
+		fprintf(stdout, "     Heading (GYR):                     %d\n", nrec_GYR);
+		fprintf(stdout, "     Attitude (HCP):                    %d\n", nrec_HCP);
+		fprintf(stdout, "     Echosounder (altitude) (EC1):      %d\n", nrec_EC1);
+		fprintf(stdout, "     Dynamic draft (DFT):               %d\n", nrec_DFT );
+		fprintf(stdout, "     Raw multibeam (RMB):               %d\n", nrec_RMB);
+		fprintf(stdout, "     Other:                             %d\n", nrec_other);
+		nrec_POS_tot += nrec_POS;
+		nrec_POSunused_tot += nrec_POSunused;
+		nrec_GYR_tot += nrec_GYR;
+		nrec_HCP_tot += nrec_HCP;
+		nrec_EC1_tot += nrec_EC1;
+		nrec_DFT_tot += nrec_DFT;
+		nrec_RMB_tot += nrec_RMB;
+		nrec_other_tot += nrec_other;
+	
+		/* figure out whether and what to read next */
+			if (read_datalist == MB_YES)
 					{
-					ndat_heading_alloc +=  MBHYSWEEPPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_time_d,&error);
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_heading,&error);
-					if (error != MB_ERROR_NO_ERROR)
-						{
-						mb_error(verbose,error,&message);
-						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-						fprintf(stderr,"\nProgram <%s> Terminated\n",
-						    program_name);
-						exit(error);
-						}
+			if ((status = mb_datalist_read(verbose,datalist,
+					ifile,&format,&file_weight,&error))
+					== MB_SUCCESS)
+							read_data = MB_YES;
+					else
+							read_data = MB_NO;
 					}
-
-				/* store the heading data */
-				if (ndat_heading == 0 || dat_heading_time_d[ndat_heading-1] < istore->time_d)
+			else
 					{
-					dat_heading_time_d[ndat_heading] = istore->time_d;
-					dat_heading_heading[ndat_heading] = istore->GYR_heading;
-					ndat_heading++;
+					read_data = MB_NO;
 					}
-				}
-			}
-
-	   	/* save primary sonardepth data */
-		if (status == MB_SUCCESS && kind == MB_DATA_SONARDEPTH)
-			{
-			/* check device for being enabled */
-			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->DFT_device_number]);
-			if (device->DV2_enabled == MB_YES)
-				{
-				nrec_DFT++;
-
-				if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == MB_YES)
-					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d DFT record:%d\n",
-						istore->time_i[0],istore->time_i[1],istore->time_i[2],
-						istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],nrec_DFT);
-
-				/* allocate memory for position arrays if needed */
-				if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc)
-					{
-					ndat_sonardepth_alloc +=  MBHYSWEEPPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
-					if (error != MB_ERROR_NO_ERROR)
-						{
-						mb_error(verbose,error,&message);
-						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-						fprintf(stderr,"\nProgram <%s> Terminated\n",
-						    program_name);
-						exit(error);
-						}
-					}
-
-				/* store the sonardepth data */
-				if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < istore->time_d)
-					{
-					dat_sonardepth_time_d[ndat_sonardepth] = istore->time_d;
-					dat_sonardepth_sonardepth[ndat_sonardepth] = istore->DFT_draft;
-					ndat_sonardepth++;
-					}
-				}
-			}
-
-	   	/* save primary altitude data */
-		if (status == MB_SUCCESS && kind == MB_DATA_ALTITUDE)
-			{
-			/* check device for being enabled */
-			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->GYR_device_number]);
-			if (device->DV2_enabled == MB_YES)
-				{
-				nrec_EC1++;
-
-				if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == MB_YES)
-					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d EC1 record:%d\n",
-						istore->time_i[0],istore->time_i[1],istore->time_i[2],
-						istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],nrec_EC1);
-
-				/* allocate memory for position arrays if needed */
-				if (ndat_altitude + 1 >= ndat_altitude_alloc)
-					{
-					ndat_altitude_alloc +=  MBHYSWEEPPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_altitude_alloc*sizeof(double),(void **)&dat_altitude_time_d,&error);
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_altitude_alloc*sizeof(double),(void **)&dat_altitude_altitude,&error);
-					if (error != MB_ERROR_NO_ERROR)
-						{
-						mb_error(verbose,error,&message);
-						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-						fprintf(stderr,"\nProgram <%s> Terminated\n",
-						    program_name);
-						exit(error);
-						}
-					}
-
-				/* store the altitude data */
-				if (ndat_altitude == 0 || dat_altitude_time_d[ndat_altitude-1] < istore->time_d)
-					{
-					dat_altitude_time_d[ndat_altitude] = istore->time_d;
-					dat_altitude_altitude[ndat_altitude] = istore->EC1_rawdepth;
-					ndat_altitude++;
-					}
-				}
-			}
-
-	   	/* handle unknown data */
-		else  if (status == MB_SUCCESS)
-			{
-/*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
-			nrec_other++;
-			}
-
-	   	/* handle read error */
-		else
-			{
-/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
-			}
-
-		/* print debug statements */
-		if (verbose >= 2)
-			{
-			fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",
-				program_name);
-			fprintf(stderr,"dbg2       kind:           %d\n",kind);
-			fprintf(stderr,"dbg2       error:          %d\n",error);
-			fprintf(stderr,"dbg2       status:         %d\n",status);
-			}
+	
+		/* end loop over files in list */
 		}
-
-	/* close the swath file */
-	status = mb_close(verbose,&imbio_ptr,&error);
-
-	/* output counts */
-	fprintf(stdout, "\nData records read from: %s\n", ifile);
-	fprintf(stdout, "     Positions (POS):                   %d\n", nrec_POS);
-	fprintf(stdout, "     Positions ignored (POS):           %d\n", nrec_POSunused);
-	fprintf(stdout, "     Heading (GYR):                     %d\n", nrec_GYR);
-	fprintf(stdout, "     Attitude (HCP):                    %d\n", nrec_HCP);
-	fprintf(stdout, "     Echosounder (altitude) (EC1):      %d\n", nrec_EC1);
-	fprintf(stdout, "     Dynamic draft (DFT):               %d\n", nrec_DFT );
-	fprintf(stdout, "     Raw multibeam (RMB):               %d\n", nrec_RMB);
-	fprintf(stdout, "     Other:                             %d\n", nrec_other);
-	nrec_POS_tot += nrec_POS;
-	nrec_POSunused_tot += nrec_POSunused;
-	nrec_GYR_tot += nrec_GYR;
-	nrec_HCP_tot += nrec_HCP;
-	nrec_EC1_tot += nrec_EC1;
-	nrec_DFT_tot += nrec_DFT;
-	nrec_RMB_tot += nrec_RMB;
-	nrec_other_tot += nrec_other;
-
-	/* figure out whether and what to read next */
-        if (read_datalist == MB_YES)
-                {
-		if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error))
-			    == MB_SUCCESS)
-                        read_data = MB_YES;
-                else
-                        read_data = MB_NO;
-                }
-        else
-                {
-                read_data = MB_NO;
-                }
-
-	/* end loop over files in list */
-	}
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
 
@@ -1233,7 +1509,7 @@ fprintf(stderr,"Applying timelag to %d nav data\n", ndat_nav);
 		for (i=0;i<ndat_nav;i++)
 			{
 			/* get timelag value */
-			timelag = offset_nav_t;
+			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT)
 				{
 				timelag -= timelagconstant;
@@ -1253,7 +1529,7 @@ fprintf(stderr,"Applying timelag to %d heading data\n", ndat_heading);
 		for (i=0;i<ndat_heading;i++)
 			{
 			/* get timelag value */
-			timelag = offset_nav_t;
+			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT)
 				{
 				timelag -= timelagconstant;
@@ -1273,7 +1549,7 @@ fprintf(stderr,"Applying timelag to %d attitude data\n", ndat_rph);
 		for (i=0;i<ndat_rph;i++)
 			{
 			/* get timelag value */
-			timelag = offset_mru_t;
+			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT)
 				{
 				timelag -= timelagconstant;
@@ -1293,7 +1569,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth data\n", ndat_sonardepth);
 		for (i=0;i<ndat_sonardepth;i++)
 			{
 			/* get timelag value */
-			timelag = offset_nav_t;
+			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT)
 				{
 				timelag -= timelagconstant;
@@ -1313,7 +1589,7 @@ fprintf(stderr,"Applying timelag to %d altitude data\n", ndat_altitude);
 		for (i=0;i<ndat_altitude;i++)
 			{
 			/* get timelag value */
-			timelag = offset_nav_t;
+			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT)
 				{
 				timelag -= timelagconstant;
@@ -1334,7 +1610,7 @@ fprintf(stderr,"Applying timelag to %d INS data\n", nnav);
 		for (i=0;i<nnav;i++)
 			{
 			/* get timelag value */
-			timelag = offset_mru_t;
+			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT)
 				{
 				timelag -= timelagconstant;
@@ -1355,7 +1631,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 		for (i=0;i<nsonardepth;i++)
 			{
 			/* get timelag value */
-			timelag = offset_nav_t;
+			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT)
 				{
 				timelag -= timelagconstant;
@@ -1852,19 +2128,35 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 							dat_rph_time_d-1, dat_rph_pitch-1,
 							ndat_rph, time_d, &pitch, &j,
 							&error);
+				if (interp_status == MB_SUCCESS)
+				interp_status = mb_linear_interp(verbose,
+							dat_rph_time_d-1, dat_rph_heave-1,
+							ndat_rph, time_d, &heave, &j,
+							&error);
 				}
 			else
 				{
 				roll = 0.0;
 				pitch = 0.0;
+				heave = 0.0;
 				}
 
+			if (platform != NULL)
+				{
+				status = mb_platform_position(verbose,  (void *)platform,
+								platform->source_bathymetry, 0,
+								navlon, navlat, sonardepth,
+								heading, roll, pitch,
+								&navlon, &navlat, &sonardepth,
+								&error);
+				}			
+
 			/* do lever arm calculation with sensor offsets */
-			mb_lever(verbose, offset_sonar_x, offset_sonar_y, offset_sonar_z,
-					offset_mru_x, offset_mru_y, offset_mru_z,
-					offset_nav_x, offset_nav_y, offset_nav_z,
-					roll, pitch,
-					&lever_x, &lever_y, &lever_z, &error);
+			//mb_lever(verbose, offset_sonar_x, offset_sonar_y, offset_sonar_z,
+			//		offset_mru_x, offset_mru_y, offset_mru_z,
+			//		offset_nav_x, offset_nav_y, offset_nav_z,
+			//		roll, pitch,
+			//		&lever_x, &lever_y, &lever_z, &error);
 
 			/* set values at sonar ping time */
 			istore->RMBint_lon = navlon;
@@ -1883,11 +2175,11 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 				istore->RMBint_x = istore->RMBint_lon;
 				istore->RMBint_y = istore->RMBint_lat;
 				}
-			istore->RMBint_heave = 0.0;
+			istore->RMBint_heave = heave;
 			istore->RMBint_roll = roll;
 			istore->RMBint_pitch = pitch;
 			istore->RMBint_heading = heading;
-			istore->RMBint_draft = sonardepth - lever_z;
+			istore->RMBint_draft = sonardepth; // - lever_z;
 
 			/* get mapping sonar device pointer */
 			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->RMB_device_number]);
@@ -1895,7 +2187,22 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			/* deal with case of multibeam sonar - recalculate bathymetry if possible */
 			if (istore->RMB_beam_data_available & 0x0001)
 				{
-				/* handle data that starts with beam angles in roll and pitch coordinates */
+				/* get transducer angular offsets */
+				if (platform != NULL)
+					{
+					status = mb_platform_orientation_offset(verbose,  (void *)platform,
+									platform->source_bathymetry, 0,
+									&(tx_align.heading), &(tx_align.roll), &(tx_align.pitch),
+									&error);
+
+					status = mb_platform_orientation_offset(verbose,  (void *)platform,
+									platform->source_bathymetry, 0,
+									&(rx_align.heading), &(rx_align.roll), &(rx_align.pitch),
+									&error);
+					}
+
+				/* if beam angles angles are available in roll and pitch
+				 * coordinates calculate beam takeoff and azimuthal angles */
 				if (istore->RMB_sonar_type == 1 || istore->RMB_sonar_type == 2)
 					{
 					/* get beam roll angles from sonar parameters if necessary */
@@ -1922,17 +2229,159 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 					/* get beam takeoff and azimuthal angles */
 					for (i=0;i<istore->RMB_num_beams;i++)
 						{
-						alpha = istore->RMB_sounding_pitchangles[i];
-						beta = 90.0 + istore->RMB_sounding_rollangles[i];
+						/* get attitude at beam receive time from best available source */
+						if (ndat_rph > 0)
+							{
+							interp_status = mb_linear_interp(verbose,
+										dat_rph_time_d-1, dat_rph_roll-1,
+										ndat_rph, time_d, &beamroll, &j,
+										&error);
+							if (interp_status == MB_SUCCESS)
+							interp_status = mb_linear_interp(verbose,
+										dat_rph_time_d-1, dat_rph_pitch-1,
+										ndat_rph, time_d, &beampitch, &j,
+										&error);
+							}
+						else
+							{
+							beamroll = roll;
+							beampitch = pitch;
+							}
+							
+						/* get heading at receive time from best available source */
+						if (nnav > 0)
+							{
+							interp_status = mb_linear_interp_heading(verbose,
+										nav_time_d-1, nav_heading-1,
+										nnav, time_d, &beamheading, &j,
+										&error);
+							}
+						else if (ndat_heading > 0)
+							{
+							interp_status = mb_linear_interp_heading(verbose,
+										dat_heading_time_d-1, dat_heading_heading-1,
+										ndat_heading, time_d, &beamheading, &j,
+										&error);
+							}
+						else
+							{
+							beamheading = 0.0;
+							}
+						if (beamheading < 0.0)
+							beamheading += 360.0;
+						else if (beamheading >= 360.0)
+							beamheading -= 360.0;
 
-						/* correct alpha for pitch if necessary */
-						if (!(device->MBI_sonar_flags & 0x0002))
-							alpha += istore->RMBint_pitch;
+						/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
+							Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+							Surface Sound Speed Measurements in Post-Processing for Multi-Sector
+							Multibeam Echosounders : International Hydrographic Review, v.5, no.3,
+							p.26-31.
+							(http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+						   note complexity if transducer arrays are reverse mounted, as determined
+						   by a mount heading angle of about 180 degrees rather than about 0 degrees.
+						   If a receive array or a transmit array are reverse mounted then:
+							1) subtract 180 from the heading mount angle of the array
+							2) flip the sign of the pitch and roll mount offsets of the array
+							3) flip the sign of the beam steering angle from that array
+								(reverse TX means flip sign of TX steer, reverse RX
+								means flip sign of RX steer) */
+						tx_steer = istore->RMB_sounding_pitchangles[i];
+						if (!(istore->RMB_sonar_flags & 0x0001))
+							tx_orientation.roll = roll;
+						else
+							tx_orientation.roll = 0.0;
+						if (!(istore->RMB_sonar_flags & 0x0002))
+							tx_orientation.pitch = pitch;
+						else
+							tx_orientation.pitch = 0.0;
+						tx_orientation.heading = heading;
+						rx_steer = istore->RMB_sounding_rollangles[i];
+						if (!(istore->RMB_sonar_flags & 0x0001))
+							rx_orientation.roll = beamroll;
+						else
+							rx_orientation.roll = 0.0;
+						if (!(istore->RMB_sonar_flags & 0x0002))
+							rx_orientation.pitch = beampitch;
+						else
+							rx_orientation.pitch = 0.0;
+						rx_orientation.heading = beamheading;
+						reference_heading = heading;
+		
+						status = mb_beaudoin(verbose,
+									tx_align,
+									tx_orientation,
+									tx_steer,
+									rx_align,
+									rx_orientation,
+									rx_steer,
+									reference_heading,
+									&beamAzimuth,
+									&beamDepression,
+									&error);
+						theta = 90.0 - beamDepression;
+						phi = 90.0 - beamAzimuth;
+						if (phi < 0.0)
+							phi += 360.0;
+						istore->RMB_sounding_takeoffangles[i] = theta;
+						istore->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
+
+						//alpha = istore->RMB_sounding_pitchangles[i];
+						//beta = 90.0 + istore->RMB_sounding_rollangles[i];
 
 						/* correct beta for roll if necessary */
-						if (!(device->MBI_sonar_flags & 0x0001))
-							beta -= istore->RMBint_roll;
+						//if (!(istore->RMB_sonar_flags & 0x0001))
+						//	beta -= istore->RMBint_roll;
 
+						/* correct alpha for pitch if necessary */
+						//if (!(istore->RMB_sonar_flags & 0x0002))
+						//	alpha += istore->RMBint_pitch;
+
+						//mb_rollpitch_to_takeoff(
+						//	verbose,
+						//	alpha, beta,
+						//	&theta, &phi,
+						//	&error);
+						
+						//istore->RMB_sounding_takeoffangles[i] = theta;
+						//istore->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
+						}
+					istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0300;
+					}
+
+				/* else if beam takeoff and azimuthal angles exist but are not
+				 * corrected for beam roll and/or pitch apply the corrections
+				 * - doesn't make sense to have takeoff/azimuthal beam angles
+				 *		that are not corrected for attitude, but this apparently
+				 *		can happen with hysweep data logging */
+				else if ((istore->RMB_beam_data_available & 0x0300)
+					&& (!(istore->RMB_sonar_flags & 0x0001)
+						|| !(istore->RMB_sonar_flags & 0x0002)))
+					{
+					for (i=0;i<istore->RMB_num_beams;i++)
+						{
+						/* convert to roll pitch angles */
+						theta = istore->RMB_sounding_takeoffangles[i];
+						phi = 90.0 - istore->RMB_sounding_azimuthalangles[i];
+						mb_takeoff_to_rollpitch(
+							verbose,
+							theta, phi,
+							&alpha, &beta,
+							&error);
+
+						/* correct beta for roll if necessary */
+						if (!(istore->RMB_sonar_flags & 0x0001))
+							{
+							beta -= istore->RMBint_roll;
+							}
+						
+						/* correct alpha for pitch if necessary */
+						if (!(istore->RMB_sonar_flags & 0x0002))
+							{
+							alpha += istore->RMBint_pitch;
+							}
+						
+						/* convert back to takeoff and azimuthal angles */
 						mb_rollpitch_to_takeoff(
 							verbose,
 							alpha, beta,
@@ -1941,12 +2390,14 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 						istore->RMB_sounding_takeoffangles[i] = theta;
 						istore->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
 						}
-					istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0300;
+					istore->RMB_sonar_flags = istore->RMB_sonar_flags | 0x0001;
+					istore->RMB_sonar_flags = istore->RMB_sonar_flags | 0x0002;
 					}
 
 				/* recalculate beam bathymetry if beam takeoff and azimuthal angles are available */
 				if ((istore->RMB_beam_data_available & 0x0300))
 					{
+					/* recalculate bathymetry using beam takeoff and azimuthal angles */
 					for (i=0;i<istore->RMB_num_beams;i++)
 						{
 						rr = istore->RMB_beam_ranges[i];
@@ -2007,7 +2458,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 					}
 
 				/* correct beam roll angles for roll if necessary */
-				if (!(device->MBI_sonar_flags & 0x0001))
+				if (!(istore->RMB_sonar_flags & 0x0001) || kluge_force_attitude_compensation == 1)
 					{
 					for (i=0;i<istore->RMB_num_beams;i++)
 						{
@@ -2018,7 +2469,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 				/* get beam pitch angles if necessary */
 				if (!(istore->RMB_beam_data_available & 0x0040))
 					{
-					if (!(device->MBI_sonar_flags & 0x0002))
+					if (!(istore->RMB_sonar_flags & 0x0002) || kluge_force_attitude_compensation == 1)
 						{
 						for (i=0;i<istore->RMB_num_beams;i++)
 							{

@@ -850,12 +850,12 @@ int main (int argc, char **argv)
 						status = mb_read_ping(verbose, mbio_ptr, store_ptr,
 									&kind, &error);
 				
-						/* if platform_source kind then extract data */
+						/* if platform_source kind then extract platform definition */
 						if (error <= MB_ERROR_NO_ERROR
 							&& kind == platform_source
 							&& platform_source != MB_DATA_NONE)
 							{
-							/* extract svp */
+							/* extract platform */
 							status = mb_extract_platform(verbose, mbio_ptr, store_ptr,
 										&kind, (void **) &platform,
 										&error);

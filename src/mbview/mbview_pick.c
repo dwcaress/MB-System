@@ -895,7 +895,7 @@ int mbview_pick_text(size_t instance)
 		mbview_setlonlatstrings(shared.lonlatstyle, lonmin,latmin, lonstr0, latstr0);
 		mbview_setlonlatstrings(shared.lonlatstyle, lonmax,latmax, lonstr1, latstr1);
 		sprintf(value_text,
-		":::t\"Region Info:\":t\" West: %s\":t\" East: %s\":t\" South: %s\":t\" North: %s\":t\" Width: %.3f m\":t\" Height: %.3f m\"",
+		":::t\"Region Info:\":t\" W: %s\":t\" E: %s\":t\" S: %s\":t\" N: %s\":t\" Width: %.3f m\":t\" Height: %.3f m\"",
 			lonstr0, lonstr1, latstr0, latstr1,
 			data->region.width,
 			data->region.height);
@@ -1094,29 +1094,23 @@ int mbview_setlonlatstrings(int style, double lon, double lat, char *lonstring, 
 
 	if (style == MBV_LONLAT_DEGREESDECIMAL)
 		{
-		if (lon < 0.0)
-			sprintf(lonstring, "%9.5f W", fabs(lon));
-		else
-			sprintf(lonstring, "%9.5f E", fabs(lon));
-		if (lat < 0.0)
-			sprintf(latstring, "%8.5f S", fabs(lat));
-		else
-			sprintf(latstring, "%8.5f N", fabs(lat));
+		sprintf(lonstring, "%.7f", lon);
+		sprintf(latstring, "%.7f", lat);
 		}
 	else
 		{
 		degree = (int)fabs(lon);
 		minute = 60.0 * (fabs(lon) - (double)degree);
 		if (lon < 0.0)
-			sprintf(lonstring, "%3d W %6.3f", degree, minute);
+			sprintf(lonstring, "%3d %10.6f W", degree, minute);
 		else
-			sprintf(lonstring, "%3d E %6.3f", degree, minute);
+			sprintf(lonstring, "%3d %10.6f E", degree, minute);
 		degree = (int)fabs(lat);
 		minute = 60.0 * (fabs(lat) - (double)degree);
 		if (lat < 0.0)
-			sprintf(latstring, "%3d S %6.3f", degree, minute);
+			sprintf(latstring, "%3d %10.6f S", degree, minute);
 		else
-			sprintf(latstring, "%3d N %6.3f", degree, minute);
+			sprintf(latstring, "%3d %10.6f N", degree, minute);
 		}
 
 	/* print output debug statements */

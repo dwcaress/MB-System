@@ -165,6 +165,8 @@ int mbeditviz_init(int argc,char **argv)
 	mbev_pitchbias = 0.0;
 	mbev_headingbias = 0.0;
 	mbev_timelag = 0.0;
+	mbev_sizemultiplier = 2;
+	mbev_nsoundingthreshold = 5;
 
 	/* set mbio default values */
 	mb_lonflip(mbev_verbose,&mbdef_lonflip);
@@ -4370,6 +4372,320 @@ rollbias, pitchbias, headingbias, timelag);
 	/* update the grid to mbview */
 	mbview_updateprimarygrid(mbev_verbose, 0, mbev_grid.nx, mbev_grid.ny, mbev_grid.val, &mbev_error);
 	mbview_updatesecondarygrid(mbev_verbose, 0, mbev_grid.nx, mbev_grid.ny, mbev_grid.sgm, &mbev_error);
+
+	/* turn message of */
+	do_mbeditviz_message_off();
+
+	/* redisplay grid */
+	mbview_plothigh(0);
+
+	/* print output debug statements */
+	if (mbev_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",mbev_error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       mbev_status:%d\n",mbev_status);
+		}
+}
+/*--------------------------------------------------------------------*/
+void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingthreshold)
+
+{
+	char	*function_name = "mbeditviz_mb3dsoundings_flagsparsevoxels";
+	struct mb3dsoundings_sounding_struct *sounding;
+	int		isounding;
+	int 	nx, ny, nz, cnx, cny, cnz;
+	double	dx, dy, dz;
+	int		**coarsevoxels = NULL;
+	int		*ncoarsevoxels = NULL;
+	int		*ncoarsevoxels_alloc = NULL;
+	int		nvoxels_alloc;
+	int		voxel_size;
+	int		nvoxels_alloc_chunk;
+	int 	*voxels = NULL;
+	int 	*voxel;
+	int		nvoxels, nvoxels_occupied;
+	int		occupied_voxel;
+	size_t	alloc_size;
+	int		ncoarsevoxelstot, nvoxelstot;
+	int		found, ivoxel, ivoxeluse, nsoundingsinvoxel, nflagged;
+	int		i, j, k;
+	int		i0, i1, j0, j1, k0, k1;
+	int		ii, jj, kk, ll, iii, jjj, kkk;
+
+if (mbev_verbose > 0)
+fprintf(stderr,"mbeditviz_mb3dsoundings_flagsparsevoxels: sizemultiplier:%d nsoundingthreshold:%d\n",
+sizemultiplier, nsoundingthreshold);
+
+	/* print input debug statements */
+	if (mbev_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       sizemultiplier:        %d\n",sizemultiplier);
+		fprintf(stderr,"dbg2       nsoundingthreshold:    %d\n",nsoundingthreshold);
+		}
+
+	/* copy bias parameters */
+	mbev_sizemultiplier = sizemultiplier;
+	mbev_nsoundingthreshold = nsoundingthreshold;
+
+	/* turn message on */
+	sprintf(message, "Filtering sparse (n<%d) voxels (%dXcell)", nsoundingthreshold, sizemultiplier);
+	do_mbeditviz_message_on(message);
+fprintf(stderr, "\nFlagging soundings in sparse voxels:\n");
+fprintf(stderr, "\tvoxel size: %d x cell size = %f meters\n", sizemultiplier, sizemultiplier * mbev_grid_cellsize);
+fprintf(stderr, "\tflag threshold: n < %d soundings within 3X3X3 voxel volume\n", nsoundingthreshold);
+
+	/* get number of voxels */
+	dx = sizemultiplier * mbev_grid_cellsize;
+	dy = sizemultiplier * mbev_grid_cellsize;
+	dz = sizemultiplier * mbev_grid_cellsize;
+	nx = (mbev_selected.xmax - mbev_selected.xmin) / dx;
+	ny = (mbev_selected.ymax - mbev_selected.ymin) / dy;
+	nz = (mbev_selected.zmax - mbev_selected.zmin) / dz;
+	cnx = nx / 10 + 1;
+	cny = ny / 10 + 1;
+	cnz = nz / 10 + 1;
+	nx = 10 * cnx;
+	ny = 10 * cny;
+	nz = 10 * cnz;
+	nvoxels_occupied = 0;
+//fprintf(stderr,"Volume Bounds: %f %f  %f %f  %f %f  dxyz:%f  Dims: %d %d %d\n",
+//mbev_selected.xmin,mbev_selected.xmax,mbev_selected.ymin,mbev_selected.ymax,mbev_selected.zmin,mbev_selected.zmax,
+//dx,nx,ny,nz);
+	
+	/* allocate arrays for lists of occupied voxels */
+//fprintf(stderr,"\nArray pointers before: %p %p %p\n",ncoarsevoxels,ncoarsevoxels_alloc,coarsevoxels);
+	alloc_size = cnx * cny * cnz * sizeof(int);
+//fprintf(stderr,"Alloc sizes: %zu ", alloc_size);
+	if ((mbev_status = mb_mallocd(mbev_verbose,__FILE__,__LINE__, alloc_size, (void **)&ncoarsevoxels, &mbev_error))
+		== MB_SUCCESS)
+		memset(ncoarsevoxels, 0, alloc_size);
+	if ((mbev_status = mb_mallocd(mbev_verbose,__FILE__,__LINE__, alloc_size, (void **)&ncoarsevoxels_alloc, &mbev_error))
+		== MB_SUCCESS)
+		memset(ncoarsevoxels_alloc, 0, alloc_size);
+	alloc_size = cnx * cny * cnz * sizeof(int *);
+//fprintf(stderr," %zu\n", alloc_size);
+	if ((mbev_status = mb_mallocd(mbev_verbose,__FILE__,__LINE__, alloc_size, (void **)&coarsevoxels, &mbev_error))
+		== MB_SUCCESS)
+		memset(coarsevoxels, 0, alloc_size);
+	voxel_size = (mbev_nsoundingthreshold + 5);
+	nvoxels_alloc_chunk = nx * ny * 2 / 10; /* figure occupied voxels likely to number about twice a horizontal slice */
+//fprintf(stderr,"Array pointers after: %p %p %p\n",ncoarsevoxels,ncoarsevoxels_alloc,coarsevoxels);
+		
+	/* loop over all soundings setting occupied voxels as needed */
+	if (mbev_status == MB_SUCCESS)
+		{
+		for (isounding=0; isounding<mbev_selected.num_soundings; isounding++)
+			{
+			sounding = &mbev_selected.soundings[isounding];
+			if (mb_beam_ok(sounding->beamflag))
+				{
+				i = (sounding->x - mbev_selected.xmin) / dx;
+				j = (sounding->y - mbev_selected.ymin) / dy;
+				k = (sounding->z - mbev_selected.zmin) / dz;
+				
+				/* loop over the neighborhood (+/- 1) of the voxel containing
+				 * this sounding, setting occupancy for the containing voxel and
+				 * neighbor occupancy for the surrounding voxels */
+				i0 = MAX(i - 1, 0);
+				i1 = MIN(i + 1, nx - 1);
+				j0 = MAX(j - 1, 0);
+				j1 = MIN(j + 1, ny - 1);
+				k0 = MAX(k- 1, 0);
+				k1 = MIN(k + 1, nz - 1);
+				for (iii = i0; iii <= i1; iii++)
+					{
+					for (jjj = j0; jjj <= j1; jjj++)
+						{
+						for (kkk = k0; kkk <= k1; kkk++)
+							{
+							/* is this the occupied voxel or a neighbor */
+							if (i == iii && j == jjj && k == kkk)
+								occupied_voxel = MB_YES;
+							else
+								occupied_voxel = MB_NO;
+								
+							/* get coarse voxel */
+							ii = i / 10;
+							jj = j / 10;
+							kk = k / 10;
+							ll = ii + jj * cnx + kk * cnx * cny;
+							
+							/* look for voxel already set in the appropriate coarse voxel */
+							nvoxels = ncoarsevoxels[ll];
+							nvoxels_alloc = ncoarsevoxels_alloc[ll];
+							voxels = coarsevoxels[ll];
+							
+							found = MB_NO;
+							if (nvoxels > 0 && voxels != NULL)
+								{
+								for (ivoxel=0; ivoxel < nvoxels && found == MB_NO; ivoxel++)
+									{
+									voxel = &voxels[ivoxel * voxel_size];
+									if (iii == voxel[0] && jjj == voxel[1] && kkk == voxel[2])
+										{
+										found = MB_YES;
+										ivoxeluse = ivoxel;
+										}
+									}
+								}
+							
+							/* if needed allocate more space for a new voxel to the list */
+							if (found == MB_NO && nvoxels_alloc <= nvoxels)
+								{
+								nvoxels_alloc += nvoxels_alloc_chunk;
+								alloc_size = nvoxels_alloc * voxel_size * sizeof(int);
+								mbev_status = mb_reallocd(mbev_verbose,__FILE__,__LINE__, alloc_size, (void **)&coarsevoxels[ll], &mbev_error);
+			
+								if (mbev_status == MB_SUCCESS)
+									{
+									voxels = coarsevoxels[ll];
+									alloc_size = nvoxels_alloc_chunk * voxel_size * sizeof(int);
+									memset(&voxels[ncoarsevoxels_alloc[ll] * voxel_size], 0, alloc_size);
+									ncoarsevoxels_alloc[ll] = nvoxels_alloc;
+									}
+								}
+							
+							/* if needed add a new voxel to the list */
+							if (mbev_status == MB_SUCCESS && found == MB_NO)
+								{
+								ivoxeluse = nvoxels;
+								voxel = &voxels[ivoxeluse * voxel_size];
+								voxel[0] = iii;
+								voxel[1] = jjj;
+								voxel[2] = kkk;
+								voxel[3] = 0;
+								voxel[4] = 0;
+								nvoxels++;
+								ncoarsevoxels[ll] = nvoxels;
+								}
+							
+							/* add sounding to voxel list */
+							if (mbev_status == MB_SUCCESS)
+								{
+								voxel = &voxels[ivoxeluse * voxel_size];
+								if (occupied_voxel == MB_YES)
+									{
+									nsoundingsinvoxel = voxel[3];
+									if (nsoundingsinvoxel < mbev_nsoundingthreshold)
+										{
+										voxel[5+nsoundingsinvoxel] = isounding;
+										}
+									voxel[3]++;
+									if (voxel[3] == 1)
+										nvoxels_occupied++;
+									}
+								else
+									{
+									voxel[4]++;
+									}
+								}
+//fprintf(stderr,"Pt:%f %f %f  IJK:%d %d %d CIJK:%d %d %d LL:%d  NVOX:%d:%d Found:%d IVOXUSE:%d\n",
+//sounding->x,sounding->y,sounding->z,i,j,k,ii,jj,kk,ll,nvoxels,nvoxels_alloc,found,ivoxeluse);
+								
+							}
+						}
+					}
+				}
+				
+			if (isounding % 100000 == 0 && isounding > 0)
+				{
+				/* update message */
+				sprintf(message, "Processed %d of %d soundings, %d voxels occupied",
+							isounding, mbev_selected.num_soundings, (int)nvoxels_occupied);
+				do_mbeditviz_message_on(message);
+fprintf(stderr,"%s\n",message);
+				}
+			}
+		}
+
+	/* turn message on */
+	sprintf(message, "Filtering sparse (n<%d) voxels (%dXcell)", nsoundingthreshold, sizemultiplier);
+	do_mbeditviz_message_on(message);
+fprintf(stderr,"%s\n",message);
+
+	/* loop over all coarse voxels, within each coarse voxel loop over all
+	 * occupied voxels and flag soundings in any that have less
+	 * than the minimum number of soundings */
+	if (mbev_status == MB_SUCCESS)
+		{
+		/* count occupied voxels */
+		ncoarsevoxelstot = 0;
+		nvoxelstot = 0;
+		for (ll=0; ll < cnx * cny * cnz; ll++)
+			{
+			if (ncoarsevoxels[ll] > 0)
+				{
+				ncoarsevoxelstot++;
+				voxels = coarsevoxels[ll];
+				for (ivoxel=0; ivoxel < ncoarsevoxels[ll]; ivoxel++)
+					{
+					voxel = &voxels[ivoxel * voxel_size];
+					if (voxel[3] > 0)
+						nvoxelstot++;
+					}
+				}
+			}
+fprintf(stderr,"Number of occupied coarse voxels: %10d of %10d\n", ncoarsevoxelstot, cnx * cny * cnz);
+fprintf(stderr,"Number of occupied voxels:        %10d of %10d\n", nvoxelstot, nx * ny * nz);
+		
+		/* loop over all occupied voxels */
+		nflagged = 0;
+		nvoxels = 0;
+		for (ll = 0; ll < cnx * cny * cnz; ll++)
+			{
+			voxels = coarsevoxels[ll];
+			for (ivoxel=0; ivoxel < ncoarsevoxels[ll]; ivoxel++)
+				{
+				voxel = &voxels[ivoxel * voxel_size];
+				if (voxel[3] > 0 && (voxel[3] + voxel[4]) < mbev_nsoundingthreshold)
+					{
+					for (i=0; i < voxel[3]; i++)
+						{
+						isounding = voxel[5 + i];
+						sounding = &mbev_selected.soundings[isounding];
+						sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+						
+						/* apply the flag in the primary application */
+						mbeditviz_mb3dsoundings_edit(sounding->ifile, sounding->iping,
+							sounding->ibeam, sounding->beamflag, MB3DSDG_EDIT_NOFLUSH);
+
+						mbev_selected.num_soundings_unflagged--;
+						mbev_selected.num_soundings_flagged++;
+						nflagged++;
+						}
+//fprintf(stderr,"Flagged %d soundings in voxel %d:%d:%d\n", voxel[3],voxel[0], voxel[1], voxel[2]);
+					}
+				if (voxel[3] > 0)
+					nvoxels++;
+				if (nvoxels % 10000 == 0)
+					{
+					/* update message */
+					sprintf(message, "Processed %d of %d occupied voxels, %d soundings flagged",
+								(int)nvoxels, (int)nvoxels_occupied, nflagged);
+					do_mbeditviz_message_on(message);
+fprintf(stderr,"%s\n",message);
+					}
+				}
+			}
+		
+		/* flush all edit events */
+		mbeditviz_mb3dsoundings_edit(0, 0, 0, MB_FLAG_NULL,MB3DSDG_EDIT_FLUSHPREVIOUS);
+
+		}
+		
+	/* deallocate arrays */
+	for (ll = 0; ll < cnx * cny * cnz; ll++)
+		mbev_status = mb_freed(mbev_verbose,__FILE__,__LINE__, (void **)&coarsevoxels[ll], &mbev_error);
+	mbev_status = mb_freed(mbev_verbose,__FILE__,__LINE__, (void **)&ncoarsevoxels, &mbev_error);
+	mbev_status = mb_freed(mbev_verbose,__FILE__,__LINE__, (void **)&ncoarsevoxels_alloc, &mbev_error);
+	mbev_status = mb_freed(mbev_verbose,__FILE__,__LINE__, (void **)&coarsevoxels, &mbev_error);
 
 	/* turn message of */
 	do_mbeditviz_message_off();

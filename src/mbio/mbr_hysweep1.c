@@ -45,8 +45,8 @@
 /* local defines */
 
 /* turn on debug statements here */
-/* #define MBR_HYSWEEP1_DEBUG 1 */
-/* #define MBR_HYSWEEP1_DEBUG2 1 */
+// #define MBR_HYSWEEP1_DEBUG 1
+// #define MBR_HYSWEEP1_DEBUG2 1
 
 /* essential function prototypes */
 int mbr_register_hysweep1(int verbose, void *mbio_ptr,
@@ -134,6 +134,7 @@ int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_hysweep1;
 	mb_io_ptr->mb_io_dimensions = &mbsys_hysweep_dimensions;
 	mb_io_ptr->mb_io_pingnumber = &mbsys_hysweep_pingnumber;
+	mb_io_ptr->mb_io_extract_platform = &mbsys_hysweep_extract_platform;
 	mb_io_ptr->mb_io_extract = &mbsys_hysweep_extract;
 	mb_io_ptr->mb_io_insert = &mbsys_hysweep_insert;
 	mb_io_ptr->mb_io_extract_nav = &mbsys_hysweep_extract_nav;
@@ -260,7 +261,7 @@ int mbr_info_hysweep1(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
-	*platform_source = MB_DATA_NONE;
+	*platform_source = MB_DATA_HEADER;
 	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
@@ -413,7 +414,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	double	navlon, navlat;
-	double	speed;
+	double	roll, speed;
 	double	alpha, beta, theta, phi;
 	double	rr, xx, zz;
 	double	*pixel_size, *swath_width;
@@ -483,7 +484,7 @@ store->POS_x,store->POS_y,navlon,navlat);*/
 			{
 			/* add latest attitude */
 			mb_attint_add(verbose, mbio_ptr,
-					store->time_d, -store->HCP_heave,
+					store->time_d, store->HCP_heave,
 					-store->HCP_roll, store->HCP_pitch, error);
 			}
 		}
@@ -548,8 +549,9 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		interp_error = MB_ERROR_NO_ERROR;
 
 		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d,
-				    &(store->RMBint_heave), &(store->RMBint_roll),
+				    &(store->RMBint_heave), &(roll),
 				    &(store->RMBint_pitch), &interp_error);
+		store->RMBint_roll = -roll;
 		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, store->RMBint_heading, speed,
 				    &(store->RMBint_lon), &(store->RMBint_lat), &speed, &interp_error);
 		if (interp_status == MB_SUCCESS)
@@ -631,7 +633,7 @@ store->RMBint_x,store->RMBint_y,store->RMBint_lon,store->RMBint_lat);*/
 
 					/* correct beta for roll if necessary */
 					if (!(device->MBI_sonar_flags & 0x0001))
-						beta -= store->RMBint_roll;
+						beta += store->RMBint_roll;
 
 					mb_rollpitch_to_takeoff(
 						verbose,
@@ -658,7 +660,7 @@ store->RMBint_x,store->RMBint_y,store->RMBint_lon,store->RMBint_lat);*/
 					zz = rr * cos(DTR * theta);
 					store->RMB_sounding_across[i] = xx * cos(DTR * phi);
 					store->RMB_sounding_along[i] = xx * sin(DTR * phi);
-					store->RMB_sounding_depths[i] = zz + store->RMBint_draft - store->RMBint_heave;
+					store->RMB_sounding_depths[i] = zz + store->RMBint_draft + store->RMBint_heave;
 					}
 				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0038;
 				}
@@ -713,7 +715,7 @@ store->RMBint_x,store->RMBint_y,store->RMBint_lon,store->RMBint_lat);*/
 				{
 				for (i=0;i<store->RMB_num_beams;i++)
 					{
-					store->RMB_sounding_rollangles[i] += store->RMBint_roll;
+					store->RMB_sounding_rollangles[i] -= store->RMBint_roll;
 					}
 				}
 
@@ -771,7 +773,7 @@ store->RMBint_x,store->RMBint_y,store->RMBint_lon,store->RMBint_lat);*/
 					zz = rr * cos(DTR * theta);
 					store->RMB_sounding_across[i] = xx * cos(DTR * phi);
 					store->RMB_sounding_along[i] = xx * sin(DTR * phi);
-					store->RMB_sounding_depths[i] = zz + store->RMBint_draft - store->RMBint_heave;
+					store->RMB_sounding_depths[i] = zz + store->RMBint_draft + store->RMBint_heave;
 					}
 				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x003C;
 				}
@@ -978,6 +980,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	double	tmpRMB_sound_velocity;
 	int	tmpRMB_ping_number;
 	int	SNRok, RSSok;
+	int len;
 	int	i;
 
 	/* print input debug statements */
@@ -1669,8 +1672,20 @@ fprintf(stderr,"SAVED:"); */
 						&(store->RSS_maximum_amplitude),
 						&(store->RSS_bit_shift),
 						&(store->RSS_frequency));
-				if (nscan != 13)
+				if (nscan == 10)
 					{
+					store->RSS_minimum_amplitude = 0;
+					store->RSS_maximum_amplitude = 0;
+					store->RSS_frequency = 0;
+					}
+				else if (nscan == 12)
+					{
+					store->RSS_frequency = 0;
+					}
+				else if (nscan < 12)
+					{
+					store->RSS_port_num_samples = 0;
+					store->RSS_starboard_num_samples = 0;
 					status = MB_FAILURE;
 					*error = MB_ERROR_UNINTELLIGIBLE;
 					}
@@ -2330,6 +2345,19 @@ fprintf(stderr,"SAVED:"); */
 					strcpy(mb_io_ptr->projection_id, store->PRJ_proj4_command);
 					mb_io_ptr->projection_initialized = MB_YES;
 					}
+
+				/* print debug statements */
+				if (verbose >= 4)
+					{
+					fprintf(stderr,"\ndbg4  Hysweep file header read by MBIO function <%s>\n",function_name);
+					}
+
+				/* if successful this completes a file header record */
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
+					store->kind = MB_DATA_HEADER;
+					}
 				}
 
 			/* EOL end of line data record */
@@ -2350,12 +2378,21 @@ fprintf(stderr,"SAVED:"); */
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_FTP;
 
 				/* parse the first line */
-				nscan = sscanf(line+4, "%s",
-						store->FTP_record);
-				if (nscan != 1)
+				strcpy(store->FTP_record,line+4);
+				len = strlen(store->FTP_record);
+				if (len <= 0)
 					{
 					status = MB_FAILURE;
 					*error = MB_ERROR_UNINTELLIGIBLE;
+					}
+				else
+					{
+					for (i=0;i<len;i++)
+						{
+						if (store->FTP_record[i] == '\r'
+							|| store->FTP_record[i] == '\n')
+							store->FTP_record[i] = '\0';
+						}
 					}
 
 				/* print debug statements */
@@ -2693,6 +2730,7 @@ fprintf(stderr,"SAVED:"); */
 					{
 					device = (struct mbsys_hysweep_device_struct *) &(store->devices[OF2_device_number]);
 					offset = (struct mbsys_hysweep_device_offset_struct *) &(device->offsets[device->num_offsets]);
+					offset->OF2_device_number = OF2_device_number;
 					offset->OF2_offset_type = OF2_offset_type;
 					offset->OF2_offset_starboard = OF2_offset_starboard;
 					offset->OF2_offset_forward = OF2_offset_forward;
@@ -3295,7 +3333,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			device->DEV_device_number = hysweeptmp.num_devices;
 			device->DEV_device_capability = 16384;
 			strcpy(device->DEV_device_name, "MB-System interpolated sonar depth");
-			device->DV2_device_capability = 0x1000;
+			device->DV2_device_capability = 0x8000;
 			device->DV2_towfish = 0;
 			device->DV2_enabled = 1;
 
@@ -3409,7 +3447,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				device->DEV_device_number,
 				device->DEV_device_capability,
 				device->DEV_device_name);
-			fprintf(mbfp, "DV2 %d %d %d %d\r\n",
+			fprintf(mbfp, "DV2 %d %x %d %d\r\n",
 				device->DEV_device_number,
 				device->DV2_device_capability,
 				device->DV2_towfish,
@@ -3432,7 +3470,8 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				{
 				fprintf(mbfp, "PRI 1\r\n");
 				}
-			if (device->DEV_device_capability & 16)
+			if (device->DV2_device_capability & 1
+				|| device->DV2_device_capability & 2)
 				{
 				fprintf(mbfp, "MBI %d %x %x %x %d %d %.3f %.3f\r\n",
 					device->DEV_device_number,
@@ -3566,7 +3605,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			sprintf(line, "HCP %d %.3f %.2f %.2f %.2f\r\n",
 				*device_number_MB_HCP,
 				store->RMB_time,
-				(-store->RMBint_heave),
+				(store->RMBint_heave),
 				(-store->RMBint_roll),
 				store->RMBint_pitch);
 			fputs(line, mbfp);

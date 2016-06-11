@@ -71,6 +71,16 @@ typedef struct _Mb3dsdgData
     Widget cascadeButton_action;
     Widget pulldownMenu_action;
     Widget pushButton_action_applybias;
+    Widget separator3;
+    Widget pushButton_action_flagsparsevoxels_A;
+    Widget pushButton_action_flagsparsevoxels_B;
+    Widget pushButton_action_flagsparsevoxels_C;
+    Widget pushButton_action_flagsparsevoxels_D;
+    Widget pushButton_action_flagsparsevoxels_E;
+    Widget pushButton_action_flagsparsevoxels_F;
+    Widget separator4;
+    Widget cascadeButton_action_colorsoundings;
+    Widget pulldownMenu_action_colorsoundings;
     Widget pushButton_action_colorsoundingsblack;
     Widget pushButton_action_colorsoundingsred;
     Widget pushButton_action_colorsoundingsyellow;
@@ -78,6 +88,9 @@ typedef struct _Mb3dsdgData
     Widget pushButton_action_colorsoundingsbluegreen;
     Widget pushButton_action_colorsoundingsblue;
     Widget pushButton_action_colorsoundingspurple;
+    Widget separator5;
+    Widget cascadeButton_action_optimizebiasvalues;
+    Widget pulldownMenu_action_optimizebiasvalues;
     Widget pushButton_action_optimizebiasvalues_r;
     Widget pushButton_action_optimizebiasvalues_p;
     Widget pushButton_action_optimizebiasvalues_h;

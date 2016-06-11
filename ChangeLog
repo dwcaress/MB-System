@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.5.2277       June 11, 2016
   Version 5.5.2275       May 17, 2016
 * Version 5.5.2274       May 5, 2016
   Version 5.5.2271       April 1, 2016
@@ -232,6 +233,39 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2277 (June 11, 2016)
+
+Format 201 (MBF_HYSWEEP1): Changed handling of file header data to enable the
+extraction of platform definition data by the program mbmakeplatform.
+
+MBmakeplatform: Now capable of extracting the list of sensors and the associated
+offsets from Hypack HSX files, and outputting an MB-System platform file.
+
+MBhysweeppreprocess: Now allows for sensor offsets to be defined by an
+MB-System platform file, which can be extracted from HSX data files with
+mbmakeplatform, and can be modified and augmented using the same program.
+
+MBeditviz: Added a new sounding filter mode that calculates the sounding density
+for a 3D "voxel" representation of the selected volume, and then flags soundings
+in voxels containing less than a threshold of soundings. This algorithm flags
+isolated soundings, an approach that is particularly useful for submarine
+lidar data. This filter is accessible from the "action" menu of the 3D sounding
+window.
+
+-----> 5.5.2276 (May 31, 2016)
+
+MBeditviz: Added algorithm to flag isolated soundings by analyzing the 3D
+distribution of currently selected soundings. Soundings are flagged in voxels
+containing less than a desired threshold of soundings. This option is accessed
+from the <Action> menu of the 3D sounding view.
+
+Format 201 (MBF_HYSWEEP1) and mbhysweeppreprocess: Fixed handling of data that
+have beam takeoff angles calculated without attitude correction. Changed the
+default heave sign convention.
+
+Format 231 (MBF_3DDEPTHP): Now handles files with broken data records a bit more
+gracefully.
 
 -----> 5.5.2275 (May 17, 2016)
 
