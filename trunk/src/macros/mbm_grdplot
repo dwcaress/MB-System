@@ -1235,46 +1235,61 @@ else
 	$use_scale = 1;
 	}
 
-# now find out the apparent size of the plot
-`echo $xmin $ymin > tmp$$.dat`;
-`echo $xmax $ymin >> tmp$$.dat`;
-`echo $xmax $ymax >> tmp$$.dat`;
-`echo $xmin $ymax >> tmp$$.dat`;
-@projected = `gmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1`;
-#
-if ($verbose > 0)
-	{
-	print "\nCalling GMT program mapproject...\n\tgmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot \n";
-	}
-`/bin/rm -f tmp$$.dat`;
-$cnt = 0;
-while (@projected)
-	{
-	$line = shift @projected;
-	$cnt++;
 
-	if ($verbose > 0)
-		{
-		print "gmt mapproject output: $line";
-		}
+# now find out the apparent size of the plot using the specified linear scaling
+if (!$geographic && $projection eq "x" && $map_scale)
+    {
+    if ($map_scale =~ /(\S+)\/(\S+)/)
+        {
+        ($xscale,$yscale) = $map_scale =~ /(\S+)\/(\S+)/;
+        }
+    else
+        {
+        ($xscale) = $map_scale =~ /(\S+)/;
+        $yscale = $xscale;
+        }
+    $xxmin = $xmin * $xscale;
+    $xxmax = $xmax * $xscale;
+    $yymin = $ymin * $yscale;
+    $yymax = $ymax * $yscale;
 
-	if ($cnt == 1)
-		{
-		($xxmin,$yymin) = $line =~ /(\S+)\s+(\S+)/;
-		$xxmax = $xxmin;
-		$yymax = $yymin;
-		}
-	else
-		{
-		($xx,$yy) = $line =~ /(\S+)\s+(\S+)/;
-		$xxmin = ($xx < $xxmin ? $xx : $xxmin);
-		$xxmax = ($xx > $xxmax ? $xx : $xxmax);
-		$yymin = ($yy < $yymin ? $yy : $yymin);
-		$yymax = ($yy > $yymax ? $yy : $yymax);
-		}
-	}
-$dxx = $xxmax - $xxmin;
-$dyy = $yymax - $yymin;
+    $dxx = $xxmax - $xxmin;
+    $dyy = $yymax - $yymin;
+    }
+
+# or find out the apparent size of the plot using gmt mapproject
+else
+    {
+    `echo $xmin $ymin > tmp$$.dat`;
+    `echo $xmax $ymin >> tmp$$.dat`;
+    `echo $xmax $ymax >> tmp$$.dat`;
+    `echo $xmin $ymax >> tmp$$.dat`;
+    @projected = `gmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
+    `/bin/rm -f tmp$$.dat`;
+    print "gmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot\n";
+    
+    while (@projected)
+        {
+            $line = shift @projected;
+        print $line;
+            if(!$xxmin)
+                {
+                ($xxmin,$yymin) = $line =~ /(\S+)\s+(\S+)/;
+                $xxmax = $xxmin;
+                $yymax = $yymin;
+                }
+            else
+                {
+                ($xx,$yy) = $line =~ /(\S+)\s+(\S+)/;
+                $xxmin = ($xx < $xxmin ? $xx : $xxmin);
+                $xxmax = ($xx > $xxmax ? $xx : $xxmax);
+                $yymin = ($yy < $yymin ? $yy : $yymin);
+                $yymax = ($yy > $yymax ? $yy : $yymax);
+                }
+        }
+    $dxx = $xxmax - $xxmin;
+    $dyy = $yymax - $yymin;
+    }
 
 # check for valid scaling
 if ($dxx == 0.0 && $dyy == 0.0)

@@ -61,15 +61,21 @@
 #define MBKONSBERGPREPROCESS_NAVFORMAT_OFG	1
 
 /* set precision of iterative raytracing depth & distance matching */
-#define MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION 0.0001
-#define MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX 50
-#define MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE 0
+#define MBKONSBERGPREPROCESS_BATH_RECALC_PRECISION 				0.0001
+#define MBKONSBERGPREPROCESS_BATH_RECALC_NCALCMAX 				50
+#define MBKONSBERGPREPROCESS_BATH_RECALC_ANGLEMODE 				0
 
-#define MBKONSBERGPREPROCESS_USE_SENSORDEPTH_ONLY	0
-#define MBKONSBERGPREPROCESS_USE_HEAVE_ONLY		1
+#define MBKONSBERGPREPROCESS_ZMODE_UNKNOWN						0
+#define MBKONSBERGPREPROCESS_ZMODE_USE_HEAVE_ONLY				1
+#define MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_ONLY			2
+#define MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_AND_HEAVE	3
 
-#define MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE		0
-#define	MBKONSBERGPREPROCESS_WATERCOLUMN_OUTPUT		1
+#define MBKONSBERGPREPROCESS_WATERCOLUMN_IGNORE					0
+#define	MBKONSBERGPREPROCESS_WATERCOLUMN_OUTPUT					1
+
+#define	MBKONSBERGPREPROCESS_FILTER_NONE						0
+#define	MBKONSBERGPREPROCESS_FILTER_MEAN						1
+#define	MBKONSBERGPREPROCESS_FILTER_MEDIAN						2
 
 static char rcs_id[] = "$Id: mbkongsbergpreprocess.c 1938 2012-02-22 20:58:08Z caress $";
 
@@ -285,7 +291,7 @@ int main (int argc, char **argv)
 	double	*timelag_model = NULL;
 
 	/* depth sensor filtering */
-	int	sonardepthfilter = MB_NO;
+	int	sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_NONE;
 	double	sonardepthfilterlength = 20.0;
 	double	sonardepthfilterdepth = 20.0;
 
@@ -333,7 +339,7 @@ int main (int argc, char **argv)
 	double	rx_x, rx_y, rx_z, rx_h, rx_r, rx_p;
 	
 	/* depth sensor offsets - used in place of heave for underwater platforms */
-	int	depthsensor_mode;
+	int	depthsensor_mode = MBKONSBERGPREPROCESS_ZMODE_UNKNOWN;
 	double	depth_off_x, depth_off_y, depth_off_z;
 	
 	/* roll and pitch sensor offsets */
@@ -370,6 +376,9 @@ int main (int argc, char **argv)
 	double	sonardepth_filterweight;
 	double	dtime, dtol, weight;
 	double	factor;
+	double	*median = NULL;
+	int		nmedian = 0;
+	int		nmedian_alloc = 0;
 
 	int	nscan;
 	int	i, j, j1, j2;
@@ -477,9 +486,23 @@ int main (int argc, char **argv)
 				if (nscan == 1)
 					sonardepthfilterdepth = 20.0;
 				if (nscan >= 1)
-					sonardepthfilter = MB_YES;
+					sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_MEAN;
 				else
-					sonardepthfilter = MB_NO;
+					sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_NONE;
+				}
+			else if (optarg[0] == 'M' || optarg[0] == 'm')
+				{
+				nscan = sscanf (&(optarg[1]),"%lf/%lf", &sonardepthfilterlength, &sonardepthfilterdepth);
+				if (nscan == 1)
+					sonardepthfilterdepth = 20.0;
+				if (nscan >= 1)
+					sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_MEDIAN;
+				else
+					sonardepthfilter = MBKONSBERGPREPROCESS_FILTER_NONE;
+				}
+			else if (optarg[0] == 'U' || optarg[0] == 'u')
+				{
+				nscan = sscanf (&(optarg[1]),"%d", &depthsensor_mode);
 				}
 			flag++;
 			break;
@@ -635,13 +658,13 @@ int main (int argc, char **argv)
 			if (error == MB_ERROR_NO_ERROR)
 				status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_sonardepthfilter,&error);
 			if (error != MB_ERROR_NO_ERROR)
-			{
-			mb_error(verbose,error,&message);
-			fprintf(stderr,"\nMBIO Error allocating sonardepth data arrays:\n%s\n",message);
-			fprintf(stderr,"\nProgram <%s> Terminated\n",
-				program_name);
-			exit(error);
-			}
+				{
+				mb_error(verbose,error,&message);
+				fprintf(stderr,"\nMBIO Error allocating sonardepth data arrays:\n%s\n",message);
+				fprintf(stderr,"\nProgram <%s> Terminated\n",
+					program_name);
+				exit(error);
+				}
 			}
 
 		/* if no sonardepth data then quit */
@@ -666,7 +689,7 @@ int main (int argc, char **argv)
 /*fprintf(stderr,"SONARDEPTH DATA: %f %f\n",
 sonardepth_time_d[nsonardepth],
 sonardepth_sonardepth[nsonardepth]);*/
-					sonardepth_sonardepth[nsonardepth] += sonardepthoffset;
+					//sonardepth_sonardepth[nsonardepth] += sonardepthoffset;
 					nsonardepth++;
 					}
 				}
@@ -1707,30 +1730,65 @@ sonardepth_sonardepth[nsonardepth]);*/
 		mb_datalist_close(verbose,&datalist,&error);
 
 	/* if desired apply filtering to sonardepth data */
-	if (sonardepthfilter == MB_YES)
+	if (sonardepthfilter != MBKONSBERGPREPROCESS_FILTER_NONE)
 		{
 		/* apply filtering to sonardepth data
 			read from asynchronous records in 7k files */
 		if (ndat_sonardepth > 1)
 			{
-fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
 			dtime = (dat_sonardepth_time_d[ndat_sonardepth-1]  - dat_sonardepth_time_d[0]) / ndat_sonardepth;
-			nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
-			for (i=0;i<ndat_sonardepth;i++)
+			if (sonardepthfilter == MBKONSBERGPREPROCESS_FILTER_MEDIAN)
 				{
-				dat_sonardepth_sonardepthfilter[i] = 0.0;
-				sonardepth_filterweight = 0.0;
-				j1 = MAX(i - nhalffilter, 0);
-				j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
-				for (j=j1;j<=j2;j++)
+fprintf(stderr,"Applying running median filtering to %d sonardepth data filter length %f seconds\n", ndat_sonardepth, sonardepthfilterlength);
+				nhalffilter = (int)(0.5 * sonardepthfilterlength / dtime);
+				nmedian_alloc = 2 * nhalffilter + 1;
+				median = NULL;
+				status = mb_reallocd(verbose,__FILE__,__LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
+				for (i=0;i<ndat_sonardepth;i++)
 					{
-					dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
-					weight = exp(-dtol * dtol);
-					dat_sonardepth_sonardepthfilter[i] += weight * dat_sonardepth_sonardepth[j];
-					sonardepth_filterweight += weight;
+					dat_sonardepth_sonardepthfilter[i] = dat_sonardepth_sonardepth[i];
+					j1 = MAX(i - nhalffilter, 0);
+					j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+					nmedian = 0;
+					for (j=j1;j<=j2;j++)
+						{
+						median[nmedian] = dat_sonardepth_sonardepth[j];
+						nmedian++;
+						}
+					if (nmedian > 0)
+						{
+						qsort((char *)median, nmedian, sizeof(double), (void *)mb_double_compare);
+						dat_sonardepth_sonardepthfilter[i] = median[nmedian/2];
+						}
 					}
-				if (sonardepth_filterweight > 0.0)
-					dat_sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
+				if (median != NULL)
+					{
+					status = mb_freed(verbose,__FILE__,__LINE__, (void **)&median, &error);
+					nmedian_alloc = 0;
+					}
+				}
+			else
+				{
+fprintf(stderr,"Applying running Gaussian mean filtering to %d sonardepth data filter length %f seconds\n", ndat_sonardepth, sonardepthfilterlength);
+				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+				for (i=0;i<ndat_sonardepth;i++)
+					{
+					dat_sonardepth_sonardepthfilter[i] = 0.0;
+					sonardepth_filterweight = 0.0;
+					j1 = MAX(i - nhalffilter, 0);
+					j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
+					for (j=j1;j<=j2;j++)
+						{
+						dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
+						weight = exp(-dtol * dtol);
+						dat_sonardepth_sonardepthfilter[i] += weight * dat_sonardepth_sonardepth[j];
+						sonardepth_filterweight += weight;
+						}
+					if (sonardepth_filterweight > 0.0)
+						dat_sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
+					else
+						dat_sonardepth_sonardepthfilter[i] = dat_sonardepth_sonardepth[i];
+					}
 				}
 			for (i=0;i<ndat_sonardepth;i++)
 				{
@@ -1747,24 +1805,57 @@ fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
 		/* filter sonardepth data from separate file */
 		if (nsonardepth > 1)
 			{
-fprintf(stderr,"Applying filtering to %d sonardepth nav data\n", nsonardepth);
 			dtime = (sonardepth_time_d[nsonardepth-1]  - sonardepth_time_d[0]) / nsonardepth;
-			nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
-			for (i=0;i<nsonardepth;i++)
+			if (sonardepthfilter == MBKONSBERGPREPROCESS_FILTER_MEDIAN)
 				{
-				sonardepth_sonardepthfilter[i] = 0.0;
-				sonardepth_filterweight = 0.0;
-				j1 = MAX(i - nhalffilter, 0);
-				j2 = MIN(i + nhalffilter, nsonardepth - 1);
-				for (j=j1;j<=j2;j++)
+fprintf(stderr,"Applying running median filtering to %d sonardepth nav data filter length %f seconds\n", nsonardepth, sonardepthfilterlength);
+				nhalffilter = (int)(0.5 * sonardepthfilterlength / dtime);
+				nmedian_alloc = 2 * nhalffilter + 1;
+				median = NULL;
+				status = mb_reallocd(verbose,__FILE__,__LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
+				for (i=0;i<nsonardepth;i++)
 					{
-					dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
-					weight = exp(-dtol * dtol);
-					sonardepth_sonardepthfilter[i] += weight * sonardepth_sonardepth[j];
-					sonardepth_filterweight += weight;
+					sonardepth_sonardepthfilter[i] =  sonardepth_sonardepth[i];
+					j1 = MAX(i - nhalffilter, 0);
+					j2 = MIN(i + nhalffilter, nsonardepth - 1);
+					nmedian = 0;
+					for (j=j1;j<=j2;j++)
+						{
+						median[nmedian] = dat_sonardepth_sonardepth[j];
+						nmedian++;
+						}
+					if (nmedian > 0)
+						{
+						qsort((char *)median, nmedian, sizeof(double), (void *)mb_double_compare);
+						dat_sonardepth_sonardepthfilter[i] = median[nmedian/2];
+						}
 					}
-				if (sonardepth_filterweight > 0.0)
-					sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
+				if (median != NULL)
+					{
+					status = mb_freed(verbose,__FILE__,__LINE__, (void **)&median, &error);
+					nmedian_alloc = 0;
+					}
+				}
+			else
+				{
+fprintf(stderr,"Applying running Gaussian mean filtering to %d sonardepth nav data filter length %f seconds\n", nsonardepth, sonardepthfilterlength);
+				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
+				for (i=0;i<nsonardepth;i++)
+					{
+					sonardepth_sonardepthfilter[i] = 0.0;
+					sonardepth_filterweight = 0.0;
+					j1 = MAX(i - nhalffilter, 0);
+					j2 = MIN(i + nhalffilter, nsonardepth - 1);
+					for (j=j1;j<=j2;j++)
+						{
+						dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
+						weight = exp(-dtol * dtol);
+						sonardepth_sonardepthfilter[i] += weight * sonardepth_sonardepth[j];
+						sonardepth_filterweight += weight;
+						}
+					if (sonardepth_filterweight > 0.0)
+						sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
+					}
 				}
 			for (i=0;i<nsonardepth;i++)
 				{
@@ -2228,7 +2319,7 @@ fprintf(stderr,"Applying filtering to %d sonardepth nav data\n", nsonardepth);
 			{
 			/* get survey data structure */
 			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
-				
+
 			/* get transducer offsets */
 			if (istore->par_stc == 0)
 				{
@@ -2352,13 +2443,26 @@ fprintf(stderr,"Applying filtering to %d sonardepth nav data\n", nsonardepth);
 				}
 				
 			/* get active sensor offsets */
-			if (istore->par_dsh[0] == 'I')
-				depthsensor_mode = MBKONSBERGPREPROCESS_USE_SENSORDEPTH_ONLY;
-			else
-				depthsensor_mode = MBKONSBERGPREPROCESS_USE_HEAVE_ONLY;
-			depth_off_x = istore->par_dsx;
-			depth_off_y = istore->par_dsy;
-			depth_off_z = istore->par_dsz;
+			if (depthsensor_mode == MBKONSBERGPREPROCESS_ZMODE_UNKNOWN)
+				{
+				if (istore->par_dsh[0] == 'I')
+					depthsensor_mode = MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_ONLY;
+				else if (istore->par_dsh[0] == 'N')
+					depthsensor_mode = MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_AND_HEAVE;
+				else
+					depthsensor_mode = MBKONSBERGPREPROCESS_ZMODE_USE_HEAVE_ONLY;
+				}
+			if (sonardepthlever == MB_NO)
+				{
+				depth_off_x = istore->par_dsx;
+				depth_off_y = istore->par_dsy;
+				depth_off_z = istore->par_dsz;
+				
+				sonardepthoffset = istore->par_dso;
+				depthsensoroffx = tx_x - istore->par_dsx;
+				depthsensoroffy = tx_y - istore->par_dsy;
+				depthsensoroffz = tx_z - istore->par_dsz;
+				}
 			if (istore->par_aps == 0)
 				{
 				position_off_x = istore->par_p1x;
@@ -2543,16 +2647,29 @@ fprintf(stderr,"Applying filtering to %d sonardepth nav data\n", nsonardepth);
 				mb_attint_interp(verbose, imbio_ptr, time_d,
 							&heave, &roll, &pitch, &error);
 				}
-
-			/* apply offset between depth sensor and sonar */
-			if (sonardepthlever == MB_YES)
+				
+			/* apply sonardepth/heave mode - if on a submerged platform usually
+			 * don't use heave - if on a surface platform usually don't use
+			 * a variable sonar depth */
+			if (depthsensor_mode == MBKONSBERGPREPROCESS_ZMODE_USE_HEAVE_ONLY)
 				{
-				sonardepth += sonardepthoffset
+				sonardepth = 0.0;
+				}
+			else if (depthsensor_mode == MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_ONLY)
+				{
+				heave = 0.0;
+				}
+
+			/* apply specified offset between depth sensor and sonar */
+//fprintf(stderr,"time_d:%.3f png_xducer_depth:%.3f  sonardepth:%f   ",
+//time_d,ping->png_xducer_depth,sonardepth);
+			sonardepth += sonardepthoffset
 						+ depthsensoroffx * sin(DTR * roll)
 						+ depthsensoroffy * sin(DTR * pitch)
 						+ depthsensoroffz * cos(DTR * pitch);
-				}
-
+//fprintf(stderr," sonardepth:%f     offset:%f x:%f y:%f z:%f  rph: %f %f %f   diff:%f\n",
+//sonardepth,sonardepthoffset,depthsensoroffx,depthsensoroffy,depthsensoroffz,roll,pitch,heave,
+//(sonardepthoffset + depthsensoroffx * sin(DTR * roll) + depthsensoroffy * sin(DTR * pitch) + depthsensoroffz * cos(DTR * pitch)));
 			/* insert navigation */
 			if (navlon < -180.0)
 				navlon += 360.0;
@@ -2652,6 +2769,46 @@ fprintf(stderr,"Applying filtering to %d sonardepth nav data\n", nsonardepth);
 								&transmit_heave, &transmit_roll, &transmit_pitch, &error);
 					mb_attint_interp(verbose, imbio_ptr, receive_time_d,
 								&receive_heave, &receive_roll, &receive_pitch, &error);
+					}
+					
+				/* use sonardepth instead of heave for submerged platforms */
+				if (depthsensor_mode == MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_ONLY)
+					{
+					/* merge sonardepth from best available source */
+					if (nsonardepth > 0)
+						{
+						interp_status = mb_linear_interp(verbose,
+									sonardepth_time_d-1, sonardepth_sonardepth-1,
+									nsonardepth, transmit_time_d, &transmit_heave, &jsonardepth,
+									&error);
+						interp_status = mb_linear_interp(verbose,
+									sonardepth_time_d-1, sonardepth_sonardepth-1,
+									nsonardepth, receive_time_d, &receive_heave, &jsonardepth,
+									&error);
+						}
+					else if (ndat_sonardepth > 0)
+						{
+						interp_status = mb_linear_interp(verbose,
+									sonardepth_time_d-1, sonardepth_sonardepth-1,
+									nsonardepth, transmit_time_d, &transmit_heave, &jsonardepth,
+									&error);
+						interp_status = mb_linear_interp(verbose,
+									sonardepth_time_d-1, sonardepth_sonardepth-1,
+									nsonardepth, receive_time_d, &receive_heave, &jsonardepth,
+									&error);
+						}
+					else
+						{
+						interp_status = mb_linear_interp(verbose,
+									sonardepth_time_d-1, sonardepth_sonardepth-1,
+									nsonardepth, transmit_time_d, &transmit_heave, &jsonardepth,
+									&error);
+						interp_status = mb_linear_interp(verbose,
+									sonardepth_time_d-1, sonardepth_sonardepth-1,
+									nsonardepth, receive_time_d, &receive_heave, &jsonardepth,
+									&error);
+						}
+					heave = transmit_heave;
 					}
 	
 				/* get ssv and range */
@@ -3102,6 +3259,12 @@ i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_rph_roll,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_rph_pitch,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_rph_heave,&error);
+		}
+	if (ndat_sonardepth > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_sonardepth_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_sonardepth_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_sonardepth_sonardepthfilter,&error);
 		}
 	if (ntimelag > 0)
 		{

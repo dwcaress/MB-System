@@ -3359,8 +3359,8 @@ ifile,file->load_status,file->esf_open);
 						else
 							action = MBP_EDIT_ZERO;
 if (mbev_verbose > 0)
-fprintf(stderr,"mb_esf_save: ifile:%d iping:%d ibeam:%d %d action:%d\n",
-ifile,iping,ibeam, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR, action);
+fprintf(stderr,"mb_esf_save: ifile:%d time_d:%.6f iping:%d multiplicity:%d ibeam:%d %d action:%d\n",
+ifile,ping->time_d,iping,ping->multiplicity,ibeam, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR, action);
 						mb_esf_save(mbev_verbose, &(file->esf),
 								ping->time_d, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 								action, &mbev_error);
