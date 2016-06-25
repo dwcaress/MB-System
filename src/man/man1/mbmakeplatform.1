@@ -1,31 +1,32 @@
-.TH mbmakeplatform 1 "3 October 2015" "MB-System 5.0" "MB-System 5.0"
+.TH mbmakeplatform 1 "11 June 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbmakeplatform\fP \- creates or modifies an MB-System platform file, which
-defines the sensors on a survey platform, along with the positional and angular
-offsets for each sensor. 
+\fBmbmakeplatform\fP \- creates or modifies an MB-System platform file.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbmakeplatform\fP [ 
+\fBmbmakeplatform\fP
+.br
+[
 .br
 \fB--verbose\fP
 .br
 \fB--help\fP
 .br
-.br
 \fB--input\fP=\fIplffile\fP
 .br
 \fB--swath\fP=\fIdatalist\fP
 .br
-\fB--swath\fP=\fIswath_file\fP
+\fB--swath\fP=\fIswathfile\fP
 .br
 \fB--swath-format\fP=\fIvalue\fP
 .br
+]
 .br
 \fB--output\fP=\fIplffile\fP
 .br
+[
 .br
 \fB--platform-type-surface-vessel\fP
 .br
@@ -39,11 +40,15 @@ Version 5.0
 .br
 \fB--platform-type-satellite\fP
 .br
-.br
 \fB--platform-name\fP=\fIstring\fP
 .br
 \fB--platform-organization\fP=\fIstring\fP
 .br
+\fB--platform-documentation-url\fP
+.br
+\fB--platform-start-time\fP
+.br
+\fB--platform-end-time\fP
 .br
 \fB--add-sensor-sonar-echosounder\fP
 .br
@@ -65,6 +70,8 @@ Version 5.0
 .br
 \fB--add-sensor-camera-video\fP
 .br
+\fB--add-sensor-lidar-scan\fP
+.br
 \fB--add-sensor-lidar-swath\fP
 .br
 \fB--add-sensor-position\fP
@@ -85,63 +92,13 @@ Version 5.0
 .br
 \fB--add-sensor-soundspeed\fP
 .br
-.br
-\fB--modify-sensor\fP=\fIsensorid\fP
-.br
-\fB--modify-sensor-bathymetry1\fP
-.br
-\fB--modify-sensor-bathymetry2\fP
-.br
-\fB--modify-sensor-bathymetry3\fP
-.br
-\fB--modify-sensor-backscatter1\fP
-.br
-\fB--modify-sensor-backscatter2\fP
-.br
-\fB--modify-sensor-backscatter3\fP
-.br
-\fB--modify-sensor-position1\fP
-.br
-\fB--modify-sensor-position2\fP
-.br
-\fB--modify-sensor-position3\fP
-.br
-\fB--modify-sensor-depth1\fP
-.br
-\fB--modify-sensor-depth2\fP
-.br
-\fB--modify-sensor-depth3\fP
-.br
-\fB--modify-sensor-heading1\fP
-.br
-\fB--modify-sensor-heading2\fP
-.br
-\fB--modify-sensor-heading3\fP
-.br
-\fB--modify-sensor-rollpitch1
-.br
-\fB--modify-sensor-rollpitch2\fP
-.br
-\fB--modify-sensor-rollpitch3\fP
-.br
-\fB--modify-sensor-heave1\fP
-.br
-\fB--modify-sensor-heave2\fP
-.br
-\fB--modify-sensor-heave3\fP
-.br
+\fB--end-sensor\fP
 .br
 \fB--sensor-model\fP=\fIstring\fP
 .br
 \fB--sensor-manufacturer\fP=\fIstring\fP
 .br
 \fB--sensor-serialnumber\fP=\fIstring\fP
-.br
-.br
-\fB--sensor-capability1\fP=\fIvalue\fP
-.br
-\fB--sensor-capability2\fP=\fIvalue\fP
-.br
 .br
 \fB--sensor-capability-position\fP
 .br
@@ -170,7 +127,6 @@ Version 5.0
 \fB--sensor-capability-soundspeed\fP
 .br
 \fB--sensor-capability-gravity\fP
-.br
 .br
 \fB--sensor-capability-topography-echosounder\fP
 .br
@@ -214,6 +170,9 @@ Version 5.0
 .br
 \fB--sensor-capability-stereovideo\fP
 .br
+\fB--sensor-capability1\fP=\fIvalue\fP
+.br
+\fB--sensor-capability2\fP=\fIvalue\fP
 .br
 \fB--sensor-offsets\fP=\fIx/y/z/azimuth/roll/pitch\fP
 .br
@@ -224,7 +183,6 @@ Version 5.0
 \fB--sensor-time-latency\fP=\fIvalue\fP
 .br
 \fB--sensor-time-latency-model\fP=\fIfile\fP
-.br
 .br
 \fB--sensor-source-bathymetry\fP
 .br
@@ -241,6 +199,14 @@ Version 5.0
 \fB--sensor-source-backscatter2\fP
 .br
 \fB--sensor-source-backscatter3\fP
+.br
+\fB--sensor-source-subbottom\fP
+.br
+\fB--sensor-source-subbottom1\fP
+.br
+\fB--sensor-source-subbottom2\fP
+.br
+\fB--sensor-source-subbottom3\fP
 .br
 \fB--sensor-source-position\fP
 .br
@@ -282,6 +248,71 @@ Version 5.0
 .br
 \fB--sensor-source-heave3\fP
 .br
+\fB--modify-sensor\fP=\fIsensorid\fP
+.br
+\fB--modify-sensor-bathymetry\fP
+.br
+\fB--modify-sensor-bathymetry1\fP
+.br
+\fB--modify-sensor-bathymetry2\fP
+.br
+\fB--modify-sensor-bathymetry3\fP
+.br
+\fB--modify-sensor-backscatter\fP
+.br
+\fB--modify-sensor-backscatter1\fP
+.br
+\fB--modify-sensor-backscatter2\fP
+.br
+\fB--modify-sensor-backscatter3\fP
+.br
+\fB--modify-sensor-subbottom\fP
+.br
+\fB--modify-sensor-subbottom1\fP
+.br
+\fB--modify-sensor-subbottom2\fP
+.br
+\fB--modify-sensor-subbottom3\fP
+.br
+\fB--modify-sensor-position\fP
+.br
+\fB--modify-sensor-position1\fP
+.br
+\fB--modify-sensor-position2\fP
+.br
+\fB--modify-sensor-position3\fP
+.br
+\fB--modify-sensor-depth\fP
+.br
+\fB--modify-sensor-depth1\fP
+.br
+\fB--modify-sensor-depth2\fP
+.br
+\fB--modify-sensor-depth3\fP
+.br
+\fB--modify-sensor-heading\fP
+.br
+\fB--modify-sensor-heading1\fP
+.br
+\fB--modify-sensor-heading2\fP
+.br
+\fB--modify-sensor-heading3\fP
+.br
+\fB--modify-sensor-rollpitch\fP
+.br
+\fB--modify-sensor-rollpitch1\fP
+.br
+\fB--modify-sensor-rollpitch2\fP
+.br
+\fB--modify-sensor-rollpitch3\fP
+.br
+\fB--modify-sensor-heave\fP
+.br
+\fB--modify-sensor-heave1\fP
+.br
+\fB--modify-sensor-heave2\fP
+.br
+\fB--modify-sensor-heave3\fP
 .br
 \fB--modify-offsets\fP=\fIioff/x/y/z/azimuth/roll/pitch\fP
 .br
@@ -291,714 +322,17 @@ Version 5.0
 .br
 \fB--modify-time-latency\fP=\fIvalue\fP
 .br
-\fB--modify-time-latency-model\fP=\fIfile\fP
-.br
-.br
-\fB--end-sensor\fP
+\fB--modify-time-latency-model\fP=\fIfile
 .br
 ]
 
 .SH DESCRIPTION
-\fBMBmakeplatform\fP creates or modifies an \fBMB-System\fP platform file.
-
-\fBMB-System\fP programs such as \fBmbpreprocess\fP and \fBmbprocess\fP use
-a platform model to calculate the trajectory of mapping
-sensors from position and attitude data. In general, position and attitude data
-derive from sensors located separately from mapping sensor on any survey platform,
-and so the position and attitude of mapping sensors must be calculated using
-the relative positional and angular offsets between the mapping sensors and
-those ancilliary sensors. These three-dimensional rotations and translations
-are called lever arm calculations.
-
-A platform file
-defines the sensors on a survey platform, along with the positional and angular
-offsets for each sensor. A number of data types can be defined (e.g. position,
-sensor depth, roll and pitch, heading, bathymetry, backscatter, photographic
-imagery), and the source sensor for each data type can be set separately.
-The specifics of survey platforms can vary greatly, and consequently the format
-used to describe an integrated survey system must have considerable flexibility.
-
-The supported types of survey platforms include surface vessels, ROVs,
-AUVs, manned submersibles, and tow bodies. Sensors may include survey sensors
-such as multibeam sonars, sidescan sonars, lidars, and cameras. Sensors may also
-include equipment that generate position and/or attitude data, such as GPS's,
-VRUs, pressure gauges, and INS's. All sensors produce at least one kind of data
-(e.g. position), and most produce multiple kinds of data. For instance, modern
-multibeam sonars produce both bathymetry and backscatter, and inertial navigation
-systems used on autonomous platforms produce both position and attitude data.
-Through this program, users can construct platform models that represent complex
-survey systems with multiple mapping sensors and redundant position and attitude
-sensors.
-
-.SH COMMAND SEQUENCE
-Unlike most \fBMB-System\fP programs, with \fBmbmakeplatform\fP the order of the
-command line options matters. The initial commands determine how the
-initial platform model, if any, is defined. The
-    \fB--input\fP=\fIplffile\fP
-.br
-option specifies an existing platform file to be read. THe
-    \fB--swath\fP=\fIswathfile\fP
-    \fB--swath\fP=\fIdatalist\fP
-.br
-options specify a swath file or a datalist from which a platform model can be extracted (this
-works for formats that include data records with sensor offset information, such
-as Reson 7k (MBIO id 88) and Kongsberg *.all (MBIO id's 56 to 59)). The
-    \fB--output\fP=\fIplffile\fP
-.br
-option specifies the filename for the output platform file; this command is required
-and must be given prior to any commands adding or modifying sensors. If neither
-\fB--input\fP nor \fB--swath\fP have been given, then \fBmbmakeplatform\fP begins with
-an empty platform including no defined sensors.
-
-Following the \fBoutput\fP command can come a series of commands that set platform
-characteristics. The platform type is set by one of:
-    \fB--platform-type-surface-vessel\fP
-    \fB--platform-type-tow-body\fP
-    \fB--platform-type-rov\fP
-    \fB--platform-type-auv\fP
-    \fB--platform-type-aircraft\fP
-    \fB--platform-type-satellite\fP
-.br
-The platform name and the relevant operating organization are set by:
-    \fB--platform-name\fP=\fIstring\fP
-    \fB--platform-organization\fP=\fIstring\fP
-
-Next can some sequences of commands that add new sensors or modify exising sensors.
-The commands to add a sensor all specify the sensor type to be added:
-    \fB--add-sensor-sonar-echosounder\fP
-    \fB--add-sensor-sonar-multiechosounder\fP
-    \fB--add-sensor-sonar-sidescan\fP
-    \fB--add-sensor-sonar-interferometry\fP
-    \fB--add-sensor-sonar-multibeam\fP
-    \fB--add-sensor-sonar-multibeam-twohead\fP
-    \fB--add-sensor-sonar-subbottom\fP
-    \fB--add-sensor-camera-mono\fP
-    \fB--add-sensor-camera-stereo\fP
-    \fB--add-sensor-camera-video\fP
-    \fB--add-sensor-lidar-scan\fP
-    \fB--add-sensor-lidar-swath\fP
-    \fB--add-sensor-position\fP
-    \fB--add-sensor-compass\fP
-    \fB--add-sensor-vru\fP
-    \fB--add-sensor-imu\fP
-    \fB--add-sensor-ins\fP
-    \fB--add-sensor-ins-with-pressure\fP
-    \fB--add-sensor-ctd\fP
-    \fB--add-sensor-pressure\fP
-    \fB--add-sensor-soundspeed\fP
-.br
-and any of these serves to initiate a new sensor. The specifics of the sensor
-are then defined by commands immediately following the \fB--add-sensor-xxx\fP
-command. These are terminated by either another \fB--add-sensor-xxx\fP initiating
-a different sensor, or by the command:
-    \fB--end-sensor\fP
-
-To set the model, manufacturer, and serial number of a sensor, respectively, use:
-    \fB--sensor-model\fP=\fIstring\fP
-    \fB--sensor-manufacturer\fP=\fIstring\fP
-    \fB--sensor-serialnumber\fP=\fIstring\fP
-
-To specify the complete data producing capabilities of a sensor, use as many of the
-following commands as are relevant:
-    \fB--sensor-capability-position\fP
-    \fB--sensor-capability-depth\fP
-    \fB--sensor-capability-altitude\fP
-    \fB--sensor-capability-velocity\fP
-    \fB--sensor-capability-acceleration\fP
-    \fB--sensor-capability-pressure\fP
-    \fB--sensor-capability-rollpitch\fP
-    \fB--sensor-capability-heading\fP
-    \fB--sensor-capability-magneticfield\fP
-    \fB--sensor-capability-temperature\fP
-    \fB--sensor-capability-conductivity\fP
-    \fB--sensor-capability-salinity\fP
-    \fB--sensor-capability-soundspeed\fP
-    \fB--sensor-capability-gravity\fP
-    \fB--sensor-capability-topography-echosounder\fP
-    \fB--sensor-capability-topography-interferometry\fP
-    \fB--sensor-capability-topography-sass\fP
-    \fB--sensor-capability-topography-multibeam\fP
-    \fB--sensor-capability-topography-photogrammetry\fP
-    \fB--sensor-capability-topography-structurefrommotion\fP
-    \fB--sensor-capability-topography-lidar\fP
-    \fB--sensor-capability-topography-structuredlight\fP
-    \fB--sensor-capability-topography-laserscanner\fP
-    \fB--sensor-capability-backscatter-echosounder\fP
-    \fB--sensor-capability-backscatter-sidescan\fP
-    \fB--sensor-capability-backscatter-interferometry\fP
-    \fB--sensor-capability-backscatter-sass\fP
-    \fB--sensor-capability-backscatter-multibeam\fP
-    \fB--sensor-capability-backscatter-lidar\fP
-    \fB--sensor-capability-backscatter-structuredlight\fP
-    \fB--sensor-capability-backscatter-laserscanner\fP
-    \fB--sensor-capability-photography\fP
-    \fB--sensor-capability-stereophotography\fP
-    \fB--sensor-capability-video\fP
-    \fB--sensor-capability-stereovideo\fP
-.br
-For example, an inertial navigation system may output position, depth, rollpitch,
-and heading data. In this case, all of the following commands should be given:
-    \fB--sensor-capability-position\fP
-    \fB--sensor-capability-depth\fP
-    \fB--sensor-capability-rollpitch\fP
-    \fB--sensor-capability-heading\fP
-
-
-    \fB--sensor-capability1\fP=\fIvalue\fP
-    \fB--sensor-capability2\fP=\fIvalue\fP
-
-To specify the positional and angular offsets of a sensor that requires both
-(e.g. a mapping sensor or an ancilliary sensor producing both position and
-attitude data), use:
-    \fB--sensor-offsets\fP=\fIx/y/z/azimuth/roll/pitch\fP
-.br
-To specify just the positional offsets for a sensor that does not need angular
-offsets (e.g. a GPS position sensor), use:
-    \fB--sensor-offset-positions\fP=\fIx/y/z\fP
-.br
-To specify just the angular offsets for a sensor that does not need positional
-offsets (e.g. a VRU attitude sensor):
-    \fB--sensor-offset-angles\fP=\fIazimuth/roll/pitch\fP
-.br
-If a sensor has just one offset vector, then only one \fB--sensor-offset-xxx\fP
-command is needed. If a sensor requires more than one offset vector (e.g. a
-multibeam sonar has two offsets, one for the transmit array and a second for the
-receive array), then multiple \fB--sensor-offset-xxx\fP commands must be given.
-Here is a list of the available sensor types, the number of offset vectors
-required for each, and the required order of the offset vectors when more than
-one are needed.
-    sonar-echosounder               1 offset vector
-    sonar-multiechosounder          1 offset vector
-    sonar-sidescan                  2 offset vectors
-        0: port stave
-        1: starboard stave
-    sonar-interferometry            2 offset vectors
-        0: port stave
-        1: starboard stave
-    sonar-multibeam                 2 offset vectors
-        0: transmit array
-        1: receive array
-    sonar-multibeam-twohead         4 offset vectors
-        0: transmit array port
-        1: receive array port
-        2: transmit array starboard
-        3: receive array starboard
-    sonar-subbottom                 1 offset vector
-    camera-mono                     1 offset vector
-    camera-stereo                   2 offset vectors
-        0: port camera
-        1: starboard camera
-    camera-video                    1 offset vector
-    lidar-scan                      1 offset vector
-    lidar-swath                     1 offset vector
-    position                        1 offset vector
-    compass                         1 offset vector
-    vru                             1 offset vector
-    imu                             1 offset vector
-    ins                             1 offset vector
-    ins-with-pressure               1 offset vector
-    ctd                             1 offset vector
-    pressure                        1 offset vector
-    soundspeed                      1 offset vector
-
-To specify a time latency correction to be applied to the sensor data before
-use, use one of the following:
-    \fB--sensor-time-latency\fP=\fIvalue\fP
-    \fB--sensor-time-latency-model\fP=\fIfile\fP
-.br
-Here the \fB--sensor-time-latency\fP command specifies a static time shift that
-is added to the time stamps of the sensor data, and the \fB--sensor-time-latency-model\fP
-command specifies a file containing a time varying time latency model. The time
-latency model file should be a text file containing two space delimited columns,
-the first being unix time values (seconds since 1970) and the second being the
-time shift values in seconds.
-
-Finally, and importantly, the user should specify any data types for which the current
-sensor is the source. The key data types are:
-    bathymetry
-    backscatter
-    subbottom
-    position
-    depth
-    heading
-    rollpitch
-    heave
-.br
-Each of these data types potentially has up to three sources, one of which will
-be the primary source. Data sources are defined by the source sensor id, which 
-is simply the sensor number counted in the order sensors are defined. Note that
-the sensor id of the first sensor is 0, not 1. If, for example, two position
-sensors are defined with id's 2 and 3, then it would make sense to define
-the source for position1 data to be sensor 2 and the source for position2 data
-to be sensor 3. The source for the primary position data can be either 2 (which
-equals position1) or 3 (which equals position2). If only one sensor source for
-a data type exists, then only the primary data source need be defined. The
-commands for specifying which data types the current sensor is the source for
-are:
-    \fB--sensor-source-bathymetry\fP
-    \fB--sensor-source-bathymetry1\fP
-    \fB--sensor-source-bathymetry2\fP
-    \fB--sensor-source-bathymetry3\fP
-    \fB--sensor-source-backscatter\fP
-    \fB--sensor-source-backscatter1\fP
-    \fB--sensor-source-backscatter2\fP
-    \fB--sensor-source-backscatter3\fP
-    \fB--sensor-source-subbottom\fP
-    \fB--sensor-source-subbottom1\fP
-    \fB--sensor-source-subbottom2\fP
-    \fB--sensor-source-subbottom3\fP
-    \fB--sensor-source-position\fP
-    \fB--sensor-source-position1\fP
-    \fB--sensor-source-position2\fP
-    \fB--sensor-source-position3\fP
-    \fB--sensor-source-depth\fP
-    \fB--sensor-source-depth1\fP
-    \fB--sensor-source-depth2\fP
-    \fB--sensor-source-depth3\fP
-    \fB--sensor-source-heading\fP
-    \fB--sensor-source-heading1\fP
-    \fB--sensor-source-heading2\fP
-    \fB--sensor-source-heading3\fP
-    \fB--sensor-source-rollpitch\fP
-    \fB--sensor-source-rollpitch1\fP
-    \fB--sensor-source-rollpitch2\fP
-    \fB--sensor-source-rollpitch3\fP
-    \fB--sensor-source-heave\fP
-    \fB--sensor-source-heave1\fP
-    \fB--sensor-source-heave2\fP
-    \fB--sensor-source-heave3\fP
-.br
-As many of these may be specified as relevant. In the position sensor example
-given above, there might be two data source commands given for the first
-position sensor:
-    \fB--sensor-source-position\fP
-    \fB--sensor-source-position1\fP
-.br
-and one data source command given for the second position sensor:
-    \fB--sensor-source-position2\fP
-
-If the user is modifying an existing platform model with sensors already defined
-rather than creating a new model by adding sensors, the characteristics of the
-existing sensors may be modified. To initiate modification of an existing sensor,
-either specify the sensor directly by it's sensor id number:
-    \fB--modify-sensor\fP=\fIsensorid\fP
-.br
-or specify it using by a data type that it is the source for:
-    \fB--modify-sensor-bathymetry\fP
-    \fB--modify-sensor-bathymetry1\fP
-    \fB--modify-sensor-bathymetry2\fP
-    \fB--modify-sensor-bathymetry3\fP
-    \fB--modify-sensor-backscatter\fP
-    \fB--modify-sensor-backscatter1\fP
-    \fB--modify-sensor-backscatter2\fP
-    \fB--modify-sensor-backscatter3\fP
-    \fB--modify-sensor-subbottom\fP
-    \fB--modify-sensor-subbottom1\fP
-    \fB--modify-sensor-subbottom2\fP
-    \fB--modify-sensor-subbottom3\fP
-    \fB--modify-sensor-position\fP
-    \fB--modify-sensor-position1\fP
-    \fB--modify-sensor-position2\fP
-    \fB--modify-sensor-position3\fP
-    \fB--modify-sensor-depth\fP
-    \fB--modify-sensor-depth1\fP
-    \fB--modify-sensor-depth2\fP
-    \fB--modify-sensor-depth3\fP
-    \fB--modify-sensor-heading\fP
-    \fB--modify-sensor-heading1\fP
-    \fB--modify-sensor-heading2\fP
-    \fB--modify-sensor-heading3\fP
-    \fB--modify-sensor-rollpitch\fP
-    \fB--modify-sensor-rollpitch1\fP
-    \fB--modify-sensor-rollpitch2\fP
-    \fB--modify-sensor-rollpitch3\fP
-    \fB--modify-sensor-heave\fP
-    \fB--modify-sensor-heave1\fP
-    \fB--modify-sensor-heave2\fP
-    \fB--modify-sensor-heave3\fP
-.br
-As with the \fB--add-sensor-xxx\fP commands, the specifics of the sensor
-being modified are then defined by commands immediately following the
-\fB--modify-sensor-xxx\fP command. These are terminated by either another
-\fB--modify-sensor-xxx\fP command initiating modification of
-a different sensor, or by the command:
-    \fB--end-sensor\fP
-
-In addition to the commands presented above that set sensor characteristics,
-some additional commands are available to modify the existing sensor offset
-vectors. These are:
-    \fB--modify-offsets\fP=\fIioff/x/y/z/azimuth/roll/pitch\fP
-    \fB--modify-offset-positions\fP=\fIioff/x/y/z\fP
-    \fB--modify-offset-angles\fP=\fIioff/azimuth/roll/pitch\fP
-.br
-where the \fIioff\fP value specifies which offset vector is being modified.
-
-The time latency values of the current sensor can also be modified:
-    \fB--modify-time-latency\fP=\fIvalue\fP
-    \fB--modify-time-latency-model\fP=\fIfile\fP
-
-.SH PLATFORM MODEL STRUCTURE
-
-In a platform file, the platform has a type (integer), a name (string), an
-organization name (string), and a number of sensors (integer). The platform
-also includes a set of integer data source id's that define which sensor is the source
-for several kinds of data (bathymetry, backscatter, position, depth, heading,
-rollpitch, and heave). Each kind of data has four instances (e.g. source_position,
-source_position1, source_position2, source_position3); the first is the primary
-data used in processing, and the others allow for multiple similar sensors and
-datastreams to be part of a single platform. Not all data source id's need to be
-defined, but in general at least one of the mapping data sources (source_bathymetry,
-source_backscatter, etc) plus source_position, source_heading, source_rollpitch,
-and either source_heave or source_depth, must be defined.
-
-The available types of platforms are:
-    MB_PLATFORM_NONE                0
-    MB_PLATFORM_SURFACE_VESSEL      1
-    MB_PLATFORM_TOW_BODY            2
-    MB_PLATFORM_ROV                 3
-    MB_PLATFORM_AUV                 4
-    MB_PLATFORM_AIRCRAFT            5
-    MB_PLATFORM_SATELLITE           6
-
-The available types of sensors are:
-    TYPE_NONE                             0
-    TYPE_SONAR_ECHOSOUNDER                10
-    TYPE_SONAR_MULTIECHOSOUNDER           11
-    TYPE_SONAR_SIDESCAN                   20
-    TYPE_SONAR_INTERFEROMETRY             21
-    TYPE_SONAR_MULTIBEAM                  30
-    TYPE_SONAR_MULTIBEAM_TWOHEAD          31
-    TYPE_SONAR_SUBBOTTOM                  40
-    TYPE_CAMERA_MONO                      50
-    TYPE_CAMERA_STEREO                    51
-    TYPE_CAMERA_VIDEO                     52
-    TYPE_LIDAR_SCAN                       60
-    TYPE_LIDAR_SWATH                      61
-    TYPE_POSITION                         70
-    TYPE_COMPASS                          80
-    TYPE_VRU                              90
-    TYPE_IMU                              100
-    TYPE_INS                              101
-    TYPE_INS_WITH_PRESSURE                102
-    TYPE_CTD                              110
-    TYPE_PRESSURE                         111
-    TYPE_SOUNDSPEED                       120
-
-Each sensor has a type (integer), a model name (string), a manufacturer name
-(string), a serial number (string), a first capability bitmask indicating what kind
-of mapping data are produced, a second capability bitmask indicating what kind
-of position or attitutde data are produced, a number of sensor offsets, and a
-time latency model. At least one of the two capability bitmasks must be nonzero
-(some kind of data have to be produced). The time latency correction is applied
-to data associated with the sensor before those data are used; the time latency
-can be none (the default), a constant time offset, or a time varying model.
-Each sensor has one or more offset vectors; the number required depends on the sensor
-type. In the case of ancilliary sensors there is generally a single offset vector.
-Many mapping sensors include multiple elements and require
-separate offset vectors for each element. Multibeam sonars can have a separate
-offset vector for the transmit and receive arrays. Dual head multibeams have
-two offset vectors for each head for a total of four. Sidescan sonars can have
-separate offsets for the port and starboard staves.
-
-Sensor offset vectors include both three-dimensional position (x, y, and z) and three-
-dimensional attitude (yaw/heading, roll, and pitch), all defined relative to
-some arbitrary reference point and reference orientation on the platform.
-Mapping sensors require all six offset values. Sensors providing only position
-information require the positional offsets but do not require the angular offsets
-to be defined, and sensors providing only attitude information require the
-angular offsets but not the positional offsets. Irrelevant offset values are
-ignored if defined.
-
-The coordinate system used in platform files is right-handed and positive up. More
-specifically, the offset convention is:
-    X           across platform:    + starboard, - port
-    Y           along platform:     + forward, - aft
-    Z           vertical:           + up, - down
-    pitch       around x-axis:      + front up, - front down
-    roll        around y-axis:      + port up, - port down
-    yaw/heading around z-axis:      + front to starboard, - front to port
-    
-The sensor offset vectors in the platform file determine any corrections that need to
-be applied in processing. In some cases the logged data navigation or mapping
-data have already been corrected for sensor offsets. The offsets of sensors for
-which the data have already been "motion corrected" should reflect the location
-on the platform to which those data were corrected. If data are already fully
-corrected, then the platform file should have zero offsets for the associated
-sensors.
-
-The data producing capabilities of a sensor are encoded in two 32-bit bitmasks.
-The capability1 bitmask encompasses position, attitude, and other non-mapping
-or ancilliary data types. The capability2 bitmask encompasses bathymetry,
-backscatter, photographic imagery subbottom profiles, and other mapping data types.
-There is not presumption in \fBMB-System\fP regarding the data producing capabilities
-of different sensor types. For instance, a sensor can be defined to produce both
-swath bathymetry and navigation, and can be set to be the primary source of both
-data types. The bit definitions for the capability bitmasks are:
-.br
-    CAPABILITY1_NONE                            0x00000000  All bits = 0
-    CAPABILITY1_POSITION                        0x00000001  Bit 0 = 1
-    CAPABILITY1_DEPTH                           0x00000002  Bit 1 = 2
-    CAPABILITY1_ALTITUDE                        0x00000004  Bit 2 = 4
-    CAPABILITY1_VELOCITY                        0x00000008  Bit 3 = 8
-    CAPABILITY1_ACCELERATION                    0x00000010  Bit 4 = 16
-    CAPABILITY1_PRESSURE                        0x00000020  Bit 5 = 32
-    CAPABILITY1_ROLLPITCH                       0x00000040  Bit 6 = 64
-    CAPABILITY1_HEADING                         0x00000080  Bit 7 = 128 
-    CAPABILITY1_HEAVE                           0x00000100  Bit 8 = 256 
-    CAPABILITY1_UNUSED09                        0x00000200  Bit 9 = 512 
-    CAPABILITY1_UNUSED10                        0x00000400  Bit 10 = 1024 
-    CAPABILITY1_UNUSED11                        0x00000800  Bit 11 = 2048
-    CAPABILITY1_UNUSED12                        0x00001000  Bit 12 = 4096
-    CAPABILITY1_TEMPERATURE                     0x00002000  Bit 13 = 8192
-    CAPABILITY1_CONDUCTIVITY                    0x00004000  Bit 14 = 16384
-    CAPABILITY1_SALINITY                        0x00008000  Bit 15 = 32768
-    CAPABILITY1_SOUNDSPEED                      0x00010000  Bit 16 = 65536
-    CAPABILITY1_UNUSED17                        0x00020000  Bit 17= 131072
-    CAPABILITY1_UNUSED18                        0x00040000  Bit 18 = 262144
-    CAPABILITY1_UNUSED19                        0x00080000  Bit 19 = 524288
-    CAPABILITY1_GRAVITY                         0x00100000  Bit 20 = 1048576
-    CAPABILITY1_UNUSED21                        0x00200000  Bit 21 = 2097152
-    CAPABILITY1_UNUSED22                        0x00400000  Bit 22 = 4194304
-    CAPABILITY1_UNUSED23                        0x00800000  Bit 23 = 8388608
-    CAPABILITY1_MAGNETICFIELD                   0x01000000  Bit 24 = 16777216
-    CAPABILITY1_UNUSED25                        0x02000000  Bit 25 = 33554432
-    CAPABILITY1_UNUSED26                        0x04000000  Bit 26 = 67108864
-    CAPABILITY1_UNUSED27                        0x08000000  Bit 27 = 134217728
-    CAPABILITY1_UNUSED28                        0x10000000  Bit 28 = 268435456
-    CAPABILITY1_UNUSED29                        0x20000000  Bit 29 = 536870912
-    CAPABILITY1_UNUSED30                        0x40000000  Bit 30 = 1073741824
-    CAPABILITY1_UNUSED31                        0x80000000  Bit 31 = 2147483648
-    CAPABILITY2_NONE                            0x00000000  All bits = 0
-    CAPABILITY2_TOPOGRAPHY_ECHOSOUNDER          0x00000001  Bit 0 = 1
-    CAPABILITY2_TOPOGRAPHY_INTERFEROMETRY       0x00000002  Bit 1 = 2
-    CAPABILITY2_TOPOGRAPHY_SASS                 0x00000004  Bit 2 = 4
-    CAPABILITY2_TOPOGRAPHY_MULTIBEAM            0x00000008  Bit 3 = 8
-    CAPABILITY2_TOPOGRAPHY_PHOTOGRAMMETRY       0x00000010  Bit 4 = 16
-    CAPABILITY2_TOPOGRAPHY_STRUCTUREFROMMOTION  0x00000020  Bit 5 = 32
-    CAPABILITY2_TOPOGRAPHY_LIDAR                0x00000040  Bit 6 = 64
-    CAPABILITY2_TOPOGRAPHY_STRUCTUREDLIGHT      0x00000080  Bit 7 = 128 
-    CAPABILITY2_TOPOGRAPHY_LASERSCANNER         0x00000100  Bit 8 = 256 
-    CAPABILITY2_UNUSED09                        0x00000200  Bit 9 = 512 
-    CAPABILITY2_UNUSED10                        0x00000400  Bit 10 = 1024 
-    CAPABILITY2_UNUSED11                        0x00000800  Bit 11 = 2048
-    CAPABILITY2_BACKSCATTER_ECHOSOUNDER         0x00001000  Bit 12 = 4096
-    CAPABILITY2_BACKSCATTER_SIDESCAN            0x00002000  Bit 13 = 8192
-    CAPABILITY2_BACKSCATTER_INTERFEROMETRY      0x00004000  Bit 14 = 16384
-    CAPABILITY2_BACKSCATTER_SASS                0x00008000  Bit 15 = 32768
-    CAPABILITY2_BACKSCATTER_MULTIBEAM           0x00010000  Bit 16 = 65536
-    CAPABILITY2_BACKSCATTER_LIDAR               0x00020000  Bit 17= 131072
-    CAPABILITY2_BACKSCATTER_STRUCTUREDLIGHT     0x00040000  Bit 18 = 262144
-    CAPABILITY2_BACKSCATTER_LASERSCANNER        0x00080000  Bit 19 = 524288
-    CAPABILITY2_UNUSED20                        0x00100000  Bit 20 = 1048576
-    CAPABILITY2_SUBBOTTOM_ECHOSOUNDER           0x00200000  Bit 21 = 2097152
-    CAPABILITY2_SUBBOTTOM_CHIRP                 0x00400000  Bit 22 = 4194304
-    CAPABILITY2_UNUSED23                        0x00800000  Bit 23 = 8388608
-    CAPABILITY2_PHOTOGRAPHY                     0x01000000  Bit 24 = 16777216
-    CAPABILITY2_STEREOPHOTOGRAPHY               0x02000000  Bit 25 = 33554432
-    CAPABILITY2_VIDEO                           0x04000000  Bit 26 = 67108864
-    CAPABILITY2_STEREOVIDEO                     0x08000000  Bit 27 = 134217728
-    CAPABILITY2_UNUSED28                        0x10000000  Bit 28 = 268435456
-    CAPABILITY2_UNUSED29                        0x20000000  Bit 29 = 536870912
-    CAPABILITY2_UNUSED30                        0x40000000  Bit 30 = 1073741824
-    CAPABILITY2_UNUSED31                        0x80000000  Bit 31 = 2147483648
-.br
-Thus, a multibeam sonar producing both swath bathymetry and backscatter will have
-a capability1 bitmask of
-    0x00000000 = 0
-.br
-and a capability2 bitmask of
-    CAPABILITY2_TOPOGRAPHY_MULTIBEAM + CAPABILITY2_BACKSCATTER_MULTIBEAM
-        = 0x00000008 + 0x00010000 = 0x00010008
-        = 8 + 65536 = 65544
-.br
-Similarly, an inertial navigation system producing position and attitude will
-have a capability bitmask of
-    CAPABILITY1_POSITION + CAPABILITY1_ROLLPITCH + CAPABILITY1_HEADING
-        = 0x00000001 + 0x00000040 + 0x00000080
-        = 1 + 64 + 128 = 193
-
-In order to understand the complexity of describing survey systems, we will consider
-two examples.
-                     
-First, a survey launch might be configured with the following equipment:
-    
-    Multibeam Sonar =====================> swath bathymetry
-                    \====================> swath backscatter
-
-    GPS 1 ===============================> position
-
-    GPS 2 ===============================> position
-    
-    Vertical Reference Unit (VRU) =======> roll & pitch
-                                  \======> heave
-                                  
-    Compass =============================> heading
-
-In this case, the platform model should define a platform with five sensors. The
-following list shows the organization of information within a platform model.
-The order of sensors is unimportant.
-
-    Platform
-        Type: MB_PLATFORM_SURFACE_VESSEL
-        Number of sensors: 5
-        Sensor 0
-            Type: MB_SENSOR_TYPE_SONAR_MULTIBEAM
-            Capability1 bitmask: 0x00000000
-            Capability2 bitmask: 0x00010008
-                CAPABILITY2_TOPOGRAPHY_MULTIBEAM
-                CAPABILITY2_BACKSCATTER_MULTIBEAM
-            Number of offset vectors: 2
-            Offset 0
-                Physical location: center of transmit array
-                    Defined offsets: x, y, z, pitch, roll, heading
-            Offset 1
-                Physical location: center of receive array
-                    Defined offsets: x, y, z, pitch, roll, heading
-        Sensor 1
-            Type: MB_SENSOR_TYPE_POSITION
-            Number of offset vectors: 1
-            Offset 0
-                Physical location: center of GPS antenna
-                    Defined offsets: x, y, z
-        Sensor 2
-            Type: MB_SENSOR_TYPE_POSITION
-            Capability1 bitmask: 0x00000001
-                CAPABILITY1_POSITION
-            Capability2 bitmask: 0x00000000
-            Number of offset vectors: 1
-            Offset 0
-                Physical location: center of GPS antenna
-                    Defined offsets: x, y, z
-        Sensor 3
-            Type: MB_SENSOR_TYPE_VRU
-            Capability1 bitmask: 0x00000140
-                CAPABILITY1_ROLLPITCH
-                CAPABILITY1_HEAVE
-            Capability2 bitmask: 0x00000000
-            Number of offset vectors: 1
-            Offset 0
-                Physical location: center of VRU housing
-                    Defined offsets: pitch, roll, heading
-        Sensor 4
-            Type: MB_SENSOR_TYPE_COMPASS
-            Capability1 bitmask: 0x00000080
-                CAPABILITY1_HEADING
-            Capability2 bitmask: 0x00000000
-            Number of offset vectors: 1
-            Offset 0
-                Physical location: center of compass housing
-                    Defined offsets: pitch, roll, heading
-        Data sources (sensor ids):
-            source_bathymetry:      sensor 0
-            source_backscatter:     sensor 0
-            source_position:        sensor 1 = source_position1
-            source_position1:       sensor 1
-            source_position2:       sensor 2
-            source_rollpitch:       sensor 3
-            source_heading:         sensor 4
-            source_heave:           sensor 3
-                     
-Second, an autonomous underwater vehicle (AUV) might be configured with the
-following equipment:
-        
-    Multibeam Sonar =====================> swath bathymetry
-                    \====================> swath backscatter
-                    
-    Sidescan Sonar (low frequency) ======> swath backscatter
-    
-    Sidescan Sonar (high frequency) =====> swath backscatter
-    
-    Subbottom Profiler Sonar ============> subbottom chirp
-
-    Inertial Navigation System ==========> position, roll & pitch, heading
-
-    Pressure sensor =====================> depth
-
-In this case, the platform file should define a platform with six sensors:
-
-    Platform
-        Type: MB_PLATFORM_AUV
-        Number of sensors: 6
-        Sensor 0
-            Type: MB_SENSOR_TYPE_SONAR_MULTIBEAM
-            Capability1 bitmask: 0x00000000
-            Capability2 bitmask: 0x00010008
-                CAPABILITY2_TOPOGRAPHY_MULTIBEAM
-                CAPABILITY2_BACKSCATTER_MULTIBEAM
-            Number of offset vectors: 2
-            Offset 0
-                Physical location: center of transmit array
-                    Defined offsets: x, y, z, pitch, roll, heading
-            Offset 1
-                Physical location: center of receive array
-                    Defined offsets: x, y, z, pitch, roll, heading
-        Sensor 1
-            Type: MB_SENSOR_TYPE_SONAR_SIDESCAN
-            Capability1 bitmask: 0x00000000
-            Capability2 bitmask: 0x00002000
-                CAPABILITY2_BACKSCATTER_SIDESCAN
-            Number of offset vectors: 2
-            Offset 0
-                Physical location: center of port stave
-                    Defined offsets: x, y, z, pitch, roll, heading
-            Offset 1
-                Physical location: center of starboard stave
-                    Defined offsets: x, y, z, pitch, roll, heading
-        Sensor 2
-             Type: MB_SENSOR_TYPE_SONAR_SIDESCAN
-            Capability1 bitmask: 0x00000000
-            Capability2 bitmask: 0x00002000
-                CAPABILITY2_BACKSCATTER_SIDESCAN
-            Number of offset vectors: 2
-            Offset 0
-                Physical location: center of port stave
-                    Defined offsets: x, y, z, pitch, roll, heading
-            Offset 1
-                Physical location: center of starboard stave
-                    Defined offsets: x, y, z, pitch, roll, heading
-        Sensor 3
-            Type: MB_SENSOR_TYPE_SONAR_SUBBOTTOM
-            Capability1 bitmask: 0x00000000
-            Capability2 bitmask: 0x00200000
-                CAPABILITY2_SUBBOTTOM_ECHOSOUNDER
-            Number of offset vectors: 1
-            Offset 0
-                Physical location: bottom of transmit transducer
-                    Defined offsets: x, y, z, pitch, roll, heading
-        Sensor 4
-            Type: MB_SENSOR_TYPE_INS
-            Capability1 bitmask: 0x00000080
-                CAPABILITY1_POSITION
-                CAPABILITY1_ROLLPITCH
-                CAPABILITY1_HEADING
-            Capability2 bitmask: 0x00000000
-            Number of offset vectors: 1
-            Offset 0
-                Physical location: center of INS housing
-                    Defined offsets: x, y, z, pitch, roll, heading
-        Sensor 5
-            Type: MB_SENSOR_TYPE_PRESSURE
-            Capability1 bitmask: 0x00000022
-                CAPABILITY1_DEPTH
-                CAPABILITY1_PRESSURE
-            Capability2 bitmask: 0x00000000
-            Number of offset vectors: 1
-            Offset 0
-                Physical location: center of pressure sensor housing
-                    Defined offsets: x, y, z
-        Data sources (sensor ids):
-            source_bathymetry:      sensor 0 = source_bathymetry1
-            source_bathymetry1:     sensor 0
-            source_backscatter:     sensor 0 = source_backscatter1
-            source_backscatter1:    sensor 0
-            source_backscatter2:    sensor 1
-            source_backscatter3:    sensor 2
-            source_subbottom:       sensor 3 = source_subbottom1
-            source_subbottom1:      sensor 3
-            source_position:        sensor 4
-            source_rollpitch:       sensor 4
-            source_heading:         sensor 4
-            source_depth:           sensor 5
+Mbmakeplatform handles preprocessing of swath sonar data as part of setting
+up an MB-System processing structure for a dataset. This program replaces
+the several format-specific preprocessing programs
+found in MB-System version 5 releases with a single program for version 6.
+This program is under development, and is not ready for general use at
+this time.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -1012,1142 +346,14 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .SH OPTIONS
 .TP
 .B --verbose
-By default \fBmbmakeplatform\fP outputs no information to the shell. This option
-causes the program to output a summary of the output platform file.
-.TP
-.B --help
-This option causes the program print out the available command options.
-.TP
-.br
-.B --input\fP=\fIplffile\fP
-Import the specified existing platform file \fIplffile\fP. Subsequent commands
-will modify this pre-existing platform model. This command must be given prior
-to the \fB--output\fP command.
-.TP
-.B --swath\fP=\fIdatalist\fP
-.B --swath\fP=\fIswath_file\fP
-.B --swath-format\fP=\fIvalue\fP
-Extract an initial platform model from the swath data referenced either through
-the \fBMB-System\fP datalist file \fIdatalist\fP or the single swath file
-\fIswath_file\fP. If the name of \fIdatalist\fP or \fIswath_file\fP does not
-conform to the \fBMB-System\fP file naming convention (e.g. datalist files end
-in *.mb-1 and format 88 files end in *.mb88), then the \fB--swath-format\fP=\fIvalue\fP
-command can be used to set the \fBMB-System\fP format id used to read the swath data.
-Extracting the sensor offset information required for a platform model can only be
-done from data formats that include such information (e.g. Reson 7k format 88,
-Kongsberg 3rd generation formats 58 and 59). The code will stop reading once the
-first data record containing sensor offsets is encountered, and so there is no
-time penalty for specifying a datalist over a single swath file. These commands
-must be given prior to the \fB--output\fP command.
-.br
-.TP
-.B --output\fP=\fIplffile\fP
-This required command specifies the output platform file name. This command must
-be given after any \fB--input\fP or \fB--swath\fP commands, and before any
-commands that set parameters, add sensors, or modify sensors. If no pre-existing
-platform model has been imported, then this command causes \fBmbmakeplatform\fP
-to initialize a new platform with no sensors.
-.br
-.TP
-.B --platform-type-surface-vessel
-.TP
-.B --platform-type-tow-body
-.TP
-.B --platform-type-rov
-.TP
-.B --platform-type-auv
-.TP
-.B --platform-type-aircraft
-.TP
-.B --platform-type-satellite
-These commands set (or reset) the platform type to one of the currently
-supported types.
-.br
-.TP
-.B --platform-name\fP=\fIstring\fP
-This command sets (or resets) the platform name (e.g. the vessel, ROV, or AUV name
-such as "R/V Marcus Langseth", "ROV Doc Ricketts", or "AUV D. Allan B.").
-.TP
-.B --platform-organization\fP=\fIstring\fP
-This command sets (or resets) the platform organization name (e.g. "Monterey
-Bay Aquarium Research Institute" or "Lamont-Doherty Earth Observatory").
-.br
-.TP
-.B --add-sensor-sonar-echosounder
-.TP
-.B --add-sensor-sonar-multiechosounder
-.TP
-.B --add-sensor-sonar-sidescan
-.TP
-.B --add-sensor-sonar-interferometry
-.TP
-.B --add-sensor-sonar-multibeam
-.TP
-.B --add-sensor-sonar-multibeam-twohead
-.TP
-.B --add-sensor-sonar-subbottom
-.TP
-.B --add-sensor-camera-mono
-.TP
-.B --add-sensor-camera-stereo
-.TP
-.B --add-sensor-camera-video
-.TP
-.B --add-sensor-lidar-swath
-.TP
-.B --add-sensor-position
-.TP
-.B --add-sensor-compass
-.TP
-.B --add-sensor-vru
-.TP
-.B --add-sensor-imu
-.TP
-.B --add-sensor-ins
-.TP
-.B --add-sensor-ins-with-pressure
-.TP
-.B --add-sensor-ctd
-.TP
-.B --add-sensor-pressure
-.TP
-.B --add-sensor-soundspeed
-These commands add a new sensor of the specified type to the platform. When one
-of these commands is used, it should be followed by a sequence of commands that
-set the sensor parameters, including the sensor offsets. The completion of the
-sensor definition should be marked by either a \fB--end-sensor\fP command, or
-by a command to add or modify a different sensor.
-The number of offset vectors expected for each type of
-sensor is pre-defined. Most of the sensor types use a single sensor offset
-vector; the exceptions are:
-    sonar-sidescan                  2 offset vectors
-        0: port stave
-        1: starboard stave
-    sonar-interferometry            2 offset vectors
-        0: port stave
-        1: starboard stave
-    sonar-multibeam                 2 offset vectors
-        0: transmit array
-        1: receive array
-    sonar-multibeam-twohead         4 offset vectors
-        0: transmit array port
-        1: receive array port
-        2: transmit array starboard
-        3: receive array starboard
-    camera-stereo                   2 offset vectors
-        0: port camera
-        1: starboard camera
-.br
-.TP
-.B --end-sensor\fP
-This command terminates the definition of the current sensor. It may be followed
-by a command to add another sensor or to modify an existing sensor. If this is
-the last \fBmbmakeplatform\fP command, then the program will output the complete
-platform model to the file specified by the \fB--output\fP command.
-.br
-.TP
-.B --sensor-model\fP=\fIstring\fP
-This command sets (or resets) the sensor model name (e.g. "SeaBat 7125 200 kHz"
-or "EM302").
-.TP
-.B --sensor-manufacturer\fP=\fIstring\fP
-This command sets (or resets) the sensor model name (e.g. "Reson"
-or "Konsberg").
-.TP
-.B --sensor-serialnumber\fP=\fIstring\fP
-This command sets (or resets) the sensor serial number as a string.
-.br
-.TP
-.B --sensor-capability-position\fP
-.TP
-.B --sensor-capability-depth\fP
-.TP
-.B --sensor-capability-altitude\fP
-.TP
-.B --sensor-capability-velocity\fP
-.TP
-.B --sensor-capability-acceleration\fP
-.TP
-.B --sensor-capability-pressure\fP
-.TP
-.B --sensor-capability-rollpitch\fP
-.TP
-.B --sensor-capability-heading\fP
-.TP
-.B --sensor-capability-magneticfield\fP
-.TP
-.B --sensor-capability-temperature\fP
-.TP
-.B --sensor-capability-conductivity\fP
-.TP
-.B --sensor-capability-salinity\fP
-.TP
-.B --sensor-capability-soundspeed\fP
-.TP
-.B --sensor-capability-gravity\fP
-.TP
-.B --sensor-capability-topography-echosounder\fP
-.TP
-.B --sensor-capability-topography-interferometry\fP
-.TP
-.B --sensor-capability-topography-sass\fP
-.TP
-.B --sensor-capability-topography-multibeam\fP
-.TP
-.B --sensor-capability-topography-photogrammetry\fP
-.TP
-.B --sensor-capability-topography-structurefrommotion\fP
-.TP
-.B --sensor-capability-topography-lidar\fP
-.TP
-.B --sensor-capability-topography-structuredlight\fP
-.TP
-.B --sensor-capability-topography-laserscanner\fP
-.TP
-.B --sensor-capability-backscatter-echosounder\fP
-.TP
-.B --sensor-capability-backscatter-sidescan\fP
-.TP
-.B --sensor-capability-backscatter-interferometry\fP
-.TP
-.B --sensor-capability-backscatter-sass\fP
-.TP
-.B --sensor-capability-backscatter-multibeam\fP
-.TP
-.B --sensor-capability-backscatter-lidar\fP
-.TP
-.B --sensor-capability-backscatter-structuredlight\fP
-.TP
-.B --sensor-capability-backscatter-laserscanner\fP
-.TP
-.B --sensor-capability-photography\fP
-.TP
-.B --sensor-capability-stereophotography\fP
-.TP
-.B --sensor-capability-video\fP
-.TP
-.B --sensor-capability-stereovideo\fP
-The \fB--sensor-capability-xxx\fP commands add the specified data producing
-capability to the current sensor.
-.br
-.TP
-.B --sensor-capability1\fP=\fIvalue\fP
-The data producing capabilities of a sensor are encoded in two 32-bit bitmasks.
-The capability1 bitmask encompasses position, attitude, and other non-mapping
-or ancilliary data types. This command allows a user to set the full capability1
-bitmask value directly.
-.TP
-.B --sensor-capability2\fP=\fIvalue\fP
-The data producing capabilities of a sensor are encoded in two 32-bit bitmasks.
-The capability2 bitmask encompasses bathymetry, backscatter, photographic imagery
-subbottom profiles, and other mapping data types.
-This command allows a user to set the full capability2 bitmask value directly.
-.br
-.TP
-.B --sensor-offsets\fP=\fIx/y/z/azimuth/roll/pitch\fP
-.TP
-.B --sensor-offset-positions\fP=\fIx/y/z\fP
-.TP
-.B --sensor-offset-angles\fP=\fIazimuth/roll/pitch\fP
-These commands set an offset vector for the current sensor. The \fB--sensor-offsets\fP
-command sets both the positional and angular offsets and should be used for
-sensors that require that both positional and angular offsets be defined
-(e.g. basically all mapping sensors). The \fB--sensor-offset-positions\fP
-command should be used for sensors that require only positional offsets
-(e.g. position sensors), and the \fB--sensor-offset-angles\fP command should
-be used for sensors that require only positional offsets (e.g. VRU's).
-If a sensor type requires more than one offset vector, these should be supplied
-by multiple \fB--sensor-offsets\fP, \fB--sensor-offset-positions\fP, or
-\fB--sensor-offset-angles\fP commands given together in the order indicated
-here:
-.br
-    sonar-sidescan                  2 offset vectors
-        0: port stave
-        1: starboard stave
-    sonar-interferometry            2 offset vectors
-        0: port stave
-        1: starboard stave
-    sonar-multibeam                 2 offset vectors
-        0: transmit array
-        1: receive array
-    sonar-multibeam-twohead         4 offset vectors
-        0: transmit array port
-        1: receive array port
-        2: transmit array starboard
-        3: receive array starboard
-    camera-stereo                   2 offset vectors
-        0: port camera
-        1: starboard camera
-.TP
-.B --sensor-time-latency\fP=\fIvalue\fP
-.TP
-.B --sensor-time-latency-model\fP=\fIfile\fP
-These commands set a time latency correction for the current sensor.
-The \fB--sensor-time-latency\fP command specifies a static time shift that
-is added to the time stamps of the sensor data, and the \fB--sensor-time-latency-model\fP
-command specifies a file containing a time varying time latency model. The time
-latency model file should be a text file containing two space delimited columns,
-the first being unix time values (seconds since 1970) and the second being the
-time shift values in seconds.
-.br
-.TP
-.B --sensor-source-bathymetry\fP
-.TP
-.B --sensor-source-bathymetry1\fP
-.TP
-.B --sensor-source-bathymetry2\fP
-.TP
-.B --sensor-source-bathymetry3\fP
-.TP
-.B --sensor-source-backscatter\fP
-.TP
-.B --sensor-source-backscatter1\fP
-.TP
-.B --sensor-source-backscatter2\fP
-.TP
-.B --sensor-source-backscatter3\fP
-.TP
-.B --sensor-source-position\fP
-.TP
-.B --sensor-source-position1\fP
-.TP
-.B --sensor-source-position2\fP
-.TP
-.B --sensor-source-position3\fP
-.TP
-.B --sensor-source-depth\fP
-.TP
-.B --sensor-source-depth1\fP
-.TP
-.B --sensor-source-depth2\fP
-.TP
-.B --sensor-source-depth3\fP
-.TP
-.B --sensor-source-heading\fP
-.TP
-.B --sensor-source-heading1\fP
-.TP
-.B --sensor-source-heading2\fP
-.TP
-.B --sensor-source-heading3\fP
-.TP
-.B --sensor-source-rollpitch\fP
-.TP
-.B --sensor-source-rollpitch1\fP
-.TP
-.B --sensor-source-rollpitch2\fP
-.TP
-.B --sensor-source-rollpitch3\fP
-.TP
-.B --sensor-source-heave\fP
-.TP
-.B --sensor-source-heave1\fP
-.TP
-.B --sensor-source-heave2\fP
-.TP
-.B --sensor-source-heave3\fP
-These commands set the current sensor to be the source for the specified
-data type. The key data types are:
-    bathymetry
-    backscatter
-    subbottom
-    position
-    depth
-    heading
-    rollpitch
-    heave
-.br
-Each of these data types potentially has up to three sources, one of which will
-be the primary source. If only one sensor source for
-a data type exists, then only the primary data source need be defined. 
-As many of these may be specified as relevant.
-.br
-.TP
-.B --modify-sensor\fP=\fIsensorid\fP
-This command initiates modification of the specified existing sensor as denoted
-by the sensor id number in the model (sensors are counted starting with 0).
-As with the \fB--add-sensor-xxx\fP commands, the specifics of the sensor
-being modified are defined by commands immediately following the
-\fB--modify-sensor-xxx\fP command. These are terminated by either another
-\fB--modify-sensor-xxx\fP command initiating modification of
-a different sensor, or by the \fB--end-sensor\fP command.
-.TP
-.B --modify-sensor-bathymetry\fP
-.TP
-.B --modify-sensor-bathymetry1\fP
-.TP
-.B --modify-sensor-bathymetry2\fP
-.TP
-.B --modify-sensor-bathymetry3\fP
-.TP
-.B --modify-sensor-backscatter\fP
-.TP
-.B --modify-sensor-backscatter1\fP
-.TP
-.B --modify-sensor-backscatter2\fP
-.TP
-.B --modify-sensor-backscatter3\fP
-.TP
-.B --modify-sensor-position\fP
-.TP
-.B --modify-sensor-position1\fP
-.TP
-.B --modify-sensor-position2\fP
-.TP
-.B --modify-sensor-position3\fP
-.TP
-.B --modify-sensor-depth\fP
-.TP
-.B --modify-sensor-depth1\fP
-.TP
-.B --modify-sensor-depth2\fP
-.TP
-.B --modify-sensor-depth3\fP
-.TP
-.B --modify-sensor-heading\fP
-.TP
-.B --modify-sensor-heading1\fP
-.TP
-.B --modify-sensor-heading2\fP
-.TP
-.B --modify-sensor-heading3\fP
-.TP
-.B --modify-sensor-rollpitch
-.TP
-.B --modify-sensor-rollpitch1
-.TP
-.B --modify-sensor-rollpitch2\fP
-.TP
-.B --modify-sensor-rollpitch3\fP
-.TP
-.B --modify-sensor-heave\fP
-.TP
-.B --modify-sensor-heave1\fP
-.TP
-.B --modify-sensor-heave2\fP
-.TP
-.B --modify-sensor-heave3\fP
-These commands initiate modification of the sensor defined as the
-source for the specified data type.
-As with the \fB--add-sensor-xxx\fP commands, the new values are defined by c
-ommands immediately following the
-\fB--modify-sensor-xxx\fP command. These are terminated by either another
-\fB--modify-sensor-xxx\fP command initiating modification of
-a different sensor, or by the \fB--end-sensor\fP command.
-.br
-.TP
-.B --modify-offsets\fP=\fIioff/x/y/z/azimuth/roll/pitch\fP
-.TP
-.B --modify-offset-positions\fP=\fIioff/x/y/z\fP
-.TP
-.B --modify-offset-angles\fP=\fIioff/azimuth/roll/pitch\fP
-These commands reset an offset vector for the current sensor. The \fB--modify-offsets\fP
-command sets both the positional and angular offsets and should be used for
-sensors that require that both positional and angular offsets be defined
-(e.g. basically all mapping sensors). The \fB--modify-offset-positions\fP
-command should be used for sensors that require only positional offsets
-(e.g. position sensors), and the \fB--modify-offset-angles\fP command should
-be used for sensors that require only positional offsets (e.g. VRU's).
-If the current sensor type requires only one offset vector, then the \fIioff\fP
-offset id value will be 0. If the current sensor type requires more than one
-offset vector, which offset vector is being modified is defined by the \fIioff\fP
-value. Offset vectors are counted from 0, so the second offset vector is specified
-using \fIioff\fP=1.
-.TP
-.B --modify-time-latency\fP=\fIvalue\fP
-.TP
-.B --modify-time-latency-model\fP=\fIfile\fP
-These commands reset a time latency correction for the current sensor.
-The \fB--modify-time-latency\fP command specifies a static time shift that
-is added to the time stamps of the sensor data, and the \fB--modify-time-latency-model\fP
-command specifies a file containing a time varying time latency model. The time
-latency model file should be a text file containing two space delimited columns,
-the first being unix time values (seconds since 1970) and the second being the
-time shift values in seconds.
+By default \fBmbmakeplatform\fP outputs minimal information to the shell. This option
+causes the program to indicate it's progress as it runs. Goody.
 
-.SH EXAMPLE 1 - MULTIBEAM ON AN AUV
-Consider an autonomous underwater vehicle (AUV) that incorporates a multibeam sonar,
-an inertial navigations system (INS), and a pressure sensor. The following
-\fBmbmakeplatform\fP call creates an \fBMB-System\fP platform file that can be
-used in processing multibeam data collected with this AUV.
-
-    mbmakeplatform --verbose \\
-                --output=20150301MappingAUV.plf \\
-                --platform-type-auv \\
-                --platform-name="MBARI Mapping AUV" \\
-                --platform-organization="Monterey Bay Aquarium Research Institute" \\
-                --add-sensor-sonar-multibeam \\
-                    --sensor-model="7125 200 kHz" \\
-                    --sensor-manufacturer="Reson" \\
-                    --sensor-serialnumber="Unknown" \\
-                    --sensor-capability-topography-multibeam \\
-                    --sensor-capability-backscatter-multibeam \\
-                    --sensor-offsets=0.0/0.35/-0.15/-2.0/0.7/1.0 \\
-                    --sensor-offsets=0.0/0.15/-0.15/-2.0/0.7/1.0 \\
-                    --sensor-source-bathymetry \\
-                --end-sensor \\
-                --add-sensor-ins \\
-                    --sensor-model="SeaDeViL" \\
-                    --sensor-manufacturer="Kearfott" \\
-                    --sensor-serialnumber="2" \\
-                    --sensor-capability-position \\
-                    --sensor-capability-heading \\
-                    --sensor-capability-rollpitch \\
-                    --sensor-offsets=0.0/0.0/0.0/0.0/0.0/0.0 \\
-                    --sensor-source-position \\
-                    --sensor-source-heading \\
-                    --sensor-source-rollpitch \\
-                --end-sensor \\
-                --add-sensor-pressure \\
-                    --sensor-model="Digiquartz" \\
-                    --sensor-manufacturer="Paroscientific" \\
-                    --sensor-serialnumber="Unknown" \\
-                    --sensor-capability-depth \\
-                    --sensor-offset-positions=0.0/-0.65/0.0 \\
-                    --sensor-source-depth \\
-                --end-sensor
-
-Because the \fB--verbose\fP command is used, \fBmbmakeplatform\fP prints out
-a synopsis of the platform model that is output to the file 20150301MappingAUV.plf:
-.br
-    Program mbmakeplatform
-    Version $Id$
-    MB-system Version 5.5.2256
-    
-    Output platform file <20150301MappingAUV.plf>
-        platform->type:                        4 <AUV>
-        platform->name:                        MBARI Mapping AUV
-        platform->organization:                Monterey Bay Aquarium Research Institute
-        platform->source_bathymetry:           0
-        platform->source_bathymetry1:          -1
-        platform->source_bathymetry2:          -1
-        platform->source_bathymetry3:          -1
-        platform->source_backscatter:          -1
-        platform->source_backscatter1:         -1
-        platform->source_backscatter2:         -1
-        platform->source_backscatter3:         -1
-        platform->source_subbottom:            -1
-        platform->source_subbottom1:           -1
-        platform->source_subbottom2:           -1
-        platform->source_subbottom3:           -1
-        platform->source_position:             1
-        platform->source_position1:            -1
-        platform->source_position2:            -1
-        platform->source_position3:            -1
-        platform->source_depth:                2
-        platform->source_depth1:               -1
-        platform->source_depth2:               -1
-        platform->source_depth3:               -1
-        platform->source_heading:              1
-        platform->source_heading1:             -1
-        platform->source_heading2:             -1
-        platform->source_heading3:             -1
-        platform->source_rollpitch:            1
-        platform->source_rollpitch1:           -1
-        platform->source_rollpitch2:           -1
-        platform->source_rollpitch3:           -1
-        platform->source_heave:                -1
-        platform->source_heave1:               -1
-        platform->source_heave2:               -1
-        platform->source_heave3:               -1
-        platform->num_sensors:                 3
-        platform->sensors[0].type:                 30 <Sonar multibeam>
-        platform->sensors[0].model:                7125 200 kHz
-        platform->sensors[0].manufacturer:         Reson
-        platform->sensors[0].serialnumber:         Unknown
-        platform->sensors[0].capability1:          0
-        platform->sensors[0].capability2:          65544
-        platform->sensors[0].num_offsets:          2
-        platform->sensors[0].offsets[0].position_offset_mode:       1
-        platform->sensors[0].offsets[0].position_offset_x:          0.000000
-        platform->sensors[0].offsets[0].position_offset_y:          0.350000
-        platform->sensors[0].offsets[0].position_offset_z:          -0.150000
-        platform->sensors[0].offsets[0].attitude_offset_mode:       1
-        platform->sensors[0].offsets[0].attitude_offset_heading:    -2.000000
-        platform->sensors[0].offsets[0].attitude_offset_roll:       0.700000
-        platform->sensors[0].offsets[0].attitude_offset_pitch:      1.000000
-        platform->sensors[0].offsets[1].position_offset_mode:       1
-        platform->sensors[0].offsets[1].position_offset_x:          0.000000
-        platform->sensors[0].offsets[1].position_offset_y:          0.150000
-        platform->sensors[0].offsets[1].position_offset_z:          -0.150000
-        platform->sensors[0].offsets[1].attitude_offset_mode:       1
-        platform->sensors[0].offsets[1].attitude_offset_heading:    -2.000000
-        platform->sensors[0].offsets[1].attitude_offset_roll:       0.700000
-        platform->sensors[0].offsets[1].attitude_offset_pitch:      1.000000
-        platform->sensors[0].time_latency_mode:    0
-        platform->sensors[0].time_latency_static:  0.000000
-        platform->sensors[0].num_time_latency:     0
-        platform->sensors[1].type:                 101 <INS>
-        platform->sensors[1].model:                SeaDeViL
-        platform->sensors[1].manufacturer:         Kearfott
-        platform->sensors[1].serialnumber:         2
-        platform->sensors[1].capability1:          193
-        platform->sensors[1].capability2:          0
-        platform->sensors[1].num_offsets:          1
-        platform->sensors[1].offsets[0].position_offset_mode:       1
-        platform->sensors[1].offsets[0].position_offset_x:          0.000000
-        platform->sensors[1].offsets[0].position_offset_y:          0.000000
-        platform->sensors[1].offsets[0].position_offset_z:          0.000000
-        platform->sensors[1].offsets[0].attitude_offset_mode:       1
-        platform->sensors[1].offsets[0].attitude_offset_heading:    0.000000
-        platform->sensors[1].offsets[0].attitude_offset_roll:       0.000000
-        platform->sensors[1].offsets[0].attitude_offset_pitch:      0.000000
-        platform->sensors[1].time_latency_mode:    0
-        platform->sensors[1].time_latency_static:  0.000000
-        platform->sensors[1].num_time_latency:     0
-        platform->sensors[2].type:                 111 <Pressure>
-        platform->sensors[2].model:                Digiquartz
-        platform->sensors[2].manufacturer:         Paroscientific
-        platform->sensors[2].serialnumber:         Unknown
-        platform->sensors[2].capability1:          2
-        platform->sensors[2].capability2:          0
-        platform->sensors[2].num_offsets:          1
-        platform->sensors[2].offsets[0].position_offset_mode:       1
-        platform->sensors[2].offsets[0].position_offset_x:          0.000000
-        platform->sensors[2].offsets[0].position_offset_y:          -0.650000
-        platform->sensors[2].offsets[0].position_offset_z:          0.000000
-        platform->sensors[2].offsets[0].attitude_offset_mode:       0
-        platform->sensors[2].offsets[0].attitude_offset_heading:    0.000000
-        platform->sensors[2].offsets[0].attitude_offset_roll:       0.000000
-        platform->sensors[2].offsets[0].attitude_offset_pitch:      0.000000
-        platform->sensors[2].time_latency_mode:    0
-        platform->sensors[2].time_latency_static:  0.000000
-        platform->sensors[2].num_time_latency:     0
-
-The contents of the resulting platform file 20150301MappingAUV.plf are:
-.br
-    ## MB-System Platform Definition File
-    MB-SYSTEM_VERSION        5.5.2256
-    SOURCE_VERSION           $Id$
-    FILE_VERSION             1.00
-    ORIGIN                   Generated by user <caress> on cpu <tharp.shore.mbari.org> at <Mon Oct  5 15:55:52 2015>
-    ##
-    PLATFORM_TYPE            4  ## AUV
-    PLATFORM_NAME            MBARI Mapping AUV
-    PLATFORM_ORGANIZATION    Monterey Bay Aquarium Research Institute
-    ##
-    PLATFORM_NUM_SENSORS     3
-    ##
-    ## Defined data source sensors:
-    SOURCE_BATHYMETRY        0
-    SOURCE_POSITION          1
-    SOURCE_DEPTH             2
-    SOURCE_HEADING           1
-    SOURCE_ROLLPITCH         1
-    ##
-    ## Undefined data sources:
-      ## SOURCE_BATHYMETRY1
-      ## SOURCE_BATHYMETRY2
-      ## SOURCE_BATHYMETRY3
-      ## SOURCE_BACKSCATTER
-      ## SOURCE_BACKSCATTER1
-      ## SOURCE_BACKSCATTER2
-      ## SOURCE_BACKSCATTER3
-      ## SOURCE_SUBBOTTOM
-      ## SOURCE_SUBBOTTOM1
-      ## SOURCE_SUBBOTTOM2
-      ## SOURCE_SUBBOTTOM3
-      ## SOURCE_POSITION1
-      ## SOURCE_POSITION2
-      ## SOURCE_POSITION3
-      ## SOURCE_DEPTH1
-      ## SOURCE_DEPTH2
-      ## SOURCE_DEPTH3
-      ## SOURCE_HEADING1
-      ## SOURCE_HEADING2
-      ## SOURCE_HEADING3
-      ## SOURCE_ROLLPITCH1
-      ## SOURCE_ROLLPITCH2
-      ## SOURCE_ROLLPITCH3
-      ## SOURCE_HEAVE
-      ## SOURCE_HEAVE1
-      ## SOURCE_HEAVE2
-      ## SOURCE_HEAVE3
-    ##
-    ## Sensor list:
-    ##
-    SENSOR_TYPE	              0   30  ## Sonar multibeam
-    SENSOR_MODEL                 0  7125 200 kHz
-    SENSOR_MANUFACTURER          0  Reson
-    SENSOR_SERIALNUMBER          0  Unknown
-    SENSOR_CAPABILITY1           0           0  ##
-    SENSOR_CAPABILITY2           0       65544  ## topography_multibeam backscatter_multibeam
-    SENSOR_NUM_OFFSETS           0   2
-    OFFSET_POSITION              0       0    0.000000    0.350000   -0.150000
-    OFFSET_ATTITUDE              0       0   -2.000000    0.700000    1.000000
-    OFFSET_POSITION              0       1    0.000000    0.150000   -0.150000
-    OFFSET_ATTITUDE              0       1   -2.000000    0.700000    1.000000
-    ##
-    SENSOR_TYPE	              1  101  ## INS
-    SENSOR_MODEL                 1  SeaDeViL
-    SENSOR_MANUFACTURER          1  Kearfott
-    SENSOR_SERIALNUMBER          1  2
-    SENSOR_CAPABILITY1           1         193  ## position rollpitch heading heading
-    SENSOR_CAPABILITY2           1           0  ##
-    SENSOR_NUM_OFFSETS           1   1
-    OFFSET_POSITION              1       0    0.000000    0.000000    0.000000
-    OFFSET_ATTITUDE              1       0    0.000000    0.000000    0.000000
-    ##
-    SENSOR_TYPE	              2  111  ## Pressure
-    SENSOR_MODEL                 2  Digiquartz
-    SENSOR_MANUFACTURER          2  Paroscientific
-    SENSOR_SERIALNUMBER          2  Unknown
-    SENSOR_CAPABILITY1           2           2  ## depth
-    SENSOR_CAPABILITY2           2           0  ##
-    SENSOR_NUM_OFFSETS           2   1
-    OFFSET_POSITION              2       0    0.000000   -0.650000    0.000000
-    ##
-
-.SH EXAMPLE 2 - MULTIBEAM ON A SHIP
-Consider the research vessel R/V Thomas G. Thompson operated by the University
-of Washington. This ship has a Kongsberg EM302 multibeam sonar. The following
-\fBmbmakeplatform\fP call creates an \fBMB-System\fP platform file that can be
-used in processing the EM302 multibeam data by first extracting the sensor
-offsets from one of the data files, and then adding information about the ship
-and university names. Although a datalist referencing many swath files is used,
-the program only reads data until it encounters the first Kongsberg start data
-record (which happens to contain installation parameters in the Kongsberg multibeam
-format).
-.br
-    mbmakeplatform --verbose \
-                --swath=datalist_raw.mb-1 \
-                --output=20150822_RVThompson.plf \
-                --platform-type-surface-vessel \
-                --platform-name="R/V Thomas G. Thompson" \
-                --platform-organization="University of Washington"
-
-Because the \fB--verbose\fP command is used, \fBmbmakeplatform\fP prints out
-a synopsis of the platform model that is first extracted from the swath data,
-and then outputs a synopsis of the modified platform model that is output to the
-file 20150822_RVThompson.plf:
-.br
-    Program mbmakeplatform
-    Version $Id$
-    MB-system Version 5.5.2256
-    
-    Extracted platform from swath data <datalist_raw.mb-1>
-        platform->type:                        0 <Unknown platform type>
-        platform->name:                        
-        platform->organization:                
-        platform->source_bathymetry:           0
-        platform->source_bathymetry1:          -1
-        platform->source_bathymetry2:          -1
-        platform->source_bathymetry3:          -1
-        platform->source_backscatter:          0
-        platform->source_backscatter1:         -1
-        platform->source_backscatter2:         -1
-        platform->source_backscatter3:         -1
-        platform->source_subbottom:            -1
-        platform->source_subbottom1:           -1
-        platform->source_subbottom2:           -1
-        platform->source_subbottom3:           -1
-        platform->source_position:             1
-        platform->source_position1:            1
-        platform->source_position2:            2
-        platform->source_position3:            3
-        platform->source_depth:                -1
-        platform->source_depth1:               -1
-        platform->source_depth2:               -1
-        platform->source_depth3:               -1
-        platform->source_heading:              4
-        platform->source_heading1:             -1
-        platform->source_heading2:             -1
-        platform->source_heading3:             -1
-        platform->source_rollpitch:            4
-        platform->source_rollpitch1:           4
-        platform->source_rollpitch2:           5
-        platform->source_rollpitch3:           -1
-        platform->source_heave:                4
-        platform->source_heave1:               -1
-        platform->source_heave2:               -1
-        platform->source_heave3:               -1
-        platform->num_sensors:                 6
-        platform->sensors[0].type:                 30 <Sonar multibeam>
-        platform->sensors[0].model:                EM302
-        platform->sensors[0].manufacturer:         Kongsberg
-        platform->sensors[0].serialnumber:         103
-        platform->sensors[0].capability1:          0
-        platform->sensors[0].capability2:          65544
-        platform->sensors[0].num_offsets:          2
-        platform->sensors[0].offsets[0].position_offset_mode:       1
-        platform->sensors[0].offsets[0].position_offset_x:          2.044000
-        platform->sensors[0].offsets[0].position_offset_y:          3.776000
-        platform->sensors[0].offsets[0].position_offset_z:          -6.305000
-        platform->sensors[0].offsets[0].attitude_offset_mode:       1
-        platform->sensors[0].offsets[0].attitude_offset_heading:    359.950000
-        platform->sensors[0].offsets[0].attitude_offset_roll:       -0.320000
-        platform->sensors[0].offsets[0].attitude_offset_pitch:      0.140000
-        platform->sensors[0].offsets[1].position_offset_mode:       1
-        platform->sensors[0].offsets[1].position_offset_x:          1.432000
-        platform->sensors[0].offsets[1].position_offset_y:          1.825000
-        platform->sensors[0].offsets[1].position_offset_z:          -6.292000
-        platform->sensors[0].offsets[1].attitude_offset_mode:       1
-        platform->sensors[0].offsets[1].attitude_offset_heading:    359.810000
-        platform->sensors[0].offsets[1].attitude_offset_roll:       0.210000
-        platform->sensors[0].offsets[1].attitude_offset_pitch:      0.000000
-        platform->sensors[0].time_latency_mode:    0
-        platform->sensors[0].time_latency_static:  0.000000
-        platform->sensors[0].num_time_latency:     0
-        platform->sensors[1].type:                 70 <Position>
-        platform->sensors[1].model:                
-        platform->sensors[1].manufacturer:         
-        platform->sensors[1].serialnumber:         
-        platform->sensors[1].capability1:          0
-        platform->sensors[1].capability2:          0
-        platform->sensors[1].num_offsets:          1
-        platform->sensors[1].offsets[0].position_offset_mode:       1
-        platform->sensors[1].offsets[0].position_offset_x:          0.000000
-        platform->sensors[1].offsets[0].position_offset_y:          0.000000
-        platform->sensors[1].offsets[0].position_offset_z:          -0.000000
-        platform->sensors[1].offsets[0].attitude_offset_mode:       0
-        platform->sensors[1].offsets[0].attitude_offset_heading:    0.000000
-        platform->sensors[1].offsets[0].attitude_offset_roll:       0.000000
-        platform->sensors[1].offsets[0].attitude_offset_pitch:      0.000000
-        platform->sensors[1].time_latency_mode:    0
-        platform->sensors[1].time_latency_static:  0.000000
-        platform->sensors[1].num_time_latency:     0
-        platform->sensors[2].type:                 70 <Position>
-        platform->sensors[2].model:                
-        platform->sensors[2].manufacturer:         
-        platform->sensors[2].serialnumber:         
-        platform->sensors[2].capability1:          0
-        platform->sensors[2].capability2:          0
-        platform->sensors[2].num_offsets:          1
-        platform->sensors[2].offsets[0].position_offset_mode:       1
-        platform->sensors[2].offsets[0].position_offset_x:          2.492000
-        platform->sensors[2].offsets[0].position_offset_y:          -5.034000
-        platform->sensors[2].offsets[0].position_offset_z:          24.576000
-        platform->sensors[2].offsets[0].attitude_offset_mode:       1
-        platform->sensors[2].offsets[0].attitude_offset_heading:    0.000000
-        platform->sensors[2].offsets[0].attitude_offset_roll:       0.000000
-        platform->sensors[2].offsets[0].attitude_offset_pitch:      0.000000
-        platform->sensors[2].time_latency_mode:    0
-        platform->sensors[2].time_latency_static:  0.000000
-        platform->sensors[2].num_time_latency:     0
-        platform->sensors[3].type:                 70 <Position>
-        platform->sensors[3].model:                
-        platform->sensors[3].manufacturer:         
-        platform->sensors[3].serialnumber:         
-        platform->sensors[3].capability1:          0
-        platform->sensors[3].capability2:          0
-        platform->sensors[3].num_offsets:          1
-        platform->sensors[3].offsets[0].position_offset_mode:       1
-        platform->sensors[3].offsets[0].position_offset_x:          0.000000
-        platform->sensors[3].offsets[0].position_offset_y:          0.000000
-        platform->sensors[3].offsets[0].position_offset_z:          -0.000000
-        platform->sensors[3].offsets[0].attitude_offset_mode:       0
-        platform->sensors[3].offsets[0].attitude_offset_heading:    0.000000
-        platform->sensors[3].offsets[0].attitude_offset_roll:       0.000000
-        platform->sensors[3].offsets[0].attitude_offset_pitch:      0.000000
-        platform->sensors[3].time_latency_mode:    0
-        platform->sensors[3].time_latency_static:  0.000000
-        platform->sensors[3].num_time_latency:     0
-        platform->sensors[4].type:                 90 <VRU>
-        platform->sensors[4].model:                
-        platform->sensors[4].manufacturer:         
-        platform->sensors[4].serialnumber:         
-        platform->sensors[4].capability1:          0
-        platform->sensors[4].capability2:          0
-        platform->sensors[4].num_offsets:          1
-        platform->sensors[4].offsets[0].position_offset_mode:       1
-        platform->sensors[4].offsets[0].position_offset_x:          0.000000
-        platform->sensors[4].offsets[0].position_offset_y:          0.000000
-        platform->sensors[4].offsets[0].position_offset_z:          -0.000000
-        platform->sensors[4].offsets[0].attitude_offset_mode:       1
-        platform->sensors[4].offsets[0].attitude_offset_heading:    -0.200000
-        platform->sensors[4].offsets[0].attitude_offset_roll:       -0.355000
-        platform->sensors[4].offsets[0].attitude_offset_pitch:      -0.110000
-        platform->sensors[4].time_latency_mode:    0
-        platform->sensors[4].time_latency_static:  0.000000
-        platform->sensors[4].num_time_latency:     0
-        platform->sensors[5].type:                 90 <VRU>
-        platform->sensors[5].model:                
-        platform->sensors[5].manufacturer:         
-        platform->sensors[5].serialnumber:         
-        platform->sensors[5].capability1:          0
-        platform->sensors[5].capability2:          0
-        platform->sensors[5].num_offsets:          1
-        platform->sensors[5].offsets[0].position_offset_mode:       1
-        platform->sensors[5].offsets[0].position_offset_x:          0.000000
-        platform->sensors[5].offsets[0].position_offset_y:          0.000000
-        platform->sensors[5].offsets[0].position_offset_z:          -0.000000
-        platform->sensors[5].offsets[0].attitude_offset_mode:       1
-        platform->sensors[5].offsets[0].attitude_offset_heading:    -0.200000
-        platform->sensors[5].offsets[0].attitude_offset_roll:       -0.355000
-        platform->sensors[5].offsets[0].attitude_offset_pitch:      -0.110000
-        platform->sensors[5].time_latency_mode:    0
-        platform->sensors[5].time_latency_static:  0.000000
-        platform->sensors[5].num_time_latency:     0
-    
-    Output platform file <20150822_RVThompson.plf>
-        platform->type:                        1 <Surface vessel>
-        platform->name:                        R/V Thomas G. Thompson
-        platform->organization:                University of Washington
-        platform->source_bathymetry:           0
-        platform->source_bathymetry1:          -1
-        platform->source_bathymetry2:          -1
-        platform->source_bathymetry3:          -1
-        platform->source_backscatter:          0
-        platform->source_backscatter1:         -1
-        platform->source_backscatter2:         -1
-        platform->source_backscatter3:         -1
-        platform->source_subbottom:            -1
-        platform->source_subbottom1:           -1
-        platform->source_subbottom2:           -1
-        platform->source_subbottom3:           -1
-        platform->source_position:             1
-        platform->source_position1:            1
-        platform->source_position2:            2
-        platform->source_position3:            3
-        platform->source_depth:                -1
-        platform->source_depth1:               -1
-        platform->source_depth2:               -1
-        platform->source_depth3:               -1
-        platform->source_heading:              4
-        platform->source_heading1:             -1
-        platform->source_heading2:             -1
-        platform->source_heading3:             -1
-        platform->source_rollpitch:            4
-        platform->source_rollpitch1:           4
-        platform->source_rollpitch2:           5
-        platform->source_rollpitch3:           -1
-        platform->source_heave:                4
-        platform->source_heave1:               -1
-        platform->source_heave2:               -1
-        platform->source_heave3:               -1
-        platform->num_sensors:                 6
-        platform->sensors[0].type:                 30 <Sonar multibeam>
-        platform->sensors[0].model:                EM302
-        platform->sensors[0].manufacturer:         Kongsberg
-        platform->sensors[0].serialnumber:         103
-        platform->sensors[0].capability1:          0
-        platform->sensors[0].capability2:          65544
-        platform->sensors[0].num_offsets:          2
-        platform->sensors[0].offsets[0].position_offset_mode:       1
-        platform->sensors[0].offsets[0].position_offset_x:          2.044000
-        platform->sensors[0].offsets[0].position_offset_y:          3.776000
-        platform->sensors[0].offsets[0].position_offset_z:          -6.305000
-        platform->sensors[0].offsets[0].attitude_offset_mode:       1
-        platform->sensors[0].offsets[0].attitude_offset_heading:    359.950000
-        platform->sensors[0].offsets[0].attitude_offset_roll:       -0.320000
-        platform->sensors[0].offsets[0].attitude_offset_pitch:      0.140000
-        platform->sensors[0].offsets[1].position_offset_mode:       1
-        platform->sensors[0].offsets[1].position_offset_x:          1.432000
-        platform->sensors[0].offsets[1].position_offset_y:          1.825000
-        platform->sensors[0].offsets[1].position_offset_z:          -6.292000
-        platform->sensors[0].offsets[1].attitude_offset_mode:       1
-        platform->sensors[0].offsets[1].attitude_offset_heading:    359.810000
-        platform->sensors[0].offsets[1].attitude_offset_roll:       0.210000
-        platform->sensors[0].offsets[1].attitude_offset_pitch:      0.000000
-        platform->sensors[0].time_latency_mode:    0
-        platform->sensors[0].time_latency_static:  0.000000
-        platform->sensors[0].num_time_latency:     0
-        platform->sensors[1].type:                 70 <Position>
-        platform->sensors[1].model:                
-        platform->sensors[1].manufacturer:         
-        platform->sensors[1].serialnumber:         
-        platform->sensors[1].capability1:          0
-        platform->sensors[1].capability2:          0
-        platform->sensors[1].num_offsets:          1
-        platform->sensors[1].offsets[0].position_offset_mode:       1
-        platform->sensors[1].offsets[0].position_offset_x:          0.000000
-        platform->sensors[1].offsets[0].position_offset_y:          0.000000
-        platform->sensors[1].offsets[0].position_offset_z:          -0.000000
-        platform->sensors[1].offsets[0].attitude_offset_mode:       0
-        platform->sensors[1].offsets[0].attitude_offset_heading:    0.000000
-        platform->sensors[1].offsets[0].attitude_offset_roll:       0.000000
-        platform->sensors[1].offsets[0].attitude_offset_pitch:      0.000000
-        platform->sensors[1].time_latency_mode:    0
-        platform->sensors[1].time_latency_static:  0.000000
-        platform->sensors[1].num_time_latency:     0
-        platform->sensors[2].type:                 70 <Position>
-        platform->sensors[2].model:                
-        platform->sensors[2].manufacturer:         
-        platform->sensors[2].serialnumber:         
-        platform->sensors[2].capability1:          0
-        platform->sensors[2].capability2:          0
-        platform->sensors[2].num_offsets:          1
-        platform->sensors[2].offsets[0].position_offset_mode:       1
-        platform->sensors[2].offsets[0].position_offset_x:          2.492000
-        platform->sensors[2].offsets[0].position_offset_y:          -5.034000
-        platform->sensors[2].offsets[0].position_offset_z:          24.576000
-        platform->sensors[2].offsets[0].attitude_offset_mode:       1
-        platform->sensors[2].offsets[0].attitude_offset_heading:    0.000000
-        platform->sensors[2].offsets[0].attitude_offset_roll:       0.000000
-        platform->sensors[2].offsets[0].attitude_offset_pitch:      0.000000
-        platform->sensors[2].time_latency_mode:    0
-        platform->sensors[2].time_latency_static:  0.000000
-        platform->sensors[2].num_time_latency:     0
-        platform->sensors[3].type:                 70 <Position>
-        platform->sensors[3].model:                
-        platform->sensors[3].manufacturer:         
-        platform->sensors[3].serialnumber:         
-        platform->sensors[3].capability1:          0
-        platform->sensors[3].capability2:          0
-        platform->sensors[3].num_offsets:          1
-        platform->sensors[3].offsets[0].position_offset_mode:       1
-        platform->sensors[3].offsets[0].position_offset_x:          0.000000
-        platform->sensors[3].offsets[0].position_offset_y:          0.000000
-        platform->sensors[3].offsets[0].position_offset_z:          -0.000000
-        platform->sensors[3].offsets[0].attitude_offset_mode:       0
-        platform->sensors[3].offsets[0].attitude_offset_heading:    0.000000
-        platform->sensors[3].offsets[0].attitude_offset_roll:       0.000000
-        platform->sensors[3].offsets[0].attitude_offset_pitch:      0.000000
-        platform->sensors[3].time_latency_mode:    0
-        platform->sensors[3].time_latency_static:  0.000000
-        platform->sensors[3].num_time_latency:     0
-        platform->sensors[4].type:                 90 <VRU>
-        platform->sensors[4].model:                
-        platform->sensors[4].manufacturer:         
-        platform->sensors[4].serialnumber:         
-        platform->sensors[4].capability1:          0
-        platform->sensors[4].capability2:          0
-        platform->sensors[4].num_offsets:          1
-        platform->sensors[4].offsets[0].position_offset_mode:       1
-        platform->sensors[4].offsets[0].position_offset_x:          0.000000
-        platform->sensors[4].offsets[0].position_offset_y:          0.000000
-        platform->sensors[4].offsets[0].position_offset_z:          -0.000000
-        platform->sensors[4].offsets[0].attitude_offset_mode:       1
-        platform->sensors[4].offsets[0].attitude_offset_heading:    -0.200000
-        platform->sensors[4].offsets[0].attitude_offset_roll:       -0.355000
-        platform->sensors[4].offsets[0].attitude_offset_pitch:      -0.110000
-        platform->sensors[4].time_latency_mode:    0
-        platform->sensors[4].time_latency_static:  0.000000
-        platform->sensors[4].num_time_latency:     0
-        platform->sensors[5].type:                 90 <VRU>
-        platform->sensors[5].model:                
-        platform->sensors[5].manufacturer:         
-        platform->sensors[5].serialnumber:         
-        platform->sensors[5].capability1:          0
-        platform->sensors[5].capability2:          0
-        platform->sensors[5].num_offsets:          1
-        platform->sensors[5].offsets[0].position_offset_mode:       1
-        platform->sensors[5].offsets[0].position_offset_x:          0.000000
-        platform->sensors[5].offsets[0].position_offset_y:          0.000000
-        platform->sensors[5].offsets[0].position_offset_z:          -0.000000
-        platform->sensors[5].offsets[0].attitude_offset_mode:       1
-        platform->sensors[5].offsets[0].attitude_offset_heading:    -0.200000
-        platform->sensors[5].offsets[0].attitude_offset_roll:       -0.355000
-        platform->sensors[5].offsets[0].attitude_offset_pitch:      -0.110000
-        platform->sensors[5].time_latency_mode:    0
-        platform->sensors[5].time_latency_static:  0.000000
-        platform->sensors[5].num_time_latency:     0
-
-The contents of the resulting platform file 20150822_RVThompson.plf are:
-.br
-    ## MB-System Platform Definition File
-    MB-SYSTEM_VERSION        5.5.2256
-    SOURCE_VERSION           $Id$
-    FILE_VERSION             1.00
-    ORIGIN                   Generated by user <caress> on cpu <tharp.shore.mbari.org> at <Mon Oct  5 17:03:48 2015>
-    ##
-    PLATFORM_TYPE            1  ## Surface vessel
-    PLATFORM_NAME            R/V Thomas G. Thompson
-    PLATFORM_ORGANIZATION    University of Washington
-    ##
-    PLATFORM_NUM_SENSORS     6
-    ##
-    ## Defined data source sensors:
-    SOURCE_BATHYMETRY        0
-    SOURCE_BACKSCATTER       0
-    SOURCE_POSITION          1
-    SOURCE_POSITION1         1
-    SOURCE_POSITION2         2
-    SOURCE_POSITION3         3
-    SOURCE_HEADING           4
-    SOURCE_ROLLPITCH         4
-    SOURCE_ROLLPITCH1        4
-    SOURCE_ROLLPITCH2        5
-    SOURCE_HEAVE             4
-    ##
-    ## Undefined data sources:
-      ## SOURCE_BATHYMETRY1
-      ## SOURCE_BATHYMETRY2
-      ## SOURCE_BATHYMETRY3
-      ## SOURCE_BACKSCATTER1
-      ## SOURCE_BACKSCATTER2
-      ## SOURCE_BACKSCATTER3
-      ## SOURCE_SUBBOTTOM
-      ## SOURCE_SUBBOTTOM1
-      ## SOURCE_SUBBOTTOM2
-      ## SOURCE_SUBBOTTOM3
-      ## SOURCE_DEPTH
-      ## SOURCE_DEPTH1
-      ## SOURCE_DEPTH2
-      ## SOURCE_DEPTH3
-      ## SOURCE_HEADING1
-      ## SOURCE_HEADING2
-      ## SOURCE_HEADING3
-      ## SOURCE_ROLLPITCH3
-      ## SOURCE_HEAVE1
-      ## SOURCE_HEAVE2
-      ## SOURCE_HEAVE3
-    ##
-    ## Sensor list:
-    ##
-    SENSOR_TYPE	              0   30  ## Sonar multibeam
-    SENSOR_MODEL                 0  EM302
-    SENSOR_MANUFACTURER          0  Kongsberg
-    SENSOR_SERIALNUMBER          0  103
-    SENSOR_CAPABILITY1           0           0  ##
-    SENSOR_CAPABILITY2           0       65544  ## topography_multibeam backscatter_multibeam
-    SENSOR_NUM_OFFSETS           0   2
-    OFFSET_POSITION              0       0    2.044000    3.776000   -6.305000
-    OFFSET_ATTITUDE              0       0  359.950000   -0.320000    0.140000
-    OFFSET_POSITION              0       1    1.432000    1.825000   -6.292000
-    OFFSET_ATTITUDE              0       1  359.810000    0.210000    0.000000
-    ##
-    SENSOR_TYPE	              1   70  ## Position
-    SENSOR_MODEL                 1  
-    SENSOR_MANUFACTURER          1  
-    SENSOR_SERIALNUMBER          1  
-    SENSOR_CAPABILITY1           1           0  ##
-    SENSOR_CAPABILITY2           1           0  ##
-    SENSOR_NUM_OFFSETS           1   1
-    OFFSET_POSITION              1       0    0.000000    0.000000   -0.000000
-    ##
-    SENSOR_TYPE	              2   70  ## Position
-    SENSOR_MODEL                 2  
-    SENSOR_MANUFACTURER          2  
-    SENSOR_SERIALNUMBER          2  
-    SENSOR_CAPABILITY1           2           0  ##
-    SENSOR_CAPABILITY2           2           0  ##
-    SENSOR_NUM_OFFSETS           2   1
-    OFFSET_POSITION              2       0    2.492000   -5.034000   24.576000
-    OFFSET_ATTITUDE              2       0    0.000000    0.000000    0.000000
-    ##
-    SENSOR_TYPE	              3   70  ## Position
-    SENSOR_MODEL                 3  
-    SENSOR_MANUFACTURER          3  
-    SENSOR_SERIALNUMBER          3  
-    SENSOR_CAPABILITY1           3           0  ##
-    SENSOR_CAPABILITY2           3           0  ##
-    SENSOR_NUM_OFFSETS           3   1
-    OFFSET_POSITION              3       0    0.000000    0.000000   -0.000000
-    ##
-    SENSOR_TYPE	              4   90  ## VRU
-    SENSOR_MODEL                 4  
-    SENSOR_MANUFACTURER          4  
-    SENSOR_SERIALNUMBER          4  
-    SENSOR_CAPABILITY1           4           0  ##
-    SENSOR_CAPABILITY2           4           0  ##
-    SENSOR_NUM_OFFSETS           4   1
-    OFFSET_POSITION              4       0    0.000000    0.000000   -0.000000
-    OFFSET_ATTITUDE              4       0   -0.200000   -0.355000   -0.110000
-    ##
-    SENSOR_TYPE	              5   90  ## VRU
-    SENSOR_MODEL                 5  
-    SENSOR_MANUFACTURER          5  
-    SENSOR_SERIALNUMBER          5  
-    SENSOR_CAPABILITY1           5           0  ##
-    SENSOR_CAPABILITY2           5           0  ##
-    SENSOR_NUM_OFFSETS           5   1
-    OFFSET_POSITION              5       0    0.000000    0.000000   -0.000000
-    OFFSET_ATTITUDE              5       0   -0.200000   -0.355000   -0.110000
-    ##
+.SH EXAMPLES
+To be written.....
 
 .SH SEE ALSO
-\fBmbsystem\fP(1), \fBmbpreprocess\fP(1), \fBmbprocess\fP(1)
+\fBmbsystem\fP(1), \fBmbdatalist\fP(1), \fBmbprocess\fP(1)
 
 .SH BUGS
-Echinoderms, mostly.
+Oh yeah.
