@@ -234,6 +234,12 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.5.2278 (June 30, 2016)
+
+Mbkongsbergpreprocess (Formats 58 & 59): Fixed modification of png_xducer_depth
+value to not include lever arms or heave, as SIS records sensor depth value
+in height datagrams that are already compensated for lever arms and heave.
+
 -----> 5.5.2277 (June 25, 2016)
 
 Mbm_xyplot, mbm_grdplot: fixed problem generating plots using linear axes. Recent
