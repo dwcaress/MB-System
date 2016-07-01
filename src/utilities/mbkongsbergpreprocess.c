@@ -823,353 +823,690 @@ sonardepth_sonardepth[nsonardepth]);*/
 		|| format == MBF_EM300MBA
 		|| format == MBF_EM710RAW
 		|| format == MBF_EM710MBA))
-	{
-	/* initialize reading the swath file */
-	if ((status = mb_read_init(
-		verbose,ifile,format,pings,lonflip,bounds,
-		btime_i,etime_i,speedmin,timegap,
-		&imbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* get pointers to data storage */
-	imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
-	istore_ptr = imb_io_ptr->store_data;
-	istore = (struct mbsys_simrad3_struct *) istore_ptr;
-
-	if (error == MB_ERROR_NO_ERROR)
-		{
-		beamflag = NULL;
-		bath = NULL;
-		amp = NULL;
-		bathacrosstrack = NULL;
-		bathalongtrack = NULL;
-		ss = NULL;
-		ssacrosstrack = NULL;
-		ssalongtrack = NULL;
-		}
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(char), (void **)&beamflag, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bath, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
-						sizeof(double), (void **)&amp, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bathacrosstrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bathalongtrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
-						sizeof(double), (void **)&ss, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
-						sizeof(double), (void **)&ssacrosstrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
-						sizeof(double), (void **)&ssalongtrack, &error);
-
-	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-			message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* reset file record counters */
-	nrec_0x30_pu_id = 0;
-	nrec_0x31_pu_status = 0;
-	nrec_0x32_pu_bist = 0;
-	nrec_0x33_parameter_extra = 0;
-	nrec_0x41_attitude = 0;
-	nrec_0x43_clock = 0;
-	nrec_0x44_bathymetry = 0;
-	nrec_0x45_singlebeam = 0;
-	nrec_0x46_rawbeamF = 0;
-	nrec_0x47_surfacesoundspeed2 = 0;
-	nrec_0x48_heading = 0;
-	nrec_0x49_parameter_start = 0;
-	nrec_0x4A_tilt = 0;
-	nrec_0x4B_echogram = 0;
-	nrec_0x4E_rawbeamN = 0;
-	nrec_0x4F_quality = 0;
-	nrec_0x50_pos = 0;
-	nrec_0x52_runtime = 0;
-	nrec_0x53_sidescan = 0;
-	nrec_0x54_tide = 0;
-	nrec_0x55_svp2 = 0;
-	nrec_0x56_svp = 0;
-	nrec_0x57_surfacesoundspeed = 0;
-	nrec_0x58_bathymetry2 = 0;
-	nrec_0x59_sidescan2 = 0;
-	nrec_0x66_rawbeamf = 0;
-	nrec_0x68_height = 0;
-	nrec_0x69_parameter_stop = 0;
-	nrec_0x6B_water_column = 0;
-	nrec_0x6E_network_attitude = 0;
-	nrec_0x70_parameter = 0;
-	nrec_0x73_surface_sound_speed = 0;
-	nrec_0xE1_bathymetry_mbari57 = 0;
-	nrec_0xE2_sidescan_mbari57 = 0;
-	nrec_0xE3_bathymetry_mbari59 = 0;
-	nrec_0xE4_sidescan_mbari59 = 0;
-	nrec_0xE5_bathymetry_mbari59 = 0;
-
-	/* read and print data */
-	while (error <= MB_ERROR_NO_ERROR)
-		{
-		/* reset error */
-		error = MB_ERROR_NO_ERROR;
-
-		/* read next data record */
-		status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
-				    time_i,&time_d,&navlon,&navlat,
-				    &speed,&heading,
-				    &distance,&altitude,&sonardepth,
-				    &beams_bath,&beams_amp,&pixels_ss,
-				    beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-				    ss,ssacrosstrack,ssalongtrack,
-				    comment,&error);
-
-		/* some nonfatal errors do not matter */
-		if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE)
+		/* initialize reading the swath file */
+		if ((status = mb_read_init(
+			verbose,ifile,format,pings,lonflip,bounds,
+			btime_i,etime_i,speedmin,timegap,
+			&imbio_ptr,&btime_d,&etime_d,
+			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+			fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+	
+		/* get pointers to data storage */
+		imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
+		istore_ptr = imb_io_ptr->store_data;
+		istore = (struct mbsys_simrad3_struct *) istore_ptr;
+	
+		if (error == MB_ERROR_NO_ERROR)
+			{
+			beamflag = NULL;
+			bath = NULL;
+			amp = NULL;
+			bathacrosstrack = NULL;
+			bathalongtrack = NULL;
+			ss = NULL;
+			ssacrosstrack = NULL;
+			ssalongtrack = NULL;
+			}
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(char), (void **)&beamflag, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bath, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							sizeof(double), (void **)&amp, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathalongtrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							sizeof(double), (void **)&ss, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							sizeof(double), (void **)&ssacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							sizeof(double), (void **)&ssalongtrack, &error);
+	
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
+				message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+	
+		/* reset file record counters */
+		nrec_0x30_pu_id = 0;
+		nrec_0x31_pu_status = 0;
+		nrec_0x32_pu_bist = 0;
+		nrec_0x33_parameter_extra = 0;
+		nrec_0x41_attitude = 0;
+		nrec_0x43_clock = 0;
+		nrec_0x44_bathymetry = 0;
+		nrec_0x45_singlebeam = 0;
+		nrec_0x46_rawbeamF = 0;
+		nrec_0x47_surfacesoundspeed2 = 0;
+		nrec_0x48_heading = 0;
+		nrec_0x49_parameter_start = 0;
+		nrec_0x4A_tilt = 0;
+		nrec_0x4B_echogram = 0;
+		nrec_0x4E_rawbeamN = 0;
+		nrec_0x4F_quality = 0;
+		nrec_0x50_pos = 0;
+		nrec_0x52_runtime = 0;
+		nrec_0x53_sidescan = 0;
+		nrec_0x54_tide = 0;
+		nrec_0x55_svp2 = 0;
+		nrec_0x56_svp = 0;
+		nrec_0x57_surfacesoundspeed = 0;
+		nrec_0x58_bathymetry2 = 0;
+		nrec_0x59_sidescan2 = 0;
+		nrec_0x66_rawbeamf = 0;
+		nrec_0x68_height = 0;
+		nrec_0x69_parameter_stop = 0;
+		nrec_0x6B_water_column = 0;
+		nrec_0x6E_network_attitude = 0;
+		nrec_0x70_parameter = 0;
+		nrec_0x73_surface_sound_speed = 0;
+		nrec_0xE1_bathymetry_mbari57 = 0;
+		nrec_0xE2_sidescan_mbari57 = 0;
+		nrec_0xE3_bathymetry_mbari59 = 0;
+		nrec_0xE4_sidescan_mbari59 = 0;
+		nrec_0xE5_bathymetry_mbari59 = 0;
+	
+		/* read and print data */
+		while (error <= MB_ERROR_NO_ERROR)
+			{
+			/* reset error */
 			error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-			}
-
-		/* count the record that was just read */
-		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
-			{
-			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
-
-			if (format == MBF_EM300RAW)
+	
+			/* read next data record */
+			status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
+						time_i,&time_d,&navlon,&navlat,
+						&speed,&heading,
+						&distance,&altitude,&sonardepth,
+						&beams_bath,&beams_amp,&pixels_ss,
+						beamflag,bath,amp,bathacrosstrack,bathalongtrack,
+						ss,ssacrosstrack,ssalongtrack,
+						comment,&error);
+	
+			/* some nonfatal errors do not matter */
+			if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE)
 				{
-				nrec_0x58_bathymetry2++;
-				if (ping->png_raw_read == MB_YES)
-					nrec_0x4E_rawbeamN++;
-				if (ping->png_ss_read == MB_YES)
-					nrec_0x59_sidescan2++;
+				error = MB_ERROR_NO_ERROR;
+				status = MB_SUCCESS;
 				}
-			else if (format == MBF_EM300MBA)
+	
+			/* count the record that was just read */
+			if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 				{
-				nrec_0xE5_bathymetry_mbari59++;
-				if (ping->png_raw_read == MB_YES)
-					nrec_0x4E_rawbeamN++;
-				if (ping->png_ss_read == MB_YES)
-					nrec_0x59_sidescan2++;
+				ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
+	
+				if (format == MBF_EM300RAW)
+					{
+					nrec_0x58_bathymetry2++;
+					if (ping->png_raw_read == MB_YES)
+						nrec_0x4E_rawbeamN++;
+					if (ping->png_ss_read == MB_YES)
+						nrec_0x59_sidescan2++;
+					}
+				else if (format == MBF_EM300MBA)
+					{
+					nrec_0xE5_bathymetry_mbari59++;
+					if (ping->png_raw_read == MB_YES)
+						nrec_0x4E_rawbeamN++;
+					if (ping->png_ss_read == MB_YES)
+						nrec_0x59_sidescan2++;
+					}
+				else if (format == MBF_EM710RAW)
+					{
+					nrec_0x58_bathymetry2++;
+					if (ping->png_raw_read == MB_YES)
+						nrec_0x4E_rawbeamN++;
+					if (ping->png_ss_read == MB_YES)
+						nrec_0x59_sidescan2++;
+					if (ping->png_quality_read == MB_YES)
+						nrec_0x4F_quality++;
+					}
+				else if (format == MBF_EM710MBA)
+					{
+					nrec_0xE5_bathymetry_mbari59++;
+					if (ping->png_raw_read == MB_YES)
+						nrec_0x4E_rawbeamN++;
+					if (ping->png_ss_read == MB_YES)
+						nrec_0x59_sidescan2++;
+					if (ping->png_quality_read == MB_YES)
+						nrec_0x4F_quality++;
+					}
 				}
-			else if (format == MBF_EM710RAW)
+			else if (status == MB_SUCCESS)
 				{
-				nrec_0x58_bathymetry2++;
-				if (ping->png_raw_read == MB_YES)
+				if (istore->type == EM3_PU_ID)
+					nrec_0x30_pu_id++;
+				if (istore->type == EM3_PU_STATUS)
+					nrec_0x31_pu_status++;
+				if (istore->type == EM3_PU_BIST)
+					nrec_0x32_pu_bist++;
+				if (istore->type == EM3_ATTITUDE)
+					nrec_0x41_attitude++;
+				if (istore->type == EM3_CLOCK)
+					nrec_0x43_clock++;
+				if (istore->type == EM3_BATH)
+					nrec_0x44_bathymetry++;
+				if (istore->type == EM3_SBDEPTH)
+					nrec_0x45_singlebeam++;
+				if (istore->type == EM3_RAWBEAM)
+					nrec_0x46_rawbeamF++;
+				if (istore->type == EM3_SSV)
+					nrec_0x47_surfacesoundspeed2++;
+				if (istore->type == EM3_HEADING)
+					nrec_0x48_heading++;
+				if (istore->type == EM3_START)
+					nrec_0x49_parameter_start++;
+				if (istore->type == EM3_TILT)
+					nrec_0x4A_tilt++;
+				if (istore->type == EM3_CBECHO)
+					nrec_0x4B_echogram++;
+				if (istore->type == EM3_RAWBEAM4)
 					nrec_0x4E_rawbeamN++;
-				if (ping->png_ss_read == MB_YES)
-					nrec_0x59_sidescan2++;
-				if (ping->png_quality_read == MB_YES)
+				if (istore->type == EM3_QUALITY)
 					nrec_0x4F_quality++;
-				}
-			else if (format == MBF_EM710MBA)
-				{
-				nrec_0xE5_bathymetry_mbari59++;
-				if (ping->png_raw_read == MB_YES)
-					nrec_0x4E_rawbeamN++;
-				if (ping->png_ss_read == MB_YES)
+				if (istore->type == EM3_POS)
+					nrec_0x50_pos++;
+				if (istore->type == EM3_RUN_PARAMETER)
+					nrec_0x52_runtime++;
+				if (istore->type == EM3_SS)
+					nrec_0x53_sidescan++;
+				if (istore->type == EM3_TIDE)
+					nrec_0x54_tide++;
+				if (istore->type == EM3_SVP2)
+					nrec_0x55_svp2++;
+				if (istore->type == EM3_SVP)
+					nrec_0x56_svp++;
+				if (istore->type == EM3_SSPINPUT)
+					nrec_0x57_surfacesoundspeed++;
+				if (istore->type == EM3_BATH2)
+					nrec_0x58_bathymetry2++;
+				if (istore->type == EM3_SS2)
 					nrec_0x59_sidescan2++;
-				if (ping->png_quality_read == MB_YES)
-					nrec_0x4F_quality++;
+				if (istore->type == EM3_RAWBEAM3)
+					nrec_0x66_rawbeamf++;
+				if (istore->type == EM3_HEIGHT)
+					nrec_0x68_height++;
+				if (istore->type == EM3_STOP)
+					nrec_0x69_parameter_stop++;
+				if (istore->type == EM3_WATERCOLUMN)
+					nrec_0x6B_water_column++;
+				if (istore->type == EM3_NETATTITUDE)
+					nrec_0x6E_network_attitude++;
+				if (istore->type == EM3_REMOTE)
+					nrec_0x70_parameter++;
+				if (istore->type == EM3_SSP)
+					nrec_0x73_surface_sound_speed++;
+				if (istore->type == EM3_BATH_MBA)
+					nrec_0xE1_bathymetry_mbari57++;
+				if (istore->type == EM3_SS_MBA)
+					nrec_0xE2_sidescan_mbari57++;
+				if (istore->type == EM3_BATH2_MBA)
+					nrec_0xE3_bathymetry_mbari59++;
+				if (istore->type == EM3_SS2_MBA)
+					nrec_0xE4_sidescan_mbari59++;
+				if (istore->type == EM3_BATH3_MBA)
+					nrec_0xE5_bathymetry_mbari59++;
 				}
-			}
-		else if (status == MB_SUCCESS)
-			{
-			if (istore->type == EM3_PU_ID)
-				nrec_0x30_pu_id++;
-			if (istore->type == EM3_PU_STATUS)
-				nrec_0x31_pu_status++;
-			if (istore->type == EM3_PU_BIST)
-				nrec_0x32_pu_bist++;
-			if (istore->type == EM3_ATTITUDE)
-				nrec_0x41_attitude++;
-			if (istore->type == EM3_CLOCK)
-				nrec_0x43_clock++;
-			if (istore->type == EM3_BATH)
-				nrec_0x44_bathymetry++;
-			if (istore->type == EM3_SBDEPTH)
-				nrec_0x45_singlebeam++;
-			if (istore->type == EM3_RAWBEAM)
-				nrec_0x46_rawbeamF++;
-			if (istore->type == EM3_SSV)
-				nrec_0x47_surfacesoundspeed2++;
-			if (istore->type == EM3_HEADING)
-				nrec_0x48_heading++;
-			if (istore->type == EM3_START)
-				nrec_0x49_parameter_start++;
-			if (istore->type == EM3_TILT)
-				nrec_0x4A_tilt++;
-			if (istore->type == EM3_CBECHO)
-				nrec_0x4B_echogram++;
-			if (istore->type == EM3_RAWBEAM4)
-				nrec_0x4E_rawbeamN++;
-			if (istore->type == EM3_QUALITY)
-				nrec_0x4F_quality++;
-			if (istore->type == EM3_POS)
-				nrec_0x50_pos++;
-			if (istore->type == EM3_RUN_PARAMETER)
-				nrec_0x52_runtime++;
-			if (istore->type == EM3_SS)
-				nrec_0x53_sidescan++;
-			if (istore->type == EM3_TIDE)
-				nrec_0x54_tide++;
-			if (istore->type == EM3_SVP2)
-				nrec_0x55_svp2++;
-			if (istore->type == EM3_SVP)
-				nrec_0x56_svp++;
-			if (istore->type == EM3_SSPINPUT)
-				nrec_0x57_surfacesoundspeed++;
-			if (istore->type == EM3_BATH2)
-				nrec_0x58_bathymetry2++;
-			if (istore->type == EM3_SS2)
-				nrec_0x59_sidescan2++;
-			if (istore->type == EM3_RAWBEAM3)
-				nrec_0x66_rawbeamf++;
-			if (istore->type == EM3_HEIGHT)
-				nrec_0x68_height++;
-			if (istore->type == EM3_STOP)
-				nrec_0x69_parameter_stop++;
-			if (istore->type == EM3_WATERCOLUMN)
-				nrec_0x6B_water_column++;
-			if (istore->type == EM3_NETATTITUDE)
-				nrec_0x6E_network_attitude++;
-			if (istore->type == EM3_REMOTE)
-				nrec_0x70_parameter++;
-			if (istore->type == EM3_SSP)
-				nrec_0x73_surface_sound_speed++;
-			if (istore->type == EM3_BATH_MBA)
-				nrec_0xE1_bathymetry_mbari57++;
-			if (istore->type == EM3_SS_MBA)
-				nrec_0xE2_sidescan_mbari57++;
-			if (istore->type == EM3_BATH2_MBA)
-				nrec_0xE3_bathymetry_mbari59++;
-			if (istore->type == EM3_SS2_MBA)
-				nrec_0xE4_sidescan_mbari59++;
-			if (istore->type == EM3_BATH3_MBA)
-				nrec_0xE5_bathymetry_mbari59++;
-			}
-
-	   	/* handle read error */
-		else
-			{
-/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
-			}
-			
-		/* set attitude data source from active sensors set in the start datagram */
-		if (status == MB_SUCCESS
-			&& istore->type == EM3_START
-			&& istore->kind == MB_DATA_START
-			&& attitude_source == MB_DATA_NONE)
-			{
-			if (istore->par_aro == 2)
-				{
-				attitude_source = MB_DATA_ATTITUDE;
-				}
-			else if (istore->par_aro == 3)
-				{
-				attitude_source = MB_DATA_ATTITUDE1;
-				}
+	
+			/* handle read error */
 			else
 				{
-				attitude_source = MB_DATA_ATTITUDE2;
+	/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
 				}
-			}
-
-	   	/* save navigation and heading data from EM3_POS records */
-		if (status == MB_SUCCESS
-			&& istore->type == EM3_POS
-			&& (istore->kind == nav_source
-				|| istore->kind == heading_source))
-			{
-			/* get nav time */
-			time_i[0] = istore->pos_date / 10000;
-			time_i[1] = (istore->pos_date % 10000) / 100;
-			time_i[2] = istore->pos_date % 100;
-			time_i[3] = istore->pos_msec / 3600000;
-			time_i[4] = (istore->pos_msec % 3600000) / 60000;
-			time_i[5] = (istore->pos_msec % 60000) / 1000;
-			time_i[6] = (istore->pos_msec % 1000) * 1000;
-			mb_get_time(verbose, time_i, &time_d);
-
-			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x50_pos:%d\n",
-						time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x50_pos);
-
-			/* deal with desired navigation source and valid positions */
-			if (istore->kind == nav_source
-				&& istore->pos_longitude != EM3_INVALID_INT
-				&& istore->pos_latitude != EM3_INVALID_INT)
+				
+			/* set attitude data source from active sensors set in the start datagram */
+			if (status == MB_SUCCESS
+				&& istore->type == EM3_START
+				&& istore->kind == MB_DATA_START
+				&& attitude_source == MB_DATA_NONE)
 				{
-				/* allocate memory for position arrays if needed */
-				if (ndat_nav + 1 >= ndat_nav_alloc)
+				if (istore->par_aro == 2)
 					{
-					ndat_nav_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_time_d,&error);
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lon,&error);
-					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lat,&error);
+					attitude_source = MB_DATA_ATTITUDE;
+					}
+				else if (istore->par_aro == 3)
+					{
+					attitude_source = MB_DATA_ATTITUDE1;
+					}
+				else
+					{
+					attitude_source = MB_DATA_ATTITUDE2;
+					}
+				}
+	
+			/* save navigation and heading data from EM3_POS records */
+			if (status == MB_SUCCESS
+				&& istore->type == EM3_POS
+				&& (istore->kind == nav_source
+					|| istore->kind == heading_source))
+				{
+				/* get nav time */
+				time_i[0] = istore->pos_date / 10000;
+				time_i[1] = (istore->pos_date % 10000) / 100;
+				time_i[2] = istore->pos_date % 100;
+				time_i[3] = istore->pos_msec / 3600000;
+				time_i[4] = (istore->pos_msec % 3600000) / 60000;
+				time_i[5] = (istore->pos_msec % 60000) / 1000;
+				time_i[6] = (istore->pos_msec % 1000) * 1000;
+				mb_get_time(verbose, time_i, &time_d);
+	
+				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x50_pos:%d\n",
+							time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x50_pos);
+	
+				/* deal with desired navigation source and valid positions */
+				if (istore->kind == nav_source
+					&& istore->pos_longitude != EM3_INVALID_INT
+					&& istore->pos_latitude != EM3_INVALID_INT)
+					{
+					/* allocate memory for position arrays if needed */
+					if (ndat_nav + 1 >= ndat_nav_alloc)
+						{
+						ndat_nav_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_time_d,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lon,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lat,&error);
+						if (error != MB_ERROR_NO_ERROR)
+							{
+							mb_error(verbose,error,&message);
+							fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+							fprintf(stderr,"\nProgram <%s> Terminated\n",
+								program_name);
+							exit(error);
+							}
+						}
+	
+					/* store the position data */
+					if (ndat_nav == 0 || dat_nav_time_d[ndat_nav-1] < time_d)
+						{
+						dat_nav_time_d[ndat_nav] = time_d;
+						dat_nav_lon[ndat_nav] = (double)(0.0000001 * istore->pos_longitude);
+						dat_nav_lat[ndat_nav] = (double)(0.00000005 * istore->pos_latitude);
+	
+						/* apply time lag correction if specified */
+						if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
+							{
+							dat_nav_time_d[ndat_nav] -= timelagconstant;
+							}
+						else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
+							{
+							interp_status = mb_linear_interp(verbose,
+										timelag_time_d-1, timelag_model-1,
+										ntimelag, dat_nav_time_d[ndat_nav], &timelag, &jtimelag,
+										&error);
+							dat_nav_time_d[ndat_nav] -= timelag;
+							}
+	
+						/* increment counter */
+						ndat_nav++;
+						}
+					}
+	
+				/* deal with desired heading source and valid heading */
+				if (istore->kind == heading_source
+					&& istore->pos_heading != EM3_INVALID_INT)
+					{
+	
+					/* allocate memory for heading arrays if needed */
+					if (ndat_heading + 1 >= ndat_heading_alloc)
+						{
+						ndat_heading_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_time_d,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_heading,&error);
+						if (error != MB_ERROR_NO_ERROR)
+							{
+							mb_error(verbose,error,&message);
+							fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+							fprintf(stderr,"\nProgram <%s> Terminated\n",
+								program_name);
+							exit(error);
+							}
+						}
+	
+					/* store the heading data */
+					if (ndat_heading == 0 || dat_heading_time_d[ndat_heading-1] < time_d)
+						{
+						dat_heading_time_d[ndat_heading] = time_d;
+						dat_heading_heading[ndat_heading] = (double)(0.01 * istore->pos_heading);
+	
+						/* apply time lag correction if specified */
+						if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
+							{
+							dat_heading_time_d[ndat_heading] -= timelagconstant;
+							}
+						else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
+							{
+							interp_status = mb_linear_interp(verbose,
+										timelag_time_d-1, timelag_model-1,
+										ntimelag, dat_heading_time_d[ndat_heading], &timelag, &jtimelag,
+										&error);
+							dat_nav_time_d[ndat_heading] -= timelag;
+							}
+	
+						/* increment counter */
+						ndat_heading++;
+						}
+					}
+	
+				}
+	
+			/* save sonardepth data from height records */
+			if (status == MB_SUCCESS
+				&& istore->type == EM3_HEIGHT
+					&& istore->kind == sonardepth_source)
+				{			
+				/* get sonardepth time */
+				time_i[0] = istore->hgt_date / 10000;
+				time_i[1] = (istore->hgt_date % 10000) / 100;
+				time_i[2] = istore->hgt_date % 100;
+				time_i[3] = istore->hgt_msec / 3600000;
+				time_i[4] = (istore->hgt_msec % 3600000) / 60000;
+				time_i[5] = (istore->hgt_msec % 60000) / 1000;
+				time_i[6] = (istore->hgt_msec % 1000) * 1000;
+				mb_get_time(verbose, time_i, &time_d);
+	
+				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x68_height:%d\n",
+							time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x68_height);
+	
+				/* allocate memory for sonar depth arrays if needed */
+				if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc)
+					{
+					ndat_sonardepth_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthfilter,&error);
 					if (error != MB_ERROR_NO_ERROR)
 						{
 						mb_error(verbose,error,&message);
 						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 						fprintf(stderr,"\nProgram <%s> Terminated\n",
-						    program_name);
+							program_name);
 						exit(error);
 						}
 					}
-
-				/* store the position data */
-				if (ndat_nav == 0 || dat_nav_time_d[ndat_nav-1] < time_d)
+	
+				/* store the sonar depth data */
+				if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < time_d)
 					{
-					dat_nav_time_d[ndat_nav] = time_d;
-					dat_nav_lon[ndat_nav] = (double)(0.0000001 * istore->pos_longitude);
-					dat_nav_lat[ndat_nav] = (double)(0.00000005 * istore->pos_latitude);
-
+					dat_sonardepth_time_d[ndat_sonardepth] = time_d;
+					dat_sonardepth_sonardepth[ndat_sonardepth] = 0.01 * istore->hgt_height;
+					dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
+					
 					/* apply time lag correction if specified */
 					if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
 						{
-						dat_nav_time_d[ndat_nav] -= timelagconstant;
+						dat_sonardepth_time_d[ndat_sonardepth] -= timelagconstant;
 						}
 					else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 						{
 						interp_status = mb_linear_interp(verbose,
 									timelag_time_d-1, timelag_model-1,
-									ntimelag, dat_nav_time_d[ndat_nav], &timelag, &jtimelag,
+									ntimelag, dat_sonardepth_time_d[ndat_sonardepth], &timelag, &jtimelag,
 									&error);
-						dat_nav_time_d[ndat_nav] -= timelag;
+						dat_sonardepth_time_d[ndat_sonardepth] -= timelag;
 						}
-
+	
 					/* increment counter */
-					ndat_nav++;
+					ndat_sonardepth++;
 					}
 				}
-
-			/* deal with desired heading source and valid heading */
-			if (istore->kind == heading_source
-				&& istore->pos_heading != EM3_INVALID_INT)
+	
+			/* save primary attitude data from attitude records */
+			if (status == MB_SUCCESS
+				&& istore->type == EM3_ATTITUDE
+					&& istore->kind == attitude_source)
 				{
-
+				/* get attitude structure */
+				attitude = (struct mbsys_simrad3_attitude_struct *) istore->attitude;
+	
+				/* get attitude time */
+				time_i[0] = attitude->att_date / 10000;
+				time_i[1] = (attitude->att_date % 10000) / 100;
+				time_i[2] = attitude->att_date % 100;
+				time_i[3] = attitude->att_msec / 3600000;
+				time_i[4] = (attitude->att_msec % 3600000) / 60000;
+				time_i[5] = (attitude->att_msec % 60000) / 1000;
+				time_i[6] = (attitude->att_msec % 1000) * 1000;
+				mb_get_time(verbose, time_i, &time_d);
+	
+				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x41_attitude:%d\n",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x41_attitude);
+	
+				/* allocate memory for attitude arrays if needed */
+				if (ndat_rph + attitude->att_ndata >= ndat_rph_alloc)
+					{
+					ndat_rph_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_time_d,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_roll,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_pitch,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_heave,&error);
+					if (error != MB_ERROR_NO_ERROR)
+						{
+						mb_error(verbose,error,&message);
+						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+						fprintf(stderr,"\nProgram <%s> Terminated\n",
+							program_name);
+						exit(error);
+						}
+					}
+	
+				/* store the attitude data */
+				if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < time_d)
+					{
+					for (i=0;i<attitude->att_ndata;i++)
+						{
+						dat_rph_time_d[ndat_rph] = (double)(time_d + 0.001 * attitude->att_time[i]);
+						dat_rph_heave[ndat_rph] = (double)(0.01 * attitude->att_heave[i]);
+						dat_rph_roll[ndat_rph] = (double)(0.01 * attitude->att_roll[i]);
+						dat_rph_pitch[ndat_rph] = (double)(0.01 * attitude->att_pitch[i]);
+	
+						/* apply time lag correction if specified */
+						if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
+							{
+							dat_rph_time_d[ndat_rph] -= timelagconstant;
+							}
+						else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
+							{
+							interp_status = mb_linear_interp(verbose,
+										timelag_time_d-1, timelag_model-1,
+										ntimelag, dat_rph_time_d[ndat_rph], &timelag, &jtimelag,
+										&error);
+							dat_rph_time_d[ndat_rph] -= timelag;
+							}
+	
+						/* increment counter */
+						ndat_rph++;
+						}
+					}
+				}
+	
+			/* save primary attitude data from netattitude records */
+			if (status == MB_SUCCESS
+				&& istore->type == EM3_NETATTITUDE
+					&& istore->kind == attitude_source)
+				{
+				/* get netattitude structure */
+				netattitude = (struct mbsys_simrad3_netattitude_struct *) istore->netattitude;
+	
+				/* get attitude time */
+				time_i[0] = netattitude->nat_date / 10000;
+				time_i[1] = (netattitude->nat_date % 10000) / 100;
+				time_i[2] = netattitude->nat_date % 100;
+				time_i[3] = netattitude->nat_msec / 3600000;
+				time_i[4] = (netattitude->nat_msec % 3600000) / 60000;
+				time_i[5] = (netattitude->nat_msec % 60000) / 1000;
+				time_i[6] = (netattitude->nat_msec % 1000) * 1000;
+				mb_get_time(verbose, time_i, &time_d);
+	
+				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x6E_network_attitude:%d\n",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x6E_network_attitude);
+	
+				/* allocate memory for attitude arrays if needed */
+				if (ndat_rph + netattitude->nat_ndata >= ndat_rph_alloc)
+					{
+					ndat_rph_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_time_d,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_roll,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_pitch,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_heave,&error);
+					if (error != MB_ERROR_NO_ERROR)
+						{
+						mb_error(verbose,error,&message);
+						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+						fprintf(stderr,"\nProgram <%s> Terminated\n",
+							program_name);
+						exit(error);
+						}
+					}
+	
+				/* store the attitude data */
+				if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < time_d)
+					{
+					for (i=0;i<netattitude->nat_ndata;i++)
+						{
+						dat_rph_time_d[ndat_rph] = (double)(time_d + 0.001 * netattitude->nat_time[i]);
+						dat_rph_heave[ndat_rph] = (double)(0.01 * netattitude->nat_heave[i]);
+						dat_rph_roll[ndat_rph] = (double)(0.01 * netattitude->nat_roll[i]);
+						dat_rph_pitch[ndat_rph] = (double)(0.01 * netattitude->nat_pitch[i]);
+	
+						/* apply time lag correction if specified */
+						if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
+							{
+							dat_rph_time_d[ndat_rph] -= timelagconstant;
+							}
+						else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
+							{
+							interp_status = mb_linear_interp(verbose,
+										timelag_time_d-1, timelag_model-1,
+										ntimelag, dat_rph_time_d[ndat_rph], &timelag, &jtimelag,
+										&error);
+							dat_rph_time_d[ndat_rph] -= timelag;
+							}
+	
+						/* increment counter */
+						ndat_rph++;
+						}
+					}
+				}
+	
+			/* save primary heading data */
+			if (status == MB_SUCCESS
+				&& istore->type == EM3_HEADING
+					&& istore->kind == heading_source)
+				{
+				/* get heading structure */
+				headingr = (struct mbsys_simrad3_heading_struct *) istore->heading;
+	
+				/* get heading time */
+				time_i[0] = headingr->hed_date / 10000;
+				time_i[1] = (headingr->hed_date % 10000) / 100;
+				time_i[2] = headingr->hed_date % 100;
+				time_i[3] = headingr->hed_msec / 3600000;
+				time_i[4] = (headingr->hed_msec % 3600000) / 60000;
+				time_i[5] = (headingr->hed_msec % 60000) / 1000;
+				time_i[6] = (headingr->hed_msec % 1000) * 1000;
+				mb_get_time(verbose, time_i, &time_d);
+	
+				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x48_heading:%d\n",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x48_heading);
+	
+				/* allocate memory for heading arrays if needed */
+				if (ndat_heading + headingr->hed_ndata >= ndat_heading_alloc)
+					{
+					ndat_heading_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_time_d,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_heading,&error);
+					if (error != MB_ERROR_NO_ERROR)
+						{
+						mb_error(verbose,error,&message);
+						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+						fprintf(stderr,"\nProgram <%s> Terminated\n",
+							program_name);
+						exit(error);
+						}
+					}
+	
+				/* store the heading data */
+				if (ndat_heading == 0 || dat_heading_time_d[ndat_heading-1] < time_d)
+					{
+					for (i=0;i<headingr->hed_ndata;i++)
+						{
+						dat_heading_time_d[ndat_heading] = (double)(time_d + 0.001 * headingr->hed_time[i]);
+						dat_heading_heading[ndat_heading] = (double)(0.01 * headingr->hed_heading[i]);
+	
+						/* apply time lag correction if specified */
+						if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
+							{
+							dat_heading_time_d[ndat_heading] -= timelagconstant;
+							}
+						else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
+							{
+							interp_status = mb_linear_interp(verbose,
+										timelag_time_d-1, timelag_model-1,
+										ntimelag, dat_heading_time_d[ndat_heading], &timelag, &jtimelag,
+										&error);
+							dat_heading_time_d[ndat_heading] -= timelag;
+							}
+	
+						/* increment counter */
+						ndat_heading++;
+						}
+					}
+				}
+	
+			/* save heading data from survey records */
+			if (status == MB_SUCCESS
+				&& istore->kind == MB_DATA_DATA
+					&& istore->kind == heading_source)
+				{
+				/* get survey data structure */
+				ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
+	
+				/* get ping time */
+				time_i[0] = ping->png_date / 10000;
+				time_i[1] = (ping->png_date % 10000) / 100;
+				time_i[2] = ping->png_date % 100;
+				time_i[3] = ping->png_msec / 3600000;
+				time_i[4] = (ping->png_msec % 3600000) / 60000;
+				time_i[5] = (ping->png_msec % 60000) / 1000;
+				time_i[6] = (ping->png_msec % 1000) * 1000;
+				mb_get_time(verbose, time_i, &time_d);
+	
+				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],time_i[6]);
+	
 				/* allocate memory for heading arrays if needed */
 				if (ndat_heading + 1 >= ndat_heading_alloc)
 					{
@@ -1181,289 +1518,17 @@ sonardepth_sonardepth[nsonardepth]);*/
 						mb_error(verbose,error,&message);
 						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 						fprintf(stderr,"\nProgram <%s> Terminated\n",
-						    program_name);
+							program_name);
 						exit(error);
 						}
 					}
-
+	
 				/* store the heading data */
 				if (ndat_heading == 0 || dat_heading_time_d[ndat_heading-1] < time_d)
 					{
-					dat_heading_time_d[ndat_heading] = time_d;
-					dat_heading_heading[ndat_heading] = (double)(0.01 * istore->pos_heading);
-
-					/* apply time lag correction if specified */
-					if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
-						{
-						dat_heading_time_d[ndat_heading] -= timelagconstant;
-						}
-					else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
-						{
-						interp_status = mb_linear_interp(verbose,
-									timelag_time_d-1, timelag_model-1,
-									ntimelag, dat_heading_time_d[ndat_heading], &timelag, &jtimelag,
-									&error);
-						dat_nav_time_d[ndat_heading] -= timelag;
-						}
-
-					/* increment counter */
-					ndat_heading++;
-					}
-				}
-
-			}
-
-	   	/* save sonardepth data from height records */
-		if (status == MB_SUCCESS
-			&& istore->type == EM3_HEIGHT
-		    	&& istore->kind == sonardepth_source)
-			{			
-			/* get sonardepth time */
-			time_i[0] = istore->hgt_date / 10000;
-			time_i[1] = (istore->hgt_date % 10000) / 100;
-			time_i[2] = istore->hgt_date % 100;
-			time_i[3] = istore->hgt_msec / 3600000;
-			time_i[4] = (istore->hgt_msec % 3600000) / 60000;
-			time_i[5] = (istore->hgt_msec % 60000) / 1000;
-			time_i[6] = (istore->hgt_msec % 1000) * 1000;
-			mb_get_time(verbose, time_i, &time_d);
-
-			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x68_height:%d\n",
-						time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x68_height);
-
-			/* allocate memory for sonar depth arrays if needed */
-			if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc)
-				{
-				ndat_sonardepth_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthfilter,&error);
-				if (error != MB_ERROR_NO_ERROR)
-					{
-					mb_error(verbose,error,&message);
-					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
-					exit(error);
-					}
-				}
-
-			/* store the sonar depth data */
-			if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < time_d)
-				{
-				dat_sonardepth_time_d[ndat_sonardepth] = time_d;
-				dat_sonardepth_sonardepth[ndat_sonardepth] = 0.01 * istore->hgt_height;
-				dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
-				
-				/* apply time lag correction if specified */
-				if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
-					{
-					dat_sonardepth_time_d[ndat_sonardepth] -= timelagconstant;
-					}
-				else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
-					{
-					interp_status = mb_linear_interp(verbose,
-								timelag_time_d-1, timelag_model-1,
-								ntimelag, dat_sonardepth_time_d[ndat_sonardepth], &timelag, &jtimelag,
-								&error);
-					dat_sonardepth_time_d[ndat_sonardepth] -= timelag;
-					}
-
-				/* increment counter */
-				ndat_sonardepth++;
-				}
-			}
-
-	   	/* save primary attitude data from attitude records */
-		if (status == MB_SUCCESS
-			&& istore->type == EM3_ATTITUDE
-		    	&& istore->kind == attitude_source)
-			{
-			/* get attitude structure */
-			attitude = (struct mbsys_simrad3_attitude_struct *) istore->attitude;
-
-			/* get attitude time */
-			time_i[0] = attitude->att_date / 10000;
-			time_i[1] = (attitude->att_date % 10000) / 100;
-			time_i[2] = attitude->att_date % 100;
-			time_i[3] = attitude->att_msec / 3600000;
-			time_i[4] = (attitude->att_msec % 3600000) / 60000;
-			time_i[5] = (attitude->att_msec % 60000) / 1000;
-			time_i[6] = (attitude->att_msec % 1000) * 1000;
-			mb_get_time(verbose, time_i, &time_d);
-
-			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x41_attitude:%d\n",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x41_attitude);
-
-			/* allocate memory for attitude arrays if needed */
-			if (ndat_rph + attitude->att_ndata >= ndat_rph_alloc)
-				{
-				ndat_rph_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_time_d,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_roll,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_pitch,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_heave,&error);
-				if (error != MB_ERROR_NO_ERROR)
-					{
-					mb_error(verbose,error,&message);
-					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
-					exit(error);
-					}
-				}
-
-			/* store the attitude data */
-			if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < time_d)
-				{
-				for (i=0;i<attitude->att_ndata;i++)
-					{
-					dat_rph_time_d[ndat_rph] = (double)(time_d + 0.001 * attitude->att_time[i]);
-					dat_rph_heave[ndat_rph] = (double)(0.01 * attitude->att_heave[i]);
-					dat_rph_roll[ndat_rph] = (double)(0.01 * attitude->att_roll[i]);
-					dat_rph_pitch[ndat_rph] = (double)(0.01 * attitude->att_pitch[i]);
-
-					/* apply time lag correction if specified */
-					if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
-						{
-						dat_rph_time_d[ndat_rph] -= timelagconstant;
-						}
-					else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
-						{
-						interp_status = mb_linear_interp(verbose,
-									timelag_time_d-1, timelag_model-1,
-									ntimelag, dat_rph_time_d[ndat_rph], &timelag, &jtimelag,
-									&error);
-						dat_rph_time_d[ndat_rph] -= timelag;
-						}
-
-					/* increment counter */
-					ndat_rph++;
-					}
-				}
-			}
-
-	   	/* save primary attitude data from netattitude records */
-		if (status == MB_SUCCESS
-			&& istore->type == EM3_NETATTITUDE
-		    	&& istore->kind == attitude_source)
-			{
-			/* get netattitude structure */
-			netattitude = (struct mbsys_simrad3_netattitude_struct *) istore->netattitude;
-
-			/* get attitude time */
-			time_i[0] = netattitude->nat_date / 10000;
-			time_i[1] = (netattitude->nat_date % 10000) / 100;
-			time_i[2] = netattitude->nat_date % 100;
-			time_i[3] = netattitude->nat_msec / 3600000;
-			time_i[4] = (netattitude->nat_msec % 3600000) / 60000;
-			time_i[5] = (netattitude->nat_msec % 60000) / 1000;
-			time_i[6] = (netattitude->nat_msec % 1000) * 1000;
-			mb_get_time(verbose, time_i, &time_d);
-
-			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x6E_network_attitude:%d\n",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x6E_network_attitude);
-
-			/* allocate memory for attitude arrays if needed */
-			if (ndat_rph + netattitude->nat_ndata >= ndat_rph_alloc)
-				{
-				ndat_rph_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_time_d,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_roll,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_pitch,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_heave,&error);
-				if (error != MB_ERROR_NO_ERROR)
-					{
-					mb_error(verbose,error,&message);
-					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
-					exit(error);
-					}
-				}
-
-			/* store the attitude data */
-			if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < time_d)
-				{
-				for (i=0;i<netattitude->nat_ndata;i++)
-					{
-					dat_rph_time_d[ndat_rph] = (double)(time_d + 0.001 * netattitude->nat_time[i]);
-					dat_rph_heave[ndat_rph] = (double)(0.01 * netattitude->nat_heave[i]);
-					dat_rph_roll[ndat_rph] = (double)(0.01 * netattitude->nat_roll[i]);
-					dat_rph_pitch[ndat_rph] = (double)(0.01 * netattitude->nat_pitch[i]);
-
-					/* apply time lag correction if specified */
-					if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
-						{
-						dat_rph_time_d[ndat_rph] -= timelagconstant;
-						}
-					else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
-						{
-						interp_status = mb_linear_interp(verbose,
-									timelag_time_d-1, timelag_model-1,
-									ntimelag, dat_rph_time_d[ndat_rph], &timelag, &jtimelag,
-									&error);
-						dat_rph_time_d[ndat_rph] -= timelag;
-						}
-
-					/* increment counter */
-					ndat_rph++;
-					}
-				}
-			}
-
-	   	/* save primary heading data */
-		if (status == MB_SUCCESS
-			&& istore->type == EM3_HEADING
-		    	&& istore->kind == heading_source)
-			{
-			/* get heading structure */
-			headingr = (struct mbsys_simrad3_heading_struct *) istore->heading;
-
-			/* get heading time */
-			time_i[0] = headingr->hed_date / 10000;
-			time_i[1] = (headingr->hed_date % 10000) / 100;
-			time_i[2] = headingr->hed_date % 100;
-			time_i[3] = headingr->hed_msec / 3600000;
-			time_i[4] = (headingr->hed_msec % 3600000) / 60000;
-			time_i[5] = (headingr->hed_msec % 60000) / 1000;
-			time_i[6] = (headingr->hed_msec % 1000) * 1000;
-			mb_get_time(verbose, time_i, &time_d);
-
-			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d nrec_0x48_heading:%d\n",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5],time_i[6],nrec_0x48_heading);
-
-			/* allocate memory for heading arrays if needed */
-			if (ndat_heading + headingr->hed_ndata >= ndat_heading_alloc)
-				{
-				ndat_heading_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_time_d,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_heading,&error);
-				if (error != MB_ERROR_NO_ERROR)
-					{
-					mb_error(verbose,error,&message);
-					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
-					exit(error);
-					}
-				}
-
-			/* store the heading data */
-			if (ndat_heading == 0 || dat_heading_time_d[ndat_heading-1] < time_d)
-				{
-				for (i=0;i<headingr->hed_ndata;i++)
-					{
-					dat_heading_time_d[ndat_heading] = (double)(time_d + 0.001 * headingr->hed_time[i]);
-					dat_heading_heading[ndat_heading] = (double)(0.01 * headingr->hed_heading[i]);
-
+					dat_heading_time_d[ndat_heading] = (double)(time_d);
+					dat_heading_heading[ndat_heading] = (double)(0.01 * ping->png_heading);
+	
 					/* apply time lag correction if specified */
 					if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
 						{
@@ -1477,255 +1542,190 @@ sonardepth_sonardepth[nsonardepth]);*/
 									&error);
 						dat_heading_time_d[ndat_heading] -= timelag;
 						}
-
+	
 					/* increment counter */
 					ndat_heading++;
 					}
 				}
+	
+			/* save sonardepth data from survey records */
+			if (status == MB_SUCCESS
+				&& istore->kind == MB_DATA_DATA
+					&& istore->kind == sonardepth_source)
+				{			
+				/* get survey data structure */
+				ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
+	
+				/* get ping time */
+				time_i[0] = ping->png_date / 10000;
+				time_i[1] = (ping->png_date % 10000) / 100;
+				time_i[2] = ping->png_date % 100;
+				time_i[3] = ping->png_msec / 3600000;
+				time_i[4] = (ping->png_msec % 3600000) / 60000;
+				time_i[5] = (ping->png_msec % 60000) / 1000;
+				time_i[6] = (ping->png_msec % 1000) * 1000;
+				mb_get_time(verbose, time_i, &time_d);
+	
+				if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
+					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],time_i[6]);
+	
+				/* allocate memory for sonar depth arrays if needed */
+				if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc)
+					{
+					ndat_sonardepth_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthfilter,&error);
+					if (error != MB_ERROR_NO_ERROR)
+						{
+						mb_error(verbose,error,&message);
+						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+						fprintf(stderr,"\nProgram <%s> Terminated\n",
+							program_name);
+						exit(error);
+						}
+					}
+	
+				/* store the sonar depth data */
+				if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < time_d)
+					{
+					dat_sonardepth_time_d[ndat_sonardepth] = time_d;
+					dat_sonardepth_sonardepth[ndat_sonardepth] = ping->png_xducer_depth;
+					dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
+					
+					/* apply time lag correction if specified */
+					if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
+						{
+						dat_sonardepth_time_d[ndat_sonardepth] -= timelagconstant;
+						}
+					else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
+						{
+						interp_status = mb_linear_interp(verbose,
+									timelag_time_d-1, timelag_model-1,
+									ntimelag, dat_sonardepth_time_d[ndat_sonardepth], &timelag, &jtimelag,
+									&error);
+						dat_sonardepth_time_d[ndat_sonardepth] -= timelag;
+						}
+	
+					/* increment counter */
+					ndat_sonardepth++;
+					}
+				}
+	
+			/* print debug statements */
+			if (verbose >= 2)
+				{
+				fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",
+					program_name);
+				fprintf(stderr,"dbg2       kind:           %d\n",kind);
+				fprintf(stderr,"dbg2       error:          %d\n",error);
+				fprintf(stderr,"dbg2       status:         %d\n",status);
+				}
 			}
-
-	   	/* save heading data from survey records */
-		if (status == MB_SUCCESS
-			&& istore->kind == MB_DATA_DATA
-		    	&& istore->kind == heading_source)
+	
+		/* close the swath file */
+		status = mb_close(verbose,&imbio_ptr,&error);
+	
+		/* output counts */
+		if (output_counts == MB_YES)
 			{
-			/* get survey data structure */
-			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
-
-			/* get ping time */
-			time_i[0] = ping->png_date / 10000;
-			time_i[1] = (ping->png_date % 10000) / 100;
-			time_i[2] = ping->png_date % 100;
-			time_i[3] = ping->png_msec / 3600000;
-			time_i[4] = (ping->png_msec % 3600000) / 60000;
-			time_i[5] = (ping->png_msec % 60000) / 1000;
-			time_i[6] = (ping->png_msec % 1000) * 1000;
-			mb_get_time(verbose, time_i, &time_d);
-
-			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5],time_i[6]);
-
-			/* allocate memory for heading arrays if needed */
-			if (ndat_heading + 1 >= ndat_heading_alloc)
-				{
-				ndat_heading_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_time_d,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_heading,&error);
-				if (error != MB_ERROR_NO_ERROR)
-					{
-					mb_error(verbose,error,&message);
-					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
-					exit(error);
-					}
-				}
-
-			/* store the heading data */
-			if (ndat_heading == 0 || dat_heading_time_d[ndat_heading-1] < time_d)
-				{
-				dat_heading_time_d[ndat_heading] = (double)(time_d);
-				dat_heading_heading[ndat_heading] = (double)(0.01 * ping->png_heading);
-
-				/* apply time lag correction if specified */
-				if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
-					{
-					dat_heading_time_d[ndat_heading] -= timelagconstant;
-					}
-				else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
-					{
-					interp_status = mb_linear_interp(verbose,
-								timelag_time_d-1, timelag_model-1,
-								ntimelag, dat_heading_time_d[ndat_heading], &timelag, &jtimelag,
-								&error);
-					dat_heading_time_d[ndat_heading] -= timelag;
-					}
-
-				/* increment counter */
-				ndat_heading++;
-				}
+			fprintf(stdout, "\nData records read from: %s\n", ifile);
+			fprintf(stdout, "     nrec_0x30_pu_id:         %d\n", nrec_0x30_pu_id);
+			fprintf(stdout, "     nrec_0x31_pu_status:          %d\n", nrec_0x31_pu_status);
+			fprintf(stdout, "     nrec_0x32_pu_bist:           %d\n", nrec_0x32_pu_bist);
+			fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
+			fprintf(stdout, "     nrec_0x41_attitude:               %d\n", nrec_0x41_attitude);
+			fprintf(stdout, "     nrec_0x43_clock:                  %d\n", nrec_0x43_clock);
+			fprintf(stdout, "     nrec_0x44_bathymetry:             %d\n", nrec_0x44_bathymetry);
+			fprintf(stdout, "     nrec_0x45_singlebeam:             %d\n", nrec_0x45_singlebeam);
+			fprintf(stdout, "     nrec_0x46_rawbeamF:               %d\n", nrec_0x46_rawbeamF);
+			fprintf(stdout, "     nrec_0x47_surfacesoundspeed2:     %d\n", nrec_0x47_surfacesoundspeed2);
+			fprintf(stdout, "     nrec_0x48_heading:                %d\n", nrec_0x48_heading);
+			fprintf(stdout, "     nrec_0x49_parameter_start:        %d\n", nrec_0x49_parameter_start);
+			fprintf(stdout, "     nrec_0x4A_tilt:                   %d\n", nrec_0x4A_tilt);
+			fprintf(stdout, "     nrec_0x4B_echogram:               %d\n", nrec_0x4B_echogram);
+			fprintf(stdout, "     nrec_0x4E_rawbeamN:               %d\n", nrec_0x4E_rawbeamN);
+			fprintf(stdout, "     nrec_0x4F_quality:                %d\n", nrec_0x4F_quality);
+			fprintf(stdout, "     nrec_0x50_pos:                    %d\n", nrec_0x50_pos);
+			fprintf(stdout, "     nrec_0x52_runtime:                %d\n", nrec_0x52_runtime);
+			fprintf(stdout, "     nrec_0x53_sidescan:               %d\n", nrec_0x53_sidescan);
+			fprintf(stdout, "     nrec_0x54_tide:                   %d\n", nrec_0x54_tide);
+			fprintf(stdout, "     nrec_0x55_svp2:                   %d\n", nrec_0x55_svp2);
+			fprintf(stdout, "     nrec_0x56_svp:                    %d\n", nrec_0x56_svp);
+			fprintf(stdout, "     nrec_0x57_surfacesoundspeed:      %d\n", nrec_0x57_surfacesoundspeed);
+			fprintf(stdout, "     nrec_0x58_bathymetry2:            %d\n", nrec_0x58_bathymetry2);
+			fprintf(stdout, "     nrec_0x59_sidescan2:              %d\n", nrec_0x59_sidescan2);
+			fprintf(stdout, "     nrec_0x66_rawbeamf:               %d\n", nrec_0x66_rawbeamf);
+			fprintf(stdout, "     nrec_0x68_height:                 %d\n", nrec_0x68_height);
+			fprintf(stdout, "     nrec_0x69_parameter_stop:         %d\n", nrec_0x69_parameter_stop);
+			fprintf(stdout, "     nrec_0x6B_water_column:           %d\n", nrec_0x6B_water_column);
+			fprintf(stdout, "     nrec_0x6E_network_attitude:       %d\n", nrec_0x6E_network_attitude);
+			fprintf(stdout, "     nrec_0x70_parameter:              %d\n", nrec_0x70_parameter);
+			fprintf(stdout, "     nrec_0x73_surface_sound_speed:    %d\n", nrec_0x73_surface_sound_speed);
+			fprintf(stdout, "     nrec_0xE1_bathymetry_mbari57:     %d\n", nrec_0xE1_bathymetry_mbari57);
+			fprintf(stdout, "     nrec_0xE2_sidescan_mbari57:       %d\n", nrec_0xE2_sidescan_mbari57);
+			fprintf(stdout, "     nrec_0xE3_bathymetry_mbari59:     %d\n", nrec_0xE3_bathymetry_mbari59);
+			fprintf(stdout, "     nrec_0xE4_sidescan_mbari59:       %d\n", nrec_0xE4_sidescan_mbari59);
+			fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59:     %d\n", nrec_0xE5_bathymetry_mbari59);
+	
+			nrec_0x30_pu_id_tot += nrec_0x30_pu_id;
+			nrec_0x31_pu_status_tot += nrec_0x31_pu_status;
+			nrec_0x32_pu_bist_tot += nrec_0x32_pu_bist;
+			nrec_0x33_parameter_extra_tot += nrec_0x33_parameter_extra;
+			nrec_0x41_attitude_tot += nrec_0x41_attitude;
+			nrec_0x43_clock_tot += nrec_0x43_clock;
+			nrec_0x44_bathymetry_tot += nrec_0x44_bathymetry;
+			nrec_0x45_singlebeam_tot += nrec_0x45_singlebeam;
+			nrec_0x46_rawbeamF_tot += nrec_0x46_rawbeamF;
+			nrec_0x47_surfacesoundspeed2_tot += nrec_0x47_surfacesoundspeed2;
+			nrec_0x48_heading_tot += nrec_0x48_heading;
+			nrec_0x49_parameter_start_tot += nrec_0x49_parameter_start;
+			nrec_0x4A_tilt_tot += nrec_0x4A_tilt;
+			nrec_0x4B_echogram_tot += nrec_0x4B_echogram;
+			nrec_0x4E_rawbeamN_tot += nrec_0x4E_rawbeamN;
+			nrec_0x4F_quality_tot += nrec_0x4F_quality;
+			nrec_0x50_pos_tot += nrec_0x50_pos;
+			nrec_0x52_runtime_tot += nrec_0x52_runtime;
+			nrec_0x53_sidescan_tot += nrec_0x53_sidescan;
+			nrec_0x54_tide_tot += nrec_0x54_tide;
+			nrec_0x55_svp2_tot += nrec_0x55_svp2;
+			nrec_0x56_svp_tot += nrec_0x56_svp;
+			nrec_0x57_surfacesoundspeed_tot += nrec_0x57_surfacesoundspeed;
+			nrec_0x58_bathymetry2_tot += nrec_0x58_bathymetry2;
+			nrec_0x59_sidescan2_tot += nrec_0x59_sidescan2;
+			nrec_0x66_rawbeamf_tot += nrec_0x66_rawbeamf;
+			nrec_0x68_height_tot += nrec_0x68_height;
+			nrec_0x69_parameter_stop_tot += nrec_0x69_parameter_stop;
+			nrec_0x6B_water_column_tot += nrec_0x6B_water_column;
+			nrec_0x6E_network_attitude_tot += nrec_0x6E_network_attitude;
+			nrec_0x70_parameter_tot += nrec_0x70_parameter;
+			nrec_0x73_surface_sound_speed_tot += nrec_0x73_surface_sound_speed;
+			nrec_0xE1_bathymetry_mbari57_tot += nrec_0xE1_bathymetry_mbari57;
+			nrec_0xE2_sidescan_mbari57_tot += nrec_0xE2_sidescan_mbari57;
+			nrec_0xE3_bathymetry_mbari59_tot += nrec_0xE3_bathymetry_mbari59;
+			nrec_0xE4_sidescan_mbari59_tot += nrec_0xE4_sidescan_mbari59;
+			nrec_0xE5_bathymetry_mbari59_tot += nrec_0xE5_bathymetry_mbari59;
 			}
-
-	   	/* save sonardepth data from survey records */
-		if (status == MB_SUCCESS
-			&& istore->kind == MB_DATA_DATA
-		    	&& istore->kind == sonardepth_source)
-			{			
-			/* get survey data structure */
-			ping = (struct mbsys_simrad3_ping_struct *) &(istore->pings[istore->ping_index]);
-
-			/* get ping time */
-			time_i[0] = ping->png_date / 10000;
-			time_i[1] = (ping->png_date % 10000) / 100;
-			time_i[2] = ping->png_date % 100;
-			time_i[3] = ping->png_msec / 3600000;
-			time_i[4] = (ping->png_msec % 3600000) / 60000;
-			time_i[5] = (ping->png_msec % 60000) / 1000;
-			time_i[6] = (ping->png_msec % 1000) * 1000;
-			mb_get_time(verbose, time_i, &time_d);
-
-			if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-				fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5],time_i[6]);
-
-			/* allocate memory for sonar depth arrays if needed */
-			if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc)
-				{
-				ndat_sonardepth_alloc +=  MBKONSBERGPREPROCESS_ALLOC_CHUNK;
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthfilter,&error);
-				if (error != MB_ERROR_NO_ERROR)
-					{
-					mb_error(verbose,error,&message);
-					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
-					exit(error);
-					}
-				}
-
-			/* store the sonar depth data */
-			if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < time_d)
-				{
-				dat_sonardepth_time_d[ndat_sonardepth] = time_d;
-				dat_sonardepth_sonardepth[ndat_sonardepth] = ping->png_xducer_depth;
-				dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
-				
-				/* apply time lag correction if specified */
-				if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_CONSTANT)
-					{
-					dat_sonardepth_time_d[ndat_sonardepth] -= timelagconstant;
-					}
-				else if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
-					{
-					interp_status = mb_linear_interp(verbose,
-								timelag_time_d-1, timelag_model-1,
-								ntimelag, dat_sonardepth_time_d[ndat_sonardepth], &timelag, &jtimelag,
-								&error);
-					dat_sonardepth_time_d[ndat_sonardepth] -= timelag;
-					}
-
-				/* increment counter */
-				ndat_sonardepth++;
-				}
-			}
-
-		/* print debug statements */
-		if (verbose >= 2)
+	
+		/* figure out whether and what to read next */
+		if (read_datalist == MB_YES)
 			{
-			fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",
-				program_name);
-			fprintf(stderr,"dbg2       kind:           %d\n",kind);
-			fprintf(stderr,"dbg2       error:          %d\n",error);
-			fprintf(stderr,"dbg2       status:         %d\n",status);
+			if ((status = mb_datalist_read(verbose,datalist,
+				ifile,&format,&file_weight,&error))
+				== MB_SUCCESS)
+						read_data = MB_YES;
+				else
+						read_data = MB_NO;
 			}
+		else
+			{
+			read_data = MB_NO;
+			}
+
+		/* end loop over files in list */
 		}
-
-	/* close the swath file */
-	status = mb_close(verbose,&imbio_ptr,&error);
-
-	/* output counts */
-	if (output_counts == MB_YES)
-		{
-		fprintf(stdout, "\nData records read from: %s\n", ifile);
-		fprintf(stdout, "     nrec_0x30_pu_id:         %d\n", nrec_0x30_pu_id);
-		fprintf(stdout, "     nrec_0x31_pu_status:          %d\n", nrec_0x31_pu_status);
-		fprintf(stdout, "     nrec_0x32_pu_bist:           %d\n", nrec_0x32_pu_bist);
-		fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
-		fprintf(stdout, "     nrec_0x41_attitude:               %d\n", nrec_0x41_attitude);
-		fprintf(stdout, "     nrec_0x43_clock:                  %d\n", nrec_0x43_clock);
-		fprintf(stdout, "     nrec_0x44_bathymetry:             %d\n", nrec_0x44_bathymetry);
-		fprintf(stdout, "     nrec_0x45_singlebeam:             %d\n", nrec_0x45_singlebeam);
-		fprintf(stdout, "     nrec_0x46_rawbeamF:               %d\n", nrec_0x46_rawbeamF);
-		fprintf(stdout, "     nrec_0x47_surfacesoundspeed2:     %d\n", nrec_0x47_surfacesoundspeed2);
-		fprintf(stdout, "     nrec_0x48_heading:                %d\n", nrec_0x48_heading);
-		fprintf(stdout, "     nrec_0x49_parameter_start:        %d\n", nrec_0x49_parameter_start);
-		fprintf(stdout, "     nrec_0x4A_tilt:                   %d\n", nrec_0x4A_tilt);
-		fprintf(stdout, "     nrec_0x4B_echogram:               %d\n", nrec_0x4B_echogram);
-		fprintf(stdout, "     nrec_0x4E_rawbeamN:               %d\n", nrec_0x4E_rawbeamN);
-		fprintf(stdout, "     nrec_0x4F_quality:                %d\n", nrec_0x4F_quality);
-		fprintf(stdout, "     nrec_0x50_pos:                    %d\n", nrec_0x50_pos);
-		fprintf(stdout, "     nrec_0x52_runtime:                %d\n", nrec_0x52_runtime);
-		fprintf(stdout, "     nrec_0x53_sidescan:               %d\n", nrec_0x53_sidescan);
-		fprintf(stdout, "     nrec_0x54_tide:                   %d\n", nrec_0x54_tide);
-		fprintf(stdout, "     nrec_0x55_svp2:                   %d\n", nrec_0x55_svp2);
-		fprintf(stdout, "     nrec_0x56_svp:                    %d\n", nrec_0x56_svp);
-		fprintf(stdout, "     nrec_0x57_surfacesoundspeed:      %d\n", nrec_0x57_surfacesoundspeed);
-		fprintf(stdout, "     nrec_0x58_bathymetry2:            %d\n", nrec_0x58_bathymetry2);
-		fprintf(stdout, "     nrec_0x59_sidescan2:              %d\n", nrec_0x59_sidescan2);
-		fprintf(stdout, "     nrec_0x66_rawbeamf:               %d\n", nrec_0x66_rawbeamf);
-		fprintf(stdout, "     nrec_0x68_height:                 %d\n", nrec_0x68_height);
-		fprintf(stdout, "     nrec_0x69_parameter_stop:         %d\n", nrec_0x69_parameter_stop);
-		fprintf(stdout, "     nrec_0x6B_water_column:           %d\n", nrec_0x6B_water_column);
-		fprintf(stdout, "     nrec_0x6E_network_attitude:       %d\n", nrec_0x6E_network_attitude);
-		fprintf(stdout, "     nrec_0x70_parameter:              %d\n", nrec_0x70_parameter);
-		fprintf(stdout, "     nrec_0x73_surface_sound_speed:    %d\n", nrec_0x73_surface_sound_speed);
-		fprintf(stdout, "     nrec_0xE1_bathymetry_mbari57:     %d\n", nrec_0xE1_bathymetry_mbari57);
-		fprintf(stdout, "     nrec_0xE2_sidescan_mbari57:       %d\n", nrec_0xE2_sidescan_mbari57);
-		fprintf(stdout, "     nrec_0xE3_bathymetry_mbari59:     %d\n", nrec_0xE3_bathymetry_mbari59);
-		fprintf(stdout, "     nrec_0xE4_sidescan_mbari59:       %d\n", nrec_0xE4_sidescan_mbari59);
-		fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59:     %d\n", nrec_0xE5_bathymetry_mbari59);
-
-		nrec_0x30_pu_id_tot += nrec_0x30_pu_id;
-		nrec_0x31_pu_status_tot += nrec_0x31_pu_status;
-		nrec_0x32_pu_bist_tot += nrec_0x32_pu_bist;
-		nrec_0x33_parameter_extra_tot += nrec_0x33_parameter_extra;
-		nrec_0x41_attitude_tot += nrec_0x41_attitude;
-		nrec_0x43_clock_tot += nrec_0x43_clock;
-		nrec_0x44_bathymetry_tot += nrec_0x44_bathymetry;
-		nrec_0x45_singlebeam_tot += nrec_0x45_singlebeam;
-		nrec_0x46_rawbeamF_tot += nrec_0x46_rawbeamF;
-		nrec_0x47_surfacesoundspeed2_tot += nrec_0x47_surfacesoundspeed2;
-		nrec_0x48_heading_tot += nrec_0x48_heading;
-		nrec_0x49_parameter_start_tot += nrec_0x49_parameter_start;
-		nrec_0x4A_tilt_tot += nrec_0x4A_tilt;
-		nrec_0x4B_echogram_tot += nrec_0x4B_echogram;
-		nrec_0x4E_rawbeamN_tot += nrec_0x4E_rawbeamN;
-		nrec_0x4F_quality_tot += nrec_0x4F_quality;
-		nrec_0x50_pos_tot += nrec_0x50_pos;
-		nrec_0x52_runtime_tot += nrec_0x52_runtime;
-		nrec_0x53_sidescan_tot += nrec_0x53_sidescan;
-		nrec_0x54_tide_tot += nrec_0x54_tide;
-		nrec_0x55_svp2_tot += nrec_0x55_svp2;
-		nrec_0x56_svp_tot += nrec_0x56_svp;
-		nrec_0x57_surfacesoundspeed_tot += nrec_0x57_surfacesoundspeed;
-		nrec_0x58_bathymetry2_tot += nrec_0x58_bathymetry2;
-		nrec_0x59_sidescan2_tot += nrec_0x59_sidescan2;
-		nrec_0x66_rawbeamf_tot += nrec_0x66_rawbeamf;
-		nrec_0x68_height_tot += nrec_0x68_height;
-		nrec_0x69_parameter_stop_tot += nrec_0x69_parameter_stop;
-		nrec_0x6B_water_column_tot += nrec_0x6B_water_column;
-		nrec_0x6E_network_attitude_tot += nrec_0x6E_network_attitude;
-		nrec_0x70_parameter_tot += nrec_0x70_parameter;
-		nrec_0x73_surface_sound_speed_tot += nrec_0x73_surface_sound_speed;
-		nrec_0xE1_bathymetry_mbari57_tot += nrec_0xE1_bathymetry_mbari57;
-		nrec_0xE2_sidescan_mbari57_tot += nrec_0xE2_sidescan_mbari57;
-		nrec_0xE3_bathymetry_mbari59_tot += nrec_0xE3_bathymetry_mbari59;
-		nrec_0xE4_sidescan_mbari59_tot += nrec_0xE4_sidescan_mbari59;
-		nrec_0xE5_bathymetry_mbari59_tot += nrec_0xE5_bathymetry_mbari59;
-		}
-
-	/* figure out whether and what to read next */
-        if (read_datalist == MB_YES)
-                {
-		if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error))
-			    == MB_SUCCESS)
-                        read_data = MB_YES;
-                else
-                        read_data = MB_NO;
-                }
-        else
-                {
-                read_data = MB_NO;
-                }
-
-	/* end loop over files in list */
-	}
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
 
@@ -2660,16 +2660,21 @@ fprintf(stderr,"Applying running Gaussian mean filtering to %d sonardepth nav da
 				heave = 0.0;
 				}
 
+			/* Disable this section - Kongsberg SIS logs sensordepth values
+			 * already compensated for lever arms
+			 * 30 Jun 2016 DWC */
+			
 			/* apply specified offset between depth sensor and sonar */
 //fprintf(stderr,"time_d:%.3f png_xducer_depth:%.3f  sonardepth:%f   ",
 //time_d,ping->png_xducer_depth,sonardepth);
-			sonardepth += sonardepthoffset
-						+ depthsensoroffx * sin(DTR * roll)
-						+ depthsensoroffy * sin(DTR * pitch)
-						+ depthsensoroffz * cos(DTR * pitch);
+			//sonardepth += sonardepthoffset
+			//			+ depthsensoroffx * sin(DTR * roll)
+			//			+ depthsensoroffy * sin(DTR * pitch)
+			//			+ depthsensoroffz * cos(DTR * pitch);
 //fprintf(stderr," sonardepth:%f     offset:%f x:%f y:%f z:%f  rph: %f %f %f   diff:%f\n",
 //sonardepth,sonardepthoffset,depthsensoroffx,depthsensoroffy,depthsensoroffz,roll,pitch,heave,
 //(sonardepthoffset + depthsensoroffx * sin(DTR * roll) + depthsensoroffy * sin(DTR * pitch) + depthsensoroffz * cos(DTR * pitch)));
+
 			/* insert navigation */
 			if (navlon < -180.0)
 				navlon += 360.0;
