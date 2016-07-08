@@ -885,6 +885,7 @@ int mb_mergesort(void *base, size_t nmemb,register size_t size, int (*cmp) (cons
 int mb_double_compare(const void *a, const void *b);
 int mb_int_compare(const void *a, const void *b);
 int mb_edit_compare(const void *a, const void *b);
+int mb_edit_compare_coarse(const void *a, const void *b);
 void hilbert(int n, double delta[], double kappa[]);
 void hilbert2(int n, double data[]);
 

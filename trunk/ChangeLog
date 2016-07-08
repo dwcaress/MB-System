@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.5.2279       July 8, 2016
 * Version 5.5.2278       July 1, 2016
   Version 5.5.2277       June 25, 2016
   Version 5.5.2275       May 17, 2016
@@ -234,6 +235,16 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2279 (July 8, 2016)
+
+Bathymetry editing (mbedit, mbeditviz, mbclean, mbareaclean): fixed problem in
+which mbprocess failed to successfully apply new edits generated using mbeditviz
+on files with existing, old esf (edit save files) files. Yet another consequence
+of adapting to very short ping intervals...
+Existing edit save files can now be fixed using mbclean -T0.0011.
+
+Mbm_grdtiff: Added support for image display program feh.
 
 -----> 5.5.2278 (July 1, 2016)
 

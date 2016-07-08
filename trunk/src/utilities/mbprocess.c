@@ -2872,12 +2872,12 @@ and mbedit edit save files.\n";
 	    status = mb_esf_open(verbose, program_name, process.mbp_editfile,
 			    MB_YES, MB_NO, &esf, &error);
 	    if (status == MB_FAILURE)
-		{
-		fprintf(stderr,"\nUnable to resd from Edit Save File <%s>\n",process.mbp_editfile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+			{
+			fprintf(stderr,"\nUnable to read from Edit Save File <%s>\n",process.mbp_editfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
 
 	    /* give the statistics */
@@ -4925,10 +4925,10 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 					ntime-1, nheading-1,
 					nnav, time_d, &heading, &itime,
 					&error);
-                            if (heading < 0.0)
-                                heading += 360.0;
-                            else if (heading > 360.0)
-                                heading -= 360.0;
+				if (heading < 0.0)
+					heading += 360.0;
+				else if (heading > 360.0)
+					heading -= 360.0;
 			    }
 
 			/* interpolate speed */
@@ -5911,8 +5911,10 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_NAV))
 			{
-if (heading < 0.0)
-fprintf(stderr,"INSERTING NEGATIVE HEADING:%f\n",heading);
+			if (heading >= 360.0)
+			    heading -= 360.0;
+			else if (heading < 0.0)
+			    heading += 360.0;
 			status = mb_insert_nav(verbose,imbio_ptr,store_ptr,
 					time_i,time_d,navlon,navlat,
 					speed,heading,draft,roll,pitch,heave,&error);

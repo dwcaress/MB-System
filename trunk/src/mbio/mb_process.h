@@ -857,6 +857,7 @@ struct mb_process_struct
 
 /* edit save file definitions */
 #define MB_ESF_MAXTIMEDIFF 0.00011
+#define MB_ESF_MAXTIMEDIFF_X10 0.0011
 #define MB_ESF_MULTIPLICITY_FACTOR	1000000
 struct mb_edit_struct
 	{
@@ -1257,17 +1258,17 @@ int mb_pr_point_in_quad(int verbose, double px, double py,
 int mb_esf_check(int verbose, char *swathfile, char *esffile,
 			int *found, int *error);
 int mb_esf_load(int verbose, char *program_name, char *swathfile,
-			int load, int output,
+			int load, int output, 
 			char *esffile,
 			struct mb_esf_struct *esf,
 			int *error);
 int mb_esf_open(int verbose, char *program_name, char *esffile,
-			int load, int output,
+			int load, int output, 
 			struct mb_esf_struct *esf,
 			int *error);
 int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf,
 			double time_d, double tolerance, int *error);
-int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
+int mb_esf_apply(int verbose, struct mb_esf_struct *esf, 
 			double time_d, int pingmultiplicity, int nbath, char *beamflag,
 			int *error);
 int mb_esf_save(int verbose, struct mb_esf_struct *esf,

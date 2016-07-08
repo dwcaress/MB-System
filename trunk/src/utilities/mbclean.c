@@ -967,13 +967,14 @@ int main (int argc, char **argv)
 
 				/* if requested set all edit timestamps within tolerance of
 					ping[nrec].time_d to ping[nrec].time_d */
-				status = mb_esf_fixtimestamps(verbose, &esf,
-		    				ping[nrec].time_d, tolerance, &error);
+				if (fix_edit_timestamps == MB_YES)
+					status = mb_esf_fixtimestamps(verbose, &esf,
+								ping[nrec].time_d, tolerance, &error);
 
 				/* apply saved edits */
 				status = mb_esf_apply(verbose, &esf,
 		    				ping[nrec].time_d, ping[nrec].multiplicity, ping[nrec].beams_bath,
-						ping[nrec].beamflag, &error);
+							ping[nrec].beamflag, &error);
 
 				/* update counters */
 				for (i=0;i<ping[nrec].beams_bath;i++)
