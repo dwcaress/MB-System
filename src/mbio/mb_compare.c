@@ -87,3 +87,30 @@ fprintf(stderr,"aa:%.7f bb:%.7f diff:%g\n",aa->time_d,bb->time_d,aa->time_d - bb
 		return(-1);
 }
 /*--------------------------------------------------------------------*/
+/* 	function mb_edit_compare compares mb_edit_struct values. */
+int mb_edit_compare_coarse(const void *a, const void *b)
+{
+	struct mb_edit_struct	*aa, *bb;
+
+	aa = (struct mb_edit_struct *) a;
+	bb = (struct mb_edit_struct *) b;
+
+/*if (fabs(aa->time_d - bb->time_d) < MB_ESF_MAXTIMEDIFF && aa->time_d != bb->time_d)
+{
+fprintf(stderr,"aa:%.7f bb:%.7f diff:%g\n",aa->time_d,bb->time_d,aa->time_d - bb->time_d);
+}*/
+	if (fabs(aa->time_d - bb->time_d) < MB_ESF_MAXTIMEDIFF_X10)
+		{
+		if (aa->beam > bb->beam)
+			return(1);
+		else if (aa->beam < bb->beam)
+			return(-1);
+		else
+			return(0);
+		}
+	else if (aa->time_d > bb->time_d)
+		return(1);
+	else
+		return(-1);
+}
+/*--------------------------------------------------------------------*/

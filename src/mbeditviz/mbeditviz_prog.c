@@ -1148,8 +1148,9 @@ fprintf(stderr,"     Beam bathymetry: %d %f %f %f\n",ibeam,ping->bath[ibeam],pin
 					}
 
 				/* now read and apply the global edits */
-				mbev_status = mb_esf_open(mbev_verbose, program_name, geffile, MB_YES, MBP_ESF_NOWRITE,
-							&(file->esf), &mbev_error);
+				mbev_status = mb_esf_open(mbev_verbose, program_name, geffile,
+										  MB_YES, MBP_ESF_NOWRITE,
+										&(file->esf), &mbev_error);
 				if (mbev_status == MB_SUCCESS)
 					{
 					file->esf_open = MB_YES;
@@ -1200,8 +1201,9 @@ fprintf(stderr,"loaded swathfile:%s file->processed_info_loaded:%d file->process
 swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 
 			/* attempt to load bathymetry edits */
-			mbev_status = mb_esf_load(mbev_verbose, program_name, file->path, MB_YES, MBP_ESF_NOWRITE,
-							file->esffile, &(file->esf), &mbev_error);
+			mbev_status = mb_esf_load(mbev_verbose, program_name, file->path,
+									  MB_YES, MBP_ESF_NOWRITE,
+									file->esffile, &(file->esf), &mbev_error);
 			if (mbev_status == MB_SUCCESS)
 				{
 				file->esf_open = MB_YES;
@@ -1215,7 +1217,7 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 			if (file->esf_open == MB_YES)
 				{
 				/* loop over pings applying edits */
-fprintf(stderr,"MBeditviz is applying %d saved edits\n",file->esf.nedit);
+fprintf(stderr,"MBeditviz is applying %d saved edits from version %d esf file %s\n",file->esf.nedit,file->esf.version,file->path);
 				do_mbeditviz_message_on("MBeditviz is applying saved edits...");
 				for (iping=0;iping<file->num_pings;iping++)
 					{
@@ -4087,8 +4089,9 @@ ifile, iping, ibeam, beamflag, flush); */
 			/* open esf and ess files if not already open */
 			if (file->esf_open == MB_NO)
 				{
-				mbev_status = mb_esf_load(mbev_verbose, program_name, file->path, MB_NO, MBP_ESF_APPEND,
-								file->esffile, &(file->esf), &mbev_error);
+				mbev_status = mb_esf_load(mbev_verbose, program_name, file->path,
+										MB_NO, MBP_ESF_APPEND,
+										file->esffile, &(file->esf), &mbev_error);
 				if (mbev_status == MB_SUCCESS)
 					{
 					file->esf_open = MB_YES;
