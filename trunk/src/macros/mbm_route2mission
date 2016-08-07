@@ -67,7 +67,7 @@ $program_name = "mbm_route2mission";
 #     Use 1.3 * expected duration the mission as a whole
 #     Abort time must not be greater than battery life of 8 hours = 28800 seconds
 $durationfactorwaypoint = 6.0;
-$durationfactormission = 1.3;
+$durationfactormission = 1.5;
 $durationmax = 28800;
 $batterylife = 68400; # 19 hours
 $safetymargin = 1800;
@@ -453,6 +453,15 @@ else
 if (!$missionfile)
 	{
 	$missionfile = "$root.cfg";
+	}
+elsif ($missionfile =~ /\S+.cfg/)
+	{
+	($root) = $missionfile =~ /(\S+).cfg/;
+	}
+else
+	{
+	$root = $missionfile;
+    $missionfile = "$root.cfg";
 	}
 $waypointfile = "$root" . "_wpt.ste";
 
@@ -2320,7 +2329,7 @@ print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
 			#print MFILE "MB_Rate = $mb_pingrate; \r\n";
 			#print MFILE "MB_Gain = $mb_receivegain; \r\n";
-			#print MFILE "MB_Sound_Velocity = 0.0; \r\n";
+			print MFILE "MB_Sound_Velocity = 0.0; \r\n";
 			#printf MFILE "MB_Pulse_Width = %f; \r\n", $mb_pulsewidth;
 			printf MFILE "MB_Bottom_Detect_Filter_Min_Range = %.2f; \r\n", $mb_minrange;
 			printf MFILE "MB_Bottom_Detect_Filter_Max_Range = %.2f; \r\n", $mb_maxrange;
@@ -2654,7 +2663,120 @@ print "Behavior: delta_t (start, reset, logMode = 0)\r\n";
 		printf TFILE "%f %f\r\n", $mdistances[$i], $altitude;
 		}
 	close(TFILE);
-	}
+	$topodatafile = "$root" . "_nav.xy";
+	open(TFILE,">$topodatafile") || die "Cannot open output navigation file: $topodatafile\r\n$program_name aborted.\r\n";
+	for ($i = 0; $i < $nmissionpoints-1; $i++)
+		{
+		printf TFILE "%f %f\r\n", $mlons[$i], $mlats[$i];
+		}
+	close(TFILE);
+    
+    # generate lon lat bounds box in various formats
+	for ($i = 0; $i < $npoints; $i++)
+		{
+        if ($i == 0)
+            {
+            $lonmin = $lons[$i];
+            $lonmax = $lons[$i];
+            $latmin = $lats[$i];
+            $latmax = $lats[$i];
+            }
+        else
+            {
+            if ($lons[$i] < $lonmin)
+                {
+                $lonmin = $lons[$i];
+                }
+            if ($lons[$i] > $lonmax)
+                {
+                $lonmax = $lons[$i];
+                }
+            if ($lats[$i] < $latmin)
+                {
+                $latmin = $lats[$i];
+                }
+            if ($lats[$i] > $latmax)
+                {
+                $latmax = $lats[$i];
+                }
+            }
+printf "Lon: %f %f %f    Lat: %f %f %f\n", $lons[$i], $lonmin, $lonmax, $lats[$i], $latmin, $latmax;
+		}
+	$topodatafile = "$root" . "_bounds.txt";
+	open(TFILE,">$topodatafile") || die "Cannot open output bounds file: $topodatafile\r\n$program_name aborted.\r\n";
+    if ($lonmin < 0.0) {
+        $lonminEW = "W";
+    } else {
+        $lonminEW = "E";
+    }
+    $lonminabs = abs($lonmin);
+    $lonminintdegrees = int($lonminabs);
+    $lonminminutes = ($lonminabs - $lonminintdegrees) * 60.0;
+    $lonminintminutes = int($lonminminutes);
+    $lonminintminutes = int($lonminminutes);
+    $lonminseconds = ($lonminminutes - $lonminintminutes) * 60.0;
+    $lonminintseconds = int($lonminseconds);
+
+    if ($lonmax < 0.0) {
+        $lonmaxEW = "W";
+    } else {
+        $lonmaxEW = "E";
+    }
+    $lonmaxabs = abs($lonmax);
+    $lonmaxintdegrees = int($lonmaxabs);
+    $lonmaxminutes = ($lonmaxabs - $lonmaxintdegrees) * 60.0;
+    $lonmaxintminutes = int($lonmaxminutes);
+    $lonmaxintminutes = int($lonmaxminutes);
+    $lonmaxseconds = ($lonmaxminutes - $lonmaxintminutes) * 60.0;
+    $lonmaxintseconds = int($lonmaxseconds);
+
+    if ($latmin < 0.0) {
+        $latminNS = "S";
+    } else {
+        $latminNS = "N";
+    }
+    $latminabs = abs($latmin);
+    $latminintdegrees = int($latminabs);
+    $latminminutes = ($latminabs - $latminintdegrees) * 60.0;
+    $latminintminutes = int($latminminutes);
+    $latminintminutes = int($latminminutes);
+    $latminseconds = ($latminminutes - $latminintminutes) * 60.0;
+    $latminintseconds = int($latminseconds);
+
+    if ($latmax < 0.0) {
+        $latmaxNS = "S";
+    } else {
+        $latmaxNS = "N";
+    }
+    $latmaxabs = abs($latmax);
+    $latmaxintdegrees = int($latmaxabs);
+    $latmaxminutes = ($latmaxabs - $latmaxintdegrees) * 60.0;
+    $latmaxintminutes = int($latmaxminutes);
+    $latmaxintminutes = int($latmaxminutes);
+    $latmaxseconds = ($latmaxminutes - $latmaxintminutes) * 60.0;
+    $latmaxintseconds = int($latmaxseconds);
+    
+    print TFILE "AUV mission $missionfile position bounds:\n";
+    printf TFILE "Decimal degrees:\n";
+    printf TFILE "  Longitude: %11.6f %11.6f\n", $lonmin, $lonmax;
+    printf TFILE "  Latitude:  %11.6f %11.6f\n", $latmin, $latmax;
+    printf TFILE "Degrees + decimal minutes:\n";
+    printf TFILE "  Longitude: %3d %6.3f %s   %3d %6.3f %s\n",
+            $lonminintdegrees, $lonminminutes, $lonminEW,
+            $lonmaxintdegrees, $lonmaxminutes, $lonmaxEW;
+    printf TFILE "  Latitude:  %3d %6.3f %s   %3d %6.3f %s\n",
+            $latminintdegrees, $latminminutes, $latminNS,
+            $latmaxintdegrees, $latmaxminutes, $latmaxNS;
+    printf TFILE "Degrees + minutes + decimal seconds:\n";
+    printf TFILE "  Longitude: %3d %2d %6.3f %s   %3d %2d %6.3f %s\n",
+            $lonminintdegrees, $lonminintminutes, $lonminseconds, $lonminEW,
+            $lonmaxintdegrees, $lonmaxintminutes, $lonmaxseconds, $lonmaxEW;
+    printf TFILE "  Latitude:  %3d %2d %6.3f %s   %3d %2d %6.3f %s\n",
+            $latminintdegrees, $latminintminutes, $latminseconds, $latminNS,
+            $latmaxintdegrees, $latmaxintminutes, $latmaxseconds, $latmaxNS;
+    print TFILE "\n";
+	close(TFILE);
+    }
 
 # End it all
 if ($verbose)
@@ -2677,13 +2799,12 @@ sub Getopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
      ($first,$rest) = ($1,$2);
      $pos = index($argumentative,$first);
-     if($pos >= $[) {
+     if($pos >= 0) {
          if($args[$pos+1] eq ':') {
           shift(@ARGV);
           if($rest eq '') {
@@ -2748,7 +2869,7 @@ sub MBGetopts {
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
 	($first,$rest) = ($1,$2);
 	$pos = index($argumentative,$first);
-	if($pos >= $[) {
+	if($pos >= 0) {
 	    if($args[$pos+1] eq ':') {
 		shift(@ARGV);
 		if($rest eq '') {
@@ -2782,7 +2903,7 @@ sub MBGetopts {
 		    $rest = $ARGV[0];
 		    ($one) = $rest =~ /^-(.).*/;
 		    $pos = index($argumentative,$one);
-		    if(!$one || $pos < $[) {
+		    if(!$one || $pos < 0) {
 			eval "\$opt_$first = \$rest;";
 			shift(@ARGV);
 		    }

@@ -1,4 +1,4 @@
-.TH mbclean 1 "7 July 2016" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean 1 "1 August 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbclean\fP \- Tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -39,20 +39,20 @@ as follows:
 .br
  	1. Flag specified numbers of outer beams
  		(\fB\-X\fP option).
- 	2. Flag outer beams by acrosstrack distance
- 		(\fB\-Y\fP option).
-	3. Flag all beams in pings outside specified
-		acceptable speed range (\fB\-P\fP option).
-	4. Flag all beams in pings outside specified
-		acceptable position bounds (\fB\-W\fP option).
-	5. Flag all beams in pings with zero
-		longitude and latitude values (\fB\-Z\fP option).
+ 	2. Flag outer beams and/or unflag inner beams
+        by acrosstrack distance (\fB\-Y\fP option).
+ 	3. Flag all beams in pings outside specified
+ 		acceptable speed range (\fB\-P\fP option).
+ 	4. Flag all beams in pings outside specified
+ 		acceptable position bounds (\fB\-W\fP option).
+ 	5. Flag all beams in pings with zero
+ 		longitude and latitude values (\fB\-Z\fP option).
  	6. Flag soundings outside specified acceptable
  		depth range (\fB\-B\fP option).
  	7. Flag soundings with ranges less than
  		specified minimum value (\fB\-B\fP option).
  	8. Flag pings with excessive heading change rate
-	        (\fB\-R\fP option).
+ 	        (\fB\-R\fP option).
  	9. Zap "rails" (\fB\-Q\fP option).
  	10. Flag soundings with acrosstrack distances 
  		greater than specified maximum value
@@ -325,12 +325,16 @@ of the swath are flagged as bad; this is useful if the outer beams
 are known to be unreliable. Default: \fIzap_beams\fP = 0.
 .TP
 .B \-Y
-\fIdistanceleft/distanceright\fP
+\fIdistanceleft/distanceright[/mode]\fP
 .br
-This option causes \fBmbclean\fP to flag as bad all beams with
-acrosstrack distances more to port than \fIdistanceleft\fP
-and more to starboard than \fIdistanceright\fP. The distances
-are defined in meters, and distances to port of nadir are
+This option causes \fBmbclean\fP to flag and/or unflag beams according to
+acrosstrack distance. If \fImode\fP=1 or is not specified, then all beams 
+outside the specified range (acrosstrack distances more to port/left than \fIdistanceleft\fP
+or more to starboard/right than \fIdistanceright\fP) will be flagged as bad.
+If \fImode\fP=2, then all beams inside the specified range
+(acrosstrack distances more to starboard/right than \fIdistanceleft\fP
+and more to port/left than \fIdistanceright\fP) will be flagged as good.
+The distances are defined in meters, and distances to port of nadir are
 negative.
 .TP
 .B \-Z

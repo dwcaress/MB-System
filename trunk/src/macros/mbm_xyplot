@@ -668,15 +668,15 @@ else
 	}
 
 # now find out the apparent size of the plot using the specified linear scaling
-if (!$geographic && $projection eq "x" && $map_scale)
+if (!$geographic && $projection eq "x" && $plot_scale)
     {
-    if ($map_scale =~ /(\S+)\/(\S+)/)
+    if ($plot_scale =~ /(\S+)\/(\S+)/)
         {
-        ($xscale,$yscale) = $map_scale =~ /(\S+)\/(\S+)/;
+        ($xscale,$yscale) = $plot_scale =~ /(\S+)\/(\S+)/;
         }
     else
         {
-        ($xscale) = $map_scale =~ /(\S+)/;
+        ($xscale) = $plot_scale =~ /(\S+)/;
         $yscale = $xscale;
         }
     $xxmin = $xmin * $xscale;
