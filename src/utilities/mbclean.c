@@ -75,6 +75,8 @@
 /* local defines */
 #define	MBCLEAN_FLAG_ONE	1
 #define	MBCLEAN_FLAG_BOTH	2
+#define	MBCLEAN_DISTANCE_MODE_FLAG		1
+#define	MBCLEAN_DISTANCE_MODE_UNFLAG	2
 
 /* MBIO buffer size default */
 #define	MBCLEAN_BUFFER_DEFAULT	500
@@ -127,7 +129,7 @@ int main (int argc, char **argv)
 				"\t-Fformat -Gfraction_low/fraction_high -Iinfile -Krange_min \n"
 				"\t-Llonflip -Mmode -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate \n"
 				"\t-Sspike_slope/mode/format -Ttolerance -Wwest/east/south/north \n"
-				"\t-Xbeamsleft/beamsright -Ydistanceleft/distanceright -Z\n\t-V -H]\n\n";
+				"\t-Xbeamsleft/beamsright -Ydistanceleft/distanceright[/mode] -Z\n\t-V -H]\n\n";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -202,8 +204,9 @@ int main (int argc, char **argv)
 	int	ndeviationtot = 0;
 	int	nouterbeamstot = 0;
 	int	nouterdistancetot = 0;
+	int ninnerdistancetot = 0;
 	int	nrailtot = 0;
-	int     nlong_acrosstot=0; //2010/03/07 DY
+	int nlong_acrosstot=0; //2010/03/07 DY
 	int	nmintot = 0;
 	int	nbadtot = 0;
 	int	nspiketot = 0;
@@ -216,16 +219,17 @@ int main (int argc, char **argv)
 	int	ndepthrange = 0;
 	int	nminrange = 0;
 	int	nfraction = 0;
-	int 	nspeed = 0;
-	int 	nzeropos = 0;
-	int 	nrangepos = 0;
+	int nspeed = 0;
+	int nzeropos = 0;
+	int nrangepos = 0;
 	int	ndeviation = 0;
 	int	nouterbeams = 0;
 	int	nouterdistance = 0;
+	int ninnerdistance = 0;
 	int	nrail = 0;
-	int     nlong_across=0; //2010/03/07 DY
-	int     nmax_heading_rate=0; //2010/04/27 DY
-	int     nmax_heading_ratetot=0; //2010/04/27 DY
+	int nlong_across=0; //2010/03/07 DY
+	int nmax_heading_rate=0; //2010/04/27 DY
+	int nmax_heading_ratetot=0; //2010/04/27 DY
 	int	nmin = 0;
 	int	nbad = 0;
 	int	nspike = 0;
@@ -234,7 +238,7 @@ int main (int argc, char **argv)
 	int	nflagesf = 0;
 	int	nunflagesf = 0;
 	int	nzeroesf = 0;
-	char	comment[MB_COMMENT_MAXLINE];
+	char comment[MB_COMMENT_MAXLINE];
 	int	check_slope = MB_NO;
 	double	slopemax = 1.0;
 	int	check_spike = MB_NO;
@@ -247,9 +251,12 @@ int main (int argc, char **argv)
 	int	zap_beams = MB_NO;
 	int	zap_beams_right = 0;
 	int	zap_beams_left = 0;
-	int	zap_distance = MB_NO;
-	double	zap_distance_right = 0.0;
-	double	zap_distance_left = 0.0;
+	int	flag_distance = MB_NO;
+	double	flag_distance_right = 0.0;
+	double	flag_distance_left = 0.0;
+	int	unflag_distance = MB_NO;
+	double	unflag_distance_right = 0.0;
+	double	unflag_distance_left = 0.0;
 	int	zap_rails = MB_NO;
 	int     zap_long_across = MB_NO;  //2010/03/07 DY
 	int     zap_max_heading_rate = MB_NO;  //2010/04/27 DY
@@ -311,6 +318,8 @@ int main (int argc, char **argv)
 	struct mb_esf_struct esf;
 
 	/* processing variables */
+	double distance_left, distance_right;
+	int distance_mode;
 	int	read_data;
 	int	start, done;
 	int	i, j, k, n, p, b;
@@ -481,14 +490,33 @@ int main (int argc, char **argv)
 			break;
 		case 'Y':
 		case 'y':
-			n = sscanf (optarg,"%lf/%lf", &zap_distance_left, &zap_distance_right);
+			n = sscanf (optarg,"%lf/%lf/%d", &distance_left, &distance_right, &distance_mode);
 			if (n == 1)
-				zap_distance_right = zap_distance_left;
-			if (zap_distance_left > 0.0)
-				zap_distance_left = -zap_distance_left;
-			if (zap_distance_right < 0.0)
-				zap_distance_right = -zap_distance_right;
-			zap_distance = MB_YES;
+				{
+				if (distance_left >= 0.0)
+					{
+					flag_distance_left = -distance_left;
+					flag_distance_right = distance_left;
+					}
+				else
+					{
+					flag_distance_left = distance_left;
+					flag_distance_right = -distance_left;
+					}
+				flag_distance = MB_YES;
+				}
+			else if (n == 2 || (n == 3 && distance_mode != MBCLEAN_DISTANCE_MODE_UNFLAG))
+				{
+				flag_distance_left = distance_left;
+				flag_distance_right = distance_right;
+				flag_distance = MB_YES;
+				}
+			else if (n == 3)
+				{
+				unflag_distance_left = distance_left;
+				unflag_distance_right = distance_right;
+				unflag_distance = MB_YES;
+				}
 			flag++;
 			break;
 		case 'Z':
@@ -514,7 +542,8 @@ int main (int argc, char **argv)
 	/* turn on slope checking if nothing else is to be used */
 	if (check_slope == MB_NO
 		&& zap_beams == MB_NO
-		&& zap_distance == MB_NO
+		&& flag_distance == MB_NO
+		&& unflag_distance == MB_NO
 		&& zap_rails == MB_NO
 		&& check_spike == MB_NO
 		&& check_range == MB_NO
@@ -572,9 +601,12 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       zap_beams:            %d\n",zap_beams);
 		fprintf(stderr,"dbg2       zap_beams_left:       %d\n",zap_beams_left);
 		fprintf(stderr,"dbg2       zap_beams_right:      %d\n",zap_beams_right);
-		fprintf(stderr,"dbg2       zap_distance:         %d\n",zap_distance);
-		fprintf(stderr,"dbg2       zap_distance_left:    %f\n",zap_distance_left);
-		fprintf(stderr,"dbg2       zap_distance_right:   %f\n",zap_distance_right);
+		fprintf(stderr,"dbg2       flag_distance:        %d\n",flag_distance);
+		fprintf(stderr,"dbg2       flag_distance_left:   %f\n",flag_distance_left);
+		fprintf(stderr,"dbg2       flag_distance_right:  %f\n",flag_distance_right);
+		fprintf(stderr,"dbg2       unflag_distance:      %d\n",unflag_distance);
+		fprintf(stderr,"dbg2       unflag_distance_left: %f\n",unflag_distance_left);
+		fprintf(stderr,"dbg2       unflag_distance_right:%f\n",unflag_distance_right);
 		fprintf(stderr,"dbg2       zap_rails:            %d\n",zap_rails);
 		fprintf(stderr,"dbg2       backup_dist:          %f\n",backup_dist);
 		fprintf(stderr,"dbg2       zap_max_heading_rate: %d\n",zap_max_heading_rate);
@@ -1061,14 +1093,14 @@ int main (int argc, char **argv)
 						}
 					}
 
-				/* zap outer beams by distance if requested */
-				if (zap_distance == MB_YES)
+				/* flag outer beams by distance if requested */
+				if (flag_distance == MB_YES)
 					{
 					for (i=0;i<ping[irec].beams_bath;i++)
 						{
 						if (mb_beam_ok(ping[irec].beamflag[i])
-							&& (ping[irec].bathacrosstrack[i] <= zap_distance_left
-							|| ping[irec].bathacrosstrack[i] >= zap_distance_right))
+							&& (ping[irec].bathacrosstrack[i] <= flag_distance_left
+							|| ping[irec].bathacrosstrack[i] >= flag_distance_right))
 							{
 							find_bad = MB_YES;
 							if (verbose >= 1)
@@ -1088,6 +1120,37 @@ int main (int argc, char **argv)
 							mb_ess_save(verbose, &esf, ping[irec].time_d,
 									i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 									MBP_EDIT_FILTER, &error);
+							}
+						}
+					}
+
+				/* unflag inner beams by distance if requested */
+				if (unflag_distance == MB_YES)
+					{
+					for (i=0;i<ping[irec].beams_bath;i++)
+						{
+						if (ping[irec].beamflag[i] != MB_FLAG_NULL
+							&& !mb_beam_ok(ping[irec].beamflag[i])
+							&& (ping[irec].bathacrosstrack[i] >= unflag_distance_left
+								&& ping[irec].bathacrosstrack[i] <= unflag_distance_right))
+							{
+							find_bad = MB_YES;
+							if (verbose >= 1)
+							fprintf(stderr,"y: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n",
+									ping[irec].time_i[0],
+									ping[irec].time_i[1],
+									ping[irec].time_i[2],
+									ping[irec].time_i[3],
+									ping[irec].time_i[4],
+									ping[irec].time_i[5],
+									ping[irec].time_i[6],
+									i,ping[irec].bath[i]);
+							ping[irec].beamflag[i] = MB_FLAG_NONE;
+							ninnerdistance++;
+							nflag++;
+							mb_ess_save(verbose, &esf, ping[irec].time_d,
+									i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+									MBP_EDIT_UNFLAG, &error);
 							}
 						}
 					}
@@ -1920,6 +1983,7 @@ i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
 			ndeviationtot += ndeviation;
 			nouterbeamstot += nouterbeams;
 			nouterdistancetot += nouterdistance;
+			ninnerdistancetot += ninnerdistance;
 			nrailtot += nrail;
 			nlong_acrosstot += nlong_across;
 			nmax_heading_ratetot += nmax_heading_rate;
@@ -1941,6 +2005,7 @@ i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
 					}
 				fprintf(stderr,"%d beams zapped by beam number\n",nouterbeams);
 				fprintf(stderr,"%d beams zapped by distance\n",nouterdistance);
+				fprintf(stderr,"%d beams unzapped by distance\n",ninnerdistance);
 				fprintf(stderr,"%d beams zapped for too few good beams in ping\n",nmin);
 				fprintf(stderr,"%d beams out of acceptable depth range\n",ndepthrange);
 				fprintf(stderr,"%d beams less than minimum range\n",nminrange);
@@ -1990,6 +2055,7 @@ i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
 		fprintf(stderr,"%d total beams zeroed in old esf files\n",nzeroesftot);
 		fprintf(stderr,"%d total beams zapped by beam number\n",nouterbeamstot);
 		fprintf(stderr,"%d total beams zapped by distance\n",nouterdistancetot);
+		fprintf(stderr,"%d total beams unzapped by distance\n",ninnerdistancetot);
 		fprintf(stderr,"%d total beams zapped for too few good beams in ping\n",nmintot);
 		fprintf(stderr,"%d total beams out of acceptable depth range\n",ndepthrangetot);
 		fprintf(stderr,"%d total beams less than minimum range\n",nminrangetot);

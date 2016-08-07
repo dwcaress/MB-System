@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbclean</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  7 July 2016 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  1 August 2016 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -63,20 +63,20 @@ as follows:
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1.&nbsp;Flag&nbsp;specified&nbsp;numbers&nbsp;of&nbsp;outer&nbsp;beams<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-X</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2.&nbsp;Flag&nbsp;outer&nbsp;beams&nbsp;by&nbsp;acrosstrack&nbsp;distance<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-Y</B>&nbsp;option).<BR>
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3. Flag all beams in pings outside specified<BR>
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>acceptable speed range (<B>-P</B> option).<BR>
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4. Flag all beams in pings outside specified<BR>
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>acceptable position bounds (<B>-W</B> option).<BR>
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5. Flag all beams in pings with zero<BR>
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>longitude and latitude values (<B>-Z</B> option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2.&nbsp;Flag&nbsp;outer&nbsp;beams&nbsp;and/or&nbsp;unflag&nbsp;inner&nbsp;beams<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;by&nbsp;acrosstrack&nbsp;distance&nbsp;(<B>-Y</B>&nbsp;option).
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3.&nbsp;Flag&nbsp;all&nbsp;beams&nbsp;in&nbsp;pings&nbsp;outside&nbsp;specified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>acceptable&nbsp;speed&nbsp;range&nbsp;(<B>-P</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4.&nbsp;Flag&nbsp;all&nbsp;beams&nbsp;in&nbsp;pings&nbsp;outside&nbsp;specified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>acceptable&nbsp;position&nbsp;bounds&nbsp;(<B>-W</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5.&nbsp;Flag&nbsp;all&nbsp;beams&nbsp;in&nbsp;pings&nbsp;with&nbsp;zero<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>longitude&nbsp;and&nbsp;latitude&nbsp;values&nbsp;(<B>-Z</B>&nbsp;option).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>6.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;specified&nbsp;acceptable<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>depth&nbsp;range&nbsp;(<B>-B</B>&nbsp;option).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7.&nbsp;Flag&nbsp;soundings&nbsp;with&nbsp;ranges&nbsp;less&nbsp;than<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>specified&nbsp;minimum&nbsp;value&nbsp;(<B>-B</B>&nbsp;option).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>8.&nbsp;Flag&nbsp;pings&nbsp;with&nbsp;excessive&nbsp;heading&nbsp;change&nbsp;rate<BR>
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>        (<B>-R</B> option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<B>-R</B>&nbsp;option).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>9.&nbsp;Zap&nbsp;&quot;rails&quot;&nbsp;(<B>-Q</B>&nbsp;option).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>10.&nbsp;Flag&nbsp;soundings&nbsp;with&nbsp;acrosstrack&nbsp;distances&nbsp;<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>greater&nbsp;than&nbsp;specified&nbsp;maximum&nbsp;value<BR>
@@ -399,13 +399,17 @@ are known to be unreliable. Default: <I>zap_beams</I> = 0.
 <DT><B>-Y</B>
 
 <DD>
-<I>distanceleft/distanceright</I>
+<I>distanceleft/distanceright[/mode]</I>
 <BR>
 
-This option causes <B>mbclean</B> to flag as bad all beams with
-acrosstrack distances more to port than <I>distanceleft</I>
-and more to starboard than <I>distanceright</I>. The distances
-are defined in meters, and distances to port of nadir are
+This option causes <B>mbclean</B> to flag and/or unflag beams according to
+acrosstrack distance. If <I>mode</I>=1 or is not specified, then all beams 
+outside the specified range (acrosstrack distances more to port/left than <I>distanceleft</I>
+or more to starboard/right than <I>distanceright</I>) will be flagged as bad.
+If <I>mode</I>=2, then all beams inside the specified range
+(acrosstrack distances more to starboard/right than <I>distanceleft</I>
+and more to port/left than <I>distanceright</I>) will be flagged as good.
+The distances are defined in meters, and distances to port of nadir are
 negative.
 <DT><B>-Z</B>
 
@@ -579,7 +583,7 @@ bathymetry data (e.g. <B>mbedit</B>).
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 7 July 2016</P></CENTER>
+Last Updated: 1 August 2016</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
