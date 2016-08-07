@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2281       August 7, 2016
 * Version 5.5.2279       July 8, 2016
 * Version 5.5.2278       July 1, 2016
   Version 5.5.2277       June 25, 2016
@@ -235,6 +236,16 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2281 (August 7, 2016)
+
+Mbnavadjustmerge: Added --unset-skipped-crossings-by-block=survey1/survey2
+and --unset-skipped-crossings-between-surveys options, and made the
+--import-tie-list=filename and --export-tie-list=filename options work
+correctly.
+
+Mbclean: Added option to flag outer beams and/or unflag inner beams
+by acrosstrack distance (-Y option).
 
 -----> 5.5.2279 (July 8, 2016)
 
