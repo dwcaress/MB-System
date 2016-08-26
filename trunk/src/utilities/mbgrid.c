@@ -1690,9 +1690,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		    /* check for "fast bathymetry" or "fbt" file */
 		    if (datatype == MBGRID_DATA_TOPOGRAPHY
 			    || datatype == MBGRID_DATA_BATHYMETRY)
-			{
-			mb_get_fbt(verbose, rfile, &rformat, &error);
-			}
+				{
+				mb_get_fbt(verbose, rfile, &rformat, &error);
+				}
 
 		    /* call mb_read_init() */
 		    if ((status = mb_read_init(
@@ -1700,21 +1700,21 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			btime_i,etime_i,speedmin,timegap,
 			&mbio_ptr,&btime_d,&etime_d,
 			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
-			{
-			mb_error(verbose,error,&message);
-			fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",rfile);
-			fprintf(outfp,"\nProgram <%s> Terminated\n",
-				program_name);
-			mb_memory_clear(verbose, &error);
-			exit(error);
-			}
+				{
+				mb_error(verbose,error,&message);
+				fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+				fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",rfile);
+				fprintf(outfp,"\nProgram <%s> Terminated\n",
+					program_name);
+				mb_memory_clear(verbose, &error);
+				exit(error);
+				}
 
 		    /* get mb_io_ptr */
 		    mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
                     
-                    /* get topography type */
-                    status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
+            /* get topography type */
+            status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
 
 		    /* allocate memory for reading data arrays */
 		    if (error == MB_ERROR_NO_ERROR)
@@ -1744,15 +1744,15 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 
 		    /* if error initializing memory then quit */
 		    if (error != MB_ERROR_NO_ERROR)
-			{
-			mb_error(verbose,error,&message);
-			fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
-				message);
-			fprintf(outfp,"\nProgram <%s> Terminated\n",
-				program_name);
-			mb_memory_clear(verbose, &error);
-			exit(error);
-			}
+				{
+				mb_error(verbose,error,&message);
+				fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
+					message);
+				fprintf(outfp,"\nProgram <%s> Terminated\n",
+					program_name);
+				mb_memory_clear(verbose, &error);
+				exit(error);
+				}
 
 		    /* loop over reading */
 		    while (error <= MB_ERROR_NO_ERROR)

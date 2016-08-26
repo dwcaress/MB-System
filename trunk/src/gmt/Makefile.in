@@ -132,18 +132,18 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-libmbgmt_la_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
+mbsystem_la_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbaux.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-am_libmbgmt_la_OBJECTS = mbswath.lo mbcontour.lo mbgrdtiff.lo
-libmbgmt_la_OBJECTS = $(am_libmbgmt_la_OBJECTS)
+am_mbsystem_la_OBJECTS = mbswath.lo mbcontour.lo mbgrdtiff.lo
+mbsystem_la_OBJECTS = $(am_mbsystem_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-libmbgmt_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+mbsystem_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(libmbgmt_la_LDFLAGS) $(LDFLAGS) -o $@
+	$(mbsystem_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -178,7 +178,7 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libmbgmt_la_SOURCES)
+SOURCES = $(mbsystem_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -234,6 +234,7 @@ EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GDAL_CONF = @GDAL_CONF@
 GMT_CONF = @GMT_CONF@
+GMT_PLUGINDIR = @GMT_PLUGINDIR@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -359,7 +360,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-lib_LTLIBRARIES = libmbgmt.la
+lib_LTLIBRARIES = mbsystem.la
 include_HEADERS = 
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	      -I${top_srcdir}/src/mbaux \
@@ -368,9 +369,9 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	      ${libnetcdf_CPPFLAGS}
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
-libmbgmt_la_LDFLAGS = -no-undefined -version-info 0:0:0
-libmbgmt_la_SOURCES = mbswath.c mbcontour.c mbgrdtiff.c
-libmbgmt_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
+mbsystem_la_LDFLAGS = -module -avoid-version -shared
+mbsystem_la_SOURCES = mbswath.c mbcontour.c mbgrdtiff.c
+mbsystem_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
 			${top_builddir}/src/mbaux/libmbaux.la \
 			${libgmt_LIBS} ${libgdal_LIBS} ${libnetcdf_LIBS}
 
@@ -443,8 +444,8 @@ clean-libLTLIBRARIES:
 	  rm -f $${locs}; \
 	}
 
-libmbgmt.la: $(libmbgmt_la_OBJECTS) $(libmbgmt_la_DEPENDENCIES) $(EXTRA_libmbgmt_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libmbgmt_la_LINK) -rpath $(libdir) $(libmbgmt_la_OBJECTS) $(libmbgmt_la_LIBADD) $(LIBS)
+mbsystem.la: $(mbsystem_la_OBJECTS) $(mbsystem_la_DEPENDENCIES) $(EXTRA_mbsystem_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(mbsystem_la_LINK) -rpath $(libdir) $(mbsystem_la_OBJECTS) $(mbsystem_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

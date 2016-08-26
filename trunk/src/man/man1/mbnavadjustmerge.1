@@ -8,7 +8,8 @@ both existing projects.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavadjustmerge\fP --input=project-base [--input=project-add --output=project-output
+\fBmbnavadjustmerge\fP --input=project-base
+[--input=project-add --output=project-output
 --set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
 --set-global-tie-xyz=file:section[:snav]
 --set-global-tie-xyonly=file:section[:snav]
@@ -33,6 +34,7 @@ Version 5.0
 --set-ties-xyonly-by-block=survey1/survey2
 --set-ties-zonly-by-block=survey1/survey2
 --set-ties-zoffset-by-block=survey1/survey2/zoffset
+--set-ties-xyonly-by-time=dt
 --skip-unset-crossings
 --insert-discontinuity=file:section
 --import-tie-list=filename
@@ -250,6 +252,12 @@ for an optimal navigation model.
 .B \--set-ties-zoffset-by-block=survey1/survey2/zoffset
 This option resets the zoffset value of all ties between sections in the specified
 two surveys.
+.TP
+.B \--set-ties-xyonly-by-time=dt
+This option sets the mode of all ties with nav points separated in time by dt or
+larger in the \fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
 .TP
 .B \--skip-unset-crossings
 This option sets all unset crossings in the input projects to be

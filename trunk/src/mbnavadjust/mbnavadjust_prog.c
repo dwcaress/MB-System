@@ -935,16 +935,11 @@ project.name,project.path,project.home,project.datadir);
 		    do_info_add(message, MB_YES);
 		    }
 			
-		/* check that raw and adjusted topography grids exist - if not make them */
-		sprintf(path, "%s/ProjectTopoRaw.grd", project.datadir);
-		if (stat(path, &file_status) != 0)
-			{
-			status = mbnavadjust_updaterawgrid();
-			}
+		/* update topography grid if it does not exist */
 		sprintf(path, "%s/ProjectTopoAdj.grd", project.datadir);
 		if (stat(path, &file_status) != 0)
 			{
-			status = mbnavadjust_updateadjustedgrid();
+			status = mbnavadjust_updategrid();
 			}
 		}
 
@@ -6430,7 +6425,7 @@ mbnavadjust_naverr_scale()
 
 void
 mbnavadjust_naverr_plot(int plotmode)
-{
+	{
 	/* local variables */
 	char	*function_name = "mbnavadjust_naverr_plot";
 	int	status = MB_SUCCESS;
@@ -8199,13 +8194,13 @@ mbnavadjust_invertnav()
 
 
 	/* invert if there is a project and enough crossings have been analyzed */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
+	if (project.open == MB_YES
+		&& project.num_crossings > 0
 		&& (project.num_crossings_analyzed >= 10
 			|| project.num_truecrossings_analyzed == project.num_truecrossings)
 		&& ok_to_invert == MB_YES)
 
-    		{
+		{
 		fprintf(stderr,"\nInverting for navigation adjustment model...\n");
 
 		/* set message dialog on */
@@ -8225,10 +8220,10 @@ mbnavadjust_invertnav()
 		misfit_initial = 0.0;
 		nmisfit = 0;
 		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-		    {
-		    crossing = &project.crossings[icrossing];
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    	{
+			{
+			crossing = &project.crossings[icrossing];
+			if (crossing->status == MBNA_CROSSING_STATUS_SET)
+				{
 				ntie += crossing->num_ties;
 				for (j=0;j<crossing->num_ties;j++)
 					{
@@ -8246,11 +8241,11 @@ mbnavadjust_invertnav()
 						}
 					}
 				}
-		    }
+			}
 		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    for (isection=0;isection<file->num_sections;isection++)
+			{
+			file = &project.files[i];
+			for (isection=0;isection<file->num_sections;isection++)
 				{
 				section = &file->sections[isection];
 				if (section->global_tie_status != MBNA_TIE_NONE)
@@ -8269,56 +8264,56 @@ mbnavadjust_invertnav()
 						}
 					}
 				}
-		    }
+			}
 		misfit_initial = sqrt(misfit_initial) / nmisfit;
 		perturbationsizeold = misfit_initial;
 
 		/* count the number of fixed files */
 		nfixed = 0;
 		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    if (file->status == MBNA_FILE_FIXEDNAV)
-		    	nfixed++;
-		    }
+			{
+			file = &project.files[i];
+			if (file->status == MBNA_FILE_FIXEDNAV)
+				nfixed++;
+			}
 
 		/* if only one block just set average offsets to zero */
 		if (project.num_blocks <= 1)
-		    {
-		    block_offset_avg_x = 0.0;
-		    block_offset_avg_y = 0.0;
-		    block_offset_avg_z = 0.0;
-		    for (i=0;i<project.num_files;i++)
+			{
+			block_offset_avg_x = 0.0;
+			block_offset_avg_y = 0.0;
+			block_offset_avg_z = 0.0;
+			for (i=0;i<project.num_files;i++)
 			{
 			file = &project.files[i];
 			file->block_offset_x = 0.0;
 			file->block_offset_y = 0.0;
 			file->block_offset_z = 0.0;
 			}
-		    }
+			}
 
 		/* else if more than one block first invert for block offsets  */
 		else if (project.num_blocks > 1)
-		    {
-		    /* allocate space for the inverse problem */
-		    ncols = ndf * project.num_blocks;
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&x,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&xx,&error);
+			{
+			/* allocate space for the inverse problem */
+			ncols = ndf * project.num_blocks;
+			status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&x,&error);
+			status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&xx,&error);
 
-		    /* initialize x array */
-		    for (i=0;i<ndf*project.num_blocks;i++)
+			/* initialize x array */
+			for (i=0;i<ndf*project.num_blocks;i++)
 				{
 				x[i] = 0.0;
 				}
 
-		    /* construct the inverse problem */
-		    sprintf(message,"Solving for block offsets...");
-		    do_message_update(message);
+			/* construct the inverse problem */
+			sprintf(message,"Solving for block offsets...");
+			do_message_update(message);
 
-		    done = MB_NO;
-		    iter = 0;
-		    while (done == MB_NO)
-		    	{
+			done = MB_NO;
+			iter = 0;
+			while (done == MB_NO)
+				{
 				/* initialize xx array */
 				for (i=0;i<ndf*project.num_blocks;i++)
 					{
@@ -8619,9 +8614,9 @@ block_offset_avg_x,block_offset_avg_y,block_offset_avg_z,navg,project.num_blocks
 		nnav = 0;
 		nsnav = 0;
 		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    for (j=0;j<file->num_sections;j++)
+			{
+			file = &project.files[i];
+			for (j=0;j<file->num_sections;j++)
 				{
 				section = &file->sections[j];
 				nsnav += section->num_snav - section->continuity;
@@ -8635,7 +8630,7 @@ block_offset_avg_x,block_offset_avg_y,block_offset_avg_z,navg,project.num_blocks
 					}
 					}
 				}
-		    }
+			}
 
 		/* allocate solution vector x, perturbation vector xx, and average solution vector xa */
 		ncols = ndf * nnav;
@@ -8646,9 +8641,9 @@ block_offset_avg_x,block_offset_avg_y,block_offset_avg_z,navg,project.num_blocks
 		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&xw,&error);
 		inav = 0;
 		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    for (j=0;j<file->num_sections;j++)
+			{
+			file = &project.files[i];
+			for (j=0;j<file->num_sections;j++)
 				{
 				section = &file->sections[j];
 				for (isnav=0;isnav<section->num_snav;isnav++)
@@ -8669,19 +8664,19 @@ block_offset_avg_x,block_offset_avg_y,block_offset_avg_z,navg,project.num_blocks
 					}
 					}
 				}
-		    }
+			}
 
 		/* calculate initial normalized misfit */
 		misfit_ties_initial = 0.0;
 		misfit_norm_initial = 0.0;
 		nmisfit = 0;
 		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-		    {
-		    crossing = &project.crossings[icrossing];
+			{
+			crossing = &project.crossings[icrossing];
 
-		    /* use only set crossings */
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    for (j=0;j<crossing->num_ties;j++)
+			/* use only set crossings */
+			if (crossing->status == MBNA_CROSSING_STATUS_SET)
+			for (j=0;j<crossing->num_ties;j++)
 				{
 				/* get tie */
 				tie = (struct mbna_tie *) &crossing->ties[j];
@@ -8740,12 +8735,12 @@ fprintf(stderr, "BAD TIE snav ID: %d %d %d\n", nc1, nc2, nsnav);
 //icrossing,j,tie->sigmar3,misfit,misfit_norm_initial);
 					}
 				}
-		    }
+			}
 		for (ifile=0;ifile<project.num_files;ifile++)
-		    {
-		    /* get file */
-		    file = &project.files[ifile];
-		    for (isection=0;isection<file->num_sections;isection++)
+			{
+			/* get file */
+			file = &project.files[ifile];
+			for (isection=0;isection<file->num_sections;isection++)
 				{
 				/* get section */
 				section = &file->sections[isection];
@@ -8786,7 +8781,7 @@ fprintf(stderr, "BAD GLOBAL TIE snav ID: %d %d\n", nc1, nsnav);
 						}
 					}
 				}
-		    }
+			}
 		misfit_ties_initial = sqrt(misfit_ties_initial) / nmisfit;
 		misfit_norm_initial = sqrt(misfit_norm_initial) / nmisfit;
 
@@ -8796,15 +8791,15 @@ fprintf(stderr, "BAD GLOBAL TIE snav ID: %d %d\n", nc1, nsnav);
 		/*     data along with the average block offsets.                 */
 		/*----------------------------------------------------------------*/
 		if (nfixed > 0 || nglobal > 0)
-		    {
-		    /* set message dialog on */
-		    sprintf(message,"Getting average offsets relative to fixed data...");
-		    do_message_update(message);
+			{
+			/* set message dialog on */
+			sprintf(message,"Getting average offsets relative to fixed data...");
+			do_message_update(message);
 
-		    /* allocate some extra arrays */
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&nxs,&error);
-		    for (inav=0;inav<nnav;inav++)
-		    	{
+			/* allocate some extra arrays */
+			status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&nxs,&error);
+			for (inav=0;inav<nnav;inav++)
+				{
 				nxs[inav] = 0;
 				xs[ndf * inav] = 0.0;
 				xs[ndf * inav + 1] = 0.0;
@@ -8814,8 +8809,8 @@ fprintf(stderr, "BAD GLOBAL TIE snav ID: %d %d\n", nc1, nsnav);
 				xw[ndf * inav + 2] = 0.0;
 				}
 
-		    /* loop over all ties, working only with ties including fixed sections */
-		    for (icrossing=0;icrossing<project.num_crossings;icrossing++)
+			/* loop over all ties, working only with ties including fixed sections */
+			for (icrossing=0;icrossing<project.num_crossings;icrossing++)
 				{
 				crossing = &project.crossings[icrossing];
 	
@@ -9039,8 +9034,8 @@ i,j,isnav,inav,nseqlast,nseq,file->status,nxs[inav],nxs[inav+1]); */
 					}
 				}
 			
-		    /* loop over all global ties */
-		    for (ifile=0;ifile<project.num_files;ifile++)
+			/* loop over all global ties */
+			for (ifile=0;ifile<project.num_files;ifile++)
 				{
 				file = &project.files[ifile];
 				for (isection=0;isection<file->num_sections;isection++)
@@ -9221,8 +9216,8 @@ offsetx,offsety,offsetz); */
 					}
 				}
 
-		    /* construct average offset model */
-		    for (inav=0;inav<nnav;inav++)
+			/* construct average offset model */
+			for (inav=0;inav<nnav;inav++)
 				{
 				if (xw[ndf * inav] > 0.0)
 					xa[ndf * inav] += xs[ndf * inav] / xw[ndf * inav];
@@ -9234,9 +9229,9 @@ offsetx,offsety,offsetz); */
 //xs[ndf*inav],xs[ndf*inav+1],xs[ndf*inav+2],xw[ndf*inav],xw[ndf*inav+1],xw[ndf*inav+2],xa[ndf*inav],xa[ndf*inav+1],xa[ndf*inav+2]);
 				}
 
-		    /* save solution */
-		    k = 0;
-		    for (i=0;i<project.num_files;i++)
+			/* save solution */
+			k = 0;
+			for (i=0;i<project.num_files;i++)
 				{
 				file = &project.files[i];
 				for (j=0;j<file->num_sections;j++)
@@ -9262,12 +9257,12 @@ i,j,isnav,k,x[3*k+2],xa[3*k+2],section->snav_z_offset[isnav]); */
 					}
 				}
 
-		    /* interpolate the solution */
-		    mbnavadjust_interpolatesolution(mbna_verbose, &project, &error);
+			/* interpolate the solution */
+			mbnavadjust_interpolatesolution(mbna_verbose, &project, &error);
 
-		    /* save interpolated solution */
-		    k = 0;
-		    for (i=0;i<project.num_files;i++)
+			/* save interpolated solution */
+			k = 0;
+			for (i=0;i<project.num_files;i++)
 				{
 				file = &project.files[i];
 				for (j=0;j<file->num_sections;j++)
@@ -9282,12 +9277,12 @@ i,j,isnav,k,x[3*k+2],xa[3*k+2],section->snav_z_offset[isnav]); */
 					}
 				}
 
-		    /* update model plot */
-		    if (project.modelplot == MB_YES && iter % 25 == 0)
-		    	mbnavadjust_modelplot_plot();
+			/* update model plot */
+			if (project.modelplot == MB_YES && iter % 25 == 0)
+				mbnavadjust_modelplot_plot();
 
-		    /* output goodness of fit for ties including fixed sections */
-		    for (icrossing=0;icrossing<project.num_crossings;icrossing++)
+			/* output goodness of fit for ties including fixed sections */
+			for (icrossing=0;icrossing<project.num_crossings;icrossing++)
 				{
 				crossing = &project.crossings[icrossing];
 	
@@ -9322,8 +9317,8 @@ i,j,isnav,k,x[3*k+2],xa[3*k+2],section->snav_z_offset[isnav]); */
 					}
 				}
 
-		    /* output goodness of fit for global ties */
-		    for (ifile=0;ifile<project.num_files;ifile++)
+			/* output goodness of fit for global ties */
+			for (ifile=0;ifile<project.num_files;ifile++)
 				{
 				file = &project.files[ifile];
 				for (isection=0;isection<file->num_sections;isection++)
@@ -9361,9 +9356,9 @@ i,j,isnav,k,x[3*k+2],xa[3*k+2],section->snav_z_offset[isnav]); */
 					}
 				}
 
-		    /* deallocate arrays */
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nxs,&error);
-		    }
+			/* deallocate arrays */
+			status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nxs,&error);
+			}
 
 
 		/*----------------------------------------------------------------*/
@@ -9376,1243 +9371,1243 @@ i,j,isnav,k,x[3*k+2],xa[3*k+2],section->snav_z_offset[isnav]); */
 		perturbationsizeold = misfit_ties_initial;
 		mbna_smoothweight = pow(10.0, project.smoothing) * mbna_offsetweight;
 		while (done == MB_NO)
-		    {
-		    /* zero smoothed adjustment vector solution */
-		    for (i=0;i<ncols;i++)
 			{
-			xx[i] = 0.0;
-			xs[i] = 0.0;
-			xw[i] = 0.0;
-			}
+			/* zero smoothed adjustment vector solution */
+			for (i=0;i<ncols;i++)
+				{
+				xx[i] = 0.0;
+				xs[i] = 0.0;
+				xw[i] = 0.0;
+				}
 
-		    /* loop over each crossing, applying offsets evenly to both points */
-		    for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-			{
-			crossing = &project.crossings[icrossing];
-
-			/* use only set crossings */
-			if (crossing->status == MBNA_CROSSING_STATUS_SET)
-			for (j=0;j<crossing->num_ties;j++)
-			    {
-			    /* get tie */
-			    tie = (struct mbna_tie *) &crossing->ties[j];
-
-			    /* get absolute id for first snav point */
-			    file1 = &project.files[crossing->file_id_1];
-			    section1 = &file1->sections[crossing->section_1];
-			    nc1 = section1->snav_invert_id[tie->snav_1];
-
-			    /* get absolute id for second snav point */
-			    file2 = &project.files[crossing->file_id_2];
-			    section2 = &file2->sections[crossing->section_2];
-			    nc2 = section2->snav_invert_id[tie->snav_2];
+			/* loop over each crossing, applying offsets evenly to both points */
+			for (icrossing=0;icrossing<project.num_crossings;icrossing++)
+				{
+				crossing = &project.crossings[icrossing];
+	
+				/* use only set crossings */
+				if (crossing->status == MBNA_CROSSING_STATUS_SET)
+				for (j=0;j<crossing->num_ties;j++)
+					{
+					/* get tie */
+					tie = (struct mbna_tie *) &crossing->ties[j];
+	
+					/* get absolute id for first snav point */
+					file1 = &project.files[crossing->file_id_1];
+					section1 = &file1->sections[crossing->section_1];
+					nc1 = section1->snav_invert_id[tie->snav_1];
+	
+					/* get absolute id for second snav point */
+					file2 = &project.files[crossing->file_id_2];
+					section2 = &file2->sections[crossing->section_2];
+					nc2 = section2->snav_invert_id[tie->snav_2];
 if (file1->sections[crossing->section_1].snav_time_d[tie->snav_1] == file2->sections[crossing->section_2].snav_time_d[tie->snav_2])
 fprintf(stderr,"ZERO TIME BETWEEN TIED POINTS!!  file:section:snav - %d:%d:%d   %d:%d:%d  DIFF:%f\n",
 	crossing->file_id_1,crossing->section_1,tie->snav_1,
 	crossing->file_id_2,crossing->section_2,tie->snav_2,
 	(file1->sections[crossing->section_1].snav_time_d[tie->snav_1]
 	 - file2->sections[crossing->section_2].snav_time_d[tie->snav_2]));
+	
+					/* get current offset vector including reduction of block solution */
+					if (tie->status != MBNA_TIE_Z)
+						{
+						offsetx = tie->offset_x_m - (xa[3*nc2] - xa[3*nc1]) - (x[3*nc2] - x[3*nc1]);
+						offsety = tie->offset_y_m - (xa[3*nc2+1] - xa[3*nc1+1]) - (x[3*nc2+1] - x[3*nc1+1]);
+						}
+					else
+						{
+						offsetx = 0.0;
+						offsety = 0.0;
+						}
+					if (tie->status != MBNA_TIE_XY)
+						{
+						offsetz = tie->offset_z_m - (xa[3*nc2+2] - xa[3*nc1+2]) - (x[3*nc2+2] - x[3*nc1+2]);
+						}
+					else
+						{
+						offsetz = 0.0;
+						}
+					offsetr = sqrt(offsetx * offsetx + offsety * offsety + offsetz * offsetz);
 
-			    /* get current offset vector including reduction of block solution */
-			    if (tie->status != MBNA_TIE_Z)
-			        {
-				offsetx = tie->offset_x_m - (xa[3*nc2] - xa[3*nc1]) - (x[3*nc2] - x[3*nc1]);
-				offsety = tie->offset_y_m - (xa[3*nc2+1] - xa[3*nc1+1]) - (x[3*nc2+1] - x[3*nc1+1]);
-				}
-			    else
-			        {
-				offsetx = 0.0;
-				offsety = 0.0;
-				}
-			    if (tie->status != MBNA_TIE_XY)
-			        {
-				offsetz = tie->offset_z_m - (xa[3*nc2+2] - xa[3*nc1+2]) - (x[3*nc2+2] - x[3*nc1+2]);
-				}
-			    else
-			        {
-				offsetz = 0.0;
-				}
-			    offsetr = sqrt(offsetx * offsetx + offsety * offsety + offsetz * offsetz);
-
-			    /* deal with each component of the error ellipse
-			    	- project offset vector onto each component by dot-product
-				- weight inversely by size of error for that component */
-
-			    /* deal with long axis */
-			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-				projected_offset = offsetx * tie->sigmax1[0]
-						+ offsety * tie->sigmax1[1]
-						+ offsetz * tie->sigmax1[2];
-			    else
-				projected_offset = offsetx * tie->sigmax1[0]
-						+ offsety * tie->sigmax1[1];
-			    if (fabs(tie->sigmar1) > 0.0)
-			    	{
-				xyweight = sqrt(mbna_offsetweight / tie->sigmar1);
-				zweight = sqrt(mbna_offsetweight / mbna_zweightfactor / tie->sigmar1);
-				}
-			    else
-			    	{
-				xyweight = 0.0;
-			    	zweight = 0.0;
-				}
+					/* deal with each component of the error ellipse
+						- project offset vector onto each component by dot-product
+					- weight inversely by size of error for that component */
+	
+					/* deal with long axis */
+					if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+						projected_offset = offsetx * tie->sigmax1[0]
+								+ offsety * tie->sigmax1[1]
+								+ offsetz * tie->sigmax1[2];
+					else
+						projected_offset = offsetx * tie->sigmax1[0]
+								+ offsety * tie->sigmax1[1];
+					if (fabs(tie->sigmar1) > 0.0)
+						{
+						xyweight = sqrt(mbna_offsetweight / tie->sigmar1);
+						zweight = sqrt(mbna_offsetweight / mbna_zweightfactor / tie->sigmar1);
+						}
+					else
+						{
+						xyweight = 0.0;
+						zweight = 0.0;
+						}
 //zweight = 0.0;
 
-			    /* deal with fixed, good, or poor status of sections */
-			    if (file1->status == file2->status)
-			    	{
-				if (file1->status == MBNA_FILE_GOODNAV || file1->status == MBNA_FILE_POORNAV)
-				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];				    
-				    }
-				else if (file1->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
-				    }
-				else if (file1->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    */
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    /*
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_GOODNAV)
-			    	{
-				if (file2->status == MBNA_FILE_POORNAV)
-				    {
-				    xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax1[2];
-				    xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax1[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    /*
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_POORNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV)
-				    {
-				    xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax1[2];
-				    xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax1[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax1[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax1[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
-				    xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax1[1];
-				    /*
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_FIXEDNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV || file2->status == MBNA_FILE_POORNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    */
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    */
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
-				    /*
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_FIXEDXYNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
-				    }
-				else if (file2->status == MBNA_FILE_POORNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax1[2];
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax1[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
-				    /*
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_FIXEDZNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV)
-				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    */
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
-				    }
-				else if (file2->status == MBNA_FILE_POORNAV)
-				    {
-				    xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax1[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    */
-				    xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax1[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
-				    }
-				}
-			    xw[3*nc1]   += xyweight;
-			    xw[3*nc1+1] += xyweight;
-			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-				xw[3*nc1+2] += zweight;
-			    xw[3*nc2]   += xyweight;
-			    xw[3*nc2+1] += xyweight;
-			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-				xw[3*nc2+2] += zweight;
+					/* deal with fixed, good, or poor status of sections */
+					if (file1->status == file2->status)
+						{
+						if (file1->status == MBNA_FILE_GOODNAV || file1->status == MBNA_FILE_POORNAV)
+							{
+							xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
+							xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];				    
+							}
+						else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
+							}
+						else if (file1->status == MBNA_FILE_FIXEDZNAV)
+							{
+							xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] +=  0.0;
+							*/
+							xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
+							/*
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_GOODNAV)
+						{
+						if (file2->status == MBNA_FILE_POORNAV)
+							{
+							xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax1[2];
+							xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax1[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+							xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
+							/*
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_POORNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV)
+							{
+							xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax1[2];
+							xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax1[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax1[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax1[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+							xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax1[1];
+							/*
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_FIXEDNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV || file2->status == MBNA_FILE_POORNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] +=  0.0;
+							*/
+							xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] +=  0.0;
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] +=  0.0;
+							*/
+							xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
+							/*
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax1[2];
+							xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax1[2];
+							}
+						else if (file2->status == MBNA_FILE_POORNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax1[2];
+							xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax1[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax1[2];
+							xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax1[1];
+							/*
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_FIXEDZNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV)
+							{
+							xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax1[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] +=  0.0;
+							*/
+							xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
+							}
+						else if (file2->status == MBNA_FILE_POORNAV)
+							{
+							xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax1[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] +=  0.0;
+							*/
+							xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax1[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] +=  0.0;
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax1[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax1[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] +=  0.0;
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax1[2];
+							}
+						}
+					xw[3*nc1]   += xyweight;
+					xw[3*nc1+1] += xyweight;
+					if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xw[3*nc1+2] += zweight;
+					xw[3*nc2]   += xyweight;
+					xw[3*nc2+1] += xyweight;
+					if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+					xw[3*nc2+2] += zweight;
 /* fprintf(stderr,"long axis:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xs[3*nc1],xs[3*nc1+1],xs[3*nc1+2],
 nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 
-			    /* deal with horizontal axis */
-			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-				projected_offset = offsetx * tie->sigmax2[0]
-						+ offsety * tie->sigmax2[1]
-						+ offsetz * tie->sigmax2[2];
-			    else
-				projected_offset = offsetx * tie->sigmax2[0]
-						+ offsety * tie->sigmax2[1];
-			    if (fabs(tie->sigmar2) > 0.0)
-			    	{
-				xyweight = sqrt(mbna_offsetweight / tie->sigmar2);
-			    	zweight = sqrt(mbna_offsetweight / mbna_zweightfactor / tie->sigmar2);
-				}
-			    else
-			    	{
-				xyweight = 0.0;
-			    	zweight = 0.0;
-				}
+					/* deal with horizontal axis */
+					if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+						projected_offset = offsetx * tie->sigmax2[0]
+							+ offsety * tie->sigmax2[1]
+							+ offsetz * tie->sigmax2[2];
+					else
+						projected_offset = offsetx * tie->sigmax2[0]
+							+ offsety * tie->sigmax2[1];
+					if (fabs(tie->sigmar2) > 0.0)
+						{
+						xyweight = sqrt(mbna_offsetweight / tie->sigmar2);
+						zweight = sqrt(mbna_offsetweight / mbna_zweightfactor / tie->sigmar2);
+						}
+					else
+						{
+						xyweight = 0.0;
+						zweight = 0.0;
+						}
 //zweight = 0.0;
 
-			    /* deal with fixed, good, or poor status of sections */
-			    if (file1->status == file2->status)
-			    	{
-				if (file1->status == MBNA_FILE_GOODNAV || file1->status == MBNA_FILE_POORNAV)
-				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file1->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file1->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    */
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.0;
-				    */
-				    }
+					/* deal with fixed, good, or poor status of sections */
+					if (file1->status == file2->status)
+						{
+						if (file1->status == MBNA_FILE_GOODNAV || file1->status == MBNA_FILE_POORNAV)
+							{
+							xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
+							xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file1->status == MBNA_FILE_FIXEDZNAV)
+							{
+							xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] +=  0.0;
+							*/
+							xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_GOODNAV)
+						{
+						if (file2->status == MBNA_FILE_POORNAV)
+							{
+							xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax2[2];
+							xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+							xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_POORNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV)
+							{
+							xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax2[2];
+							xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax2[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+							xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax2[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_FIXEDNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV || file2->status == MBNA_FILE_POORNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] +=  0.0;
+							*/
+							xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] +=  0.0;
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] +=  0.0;
+							*/
+							xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
+							xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file2->status == MBNA_FILE_POORNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax2[2];
+							xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+							/*
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							/*
+							xs[3*nc1]   +=  0.0;
+							xs[3*nc1+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
+							xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_FIXEDZNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV)
+							{
+							xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] +=  0.0;
+							*/
+							xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file2->status == MBNA_FILE_POORNAV)
+							{
+							xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax2[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] +=  0.0;
+							*/
+							xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax2[1];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] +=  0.0;
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
+							xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc1+2] +=  0.0;
+							xs[3*nc2]   +=  0.0;
+							xs[3*nc2+1] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
+							}
+						}
+					xw[3*nc1]   += xyweight;
+					xw[3*nc1+1] += xyweight;
+					if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+						xw[3*nc1+2] += zweight;
+					xw[3*nc2]   += xyweight;
+					xw[3*nc2+1] += xyweight;
+					if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+						xw[3*nc2+2] += zweight;
+	/* fprintf(stderr,"horizontal:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
+	nc1,xs[3*nc1],xs[3*nc1+1],xs[3*nc1+2],
+	nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
+	
+					/* deal with semi-vertical axis */
+					if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+						projected_offset = offsetx * tie->sigmax3[0]
+								+ offsety * tie->sigmax3[1]
+								+ offsetz * tie->sigmax3[2];
+					else
+						projected_offset = offsetz * tie->sigmax3[2];
+					if (fabs(tie->sigmar3) > 0.0)
+						{
+						xyweight = sqrt(mbna_offsetweight / tie->sigmar3);
+						zweight = sqrt(mbna_zweightfactor * mbna_offsetweight / tie->sigmar3);
+						}
+					else
+						{
+						xyweight = 0.0;
+						zweight = 0.0;
+						}
+	//xyweight = 0.0;
+	//zweight = 1.0;
+	
+					/* deal with fixed, good, or poor status of sections */
+					if (file1->status == file2->status)
+						{
+						if (file1->status == MBNA_FILE_GOODNAV || file1->status == MBNA_FILE_POORNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+									xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   +=  0.0;
+								xs[3*nc1+1] +=  0.0;
+								}
+							*/
+							xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.0;
+								xs[3*nc2+1] +=  0.0;
+								}
+							*/
+							xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file1->status == MBNA_FILE_FIXEDZNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							/*
+							xs[3*nc1+2] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+									xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							/*
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_GOODNAV)
+						{
+						if (file2->status == MBNA_FILE_POORNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							{
+							xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+							xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+							}
+							xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax3[2];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							{
+							xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+							}
+							xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							{
+							xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+							xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+							}
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							{
+								xs[3*nc2]   +=  0.0;
+								xs[3*nc2+1] +=  0.0;
+								}
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.0;
+								xs[3*nc2+1] +=  0.0;
+								}
+							*/
+							xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+									xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							/*
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_POORNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax3[2];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+									xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.0;
+								xs[3*nc2+1] +=  0.0;
+								}
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax3[2];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.0;
+								xs[3*nc2+1] +=  0.0;
+								}
+							*/
+							xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+									xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							/*
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_FIXEDNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV || file2->status == MBNA_FILE_POORNAV)
+							{
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   +=  0.0;
+								xs[3*nc1+1] +=  0.0;
+								}
+							xs[3*nc1+2] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+									xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   +=  0.0;
+								xs[3*nc1+1] +=  0.0;
+								}
+							xs[3*nc1+2] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.0;
+								xs[3*nc2+1] +=  0.0;
+								}
+							*/
+							xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   +=  0.0;
+								xs[3*nc1+1] +=  0.0;
+								}
+							xs[3*nc1+2] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+									xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							/*
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV)
+							{
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   +=  0.0;
+								xs[3*nc1+1] +=  0.0;
+								}
+							*/
+							xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file2->status == MBNA_FILE_POORNAV)
+							{
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   +=  0.0;
+								xs[3*nc1+1] +=  0.0;
+								}
+							*/
+							xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax3[2];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   +=  0.0;
+								xs[3*nc1+1] +=  0.0;
+								}
+							*/
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.0;
+								xs[3*nc2+1] +=  0.0;
+								}
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDZNAV)
+							{
+							/*
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   +=  0.0;
+								xs[3*nc1+1] +=  0.0;
+								}
+							*/
+							xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							/*
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						}
+					else if (file1->status == MBNA_FILE_FIXEDZNAV)
+						{
+						if (file2->status == MBNA_FILE_GOODNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							/*
+							xs[3*nc1+2] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+									xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file2->status == MBNA_FILE_POORNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							/*
+							xs[3*nc1+2] +=  0.0;
+							*/
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
+							}
+						else if (file2->status == MBNA_FILE_FIXEDNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							/*
+							xs[3*nc1+2] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+							{
+								xs[3*nc2]   +=  0.0;
+								xs[3*nc2+1] +=  0.0;
+								}
+							xs[3*nc2+2] +=  0.0;
+							*/
+							}
+						else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+							{
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
+								xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
+								}
+							/*
+							xs[3*nc1+2] +=  0.0;
+							if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+								{
+								xs[3*nc2]   +=  0.0;
+								xs[3*nc2+1] +=  0.0;
+								}
+							*/
+							xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
+							}
+						}
+					if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+						{
+						xw[3*nc1]   += xyweight;
+						xw[3*nc1+1] += xyweight;
+						}
+					xw[3*nc1+2] += zweight;
+					if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+						{
+						xw[3*nc2]   += xyweight;
+						xw[3*nc2+1] += xyweight;
+						}
+					xw[3*nc2+2] += zweight;
+	/* fprintf(stderr,"semi-vertical:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
+	nc1,xs[3*nc1],xs[3*nc1+1],xs[3*nc1+2],
+	nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
+	
+					}
 				}
-			    else if (file1->status == MBNA_FILE_GOODNAV)
-			    	{
-				if (file2->status == MBNA_FILE_POORNAV)
-				    {
-				    xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax2[2];
-				    xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_POORNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV)
-				    {
-				    xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax2[2];
-				    xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax2[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    xs[3*nc1]   += -0.995 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -0.995 * xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
-				    xs[3*nc2]   +=  0.005 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  0.005 * xyweight * projected_offset * tie->sigmax2[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_FIXEDNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV || file2->status == MBNA_FILE_POORNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    */
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    */
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_FIXEDXYNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax2[2];
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file2->status == MBNA_FILE_POORNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax2[2];
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
-				    /*
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    /*
-				    xs[3*nc1]   +=  0.0;
-				    xs[3*nc1+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax2[2];
-				    xs[3*nc2]   +=  xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  xyweight * projected_offset * tie->sigmax2[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_FIXEDZNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV)
-				    {
-				    xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    */
-				    xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file2->status == MBNA_FILE_POORNAV)
-				    {
-				    xs[3*nc1]   += -0.005 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -0.005 * xyweight * projected_offset * tie->sigmax2[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    */
-				    xs[3*nc2]   +=  0.995 * xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc2+1] +=  0.995 * xyweight * projected_offset * tie->sigmax2[1];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    xs[3*nc1]   += -xyweight * projected_offset * tie->sigmax2[0];
-				    xs[3*nc1+1] += -xyweight * projected_offset * tie->sigmax2[1];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc1+2] +=  0.0;
-				    xs[3*nc2]   +=  0.0;
-				    xs[3*nc2+1] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax2[2];
-				    }
-				}
-			    xw[3*nc1]   += xyweight;
-			    xw[3*nc1+1] += xyweight;
-			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-				xw[3*nc1+2] += zweight;
-			    xw[3*nc2]   += xyweight;
-			    xw[3*nc2+1] += xyweight;
-			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-				xw[3*nc2+2] += zweight;
-/* fprintf(stderr,"horizontal:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
-nc1,xs[3*nc1],xs[3*nc1+1],xs[3*nc1+2],
-nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
 
-			    /* deal with semi-vertical axis */
-			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-				projected_offset = offsetx * tie->sigmax3[0]
-						+ offsety * tie->sigmax3[1]
-						+ offsetz * tie->sigmax3[2];
-			    else
-				projected_offset = offsetz * tie->sigmax3[2];
-			    if (fabs(tie->sigmar3) > 0.0)
-			    	{
-				xyweight = sqrt(mbna_offsetweight / tie->sigmar3);
-			    	zweight = sqrt(mbna_zweightfactor * mbna_offsetweight / tie->sigmar3);
-				}
-			    else
-			    	{
-				xyweight = 0.0;
-			    	zweight = 0.0;
-				}
-//xyweight = 0.0;
-//zweight = 1.0;
-
-			    /* deal with fixed, good, or poor status of sections */
-			    if (file1->status == file2->status)
-			    	{
-				if (file1->status == MBNA_FILE_GOODNAV || file1->status == MBNA_FILE_POORNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file1->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc1]   +=  0.0;
-				        xs[3*nc1+1] +=  0.0;
-				        }
-				    */
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc2]   +=  0.0;
-				        xs[3*nc2+1] +=  0.0;
-				        }
-				    */
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file1->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    /*
-				    xs[3*nc1+2] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    /*
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_GOODNAV)
-			    	{
-				if (file2->status == MBNA_FILE_POORNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax3[2];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc2]   +=  0.0;
-				        xs[3*nc2+1] +=  0.0;
-				        }
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc2]   +=  0.0;
-				        xs[3*nc2+1] +=  0.0;
-				        }
-				    */
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    /*
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_POORNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax3[2];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc2]   +=  0.0;
-				        xs[3*nc2+1] +=  0.0;
-				        }
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc1+2] += -0.995 * zweight * projected_offset * tie->sigmax3[2];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc2]   +=  0.0;
-				        xs[3*nc2+1] +=  0.0;
-				        }
-				    */
-				    xs[3*nc2+2] +=  0.005 * zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    /*
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_FIXEDNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV || file2->status == MBNA_FILE_POORNAV)
-				    {
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc1]   +=  0.0;
-				        xs[3*nc1+1] +=  0.0;
-				        }
-				    xs[3*nc1+2] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc1]   +=  0.0;
-				        xs[3*nc1+1] +=  0.0;
-				        }
-				    xs[3*nc1+2] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc2]   +=  0.0;
-				        xs[3*nc2+1] +=  0.0;
-				        }
-				    */
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc1]   +=  0.0;
-				        xs[3*nc1+1] +=  0.0;
-				        }
-				    xs[3*nc1+2] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    /*
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_FIXEDXYNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV)
-				    {
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc1]   +=  0.0;
-				        xs[3*nc1+1] +=  0.0;
-				        }
-				    */
-				    xs[3*nc1+2] += -0.5 * zweight * projected_offset * tie->sigmax3[2];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc2+2] +=  0.5 * zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file2->status == MBNA_FILE_POORNAV)
-				    {
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc1]   +=  0.0;
-				        xs[3*nc1+1] +=  0.0;
-				        }
-				    */
-				    xs[3*nc1+2] += -0.005 * zweight * projected_offset * tie->sigmax3[2];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc2+2] +=  0.995 * zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc1]   +=  0.0;
-				        xs[3*nc1+1] +=  0.0;
-				        }
-				    */
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc2]   +=  0.0;
-				        xs[3*nc2+1] +=  0.0;
-				        }
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDZNAV)
-				    {
-				    /*
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc1]   +=  0.0;
-				        xs[3*nc1+1] +=  0.0;
-				        }
-				    */
-				    xs[3*nc1+2] += -zweight * projected_offset * tie->sigmax3[2];
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    /*
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				}
-			    else if (file1->status == MBNA_FILE_FIXEDZNAV)
-			    	{
-				if (file2->status == MBNA_FILE_GOODNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    /*
-				    xs[3*nc1+2] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file2->status == MBNA_FILE_POORNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    /*
-				    xs[3*nc1+2] +=  0.0;
-				    */
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc2]   +=  0.5 * xyweight * projected_offset * tie->sigmax3[0];
-				        xs[3*nc2+1] +=  0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    /*
-				    xs[3*nc1+2] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc2]   +=  0.0;
-				        xs[3*nc2+1] +=  0.0;
-				        }
-				    xs[3*nc2+2] +=  0.0;
-				    */
-				    }
-				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
-				    {
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-					xs[3*nc1]   += -0.5 * xyweight * projected_offset * tie->sigmax3[0];
-					xs[3*nc1+1] += -0.5 * xyweight * projected_offset * tie->sigmax3[1];
-					}
-				    /*
-				    xs[3*nc1+2] +=  0.0;
-				    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-					{
-				        xs[3*nc2]   +=  0.0;
-				        xs[3*nc2+1] +=  0.0;
-				        }
-				    */
-				    xs[3*nc2+2] +=  zweight * projected_offset * tie->sigmax3[2];
-				    }
-				}
-			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
+			/* loop over all global ties applying offsets to the affected points */
+			for (ifile=0;ifile<project.num_files;ifile++)
 				{
-				xw[3*nc1]   += xyweight;
-				xw[3*nc1+1] += xyweight;
-				}
-			    xw[3*nc1+2] += zweight;
-			    if (mbna_invert_mode == MBNA_INVERT_ZFULL)
-				{
-				xw[3*nc2]   += xyweight;
-				xw[3*nc2+1] += xyweight;
-				}
-			    xw[3*nc2+2] += zweight;
-/* fprintf(stderr,"semi-vertical:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
-nc1,xs[3*nc1],xs[3*nc1+1],xs[3*nc1+2],
-nc2,xs[3*nc2],xs[3*nc2+1],xs[3*nc2+2]);*/
-
-			    }
-			}
-
-		    /* loop over all global ties applying offsets to the affected points */
-		    for (ifile=0;ifile<project.num_files;ifile++)
-			{
-			file = &project.files[ifile];
-
-			for (isection=0;isection<file->num_sections;isection++)
-			    {
-			    /* use only set global ties */
-			    section = &file->sections[isection];
-			    if (section->global_tie_status != MBNA_TIE_NONE)
-				{
-				/* get absolute id for first snav point */
-				nc1 = section->snav_invert_id[section->global_tie_snav];
-				
-				/* get current offset vector including reduction of block solution */
-				offsetx = 0.0;
-				offsety = 0.0;
-				offsetz = 0.0;
-				if (section->global_tie_status != MBNA_TIE_Z)
-				    {
-				    offsetx = section->global_tie_offset_x_m - xa[3*nc1] - x[3*nc1];
-				    offsety = section->global_tie_offset_y_m - xa[3*nc1+1] - x[3*nc1+1];
-				    }
-				if (section->global_tie_status != MBNA_TIE_XY)
-				    {
-				    offsetz = section->global_tie_offset_z_m - xa[3*nc1+2] - x[3*nc1+2];
-				    }
-				offsetr = sqrt(offsetx * offsetx + offsety * offsety + offsetz * offsetz);
-				
-				/* global ties have a simple error ellipse oriented on the axes */
-				
-				if (section->global_tie_status != MBNA_TIE_Z)
-				    {
-				    /* deal with x-axis */
-				    projected_offset = offsetx;
-				    if (fabs(section->global_tie_xsigma) > 0.0)
-					xyweight = sqrt(mbna_offsetweight / section->global_tie_xsigma);
-				    else
-					xyweight = 0.0;
-//fprintf(stderr,"GLOBAL X: xyweight:%f mbna_offsetweight:%f xsigma:%f\n",xyweight,mbna_offsetweight,section->global_tie_xsigma);
-				    xs[3*nc1]   += xyweight * projected_offset;
-				    xw[3*nc1]   += xyweight;
-					
-				    /* deal with y-axis */
-				    projected_offset = offsety;
-				    if (fabs(section->global_tie_ysigma) > 0.0)
-					xyweight = sqrt(mbna_offsetweight / section->global_tie_ysigma);
-				    else
-					xyweight = 0.0;
-//fprintf(stderr,"GLOBAL Y: xyweight:%f mbna_offsetweight:%f zsigma:%f\n",xyweight,mbna_offsetweight,section->global_tie_ysigma);
-				    xs[3*nc1+1] += xyweight * projected_offset;
-				    xw[3*nc1+1] += xyweight;
-				    }
-				    
-				if (section->global_tie_status != MBNA_TIE_XY)
-				    {
-				    /* deal with z-axis */
-				    projected_offset = offsetz;
-				    if (fabs(section->global_tie_zsigma) > 0.0)
-					zweight = sqrt(mbna_zweightfactor * mbna_offsetweight / section->global_tie_zsigma);
-				    else
-					zweight = 0.0;
-//fprintf(stderr,"GLOBAL Z: zweight:%f mbna_offsetweight:%f sigma:%f\n",zweight,mbna_offsetweight,section->global_tie_zsigma);
-				    xs[3*nc1+2] += zweight * projected_offset;
-				    xw[3*nc1+2] += zweight;
-				    }
+				file = &project.files[ifile];
+	
+				for (isection=0;isection<file->num_sections;isection++)
+					{
+					/* use only set global ties */
+					section = &file->sections[isection];
+					if (section->global_tie_status != MBNA_TIE_NONE)
+						{
+						/* get absolute id for first snav point */
+						nc1 = section->snav_invert_id[section->global_tie_snav];
+						
+						/* get current offset vector including reduction of block solution */
+						offsetx = 0.0;
+						offsety = 0.0;
+						offsetz = 0.0;
+						if (section->global_tie_status != MBNA_TIE_Z)
+							{
+							offsetx = section->global_tie_offset_x_m - xa[3*nc1] - x[3*nc1];
+							offsety = section->global_tie_offset_y_m - xa[3*nc1+1] - x[3*nc1+1];
+							}
+						if (section->global_tie_status != MBNA_TIE_XY)
+							{
+							offsetz = section->global_tie_offset_z_m - xa[3*nc1+2] - x[3*nc1+2];
+							}
+						offsetr = sqrt(offsetx * offsetx + offsety * offsety + offsetz * offsetz);
+						
+						/* global ties have a simple error ellipse oriented on the axes */
+						
+						if (section->global_tie_status != MBNA_TIE_Z)
+							{
+							/* deal with x-axis */
+							projected_offset = offsetx;
+							if (fabs(section->global_tie_xsigma) > 0.0)
+							xyweight = sqrt(mbna_offsetweight / section->global_tie_xsigma);
+							else
+							xyweight = 0.0;
+	//fprintf(stderr,"GLOBAL X: xyweight:%f mbna_offsetweight:%f xsigma:%f\n",xyweight,mbna_offsetweight,section->global_tie_xsigma);
+							xs[3*nc1]   += xyweight * projected_offset;
+							xw[3*nc1]   += xyweight;
+							
+							/* deal with y-axis */
+							projected_offset = offsety;
+							if (fabs(section->global_tie_ysigma) > 0.0)
+							xyweight = sqrt(mbna_offsetweight / section->global_tie_ysigma);
+							else
+							xyweight = 0.0;
+	//fprintf(stderr,"GLOBAL Y: xyweight:%f mbna_offsetweight:%f zsigma:%f\n",xyweight,mbna_offsetweight,section->global_tie_ysigma);
+							xs[3*nc1+1] += xyweight * projected_offset;
+							xw[3*nc1+1] += xyweight;
+							}
+							
+						if (section->global_tie_status != MBNA_TIE_XY)
+							{
+							/* deal with z-axis */
+							projected_offset = offsetz;
+							if (fabs(section->global_tie_zsigma) > 0.0)
+							zweight = sqrt(mbna_zweightfactor * mbna_offsetweight / section->global_tie_zsigma);
+							else
+							zweight = 0.0;
+	//fprintf(stderr,"GLOBAL Z: zweight:%f mbna_offsetweight:%f sigma:%f\n",zweight,mbna_offsetweight,section->global_tie_zsigma);
+							xs[3*nc1+2] += zweight * projected_offset;
+							xw[3*nc1+2] += zweight;
+							}
 /* fprintf(stderr,"STAGE 3 GLOBAL TIE: %2d:%2d:%2d  status:%d  nc1:%d  tie: ",ifile,isection,section->global_tie_snav,section->global_tie_status,nc1);
 if (section->global_tie_status != MBNA_TIE_Z) fprintf(stderr,"x:%f y:%f ",section->global_tie_offset_x_m,section->global_tie_offset_y_m);
 if (section->global_tie_status != MBNA_TIE_XY) fprintf(stderr,"z:%f ",section->global_tie_offset_z_m);
@@ -10629,413 +10624,415 @@ fprintf(stderr," (off-xa-x-xx): ");
 if (section->global_tie_status != MBNA_TIE_Z) fprintf(stderr,"x:%f y:%f ",offsetx,offsety);
 if (section->global_tie_status != MBNA_TIE_XY) fprintf(stderr,"z:%f ",offsetz);
 fprintf(stderr,"\n");*/
+						}
+					}
 				}
-			    }
-			}
 
-		    /* now loop over all points applying smoothing to the xx[] vector */
-		    nseq = 0;
-		    ndx = 0;
-		    ndx2 = 0;
-		    for (ifile=0;ifile<project.num_files;ifile++)
-			{
-			file = &project.files[ifile];
-			if (file->status != MBNA_FILE_FIXEDNAV)
-			for (isection=0;isection<file->num_sections;isection++)
-			    {
-			    section = &file->sections[isection];
-			    if (section->continuity == MB_NO)
-			    	nseq = 0;
-			    for (isnav=0;isnav<section->num_snav;isnav++)
+			/* now loop over all points applying smoothing to the xx[] vector */
+			nseq = 0;
+			ndx = 0;
+			ndx2 = 0;
+			for (ifile=0;ifile<project.num_files;ifile++)
 				{
-				/* work only with points that are tied */
-				if (section->snav_num_ties[isnav] > 0
-				    || (section->global_tie_status != MBNA_TIE_NONE && section->global_tie_snav == isnav))
-				    {
-				    /* get ids for tied nav points */
-				    if (nseq > 1)
-				    	{
-						nc1 = nc2;
-						time_d1 = time_d2;
-						}
-				    if (nseq > 0)
-				    	{
-						nc2 = nc3;
-						time_d2 = time_d3;
-						}
-				    nc3 = section->snav_invert_id[isnav];
-				    time_d3 = section->snav_time_d[isnav];
-
-				    /* add first derivative constraint if nseq > 1 AND dtime_d > 0.0 */
-				    dtime_d = time_d3 - time_d2;
-				    if (nseq > 0 && dtime_d > 0.0)
+				file = &project.files[ifile];
+				if (file->status != MBNA_FILE_FIXEDNAV)
+				for (isection=0;isection<file->num_sections;isection++)
+					{
+					section = &file->sections[isection];
+					if (section->continuity == MB_NO)
+						nseq = 0;
+					for (isnav=0;isnav<section->num_snav;isnav++)
 						{
-			    		/* get current offset vector */
-						offsetx = (x[3*nc3]   - x[3*nc2]);
-						offsety = (x[3*nc3+1] - x[3*nc2+1]);
-						offsetz = (x[3*nc3+2] - x[3*nc2+2]);
-
-						/* add remaining offsets to both points */
-						xyweight = MIN(mbna_smoothweight / dtime_d, 0.5);
-						zweight = MIN(mbna_smoothweight / dtime_d, 0.5);
-						xs[3*nc2]   +=  0.5 * xyweight * offsetx;
-						xs[3*nc2+1] +=  0.5 * xyweight * offsety;
-						xs[3*nc2+2] +=  0.5 * zweight * offsetz;
-						xs[3*nc3]   += -0.5 * xyweight * offsetx;
-						xs[3*nc3+1] += -0.5 * xyweight * offsety;
-						xs[3*nc3+2] += -0.5 * zweight * offsetz;
-						xw[3*nc2]   += xyweight;
-						xw[3*nc2+1] += xyweight;
-						xw[3*nc2+2] += zweight;
-						xw[3*nc3]   += xyweight;
-						xw[3*nc3+1] += xyweight;
-						xw[3*nc3+2] += zweight;
-	
-						ndx++;
+						/* work only with points that are tied */
+						if (section->snav_num_ties[isnav] > 0
+							|| (section->global_tie_status != MBNA_TIE_NONE && section->global_tie_snav == isnav))
+							{
+							/* get ids for tied nav points */
+							if (nseq > 1)
+								{
+								nc1 = nc2;
+								time_d1 = time_d2;
+								}
+							if (nseq > 0)
+								{
+								nc2 = nc3;
+								time_d2 = time_d3;
+								}
+							nc3 = section->snav_invert_id[isnav];
+							time_d3 = section->snav_time_d[isnav];
+		
+							/* add first derivative constraint if nseq > 1 AND dtime_d > 0.0 */
+							dtime_d = time_d3 - time_d2;
+							if (nseq > 0 && dtime_d > 0.0)
+								{
+								/* get current offset vector */
+								offsetx = (x[3*nc3]   - x[3*nc2]);
+								offsety = (x[3*nc3+1] - x[3*nc2+1]);
+								offsetz = (x[3*nc3+2] - x[3*nc2+2]);
+		
+								/* add remaining offsets to both points */
+								xyweight = MIN(mbna_smoothweight / dtime_d, 0.5);
+								zweight = MIN(mbna_smoothweight / dtime_d, 0.5);
+								xs[3*nc2]   +=  0.5 * xyweight * offsetx;
+								xs[3*nc2+1] +=  0.5 * xyweight * offsety;
+								xs[3*nc2+2] +=  0.5 * zweight * offsetz;
+								xs[3*nc3]   += -0.5 * xyweight * offsetx;
+								xs[3*nc3+1] += -0.5 * xyweight * offsety;
+								xs[3*nc3+2] += -0.5 * zweight * offsetz;
+								xw[3*nc2]   += xyweight;
+								xw[3*nc2+1] += xyweight;
+								xw[3*nc2+2] += zweight;
+								xw[3*nc3]   += xyweight;
+								xw[3*nc3+1] += xyweight;
+								xw[3*nc3+2] += zweight;
+			
+								ndx++;
+								}
+		
+							/* add second derivative constraint if nseq > 2  AND dtime_d > 0.0 */
+							dtime_d = time_d3 - time_d1;
+							if (nseq > 1 && dtime_d > 0.0)
+								{
+									/* get current offset vector */
+								offsetx = x[3*nc1]   - 2.0 * x[3*nc2]   + x[3*nc3];
+								offsety = x[3*nc1+1] - 2.0 * x[3*nc2+1] + x[3*nc3+1];
+								offsetz = x[3*nc1+2] - 2.0 * x[3*nc2+2] + x[3*nc3+2];
+			
+								/* add remaining offsets to both points, or just one if one is fixed (weight 2nd derivative 1/4th of first derivative)*/
+								xyweight = MIN(mbna_smoothweight / dtime_d / dtime_d, 0.05);
+								zweight = MIN(mbna_smoothweight / dtime_d / dtime_d, 0.05);
+								xs[3*nc1]   += -xyweight * offsetx;
+								xs[3*nc1+1] += -xyweight * offsety;
+								xs[3*nc1+2] += -zweight * offsetz;
+								xs[3*nc2]   +=  2.0 * xyweight * offsetx;
+								xs[3*nc2+1] +=  2.0 * xyweight * offsety;
+								xs[3*nc2+2] +=  2.0 * zweight * offsetz;
+								xs[3*nc3]   += -xyweight * offsetx;
+								xs[3*nc3+1] += -xyweight * offsety;
+								xs[3*nc3+2] += -zweight * offsetz;
+								xw[3*nc1]   += xyweight;
+								xw[3*nc1+1] += xyweight;
+								xw[3*nc1+2] += zweight;
+								xw[3*nc2]   += xyweight;
+								xw[3*nc2+1] += xyweight;
+								xw[3*nc2+2] += zweight;
+								xw[3*nc3]   += xyweight;
+								xw[3*nc3+1] += xyweight;
+								xw[3*nc3+2] += zweight;
+			
+								ndx2++;
+								}
+		
+							/* increment sequence counter */
+							nseq++;
+							}
 						}
-
-				    /* add second derivative constraint if nseq > 2  AND dtime_d > 0.0 */
-				    dtime_d = time_d3 - time_d1;
-				    if (nseq > 1 && dtime_d > 0.0)
-						{
-							/* get current offset vector */
-						offsetx = x[3*nc1]   - 2.0 * x[3*nc2]   + x[3*nc3];
-						offsety = x[3*nc1+1] - 2.0 * x[3*nc2+1] + x[3*nc3+1];
-						offsetz = x[3*nc1+2] - 2.0 * x[3*nc2+2] + x[3*nc3+2];
-	
-						/* add remaining offsets to both points, or just one if one is fixed (weight 2nd derivative 1/4th of first derivative)*/
-						xyweight = MIN(mbna_smoothweight / dtime_d / dtime_d, 0.05);
-						zweight = MIN(mbna_smoothweight / dtime_d / dtime_d, 0.05);
-						xs[3*nc1]   += -xyweight * offsetx;
-						xs[3*nc1+1] += -xyweight * offsety;
-						xs[3*nc1+2] += -zweight * offsetz;
-						xs[3*nc2]   +=  2.0 * xyweight * offsetx;
-						xs[3*nc2+1] +=  2.0 * xyweight * offsety;
-						xs[3*nc2+2] +=  2.0 * zweight * offsetz;
-						xs[3*nc3]   += -xyweight * offsetx;
-						xs[3*nc3+1] += -xyweight * offsety;
-						xs[3*nc3+2] += -zweight * offsetz;
-						xw[3*nc1]   += xyweight;
-						xw[3*nc1+1] += xyweight;
-						xw[3*nc1+2] += zweight;
-						xw[3*nc2]   += xyweight;
-						xw[3*nc2+1] += xyweight;
-						xw[3*nc2+2] += zweight;
-						xw[3*nc3]   += xyweight;
-						xw[3*nc3+1] += xyweight;
-						xw[3*nc3+2] += zweight;
-	
-						ndx2++;
-						}
-
-				    /* increment sequence counter */
-				    nseq++;
-				    }
+					}
 				}
-			    }
-			}
 
-		    /* calculate perturbation and 2-norm of perturbation */
-		    perturbationsize = 0.0;
-		    for (i=0;i<ncols;i++)
-			{
-			if (xw[i] > 0.0)
-				xx[i] = xs[i] / xw[i];
-			else
-				xx[i] = 0.0;
-			perturbationsize += xx[i] * xx[i];
-			}
-		    perturbationsize = sqrt(perturbationsize) / ncols;
+			/* calculate perturbation and 2-norm of perturbation */
+			perturbationsize = 0.0;
+			for (i=0;i<ncols;i++)
+				{
+				if (xw[i] > 0.0)
+					xx[i] = xs[i] / xw[i];
+				else
+					xx[i] = 0.0;
+				perturbationsize += xx[i] * xx[i];
+				}
+			perturbationsize = sqrt(perturbationsize) / ncols;
 
-		    /* apply perturbation */
-		    for (i=0;i<ncols;i++)
-			{
+			/* apply perturbation */
+			for (i=0;i<ncols;i++)
+				{
 /* fprintf(stderr,"i:%d x:%f xx:%f ",i,x[i],xx[i]);*/
-			x[i] += xx[i];
-			xx[i] = 0.0;
+				x[i] += xx[i];
+				xx[i] = 0.0;
 /* fprintf(stderr,"x:%f\n",x[i]);*/
-			}
+				}
 
-		    /* calculate misfit */
-		    misfit_ties = 0.0;
-		    misfit_norm = 0.0;
-		    nmisfit = 0;
-		    for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-			{
-			crossing = &project.crossings[icrossing];
-
-			/* use only set crossings */
-			if (crossing->status == MBNA_CROSSING_STATUS_SET)
-			for (j=0;j<crossing->num_ties;j++)
-			    {
-			    /* get tie */
-			    tie = (struct mbna_tie *) &crossing->ties[j];
-
-			    /* get absolute id for first snav point */
-			    file1 = &project.files[crossing->file_id_1];
-			    section1 = &file1->sections[crossing->section_1];
-			    nc1 = section1->snav_invert_id[tie->snav_1];
-
-			    /* get absolute id for second snav point */
-			    file2 = &project.files[crossing->file_id_2];
-			    section2 = &file2->sections[crossing->section_2];
-			    nc2 = section2->snav_invert_id[tie->snav_2];
+			/* calculate misfit */
+			misfit_ties = 0.0;
+			misfit_norm = 0.0;
+			nmisfit = 0;
+			for (icrossing=0;icrossing<project.num_crossings;icrossing++)
+				{
+				crossing = &project.crossings[icrossing];
+	
+				/* use only set crossings */
+				if (crossing->status == MBNA_CROSSING_STATUS_SET)
+				for (j=0;j<crossing->num_ties;j++)
+					{
+					/* get tie */
+					tie = (struct mbna_tie *) &crossing->ties[j];
+	
+					/* get absolute id for first snav point */
+					file1 = &project.files[crossing->file_id_1];
+					section1 = &file1->sections[crossing->section_1];
+					nc1 = section1->snav_invert_id[tie->snav_1];
+	
+					/* get absolute id for second snav point */
+					file2 = &project.files[crossing->file_id_2];
+					section2 = &file2->sections[crossing->section_2];
+					nc2 = section2->snav_invert_id[tie->snav_2];
 if (nc1 > nsnav - 1 || nc2 > nsnav -1
 || nc1 < 0 || nc2 < 0)
 fprintf(stderr, "BAD TIE snav ID: %d %d %d\n", nc1, nc2, nsnav);
-
-			    /* get observed offset vector including removal of block solution */
-			    offsetx = (x[3*nc2] + xa[3*nc2] - x[3*nc1] - xa[3*nc1]) - tie->offset_x_m;
-			    offsety = (x[3*nc2+1] + xa[3*nc2+1] - x[3*nc1+1] - xa[3*nc1+1]) - tie->offset_y_m;
-			    offsetz = (x[3*nc2+2] + xa[3*nc2+2] - x[3*nc1+2] - xa[3*nc1+2]) - tie->offset_z_m;
-
-			    if (tie->status != MBNA_TIE_Z)
-				{
-				/* get long axis misfit */
-				misfit = (offsetx * tie->sigmax1[0]
-						+ offsety * tie->sigmax1[1]
-						+ offsetz * tie->sigmax1[2]);
-				misfit_ties += misfit * misfit;
-				misfit_norm += misfit * misfit / tie->sigmar1 / tie->sigmar1;
-				nmisfit++;
-    
-				/* get horizontal axis misfit */
-				misfit = (offsetx * tie->sigmax2[0]
-						+ offsety * tie->sigmax2[1]
-						+ offsetz * tie->sigmax2[2]);
-				misfit_ties += misfit * misfit;
-				misfit_norm += misfit * misfit / tie->sigmar2 / tie->sigmar2;
-				nmisfit++;
+	
+					/* get observed offset vector including removal of block solution */
+					offsetx = (x[3*nc2] + xa[3*nc2] - x[3*nc1] - xa[3*nc1]) - tie->offset_x_m;
+					offsety = (x[3*nc2+1] + xa[3*nc2+1] - x[3*nc1+1] - xa[3*nc1+1]) - tie->offset_y_m;
+					offsetz = (x[3*nc2+2] + xa[3*nc2+2] - x[3*nc1+2] - xa[3*nc1+2]) - tie->offset_z_m;
+	
+					if (tie->status != MBNA_TIE_Z)
+						{
+						/* get long axis misfit */
+						misfit = (offsetx * tie->sigmax1[0]
+								+ offsety * tie->sigmax1[1]
+								+ offsetz * tie->sigmax1[2]);
+						misfit_ties += misfit * misfit;
+						misfit_norm += misfit * misfit / tie->sigmar1 / tie->sigmar1;
+						nmisfit++;
+			
+						/* get horizontal axis misfit */
+						misfit = (offsetx * tie->sigmax2[0]
+								+ offsety * tie->sigmax2[1]
+								+ offsetz * tie->sigmax2[2]);
+						misfit_ties += misfit * misfit;
+						misfit_norm += misfit * misfit / tie->sigmar2 / tie->sigmar2;
+						nmisfit++;
+						}
+	
+					if (tie->status != MBNA_TIE_XY)
+						{
+						/* get semi-vertical axis misfit */
+						misfit = (offsetx * tie->sigmax3[0]
+								+ offsety * tie->sigmax3[1]
+								+ offsetz * tie->sigmax3[2]);
+						misfit_ties += misfit * misfit;
+						misfit_norm += misfit * misfit / tie->sigmar3 / tie->sigmar3;
+						nmisfit++;
+						}
+					}
 				}
-
-			    if (tie->status != MBNA_TIE_XY)
+			for (ifile=0;ifile<project.num_files;ifile++)
 				{
-				/* get semi-vertical axis misfit */
-				misfit = (offsetx * tie->sigmax3[0]
-						+ offsety * tie->sigmax3[1]
-						+ offsetz * tie->sigmax3[2]);
-				misfit_ties += misfit * misfit;
-				misfit_norm += misfit * misfit / tie->sigmar3 / tie->sigmar3;
-				nmisfit++;
-				}
-			    }
-			}
-		    for (ifile=0;ifile<project.num_files;ifile++)
-			{
-			/* get file */
-			file = &project.files[ifile];
-			for (isection=0;isection<file->num_sections;isection++)
-			    {
-			    /* get section */
-			    section = &file->sections[isection];
-			    if (section->global_tie_status != MBNA_TIE_NONE)
-				{
-				/* get absolute id for snav point */
-				nc1 = section->snav_invert_id[section->global_tie_snav];
+				/* get file */
+				file = &project.files[ifile];
+				for (isection=0;isection<file->num_sections;isection++)
+					{
+					/* get section */
+					section = &file->sections[isection];
+					if (section->global_tie_status != MBNA_TIE_NONE)
+						{
+						/* get absolute id for snav point */
+						nc1 = section->snav_invert_id[section->global_tie_snav];
 if (nc1 > nsnav - 1 || nc1 < 0)
 fprintf(stderr, "BAD GLOBAL TIE snav ID: %d %d\n", nc1, nsnav);
-
-				/* get observed offset vector including removal of block solution */
-				offsetx = (x[3*nc1] + xa[3*nc1]) - section->global_tie_offset_x_m;
-				offsety = (x[3*nc1+1] + xa[3*nc1+1]) - section->global_tie_offset_y_m;
-				offsetz = (x[3*nc1+2] + xa[3*nc1+2]) - section->global_tie_offset_z_m;
 		
-				if (section->global_tie_status != MBNA_TIE_Z)
-				    {
-				    /* get x axis misfit */
-				    misfit = offsetx;
-				    misfit_ties += misfit * misfit;
-				    misfit_norm += misfit * misfit / section->global_tie_xsigma / section->global_tie_xsigma;
-				    nmisfit++;
-    
-				    /* get y axis misfit */
-				    misfit = offsety;
-				    misfit_ties += misfit * misfit;
-				    misfit_norm += misfit * misfit / section->global_tie_ysigma / section->global_tie_ysigma;
-				    nmisfit++;
-				    }
-    
-				if (section->global_tie_status != MBNA_TIE_XY)
-				    {
-				    /* get z axis misfit */
-				    misfit = offsetz;
-				    misfit_ties += misfit * misfit;
-				    misfit_norm += misfit * misfit / section->global_tie_zsigma / section->global_tie_zsigma;
-				    nmisfit++;
-				    }
+						/* get observed offset vector including removal of block solution */
+						offsetx = (x[3*nc1] + xa[3*nc1]) - section->global_tie_offset_x_m;
+						offsety = (x[3*nc1+1] + xa[3*nc1+1]) - section->global_tie_offset_y_m;
+						offsetz = (x[3*nc1+2] + xa[3*nc1+2]) - section->global_tie_offset_z_m;
+				
+						if (section->global_tie_status != MBNA_TIE_Z)
+							{
+							/* get x axis misfit */
+							misfit = offsetx;
+							misfit_ties += misfit * misfit;
+							misfit_norm += misfit * misfit / section->global_tie_xsigma / section->global_tie_xsigma;
+							nmisfit++;
+			
+							/* get y axis misfit */
+							misfit = offsety;
+							misfit_ties += misfit * misfit;
+							misfit_norm += misfit * misfit / section->global_tie_ysigma / section->global_tie_ysigma;
+							nmisfit++;
+							}
+			
+						if (section->global_tie_status != MBNA_TIE_XY)
+							{
+							/* get z axis misfit */
+							misfit = offsetz;
+							misfit_ties += misfit * misfit;
+							misfit_norm += misfit * misfit / section->global_tie_zsigma / section->global_tie_zsigma;
+							nmisfit++;
+							}
+						}
+					}
 				}
-			    }
-			}
-		    misfit_ties = sqrt(misfit_ties) / nmisfit;
-		    misfit_norm = sqrt(misfit_norm) / nmisfit;
+			misfit_ties = sqrt(misfit_ties) / nmisfit;
+			misfit_norm = sqrt(misfit_norm) / nmisfit;
 
-		    /* check for convergence */
-		    perturbationchange = perturbationsize - perturbationsizeold;
-		    convergencecriterea = fabs(perturbationchange) / misfit_ties_initial;
-		    if (convergencecriterea < MBNA_CONVERGENCE || convergencecriterea > 10000.0 || iter > MBNA_INTERATION_MAX)
-		    	done = MB_YES;
+			/* check for convergence */
+			perturbationchange = perturbationsize - perturbationsizeold;
+			convergencecriterea = fabs(perturbationchange) / misfit_ties_initial;
+			if (convergencecriterea < MBNA_CONVERGENCE || convergencecriterea > 10000.0 || iter > MBNA_INTERATION_MAX)
+				done = MB_YES;
 
 fprintf(stderr,"MODEL INVERT: iter:%d nmisfit:%d misfit_initial:%f misfit_ties_initial:%f misfit_ties:%f misfit_norm_initial:%f misfit_norm:%f perturbationsize:%g perturbationchange:%g convergencecriterea:%g done:%d\n",
 iter,nmisfit,misfit_initial,misfit_ties_initial,misfit_ties,misfit_norm_initial,misfit_norm,perturbationsize,perturbationchange,convergencecriterea,done);
 
-		    if (done == MB_NO)
-		        {
-			perturbationsizeold = perturbationsize;
-		        iter++;
-		    	}
-
-		    /* save solution */
-		    k = 0;
-		    for (i=0;i<project.num_files;i++)
-			{
-			file = &project.files[i];
-			for (j=0;j<file->num_sections;j++)
-			    {
-			    section = &file->sections[j];
-			    for (isnav=0;isnav<section->num_snav;isnav++)
+			if (done == MB_NO)
 				{
-				if (section->snav_num_ties[isnav] > 0
-				    || section->global_tie_snav == isnav)
-				    {
-				    k = section->snav_invert_id[isnav];
-				    section->snav_lon_offset[isnav] = (x[3*k] + xa[3*k]) * project.mtodeglon;
+				perturbationsizeold = perturbationsize;
+				iter++;
+				}
+
+			/* save solution */
+			k = 0;
+			for (i=0;i<project.num_files;i++)
+				{
+				file = &project.files[i];
+				for (j=0;j<file->num_sections;j++)
+					{
+					section = &file->sections[j];
+					for (isnav=0;isnav<section->num_snav;isnav++)
+						{
+						if (section->snav_num_ties[isnav] > 0
+							|| section->global_tie_snav == isnav)
+							{
+							k = section->snav_invert_id[isnav];
+							section->snav_lon_offset[isnav] = (x[3*k] + xa[3*k]) * project.mtodeglon;
 /* fprintf(stderr,"isnav:%d k:%d x[3*k]:%f xa[3*k]:%f project.mtodeglon:%f section->snav_lon_offset[isnav]:%f\n",
 isnav,k,x[3*k],xa[3*k],project.mtodeglon,section->snav_lon_offset[isnav]);*/
-				    section->snav_lat_offset[isnav] = (x[3*k+1] + xa[3*k+1]) * project.mtodeglat;
+					section->snav_lat_offset[isnav] = (x[3*k+1] + xa[3*k+1]) * project.mtodeglat;
 /* fprintf(stderr,"isnav:%d k:%d x[3*k+1]:%f xa[3*k+1]:%f project.mtodeglat:%f section->snav_lat_offset[isnav]:%f\n",
 isnav,k,x[3*k+1],xa[3*k+1],project.mtodeglat,section->snav_lat_offset[isnav]);*/
-				    section->snav_z_offset[isnav] = (x[3*k+2] + xa[3*k+2]);
+					section->snav_z_offset[isnav] = (x[3*k+2] + xa[3*k+2]);
 /* fprintf(stderr,"isnav:%d k:%d x[3*k+2]:%f xa[3*k+2]:%f section->snav_lat_offset[isnav]:%f\n\n",
 isnav,k,x[3*k+2],xa[3*k+2],section->snav_lat_offset[isnav]); */
-				    }
+							}
+						}
+					}
 				}
-			    }
-			}
 
-		    /* interpolate the solution */
-		    mbnavadjust_interpolatesolution(mbna_verbose, &project, &error);
+			/* interpolate the solution */
+			mbnavadjust_interpolatesolution(mbna_verbose, &project, &error);
 
-		    /* save interpolated solution */
-		    k = 0;
-		    for (i=0;i<project.num_files;i++)
-			{
-			file = &project.files[i];
-			for (j=0;j<file->num_sections;j++)
-			    {
-			    section = &file->sections[j];
-			    for (isnav=0;isnav<section->num_snav;isnav++)
+			/* save interpolated solution */
+			k = 0;
+			for (i=0;i<project.num_files;i++)
 				{
-				section->snav_lon_offset[isnav] = section->snav_lon_offset_int[isnav];
-				section->snav_lat_offset[isnav] = section->snav_lat_offset_int[isnav];
-				section->snav_z_offset[isnav] = section->snav_z_offset_int[isnav];
+				file = &project.files[i];
+				for (j=0;j<file->num_sections;j++)
+					{
+					section = &file->sections[j];
+					for (isnav=0;isnav<section->num_snav;isnav++)
+					{
+					section->snav_lon_offset[isnav] = section->snav_lon_offset_int[isnav];
+					section->snav_lat_offset[isnav] = section->snav_lat_offset_int[isnav];
+					section->snav_z_offset[isnav] = section->snav_z_offset_int[isnav];
+					}
+					}
 				}
-			    }
+
+			/* set message dialog on */
+			if (iter % 100 == 0)
+				{
+				sprintf(message,"Completed inversion iteration %d Convergence:%.2f", iter, convergencecriterea / MBNA_CONVERGENCE);
+				do_message_update(message);
+				}
+
+
+			/* update model plot */
+			if (project.modelplot == MB_YES && iter % 25 == 0)
+				mbnavadjust_modelplot_plot();
 			}
-
-		    /* set message dialog on */
-		    if (iter % 100 == 0)
-		    	{
-		    	sprintf(message,"Completed inversion iteration %d Convergence:%.2f", iter, convergencecriterea / MBNA_CONVERGENCE);
-		    	do_message_update(message);
-		    	}
-
-
-		    /* update model plot */
-		    if (project.modelplot == MB_YES && iter % 25 == 0)
-		    	mbnavadjust_modelplot_plot();
-		    }
 		}
 
 	/* output results from navigation solution */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
+	if (project.open == MB_YES
+		&& project.num_crossings > 0
 		&& (project.num_crossings_analyzed >= 10
 			|| project.num_truecrossings_analyzed == project.num_truecrossings)
 		&& ok_to_invert == MB_YES
 		&& error == MB_ERROR_NO_ERROR)
-    		{
+		{
 		/* now output inverse solution */
 		sprintf(message,"Outputting navigation solution...");
 		do_message_update(message);
 
 		sprintf(message, " > Final misfit:%12g\n > Initial misfit:%12g\n",
-			misfit_ties, misfit_initial);
+		misfit_ties, misfit_initial);
 		do_info_add(message, MB_NO);
 
 		/* get crossing offset results */
 		sprintf(message, " > Nav Tie Offsets (m):  id  observed  solution  error\n");
 		do_info_add(message, MB_NO);
 		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-		    {
-		    crossing = &project.crossings[icrossing];
-
-		    /* check only set ties */
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    for (j=0;j<crossing->num_ties;j++)
 			{
-			tie = (struct mbna_tie *) &crossing->ties[j];
-			offset_x =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_lon_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_lon_offset[tie->snav_1];
-			offset_y =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_lat_offset[tie->snav_1];
-			offset_z =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_z_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_z_offset[tie->snav_1];
-			tie->inversion_status = MBNA_INVERSION_CURRENT;
-    			tie->inversion_offset_x = offset_x;
-    			tie->inversion_offset_y = offset_y;
-   			tie->inversion_offset_x_m = offset_x / project.mtodeglon;
-    			tie->inversion_offset_y_m = offset_y / project.mtodeglat;
-    			tie->inversion_offset_z_m = offset_z;
+			crossing = &project.crossings[icrossing];
+
+			/* check only set ties */
+			if (crossing->status == MBNA_CROSSING_STATUS_SET)
+				{
+				for (j=0;j<crossing->num_ties;j++)
+					{
+					tie = (struct mbna_tie *) &crossing->ties[j];
+					offset_x =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_lon_offset[tie->snav_2]
+						- project.files[crossing->file_id_1].sections[crossing->section_1].snav_lon_offset[tie->snav_1];
+					offset_y =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat_offset[tie->snav_2]
+						- project.files[crossing->file_id_1].sections[crossing->section_1].snav_lat_offset[tie->snav_1];
+					offset_z =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_z_offset[tie->snav_2]
+						- project.files[crossing->file_id_1].sections[crossing->section_1].snav_z_offset[tie->snav_1];
+					tie->inversion_status = MBNA_INVERSION_CURRENT;
+					tie->inversion_offset_x = offset_x;
+					tie->inversion_offset_y = offset_y;
+					tie->inversion_offset_x_m = offset_x / project.mtodeglon;
+					tie->inversion_offset_y_m = offset_y / project.mtodeglat;
+					tie->inversion_offset_z_m = offset_z;
 /* fprintf(stderr,"project.mtodeglon:%f project.mtodeglat:%f\n",project.mtodeglon,project.mtodeglat);
 fprintf(stderr,"offsets:%f %f %f   offsets_m:%f %f %f\n",
 offset_x,offset_y,offset_z,tie->inversion_offset_x_m,tie->inversion_offset_y_m,tie->inversion_offset_z_m);*/
 
-			sprintf(message, " >     %4d   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f\n",
-				icrossing,
-				tie->offset_x_m,
-				tie->offset_y_m,
-				tie->offset_z_m,
-				tie->inversion_offset_x_m,
-				tie->inversion_offset_y_m,
-				tie->inversion_offset_z_m,
-				(tie->inversion_offset_x_m - tie->offset_x_m),
-				(tie->inversion_offset_y_m - tie->offset_y_m),
-				(tie->inversion_offset_z_m - tie->offset_z_m));
-			do_info_add(message, MB_NO);
+					sprintf(message, " >     %4d   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f\n",
+						icrossing,
+						tie->offset_x_m,
+						tie->offset_y_m,
+						tie->offset_z_m,
+						tie->inversion_offset_x_m,
+						tie->inversion_offset_y_m,
+						tie->inversion_offset_z_m,
+						(tie->inversion_offset_x_m - tie->offset_x_m),
+						(tie->inversion_offset_y_m - tie->offset_y_m),
+						(tie->inversion_offset_z_m - tie->offset_z_m));
+					do_info_add(message, MB_NO);
+					}
+				}
 			}
-		    }
 
 		/* get global tie results */
 		sprintf(message, " > Global Tie Offsets (m):  id  observed  solution  error\n");
 		do_info_add(message, MB_NO);
 		for (ifile=0;ifile<project.num_files;ifile++)
-		    {
-		    file = &project.files[ifile];
-		    for (isection=0;isection<file->num_sections;isection++)
 			{
-			section = &file->sections[isection];
-			if (section->global_tie_status != MBNA_TIE_NONE)
-			    {
-			    offset_x =  section->snav_lon_offset[section->global_tie_snav];
-			    offset_y =  section->snav_lat_offset[section->global_tie_snav];
-			    offset_z =  section->snav_z_offset[section->global_tie_snav];
-			    
-			    sprintf(message, " >     %2.2d:%2.2d:%2.2d %d   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f\n",
-				ifile,isection,section->global_tie_snav,section->global_tie_status,
-				section->global_tie_offset_x_m,
-				section->global_tie_offset_y_m,
-				section->global_tie_offset_z_m,
-				offset_x / project.mtodeglon,
-				offset_y / project.mtodeglat,
-				offset_z,
-				(offset_x / project.mtodeglon - section->global_tie_offset_x_m),
-				(offset_y / project.mtodeglat - section->global_tie_offset_y_m),
-				(offset_z - section->global_tie_offset_z_m));
-			    do_info_add(message, MB_NO);
-			    }
+			file = &project.files[ifile];
+			for (isection=0;isection<file->num_sections;isection++)
+				{
+				section = &file->sections[isection];
+				if (section->global_tie_status != MBNA_TIE_NONE)
+					{
+					offset_x =  section->snav_lon_offset[section->global_tie_snav];
+					offset_y =  section->snav_lat_offset[section->global_tie_snav];
+					offset_z =  section->snav_z_offset[section->global_tie_snav];
+					
+					sprintf(message, " >     %2.2d:%2.2d:%2.2d %d   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f\n",
+					ifile,isection,section->global_tie_snav,section->global_tie_status,
+					section->global_tie_offset_x_m,
+					section->global_tie_offset_y_m,
+					section->global_tie_offset_z_m,
+					offset_x / project.mtodeglon,
+					offset_y / project.mtodeglat,
+					offset_z,
+					(offset_x / project.mtodeglon - section->global_tie_offset_x_m),
+					(offset_y / project.mtodeglat - section->global_tie_offset_y_m),
+					(offset_z - section->global_tie_offset_z_m));
+					do_info_add(message, MB_NO);
+					}
+				}
 			}
-		    }
-
+	
 		/* write updated project */
 		project.inversion_status = MBNA_INVERSION_CURRENT;
 		project.grid_status = MBNA_GRID_OLD;
@@ -11069,124 +11066,10 @@ offset_x,offset_y,offset_z,tie->inversion_offset_x_m,tie->inversion_offset_y_m,t
 /*--------------------------------------------------------------------*/
 
 int
-mbnavadjust_updaterawgrid()
+mbnavadjust_updategrid()
 {
 	/* local variables */
-	char	*function_name = "mbnavadjust_updaterawgrid";
-	int	status = MB_SUCCESS;
-	struct mbna_file *file;
-	char	apath[STRING_MAX];
-	char	command[STRING_MAX];
-	FILE	*afp;
-	double	lon_min, lon_max, lat_min, lat_max;
-	int		nfixed;
-	int		shellstatus;
-	int		i, j;
-
- 	/* print input debug statements */
-	if (mbna_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		}
-		
-	/* set message */
-	sprintf(message,"Generate raw topography grid...");
-	do_message_on(message);
-	do_info_add(message, MB_NO);
-	if (mbna_verbose == 0)
-		fprintf(stderr,"%s",message);	
-
-	/* update datalist files and mbgrid commands */
-	sprintf(apath,"%s/datalist.mb-1",project.datadir);
-	if ((afp = fopen(apath,"w")) != NULL)
-		{
-		for (i=0;i<project.num_files;i++)
-			{
-			file = &project.files[i];
-			if (file->status != MBNA_FILE_FIXEDNAV)
-				{
-				for (j=0;j<file->num_sections;j++)
-					{
-					fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
-					}
-				}
-			}
-		fclose(afp);
-		}
-	sprintf(apath,"%s/datalistf.mb-1",project.datadir);
-	if ((afp = fopen(apath,"w")) != NULL)
-		{
-		nfixed = 0;
-		for (i=0;i<project.num_files;i++)
-			{
-			file = &project.files[i];
-			if (file->status == MBNA_FILE_FIXEDNAV)
-				{
-				nfixed++;
-				for (j=0;j<file->num_sections;j++)
-					{
-					fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
-					}
-				}
-			}
-		fclose(afp);
-		}
-	
-	lon_min = project.lon_min - 0.1 * (project.lon_max - project.lon_min);
-	lon_max = project.lon_max + 0.1 * (project.lon_max - project.lon_min);
-	lat_min = project.lat_min - 0.1 * (project.lat_max - project.lat_min);
-	lat_max = project.lat_max + 0.1 * (project.lat_max - project.lat_min);
-	sprintf(apath,"%s/mbgrid_raw.cmd",project.datadir);
-	if ((afp = fopen(apath,"w")) != NULL)
-		{
-		fprintf(afp, "mbgrid -I datalist.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoRaw\n\n",
-				lon_min, lon_max, lat_min, lat_max);
-		fclose(afp);
-		}
-	sprintf(apath,"%s/mbgrid_adj.cmd",project.datadir);
-	if ((afp = fopen(apath,"w")) != NULL)
-		{
-		fprintf(afp, "mbgrid -I datalistp.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoAdj\n\n",
-				lon_min, lon_max, lat_min, lat_max);
-		if (nfixed > 0)
-			fprintf(afp, "mbgrid -I datalistf.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoFix\n\n",
-					lon_min, lon_max, lat_min, lat_max);
-		fclose(afp);
-		}
-
-	sprintf(command, "chmod +x %s/mbgrid_raw.cmd %s/mbgrid_adj.cmd", project.datadir, project.datadir);
-	shellstatus = system(command);
-
-	sprintf(command, "cd %s ; mbdatalist -Idatalist.mb-1 -O -Y -Z -V", project.datadir);
-	shellstatus = system(command);
-
-	sprintf(command, "cd %s ; mbgrid_raw.cmd", project.datadir);
-	shellstatus = system(command);
-
-	/* turn off message dialog */
-	do_message_off();
-
- 	/* print output debug statements */
-	if (mbna_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:       %d\n",error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:      %d\n",status);
-		}
-
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-
-int
-mbnavadjust_updateadjustedgrid()
-{
-	/* local variables */
-	char	*function_name = "mbnavadjust_updateadjustedgrid";
+	char	*function_name = "mbnavadjust_updategrid";
 	int		status = MB_SUCCESS;
 	struct mbna_file *file;
 	struct mbna_section *section;
@@ -11225,17 +11108,13 @@ mbnavadjust_updateadjustedgrid()
 			function_name);
 		}
 
-	/* output results from navigation solution into project, run mbprocess,
-		regenerate topography grid */
+	/* generate current topography grid */
 	if (project.open == MB_YES
-		&& project.num_crossings > 0
-	&& (project.num_crossings_analyzed >= 10
-		|| project.num_truecrossings_analyzed == project.num_truecrossings)
-	&& error == MB_ERROR_NO_ERROR)
+		&& project.num_files > 0
+		&& error == MB_ERROR_NO_ERROR)
 		{
-
 		/* set message */
-		sprintf(message,"Applying navigation solution within the project...");
+		sprintf(message,"Setting up to generate current topography grid...");
 		do_message_on(message);
 		do_info_add(message, MB_NO);
 		if (mbna_verbose == 0)
@@ -11258,268 +11137,263 @@ mbnavadjust_updateadjustedgrid()
 				}
 			fclose(afp);
 			}
-		sprintf(apath,"%s/datalistf.mb-1",project.datadir);
-		if ((afp = fopen(apath,"w")) != NULL)
-			{
-			for (i=0;i<project.num_files;i++)
-				{
-				file = &project.files[i];
-				if (file->status == MBNA_FILE_FIXEDNAV)
-					{
-					for (j=0;j<file->num_sections;j++)
-						{
-						fprintf(afp, "nvs_%4.4d_%4.4d.mb71 71\n", file->id, j);
-						}
-					}
-				}
-			fclose(afp);
-			}
 	
 		lon_min = project.lon_min - 0.1 * (project.lon_max - project.lon_min);
 		lon_max = project.lon_max + 0.1 * (project.lon_max - project.lon_min);
 		lat_min = project.lat_min - 0.1 * (project.lat_max - project.lat_min);
 		lat_max = project.lat_max + 0.1 * (project.lat_max - project.lat_min);
-		sprintf(apath,"%s/mbgrid_raw.cmd",project.datadir);
-		if ((afp = fopen(apath,"w")) != NULL)
-			{
-			fprintf(afp, "mbgrid -I datalist.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoRaw\n\n",
-					lon_min, lon_max, lat_min, lat_max);
-			fclose(afp);
-			}
 		sprintf(apath,"%s/mbgrid_adj.cmd",project.datadir);
 		if ((afp = fopen(apath,"w")) != NULL)
 			{
 			fprintf(afp, "mbgrid -I datalistp.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoAdj\n\n",
 					lon_min, lon_max, lat_min, lat_max);
-			fprintf(afp, "mbgrid -I datalistf.mb-1 \\\n\t-R%.8f/%.8f/%.8f/%.8f \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopoFix\n\n",
-					lon_min, lon_max, lat_min, lat_max);
 			fclose(afp);
 			}
-
-		/* generate new nav files */
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    sprintf(npath,"%s/nvs_%4.4d.mb166", project.datadir,i);
-		    sprintf(apath,"%s/nvs_%4.4d.na%d", project.datadir,i,file->output_id);
-		    if (file->status == MBNA_FILE_FIXEDNAV)
-				{
-				sprintf(message, " > Not outputting updated nav to fixed file %s\n", apath);
-				do_info_add(message, MB_NO);
-				if (mbna_verbose == 0)
-					fprintf(stderr,"%s",message);
-				}
-		    else if ((nfp = fopen(npath,"r")) == NULL)
-				{
-				status = MB_FAILURE;
-				error = MB_ERROR_OPEN_FAIL;
-				sprintf(message, " > Unable to read initial nav file %s\n", npath);
-				do_info_add(message, MB_NO);
-				if (mbna_verbose == 0)
-					fprintf(stderr,"%s",message);
-				}
-		    else if ((afp = fopen(apath,"w")) == NULL)
-				{
-				fclose(nfp);
-				status = MB_FAILURE;
-				error = MB_ERROR_OPEN_FAIL;
-				sprintf(message, " > Unable to open output nav file %s\n", apath);
-				do_info_add(message, MB_NO);
-				if (mbna_verbose == 0)
-					fprintf(stderr,"%s",message);
-				}
-		    else
-				{
-				sprintf(message, " > Output updated nav to %s\n", apath);
-				do_info_add(message, MB_NO);
-				if (mbna_verbose == 0)
-					fprintf(stderr,"%s",message);
-	
-				/* write file header */
-				right_now = time((time_t *)0);
-				strcpy(date,ctime(&right_now));
-							date[strlen(date)-1] = '\0';
-				if ((user_ptr = getenv("USER")) == NULL)
-					user_ptr = getenv("LOGNAME");
-				if (user_ptr != NULL)
-					strcpy(user,user_ptr);
-				else
-					strcpy(user, "unknown");
-				gethostname(host,MBP_FILENAMESIZE);
-				sprintf(ostring, "# Adjusted navigation generated using MBnavadjust\n");
-					fprintf(afp, "%s", ostring);
-				sprintf(ostring, "# MB-System version:        %s\n",MB_VERSION);
-					fprintf(afp, "%s", ostring);
-				sprintf(ostring, "# MB-System build data:     %s\n",MB_BUILD_DATE);
-					fprintf(afp, "%s", ostring);
-				sprintf(ostring, "# MBnavadjust version:      %s\n",rcs_id);
-					fprintf(afp, "%s", ostring);
-				sprintf(ostring, "# MBnavadjust project name: %s\n",project.name);
-					fprintf(afp, "%s", ostring);
-				sprintf(ostring, "# MBnavadjust project path: %s\n",project.path);
-					fprintf(afp, "%s", ostring);
-				sprintf(ostring, "# MBnavadjust project home: %s\n",project.home);
-					fprintf(afp, "%s", ostring);
-				sprintf(ostring, "# Generated by user <%s> on cpu <%s> at <%s>\n", user,host,date);
-					fprintf(afp, "%s", ostring);
-	
-				/* read the input nav */
-				isection = 0;
-				section = &file->sections[isection];
-				isnav = 0;
-				done = MB_NO;
-				while (done == MB_NO)
-					{
-					if ((result = fgets(buffer,BUFFER_MAX,nfp)) != buffer)
-						{
-						done = MB_YES;
-						}
-					else if ((nscan = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-								&time_i[0], &time_i[1], &time_i[2], &time_i[3],
-								&time_i[4], &seconds, &time_d,
-								&navlon, &navlat, &heading, &speed,
-								&draft, &roll, &pitch, &heave)) >= 11)
-						{
-						/* get integer seconds and microseconds */
-						time_i[5] = (int) floor(seconds);
-						time_i[6] = (int) ((seconds - (double)time_i[5]) * 1000000);
-						
-						/* fix nav from early version */
-						if (nscan < 15)
-							{
-							draft = 0.0;
-							roll = 0.0;
-							pitch = 0.0;
-							heave = 0.0;
-							}
 		
-						/* get next snav interval if needed */
-						while (time_d > section->snav_time_d[isnav+1]
-							&& !(isection == file->num_sections - 1
-							&& isnav == section->num_snav - 2))
-							{
-							if (isnav < section->num_snav - 2)
-							{
-							isnav++;
-							}
-							else if (isection < file->num_sections)
-							{
-							isection++;
-							section = &file->sections[isection];
-							isnav = 0;
-							}
-							}
-		
-						/* update the nav if possible (and it should be...) */
-						if (time_d < section->snav_time_d[isnav])
-							{
-							factor = 0.0;
-							}
-						else if (time_d > section->snav_time_d[isnav+1])
-							{
-							factor = 1.0;
-							}
-						else
-							{
-							if (section->snav_time_d[isnav+1] > section->snav_time_d[isnav])
-								{
-								factor = (time_d - section->snav_time_d[isnav])
-										/ (section->snav_time_d[isnav+1] - section->snav_time_d[isnav]);
-			/*if (fabs(time_d - section->snav_time_d[isnav]) < 1.0)
-			fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav]);
-			else if (fabs(time_d - section->snav_time_d[isnav+1]) < 1.0)
-			fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
-								}
-							else
-								factor = 0.0;
-							}
-		
-						/* update and output only nonzero navigation */
-						if (fabs(navlon) > 0.0000001 && fabs(navlat) > 0.0000001)
-							{
-							navlon += section->snav_lon_offset[isnav]
-									+ factor * (section->snav_lon_offset[isnav+1]
-										- section->snav_lon_offset[isnav]);
-							navlat += section->snav_lat_offset[isnav]
-									+ factor * (section->snav_lat_offset[isnav+1]
-										- section->snav_lat_offset[isnav]);
-							zoffset = section->snav_z_offset[isnav]
-									+ factor * (section->snav_z_offset[isnav+1]
-										- section->snav_z_offset[isnav]);
-		
-							/* write the updated nav out */
-							/* printing this string twice because in some situations the first
-								print has the time_d value come out as "nan" - this is the worst sort
-								of kluge for a real but mysterious bug - apologies to all who find this
-								- DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
-							sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f %.2f %.3f\r\n",
-								time_i[0], time_i[1], time_i[2], time_i[3],
-								time_i[4], time_i[5], time_i[6], time_d,
-								navlon, navlat, heading, speed,
-								draft, roll, pitch, heave, zoffset);
-							sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f %.2f %.3f\r\n",
-								time_i[0], time_i[1], time_i[2], time_i[3],
-								time_i[4], time_i[5], time_i[6], time_d,
-								navlon, navlat, heading, speed,
-								draft, roll, pitch, heave, zoffset);
-							fprintf(afp, "%s", ostring);
-		/* fprintf(stderr, "NAV OUT: %3.3d:%3.3d:%2.2d factor:%f | %s", i,isection,isnav,factor,ostring); */
-							}
-						}
-					}
-				fclose(nfp);
-				fclose(afp);
-	
-				/* update output file in mbprocess parameter file for each section file */
-				for (isection=0;isection<file->num_sections;isection++)
-					{
-					section = &(file->sections[isection]);
+		sprintf(command, "chmod +x %s/mbgrid_adj.cmd", project.datadir);
+		fprintf(stderr,"Executing:\n%s\n\n",command);
+		shellstatus = system(command);
 					
-					sprintf(spath, "%s/nvs_%4.4d_%4.4d.mb71",
-							project.datadir,file->id,isection);
-
-					status = mb_pr_update_format(mbna_verbose, spath,
-							MB_YES, 71,
-							&error);
-					status = mb_pr_update_navadj(mbna_verbose, spath,
-							MBP_NAVADJ_LLZ, apath,
-							MBP_NAV_LINEAR,
-							&error);
-					}
-				}
-		    }
-					
-		/* run mbdatalist to clear any processin lock files */
+		/* run mbdatalist to create datalistp.mb-1, update ancilliary files,
+			and clear any processing lock files */
 		sprintf(message, " > Running mbdatalist in project\n");
 		do_info_add(message, MB_NO);
 		if (mbna_verbose == 0)
 			fprintf(stderr,"%s",message);
-		sprintf(command, "cd %s ; mbdatalist -Y", project.datadir);
+		sprintf(command, "cd %s ; mbdatalist -Idatalist.mb-1 -O -Y -Z -V", project.datadir);
+		fprintf(stderr,"Executing:\n%s\n\n",command);
 		shellstatus = system(command);
-					
-		/* run mbprocess */
-		sprintf(message, " > Running mbprocess in project\n");
-		do_info_add(message, MB_NO);
-		if (mbna_verbose == 0)
-			fprintf(stderr,"%s",message);
-		sprintf(command, "cd %s ; mbprocess", project.datadir);
-		shellstatus = system(command);
-			
-		/* run mbgrid */
-		sprintf(message, " > Running mbgrid_adj\n");
-		do_info_add(message, MB_NO);
-		if (mbna_verbose == 0)
-			fprintf(stderr,"%s",message);
-		sprintf(command, "cd %s ; mbgrid_adj.cmd", project.datadir);
-		shellstatus = system(command);
-		project.grid_status = MBNA_GRID_CURRENT;
+
+		if (project.inversion_status != MBNA_INVERSION_NONE)
+			{
+			/* set message */
+			sprintf(message,"Applying navigation solution within the project...");
+			do_message_on(message);
+			do_info_add(message, MB_NO);
+			if (mbna_verbose == 0)
+				fprintf(stderr,"%s",message);
+	
+			/* generate new nav files */
+			for (i=0;i<project.num_files;i++)
+				{
+				file = &project.files[i];
+				sprintf(npath,"%s/nvs_%4.4d.mb166", project.datadir,i);
+				sprintf(apath,"%s/nvs_%4.4d.na%d", project.datadir,i,file->output_id);
+				if (file->status == MBNA_FILE_FIXEDNAV)
+					{
+					sprintf(message, " > Not outputting updated nav to fixed file %s\n", apath);
+					do_info_add(message, MB_NO);
+					if (mbna_verbose == 0)
+						fprintf(stderr,"%s",message);
+					}
+				else if ((nfp = fopen(npath,"r")) == NULL)
+					{
+					status = MB_FAILURE;
+					error = MB_ERROR_OPEN_FAIL;
+					sprintf(message, " > Unable to read initial nav file %s\n", npath);
+					do_info_add(message, MB_NO);
+					if (mbna_verbose == 0)
+						fprintf(stderr,"%s",message);
+					}
+				else if ((afp = fopen(apath,"w")) == NULL)
+					{
+					fclose(nfp);
+					status = MB_FAILURE;
+					error = MB_ERROR_OPEN_FAIL;
+					sprintf(message, " > Unable to open output nav file %s\n", apath);
+					do_info_add(message, MB_NO);
+					if (mbna_verbose == 0)
+						fprintf(stderr,"%s",message);
+					}
+				else
+					{
+					sprintf(message, " > Output updated nav to %s\n", apath);
+					do_info_add(message, MB_NO);
+					if (mbna_verbose == 0)
+						fprintf(stderr,"%s",message);
 		
-		/* write current project */
-		mbnavadjust_write_project(mbna_verbose, &project, &error);
-
-		/* turn off message dialog */
-		do_message_off();
-
+					/* write file header */
+					right_now = time((time_t *)0);
+					strcpy(date,ctime(&right_now));
+								date[strlen(date)-1] = '\0';
+					if ((user_ptr = getenv("USER")) == NULL)
+						user_ptr = getenv("LOGNAME");
+					if (user_ptr != NULL)
+						strcpy(user,user_ptr);
+					else
+						strcpy(user, "unknown");
+					gethostname(host,MBP_FILENAMESIZE);
+					sprintf(ostring, "# Adjusted navigation generated using MBnavadjust\n");
+						fprintf(afp, "%s", ostring);
+					sprintf(ostring, "# MB-System version:        %s\n",MB_VERSION);
+						fprintf(afp, "%s", ostring);
+					sprintf(ostring, "# MB-System build data:     %s\n",MB_BUILD_DATE);
+						fprintf(afp, "%s", ostring);
+					sprintf(ostring, "# MBnavadjust version:      %s\n",rcs_id);
+						fprintf(afp, "%s", ostring);
+					sprintf(ostring, "# MBnavadjust project name: %s\n",project.name);
+						fprintf(afp, "%s", ostring);
+					sprintf(ostring, "# MBnavadjust project path: %s\n",project.path);
+						fprintf(afp, "%s", ostring);
+					sprintf(ostring, "# MBnavadjust project home: %s\n",project.home);
+						fprintf(afp, "%s", ostring);
+					sprintf(ostring, "# Generated by user <%s> on cpu <%s> at <%s>\n", user,host,date);
+						fprintf(afp, "%s", ostring);
+		
+					/* read the input nav */
+					isection = 0;
+					section = &file->sections[isection];
+					isnav = 0;
+					done = MB_NO;
+					while (done == MB_NO)
+						{
+						if ((result = fgets(buffer,BUFFER_MAX,nfp)) != buffer)
+							{
+							done = MB_YES;
+							}
+						else if ((nscan = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+									&time_i[0], &time_i[1], &time_i[2], &time_i[3],
+									&time_i[4], &seconds, &time_d,
+									&navlon, &navlat, &heading, &speed,
+									&draft, &roll, &pitch, &heave)) >= 11)
+							{
+							/* get integer seconds and microseconds */
+							time_i[5] = (int) floor(seconds);
+							time_i[6] = (int) ((seconds - (double)time_i[5]) * 1000000);
+							
+							/* fix nav from early version */
+							if (nscan < 15)
+								{
+								draft = 0.0;
+								roll = 0.0;
+								pitch = 0.0;
+								heave = 0.0;
+								}
+			
+							/* get next snav interval if needed */
+							while (time_d > section->snav_time_d[isnav+1]
+								&& !(isection == file->num_sections - 1
+								&& isnav == section->num_snav - 2))
+								{
+								if (isnav < section->num_snav - 2)
+								{
+								isnav++;
+								}
+								else if (isection < file->num_sections)
+								{
+								isection++;
+								section = &file->sections[isection];
+								isnav = 0;
+								}
+								}
+			
+							/* update the nav if possible (and it should be...) */
+							if (time_d < section->snav_time_d[isnav])
+								{
+								factor = 0.0;
+								}
+							else if (time_d > section->snav_time_d[isnav+1])
+								{
+								factor = 1.0;
+								}
+							else
+								{
+								if (section->snav_time_d[isnav+1] > section->snav_time_d[isnav])
+									{
+									factor = (time_d - section->snav_time_d[isnav])
+											/ (section->snav_time_d[isnav+1] - section->snav_time_d[isnav]);
+				/*if (fabs(time_d - section->snav_time_d[isnav]) < 1.0)
+				fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav]);
+				else if (fabs(time_d - section->snav_time_d[isnav+1]) < 1.0)
+				fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
+									}
+								else
+									factor = 0.0;
+								}
+			
+							/* update and output only nonzero navigation */
+							if (fabs(navlon) > 0.0000001 && fabs(navlat) > 0.0000001)
+								{
+								navlon += section->snav_lon_offset[isnav]
+										+ factor * (section->snav_lon_offset[isnav+1]
+											- section->snav_lon_offset[isnav]);
+								navlat += section->snav_lat_offset[isnav]
+										+ factor * (section->snav_lat_offset[isnav+1]
+											- section->snav_lat_offset[isnav]);
+								zoffset = section->snav_z_offset[isnav]
+										+ factor * (section->snav_z_offset[isnav+1]
+											- section->snav_z_offset[isnav]);
+			
+								/* write the updated nav out */
+								/* printing this string twice because in some situations the first
+									print has the time_d value come out as "nan" - this is the worst sort
+									of kluge for a real but mysterious bug - apologies to all who find this
+									- DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
+								sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f %.2f %.3f\r\n",
+									time_i[0], time_i[1], time_i[2], time_i[3],
+									time_i[4], time_i[5], time_i[6], time_d,
+									navlon, navlat, heading, speed,
+									draft, roll, pitch, heave, zoffset);
+								sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.10f %.10f %.2f %.2f %.3f %.2f %.2f %.2f %.3f\r\n",
+									time_i[0], time_i[1], time_i[2], time_i[3],
+									time_i[4], time_i[5], time_i[6], time_d,
+									navlon, navlat, heading, speed,
+									draft, roll, pitch, heave, zoffset);
+								fprintf(afp, "%s", ostring);
+			/* fprintf(stderr, "NAV OUT: %3.3d:%3.3d:%2.2d factor:%f | %s", i,isection,isnav,factor,ostring); */
+								}
+							}
+						}
+					fclose(nfp);
+					fclose(afp);
+		
+					/* update output file in mbprocess parameter file for each section file */
+					for (isection=0;isection<file->num_sections;isection++)
+						{
+						section = &(file->sections[isection]);
+						
+						sprintf(spath, "%s/nvs_%4.4d_%4.4d.mb71",
+								project.datadir,file->id,isection);
+	
+						status = mb_pr_update_format(mbna_verbose, spath,
+								MB_YES, 71,
+								&error);
+						status = mb_pr_update_navadj(mbna_verbose, spath,
+								MBP_NAVADJ_LLZ, apath,
+								MBP_NAV_LINEAR,
+								&error);
+						}
+					}
+				}
+						
+			/* run mbprocess */
+			sprintf(message, " > Running mbprocess in project\n");
+			do_info_add(message, MB_NO);
+			if (mbna_verbose == 0)
+				fprintf(stderr,"%s",message);
+			sprintf(command, "cd %s ; mbprocess", project.datadir);
+			fprintf(stderr,"Executing:\n%s\n\n",command);
+			shellstatus = system(command);
+			}
+			
+		if (project.grid_status != MBNA_GRID_CURRENT)
+			{
+			/* run mbgrid */
+			sprintf(message, " > Running mbgrid_adj\n");
+			do_info_add(message, MB_NO);
+			if (mbna_verbose == 0)
+				fprintf(stderr,"%s",message);
+			sprintf(command, "cd %s ; mbgrid_adj.cmd", project.datadir);
+			fprintf(stderr,"Executing:\n%s\n\n",command);
+			shellstatus = system(command);
+			project.grid_status = MBNA_GRID_CURRENT;
+			
+			/* write current project */
+			mbnavadjust_write_project(mbna_verbose, &project, &error);
+	
+			/* turn off message dialog */
+			do_message_off();
+			}
 		}
 
  	/* print output debug statements */
@@ -16322,9 +16196,14 @@ int mbnavadjust_open_visualization(int which_grid)
 						sprintf(mbv_navname, "%4.4d:%4.4d", file->id, j);
 						sprintf(mbv_navpathraw, "%s/nvs_%4.4d_%4.4d.mb71", project.datadir, file->id, j);
 						sprintf(mbv_navpathprocessed, "%s/nvs_%4.4d_%4.4dp.mb71", project.datadir, file->id, j);
-						if ((nfp = fopen(mbv_file_name,"r")) != NULL)
+						mbv_navpings = 0;
+						if ((nfp = fopen(mbv_file_name,"r")) == NULL)
 							{
-							mbv_navpings = 0;
+							sprintf(mbv_file_name, "%s/nvs_%4.4d_%4.4d.mb71.fnv", project.datadir, file->id, j);
+							nfp = fopen(mbv_file_name,"r");
+							}
+						if (nfp != NULL)
+							{
 							while ((nscan = fscanf(nfp, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
 										  &year, &month, &day, &hour, &minute, &seconds,
 										  &navtime_d[mbv_navpings], &navlon[mbv_navpings], &navlat[mbv_navpings],
@@ -16341,7 +16220,9 @@ int mbnavadjust_open_visualization(int which_grid)
 								}
 							fclose(nfp);
 							}
-						status = mbview_addnav(mbna_verbose, instance,
+						if (mbv_navpings > 0)
+							{
+							status = mbview_addnav(mbna_verbose, instance,
 												mbv_navpings,
 												navtime_d,
 												navlon,
@@ -16369,6 +16250,7 @@ int mbnavadjust_open_visualization(int which_grid)
 												mbv_navcdp,
 												mbv_navdecimation,
 												&error);
+							}
 						}
 					}
 				}
