@@ -5053,8 +5053,7 @@ do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data)
 	
         /* update datalist files and topography grids */
         mbna_status = MBNA_STATUS_NAVSOLVE;
-        mbnavadjust_updaterawgrid();
-        mbnavadjust_updateadjustedgrid();
+        mbnavadjust_updategrid();
         mbna_status = MBNA_STATUS_GUI;
         do_update_status();
         if (project.modelplot == MB_YES)
@@ -5717,7 +5716,7 @@ do_action_updategrids( Widget w, XtPointer client_data, XtPointer call_data)
     acs = (XmAnyCallbackStruct*)call_data;
 
     mbna_status = MBNA_STATUS_NAVSOLVE;
-    mbnavadjust_updateadjustedgrid();
+    mbnavadjust_updategrid();
     mbna_status = MBNA_STATUS_GUI;
     do_update_status();
     if (project.modelplot == MB_YES)
@@ -6194,7 +6193,7 @@ do_visualize_dismiss_notify(size_t instance)
 void
 do_visualize_sensitivity(void)
 {
-    if (project.grid_status == MBNA_GRID_CURRENT && project.visualization_status == MB_NO)
+    if (project.grid_status != MBNA_GRID_NONE && project.visualization_status == MB_NO)
         XtVaSetValues(pushButton_visualize,
             XmNsensitive, True,
             NULL);

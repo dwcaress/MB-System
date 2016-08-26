@@ -44,43 +44,44 @@ static char version_id[] = "$Id$";
 #include "mbnavadjust_io.h"
 
 /* local defines */
-#define MBNAVADJUSTMERGE_MODE_NONE 	0
-#define MBNAVADJUSTMERGE_MODE_ADD 	1
+#define MBNAVADJUSTMERGE_MODE_NONE 		0
+#define MBNAVADJUSTMERGE_MODE_ADD 		1
 #define MBNAVADJUSTMERGE_MODE_MERGE 	2
-#define MBNAVADJUSTMERGE_MODE_COPY 	3
+#define MBNAVADJUSTMERGE_MODE_COPY 		3
 #define MBNAVADJUSTMERGE_MODE_MODIFY 	4
-#define NUMBER_MODS_MAX			1000
-#define MOD_MODE_NONE 			0
-#define MOD_MODE_SET_GLOBAL_TIE 	1
-#define MOD_MODE_SET_GLOBAL_TIE_XYZ	2
-#define MOD_MODE_SET_GLOBAL_TIE_XY	3
-#define MOD_MODE_SET_GLOBAL_TIE_Z	4
-#define MOD_MODE_UNSET_GLOBAL_TIE	5
-#define MOD_MODE_ADD_CROSSING 		6
-#define MOD_MODE_SET_TIE 		7
-#define MOD_MODE_SET_TIE_XYZ		8
-#define MOD_MODE_SET_TIE_XY		9
-#define MOD_MODE_SET_TIE_Z		10
-#define MOD_MODE_UNSET_TIE		11
-#define MOD_MODE_SET_TIES_XYZ_ALL	12
-#define MOD_MODE_SET_TIES_XY_ALL	13
-#define MOD_MODE_SET_TIES_Z_ALL	14
-#define MOD_MODE_SET_TIES_XYZ_FILE	15
-#define MOD_MODE_SET_TIES_XY_FILE	16
-#define MOD_MODE_SET_TIES_Z_FILE	17
-#define MOD_MODE_SET_TIES_XYZ_SURVEY	18
-#define MOD_MODE_SET_TIES_XY_SURVEY	19
-#define MOD_MODE_SET_TIES_Z_SURVEY	20
-#define MOD_MODE_SET_TIES_XYZ_BLOCK	21
-#define MOD_MODE_SET_TIES_XY_BLOCK	22
-#define MOD_MODE_SET_TIES_Z_BLOCK	23
-#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK	24
-#define MOD_MODE_SKIP_UNSET_CROSSINGS	25
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 26
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 27
-#define MOD_MODE_INSERT_DISCONTINUITY   28
-#define MOD_MODE_REIMPORT_FILE   29
-#define MOD_MODE_REIMPORT_ALL_FILES   30
+#define NUMBER_MODS_MAX										1000
+#define MOD_MODE_NONE 										0
+#define MOD_MODE_SET_GLOBAL_TIE 							1
+#define MOD_MODE_SET_GLOBAL_TIE_XYZ							2
+#define MOD_MODE_SET_GLOBAL_TIE_XY							3
+#define MOD_MODE_SET_GLOBAL_TIE_Z							4
+#define MOD_MODE_UNSET_GLOBAL_TIE							5
+#define MOD_MODE_ADD_CROSSING 								6
+#define MOD_MODE_SET_TIE 									7
+#define MOD_MODE_SET_TIE_XYZ								8
+#define MOD_MODE_SET_TIE_XY									9
+#define MOD_MODE_SET_TIE_Z									10
+#define MOD_MODE_UNSET_TIE									11
+#define MOD_MODE_SET_TIES_XYZ_ALL							12
+#define MOD_MODE_SET_TIES_XY_ALL							13
+#define MOD_MODE_SET_TIES_Z_ALL								14
+#define MOD_MODE_SET_TIES_XYZ_FILE							15
+#define MOD_MODE_SET_TIES_XY_FILE							16
+#define MOD_MODE_SET_TIES_Z_FILE							17
+#define MOD_MODE_SET_TIES_XYZ_SURVEY						18
+#define MOD_MODE_SET_TIES_XY_SURVEY							19
+#define MOD_MODE_SET_TIES_Z_SURVEY							20
+#define MOD_MODE_SET_TIES_XYZ_BLOCK							21
+#define MOD_MODE_SET_TIES_XY_BLOCK							22
+#define MOD_MODE_SET_TIES_Z_BLOCK							23
+#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK						24
+#define MOD_MODE_SET_TIES_XY_BY_TIME   						25
+#define MOD_MODE_SKIP_UNSET_CROSSINGS						26
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 				27
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS   	28
+#define MOD_MODE_INSERT_DISCONTINUITY                      	29
+#define MOD_MODE_REIMPORT_FILE             					30
+#define MOD_MODE_REIMPORT_ALL_FILES   						31
 
 struct mbnavadjust_mod
 	{
@@ -99,6 +100,7 @@ struct mbnavadjust_mod
 	double	xsigma;
 	double	ysigma;
 	double	zsigma;
+	double	dt;
 	};
 
 /*--------------------------------------------------------------------*/
@@ -135,6 +137,7 @@ int main (int argc, char **argv)
 				"\t--set-ties-xyonly-by-block=survey1/survey2\n"
 				"\t--set-ties-zonly-by-block=survey1/survey2\n"
 				"\t--set-ties-zoffset-by-block=survey1/survey2/zoffset\n"
+				"\t--set-ties-xyonly-by-time=timethreshold\n"
 				"\t--skip-unset-crossings\n"
 				"\t--unset-skipped-crossings-by-block=survey1/survey2\n"
 				"\t--unset-skipped-crossings-between-surveys\n"
@@ -163,43 +166,44 @@ int main (int argc, char **argv)
 	 */
 	static struct option options[] =
 		{
-		{"verbose",			no_argument, 		NULL, 		0},
-		{"help",			no_argument, 		NULL, 		0},
-		{"input",			required_argument, 	NULL, 		0},
-		{"output",			required_argument, 	NULL, 		0},
-		{"set-global-tie",		required_argument, 	NULL, 		0},
-		{"set-global-tie-xyz",		required_argument, 	NULL, 		0},
-		{"set-global-tie-xyonly",	required_argument, 	NULL, 		0},
-		{"set-global-tie-zonly",	required_argument, 	NULL, 		0},
-		{"unset-global-tie",		required_argument, 	NULL, 		0},
-		{"add-crossing",		required_argument, 	NULL, 		0},
-		{"set-tie",			required_argument, 	NULL, 		0},
-		{"set-tie-xyz",			required_argument, 	NULL, 		0},
-		{"set-tie-xyonly",		required_argument, 	NULL, 		0},
-		{"set-tie-zonly",		required_argument, 	NULL, 		0},
-		{"unset-tie",			required_argument, 	NULL, 		0},
-		{"set-ties-xyz-all",	no_argument, 	NULL, 		0},
-		{"set-ties-xyonly-all",	no_argument, 	NULL, 		0},
-		{"set-ties-zonly-all",	no_argument, 	NULL, 		0},
-		{"set-ties-xyz-with-file",	required_argument, 	NULL, 		0},
-		{"set-ties-xyonly-with-file",	required_argument, 	NULL, 		0},
-		{"set-ties-zonly-with-file",	required_argument, 	NULL, 		0},
-		{"set-ties-xyz-with-survey",	required_argument, 	NULL, 		0},
-		{"set-ties-xyonly-with-survey",	required_argument, 	NULL, 		0},
-		{"set-ties-zonly-with-survey",	required_argument, 	NULL, 		0},
-		{"set-ties-xyz-by-block",	required_argument, 	NULL, 		0},
-		{"set-ties-xyonly-by-block",	required_argument, 	NULL, 		0},
-		{"set-ties-zonly-by-block",	required_argument, 	NULL, 		0},
-		{"set-ties-zoffset-by-block",	required_argument, 	NULL, 		0},
-		{"skip-unset-crossings",	no_argument, 		NULL, 		0},
-		{"unset-skipped-crossings-by-block",	required_argument, 		NULL, 		0},
-		{"unset-skipped-crossings-between-surveys",	no_argument, 		NULL, 		0},
-		{"insert-discontinuity",	required_argument, 	NULL, 		0},
-		{"reimport-file",	required_argument, 	NULL, 		0},
-		{"reimport-all-files",	no_argument, 	NULL, 		0},
-		{"import-tie-list",	required_argument, 	NULL, 		0},
-		{"export-tie-list",	required_argument, 	NULL, 		0},
-		{NULL,				0, 			NULL, 		0}
+		{"verbose",										no_argument, 		NULL, 		0},
+		{"help",										no_argument, 		NULL, 		0},
+		{"input",										required_argument, 	NULL, 		0},
+		{"output",										required_argument, 	NULL, 		0},
+		{"set-global-tie",								required_argument, 	NULL, 		0},
+		{"set-global-tie-xyz",							required_argument, 	NULL, 		0},
+		{"set-global-tie-xyonly",						required_argument, 	NULL, 		0},
+		{"set-global-tie-zonly",						required_argument, 	NULL, 		0},
+		{"unset-global-tie",							required_argument, 	NULL, 		0},
+		{"add-crossing",								required_argument, 	NULL, 		0},
+		{"set-tie",										required_argument, 	NULL, 		0},
+		{"set-tie-xyz",									required_argument, 	NULL, 		0},
+		{"set-tie-xyonly",								required_argument, 	NULL, 		0},
+		{"set-tie-zonly",								required_argument, 	NULL, 		0},
+		{"unset-tie",									required_argument, 	NULL, 		0},
+		{"set-ties-xyz-all",							no_argument, 		NULL, 		0},
+		{"set-ties-xyonly-all",							no_argument, 		NULL, 		0},
+		{"set-ties-zonly-all",							no_argument, 		NULL, 		0},
+		{"set-ties-xyz-with-file",						required_argument, 	NULL, 		0},
+		{"set-ties-xyonly-with-file",					required_argument, 	NULL, 		0},
+		{"set-ties-zonly-with-file",					required_argument, 	NULL, 		0},
+		{"set-ties-xyz-with-survey",					required_argument, 	NULL, 		0},
+		{"set-ties-xyonly-with-survey",					required_argument, 	NULL, 		0},
+		{"set-ties-zonly-with-survey",					required_argument, 	NULL, 		0},
+		{"set-ties-xyz-by-block",						required_argument, 	NULL, 		0},
+		{"set-ties-xyonly-by-block",					required_argument, 	NULL, 		0},
+		{"set-ties-zonly-by-block",						required_argument, 	NULL, 		0},
+		{"set-ties-zoffset-by-block",					required_argument, 	NULL, 		0},
+		{"set-ties-xyonly-by-time",						required_argument, 	NULL, 		0},
+		{"skip-unset-crossings",						no_argument, 		NULL, 		0},
+		{"unset-skipped-crossings-by-block",			required_argument, 	NULL, 		0},
+		{"unset-skipped-crossings-between-surveys",		no_argument, 		NULL, 		0},
+		{"insert-discontinuity",						required_argument, 	NULL, 		0},
+		{"reimport-file",								required_argument, 	NULL, 		0},
+		{"reimport-all-files",							no_argument, 		NULL, 		0},
+		{"import-tie-list",								required_argument, 	NULL, 		0},
+		{"export-tie-list",								required_argument, 	NULL, 		0},
+		{NULL,											0, 					NULL, 		0}
 		};
 		
 	/* mbnavadjustmerge controls */
@@ -1055,6 +1059,60 @@ int main (int argc, char **argv)
 							optarg);	
 					}
 				}
+			
+			/*-------------------------------------------------------
+			 * set all ties between nav points separated by more time than timethreshold to xyonly
+				--set-ties-xyonly-by-time=timethreshold[y | d | h | m] */
+			else if (strcmp("set-ties-xyonly-by-time", options[option_index].name) == 0)
+				{
+				if (num_mods < NUMBER_MODS_MAX)
+					{
+					if ((nscan = sscanf(optarg, "%lfy",
+						       &mods[num_mods].dt)) == 1)
+						{
+						mods[num_mods].dt *= MB_SECINYEAR;
+						mods[num_mods].mode = MOD_MODE_SET_TIES_XY_BY_TIME;
+						num_mods++;
+						}
+					else if ((nscan = sscanf(optarg, "%lfd",
+						       &mods[num_mods].dt)) == 1)
+						{
+						mods[num_mods].dt *= MB_SECINDAY;
+						mods[num_mods].mode = MOD_MODE_SET_TIES_XY_BY_TIME;
+						num_mods++;
+						}
+					else if ((nscan = sscanf(optarg, "%lfh",
+						       &mods[num_mods].dt)) == 1)
+						{
+						mods[num_mods].dt *= MB_SECINHOUR;
+						mods[num_mods].mode = MOD_MODE_SET_TIES_XY_BY_TIME;
+						num_mods++;
+						}
+					else if ((nscan = sscanf(optarg, "%lfm",
+						       &mods[num_mods].dt)) == 1)
+						{
+						mods[num_mods].dt *= MB_SECINMINUTE;
+						mods[num_mods].mode = MOD_MODE_SET_TIES_XY_BY_TIME;
+						num_mods++;
+						}
+					else if ((nscan = sscanf(optarg, "%lf",
+						       &mods[num_mods].dt)) == 1)
+						{
+						mods[num_mods].mode = MOD_MODE_SET_TIES_XY_BY_TIME;
+						num_mods++;
+						}
+					else
+						{
+						fprintf(stderr,"Failure to parse --set-ties-xyonly-by-time=%s\n\tmod command ignored\n\n",
+							optarg);	
+						}
+					}
+				else
+					{
+					fprintf(stderr,"Maximum number of mod commands reached:\n\t--set-ties-xyonly-by-time=%s command ignored\n\n",
+							optarg);	
+					}
+				}
 				
 			/*-------------------------------------------------------
 			 * set all crossings without ties in the input project(s) to be skipped
@@ -1199,14 +1257,17 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       export_tie_list_set:        %d\n",export_tie_list_set);
 		fprintf(stderr,"dbg2       export_tie_list_path:       %s\n",export_tie_list_path);
 		fprintf(stderr,"dbg2       num_mods:                   %d\n",num_mods);
+		fprintf(stderr,"dbg2       mod# mode survey1 file1 section1 survey2 file2 section2 "
+						"xoffset yoffset zoffset xsigma ysigma zsigma dt\n");
 		for (i=0;i<num_mods;i++)
 			{
-			fprintf(stderr,"dbg2       mods[%d]: %d  %d %d %d   %d %d %d  %f %f %f  %f %f %f\n",
+			fprintf(stderr,"dbg2       mods[%d]: %d  %d %d %d   %d %d %d  %f %f %f  %f %f %f  %f\n",
 				i, mods[i].mode,
 				mods[i].survey1, mods[i].file1, mods[i].section1,
-				mods[i].survey1, mods[i].file1, mods[i].section1,
+				mods[i].survey2, mods[i].file2, mods[i].section2,
 				mods[i].xoffset, mods[i].yoffset, mods[i].zoffset,
-				mods[i].xsigma, mods[i].ysigma, mods[i].zsigma);
+				mods[i].xsigma, mods[i].ysigma, mods[i].zsigma,
+				mods[i].dt);
 			}
 		}
 
@@ -2525,6 +2586,32 @@ tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
 					}
 				break;
 
+			case MOD_MODE_SET_TIES_XY_BY_TIME:
+fprintf(stderr,"\nCommand set-ties-xyonly-by-time=%f\n", mods[imod].dt);
+				
+				for (icrossing=0;icrossing<project_output.num_crossings;icrossing++)
+					{
+					crossing = (struct mbna_crossing *) &project_output.crossings[icrossing];
+					file1 = (struct mbna_file *) &project_output.files[crossing->file_id_1];
+					file2 = (struct mbna_file *) &project_output.files[crossing->file_id_2];
+					for (itie=0;itie<crossing->num_ties;itie++)
+						{
+						tie = &crossing->ties[itie];
+						if (fabs(tie->snav_2_time_d - tie->snav_1_time_d) >= mods[imod].dt)
+							{
+							tie = &crossing->ties[itie];
+							tie->status = MBNA_TIE_XY;
+
+fprintf(stderr,"Set tie mode XY-only:  %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d  %.3f %.3f %.3f\n",
+icrossing, itie,
+file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2,
+tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
+							}
+						}
+					}
+				break;
+				
 			case MOD_MODE_SKIP_UNSET_CROSSINGS:
 fprintf(stderr,"\nCommand skip-unset-crossings\n");
 

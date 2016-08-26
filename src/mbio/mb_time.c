@@ -31,12 +31,7 @@
 #include "mb_status.h"
 #include "mb_define.h"
 
-/* time conversion constants and variables */
-#define SECINYEAR 31536000.0
-#define SECINDAY     86400.0
-#define SECINHOUR     3600.0
-#define SECINMINUTE     60.0
-#define IMININHOUR 60
+/* year-day conversion */
 int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 static char rcs_id[]="$Id$";
 
@@ -73,9 +68,9 @@ int mb_get_time(int verbose, int time_i[7], double *time_d)
 		&& (time_i[1] > 2))
 		yearday++;
 	leapday = (time_i[0] - 1969)/4;
-	*time_d = (time_i[0] - 1970)*SECINYEAR
-		+ (yearday - 1 + leapday + time_i[2])*SECINDAY
-		+ time_i[3]*SECINHOUR + time_i[4]*SECINMINUTE
+	*time_d = (time_i[0] - 1970)*MB_SECINYEAR
+		+ (yearday - 1 + leapday + time_i[2])*MB_SECINDAY
+		+ time_i[3]*MB_SECINHOUR + time_i[4]*MB_SECINMINUTE
 		+ time_i[5] + 0.000001*time_i[6];
 
 	/* assume success */
@@ -119,16 +114,16 @@ int mb_get_date(int verbose, double time_d, int time_i[7])
 		}
 
 	/* get the date */
-	daytotal = (int) (time_d/SECINDAY);
-	time_i[3] = (int) ((time_d - daytotal*SECINDAY)/SECINHOUR);
-	time_i[4] = (int) ((time_d - daytotal*SECINDAY
-			- time_i[3]*SECINHOUR)/SECINMINUTE);
-	time_i[5] = (int) (time_d - daytotal*SECINDAY
-			- time_i[3]*SECINHOUR - time_i[4]*SECINMINUTE);
-	time_i[6] = (int) 1000000*(time_d - daytotal*SECINDAY
-			- time_i[3]*SECINHOUR - time_i[4]*SECINMINUTE
+	daytotal = (int) (time_d/MB_SECINDAY);
+	time_i[3] = (int) ((time_d - daytotal*MB_SECINDAY)/MB_SECINHOUR);
+	time_i[4] = (int) ((time_d - daytotal*MB_SECINDAY
+			- time_i[3]*MB_SECINHOUR)/MB_SECINMINUTE);
+	time_i[5] = (int) (time_d - daytotal*MB_SECINDAY
+			- time_i[3]*MB_SECINHOUR - time_i[4]*MB_SECINMINUTE);
+	time_i[6] = (int) 1000000*(time_d - daytotal*MB_SECINDAY
+			- time_i[3]*MB_SECINHOUR - time_i[4]*MB_SECINMINUTE
 			- time_i[5]);
-	time_i[0] = (int) (time_d/SECINYEAR) + 1970;
+	time_i[0] = (int) (time_d/MB_SECINYEAR) + 1970;
 	leapday = (time_i[0] - 1969)/4;
 	yearday = daytotal - 365*(time_i[0] - 1970) - leapday + 1;
 	if (yearday <= 0)
@@ -245,7 +240,7 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5])
 		|| time_i[0] % 400 == 0)
 		&& (time_i[1] > 2))
 		time_j[1]++;
-	time_j[2] = time_i[3]*IMININHOUR + time_i[4];
+	time_j[2] = time_i[3]*MB_IMININHOUR + time_i[4];
 	time_j[3] = time_i[5];
 	time_j[4] = time_i[6];
 
@@ -298,8 +293,8 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7])
 
 	/* get the date */
 	time_i[0] = time_j[0];
-	time_i[3] = time_j[2]/IMININHOUR;
-	time_i[4] = time_j[2] - time_i[3]*IMININHOUR;
+	time_i[3] = time_j[2]/MB_IMININHOUR;
+	time_i[4] = time_j[2] - time_i[3]*MB_IMININHOUR;
 	time_i[5] = time_j[3];
 	time_i[6] = time_j[4];
 	if (((time_j[0] % 4 == 0 && time_j[0] % 100 != 0)

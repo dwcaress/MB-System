@@ -2663,42 +2663,6 @@ do_next_buffer( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_number_step( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
-
-    int	maxx;
-    char	label[10];
-
-    step = acs->value;
-
-    /* if slider set to minimum value, half the value range;
-	    if slider set to maximum value,  double the range */
-    XtVaGetValues(slider_number_step,
-		    XmNmaximum, &maxx,
-		    NULL);
-    if (step == 1 || step == maxx)
-	    {
-	    if (step == 1)
-		    maxx = maxx/2;
-	    else
-		    maxx = 2*maxx;
-	    if (maxx > plot_size_max)
-		    maxx = plot_size_max;
-	    if (maxx < 2)
-		    maxx = 2;
-	    XtVaSetValues(slider_number_step,
-		    XmNmaximum, maxx,
-		    NULL);
-	    sprintf(label, "%d", maxx);
-	    set_label_string(slider_number_max_step_label,
-			    label);
-	    }
-}
-
-/*--------------------------------------------------------------------*/
-
-void
 do_show_flagged( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
@@ -2968,7 +2932,11 @@ do_number_pings( Widget w, XtPointer client_data, XtPointer call_data)
     XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
 
     int	maxx;
+    double ratio;
     char	label[10];
+    
+    /* Save old ratio of mplot_size / step */
+    ratio = ((double)step) / ((double)mplot_size);
 
     /* Read the value of the slider bar for number of pings displayed */
     mplot_size = acs->value;
@@ -2995,13 +2963,79 @@ do_number_pings( Widget w, XtPointer client_data, XtPointer call_data)
 	    set_label_string(slider_num_pings_max_label,
 			    label);
 	    }
-
+        
+    /* set step to have same ratio with mplot_size as before
+        also set slider maximum to the same as for mplot_size */
+    step = ratio * mplot_size;
+    if (step < 1)
+        step = 1;
+    if (step > mplot_size)
+        step = mplot_size;
+    XtVaSetValues(slider_number_step,
+        XmNmaximum, maxx,
+        NULL);
+    sprintf(label, "%d", maxx);
+    set_label_string(slider_number_max_step_label,
+            label);
+    XtVaSetValues(slider_number_step,
+        XmNvalue, step,
+        NULL);
+    
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval,
 	    mplot_size, mshow_beammode, mshow_flagged, mshow_time,
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_number_step( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
+
+    int	maxx;
+    char	label[10];
+
+    step = acs->value;
+
+    /* if slider set to minimum value, half the value range;
+	    if slider set to maximum value,  double the range */
+    XtVaGetValues(slider_number_step,
+		    XmNmaximum, &maxx,
+		    NULL);
+    if (step == 1 || step == maxx)
+	    {
+	    if (step == 1)
+		    maxx = maxx/2;
+	    else
+		    maxx = 2*maxx;
+	    if (maxx > plot_size_max)
+		    maxx = plot_size_max;
+	    if (maxx < 2)
+		    maxx = 2;
+	    XtVaSetValues(slider_number_step,
+		    XmNmaximum, maxx,
+		    NULL);
+	    sprintf(label, "%d", maxx);
+	    set_label_string(slider_number_max_step_label,
+			    label);
+	    }
+    if (step > mplot_size)
+        {
+        mplot_size = step;
+        XtVaSetValues(slider_number_pings,
+            XmNmaximum, maxx,
+            NULL);
+        sprintf(label, "%d", maxx);
+        set_label_string(slider_num_pings_max_label,
+                    label);
+        XtVaSetValues(slider_number_pings,
+            XmNvalue, mplot_size,
+            NULL);
+        }
 }
 
 /*--------------------------------------------------------------------*/

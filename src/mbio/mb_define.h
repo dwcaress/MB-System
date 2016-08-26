@@ -171,6 +171,17 @@ typedef char mb_longname[MB_LONGNAME_LENGTH];
 /* multiply this by radians to get degrees */
 #define RTD	57.2957795130823230000
 
+/* time conversions */
+#define MB_SECINYEAR        31536000.0
+#define MB_SECINDAY            86400.0
+#define MB_SECINHOUR            3600.0
+#define MB_SECINMINUTE            60.0
+#define MB_ISECINYEAR       31536000
+#define MB_ISECINDAY           86400
+#define MB_ISECINHOUR           3600
+#define MB_ISECINMINUTE           60
+#define MB_IMININHOUR             60
+
 /* min max round define */
 #ifndef MIN
 #define	MIN(A, B)	((A) < (B) ? (A) : (B))

@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2282       August 25, 2016
   Version 5.5.2281       August 7, 2016
 * Version 5.5.2279       July 8, 2016
 * Version 5.5.2278       July 1, 2016
@@ -236,6 +237,16 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2282 (August 25, 2016)
+
+Mbnavadjustmerge: Added --set-ties-xyonly-by-time=timethreshold option.
+
+Mbnavadjust: Improved program behavior with respect to generating the grid used
+for the project visualization view.
+
+Mbedit: Changed behavior so that using the slider to change the number of pings
+viewed also changes the number of pings to step proportionately.
 
 -----> 5.5.2281 (August 7, 2016)
 

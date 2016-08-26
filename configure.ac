@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2280],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2282],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "7 August 2016", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "25 August 2016", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -202,10 +202,10 @@ dnl--------------------------------------------------------------------
 dnl OTPS Section
 dnl--------------------------------------------------------------------
 
-dnl Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps_dir, use default otherwise
-AS_ECHO(["Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps_dir, use default otherwise"])
+dnl Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps-dir, use default otherwise
+AS_ECHO(["Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps-dir, use default otherwise"])
 OTPS_DIR="/usr/local/OTPSnc"
-AC_ARG_WITH(otps_dir, [ --with-otps_dir=DIR    Location of OSU Tidal Prediction Software], [OTPS_DIR=${withval}])
+AC_ARG_WITH(otps_dir, [ --with-otps-dir=DIR    Location of OSU Tidal Prediction Software], [OTPS_DIR=${withval}])
 AC_SUBST(OTPS_DIR)
 
 dnl--------------------------------------------------------------------
@@ -406,16 +406,19 @@ if test -x "$GMT_CONF" && test "X$GMT_INC" = "X" && test "X$GMT_LIB" = "X" ; the
 	GCC_64="-m${bits}"
 	LDFLAGS="$LDFLAGS -m${bits}"
 	AC_MSG_RESULT(found ${bits}-bit)
+    AC_MSG_CHECKING(for GMT plugin location)
+    GMT_PLUGINDIR=`$GMT_CONF --plugindir`
+    AC_MSG_RESULT($GMT_PLUGINDIR)
 
     libgmt_CPPFLAGS="$GMT_INC"
     libgmt_LIBS="-L$GMT_LIB_PATH -R $GMT_LIB_PATH -lgmt -lpostscriptlight"
     libgmt_LDFLAGS="-L$GMT_LIB_PATH"
-
 fi
 
 dnl Substitute GMT library and header arguments
 AC_SUBST([libgmt_LIBS], [$libgmt_LIBS])
 AC_SUBST([libgmt_CPPFLAGS], [$libgmt_CPPFLAGS])
+AC_SUBST(GMT_PLUGINDIR)
 
 dnl--------------------------------------------------------------------
 dnl FFTW Section
@@ -774,6 +777,10 @@ if test $BYTESWAP = "yes" ; then
 else
 	AS_ECHO(["Byteswapping: Disabled"])
 fi
+AS_ECHO(["libgmt_CPPFLAGS:  $libgmt_CPPFLAGS"])
+AS_ECHO(["libgmt_LIBS:      $libgmt_LIBS"])
+AS_ECHO(["libgmt_LDFLAGS:   $libgmt_LDFLAGS"])
+AS_ECHO(["GMT PLUGIN DIR:   $GMT_PLUGINDIR"])
 if test "$GOT_FFTW" = "yes" ; then
 	AS_ECHO(["FFTW Support: Enabled"])
 else
