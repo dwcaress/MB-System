@@ -226,15 +226,15 @@ $ncpt = 11;
 	@cptbb9 = (100,  75,  50,  45,  40,  30,  24,   7,   0,   0,   0);
 
 # Determine the GMT version
-@grdinfo = `grdinfo 2>&1`;
+@grdinfo = `gmt grdinfo 2>&1`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
-	if ($line =~
-		/^grdinfo\s+(\S+)\s+\S+/)
+	if ($lgrdinfoine =~
+		/^grdinfo\(core\)\s+(\S+)\s+\S+/)
 		{
 		($gmt_version) = $line =~
-			/^grdinfo\s+(\S+)\s+\S+/;
+			/^grdinfo\(core\)\s+(\S+)\s+\S+/;
 		}
 	}
 
@@ -301,6 +301,7 @@ if ($help)
 	print "Miscellaneous Options:\n";
 	print "\t\t[-MGDgmtdef/value  -MGFscale_loc\n";
 	print "\t\t-MGL[f][x]lon0/lat0/slat/length[m]\n";
+	print "\t\t-MGOxorigin/yorigin\n";
 	print "\t\t-MGQdpi -MGSscalefactor -MGTx/y/size/angle/font/just/text\n";
 	print "\t\t-MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]\n";
 	print "\t\t-MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]\n";
@@ -402,6 +403,14 @@ if ($misc)
 			{
 			($length_scale) = $cmd =~
 				/^[Gg][Ll](\S+)/;
+			}
+
+		# set map origin
+		if ($cmd =~ /^[Gg][Oo]./)
+			{
+			($xorigin, $yorigin) = $cmd =~
+				/^[Gg][Oo](\S+)\/(\S+)/;
+            $originset = 1;
 			}
 
 		# set dpi for color image output
@@ -889,10 +898,10 @@ if ($ENV{"MB_PS_VIEWER"})
 	}
 
 # see if data file is a grd file or a list of grdfiles
-@grdinfo = `grdinfo $file_data 2>&1`;
+@grdinfo = `gmt grdinfo $file_data 2>&1`;
 if ($? != 0)
 	{
-	print "ERROR: 'grdinfo $file_data' failed.\n$program_name aborted\n";
+	print "ERROR: 'gmt grdinfo $file_data' failed.\n$program_name aborted\n";
 	exit 1;
 	}
 while (@grdinfo)
@@ -923,7 +932,7 @@ else
 # see if intensity file is a grd file or a list of grdfiles
 if ($file_intensity)
 	{
-	@grdinfo = `grdinfo $file_intensity 2>&1`;
+	@grdinfo = `gmt grdinfo $file_intensity 2>&1`;
 	while (@grdinfo)
 		{
 		$line = shift @grdinfo;
@@ -992,10 +1001,10 @@ if (!$bounds || !$zbounds || $zmode == 1)
 		}
 	else
 		{
-		@grdinfo = `grdinfo $file_grd 2>&1`;
+		@grdinfo = `gmt grdinfo $file_grd 2>&1`;
 		if ($verbose > 0)
 			{
-			print "\tgrdinfo -I$file_grd\n";
+			print "\tgmt grdinfo -I$file_grd\n";
 			}
 		}
 	while (@grdinfo)
@@ -1004,7 +1013,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
 
 		if ($verbose > 0)
 			{
-			print "\tgrdinfo output: $line";
+			print "\tgmt grdinfo output: $line";
 			}
 
 		if ($line =~
@@ -1241,7 +1250,7 @@ if (!$geographic && $projection eq "x" && $map_scale)
     {
     if ($map_scale =~ /(\S+)\/(\S+)/)
         {
-        ($xscale,$yscale) = $map_scale =~ /(\S+)\/(\S+)/;
+        ($xscale,$yscale) = $map_scale =~ /^$projection(\S+)\/(\S+)/;
         }
     else
         {
@@ -1252,9 +1261,6 @@ if (!$geographic && $projection eq "x" && $map_scale)
     $xxmax = $xmax * $xscale;
     $yymin = $ymin * $yscale;
     $yymax = $ymax * $yscale;
-
-    $dxx = $xxmax - $xxmin;
-    $dyy = $yymax - $yymin;
     }
 
 # or find out the apparent size of the plot using gmt mapproject
@@ -1287,9 +1293,10 @@ else
                 $yymax = ($yy > $yymax ? $yy : $yymax);
                 }
         }
-    $dxx = $xxmax - $xxmin;
-    $dyy = $yymax - $yymin;
     }
+
+$dxx = abs($xxmax - $xxmin);
+$dyy = abs($yymax - $yymin);
 
 # check for valid scaling
 if ($dxx == 0.0 && $dyy == 0.0)
@@ -1317,6 +1324,8 @@ if (($use_scale && $plot_scale) || ($use_width && $plot_width))
 	{
 	$plot_width = $dxx;
 	$plot_height = $dyy;
+    
+print "dxx:$dxx dyy:$dyy plot_width:$plot_width plot_height:$plot_height\n";
 
 	# decide which plot orientation to use
 	if ($orientation == 1)
@@ -1534,6 +1543,13 @@ $xoffset = ($width - $plot_width
 	- $space_left - $space_right) / 2 + $space_left;
 $yoffset = ($height - $plot_height
 	- $space_bottom - $space_top) / 2 + $space_bottom;
+if ($originset)
+    {
+    $xoffset = $xorigin;
+    $yoffset = $yorigin;
+    }
+
+print "xoffset:$xoffset width:$width plot_width:$plot_width space_left:$space_left space_right:$space_right  yoffset:$yoffset height:$height plot_height:$plot_height space_bottom:$space_bottom space_top:$space_top\n";
 
 # get plot degree annotation for geographic maps
 $degree_format = "ddd:mm";
@@ -1797,7 +1813,7 @@ if ($contour_file)
 		}
 	else
 		{
-		@grdinfo = `grdinfo $contour_file 2>&1`;
+		@grdinfo = `gmt grdinfo $contour_file 2>&1`;
 		}
 	while (@grdinfo)
 		{
@@ -1965,7 +1981,6 @@ else
 	{
 	$cptfile = "$root.cpt";
 	}
-$gmtfile = "gmt.conf\$\$";
 
 # set some gmtisms
 $first_gmt = 1;
@@ -2360,9 +2375,9 @@ if ($data_scale)
 #		}
 #	printf FCMD "\n";
 #	printf FCMD "echo Running gmt module grdhisteq...\n";
-#	printf FCMD "grdhisteq \$DATA_FILE.grad -G\$DATA_FILE.eq -N\n";
+#	printf FCMD "gmt grdhisteq \$DATA_FILE.grad -G\$DATA_FILE.eq -N\n";
 #	printf FCMD "echo Running gmt module grdmath...\n";
-#	printf FCMD "grdmath \$DATA_FILE.eq $magnitude x = \$DATA_FILE.int\n";
+#	printf FCMD "gmt grdmath \$DATA_FILE.eq $magnitude x = \$DATA_FILE.int\n";
 #	printf FCMD "/bin/rm -f \$DATA_FILE.grad \$DATA_FILE.eq\n";
 #	$file_shade = "\$DATA_FILE.int";
 #	}
@@ -3098,6 +3113,11 @@ if ($verbose)
 		{
 		print "    Orientation:              landscape\n";
 		}
+    if ($originset)
+        {
+        print "    X origin:                 $xorigin\n";
+        print "    Y origin:                 $yorigin\n";
+        }
 	if ($color_mode)
 		{
 		print "    Number of colors:         $ncolors\n";

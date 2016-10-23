@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+* Version 5.5.2283       October 23, 2016
   Version 5.5.2282       August 25, 2016
   Version 5.5.2281       August 7, 2016
 * Version 5.5.2279       July 8, 2016
@@ -237,6 +238,38 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2283 (October 23, 2016)
+
+mbmakeplatform: fixed bug that caused core dumps when built with gcc.
+
+mbaux/mb_cheb.c: Added open source least squares solver LSQR by Michael A. Saunders
+(in C version translated from Fortran by Michael P. Friedlander),
+
+Mbnavadjust: Switch navigation matrix solution algorithm to LSQR.
+
+Mbnavadjust: Fixed bug that reset the z-offset-width value to 5-m every time
+a project was read.
+
+Mb7kpreprocess: Now will use complete platform description when reading older
+Reson 7k data.
+
+Mb7kpreprocess: Now allows users to specify the the sources of asynchronous ancilliary data
+(position, sensor depth, heading, attitude) to be merged with the survey data.
+
+Mbgrdviz, mbeditviz, mbnavadjust: pick actions will now print out positions to
+the shell in both decimal degrees and degrees + minutes.
+
+Mbextractsegy: Now uses psconvert from GMT instead of convert from imagemagick.
+
+mbm_grdplot: Once again handles section plots from mbextractsegy properly.
+
+mbm_arc2grd, mbm_dslnavfix, mbm_grd2arc, mbm_grd2geovrml, mbm_grd3dplot,
+mbm_grdcut, mbm_grdinfo, mbm_grdplo, mbm_grdtiff, mbm_grid, mbm_histplot,
+mbm_plot, mbm_utm, mbm_xyplot: Modified to work properly with GMT 5.3
+
+mbprocess: fixed correction of sidescan and amplitude data using topographic
+grid so that the correction is actually calculated and applied.
 
 -----> 5.5.2282 (August 25, 2016)
 

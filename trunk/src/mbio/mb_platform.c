@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* mbio include files */
 #include "mb_status.h"
@@ -1283,6 +1284,13 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 				
 			/* close the file */
 			fclose(fp);
+			
+			/* only successful if at least one sensor is defined */
+			if (platform->num_sensors <= 0)
+				{
+				*error = MB_ERROR_BAD_PARAMETER;
+				status = MB_FAILURE;
+				}
 		
 			/* print platform */
 			if (verbose >= 2)
@@ -1352,8 +1360,9 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 		if ((fp = fopen(platform_file, "w")) != NULL)
 			{
 			right_now = time((time_t *)0);
+fprintf(stderr,"ctime:%s\n",ctime(&right_now));
 			strcpy(date,ctime(&right_now));
-					date[strlen(date)-1] = '\0';
+			date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)
 				user_ptr = getenv("LOGNAME");
 			if (user_ptr != NULL)

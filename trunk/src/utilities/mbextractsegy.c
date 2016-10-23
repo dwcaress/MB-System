@@ -929,7 +929,7 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
 
-					sprintf(command, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
+					sprintf(command, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -MGO2/2 -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
 							lineroot, linenumber, i + 1, scale, zbounds,
 							lineroot, linenumber, i + 1, lineroot, linenumber,
 							i + 1, nplot);
@@ -941,8 +941,10 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
 
-					sprintf(command, "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -trim -quality 75 %s_%4.4d_%2.2d_sectionplot.jpg\n\n",
-							lineroot, linenumber, i + 1, lineroot, linenumber, i + 1);
+					//sprintf(command, "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -trim -quality 75 %s_%4.4d_%2.2d_sectionplot.jpg\n\n",
+					//		lineroot, linenumber, i + 1, lineroot, linenumber, i + 1);
+					sprintf(command, "gmt psconvert %s_%4.4d_%2.2d_sectionplot.ps -Tj -A -E300\n\n",
+							lineroot, linenumber, i + 1);
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
 					fflush(sfp);

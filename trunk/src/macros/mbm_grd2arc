@@ -93,9 +93,9 @@ elsif (!open(OUT,">$ofile"))
 	}
 
 # Save old GMT default double format and set new format
-$line = `gmtdefaults -L | grep D_FORMAT`;
-($dformatsave) = $line =~ /D_FORMAT\s+=\s+(\S+)/;
-`gmtset D_FORMAT %.10lg`;
+$line = `gmt gmtdefaults | grep FORMAT_FLOAT_OUT`;
+($dformatsave) = $line =~ /FORMAT_FLOAT_OUT\s+=\s+(\S+)/;
+`gmt gmtset FORMAT_FLOAT_OUT %.10lg`;
 
 # Get info using grdinfo
 @grdinfo = `gmt grdinfo $ifile`;
@@ -162,7 +162,7 @@ while (@grdinfo)
 	}
 
 # reset the GMT default double format
-`gmtset D_FORMAT $dformatsave`;
+`gmt gmtset FORMAT_FLOAT_OUT $dformatsave`;
 
 # deal with translating grid bounds
 if ($node_normal)
@@ -213,7 +213,7 @@ if ($verbose > 0)
 	print "\nGenerating temporary file...\n";
 	}
 $tmpfile = $program_name . "_tmp_" . "$$";
-@grd2xyz = `grd2xyz $ifile -ZTLa > $tmpfile`;
+@grd2xyz = `gmt grd2xyz $ifile -ZTLa > $tmpfile`;
 if (!open(TMP,"<$tmpfile"))
 	{
 	print "\a";

@@ -1362,8 +1362,8 @@ int mbview_updatesitelist()
 	int	status = MB_SUCCESS;
    	XmString *xstr;
 	int	isite;
-	char	lonstr0[24];
-	char	latstr0[24];
+	char	londstr0[24], lonmstr0[24];
+	char	latdstr0[24], latmstr0[24];
 
 
 	/* print starting debug statements */
@@ -1391,17 +1391,24 @@ int mbview_updatesitelist()
 			for (isite=0;isite<shared.shareddata.nsite;isite++)
 				{
 				/* add list item for each site */
-				mbview_setlonlatstrings(shared.lonlatstyle,
-							shared.shareddata.sites[isite].point.xlon,
+				mbview_setlonlatstrings(shared.shareddata.sites[isite].point.xlon,
 							shared.shareddata.sites[isite].point.ylat,
-							lonstr0, latstr0);
-				sprintf(value_string,"%3d | %s | %s | %.3f | %s | %d | %s",
-					isite, lonstr0, latstr0,
-					shared.shareddata.sites[isite].point.zdata,
-					mbview_colorname[shared.shareddata.sites[isite].color],
-					shared.shareddata.sites[isite].size,
-					shared.shareddata.sites[isite].name);
-    				xstr[isite] = XmStringCreateLocalized(value_string);
+							londstr0, latdstr0,lonmstr0, latmstr0);
+				if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)
+					sprintf(value_string,"%3d | %s | %s | %.3f | %s | %d | %s",
+						isite, londstr0, latdstr0,
+						shared.shareddata.sites[isite].point.zdata,
+						mbview_colorname[shared.shareddata.sites[isite].color],
+						shared.shareddata.sites[isite].size,
+						shared.shareddata.sites[isite].name);
+				else
+					sprintf(value_string,"%3d | %s | %s | %.3f | %s | %d | %s",
+						isite, lonmstr0, latmstr0,
+						shared.shareddata.sites[isite].point.zdata,
+						mbview_colorname[shared.shareddata.sites[isite].color],
+						shared.shareddata.sites[isite].size,
+						shared.shareddata.sites[isite].name);
+				xstr[isite] = XmStringCreateLocalized(value_string);
 				}
 
 			/* add list items */

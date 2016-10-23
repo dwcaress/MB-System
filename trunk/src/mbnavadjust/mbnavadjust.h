@@ -135,6 +135,7 @@ MBNAVADJUST_EXTERNAL int	mbna_zoom_y2;
 MBNAVADJUST_EXTERNAL double mbna_smoothweight;
 MBNAVADJUST_EXTERNAL double mbna_offsetweight;
 MBNAVADJUST_EXTERNAL double mbna_zweightfactor;
+MBNAVADJUST_EXTERNAL double mbna_global_tie_influence;
 MBNAVADJUST_EXTERNAL int	mbna_bias_mode;
 MBNAVADJUST_EXTERNAL int	mbna_allow_set_tie;
 

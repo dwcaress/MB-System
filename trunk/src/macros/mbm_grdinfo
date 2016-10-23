@@ -45,23 +45,24 @@
 $program_name = "mbm_grdinfo";
 
 # Determine the GMT version
-@grdinfo = `grdinfo 2>&1`;
+@grdinfo = `gmt grdinfo 2>&1`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
 	if ($line =~
-		/^grdinfo\s+(\S+)\s+\S+/)
+		/^grdinfo\(core\)\s+(\S+)\s+\S+/)
 		{
 		($gmt_version) = $line =~
-			/^grdinfo\s+(\S+)\s+\S+/;
+			/^grdinfo\(core\)\s+(\S+)\s+\S+/;
 		}
 	}
+print "gmt_version:$gmt_version\n";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
 &MBGetopts('HhI:i:R:r:Vv');
 $help =    		($opt_H || $opt_h);
-$file_input =    	($opt_I || $opt_i);
+$file_input =   ($opt_I || $opt_i);
 $bounds = 		($opt_R || $opt_r);
 $verbose = 		($opt_V || $opt_v);
 
@@ -95,9 +96,14 @@ elsif (! -r $file_input)
 	}
 
 # Save old GMT default double format and set new format
-$line = `gmtdefaults -L | grep D_FORMAT`;
-($dformatsave) = $line =~ /D_FORMAT\s+=\s+(\S+)/;
-`gmtset D_FORMAT %.15lg`;
+if (-e "./gmt.conf")
+    {
+    $local_gmtconf = 1;
+    }
+
+$line = `gmt gmtdefaults | grep FORMAT_FLOAT_OUT`;
+($dformatsave) = $line =~ /FORMAT_FLOAT_OUT\s+=\s+(\S+)/;
+`gmt gmtset FORMAT_FLOAT_OUT %.15lg`;
 
 # get limits of file using grdinfo
 if ($bounds)
@@ -111,7 +117,7 @@ if ($bounds)
 	$ymax = &GetDecimalDegrees($ymax_raw);
 
 	# get bounds from file
-	@rawgrdinfo = `grdinfo $file_input`;
+	@rawgrdinfo = `gmt grdinfo $file_input`;
 	while (@rawgrdinfo)
 		{
 		$line = shift @rawgrdinfo;
@@ -128,6 +134,12 @@ if ($bounds)
 				/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+name:\s+(.+)\s+nx:\s+(\S+)/;
 			}
 		elsif ($line =~
+			/\S+\s+x_min:\s+\S+\s+x_max:\s+\S+\s+x_inc:\s+\S+\s+name:\s+.+\s+n_columns:\s+\S+/)
+			{
+			($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~
+				/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+name:\s+(.+)\s+n_columns:\s+(\S+)/;
+			}
+		elsif ($line =~
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
 			{
 			($xmin_f,$xmax_f) = $line =~
@@ -142,6 +154,11 @@ if ($bounds)
 			{
 			($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~
 				/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+name:\s+(.+)\s+ny:\s+(\S+)/;
+			}
+		elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:\s+\S+\s+name:\s+.+\s+n_rows:\s+\S+/)
+			{
+			($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~
+				/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+name:\s+(.+)\s+n_rows:\s+(\S+)/;
 			}
 		elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:/)
 			{
@@ -211,24 +228,24 @@ if ($bounds)
 				}
 			}
 
-		@grdinfo = `grdinfo $file_grd 2>&1`;
+		@grdinfo = `gmt grdinfo $file_grd 2>&1`;
 		@rminfo = `rm -f $file_grd`;
 
-		# if it doesn't work just grdinfo the whole file
+		# if it doesn't work just gmt grdinfo the whole file
 		if (!@grdinfo)
 			{
-			@grdinfo = `grdinfo $file_input 2>&1`;
+			@grdinfo = `gmt grdinfo $file_input 2>&1`;
 			}
 		}
 	else
 		{
-		@grdinfo = `grdinfo $file_input 2>&1`;
+		@grdinfo = `gmt grdinfo $file_input 2>&1`;
  		}
 
  	}
 else
 	{
-	@grdinfo = `grdinfo $file_input 2>&1`;
+	@grdinfo = `gmt grdinfo $file_input 2>&1`;
  	}
 
 # now spit out grdinfo results
@@ -239,7 +256,7 @@ while (@grdinfo)
 	}
 
 # reset the GMT default double format
-`gmtset D_FORMAT $dformatsave`;
+`gmt gmtset FORMAT_FLOAT_OUT $dformatsave`;
 
 exit 0;
 

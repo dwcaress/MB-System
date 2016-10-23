@@ -117,10 +117,10 @@ while (@grdinfo)
 	{
 	$line = shift @grdinfo;
 	if ($line =~
-		/^grdinfo\s+(\S+)\s+\S+/)
+		/^gmt grdinfo\s+(\S+)\s+\S+/)
 		{
 		($gmt_version) = $line =~
-			/^grdinfo\s+(\S+)\s+\S+/;
+			/^grdinfo\(core\)\s+(\S+)\s+\S+/;
 		}
 	}
 
@@ -861,7 +861,7 @@ print FCMD "set MAP_REGION      = $bounds_plot\n";
 # Reset GMT defaults, saving old defaults
 print FCMD "#\n# Save existing GMT defaults\n";
 print FCMD "echo Saving GMT defaults...\n";
-print FCMD "gmtdefaults > $gmtfile\n";
+print FCMD "gmt gmtdefaults > $gmtfile\n";
 print FCMD "#\n# Set new GMT defaults\n";
 print FCMD "echo Setting new GMT defaults...\n";
 foreach $gmt_def (@gmt_macro_defs) {
@@ -876,7 +876,7 @@ if (@gmt_defs)
 	print FCMD "echo Setting user defined GMT defaults...\n";
 	foreach $gmt_def (@gmt_defs) {
 		($gmt_par, $gmt_var) = $gmt_def =~ /^([^\/]+)\/(.+)/;
-		print FCMD "gmtset $gmt_par $gmt_var\n";
+		print FCMD "gmt gmtset $gmt_par $gmt_var\n";
 		}
 	}
 
@@ -1144,7 +1144,7 @@ if ($data_scale)
 	printf FCMD "#\n# Rescale data\n";
 	printf FCMD "echo Rescaling data by $data_scale...\n";
 	printf FCMD "echo Running gmt module grdmath...\n";
-	printf FCMD "grdmath \$DATA_FILE $data_scale x = \$DATA_FILE.scale\n";
+	printf FCMD "gmt grdmath \$DATA_FILE $data_scale x = \$DATA_FILE.scale\n";
 	$file_use = "\$DATA_FILE.scale";
 	}
 
@@ -1154,16 +1154,16 @@ if ($data_scale)
 #	printf FCMD "#\n# Get shading array\n";
 #	printf FCMD "echo Getting shading array...\n";
 #	printf FCMD "echo Running gmt module grdgradient...\n";
-#	printf FCMD "grdgradient $file_use -A$azimuth -G\$DATA_FILE.grad -N";
+#	printf FCMD "gmt grdgradient $file_use -A$azimuth -G\$DATA_FILE.grad -N";
 #	if (!$gridprojected)
 #		{
 #		printf FCMD " -fg";
 #		}
 #	printf FCMD "\n";
 #	printf FCMD "echo Running gmt module grdhisteq...\n";
-#	printf FCMD "grdhisteq \$DATA_FILE.grad -G\$DATA_FILE.eq -N\n";
+#	printf FCMD "gmt grdhisteq \$DATA_FILE.grad -G\$DATA_FILE.eq -N\n";
 #	printf FCMD "echo Running gmt module grdmath...\n";
-#	printf FCMD "grdmath \$DATA_FILE.eq $magnitude x = \$DATA_FILE.int\n";
+#	printf FCMD "gmt grdmath \$DATA_FILE.eq $magnitude x = \$DATA_FILE.int\n";
 #	printf FCMD "/bin/rm -f \$DATA_FILE.grad \$DATA_FILE.eq\n";
 #	$file_shade = "\$DATA_FILE.int";
 #	}
@@ -1179,14 +1179,14 @@ if ($color_mode == 2)
 	printf FCMD "#\n# Get shading array\n";
 	printf FCMD "echo Getting shading array...\n";
 	printf FCMD "echo Running gmt module grdgradient to get x component of the gradient...\n";
-	printf FCMD "grdgradient $file_use -A90 -G\$DATA_FILE.drvx";
+	printf FCMD "gmt grdgradient $file_use -A90 -G\$DATA_FILE.drvx";
 	if (!$gridprojected)
 		{
 		printf FCMD " -fg";
 		}
 	printf FCMD "\n";
 	printf FCMD "echo Running gmt module grdgradient to get y component of the gradient...\n";
-	printf FCMD "grdgradient $file_use -A0 -G\$DATA_FILE.drvy";
+	printf FCMD "gmt grdgradient $file_use -A0 -G\$DATA_FILE.drvy";
 	if (!$gridprojected)
 		{
 		printf FCMD " -fg";
@@ -1194,24 +1194,24 @@ if ($color_mode == 2)
 	printf FCMD "\n";
 
 	printf FCMD "echo Running gmt module grdmath to get adjusted x gradient...\n";
-	printf FCMD "grdmath \$DATA_FILE.drvx $magnitude MUL 10 MUL = \$DATA_FILE.magx\n";
+	printf FCMD "gmt grdmath \$DATA_FILE.drvx $magnitude MUL 10 MUL = \$DATA_FILE.magx\n";
 	printf FCMD "echo Running gmt module grdmath to get adjusted y gradient...\n";
-	printf FCMD "grdmath \$DATA_FILE.drvy $magnitude MUL 10 MUL = \$DATA_FILE.magy\n";
+	printf FCMD "gmt grdmath \$DATA_FILE.drvy $magnitude MUL 10 MUL = \$DATA_FILE.magy\n";
 
 	printf FCMD "echo Running gmt module grdmath to get normalization factor...\n";
-	printf FCMD "grdmath \$DATA_FILE.magx 2.0 POW \\\n";
+	printf FCMD "gmt grdmath \$DATA_FILE.magx 2.0 POW \\\n";
 		printf FCMD "\t\$DATA_FILE.magy 2.0 POW ADD \\\n";
 		printf FCMD "\t1.0 ADD SQRT = \$DATA_FILE.denom\n";
 
 	printf FCMD "echo Running gmt module grdmath to get normalized x gradient...\n";
-	printf FCMD "grdmath \$DATA_FILE.magx \$DATA_FILE.denom DIV = \$DATA_FILE.normx\n";
+	printf FCMD "gmt grdmath \$DATA_FILE.magx \$DATA_FILE.denom DIV = \$DATA_FILE.normx\n";
 	printf FCMD "echo Running gmt module grdmath to get normalized y gradient...\n";
-	printf FCMD "grdmath \$DATA_FILE.magy \$DATA_FILE.denom DIV = \$DATA_FILE.normy\n";
+	printf FCMD "gmt grdmath \$DATA_FILE.magy \$DATA_FILE.denom DIV = \$DATA_FILE.normy\n";
 	printf FCMD "echo Running gmt module grdmath to get normalized z gradient...\n";
-	printf FCMD "grdmath 1.0 \$DATA_FILE.denom DIV = \$DATA_FILE.normz\n";
+	printf FCMD "gmt grdmath 1.0 \$DATA_FILE.denom DIV = \$DATA_FILE.normz\n";
 
 	printf FCMD "echo Running gmt module grdmath to apply lighting vector to normalized gradient...\n";
-	printf FCMD "grdmath \$DATA_FILE.normx $light_x MUL \\\n";
+	printf FCMD "gmt grdmath \$DATA_FILE.normx $light_x MUL \\\n";
 		printf FCMD "\t\$DATA_FILE.normy $light_y MUL ADD \\\n";
 		printf FCMD "\t\$DATA_FILE.normz $light_z MUL ADD -0.5 ADD = \$DATA_FILE.int\n";
 
@@ -1228,9 +1228,9 @@ if ($color_mode == 3 && $file_int && $stretch_shade)
 	printf FCMD "#\n# Get shading array\n";
 	printf FCMD "echo Getting shading array...\n";
 	printf FCMD "echo Running gmt module grdhisteq...\n";
-	printf FCMD "grdhisteq \$INTENSITY_FILE -G\$INTENSITY_FILE.eq -N\n";
+	printf FCMD "gmt grdhisteq \$INTENSITY_FILE -G\$INTENSITY_FILE.eq -N\n";
 	printf FCMD "echo Running gmt module grdmath...\n";
-	printf FCMD "grdmath \$INTENSITY_FILE.eq $magnitude x = \$INTENSITY_FILE.int\n";
+	printf FCMD "gmt grdmath \$INTENSITY_FILE.eq $magnitude x = \$INTENSITY_FILE.int\n";
 	printf FCMD "/bin/rm -f \$INTENSITY_FILE.eq\n";
 	$file_shade = "\$INTENSITY_FILE.int";
 	}
@@ -1247,14 +1247,14 @@ elsif ($color_mode >= 4)
 	printf FCMD "#\n# Get slope array\n";
 	printf FCMD "echo Getting slope array...\n";
 	printf FCMD "echo Running gmt module grdgradient to get x component of the gradient...\n";
-	printf FCMD "grdgradient $file_use -A90 -G\$DATA_FILE.drvx";
+	printf FCMD "gmt grdgradient $file_use -A90 -G\$DATA_FILE.drvx";
 	if (!$gridprojected)
 		{
 		printf FCMD " -fg";
 		}
 	printf FCMD "\n";
 	printf FCMD "echo Running gmt module grdgradient to get y component of the gradient...\n";
-	printf FCMD "grdgradient $file_use -A0 -G\$DATA_FILE.drvy";
+	printf FCMD "gmt grdgradient $file_use -A0 -G\$DATA_FILE.drvy";
 	if (!$gridprojected)
 		{
 		printf FCMD " -fg";
@@ -1262,7 +1262,7 @@ elsif ($color_mode >= 4)
 	printf FCMD "\n";
 
 	printf FCMD "echo Running gmt module grdmath to get slope magnitude...\n";
-	printf FCMD "grdmath \$DATA_FILE.drvx 2.0 POW \\\n";
+	printf FCMD "gmt grdmath \$DATA_FILE.drvx 2.0 POW \\\n";
 	printf FCMD "\t\$DATA_FILE.drvy 2.0 POW ADD SQRT \\\n";
 	if ($color_mode == 5)
 		{
