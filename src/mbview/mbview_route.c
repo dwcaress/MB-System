@@ -2883,8 +2883,8 @@ int mbview_updateroutelist()
 	int	jpoint;
 	int	nitems;
 	int	iitem;
-	char	lonstr0[24];
-	char	latstr0[24];
+	char	londstr0[24], lonmstr0[24];
+	char	latdstr0[24], latmstr0[24];
 	char	waypointstr[10];
 	int	iroute, jwaypoint;
 
@@ -2941,10 +2941,9 @@ int mbview_updateroutelist()
 				for (jpoint=0;jpoint<shared.shareddata.routes[iroute].npoints;jpoint++)
 					{
 					/* add list item for each route */
-					mbview_setlonlatstrings(shared.lonlatstyle,
-								shared.shareddata.routes[iroute].points[jpoint].xlon,
+					mbview_setlonlatstrings(shared.shareddata.routes[iroute].points[jpoint].xlon,
 								shared.shareddata.routes[iroute].points[jpoint].ylat,
-								lonstr0, latstr0);
+								londstr0, latdstr0, lonmstr0, latmstr0);
 
 					if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_SIMPLE)
 						strcpy(waypointstr, "---------");
@@ -2968,13 +2967,21 @@ int mbview_updateroutelist()
 						strcpy(waypointstr, "---END4--");
 					else
 						strcpy(waypointstr, "-------");
-					sprintf(value_string,"%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s",
-						iroute, jpoint, lonstr0, latstr0,
-						shared.shareddata.routes[iroute].points[jpoint].zdata,
-						shared.shareddata.routes[iroute].distlateral[jpoint],
-						shared.shareddata.routes[iroute].disttopo[jpoint],
-						waypointstr);
-      					xstr[nitems] = XmStringCreateLocalized(value_string);
+					if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)
+						sprintf(value_string,"%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s",
+							iroute, jpoint, londstr0, latdstr0,
+							shared.shareddata.routes[iroute].points[jpoint].zdata,
+							shared.shareddata.routes[iroute].distlateral[jpoint],
+							shared.shareddata.routes[iroute].disttopo[jpoint],
+							waypointstr);
+					else
+						sprintf(value_string,"%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s",
+							iroute, jpoint, lonmstr0, latmstr0,
+							shared.shareddata.routes[iroute].points[jpoint].zdata,
+							shared.shareddata.routes[iroute].distlateral[jpoint],
+							shared.shareddata.routes[iroute].disttopo[jpoint],
+							waypointstr);
+      				xstr[nitems] = XmStringCreateLocalized(value_string);
 					nitems++;
 					}
 				}

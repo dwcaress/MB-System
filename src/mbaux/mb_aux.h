@@ -386,3 +386,107 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr,
 			double *table_angle, double *table_xtrack,
 			double *table_ltrack, double *table_altitude,
 			double *table_range, int *error);
+
+/* lsqr.h
+   $Revision: 229 $ $Date: 2006-04-15 18:40:08 -0700 (Sat, 15 Apr 2006) $
+*/
+/*!
+   \file
+   Header file for ISO C version of LSQR.
+*/
+void
+mb_aprod(int mode, int m, int n, double x[], double y[], void *UsrWrk);
+
+void
+mblsqr_lsqr( int m,
+      int n,
+      void (*aprod)(int mode, int m, int n, double x[], double y[],
+                    void *UsrWrk ),
+      double damp,
+      void   *UsrWrk,
+      double u[],    // len = m
+      double v[],    // len = n
+      double w[],    // len = n
+      double x[],    // len = n
+      double se[],   // len = *
+      double atol,
+      double btol,
+      double conlim,
+      int    itnlim,
+      FILE   *nout,
+      // The remaining variables are output only.
+      int    *istop_out,
+      int    *itn_out,
+      double *anorm_out,
+      double *acond_out,
+      double *rnorm_out,
+      double *arnorm_out,
+      double *xnorm_out
+     );
+
+#define ZERO   0.0
+#define ONE    1.0
+
+/* cblas.h
+   $Revision: 273 $ $Date: 2006-09-04 15:59:04 -0700 (Mon, 04 Sep 2006) $
+
+   ----------------------------------------------------------------------
+   This file is part of BCLS (Bound-Constrained Least Squares).
+
+   Copyright (C) 2006 Michael P. Friedlander, Department of Computer
+   Science, University of British Columbia, Canada. All rights
+   reserved. E-mail: <mpf@cs.ubc.ca>.
+   
+   BCLS is free software; you can redistribute it and/or modify it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of the
+   License, or (at your option) any later version.
+   
+   BCLS is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General
+   Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public
+   License along with BCLS; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
+   USA
+   ----------------------------------------------------------------------
+*/
+/*!
+   \file
+   CBLAS library header file.
+*/
+
+
+#define MBCBLAS_OFFSET(N, incX) ((incX) > 0 ?  0 : ((N) - 1) * (-(incX)))
+
+enum MBCBLAS_ORDER    {MBCblasRowMajor=101, MBCblasColMajor=102};
+enum MBCBLAS_TRANSPOSE {MBCblasNoTrans=111, MBCblasTrans=112, MBCblasConjTrans=113};
+
+void
+mbcblas_daxpy(const int N, const double alpha, const double *X,
+            const int incX, double *Y, const int incY);
+
+void
+mbcblas_dcopy(const int N, const double *X, const int incX, 
+            double *Y, const int incY);
+
+
+double
+mbcblas_ddot(const int N, const double *X, const int incX,
+           const double *Y, const int incY);
+
+double
+mbcblas_dnrm2(const int N, const double *X, const int incX);
+
+void
+mbcblas_dscal(const int N, const double alpha, double *X, const int incX);
+
+void
+mbcblas_dgemv(const enum MBCBLAS_ORDER order,
+            const enum MBCBLAS_TRANSPOSE TransA, const int M, const int N,
+            const double alpha, const double  *A, const int lda,
+            const double  *X, const int incX, const double beta,
+            double  *Y, const int incY);
+

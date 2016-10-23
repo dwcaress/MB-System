@@ -143,9 +143,9 @@ $bounds = "$org_lon" . "/" . "$org_lat"
 		. "/" . "$org_lat_plus1" . "r";
 
 # set gmt defaults
-($d_format) = `gmtdefaults -L | grep D_FORMAT` =~ /\S+\s+\S+\s+(\S+)/;
-($ellipsoid_save) = `gmtdefaults -L | grep ELLIPSOID` =~ /\S+\s+\S+\s+(\S+)/;
-`gmtset D_FORMAT %.10lg ELLIPSOID $ellipsoid_use`;
+($d_format) = `gmt gmtdefaults | grep FORMAT_FLOAT_OUT` =~ /\S+\s+\S+\s+(\S+)/;
+($ellipsoid_save) = `gmt gmtdefaults | grep ELLIPSOID` =~ /\S+\s+\S+\s+(\S+)/;
+`gmt gmtset FORMAT_FLOAT_OUT %.10lg ELLIPSOID $ellipsoid_use`;
 
 # print out info
 if ($verbose)
@@ -441,7 +441,7 @@ if ($verbose)
 	}
 
 # reset the gmt defaults
-`gmtset D_FORMAT $d_format ELLIPSOID $ellipsoid_save`;
+`gmt gmtset FORMAT_FLOAT_OUT $d_format ELLIPSOID $ellipsoid_save`;
 
 # now open the unprojected navigation data
 if (!open(INP,"<$tmp_geo_navfile"))

@@ -1,4 +1,4 @@
-.TH mb7kpreprocess 1 "12 November 2014" "MB-System 5.0" "MB-System 5.0"
+.TH mb7kpreprocess 1 "21 October 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7kpreprocess\fP \- performs preprocessing of Reson 7k multibeam data
 in the 7k format (\fBMBIO\fP format 88).
@@ -11,6 +11,7 @@ Version 5.0
 \fB\-D\fP\fIoffx/offy[/offdepth]\fP \fB\-F\fP\fIformat\fP
 \fB\-I\fIfile \fB\-K\fP\fIklugemode\fP \fB\-L\fP \fB\-M\fP\fIrockfile\fP \fB\-N\fP\fIinsfile\fP \fB\-O\fP\fIoutfile\fP
 \fB\-P\fP\fIsonardepthfile\fP \fB\-PF\fP\fIfilterlength/filterdepth\fP
+\fB\-S\fP\fIdatatype/source\fP
 \fB\-T\fP\fItimelag\fP \fB\-W\fP\fIdslfile\fP \fB\-H \-V\fP]
 
 .SH DESCRIPTION
@@ -176,6 +177,38 @@ values used to determine depth are affected by waves at the sea surface. In this
 case, a longer period \fIfilterlength\fP (e.g. 10 seconds) and a shallower
 \fIfilterdepth\fP (e.g. 50 meters) may be used to lessen the artifacts due to
 surface swell.
+.TP
+.B \-S
+\fIdatatype/source\fP
+.br
+This option specifies which data records should be the source of the
+navigation (\fIdatatype\fP = 1), heading (\fIdatatype\fP = 2), 
+attitude (\fIdatatype\fP = 3), and sonar depth  (\fIdatatype\fP = 4)
+data that are interpolated onto the
+survey ping times. In each case the \fIsource\fP value specifies
+a data record type. This option can also specify (\fIdatatype\fP = 5) the data record
+type source of the backscatter data
+used to generate pseudo-sidescan data from Reson multibeam sonars.
+The possibilities of \fIsource\fP values for Reson 7k data include:
+      1		MB_DATA_DATA			multibeam data + interpolated position, sensor depth, heading, attitude
+      28	MB_DATA_NAV1			position and sensor depth data (R7KRECID_Position 1003)
+      29	MB_DATA_NAV2			position, sensor depth, heading, attitude data (R7KRECID_BluefinNav 3100:0)
+      30	MB_DATA_NAV3			position heading sensor depth data (R7KRECID_Navigation 1015)
+      18	MB_DATA_ATTITUDE		attitude data (R7KRECID_Attitude 1016)
+      17	MB_DATA_HEADING			heading data (R7KRECID_Heading 1013)
+      16	MB_DATA_HEIGHT			sensor depth data (R7KRECID_Depth 1008)
+.br
+where the numbers in parentheses are the Reson 7k format record type identifiers.
+
+For the backscatter \fIsource\fP values the options are:
+      7007   R7KRECID_7kBackscatterImageData (backscatter time series for port and starboard)
+      7028   R7KRECID_7kV2SnippetData (time slice backscatter derived from bottom arrivals)
+      7058   R7KRECID_7kCalibratedSnippetData
+.br
+By default \fBmb7kpreprocess\fP will attempt to construct the multibeam pseudosidescan
+out of the snippet backscatter records. Also, the previous definition of the
+\fB-S\P\fIsidescansource\fP option is still valid, and is described immediately below.
+.br
 .TP
 .B \-S
 \fIsidescansource\fP

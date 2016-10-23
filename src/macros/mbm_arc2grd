@@ -140,10 +140,10 @@ if ($verbose)
 	}
 
 # run xyz2grd
-$cmd = "xyz2grd $tmpfile -G$ofile -H0 -I$cellsize/$cellsize -R$xmin_f/$xmax_f/$ymin_f/$ymax_f -N$nodata -ZTLa -V";
+$cmd = "gmt xyz2grd $tmpfile -G$ofile -H0 -I$cellsize/$cellsize -R$xmin_f/$xmax_f/$ymin_f/$ymax_f -N$nodata -ZTLa -V";
 if ($verbose)
 	{
-	print "\nRunning xyz2grd...\n$cmd\n";
+	print "\nRunning gmt xyz2grd...\n$cmd\n";
 	}
 `$cmd`;
 #`rm -f $tmpfile`;

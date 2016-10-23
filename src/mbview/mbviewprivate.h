@@ -842,7 +842,7 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel);
 int mbview_extract_pick_profile(size_t instance);
 int mbview_picksize(size_t instance);
 int mbview_pick_text(size_t instance);
-int mbview_setlonlatstrings(int style, double lon, double lat, char *lonstring, char *latstring);
+int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latdstring, char *lonmstring, char *latmstring);
 int mbview_region(size_t instance, int which, int xpixel, int ypixel);
 int mbview_area(size_t instance, int which, int xpixel, int ypixel);
 int mbview_drawpick(size_t instance);

@@ -210,15 +210,15 @@ $PI = 3.1415926;
 $DTR = $PI / 180.0;
 
 # Determine the GMT version
-@grdinfo = `grdinfo 2>&1`;
+@grdinfo = `gmt grdinfo 2>&1`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
 	if ($line =~
-		/^grdinfo\s+(\S+)\s+\S+/)
+		/^gmt grdinfo\s+(\S+)\s+\S+/)
 		{
 		($gmt_version) = $line =~
-			/^grdinfo\s+(\S+)\s+\S+/;
+			/^gmt grdinfo\s+(\S+)\s+\S+/;
 		}
 	}
 
@@ -712,7 +712,7 @@ if (!$bounds || !$zbounds)
 		}
 	else
 		{
-		@grdinfo = `grdinfo $file_data`;
+		@grdinfo = `gmt grdinfo $file_data`;
 		}
 	while (@grdinfo)
 		{
@@ -793,10 +793,10 @@ if (!$bounds || !$zbounds)
 		}
 	}
 
-# get limits of drape data file using grdinfo
+# get limits of drape data file using gmt grdinfo
 if ($file_drape && !$zbounds)
 	{
-	@grdinfo = `grdinfo $file_drape`;
+	@grdinfo = `gmt grdinfo $file_drape`;
 	while (@grdinfo)
 		{
 		$line = shift @grdinfo;
@@ -816,7 +816,7 @@ if ($file_drape && !$zbounds)
 	if ($zmin >= $zmax)
 		{
 		print "\a";
-		die "The program grdinfo does not appear to have worked properly!\n$program_name aborted.\n"
+		die "The program gmt grdinfo does not appear to have worked properly!\n$program_name aborted.\n"
 		}
 	}
 
@@ -1588,7 +1588,7 @@ if ($color_mode && !$file_cpt)
 			print "Running gmt module grdhisteq...\n";
 			}
 		$ncolors_minus = $ncolors - 1;
-		@grdhisteq = `grdhisteq $files_data[0] -C$ncolors_minus -D`;
+		@grdhisteq = `gmt grdhisteq $files_data[0] -C$ncolors_minus -D`;
 		foreach $d (@grdhisteq) {
 			($d1, $d2) = $d =~ /(\S+)\s+(\S+).*/;
 			if ($d2 > $d1)

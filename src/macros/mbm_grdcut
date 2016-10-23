@@ -46,17 +46,18 @@
 $program_name = "mbm_grdcut";
 
 # Determine the GMT version
-@grdinfo = `grdinfo 2>&1`;
+@grdinfo = `gmt grdinfo 2>&1`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
 	if ($line =~
-		/^grdinfo\s+(\S+)\s+\S+/)
+		/^grdinfo\(core\)\s+(\S+)\s+\S+/)
 		{
 		($gmt_version) = $line =~
-			/^grdinfo\s+(\S+)\s+\S+/;
+			/^grdinfo\(core\)\s+(\S+)\s+\S+/;
 		}
 	}
+print "gmt_version:$gmt_version\n";
 
 # Deal with command line arguments
 &Getopts('I:i:O:o:R:r:VvHh');
@@ -119,12 +120,12 @@ if ($bounds =~ /^\S+\/\S+\/\S+\/\S+$/)
 	}
 
 # Save old GMT default double format and set new format
-$line = `gmtdefaults -L | grep D_FORMAT`;
-($dformatsave) = $line =~ /D_FORMAT\s+=\s+(\S+)/;
-`gmtset D_FORMAT %.15lg`;
+$line = `gmt gmtdefaults | grep FORMAT_FLOAT_OUT`;
+($dformatsave) = $line =~ /FORMAT_FLOAT_OUT\s+=\s+(\S+)/;
+`gmtset FORMAT_FLOAT_OUT %.15lg`;
 
 # get limits of files using grdinfo
-@grdinfo = `grdinfo $ifile 2>&1`;
+@grdinfo = `gmt grdinfo $ifile 2>&1`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
@@ -141,6 +142,12 @@ while (@grdinfo)
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+name:\s+(.+)\s+nx:\s+(\S+)/;
 		}
 	elsif ($line =~
+		/\S+\s+x_min:\s+\S+\s+x_max:\s+\S+\s+x_inc:\s+\S+\s+name:\s+.+\s+n_columns:\s+\S+/)
+		{
+		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~
+			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+name:\s+(.+)\s+n_columns:\s+(\S+)/;
+		}
+	elsif ($line =~
 		/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
 		{
 		($xmin_f,$xmax_f) = $line =~
@@ -155,6 +162,11 @@ while (@grdinfo)
 		{
 		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~
 			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+name:\s+(.+)\s+ny:\s+(\S+)/;
+		}
+	elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:\s+\S+\s+name:\s+.+\s+n_rows:\s+\S+/)
+		{
+		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~
+			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+name:\s+(.+)\s+n_rows:\s+(\S+)/;
 		}
 	elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:/)
 		{
@@ -182,6 +194,7 @@ while (@grdinfo)
 			/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
 		}
 	}
+print "MBM_GRDCUT: xminr:$xminr xmin_f:$xmin_f xinc_f:$xinc_f\n";
 
 # calculate acceptable output bounds
 $diffx = ($xminr - $xmin_f) / $xinc_f;
@@ -209,7 +222,7 @@ if ($verbose)
 	}
 
 # run grdcut
-$cmd = "grdcut $ifile -G$ofile -R$xminout/$xmaxout/$yminout/$ymaxout -V";
+$cmd = "gmt grdcut $ifile -G$ofile -R$xminout/$xmaxout/$yminout/$ymaxout -V";
 if ($verbose)
 	{
 	print "\tCommand: $cmd\n";
@@ -225,7 +238,7 @@ if ($verbose)
 	}
 
 # reset the GMT default double format
-`gmtset D_FORMAT $dformatsave`;
+`gmt gmtset FORMAT_FLOAT_OUT $dformatsave`;
 
 exit 0;
 

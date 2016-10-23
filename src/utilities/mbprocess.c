@@ -357,7 +357,7 @@ and mbedit edit save files.\n";
 	int	neditused;
 
 	double	draft_org, depth_offset_use, depth_offset_change, depth_offset_org, static_shift;
-	double	roll_org, pitch_org, heave_org;
+	double	roll_org, pitch_org, heave_org, heading_org;
 	double	ttime, range;
 	double	xx, zz, rr, vsum, vavg;
 	double	alpha, beta;
@@ -4850,7 +4850,8 @@ and mbedit edit save files.\n";
 			{
 			status = mb_extract_nav(verbose,imbio_ptr,store_ptr,&kind,
 					time_i,&time_d,&navlon,&navlat,
-					&speed,&heading,&draft_org,&roll_org,&pitch_org,&heave_org,&error);
+					&speed,&heading_org,&draft_org,&roll_org,&pitch_org,&heave_org,&error);
+			heading = heading_org;
 			draft = draft_org;
 			roll = roll_org;
 			pitch = pitch_org;
@@ -5514,37 +5515,37 @@ bathacrosstrack[i]-xx*cos(DTR*angles_forward[i]),
 bathalongtrack[i]-xx*sin(DTR*angles_forward[i]),
 bath[i]-zz); */
 
-				/* get alongtrack and acrosstrack distances
-					and depth */
-				bathacrosstrack[i] = xx*cos(DTR*angles_forward[i]);
-				bathalongtrack[i] = xx*sin(DTR*angles_forward[i]) + alongtrack_offset[i];
-				bath[i] = zz;
+						/* get alongtrack and acrosstrack distances
+							and depth */
+						bathacrosstrack[i] = xx*cos(DTR*angles_forward[i]);
+						bathalongtrack[i] = xx*sin(DTR*angles_forward[i]) + alongtrack_offset[i];
+						bath[i] = zz;
+		
+						/* output some debug values */
+						if (verbose >= 5)
+							fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %6.3f %8.2f %8.2f %8.2f\n",
+							idata, i, 0.5*ttimes[i], angles[i], angles_forward[i],
+							bathacrosstrack[i], bathalongtrack[i], bath[i]);
+		
+						/* output some debug messages */
+						if (verbose >= 5)
+							{
+							fprintf(stderr,"\ndbg5  Depth value calculated in program <%s>:\n",program_name);
+							fprintf(stderr,"dbg5       kind:  %d\n",kind);
+							fprintf(stderr,"dbg5       beam:  %d\n",i);
+							fprintf(stderr,"dbg5       tt:     %f\n",ttimes[i]);
+							fprintf(stderr,"dbg5       xx:     %f\n",xx);
+							fprintf(stderr,"dbg5       zz:     %f\n",zz);
+							fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
+							fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
+							fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
+							}
+						}
 
-				/* output some debug values */
-				if (verbose >= 5)
-				    fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %6.3f %8.2f %8.2f %8.2f\n",
-					idata, i, 0.5*ttimes[i], angles[i], angles_forward[i],
-					bathacrosstrack[i], bathalongtrack[i], bath[i]);
-
-				/* output some debug messages */
-				if (verbose >= 5)
-				    {
-				    fprintf(stderr,"\ndbg5  Depth value calculated in program <%s>:\n",program_name);
-				    fprintf(stderr,"dbg5       kind:  %d\n",kind);
-				    fprintf(stderr,"dbg5       beam:  %d\n",i);
-				    fprintf(stderr,"dbg5       tt:     %f\n",ttimes[i]);
-				    fprintf(stderr,"dbg5       xx:     %f\n",xx);
-				    fprintf(stderr,"dbg5       zz:     %f\n",zz);
-				    fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
-				    fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
-				    fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
-				    }
-				}
-
-			      /* else if no travel time no data */
-			      else
-				beamflag[i] = MB_FLAG_NULL;
-			      }
+					/* else if no travel time no data */
+					else
+						beamflag[i] = MB_FLAG_NULL;
+					}
 			    }
 
 			/* recalculate bathymetry by rigid rotations  */
@@ -5552,92 +5553,91 @@ bath[i]-zz); */
 			    {
 			    /* loop over the beams */
 			    for (i=0;i<nbath;i++)
-			      {
-			      if (beamflag[i] != MB_FLAG_NULL)
-				{
-				/* output some debug messages */
-				if (verbose >= 5)
-				    {
-				    fprintf(stderr,"\ndbg5  Depth value to be calculated in program <%s>:\n",program_name);
-				    fprintf(stderr,"dbg5       kind:  %d\n",kind);
-				    fprintf(stderr,"dbg5       beam:  %d\n",i);
-				    fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
-				    fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
-				    fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
-				    }
-
-				/* add heave and draft */
-				depth_offset_use = bheave[i] + draft + lever_heave;
-				depth_offset_org = bheave[i] + draft_org;
-
-				/* strip off heave + draft */
-				bath[i] -= depth_offset_org;
-
-				/* get range and angles in
-				    roll-pitch frame */
-				range = sqrt(bath[i] * bath[i]
-					    + bathacrosstrack[i]
-						* bathacrosstrack[i]
-					    + bathalongtrack[i]
-						* bathalongtrack[i]);
-                                if (fabs(range) < 0.001)
-                                        {
-                                        alphar = 0.0;
-                                        betar = 0.5 * M_PI;
-                                        }
-                                else
-                                        {
-                                        alphar = asin(MAX(-1.0, MIN(1.0, (bathalongtrack[i] / range))));
-                                        betar = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alphar)))));
-                                        }
-                                if (bath[i] < 0.0)
-                                        betar = 2.0 * M_PI - betar;
-
-				/* apply roll pitch corrections */
-                                if (process.mbp_nav_attitude == MBP_NAV_ON
-                                        || process.mbp_attitude_mode == MBP_ATTITUDE_ON)
-                                        {
-                                        betar += DTR * (roll - roll_org);
-                                        alphar += DTR * (pitch - pitch_org);
-                                        }
-				if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-			    		alphar += DTR * process.mbp_pitchbias;
-			    	if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-			    		betar += DTR * process.mbp_rollbias;
-			    	else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE
-					&& betar <= M_PI * 0.5)
-			    		betar += DTR * process.mbp_rollbias_stbd;
-			    	else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-			    		betar += DTR * process.mbp_rollbias_port;
-
-				/* recalculate bathymetry */
-				bath[i] = range * cos(alphar) * sin(betar);
-				bathalongtrack[i] = range * sin(alphar);
-				bathacrosstrack[i] = range * cos(alphar) * cos(betar);
-
-				/* add heave and draft back in */
-				bath[i] += depth_offset_use;
-
-				/* output some debug values */
-				if (verbose >= 5)
-				    fprintf(stderr,"dbg5       %3d %3d %8.2f %8.2f %8.2f\n",
-					idata, i,
-					bathacrosstrack[i],
-					bathalongtrack[i],
-					bath[i]);
-
-				/* output some debug messages */
-				if (verbose >= 5)
-				    {
-				    fprintf(stderr,"\ndbg5  Depth value calculated in program <%s>:\n",program_name);
-				    fprintf(stderr,"dbg5       kind:  %d\n",kind);
-				    fprintf(stderr,"dbg5       beam:  %d\n",i);
-				    fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
-				    fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
-				    fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
-				    }
-				}
-			      }
+					{
+					if (beamflag[i] != MB_FLAG_NULL)
+						{
+						/* output some debug messages */
+						if (verbose >= 5)
+							{
+							fprintf(stderr,"\ndbg5  Depth value to be calculated in program <%s>:\n",program_name);
+							fprintf(stderr,"dbg5       kind:  %d\n",kind);
+							fprintf(stderr,"dbg5       beam:  %d\n",i);
+							fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
+							fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
+							fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
+							}
+		
+						/* add heave and draft */
+						depth_offset_use = bheave[i] + draft + lever_heave;
+						depth_offset_org = bheave[i] + draft_org;
+		
+						/* strip off heave + draft */
+						bath[i] -= depth_offset_org;
+		
+						/* get range and angles in
+							roll-pitch frame */
+						range = sqrt(bath[i] * bath[i]
+								+ bathacrosstrack[i]
+								* bathacrosstrack[i]
+								+ bathalongtrack[i]
+								* bathalongtrack[i]);
+										if (fabs(range) < 0.001)
+												{
+												alphar = 0.0;
+												betar = 0.5 * M_PI;
+												}
+										else
+												{
+												alphar = asin(MAX(-1.0, MIN(1.0, (bathalongtrack[i] / range))));
+												betar = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alphar)))));
+												}
+										if (bath[i] < 0.0)
+												betar = 2.0 * M_PI - betar;
+		
+						/* apply roll pitch corrections */
+										if (process.mbp_nav_attitude == MBP_NAV_ON
+												|| process.mbp_attitude_mode == MBP_ATTITUDE_ON)
+												{
+												betar += DTR * (roll - roll_org);
+												alphar += DTR * (pitch - pitch_org);
+												}
+						if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+								alphar += DTR * process.mbp_pitchbias;
+							if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+								betar += DTR * process.mbp_rollbias;
+							else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE
+							&& betar <= M_PI * 0.5)
+								betar += DTR * process.mbp_rollbias_stbd;
+							else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+								betar += DTR * process.mbp_rollbias_port;
+		
+						/* recalculate bathymetry */
+						bath[i] = range * cos(alphar) * sin(betar);
+						bathalongtrack[i] = range * sin(alphar);
+						bathacrosstrack[i] = range * cos(alphar) * cos(betar);
+						
+						/* rotate bathymetry by applying attitude biases */
+		//				status = mb_platform_math_attitude_rotate_beam (verbose,
+		//										bathacrosstrack[i], 
+		//										bathalongtrack[i], 
+		//										bath[i],
+		//										(roll - roll_org + process.mbp_rollbias), 
+		//										(pitch - pitch_org + process.mbp_pitchbias), 
+		//										(heading - heading_org + process.mbp_headingbias),
+		//										&bathacrosstrack[i], 
+		//										&bathalongtrack[i], 
+		//										&bath[i],
+		//										&error);			
+		
+						/* add heave and draft back in */
+						bath[i] += depth_offset_use;
+		
+						/* output some debug values */
+						if (verbose >= 5)
+							fprintf(stderr,"dbg5       %3d beam:%3d bath:%8.2f %8.2f %8.2f\n",
+									idata, i, bathacrosstrack[i], bathalongtrack[i], bath[i]);
+						}
+					}
 			    }
 
 			/* recalculate bathymetry by changes to transducer depth  */
@@ -6058,7 +6058,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				}
 			    }
 			}
-		    }
+		}
 
 	/*--------------------------------------------
 	  apply grazing angle corrections to amplitude and sidescan
@@ -6235,7 +6235,7 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 	i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*/
 
 				/* get seafloor slopes */
-		    		for (i=0;i<pixels_ss;i++)
+		    	for (i=0;i<nss;i++)
 					{
 					if (ss[i] > MB_SIDESCAN_NULL)
 			    			{
@@ -6259,7 +6259,7 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 				    				error = MB_ERROR_NO_ERROR;
 				    				}
 							}
-			    			if (bathy <= 0.0)
+			    		if (bathy <= 0.0)
 							{
 							if (altitude > 0.0)
 								bathy = altitude + sonardepth;
@@ -6268,7 +6268,7 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 							slope = 0.0;
 							}
 
-			    			if (bathy > 0.0)
+			    		if (bathy > 0.0)
 							{
 							altitude_use = bathy - sonardepth;
 							angle = RTD * atan(ssacrosstrack[i] / altitude_use);
@@ -6293,7 +6293,7 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 				    				ss[i] = ss[i] / correction * reference_amp;
 /*fprintf(stderr, " ss: %f\n", ss[i]);*/
 							}
-			    			}
+			    		}
 					}
 				}
 			}
@@ -6478,18 +6478,18 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 				reference_amp = 0.5 * (reference_amp_port
 								+ reference_amp_stbd);
 
-	/*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
-	itable, sscorrtableuse.time_d,
-	sscorrtableuse.nangle);
-	for (i=0;i<sscorrtableuse.nangle;i++)
-	fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
-	i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*/
+/* fprintf(stderr, "itable:%d time:%f nangle:%d\n",
+itable, sscorrtableuse.time_d,
+sscorrtableuse.nangle);
+for (i=0;i<sscorrtableuse.nangle;i++)
+fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
+i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]); */
 
 				/* get seafloor slopes */
-		    		for (i=0;i<pixels_ss;i++)
+		    	for (i=0;i<nss;i++)
 					{
 					if (ss[i] > MB_SIDESCAN_NULL)
-			    			{
+			    		{
 						/* get position in grid */
 						r[0] =  headingy * ssacrosstrack[i]
 							+ headingx * ssalongtrack[i];
@@ -6574,14 +6574,14 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 								sscorrtableuse.amplitude,
 								angle, &correction, &error);
 						if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
-				    			{
-                                                        ss[i] = ss[i] - correction + reference_amp;
-                                                        }
+				    		{
+							ss[i] = ss[i] - correction + reference_amp;
+							}
 						else
-				    			{
-                                                        ss[i] = ss[i] / correction * reference_amp;
-                                                        }
-			    			}
+				    		{
+							ss[i] = ss[i] / correction * reference_amp;
+							}
+			    		}
 					}
 				}
 			}

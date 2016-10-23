@@ -534,13 +534,15 @@ int mbnavadjust_read_project(int verbose, char *projectpath,
                 
                 if (status == MB_SUCCESS)
                     {
-                    if (version_id >= 105
-                            && ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+                    if (version_id >= 105)
+                        {
+                        if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
                                     || (nscan = sscanf(buffer,"%s %lf",label,&project->zoffsetwidth)) != 2
-                                    || strcmp(label,"ZOFFSETWIDTH") != 0))
+                                    || strcmp(label,"ZOFFSETWIDTH") != 0)
                             status = MB_FAILURE;
+                        }
                     else
-                            project->zoffsetwidth = 5.0;
+                        project->zoffsetwidth = 5.0;
                     }
                 
                 /* allocate memory for files array */
@@ -730,9 +732,6 @@ fprintf(stderr, "read failed on section: %s\n", buffer);
                                         &section->snav_lat_offset[k],
                                         &section->snav_z_offset[k]);
                             section->snav_num_ties[k] = 0;
-                            section->snav_lon_offset_int[k] = 0.0;
-                            section->snav_lat_offset_int[k] = 0.0;
-                            section->snav_z_offset_int[k] = 0.0;
                             if (result == buffer && nscan == 6)
                                 {
                                 section->snav_lon_offset[k] = 0.0;
@@ -1250,10 +1249,6 @@ fprintf(stderr,"Reset tie snav_2 on read:%d\n",tie->snav_2);
                             project->num_goodcrossings++;
                         }
                     }
-        
-                /* interpolate inversion solution if it exists */
-                if (project->inversion_status != MBNA_INVERSION_NONE)
-                    mbnavadjust_interpolatesolution(verbose, project, error);
                 }
         
             /* else set error */
@@ -2632,304 +2627,4 @@ int mbnavadjust_crossing_overlapbounds(int verbose,
 	return(status);
 }
 
-/*--------------------------------------------------------------------*/
-
-int
-mbnavadjust_interpolatesolution(int verbose, struct mbna_project *project,
-                                int *error)
-{
-	/* local variables */
-	char	*function_name = "mbnavadjust_interpolatesolution";
-	int	status = MB_SUCCESS;
-	struct mbna_file *file;
-	struct mbna_file *pfile;
-	struct mbna_section *section;
-	struct mbna_section *psection;
-	int	previoustie;
-	int	ifilestart;
-	int	isectionstart;
-	int	isnavstart;
-	double	plonoffset;
-	double	platoffset;
-	double	pzoffset;
-	double	ptime_d;
-	double	factor;
-	int	ok;
-	int	ii, jj, iisnav;
-	int	i, j, isnav;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
-		fprintf(stderr,"dbg2       project:            %p\n",project);
-		}
-
-	/* linearly interpolate solution between tied snavs */
-	previoustie = MB_NO;
-	ifilestart = 0;
-	isectionstart = 0;
-	isnavstart = 0;
-	for (i=0;i<project->num_files;i++)
-	    {
-	    file = &project->files[i];
-	    for (j=0;j<file->num_sections;j++)
-            {
-            section = &file->sections[j];
-            for (isnav=0;isnav<section->num_snav;isnav++)
-                {
-                /* deal with constrained snav points */
-                if (section->snav_num_ties[isnav] > 0
-                        || section->global_tie_snav == isnav)
-                    {
-                    /* if no previous tie set apply current offset to intervening snav points */
-                    if (previoustie == MB_NO)
-                        {
-                        for (ii=ifilestart;ii<=i;ii++)
-                            {
-                            pfile = &project->files[ii];
-                            for (jj=0;jj<pfile->num_sections;jj++)
-                                {
-                                psection = &pfile->sections[jj];
-                                for (iisnav=0;iisnav<psection->num_snav;iisnav++)
-                                    {
-                                    ok = MB_YES;
-                                    if (ii == ifilestart && jj < isectionstart)
-                                        ok = MB_NO;
-                                    if (ii == ifilestart && jj == isectionstart && iisnav < isnavstart)
-                                        ok = MB_NO;
-                                    if (ii == i && jj > j)
-                                        ok = MB_NO;
-                                    if (ii == i && jj == j && iisnav > isnav)
-                                        ok = MB_NO;
-                                    if (ok == MB_YES)
-                                        {
-                                        psection->snav_lon_offset_int[iisnav] = section->snav_lon_offset[isnav];
-                                        psection->snav_lat_offset_int[iisnav] = section->snav_lat_offset[isnav];
-                                        psection->snav_z_offset_int[iisnav] = section->snav_z_offset[isnav];
-/*fprintf(stderr,"SET1: %d %d %d   %f %f %f\n",
-ii,jj,iisnav,
-psection->snav_lon_offset_int[iisnav],
-psection->snav_lat_offset_int[iisnav],
-psection->snav_z_offset_int[iisnav]);*/
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    /* if previous tie set interpolate intervening snav points */
-                    if (previoustie == MB_YES)
-                        {
-                        pfile = &project->files[ifilestart];
-                        psection = &pfile->sections[isectionstart];
-                        plonoffset = psection->snav_lon_offset[isnavstart];
-                        platoffset = psection->snav_lat_offset[isnavstart];
-                        pzoffset = psection->snav_z_offset[isnavstart];
-                        ptime_d = psection->snav_time_d[isnavstart];
-                        for (ii=ifilestart;ii<=i;ii++)
-                            {
-                            pfile = &project->files[ii];
-                            for (jj=0;jj<pfile->num_sections;jj++)
-                                {
-                                psection = &pfile->sections[jj];
-                                for (iisnav=0;iisnav<psection->num_snav;iisnav++)
-                                    {
-                                    ok = MB_YES;
-                                    if (ii == ifilestart && jj < isectionstart)
-                                        ok = MB_NO;
-                                    if (ii == ifilestart && jj == isectionstart && iisnav <= isnavstart)
-                                        ok = MB_NO;
-                                    if (ii == i && jj > j)
-                                        ok = MB_NO;
-                                    if (ii == i && jj == j && iisnav > isnav)
-                                        ok = MB_NO;
-                                    if (ok == MB_YES)
-                                        {
-                                        if ((section->snav_time_d[isnav] - ptime_d) > 0.0)
-                                            {
-                                            factor = (psection->snav_time_d[iisnav] - ptime_d)
-                                                / (section->snav_time_d[isnav] - ptime_d);
-                                            }
-                                        else
-                                            {
-                                            factor = 0.0;
-                                            }
-                                        psection->snav_lon_offset_int[iisnav] = plonoffset
-                                            + factor * (section->snav_lon_offset[isnav] - plonoffset);
-                                        psection->snav_lat_offset_int[iisnav] = platoffset
-                                            + factor * (section->snav_lat_offset[isnav] - platoffset);
-                                        psection->snav_z_offset_int[iisnav] = pzoffset
-                                            + factor * (section->snav_z_offset[isnav] - pzoffset);
-        /*fprintf(stderr,"SET2: %d %d %d   %f %f %f   times: %f %f %f\n",
-        ii,jj,iisnav,
-        psection->snav_lon_offset_int[iisnav],
-        psection->snav_lat_offset_int[iisnav],
-        psection->snav_z_offset_int[iisnav],
-        section->snav_time_d[isnav],psection->snav_time_d[iisnav],ptime_d);*/
-                                        }
-                                    }
-                                }
-                            }
-                        }
-        
-                    /* reset tracking */
-                    previoustie = MB_YES;
-                    ifilestart = i;
-                    isectionstart = j;
-                    isnavstart = isnav;
-                    }
-    
-                /* deal with a break in continuity */
-                else if (isnav == 0 && section->continuity == MB_NO)
-                    {
-                    /* if previous tie set apply that offset to intervening snav points */
-                    if (previoustie == MB_YES)
-                        {
-                        pfile = &project->files[ifilestart];
-                        psection = &pfile->sections[isectionstart];
-                        plonoffset = psection->snav_lon_offset[isnavstart];
-                        platoffset = psection->snav_lat_offset[isnavstart];
-                        pzoffset = psection->snav_z_offset[isnavstart];
-                        for (ii=ifilestart;ii<=i;ii++)
-                            {
-                            pfile = &project->files[ii];
-                            for (jj=0;jj<pfile->num_sections;jj++)
-                                {
-                                psection = &pfile->sections[jj];
-                                for (iisnav=0;iisnav<psection->num_snav;iisnav++)
-                                    {
-                                    ok = MB_YES;
-                                    if (ii == ifilestart && jj < isectionstart)
-                                        ok = MB_NO;
-                                    if (ii == ifilestart && jj == isectionstart && iisnav <= isnavstart)
-                                        ok = MB_NO;
-                                    if (ii == i && jj > j)
-                                        ok = MB_NO;
-                                    if (ii == i && jj == j && iisnav >= isnav)
-                                        ok = MB_NO;
-                                    if (ok == MB_YES)
-                                        {
-                                        psection->snav_lon_offset_int[iisnav] = plonoffset;
-                                        psection->snav_lat_offset_int[iisnav] = platoffset;
-                                        psection->snav_z_offset_int[iisnav] = pzoffset;
-/*fprintf(stderr,"SET3: %d %d %d   %f %f %f\n",
-ii,jj,iisnav,
-psection->snav_lon_offset_int[iisnav],
-psection->snav_lat_offset_int[iisnav],
-psection->snav_z_offset_int[iisnav]);*/
-                                        }
-                
-                                    }
-                                }
-                            }
-                        }
-        
-                    /* reset tracking */
-                    previoustie = MB_NO;
-                    ifilestart = i;
-                    isectionstart = j;
-                    isnavstart = isnav;
-                    }
-
-                /* deal with end of data */
-                else if (i == project->num_files - 1
-                        && j == file->num_sections - 1
-                        && isnav == section->num_snav - 1)
-                    {
-                    /* if previous tie set apply that offset to intervening snav points */
-                    if (previoustie == MB_YES)
-                        {
-                        pfile = &project->files[ifilestart];
-                        psection = &pfile->sections[isectionstart];
-                        plonoffset = psection->snav_lon_offset[isnavstart];
-                        platoffset = psection->snav_lat_offset[isnavstart];
-                        pzoffset = psection->snav_z_offset[isnavstart];
-                        for (ii=ifilestart;ii<=i;ii++)
-                            {
-                            pfile = &project->files[ii];
-                            for (jj=0;jj<pfile->num_sections;jj++)
-                                {
-                                psection = &pfile->sections[jj];
-                                for (iisnav=0;iisnav<psection->num_snav;iisnav++)
-                                    {
-                                    ok = MB_YES;
-                                    if (ii == ifilestart && jj < isectionstart)
-                                        ok = MB_NO;
-                                    if (ii == ifilestart && jj == isectionstart && iisnav <= isnavstart)
-                                        ok = MB_NO;
-                                    if (ii == i && jj > j)
-                                        ok = MB_NO;
-                                    if (ii == i && jj == j && iisnav > isnav)
-                                        ok = MB_NO;
-                                    if (ok == MB_YES)
-                                        {
-                                        psection->snav_lon_offset_int[iisnav] = plonoffset;
-                                        psection->snav_lat_offset_int[iisnav] = platoffset;
-                                        psection->snav_z_offset_int[iisnav] = pzoffset;
-/*fprintf(stderr,"SET4: %d %d %d   %f %f %f\n",
-ii,jj,iisnav,
-psection->snav_lon_offset_int[iisnav],
-psection->snav_lat_offset_int[iisnav],
-psection->snav_z_offset_int[iisnav]);*/
-                                        }
-                                    }
-                                }
-                            }
-                        }
-        
-                    /* reset tracking */
-                    previoustie = MB_NO;
-                    ifilestart = i;
-                    isectionstart = j;
-                    isnavstart = isnav;
-                    }
-    
-                /* zero unconstrained snav points - these will be interpolated later if possible */
-                else
-                    {
-                    section->snav_lon_offset_int[isnav] = 0.0;
-                    section->snav_lat_offset_int[isnav] = 0.0;
-                    section->snav_z_offset_int[isnav] = 0.0;
-/*fprintf(stderr,"SET5: %d %d %d   %f %f %f\n",
-i,j,isnav,
-section->snav_lon_offset_int[isnav],
-section->snav_lat_offset_int[isnav],
-section->snav_z_offset_int[isnav]);*/
-                    }
-                }
-            }
-	    }
-/*for (i=0;i<project->num_files;i++)
-{
-file = &project->files[i];
-for (j=0;j<file->num_sections;j++)
-{
-section = &file->sections[j];
-for (isnav=0;isnav<section->num_snav;isnav++)
-{
-fprintf(stderr,"INTERPOLATION: %2d %2d %2d   %f %f %f\n",
-i,j,isnav,
-section->snav_lon_offset_int[isnav],
-section->snav_lat_offset_int[isnav],
-section->snav_z_offset_int[isnav]);
-}
-}
-}*/
-
- 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:       %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:      %d\n",status);
-		}
-
-	return(status);
-}
 /*--------------------------------------------------------------------*/
