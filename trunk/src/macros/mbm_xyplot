@@ -1244,8 +1244,8 @@ if ($tlabel)
 for ($i = 0; $i < scalar(@xyfiles); $i++)
 	{
 	printf FCMD "#\n# Make xy data plot\n";
-	printf FCMD "echo Running psxy...\n";
-	printf FCMD "psxy $xyfiles[$i] \\\n\t";
+	printf FCMD "echo Running gmt psxy...\n";
+	printf FCMD "gmt psxy $xyfiles[$i] \\\n\t";
 	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
 	if ($xysymbols[$i] ne "N")
@@ -1283,8 +1283,8 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 if ($coast_control)
 	{
 	printf FCMD "#\n# Make coastline data plot\n";
-	printf FCMD "echo Running pscoast...\n";
-	printf FCMD "pscoast \\\n\t";
+	printf FCMD "echo Running gmt pscoast...\n";
+	printf FCMD "gmt pscoast \\\n\t";
 	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
 	if ($coast_lakefill)
@@ -1334,8 +1334,8 @@ if ($coast_control)
 if (@text)
 	{
 	printf FCMD "#\n# Make text labels\n";
-	printf FCMD "echo Running pstext...\n";
-	printf FCMD "pstext -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "echo Running gmt pstext...\n";
+	printf FCMD "gmt pstext -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
 	printf FCMD "$middle <<EOT\n";
 	foreach $text_info (@text) {
@@ -1350,8 +1350,8 @@ if (@text)
 
 # do psbasemap plot
 printf FCMD "#\n# Make basemap\n";
-printf FCMD "echo Running psbasemap...\n";
-printf FCMD "psbasemap -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+printf FCMD "echo Running gmt psbasemap...\n";
+printf FCMD "gmt psbasemap -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 printf FCMD "-R\$MAP_REGION \\\n\t";
 printf FCMD "$axes \\\n\t";
 if ($length_scale)

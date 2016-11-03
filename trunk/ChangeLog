@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2285       November 3, 2016
 * Version 5.5.2284       October 23, 2016
   Version 5.5.2282       August 25, 2016
   Version 5.5.2281       August 7, 2016
@@ -238,6 +239,14 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2285 (November 3, 2016)
+
+Mbnavadjust: Added a first step in the inversion in which mbnavadjust solves for
+average offsets for each survey ("block"). The offsets associated with this
+average model are removed from the tie offsets before the full inversion. The
+smoothing penalty is thus applied to deviations from the average model rather
+than the full navigation adjustment model.
 
 -----> 5.5.2284 (October 23, 2016)
 
