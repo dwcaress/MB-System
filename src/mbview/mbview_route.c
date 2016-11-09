@@ -354,17 +354,17 @@ int mbview_allocroutearrays(int verbose,
 		fprintf(stderr,"dbg2       routelon:                  %p\n", *routelon);
 		fprintf(stderr,"dbg2       routelat:                  %p\n", *routelat);
 		if (waypoint != NULL)
-		fprintf(stderr,"dbg2       waypoint:                  %p\n", *waypoint);
+			fprintf(stderr,"dbg2       waypoint:                  %p\n", *waypoint);
 		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %p\n", *routetopo);
+			fprintf(stderr,"dbg2       routetopo:                 %p\n", *routetopo);
 		if (routebearing != NULL)
-		fprintf(stderr,"dbg2       routebearing:              %p\n", *routebearing);
+			fprintf(stderr,"dbg2       routebearing:              %p\n", *routebearing);
 		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %p\n", *distlateral);
+			fprintf(stderr,"dbg2       distlateral:               %p\n", *distlateral);
 		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
+			fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
 		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
+			fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		}
 
 	/* allocate the arrays using mb_realloc */
@@ -393,17 +393,17 @@ int mbview_allocroutearrays(int verbose,
 		fprintf(stderr,"dbg2       routelon:                  %p\n", *routelon);
 		fprintf(stderr,"dbg2       routelat:                  %p\n", *routelat);
 		if (waypoint != NULL)
-		fprintf(stderr,"dbg2       waypoint:                  %p\n", *waypoint);
+			fprintf(stderr,"dbg2       waypoint:                  %p\n", *waypoint);
 		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %p\n", *routetopo);
+			fprintf(stderr,"dbg2       routetopo:                 %p\n", *routetopo);
 		if (routebearing != NULL)
-		fprintf(stderr,"dbg2       routebearing:              %p\n", *routebearing);
+			fprintf(stderr,"dbg2       routebearing:              %p\n", *routebearing);
 		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %p\n", *distlateral);
+			fprintf(stderr,"dbg2       distlateral:               %p\n", *distlateral);
 		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
+			fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
 		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
+			fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -441,17 +441,17 @@ int mbview_freeroutearrays(int verbose,
 		fprintf(stderr,"dbg2       routelon:                  %p\n", *routelon);
 		fprintf(stderr,"dbg2       routelat:                  %p\n", *routelat);
 		if (waypoint != NULL)
-		fprintf(stderr,"dbg2       waypoint:                  %p\n", *waypoint);
+			fprintf(stderr,"dbg2       waypoint:                  %p\n", *waypoint);
 		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %p\n", *routetopo);
+			fprintf(stderr,"dbg2       routetopo:                 %p\n", *routetopo);
 		if (routebearing != NULL)
-		fprintf(stderr,"dbg2       routebearing:              %p\n", *routebearing);
+			fprintf(stderr,"dbg2       routebearing:              %p\n", *routebearing);
 		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %p\n", *distlateral);
+			fprintf(stderr,"dbg2       distlateral:               %p\n", *distlateral);
 		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
+			fprintf(stderr,"dbg2       distovertopo:              %p\n", *distovertopo);
 		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
+			fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		}
 
 	/* free the arrays using mb_free */
@@ -563,7 +563,7 @@ int mbview_addroute(int verbose, size_t instance,
 		{
 		/* check waypoint flag correct */
 		if (waypoint[i] <= MBV_ROUTE_WAYPOINT_NONE
-			|| waypoint[i] > MBV_ROUTE_WAYPOINT_ENDLINE4)
+			|| waypoint[i] > MBV_ROUTE_WAYPOINT_ENDLINE5)
 			waypoint[i] = MBV_ROUTE_WAYPOINT_SIMPLE;
 
 		/* get route positions in grid coordinates */
@@ -2965,6 +2965,10 @@ int mbview_updateroutelist()
 						strcpy(waypointstr, "--START4-");
 					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE4)
 						strcpy(waypointstr, "---END4--");
+					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE5)
+						strcpy(waypointstr, "--START5-");
+					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE5)
+						strcpy(waypointstr, "---END5--");
 					else
 						strcpy(waypointstr, "-------");
 					if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)

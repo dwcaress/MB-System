@@ -240,6 +240,13 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.5.2286 (November 3, 2016)
+
+Mbsvplist: Added -R command to set longitude-latitude bounds within which the
+-S option will cause ssv values to be output.
+
+Mbgrdviz: Added start5 and end5 waypoint types to routes.
+
 -----> 5.5.2285 (November 3, 2016)
 
 Mbnavadjust: Added a first step in the inversion in which mbnavadjust solves for

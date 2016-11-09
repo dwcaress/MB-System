@@ -3071,6 +3071,10 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 			    	    fprintf(sfp," ## WAYPOINT STARTLINE4\n");
 				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE4)
 			    	    fprintf(sfp," ## WAYPOINT ENDLINE4\n");
+				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE5)
+			    	    fprintf(sfp," ## WAYPOINT STARTLINE5\n");
+				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE5)
+			    	    fprintf(sfp," ## WAYPOINT ENDLINE5\n");
 				else
 			    	    fprintf(sfp,"\n");
 				}
@@ -3289,22 +3293,22 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr)
                         settlingtime = 3.0;
 			for (j=0;j<npointtotal;j++)
 				{
-                                if (projection_initialized == MB_NO)
-                                    {
-                                    mb_coor_scale(verbose, routelat[j], &mtodeglon, &mtodeglat);
-                                    lon_origin = routelon[j];
-                                    lat_origin = routelat[j];
-                                    projection_initialized = MB_YES;
-                                    }
+                if (projection_initialized == MB_NO)
+                    {
+                    mb_coor_scale(verbose, routelat[j], &mtodeglon, &mtodeglat);
+                    lon_origin = routelon[j];
+                    lat_origin = routelat[j];
+                    projection_initialized = MB_YES;
+                    }
 				if (routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE)
-                                    {
-                                    iscript++;
-                                    xx = (routelon[j] - lon_origin) / mtodeglon;
-                                    yy = (routelat[j] - lat_origin) / mtodeglat;
-                                    zz = 0.0;
-			    	    fprintf(sfp,"%d, %.3f, %.3f, %.3f, %.3f, %.3f\r\n",
+                    {
+                    iscript++;
+                    xx = (routelon[j] - lon_origin) / mtodeglon;
+                    yy = (routelat[j] - lat_origin) / mtodeglat;
+                    zz = 0.0;
+			    	fprintf(sfp,"%d, %.3f, %.3f, %.3f, %.3f, %.3f\r\n",
                                             iscript, xx, yy, zz, vvspeed, settlingtime);
-                                    }
+                    }
 				}
 
 			/* write the route end */
@@ -3618,10 +3622,10 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr)
 			    {
 			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
 			    	{
-				n++;
+                    n++;
  			        fprintf(sfp,"%s %d,%.10f,%.10f,17,100.0,0.00,0.00,255,0.00\r\n",
 						routename, n, routelat[j], routelon[j]);
-				}
+                    }
 			    }
 		    }
 
@@ -3778,8 +3782,8 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr)
 			    {
 			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
 			    	{
-				n++;
-				}
+                    n++;
+                    }
 			    }
 		    if (iroute > 0)
 			fprintf(sfp,"#\r\n");
@@ -3789,22 +3793,22 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr)
 			    {
 			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
 			    	{
-				if (routelat[j] >= 0.0)
-				    latNS = 'N';
-				else
-				    latNS = 'S';
-				latDeg = (int)(floor(fabs(routelat[j])));
-				latMin = (fabs(routelat[j]) - (double)latDeg) * 60.0;
-				if (routelon[j] >= 0.0)
-				    lonEW = 'E';
-				else
-				    lonEW = 'W';
-				lonDeg = (int)(floor(fabs(routelon[j])));
-				lonMin = (fabs(routelon[j]) - (double)lonDeg) * 60.0;
+                    if (routelat[j] >= 0.0)
+                        latNS = 'N';
+                    else
+                        latNS = 'S';
+                    latDeg = (int)(floor(fabs(routelat[j])));
+                    latMin = (fabs(routelat[j]) - (double)latDeg) * 60.0;
+                    if (routelon[j] >= 0.0)
+                        lonEW = 'E';
+                    else
+                        lonEW = 'W';
+                    lonDeg = (int)(floor(fabs(routelon[j])));
+            		lonMin = (fabs(routelon[j]) - (double)lonDeg) * 60.0;
 
  			        fprintf(sfp,"%c %3d %9.6f   %c %3d %9.6f \r\n",
 						latNS,latDeg,latMin,lonEW,lonDeg,lonMin);
-				}
+                    }
 			    }
 		    }
 
@@ -4009,22 +4013,22 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr)
 			    {
 			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
 			    	{
-				n++;
-				}
+                    n++;
+                    }
 			    }
 		    fprintf(sfp,"LIN %d\r\n",n);
 		    for (j=0;j<npointtotal;j++)
 			    {
 			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
 			    	{
-				proj_status = mb_proj_forward(verbose,
+                    proj_status = mb_proj_forward(verbose,
 							pjptr,
 							routelon[j], routelat[j],
 							&easting,
 							&northing,
 							&error);
  			        fprintf(sfp,"PTS %.2f %.2f\r\n",easting,northing);
-				}
+                    }
 			    }
 		    fprintf(sfp,"LNN %d\r\nEOL\r\n",iroute+1);
 		    }
