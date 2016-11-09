@@ -1,4 +1,4 @@
-.TH mbsvplist 1 "17 March 2014" "MB-System 5.0" "MB-System 5.0"
+.TH mbsvplist 1 "8 November 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsvplist\fP \- List water sound velocity profiles in swath sonar data files.
 
@@ -6,7 +6,8 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsvplist\fP [\fB\-C \-D \fB\-F\fIformat \fB\-H \fB\-I\fIfile \fB\-M\fImode\fP \fB\-O \-P \-S \-V \-Z\fP]
+\fBmbsvplist\fP [\fB\-C \-D \fB\-F\fIformat \fB\-H \fB\-I\fIfile \fB\-M\fImode\fP
+\fB\-O \-P\fP \fB\-R\fIwest/east/south/north\fP \fB\-S \-V \-Z\fP]
 
 .SH DESCRIPTION
 This program, \fBmbsvplist\fP, lists all water
@@ -36,11 +37,13 @@ so that the first SVP output for each file becomes the
 SVP used for recalculating bathymetry for that swath file.
 The \fB\-C\fP option causes \fBmbsvplist\fP to output the number
 of unique SVPs in a file to the shell (standard out).
+
 The \fB\-S\fP option causes \fBmbsvplist\fP to output the sound velocity values
 used for beamforming by the sonar (often called surface sound velocity, or SSV)
 instead of SVP profiles. Each SSV value will be paired with the
 corresponding sonar depth, and there will generally be one SSV value output
-for each survey ping.
+for each survey ping. The \fB-R\fP option can be used in conjunction with \fB-S\fP
+to output SSV values only within a desired longitude-latitude box.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -122,6 +125,13 @@ This option implies the output option \fB\-O\fP. Additionally,
 this option sets the first SVP output for each swathfile to be used for
 recalculating the bathymetry in that swathfile by \fBmbprocess\fP
 by modifying the associated parameter file.
+.TP
+.B \-R
+\fIwest/east/south/north\fP
+.br
+When the \fB\-S\fP option has been specified, this option sets the longitude
+and latitude bounds within which SSV values will be output. Default: all SSV
+values are output.
 .TP
 .B \-S
 .br

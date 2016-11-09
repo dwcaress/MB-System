@@ -8685,7 +8685,7 @@ fprintf(stderr,"do_mbview_routelistselect:\n");
 			/* increment waypoint type */
 			shared.shareddata.routes[iroute].waypoint[iwaypoint]++;
 			if (shared.shareddata.routes[iroute].waypoint[iwaypoint] < MBV_ROUTE_WAYPOINT_SIMPLE
-				|| shared.shareddata.routes[iroute].waypoint[iwaypoint] > MBV_ROUTE_WAYPOINT_ENDLINE4)
+				|| shared.shareddata.routes[iroute].waypoint[iwaypoint] > MBV_ROUTE_WAYPOINT_ENDLINE5)
 				shared.shareddata.routes[iroute].waypoint[iwaypoint] = MBV_ROUTE_WAYPOINT_SIMPLE;
 
 			/* update route list */

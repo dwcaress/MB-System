@@ -179,6 +179,8 @@ int main (int argc, char **argv)
 	int	out_cnt = 0;
 	int	min_num_pairs = 0;
 	int	svp_time_i[7];
+	int ssv_bounds_set = MB_NO;
+	double	ssv_bounds[4];
 	
 	/* ttimes values */
 	int	ssv_output = MB_NO;
@@ -213,12 +215,16 @@ int main (int argc, char **argv)
 	svp_written_tot = 0;
 	svp_unique_tot = 0;
 	svp_last.n = 0;
+	ssv_bounds[0] = -360.0;
+	ssv_bounds[1] = 360.0;
+	ssv_bounds[2] = -90.0;
+	ssv_bounds[3] = 90.0;
 
 	/* set default input to datalist.mb-1 */
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "CcDdF:f:I:i:M:m:N:n:OoPpSsTtZzVvHh")) != -1)
+	while ((c = getopt(argc, argv, "CcDdF:f:I:i:M:m:N:n:OoPpR:r:SsTtZzVvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -268,6 +274,12 @@ int main (int argc, char **argv)
 			svp_setprocess = MB_YES;
 			ssv_output = MB_NO;
 			break;
+		case 'R':
+		case 'r':
+			mb_get_bounds(optarg, ssv_bounds);
+			ssv_bounds_set = MB_YES;
+			flag++;
+			break;
 		case 'S':
 		case 's':
 			ssv_output = MB_YES;
@@ -312,32 +324,42 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Version %s\n",svn_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Control Parameters:\n");
-		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       help:           %d\n",help);
-		fprintf(stderr,"dbg2       format:         %d\n",format);
-		fprintf(stderr,"dbg2       pings:          %d\n",pings);
-		fprintf(stderr,"dbg2       lonflip:        %d\n",lonflip);
-		fprintf(stderr,"dbg2       bounds[0]:      %f\n",bounds[0]);
-		fprintf(stderr,"dbg2       bounds[1]:      %f\n",bounds[1]);
-		fprintf(stderr,"dbg2       bounds[2]:      %f\n",bounds[2]);
-		fprintf(stderr,"dbg2       bounds[3]:      %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       btime_i[0]:     %d\n",btime_i[0]);
-		fprintf(stderr,"dbg2       btime_i[1]:     %d\n",btime_i[1]);
-		fprintf(stderr,"dbg2       btime_i[2]:     %d\n",btime_i[2]);
-		fprintf(stderr,"dbg2       btime_i[3]:     %d\n",btime_i[3]);
-		fprintf(stderr,"dbg2       btime_i[4]:     %d\n",btime_i[4]);
-		fprintf(stderr,"dbg2       btime_i[5]:     %d\n",btime_i[5]);
-		fprintf(stderr,"dbg2       btime_i[6]:     %d\n",btime_i[6]);
-		fprintf(stderr,"dbg2       etime_i[0]:     %d\n",etime_i[0]);
-		fprintf(stderr,"dbg2       etime_i[1]:     %d\n",etime_i[1]);
-		fprintf(stderr,"dbg2       etime_i[2]:     %d\n",etime_i[2]);
-		fprintf(stderr,"dbg2       etime_i[3]:     %d\n",etime_i[3]);
-		fprintf(stderr,"dbg2       etime_i[4]:     %d\n",etime_i[4]);
-		fprintf(stderr,"dbg2       etime_i[5]:     %d\n",etime_i[5]);
-		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
-		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
-		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
-		fprintf(stderr,"dbg2       file:           %s\n",file);
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       help:              %d\n",help);
+		fprintf(stderr,"dbg2       format:            %d\n",format);
+		fprintf(stderr,"dbg2       pings:             %d\n",pings);
+		fprintf(stderr,"dbg2       lonflip:           %d\n",lonflip);
+		fprintf(stderr,"dbg2       bounds[0]:         %f\n",bounds[0]);
+		fprintf(stderr,"dbg2       bounds[1]:         %f\n",bounds[1]);
+		fprintf(stderr,"dbg2       bounds[2]:         %f\n",bounds[2]);
+		fprintf(stderr,"dbg2       bounds[3]:         %f\n",bounds[3]);
+		fprintf(stderr,"dbg2       btime_i[0]:        %d\n",btime_i[0]);
+		fprintf(stderr,"dbg2       btime_i[1]:        %d\n",btime_i[1]);
+		fprintf(stderr,"dbg2       btime_i[2]:        %d\n",btime_i[2]);
+		fprintf(stderr,"dbg2       btime_i[3]:        %d\n",btime_i[3]);
+		fprintf(stderr,"dbg2       btime_i[4]:        %d\n",btime_i[4]);
+		fprintf(stderr,"dbg2       btime_i[5]:        %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:        %d\n",btime_i[6]);
+		fprintf(stderr,"dbg2       etime_i[0]:        %d\n",etime_i[0]);
+		fprintf(stderr,"dbg2       etime_i[1]:        %d\n",etime_i[1]);
+		fprintf(stderr,"dbg2       etime_i[2]:        %d\n",etime_i[2]);
+		fprintf(stderr,"dbg2       etime_i[3]:        %d\n",etime_i[3]);
+		fprintf(stderr,"dbg2       etime_i[4]:        %d\n",etime_i[4]);
+		fprintf(stderr,"dbg2       etime_i[5]:        %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:        %d\n",etime_i[6]);
+		fprintf(stderr,"dbg2       speedmin:          %f\n",speedmin);
+		fprintf(stderr,"dbg2       timegap:           %f\n",timegap);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		fprintf(stderr,"dbg2       svp_printmode:     %d\n",svp_printmode);
+		fprintf(stderr,"dbg2       svp_file_output:   %d\n",svp_file_output);
+		fprintf(stderr,"dbg2       svp_setprocess:    %d\n",svp_setprocess);
+		fprintf(stderr,"dbg2       svp_force_zero:    %d\n",svp_force_zero);
+		fprintf(stderr,"dbg2       ssv_output:        %d\n",ssv_output);
+		fprintf(stderr,"dbg2       ssv_bounds_set:    %d\n",ssv_bounds_set);
+		fprintf(stderr,"dbg2       ssv_bounds[0]:     %f\n",ssv_bounds[0]);
+		fprintf(stderr,"dbg2       ssv_bounds[1]:     %f\n",ssv_bounds[1]);
+		fprintf(stderr,"dbg2       ssv_bounds[2]:     %f\n",ssv_bounds[2]);
+		fprintf(stderr,"dbg2       ssv_bounds[3]:     %f\n",ssv_bounds[3]);
 		}
 
 	/* if help desired then print it and exit */
@@ -690,7 +712,12 @@ int main (int argc, char **argv)
 
 				/* output ssv */
 				if (status == MB_SUCCESS)
+					{
+					if (ssv_bounds_set == MB_NO
+						|| (navlon >= ssv_bounds[0] && navlon <= ssv_bounds[1]
+							&& navlat >= ssv_bounds[2] && navlat <= ssv_bounds[3]))
 					fprintf(stdout, "%f %f\n", sonardepth, ssv);
+					}
 				}
 			}
 		}

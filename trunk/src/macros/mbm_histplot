@@ -869,6 +869,7 @@ if ($fill && $fill ne "N")
 	{
 	printf FCMD "-G$fill \\\n\t";
 	}
+printf FCMD " -N0+pblack -N1+pred -N2+pgreen \\\n\t";
 if ($unix_stamp_on && $unix_stamp)
 	{
 	printf FCMD "-U$unix_stamp \\\n\t";
