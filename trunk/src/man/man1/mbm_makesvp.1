@@ -1,4 +1,4 @@
-.TH mbm_makesvp 1 "13 October 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_makesvp 1 "29 November 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_makesvp\fP \- Macro to extract sound speed and depth data from a datalist of swath files,
 and generate a sound velocity profile model from averages of the sound speed values in regular depth ranges.
@@ -7,21 +7,25 @@ and generate a sound velocity profile model from averages of the sound speed val
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_makesvp\fP \fB\-I\fP\fIinputfile\fP [\fB\-H \-V\fP
-\fB\-D\fP\fIdepthinterval\fP \fB\-O\fP\fIoutputfile\fP]
+\fBmbm_makesvp\fP \fB\-I\fP\fIinputfile\fP 
+[\fB\-A\fP \fB\-D\fP\fIdepthinterval\fP \fB\-H\fP \fB\-M\fP\fImode\fP
+\fB\-O\fP\fIoutputfile\fP \fB\-V\fP]
 
 .SH DESCRIPTION
-\fBmbm_makesvp\fP is a macro to extract sound speed and depth data from a datalist of swath files,
-and generate a sound velocity profile model from averages of the sound
-speed values in regular depth ranges. 
-
-This macro uses \fBmbctdlist\fP to extract the sound speed values embedded in swath data files.
-This macro is intended for use with mapping data from submerged platforms (e.g. ROVs and AUVs) carrying
-CTD or sound speed sensors. Since the sound speed values are generally recorded during the
-entire ROV or AUV survey, these values can be used to construct a model for sound speed as
-a function of depth at the survey location.
+\fBmbm_makesvp\fP is a macro to extract sound speed and depth data from a datalist of swath files, 
+and generate a sound velocity profile model from averages of the sound 
+speed values in regular depth ranges. This macro is intended for use 
+with mapping data from submerged platforms (e.g. ROVs and AUVs) carrying 
+CTD or SSV sensors. If -M0 is used, then sound speed values are 
+extracted directly from data records containing CTD or SSV values. 
+If -M1 is used, then sound speed values are extracted from the sonar 
+survey data records (e.g. the sound speed values used for beamforming). 
 The sound speed and sonar depth value pairs are binned according to the \fIdepthinterval\fP
 value, and average sound speed values are reported for bins with at least one value.
+If -A is specified, the sound speed profile is prepended with a zero 
+depth value equal to the shallowest calculated value, and appended with a 
+full ocean depth (11000 meters) value equal to the deepest calculated 
+corrected for pressure using a correction of 0.0167 * delta_depth in m/sec. 
 The \fB\-O\fP option specifies the output filename; by default the model is output to
 the stdout stream.
 
@@ -35,6 +39,12 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
+.TP
+.B \-A
+If -A is specified, the sound speed profile is prepended with a zero 
+depth value equal to the shallowest calculated value, and appended with a 
+full ocean depth (11000 meters) value equal to the deepest calculated 
+corrected for pressure using a correction of 0.0167 * delta_depth in m/sec. 
 .TP
 .B \-D
 \fIdepthinterval\fP
@@ -82,6 +92,15 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. The default input filename is
 "datalist.mb-1".
 .TP
+.B \-M
+\fImode\fP
+.br
+If \fB\-M\fP\fI0\fP is used, then sound speed values are 
+extracted directly from data records containing CTD or SSV values. 
+If \fB\-M\fP\fI1\fP is used, then sound speed values are extracted from the sonar 
+survey data records (e.g. the sound speed values used for beamforming). 
+Default: \fImode\fP=0.
+.TP
 .B \-O
 \fIoutput\fP
 .br
@@ -97,6 +116,7 @@ want to construct an average sound speed versus depth model from these data. The
 command:
 .br
 	mbm_makesvp -Idatalist.mb-1 -D25 -Osvp.txt -V
+.br
 will generate a model of sound speed versus depth in the output file "svp.txt".
 
 .SH SEE ALSO

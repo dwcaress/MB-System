@@ -117,7 +117,7 @@
 #define	MBNA_INTERP_CONSTANT		1
 #define	MBNA_INTERP_INTERP		2
 
-#define MBNA_SMOOTHING_DEFAULT		2
+#define MBNA_SMOOTHING_DEFAULT		3.0
 
 //#define MBNA_INTERATION_MAX		10000
 //#define MBNA_CONVERGENCE		0.000001
@@ -348,9 +348,10 @@ struct mbna_contour_vector
     };
 struct mbna_matrix
 	{
-	int m;
-	int n;
-	int *nia;
+	int m; //rows
+	int n; //columns
+	int ia_dim; // column dimension of ia and a matrices
+	int *nia; // array of number of nonzero elements in each row, cannot be larger than ia_dim
 	int *ia;
 	double *a;
 	};

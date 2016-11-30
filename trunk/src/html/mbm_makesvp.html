@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_makesvp</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  13 October 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  29 November 2016 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,23 +28,27 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbm_makesvp</B> <B>-I</B><I>inputfile</I> [<B>-H -V</B>
-<B>-D</B><I>depthinterval</I> <B>-O</B><I>outputfile</I>]
+<B>mbm_makesvp</B> <B>-I</B><I>inputfile</I> 
+[<B>-A</B> <B>-D</B><I>depthinterval</I> <B>-H</B> <B>-M</B><I>mode</I>
+<B>-O</B><I>outputfile</I> <B>-V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbm_makesvp</B> is a macro to extract sound speed and depth data from a datalist of swath files,
-and generate a sound velocity profile model from averages of the sound
-speed values in regular depth ranges. 
-<P>
-This macro uses <B>mbctdlist</B> to extract the sound speed values embedded in swath data files.
-This macro is intended for use with mapping data from submerged platforms (e.g. ROVs and AUVs) carrying
-CTD or sound speed sensors. Since the sound speed values are generally recorded during the
-entire ROV or AUV survey, these values can be used to construct a model for sound speed as
-a function of depth at the survey location.
+<B>mbm_makesvp</B> is a macro to extract sound speed and depth data from a datalist of swath files, 
+and generate a sound velocity profile model from averages of the sound 
+speed values in regular depth ranges. This macro is intended for use 
+with mapping data from submerged platforms (e.g. ROVs and AUVs) carrying 
+CTD or SSV sensors. If -M0 is used, then sound speed values are 
+extracted directly from data records containing CTD or SSV values. 
+If -M1 is used, then sound speed values are extracted from the sonar 
+survey data records (e.g. the sound speed values used for beamforming). 
 The sound speed and sonar depth value pairs are binned according to the <I>depthinterval</I>
 value, and average sound speed values are reported for bins with at least one value.
+If -A is specified, the sound speed profile is prepended with a zero 
+depth value equal to the shallowest calculated value, and appended with a 
+full ocean depth (11000 meters) value equal to the deepest calculated 
+corrected for pressure using a correction of 0.0167 * delta_depth in m/sec. 
 The <B>-O</B> option specifies the output filename; by default the model is output to
 the stdout stream.
 <P>
@@ -66,6 +70,13 @@ Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+If -A is specified, the sound speed profile is prepended with a zero 
+depth value equal to the shallowest calculated value, and appended with a 
+full ocean depth (11000 meters) value equal to the deepest calculated 
+corrected for pressure using a correction of 0.0167 * delta_depth in m/sec. 
 <DT><B>-D</B>
 
 <DD>
@@ -120,6 +131,17 @@ A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. The default input filename is
 &quot;datalist.mb-1&quot;.
+<DT><B>-M</B>
+
+<DD>
+<I>mode</I>
+<BR>
+
+If <B>-M</B><I>0</I> is used, then sound speed values are 
+extracted directly from data records containing CTD or SSV values. 
+If <B>-M</B><I>1</I> is used, then sound speed values are extracted from the sonar 
+survey data records (e.g. the sound speed values used for beamforming). 
+Default: <I>mode</I>=0.
 <DT><B>-O</B>
 
 <DD>
@@ -143,6 +165,8 @@ command:
 <BR>
 
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_makesvp -Idatalist.mb-1 -D25 -Osvp.txt -V<BR>
+<BR>
+
 will generate a model of sound speed versus depth in the output file &quot;svp.txt&quot;.
 <P>
 <A NAME="lbAI">&nbsp;</A>
@@ -173,7 +197,7 @@ Likely yes.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 13 October 2013</P></CENTER>
+Last Updated: 29 November 2016</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

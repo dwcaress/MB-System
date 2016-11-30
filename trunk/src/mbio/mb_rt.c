@@ -1059,6 +1059,7 @@ int mb_rt_line(int verbose, int *error)
 	double	theta;
 	double	xvel;
 	double	zvel;
+	double	asin_arg;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1070,7 +1071,8 @@ int mb_rt_line(int verbose, int *error)
 		}
 
 	/* find linear path */
-	theta = asin(model->pp * model->layer_vel_top[model->layer]);
+	asin_arg = MIN(model->pp * model->layer_vel_top[model->layer], 1.000);
+	theta = asin(asin_arg);
 	if (model->turned == MB_NO)
 		{
 		model->zf = model->layer_depth_bottom[model->layer];
@@ -1086,6 +1088,20 @@ int mb_rt_line(int verbose, int *error)
 		model->dt = (model->zf - model->zz) / zvel;
 	else
 		model->dt = 100 * model->tt_left;
+		
+	/* if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Ray calculation in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5        model->layer:               %d\n", model->layer);
+		fprintf(stderr,"dbg5        model->layer_vel_top:       %f\n", model->layer_vel_top[model->layer]);
+		fprintf(stderr,"dbg5        layer_vel_top * pp:         %f\n", model->pp * model->layer_vel_top[model->layer]);
+		fprintf(stderr,"dbg5        asin(layer_vel_top * pp):   %f\n", asin(model->pp * model->layer_vel_top[model->layer]));
+		fprintf(stderr,"dbg5        model->pp:                  %f\n", model->pp);
+		fprintf(stderr,"dbg5        theta:                      %f\n", theta);
+		fprintf(stderr,"dbg5        model->zf:                  %f\n", model->zf);
+		fprintf(stderr,"dbg5        xvel:                       %f\n", xvel);
+		fprintf(stderr,"dbg5        zvel:                       %f\n", zvel);
+		}*/
 
 	/* ray exhausts tt_left before exiting layer */
 	if (model->dt >= model->tt_left)
@@ -1107,6 +1123,17 @@ int mb_rt_line(int verbose, int *error)
 		else
 			model->layer++;
 		}
+		
+	/* if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Ray calculation in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5        model->xf:                 %f\n", model->xf);
+		fprintf(stderr,"dbg5        model->zf:                 %f\n", model->zf);
+		fprintf(stderr,"dbg5        model->dt:                 %f\n", model->dt);
+		fprintf(stderr,"dbg5        model->tt_left:            %f\n", model->tt_left);
+		fprintf(stderr,"dbg5        model->turned:             %d\n", model->turned);
+		fprintf(stderr,"dbg5        model->layer:              %d\n", model->layer);
+		} */
 
 	/* put points in plotting arrays */
 	if (model->plot_mode != MB_RT_PLOT_MODE_OFF && model->number_plot < model->number_plot_max)

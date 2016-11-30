@@ -41,13 +41,15 @@ $program_name = "mbm_makesvp";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('D:d:F:f:HhI:i:O:o:Vv');
-$help =    		($opt_H || $opt_h);
+&MBGetopts('AaD:d:F:f:HhI:i:M:m:O:o:Vv');
+$help =    				($opt_H || $opt_h);
+$addtopbottom =    		($opt_A || $opt_a);
 $depthinterval =    	($opt_D || $opt_d || 25);
-$format =    		($opt_F || $opt_f);
-$inputfile =    	($opt_I || $opt_i | "datalist.mb-1");
-$output =    		($opt_O || $opt_o);
-$verbose = 		($opt_V || $opt_v);
+$format =    			($opt_F || $opt_f);
+$inputfile =    		($opt_I || $opt_i | "datalist.mb-1");
+$mode =    				($opt_M || $opt_m || 0);
+$output =    			($opt_O || $opt_o);
+$verbose = 				($opt_V || $opt_v);
 
 # print out help message if required
 if ($help)
@@ -58,9 +60,16 @@ if ($help)
 	print "and generate a sound velocity profile model from averages of the sound\n";
 	print "speed values in regular depth ranges. This macro is intended for use\n";
 	print "with mapping data from submerged platforms (e.g. ROVs and AUVs) carrying\n";
-	print "CTD or SSV sensors.\n";
+	print "CTD or SSV sensors. If -M0 is used, then sound speed values are\n";
+	print "extracted directly from data records containing CTD or SSV values.\n";
+	print "If -M1 is used, then sound speed values are extracted from the sonar\n";
+	print "survey data records (e.g. the sound speed values used for beamforming)\n";
+	print "If -A is specified, the sound speed profile is prepended with a zero\n";
+	print "depth value equal to the shallowest calculated value, and append a\n";
+	print "full ocean depth (11000 meters) value equal to the deepest calculated\n";
+	print "corrected for pressure using a correction of 0.0167 * delta_depth in m/sec\n";
 	print "Basic Usage: \n";
-	print "\t$program_name -Iinputfile [-H -V -Ddepthinterval]\n";
+	print "\t$program_name -Iinputfile [-A -Ddepthinterval -H -Mmode -Ooutput-V]\n";
 	exit 0;
 	}
 
@@ -93,15 +102,24 @@ if (!$format)
     ($format) = $mbformat =~ /\S+\s+(\S+)/;
     }
 
-@mbctdlist = `mbctdlist -F$format -I$inputfile  -O^cs`;
+if ($mode = 0)
+	{
+    @soundspeedlist = `mbctdlist -F$format -I$inputfile  -O^cs`;
+	}
+else
+	{
+    @soundspeedlist = `mbsvplist -F$format -I$inputfile  -S`;
+	}
+
+
 $nsoundspeed = 0;
 $depthmin = 999999999.99;
 $depthmax = 0.0;
 $depthmin = 999999999.99;
 $depthmax = 0.0;
-while (@mbctdlist)
+while (@soundspeedlist)
 	{
-	$line = shift @mbctdlist;
+	$line = shift @soundspeedlist;
 	if ($line =~ /(\S+)\s+(\S+)/)
 		{
 		($depth,$soundspeed) = $line =~ /(\S+)\s+(\S+)/;
@@ -168,23 +186,41 @@ if ($output)
 	open(F,">$output") || die "Cannot open output file: $output\n$program_name aborted.\n";
 	}
 
+$n = 0;
 for ($i=0; $i < $ndepthbin; $i++)
 	{
 	if ($depthbincount[$i] > 0)
 		{
 		$depth = $depthminuse + $i * $depthinterval + 0.5 * $depthinterval;
 		$soundspeed = $depthbinsum[$i] / $depthbincount[$i];
-		print "$depth $soundspeed\n";
+		if ($n == 0 && $addtopbottom)
+			{
+			if ($output)
+				{
+				print F "0.00 $soundspeed\n";
+				}
+			print "0.00 $soundspeed\n";
+			}
+        $n++;
 		if ($output)
 			{
 			print F "$depth $soundspeed\n";
 			}
-		else
-			{
-			print "$depth $soundspeed\n";
-			}
+		print "$depth $soundspeed\n";
 		}
 	}
+if ($addtopbottom)
+	{
+	$depthbottom = 11000.0;
+	$soundspeedbottom = $soundspeed + 0.0167 * ($depthbottom - $depth);
+	if ($output)
+		{
+		print F "$depthbottom $soundspeedbottom\n";
+		}
+	print "$depthbottom $soundspeedbottom\n";
+	}
+
+
 if ($output)
 	{
 	close(F);
