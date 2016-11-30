@@ -16,6 +16,8 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2287       November 29, 2016
+  Version 5.5.2286       November 8, 2016
   Version 5.5.2285       November 3, 2016
 * Version 5.5.2284       October 23, 2016
   Version 5.5.2282       August 25, 2016
@@ -240,7 +242,22 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2286 (November 3, 2016)
+-----> 5.5.2287 (November 29, 2016)
+
+Mbm_makesvp: added capability to extract sound speed values from survey data
+records as well as ctd data records, and to optionall produce sound speed models extending
+to the surface and the deep ocean even if the data are available only for a limited
+depth range.
+
+Mbnavadjust: Modified the inversion algorithm to once again have a first stage
+solution for "block" (survey) average offsets followed by the main inversion to
+satisfy all of the navigation tie offsets in detail.
+
+Mbnavadjust: updated the documentation of the inversion algorithm.
+
+Mbprocess: fixed rare singularity in the raytracing code.
+
+-----> 5.5.2286 (November 8, 2016)
 
 Mbsvplist: Added -R command to set longitude-latitude bounds within which the
 -S option will cause ssv values to be output.
