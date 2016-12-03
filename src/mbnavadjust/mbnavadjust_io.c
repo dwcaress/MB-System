@@ -1119,21 +1119,25 @@ fprintf(stderr, "read failed on tie covariance: %s\n", buffer);
                                 section = &file->sections[crossing->section_1];
                                 if (tie->snav_1 >= section->num_snav)
                                     {
-                                    tie->snav_1 = ((double)tie->snav_1
+fprintf(stderr,"Crossing %4d:%4d %4d:%4d Reset tie snav_1 on read from %d to ",
+        crossing->file_id_1,crossing->section_1,crossing->file_id_2,crossing->section_2,tie->snav_1);
+                                   tie->snav_1 = ((double)tie->snav_1
                                                             / (double)section->num_pings)
                                                             * (MBNA_SNAV_NUM - 1);
                                     tie->snav_1_time_d = section->snav_time_d[tie->snav_1];
-fprintf(stderr,"Reset tie snav_1 on read:%d\n",tie->snav_1);
+fprintf(stderr,"%d because numsnav=%d\n",tie->snav_1,section->num_snav);
                                     }
                                 file = &project->files[crossing->file_id_2];
                                 section = &file->sections[crossing->section_2];
                                 if (tie->snav_2 >= section->num_snav)
                                     {
+fprintf(stderr,"Crossing  %4d:%4d %4d:%4d  Reset tie snav_2 on read from %d to ",
+        crossing->file_id_1,crossing->section_1,crossing->file_id_2,crossing->section_2,tie->snav_2);
                                     tie->snav_2 = ((double)tie->snav_2
                                                             / (double)section->num_pings)
                                                             * (MBNA_SNAV_NUM - 1);
                                     tie->snav_2_time_d = section->snav_time_d[tie->snav_2];
-fprintf(stderr,"Reset tie snav_2 on read:%d\n",tie->snav_2);
+fprintf(stderr,"%d because numsnav=%d\n",tie->snav_2,section->num_snav);
                                     }
                                 }
             

@@ -82,6 +82,9 @@ static char version_id[] = "$Id$";
 #define MOD_MODE_INSERT_DISCONTINUITY                      	29
 #define MOD_MODE_REIMPORT_FILE             					30
 #define MOD_MODE_REIMPORT_ALL_FILES   						31
+#define IMPORT_NONE 		0
+#define IMPORT_TIE 			1
+#define IMPORT_GLOBALTIE 	2
 
 struct mbnavadjust_mod
 	{
@@ -230,10 +233,14 @@ int main (int argc, char **argv)
 	struct mbna_section *section1;
 	struct mbna_file *file2;
 	struct mbna_section *section2;
+	struct mbna_file *file;
+	struct mbna_section *section;
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
 	
 	int	num_import_tie;
+	int	num_import_globaltie;
+	int import_status = IMPORT_NONE;
 	int	import_tie_status;
 	mb_path import_tie_file_1_path;
 	mb_path import_tie_file_2_path;
@@ -256,6 +263,20 @@ int main (int argc, char **argv)
 	int import_tie_section_2_id;
 	int import_tie_snav_1;
 	int import_tie_snav_2;
+	int num_old_ties, num_new_ties;
+	mb_path import_globaltie_file_path;
+	mb_path import_globaltie_file_name;
+	int import_globaltie_status;
+	int import_globaltie_file;
+	int import_globaltie_section_id;
+	int import_globaltie_snav;
+	double import_globaltie_snav_time_d;
+	double import_globaltie_offset_x_m;
+	double import_globaltie_offset_y_m;
+	double import_globaltie_offset_z_m;
+	double import_globaltie_offset_xsigma;
+	double import_globaltie_offset_ysigma;
+	double import_globaltie_offset_zsigma;
 	FILE *tfp;
 
 	char buffer[BUFFER_MAX];
@@ -266,8 +287,11 @@ int main (int argc, char **argv)
 	mb_path filename;
 	double	mtodeglon, mtodeglat;
 	int	found, current_crossing;
-	int	imod, ifile, icrossing, itie, isection, isnav;
+	int	imod, ifile, icrossing, itie, itie_set, isection, isnav;
 	double timediff, timediffmin;
+	mb_path tmp_mb_path;
+	int tmp_int;
+	double tmp_double;
 	int done;
 	int	i, j, k;
 	
@@ -1292,7 +1316,8 @@ int main (int argc, char **argv)
 		&& project_output_set == MB_NO)
 		{
 		strcpy(project_output_path, project_inputbase_path);
-		project_output_set = MB_YES;
+		if (num_mods > 0 || import_tie_list_set == MB_YES)
+			project_output_set = MB_YES;
 		mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_MODIFY;
 		}
 	else if (project_inputbase_set == MB_YES
@@ -2706,7 +2731,7 @@ fprintf(stderr,"\nCommand reimport-all-files\n");
 				    if (mods[imod].mode == MOD_MODE_REIMPORT_ALL_FILES
 						|| ifile == mods[imod].file1)
 						{
-						file1 = &(project_output.files[ifile]);
+						file = &(project_output.files[ifile]);
 						
 						/* load and copy the pre-adjusted navigation */
 						
@@ -2734,44 +2759,155 @@ fprintf(stderr,"\nCommand reimport-all-files\n");
 		/* read and process the ties */
 		done = MB_NO;
 		num_import_tie = 0;
+		num_import_globaltie = 0;
 		while (done == MB_NO)
 			{
-			/* read the firt line of the next tie */
-			if ((result = fgets(buffer,BUFFER_MAX,tfp)) != buffer
-				|| (nscan = sscanf(buffer, "TIE %s %s %d %lf %lf %lf %lf %lf",
-						    import_tie_file_1_path,
-							import_tie_file_2_path,
-							&import_tie_status,
-							&import_tie_snav_1_time_d,
-							&import_tie_snav_2_time_d,
-							&import_tie_offset_x_m,
-							&import_tie_offset_y_m,
-							&import_tie_offset_z_m)) != 8)
+			import_status = IMPORT_NONE;
+			
+			/* read the next line  */
+			if ((result = fgets(buffer,BUFFER_MAX,tfp)) != buffer)
 				{
 				done = MB_YES;
 				}
-				
-			/* read the second line of the next tie */
-			if ((result = fgets(buffer,BUFFER_MAX,tfp)) != buffer
-				|| (nscan = sscanf(buffer,"COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-							&import_tie_sigmar1,
-							&(import_tie_sigmax1[0]),
-							&(import_tie_sigmax1[1]),
-							&(import_tie_sigmax1[2]),
-							&import_tie_sigmar2,
-							&(import_tie_sigmax2[0]),
-							&(import_tie_sigmax2[1]),
-							&(import_tie_sigmax2[2]),
-							&import_tie_sigmar3,
-							&(import_tie_sigmax3[0]),
-							&(import_tie_sigmax3[1]),
-							&(import_tie_sigmax3[2]))) != 12)
+			else if (strncmp(buffer, "TIE", 3) == 0)
 				{
-				done = MB_YES;
+				/* read the first line of the next tie */
+				if ((nscan = sscanf(buffer, "TIE %s %s %d %lf %lf %lf %lf %lf",
+								import_tie_file_1_path,
+								import_tie_file_2_path,
+								&import_tie_status,
+								&import_tie_snav_1_time_d,
+								&import_tie_snav_2_time_d,
+								&import_tie_offset_x_m,
+								&import_tie_offset_y_m,
+								&import_tie_offset_z_m)) == 8)
+					{
+					/* read the second line of the next tie */
+					if ((result = fgets(buffer,BUFFER_MAX,tfp)) != buffer)
+						{
+						done = MB_YES;
+						}
+					else if ((nscan = sscanf(buffer,"COV %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+									&import_tie_sigmar1,
+									&(import_tie_sigmax1[0]),
+									&(import_tie_sigmax1[1]),
+									&(import_tie_sigmax1[2]),
+									&import_tie_sigmar2,
+									&(import_tie_sigmax2[0]),
+									&(import_tie_sigmax2[1]),
+									&(import_tie_sigmax2[2]),
+									&import_tie_sigmar3,
+									&(import_tie_sigmax3[0]),
+									&(import_tie_sigmax3[1]),
+									&(import_tie_sigmax3[2]))) == 12)
+						{
+						import_status = IMPORT_TIE;
+						}
+					}
 				}
+			else if (strncmp(buffer, "GLOBALTIE", 9) == 0)
+				{
+				if ((nscan = sscanf(buffer, "GLOBALTIE %s %d %lf %lf %lf %lf %lf %lf %lf",
+								import_globaltie_file_path,
+								&import_globaltie_status,
+								&import_globaltie_snav_time_d,
+								&import_globaltie_offset_x_m,
+								&import_globaltie_offset_y_m,
+								&import_globaltie_offset_z_m,
+								&import_globaltie_offset_xsigma,
+								&import_globaltie_offset_ysigma,
+								&import_globaltie_offset_zsigma)) == 9)
+					{
+					import_status = IMPORT_GLOBALTIE;
+					}
+				}
+
+			/* apply the new global tie if it has been read */
+			if (done == MB_NO && import_status == IMPORT_GLOBALTIE)
+				{
+fprintf(stderr, "\nAttempting to import global tie from list: \n\t%s\n%1d %16.6f %13.8f %13.8f %13.8f\n",
+import_globaltie_file_path,
+import_globaltie_status,
+import_globaltie_snav_time_d,
+import_globaltie_offset_x_m,
+import_globaltie_offset_y_m,
+import_globaltie_offset_z_m);
+
+				/* figure out the file and section */
+				found = MB_NO;
+				strcpy(import_globaltie_file_name, (strrchr(import_globaltie_file_path,'/') + 1));
+				for (ifile=0;ifile<project_output.num_files && found == MB_NO;ifile++)
+				    {
+				    /* compare the file name rather than the path */
+					file = &(project_output.files[ifile]);
+					strcpy(filename, (strrchr(file->path,'/') + 1));
+					if (strcmp(import_globaltie_file_name, filename) == 0)
+						{
+						import_globaltie_file = ifile;
+						
+						/* found the file, now find the section and snav */
+						for (isection=0;isection<file->num_sections;isection++)
+							{
+							section = &(file->sections[isection]);
+							if (import_globaltie_snav_time_d >= section->btime_d
+								&& import_globaltie_snav_time_d <= section->etime_d)
+								{
+								/* now pick the closest snav */
+								found = MB_YES;
+								import_globaltie_section_id = isection;
+								timediffmin = fabs(section->etime_d - section->btime_d);
+								import_globaltie_snav = 0;
+								for (isnav=0;isnav<section->num_snav;isnav++)
+									{
+									timediff = fabs(import_globaltie_snav_time_d - section->snav_time_d[isnav]);
+									if (timediff < timediffmin)
+										{
+										import_globaltie_snav = isnav;
+										timediffmin = timediff;
+										}
+									}
+								}
+							}
+						}
+					}
+
+				/* if not found ignore the global tie */
+				if (found == MB_NO)
+					{
+fprintf(stderr, "Failure!!\n");
+					}
 				
+				/* apply the global tie */
+				else if (found == MB_YES)
+					{
+fprintf(stderr,"Success!!\nImport global tie from list: %4.4d:%4.4d:%2.2d %.3f/%.3f/%.3f  %.3f/%.3f/%.3f\n",
+import_globaltie_file,import_globaltie_section_id,import_globaltie_snav,
+import_globaltie_offset_x_m,import_globaltie_offset_y_m,import_globaltie_offset_z_m,
+import_globaltie_offset_xsigma,import_globaltie_offset_ysigma,import_globaltie_offset_zsigma);
+
+					/* count the imported global ties */
+					num_import_globaltie++;
+					
+					/* apply the global tie */
+					file = &(project_output.files[import_globaltie_file]);
+					section = &(file->sections[import_globaltie_section_id]);
+                    section->global_tie_status = import_globaltie_status;
+                    section->global_tie_snav = import_globaltie_snav;
+                    section->global_tie_offset_x_m = import_globaltie_offset_x_m;
+                    section->global_tie_offset_y_m = import_globaltie_offset_y_m;
+                    section->global_tie_offset_z_m = import_globaltie_offset_z_m;
+                    section->global_tie_xsigma = import_globaltie_offset_xsigma;
+                    section->global_tie_ysigma = import_globaltie_offset_ysigma;
+                    section->global_tie_zsigma = import_globaltie_offset_zsigma;
+                    mb_coor_scale(verbose,0.5 * (section->latmin + section->latmax),
+                                    &mtodeglon,&mtodeglat);
+                    section->global_tie_offset_x = section->global_tie_offset_x_m * mtodeglon;
+                    section->global_tie_offset_y = section->global_tie_offset_y_m * mtodeglat;
+					}
+				}
+
 			/* apply the new tie if it has been read */
-			if (done == MB_NO)
+			if (done == MB_NO && import_status == IMPORT_TIE)
 				{
 fprintf(stderr, "\nAttempting to import tie from list: \n\t%s\n\t%s\n%1d %16.6f %16.6f %13.8f %13.8f %13.8f\n",
 import_tie_file_1_path,
@@ -2870,11 +3006,47 @@ fprintf(stderr, "Failure!!\n");
 				
 				else if (found == MB_YES)
 					{
+					/* swap the order of the nav points if necessary */
+					if (import_tie_file_1 > import_tie_file_2
+						|| (import_tie_file_1 == import_tie_file_2 && import_tie_section_1_id > import_tie_section_2_id))
+						{
+						strcpy(tmp_mb_path, import_tie_file_1_path);
+						strcpy(import_tie_file_1_path, import_tie_file_2_path);
+						strcpy(import_tie_file_2_path, tmp_mb_path);
+						tmp_double = import_tie_snav_1_time_d;
+						import_tie_snav_1_time_d = import_tie_snav_2_time_d;
+						import_tie_snav_2_time_d = tmp_double;
+						tmp_int = import_tie_file_1;
+						import_tie_file_1 = import_tie_file_2;
+						import_tie_file_2 = tmp_int;
+						tmp_int = import_tie_section_1_id;
+						import_tie_section_1_id = import_tie_section_2_id;
+						import_tie_section_2_id = tmp_int;
+						tmp_int = import_tie_snav_1;
+						import_tie_snav_1 = import_tie_snav_2;
+						import_tie_snav_2 = tmp_int;						
+						import_tie_offset_x_m *= -1.0;
+						import_tie_offset_y_m *= -1.0;
+						import_tie_offset_z_m *= -1.0;
+						import_tie_sigmax1[0] *= -1.0;
+						import_tie_sigmax1[1] *= -1.0;
+						import_tie_sigmax1[2] *= -1.0;
+						import_tie_sigmax2[0] *= -1.0;
+						import_tie_sigmax2[1] *= -1.0;
+						import_tie_sigmax2[2] *= -1.0;
+						import_tie_sigmax3[0] *= -1.0;
+						import_tie_sigmax3[1] *= -1.0;
+						import_tie_sigmax3[2] *= -1.0;
+						}
+					
 fprintf(stderr,"Success!!\nImport tie from list: %4.4d:%4.4d:%2.2d %4.4d:%4.4d:%2.2d  %.3f/%.3f/%.3f  %.3f/%.3f/%.3f\n",
 import_tie_file_1,import_tie_section_1_id,import_tie_snav_1,
 import_tie_file_2,import_tie_section_2_id,import_tie_snav_2,
 import_tie_offset_x_m,import_tie_offset_y_m,import_tie_offset_z_m,
 import_tie_sigmar1,import_tie_sigmar2,import_tie_sigmar3);
+					/* count the imported ties */
+					num_import_tie++;
+					
 					/* check to see if this crossing already exists */
 					found = MB_NO;
 					for (icrossing=0;icrossing<project_output.num_crossings && found == MB_NO;icrossing++)
@@ -2942,11 +3114,26 @@ file1->block, crossing->file_id_1, crossing->section_1,
 file2->block, crossing->file_id_2, crossing->section_2);
 						}
 					
-					/* if the tie does not exist, create it */
+					/* check if this tie already exists */
+					found = MB_NO;
 					if (crossing->num_ties > 0)
 						{
+						for (itie=0;itie<crossing->num_ties;itie++)
+							{
+							tie = &crossing->ties[itie];
+							if (tie->snav_1 == import_tie_snav_1 && tie->snav_2 == import_tie_snav_2)
+								{
+								found = MB_YES;
+								itie_set = itie;
+								}
+							}
+						}
+					
+					/* if the tie exists change it */
+					if (found == MB_YES)
+						{
 						/* set nav points */
-						tie = &crossing->ties[0];
+						tie = &crossing->ties[itie_set];
 						tie->snav_1 = import_tie_snav_1;
 						tie->snav_2 = import_tie_snav_2;
 fprintf(stderr,"Reset existing tie: %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d\n",
@@ -2954,16 +3141,19 @@ current_crossing, 0,
 file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
 file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2);
 						}
-					else if (crossing->num_ties == 0)
+
+					/* if the tie does not exist, create it */
+					else
 						{
 						/* add tie and set number */
 						file1 = (struct mbna_file *) &project_output.files[crossing->file_id_1];
 						file2 = (struct mbna_file *) &project_output.files[crossing->file_id_2];
 						section1 = (struct mbna_section *) &file1->sections[crossing->section_1];
 						section2 = (struct mbna_section *) &file2->sections[crossing->section_2];
+						itie_set = crossing->num_ties;
 						crossing->num_ties++;
 						project_output.num_ties++;
-						tie = &crossing->ties[0];
+						tie = &crossing->ties[itie_set];
 			
 						if (crossing->status == MBNA_CROSSING_STATUS_NONE)
 							{
@@ -2978,8 +3168,8 @@ file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2);
 						tie->snav_2 = import_tie_snav_2;
 			
 						/* augment tie counts for snavs */
-						section1->snav_num_ties[tie->snav_1]++;
-						section2->snav_num_ties[tie->snav_2]++;
+						(section1->snav_num_ties[tie->snav_1])++;
+						(section2->snav_num_ties[tie->snav_2])++;
 	
 fprintf(stderr,"Added tie: %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d\n",
 current_crossing, 0,
@@ -2988,50 +3178,118 @@ file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2);
 						}
 						
 					/* set the tie parameters */
-					for (itie=0;itie<crossing->num_ties;itie++)
-						{
-						tie = &crossing->ties[itie];
+					tie = &crossing->ties[itie_set];
 
-						tie->status = import_tie_status;
-						tie->snav_1_time_d = section1->snav_time_d[tie->snav_1];
-						tie->snav_2_time_d = section2->snav_time_d[tie->snav_2];
-						mb_coor_scale(verbose,0.25 * (section1->latmin + section1->latmax + section2->latmin + section2->latmax),
-								&mtodeglon,&mtodeglat);
-						tie->offset_x = import_tie_offset_x_m * mtodeglon;
-						tie->offset_y = import_tie_offset_y_m * mtodeglat;
-						tie->offset_x_m = import_tie_offset_x_m;
-						tie->offset_y_m = import_tie_offset_y_m;
-						tie->offset_z_m = import_tie_offset_z_m;
-						tie->sigmar1 = import_tie_sigmar1;
-						tie->sigmax1[0] = import_tie_sigmax1[0];
-						tie->sigmax1[1] = import_tie_sigmax1[1];
-						tie->sigmax1[2] = import_tie_sigmax1[2];
-						tie->sigmar2 = import_tie_sigmar2;
-						tie->sigmax2[0] = import_tie_sigmax2[0];
-						tie->sigmax2[1] = import_tie_sigmax2[1];
-						tie->sigmax2[2] = import_tie_sigmax2[2];
-						tie->sigmar3 = import_tie_sigmar3;
-						tie->sigmax3[0] = import_tie_sigmax3[0];
-						tie->sigmax3[1] = import_tie_sigmax3[1];
-						tie->sigmax3[2] = import_tie_sigmax3[2];
-						tie->inversion_offset_x = section2->snav_lon_offset[tie->snav_2]
-									- section1->snav_lon_offset[tie->snav_1];
-						tie->inversion_offset_y = section2->snav_lat_offset[tie->snav_2]
-									- section1->snav_lat_offset[tie->snav_1];
-						tie->inversion_offset_x_m = tie->inversion_offset_x / mtodeglon;
-						tie->inversion_offset_y_m = tie->inversion_offset_y / mtodeglat;
-						tie->inversion_offset_z_m = section2->snav_z_offset[tie->snav_2]
-									- section1->snav_z_offset[tie->snav_1];
-						tie->inversion_status = MBNA_INVERSION_NONE;
-						if (project_output.inversion_status == MBNA_INVERSION_CURRENT)
-							project_output.inversion_status = MBNA_INVERSION_OLD;
-						project_output.grid_status = MBNA_GRID_OLD;
+					tie->status = -import_tie_status;
+					tie->snav_1_time_d = section1->snav_time_d[tie->snav_1];
+					tie->snav_2_time_d = section2->snav_time_d[tie->snav_2];
+					mb_coor_scale(verbose,0.25 * (section1->latmin + section1->latmax + section2->latmin + section2->latmax),
+							&mtodeglon,&mtodeglat);
+					tie->offset_x = import_tie_offset_x_m * mtodeglon;
+					tie->offset_y = import_tie_offset_y_m * mtodeglat;
+					tie->offset_x_m = import_tie_offset_x_m;
+					tie->offset_y_m = import_tie_offset_y_m;
+					tie->offset_z_m = import_tie_offset_z_m;
+					tie->sigmar1 = import_tie_sigmar1;
+					tie->sigmax1[0] = import_tie_sigmax1[0];
+					tie->sigmax1[1] = import_tie_sigmax1[1];
+					tie->sigmax1[2] = import_tie_sigmax1[2];
+					tie->sigmar2 = import_tie_sigmar2;
+					tie->sigmax2[0] = import_tie_sigmax2[0];
+					tie->sigmax2[1] = import_tie_sigmax2[1];
+					tie->sigmax2[2] = import_tie_sigmax2[2];
+					tie->sigmar3 = import_tie_sigmar3;
+					tie->sigmax3[0] = import_tie_sigmax3[0];
+					tie->sigmax3[1] = import_tie_sigmax3[1];
+					tie->sigmax3[2] = import_tie_sigmax3[2];
+					tie->inversion_offset_x = section2->snav_lon_offset[tie->snav_2]
+								- section1->snav_lon_offset[tie->snav_1];
+					tie->inversion_offset_y = section2->snav_lat_offset[tie->snav_2]
+								- section1->snav_lat_offset[tie->snav_1];
+					tie->inversion_offset_x_m = tie->inversion_offset_x / mtodeglon;
+					tie->inversion_offset_y_m = tie->inversion_offset_y / mtodeglat;
+					tie->inversion_offset_z_m = section2->snav_z_offset[tie->snav_2]
+								- section1->snav_z_offset[tie->snav_1];
+					tie->inversion_status = MBNA_INVERSION_NONE;
+					if (project_output.inversion_status == MBNA_INVERSION_CURRENT)
+						project_output.inversion_status = MBNA_INVERSION_OLD;
+					project_output.grid_status = MBNA_GRID_OLD;
 	
 fprintf(stderr,"Set tie offsets:       %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d  %.3f %.3f %.3f\n",
 current_crossing, itie,
 file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
 file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2,
 tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
+					}
+				}
+			}
+			
+		/* now loop over all crossings. Imported ties have a negative status.
+		 * In cases where a crossing only has imported ties, set the status positive.
+		 * In cases where a crossing has both pre-existing and imported ties, then
+		 * delete the pre-existing ties, and set the status of the remaining
+		 * imported ties positive.
+		 */
+		if (num_import_tie > 0)
+			{
+			for (icrossing=0;icrossing<project_output.num_crossings;icrossing++)
+				{
+				crossing = &(project_output.crossings[icrossing]);
+				num_old_ties = 0;
+				num_new_ties = 0;
+				for (itie=0;itie<crossing->num_ties;itie++)
+					{
+					tie = &crossing->ties[itie];
+					if (tie->status > 0)
+						num_old_ties++;
+					if (tie->status < 0)
+						num_new_ties++;
+					}
+				if (num_old_ties > 0 && num_new_ties > 0)
+					{
+					for (itie=crossing->num_ties-1;itie>=0;itie--)
+						{
+						tie = &crossing->ties[itie];
+						if (tie->status > 0)
+							{
+fprintf(stderr,"Removed duplicate pre-existing tie: crossing %d ( tie %d of %d): %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d\n",
+icrossing, itie, crossing->num_ties,
+file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2);
+
+							/* reset tie counts for snavs */
+							file1 = &project_output.files[crossing->file_id_1];
+							section1 = &file1->sections[crossing->section_1];
+							section1->snav_num_ties[tie->snav_1]--;
+							file2 = &project_output.files[crossing->file_id_2];
+							section2 = &file2->sections[crossing->section_2];
+							section2->snav_num_ties[tie->snav_2]--;
+				
+							/* delete tie and set number */
+							for (i=itie;i<crossing->num_ties-1;i++)
+								{
+								crossing->ties[i].status = crossing->ties[i+1].status;
+								crossing->ties[i].snav_1 = crossing->ties[i+1].snav_1;
+								crossing->ties[i].snav_1_time_d = crossing->ties[i+1].snav_1_time_d;
+								crossing->ties[i].snav_2 = crossing->ties[i+1].snav_2;
+								crossing->ties[i].snav_2_time_d = crossing->ties[i+1].snav_2_time_d;
+								crossing->ties[i].offset_x = crossing->ties[i+1].offset_x;
+								crossing->ties[i].offset_y = crossing->ties[i+1].offset_y;
+								crossing->ties[i].offset_x_m = crossing->ties[i+1].offset_x_m;
+								crossing->ties[i].offset_y_m = crossing->ties[i+1].offset_y_m;
+								crossing->ties[i].offset_z_m = crossing->ties[i+1].offset_z_m;
+								}
+							crossing->num_ties--;
+							project_output.num_ties--;
+							}
+						}
+					}
+				for (itie=0;itie<crossing->num_ties;itie++)
+					{
+					tie = &crossing->ties[itie];
+					if (tie->status < 0)
+						{
+						tie->status = -tie->status;
 						}
 					}
 				}
@@ -3049,6 +3307,7 @@ tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
 			exit(error);
 			}
 			
+		/* output navigation crossing ties */
 		for (icrossing=0;icrossing<project_output.num_crossings;icrossing++)
 			{
 			crossing = &(project_output.crossings[icrossing]);
@@ -3084,14 +3343,34 @@ tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
 				}
 			}
 			
+		/* output global ties */
+		for (ifile=0;ifile<project_output.num_files;ifile++)
+			{
+			file = &project_output.files[ifile];
+			for (isection=0;isection<file->num_sections;isection++)
+				{
+				section = &file->sections[isection];
+				if (section->global_tie_status != MBNA_TIE_NONE)
+					{
+					fprintf(tfp,"GLOBALTIE %s %1d %16.6f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n",
+						file->path,
+						section->global_tie_status,
+						section->snav_time_d[section->global_tie_snav],
+						section->global_tie_offset_x_m,
+						section->global_tie_offset_y_m,
+						section->global_tie_offset_z_m,
+						section->global_tie_xsigma,
+						section->global_tie_ysigma,
+						section->global_tie_zsigma);
+					}
+				}
+			}
+			
 		fclose(tfp);
 		}
 
 	/* write out the new project file */
-	if (!((export_tie_list_set == MB_YES || import_tie_list_set == MB_YES)
-			&& project_inputadd_set == MB_NO
-			&& project_output_set == MB_NO
-			&& num_mods == 0))
+	if (project_output_set == MB_YES)
 		{
 		status = mbnavadjust_write_project(verbose, &project_output, &error);
 		if (status == MB_SUCCESS)
@@ -3108,29 +3387,29 @@ tie->offset_x_m,tie->offset_y_m,tie->offset_z_m);
 			error = MB_ERROR_BAD_USAGE;
 			exit(error);
 			}
-		}
 	
-	/* update datalist and ancilliary files */
-	sprintf(filename,"%s/%s.dir/datalist.mb-1",project_output.path,project_output.name);
-	if ((tfp = fopen(filename,"w")) != NULL)
-		{
-		for (i=0;i<project_output.num_files;i++)
+		/* update datalist and ancilliary files */
+		sprintf(filename,"%s/%s.dir/datalist.mb-1",project_output.path,project_output.name);
+		if ((tfp = fopen(filename,"w")) != NULL)
 			{
-			file1 = &project_output.files[i];
-			for (j=0;j<file1->num_sections;j++)
+			for (i=0;i<project_output.num_files;i++)
 				{
-				fprintf(tfp, "%s/nvs_%4.4d_%4.4d.mb71 71\n", project_output.datadir, file1->id, j);
+				file1 = &project_output.files[i];
+				for (j=0;j<file1->num_sections;j++)
+					{
+					fprintf(tfp, "%s/nvs_%4.4d_%4.4d.mb71 71\n", project_output.datadir, file1->id, j);
+					}
 				}
+			fclose(tfp);
 			}
-		fclose(tfp);
-		}
-	sprintf(filename, "cd %s/%s.dir ; mbdatalist -Idatalist.mb-1 -O -Z -V", project_output.path,project_output.name);
-	shellstatus = system(filename);
-	sprintf(filename,"%s/%s.dir/mbgrid.cmd",project_output.path,project_output.name);
-	if ((tfp = fopen(filename,"w")) != NULL)
-		{
-		fprintf(tfp, "mbgrid -I datalistp.mb-1 \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopo\n\n");
-		fclose(tfp);
+		sprintf(filename, "cd %s/%s.dir ; mbdatalist -Idatalist.mb-1 -O -Z -V", project_output.path,project_output.name);
+		shellstatus = system(filename);
+		sprintf(filename,"%s/%s.dir/mbgrid.cmd",project_output.path,project_output.name);
+		if ((tfp = fopen(filename,"w")) != NULL)
+			{
+			fprintf(tfp, "mbgrid -I datalistp.mb-1 \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopo\n\n");
+			fclose(tfp);
+			}
 		}
 
 	/* check memory */

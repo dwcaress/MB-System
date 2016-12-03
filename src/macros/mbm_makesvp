@@ -65,9 +65,9 @@ if ($help)
 	print "If -M1 is used, then sound speed values are extracted from the sonar\n";
 	print "survey data records (e.g. the sound speed values used for beamforming)\n";
 	print "If -A is specified, the sound speed profile is prepended with a zero\n";
-	print "depth value equal to the shallowest calculated value, and append a\n";
+	print "depth value equal to the shallowest calculated value, and appended with a\n";
 	print "full ocean depth (11000 meters) value equal to the deepest calculated\n";
-	print "corrected for pressure using a correction of 0.0167 * delta_depth in m/sec\n";
+	print "corrected for pressure using a correction of 0.0167 * delta_depth in m/sec.\n";
 	print "Basic Usage: \n";
 	print "\t$program_name -Iinputfile [-A -Ddepthinterval -H -Mmode -Ooutput-V]\n";
 	exit 0;
