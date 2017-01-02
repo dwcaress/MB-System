@@ -1130,6 +1130,7 @@ int main (int argc, char **argv)
 						fprintf(stderr,"Failure to parse --set-ties-xyonly-by-time=%s\n\tmod command ignored\n\n",
 							optarg);	
 						}
+
 					}
 				else
 					{
@@ -2622,6 +2623,11 @@ fprintf(stderr,"\nCommand set-ties-xyonly-by-time=%f\n", mods[imod].dt);
 					for (itie=0;itie<crossing->num_ties;itie++)
 						{
 						tie = &crossing->ties[itie];
+fprintf(stderr,"Testing by time:  %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d  %.3f %.3f %.3f\n",
+icrossing, itie,
+file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2,
+tie->snav_2_time_d,tie->snav_1_time_d,fabs(tie->snav_2_time_d - tie->snav_1_time_d));
 						if (fabs(tie->snav_2_time_d - tie->snav_1_time_d) >= mods[imod].dt)
 							{
 							tie = &crossing->ties[itie];

@@ -16,6 +16,7 @@ Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 
+  Version 5.5.2290       January 2, 2017
   Version 5.5.2289       December 2, 2016
   Version 5.5.2287       November 29, 2016
   Version 5.5.2286       November 8, 2016
@@ -242,6 +243,24 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2290 (January 2, 2017)
+
+Mbinfo: applied fixes from Suzanne O'Hara to JSON output from mbinfo.
+
+Mbnavadjust: Fixed problem in which tie snav times became incorrect - these values
+are now reset when the project is read.
+
+Mbgrid and mbmosaic: added code to mbaux/mb_readwritegrd.c that will enable use
+of new GMT5 grid mode flags, solving the problem of creating geographic grids
+that can be directly read into ESRI ArcGIS. These modes will appear in GMT 5.3.2
+sometime early in 2017. Thanks to Paul Wessel for diagnosing and fixing this
+longstanding issue.
+
+Mbgrid and mbmosaic: implemented suggestion by Paul Wessel that the calculation
+of grid dimensions be done with a lrint() rounding call rather than implicit
+truncation. This will change the behavior of the -Edx/dy/units option, but the
+resulting grid dimensions will be more consistent with users expectations.
 
 -----> 5.5.2289 (December 2, 2016)
 

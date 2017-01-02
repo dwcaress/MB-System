@@ -377,6 +377,7 @@ int mb_write_gmt_grd(int verbose,
 	void *API = NULL;			/* GMT API control structure pointer */
 	struct GMT_GRID *G = NULL;		/* GMT grid structure pointer */
 	struct GMT_GRID_HEADER *header;		/* GMT grid header structure pointer */
+	unsigned int mode = GMT_GRID_ALL;
 
 	int	modeltype;
 	int	projectionid;
@@ -564,6 +565,23 @@ int mb_write_gmt_grd(int verbose,
 				}
 			}
 		}
+		
+	/* create null grid mode flags if valid flags don't exist - Paul Wessel
+	 * indicated in December 2016 that these will appear with GMT 5.3.2
+	 * and fix the problem of generating geographic grids that can be
+	 * directly imported to ESRI ArcGIS */
+#ifndef GMT_GRID_IS_GEO
+#define GMT_GRID_IS_GEO 0
+#endif
+#ifndef GMT_GRID_IS_CARTESIAN
+#define GMT_GRID_IS_CARTESIAN 0
+#endif
+		
+	/* set GMT grid mode flag */
+	if (modeltype == ModelTypeGeographic)
+		mode = GMT_GRID_ALL | GMT_GRID_IS_GEO;
+	else
+		mode = GMT_GRID_ALL | GMT_GRID_IS_CARTESIAN;
 
 	/* print info */
 	if (verbose > 0)
@@ -607,7 +625,7 @@ int mb_write_gmt_grd(int verbose,
 		}
 
 	/* write out the grid */
-	if (GMT_Write_Data (API, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE, GMT_GRID_ALL, NULL, grdfile, G) != 0)
+	if (GMT_Write_Data (API, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE, mode, NULL, grdfile, G) != 0)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
