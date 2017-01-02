@@ -3835,16 +3835,16 @@ int mbnavadjust_naverr_addtie()
 			function_name);
 		}
 
-     	/* get current crossing */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0)
-    		{
-     		/* retrieve crossing parameters */
-    		if (mbna_current_crossing >= 0
+    /* get current crossing */
+    if (project.open == MB_YES
+    	&& project.num_crossings > 0)
+    	{
+     	/* retrieve crossing parameters */
+    	if (mbna_current_crossing >= 0
 		    && project.crossings[mbna_current_crossing].num_ties < MBNA_SNAV_NUM)
-    			{
+    		{
 			/* add tie and set number */
-    			crossing = &project.crossings[mbna_current_crossing];
+    		crossing = &project.crossings[mbna_current_crossing];
 			file1 = (struct mbna_file *) &project.files[mbna_file_id_1];
 			file2 = (struct mbna_file *) &project.files[mbna_file_id_2];
 			section1 = (struct mbna_section *) &file1->sections[mbna_section_1];
@@ -3852,7 +3852,7 @@ int mbnavadjust_naverr_addtie()
 			mbna_current_tie = crossing->num_ties;
 			crossing->num_ties++;
 			project.num_ties++;
-    			tie = &crossing->ties[mbna_current_tie];
+    		tie = &crossing->ties[mbna_current_tie];
 
 			if (crossing->status == MBNA_CROSSING_STATUS_NONE)
 				{
@@ -3860,47 +3860,47 @@ int mbnavadjust_naverr_addtie()
 				if (crossing->truecrossing == MB_YES)
  					project.num_truecrossings_analyzed++;
 				}
-    			crossing->status = MBNA_CROSSING_STATUS_SET;
+    		crossing->status = MBNA_CROSSING_STATUS_SET;
 
 			/* look for unused pair of nav points */
-     			tie->snav_1 = -1;
+     		tie->snav_1 = -1;
 			found = MB_NO;
 			while (found == MB_NO)
 			    {
 			    found = MB_YES;
 			    tie->snav_1++;
 			    for (i=0;i<crossing->num_ties-1;i++)
-				{
-				if (crossing->ties[i].snav_1 == tie->snav_1)
-				    found = MB_NO;
-				}
+					{
+					if (crossing->ties[i].snav_1 == tie->snav_1)
+						found = MB_NO;
+					}
 			    }
-     			tie->snav_2 = -1;
+     		tie->snav_2 = -1;
 			found = MB_NO;
 			while (found == MB_NO)
 			    {
 			    found = MB_YES;
 			    tie->snav_2++;
 			    for (i=0;i<crossing->num_ties-1;i++)
-				{
-				if (crossing->ties[i].snav_2 == tie->snav_2)
-				    found = MB_NO;
-				}
+					{
+					if (crossing->ties[i].snav_2 == tie->snav_2)
+						found = MB_NO;
+					}
 			    }
 
 			/* get rest of tie parameters */
 			tie->status = MBNA_TIE_XYZ;
 			tie->snav_1_time_d = section1->snav_time_d[tie->snav_1];
 			tie->snav_2_time_d = section2->snav_time_d[tie->snav_2];
-     			mbna_snav_1 = tie->snav_1;
-     			mbna_snav_2 = tie->snav_2;
-     			mbna_snav_1_time_d = tie->snav_1_time_d;
-     			mbna_snav_2_time_d = tie->snav_2_time_d;
-    			tie->offset_x = mbna_offset_x;
-    			tie->offset_y = mbna_offset_y;
-    			tie->offset_x_m = mbna_offset_x / mbna_mtodeglon;
-    			tie->offset_y_m = mbna_offset_y / mbna_mtodeglat;
-    			tie->offset_z_m = mbna_offset_z;
+			mbna_snav_1 = tie->snav_1;
+			mbna_snav_2 = tie->snav_2;
+			mbna_snav_1_time_d = tie->snav_1_time_d;
+			mbna_snav_2_time_d = tie->snav_2_time_d;
+			tie->offset_x = mbna_offset_x;
+			tie->offset_y = mbna_offset_y;
+			tie->offset_x_m = mbna_offset_x / mbna_mtodeglon;
+			tie->offset_y_m = mbna_offset_y / mbna_mtodeglat;
+			tie->offset_z_m = mbna_offset_z;
 			tie->sigmar1 = mbna_minmisfit_sr1;
 			tie->sigmar2 = mbna_minmisfit_sr2;
 			tie->sigmar3 = mbna_minmisfit_sr3;
@@ -4013,20 +4013,20 @@ int mbnavadjust_naverr_addtie()
    		}
 
    	/* set mbna_crossing_select */
-    	if (project.open == MB_YES
+    if (project.open == MB_YES
     		&& project.num_crossings > 0
     		&& mbna_current_crossing >= 0)
 		{
-    		mbna_crossing_select = mbna_current_crossing;
-    		if (mbna_current_tie >= 0)
+    	mbna_crossing_select = mbna_current_crossing;
+    	if (mbna_current_tie >= 0)
 		    mbna_tie_select = mbna_current_tie;
 		else
     		    mbna_tie_select = MBNA_SELECT_NONE;
 		}
-    	else
+    else
 		{
-    		mbna_crossing_select = MBNA_SELECT_NONE;
-    		mbna_tie_select = MBNA_SELECT_NONE;
+    	mbna_crossing_select = MBNA_SELECT_NONE;
+    	mbna_tie_select = MBNA_SELECT_NONE;
 		}
 
  	/* print output debug statements */

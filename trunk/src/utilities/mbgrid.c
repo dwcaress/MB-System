@@ -514,17 +514,17 @@ int main (int argc, char **argv)
 			break;
 		case 'R':
 		case 'r':
-                        if (strchr(optarg,'/') == NULL)
-                            {
-                            sscanf (optarg,"%lf", &boundsfactor);
-                            if (boundsfactor <= 1.0)
-                                boundsfactor = 0.0;
-                            }
+			if (strchr(optarg,'/') == NULL)
+				{
+				sscanf (optarg,"%lf", &boundsfactor);
+				if (boundsfactor <= 1.0)
+					boundsfactor = 0.0;
+				}
 			else
-                            {
-                            mb_get_bounds(optarg, gbnd);
-                            gbndset = MB_YES;
-                            }
+				{
+				mb_get_bounds(optarg, gbnd);
+				gbndset = MB_YES;
+				}
 			flag++;
 			break;
 		case 'S':
@@ -885,10 +885,10 @@ int main (int argc, char **argv)
 		/* calculate grid properties */
 		if (set_spacing == MB_YES)
 			{
-			xdim = (gbnd[1] - gbnd[0])/dx_set + 1;
+			xdim = lrint((gbnd[1] - gbnd[0])/dx_set + 1);
 			if (dy_set <= 0.0)
 				dy_set = dx_set;
-			ydim = (gbnd[3] - gbnd[2])/dy_set + 1;
+			ydim = lrint((gbnd[3] - gbnd[2])/dy_set + 1);
 			if (spacing_priority == MB_YES)
 				{
 				gbnd[1] = gbnd[0] + dx_set * (xdim - 1);
@@ -900,6 +900,18 @@ int main (int argc, char **argv)
 				strcpy(units, "km");
 			else if (units[0] == 'F' || units[0] == 'f')
 				strcpy(units, "feet");
+			else if (strncmp(units, "arcmin", 6) == 0)
+				{
+				dx_set = dx_set / 60.0;
+				dy_set = dy_set / 60.0;
+				strcpy(units, "degrees");
+				}
+			else if (strncmp(units, "arcsec", 6) == 0)
+				{
+				dx_set = dx_set / 3600.0;
+				dy_set = dy_set / 3600.0;
+				strcpy(units, "degrees");
+				}
 			else
 				strcpy(units, "unknown");
 			}
@@ -925,10 +937,10 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		if (set_spacing == MB_YES
 			&& (units[0] == 'M' || units[0] == 'm'))
 			{
-			xdim = (gbnd[1] - gbnd[0])/(mtodeglon*dx_set) + 1;
+			xdim = lrint((gbnd[1] - gbnd[0])/(mtodeglon*dx_set) + 1);
 			if (dy_set <= 0.0)
 				dy_set = mtodeglon * dx_set / mtodeglat;
-			ydim = (gbnd[3] - gbnd[2])/(mtodeglat*dy_set) + 1;
+			ydim = lrint((gbnd[3] - gbnd[2])/(mtodeglat*dy_set) + 1);
 			if (spacing_priority == MB_YES)
 				{
 				gbnd[1] = gbnd[0] + mtodeglon * dx_set * (xdim - 1);
@@ -939,10 +951,10 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		else if (set_spacing == MB_YES
 			&& (units[0] == 'K' || units[0] == 'k'))
 			{
-			xdim = (gbnd[1] - gbnd[0])*deglontokm/dx_set + 1;
+			xdim = lrint((gbnd[1] - gbnd[0])*deglontokm/dx_set + 1);
 			if (dy_set <= 0.0)
 				dy_set = deglattokm * dx_set / deglontokm;
-			ydim = (gbnd[3] - gbnd[2])*deglattokm/dy_set + 1;
+			ydim = lrint((gbnd[3] - gbnd[2])*deglattokm/dy_set + 1);
 			if (spacing_priority == MB_YES)
 				{
 				gbnd[1] = gbnd[0] + dx_set * (xdim - 1) / deglontokm;
@@ -953,10 +965,10 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		else if (set_spacing == MB_YES
 			&& (units[0] == 'F' || units[0] == 'f'))
 			{
-			xdim = (gbnd[1] - gbnd[0])/(mtodeglon*0.3048*dx_set) + 1;
+			xdim = lrint((gbnd[1] - gbnd[0])/(mtodeglon*0.3048*dx_set) + 1);
 			if (dy_set <= 0.0)
 				dy_set = mtodeglon * dx_set / mtodeglat;
-			ydim = (gbnd[3] - gbnd[2])/(mtodeglat*0.3048*dy_set) + 1;
+			ydim = lrint((gbnd[3] - gbnd[2])/(mtodeglat*0.3048*dy_set) + 1);
 			if (spacing_priority == MB_YES)
 				{
 				gbnd[1] = gbnd[0] + mtodeglon * 0.3048 * dx_set * (xdim - 1);
@@ -966,16 +978,29 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			}
 		else if (set_spacing == MB_YES)
 			{
-			xdim = (gbnd[1] - gbnd[0])/dx_set + 1;
+			if (strncmp(units, "arcmin", 6) == 0)
+				{
+				dx_set = dx_set / 60.0;
+				dy_set = dy_set / 60.0;
+				strcpy(units, "degrees");
+				}
+			else if (strncmp(units, "arcsec", 6) == 0)
+				{
+				dx_set = dx_set / 3600.0;
+				dy_set = dy_set / 3600.0;
+				strcpy(units, "degrees");
+				}
+			else
+				strcpy(units, "degrees");
+			xdim = lrint((gbnd[1] - gbnd[0])/dx_set + 1);
 			if (dy_set <= 0.0)
 				dy_set = dx_set;
-			ydim = (gbnd[3] - gbnd[2])/dy_set + 1;
+			ydim = lrint((gbnd[3] - gbnd[2])/dy_set + 1);
 			if (spacing_priority == MB_YES)
 				{
 				gbnd[1] = gbnd[0] + dx_set * (xdim - 1);
 				gbnd[3] = gbnd[2] + dy_set * (ydim - 1);
 				}
-			strcpy(units, "degrees");
 			}
 		}
 
@@ -4697,8 +4722,8 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 					if (grid[ii*gydim+jj] < clipvalue)
 					    {
 					    r = sqrt((double)((ii-i)*(ii-i) + (jj-j)*(jj-j)));
-					    iii = rint((ii - i)/r) + 1;
-					    jjj = rint((jj - j)/r) + 1;
+					    iii = rint((ii - i)/r + 1);
+					    jjj = rint((jj - j)/r + 1);
 					    kkk = iii * 3 + jjj;
 					    dmask[kkk] = MB_YES;
 					    if ((dmask[0] && dmask[8])
@@ -4715,8 +4740,8 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 					if (grid[ii*gydim+jj] < clipvalue)
 					    {
 					    r = sqrt((double)((ii-i)*(ii-i) + (jj-j)*(jj-j)));
-					    iii = rint((ii - i)/r) + 1;
-					    jjj = rint((jj - j)/r) + 1;
+					    iii = rint((ii - i)/r + 1);
+					    jjj = rint((jj - j)/r + 1);
 					    kkk = iii * 3 + jjj;
 					    dmask[kkk] = MB_YES;
 					    if ((dmask[0] && dmask[8])
@@ -4733,8 +4758,8 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 					if (grid[ii*gydim+jj] < clipvalue)
 					    {
 					    r = sqrt((double)((ii-i)*(ii-i) + (jj-j)*(jj-j)));
-					    iii = rint((ii - i)/r) + 1;
-					    jjj = rint((jj - j)/r) + 1;
+					    iii = rint((ii - i)/r + 1);
+					    jjj = rint((jj - j)/r + 1);
 					    kkk = iii * 3 + jjj;
 					    dmask[kkk] = MB_YES;
 					    if ((dmask[0] && dmask[8])
@@ -4751,8 +4776,8 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 					if (grid[ii*gydim+jj] < clipvalue)
 					    {
 					    r = sqrt((double)((ii-i)*(ii-i) + (jj-j)*(jj-j)));
-					    iii = rint((ii - i)/r) + 1;
-					    jjj = rint((jj - j)/r) + 1;
+					    iii = rint((ii - i)/r + 1);
+					    jjj = rint((jj - j)/r + 1);
 					    kkk = iii * 3 + jjj;
 					    dmask[kkk] = MB_YES;
 					    if ((dmask[0] && dmask[8])

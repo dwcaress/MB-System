@@ -1200,6 +1200,16 @@ fprintf(stderr,"%d because numsnav=%d\n",tie->snav_2,section->num_snav);
                             tie->inversion_offset_z_m *= -1.0;
                             }
                         }
+                        
+                    /* and even more finally, reset the snav times for the ties */
+                    for (j=0;j<crossing->num_ties;j++)
+                        {
+                        tie = &crossing->ties[j];
+                        section1 = &(project->files[crossing->file_id_1].sections[crossing->section_1]);
+                        section2 = &(project->files[crossing->file_id_2].sections[crossing->section_2]);
+                        tie->snav_1_time_d = section1->snav_time_d[tie->snav_1];
+                        tie->snav_2_time_d = section2->snav_time_d[tie->snav_2];
+                        }
                     }
             
                 /* close home file */

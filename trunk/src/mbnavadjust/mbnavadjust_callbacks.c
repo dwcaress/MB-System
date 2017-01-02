@@ -1725,13 +1725,13 @@ void do_update_status()
 						dx = section->global_tie_offset_x_m - section->snav_lon_offset[section->global_tie_snav] / project.mtodeglon;
 						dy = section->global_tie_offset_y_m - section->snav_lat_offset[section->global_tie_snav] / project.mtodeglat;
 						dz = section->global_tie_offset_z_m - section->snav_z_offset[section->global_tie_snav];
-fprintf(stderr,"dx:%f dy:%f dz:%f  snav:%d  tie:%f %f %f  offset:%f %f %f  mtodeg:%f %f\n",
+/*fprintf(stderr,"dx:%f dy:%f dz:%f  snav:%d  tie:%f %f %f  offset:%f %f %f  mtodeg:%f %f\n",
 dx, dy, dz, section->global_tie_snav,
 section->global_tie_offset_x_m, section->global_tie_offset_y_m, section->global_tie_offset_z_m,
 section->snav_lon_offset[section->global_tie_snav] / project.mtodeglon,
 section->snav_lat_offset[section->global_tie_snav] / project.mtodeglon,
 section->snav_z_offset[section->global_tie_snav],
-project.mtodeglon, project.mtodeglat);
+project.mtodeglon, project.mtodeglat);*/
 						dr1 = fabs(dx / section->global_tie_xsigma);
 						dr2 = fabs(dy / section->global_tie_ysigma);
 						dr3 = fabs(dz / section->global_tie_zsigma);
