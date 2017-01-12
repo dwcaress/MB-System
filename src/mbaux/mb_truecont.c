@@ -94,7 +94,7 @@ static char rcs_id[]="$Id$";
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour_init initializes the memory required to
 	contour multibeam bathymetry data.
-	if mbio_ptr is null, the arrays are allocated using mb_malloc. If
+	if mbio_ptr is null, the arrays are allocated using mb_mallocd. If
 	mbio_ptr is a valid mbio structure, then the arrays tied to
 	beams_bath will be registered using mb_register_array */
 int mb_contour_init(

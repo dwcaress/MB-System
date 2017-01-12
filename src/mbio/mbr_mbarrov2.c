@@ -310,10 +310,10 @@ int mbr_alm_mbarrov2(int verbose, void *mbio_ptr, int *error)
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_mbarrov2_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_malloc(verbose,mb_io_ptr->structure_size,
-				&mb_io_ptr->raw_data,error);
-	status = mb_malloc(verbose,sizeof(struct mbsys_singlebeam_struct),
-				&mb_io_ptr->store_data,error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size,
+				&mb_io_ptr->raw_data, error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct),
+				&mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -360,8 +360,8 @@ int mbr_dem_mbarrov2(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
-	status = mb_free(verbose,&mb_io_ptr->store_data,error);
+	status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->raw_data, error);
+	status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -495,7 +495,7 @@ int mbr_rt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->ship_latitude = data->ship_latitude;
 		store->ship_heading = data->ship_heading;
 		store->qc_flag = data->qc_flag;
-		for (i=0;i<MB_COMMENT_MAXLINE;i++)
+		for (i=0;i<MBF_MBARROV2_MAXLINE;i++)
 		    store->comment[i] = data->comment[i];
 		}
 
@@ -562,8 +562,9 @@ int mbr_wt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->ship_latitude = store->ship_latitude;
 		data->ship_heading = store->ship_heading;
 		data->qc_flag = store->qc_flag;
-		for (i=0;i<MB_COMMENT_MAXLINE;i++)
+		for (i=0;i<MBF_MBARROV2_MAXLINE;i++)
 		    data->comment[i] = store->comment[i];
+		data->comment[MBF_MBARROV2_MAXLINE-1] = '\0';
 		}
 
 	/* write next data to file */

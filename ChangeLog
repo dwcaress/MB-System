@@ -244,6 +244,17 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.5.2291 (January 12, 2017)
+
+Mbnavedit: interpolation of selected navigation values now also flags the original
+values so they are not used in calculating a navigation model.
+
+General: fixed a number of memory leaks by switching all remaining mb_malloc(),
+mb_realloc(), and mb_free() calls to mb_mallocd(), mb_reallocd(), and mb_freed().
+
+Mbnavadjust: prevent occasional corruption of the mbnavadjust project by not
+allowing excessively large offset values to result from unstable inversions.
+
 -----> 5.5.2290 (January 2, 2017)
 
 Mbinfo: applied fixes from Suzanne O'Hara to JSON output from mbinfo.

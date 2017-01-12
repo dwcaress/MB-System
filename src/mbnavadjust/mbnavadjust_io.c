@@ -1037,6 +1037,21 @@ fprintf(stderr, "read failed on tie: %s\n", buffer);
                                 tie->offset_z_m = 0.0;
                                 tie->inversion_offset_z_m = 0.0;
                                 }
+                            
+                            /* check for outrageous inversion_offset values */
+                            if (fabs(tie->inversion_offset_x) > 10000.0
+                                || fabs(tie->inversion_offset_y) > 10000.0
+                                || fabs(tie->inversion_offset_x_m) > 10000.0
+                                || fabs(tie->inversion_offset_y_m) > 10000.0
+                                || fabs(tie->inversion_offset_z_m) > 10000.0)
+                                {
+                                tie->inversion_status = MBNA_INVERSION_OLD;
+                                tie->inversion_offset_x = 0.0;
+                                tie->inversion_offset_y = 0.0;
+                                tie->inversion_offset_x_m = 0.0;
+                                tie->inversion_offset_y_m = 0.0;
+                                tie->inversion_offset_z_m = 0.0;
+                                }
         
                             /* reorder crossing to be early file first older file second if
                                     file version prior to 3.00 */
@@ -1765,7 +1780,7 @@ fprintf(stderr,"Writing project %s\n", project->name);
 				}
 			}
 		fclose(hfp);
-fprintf(stderr,"Output %d (expected %d) true crossing locations to %s\n", nroute, ncrossings_true, routefile);
+//fprintf(stderr,"Output %d (expected %d) true crossing locations to %s\n", nroute, ncrossings_true, routefile);
 		}
 
 	/* write mbgrdviz route file for all unfixed >=50% crossings */
@@ -1860,7 +1875,7 @@ fprintf(stderr,"Output %d (expected %d) true crossing locations to %s\n", nroute
 				}
 			}
 		fclose(hfp);
-fprintf(stderr,"Output %d (expected %d) >=50%% overlap crossing locations to %s\n", nroute, ncrossings_gt50, routefile);
+//fprintf(stderr,"Output %d (expected %d) >=50%% overlap crossing locations to %s\n", nroute, ncrossings_gt50, routefile);
 		}
 
 	/* write mbgrdviz route file for all unfixed >=25% but less than 50% crossings */
@@ -1955,7 +1970,7 @@ fprintf(stderr,"Output %d (expected %d) >=50%% overlap crossing locations to %s\
 				}
 			}
 		fclose(hfp);
-fprintf(stderr,"Output %d (expected %d) >=25%% && < 50%% overlap crossing locations to %s\n", nroute, ncrossings_gt25, routefile);
+//fprintf(stderr,"Output %d (expected %d) >=25%% && < 50%% overlap crossing locations to %s\n", nroute, ncrossings_gt25, routefile);
 		}
 
 	/* write mbgrdviz route file for all unfixed <25% crossings */
@@ -2050,7 +2065,7 @@ fprintf(stderr,"Output %d (expected %d) >=25%% && < 50%% overlap crossing locati
 				}
 			}
 		fclose(hfp);
-fprintf(stderr,"Output %d (expected %d) <25%% overlap crossing locations to %s\n", nroute, ncrossings_lt25, routefile);
+//fprintf(stderr,"Output %d (expected %d) <25%% overlap crossing locations to %s\n", nroute, ncrossings_lt25, routefile);
 		}
 
 	/* write mbgrdviz route file for all fixed crossings */
@@ -2144,7 +2159,7 @@ fprintf(stderr,"Output %d (expected %d) <25%% overlap crossing locations to %s\n
 				}
 			}
 		fclose(hfp);
-fprintf(stderr,"Output %d (expected %d) fixed crossing locations to %s\n", nroute, ncrossings_fixed, routefile);
+//fprintf(stderr,"Output %d (expected %d) fixed crossing locations to %s\n", nroute, ncrossings_fixed, routefile);
 		}
 
 	/* write mbgrdviz route file for all unfixed ties */
@@ -2235,7 +2250,7 @@ fprintf(stderr,"Output %d (expected %d) fixed crossing locations to %s\n", nrout
 				}
 			}
 		fclose(hfp);
-fprintf(stderr,"Output %d (expected %d) unfixed tie locations to %s\n", nroute, nties_unfixed, routefile);
+//fprintf(stderr,"Output %d (expected %d) unfixed tie locations to %s\n", nroute, nties_unfixed, routefile);
 		}
 
 	/* write mbgrdviz route file for all fixed ties */
@@ -2326,7 +2341,7 @@ fprintf(stderr,"Output %d (expected %d) unfixed tie locations to %s\n", nroute, 
 				}
 			}
 		fclose(hfp);
-fprintf(stderr,"Output %d (expected %d) fixed tie locations to %s\n", nroute, nties_fixed, routefile);
+//fprintf(stderr,"Output %d (expected %d) fixed tie locations to %s\n", nroute, nties_fixed, routefile);
 		}
 
 	/* output offset vectors */

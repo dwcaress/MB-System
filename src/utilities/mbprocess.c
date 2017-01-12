@@ -3494,11 +3494,11 @@ and mbedit edit save files.\n";
 		exit(error);
 		}
 
-        /* get data kind sources for input format */
-        mb_format_source(verbose, &(process.mbp_format),
-		&platform_source, &nav_source, &heading_source,
-		&vru_source, &svp_source,
-		&error);
+	/* get data kind sources for input format */
+	mb_format_source(verbose, &(process.mbp_format),
+	&platform_source, &nav_source, &heading_source,
+	&vru_source, &svp_source,
+	&error);
 
 	/*--------------------------------------------
 	  read the input file to get first ssv if necessary
@@ -3515,73 +3515,73 @@ and mbedit edit save files.\n";
 	    ssv_prelimpass = MB_YES;
 	    error = MB_ERROR_NO_ERROR;
 	    while (error <= MB_ERROR_NO_ERROR
-		&& ssv_start <= 0.0)
-		{
-		/* read some data */
-		error = MB_ERROR_NO_ERROR;
-		status = MB_SUCCESS;
-		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
-				time_i,&time_d,&navlon,&navlat,
-				&speed,&heading,
-				&distance,&altitude,&sonardepth,
-				&nbath,&namp,&nss,
-				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,&error);
-
-		/* time gaps do not matter to mbprocess */
-		if (error == MB_ERROR_TIME_GAP)
+			&& ssv_start <= 0.0)
 			{
-			status = MB_SUCCESS;
+			/* read some data */
 			error = MB_ERROR_NO_ERROR;
-			}
-
-		/* out of bounds do not matter to mbprocess */
-		if (error == MB_ERROR_OUT_BOUNDS)
-			{
 			status = MB_SUCCESS;
-			error = MB_ERROR_NO_ERROR;
+			status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
+					time_i,&time_d,&navlon,&navlat,
+					&speed,&heading,
+					&distance,&altitude,&sonardepth,
+					&nbath,&namp,&nss,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
+					ss,ssacrosstrack,ssalongtrack,
+					comment,&error);
+	
+			/* time gaps do not matter to mbprocess */
+			if (error == MB_ERROR_TIME_GAP)
+				{
+				status = MB_SUCCESS;
+				error = MB_ERROR_NO_ERROR;
+				}
+	
+			/* out of bounds do not matter to mbprocess */
+			if (error == MB_ERROR_OUT_BOUNDS)
+				{
+				status = MB_SUCCESS;
+				error = MB_ERROR_NO_ERROR;
+				}
+	
+			/* non-survey data do not matter to mbprocess */
+			if (error == MB_ERROR_OTHER)
+				{
+				status = MB_SUCCESS;
+				error = MB_ERROR_NO_ERROR;
+				}
+	
+			if (kind == MB_DATA_DATA
+				&& error <= MB_ERROR_NO_ERROR)
+				{
+				/* extract travel times */
+				status = mb_ttimes(verbose,imbio_ptr,
+					store_ptr,&kind,&nbeams,
+					ttimes,angles,
+					angles_forward,angles_null,
+					bheave,alongtrack_offset,
+					&draft,&ssv,&error);
+	
+				/* check surface sound velocity */
+				if (ssv > 0.0)
+					ssv_start = ssv;
+				}
 			}
-
-		/* non-survey data do not matter to mbprocess */
-		if (error == MB_ERROR_OTHER)
-			{
-			status = MB_SUCCESS;
-			error = MB_ERROR_NO_ERROR;
-			}
-
-		if (kind == MB_DATA_DATA
-			&& error <= MB_ERROR_NO_ERROR)
-			{
-			/* extract travel times */
-			status = mb_ttimes(verbose,imbio_ptr,
-				store_ptr,&kind,&nbeams,
-				ttimes,angles,
-				angles_forward,angles_null,
-				bheave,alongtrack_offset,
-				&draft,&ssv,&error);
-
-			/* check surface sound velocity */
-			if (ssv > 0.0)
-				ssv_start = ssv;
-			}
-		}
 
 	    /* close and reopen the input file */
 	    status = mb_close(verbose,&imbio_ptr,&error);
 	    if ((status = mb_read_init(
-		verbose,process.mbp_ifile,process.mbp_format,pings,lonflip,bounds,
-		btime_i,etime_i,speedmin,timegap,
-		&imbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",process.mbp_ifile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+				verbose,process.mbp_ifile,process.mbp_format,pings,lonflip,bounds,
+				btime_i,etime_i,speedmin,timegap,
+				&imbio_ptr,&btime_d,&etime_d,
+				&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+			fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",process.mbp_ifile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
 	    /* reallocate memory for data arrays */
 	    if (error == MB_ERROR_NO_ERROR)
@@ -3666,6 +3666,7 @@ and mbedit edit save files.\n";
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							2 * sizeof(double), (void **)&slopeacrosstrack, &error);
 		}
+
 
 	/*--------------------------------------------
 	  output comments
@@ -4700,6 +4701,7 @@ and mbedit edit save files.\n";
 	  loop over reading input
 	  --------------------------------------------*/
 
+
 	/* read and write */
 	while (error <= MB_ERROR_NO_ERROR)
 		{
@@ -4715,8 +4717,6 @@ and mbedit edit save files.\n";
 				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
-
-		
 
 		/* time gaps do not matter to mbprocess */
 		if (error == MB_ERROR_TIME_GAP)
@@ -6719,7 +6719,7 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]); 
 			mb_freed(verbose,__FILE__,__LINE__,(void **)&(ampcorrtable[i].amplitude),&error);
 			mb_freed(verbose,__FILE__,__LINE__,(void **)&(ampcorrtable[i].sigma),&error);
 			}
-		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&ampcorrtable,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ampcorrtable,&error);
 		}
 
 	/* deallocate arrays for sidescan correction tables */
@@ -6734,7 +6734,7 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]); 
 			mb_freed(verbose,__FILE__,__LINE__,(void **)&(sscorrtable[i].amplitude),&error);
 			mb_freed(verbose,__FILE__,__LINE__,(void **)&(sscorrtable[i].sigma),&error);
 			}
-		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&sscorrtable,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&sscorrtable,&error);
 		}
 
 	/* deallocate topography grid */
@@ -6766,8 +6766,10 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]); 
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&natime,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&nalon,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&nalat,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&naz,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&nalonspl,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&nalatspl,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nazspl,&error);
 		}
 
 	/* deallocate arrays for attitude merging */
@@ -6784,6 +6786,13 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]); 
 		{
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&fsonardepthtime,&error);
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&fsonardepth,&error);
+		}
+
+	/* deallocate arrays for tide */
+	if (ntide > 0)
+		{
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&tidetime,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&tide,&error);
 		}
 
 	/* deallocate arrays for beam edits */
@@ -6852,8 +6861,7 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]); 
 		mb_datalist_close(verbose,&datalist,&error);
 
 	/* check memory */
-	if (verbose >= 4)
-		status = mb_memory_list(verbose,&error);
+	status = mb_memory_list(verbose,&error);
 
 
 	/* end it all */

@@ -305,7 +305,7 @@ int mbr_alm_segysegy(int verbose, void *mbio_ptr, int *error)
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_malloc(verbose,sizeof(struct mbsys_singlebeam_struct),
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct),
 				&mb_io_ptr->store_data,error);
 
 	/* get pointer to mbio descriptor */
@@ -345,10 +345,10 @@ int mbr_dem_segysegy(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,&mb_io_ptr->store_data,error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data,error);
 	if (mb_io_ptr->data_structure_size > 0)
 		{
-		status = mb_free(verbose,&mb_io_ptr->raw_data,error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data,error);
 		mb_io_ptr->data_structure_size = 0;
 		}
 

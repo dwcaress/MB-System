@@ -3123,277 +3123,316 @@ int mbnavedit_action_interpolate()
 	for (iping=0;iping<nbuff;iping++)
 	    {
 	    if (ping[iping].tint_select == MB_YES)
-		{
-		ibefore = iping;
-		for (i=iping-1;i>=0;i--)
-		    if (ping[i].tint_select == MB_NO
-			&& ibefore == iping)
-			ibefore = i;
-		iafter = iping;
-		for (i=iping+1;i<nbuff;i++)
-		    if (ping[i].tint_select == MB_NO
-			&& iafter == iping)
-			iafter = i;
-		if (ibefore < iping && iafter > iping)
-		    {
-		    ping[iping].time_d = ping[ibefore].time_d
-			+ (ping[iafter].time_d - ping[ibefore].time_d)
-			*((double)(iping - ibefore))
-			    /	((double)(iafter - ibefore));
-		    ping[iping].tint = ping[iping].time_d
-					- ping[iping-1].time_d;
-		    timelonlat_change = MB_YES;
-		    }
-		else if (ibefore < iping && ibefore > 0)
-		    {
-		    ping[iping].time_d = ping[ibefore].time_d
-			+ (ping[ibefore].time_d - ping[ibefore-1].time_d)
-			* (iping - ibefore);
-		    ping[iping].tint = ping[iping].time_d
-					- ping[iping-1].time_d;
-		    timelonlat_change = MB_YES;
-		    }
-		else if (ibefore < iping)
-		    {
-		    ping[iping].time_d = ping[ibefore].time_d;
-		    ping[iping].tint = ping[iping].time_d
-					- ping[iping-1].time_d;
-		    timelonlat_change = MB_YES;
-		    }
-		else if (iafter > iping && iafter < nbuff - 1)
-		    {
-		    ping[iping].time_d = ping[iafter].time_d
-			+ (ping[iafter+1].time_d - ping[iafter].time_d)
-			*(iping - iafter);
-		    ping[iping].tint = 0.0;
-		    timelonlat_change = MB_YES;
-		    }
-		else if (iafter > iping)
-		    {
-		    ping[iping].time_d = ping[iafter].time_d;
-		    ping[iping].tint = ping[iping].time_d
-					- ping[iping-1].time_d;
-		    timelonlat_change = MB_YES;
-		    }
-		ping[iping].file_time_d =
-			ping[iping].time_d - file_start_time_d;
-		status = mb_get_date(verbose, ping[iping].time_d, ping[iping].time_i);
-		if (iping < nbuff - 1)
-		    if (ping[iping+1].tint_select == MB_NO)
-			ping[iping+1].tint = ping[iping+1].time_d
-						- ping[iping].time_d;
-		}
+			{
+			ibefore = iping;
+			for (i=iping-1;i>=0;i--)
+				{
+				if (ping[i].tint_select == MB_NO
+					&& ibefore == iping)
+				ibefore = i;
+				}
+			iafter = iping;
+			for (i=iping+1;i<nbuff;i++)
+				{
+				if (ping[i].tint_select == MB_NO
+					&& iafter == iping)
+				iafter = i;
+				}
+			if (ibefore < iping && iafter > iping)
+				{
+				ping[iping].time_d = ping[ibefore].time_d
+				+ (ping[iafter].time_d - ping[ibefore].time_d)
+				*((double)(iping - ibefore))
+					/	((double)(iafter - ibefore));
+				ping[iping].tint = ping[iping].time_d
+						- ping[iping-1].time_d;
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (ibefore < iping && ibefore > 0)
+				{
+				ping[iping].time_d = ping[ibefore].time_d
+				+ (ping[ibefore].time_d - ping[ibefore-1].time_d)
+				* (iping - ibefore);
+				ping[iping].tint = ping[iping].time_d
+						- ping[iping-1].time_d;
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (ibefore < iping)
+				{
+				ping[iping].time_d = ping[ibefore].time_d;
+				ping[iping].tint = ping[iping].time_d
+						- ping[iping-1].time_d;
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (iafter > iping && iafter < nbuff - 1)
+				{
+				ping[iping].time_d = ping[iafter].time_d
+				+ (ping[iafter+1].time_d - ping[iafter].time_d)
+				*(iping - iafter);
+				ping[iping].tint = 0.0;
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (iafter > iping)
+				{
+				ping[iping].time_d = ping[iafter].time_d;
+				ping[iping].tint = ping[iping].time_d
+						- ping[iping-1].time_d;
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			ping[iping].file_time_d =
+				ping[iping].time_d - file_start_time_d;
+			status = mb_get_date(verbose, ping[iping].time_d, ping[iping].time_i);
+			if (iping < nbuff - 1)
+				if (ping[iping+1].tint_select == MB_NO)
+				ping[iping+1].tint = ping[iping+1].time_d
+							- ping[iping].time_d;
+			}
 	    }
 
 	/* do longitude */
 	for (iping=0;iping<nbuff;iping++)
 	    {
 	    if (ping[iping].lon_select == MB_YES)
-		{
-		ibefore = iping;
-		for (i=iping-1;i>=0;i--)
-		    if (ping[i].lon_select == MB_NO
-			&& ibefore == iping)
-			ibefore = i;
-		iafter = iping;
-		for (i=iping+1;i<nbuff;i++)
-		    if (ping[i].lon_select == MB_NO
-			&& iafter == iping)
-			iafter = i;
-		if (ibefore < iping && iafter > iping)
-		    {
-		    ping[iping].lon = ping[ibefore].lon
-			+ (ping[iafter].lon - ping[ibefore].lon)
-			*(ping[iping].time_d - ping[ibefore].time_d)
-			/(ping[iafter].time_d - ping[ibefore].time_d);
-		    timelonlat_change = MB_YES;
-		    }
-		else if (ibefore < iping && ibefore > 0)
-		    {
-		    ping[iping].lon = ping[ibefore].lon
-			+ (ping[ibefore].lon - ping[ibefore-1].lon)
-			*(ping[iping].time_d - ping[ibefore].time_d)
-			/(ping[ibefore].time_d - ping[ibefore-1].time_d);
-		    timelonlat_change = MB_YES;
-		    }
-		else if (ibefore < iping)
-		    {
-		    ping[iping].lon = ping[ibefore].lon;
-		    timelonlat_change = MB_YES;
-		    }
-		else if (iafter > iping && iafter < nbuff - 1)
-		    {
-		    ping[iping].lon = ping[iafter].lon
-			+ (ping[iafter+1].lon - ping[iafter].lon)
-			*(ping[iping].time_d - ping[iafter].time_d)
-			/(ping[iafter+1].time_d - ping[iafter].time_d);
-		    timelonlat_change = MB_YES;
-		    }
-		else if (iafter > iping)
-		    {
-		    ping[iping].lon = ping[iafter].lon;
-		    timelonlat_change = MB_YES;
-		    }
-		}
+			{
+			ibefore = iping;
+			for (i=iping-1;i>=0;i--)
+				{
+				if (ping[i].lon_select == MB_NO
+					&& ibefore == iping)
+					ibefore = i;
+				}
+			iafter = iping;
+			for (i=iping+1;i<nbuff;i++)
+				{
+				if (ping[i].lon_select == MB_NO
+					&& iafter == iping)
+					iafter = i;
+				}
+			if (ibefore < iping && iafter > iping)
+				{
+				ping[iping].lon = ping[ibefore].lon
+									+ (ping[iafter].lon - ping[ibefore].lon)
+									* (ping[iping].time_d - ping[ibefore].time_d)
+									/ (ping[iafter].time_d - ping[ibefore].time_d);
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (ibefore < iping && ibefore > 0)
+				{
+				ping[iping].lon = ping[ibefore].lon
+									+ (ping[ibefore].lon - ping[ibefore-1].lon)
+									* (ping[iping].time_d - ping[ibefore].time_d)
+									/ (ping[ibefore].time_d - ping[ibefore-1].time_d);
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (ibefore < iping)
+				{
+				ping[iping].lon = ping[ibefore].lon;
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (iafter > iping && iafter < nbuff - 1)
+				{
+				ping[iping].lon = ping[iafter].lon
+									+ (ping[iafter+1].lon - ping[iafter].lon)
+									* (ping[iping].time_d - ping[iafter].time_d)
+									/ (ping[iafter+1].time_d - ping[iafter].time_d);
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (iafter > iping)
+				{
+				ping[iping].lon = ping[iafter].lon;
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			}
 	    }
 
 	/* do latitude */
 	for (iping=0;iping<nbuff;iping++)
 	    {
 	    if (ping[iping].lat_select == MB_YES)
-		{
-		ibefore = iping;
-		for (i=iping-1;i>=0;i--)
-		    if (ping[i].lat_select == MB_NO
-			&& ibefore == iping)
-			ibefore = i;
-		iafter = iping;
-		for (i=iping+1;i<nbuff;i++)
-		    if (ping[i].lat_select == MB_NO
-			&& iafter == iping)
-			iafter = i;
-		if (ibefore < iping && iafter > iping)
-		    {
-		    ping[iping].lat = ping[ibefore].lat
-			+ (ping[iafter].lat - ping[ibefore].lat)
-			*(ping[iping].time_d - ping[ibefore].time_d)
-			/(ping[iafter].time_d - ping[ibefore].time_d);
-		    timelonlat_change = MB_YES;
-		    }
-		else if (ibefore < iping && ibefore > 0)
-		    {
-		    ping[iping].lat = ping[ibefore].lat
-			+ (ping[ibefore].lat - ping[ibefore-1].lat)
-			*(ping[iping].time_d - ping[ibefore].time_d)
-			/(ping[ibefore].time_d - ping[ibefore-1].time_d);
-		    timelonlat_change = MB_YES;
-		    }
-		else if (ibefore < iping)
-		    {
-		    ping[iping].lat = ping[ibefore].lat;
-		    timelonlat_change = MB_YES;
-		    }
-		else if (iafter > iping && iafter < nbuff - 1)
-		    {
-		    ping[iping].lat = ping[iafter].lat
-			+ (ping[iafter+1].lat - ping[iafter].lat)
-			*(ping[iping].time_d - ping[iafter].time_d)
-			/(ping[iafter+1].time_d - ping[iafter].time_d);
-		    timelonlat_change = MB_YES;
-		    }
-		else if (iafter > iping)
-		    {
-		    ping[iping].lat = ping[iafter].lat;
-		    timelonlat_change = MB_YES;
-		    }
-		}
+			{
+			ibefore = iping;
+			for (i=iping-1;i>=0;i--)
+				{
+				if (ping[i].lat_select == MB_NO
+					&& ibefore == iping)
+				ibefore = i;
+				}
+			iafter = iping;
+			for (i=iping+1;i<nbuff;i++)
+				{
+				if (ping[i].lat_select == MB_NO
+					&& iafter == iping)
+				iafter = i;
+				}
+			if (ibefore < iping && iafter > iping)
+				{
+				ping[iping].lat = ping[ibefore].lat
+				+ (ping[iafter].lat - ping[ibefore].lat)
+				*(ping[iping].time_d - ping[ibefore].time_d)
+				/(ping[iafter].time_d - ping[ibefore].time_d);
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (ibefore < iping && ibefore > 0)
+				{
+				ping[iping].lat = ping[ibefore].lat
+				+ (ping[ibefore].lat - ping[ibefore-1].lat)
+				*(ping[iping].time_d - ping[ibefore].time_d)
+				/(ping[ibefore].time_d - ping[ibefore-1].time_d);
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (ibefore < iping)
+				{
+				ping[iping].lat = ping[ibefore].lat;
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (iafter > iping && iafter < nbuff - 1)
+				{
+				ping[iping].lat = ping[iafter].lat
+				+ (ping[iafter+1].lat - ping[iafter].lat)
+				*(ping[iping].time_d - ping[iafter].time_d)
+				/(ping[iafter+1].time_d - ping[iafter].time_d);
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (iafter > iping)
+				{
+				ping[iping].lat = ping[iafter].lat;
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			}
 	    }
 
 	/* do speed */
 	for (iping=0;iping<nbuff;iping++)
 	    {
 	    if (ping[iping].speed_select == MB_YES)
-		{
-		ibefore = iping;
-		for (i=iping-1;i>=0;i--)
-		    if (ping[i].speed_select == MB_NO
-			&& ibefore == iping)
-			ibefore = i;
-		iafter = iping;
-		for (i=iping+1;i<nbuff;i++)
-		    if (ping[i].speed_select == MB_NO
-			&& iafter == iping)
-			iafter = i;
-		if (ibefore < iping && iafter > iping)
-		    {
-		    ping[iping].speed = ping[ibefore].speed
-			+ (ping[iafter].speed - ping[ibefore].speed)
-			*(ping[iping].time_d - ping[ibefore].time_d)
-			/(ping[iafter].time_d - ping[ibefore].time_d);
-		    speedheading_change = MB_YES;
-		    }
-		else if (ibefore < iping)
-		    {
-		    ping[iping].speed = ping[ibefore].speed;
-		    speedheading_change = MB_YES;
-		    }
-		else if (iafter > iping)
-		    {
-		    ping[iping].speed = ping[iafter].speed;
-		    speedheading_change = MB_YES;
-		    }
-		}
+			{
+			ibefore = iping;
+			for (i=iping-1;i>=0;i--)
+				{
+				if (ping[i].speed_select == MB_NO
+					&& ibefore == iping)
+				ibefore = i;
+				}
+			iafter = iping;
+			for (i=iping+1;i<nbuff;i++)
+				{
+				if (ping[i].speed_select == MB_NO
+					&& iafter == iping)
+				iafter = i;
+				}
+			if (ibefore < iping && iafter > iping)
+				{
+				ping[iping].speed = ping[ibefore].speed
+				+ (ping[iafter].speed - ping[ibefore].speed)
+				*(ping[iping].time_d - ping[ibefore].time_d)
+				/(ping[iafter].time_d - ping[ibefore].time_d);
+				speedheading_change = MB_YES;
+				}
+			else if (ibefore < iping)
+				{
+				ping[iping].speed = ping[ibefore].speed;
+				speedheading_change = MB_YES;
+				}
+			else if (iafter > iping)
+				{
+				ping[iping].speed = ping[iafter].speed;
+				speedheading_change = MB_YES;
+				}
+			}
 	    }
 
 	/* do heading */
 	for (iping=0;iping<nbuff;iping++)
 	    {
 	    if (ping[iping].heading_select == MB_YES)
-		{
-		ibefore = iping;
-		for (i=iping-1;i>=0;i--)
-		    if (ping[i].heading_select == MB_NO
-			&& ibefore == iping)
-			ibefore = i;
-		iafter = iping;
-		for (i=iping+1;i<nbuff;i++)
-		    if (ping[i].heading_select == MB_NO
-			&& iafter == iping)
-			iafter = i;
-		if (ibefore < iping && iafter > iping)
-		    {
-		    ping[iping].heading = ping[ibefore].heading
-			+ (ping[iafter].heading - ping[ibefore].heading)
-			*(ping[iping].time_d - ping[ibefore].time_d)
-			/(ping[iafter].time_d - ping[ibefore].time_d);
-		    speedheading_change = MB_YES;
-		    }
-		else if (ibefore < iping)
-		    {
-		    ping[iping].heading = ping[ibefore].heading;
-		    speedheading_change = MB_YES;
-		    }
-		else if (iafter > iping)
-		    {
-		    ping[iping].heading = ping[iafter].heading;
-		    speedheading_change = MB_YES;
-		    }
-		}
+			{
+			ibefore = iping;
+			for (i=iping-1;i>=0;i--)
+				{
+				if (ping[i].heading_select == MB_NO
+					&& ibefore == iping)
+				ibefore = i;
+				}
+			iafter = iping;
+			for (i=iping+1;i<nbuff;i++)
+				if (ping[i].heading_select == MB_NO
+				&& iafter == iping)
+				iafter = i;
+			if (ibefore < iping && iafter > iping)
+				{
+				ping[iping].heading = ping[ibefore].heading
+				+ (ping[iafter].heading - ping[ibefore].heading)
+				*(ping[iping].time_d - ping[ibefore].time_d)
+				/(ping[iafter].time_d - ping[ibefore].time_d);
+				speedheading_change = MB_YES;
+				}
+			else if (ibefore < iping)
+				{
+				ping[iping].heading = ping[ibefore].heading;
+				speedheading_change = MB_YES;
+				}
+			else if (iafter > iping)
+				{
+				ping[iping].heading = ping[iafter].heading;
+				speedheading_change = MB_YES;
+				}
+			}
 	    }
 
 	/* do draft */
 	for (iping=0;iping<nbuff;iping++)
 	    {
 	    if (ping[iping].draft_select == MB_YES)
-		{
-		ibefore = iping;
-		for (i=iping-1;i>=0;i--)
-		    if (ping[i].draft_select == MB_NO
-			&& ibefore == iping)
-			ibefore = i;
-		iafter = iping;
-		for (i=iping+1;i<nbuff;i++)
-		    if (ping[i].draft_select == MB_NO
-			&& iafter == iping)
-			iafter = i;
-		if (ibefore < iping && iafter > iping)
-		    {
-		    ping[iping].draft = ping[ibefore].draft
-			+ (ping[iafter].draft - ping[ibefore].draft)
-			*(ping[iping].time_d - ping[ibefore].time_d)
-			/(ping[iafter].time_d - ping[ibefore].time_d);
-		    timelonlat_change = MB_YES;
-		    }
-		else if (ibefore < iping)
-		    {
-		    ping[iping].draft = ping[ibefore].draft;
-		    timelonlat_change = MB_YES;
-		    }
-		else if (iafter > iping)
-		    {
-		    ping[iping].draft = ping[iafter].draft;
-		    }
-		}
+			{
+			ibefore = iping;
+			for (i=iping-1;i>=0;i--)
+				{
+				if (ping[i].draft_select == MB_NO
+					&& ibefore == iping)
+				ibefore = i;
+				}
+			iafter = iping;
+			for (i=iping+1;i<nbuff;i++)
+				if (ping[i].draft_select == MB_NO
+				&& iafter == iping)
+				iafter = i;
+			if (ibefore < iping && iafter > iping)
+				{
+				ping[iping].draft = ping[ibefore].draft
+				+ (ping[iafter].draft - ping[ibefore].draft)
+				*(ping[iping].time_d - ping[ibefore].time_d)
+				/(ping[iafter].time_d - ping[ibefore].time_d);
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (ibefore < iping)
+				{
+				ping[iping].draft = ping[ibefore].draft;
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			else if (iafter > iping)
+				{
+				ping[iping].draft = ping[iafter].draft;
+				ping[iping].lonlat_flag = MB_YES;
+				timelonlat_change = MB_YES;
+				}
+			}
 	    }
 
 	/* recalculate speed-made-good and course-made-good */
@@ -4217,11 +4256,11 @@ int mbnavedit_get_model()
 	    {
 	    /* call correct modeling function */
 	    if (model_mode == MODEL_MODE_MEAN)
-		mbnavedit_get_gaussianmean();
+			mbnavedit_get_gaussianmean();
 	    else if (model_mode == MODEL_MODE_DR)
-		mbnavedit_get_dr();
+			mbnavedit_get_dr();
 	    else if (model_mode == MODEL_MODE_INVERT)
-		mbnavedit_get_inversion();
+			mbnavedit_get_inversion();
 	    }
 
 	/* print output debug statements */
@@ -4520,27 +4559,27 @@ int mbnavedit_get_inversion()
 
 	    /* initialize arrays */
 	    for (i=0;i<nrows;i++)
-		{
-		nia[i] = 0;
-		d[i] = 0.0;
-		for (j=0;j<nnz;j++)
-		    {
-		    k = nnz * i + j;
-		    ia[k] = 0;
-		    a[k] = 0.0;
-		    }
-		}
+			{
+			nia[i] = 0;
+			d[i] = 0.0;
+			for (j=0;j<nnz;j++)
+				{
+				k = nnz * i + j;
+				ia[k] = 0;
+				a[k] = 0.0;
+				}
+			}
 	    for (i=0;i<ncols;i++)
-		{
-		nx[i] = 0;
-		x[i] = 0;
-		dx[i] = 0.0;
-		}
+			{
+			nx[i] = 0;
+			x[i] = 0;
+			dx[i] = 0.0;
+			}
 	    for (i=0;i<ncycle;i++)
-		{
-		sigma[i] = 0;
-		work[i] = 0.0;
-		}
+			{
+			sigma[i] = 0;
+			work[i] = 0.0;
+			}
 
 	    /* loop over all nav points - add constraints for
 	       original lon values, speed, acceleration */

@@ -330,7 +330,7 @@ int mbr_alm_sb2000ss(int verbose, void *mbio_ptr, int *error)
 	status = MB_SUCCESS;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_sb2000_struct),
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2000_struct),
 				&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
@@ -367,7 +367,7 @@ int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,&mb_io_ptr->store_data,error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

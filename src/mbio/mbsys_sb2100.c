@@ -64,7 +64,7 @@ int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_sb2100_struct),
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct),
 				store_ptr,error);
 
 	/* get store structure pointer */
@@ -107,7 +107,7 @@ int mbsys_sb2100_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		}
 
 	/* deallocate memory for data structure */
-	status = mb_free(verbose,store_ptr,error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

@@ -9906,12 +9906,28 @@ fprintf(stderr,"damp:%f\natol:%f\nbtol:%f\nconlim:%f\nitnlim:%d\n",
 						- project.files[crossing->file_id_1].sections[crossing->section_1].snav_lat_offset[tie->snav_1];
 					offset_z =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_z_offset[tie->snav_2]
 						- project.files[crossing->file_id_1].sections[crossing->section_1].snav_z_offset[tie->snav_1];
-					tie->inversion_status = MBNA_INVERSION_CURRENT;
-					tie->inversion_offset_x = offset_x;
-					tie->inversion_offset_y = offset_y;
-					tie->inversion_offset_x_m = offset_x / project.mtodeglon;
-					tie->inversion_offset_y_m = offset_y / project.mtodeglat;
-					tie->inversion_offset_z_m = offset_z;
+					
+					/* discard outrageous inversion_offset values - this happens if the inversion blows up */
+					if (fabs(offset_x) > 10000.0
+						|| fabs(offset_y) > 10000.0
+						|| fabs(offset_z) > 10000.0)
+						{
+						tie->inversion_status = MBNA_INVERSION_OLD;
+						tie->inversion_offset_x = 0.0;
+						tie->inversion_offset_y = 0.0;
+						tie->inversion_offset_x_m = 0.0;
+						tie->inversion_offset_y_m = 0.0;
+						tie->inversion_offset_z_m = 0.0;
+						}
+					else
+						{
+						tie->inversion_status = MBNA_INVERSION_CURRENT;
+						tie->inversion_offset_x = offset_x;
+						tie->inversion_offset_y = offset_y;
+						tie->inversion_offset_x_m = offset_x / project.mtodeglon;
+						tie->inversion_offset_y_m = offset_y / project.mtodeglat;
+						tie->inversion_offset_z_m = offset_z;
+						}
 /* fprintf(stderr,"project.mtodeglon:%f project.mtodeglat:%f\n",project.mtodeglon,project.mtodeglat);
 fprintf(stderr,"offsets:%f %f %f   offsets_m:%f %f %f\n",
 offset_x,offset_y,offset_z,tie->inversion_offset_x_m,tie->inversion_offset_y_m,tie->inversion_offset_z_m);*/

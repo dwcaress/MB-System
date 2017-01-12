@@ -166,7 +166,7 @@ int mbview_allocsitearrays(int verbose,
 		fprintf(stderr,"dbg2       sitename:                  %p\n", *sitename);
 		}
 
-	/* allocate the arrays using mb_realloc */
+	/* allocate the arrays using mb_reallocd */
 	status = mb_reallocd(verbose,__FILE__,__LINE__,nsite*sizeof(double),(void **)sitelon,error);
 	if (status == MB_SUCCESS)
 		status = mb_reallocd(verbose,__FILE__,__LINE__,nsite*sizeof(double),(void **)sitelat,error);
@@ -233,7 +233,7 @@ int mbview_freesitearrays(int verbose,
 		fprintf(stderr,"dbg2       sitename:                  %p\n", *sitename);
 		}
 
-	/* free the arrays using mb_free */
+	/* free the arrays using mb_freed */
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)sitelon,error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)sitelat,error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)sitetopo,error);

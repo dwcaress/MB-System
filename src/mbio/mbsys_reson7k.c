@@ -1434,7 +1434,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		v2snippettimeseries->detect_sample = 0;
 		v2snippettimeseries->end_sample = 0;
 		v2snippettimeseries->nalloc = 0;
-		if (amplitudephase->amplitude != NULL)
+		if (v2snippettimeseries->amplitude != NULL)
 			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(v2snippettimeseries->amplitude),error);
 		}
 
@@ -1457,7 +1457,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		calibratedsnippettimeseries->detect_sample = 0;
 		calibratedsnippettimeseries->end_sample = 0;
 		calibratedsnippettimeseries->nalloc = 0;
-		if (amplitudephase->amplitude != NULL)
+		if (v2snippettimeseries->amplitude != NULL)
 			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(calibratedsnippettimeseries->amplitude),error);
 		}
 

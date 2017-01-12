@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0
 %%Creator: groff version 1.19.2
-%%CreationDate: Mon Jan  2 10:41:19 2017
+%%CreationDate: Thu Jan 12 01:19:51 2017
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
@@ -339,7 +339,8 @@ ndicates that none of the data in the input \214le lies inside the w)108
 710.4 R(ork-)-.1 E .28
 (ing grid bounds, that input \214le is skipped. This allo)108 722.4 R
 .279(ws users to maintain a single master list of data \214les for)-.25
-F(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(1)198.45 E 0 Cg EP
+F(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(1)198.45 E 0
+Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
@@ -448,8 +449,8 @@ ted mean algorithm. The)108 672 R .521
 (sc)-.55 G(ontrib)-3.085 E .585(ution to a Gaussian weighted a)-.2 F
 -.15(ve)-.2 G .584(rage for each nearby grid cell is calculated).15 F
 (using this weighting function:)108 708 Q(W\(r\) = Ae)144 720 Q
-(xp\(r**2/a**2\))-.15 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(2)
-198.45 E 0 Cg EP
+(xp\(r**2/a**2\))-.15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(2)198.45 E 0 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
 BP
@@ -546,8 +547,8 @@ E .241(Mosaicing of bath)144 717.6 R .241
 (raph)144 729.6 Q 1.485(y\) are not allo)-.05 F 1.485(wed. Bath)-.25 F
 1.484(ymetry and topograph)-.05 F 3.984(ys)-.05 G 1.484
 (hould be gridded with)-3.984 F F1(mbgrid)3.984 E F0 6.484(.I)C 3.984
-(f")-6.484 G 1.484(F" is)-3.984 F(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(3)198.45 E 0 Cg EP
+(f")-6.484 G 1.484(F" is)-3.984 F(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(3)198.45 E 0 Cg EP
 %%Page: 4 4
 %%BeginPageSetup
 BP
@@ -591,474 +592,481 @@ R F1(clip)3.498 E F0 .998(=0 no spline interpolation will be)B 3.048
 (Sets the grid cell spacing to)144 295.2 R F1(dx)2.968 E F0 .468
 (in longitude and)2.968 F F1(dy)2.968 E F0 .468(in latitude. If)2.968 F
 F1(units)2.968 E F0 .468(is not speci\214ed, the)2.968 F F1(dx)2.968 E
-F0(and)2.968 E F1(dy)144 307.2 Q F0 -.25(va)5.22 G 2.72
-(lues are assumed to be in meters. V).25 F 2.719(alid v)-1.11 F 2.719
-(alues for)-.25 F F1(units)5.219 E F0 2.719(include "km", "meters", and)
-5.219 F("de)144 319.2 Q 2.71(grees". If)-.15 F .21(not in de)2.71 F .21
-(grees, the grid cell spacing v)-.15 F .21(alues are con)-.25 F -.15(ve)
--.4 G .21(rted to de).15 F .21(grees using the central)-.15 F .284
-(latitude of the grid. If)144 331.2 R F1(dy)2.784 E F0 2.784(=0)2.784 G
-.284(.0, then the latitude cell spacing will be set equal to the longit\
-ude cell)-2.784 F .294(spacing \(after con)144 343.2 R -.15(ve)-.4 G
-.294(rsion to de).15 F .294(grees, if necessary\).)-.15 F .294(By def)
-5.294 F .295(ault, the grid spacing is calculated from)-.1 F .019
-(the grid bounds and the grid dimensions. When the user uses the)144
-355.2 R F2<ad45>2.518 E F0 .018(option to set the cell spacings,)2.518 F
-.944(the grid dimensions are calculated using the grid bounds and grid \
-cell spacings. Ho)144 367.2 R(we)-.25 E -.15(ve)-.25 G 1.744 -.4(r, s)
-.15 H(light).4 E 1.41
-(adjustments to the grid cell spacings are usually required to k)144
-379.2 R 1.41(eep the grid bounds as speci\214ed.)-.1 F .1
-(Appending an ! to the end of the)144 391.2 R F2<ad45>2.6 E F0(ar)2.601
-E .101(guments forces)-.18 F F2(mbmosaic)2.601 E F0 .101(to use the e)
-2.601 F .101(xact grid cell spacing)-.15 F -.25(va)144 403.2 S .487
-(lues speci\214ed by adjusting the grid bounds.).25 F(Def)5.486 E .486
-(ault: If neither the)-.1 F F2<ad45>2.986 E F0(or)2.986 E F2<ad44>2.986
-E F0 .486(options are speci-)2.986 F 1.221(\214ed, the program sets the\
- grid cell spacing to be 0.02 times the maximum sonar altitude in the)
-144 415.2 R(input \214les.)144 427.2 Q F2<ad46>108 444 Q F1(priority_r)
-24.19 E(ang)-.15 E(e[/weight])-.1 E F0 -.45(Tu)144 456 S 1.496
-(rns on Gaussian weighted mean mosaicing. The).45 F F1(priority_r)3.995
-E(ang)-.15 E(e)-.1 E F0 -.25(va)3.995 G 1.495(lue determines which data)
+F0(and)2.968 E F1(dy)144 307.2 Q F0 -.25(va)4.472 G 1.972
+(lues are assumed to be in meters. V).25 F 1.972(alid v)-1.11 F 1.972
+(alues for)-.25 F F1(units)4.472 E F0 1.972
+(include "km", "meters", "feet",)4.472 F("de)144 319.2 Q .589
+(grees", "arcmin", and "arcsec".)-.15 F .589(If not in de)5.589 F .589
+(grees, the grid cell spacing v)-.15 F .59(alues are con)-.25 F -.15(ve)
+-.4 G .59(rted to).15 F(de)144 331.2 Q .746(grees. F)-.15 F .746
+(or "km" and "meters", the con)-.15 F -.15(ve)-.4 G .746(rsion to de).15
+F .746(grees is made using the distance per de)-.15 F(gree)-.15 E .087
+(latitude calculated for the Earth')144 343.2 R 2.587(ss)-.55 G(urf)
+-2.587 E .087(ace at the central latitude of the grid. If)-.1 F F1(dy)
+2.588 E F0 2.588(=0)2.588 G .088(.0, then the lat-)-2.588 F 1.169(itude\
+ cell spacing will be set equal to the longitude cell spacing \(after c\
+on)144 355.2 R -.15(ve)-.4 G 1.169(rsion to de).15 F 1.169(grees, if)
+-.15 F 1.207(necessary\). By def)144 367.2 R 1.207(ault, the grid spaci\
+ng is calculated from the grid bounds and the grid dimen-)-.1 F .07
+(sions. When the user uses the)144 379.2 R F2<ad45>2.57 E F0 .069
+(option to set the cell spacings, the grid dimensions are calculated)
+2.57 F .305(using the grid bounds and grid cell spacings. Ho)144 391.2 R
+(we)-.25 E -.15(ve)-.25 G 1.105 -.4(r, s).15 H .306
+(light adjustments to the grid cell spacings).4 F 1.214
+(are usually required to k)144 403.2 R 1.214
+(eep the grid bounds as speci\214ed. Appending an ! to the end of the)
+-.1 F F2<ad45>3.713 E F0(ar)144 415.2 Q .646(guments forces)-.18 F F2
+(mbgrid)3.146 E F0 .646(to use the e)3.146 F .646
+(xact grid cell spacing v)-.15 F .646
+(alues speci\214ed by adjusting the grid)-.25 F 2.618(bounds. Def)144
+427.2 R .117(ault: If neither the)-.1 F F2<ad45>2.617 E F0(or)2.617 E F2
+<ad44>2.617 E F0 .117
+(options are speci\214ed, the program sets the grid cell spac-)2.617 F
+(ing to be 0.02 times the maximum sonar altitude in the input \214les.)
+144 439.2 Q F2<ad46>108 456 Q F1(priority_r)24.19 E(ang)-.15 E
+(e[/weight])-.1 E F0 -.45(Tu)144 468 S 1.495
+(rns on Gaussian weighted mean mosaicing. The).45 F F1(priority_r)3.996
+E(ang)-.15 E(e)-.1 E F0 -.25(va)3.996 G 1.496(lue determines which data)
 .25 F .164(points are used in the mosaicing. The minimum priority thres\
-hold for each bin is the highest prior)144 468 R(-)-.2 E .284(ity v)144
-480 R .284(alue found among the samples in that bin minus the)-.25 F F1
+hold for each bin is the highest prior)144 480 R(-)-.2 E .284(ity v)144
+492 R .284(alue found among the samples in that bin minus the)-.25 F F1
 (priority_r)2.784 E(ang)-.15 E(e)-.1 E F0 -.25(va)2.784 G 2.784
 (lue. Only).25 F .284(samples with)2.784 F 1.812(priorities greater tha\
 n this threshold are used in the Gaussian weighted mean mosaicing.)144
-492 R(The)6.813 E(def)144 504 Q .986(ault is to simply set each bin')-.1
-F 3.486(sv)-.55 G .986(alue equal to the v)-3.736 F .985
-(alue of the highest priority sample in that)-.25 F 2.817(bin. The)144
-516 R F1(weight)2.817 E F0 -.25(va)2.817 G .317
+504 R(The)6.812 E(def)144 516 Q .985(ault is to simply set each bin')-.1
+F 3.485(sv)-.55 G .986(alue equal to the v)-3.735 F .986
+(alue of the highest priority sample in that)-.25 F 2.818(bin. The)144
+528 R F1(weight)2.818 E F0 -.25(va)2.818 G .317
 (lue, if present, causes priorities to be also used to weight v).25 F
-.318(alues. A)-.25 F F1(weight)2.818 E F0 .318(of 0)2.818 F 1.559
-(\(the def)144 528 R 1.559
+.317(alues. A)-.25 F F1(weight)2.817 E F0 .317(of 0)2.817 F 1.558
+(\(the def)144 540 R 1.558
 (ault\) indicates priorities are not used as weights. A)-.1 F F1(weight)
-4.059 E F0 1.558(of 1 indicates the Gaussian)4.058 F .686
-(weight of each v)144 540 R .687
-(alue is multiplied by its priority to get the v)-.25 F .687
-(alue weight. A)-.25 F F1(weight)3.187 E F0 .687(of 2 indicates)3.187 F
-1.872(the Gaussian weight of each v)144 552 R 1.872
+4.059 E F0 1.559(of 1 indicates the Gaussian)4.059 F .687
+(weight of each v)144 552 R .687
+(alue is multiplied by its priority to get the v)-.25 F .686
+(alue weight. A)-.25 F F1(weight)3.186 E F0 .686(of 2 indicates)3.186 F
+1.871(the Gaussian weight of each v)144 564 R 1.872
 (alue is multiplied by the square of its priority to get the v)-.25 F
-(alue)-.25 E(weight.)144 564 Q F2<ad47>108 580.8 Q F1(gridkind)22.52 E
-F0 .37(This option sets the format of the output grid \214le.)144 592.8
-R .371(The def)5.371 F .371(ault is to output a GMT netCDF 4-byte)-.1 F
-.51(\215oat grid.)144 604.8 R .51(The user may specify the grid format \
+(alue)-.25 E(weight.)144 576 Q F2<ad47>108 592.8 Q F1(gridkind)22.52 E
+F0 .371(This option sets the format of the output grid \214le.)144 604.8
+R .37(The def)5.371 F .37(ault is to output a GMT netCDF 4-byte)-.1 F
+.51(\215oat grid.)144 616.8 R .51(The user may specify the grid format \
 either by using an identi\214er number)5.51 F 3.01(,o)-.4 G 3.01(rb)
--3.01 G 3.01(yu)-3.01 G(sing)-3.01 E(the)144 616.8 Q F2(GMT)2.5 E F0
+-3.01 G 3.01(yu)-3.01 G(sing)-3.01 E(the)144 628.8 Q F2(GMT)2.5 E F0
 (grid format syntax, which allo)2.5 E(ws for scaling and of)-.25 E
 (fsets of the data.)-.25 E
-(First, the simple grid format identi\214ers are:)144 640.8 Q F1
-(gridkind)180 652.8 Q F0 2.5(=1)2.5 G 19.69(:A)-2.5 G(SCII table)-19.69
-E F1(gridkind)180 664.8 Q F0 2.5(=2)2.5 G 19.69(:b)-2.5 G
+(First, the simple grid format identi\214ers are:)144 652.8 Q F1
+(gridkind)180 664.8 Q F0 2.5(=1)2.5 G 19.69(:A)-2.5 G(SCII table)-19.69
+E F1(gridkind)180 676.8 Q F0 2.5(=2)2.5 G 19.69(:b)-2.5 G
 (inary \214le \()-19.69 E F2(GMT)A F0 -.15(ve)2.5 G
-(rsion 1 GRD \214le\)).15 E F1(gridkind)180 676.8 Q F0 2.5(=3)2.5 G
+(rsion 1 GRD \214le\)).15 E F1(gridkind)180 688.8 Q F0 2.5(=3)2.5 G
 19.69(:n)-2.5 G(etCDF \214le \()-19.69 E F2(GMT)A F0 -.15(ve)2.5 G
-(rsion 2 GRD \214le\)).15 E F1(gridkind)180 688.8 Q F0 2.5(=4)2.5 G
+(rsion 2 GRD \214le\)).15 E F1(gridkind)180 700.8 Q F0 2.5(=4)2.5 G
 19.69(:A)-2.5 G(rc/Info and ArcV)-19.69 E(ie)-.6 E 2.5(wA)-.25 G
-(SCII grid)-2.5 E F1(gridkind)180 700.8 Q F0 2.5(=1)2.5 G 7.19(00: GMT)
+(SCII grid)-2.5 E F1(gridkind)180 712.8 Q F0 2.5(=1)2.5 G 7.19(00: GMT)
 -2.5 F(netCDF 4-byte \215oat format [Def)2.5 E(ault])-.1 E F1(gridkind)
-180 712.8 Q F0 4.907(=1)4.907 G 7.19(01: Nati)-4.907 F 2.707 -.15(ve b)
+180 724.8 Q F0 4.908(=1)4.908 G 7.19(01: Nati)-4.908 F 2.708 -.15(ve b)
 -.25 H 2.407
 (inary single precision \215oats in scanlines with leading grd).15 F
-(header)144 724.8 Q(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(4)
-198.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(4)198.45 E 0
+Cg EP
 %%Page: 5 5
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F/F1 10/Times-Italic@0 SF(gridkind)180 84 Q F0
-2.5(=1)2.5 G 7.19(02: Nati)-2.5 F .3 -.15(ve b)-.25 H(inary short inte)
-.15 E(gers in scanlines with leading grd header)-.15 E F1(gridkind)180
-96 Q F0 2.5(=1)2.5 G 7.19(03: 8-bit)-2.5 F
+(5.0 mbmosaic\(1\))2.5 F(header)144 84 Q/F1 10/Times-Italic@0 SF
+(gridkind)180 96 Q F0 2.5(=1)2.5 G 7.19(02: Nati)-2.5 F .3 -.15(ve b)
+-.25 H(inary short inte).15 E(gers in scanlines with leading grd header)
+-.15 E F1(gridkind)180 108 Q F0 2.5(=1)2.5 G 7.19(03: 8-bit)-2.5 F
 (standard Sun raster\214le \(colormap ignored\))2.5 E F1(gridkind)180
-108 Q F0 2.5(=1)2.5 G 7.19(04: Nati)-2.5 F .3 -.15(ve b)-.25 H
+120 Q F0 2.5(=1)2.5 G 7.19(04: Nati)-2.5 F .3 -.15(ve b)-.25 H
 (inary unsigned char in scanlines with leading grd header).15 E F1
-(gridkind)180 120 Q F0 2.5(=1)2.5 G 7.19(05: Nati)-2.5 F .3 -.15(ve b)
+(gridkind)180 132 Q F0 2.5(=1)2.5 G 7.19(05: Nati)-2.5 F .3 -.15(ve b)
 -.25 H(inary bits in scanlines with leading grd header).15 E F1
-(gridkind)180 132 Q F0 2.5(=1)2.5 G 7.19(06: Nati)-2.5 F .3 -.15(ve b)
+(gridkind)180 144 Q F0 2.5(=1)2.5 G 7.19(06: Nati)-2.5 F .3 -.15(ve b)
 -.25 H(inary `).15 E(`surfer')-.74 E 2.5('g)-.74 G(rid \214les)-2.5 E F1
-(gridkind)180 144 Q F0 2.5(=1)2.5 G 7.19(07: netCDF)-2.5 F
-(1-byte byte format)2.5 E F1(gridkind)180 156 Q F0 2.5(=1)2.5 G 7.19
-(08: netCDF)-2.5 F(1-byte char format)2.5 E F1(gridkind)180 168 Q F0 2.5
+(gridkind)180 156 Q F0 2.5(=1)2.5 G 7.19(07: netCDF)-2.5 F
+(1-byte byte format)2.5 E F1(gridkind)180 168 Q F0 2.5(=1)2.5 G 7.19
+(08: netCDF)-2.5 F(1-byte char format)2.5 E F1(gridkind)180 180 Q F0 2.5
 (=1)2.5 G 7.19(09: netCDF)-2.5 F(2-byte int format)2.5 E F1(gridkind)180
-180 Q F0 2.5(=1)2.5 G 7.19(10: netCDF)-2.5 F(4-byte int format)2.5 E F1
-(gridkind)180 192 Q F0 2.5(=1)2.5 G 7.19(11: netCDF)-2.5 F
-(8-byte double format)2.5 E(Second, a)144 216 Q/F2 10/Times-Bold@0 SF
+192 Q F0 2.5(=1)2.5 G 7.19(10: netCDF)-2.5 F(4-byte int format)2.5 E F1
+(gridkind)180 204 Q F0 2.5(=1)2.5 G 7.19(11: netCDF)-2.5 F
+(8-byte double format)2.5 E(Second, a)144 228 Q/F2 10/Times-Bold@0 SF
 (GMT)2.5 E F0(grid format string has the form:)2.5 E(=id[/scale/of)180
-228 Q(fset[/nan]])-.25 E .247(where id is the)144 240 R F2(GMT)2.747 E
-F0 .246(format id, and the other v)2.747 F .246(alues are optional. If)
--.25 F F1(scale)2.746 E F0(and)2.746 E F1(of)2.746 E(fset)-.18 E F0 .246
-(are gi)2.746 F -.15(ve)-.25 G .246(n, the).15 F .696
-(data will be multiplied by)144 252 R F1(scale)3.196 E F0 .697(and of)
-3.196 F .697(fset by)-.25 F F1(of)3.197 E(fset)-.18 E F0 .697
-(prior to being output. The)3.197 F F1(nan)3.197 E F0 -.25(va)3.197 G
-.697(lue sets the).25 F -.25(va)144 264 S
+240 Q(fset[/nan]])-.25 E .246(where id is the)144 252 R F2(GMT)2.746 E
+F0 .246(format id, and the other v)2.746 F .246(alues are optional. If)
+-.25 F F1(scale)2.747 E F0(and)2.747 E F1(of)2.747 E(fset)-.18 E F0 .247
+(are gi)2.747 F -.15(ve)-.25 G .247(n, the).15 F .697
+(data will be multiplied by)144 264 R F1(scale)3.197 E F0 .697(and of)
+3.197 F .697(fset by)-.25 F F1(of)3.197 E(fset)-.18 E F0 .697
+(prior to being output. The)3.197 F F1(nan)3.196 E F0 -.25(va)3.196 G
+.696(lue sets the).25 F -.25(va)144 276 S
 (lue used for "not-a-number". The).25 E F2(GMT)2.5 E F0(format id')2.5 E
-2.5(sf)-.55 G(or these format strings are:)-2.5 E F1(id)180 276 Q F0 2.5
+2.5(sf)-.55 G(or these format strings are:)-2.5 E F1(id)180 288 Q F0 2.5
 (=0)2.5 G 9.8(:G)-2.5 G(MT netCDF 4-byte \215oat format [Def)-9.8 E
-(ault])-.1 E F1(id)180 288 Q F0 2.5(=1)2.5 G 9.8(:N)-2.5 G(ati)-9.8 E .3
+(ault])-.1 E F1(id)180 300 Q F0 2.5(=1)2.5 G 9.8(:N)-2.5 G(ati)-9.8 E .3
 -.15(ve b)-.25 H
 (inary single precision \215oats in scanlines with leading grd header)
-.15 E F1(id)180 300 Q F0 2.5(=2)2.5 G 9.8(:N)-2.5 G(ati)-9.8 E .3 -.15
+.15 E F1(id)180 312 Q F0 2.5(=2)2.5 G 9.8(:N)-2.5 G(ati)-9.8 E .3 -.15
 (ve b)-.25 H(inary short inte).15 E
-(gers in scanlines with leading grd header)-.15 E F1(id)180 312 Q F0 2.5
+(gers in scanlines with leading grd header)-.15 E F1(id)180 324 Q F0 2.5
 (=3)2.5 G 9.8(:8)-2.5 G
 (-bit standard Sun raster\214le \(colormap ignored\))-9.8 E F1(id)180
-324 Q F0 2.5(=4)2.5 G 9.8(:N)-2.5 G(ati)-9.8 E .3 -.15(ve b)-.25 H
+336 Q F0 2.5(=4)2.5 G 9.8(:N)-2.5 G(ati)-9.8 E .3 -.15(ve b)-.25 H
 (inary unsigned char in scanlines with leading grd header).15 E F1(id)
-180 336 Q F0 2.5(=5)2.5 G 9.8(:N)-2.5 G(ati)-9.8 E .3 -.15(ve b)-.25 H
-(inary bits in scanlines with leading grd header).15 E F1(id)180 348 Q
+180 348 Q F0 2.5(=5)2.5 G 9.8(:N)-2.5 G(ati)-9.8 E .3 -.15(ve b)-.25 H
+(inary bits in scanlines with leading grd header).15 E F1(id)180 360 Q
 F0 2.5(=6)2.5 G 9.8(:N)-2.5 G(ati)-9.8 E .3 -.15(ve b)-.25 H(inary `).15
-E(`surfer')-.74 E 2.5('g)-.74 G(rid \214les)-2.5 E F1(id)180 360 Q F0
-2.5(=7)2.5 G 9.8(:n)-2.5 G(etCDF 1-byte byte format)-9.8 E F1(id)180 372
+E(`surfer')-.74 E 2.5('g)-.74 G(rid \214les)-2.5 E F1(id)180 372 Q F0
+2.5(=7)2.5 G 9.8(:n)-2.5 G(etCDF 1-byte byte format)-9.8 E F1(id)180 384
 Q F0 2.5(=8)2.5 G 9.8(:n)-2.5 G(etCDF 1-byte char format)-9.8 E F1(id)
-180 384 Q F0 2.5(=9)2.5 G 9.8(:n)-2.5 G(etCDF 2-byte int format)-9.8 E
-F1(id)180 396 Q F0 2.5(=1)2.5 G 2.3(0: netCDF)-2.5 F(4-byte int format)
-2.5 E F1(id)180 408 Q F0 2.5(=1)2.5 G 2.3(1: netCDF)-2.5 F
-(8-byte double format)2.5 E 2.324(Note that the follo)144 420 R 2.324
+180 396 Q F0 2.5(=9)2.5 G 9.8(:n)-2.5 G(etCDF 2-byte int format)-9.8 E
+F1(id)180 408 Q F0 2.5(=1)2.5 G 2.3(0: netCDF)-2.5 F(4-byte int format)
+2.5 E F1(id)180 420 Q F0 2.5(=1)2.5 G 2.3(1: netCDF)-2.5 F
+(8-byte double format)2.5 E 2.323(Note that the follo)144 432 R 2.324
 (wing ar)-.25 F 2.324(guments are equi)-.18 F -.25(va)-.25 G 2.324
 (lent because the).25 F 4.824(ya)-.15 G 2.324(ll produce a standard)
--4.824 F F2(GMT)4.823 E F0(netCDF 4-byte \215oat grid:)144 432 Q F2
-<ad47>180 444 Q F1(3)A F2<ad47>180 456 Q F1(100)A F2<ad47>180 468 Q F1
-(=0)A F0 .834(Should the user wish to produce a grid in nati)144 480 R
-1.134 -.15(ve b)-.25 H .835(inary \215oats, then the follo).15 F .835
-(wing tw)-.25 F 3.335(oa)-.1 G -.18(rg)-3.335 G(uments).18 E(will w)144
-492 Q(ork:)-.1 E F2<ad47>180 504 Q F1(101)A F2<ad47>180 516 Q F1(=1)A F0
-.077(Should the user wish to produce a grid in nati)144 528 R .377 -.15
-(ve s)-.25 H .076(hort int format with a scaling f).15 F .076
-(actor of 10, an of)-.1 F(f-)-.25 E(set of 32000, and a NaN v)144 540 Q
+-4.824 F F2(GMT)4.824 E F0(netCDF 4-byte \215oat grid:)144 444 Q F2
+<ad47>180 456 Q F1(3)A F2<ad47>180 468 Q F1(100)A F2<ad47>180 480 Q F1
+(=0)A F0 .835(Should the user wish to produce a grid in nati)144 492 R
+1.134 -.15(ve b)-.25 H .834(inary \215oats, then the follo).15 F .834
+(wing tw)-.25 F 3.334(oa)-.1 G -.18(rg)-3.334 G(uments).18 E(will w)144
+504 Q(ork:)-.1 E F2<ad47>180 516 Q F1(101)A F2<ad47>180 528 Q F1(=1)A F0
+.076(Should the user wish to produce a grid in nati)144 540 R .376 -.15
+(ve s)-.25 H .077(hort int format with a scaling f).15 F .077
+(actor of 10, an of)-.1 F(f-)-.25 E(set of 32000, and a NaN v)144 552 Q
 (alue of 32767, then the follo)-.25 E(wing ar)-.25 E(guments will suf)
--.18 E(\214ce:)-.25 E F2<ad47>180 552 Q F1(=2/10/32000/32767)A F0(If)144
-576 Q F1(gridkind)2.773 E F0 2.773(=3o)2.773 G(r)-2.773 E F1(gridkind)
+-.18 E(\214ce:)-.25 E F2<ad47>180 564 Q F1(=2/10/32000/32767)A F0(If)144
+588 Q F1(gridkind)2.774 E F0 2.773(=3o)2.774 G(r)-2.773 E F1(gridkind)
 2.773 E F0 .273(>= 100,)2.773 F F2(mbgrid)2.773 E F0 .273
-(also outputs shellscripts which run)2.773 F F2(GMT)2.773 E F0 .274
-(programs to)2.774 F(pro)144 588 Q .504(vide preliminary color \214ll m\
+(also outputs shellscripts which run)2.773 F F2(GMT)2.773 E F0 .273
+(programs to)2.773 F(pro)144 600 Q .504(vide preliminary color \214ll m\
 aps of the gridded data. These shellscripts are generated using the)-.15
-F F2(mbm_grdplot)144 600 Q F0(macro.)2.5 E(If)144 624 Q F1(gridkind)
-2.981 E F0 2.981(=4)2.981 G 2.981(,t)-2.981 G .481
+F F2(mbm_grdplot)144 612 Q F0(macro.)2.5 E(If)144 636 Q F1(gridkind)
+2.982 E F0 2.982(=4)2.982 G 2.981(,t)-2.982 G .481
 (he output grids will be in the Arc/Info ASCII grid format.)-2.981 F
-.482(Arc/Info ASCII grids)5.482 F 1.396(use "square" bins, meaning that\
+.481(Arc/Info ASCII grids)5.481 F 1.396(use "square" bins, meaning that\
  the longitude and latitude grid cell spacings must be identical.)144
-636 R .58(Thus, whene)144 648 R -.15(ve)-.25 G 3.08(rt).15 G(he)-3.08 E
+648 R .58(Thus, whene)144 660 R -.15(ve)-.25 G 3.08(rt).15 G(he)-3.08 E
 F1(gridkind)3.08 E F0 3.08(=4o)3.08 G .58(ption is used, the)-3.08 F F2
 <ad45>3.08 E F0 .58(option must also be used in a w)3.08 F .58(ay which)
--.1 F(ensures equal grid cell spacings \(see the)144 660 Q F2<ad45>2.5 E
+-.1 F(ensures equal grid cell spacings \(see the)144 672 Q F2<ad45>2.5 E
 F0(documentation abo)2.5 E -.15(ve)-.15 G 2.5(\). Def).15 F(ault:)-.1 E
-F1(gridkind)2.5 E F0 2.5(=1)2.5 G(00.)-2.5 E F2<ad48>108 676.8 Q F0 .162
+F1(gridkind)2.5 E F0 2.5(=1)2.5 G(00.)-2.5 E F2<ad48>108 688.8 Q F0 .162
 (This "help" \215ag cause the program to print out a description of its\
- operation and then e)22.52 F .161(xit immedi-)-.15 F(ately)144 688.8 Q
-(.)-.65 E F2<ad49>108 705.6 Q F1(datalist)26.41 E F0 .572
+ operation and then e)22.52 F .162(xit immedi-)-.15 F(ately)144 700.8 Q
+(.)-.65 E F2<ad49>108 717.6 Q F1(datalist)26.41 E F0 .572
 (Sets the \214lename of the \214le containing a list of the input sw)144
-717.6 R .573(ath sonar data \214les and their formats.)-.1 F(In the)144
-729.6 Q F1(datalist)2.5 E F0(\214le, each data \214le should be follo)
-2.5 E(wed by a data format identi\214er)-.25 E 2.5(,e)-.4 G(.g.:)-2.5 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(5)198.45 E 0 Cg EP
+729.6 R .572(ath sonar data \214les and their formats.)-.1 F
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(5)198.45 E 0
+Cg EP
 %%Page: 6 6
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F(data\214le1 11)180 84 Q(data\214le2 24)180 96 Q
-.569(This program uses the)144 108 R/F1 10/Times-Bold@0 SF(MBIO)3.068 E
-F0 .568(library and will read or write an)3.068 F 3.068(ys)-.15 G -.1
-(wa)-3.068 G .568(th sonar format supported by).1 F F1(MBIO)144 120 Q F0
+(5.0 mbmosaic\(1\))2.5 F(In the)144 84 Q/F1 10/Times-Italic@0 SF
+(datalist)2.5 E F0(\214le, each data \214le should be follo)2.5 E
+(wed by a data format identi\214er)-.25 E 2.5(,e)-.4 G(.g.:)-2.5 E
+(data\214le1 11)180 96 Q(data\214le2 24)180 108 Q .568
+(This program uses the)144 120 R/F2 10/Times-Bold@0 SF(MBIO)3.068 E F0
+.568(library and will read or write an)3.068 F 3.068(ys)-.15 G -.1(wa)
+-3.068 G .568(th sonar format supported by).1 F F2(MBIO)144 132 Q F0
 3.428(.Al)C .928(ist of the sw)-3.428 F .928
-(ath sonar data formats currently supported by)-.1 F F1(MBIO)3.428 E F0
-.928(and their identi\214er)3.428 F -.25(va)144 132 S(lues is gi).25 E
--.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F1(MBIO)2.5 E F0
-(manual page.)2.5 E(Def)5 E(ault:)-.1 E/F2 10/Times-Italic@0 SF
-(datalist)2.5 E F0 2.5(=d)2.5 G(atalist.mb-1)-2.5 E F1<ad4a>108 148.8 Q
-F2(pr)25.3 E(ojection)-.45 E F0 .225(By def)2.725 F(ault,)-.1 E F1
-(mbgrid)2.725 E F0 .225
+(ath sonar data formats currently supported by)-.1 F F2(MBIO)3.428 E F0
+.928(and their identi\214er)3.428 F -.25(va)144 144 S(lues is gi).25 E
+-.15(ve)-.25 G 2.5(ni).15 G 2.5(nt)-2.5 G(he)-2.5 E F2(MBIO)2.5 E F0
+(manual page.)2.5 E(Def)5 E(ault:)-.1 E F1(datalist)2.5 E F0 2.5(=d)2.5
+G(atalist.mb-1)-2.5 E F2<ad4a>108 160.8 Q F1(pr)25.3 E(ojection)-.45 E
+F0 .225(By def)2.725 F(ault,)-.1 E F2(mbgrid)2.725 E F0 .225
 (generates grids in Geographic coordinates, meaning that position is)
 2.725 F .517(de\214ned in longitude and latitude using the WGS84 geogra\
-phic coordinate system.)144 160.8 R(The)5.517 E F1<ad4a>3.017 E F0
-(option)3.017 E .223(can be used to specify an alternate, projected coo\
-rdinate system \(PCS\). When a PCS is used, posi-)144 172.8 R .489
+phic coordinate system.)144 172.8 R(The)5.517 E F2<ad4a>3.017 E F0
+(option)3.016 E .222(can be used to specify an alternate, projected coo\
+rdinate system \(PCS\). When a PCS is used, posi-)144 184.8 R .489
 (tion will be de\214ned in eastings and northings \(meters\) relati)144
-184.8 R .789 -.15(ve t)-.25 H 2.989(ot).15 G .489
-(he origin of the particular PCS.)-2.989 F(Uni)144 196.8 Q -.15(ve)-.25
-G .379(rsal T).15 F(ransv)-.35 E .378(erse Mercator is the most commonl\
+196.8 R .789 -.15(ve t)-.25 H 2.989(ot).15 G .488
+(he origin of the particular PCS.)-2.989 F(Uni)144 208.8 Q -.15(ve)-.25
+G .378(rsal T).15 F(ransv)-.35 E .378(erse Mercator is the most commonl\
 y used PCS in the oceanographic community)-.15 F(,)-.65 E -.2(bu)144
-208.8 S(t).2 E F1(mbgrid)3.037 E F0 .537(supports a lar)3.037 F .537
+220.8 S(t).2 E F2(mbgrid)3.038 E F0 .537(supports a lar)3.038 F .537
 (ge number of other PCS')-.18 F 3.037(sa)-.55 G 3.037(sw)-3.037 G 3.037
-(ell. The)-3.037 F .538(underlying projection functions)3.037 F(deri)144
-220.8 Q .3 -.15(ve f)-.25 H(rom the).15 E F1(PR)2.5 E(OJ)-.3 E(.4)-.2 E
+(ell. The)-3.037 F .537(underlying projection functions)3.037 F(deri)144
+232.8 Q .3 -.15(ve f)-.25 H(rom the).15 E F2(PR)2.5 E(OJ)-.3 E(.4)-.2 E
 F0(library written by Gerald Ev)2.5 E
 (enden, then of the U.S. Geological Surv)-.15 E -.15(ey)-.15 G(.)-.5 E
-(The)144 244.8 Q F2(pr)2.944 E(ojection)-.45 E F0(ar)2.944 E .443
-(gument for the)-.18 F F1<ad4a>2.943 E F0 .443
+(The)144 256.8 Q F1(pr)2.943 E(ojection)-.45 E F0(ar)2.943 E .443
+(gument for the)-.18 F F2<ad4a>2.943 E F0 .443
 (option can be either a PCS identi\214er from the projection de\214-)
-2.943 F .442(nition list pro)144 256.8 R .443
-(vided at the end of this manual page, or simply)-.15 F F1<ad4a>2.943 E
-F2(U)A F0 .443(to specify using UTM in what-)2.943 F -2.15 -.25(ev e)144
-268.8 T 2.5(rz).25 G
-(one is appropriate for the grid bounds speci\214ed with the)-2.5 E F1
-<ad52>2.5 E F0(option.)2.5 E -.15(Fo)144 292.8 S 3.249(ri).15 G .749
-(nstance, to fully specify a particular northern UTM zone, set)-3.249 F
-F2(pr)3.248 E(ojection)-.45 E F0 3.248(=U)3.248 G .748(TMXXN where)
--3.248 F .121(XX gi)144 304.8 R -.15(ve)-.25 G 2.621(st).15 G .122
-(he UTM zone \(de\214ned from 01 to 60\). As an e)-2.621 F .122
-(xample, a northern UTM zone 12 projec-)-.15 F 1.267
-(tion can be speci\214ed using)144 316.8 R F1<ad4a>3.766 E F2(UTM12N)A
+2.943 F .443(nition list pro)144 268.8 R .443
+(vided at the end of this manual page, or simply)-.15 F F2<ad4a>2.943 E
+F1(U)A F0 .442(to specify using UTM in what-)2.943 F -2.15 -.25(ev e)144
+280.8 T 2.5(rz).25 G
+(one is appropriate for the grid bounds speci\214ed with the)-2.5 E F2
+<ad52>2.5 E F0(option.)2.5 E -.15(Fo)144 304.8 S 3.248(ri).15 G .748
+(nstance, to fully specify a particular northern UTM zone, set)-3.248 F
+F1(pr)3.249 E(ojection)-.45 E F0 3.249(=U)3.249 G .749(TMXXN where)
+-3.249 F .122(XX gi)144 316.8 R -.15(ve)-.25 G 2.622(st).15 G .122
+(he UTM zone \(de\214ned from 01 to 60\). As an e)-2.622 F .121
+(xample, a northern UTM zone 12 projec-)-.15 F 1.266
+(tion can be speci\214ed using)144 328.8 R F2<ad4a>3.766 E F1(UTM12N)A
 F0 6.266(.S)C 1.266(outhern UTM zones are speci\214ed as UTMXXS. The)
--6.266 F .616(European Petroleum Surv)144 328.8 R .917 -.15(ey G)-.15 H
+-6.266 F .617(European Petroleum Surv)144 340.8 R .917 -.15(ey G)-.15 H
 .617(roup \(EPSG\) has de\214ned a lar).15 F .617(ge number of PCS')-.18
-F 3.117(su)-.55 G .617(sed w)-3.117 F(orldwide)-.1 E .032
-(and assigned number id')144 340.8 R 2.532(st)-.55 G 2.532(oe)-2.532 G
+F 3.117(su)-.55 G .616(sed w)-3.117 F(orldwide)-.1 E .031
+(and assigned number id')144 352.8 R 2.532(st)-.55 G 2.532(oe)-2.532 G
 .032
 (ach; one can also specify the northern UTM zone 12 projection using)
--2.532 F .976(its EPSG designation, or)144 352.8 R F1<ad4a>3.476 E F2
-(epsg32612)A F0 5.977(.W)C .977
-(hen the projected coordinate system is fully speci\214ed)-5.977 F .501
-(by the)144 364.8 R F1<ad4a>3.001 E F0 .501
-(option, then the grid bounds may be speci\214ed using)3.001 F F1<ad52>3
-E F0 .5(in either longitude and latitude)3 F
-(or in eastings and northings.)144 376.8 Q(Alternati)144 400.8 Q -.15
-(ve)-.25 G(ly).15 E 3.393(,o)-.65 G .894
+-2.532 F .977(its EPSG designation, or)144 364.8 R F2<ad4a>3.477 E F1
+(epsg32612)A F0 5.977(.W)C .976
+(hen the projected coordinate system is fully speci\214ed)-5.977 F .5
+(by the)144 376.8 R F2<ad4a>3 E F0 .5
+(option, then the grid bounds may be speci\214ed using)3 F F2<ad52>3.001
+E F0 .501(in either longitude and latitude)3.001 F
+(or in eastings and northings.)144 388.8 Q(Alternati)144 412.8 Q -.15
+(ve)-.25 G(ly).15 E 3.394(,o)-.65 G .894
 (ne may indicate a UTM projection without specifying the zone by using)
--3.393 F F1<ad4a>3.394 E F2(U)A F0 3.394(.I)C(n)-3.394 E .361(this case\
+-3.394 F F2<ad4a>3.393 E F1(U)A F0 3.393(.I)C(n)-3.393 E .361(this case\
 , the UTM zone will be inferred from the midpoint of the speci\214ed lo\
-ngitude and latitude)144 412.8 R 1.308
-(bounds, and then the longitude and latitude bounds gi)144 424.8 R -.15
-(ve)-.25 G 3.808(nw).15 G 1.308(ith the)-3.808 F F1(\255fR)3.808 E F0
+ngitude and latitude)144 424.8 R 1.308
+(bounds, and then the longitude and latitude bounds gi)144 436.8 R -.15
+(ve)-.25 G 3.808(nw).15 G 1.308(ith the)-3.808 F F2(\255fR)3.808 E F0
 1.308(option are translated to)3.808 F(UTM eastings and northings.)144
-436.8 Q .923(All grids and mosaics produced by)144 460.8 R F1(MB-System)
-3.423 E F0 .922(programs contain identi\214ers that are recognized)3.422
-F 3.167(by the plotting macros)144 472.8 R F1(mbm_grdplot)5.668 E F0(,)A
-F1(mbm_grd3dplot)5.668 E F0 5.668(,a)C(nd)-5.668 E F1(mbm_grdtiff)5.668
-E F0 8.168(.T)C 3.168(hese plotting)-8.168 F .403
-(macros automatically use a linear map projection whene)144 484.8 R -.15
+448.8 Q .922(All grids and mosaics produced by)144 472.8 R F2(MB-System)
+3.422 E F0 .923(programs contain identi\214ers that are recognized)3.423
+F 3.168(by the plotting macros)144 484.8 R F2(mbm_grdplot)5.668 E F0(,)A
+F2(mbm_grd3dplot)5.668 E F0 5.668(,a)C(nd)-5.668 E F2(mbm_grdtiff)5.668
+E F0 8.167(.T)C 3.167(hese plotting)-8.167 F .403
+(macros automatically use a linear map projection whene)144 496.8 R -.15
 (ve)-.25 G 2.903(rt).15 G(he)-2.903 E 2.903(ye)-.15 G .403
 (ncounter grids and mosaics that)-2.903 F 1.062
 (are already in a projected coordinate system. Also, the program)144
-496.8 R F1(mbgrdtiff)3.562 E F0 1.062(automatically inserts)3.562 F .786
+508.8 R F2(mbgrdtiff)3.561 E F0 1.061(automatically inserts)3.561 F .786
 (the appropriate projection information into the GeoTIFF images it gene\
-rates. As a result, images)144 508.8 R .146(generated by)144 520.8 R F1
+rates. As a result, images)144 520.8 R .147(generated by)144 532.8 R F2
 (mbgrdtiff)2.647 E F0 .147(will be properly georeferenced when the)2.647
-F 2.647(ya)-.15 G .147(re imported into GIS softw)-2.647 F(are.)-.1 E F1
-<ad4c>108 537.6 Q F2(lon\215ip)23.63 E F0 .572
-(Sets the range of the longitude v)144 549.6 R .572(alues returned.)-.25
-F(If)5.572 E F2(lon\215ip)3.072 E F0 .572(=\2551 then the longitude v)B
-.571(alues will be in)-.25 F .488(the range from \255360 to 0 de)144
-561.6 R .488(grees. If)-.15 F F2(lon\215ip)2.988 E F0 .488
-(=0 then the longitude v)B .489(alues will be in the range from)-.25 F
-1.383(\255180 to 180 de)144 573.6 R 1.383(grees. If)-.15 F F2(lon\215ip)
+F 2.647(ya)-.15 G .147(re imported into GIS softw)-2.647 F(are.)-.1 E F2
+<ad4c>108 549.6 Q F1(lon\215ip)23.63 E F0 .572
+(Sets the range of the longitude v)144 561.6 R .572(alues returned.)-.25
+F(If)5.572 E F1(lon\215ip)3.072 E F0 .572(=\2551 then the longitude v)B
+.572(alues will be in)-.25 F .489(the range from \255360 to 0 de)144
+573.6 R .488(grees. If)-.15 F F1(lon\215ip)2.988 E F0 .488
+(=0 then the longitude v)B .488(alues will be in the range from)-.25 F
+1.382(\255180 to 180 de)144 585.6 R 1.382(grees. If)-.15 F F1(lon\215ip)
 3.882 E F0 1.382(=1 then the longitude v)B 1.382
-(alues will be in the range from 0 to 360)-.25 F(de)144 585.6 Q 2.5
-(grees. Def)-.15 F(ault:)-.1 E F2(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5
-E F1<ad4d>108 602.4 Q F0 1.11(Causes tw)20.86 F 3.61(oa)-.1 G 1.111
+(alues will be in the range from 0 to 360)-.25 F(de)144 597.6 Q 2.5
+(grees. Def)-.15 F(ault:)-.1 E F1(lon\215ip)2.5 E F0 2.5(=0)2.5 G(.)-2.5
+E F2<ad4d>108 614.4 Q F0 1.111(Causes tw)20.86 F 3.611(oa)-.1 G 1.111
 (dditional grids to be output. One is a grid containing the standard de)
--3.61 F 1.111(viation of the)-.25 F .234
-(data within each grid cell relati)144 614.4 R .534 -.15(ve t)-.25 H
+-3.611 F 1.11(viation of the)-.25 F .234
+(data within each grid cell relati)144 626.4 R .534 -.15(ve t)-.25 H
 2.734(ot).15 G .234(he grid v)-2.734 F .234
 (alue, the other contains the number of data points in)-.25 F 1.285(eac\
 h grid cell. This option is ignored unless the Gaussian weighted mean m\
-osaicing is enabled)144 626.4 R(with the)144 638.4 Q F1(-F)2.5 E F0
-(option.)2.5 E F1<ad4e>108 655.2 Q F0 1.458
+osaicing is enabled)144 638.4 R(with the)144 650.4 Q F2(-F)2.5 E F0
+(option.)2.5 E F2<ad4e>108 667.2 Q F0 1.457
 (Causes grid cells with no data and no interpolation to be set to a v)
-23.08 F 1.457(alue of NaN instead of the)-.25 F(def)144 667.2 Q(ault v)
+23.08 F 1.458(alue of NaN instead of the)-.25 F(def)144 679.2 Q(ault v)
 -.1 E(alue of 99999.9.)-.25 E(The NaN v)5 E(alue is e)-.25 E(xpected by)
--.15 E F1(GMT)2.5 E F0(programs such)2.5 E F1(grdview)2.5 E F0(.)A F1
-<ad4f>108 684 Q F2 -.45(ro)22.52 G(ot).45 E F0 .524(Sets the character \
-string to be used as the root of the output \214lenames. F)144 696 R
-.524(or e)-.15 F .525(xample, if the grid is)-.15 F .074(output as a)144
-708 R F1(GMT)2.574 E F0 -.15(ve)2.574 G .074
-(rsion 2 GRD format \(netCDF\) \214le \(the def).15 F .073
-(ault\), then its \214lename is "root.grd".)-.1 F 1.268(If the)144 720 R
-F1<ad47>3.768 E F2(1)A F0 1.268(option is used to specify an ascii form\
-at grid, then the output grid \214lename will be)3.768 F(MB-System 5.0)
-72 768 Q(13 March 2014)140.11 E(6)198.45 E 0 Cg EP
+-.15 E F2(GMT)2.5 E F0(programs such)2.5 E F2(grdview)2.5 E F0(.)A F2
+<ad4f>108 696 Q F1 -.45(ro)22.52 G(ot).45 E F0 .524(Sets the character \
+string to be used as the root of the output \214lenames. F)144 708 R
+.524(or e)-.15 F .524(xample, if the grid is)-.15 F .073(output as a)144
+720 R F2(GMT)2.573 E F0 -.15(ve)2.573 G .074
+(rsion 2 GRD format \(netCDF\) \214le \(the def).15 F .074
+(ault\), then its \214lename is "root.grd".)-.1 F(MB-System 5.0)72 768 Q
+2.5(3J)140.11 G(anuary 2017)-2.5 E(6)198.45 E 0 Cg EP
 %%Page: 7 7
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F .084("root.asc". If the)144 84 R/F1 10
-/Times-Bold@0 SF<ad47>2.584 E/F2 10/Times-Italic@0 SF(2)A F0 .084
+(5.0 mbmosaic\(1\))2.5 F 1.269(If the)144 84 R/F1 10/Times-Bold@0 SF
+<ad47>3.769 E/F2 10/Times-Italic@0 SF(1)A F0 1.268(option is used to sp\
+ecify an ascii format grid, then the output grid \214lename will be)
+3.769 F .083("root.asc". If the)144 96 R F1<ad47>2.584 E F2(2)A F0 .084
 (option is used to specify a v)2.584 F .084
 (ersion 1 GRD format \(binary\) grid, then the out-)-.15 F .831
 (put grid \214lename will be "root.grd1". If the output grid is in the)
-144 96 R F1(GMT)3.331 E F0 -.15(ve)3.331 G .831(rsion 2 GRD format, a)
-.15 F .165(shellscript which will allo)144 108 R 2.665(wt)-.25 G .164
-(he contents of the grid to vie)-2.665 F .164(wed using)-.25 F F1(GMT)
-2.664 E F0 .164(programs is also output)2.664 F
-(with the \214lename "root.grd.cmd".)144 120 Q F1<ad50>108 136.8 Q F2
-(pings)24.19 E F0 .009(Sets the ping a)144 148.8 R -.15(ve)-.2 G .009
-(raging of the input data. If).15 F F2(pings)2.509 E F0 2.51(>0)2.509 G
-2.51(,t)-2.51 G .01(hen that number of input pings will be a)-2.51 F
+144 108 R F1(GMT)3.331 E F0 -.15(ve)3.331 G .831(rsion 2 GRD format, a)
+.15 F .164(shellscript which will allo)144 120 R 2.664(wt)-.25 G .164
+(he contents of the grid to vie)-2.664 F .165(wed using)-.25 F F1(GMT)
+2.665 E F0 .165(programs is also output)2.665 F
+(with the \214lename "root.grd.cmd".)144 132 Q F1<ad50>108 148.8 Q F2
+(pings)24.19 E F0 .01(Sets the ping a)144 160.8 R -.15(ve)-.2 G .01
+(raging of the input data. If).15 F F2(pings)2.51 E F0 2.509(>0)2.51 G
+2.509(,t)-2.509 G .009(hen that number of input pings will be a)-2.509 F
 -.15(ve)-.2 G -.2(r-).15 G .306(aged to produce one output ping.)144
-160.8 R(If)5.306 E F2(pings)2.806 E F0 2.806(=0)2.806 G 2.806(,t)-2.806
+172.8 R(If)5.306 E F2(pings)2.806 E F0 2.806(=0)2.806 G 2.806(,t)-2.806
 G .306(hen the ping a)-2.806 F -.15(ve)-.2 G .306
 (raging will automatically be done).15 F(so that the along-track ping s\
-pacing is equal to the across-track beam spacing. Def)144 172.8 Q(ault:)
--.1 E F2(pings)2.5 E F0 2.5(=1)2.5 G(.)-2.5 E F1<ad52>108 189.6 Q F2
-(west/east/south/north)23.08 E(factor)144 201.6 Q F0 2.431(The \214rst \
+pacing is equal to the across-track beam spacing. Def)144 184.8 Q(ault:)
+-.1 E F2(pings)2.5 E F0 2.5(=1)2.5 G(.)-2.5 E F1<ad52>108 201.6 Q F2
+(west/east/south/north)23.08 E(factor)144 213.6 Q F0 2.431(The \214rst \
 form sets the longitude and latitude bounds of the output grid.)144
-213.6 R 2.432(By def)7.432 F 2.432(ault \(if the)-.1 F F1<ad52>144 225.6
+225.6 R 2.431(By def)7.431 F 2.431(ault \(if the)-.1 F F1<ad52>144 237.6
 Q F2(west/east/south/north)A F0 .003(option is not speci\214ed\) the pr\
-ogram will set the grid bounds to be the area)2.503 F .367
+ogram will set the grid bounds to be the area)2.502 F .367
 (encompassing all of the data in the input \214les. The second form \()
-144 237.6 R F1<ad52>A F2(factor)A F0 2.867(\)e)C .367
-(xpands the automati-)-3.017 F .737
-(cally calculated bounds by the multiplicati)144 249.6 R -.15(ve)-.25 G
-F2(factor)3.387 E F0 .736(.The v)B(alue)-.25 E F2(factor)3.236 E F0 .736
-(must be greater than one; if)3.236 F F2(factor)144 261.6 Q F0 3.127(=1)
-3.127 G .628(.1 then the grid bounds will be e)-3.127 F .628
-(xpanded to the east and west by an amount 0.05 times)-.15 F 1.345
-(the data bounds east-west e)144 273.6 R 1.345
+144 249.6 R F1<ad52>A F2(factor)A F0 2.866(\)e)C .366
+(xpands the automati-)-3.016 F .736
+(cally calculated bounds by the multiplicati)144 261.6 R -.15(ve)-.25 G
+F2(factor)3.386 E F0 .736(.The v)B(alue)-.25 E F2(factor)3.236 E F0 .737
+(must be greater than one; if)3.237 F F2(factor)144 273.6 Q F0 3.128(=1)
+3.128 G .628(.1 then the grid bounds will be e)-3.128 F .628
+(xpanded to the east and west by an amount 0.05 times)-.15 F 1.344
+(the data bounds east-west e)144 285.6 R 1.345
 (xtend and to the north and south by an amount 0.05 times the data)-.15
-F .485(bounds north-south e)144 285.6 R 2.986(xtent. If)-.15 F .486
+F .486(bounds north-south e)144 297.6 R 2.986(xtent. If)-.15 F .486
 (the user uses the)2.986 F F1<ad45>2.986 E F0 .486
 (option to set the grid spacing, then the dimen-)2.986 F .414(sions wil\
 l be calculated from the grid bounds and spacing. In these circumstance\
-s rounding errors)144 297.6 R 1.047(will usually require that the easte\
-rn and northern bounds be adjusted to \214t e)144 309.6 R 1.047
-(xactly with the grid)-.15 F .706(dimensions and spacing.)144 321.6 R
+s rounding errors)144 309.6 R 1.047(will usually require that the easte\
+rn and northern bounds be adjusted to \214t e)144 321.6 R 1.046
+(xactly with the grid)-.15 F .705(dimensions and spacing.)144 333.6 R
 (Def)5.706 E .706(ault: If the)-.1 F F1<ad52>3.206 E F2
 (west/east/south/north)A F0 .706(option is not speci\214ed, the pro-)
 3.206 F(gram will set the grid bounds to be the area encompassing all o\
-f the data in the input \214les.)144 333.6 Q F1<ad53>108 350.4 Q F2
+f the data in the input \214les.)144 345.6 Q F1<ad53>108 362.4 Q F2
 (speed)24.74 E F0 .532
-(Sets the minimum speed in km/hr \(5.5 kts ~ 10 km/hr\) allo)144 362.4 R
-.532(wed in the input data; pings associated)-.25 F
-(with a smaller ship speed will not be output. Def)144 374.4 Q(ault:)-.1
-E F2(speed)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F1<ad54>108 391.2 Q F2
-(tension)23.63 E F0 .441(Sets the)144 403.2 R F2(tension)2.941 E F0 -.25
-(va)2.941 G .441(lue used in the thin plate spline interpolation.).25 F
-(A)5.44 E F2(tension)2.94 E F0 .44(of 0 gi)2.94 F -.15(ve)-.25 G 2.94
-(sam).15 G(inimum)-2.94 E(curv)144 415.2 Q 1.243(ature surf)-.25 F 1.243
-(ace with free edges; this is a pure Laplacian solution. A nonzero)-.1 F
-F2(tension)3.744 E F0 1.244(tends to)3.744 F .853
+(Sets the minimum speed in km/hr \(5.5 kts ~ 10 km/hr\) allo)144 374.4 R
+.531(wed in the input data; pings associated)-.25 F
+(with a smaller ship speed will not be output. Def)144 386.4 Q(ault:)-.1
+E F2(speed)2.5 E F0 2.5(=0)2.5 G(.)-2.5 E F1<ad54>108 403.2 Q F2
+(tension)23.63 E F0 .44(Sets the)144 415.2 R F2(tension)2.94 E F0 -.25
+(va)2.94 G .44(lue used in the thin plate spline interpolation.).25 F(A)
+5.441 E F2(tension)2.941 E F0 .441(of 0 gi)2.941 F -.15(ve)-.25 G 2.941
+(sam).15 G(inimum)-2.941 E(curv)144 427.2 Q 1.244(ature surf)-.25 F
+1.243(ace with free edges; this is a pure Laplacian solution. A nonzero)
+-.1 F F2(tension)3.743 E F0 1.243(tends to)3.743 F .853
 (suppress spurious oscillations and \215atten the interpolation to)144
-427.2 R -.1(wa)-.25 G .853(rd the edges; a).1 F F2(tension)3.353 E F0
-.853(of in\214nity)3.353 F .31(yields a pure spline solution. The)144
-439.2 R F2(tension)2.81 E F0 .31(must be zero or greater)2.81 F 5.31(.D)
+439.2 R -.1(wa)-.25 G .853(rd the edges; a).1 F F2(tension)3.353 E F0
+.854(of in\214nity)3.353 F .31(yields a pure spline solution. The)144
+451.2 R F2(tension)2.81 E F0 .31(must be zero or greater)2.81 F 5.31(.D)
 -.55 G(ef)-5.31 E(ault:)-.1 E F2(tension)2.81 E F0 2.81(=1)2.81 G .31
-(.0e10 \(pure)-2.81 F(spline solution\).)144 451.2 Q F1<ad55>108 468 Q
+(.0e10 \(pure)-2.81 F(spline solution\).)144 463.2 Q F1<ad55>108 480 Q
 F2(bearing/factor[/mode])23.08 E F0 .384(Enables prioritizing data poin\
 ts according to their look azimuth or to the platform heading at ping)
-144 480 R(time.)144 492 Q(If)144 516 Q F2(mode)3.128 E F0 -5.627 3.128
-(=0 o)3.128 H 3.129(ri)-3.128 G 3.129(sa)-3.129 G .629
+144 492 R(time.)144 504 Q(If)144 528 Q F2(mode)3.129 E F0 3.129(=0o)
+3.129 G 3.129(ri)-3.129 G 3.129(sa)-3.129 G .629
 (bsent, then the look azimuth criteria is applied, with)-3.129 F F2
-(bearing)3.129 E F0 .629(being interpreted)3.129 F .781
-(as the desired look azimuth. Data on the port side of the sw)144 528 R
+(bearing)3.128 E F0 .628(being interpreted)3.128 F .781
+(as the desired look azimuth. Data on the port side of the sw)144 540 R
 .781(ath ha)-.1 F 1.081 -.15(ve a l)-.2 H .781(ook azimuth equal to the)
-.15 F .68(heading \255 90 de)144 540 R .68
+.15 F .68(heading \255 90 de)144 552 R .68
 (grees, and data on the starboard side ha)-.15 F .98 -.15(ve a l)-.2 H
-.68(ook azimuth equal to the heading +).15 F .055(90 de)144 552 R .055
-(grees\). The)-.15 F F2(factor)2.555 E F0 -.25(va)2.555 G .054
+.68(ook azimuth equal to the heading +).15 F .054(90 de)144 564 R .054
+(grees\). The)-.15 F F2(factor)2.554 E F0 -.25(va)2.554 G .054
 (lue modulates ho).25 F 2.554(wr)-.25 G .054(apidly the priority de)
--2.554 F .054(grades a)-.15 F -.1(wa)-.15 G 2.554(yf).1 G .054
-(rom the preferred)-2.554 F
+-2.554 F .055(grades a)-.15 F -.1(wa)-.15 G 2.555(yf).1 G .055
+(rom the preferred)-2.555 F
 (look azimuth. The priority \(p\) for a data point is assigned as follo)
-144 564 Q(ws:)-.25 E 2.5(p=c)164 576 S(os\(f * \(Ap \255 Aa\)\))-2.5 E
-(when \25590 < \(f * \(Ap \255 Aa\)\) < 90 and)144 588 Q 2.5(p=0)164 600
-S .397(otherwise, where f =)144 612 R F2(factor)2.898 E F0 2.898(,A)C
+144 576 Q(ws:)-.25 E 2.5(p=c)164 588 S(os\(f * \(Ap \255 Aa\)\))-2.5 E
+(when \25590 < \(f * \(Ap \255 Aa\)\) < 90 and)144 600 Q 2.5(p=0)164 612
+S .398(otherwise, where f =)144 624 R F2(factor)2.898 E F0 2.898(,A)C
 2.898(p=)-2.898 G F2(bearing)A F0 2.898(,a)C .398
-(nd Aa is the actual look azimuth of the data point.)-2.898 F(If)5.398 E
-F2(factor)144 624 Q F0 2.594(=1)2.594 G .094
+(nd Aa is the actual look azimuth of the data point.)-2.898 F(If)5.397 E
+F2(factor)144 636 Q F0 2.594(=1)2.594 G .094
 (.0, the priority will be 1.0 at)-2.594 F F2(bearing)2.594 E F0 .094
 (and will f)2.594 F .094(all to zero for look azimuths more than 90)-.1
-F(de)144 636 Q .92(grees a)-.15 F -.1(wa)-.15 G 3.42(yf).1 G(rom)-3.42 E
+F(de)144 648 Q .92(grees a)-.15 F -.1(wa)-.15 G 3.42(yf).1 G(rom)-3.42 E
 F2(bearing)3.42 E F0 5.92(.I)C(f)-5.92 E F2(factor)3.42 E F0 3.42(>1)
 3.42 G .92(.0, the range of nonzero priorities will shrink closer to)
--3.42 F F2(bearing)144 648 Q F0 2.082(\(e.g. if)4.582 F F2(factor)4.582
-E F0 4.582(=2)4.582 G 2.081
+-3.42 F F2(bearing)144 660 Q F0 2.081(\(e.g. if)4.581 F F2(factor)4.581
+E F0 4.581(=2)4.581 G 2.081
 (.0, nonzero priorities will be restricted to look azimuths within 45)
--4.582 F(de)144 660 Q .02(grees of)-.15 F F2(bearing)2.52 E F0 .02
-(\). If)B F2(factor)2.52 E F0 2.52(<1)2.52 G .021
-(.0, the range of nonzero priorities will e)-2.52 F .021
-(xpand \(e.g. if)-.15 F F2(factor)2.521 E F0 2.521(=0)2.521 G(.5,)-2.521
-E(only look azimuths 180 de)144 672 Q(grees a)-.15 E -.1(wa)-.15 G 2.5
+-4.581 F(de)144 672 Q .021(grees of)-.15 F F2(bearing)2.521 E F0 .021
+(\). If)B F2(factor)2.521 E F0 2.521(<1)2.521 G .021
+(.0, the range of nonzero priorities will e)-2.521 F .02
+(xpand \(e.g. if)-.15 F F2(factor)2.52 E F0 2.52(=0)2.52 G(.5,)-2.52 E
+(only look azimuths 180 de)144 684 Q(grees a)-.15 E -.1(wa)-.15 G 2.5
 (yf).1 G(rom)-2.5 E F2(bearing)2.5 E F0(will ha)2.5 E .3 -.15(ve a z)-.2
-H(ero priority\).).15 E(If)144 696 Q F2(mode)2.526 E F0 2.526(=1t)2.526
+H(ero priority\).).15 E(If)144 708 Q F2(mode)2.525 E F0 2.526(=1t)2.525
 G .026(hen the heading criteria is applied, with)-2.526 F F2(bearing)
-2.526 E F0 .026(being interpreted as the desired head-)2.526 F .677
-(ing. The)144 708 R F2(factor)3.177 E F0 -.25(va)3.178 G .678
-(lue modulates ho).25 F 3.178(wr)-.25 G .678(apidly the priority de)
--3.178 F .678(grades a)-.15 F -.1(wa)-.15 G 3.178(yf).1 G .678
-(rom the preferred head-)-3.178 F
-(ing. The priority \(p\) for a data point is assigned as follo)144 720 Q
-(ws:)-.25 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(7)198.45 E 0
-Cg EP
+2.526 E F0 .026(being interpreted as the desired head-)2.526 F 2.631
+(ing. The)144 720 R F2(factor)5.131 E F0 -.25(va)5.131 G 2.631
+(lue modulates ho).25 F 5.131(wr)-.25 G 2.631(apidly the priority de)
+-5.131 F 2.631(grades a)-.15 F -.1(wa)-.15 G 5.13(yf).1 G 2.63
+(rom the preferred)-5.13 F(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(7)198.45 E 0 Cg EP
 %%Page: 8 8
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F 2.5(p=c)164 84 S(os\(f * \(Hp \255 Ha\)\))-2.5
-E(when \25590 < \(f * \(Hp \255 Ha\)\) < 90 and)144 96 Q 2.5(p=0)164 108
-S .106(otherwise, where f =)144 120 R/F1 10/Times-Italic@0 SF(factor)
-2.606 E F0 2.606(,A)C 2.606(p=)-2.606 G F1(bearing)A F0 2.606(,a)C .106
-(nd Aa is the actual heading of the data point.)-2.606 F(If)5.105 E F1
-(factor)2.605 E F0 3.353(=1)144 132 S .853
-(.0, the priority will be 1.0 at)-3.353 F F1(bearing)3.354 E F0 .854
-(and will f)3.354 F .854(all to zero for headings more than 90 de)-.1 F
-(grees)-.15 E -2.3 -.15(aw a)144 144 T 3.375(yf).15 G(rom)-3.375 E F1
+(5.0 mbmosaic\(1\))2.5 F
+(heading. The priority \(p\) for a data point is assigned as follo)144
+84 Q(ws:)-.25 E 2.5(p=c)164 96 S(os\(f * \(Hp \255 Ha\)\))-2.5 E
+(when \25590 < \(f * \(Hp \255 Ha\)\) < 90 and)144 108 Q 2.5(p=0)164 120
+S .105(otherwise, where f =)144 132 R/F1 10/Times-Italic@0 SF(factor)
+2.605 E F0 2.606(,A)C 2.606(p=)-2.606 G F1(bearing)A F0 2.606(,a)C .106
+(nd Aa is the actual heading of the data point.)-2.606 F(If)5.106 E F1
+(factor)2.606 E F0 3.354(=1)144 144 S .854
+(.0, the priority will be 1.0 at)-3.354 F F1(bearing)3.354 E F0 .854
+(and will f)3.354 F .853(all to zero for headings more than 90 de)-.1 F
+(grees)-.15 E -2.3 -.15(aw a)144 156 T 3.375(yf).15 G(rom)-3.375 E F1
 (bearing)3.375 E F0 5.875(.I)C(f)-5.875 E F1(factor)3.375 E F0 3.375(>1)
 3.375 G .875(.0, the range of nonzero priorities will shrink closer to)
--3.375 F F1(bearing)3.375 E F0 .156(\(e.g. if)144 156 R F1(factor)2.656
+-3.375 F F1(bearing)3.375 E F0 .157(\(e.g. if)144 168 R F1(factor)2.657
 E F0 2.657(=2)2.657 G .157
 (.0, nonzero priorities will be restricted to headings within 45 de)
--2.657 F .157(grees of)-.15 F F1(bearing)2.657 E F0(\).)A(If)144 168 Q
-F1(factor)2.928 E F0 2.928(<1)2.928 G .428
-(.0, the range of nonzero priorities will e)-2.928 F .428
-(xpand \(e.g. if)-.15 F F1(factor)2.928 E F0 2.927(=0)2.928 G .427
-(.5, only headings 180)-2.927 F(de)144 180 Q(grees a)-.15 E -.1(wa)-.15
+-2.657 F .156(grees of)-.15 F F1(bearing)2.656 E F0(\).)A(If)144 180 Q
+F1(factor)2.927 E F0 2.927(<1)2.927 G .428
+(.0, the range of nonzero priorities will e)-2.927 F .428
+(xpand \(e.g. if)-.15 F F1(factor)2.928 E F0 2.928(=0)2.928 G .428
+(.5, only headings 180)-2.928 F(de)144 192 Q(grees a)-.15 E -.1(wa)-.15
 G 2.5(yf).1 G(rom)-2.5 E F1(bearing)2.5 E F0(will ha)2.5 E .3 -.15
-(ve a z)-.2 H(ero priority\).).15 E/F2 10/Times-Bold@0 SF<ad56>108 196.8
+(ve a z)-.2 H(ero priority\).).15 E/F2 10/Times-Bold@0 SF<ad56>108 208.8
 Q F0(Normally)23.08 E(,)-.65 E F2(mbmosaic)2.691 E F0 .191
 (prints out information re)2.691 F -.05(ga)-.15 G .191
 (rding its controlling parameters during e).05 F -.15(xe)-.15 G(cution;)
-.15 E(the)144 208.8 Q F2<ad56>2.5 E F0(option causes the program to als\
-o print out statements indicating its progress.)2.5 E F2<ad57>108 225.6
-Q F1(scale)20.3 E F0 .179(Sets the width of the g)144 237.6 R .178
-(aussian weighting function in terms of the grid spacing.)-.05 F .178
-(The distance to the)5.178 F .303
-(1/e point of the weighting function is gi)144 249.6 R -.15(ve)-.25 G
+.15 E(the)144 220.8 Q F2<ad56>2.5 E F0(option causes the program to als\
+o print out statements indicating its progress.)2.5 E F2<ad57>108 237.6
+Q F1(scale)20.3 E F0 .178(Sets the width of the g)144 249.6 R .178
+(aussian weighting function in terms of the grid spacing.)-.05 F .179
+(The distance to the)5.179 F .303
+(1/e point of the weighting function is gi)144 261.6 R -.15(ve)-.25 G
 2.803(nb).15 G 2.803(yh)-2.803 G .303(alf of the grid spacing times)
 -2.803 F F1(scale)2.803 E F0 5.303(.D)C(ef)-5.303 E(ault:)-.1 E F1
-(scale)2.803 E F0 2.5(=1)144 261.6 S(.0)-2.5 E F2<ad58>108 278.4 Q F1
--.2(ex)23.08 G(tend).2 E F0 .646(Extends the size of the internal grid \
-so that the output grid is a subset from the center of a lar)144 290.4 R
-(ger)-.18 E 5.273(grid. This)144 302.4 R(allo)2.773 E .274(ws data outs\
+(scale)2.802 E F0 2.5(=1)144 273.6 S(.0)-2.5 E F2<ad58>108 290.4 Q F1
+-.2(ex)23.08 G(tend).2 E F0 .645(Extends the size of the internal grid \
+so that the output grid is a subset from the center of a lar)144 302.4 R
+(ger)-.18 E 5.274(grid. This)144 314.4 R(allo)2.774 E .274(ws data outs\
 ide the output grid to guide the spline interpolation of data g)-.25 F
-.274(aps which)-.05 F .498
-(happen to lie at the the edge of the output grid.)144 314.4 R .497
-(The amount of e)5.497 F .497(xtension is)-.15 F F1 -.2(ex)2.997 G(tend)
-.2 E F0 .497(times the grid)2.997 F .881(width/height to each side.)144
-326.4 R .881(Thus, if)5.881 F F1 -.2(ex)3.381 G(tend).2 E F0 .882
-(=1.0, then the internal grid will ha)B 1.182 -.15(ve d)-.2 H .882
-(imensions three).15 F(times the output grid.)144 338.4 Q(Def)5 E(ault:)
+.273(aps which)-.05 F .497
+(happen to lie at the the edge of the output grid.)144 326.4 R .498
+(The amount of e)5.497 F .498(xtension is)-.15 F F1 -.2(ex)2.998 G(tend)
+.2 E F0 .498(times the grid)2.998 F .882(width/height to each side.)144
+338.4 R .882(Thus, if)5.882 F F1 -.2(ex)3.382 G(tend).2 E F0 .881
+(=1.0, then the internal grid will ha)B 1.181 -.15(ve d)-.2 H .881
+(imensions three).15 F(times the output grid.)144 350.4 Q(Def)5 E(ault:)
 -.1 E F1 -.2(ex)2.5 G(tend).2 E F0 2.5(=0)2.5 G(.0)-2.5 E F2<ad59>108
-355.2 Q F1(priority_sour)23.08 E(ce)-.37 E F0 .276(Enables priortizatio\
+367.2 Q F1(priority_sour)23.08 E(ce)-.37 E F0 .276(Enables priortizatio\
 n of data points based on their apparent grazing angle \(this angle is \
-arctan\(x/z\))144 367.2 R .132(where x is acrosstrack distance and z is\
- sonar altitude, so that the center of the sw)144 379.2 R .133
+arctan\(x/z\))144 379.2 R .132(where x is acrosstrack distance and z is\
+ sonar altitude, so that the center of the sw)144 391.2 R .132
 (ath has an appar)-.1 F(-)-.2 E .531
-(ent grazing angle of zero, the port sw)144 391.2 R .531
+(ent grazing angle of zero, the port sw)144 403.2 R .531
 (ath edge has a lar)-.1 F .531(ge ne)-.18 F -.05(ga)-.15 G(ti).05 E .831
--.15(ve a)-.25 H .531(ngle, and the starboard sw).15 F(ath)-.1 E .845
-(edge has a lar)144 403.2 R .845(ge positi)-.18 F 1.145 -.15(ve a)-.25 H
+-.15(ve a)-.25 H .532(ngle, and the starboard sw).15 F(ath)-.1 E .845
+(edge has a lar)144 415.2 R .845(ge positi)-.18 F 1.145 -.15(ve a)-.25 H
 .845(ngle\). A number of prede\214ned priority tables are a).15 F -.25
-(va)-.2 G .845(ilable and can be).25 F(accessed by setting)144 415.2 Q
+(va)-.2 G .845(ilable and can be).25 F(accessed by setting)144 427.2 Q
 F1(priority_sour)2.5 E(ce)-.37 E F0
 (to a number from 1 to 8. These priority tables include:)2.5 E F1
-(priority_sour)144 451.2 Q(ce)-.37 E F0 2.5(=1)2.5 G(:)-2.5 E
-(Angle \(de)159 463.2 Q 2.5(g\) Priority)-.15 F
-(\255--------------------)159 475.2 Q 22.5(\25560 1.0)185 487.2 R 25(00)
-190 499.2 S(.0)-25 E 22.5(60 1.0)187.5 511.2 R F1(priority_sour)144
-547.2 Q(ce)-.37 E F0 2.5(=2)2.5 G(:)-2.5 E(Angle \(de)159 559.2 Q 2.5
-(g\) Priority)-.15 F(\255--------------------)159 571.2 Q 22.5
-(\25567 1.0)185 583.2 R 25(00)190 595.2 S(.0)-25 E 22.5(67 1.0)187.5
-607.2 R F1(priority_sour)144 643.2 Q(ce)-.37 E F0 2.5(=3)2.5 G(:)-2.5 E
-(Angle \(de)159 655.2 Q 2.5(g\) Priority)-.15 F
-(\255--------------------)159 667.2 Q 22.5(\25575 1.0)185 679.2 R 25(00)
-190 691.2 S(.0)-25 E 22.5(75 1.0)187.5 703.2 R(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(8)198.45 E 0 Cg EP
+(priority_sour)144 463.2 Q(ce)-.37 E F0 2.5(=1)2.5 G(:)-2.5 E
+(Angle \(de)159 475.2 Q 2.5(g\) Priority)-.15 F
+(\255--------------------)159 487.2 Q 22.5(\25560 1.0)185 499.2 R 25(00)
+190 511.2 S(.0)-25 E 22.5(60 1.0)187.5 523.2 R F1(priority_sour)144
+559.2 Q(ce)-.37 E F0 2.5(=2)2.5 G(:)-2.5 E(Angle \(de)159 571.2 Q 2.5
+(g\) Priority)-.15 F(\255--------------------)159 583.2 Q 22.5
+(\25567 1.0)185 595.2 R 25(00)190 607.2 S(.0)-25 E 22.5(67 1.0)187.5
+619.2 R F1(priority_sour)144 655.2 Q(ce)-.37 E F0 2.5(=3)2.5 G(:)-2.5 E
+(Angle \(de)159 667.2 Q 2.5(g\) Priority)-.15 F
+(\255--------------------)159 679.2 Q 22.5(\25575 1.0)185 691.2 R 25(00)
+190 703.2 S(.0)-25 E 22.5(75 1.0)187.5 715.2 R(MB-System 5.0)72 768 Q
+2.5(3J)140.11 G(anuary 2017)-2.5 E(8)198.45 E 0 Cg EP
 %%Page: 9 9
 %%BeginPageSetup
 BP
@@ -1081,44 +1089,45 @@ R F1(priority_sour)144 276 Q(ce)-.37 E F0 2.5(=6)2.5 G(:)-2.5 E
 -.37 E F0 2.5(=8)2.5 G(:)-2.5 E(Angle \(de)159 480 Q 2.5(g\) Priority)
 -.15 F(\255--------------------)159 492 Q 22.5(\25585 0.0)185 504 R 25
 (01)190 516 S(.0)-25 E 22.5(85 0.0)187.5 528 R(Alternati)144 564 Q -.15
-(ve)-.25 G(ly).15 E 2.721(,i)-.65 G(f)-2.721 E F1(priority_sour)2.721 E
-(ce)-.37 E F0 .221(speci\214es a \214le name, then the data priority ta\
-ble will be read from)2.721 F 1.084(this \214le.)144 576 R 1.084
-(The priority \214le should contain tw)6.084 F 3.584(oc)-.1 G 1.085
-(olumns: apparent grazing angles in de)-3.584 F 1.085(grees from)-.15 F
--.15(ve)144 588 S .428(rtical follo).15 F .427(wed by data priority v)
+(ve)-.25 G(ly).15 E 2.72(,i)-.65 G(f)-2.72 E F1(priority_sour)2.72 E(ce)
+-.37 E F0 .221(speci\214es a \214le name, then the data priority table \
+will be read from)2.72 F 1.085(this \214le.)144 576 R 1.084
+(The priority \214le should contain tw)6.085 F 3.584(oc)-.1 G 1.084
+(olumns: apparent grazing angles in de)-3.584 F 1.084(grees from)-.15 F
+-.15(ve)144 588 S .427(rtical follo).15 F .427(wed by data priority v)
 -.25 F .427
 (alues between 0.0 and 1.0. The \214rst line of the \214le should con-)
 -.25 F .873(tain the minimum, or port-most grazing angle follo)144 600 R
-.873(wed by the associated priority)-.25 F 3.373(.T)-.65 G .874
-(he follo)-3.373 F(wing)-.25 E .972
-(lines should contain increasingly lar)144 612 R .971
+.873(wed by the associated priority)-.25 F 3.373(.T)-.65 G .873
+(he follo)-3.373 F(wing)-.25 E .971
+(lines should contain increasingly lar)144 612 R .972
 (ge grazing angles \(and associated priorities\) up to the maxi-)-.18 F
-.271(mum, or starboard-most, grazing angle.)144 624 R .272
-(The highest priority assigned should be one, and the lo)5.271 F(w-)-.25
-E .274(est zero.)144 636 R .274(Priorities for grazing angles less than\
- the minimum or greater than the maximum will be)5.274 F
+.272(mum, or starboard-most, grazing angle.)144 624 R .271
+(The highest priority assigned should be one, and the lo)5.272 F(w-)-.25
+E .273(est zero.)144 636 R .274(Priorities for grazing angles less than\
+ the minimum or greater than the maximum will be)5.273 F
 (zero. See the e)144 648 Q(xamples belo)-.15 E 2.5(wf)-.25 G
 (or a further e)-2.5 E(xplanation of the use of)-.15 E F1(priority_sour)
 2.5 E(ce)-.37 E F0(.)A/F2 10/Times-Bold@0 SF<ad5a>108 664.8 Q F1
-(bath_default)23.63 E F0 .657(Sets the def)144 676.8 R .658(ault depth \
+(bath_default)23.63 E F0 .658(Sets the def)144 676.8 R .658(ault depth \
 used for calculating grazing angles for amplitude or sidescan v)-.1 F
-.658(alues where)-.25 F(depths are not a)144 688.8 Q -.25(va)-.2 G 2.5
+.657(alues where)-.25 F(depths are not a)144 688.8 Q -.25(va)-.2 G 2.5
 (ilable. Def).25 F(ault:)-.1 E F1(scale)2.5 E F0 2.5(=1)2.5 G(000.0)-2.5
-E/F3 10.95/Times-Bold@0 SF(EXAMPLES)72 705.6 Q F0 .638(Suppose you w)108
+E/F3 10.95/Times-Bold@0 SF(EXAMPLES)72 705.6 Q F0 .637(Suppose you w)108
 717.6 R .638
 (ant to mosaic some SeaBeam 2112 sidescan data in six data \214les o)-.1
-F -.15(ve)-.15 G 3.137(rar).15 G -.15(eg)-3.137 G .637(ion with longi-)
+F -.15(ve)-.15 G 3.138(rar).15 G -.15(eg)-3.138 G .638(ion with longi-)
 .15 F .329(tude bounds of 113.4833E to 115.4333E and latitude bounds of\
- 32.1166S to 31.5500S, and you w)108 729.6 R .329(ould lik)-.1 F(e)-.1 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(9)198.45 E 0 Cg EP
+ 32.1166S to 31.5500S, and you w)108 729.6 R .328(ould lik)-.1 F(e)-.1 E
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(9)198.45 E 0
+Cg EP
 %%Page: 10 10
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF 147.06(mbmosaic\(1\) MB-System)72 48 R 147.06
-(5.0 mbmosaic\(1\))2.5 F 3.084(a1)108 84 S .584(00 m grid spacing.)
--3.084 F .584(First, create a datalist \214le using a te)5.584 F .583
+(5.0 mbmosaic\(1\))2.5 F 3.083(a1)108 84 S .583(00 m grid spacing.)
+-3.083 F .584(First, create a datalist \214le using a te)5.583 F .584
 (xt editor which contains the data \214lenames fol-)-.15 F(lo)108 96 Q
 (wed by the appropriate format identi\214er:)-.25 E(kn_perth_01.mb41 41)
 144 120 Q(kn_perth_05.mb41 41)144 132 Q(kn_perth_09.mb41 41)144 144 Q
@@ -1133,31 +1142,31 @@ G 1.055(rder to allo)-3.555 F(w)-.25 E/F1 10/Times-Bold@0 SF(mbmosaic)
 data priority as a function of apparent grazing angle:)108 228 Q
 (-60.0 0.2)144 252 Q(-45.0 1.0)144 264 Q(-15.0 0.8)144 276 Q(-14.9 0.1)
 144 288 Q(14.9 0.1)144 300 Q(15.0 0.8)144 312 Q(45.0 1.0)144 324 Q
-(60.0 0.2)144 336 Q .331(Here the ne)108 360 R -.05(ga)-.15 G(ti).05 E
+(60.0 0.2)144 336 Q .332(Here the ne)108 360 R -.05(ga)-.15 G(ti).05 E
 .631 -.15(ve a)-.25 H .331(ngles denote the port side of the sw).15 F
 .331(ath and the positi)-.1 F .631 -.15(ve a)-.25 H .331
 (ngles denote the starboard side).15 F .09(of the sw)108 372 R 2.59
 (ath. The)-.1 F .09(priorities are linearly interpolated between the di\
-screet angle/priority pairs.)2.59 F .09(Note that the)5.09 F 1.54
-(nadir re)108 384 R 1.54(gion \(angles less than +/- 15 de)-.15 F 1.54
-(grees\) has lo)-.15 F 4.041(wp)-.25 G(riority)-4.041 E 4.041(,a)-.65 G
-1.541(nd that the highest priority is gi)-4.041 F -.15(ve)-.25 G 4.041
-(nt).15 G(o)-4.041 E(angles of 45 de)108 396 Q
+screet angle/priority pairs.)2.59 F .09(Note that the)5.09 F 1.541
+(nadir re)108 384 R 1.541(gion \(angles less than +/- 15 de)-.15 F 1.541
+(grees\) has lo)-.15 F 4.041(wp)-.25 G(riority)-4.041 E 4.04(,a)-.65 G
+1.54(nd that the highest priority is gi)-4.04 F -.15(ve)-.25 G 4.04(nt)
+.15 G(o)-4.04 E(angles of 45 de)108 396 Q
 (grees. No data with angle magnitudes greater than 60 de)-.15 E
 (grees will be used.)-.15 E(Then, run)108 420 Q F1(mbmosaic)2.5 E F0
 (as follo)2.5 E(ws:)-.25 E(mbmosaic \255Idatalist \\)144 432 Q
 (-R114.1333/114.7833/-32.1166/-31.55 \\)180 444 Q
 (-A4 \255E100/100/meters \255N \\)180 456 Q(-Y)180 468 Q(angle_priority)
 -1 E(.dat \255F0.10 \255C10 \\)-.65 E(-Operth_ss \255V)180 480 Q(The)108
-504 Q F1<ad45>3.215 E F0 .715(option speci\214es grid spacings of 100 m\
-eters in both the longitude and latitude; the dimensions of)3.215 F
-1.229(the output grid are calculated according by)108 516 R F1(mbmosaic)
-3.729 E F0 3.729(.T)C(he)-3.729 E F1<ad46>3.729 E F0 1.23
+504 Q F1<ad45>3.214 E F0 .715(option speci\214es grid spacings of 100 m\
+eters in both the longitude and latitude; the dimensions of)3.214 F 1.23
+(the output grid are calculated according by)108 516 R F1(mbmosaic)3.729
+E F0 3.729(.T)C(he)-3.729 E F1<ad46>3.729 E F0 1.229
 (option enables Gaussian weighted mean)3.729 F .722(mosaicing and the p\
 riority range of 0.10 means that for each bin, all data with priorities\
- within 0.1 of the)108 528 R .393(highest priority will be used.)108 540
-R .393(By specifying a clipping dimension of 10 we cause small g)5.393 F
-.394(aps in the mosaic)-.05 F
+ within 0.1 of the)108 528 R .394(highest priority will be used.)108 540
+R .393(By specifying a clipping dimension of 10 we cause small g)5.394 F
+.393(aps in the mosaic)-.05 F
 (to be \214lled in through spine interpolation .)108 552 Q
 (The output looks lik)5 E(e:)-.1 E(Program mbmosaic)110.5 576 Q -1.11
 (Ve)110.5 588 S
@@ -1168,8 +1177,8 @@ R .393(By specifying a clipping dimension of 10 we cause small g)5.393 F
 10(ype: Sidescan)-.8 F(Grid projection: Geographic)110.5 672 Q
 (Grid dimensions: 616 629)110.5 684 Q(Grid bounds:)110.5 696 Q 2.5
 (Longitude: 114.1333 114.7833)115.5 708 R 5(Latitude: \25532.1166)115.5
-720 R(\25531.5500)5 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(10)
-193.45 E 0 Cg EP
+720 R(\25531.5500)5 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(10)193.45 E 0 Cg EP
 %%Page: 11 11
 %%BeginPageSetup
 BP
@@ -1218,8 +1227,8 @@ E(NaN v)110.5 324 Q(alues used to \215ag re)-.25 E(gions with no data)
 (Bins set using interpolation:)110.5 684 Q(58051)10 E(Bins not set:)
 110.5 696 Q(242999)50 E(Maximum number of data in a bin: 121)110.5 708 Q
 (Minimum v)110.5 720 Q 5(alue: \2556573.12 Maximum)-.25 F -.25(va)2.5 G
-5(lue: 97704.64).25 F(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(11)
-193.45 E 0 Cg EP
+5(lue: 97704.64).25 F(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(11)193.45 E 0 Cg EP
 %%Page: 12 12
 %%BeginPageSetup
 BP
@@ -1254,7 +1263,7 @@ F(sigma: 42979.49567)2.5 E(Outputting results...)110.5 108 Q -.15(exe)
 -.15 E 37.5(LABEL_FONT Helv)120.5 684 R(etica)-.15 E 35
 (HEADER_FONT Helv)120.5 696 R(etica)-.15 E(ANO)120.5 708 Q 27.5
 (T_FONT_SIZE 8)-.4 F 25(LABEL_FONT_SIZE 8)120.5 720 R(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(12)193.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(12)193.45 E 0 Cg EP
 %%Page: 13 13
 %%BeginPageSetup
 BP
@@ -1276,19 +1285,19 @@ E(xpsvie)128 276 Q 2.5(wt)-.25 G 2.5(ov)-2.5 G(ie)-2.5 E 2.5(wt)-.25 G
 (he plot on the screen.)-2.5 E(\255-------------)110.5 300 Q(Done.)110.5
 336 Q .816(The names of the output \214les are based on the root charac\
 ter string speci\214ed using the)108 360 R/F1 10/Times-Bold@0 SF<ad4f>
-3.316 E F0 3.316(option. Since)3.316 F .043(the grid is output as a net\
+3.316 E F0 3.317(option. Since)3.317 F .043(the grid is output as a net\
 CDF GRD format \214le, its \214lename is "perth_ss.grd"; a shellscript \
 which will allo)108 372 R(w)-.25 E 5.318
 (the contents of the grid to vie)108 384 R 5.318(wed using)-.25 F F1
 (GMT)7.818 E F0 5.318(programs is also output with the \214lename)7.818
-F("perth_ss.grd.cmd".)108 396 Q 1.391(Suppose that one w)108 420 R 1.391
+F("perth_ss.grd.cmd".)108 396 Q 1.392(Suppose that one w)108 420 R 1.391
 (ants to produce a mosaic composed only of data with a more or less eas\
-tw)-.1 F 1.392(ard look)-.1 F .261(azimuth. Then add the)108 432 R F1
+tw)-.1 F 1.391(ard look)-.1 F .261(azimuth. Then add the)108 432 R F1
 <ad55>2.761 E F0 .261(option with a preferred azimuth of 90 de)2.761 F
 .261(grees. A look azimuth f)-.15 F .261(actor of 2.0 will)-.1 F(cause)
-108 444 Q F1(mbmosaic)2.645 E F0 .145(to reject an)2.645 F 2.645(yd)-.15
-G .146(ata with look azimuths outside a range of 45 to 135 de)-2.645 F
-2.646(grees. The)-.15 F(follo)2.646 E(wing)-.25 E(will suf)108 456 Q
+108 444 Q F1(mbmosaic)2.646 E F0 .146(to reject an)2.646 F 2.646(yd)-.15
+G .145(ata with look azimuths outside a range of 45 to 135 de)-2.646 F
+2.645(grees. The)-.15 F(follo)2.645 E(wing)-.25 E(will suf)108 456 Q
 (\214ce:)-.25 E(mbmosaic \255Idatalist \\)144 468 Q
 (-R114.1333/114.7833/-32.1166/-31.55 \\)180 480 Q
 (-A4 \255E100/100/meters \255N \\)180 492 Q(-Y)180 504 Q(angle_priority)
@@ -1296,24 +1305,25 @@ G .146(ata with look azimuths outside a range of 45 to 135 de)-2.645 F
 516 Q/F2 10.95/Times-Bold@0 SF(SEE ALSO)72 544.8 Q F1(mbsystem)108 556.8
 Q F0(\(1\),)A F1(mbgrid)2.5 E F0(\(1\),)A F1(mbm_grid)2.5 E F0(\(1\),)A
 F1(mbm_grd2ar)2.5 E(c)-.18 E F0(\(1\))A F2 -.11(BU)72 585.6 S(GS).11 E
-F0 .064(The options for this program ha)108 597.6 R .364 -.15(ve g)-.2 H
-(ro).15 E .063(wn a bit complicated.)-.25 F .063(If you ha)5.063 F .363
--.15(ve o)-.2 H .063(ther problems, please let us kno).15 F -.65(w.)-.25
+F0 .063(The options for this program ha)108 597.6 R .363 -.15(ve g)-.2 H
+(ro).15 E .063(wn a bit complicated.)-.25 F .063(If you ha)5.063 F .364
+-.15(ve o)-.2 H .064(ther problems, please let us kno).15 F -.65(w.)-.25
 G F2(APPENDIX 1: PR)72 638.4 Q(OJECTED COORDIN)-.329 E -1.04(AT)-.219 G
-2.738(ES)1.04 G(YSTEM IDENTIFIERS)-2.738 E F0 .541(The follo)108 650.4 R
+2.738(ES)1.04 G(YSTEM IDENTIFIERS)-2.738 E F0 .542(The follo)108 650.4 R
 .542(wing is a list of the projected coordinate systems \(PCS')-.25 F
 .542(s\) that are supported by MB-System. The)-.55 F 2.27(full PCS de\
 \214nitions are found in the \214le mbsystem/share/Projections.dat. The\
 se de\214nitions are in the)108 662.4 R F1(PR)108 674.4 Q(OJ)-.3 E(.4)
--.2 E F0 .734(format and deri)3.234 F 1.034 -.15(ve f)-.25 H .734
+-.2 E F0 .735(format and deri)3.235 F 1.034 -.15(ve f)-.25 H .734
 (rom the).15 F F1(PR)3.234 E(OJ)-.3 E(.4)-.2 E F0 .734(4.6.1 distrib)
-3.234 F .734(ution obtained from http://trac.osgeo.or)-.2 F .735
+3.234 F .734(ution obtained from http://trac.osgeo.or)-.2 F .734
 (g/proj/ in)-.18 F .288(September 2008. The proj library source code ha\
 s been incorporated unchanged into the MB-System pack-)108 686.4 R(age.)
 108 698.4 Q .692
 (The \214rst item on each line is the PCS identi\214er inside brack)108
-722.4 R .692(ets, such as <UTM10N> or <epsg32749>. T)-.1 F(o)-.8 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(13)193.45 E 0 Cg EP
+722.4 R .691(ets, such as <UTM10N> or <epsg32749>. T)-.1 F(o)-.8 E
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(13)193.45 E 0
+Cg EP
 %%Page: 14 14
 %%BeginPageSetup
 BP
@@ -1374,8 +1384,8 @@ Q(<UTM01N> : WGS 84 / UTM zone 1N)110.5 180 Q
 (<UTM43N> : WGS 84 / UTM zone 43N)110.5 684 Q
 (<UTM44N> : WGS 84 / UTM zone 44N)110.5 696 Q
 (<UTM45N> : WGS 84 / UTM zone 45N)110.5 708 Q
-(<UTM46N> : WGS 84 / UTM zone 46N)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(14)193.45 E 0 Cg EP
+(<UTM46N> : WGS 84 / UTM zone 46N)110.5 720 Q(MB-System 5.0)72 768 Q 2.5
+(3J)140.11 G(anuary 2017)-2.5 E(14)193.45 E 0 Cg EP
 %%Page: 15 15
 %%BeginPageSetup
 BP
@@ -1434,8 +1444,8 @@ BP
 (<UTM37S> : WGS 84 / UTM zone 37S)110.5 684 Q
 (<UTM38S> : WGS 84 / UTM zone 38S)110.5 696 Q
 (<UTM39S> : WGS 84 / UTM zone 39S)110.5 708 Q
-(<UTM40S> : WGS 84 / UTM zone 40S)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(15)193.45 E 0 Cg EP
+(<UTM40S> : WGS 84 / UTM zone 40S)110.5 720 Q(MB-System 5.0)72 768 Q 2.5
+(3J)140.11 G(anuary 2017)-2.5 E(15)193.45 E 0 Cg EP
 %%Page: 16 16
 %%BeginPageSetup
 BP
@@ -1493,7 +1503,8 @@ Q(MB-System projection ids are the zone number)115.5 396 Q(pre\214x)
 (California II .................)110.5 696 Q 12.5(402 402)5 F
 (California III ................)110.5 708 Q 12.5(403 403)5 F
 (California IV .................)110.5 720 Q 12.5(404 404)5 F
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(16)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(16)193.45 E 0
+Cg EP
 %%Page: 17 17
 %%BeginPageSetup
 BP
@@ -1555,7 +1566,8 @@ E(Kansas south .................. 1502)110.5 432 Q(1502)12.5 E -.25(Ke)
 (Missouri central .............. 2402)110.5 696 Q(2402)12.5 E
 (Missouri east ................. 2401)110.5 708 Q(2401)12.5 E
 (Missouri west ................. 2403)110.5 720 Q(2403)12.5 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(17)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(17)193.45 E 0
+Cg EP
 %%Page: 18 18
 %%BeginPageSetup
 BP
@@ -1620,8 +1632,8 @@ Q(ania south ............ 3702)-.25 E(3702)12.5 E(Puerto Rico, V)110.5
 (shington south .............. 4602).8 E(4602)12.5 E -.8(We)110.5 708 S
 (st V).8 E(ir)-.6 E(ginia north ........... 4701)-.18 E(4701)12.5 E -.8
 (We)110.5 720 S(st V).8 E(ir)-.6 E(ginia south ........... 4702)-.18 E
-(4702)12.5 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(18)193.45 E 0
-Cg EP
+(4702)12.5 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E
+(18)193.45 E 0 Cg EP
 %%Page: 19 19
 %%BeginPageSetup
 BP
@@ -1681,7 +1693,7 @@ Q(<nad27sp101> : alabama east> : nad27sp)110.5 240 Q
 110.5 696 Q .2 -.1(wa n)-.25 H(orth> : nad27sp).1 E(<nad27sp1402> : io)
 110.5 708 Q .2 -.1(wa s)-.25 H(outh> : nad27sp).1 E
 (<nad27sp1501> : kansas north> : nad27sp)110.5 720 Q(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(19)193.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(19)193.45 E 0 Cg EP
 %%Page: 20 20
 %%BeginPageSetup
 BP
@@ -1745,7 +1757,8 @@ Q 2.5(wm)-.25 G -.15(ex)-2.5 G(ico west> : nad27sp).15 E
 (<nad27sp3701> : pennsylv)110.5 696 Q(ania north> : nad27sp)-.25 E
 (<nad27sp3702> : pennsylv)110.5 708 Q(ania south> : nad27sp)-.25 E
 (<nad27sp3800> : rhode island \255--> : nad27sp)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(20)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(20)193.45 E 0
+Cg EP
 %%Page: 21 21
 %%BeginPageSetup
 BP
@@ -1805,7 +1818,7 @@ Q(<nad83sp101> : alabama east> : nad83)110.5 612 Q
 (<nad83sp302> : arkansas south> : nad83)110.5 696 Q
 (<nad83sp401> : california i> : nad83)110.5 708 Q
 (<nad83sp402> : california ii> : nad83)110.5 720 Q(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(21)193.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(21)193.45 E 0 Cg EP
 %%Page: 22 22
 %%BeginPageSetup
 BP
@@ -1864,8 +1877,8 @@ Q(<nad83sp404> : california i)110.5 96 Q(v> : nad83)-.25 E
 (<nad83sp2403> : missouri west> : nad83)110.5 684 Q
 (<nad83sp2500> : montana> : nad83)110.5 696 Q
 (<nad83sp2600> : nebraska> : nad83)110.5 708 Q(<nad83sp2701> : ne)110.5
-720 Q -.25(va)-.25 G(da east> : nad83).25 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(22)193.45 E 0 Cg EP
+720 Q -.25(va)-.25 G(da east> : nad83).25 E(MB-System 5.0)72 768 Q 2.5
+(3J)140.11 G(anuary 2017)-2.5 E(22)193.45 E 0 Cg EP
 %%Page: 23 23
 %%BeginPageSetup
 BP
@@ -1926,7 +1939,7 @@ BP
 (<nad83sp5003> : alaska zone no. 3> : nad83)110.5 696 Q
 (<nad83sp5004> : alaska zone no. 4> : nad83)110.5 708 Q
 (<nad83sp5005> : alaska zone no. 5> : nad83)110.5 720 Q(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(23)193.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(23)193.45 E 0 Cg EP
 %%Page: 24 24
 %%BeginPageSetup
 BP
@@ -2013,7 +2026,7 @@ E(<epsg4003> : Unkno)110.5 312 Q
 708 Q(wn datum based upon the WGS 72 ellipsoid)-.25 E
 (<epsg4044> : Unkno)110.5 720 Q(wn datum based upon the Ev)-.25 E
 (erest 1830 \(1962 De\214nition\) ellipsoid)-.15 E(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(24)193.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(24)193.45 E 0 Cg EP
 %%Page: 25 25
 %%BeginPageSetup
 BP
@@ -2056,7 +2069,8 @@ Q(<epsg4155> : Dabola 1981)110.5 564 Q(<epsg4156> : S-JTSK)110.5 576 Q
 (emen NGN96)-1 E(<epsg4164> : South Y)110.5 672 Q(emen)-1 E
 (<epsg4165> : Bissau)110.5 684 Q(<epsg4166> : K)110.5 696 Q(orean 1995)
 -.35 E(<epsg4167> : NZGD2000)110.5 708 Q(<epsg4168> : Accra)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(25)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(25)193.45 E 0
+Cg EP
 %%Page: 26 26
 %%BeginPageSetup
 BP
@@ -2096,7 +2110,7 @@ Q(<epsg4214> : Beijing 1954)110.5 588 Q(<epsg4215> : Belge 1950)110.5
 110.5 672 Q(<epsg4223> : Carthage)110.5 684 Q(<epsg4224> : Chua)110.5
 696 Q(<epsg4225> : Corre)110.5 708 Q(go Ale)-.15 E(gre)-.15 E
 (<epsg4226> : Cote d'Iv)110.5 720 Q(oire)-.2 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(26)193.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(26)193.45 E 0 Cg EP
 %%Page: 27 27
 %%BeginPageSetup
 BP
@@ -2131,8 +2145,8 @@ Q(<epsg4266> : M'poralok)110.5 552 Q(o)-.1 E(<epsg4267> : N)110.5 564 Q
 (<epsg4274> : Datum 73)110.5 648 Q(<epsg4275> : NTF)110.5 660 Q
 (<epsg4276> : NSWC 9Z-2)110.5 672 Q(<epsg4277> : OSGB 1936)110.5 684 Q
 (<epsg4278> : OSGB70)110.5 696 Q(<epsg4279> : OS\(SN\)80)110.5 708 Q
-(<epsg4280> : P)110.5 720 Q(adang)-.15 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(27)193.45 E 0 Cg EP
+(<epsg4280> : P)110.5 720 Q(adang)-.15 E(MB-System 5.0)72 768 Q 2.5(3J)
+140.11 G(anuary 2017)-2.5 E(27)193.45 E 0 Cg EP
 %%Page: 28 28
 %%BeginPageSetup
 BP
@@ -2171,7 +2185,8 @@ Q(<epsg4287> : Qornoq)110.5 156 Q(<epsg4288> : Loma Quintana)110.5 168 Q
 (AD27\(CGQ77\))-.35 E(<epsg4610> : Xian 1980)110.5 684 Q
 (<epsg4611> : Hong K)110.5 696 Q(ong 1980)-.35 E(<epsg4612> : JGD2000)
 110.5 708 Q(<epsg4613> : Se)110.5 720 Q -.05(ga)-.15 G(ra).05 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(28)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(28)193.45 E 0
+Cg EP
 %%Page: 29 29
 %%BeginPageSetup
 BP
@@ -2210,7 +2225,7 @@ Q(<epsg4669> : LKS94)110.5 624 Q(<epsg4670> : IGM95)110.5 636 Q
 660 Q(<epsg4673> : CI1979)110.5 672 Q(<epsg4674> : SIRGAS 2000)110.5 684
 Q(<epsg4675> : Guam 1963)110.5 696 Q(<epsg4676> : V)110.5 708 Q
 (ientiane 1982)-.6 E(<epsg4677> : Lao 1993)110.5 720 Q(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(29)193.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(29)193.45 E 0 Cg EP
 %%Page: 30 30
 %%BeginPageSetup
 BP
@@ -2253,7 +2268,8 @@ Q(<epsg4719> : Easter Island 1967)110.5 576 Q(<epsg4720> : Fiji 1986)
 Q(ay 1961)-.1 E(<epsg4728> : Pico de la Nie)110.5 684 Q -.15(ve)-.25 G
 (s).15 E(<epsg4729> : Pitcairn 1967)110.5 696 Q(<epsg4730> : Santo 1965)
 110.5 708 Q(<epsg4731> : V)110.5 720 Q(iti Le)-.6 E(vu 1916)-.25 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(30)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(30)193.45 E 0
+Cg EP
 %%Page: 31 31
 %%BeginPageSetup
 BP
@@ -2301,7 +2317,8 @@ Q(usaie 1951)-.15 E(<epsg4736> : Deception Island)110.5 132 Q
 (<epsg4903> : Madrid 1870 \(Madrid\))110.5 696 Q
 (<epsg4904> : Lisbon 1890 \(Lisbon\))110.5 708 Q
 (<epsg2000> : Anguilla 1957 / British W)110.5 720 Q(est Indies Grid)-.8
-E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(31)193.45 E 0 Cg EP
+E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(31)193.45 E
+0 Cg EP
 %%Page: 32 32
 %%BeginPageSetup
 BP
@@ -2364,7 +2381,8 @@ E(<epsg2007> : St. V)110.5 156 Q(incent 45 / British W)-.6 E
 (<epsg2062> : Madrid 1870 \(Madrid\) / Spain)110.5 696 Q
 (<epsg2063> : Dabola 1981 / UTM zone 28N \(deprecated\))110.5 708 Q
 (<epsg2064> : Dabola 1981 / UTM zone 29N \(deprecated\))110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(32)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(32)193.45 E 0
+Cg EP
 %%Page: 33 33
 %%BeginPageSetup
 BP
@@ -2424,7 +2442,8 @@ Q(ood Circuit 2000)-.1 E(<epsg2115> : NZGD2000 / Nelson Circuit 2000)
 110.5 684 Q(<epsg2116> : NZGD2000 / Karamea Circuit 2000)110.5 696 Q
 (<epsg2117> : NZGD2000 / Buller Circuit 2000)110.5 708 Q
 (<epsg2118> : NZGD2000 / Gre)110.5 720 Q 2.5(yC)-.15 G(ircuit 2000)-2.5
-E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(33)193.45 E 0 Cg EP
+E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(33)193.45 E
+0 Cg EP
 %%Page: 34 34
 %%BeginPageSetup
 BP
@@ -2494,7 +2513,8 @@ Q 2.5(wW)-.25 G(ar Of)-3.3 E(\214ce Grid)-.25 E
 (<epsg2171> : Pulk)110.5 708 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (942\(58\) / Poland zone I \(deprecated\))-2.5 E(<epsg2172> : Pulk)110.5
 720 Q -.15(ov)-.1 G 2.5(o1)-.05 G(942\(58\) / Poland zone II)-2.5 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(34)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(34)193.45 E 0
+Cg EP
 %%Page: 35 35
 %%BeginPageSetup
 BP
@@ -2558,7 +2578,7 @@ Q(AD27 / T)-.35 E(ennessee)-.7 E(<epsg2205> : N)110.5 384 Q(AD83 / K)
 (AD83 / Colorado South \(ftUS\))-.35 E(<epsg2234> : N)110.5 708 Q
 (AD83 / Connecticut \(ftUS\))-.35 E(<epsg2235> : N)110.5 720 Q
 (AD83 / Dela)-.35 E -.1(wa)-.15 G(re \(ftUS\)).1 E(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(35)193.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(35)193.45 E 0 Cg EP
 %%Page: 36 36
 %%BeginPageSetup
 BP
@@ -2624,8 +2644,8 @@ E(<epsg2277> : N)110.5 576 Q(AD83 / T)-.35 E -.15(ex)-.7 G
 E(<epsg2287> : N)110.5 696 Q(AD83 / W)-.35 E(isconsin North \(ftUS\))-.4
 E(<epsg2288> : N)110.5 708 Q(AD83 / W)-.35 E(isconsin Central \(ftUS\))
 -.4 E(<epsg2289> : N)110.5 720 Q(AD83 / W)-.35 E
-(isconsin South \(ftUS\))-.4 E(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(36)193.45 E 0 Cg EP
+(isconsin South \(ftUS\))-.4 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(36)193.45 E 0 Cg EP
 %%Page: 37 37
 %%BeginPageSetup
 BP
@@ -2686,8 +2706,8 @@ Q(<epsg2321> : ED50 / TM33)110.5 300 Q(<epsg2322> : ED50 / TM36)110.5
 -.15 E(<epsg2354> : Xian 1980 / 3-de)110.5 696 Q
 (gree Gauss-Kruger zone 30)-.15 E(<epsg2355> : Xian 1980 / 3-de)110.5
 708 Q(gree Gauss-Kruger zone 31)-.15 E(<epsg2356> : Xian 1980 / 3-de)
-110.5 720 Q(gree Gauss-Kruger zone 32)-.15 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(37)193.45 E 0 Cg EP
+110.5 720 Q(gree Gauss-Kruger zone 32)-.15 E(MB-System 5.0)72 768 Q 2.5
+(3J)140.11 G(anuary 2017)-2.5 E(37)193.45 E 0 Cg EP
 %%Page: 38 38
 %%BeginPageSetup
 BP
@@ -2758,8 +2778,8 @@ Q(gree Gauss-Kruger CM 96E)-.15 E(<epsg2378> : Xian 1980 / 3-de)110.5
 110.5 696 Q(gree Gauss-Kruger zone 32)-.15 E
 (<epsg2409> : Beijing 1954 / 3-de)110.5 708 Q(gree Gauss-Kruger zone 33)
 -.15 E(<epsg2410> : Beijing 1954 / 3-de)110.5 720 Q
-(gree Gauss-Kruger zone 34)-.15 E(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(38)193.45 E 0 Cg EP
+(gree Gauss-Kruger zone 34)-.15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(38)193.45 E 0 Cg EP
 %%Page: 39 39
 %%BeginPageSetup
 BP
@@ -2828,7 +2848,7 @@ BP
 (<epsg2463> : Pulk)110.5 708 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (995 / Gauss-Kruger CM 21E)-2.5 E(<epsg2464> : Pulk)110.5 720 Q -.15(ov)
 -.1 G 2.5(o1)-.05 G(995 / Gauss-Kruger CM 27E)-2.5 E(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(39)193.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(39)193.45 E 0 Cg EP
 %%Page: 40 40
 %%BeginPageSetup
 BP
@@ -2910,8 +2930,8 @@ E(<epsg2479> : Pulk)110.5 252 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (942 / Gauss-Kruger CM 153E)-2.5 E(<epsg2517> : Pulk)110.5 708 Q -.15
 (ov)-.1 G 2.5(o1)-.05 G(942 / Gauss-Kruger CM 159E)-2.5 E
 (<epsg2518> : Pulk)110.5 720 Q -.15(ov)-.1 G 2.5(o1)-.05 G
-(942 / Gauss-Kruger CM 165E)-2.5 E(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(40)193.45 E 0 Cg EP
+(942 / Gauss-Kruger CM 165E)-2.5 E(MB-System 5.0)72 768 Q 2.5(3J)140.11
+G(anuary 2017)-2.5 E(40)193.45 E 0 Cg EP
 %%Page: 41 41
 %%BeginPageSetup
 BP
@@ -3002,7 +3022,8 @@ Q -.15(ov)-.1 G 2.5(o1)-.05 G(942 / Gauss-Kruger CM 177E)-2.5 E
 (<epsg2571> : Pulk)110.5 708 Q -.15(ov)-.1 G 2.5(o1)-.05 G(942 / 3-de)
 -2.5 E(gree Gauss-Kruger zone 54)-.15 E(<epsg2572> : Pulk)110.5 720 Q
 -.15(ov)-.1 G 2.5(o1)-.05 G(942 / 3-de)-2.5 E(gree Gauss-Kruger zone 55)
--.15 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(41)193.45 E 0 Cg EP
+-.15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(41)
+193.45 E 0 Cg EP
 %%Page: 42 42
 %%BeginPageSetup
 BP
@@ -3095,8 +3116,8 @@ BP
 -.15 E(<epsg2625> : Pulk)110.5 708 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (942 / 3-de)-2.5 E(gree Gauss-Kruger CM 147E)-.15 E(<epsg2626> : Pulk)
 110.5 720 Q -.15(ov)-.1 G 2.5(o1)-.05 G(942 / 3-de)-2.5 E
-(gree Gauss-Kruger CM 150E)-.15 E(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(42)193.45 E 0 Cg EP
+(gree Gauss-Kruger CM 150E)-.15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(42)193.45 E 0 Cg EP
 %%Page: 43 43
 %%BeginPageSetup
 BP
@@ -3189,7 +3210,7 @@ BP
 -.15(ov)-.1 G 2.5(o1)-.05 G(995 / 3-de)-2.5 E(gree Gauss-Kruger zone 45)
 -.15 E(<epsg2680> : Pulk)110.5 720 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (995 / 3-de)-2.5 E(gree Gauss-Kruger zone 46)-.15 E(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(43)193.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(43)193.45 E 0 Cg EP
 %%Page: 44 44
 %%BeginPageSetup
 BP
@@ -3282,7 +3303,8 @@ BP
 110.5 708 Q -.15(ov)-.1 G 2.5(o1)-.05 G(995 / 3-de)-2.5 E
 (gree Gauss-Kruger CM 123E)-.15 E(<epsg2734> : Pulk)110.5 720 Q -.15(ov)
 -.1 G 2.5(o1)-.05 G(995 / 3-de)-2.5 E(gree Gauss-Kruger CM 126E)-.15 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(44)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(44)193.45 E 0
+Cg EP
 %%Page: 45 45
 %%BeginPageSetup
 BP
@@ -3356,7 +3378,8 @@ G 2.5(o1)-.05 G(995 / 3-de)-2.5 E(gree Gauss-Kruger CM 132E)-.15 E
 110.5 696 Q(AD83\(HARN\) / Ha)-.35 E -.1(wa)-.15 G(ii zone 5).1 E
 (<epsg2787> : N)110.5 708 Q(AD83\(HARN\) / Idaho East)-.35 E
 (<epsg2788> : N)110.5 720 Q(AD83\(HARN\) / Idaho Central)-.35 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(45)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(45)193.45 E 0
+Cg EP
 %%Page: 46 46
 %%BeginPageSetup
 BP
@@ -3422,7 +3445,7 @@ E 2.5(wH)-.25 G(ampshire)-2.5 E(<epsg2824> : N)110.5 504 Q
 (AD83\(HARN\) / Rhode Island)-.35 E(<epsg2841> : N)110.5 708 Q
 (AD83\(HARN\) / South Dak)-.35 E(ota North)-.1 E(<epsg2842> : N)110.5
 720 Q(AD83\(HARN\) / South Dak)-.35 E(ota South)-.1 E(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(46)193.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(46)193.45 E 0 Cg EP
 %%Page: 47 47
 %%BeginPageSetup
 BP
@@ -3492,8 +3515,8 @@ E(<epsg2892> : N)110.5 672 Q(AD83\(HARN\) / K)-.35 E(entuck)-.25 E 2.5
 (AD83\(HARN\) / Massachusetts Mainland \(ftUS\))-.35 E(<epsg2895> : N)
 110.5 708 Q(AD83\(HARN\) / Massachusetts Island \(ftUS\))-.35 E
 (<epsg2896> : N)110.5 720 Q(AD83\(HARN\) / Michig)-.35 E
-(an North \(ft\))-.05 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E
-(47)193.45 E 0 Cg EP
+(an North \(ft\))-.05 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(47)193.45 E 0 Cg EP
 %%Page: 48 48
 %%BeginPageSetup
 BP
@@ -3566,8 +3589,8 @@ E(<epsg2913> : N)110.5 276 Q(AD83\(HARN\) / Ore)-.35 E(gon North \(ft\))
 (AD83\(CSRS\) / MTM zone 5)-.35 E(<epsg2948> : N)110.5 696 Q
 (AD83\(CSRS\) / MTM zone 6)-.35 E(<epsg2949> : N)110.5 708 Q
 (AD83\(CSRS\) / MTM zone 7)-.35 E(<epsg2950> : N)110.5 720 Q
-(AD83\(CSRS\) / MTM zone 8)-.35 E(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(48)193.45 E 0 Cg EP
+(AD83\(CSRS\) / MTM zone 8)-.35 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(48)193.45 E 0 Cg EP
 %%Page: 49 49
 %%BeginPageSetup
 BP
@@ -3628,8 +3651,8 @@ Q(via / NEIEZ)-.2 E(<epsg3002> : Makassar / NEIEZ)110.5 648 Q
 (<epsg3004> : Monte Mario / Italy zone 2)110.5 672 Q(<epsg3005> : N)
 110.5 684 Q(AD83 / BC Albers)-.35 E(<epsg3006> : SWEREF99 TM)110.5 696 Q
 (<epsg3007> : SWEREF99 12 00)110.5 708 Q(<epsg3008> : SWEREF99 13 30)
-110.5 720 Q(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(49)193.45 E 0
-Cg EP
+110.5 720 Q(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E
+(49)193.45 E 0 Cg EP
 %%Page: 50 50
 %%BeginPageSetup
 BP
@@ -3682,7 +3705,7 @@ Q(T38 0 gon)-.6 E(<epsg3029> : R)110.5 324 Q(T38 2.5 gon O)-.6 E
 (<epsg3062> : Azores Oriental 1995 / UTM zone 26N)110.5 696 Q
 (<epsg3063> : Azores Central 1995 / UTM zone 26N)110.5 708 Q
 (<epsg3064> : IGM95 / UTM zone 32N)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(50)193.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(50)193.45 E 0 Cg EP
 %%Page: 51 51
 %%BeginPageSetup
 BP
@@ -3748,7 +3771,7 @@ Q(<epsg3098> : JGD2000 / UTM zone 52N)110.5 480 Q
 (A-SIRGAS / Colombia Bogota zone)-.35 E(<epsg3117> : MA)110.5 708 Q(GN)
 -.4 E(A-SIRGAS / Colombia East Central zone)-.35 E(<epsg3118> : MA)110.5
 720 Q(GN)-.4 E(A-SIRGAS / Colombia East zone)-.35 E(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(51)193.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(51)193.45 E 0 Cg EP
 %%Page: 52 52
 %%BeginPageSetup
 BP
@@ -3811,7 +3834,7 @@ Q(iti Le)-.6 E(vu 1912 / V)-.25 E(iti Le)-.6 E(vu Grid)-.25 E
 696 Q(AD83 / Great Lak)-.35 E(es Albers)-.1 E(<epsg3175> : N)110.5 708 Q
 (AD83 / Great Lak)-.35 E(es and St La)-.1 E(wrence Albers)-.15 E
 (<epsg3176> : Indian 1960 / TM 106 NE)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(52)193.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(52)193.45 E 0 Cg EP
 %%Page: 53 53
 %%BeginPageSetup
 BP
@@ -3871,7 +3894,7 @@ BP
 (<epsg3228> : WGS 84 / SCAR IMW SR33-34)110.5 696 Q
 (<epsg3229> : WGS 84 / SCAR IMW SR35-36)110.5 708 Q
 (<epsg3230> : WGS 84 / SCAR IMW SR37-38)110.5 720 Q(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(53)193.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(53)193.45 E 0 Cg EP
 %%Page: 54 54
 %%BeginPageSetup
 BP
@@ -3931,7 +3954,7 @@ Q(<epsg3232> : WGS 84 / SCAR IMW SR41-42)110.5 96 Q
 (<epsg3282> : WGS 84 / SCAR IMW SU36-40)110.5 696 Q
 (<epsg3283> : WGS 84 / SCAR IMW SU41-45)110.5 708 Q
 (<epsg3284> : WGS 84 / SCAR IMW SU46-50)110.5 720 Q(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(54)193.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(54)193.45 E 0 Cg EP
 %%Page: 55 55
 %%BeginPageSetup
 BP
@@ -3997,7 +4020,7 @@ Q(<epsg3317> : Kasai 1953 / Congo TM zone 24)110.5 456 Q
 (<epsg3337> : Le Pouce 1934 / Mauritius Grid)110.5 696 Q(<epsg3338> : N)
 110.5 708 Q(AD83 / Alaska Albers)-.35 E
 (<epsg3339> : IGCB 1955 / Congo TM zone 12)110.5 720 Q(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(55)193.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(55)193.45 E 0 Cg EP
 %%Page: 56 56
 %%BeginPageSetup
 BP
@@ -4059,7 +4082,8 @@ E(<epsg3389> : Pulk)110.5 672 Q -.15(ov)-.1 G 2.5(o1)-.05 G(942 / 3-de)
 -.15 E(<epsg3391> : Karbala 1979 \(Polservice\) / UTM zone 37N)110.5 696
 Q(<epsg3392> : Karbala 1979 \(Polservice\) / UTM zone 38N)110.5 708 Q
 (<epsg3393> : Karbala 1979 \(Polservice\) / UTM zone 39N)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(56)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(56)193.45 E 0
+Cg EP
 %%Page: 57 57
 %%BeginPageSetup
 BP
@@ -4125,7 +4149,8 @@ Q(AD83\(HARN\) / Illinois W)-.35 E(est \(ftUS\))-.8 E(<epsg3445> : N)
 -2.5 E(<epsg3446> : N)110.5 696 Q(AD83\(HARN\) / Rhode Island \(ftUS\))
 -.35 E(<epsg3447> : ETRS89 / Belgian Lambert 2005)110.5 708 Q
 (<epsg3448> : J)110.5 720 Q(AD2001 / Jamaica Metric Grid)-.6 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(57)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(57)193.45 E 0
+Cg EP
 %%Page: 58 58
 %%BeginPageSetup
 BP
@@ -4191,7 +4216,7 @@ Q(AD83\(NSRS2007\) / Arizona W)-.35 E(est \(ft\))-.8 E(<epsg3484> : N)
 (<epsg3501> : N)110.5 708 Q(AD83\(NSRS2007\) / Colorado Central)-.35 E
 (<epsg3502> : N)110.5 720 Q
 (AD83\(NSRS2007\) / Colorado Central \(ftUS\))-.35 E(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(58)193.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(58)193.45 E 0 Cg EP
 %%Page: 59 59
 %%BeginPageSetup
 BP
@@ -4260,8 +4285,8 @@ Q(AD83\(NSRS2007\) / Louisiana South \(ftUS\))-.35 E(<epsg3554> : N)
 110.5 696 Q(AD83\(NSRS2007\) / Maine CS2000 Central)-.35 E
 (<epsg3555> : N)110.5 708 Q(AD83\(NSRS2007\) / Maine CS2000 East)-.35 E
 (<epsg3556> : N)110.5 720 Q(AD83\(NSRS2007\) / Maine CS2000 W)-.35 E
-(est)-.8 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(59)193.45 E 0
-Cg EP
+(est)-.8 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(59)
+193.45 E 0 Cg EP
 %%Page: 60 60
 %%BeginPageSetup
 BP
@@ -4331,8 +4356,8 @@ Q(AD83\(NSRS2007\) / Montana)-.35 E(<epsg3605> : N)110.5 660 Q
 (da Central \(ft US\)).25 E(<epsg3609> : N)110.5 708 Q
 (AD83\(NSRS2007\) / Ne)-.35 E -.25(va)-.25 G(da East).25 E
 (<epsg3610> : N)110.5 720 Q(AD83\(NSRS2007\) / Ne)-.35 E -.25(va)-.25 G
-(da East \(ft US\)).25 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E
-(60)193.45 E 0 Cg EP
+(da East \(ft US\)).25 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(60)193.45 E 0 Cg EP
 %%Page: 61 61
 %%BeginPageSetup
 BP
@@ -4410,8 +4435,8 @@ E(<epsg3656> : N)110.5 624 Q(AD83\(NSRS2007\) / South Carolina \(ft\))
 (ennessee \(ftUS\))-.7 E(<epsg3663> : N)110.5 708 Q
 (AD83\(NSRS2007\) / T)-.35 E -.15(ex)-.7 G(as Central).15 E
 (<epsg3664> : N)110.5 720 Q(AD83\(NSRS2007\) / T)-.35 E -.15(ex)-.7 G
-(as Central \(ftUS\)).15 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E
-(61)193.45 E 0 Cg EP
+(as Central \(ftUS\)).15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(61)193.45 E 0 Cg EP
 %%Page: 62 62
 %%BeginPageSetup
 BP
@@ -4482,7 +4507,8 @@ E(<epsg3705> : N)110.5 564 Q(AD83\(NSRS2007\) / W)-.35 E(yoming W)-.73 E
 (<epsg3716> : N)110.5 696 Q(AD83\(NSRS2007\) / UTM zone 9N)-.35 E
 (<epsg3717> : N)110.5 708 Q(AD83\(NSRS2007\) / UTM zone 10N)-.35 E
 (<epsg3718> : N)110.5 720 Q(AD83\(NSRS2007\) / UTM zone 11N)-.35 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(62)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(62)193.45 E 0
+Cg EP
 %%Page: 63 63
 %%BeginPageSetup
 BP
@@ -4550,7 +4576,7 @@ E(<epsg3761> : N)110.5 588 Q(AD83\(CSRS\) / UTM zone 22N)-.35 E
 (<epsg20009> : Pulk)110.5 708 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (995 / Gauss-Kruger zone 9)-2.5 E(<epsg20010> : Pulk)110.5 720 Q -.15
 (ov)-.1 G 2.5(o1)-.05 G(995 / Gauss-Kruger zone 10)-2.5 E(MB-System 5.0)
-72 768 Q(13 March 2014)140.11 E(63)193.45 E 0 Cg EP
+72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(63)193.45 E 0 Cg EP
 %%Page: 64 64
 %%BeginPageSetup
 BP
@@ -4636,7 +4662,7 @@ Q -.15(ov)-.1 G 2.5(o1)-.05 G(995 / Gauss-Kruger zone 12)-2.5 E
 (<epsg20135> : Adindan / UTM zone 35N)110.5 696 Q
 (<epsg20136> : Adindan / UTM zone 36N)110.5 708 Q
 (<epsg20137> : Adindan / UTM zone 37N)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(64)193.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(64)193.45 E 0 Cg EP
 %%Page: 65 65
 %%BeginPageSetup
 BP
@@ -4695,7 +4721,8 @@ E(<epsg21292> : Barbados 1938 / Barbados National Grid)110.5 684 Q
 (<epsg21413> : Beijing 1954 / Gauss-Kruger zone 13)110.5 696 Q
 (<epsg21414> : Beijing 1954 / Gauss-Kruger zone 14)110.5 708 Q
 (<epsg21415> : Beijing 1954 / Gauss-Kruger zone 15)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(65)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(65)193.45 E 0
+Cg EP
 %%Page: 66 66
 %%BeginPageSetup
 BP
@@ -4758,7 +4785,8 @@ Q(<epsg21500> : Belge 1950 \(Brussels\) / Belge Lambert 50)110.5 444 Q
 (<epsg22175> : POSGAR 98 / Ar)110.5 696 Q(gentina 5)-.18 E
 (<epsg22176> : POSGAR 98 / Ar)110.5 708 Q(gentina 6)-.18 E
 (<epsg22177> : POSGAR 98 / Ar)110.5 720 Q(gentina 7)-.18 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(66)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(66)193.45 E 0
+Cg EP
 %%Page: 67 67
 %%BeginPageSetup
 BP
@@ -4818,7 +4846,8 @@ E(<epsg22183> : POSGAR 94 / Ar)110.5 108 Q(gentina 3)-.18 E
 (<epsg23831> : DGN95 / Indonesia TM-3 zone 47.1)110.5 696 Q
 (<epsg23832> : DGN95 / Indonesia TM-3 zone 47.2)110.5 708 Q
 (<epsg23833> : DGN95 / Indonesia TM-3 zone 48.1)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(67)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(67)193.45 E 0
+Cg EP
 %%Page: 68 68
 %%BeginPageSetup
 BP
@@ -4878,7 +4907,7 @@ BP
 (<epsg24305> : Kalianpur 1937 / UTM zone 45N)110.5 696 Q
 (<epsg24306> : Kalianpur 1937 / UTM zone 46N)110.5 708 Q
 (<epsg24311> : Kalianpur 1962 / UTM zone 41N)110.5 720 Q(MB-System 5.0)
-72 768 Q(13 March 2014)140.11 E(68)193.45 E 0 Cg EP
+72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(68)193.45 E 0 Cg EP
 %%Page: 69 69
 %%BeginPageSetup
 BP
@@ -4938,7 +4967,7 @@ BP
 (<epsg25700> : Makassar \(Jakarta\) / NEIEZ \(deprecated\))110.5 696 Q
 (<epsg25828> : ETRS89 / UTM zone 28N)110.5 708 Q
 (<epsg25829> : ETRS89 / UTM zone 29N)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(69)193.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(69)193.45 E 0 Cg EP
 %%Page: 70 70
 %%BeginPageSetup
 BP
@@ -4997,8 +5026,8 @@ E(<epsg26702> : N)110.5 420 Q(AD27 / UTM zone 2N)-.35 E(<epsg26703> : N)
 (AD27 / Alabama W)-.35 E(est)-.8 E(<epsg26731> : N)110.5 696 Q
 (AD27 / Alaska zone 1)-.35 E(<epsg26732> : N)110.5 708 Q
 (AD27 / Alaska zone 2)-.35 E(<epsg26733> : N)110.5 720 Q
-(AD27 / Alaska zone 3)-.35 E(MB-System 5.0)72 768 Q(13 March 2014)140.11
-E(70)193.45 E 0 Cg EP
+(AD27 / Alaska zone 3)-.35 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(70)193.45 E 0 Cg EP
 %%Page: 71 71
 %%BeginPageSetup
 BP
@@ -5057,8 +5086,8 @@ Q(AD27 / Io)-.35 E .2 -.1(wa S)-.25 H(outh).1 E(<epsg26777> : N)110.5
 (AD27 / Minnesota Central)-.35 E(<epsg26793> : N)110.5 696 Q
 (AD27 / Minnesota South)-.35 E(<epsg26794> : N)110.5 708 Q
 (AD27 / Mississippi East)-.35 E(<epsg26795> : N)110.5 720 Q
-(AD27 / Mississippi W)-.35 E(est)-.8 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(71)193.45 E 0 Cg EP
+(AD27 / Mississippi W)-.35 E(est)-.8 E(MB-System 5.0)72 768 Q 2.5(3J)
+140.11 G(anuary 2017)-2.5 E(71)193.45 E 0 Cg EP
 %%Page: 72 72
 %%BeginPageSetup
 BP
@@ -5119,8 +5148,8 @@ BP
 (AD83 / California zone 6)-.35 E(<epsg26948> : N)110.5 696 Q
 (AD83 / Arizona East)-.35 E(<epsg26949> : N)110.5 708 Q
 (AD83 / Arizona Central)-.35 E(<epsg26950> : N)110.5 720 Q
-(AD83 / Arizona W)-.35 E(est)-.8 E(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(72)193.45 E 0 Cg EP
+(AD83 / Arizona W)-.35 E(est)-.8 E(MB-System 5.0)72 768 Q 2.5(3J)140.11
+G(anuary 2017)-2.5 E(72)193.45 E 0 Cg EP
 %%Page: 73 73
 %%BeginPageSetup
 BP
@@ -5180,7 +5209,8 @@ Q(AD83 / Io)-.35 E .2 -.1(wa N)-.25 H(orth).1 E(<epsg26976> : N)110.5
 (an 1967 / UTM zone 40N)-.1 E
 (<epsg27120> : Naparima 1972 / UTM zone 20N)110.5 708 Q
 (<epsg27200> : NZGD49 / Ne)110.5 720 Q 2.5(wZ)-.25 G(ealand Map Grid)
--2.5 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(73)193.45 E 0 Cg EP
+-2.5 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(73)
+193.45 E 0 Cg EP
 %%Page: 74 74
 %%BeginPageSetup
 BP
@@ -5240,7 +5270,8 @@ E(<epsg27561> : NTF \(P)110.5 612 Q(aris\) / Lambert Nord France)-.15 E
 (<epsg27574> : NTF \(P)110.5 696 Q(aris\) / Lambert zone IV)-.15 E
 (<epsg27581> : NTF \(P)110.5 708 Q(aris\) / France I \(deprecated\))-.15
 E(<epsg27582> : NTF \(P)110.5 720 Q(aris\) / France II \(deprecated\))
--.15 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(74)193.45 E 0 Cg EP
+-.15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(74)
+193.45 E 0 Cg EP
 %%Page: 75 75
 %%BeginPageSetup
 BP
@@ -5316,7 +5347,8 @@ E(<epsg28232> : Pointe Noire / UTM zone 32S)110.5 204 Q
 (<epsg28432> : Pulk)110.5 708 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (942 / Gauss-Kruger zone 32)-2.5 E(<epsg28462> : Pulk)110.5 720 Q -.15
 (ov)-.1 G 2.5(o1)-.05 G(942 / Gauss-Kruger 2N \(deprecated\))-2.5 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(75)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(75)193.45 E 0
+Cg EP
 %%Page: 76 76
 %%BeginPageSetup
 BP
@@ -5392,7 +5424,8 @@ BP
 (<epsg29183> : SAD69 / UTM zone 23S \(deprecated\))110.5 696 Q
 (<epsg29184> : SAD69 / UTM zone 24S \(deprecated\))110.5 708 Q
 (<epsg29185> : SAD69 / UTM zone 25S \(deprecated\))110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(76)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(76)193.45 E 0
+Cg EP
 %%Page: 77 77
 %%BeginPageSetup
 BP
@@ -5461,7 +5494,8 @@ E(<epsg30493> : V)110.5 696 Q(oirol 1879 / Nord Algerie \(ancienne\))
 -1.29 E(<epsg30494> : V)110.5 708 Q
 (oirol 1879 / Sud Algerie \(ancienne\))-1.29 E
 (<epsg30729> : Nord Sahara 1959 / UTM zone 29N)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(77)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(77)193.45 E 0
+Cg EP
 %%Page: 78 78
 %%BeginPageSetup
 BP
@@ -5525,7 +5559,8 @@ E 2.5(f/U)-.25 G(TM zone 28N)-2.5 E
 110.5 696 Q(gree Gauss zone 4 \(deprecated\))-.15 E
 (<epsg31465> : DHDN / 3-de)110.5 708 Q(gree Gauss zone 5 \(deprecated\))
 -.15 E(<epsg31466> : DHDN / Gauss-Kruger zone 2)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(78)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(78)193.45 E 0
+Cg EP
 %%Page: 79 79
 %%BeginPageSetup
 BP
@@ -5583,8 +5618,8 @@ BP
 (AD27 / Nebraska North)-.35 E(<epsg32006> : N)110.5 696 Q
 (AD27 / Nebraska South)-.35 E(<epsg32007> : N)110.5 708 Q(AD27 / Ne)-.35
 E -.25(va)-.25 G(da East).25 E(<epsg32008> : N)110.5 720 Q(AD27 / Ne)
--.35 E -.25(va)-.25 G(da Central).25 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(79)193.45 E 0 Cg EP
+-.35 E -.25(va)-.25 G(da Central).25 E(MB-System 5.0)72 768 Q 2.5(3J)
+140.11 G(anuary 2017)-2.5 E(79)193.45 E 0 Cg EP
 %%Page: 80 80
 %%BeginPageSetup
 BP
@@ -5646,8 +5681,8 @@ Q(AD27 / T)-.35 E -.15(ex)-.7 G(as North Central).15 E(<epsg32039> : N)
 (AD27 / Guatemala Sur)-.35 E(<epsg32064> : N)110.5 696 Q
 (AD27 / BLM 14N \(ftUS\))-.35 E(<epsg32065> : N)110.5 708 Q
 (AD27 / BLM 15N \(ftUS\))-.35 E(<epsg32066> : N)110.5 720 Q
-(AD27 / BLM 16N \(ftUS\))-.35 E(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(80)193.45 E 0 Cg EP
+(AD27 / BLM 16N \(ftUS\))-.35 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(80)193.45 E 0 Cg EP
 %%Page: 81 81
 %%BeginPageSetup
 BP
@@ -5707,8 +5742,8 @@ G(ico Central).15 E(<epsg32114> : N)110.5 348 Q(AD83 / Ne)-.35 E 2.5(wM)
 (<epsg32144> : N)110.5 684 Q(AD83 / Utah South)-.35 E(<epsg32145> : N)
 110.5 696 Q(AD83 / V)-.35 E(ermont)-1.11 E(<epsg32146> : N)110.5 708 Q
 (AD83 / V)-.35 E(ir)-.6 E(ginia North)-.18 E(<epsg32147> : N)110.5 720 Q
-(AD83 / V)-.35 E(ir)-.6 E(ginia South)-.18 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(81)193.45 E 0 Cg EP
+(AD83 / V)-.35 E(ir)-.6 E(ginia South)-.18 E(MB-System 5.0)72 768 Q 2.5
+(3J)140.11 G(anuary 2017)-2.5 E(81)193.45 E 0 Cg EP
 %%Page: 82 82
 %%BeginPageSetup
 BP
@@ -5768,7 +5803,7 @@ E(ir)-.6 E(gin Is.)-.18 E(<epsg32164> : N)110.5 228 Q
 (<epsg32216> : WGS 72 / UTM zone 16N)110.5 696 Q
 (<epsg32217> : WGS 72 / UTM zone 17N)110.5 708 Q
 (<epsg32218> : WGS 72 / UTM zone 18N)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(82)193.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(82)193.45 E 0 Cg EP
 %%Page: 83 83
 %%BeginPageSetup
 BP
@@ -5828,7 +5863,7 @@ BP
 (<epsg32310> : WGS 72 / UTM zone 10S)110.5 696 Q
 (<epsg32311> : WGS 72 / UTM zone 11S)110.5 708 Q
 (<epsg32312> : WGS 72 / UTM zone 12S)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(83)193.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(83)193.45 E 0 Cg EP
 %%Page: 84 84
 %%BeginPageSetup
 BP
@@ -5888,7 +5923,7 @@ BP
 (<epsg32404> : WGS 72BE / UTM zone 4N)110.5 696 Q
 (<epsg32405> : WGS 72BE / UTM zone 5N)110.5 708 Q
 (<epsg32406> : WGS 72BE / UTM zone 6N)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(84)193.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(84)193.45 E 0 Cg EP
 %%Page: 85 85
 %%BeginPageSetup
 BP
@@ -5948,7 +5983,7 @@ BP
 (<epsg32458> : WGS 72BE / UTM zone 58N)110.5 696 Q
 (<epsg32459> : WGS 72BE / UTM zone 59N)110.5 708 Q
 (<epsg32460> : WGS 72BE / UTM zone 60N)110.5 720 Q(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(85)193.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(85)193.45 E 0 Cg EP
 %%Page: 86 86
 %%BeginPageSetup
 BP
@@ -6008,7 +6043,7 @@ BP
 (<epsg32552> : WGS 72BE / UTM zone 52S)110.5 696 Q
 (<epsg32553> : WGS 72BE / UTM zone 53S)110.5 708 Q
 (<epsg32554> : WGS 72BE / UTM zone 54S)110.5 720 Q(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(86)193.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(86)193.45 E 0 Cg EP
 %%Page: 87 87
 %%BeginPageSetup
 BP
@@ -6068,7 +6103,7 @@ Q(<epsg32556> : WGS 72BE / UTM zone 56S)110.5 96 Q
 (<epsg32646> : WGS 84 / UTM zone 46N)110.5 696 Q
 (<epsg32647> : WGS 84 / UTM zone 47N)110.5 708 Q
 (<epsg32648> : WGS 84 / UTM zone 48N)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(87)193.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(87)193.45 E 0 Cg EP
 %%Page: 88 88
 %%BeginPageSetup
 BP
@@ -6128,7 +6163,7 @@ BP
 (<epsg32734> : WGS 84 / UTM zone 34S)110.5 696 Q
 (<epsg32735> : WGS 84 / UTM zone 35S)110.5 708 Q
 (<epsg32736> : WGS 84 / UTM zone 36S)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(88)193.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(88)193.45 E 0 Cg EP
 %%Page: 89 89
 %%BeginPageSetup
 BP
@@ -6187,7 +6222,8 @@ Q(AD83 / Albers NorthAm)-.35 E(<epsg42304> : N)110.5 684 Q
 (AD83 / NRCan LCC Canada)-.35 E(<epsg42305> : France_II)110.5 696 Q
 (<epsg42306> : N)110.5 708 Q(AD83/QC_LCC)-.35 E(<epsg42307> : N)110.5
 720 Q(AD83 / T)-.35 E -.15(ex)-.7 G(as Central \255 feet).15 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(89)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(89)193.45 E 0
+Cg EP
 %%Page: 90 90
 %%BeginPageSetup
 BP
@@ -6248,7 +6284,8 @@ E(<esri2007> : St V)110.5 264 Q(incent 45 / British W)-.6 E
 (<esri2043> : Abidjan 1987 / UTM zone 29N)110.5 696 Q
 (<esri2044> : Hanoi 1972 / Gauss-Kruger zone 18)110.5 708 Q
 (<esri2045> : Hanoi 1972 / Gauss-Kruger zone 19)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(90)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(90)193.45 E 0
+Cg EP
 %%Page: 91 91
 %%BeginPageSetup
 BP
@@ -6307,8 +6344,8 @@ G(aracaibo Grid M3)-2.5 E(<esri2104> : Lak)110.5 660 Q 2.5(e/M)-.1 G
 (<esri2107> : NZGD2000 / Po)110.5 696 Q -.15(ve)-.15 G
 (rty Bay Circuit 2000).15 E(<esri2108> : NZGD2000 / Ha)110.5 708 Q(wk)
 -.15 E(es Bay Circuit 2000)-.1 E(<esri2109> : NZGD2000 / T)110.5 720 Q
-(aranaki Circuit 2000)-.8 E(MB-System 5.0)72 768 Q(13 March 2014)140.11
-E(91)193.45 E 0 Cg EP
+(aranaki Circuit 2000)-.8 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(91)193.45 E 0 Cg EP
 %%Page: 92 92
 %%BeginPageSetup
 BP
@@ -6368,7 +6405,7 @@ Q 2.5(wW)-.25 G(ar Of)-3.3 E(\214ce Grid)-.25 E
 (<esri2161> : Sierra Leone 1968 / UTM zone 28N)110.5 696 Q
 (<esri2162> : Sierra Leone 1968 / UTM zone 29N)110.5 708 Q
 (<esri2163> : US National Atlas Equal Area)110.5 720 Q(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(92)193.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(92)193.45 E 0 Cg EP
 %%Page: 93 93
 %%BeginPageSetup
 BP
@@ -6432,8 +6469,8 @@ Q(AD27 / T)-.35 E(ennessee)-.7 E(<esri2205> : N)110.5 492 Q(AD83 / K)
 (AD83 / Arizona Central \(ft\))-.35 E(<esri2224> : N)110.5 696 Q
 (AD83 / Arizona W)-.35 E(est \(ft\))-.8 E(<esri2225> : N)110.5 708 Q
 (AD83 / California zone 1 \(ftUS\))-.35 E(<esri2226> : N)110.5 720 Q
-(AD83 / California zone 2 \(ftUS\))-.35 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(93)193.45 E 0 Cg EP
+(AD83 / California zone 2 \(ftUS\))-.35 E(MB-System 5.0)72 768 Q 2.5(3J)
+140.11 G(anuary 2017)-2.5 E(93)193.45 E 0 Cg EP
 %%Page: 94 94
 %%BeginPageSetup
 BP
@@ -6498,8 +6535,8 @@ E(<esri2277> : N)110.5 684 Q(AD83 / T)-.35 E -.15(ex)-.7 G
 (as Central \(ftUS\)).15 E(<esri2278> : N)110.5 696 Q(AD83 / T)-.35 E
 -.15(ex)-.7 G(as South Central \(ftUS\)).15 E(<esri2279> : N)110.5 708 Q
 (AD83 / T)-.35 E -.15(ex)-.7 G(as South \(ftUS\)).15 E(<esri2280> : N)
-110.5 720 Q(AD83 / Utah North \(ft\))-.35 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(94)193.45 E 0 Cg EP
+110.5 720 Q(AD83 / Utah North \(ft\))-.35 E(MB-System 5.0)72 768 Q 2.5
+(3J)140.11 G(anuary 2017)-2.5 E(94)193.45 E 0 Cg EP
 %%Page: 95 95
 %%BeginPageSetup
 BP
@@ -6560,7 +6597,8 @@ Q(<esri2321> : ED50 / TM33)110.5 408 Q(<esri2322> : ED50 / TM36)110.5
 (<esri2345> : Xian 1980 / Gauss-Kruger CM 117E)110.5 696 Q
 (<esri2346> : Xian 1980 / Gauss-Kruger CM 123E)110.5 708 Q
 (<esri2347> : Xian 1980 / Gauss-Kruger CM 129E)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(95)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(95)193.45 E 0
+Cg EP
 %%Page: 96 96
 %%BeginPageSetup
 BP
@@ -6631,7 +6669,8 @@ E(<esri2379> : Xian 1980 / 3-de)110.5 456 Q(gree Gauss-Kruger CM 102E)
 -.15(ov)-.1 G 2.5(o1)-.05 G(942\(83\) / Gauss-Kruger zone 5)-2.5 E
 (<esri2400> : R)110.5 708 Q(T90 2.5 gon W)-.6 E
 (<esri2401> : Beijing 1954 / 3-de)110.5 720 Q(gree Gauss-Kruger zone 25)
--.15 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(96)193.45 E 0 Cg EP
+-.15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(96)
+193.45 E 0 Cg EP
 %%Page: 97 97
 %%BeginPageSetup
 BP
@@ -6702,7 +6741,8 @@ BP
 (<esri2453> : JGD2000 / Japan Plane Rectangular CS XI)110.5 696 Q
 (<esri2454> : JGD2000 / Japan Plane Rectangular CS XII)110.5 708 Q
 (<esri2455> : JGD2000 / Japan Plane Rectangular CS XIII)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(97)193.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(97)193.45 E 0
+Cg EP
 %%Page: 98 98
 %%BeginPageSetup
 BP
@@ -6781,7 +6821,8 @@ E(<esri2478> : Pulk)110.5 348 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (942 / Gauss-Kruger CM 99E)-2.5 E(<esri2508> : Pulk)110.5 708 Q -.15(ov)
 -.1 G 2.5(o1)-.05 G(942 / Gauss-Kruger CM 105E)-2.5 E(<esri2509> : Pulk)
 110.5 720 Q -.15(ov)-.1 G 2.5(o1)-.05 G(942 / Gauss-Kruger CM 111E)-2.5
-E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(98)193.45 E 0 Cg EP
+E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(98)193.45 E
+0 Cg EP
 %%Page: 99 99
 %%BeginPageSetup
 BP
@@ -6871,8 +6912,8 @@ E(<esri2524> : Pulk)110.5 252 Q -.15(ov)-.1 G 2.5(o1)-.05 G(942 / 3-de)
 (gree Gauss-Kruger zone 44)-.15 E(<esri2562> : Pulk)110.5 708 Q -.15(ov)
 -.1 G 2.5(o1)-.05 G(942 / 3-de)-2.5 E(gree Gauss-Kruger zone 45)-.15 E
 (<esri2563> : Pulk)110.5 720 Q -.15(ov)-.1 G 2.5(o1)-.05 G(942 / 3-de)
--2.5 E(gree Gauss-Kruger zone 46)-.15 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(99)193.45 E 0 Cg EP
+-2.5 E(gree Gauss-Kruger zone 46)-.15 E(MB-System 5.0)72 768 Q 2.5(3J)
+140.11 G(anuary 2017)-2.5 E(99)193.45 E 0 Cg EP
 %%Page: 100 100
 %%BeginPageSetup
 BP
@@ -6964,8 +7005,8 @@ E(<esri2601> : Pulk)110.5 528 Q -.15(ov)-.1 G 2.5(o1)-.05 G(942 / 3-de)
 (<esri2616> : Pulk)110.5 708 Q -.15(ov)-.1 G 2.5(o1)-.05 G(942 / 3-de)
 -2.5 E(gree Gauss-Kruger CM 120E)-.15 E(<esri2617> : Pulk)110.5 720 Q
 -.15(ov)-.1 G 2.5(o1)-.05 G(942 / 3-de)-2.5 E(gree Gauss-Kruger CM 123E)
--.15 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(100)188.45 E 0 Cg
-EP
+-.15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(100)
+188.45 E 0 Cg EP
 %%Page: 101 101
 %%BeginPageSetup
 BP
@@ -7058,7 +7099,7 @@ BP
 -.15(ov)-.1 G 2.5(o1)-.05 G(995 / 3-de)-2.5 E(gree Gauss-Kruger zone 36)
 -.15 E(<esri2671> : Pulk)110.5 720 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (995 / 3-de)-2.5 E(gree Gauss-Kruger zone 37)-.15 E(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(101)188.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(101)188.45 E 0 Cg EP
 %%Page: 102 102
 %%BeginPageSetup
 BP
@@ -7151,7 +7192,7 @@ BP
 -.15(ov)-.1 G 2.5(o1)-.05 G(995 / 3-de)-2.5 E(gree Gauss-Kruger CM 96E)
 -.15 E(<esri2725> : Pulk)110.5 720 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (995 / 3-de)-2.5 E(gree Gauss-Kruger CM 99E)-.15 E(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(102)188.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(102)188.45 E 0 Cg EP
 %%Page: 103 103
 %%BeginPageSetup
 BP
@@ -7229,8 +7270,8 @@ BP
 (AD83\(HARN\) / Dela)-.35 E -.1(wa)-.15 G(re).1 E(<esri2777> : N)110.5
 696 Q(AD83\(HARN\) / Florida East)-.35 E(<esri2778> : N)110.5 708 Q
 (AD83\(HARN\) / Florida W)-.35 E(est)-.8 E(<esri2779> : N)110.5 720 Q
-(AD83\(HARN\) / Florida North)-.35 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(103)188.45 E 0 Cg EP
+(AD83\(HARN\) / Florida North)-.35 E(MB-System 5.0)72 768 Q 2.5(3J)
+140.11 G(anuary 2017)-2.5 E(103)188.45 E 0 Cg EP
 %%Page: 104 104
 %%BeginPageSetup
 BP
@@ -7297,7 +7338,7 @@ E 2.5(wH)-.25 G(ampshire)-2.5 E(<esri2824> : N)110.5 612 Q
 (ork Long Island)-3.6 E(<esri2832> : N)110.5 708 Q
 (AD83\(HARN\) / North Dak)-.35 E(ota North)-.1 E(<esri2833> : N)110.5
 720 Q(AD83\(HARN\) / North Dak)-.35 E(ota South)-.1 E(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(104)188.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(104)188.45 E 0 Cg EP
 %%Page: 105 105
 %%BeginPageSetup
 BP
@@ -7365,7 +7406,8 @@ Q(AD83\(HARN\) / Connecticut \(ftUS\))-.35 E(<esri2880> : N)110.5 636 Q
 110.5 696 Q(AD83\(HARN\) / Geor)-.35 E(gia W)-.18 E(est \(ftUS\))-.8 E
 (<esri2886> : N)110.5 708 Q(AD83\(HARN\) / Idaho East \(ftUS\))-.35 E
 (<esri2887> : N)110.5 720 Q(AD83\(HARN\) / Idaho Central \(ftUS\))-.35 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(105)188.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(105)188.45 E
+0 Cg EP
 %%Page: 106 106
 %%BeginPageSetup
 BP
@@ -7440,8 +7482,8 @@ E(<esri2913> : N)110.5 384 Q(AD83\(HARN\) / Ore)-.35 E(gon North \(ft\))
 110.5 696 Q -.15(ov)-.1 G 2.5(o1)-.05 G(942 / CS63 zone K2)-2.5 E
 (<esri2940> : Pulk)110.5 708 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (942 / CS63 zone K3)-2.5 E(<esri2941> : Pulk)110.5 720 Q -.15(ov)-.1 G
-2.5(o1)-.05 G(942 / CS63 zone K4)-2.5 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(106)188.45 E 0 Cg EP
+2.5(o1)-.05 G(942 / CS63 zone K4)-2.5 E(MB-System 5.0)72 768 Q 2.5(3J)
+140.11 G(anuary 2017)-2.5 E(106)188.45 E 0 Cg EP
 %%Page: 107 107
 %%BeginPageSetup
 BP
@@ -7516,7 +7558,7 @@ Q(<esri3991> : Puerto Rico State Plane CS of 1927)110.5 528 Q
 (880 \(SGA 1922\) ellipsoid)-2.5 E(<esri4015> : Unkno)110.5 720 Q
 (wn datum based upon the Ev)-.25 E
 (erest 1830 \(1937 Adjustment\) ellipsoid)-.15 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(107)188.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(107)188.45 E 0 Cg EP
 %%Page: 108 108
 %%BeginPageSetup
 BP
@@ -7579,8 +7621,8 @@ Q(<esri4122> : A)110.5 396 Q(TS77)-1.11 E(<esri4123> : KKJ)110.5 408 Q
 660 Q(<esri4145> : Kalianpur 1962)110.5 672 Q
 (<esri4146> : Kalianpur 1975)110.5 684 Q(<esri4147> : Hanoi 1972)110.5
 696 Q(<esri4148> : Hartebeesthoek94)110.5 708 Q(<esri4149> : CH1903)
-110.5 720 Q(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(108)188.45 E 0
-Cg EP
+110.5 720 Q(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E
+(108)188.45 E 0 Cg EP
 %%Page: 109 109
 %%BeginPageSetup
 BP
@@ -7620,8 +7662,8 @@ Q(<esri4198> : K)110.5 624 Q(ousseri)-.35 E(<esri4199> : Egypt 1930)
 (995)-2.5 E(<esri4201> : Adindan)110.5 660 Q(<esri4202> : A)110.5 672 Q
 (GD66)-.4 E(<esri4203> : A)110.5 684 Q(GD84)-.4 E
 (<esri4204> : Ain el Abd)110.5 696 Q(<esri4205> : Afgoo)110.5 708 Q(ye)
--.1 E(<esri4206> : Ag)110.5 720 Q(adez)-.05 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(109)188.45 E 0 Cg EP
+-.1 E(<esri4206> : Ag)110.5 720 Q(adez)-.05 E(MB-System 5.0)72 768 Q 2.5
+(3J)140.11 G(anuary 2017)-2.5 E(109)188.45 E 0 Cg EP
 %%Page: 110 110
 %%BeginPageSetup
 BP
@@ -7656,7 +7698,8 @@ Q(<esri4241> : Jamaica 1875)110.5 480 Q(<esri4242> : J)110.5 492 Q(AD69)
 648 Q(<esri4256> : Mahe 1971)110.5 660 Q(<esri4257> : Makassar)110.5 672
 Q(<esri4258> : ETRS89)110.5 684 Q(<esri4259> : Malongo 1987)110.5 696 Q
 (<esri4260> : Manoca)110.5 708 Q(<esri4261> : Merchich)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(110)188.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(110)188.45 E
+0 Cg EP
 %%Page: 111 111
 %%BeginPageSetup
 BP
@@ -7695,7 +7738,7 @@ Q(<esri4287> : Qornoq)110.5 384 Q(<esri4288> : Loma Quintana)110.5 396 Q
 (<esri4314> : DHDN)110.5 684 Q(<esri4315> : Conakry 1905)110.5 696 Q
 (<esri4316> : Dealul Piscului 1933)110.5 708 Q
 (<esri4317> : Dealul Piscului 1970)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(111)188.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(111)188.45 E 0 Cg EP
 %%Page: 112 112
 %%BeginPageSetup
 BP
@@ -7747,8 +7790,8 @@ BP
 (995 / Gauss-Kruger zone 9)-2.5 E(<esri20010> : Pulk)110.5 708 Q -.15
 (ov)-.1 G 2.5(o1)-.05 G(995 / Gauss-Kruger zone 10)-2.5 E
 (<esri20011> : Pulk)110.5 720 Q -.15(ov)-.1 G 2.5(o1)-.05 G
-(995 / Gauss-Kruger zone 11)-2.5 E(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(112)188.45 E 0 Cg EP
+(995 / Gauss-Kruger zone 11)-2.5 E(MB-System 5.0)72 768 Q 2.5(3J)140.11
+G(anuary 2017)-2.5 E(112)188.45 E 0 Cg EP
 %%Page: 113 113
 %%BeginPageSetup
 BP
@@ -7827,8 +7870,8 @@ G 2.5(o1)-.05 G(995 / Gauss-Kruger 10N)-2.5 E(<esri20071> : Pulk)110.5
 (<esri20137> : Adindan / UTM zone 37N)110.5 684 Q
 (<esri20138> : Adindan / UTM zone 38N)110.5 696 Q(<esri20248> : A)110.5
 708 Q(GD66 / AMG zone 48)-.4 E(<esri20249> : A)110.5 720 Q
-(GD66 / AMG zone 49)-.4 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E
-(113)188.45 E 0 Cg EP
+(GD66 / AMG zone 49)-.4 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(113)188.45 E 0 Cg EP
 %%Page: 114 114
 %%BeginPageSetup
 BP
@@ -7887,7 +7930,8 @@ BP
 (<esri21418> : Beijing 1954 / Gauss-Kruger zone 18)110.5 696 Q
 (<esri21419> : Beijing 1954 / Gauss-Kruger zone 19)110.5 708 Q
 (<esri21420> : Beijing 1954 / Gauss-Kruger zone 20)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(114)188.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(114)188.45 E
+0 Cg EP
 %%Page: 115 115
 %%BeginPageSetup
 BP
@@ -7948,7 +7992,8 @@ BP
 (<esri22523> : Corre)110.5 696 Q(go Ale)-.15 E(gre / UTM zone 23S)-.15 E
 (<esri22524> : Corre)110.5 708 Q(go Ale)-.15 E(gre / UTM zone 24S)-.15 E
 (<esri22700> : Deir ez Zor / Le)110.5 720 Q -.25(va)-.25 G(nt Zone).25 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(115)188.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(115)188.45 E
+0 Cg EP
 %%Page: 116 116
 %%BeginPageSetup
 BP
@@ -8007,7 +8052,7 @@ BP
 (<esri24312> : Kalianpur 1962 / UTM zone 42N)110.5 696 Q
 (<esri24313> : Kalianpur 1962 / UTM zone 43N)110.5 708 Q
 (<esri24342> : Kalianpur 1975 / UTM zone 42N)110.5 720 Q(MB-System 5.0)
-72 768 Q(13 March 2014)140.11 E(116)188.45 E 0 Cg EP
+72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(116)188.45 E 0 Cg EP
 %%Page: 117 117
 %%BeginPageSetup
 BP
@@ -8067,7 +8112,7 @@ BP
 (<esri25832> : ETRS89 / UTM zone 32N)110.5 696 Q
 (<esri25833> : ETRS89 / UTM zone 33N)110.5 708 Q
 (<esri25834> : ETRS89 / UTM zone 34N)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(117)188.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(117)188.45 E 0 Cg EP
 %%Page: 118 118
 %%BeginPageSetup
 BP
@@ -8126,8 +8171,8 @@ BP
 (AD27 / Alaska zone 9)-.35 E(<esri26740> : N)110.5 696 Q
 (AD27 / Alaska zone 10)-.35 E(<esri26741> : N)110.5 708 Q
 (AD27 / California zone I)-.35 E(<esri26742> : N)110.5 720 Q
-(AD27 / California zone II)-.35 E(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(118)188.45 E 0 Cg EP
+(AD27 / California zone II)-.35 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(118)188.45 E 0 Cg EP
 %%Page: 119 119
 %%BeginPageSetup
 BP
@@ -8188,7 +8233,8 @@ Q(AD27 / Io)-.35 E .2 -.1(wa S)-.25 H(outh).1 E(<esri26777> : N)110.5
 (an / Michig)-.05 E(an North)-.05 E(<esri26812> : N)110.5 708 Q
 (AD Michig)-.35 E(an / Michig)-.05 E(an Central)-.05 E(<esri26813> : N)
 110.5 720 Q(AD Michig)-.35 E(an / Michig)-.05 E(an South)-.05 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(119)188.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(119)188.45 E
+0 Cg EP
 %%Page: 120 120
 %%BeginPageSetup
 BP
@@ -8247,7 +8293,8 @@ E -.1(wa)-.15 G(re).1 E(<esri26958> : N)110.5 672 Q(AD83 / Florida East)
 (<esri26960> : N)110.5 696 Q(AD83 / Florida North)-.35 E
 (<esri26961> : N)110.5 708 Q(AD83 / Ha)-.35 E -.1(wa)-.15 G(ii zone 1).1
 E(<esri26962> : N)110.5 720 Q(AD83 / Ha)-.35 E -.1(wa)-.15 G(ii zone 2)
-.1 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(120)188.45 E 0 Cg EP
+.1 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(120)
+188.45 E 0 Cg EP
 %%Page: 121 121
 %%BeginPageSetup
 BP
@@ -8307,7 +8354,7 @@ E(<esri27209> : NZGD49 / T)110.5 624 Q(aranaki Circuit)-.8 E
 (<esri27215> : NZGD49 / Nelson Circuit)110.5 696 Q
 (<esri27216> : NZGD49 / Karamea Circuit)110.5 708 Q
 (<esri27217> : NZGD49 / Buller Circuit)110.5 720 Q(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(121)188.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(121)188.45 E 0 Cg EP
 %%Page: 122 122
 %%BeginPageSetup
 BP
@@ -8366,8 +8413,8 @@ E(<esri28192> : P)110.5 672 Q(alestine 1923 / P)-.15 E(alestine Belt)
 -.15 E(<esri28193> : P)110.5 684 Q(alestine 1923 / Israeli CS Grid)-.15
 E(<esri28232> : Pointe Noire / UTM zone 32S)110.5 696 Q
 (<esri28348> : GD)110.5 708 Q(A94 / MGA zone 48)-.4 E(<esri28349> : GD)
-110.5 720 Q(A94 / MGA zone 49)-.4 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(122)188.45 E 0 Cg EP
+110.5 720 Q(A94 / MGA zone 49)-.4 E(MB-System 5.0)72 768 Q 2.5(3J)140.11
+G(anuary 2017)-2.5 E(122)188.45 E 0 Cg EP
 %%Page: 123 123
 %%BeginPageSetup
 BP
@@ -8446,7 +8493,7 @@ G 2.5(o1)-.05 G(942 / Gauss-Kruger 9N)-2.5 E(<esri28470> : Pulk)110.5
 (<esri28474> : Pulk)110.5 708 Q -.15(ov)-.1 G 2.5(o1)-.05 G
 (942 / Gauss-Kruger 14N)-2.5 E(<esri28475> : Pulk)110.5 720 Q -.15(ov)
 -.1 G 2.5(o1)-.05 G(942 / Gauss-Kruger 15N)-2.5 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(123)188.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(123)188.45 E 0 Cg EP
 %%Page: 124 124
 %%BeginPageSetup
 BP
@@ -8513,7 +8560,7 @@ Q(imbalai 1948 / UTM zone 50N)-.35 E(<esri29871> : T)110.5 624 Q
 (<esri29903> : TM75 / Irish Grid)110.5 696 Q(<esri30161> : T)110.5 708 Q
 (ok)-.8 E(yo / Japan Plane Rectangular CS I)-.15 E(<esri30162> : T)110.5
 720 Q(ok)-.8 E(yo / Japan Plane Rectangular CS II)-.15 E(MB-System 5.0)
-72 768 Q(13 March 2014)140.11 E(124)188.45 E 0 Cg EP
+72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(124)188.45 E 0 Cg EP
 %%Page: 125 125
 %%BeginPageSetup
 BP
@@ -8577,8 +8624,8 @@ E(<esri30729> : Nord Sahara 1959 / UTM zone 29N)110.5 348 Q
 (<esri31291> : MGI \(Ferro\) / Austria W)110.5 684 Q(est Zone)-.8 E
 (<esri31292> : MGI \(Ferro\) / Austria Central Zone)110.5 696 Q
 (<esri31293> : MGI \(Ferro\) / Austria East Zone)110.5 708 Q
-(<esri31294> : MGI / M28)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(125)188.45 E 0 Cg EP
+(<esri31294> : MGI / M28)110.5 720 Q(MB-System 5.0)72 768 Q 2.5(3J)
+140.11 G(anuary 2017)-2.5 E(125)188.45 E 0 Cg EP
 %%Page: 126 126
 %%BeginPageSetup
 BP
@@ -8637,8 +8684,8 @@ E(<esri32015> : N)110.5 672 Q(AD27 / Ne)-.35 E 2.5(wY)-.25 G(ork East)
 (ork Central)-3.6 E(<esri32017> : N)110.5 696 Q(AD27 / Ne)-.35 E 2.5(wY)
 -.25 G(ork W)-3.6 E(est)-.8 E(<esri32018> : N)110.5 708 Q(AD27 / Ne)-.35
 E 2.5(wY)-.25 G(ork Long Island)-3.6 E(<esri32019> : N)110.5 720 Q
-(AD27 / North Carolina)-.35 E(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(126)188.45 E 0 Cg EP
+(AD27 / North Carolina)-.35 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(126)188.45 E 0 Cg EP
 %%Page: 127 127
 %%BeginPageSetup
 BP
@@ -8697,7 +8744,7 @@ E(<esri32062> : N)110.5 552 Q(AD27 / Guatemala Sur)-.35 E
 (AD27 / MTM zone 3)-.35 E(<esri32084> : N)110.5 696 Q(AD27 / MTM zone 4)
 -.35 E(<esri32085> : N)110.5 708 Q(AD27 / MTM zone 5)-.35 E
 (<esri32086> : N)110.5 720 Q(AD27 / MTM zone 6)-.35 E(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(127)188.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(127)188.45 E 0 Cg EP
 %%Page: 128 128
 %%BeginPageSetup
 BP
@@ -8760,7 +8807,7 @@ G(ico Central).15 E(<esri32114> : N)110.5 204 Q(AD83 / Ne)-.35 E 2.5(wM)
 (yoming W)-.73 E(est Central)-.8 E(<esri32158> : N)110.5 708 Q(AD83 / W)
 -.35 E(yoming W)-.73 E(est)-.8 E(<esri32161> : N)110.5 720 Q
 (AD83 / Puerto Rico & V)-.35 E(ir)-.6 E(gin Is.)-.18 E(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(128)188.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(128)188.45 E 0 Cg EP
 %%Page: 129 129
 %%BeginPageSetup
 BP
@@ -8818,7 +8865,7 @@ BP
 (<esri32233> : WGS 72 / UTM zone 33N)110.5 696 Q
 (<esri32234> : WGS 72 / UTM zone 34N)110.5 708 Q
 (<esri32235> : WGS 72 / UTM zone 35N)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(129)188.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(129)188.45 E 0 Cg EP
 %%Page: 130 130
 %%BeginPageSetup
 BP
@@ -8878,7 +8925,7 @@ BP
 (<esri32327> : WGS 72 / UTM zone 27S)110.5 696 Q
 (<esri32328> : WGS 72 / UTM zone 28S)110.5 708 Q
 (<esri32329> : WGS 72 / UTM zone 29S)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(130)188.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(130)188.45 E 0 Cg EP
 %%Page: 131 131
 %%BeginPageSetup
 BP
@@ -8938,7 +8985,7 @@ BP
 (<esri32421> : WGS 72BE / UTM zone 21N)110.5 696 Q
 (<esri32422> : WGS 72BE / UTM zone 22N)110.5 708 Q
 (<esri32423> : WGS 72BE / UTM zone 23N)110.5 720 Q(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(131)188.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(131)188.45 E 0 Cg EP
 %%Page: 132 132
 %%BeginPageSetup
 BP
@@ -8998,7 +9045,7 @@ Q(<esri32425> : WGS 72BE / UTM zone 25N)110.5 96 Q
 (<esri32515> : WGS 72BE / UTM zone 15S)110.5 696 Q
 (<esri32516> : WGS 72BE / UTM zone 16S)110.5 708 Q
 (<esri32517> : WGS 72BE / UTM zone 17S)110.5 720 Q(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(132)188.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(132)188.45 E 0 Cg EP
 %%Page: 133 133
 %%BeginPageSetup
 BP
@@ -9058,7 +9105,7 @@ Q(<esri32519> : WGS 72BE / UTM zone 19S)110.5 96 Q
 (<esri32609> : WGS 84 / UTM zone 9N)110.5 696 Q
 (<esri32610> : WGS 84 / UTM zone 10N)110.5 708 Q
 (<esri32611> : WGS 84 / UTM zone 11N)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(133)188.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(133)188.45 E 0 Cg EP
 %%Page: 134 134
 %%BeginPageSetup
 BP
@@ -9118,7 +9165,7 @@ BP
 (<esri32702> : WGS 84 / UTM zone 2S)110.5 696 Q
 (<esri32703> : WGS 84 / UTM zone 3S)110.5 708 Q
 (<esri32704> : WGS 84 / UTM zone 4S)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(134)188.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(134)188.45 E 0 Cg EP
 %%Page: 135 135
 %%BeginPageSetup
 BP
@@ -9178,7 +9225,7 @@ BP
 (<esri32756> : WGS 84 / UTM zone 56S)110.5 696 Q
 (<esri32757> : WGS 84 / UTM zone 57S)110.5 708 Q
 (<esri32758> : WGS 84 / UTM zone 58S)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(135)188.45 E 0 Cg EP
+2.5(3J)140.11 G(anuary 2017)-2.5 E(135)188.45 E 0 Cg EP
 %%Page: 136 136
 %%BeginPageSetup
 BP
@@ -9238,7 +9285,8 @@ E(<esri53011> : Sphere Eck)110.5 480 Q(ert V)-.1 E
 684 Q(an der Grinten I)-1.11 E(<esri53030> : Sphere Robinson)110.5 696 Q
 (<esri53031> : Sphere T)110.5 708 Q .2 -.1(wo P)-.8 H(oint Equidistant)
 .1 E(<esri53032> : Sphere Azimuthal Equidistant)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(136)188.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(136)188.45 E
+0 Cg EP
 %%Page: 137 137
 %%BeginPageSetup
 BP
@@ -9294,7 +9342,8 @@ E(<esri54031> : W)110.5 396 Q(orld T)-.8 E .2 -.1(wo P)-.8 H
 (<esri102022> : Africa Albers Equal Area Conic)110.5 696 Q
 (<esri102023> : Africa Equidistant Conic)110.5 708 Q
 (<esri102024> : Africa Lambert Conformal Conic)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(137)188.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(137)188.45 E
+0 Cg EP
 %%Page: 138 138
 %%BeginPageSetup
 BP
@@ -9354,7 +9403,7 @@ Q(<esri102133> : NGO 1948 UTM Zone 33N)110.5 444 Q
 110.5 696 Q(agem Grande 1938 UTM Zone 28N)-.25 E
 (<esri102191> : Nord Maroc De)110.5 708 Q(gree)-.15 E
 (<esri102192> : Sud Maroc De)110.5 720 Q(gree)-.15 E(MB-System 5.0)72
-768 Q(13 March 2014)140.11 E(138)188.45 E 0 Cg EP
+768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(138)188.45 E 0 Cg EP
 %%Page: 139 139
 %%BeginPageSetup
 BP
@@ -9446,7 +9495,8 @@ BP
 (AD 1983 HARN StatePlane Minnesota South FIPS 2203)-.35 E
 (<esri102294> : N)110.5 720 Q
 (AD 1983 HARN StatePlane Mississippi East FIPS 2301)-.35 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(139)188.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(139)188.45 E
+0 Cg EP
 %%Page: 140 140
 %%BeginPageSetup
 BP
@@ -9538,7 +9588,8 @@ E(ir)-.6 E(ginia North FIPS 4701)-.18 E(<esri102351> : N)110.5 612 Q
 (<esri102361> : N)110.5 708 Q(AD 1983 HARN StatePlane Puerto Rico V)-.35
 E(ir)-.6 E(gin Islands FIPS 5200)-.18 E
 (<esri102491> : Nord Algerie Ancienne De)110.5 720 Q(gree)-.15 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(140)188.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(140)188.45 E
+0 Cg EP
 %%Page: 141 141
 %%BeginPageSetup
 BP
@@ -9623,7 +9674,8 @@ E(est FIPS 1002 Feet)-.8 E(<esri102668> : N)110.5 624 Q
 (<esri102675> : N)110.5 708 Q(AD 1983 StatePlane Io)-.35 E .2 -.1(wa N)
 -.25 H(orth FIPS 1401 Feet).1 E(<esri102676> : N)110.5 720 Q
 (AD 1983 StatePlane Io)-.35 E .2 -.1(wa S)-.25 H(outh FIPS 1402 Feet).1
-E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(141)188.45 E 0 Cg EP
+E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(141)188.45 E
+0 Cg EP
 %%Page: 142 142
 %%BeginPageSetup
 BP
@@ -9716,8 +9768,8 @@ G(ork Central FIPS 3102 Feet)-3.6 E(<esri102717> : N)110.5 492 Q
 (ennessee FIPS 4100 Feet)-.7 E(<esri102737> : N)110.5 708 Q
 (AD 1983 StatePlane T)-.35 E -.15(ex)-.7 G(as North FIPS 4201 Feet).15 E
 (<esri102738> : N)110.5 720 Q(AD 1983 StatePlane T)-.35 E -.15(ex)-.7 G
-(as North Central FIPS 4202 Feet).15 E(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(142)188.45 E 0 Cg EP
+(as North Central FIPS 4202 Feet).15 E(MB-System 5.0)72 768 Q 2.5(3J)
+140.11 G(anuary 2017)-2.5 E(142)188.45 E 0 Cg EP
 %%Page: 143 143
 %%BeginPageSetup
 BP
@@ -9781,8 +9833,8 @@ Q(erest Modi\214ed 1969)-.15 E(<esri37007> : GCS W)110.5 492 Q(albeck)
 (<esri37217> : GCS Chatham Island 1971)110.5 684 Q
 (<esri37218> : GCS DOS 1968)110.5 696 Q
 (<esri37219> : GCS Easter Island 1967)110.5 708 Q
-(<esri37220> : GCS Guam 1963)110.5 720 Q(MB-System 5.0)72 768 Q
-(13 March 2014)140.11 E(143)188.45 E 0 Cg EP
+(<esri37220> : GCS Guam 1963)110.5 720 Q(MB-System 5.0)72 768 Q 2.5(3J)
+140.11 G(anuary 2017)-2.5 E(143)188.45 E 0 Cg EP
 %%Page: 144 144
 %%BeginPageSetup
 BP
@@ -9835,8 +9887,8 @@ Q(<900913> Chris' funn)110.5 684 Q 2.5(ye)-.15 G
 (psgish code for the google mercator)-2.5 E
 (\255--------------------------------------------------------)110.5 708
 Q(IGNF \(French Mapping Agenc)110.5 720 Q(y\) projection de\214nitions)
--.15 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(144)188.45 E 0 Cg
-EP
+-.15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(144)
+188.45 E 0 Cg EP
 %%Page: 145 145
 %%BeginPageSetup
 BP
@@ -9900,8 +9952,8 @@ E(anna Bloc Sud)-.8 E(<TERA50> : Pointe Geologie \255 Perroud 1950)110.5
 (uai\) Iles Australes)-.2 E(<W)110.5 696 Q(ALL78> : W)-1.2 E(allis-Uv)
 -.8 E(ea 1978 \(MOP78\))-.15 E(<WGS72> : W)110.5 708 Q
 (orld Geodetic System 1972)-.8 E(<WGS84> : W)110.5 720 Q
-(orld Geodetic System 1984)-.8 E(MB-System 5.0)72 768 Q(13 March 2014)
-140.11 E(145)188.45 E 0 Cg EP
+(orld Geodetic System 1984)-.8 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G
+(anuary 2017)-2.5 E(145)188.45 E 0 Cg EP
 %%Page: 146 146
 %%BeginPageSetup
 BP
@@ -9968,7 +10020,8 @@ Q(<RGR92GEO> : Reseau geodesique de la Reunion 1992)110.5 528 Q
 reference des Antilles francaises \(1988-1991\))110.5 696 Q
 (<XGEO> : Systeme CIO-BIH)110.5 708 Q(<AN)110.5 720 Q
 (AA92UTM6S> : MOP92 \(Anaa\) T)-.35 E(uamotu \255 UTM fuseau 6 Sud)-.45
-E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(146)188.45 E 0 Cg EP
+E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(146)188.45 E
+0 Cg EP
 %%Page: 147 147
 %%BeginPageSetup
 BP
@@ -10039,7 +10092,8 @@ E(ahaa-Bora Bora-Huahine \255 UTM fuseau 5)-.8 E(<REUN47GA)110.5 672 Q
 (<RGF93CC43> : Projection conique conforme Zone 2)110.5 696 Q
 (<RGF93CC44> : Projection conique conforme Zone 3)110.5 708 Q
 (<RGF93CC45> : Projection conique conforme Zone 4)110.5 720 Q
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(147)188.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(147)188.45 E
+0 Cg EP
 %%Page: 148 148
 %%BeginPageSetup
 BP
@@ -10114,7 +10168,8 @@ E(<UTM13SW84> : W)110.5 684 Q
 696 Q(orld Geodetic System 1984 UTM fuseau 13)-.8 E(<UTM14SW84> : W)
 110.5 708 Q(orld Geodetic System 1984 UTM fuseau 14 Sud)-.8 E
 (<UTM14W84> : W)110.5 720 Q(orld Geodetic System 1984 UTM fuseau 14)-.8
-E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(148)188.45 E 0 Cg EP
+E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(148)188.45 E
+0 Cg EP
 %%Page: 149 149
 %%BeginPageSetup
 BP
@@ -10186,7 +10241,7 @@ E(<UTM33SW84> : W)110.5 660 Q
 E(<UTM35SW84> : W)110.5 708 Q
 (orld Geodetic System 1984 UTM fuseau 35 Sud)-.8 E(<UTM35W84> : W)110.5
 720 Q(orld Geodetic System 1984 UTM fuseau 35)-.8 E(MB-System 5.0)72 768
-Q(13 March 2014)140.11 E(149)188.45 E 0 Cg EP
+Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(149)188.45 E 0 Cg EP
 %%Page: 150 150
 %%BeginPageSetup
 BP
@@ -10258,7 +10313,8 @@ E(<UTM60SW84> : W)110.5 660 Q
 (ALL78UTM1S> : W)-1.2 E(allis-Uv)-.8 E(ea 1978 \(MOP78\) UTM 1 SUD)-.15
 E(\255--------------------------------------------------------)110.5 708
 Q -1.11(Va)110.5 720 S(rious Non-U.S. Coordinate Systems,)1.11 E
-(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(150)188.45 E 0 Cg EP
+(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(150)188.45 E
+0 Cg EP
 %%Page: 151 151
 %%BeginPageSetup
 BP
@@ -10305,7 +10361,8 @@ Q(<bng> : British National Grid)110.5 492 Q(<malay> : W)110.5 504 Q
 (<s-alger> : Sud Algerie Grid)110.5 672 Q(<s-maroc> : Sud Maroc Grid)
 110.5 684 Q(<s-tunis> : Sud T)110.5 696 Q(unisie Grid)-.45 E
 (\255--------------------------------------------------------)110.5 720
-Q(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(151)188.45 E 0 Cg EP
+Q(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(151)188.45 E
+0 Cg EP
 %%Page: 152 152
 %%BeginPageSetup
 BP
@@ -10316,8 +10373,8 @@ E(y)-.15 E(\255--------------------------------------------------------)
 110.5 96 Q(<gk2-d> : Gauss Krue)110.5 108 Q(ger Grid for German)-.15 E
 (y)-.15 E(<gk3-d> : Gauss Krue)110.5 120 Q(ger Grid for German)-.15 E(y)
 -.15 E(<gk4-d> : Gauss Krue)110.5 132 Q(ger Grid for German)-.15 E(y)
--.15 E(MB-System 5.0)72 768 Q(13 March 2014)140.11 E(152)188.45 E 0 Cg
-EP
+-.15 E(MB-System 5.0)72 768 Q 2.5(3J)140.11 G(anuary 2017)-2.5 E(152)
+188.45 E 0 Cg EP
 %%Trailer
 end
 %%EOF

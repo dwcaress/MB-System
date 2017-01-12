@@ -312,9 +312,9 @@ int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error)
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_xtfr8101_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_malloc(verbose,mb_io_ptr->structure_size,
+	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size,
 				&mb_io_ptr->raw_data,error);
-	status = mb_malloc(verbose,sizeof(struct mbsys_reson8k_struct),
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson8k_struct),
 				&mb_io_ptr->store_data,error);
 
 	/* set saved flags */
@@ -362,8 +362,8 @@ int mbr_dem_xtfr8101(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
-	status = mb_free(verbose,&mb_io_ptr->store_data,error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data,error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
