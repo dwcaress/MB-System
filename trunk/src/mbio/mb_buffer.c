@@ -132,7 +132,7 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error)
 		}
 
 	/* deallocate memory for data structure */
-	status = mb_free(verbose,buff_ptr,error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)buff_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

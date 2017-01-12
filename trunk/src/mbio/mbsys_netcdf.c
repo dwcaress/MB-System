@@ -1209,7 +1209,7 @@ int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbVelProfilTime, error);
 
 	/* deallocate memory for data structure */
-	status = mb_free(verbose,store_ptr,error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

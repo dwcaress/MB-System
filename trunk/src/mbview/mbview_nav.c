@@ -238,7 +238,7 @@ fprintf(stderr,"mbview_allocnavarrays: %d points\n",npointtotal);
 		fprintf(stderr,"dbg2       cdp:                       %p\n", *cdp);
 		}
 
-	/* allocate the arrays using mb_realloc */
+	/* allocate the arrays using mb_reallocd */
 	status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)time_d,error);
 	if (status == MB_SUCCESS)
 		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)navlon,error);
@@ -353,7 +353,7 @@ int mbview_freenavarrays(int verbose,
 		fprintf(stderr,"dbg2       cdp:                       %p\n", *cdp);
 		}
 
-	/* free the arrays using mb_free */
+	/* free the arrays using mb_freed */
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)time_d,error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)navlon,error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)navlat,error);
@@ -519,7 +519,7 @@ int mbview_addnav(int verbose, size_t instance,
 	if (shared.shareddata.nnav_alloc < shared.shareddata.nnav + 1)
 		{
 		shared.shareddata.nnav_alloc = shared.shareddata.nnav + 1;
-		status = mb_realloc(mbv_verbose,
+		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 			    	shared.shareddata.nnav_alloc * sizeof(struct mbview_nav_struct),
 			    	(void **)&(shared.shareddata.navs), error);
 		if (status == MB_FAILURE)

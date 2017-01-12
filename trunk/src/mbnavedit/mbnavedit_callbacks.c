@@ -2707,41 +2707,41 @@ do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data)
     if(!XmStringGetLtoR(acs->value,
 	XmSTRING_DEFAULT_CHARSET,
 	&input_file_ptr))
-	{
-	fprintf(stderr,"\nno input multibeam file selected\n");
-	}
+        {
+        fprintf(stderr,"\nno input multibeam file selected\n");
+        }
     else
-	{
-	/* turn off expose plots */
-	expose_plot_ok = False;
-
-	/* close out previously open file */
-	status = mbnavedit_action_done(&quit);
-	if (status == 0) XBell(display,100);
-	currentfile = -1;
-
-	/* read the input file name */
-	numfilessave = numfiles;
-	strncpy(input_file, input_file_ptr, MB_PATH_MAXLINE);
-	XtFree(input_file_ptr);
-
-	/* read the mbio format number from the dialog */
-	get_text_string(textField_format, format_text);
-	sscanf(format_text, "%d", &format);
-
-	/* try to parse the selection */
-	do_parse_datalist(input_file, format);
-
-	/* load first new file in the list */
-	if (numfiles > 0 && numfilessave < numfiles)
-	    {
-	    currentfile = numfilessave;
-	    do_load_specific_file(numfilessave);
-	    }
-
-	/* turn on expose plots */
-	expose_plot_ok = True;
-	}
+        {
+        /* turn off expose plots */
+        expose_plot_ok = False;
+    
+        /* close out previously open file */
+        status = mbnavedit_action_done(&quit);
+        if (status == 0) XBell(display,100);
+        currentfile = -1;
+    
+        /* read the input file name */
+        numfilessave = numfiles;
+        strncpy(input_file, input_file_ptr, MB_PATH_MAXLINE);
+        XtFree(input_file_ptr);
+    
+        /* read the mbio format number from the dialog */
+        get_text_string(textField_format, format_text);
+        sscanf(format_text, "%d", &format);
+    
+        /* try to parse the selection */
+        do_parse_datalist(input_file, format);
+    
+        /* load first new file in the list */
+        if (numfiles > 0 && numfilessave < numfiles)
+            {
+            currentfile = numfilessave;
+            do_load_specific_file(numfilessave);
+            }
+    
+        /* turn on expose plots */
+        expose_plot_ok = True;
+        }
 }
 
 /*--------------------------------------------------------------------*/

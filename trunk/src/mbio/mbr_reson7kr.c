@@ -9135,7 +9135,7 @@ int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr
 			{
 			calibratedsnippettimeseries->nalloc = sizeof(float) * (calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1);
 			if (status == MB_SUCCESS)
-			status = mb_reallocd(verbose, __FILE__, __LINE__, calibratedsnippettimeseries->nalloc,
+				status = mb_reallocd(verbose, __FILE__, __LINE__, calibratedsnippettimeseries->nalloc,
 						(void **)&(calibratedsnippettimeseries->amplitude), error);
 			if (status != MB_SUCCESS)
 				{

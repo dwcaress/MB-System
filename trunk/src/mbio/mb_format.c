@@ -3673,7 +3673,7 @@ int mb_datalist_open(int verbose,
 
 		if ((datalist_ptr->fp = fopen(path,"r")) == NULL)
 			{
-			mb_free(verbose,datalist,error);
+			mb_freed(verbose, __FILE__, __LINE__, (void **)datalist,error);
 			status = MB_FAILURE;
 			*error = MB_ERROR_OPEN_FAIL;
 			}
@@ -3750,7 +3750,7 @@ int mb_datalist_close(int verbose,
 	/* deallocate structure */
 	if (*datalist != NULL)
 		{
-		status = mb_free(verbose,datalist,error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)datalist,error);
 		}
 
 	/* print output debug statements */

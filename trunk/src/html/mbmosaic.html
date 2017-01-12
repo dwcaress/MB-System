@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbmosaic</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  13 March 2014 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 January 2017 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -330,20 +330,20 @@ Default:  <I>xdim</I> = <I>ydim</I> = 101.
 Sets the grid cell spacing to <I>dx</I> in longitude and <I>dy</I>
 in latitude. If <I>units</I> is not specified, the <I>dx</I>
 and <I>dy</I> values are assumed to be in meters. Valid values
-for <I>units</I> include &quot;km&quot;, &quot;meters&quot;, and &quot;degrees&quot;.
+for <I>units</I> include &quot;km&quot;, &quot;meters&quot;, &quot;feet&quot;, &quot;degrees&quot;, &quot;arcmin&quot;, and &quot;arcsec&quot;.
 If not in degrees, the grid cell spacing values are converted to
-degrees using the central latitude of the grid. If
-<I>dy</I> = 0.0, then the latitude cell spacing will be set
-equal to the longitude cell spacing (after conversion to
-degrees, if necessary).
-By default, the grid spacing is calculated from
+degrees. For &quot;km&quot; and &quot;meters&quot;, the conversion to degrees is made using the
+distance per degree latitude calculated for the Earth's surface at the central
+latitude of the grid. If <I>dy</I> = 0.0, then the latitude cell spacing will
+be set equal to the longitude cell spacing (after conversion to degrees, if
+necessary). By default, the grid spacing is calculated from
 the grid bounds and the grid dimensions. When the user
 uses the <B>-E</B> option to set the cell spacings, the
 grid dimensions are calculated using the grid bounds and
 grid cell spacings. However, slight adjustments to the
 grid cell spacings are usually required to keep
 the grid bounds as specified. Appending an ! to the end of
-the <B>-E</B> arguments forces <B>mbmosaic</B> to use the
+the <B>-E</B> arguments forces <B>mbgrid</B> to use the
 exact grid cell spacing values specified by adjusting the
 grid bounds.
 Default: If neither the <B>-E</B> or <B>-D</B> options are specified,
@@ -8580,7 +8580,7 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 13 March 2014</P></CENTER>
+Last Updated: 3 January 2017</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

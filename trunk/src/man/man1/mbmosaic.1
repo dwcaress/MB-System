@@ -1,4 +1,4 @@
-.TH mbmosaic 1 "13 March 2014" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic 1 "3 January 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP \- Mosaic amplitude or sidescan data
 from swath mapping sonar data files.
@@ -285,20 +285,20 @@ Default:  \fIxdim\fP = \fIydim\fP = 101.
 Sets the grid cell spacing to \fIdx\fP in longitude and \fIdy\fP
 in latitude. If \fIunits\fP is not specified, the \fIdx\fP
 and \fIdy\fP values are assumed to be in meters. Valid values
-for \fIunits\fP include "km", "meters", and "degrees".
+for \fIunits\fP include "km", "meters", "feet", "degrees", "arcmin", and "arcsec".
 If not in degrees, the grid cell spacing values are converted to
-degrees using the central latitude of the grid. If
-\fIdy\fP = 0.0, then the latitude cell spacing will be set
-equal to the longitude cell spacing (after conversion to
-degrees, if necessary).
-By default, the grid spacing is calculated from
+degrees. For "km" and "meters", the conversion to degrees is made using the
+distance per degree latitude calculated for the Earth's surface at the central
+latitude of the grid. If \fIdy\fP = 0.0, then the latitude cell spacing will
+be set equal to the longitude cell spacing (after conversion to degrees, if
+necessary). By default, the grid spacing is calculated from
 the grid bounds and the grid dimensions. When the user
 uses the \fB\-E\fP option to set the cell spacings, the
 grid dimensions are calculated using the grid bounds and
 grid cell spacings. However, slight adjustments to the
 grid cell spacings are usually required to keep
 the grid bounds as specified. Appending an ! to the end of
-the \fB\-E\fP arguments forces \fBmbmosaic\fP to use the
+the \fB\-E\fP arguments forces \fBmbgrid\fP to use the
 exact grid cell spacing values specified by adjusting the
 grid bounds.
 Default: If neither the \fB\-E\fP or \fB\-D\fP options are specified,

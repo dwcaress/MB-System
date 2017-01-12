@@ -367,7 +367,7 @@ int mbview_allocroutearrays(int verbose,
 			fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		}
 
-	/* allocate the arrays using mb_realloc */
+	/* allocate the arrays using mb_reallocd */
 	status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)routelon,error);
 	if (status == MB_SUCCESS)
 		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)routelat,error);
@@ -454,7 +454,7 @@ int mbview_freeroutearrays(int verbose,
 			fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		}
 
-	/* free the arrays using mb_free */
+	/* free the arrays using mb_freed */
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)routelon,error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)routelat,error);
 	if (waypoint != NULL)

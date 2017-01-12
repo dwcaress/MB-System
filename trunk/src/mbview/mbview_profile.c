@@ -155,7 +155,7 @@ int mbview_allocprofilepoints(int verbose,
 		fprintf(stderr,"dbg2       points:                    %p\n", *points);
 		}
 
-	/* allocate the arrays using mb_realloc */
+	/* allocate the arrays using mb_reallocd */
 	status = mb_reallocd(verbose, __FILE__, __LINE__,
 				npoints * sizeof(struct mbview_profilepoint_struct),
 				(void **)points,error);
@@ -199,7 +199,7 @@ int mbview_freeprofilepoints(int verbose,
 		fprintf(stderr,"dbg2       points:                    %p\n", *points);
 		}
 
-	/* free the arrays using mb_free */
+	/* free the arrays using mb_freed */
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)points,error);
 
 	/* print output debug statements */
@@ -257,7 +257,7 @@ int mbview_allocprofilearrays(int verbose,
 		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		}
 
-	/* allocate the arrays using mb_realloc */
+	/* allocate the arrays using mb_reallocd */
 	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)distance,error);
 	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)zdata,error);
 	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)boundary,error);
@@ -327,7 +327,7 @@ int mbview_freeprofilearrays(int verbose,
 		fprintf(stderr,"dbg2       slope:                     %p\n", *slope);
 		}
 
-	/* free the arrays using mb_free */
+	/* free the arrays using mb_freed */
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)distance,error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)zdata,error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)boundary,error);
