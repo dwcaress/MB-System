@@ -236,6 +236,7 @@ int mbnavadjust_init_globals()
  	mbna_view_list = MBNA_VIEW_LIST_FILES;
  	mbna_view_mode = MBNA_VIEW_MODE_ALL;
 	mbna_invert_mode = MBNA_INVERT_ZISOLATED;
+	mbna_save_frequency = 10;
 	mbna_color_foreground = BLACK;
 	mbna_color_background = WHITE;
  	project.section_length = 0.14;
@@ -670,6 +671,7 @@ int mbnavadjust_file_new(char *projectname)
 				project.precision = SIGMA_MINIMUM;
 				project.smoothing = MBNA_SMOOTHING_DEFAULT;
 				project.zoffsetwidth = 5.0;
+				project.save_count = 0;
 
 				/* create data directory */
 #ifdef WIN32
@@ -848,6 +850,7 @@ project.name,project.path,project.home,project.datadir);
 				project.num_crossings_alloc = 0;
 				project.crossings = NULL;
 				project.num_ties = 0;
+				project.save_count = 0;
 
 				/* read home file and other files */
 				if ((status = mbnavadjust_read_project(mbna_verbose, projectname, &project, &error)) == MB_FAILURE)
@@ -1058,6 +1061,7 @@ int mbnavadjust_import_data(char *path, int iformat)
 
 	/* write updated project */
 	mbnavadjust_write_project(mbna_verbose, &project, &error);
+	project.save_count = 0;
 
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -2639,6 +2643,7 @@ int mbnavadjust_poornav_file()
 
 		/* write out updated project */
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 
 		/* add info text */
 		sprintf(message, "Set file %d to have poor nav: %s\n",
@@ -2704,6 +2709,7 @@ int mbnavadjust_goodnav_file()
 
 		/* write out updated project */
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 
 		/* add info text */
 		sprintf(message, "Set file %d to have good nav: %s\n",
@@ -2771,6 +2777,7 @@ int mbnavadjust_fixednav_file()
 
 		/* write out updated project */
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 
 		/* add info text */
 		sprintf(message, "Set file %d to have fixed nav: %s\n",
@@ -2838,6 +2845,7 @@ int mbnavadjust_fixedxynav_file()
 
 		/* write out updated project */
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 
 		/* add info text */
 		sprintf(message, "Set file %d to have fixed xy nav: %s\n",
@@ -2905,6 +2913,7 @@ int mbnavadjust_fixedznav_file()
 
 		/* write out updated project */
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 
 		/* add info text */
 		sprintf(message, "Set file %d to have fixed z nav: %s\n",
@@ -2958,6 +2967,7 @@ int mbnavadjust_set_tie_xyz()
 
 		/* write out updated project */
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 
 		/* add info text */
 		sprintf(message, "Set crossing %d tie %d to fix XYZ\n",
@@ -3011,6 +3021,7 @@ int mbnavadjust_set_tie_xy()
 
 		/* write out updated project */
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 
 		/* add info text */
 		sprintf(message, "Set crossing %d tie %d to fix XY\n",
@@ -3064,6 +3075,7 @@ int mbnavadjust_set_tie_z()
 
 		/* write out updated project */
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 
 		/* add info text */
 		sprintf(message, "Set crossing %d tie %d to fix Z\n",
@@ -3188,7 +3200,12 @@ int mbnavadjust_naverr_save()
 		    section->snav_num_ties[tie->snav_2]++;
 
 		    /* write updated project */
-		    mbnavadjust_write_project(mbna_verbose, &project, &error);
+			project.save_count++;
+			if (project.save_count < 0 || project.save_count >= mbna_save_frequency)
+				{
+				mbnavadjust_write_project(mbna_verbose, &project, &error);
+				project.save_count = 0;
+				}
 
 		    /* add info text */
 		    sprintf(message,"Save Tie Point %d of Crossing %d\n > Nav points: %d:%d:%d %d:%d:%d\n > Offsets: %f %f %f m\n",
@@ -3968,7 +3985,12 @@ int mbnavadjust_naverr_addtie()
 			section2->snav_num_ties[tie->snav_2]++;
 
 			/* write updated project */
-			mbnavadjust_write_project(mbna_verbose, &project, &error);
+			project.save_count++;
+			if (project.save_count < 0 || project.save_count >= mbna_save_frequency)
+				{
+				mbnavadjust_write_project(mbna_verbose, &project, &error);
+				project.save_count = 0;
+				}
 
 			/* add info text */
 			sprintf(message,"Add Tie Point %d of Crossing %d\n > Nav points: %d:%d:%d %d:%d:%d\n > Offsets: %f %f %f m\n",
@@ -4069,7 +4091,12 @@ int mbnavadjust_naverr_deletetie()
 			mbnavadjust_deletetie(mbna_current_crossing, mbna_current_tie, MBNA_CROSSING_STATUS_SKIP);
 
 			/* write updated project */
-			mbnavadjust_write_project(mbna_verbose, &project, &error);
+			project.save_count++;
+			if (project.save_count < 0 || project.save_count >= mbna_save_frequency)
+				{
+				mbnavadjust_write_project(mbna_verbose, &project, &error);
+				project.save_count = 0;
+				}
   			}
    		}
 
@@ -4411,7 +4438,12 @@ int mbnavadjust_naverr_skip()
 			mbna_current_tie = MBNA_SELECT_NONE;
 	
 			/* write updated project */
-			mbnavadjust_write_project(mbna_verbose, &project, &error);
+			project.save_count++;
+			if (project.save_count < 0 || project.save_count >= mbna_save_frequency)
+				{
+				mbnavadjust_write_project(mbna_verbose, &project, &error);
+				project.save_count = 0;
+				}
 	
 			/* add info text */
 			sprintf(message,"Set crossing %d to be ignored\n",
@@ -4494,7 +4526,12 @@ int mbnavadjust_naverr_unset()
 			crossing->status = MBNA_CROSSING_STATUS_NONE;
 
 			/* write updated project */
-			mbnavadjust_write_project(mbna_verbose, &project, &error);
+			project.save_count++;
+			if (project.save_count < 0 || project.save_count >= mbna_save_frequency)
+				{
+				mbnavadjust_write_project(mbna_verbose, &project, &error);
+				project.save_count = 0;
+				}
 
 			/* add info text */
 			sprintf(message,"Unset crossing %d\n",
@@ -7433,6 +7470,7 @@ mbna_file_select,mbna_survey_select,mbna_section_select);
 
 		/* write updated project */
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 
 		/* turn off message dialog */
 		do_message_off();
@@ -8487,6 +8525,7 @@ mbnavadjust_zerozoffsets()
 			}
 		/* write updated project */
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 
 		/* turn off message dialog */
 		do_message_off();
@@ -9983,6 +10022,7 @@ offset_x,offset_y,offset_z,tie->inversion_offset_x_m,tie->inversion_offset_y_m,t
 		project.inversion_status = MBNA_INVERSION_CURRENT;
 		project.grid_status = MBNA_GRID_OLD;
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 
 		/* deallocate arrays */
 		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&x_continuity,&error);
@@ -10342,6 +10382,7 @@ mbnavadjust_updategrid()
 			
 			/* write current project */
 			mbnavadjust_write_project(mbna_verbose, &project, &error);
+			project.save_count = 0;
 	
 			/* turn off message dialog */
 			do_message_off();
@@ -12289,6 +12330,7 @@ mbnavadjust_modelplot_clearblock()
 
 		/* write updated project */
 		mbnavadjust_write_project(mbna_verbose, &project, &error);
+		project.save_count = 0;
 		}
 
  	/* print output debug statements */
