@@ -631,11 +631,11 @@ for ($i = 0; $i < $npoints; $i++)
 		# insert points into arrays so they can be printed out last to first
 		# to follow the MBARI AUV mission file convention
 		push(@mwaypoints, $waypoints[$i]);
-		if ($waypoints[$i] == 3 || $waypoints[$i] == 5 || $waypoints[$i] == 7 || $waypoints[$i] == 9)
+		if ($waypoints[$i] == 3 || $waypoints[$i] == 5 || $waypoints[$i] == 7 || $waypoints[$i] == 9 || $waypoints[$i] == 11)
 			{
 			push(@mstartstops, 1);
 			}
-		elsif ($waypoints[$i] == 4 || $waypoints[$i] == 6 || $waypoints[$i] == 8 || $waypoints[$i] == 10)
+		elsif ($waypoints[$i] == 4 || $waypoints[$i] == 6 || $waypoints[$i] == 8 || $waypoints[$i] == 10 || $waypoints[$i] == 12)
 			{
 			push(@mstartstops, 2);
 			}

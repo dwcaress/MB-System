@@ -254,7 +254,11 @@ int main (int argc, char **argv)
 	int	raw_next_value = MB_NO;
 	int	port_next_value = MB_NO;
 	int	stbd_next_value = MB_NO;
+	int sensornav_next_value = MB_NO;
+	int sensorrelative_next_value = MB_NO;
+	int projectednav_next_value = MB_NO;
 	int	use_raw = MB_NO;
+	int special_character = MB_NO;
 	int	first = MB_YES;
 	int	ascii = MB_YES;
 	int	netcdf = MB_NO;
@@ -332,6 +336,16 @@ int main (int argc, char **argv)
 	int	use_swathbounds = MB_NO;
 	int	beam_port, beam_stbd;
 	int	pixel_port, pixel_stbd;
+	
+	/* projected coordinate system */
+	int use_projection = MB_NO;
+	char projection_pars[MB_PATH_MAXLINE];
+	char projection_id[MB_PATH_MAXLINE];
+	int	proj_status;
+	void *pjptr = NULL;
+	double reference_lon, reference_lat;
+	int utm_zone;
+	double naveasting, navnorthing, deasting, dnorthing;
 
 	/* bathymetry feet flag */
 	int	bathy_in_feet = MB_NO;
@@ -404,7 +418,9 @@ int main (int argc, char **argv)
 	list[5]='L';
 	list[6]='Z';
 	n_list = 7;
-	sprintf(delimiter, "\t");
+	delimiter[0] = '\t';
+	delimiter[1] = '\0';
+	projection_pars[0] = '\0';
 
 	/* set dump mode flag to DUMP_MODE_LIST */
 	dump_mode = DUMP_MODE_LIST;
@@ -416,7 +432,7 @@ int main (int argc, char **argv)
 	strcpy(output_file, "-");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:G:g:I:i:K:k:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Z:z:VvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:G:g:I:i:J:j:K:k:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Z:z:VvWwHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -482,6 +498,12 @@ int main (int argc, char **argv)
 			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
+		case 'J':
+		case 'j':
+			sscanf (optarg,"%s", projection_pars);
+			use_projection = MB_YES;
+			flag++;
+			break;
 		case 'K':
 		case 'k':
 			sscanf (optarg,"%d", &decimate);
@@ -527,7 +549,11 @@ int main (int argc, char **argv)
 		case 'o':
 			for(j=0,n_list=0;j<(int)strlen(optarg);j++,n_list++)
 				if (n_list<MAX_OPTIONS)
+					{
 					list[n_list] = optarg[j];
+					if (list[n_list] == '^')
+						use_projection = MB_YES;
+					}
 			flag++;
 			break;
 		case 'P':
@@ -655,6 +681,8 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       dump_mode:      %d\n",dump_mode);
 		fprintf(stderr,"dbg2       check_values:   %d\n",check_values);
 		fprintf(stderr,"dbg2       check_nav:      %d\n",check_nav);
+		fprintf(stderr,"dbg2       use_projection: %d\n",use_projection);
+		fprintf(stderr,"dbg2       projection_pars:%s\n",projection_pars);
 		fprintf(stderr,"dbg2       n_list:         %d\n",n_list);
 		for (i=0;i<n_list;i++)
 			fprintf(stderr,"dbg2         list[%d]:      %c\n",
@@ -830,6 +858,20 @@ int main (int argc, char **argv)
 		  case '-': /* Flip sign on next simple value */
 		    signflip_next_value = MB_YES;
 		    break;
+		
+		  case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
+			sensornav_next_value = MB_YES;
+			break;
+		
+		  case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
+			sensorrelative_next_value = MB_YES;
+			break;
+		
+		  case '^': /* Print position values in projected coordinates
+				   * - easting northing rather than lon lat
+				   * - applies to XY */
+			projectednav_next_value = MB_YES;
+			break;
 
 		  case '.': /* Raw value next field */
 		    raw_next_value = MB_YES;
@@ -1625,6 +1667,20 @@ int main (int argc, char **argv)
 		  case '-': /* Flip sign on next simple value */
 		    signflip_next_value = MB_YES;
 		    break;
+		
+		  case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
+			sensornav_next_value = MB_YES;
+			break;
+		
+		  case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
+			sensorrelative_next_value = MB_YES;
+			break;
+		
+		  case '^': /* Print position values in projected coordinates
+				   * - easting northing rather than lon lat
+				   * - applies to XY */
+			projectednav_next_value = MB_YES;
+			break;
 
 		  case '.': /* Raw value next field */
 		    raw_next_value = MB_YES;
@@ -2366,6 +2422,59 @@ int main (int argc, char **argv)
                             pingnumber = nread;
 			distance_total += distance;
 			}
+			
+		/* get projected navigation if needed */
+		if (error <= MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA
+			&& use_projection == MB_YES)
+			{
+			/* set up projection if this is the first data */
+			if (pjptr == NULL)
+				{
+				/* Default projection is UTM */
+				if  (strlen(projection_pars) == 0)
+					strcpy(projection_pars, "U");
+					
+				/* check for UTM with undefined zone */
+				if (strcmp(projection_pars, "UTM") == 0
+					|| strcmp(projection_pars, "U") == 0
+					|| strcmp(projection_pars, "utm") == 0
+					|| strcmp(projection_pars, "u") == 0)
+					{
+					reference_lon = navlon;
+					if (reference_lon < 180.0)
+						reference_lon += 360.0;
+					if (reference_lon >= 180.0)
+						reference_lon -= 360.0;
+					utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+					reference_lat = navlat;
+					if (reference_lat >= 0.0)
+						sprintf(projection_id, "UTM%2.2dN", utm_zone);
+					else
+						sprintf(projection_id, "UTM%2.2dS", utm_zone);
+					}
+				else
+					strcpy(projection_id, projection_pars);
+		
+				/* set projection flag */
+				proj_status = mb_proj_init(verbose, projection_id, &(pjptr), &error);
+
+				/* if projection not successfully initialized then quit */
+				if (proj_status != MB_SUCCESS)
+					{
+					fprintf(stderr,"\nOutput projection %s not found in database\n",
+						projection_id);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+						program_name);
+					error = MB_ERROR_BAD_PARAMETER;
+					mb_memory_clear(verbose, &error);
+					exit(error);
+					}
+				}
+			
+			/* get projected navigation */
+			mb_proj_forward(verbose, pjptr, navlon, navlat, &naveasting, &navnorthing, &error);
+			}
 
 		/* print debug statements */
 		if (verbose >= 2)
@@ -2634,6 +2743,13 @@ int main (int argc, char **argv)
 		  /* print out good beams */
 		  if (beam_status == MB_SUCCESS)
 		    {
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			sensornav_next_value = MB_NO;
+			sensorrelative_next_value = MB_NO;
+			projectednav_next_value = MB_NO;
+			special_character = MB_NO;
 		    for (i=0; i<n_list; i++)
 			{
 			if (netcdf == MB_YES && lcount > 0)
@@ -2657,19 +2773,38 @@ int main (int argc, char **argv)
 				{
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
+					special_character = MB_YES;
 					break;
 				case '-': /* Flip sign on next simple value */
 					signflip_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
+					sensornav_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
+					sensorrelative_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '^': /* Print position values in projected coordinates
+						   * - easting northing rather than lon lat
+						   * - applies to XY */
+					projectednav_next_value = MB_YES;
+					special_character = MB_YES;
 					break;
 				case '.': /* Raw value next field */
 					raw_next_value = MB_YES;
+					special_character = MB_YES;
 		  			count = 0;
 					break;
 				case '=': /* Port-most value next field -ignored here */
 				  	port_next_value = MB_YES;
+					special_character = MB_YES;
 				  	break;
 				case '+': /* Starboard-most value next field - ignored here*/
 				  	stbd_next_value = MB_YES;
+					special_character = MB_YES;
 				  	break;
 				case 'A': /* Average seafloor crosstrack slope */
 					printsimplevalue(verbose, output[i], avgslope, 0, 4, ascii,
@@ -3064,7 +3199,7 @@ int main (int argc, char **argv)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 
-					    fprintf(output[i],"%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f",
+					    fprintf(output[i],"%.4d/%.2d/%.2d/%.2d/%.2d/%09.6f",
 						time_i[0],time_i[1],time_i[2],
 						time_i[3],time_i[4],seconds);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
@@ -3095,7 +3230,7 @@ int main (int argc, char **argv)
 						time_i[3],time_i[4],time_i[5],
 						time_i[6]);
 					    else
-					    fprintf(output[i],"%.4d %.2d %.2d %.2d %.2d %9.6f",
+					    fprintf(output[i],"%.4d %.2d %.2d %.2d %.2d %09.6f",
 						time_i[0],time_i[1],time_i[2],
 						time_i[3],time_i[4],seconds);
 					    }
@@ -3155,19 +3290,43 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'X': /* longitude decimal degrees */
-					dlon = navlon;
-					if (beam_set != MBLIST_SET_OFF || k != j)
-					    dlon += headingy*mtodeglon
-							*bathacrosstrack[k]
-						    + headingx*mtodeglon
-							*bathalongtrack[k];
-					printsimplevalue(verbose, output[i], dlon, 15, 10, ascii,
-							    &invert_next_value,
-							    &signflip_next_value, &error);
+					if (projectednav_next_value == MB_NO)
+						{
+						if (sensorrelative_next_value == MB_YES)
+							dlon = 0.0;
+						else
+							dlon = navlon;
+						if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+							dlon += headingy*mtodeglon
+								*bathacrosstrack[k]
+								+ headingx*mtodeglon
+								*bathalongtrack[k];
+						printsimplevalue(verbose, output[i], dlon, 15, 10, ascii,
+									&invert_next_value,
+									&signflip_next_value, &error);
+						}
+					else
+						{
+						if (sensorrelative_next_value == MB_YES)
+							deasting = 0.0;
+						else
+							deasting = naveasting;
+						if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+							deasting += headingy
+								*bathacrosstrack[k]
+								+ headingx
+								*bathalongtrack[k];
+						printsimplevalue(verbose, output[i], deasting, 15, 3, ascii,
+									&invert_next_value,
+									&signflip_next_value, &error);
+						}
+					sensornav_next_value = MB_NO;
+					sensorrelative_next_value = MB_NO;
+					projectednav_next_value = MB_NO;
 					break;
 				case 'x': /* longitude degress + decimal minutes */
 					dlon = navlon;
-					if (beam_set != MBLIST_SET_OFF || k != j)
+					if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
 					    dlon += headingy*mtodeglon
 							*bathacrosstrack[k]
 						    + headingx*mtodeglon
@@ -3196,21 +3355,47 @@ int main (int argc, char **argv)
 					    b = minutes;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
+					sensornav_next_value = MB_NO;
 					break;
 				case 'Y': /* latitude decimal degrees */
-					dlat = navlat;
-					if (beam_set != MBLIST_SET_OFF || k != j)
-					    dlat += -headingx*mtodeglat
-							*bathacrosstrack[k]
-						    + headingy*mtodeglat
-							*bathalongtrack[k];
-					printsimplevalue(verbose, output[i], dlat, 15, 10, ascii,
-							    &invert_next_value,
-							    &signflip_next_value, &error);
+					if (projectednav_next_value == MB_NO)
+						{
+						if (sensorrelative_next_value == MB_YES)
+							dlat = 0.0;
+						else
+							dlat = navlat;
+						if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+							dlat += -headingx*mtodeglat
+								*bathacrosstrack[k]
+								+ headingy*mtodeglat
+								*bathalongtrack[k];
+						printsimplevalue(verbose, output[i], dlat, 15, 10, ascii,
+									&invert_next_value,
+									&signflip_next_value, &error);
+						sensornav_next_value = MB_NO;
+						}
+					else
+						{
+						if (sensorrelative_next_value == MB_YES)
+							dnorthing = 0.0;
+						else
+							dnorthing = navnorthing;
+						if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+							dnorthing += -headingx
+								*bathacrosstrack[k]
+								+ headingy
+								*bathalongtrack[k];
+						printsimplevalue(verbose, output[i], dnorthing, 15, 3, ascii,
+									&invert_next_value,
+									&signflip_next_value, &error);
+						}
+					sensornav_next_value = MB_NO;
+					sensorrelative_next_value = MB_NO;
+					projectednav_next_value = MB_NO;
 					break;
 				case 'y': /* latitude degrees + decimal minutes */
 					dlat = navlat;
-					if (beam_set != MBLIST_SET_OFF || k != j)
+					if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
 					    dlat += -headingx*mtodeglat
 							*bathacrosstrack[k]
 						    + headingy*mtodeglat
@@ -3239,6 +3424,7 @@ int main (int argc, char **argv)
 					    b = minutes;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
+					sensornav_next_value = MB_NO;
 					break;
 				case 'Z': /* topography */
 					if (beamflag[k] == MB_FLAG_NULL
@@ -3257,10 +3443,14 @@ int main (int argc, char **argv)
 					else
 					    {
 					    b = -bathy_scale * bath[k];
+						if (sensorrelative_next_value == MB_YES)
+							b -= -bathy_scale * sonardepth;
 					    printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
+					sensornav_next_value = MB_NO;
+					sensorrelative_next_value = MB_NO;
 					break;
 				case 'z': /* depth */
 					if (beamflag[k] == MB_FLAG_NULL
@@ -3279,10 +3469,14 @@ int main (int argc, char **argv)
 					else
 					    {
 					    b = bathy_scale * bath[k];
+						if (sensorrelative_next_value == MB_YES)
+							b -= bathy_scale * sonardepth;
 					    printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
+					sensornav_next_value = MB_NO;
+					sensorrelative_next_value = MB_NO;
 					break;
 				case '#': /* beam number */
 					if (ascii == MB_YES)
@@ -3306,19 +3500,38 @@ int main (int argc, char **argv)
 				{
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
+					special_character = MB_YES;
 					break;
 				case '-': /* Flip sign on next simple value */
 					signflip_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
+					sensornav_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
+					sensorrelative_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '^': /* Print position values in projected coordinates
+						   * - easting northing rather than lon lat
+						   * - applies to XY */
+					projectednav_next_value = MB_YES;
+					special_character = MB_YES;
 					break;
 				case '.': /* Raw value next field */
 					raw_next_value = MB_YES;
+					special_character = MB_YES;
 					count = 0;
 					break;
 				case '=': /* Port-most value next field -ignored here */
 				  	port_next_value = MB_YES;
+					special_character = MB_YES;
 				  	break;
 				case '+': /* Starboard-most value next field - ignored here*/
 				  	stbd_next_value = MB_YES;
+					special_character = MB_YES;
 				  	break;
 
 
@@ -3590,8 +3803,19 @@ int main (int argc, char **argv)
 			    }
 			if (ascii == MB_YES)
 			    {
-			    if (i<(n_list-1)) fprintf(output[i], "%s", delimiter);
-			    else fprintf (output[lcount++ % n_list], "\n");
+			    if (i < (n_list-1))
+					{
+					if (special_character == MB_NO)
+						{
+						fprintf(output[i], "%s", delimiter);
+						}
+					else
+						{
+						special_character = MB_NO;
+						}
+					}
+			    else
+					fprintf (output[lcount++ % n_list], "\n");
 			    }
 			}
 		    }
@@ -3635,6 +3859,12 @@ int main (int argc, char **argv)
 		  /* print out good pixels */
 		  if (pixel_status == MB_SUCCESS)
 		    {
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			sensornav_next_value = MB_NO;
+			projectednav_next_value = MB_NO;
+			special_character = MB_NO;
 		    for (i=0; i<n_list; i++)
 			{
 			if (netcdf == MB_YES && lcount > 0)
@@ -3659,19 +3889,38 @@ int main (int argc, char **argv)
 				{
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
+					special_character = MB_YES;
 					break;
 				case '-': /* Flip sign on next simple value */
 					signflip_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
+					sensornav_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
+					sensorrelative_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '^': /* Print position values in projected coordinates
+						   * - easting northing rather than lon lat
+						   * - applies to XY */
+					projectednav_next_value = MB_YES;
+					special_character = MB_YES;
 					break;
 				case '.': /* Raw value next field */
 					raw_next_value = MB_YES;
 					count = 0;
+					special_character = MB_YES;
 					break;
 				case '=': /* Port-most value next field -ignored here */
 				  	port_next_value = MB_YES;
+					special_character = MB_YES;
 				  	break;
 				case '+': /* Starboard-most value next field - ignored here*/
 				  	stbd_next_value = MB_YES;
+					special_character = MB_YES;
 				  	break;
 				case 'A': /* Average seafloor crosstrack slope */
 					printsimplevalue(verbose, output[i], avgslope, 0, 4, ascii,
@@ -3901,7 +4150,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%.4d/%.2d/%.2d/%.2d/%.2d/%9.6f",
+					    fprintf(output[i],"%.4d/%.2d/%.2d/%.2d/%.2d/%09.6f",
 						time_i[0],time_i[1],time_i[2],
 						time_i[3],time_i[4],seconds);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
@@ -3932,7 +4181,7 @@ int main (int argc, char **argv)
 						time_i[3],time_i[4],time_i[5],
 						time_i[6]);
 					    else
-					    fprintf(output[i],"%.4d %.2d %.2d %.2d %.2d %9.6f",
+					    fprintf(output[i],"%.4d %.2d %.2d %.2d %.2d %09.6f",
 						time_i[0],time_i[1],time_i[2],
 						time_i[3],time_i[4],seconds);
 					    }
@@ -3992,19 +4241,43 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'X': /* longitude decimal degrees */
-					dlon = navlon;
-					if (pixel_set != MBLIST_SET_OFF || k != j)
-					    dlon += headingy*mtodeglon
-							*ssacrosstrack[k]
-						    + headingx*mtodeglon
-							*ssalongtrack[k];
-					printsimplevalue(verbose, output[i], dlon, 15, 10, ascii,
-							    &invert_next_value,
-							    &signflip_next_value, &error);
+					if (projectednav_next_value == MB_NO)
+						{
+						if (sensorrelative_next_value == MB_YES)
+							dlon = 0.0;
+						else
+							dlon = navlon;
+						if (sensornav_next_value == MB_NO && (pixel_set != MBLIST_SET_OFF || k != j))
+							dlon += headingy*mtodeglon
+								*ssacrosstrack[k]
+								+ headingx*mtodeglon
+								*ssalongtrack[k];
+						printsimplevalue(verbose, output[i], dlon, 15, 10, ascii,
+									&invert_next_value,
+									&signflip_next_value, &error);
+						}
+					else
+						{
+						if (sensorrelative_next_value == MB_YES)
+							deasting = 0.0;
+						else
+							deasting = naveasting;
+						if (sensornav_next_value == MB_NO && (pixel_set != MBLIST_SET_OFF || k != j))
+							deasting += headingy
+								*ssacrosstrack[k]
+								+ headingx
+								*ssalongtrack[k];
+						printsimplevalue(verbose, output[i], deasting, 15, 3, ascii,
+									&invert_next_value,
+									&signflip_next_value, &error);
+						}
+					sensornav_next_value = MB_NO;
+					sensorrelative_next_value = MB_NO;
+					projectednav_next_value = MB_NO;
 					break;
 				case 'x': /* longitude degress + decimal minutes */
 					dlon = navlon;
-					if (pixel_set != MBLIST_SET_OFF || k != j)
+					if (sensornav_next_value == MB_NO && (pixel_set != MBLIST_SET_OFF || k != j))
 					    dlon += headingy*mtodeglon
 							*ssacrosstrack[k]
 						    + headingx*mtodeglon
@@ -4033,21 +4306,46 @@ int main (int argc, char **argv)
 					    b = minutes;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
+					sensornav_next_value = MB_NO;
 					break;
 				case 'Y': /* latitude decimal degrees */
-					dlat = navlat;
-					if (pixel_set != MBLIST_SET_OFF || k != j)
-					    dlat += -headingx*mtodeglat
-							*ssacrosstrack[k]
-						    + headingy*mtodeglat
-							*ssalongtrack[k];
-					printsimplevalue(verbose, output[i], dlat, 15, 10, ascii,
-							    &invert_next_value,
-							    &signflip_next_value, &error);
+					if (projectednav_next_value == MB_NO)
+						{
+						if (sensorrelative_next_value == MB_YES)
+							dlat = 0.0;
+						else
+							dlat = navlat;
+						if (sensornav_next_value == MB_NO && (pixel_set != MBLIST_SET_OFF || k != j))
+							dlat += -headingx*mtodeglat
+								*ssacrosstrack[k]
+								+ headingy*mtodeglat
+								*ssalongtrack[k];
+						printsimplevalue(verbose, output[i], dlat, 15, 10, ascii,
+									&invert_next_value,
+									&signflip_next_value, &error);
+						}
+					else
+						{
+						if (sensorrelative_next_value == MB_YES)
+							dnorthing = 0.0;
+						else
+							dnorthing = navnorthing;
+						if (sensornav_next_value == MB_NO && (beam_set != MBLIST_SET_OFF || k != j))
+							dnorthing += -headingx
+								*ssacrosstrack[k]
+								+ headingy
+								*ssalongtrack[k];
+						printsimplevalue(verbose, output[i], dnorthing, 15, 3, ascii,
+									&invert_next_value,
+									&signflip_next_value, &error);
+						}
+					sensornav_next_value = MB_NO;
+					sensorrelative_next_value = MB_NO;
+					projectednav_next_value = MB_NO;
 					break;
 				case 'y': /* latitude degrees + decimal minutes */
 					dlat = navlat;
-					if (pixel_set != MBLIST_SET_OFF || k != j)
+					if (sensornav_next_value == MB_NO && (pixel_set != MBLIST_SET_OFF || k != j))
 					    dlat += -headingx*mtodeglat
 							*ssacrosstrack[k]
 						    + headingy*mtodeglat
@@ -4076,6 +4374,7 @@ int main (int argc, char **argv)
 					    b = minutes;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
+					sensornav_next_value = MB_NO;
 					break;
 				case 'Z': /* topography */
 					if (beamflag[beam_vertical] == MB_FLAG_NULL
@@ -4094,10 +4393,14 @@ int main (int argc, char **argv)
 					else
 					    {
 					    b = -bathy_scale * bath[beam_vertical];
+						if (sensorrelative_next_value == MB_YES)
+							b -= -bathy_scale * sonardepth;
 					    printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
+					sensornav_next_value = MB_NO;
+					sensorrelative_next_value = MB_NO;
 					break;
 				case 'z': /* depth */
 					if (beamflag[beam_vertical] == MB_FLAG_NULL
@@ -4116,10 +4419,14 @@ int main (int argc, char **argv)
 					else
 					    {
 					    b = bathy_scale * bath[beam_vertical];
+						if (sensorrelative_next_value == MB_YES)
+							b -= bathy_scale * sonardepth;
 					    printsimplevalue(verbose, output[i], b, 0, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
+					sensornav_next_value = MB_NO;
+					sensorrelative_next_value = MB_NO;
 					break;
 				case '#': /* pixel number */
 					if (ascii == MB_YES)
@@ -4142,19 +4449,38 @@ int main (int argc, char **argv)
 				{
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
+					special_character = MB_YES;
 					break;
 				case '-': /* Flip sign on next simple value */
 					signflip_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '_': /* Print sensor position rather than beam or pixel position - applies to XxYy */
+					sensornav_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '@': /* Print beam or pixel position and depth values relative to sensor - applies to XYZz */
+					sensorrelative_next_value = MB_YES;
+					special_character = MB_YES;
+					break;
+				case '^': /* Print position values in projected coordinates
+						   * - easting northing rather than lon lat
+						   * - applies to XY */
+					projectednav_next_value = MB_YES;
+					special_character = MB_YES;
 					break;
 				case '.': /* Raw value next field */
 					raw_next_value = MB_YES;
 					count = 0;
+					special_character = MB_YES;
 					break;
 				case '=': /* Port-most value next field -ignored here */
 				  	port_next_value = MB_YES;
+					special_character = MB_YES;
 				  	break;
 				case '+': /* Starboard-most value next field - ignored here*/
 				  	stbd_next_value = MB_YES;
+					special_character = MB_YES;
 				  	break;
 
 				case '0':
@@ -4393,8 +4719,19 @@ int main (int argc, char **argv)
 			    }
 			if (ascii == MB_YES)
 			    {
-			    if (i<(n_list-1)) fprintf(output[i], "%s", delimiter);
-			    else fprintf (output[lcount++ % n_list], "\n");
+			    if (i < (n_list-1))
+					{
+					if (special_character == MB_NO)
+						{
+						fprintf(output[i], "%s", delimiter);
+						}
+					else
+						{
+						special_character = MB_NO;
+						}
+					}
+			    else
+					fprintf (output[lcount++ % n_list], "\n");
 			    }
 			}
 		    }
@@ -4960,7 +5297,7 @@ int printsimplevalue(int verbose, FILE *output,
 
 	/* print value */
 	if (ascii == MB_YES)
-	    fprintf(output,format, value);
+	    fprintf(output, format, value);
 	else
 	    fwrite(&value, sizeof(double), 1, output);
 

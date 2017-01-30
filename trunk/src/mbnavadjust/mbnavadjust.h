@@ -47,6 +47,7 @@ MBNAVADJUST_EXTERNAL int	mbna_status;
 MBNAVADJUST_EXTERNAL int	mbna_view_list;
 MBNAVADJUST_EXTERNAL int	mbna_view_mode;
 MBNAVADJUST_EXTERNAL int	mbna_invert_mode;
+MBNAVADJUST_EXTERNAL int	mbna_save_frequency;
 MBNAVADJUST_EXTERNAL int	mbna_color_foreground;
 MBNAVADJUST_EXTERNAL int	mbna_color_background;
 MBNAVADJUST_EXTERNAL int	mbna_survey_select;

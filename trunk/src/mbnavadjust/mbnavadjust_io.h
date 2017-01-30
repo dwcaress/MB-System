@@ -310,7 +310,8 @@ struct mbna_project {
 	int		num_ties;
 	double	section_length;
 	int		section_soundings;
-	
+	int		save_count;
+
 	double	lon_min;
 	double	lon_max;
 	double	lat_min;
