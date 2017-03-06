@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavlist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  20 February 2017 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -29,7 +29,8 @@ Version 5.0
 
 <B>mbnavlist</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-D</B><I>decimate</I>
 <B>-E</B><I>yr/mo/da/hr/mn/sc</I> <B>-F</B><I>format</I>
-<B>-G</B><I>delimeter</I> <B>-H</B> <B>-I</B><I>file</I> <B>-K</B><I>kind</I>
+<B>-G</B><I>delimeter</I> <B>-H</B> <B>-I</B><I>file</I>
+<B>-J</B><I>projection</I> <B>-K</B><I>kind</I>
 <B>-L</B><I>lonflip</I> <B>-N</B><I>navchannel</I>
 <B>-O</B><I>output_format</I> <B>-R</B><I>west/east/south/north</I>
 <B>-S</B><I>speed</I> <B>-T</B><I>timegap</I> <B>-V</B> <B>-Z</B><I>segment</I>]
@@ -215,6 +216,57 @@ format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
 Default: <I>file</I> = &quot;datalist.mb-1&quot;.
+<DT><B>-J</B>
+
+<DD>
+<I>projection</I>
+<BR>
+
+Including the 'X' and 'Y' characters in the <B>-O</B><I>output_format</I> string
+causes longitude and latitude position values, respectively, to be output.
+These longitude and latitude values represent position in geographic coordinates,
+which for <B>MB-System</B> means longitude and latitude using the WGS84 geographic
+coordinate system. The <B>-J</B> option can be used to specify
+an alternate, projected coordinate system (PCS) used to represent positions in
+&quot;eastings&quot; and &quot;northings&quot; (in meters relative to the PCS origin) rather than
+longitude and latitude (in degrees).
+When a PCS is defined with the <B>-J</B> option, users can output eastings by
+including '^X' in the <I>output_format</I> string defined with the <B>-O</B> option.
+Similarly, northings can be output using '^Y' in the <I>output_format</I> string.
+Universal Transverse Mercator (UTM) is the most commonly used PCS in the
+oceanographic community, but
+<B>MB-System</B> supports a large number of other PCS's as well.
+The underlying projection functions derive from the <B>PROJ.4</B> library
+created by Gerald Evenden of the U.S. Geological Survey and since extended
+by Frank Warmerdam and others of the open source geospatial community.
+<P>
+The <I>projection</I> argument for the <B>-J</B> option can be either
+a PCS identifier from the projection definition list provided at the
+end of this manual page, or simply <B>-J</B><I>U</I> to specify using
+UTM in whatever zone is appropriate for the grid bounds specified
+with the <B>-R</B> option.
+<P>
+For instance, to fully specify a particular northern UTM
+zone, set <I>projection</I> = UTMXXN where XX gives
+the UTM zone (defined from 01 to 60). As an example, a northern UTM
+zone 12 projection can be specified using <B>-J</B><I>UTM12N</I>.
+Southern UTM zones are specified as UTMXXS. The European Petroleum
+Survey Group (EPSG) has defined a large number of PCS's used worldwide
+and assigned number id's to each; one can also specify the northern
+UTM zone 12 projection using its EPSG designation,
+or <B>-J</B><I>epsg32612</I>.
+When the projected coordinate system is fully specified
+by the <B>-J</B> option, then the grid bounds may be specified using
+<B>-R</B> in either longitude and latitude or in eastings and northings.
+<P>
+Alternatively, one may indicate a UTM projection without specifying the
+zone by using <B>-J</B><I>U</I>. In this case, the
+UTM zone will be inferred from the longitude and latitude of the first data
+point. If the user requests easting or northing output in
+the <I>output_format</I> string without specifying a particular PCS using the
+<B>-J</B> option, then <B>mblist</B>
+will use a UTM projection with the zone specified according to the position
+of the first data point.
 <DT><B>-K</B>
 
 <DD>
@@ -309,36 +361,104 @@ of all data record types in the file. This option is superceded by the
 
 Determines the form of the output. <I>Output_format</I> is a string composed
 of one or more of the following characters:
-<P>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>c</B>&nbsp;&nbsp;for&nbsp;sonar&nbsp;depth&nbsp;(meters)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>H</B>&nbsp;&nbsp;for&nbsp;heading&nbsp;(degrees)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>h</B>&nbsp;&nbsp;for&nbsp;course&nbsp;made&nbsp;good&nbsp;(degrees)<BR>
-<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>J</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;jd&nbsp;hh&nbsp;mm&nbsp;ss.ssssss)<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;jd&nbsp;is&nbsp;the&nbsp;julian&nbsp;day&nbsp;of&nbsp;the&nbsp;year
-<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>j</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;jd&nbsp;dm&nbsp;ss.ssssss)<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;jd&nbsp;is&nbsp;the&nbsp;julian&nbsp;day&nbsp;of&nbsp;the&nbsp;year
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;dm&nbsp;is&nbsp;the&nbsp;minute&nbsp;of&nbsp;the&nbsp;day
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>L</B>&nbsp;&nbsp;for&nbsp;cumulative&nbsp;along-track&nbsp;distance&nbsp;(km)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>l</B>&nbsp;&nbsp;for&nbsp;cumulative&nbsp;along-track&nbsp;distance&nbsp;(m)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>M</B>&nbsp;&nbsp;for&nbsp;unix&nbsp;time&nbsp;in&nbsp;decimal&nbsp;seconds&nbsp;since&nbsp;1/1/70&nbsp;00:00:00<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>m</B>&nbsp;&nbsp;for&nbsp;time&nbsp;in&nbsp;decimal&nbsp;seconds&nbsp;since&nbsp;first&nbsp;record<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>N</B>&nbsp;&nbsp;for&nbsp;ping&nbsp;count<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>P</B>&nbsp;&nbsp;for&nbsp;pitch&nbsp;in&nbsp;degrees<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>p</B>&nbsp;&nbsp;for&nbsp;draft&nbsp;in&nbsp;meters<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>R</B>&nbsp;&nbsp;for&nbsp;roll&nbsp;in&nbsp;degrees<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>r</B>&nbsp;&nbsp;for&nbsp;heave&nbsp;in&nbsp;meters<BR>
-<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>S</B>&nbsp;&nbsp;for&nbsp;speed&nbsp;(km/hr)<BR>
-<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>s</B>&nbsp;&nbsp;for&nbsp;speed&nbsp;made&nbsp;good&nbsp;(km/hr)<BR>
-<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>T</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy/mm/dd/hh/mm/ss)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>t</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;mm&nbsp;dd&nbsp;hh&nbsp;mm&nbsp;ss)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>U</B>&nbsp;&nbsp;for&nbsp;unix&nbsp;time&nbsp;in&nbsp;integer&nbsp;seconds&nbsp;since&nbsp;1/1/70&nbsp;00:00:00<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>u</B>&nbsp;&nbsp;for&nbsp;time&nbsp;in&nbsp;integer&nbsp;seconds&nbsp;since&nbsp;first&nbsp;record<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>V</B>&nbsp;&nbsp;for&nbsp;ping&nbsp;interval&nbsp;(decimal&nbsp;seconds)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>X</B>&nbsp;&nbsp;for&nbsp;longitude&nbsp;(decimal&nbsp;degrees)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>x</B>&nbsp;&nbsp;for&nbsp;longitude&nbsp;(degrees&nbsp;+&nbsp;decimal&nbsp;minutes&nbsp;+&nbsp;E/W)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>Y</B>&nbsp;&nbsp;for&nbsp;latitude&nbsp;(decimal&nbsp;degrees)<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>y</B>&nbsp;&nbsp;for&nbsp;latitude&nbsp;(degrees&nbsp;+&nbsp;decimal&nbsp;minutes&nbsp;+&nbsp;N/S)<BR>
-<P>
+<DT><DD>
+<B>/</B>
+special character: this causes the value
+indicated by the next character to be  inverted. This applies only to simple
+numeric values such as depth and
+heading and not to values like time
+strings or positions with hemisphere
+characters.
+<DT><DD>
+<B>-</B>
+special character: this causes the value
+indicated by the next character to be
+multiplied by -1. This applies only
+to simple numeric values such as
+depth and heading and not to values
+like time strings or positions with
+hemisphere characters.
+<DT><DD>
+<B>^</B>
+special character: this causes the position
+value indicated by the next 'X', or 'Y' 
+character to be expressed as an easting or 
+northing in the projected coordinate system 
+(PCS) specified using the <B>-J</B> option.
+If no PCS is specified, then a Universal
+Tranvserse Mercator (UTM) projection will
+be used with the zone defined by the
+longitude of the first data point. This
+applies only to position values.
+<DT><DD>
+<B>c</B>
+for sonar tranducer depth (m)
+<DT><DD>
+<B>H</B>
+for heading (degrees)
+<DT><DD>
+<B>h</B>
+for course made good (degrees)
+<DT><DD>
+<B>J</B>
+for a time string (yyyy jd hh mm ss.ssssss)
+where jd is the day of the year
+<DT><DD>
+<B>j</B>
+for a time string (yyyy jd dm ss.ssssss)
+where jd is the day of the year
+and dm is the minute of the day
+<DT><DD>
+<B>L</B>
+for cumulative along-track distance (km)
+<DT><DD>
+<B>l</B>
+for cumulative along-track distance (m)
+<DT><DD>
+<B>M</B>
+for unix (epoch) time in decimal seconds since 1/1/70 00:00:00
+<DT><DD>
+<B>m</B>
+for time in decimal seconds since first record
+<DT><DD>
+<B>N</B>
+for ping count
+<DT><DD>
+<B>P</B>  for pitch in degrees
+<DT><DD>
+<B>p</B>  for draft in meters
+<DT><DD>
+<B>R</B>  for roll in degrees
+<DT><DD>
+<B>r</B>  for heave in meters
+<DT><DD>
+<B>S</B>  for speed (km/hr)
+<DT><DD>
+<B>s</B>  for speed made good (km/hr)
+<DT><DD>
+<B>T</B>  for a time string (yyyy/mm/dd/hh/mm/ss)
+<DT><DD>
+<B>t</B>  for a time string (yyyy mm dd hh mm ss)
+<DT><DD>
+<B>U</B>  for unix time in integer seconds since 1/1/70 00:00:00
+<DT><DD>
+<B>u</B>  for time in integer seconds since first record
+<DT><DD>
+<B>V</B>  for ping interval (decimal seconds)
+<DT><DD>
+<B>X</B>  for longitude (decimal degrees)
+<DT><DD>
+<B>x</B>  for longitude (degrees + decimal minutes + E/W)
+<DT><DD>
+<B>^X</B>  for easting (meters in projected coordinate system defined by <B>-J</B>)
+<DT><DD>
+<B>Y</B>  for latitude (decimal degrees)
+<DT><DD>
+<B>y</B>  for latitude (degrees + decimal minutes + N/S)
+<DT><DD>
+<B>^Y</B>  for northing (meters in projected coordinate system defined by <B>-J</B>)
+<BR>
+
 Default <I>output_format</I> = <B>tMXYHs</B> (time, unix time, latitude,
 longitude, heading, speed).
 <DT><B>-R</B>
@@ -510,7 +630,7 @@ available in some swath data formats.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 20 February 2017</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

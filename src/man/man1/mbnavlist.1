@@ -1,4 +1,4 @@
-.TH mbnavlist 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavlist 1 "20 February 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavlist\fP \- List navigation data in swath sonar data files.
 
@@ -8,7 +8,8 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbnavlist\fP [\fB\-B\fP\fIyr/mo/da/hr/mn/sc\fP \fB\-D\fP\fIdecimate\fP
 \fB\-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB\-F\fP\fIformat\fP
-\fB\-G\fP\fIdelimeter\fP \fB\-H\fP \fB\-I\fP\fIfile\fP \fB\-K\fP\fIkind\fP
+\fB\-G\fP\fIdelimeter\fP \fB\-H\fP \fB\-I\fP\fIfile\fP
+\fB\-J\fP\fIprojection\fP \fB\-K\fP\fIkind\fP
 \fB\-L\fP\fIlonflip\fP \fB\-N\fP\fInavchannel\fP
 \fB\-O\fP\fIoutput_format\fP \fB\-R\fP\fIwest/east/south/north\fP
 \fB\-S\fP\fIspeed\fP \fB\-T\fP\fItimegap\fP \fB\-V\fP \fB\-Z\fP\fIsegment\fP]
@@ -168,6 +169,55 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIfile\fP = "datalist.mb-1".
 .TP
+.B \-J
+\fIprojection\fP
+.br
+Including the 'X' and 'Y' characters in the \fB-O\fP\fIoutput_format\fP string
+causes longitude and latitude position values, respectively, to be output.
+These longitude and latitude values represent position in geographic coordinates,
+which for \fBMB-System\fP means longitude and latitude using the WGS84 geographic
+coordinate system. The \fB\-J\fP option can be used to specify
+an alternate, projected coordinate system (PCS) used to represent positions in
+"eastings" and "northings" (in meters relative to the PCS origin) rather than
+longitude and latitude (in degrees).
+When a PCS is defined with the \fB-J\fP option, users can output eastings by
+including '^X' in the \fIoutput_format\fP string defined with the \fB-O\fP option.
+Similarly, northings can be output using '^Y' in the \fIoutput_format\fP string.
+Universal Transverse Mercator (UTM) is the most commonly used PCS in the
+oceanographic community, but
+\fBMB-System\fP supports a large number of other PCS's as well.
+The underlying projection functions derive from the \fBPROJ.4\fP library
+created by Gerald Evenden of the U.S. Geological Survey and since extended
+by Frank Warmerdam and others of the open source geospatial community.
+
+The \fIprojection\fP argument for the \fB\-J\fP option can be either
+a PCS identifier from the projection definition list provided at the
+end of this manual page, or simply \fB\-J\fP\fIU\fP to specify using
+UTM in whatever zone is appropriate for the grid bounds specified
+with the \fB\-R\fP option.
+
+For instance, to fully specify a particular northern UTM
+zone, set \fIprojection\fP = UTMXXN where XX gives
+the UTM zone (defined from 01 to 60). As an example, a northern UTM
+zone 12 projection can be specified using \fB\-J\fP\fIUTM12N\fP.
+Southern UTM zones are specified as UTMXXS. The European Petroleum
+Survey Group (EPSG) has defined a large number of PCS's used worldwide
+and assigned number id's to each; one can also specify the northern
+UTM zone 12 projection using its EPSG designation,
+or \fB\-J\fP\fIepsg32612\fP.
+When the projected coordinate system is fully specified
+by the \fB\-J\fP option, then the grid bounds may be specified using
+\fB\-R\fP in either longitude and latitude or in eastings and northings.
+
+Alternatively, one may indicate a UTM projection without specifying the
+zone by using \fB\-J\fP\fIU\fP. In this case, the
+UTM zone will be inferred from the longitude and latitude of the first data
+point. If the user requests easting or northing output in
+the \fIoutput_format\fP string without specifying a particular PCS using the
+\fB-J\fP option, then \fBmblist\fP
+will use a UTM projection with the zone specified according to the position
+of the first data point.
+.TP
 .B \-K
 \fIkind\fP
 .br
@@ -252,36 +302,103 @@ of all data record types in the file. This option is superceded by the
 .br
 Determines the form of the output. \fIOutput_format\fP is a string composed
 of one or more of the following characters:
-
- 	\fBc\fP  for sonar depth (meters)
- 	\fBH\fP  for heading (degrees)
- 	\fBh\fP  for course made good (degrees)
-  	\fBJ\fP  for a time string (yyyy jd hh mm ss.ssssss)
-                 where jd is the julian day of the year
-  	\fBj\fP  for a time string (yyyy jd dm ss.ssssss)
-                 where jd is the julian day of the year
-                 and dm is the minute of the day
- 	\fBL\fP  for cumulative along-track distance (km)
- 	\fBl\fP  for cumulative along-track distance (m)
- 	\fBM\fP  for unix time in decimal seconds since 1/1/70 00:00:00
- 	\fBm\fP  for time in decimal seconds since first record
- 	\fBN\fP  for ping count
- 	\fBP\fP  for pitch in degrees
- 	\fBp\fP  for draft in meters
- 	\fBR\fP  for roll in degrees
- 	\fBr\fP  for heave in meters
-  	\fBS\fP  for speed (km/hr)
-  	\fBs\fP  for speed made good (km/hr)
-  	\fBT\fP  for a time string (yyyy/mm/dd/hh/mm/ss)
- 	\fBt\fP  for a time string (yyyy mm dd hh mm ss)
- 	\fBU\fP  for unix time in integer seconds since 1/1/70 00:00:00
- 	\fBu\fP  for time in integer seconds since first record
- 	\fBV\fP  for ping interval (decimal seconds)
- 	\fBX\fP  for longitude (decimal degrees)
- 	\fBx\fP  for longitude (degrees + decimal minutes + E/W)
- 	\fBY\fP  for latitude (decimal degrees)
- 	\fBy\fP  for latitude (degrees + decimal minutes + N/S)
-
+.IP
+\fB/\fP
+special character: this causes the value
+indicated by the next character to be  inverted. This applies only to simple
+numeric values such as depth and
+heading and not to values like time
+strings or positions with hemisphere
+characters.
+.IP
+\fB\-\fP
+special character: this causes the value
+indicated by the next character to be
+multiplied by \-1. This applies only
+to simple numeric values such as
+depth and heading and not to values
+like time strings or positions with
+hemisphere characters.
+.IP
+\fB^\fP
+special character: this causes the position
+value indicated by the next 'X', or 'Y' 
+character to be expressed as an easting or 
+northing in the projected coordinate system 
+(PCS) specified using the \fB-J\fP option.
+If no PCS is specified, then a Universal
+Tranvserse Mercator (UTM) projection will
+be used with the zone defined by the
+longitude of the first data point. This
+applies only to position values.
+.IP
+\fBc\fP
+for sonar tranducer depth (m)
+.IP
+\fBH\fP
+for heading (degrees)
+.IP
+\fBh\fP
+for course made good (degrees)
+.IP
+\fBJ\fP
+for a time string (yyyy jd hh mm ss.ssssss)
+where jd is the day of the year
+.IP
+\fBj\fP
+for a time string (yyyy jd dm ss.ssssss)
+where jd is the day of the year
+and dm is the minute of the day
+.IP
+\fBL\fP
+for cumulative along-track distance (km)
+.IP
+\fBl\fP
+for cumulative along-track distance (m)
+.IP
+\fBM\fP
+for unix (epoch) time in decimal seconds since 1/1/70 00:00:00
+.IP
+\fBm\fP
+for time in decimal seconds since first record
+.IP
+\fBN\fP
+for ping count
+.IP
+\fBP\fP  for pitch in degrees
+.IP
+\fBp\fP  for draft in meters
+.IP
+\fBR\fP  for roll in degrees
+.IP
+\fBr\fP  for heave in meters
+.IP
+\fBS\fP  for speed (km/hr)
+.IP
+\fBs\fP  for speed made good (km/hr)
+.IP
+\fBT\fP  for a time string (yyyy/mm/dd/hh/mm/ss)
+.IP
+\fBt\fP  for a time string (yyyy mm dd hh mm ss)
+.IP
+\fBU\fP  for unix time in integer seconds since 1/1/70 00:00:00
+.IP
+\fBu\fP  for time in integer seconds since first record
+.IP
+\fBV\fP  for ping interval (decimal seconds)
+.IP
+\fBX\fP  for longitude (decimal degrees)
+.IP
+\fBx\fP  for longitude (degrees + decimal minutes + E/W)
+.IP
+\fB^X\fP  for easting (meters in projected coordinate system defined by \fB-J\fP)
+.IP
+\fBY\fP  for latitude (decimal degrees)
+.IP
+\fBy\fP  for latitude (degrees + decimal minutes + N/S)
+.IP
+\fB^Y\fP  for northing (meters in projected coordinate system defined by \fB-J\fP)
+.br
 Default \fIoutput_format\fP = \fBtMXYHs\fP (time, unix time, latitude,
 longitude, heading, speed).
 .TP

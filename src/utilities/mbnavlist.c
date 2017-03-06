@@ -109,6 +109,7 @@ int main (int argc, char **argv)
 	int	time_j[5];
 	int	invert_next_value = MB_NO;
 	int	signflip_next_value = MB_NO;
+	int projectednav_next_value = MB_NO;
 	int	first = MB_YES;
 	int	ascii = MB_YES;
 	int	segment = MB_NO;
@@ -172,6 +173,16 @@ int main (int argc, char **argv)
 	double	navlon_old, navlat_old;
 	double	dx, dy;
 	double	b;
+	
+	/* projected coordinate system */
+	int use_projection = MB_NO;
+	char projection_pars[MB_PATH_MAXLINE];
+	char projection_id[MB_PATH_MAXLINE];
+	int	proj_status;
+	void *pjptr = NULL;
+	double reference_lon, reference_lat;
+	int utm_zone;
+	double naveasting, navnorthing, deasting, dnorthing;
 
 	int	read_data;
 	int	inav, n;
@@ -194,11 +205,13 @@ int main (int argc, char **argv)
 	list[4]='H';
 	list[5]='s';
 	n_list = 6;
-	sprintf(delimiter, "\t");
+	delimiter[0] = '\t';
+	delimiter[1] = '\0';
+	projection_pars[0] = '\0';
 	decimate = 1;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaB:b:D:d:E:e:F:f:G:g:I:i:K:k:L:l:N:n:O:o:R:r:S:s:T:t:Z:z:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:D:d:E:e:F:f:G:g:I:i:J:j:K:k:L:l:N:n:O:o:R:r:S:s:T:t:Z:z:VvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -250,6 +263,12 @@ int main (int argc, char **argv)
 			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
+		case 'J':
+		case 'j':
+			sscanf (optarg,"%s", projection_pars);
+			use_projection = MB_YES;
+			flag++;
+			break;
 		case 'K':
 		case 'k':
 			sscanf (optarg,"%d", &data_kind);
@@ -269,7 +288,11 @@ int main (int argc, char **argv)
 		case 'o':
 			for(j=0,n_list=0;j<(int)strlen(optarg);j++,n_list++)
 				if (n_list<MAX_OPTIONS)
+					{
 					list[n_list] = optarg[j];
+					if (list[n_list] == '^')
+						use_projection = MB_YES;
+					}
 			flag++;
 			break;
 		case 'R':
@@ -355,6 +378,8 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       segment_tag:    %s\n",segment_tag);
 		fprintf(stderr,"dbg2       delimiter:      %s\n",delimiter);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
+		fprintf(stderr,"dbg2       use_projection: %d\n",use_projection);
+		fprintf(stderr,"dbg2       projection_pars:%s\n",projection_pars);
 		fprintf(stderr,"dbg2       n_list:         %d\n",n_list);
 		for (i=0;i<n_list;i++)
 			fprintf(stderr,"dbg2         list[%d]:      %c\n",
@@ -633,6 +658,57 @@ time_i[3],  time_i[4],  seconds);
 							= speed_made_good_old;
 					}
 				distance_total += 0.001 * distance;
+			
+				/* get projected navigation if needed */
+				if (use_projection == MB_YES)
+					{
+					/* set up projection if this is the first data */
+					if (pjptr == NULL)
+						{
+						/* Default projection is UTM */
+						if  (strlen(projection_pars) == 0)
+							strcpy(projection_pars, "U");
+							
+						/* check for UTM with undefined zone */
+						if (strcmp(projection_pars, "UTM") == 0
+							|| strcmp(projection_pars, "U") == 0
+							|| strcmp(projection_pars, "utm") == 0
+							|| strcmp(projection_pars, "u") == 0)
+							{
+							reference_lon = navlon;
+							if (reference_lon < 180.0)
+								reference_lon += 360.0;
+							if (reference_lon >= 180.0)
+								reference_lon -= 360.0;
+							utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+							reference_lat = navlat;
+							if (reference_lat >= 0.0)
+								sprintf(projection_id, "UTM%2.2dN", utm_zone);
+							else
+								sprintf(projection_id, "UTM%2.2dS", utm_zone);
+							}
+						else
+							strcpy(projection_id, projection_pars);
+				
+						/* set projection flag */
+						proj_status = mb_proj_init(verbose, projection_id, &(pjptr), &error);
+		
+						/* if projection not successfully initialized then quit */
+						if (proj_status != MB_SUCCESS)
+							{
+							fprintf(stderr,"\nOutput projection %s not found in database\n",
+								projection_id);
+							fprintf(stderr,"\nProgram <%s> Terminated\n",
+								program_name);
+							error = MB_ERROR_BAD_PARAMETER;
+							mb_memory_clear(verbose, &error);
+							exit(error);
+							}
+						}
+					
+					/* get projected navigation */
+					mb_proj_forward(verbose, pjptr, navlon, navlat, &naveasting, &navnorthing, &error);
+					}
 
 				/* reset old values */
 				navlon_old = navlon;
@@ -654,17 +730,17 @@ time_i[3],  time_i[4],  seconds);
 							signflip_next_value = MB_YES;
 							break;
 						case 'c': /* Sonar transducer depth (m) */
-							printsimplevalue(verbose, sonardepth, 0, 3, ascii,
+							printsimplevalue(verbose, sonardepth, 0, 4, ascii,
 									    &invert_next_value,
 									    &signflip_next_value, &error);
 							break;
 						case 'H': /* heading */
-							printsimplevalue(verbose, heading, 6, 2, ascii,
+							printsimplevalue(verbose, heading, 7, 3, ascii,
 									    &invert_next_value,
 									    &signflip_next_value, &error);
 							break;
 						case 'h': /* course */
-							printsimplevalue(verbose, course, 6, 2, ascii,
+							printsimplevalue(verbose, course, 7, 3, ascii,
 									    &invert_next_value,
 									    &signflip_next_value, &error);
 							break;
@@ -718,12 +794,12 @@ time_i[3],  time_i[4],  seconds);
 							    }
 							break;
 						case 'L': /* along-track distance (km) */
-							printsimplevalue(verbose, distance_total, 7, 3, ascii,
+							printsimplevalue(verbose, distance_total, 8, 4, ascii,
 									    &invert_next_value,
 									    &signflip_next_value, &error);
 							break;
 						case 'l': /* along-track distance (m) */
-							printsimplevalue(verbose, 1000.0 * distance_total, 7, 3, ascii,
+							printsimplevalue(verbose, 1000.0 * distance_total, 8, 4, ascii,
 									    &invert_next_value,
 									    &signflip_next_value, &error);
 							break;
@@ -746,32 +822,32 @@ time_i[3],  time_i[4],  seconds);
 									    &signflip_next_value, &error);
 							break;
 						case 'P': /* pitch */
-							printsimplevalue(verbose, pitch, 5, 2, ascii,
+							printsimplevalue(verbose, pitch, 6, 3, ascii,
 									    &invert_next_value,
 									    &signflip_next_value, &error);
 							break;
 						case 'p': /* draft */
-							printsimplevalue(verbose, draft, 5, 2, ascii,
+							printsimplevalue(verbose, draft, 7, 4, ascii,
 									    &invert_next_value,
 									    &signflip_next_value, &error);
 							break;
 						case 'R': /* roll */
-							printsimplevalue(verbose, roll, 5, 2, ascii,
+							printsimplevalue(verbose, roll, 6, 3, ascii,
 									    &invert_next_value,
 									    &signflip_next_value, &error);
 							break;
 						case 'r': /* heave */
-							printsimplevalue(verbose, heave, 5, 2, ascii,
+							printsimplevalue(verbose, heave, 7, 4, ascii,
 									    &invert_next_value,
 									    &signflip_next_value, &error);
 							break;
 						case 'S': /* speed */
-							printsimplevalue(verbose, speed, 5, 2, ascii,
+							printsimplevalue(verbose, speed, 6, 3, ascii,
 									    &invert_next_value,
 									    &signflip_next_value, &error);
 							break;
 						case 's': /* speed made good */
-							printsimplevalue(verbose, speed_made_good, 5, 2, ascii,
+							printsimplevalue(verbose, speed_made_good, 6, 3, ascii,
 									    &invert_next_value,
 									    &signflip_next_value, &error);
 							break;
@@ -859,10 +935,21 @@ time_i[3],  time_i[4],  seconds);
 							    }
 							break;
 						case 'X': /* longitude decimal degrees */
-							dlon = navlon;
-							printsimplevalue(verbose, dlon, 14, 9, ascii,
-									    &invert_next_value,
-									    &signflip_next_value, &error);
+							if (projectednav_next_value == MB_NO)
+								{
+								dlon = navlon;
+								printsimplevalue(verbose, dlon, 15, 10, ascii,
+											&invert_next_value,
+											&signflip_next_value, &error);
+								}
+							else
+								{
+								deasting = naveasting;
+								printsimplevalue(verbose, deasting, 15, 3, ascii,
+											&invert_next_value,
+											&signflip_next_value, &error);
+								}
+							projectednav_next_value = MB_NO;
 							break;
 						case 'x': /* longitude degress + decimal minutes */
 							dlon = navlon;
@@ -877,7 +964,7 @@ time_i[3],  time_i[4],  seconds);
 							minutes = 60.0*(dlon - degrees);
 							if (ascii == MB_YES)
 							    {
-							    printf("%3d %9.6f%c",
+							    printf("%3d %11.8f%c",
 								degrees, minutes, hemi);
 							    }
 							else
@@ -890,10 +977,21 @@ time_i[3],  time_i[4],  seconds);
 							    }
 							break;
 						case 'Y': /* latitude decimal degrees */
-							dlat = navlat;
-							printsimplevalue(verbose, dlat, 14, 9, ascii,
-									    &invert_next_value,
-									    &signflip_next_value, &error);
+							if (projectednav_next_value == MB_NO)
+								{
+								dlat = navlat;
+								printsimplevalue(verbose, dlat, 15, 10, ascii,
+											&invert_next_value,
+											&signflip_next_value, &error);
+								}
+							else
+								{
+								dnorthing = navnorthing;
+								printsimplevalue(verbose, dnorthing, 15, 3, ascii,
+											&invert_next_value,
+											&signflip_next_value, &error);
+								}
+							projectednav_next_value = MB_NO;
 							break;
 						case 'y': /* latitude degrees + decimal minutes */
 							dlat = navlat;
@@ -908,7 +1006,7 @@ time_i[3],  time_i[4],  seconds);
 							minutes = 60.0*(dlat - degrees);
 							if (ascii == MB_YES)
 							    {
-							    printf("%3d %9.6f%c",
+							    printf("%3d %11.8f%c",
 								degrees, minutes, hemi);
 							    }
 							else

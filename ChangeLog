@@ -244,16 +244,31 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.5.2293 (March 6, 2017)
+
+Mb7kpreprocess: Fixed bug in handling old MBARI Mapping AUV with navigation
+and attitude data in deprecated "Bluefin" records.
+
+Mbnavlist: Added ability to output positions in a projected coordinate system.
+
+Mblist: Use ping count as ping number when the data format does not include
+ping or shot number.
+
+Format 21 (MBF_HSATLRAW): Fixed bug in handling zero length comments.
+
+Format 231 (MBF_3DDEPTHP): Fixed bug in handling angular offset values in
+preprocessing.
+
 -----> 5.5.2292 (January 30, 2017)
 
-mblist: Added ability to output positions in a projected coordinate system, 
+Mblist: Added ability to output positions in a projected coordinate system, 
 to output positions of the sensor instead of soundings or pixels, or to output
 positions relative to the sensor in the world frame.
 
-mbm_route2mission: Fixed handling of waypoint spacing for constant depth segments
+Mbm_route2mission: Fixed handling of waypoint spacing for constant depth segments
 of missions.
 
-mbnavadjust: Now outputs the altered project less frequently (every tenth new tie
+Mbnavadjust: Now outputs the altered project less frequently (every tenth new tie
 instead of every tie).
 
 -----> 5.5.2291 (January 12, 2017)
