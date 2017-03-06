@@ -5785,7 +5785,7 @@ int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 		v2detectionsetup = &(store->v2detectionsetup);
 		v2rawdetection = &(store->v2rawdetection);
 		bluefin = &(store->bluefin);
-	
+
 		/* print out record headers */
 		if (store->read_volatilesettings == MB_YES)
 			{
@@ -6196,6 +6196,32 @@ int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 			if (bathymetry->optionaldata == MB_NO
 				|| pp_recalculate_bathymetry == MB_YES)
 				{
+		
+				/* print debug statements */
+				if (verbose >= 2)
+					{
+					fprintf(stderr,"\ndbg2 Recalculating bathymetry in %s: 7k ping records read:\n",function_name);
+					fprintf(stderr,"dbg2      current_ping_number:           %d\n", store->current_ping_number);
+					fprintf(stderr,"dbg2      read_volatilesettings:         %d\n", store->read_volatilesettings);
+					fprintf(stderr,"dbg2      read_matchfilter:              %d\n", store->read_matchfilter);
+					fprintf(stderr,"dbg2      read_beamgeometry:             %d\n", store->read_beamgeometry);
+					fprintf(stderr,"dbg2      read_remotecontrolsettings:    %d\n", store->read_remotecontrolsettings);
+					fprintf(stderr,"dbg2      read_bathymetry:               %d\n", store->read_bathymetry);
+					fprintf(stderr,"dbg2      read_backscatter:              %d\n", store->read_backscatter);
+					fprintf(stderr,"dbg2      read_beam:                     %d\n", store->read_beam);
+					fprintf(stderr,"dbg2      read_verticaldepth:            %d\n", store->read_verticaldepth);
+					fprintf(stderr,"dbg2      read_tvg:                      %d\n", store->read_tvg);
+					fprintf(stderr,"dbg2      read_image:                    %d\n", store->read_image);
+					fprintf(stderr,"dbg2      read_v2pingmotion:             %d\n", store->read_v2pingmotion);
+					fprintf(stderr,"dbg2      read_v2detectionsetup:         %d\n", store->read_v2detectionsetup);
+					fprintf(stderr,"dbg2      read_v2beamformed:             %d\n", store->read_v2beamformed);
+					fprintf(stderr,"dbg2      read_v2detection:              %d\n", store->read_v2detection);
+					fprintf(stderr,"dbg2      read_v2rawdetection:           %d\n", store->read_v2rawdetection);
+					fprintf(stderr,"dbg2      read_v2snippet:                %d\n", store->read_v2snippet);
+					fprintf(stderr,"dbg2      read_calibratedsnippet:        %d\n", store->read_calibratedsnippet);
+					fprintf(stderr,"dbg2      read_processedsidescan:        %d\n", store->read_processedsidescan);
+					}
+
 				/* initialize all of the beams */
 				for (i=0;i<bathymetry->number_beams;i++)
 					{
@@ -6295,7 +6321,7 @@ int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 									error);
 
 					status = mb_platform_orientation_offset(verbose,  (void *)platform,
-									platform_target_sensor, 0,
+									platform_target_sensor, 1,
 									&(rx_align.heading), &(rx_align.roll), &(rx_align.pitch),
 									error);
 
@@ -6388,6 +6414,9 @@ int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 						bathymetry->depth[i] = zz + sensordepth - heave;
 						bathymetry->pointing_angle[i] = DTR * theta;
 						bathymetry->azimuth_angle[i] = DTR * phi;
+//fprintf(stderr,"beam:%d time_d:%f heading:%f %f roll:%f %f pitch:%f %f theta:%f phi:%f bath:%f %f %f\n",
+//i,time_d + bathymetry->range[i],heading,beamheading,roll,beamroll,pitch,beampitch,theta,phi,
+//bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);
 						}
 					}
 

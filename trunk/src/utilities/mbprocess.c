@@ -5443,14 +5443,14 @@ time_d); */
 								alpha += pitch - pitch_org;
 								}
 							if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-									alpha += process.mbp_pitchbias;
-								if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-									beta += process.mbp_rollbias;
-								else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE
+								alpha += process.mbp_pitchbias;
+							if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+								beta += process.mbp_rollbias;
+							else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE
 								&& angles[i] >= 0.0)
-									beta += process.mbp_rollbias_stbd;
-								else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-									beta += process.mbp_rollbias_port;
+								beta += process.mbp_rollbias_stbd;
+							else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+								beta += process.mbp_rollbias_port;
 							mb_rollpitch_to_takeoff(
 								verbose,
 								alpha, beta,

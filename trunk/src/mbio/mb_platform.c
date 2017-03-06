@@ -1360,7 +1360,6 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 		if ((fp = fopen(platform_file, "w")) != NULL)
 			{
 			right_now = time((time_t *)0);
-fprintf(stderr,"ctime:%s\n",ctime(&right_now));
 			strcpy(date,ctime(&right_now));
 			date[strlen(date)-1] = '\0';
 			if ((user_ptr = getenv("USER")) == NULL)

@@ -2418,8 +2418,8 @@ int main (int argc, char **argv)
 			&& kind == MB_DATA_DATA)
 			{
 			nread++;
-                        if (use_pingnumber == MB_NO)
-                            pingnumber = nread;
+            if (use_pingnumber == MB_NO)
+                pingnumber = nread;
 			distance_total += distance;
 			}
 			
@@ -4107,7 +4107,7 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					break;
 				case 'p': /* draft */
-					printsimplevalue(verbose, output[i], draft, 6, 3, ascii,
+					printsimplevalue(verbose, output[i], draft, 7, 4, ascii,
 							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;

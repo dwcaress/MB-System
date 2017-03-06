@@ -591,6 +591,8 @@ int mbsys_3datdepthlidar_preprocess
 	/* interpolate navigation and attitude */
 	time_d = store->time_d;
 	mb_get_date(verbose, time_d, time_i);
+	
+//fprintf(stderr,"time_d:%f   1: lon:%.12f lat:%.12f ", store->time_d, store->navlon, store->navlat);
 
 	/* get nav sensordepth heading attitude values for record timestamp */
 	if (n_nav > 0)
@@ -608,6 +610,7 @@ int mbsys_3datdepthlidar_preprocess
 					time_d, &speed, &jnav,
 					&interp_error);
 		store->speed = (float) speed;
+//fprintf(stderr," 2: lon:%.12f lat:%.12f ", store->navlon, store->navlat);
 		}
 	if (n_sensordepth > 0)
 		{
@@ -637,6 +640,7 @@ int mbsys_3datdepthlidar_preprocess
 					attitude_time_d-1, attitude_roll-1, n_attitude, 
 					time_d, &roll, &jattitude,
 					&interp_error);
+		roll = -roll;
 		store->roll = (float) roll;
 		interp_status = mb_linear_interp(verbose,
 					attitude_time_d-1, attitude_pitch-1, n_attitude, 
@@ -648,10 +652,13 @@ int mbsys_3datdepthlidar_preprocess
 		//			time_d, &store->heave, &jattitude,
 		//			&interp_error);
 		}
-//fprintf(stderr,"PREPROCESS: %f %f ", time_d, store->sensordepth);
+
 	/* do lever arm correction */
 	if (platform_ptr != NULL)
 		{
+//fprintf(stderr,"Before: lon:%f lat:%f sensordepth:%f heading:%f roll:%f pitch:%f   ",
+//store->navlon,store->navlat,store->sensordepth,heading,roll,pitch);
+
 		/* calculate sonar position position */
 		status = mb_platform_position (verbose, platform_ptr,
 						platform_target_sensor, 0,
@@ -659,6 +666,7 @@ int mbsys_3datdepthlidar_preprocess
 						heading, roll, pitch,
 						&store->navlon, &store->navlat, &store->sensordepth,
 						error);
+//printf(stderr,"   3: lon:%.12f lat:%.12f \n", store->navlon, store->navlat);
 
 		/* calculate sonar attitude */
 		status = mb_platform_orientation_target (verbose, platform_ptr,
@@ -666,8 +674,12 @@ int mbsys_3datdepthlidar_preprocess
 						heading, roll, pitch,
 						&heading, &roll, &pitch,
 						error);
+		store->heading = (float) heading;
+		store->roll = (float) roll;
+		store->pitch = (float) pitch;
+//fprintf(stderr,"After: lon:%f lat:%f sensordepth:%f heading:%f roll:%f pitch:%f\n",
+//store->navlon,store->navlat,store->sensordepth,store->heading,store->roll,store->pitch);
 		}
-//fprintf(stderr,"    %f\n ", store->sensordepth);
 
 	/* loop over all pulses */
 	for (i=0;i<store->num_pulses;i++)
@@ -677,9 +689,6 @@ int mbsys_3datdepthlidar_preprocess
 		
 		/* set time */
 		pulse->time_d = store->time_d + 0.000001 * pulse->pulse_time_offset;
-		heading = pulse->heading;
-		roll = pulse->roll;
-		pitch = pulse->pitch;
 		
 		/* get nav sensordepth heading attitude values for record timestamp */
 		if (n_nav > 0)
@@ -725,6 +734,7 @@ int mbsys_3datdepthlidar_preprocess
 						attitude_time_d-1, attitude_roll-1, n_attitude, 
 						pulse->time_d, &roll, &jattitude,
 						&interp_error);
+			roll = -roll;
 			pulse->roll = (float) roll;
 			interp_status = mb_linear_interp(verbose,
 						attitude_time_d-1, attitude_pitch-1, n_attitude, 
@@ -740,7 +750,7 @@ int mbsys_3datdepthlidar_preprocess
 		/* do lever arm correction */
 		if (platform_ptr != NULL)
 			{
-			/* calculate sonar position position */
+			/* calculate sensor position position */
 			status = mb_platform_position (verbose, platform_ptr,
 							platform_target_sensor, 0,
 							pulse->navlon, pulse->navlat, pulse->sensordepth,
@@ -748,7 +758,7 @@ int mbsys_3datdepthlidar_preprocess
 							&pulse->navlon, &pulse->navlat, &pulse->sensordepth,
 							error);
 	
-			/* calculate sonar attitude */
+			/* calculate sensor attitude */
 			status = mb_platform_orientation_target (verbose, platform_ptr,
 							platform_target_sensor, 0,
 							heading, roll, pitch,
@@ -937,6 +947,7 @@ int mbsys_3datdepthlidar_insert
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
+	double dlon, dlat, dheading;
 	int	i;
 
 	/* check for non-null data */
@@ -987,12 +998,21 @@ int mbsys_3datdepthlidar_insert
 		store->navlat = navlat;
 		store->speed = speed;
 		store->heading = heading;
+		
+		dlon = navlon - store->navlon;
+		dlat = navlat - store->navlat;
+		dheading = heading - store->heading;
 
 		/* set the bathymetry */
 		for (i=0;i<nbath;i++)
 			{
 			pulse = &store->pulses[i];
 			pulse->beamflag = beamflag[i];
+			pulse->navlon += dlon;
+			pulse->navlat += dlat;
+			pulse->heading += dheading;
+			if (pulse->heading < 0.0) pulse->heading += 360.0;
+			if (pulse->heading > 360.0) pulse->heading -= 360.0;
 			pulse->depth = bath[i] - pulse->sensordepth; 
 			pulse->amplitude = amp[i]; 
 			pulse->acrosstrack = bathacrosstrack[i]; 
@@ -1811,6 +1831,7 @@ int mbsys_3datdepthlidar_insert_nav
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
+	double dlon, dlat, dheading, dsensordepth, droll, dpitch;
 	int	i;
 
 	/* check for non-null data */
@@ -1854,6 +1875,13 @@ int mbsys_3datdepthlidar_insert_nav
 	/* insert data in swathplus data structure */
 	if (store->kind == MB_DATA_DATA)
 		{
+		dlon = navlon - store->navlon;
+		dlat = navlat - store->navlat;
+		dheading = heading - store->heading;
+		dsensordepth = draft - heave - store->sensordepth;
+		droll = roll - store->roll;
+		dpitch = pitch - store->pitch;
+		
 		store->time_d = time_d;
 		store->navlon = navlon;
 		store->navlat = navlat;
@@ -1867,12 +1895,14 @@ int mbsys_3datdepthlidar_insert_nav
 		for (i=0;i<store->num_pulses;i++)
 			{
 			pulse = &store->pulses[i];
-			pulse->navlon = store->navlon;
-			pulse->navlat = store->navlat; 
-			pulse->sensordepth = store->sensordepth; 
-			pulse->heading = store->heading; 
-			pulse->roll = store->roll; 
-			pulse->pitch = store->pitch; 
+			pulse->navlon += dlon;
+			pulse->navlat += dlat; 
+			pulse->sensordepth += dsensordepth; 
+			pulse->heading += dheading; 
+			if (pulse->heading < 0.0) pulse->heading += 360.0;
+			if (pulse->heading > 360.0) pulse->heading -= 360.0;
+			pulse->roll += droll; 
+			pulse->pitch += dpitch; 
 			}
 
 		/* done translating values */
@@ -2336,7 +2366,7 @@ int mbsys_3datdepthlidar_calculatebathymetry
 				
 				/* apply pitch and roll */
 				alpha = pulse->forward_track_angle + pulse->pitch;
-				beta = 90.0 - pulse->cross_track_angle - pulse->roll;
+				beta = 90.0 - pulse->cross_track_angle + pulse->roll;
 				
 				/* translate to takeoff coordinates */
 				mb_rollpitch_to_takeoff(
@@ -2351,7 +2381,7 @@ int mbsys_3datdepthlidar_calculatebathymetry
 				pulse->acrosstrack = xx * cos(DTR * phi) + pulse->cross_track_offset;
 				pulse->alongtrack = xx * sin(DTR * phi) + pulse->forward_track_offset
 							+ 0.0000002777777 * pulse->pulse_time_offset * store->speed;
-//fprintf(stderr,"pulse:%d time_d:%f %f heading:%f pitch:%f %f roll:%f %f alpha:%f beta:%f theta:%f phi:%f  bath: %f %f %f\n",
+//fprintf(stderr,"pulse:%d time_d:%f %f heading:%f roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  bath: %f %f %f\n",
 //i, store->time_d, pulse->time_d, store->heading, store->roll, pulse->roll, store->pitch, pulse->pitch,
 //alpha, beta, theta, phi,
 //pulse->depth, pulse->acrosstrack, pulse->alongtrack);

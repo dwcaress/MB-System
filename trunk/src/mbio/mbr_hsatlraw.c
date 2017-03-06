@@ -2426,7 +2426,10 @@ int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 		{
 		nchars = strlen(line+shift);
-		strncpy(data->comment,line+shift,nchars-1);
+		if (nchars > 0)
+			strncpy(data->comment,line+shift,nchars);
+		else
+			data->comment[0] = '\0';
 		}
 
 	/* print debug statements */

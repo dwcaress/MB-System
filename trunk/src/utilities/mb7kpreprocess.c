@@ -914,7 +914,7 @@ main(int argc, char **argv)
 		}
 	else if  (nav_source == MB_DATA_NAV2)
 		{
-		nav_source = R7KRECID_BluefinNav;
+		nav_source = R7KRECID_Bluefin;
 		}
 	else if (nav_source == MB_DATA_NAV3)
 		{
@@ -924,13 +924,17 @@ main(int argc, char **argv)
 		{
 		attitude_source = R7KRECID_RollPitchHeave;
 		}
+	else if (attitude_source == MB_DATA_NAV2)
+		{
+		attitude_source = R7KRECID_Bluefin;
+		}
 	if (heading_source == MB_DATA_HEADING)
 		{
 		heading_source = R7KRECID_Heading;
 		}
 	else if (heading_source == MB_DATA_NAV2)
 		{
-		heading_source = R7KRECID_BluefinNav;
+		heading_source = R7KRECID_Bluefin;
 		}
 	else if (heading_source == MB_DATA_NAV3)
 		{
@@ -942,7 +946,7 @@ main(int argc, char **argv)
 		}
 	else if (sonardepth_source == MB_DATA_NAV2)
 		{
-		sonardepth_source = R7KRECID_BluefinNav;
+		sonardepth_source = R7KRECID_Bluefin;
 		}
 	else if (sonardepth_source == MB_DATA_NAV3)
 		{
@@ -3165,7 +3169,7 @@ main(int argc, char **argv)
 					}
 				}
 				if (verbose > 0)
-					fprintf(stderr, "R7KRECID_BluefinNav: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
+					fprintf(stderr, "R7KRECID_Bluefin Nav: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
 					    time_i[0], time_i[1], time_i[2],
 						time_i[3], time_i[4], time_i[5], time_i[6],
 						header->RecordNumber, bluefin->number_frames);
@@ -3305,7 +3309,7 @@ main(int argc, char **argv)
 					 * store regular nav and attitude
 					 * values
 					 */
-					if (nav_source == R7KRECID_BluefinNav) {
+					if (nav_source == R7KRECID_Bluefin) {
 						if (ndat_nav == 0 || dat_nav_time_d[ndat_nav - 1] < bluefin->nav[i].position_time) {
 							dat_nav_time_d[ndat_nav] = bluefin->nav[i].position_time;
 							dat_nav_lon[ndat_nav] = RTD * bluefin->nav[i].longitude;
@@ -3313,14 +3317,14 @@ main(int argc, char **argv)
 							dat_nav_speed[ndat_nav] = bluefin->nav[i].speed;
 							ndat_nav++;
 						}
-					if (heading_source == R7KRECID_BluefinNav) {
+					if (heading_source == R7KRECID_Bluefin) {
 						if (ndat_heading == 0 || dat_heading_time_d[ndat_heading - 1] < bluefin->nav[i].position_time) {
 							dat_heading_time_d[ndat_heading] = bluefin->nav[i].position_time;
 							dat_heading_heading[ndat_heading] = RTD * bluefin->nav[i].yaw;
 							ndat_heading++;
 						}
 						}
-					if (attitude_source == R7KRECID_BluefinNav) {
+					if (attitude_source == R7KRECID_Bluefin) {
 						if (ndat_rph == 0 || dat_rph_time_d[ndat_rph - 1] < bluefin->nav[i].position_time) {
 							dat_rph_time_d[ndat_rph] = bluefin->nav[i].position_time;
 							dat_rph_roll[ndat_rph] = RTD * bluefin->nav[i].roll;
@@ -3334,12 +3338,12 @@ main(int argc, char **argv)
 						ndat_altitude++;
 					}
 						}
-					if (sonardepth_source == R7KRECID_BluefinNav) {
+					if (sonardepth_source == R7KRECID_Bluefin) {
 						if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth - 1] < bluefin->nav[i].depth_time) {
 							dat_sonardepth_time_d[ndat_sonardepth] = bluefin->nav[i].depth_time;
 							dat_sonardepth_sonardepth[ndat_sonardepth] = bluefin->nav[i].depth;
 							dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
-//fprintf(stderr,"Use R7KRECID_BluefinNav %f %f %f\n",
+//fprintf(stderr,"Use R7KRECID_Bluefin %f %f %f\n",
 //dat_sonardepth_time_d[ndat_sonardepth],bluefin->nav[i].depth,dat_sonardepth_sonardepth[ndat_sonardepth]);
 							ndat_sonardepth++;
 						}
@@ -7329,7 +7333,7 @@ main(int argc, char **argv)
 					header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
 
 					if (verbose > 0)
-						fprintf(stderr, "R7KRECID_BluefinNav:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+						fprintf(stderr, "R7KRECID_Bluefin Nav:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 							time_i[0], time_i[1], time_i[2],
 							time_i[3], time_i[4], time_i[5], time_i[6],
 						      header->RecordNumber);
@@ -7667,7 +7671,7 @@ main(int argc, char **argv)
 						for (i = 0; i < 16; i++)
 							bluefin->reserved[i] = 0;
 						if (verbose > 0)
-							fprintf(stderr, "R7KRECID_BluefinNav:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+							fprintf(stderr, "R7KRECID_Bluefin Nav:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 								time_i[0], time_i[1], time_i[2],
 								time_i[3], time_i[4], time_i[5], time_i[6],
 								header->RecordNumber);
@@ -7757,6 +7761,9 @@ main(int argc, char **argv)
 				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA
 				    && istore->read_beam == MB_YES)
 					istore->read_beam = MB_NO;
+				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA
+				    && istore->read_v2beamformed == MB_YES)
+					istore->read_v2beamformed = MB_NO;
 
 				/* write some data */
 				if (error == MB_ERROR_NO_ERROR && (nins < 1 || kind != MB_DATA_NAV2)) {
