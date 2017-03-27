@@ -60,7 +60,7 @@
 
 /* Macro definitions for the limits of the scale factor multipler */
 #define MIN_GSF_SF_MULT_VALUE  1
-#define MAX_GSF_SF_MULT_VALUE  ULONG_MAX
+#define MAX_GSF_SF_MULT_VALUE  UINT_MAX // Changed from ULONG_MAX for MB-System DW Caress 21 March 2017
 
 /* Typedef structure to hold the record index information */
 typedef struct

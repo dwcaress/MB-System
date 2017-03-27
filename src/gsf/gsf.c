@@ -165,7 +165,7 @@
 #include "gsf_indx.h"
 
 /* Macros required for this module */
-#ifndef USE_DEFAULT_FILE_FUNCTIONS
+#ifndef USE_DEFAULT_FILE_FUNCTIONS   // Added USE_DEFAULT_FILE_FUNCTIONS test for MB-System DW Caress 21 March 2017
 
 #undef fseek
 #undef ftell
@@ -252,17 +252,19 @@ gsfStat (const char *filename, long long *sz)
         return -1;
     }
 
-#ifdef USE_DEFAULT_FILE_FUNCTIONS
+#ifdef USE_DEFAULT_FILE_FUNCTIONS   // Added USE_DEFAULT_FILE_FUNCTIONS test for MB-System DW Caress 21 March 2017
     struct stat stbuf;
     rc = stat(filename, &stbuf);
 #else
-#if defined(__WINDOWS__) || defined(__MINGW32__)
+
+#if (defined __WINDOWS__) || (defined __MINGW32__)
     struct _stati64    stbuf;
     rc = _stati64(filename, &stbuf);
 #else
     struct stat64      stbuf;
     rc = stat64(filename, &stbuf);
 #endif
+
 #endif
 
     if (!rc)
@@ -458,7 +460,7 @@ gsfOpen(const char *filename, const int mode, int *handle)
     id.reserved = 0;
     id.recordID = GSF_RECORD_HEADER;
     strncpy(gsfFileTable[fileTableIndex].rec.header.version, GSF_VERSION, GSF_VERSION_SIZE-1);
-    gsfFileTable[fileTableIndex].rec.header.version[GSF_VERSION_SIZE] = 0;
+    gsfFileTable[fileTableIndex].rec.header.version[GSF_VERSION_SIZE-1] = 0; // changed "version[GSF_VERSION_SIZE]" to "version[GSF_VERSION_SIZE-1]" for MB-System DW Caress 21 March 2017
     gsfFileTable[fileTableIndex].bufferedBytes += gsfWrite(*handle, &id, &gsfFileTable[fileTableIndex].rec);
 
         /* Flush this record to disk so that the file size will be non-zero
@@ -794,7 +796,7 @@ gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_size)
         id.reserved = 0;
         id.recordID = GSF_RECORD_HEADER;
         strncpy(gsfFileTable[fileTableIndex].rec.header.version, GSF_VERSION, GSF_VERSION_SIZE-1);
-        gsfFileTable[fileTableIndex].rec.header.version[GSF_VERSION_SIZE] = 0;
+        gsfFileTable[fileTableIndex].rec.header.version[GSF_VERSION_SIZE-1] = 0; // changed "version[GSF_VERSION_SIZE]" to "version[GSF_VERSION_SIZE-1]" for MB-System DW Caress 21 March 2017
         gsfFileTable[fileTableIndex].bufferedBytes += gsfWrite(*handle, &id, &gsfFileTable[fileTableIndex].rec);
 
         /* Flush this record to disk so that the file size will be non-zero
@@ -9346,18 +9348,18 @@ gsfInitializeMBParams (gsfMBParams *p)
     int i;
 
     memset(p->start_of_epoch, 0, sizeof(p->start_of_epoch));
-    p->horizontal_datum = GSF_UNKNOWN_PARAM_VALUE;
-    p->vertical_datum = GSF_UNKNOWN_PARAM_VALUE;
-    p->roll_compensated = GSF_UNKNOWN_PARAM_VALUE;
-    p->pitch_compensated = GSF_UNKNOWN_PARAM_VALUE;
-    p->heave_compensated = GSF_UNKNOWN_PARAM_VALUE;
-    p->tide_compensated = GSF_UNKNOWN_PARAM_VALUE;
-    p->ray_tracing = GSF_UNKNOWN_PARAM_VALUE;
-    p->depth_calculation = GSF_UNKNOWN_PARAM_VALUE;
-    p->vessel_type = GSF_UNKNOWN_PARAM_VALUE;
-    p->full_raw_data = GSF_UNKNOWN_PARAM_VALUE;
-    p->msb_applied_to_attitude = GSF_UNKNOWN_PARAM_VALUE;
-    p->heave_removed_from_gps_tc = GSF_UNKNOWN_PARAM_VALUE;
+    p->horizontal_datum = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
+    p->vertical_datum = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
+    p->roll_compensated = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
+    p->pitch_compensated = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
+    p->heave_compensated = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
+    p->tide_compensated = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
+    p->ray_tracing = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
+    p->depth_calculation = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
+    p->vessel_type = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
+    p->full_raw_data = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
+    p->msb_applied_to_attitude = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
+    p->heave_removed_from_gps_tc = GSF_UNKNOWN_PARAM_INT;  // Changed from GSF_UNKNOWN_PARAM_VALUE for MB-System DW Caress 21 March 2017
     p->utc_offset = GSF_UNKNOWN_PARAM_INT;
     p->roll_reference = GSF_UNKNOWN_PARAM_INT;
     p->number_of_transmitters = GSF_UNKNOWN_PARAM_INT;

@@ -137,17 +137,7 @@ use POSIX;
 	"m4",   "16m",   "m5",   "16m",   "m6",   "16m");
 
 # Determine the GMT version
-@grdinfo = `gmt grdinfo 2>&1`;
-while (@grdinfo)
-	{
-	$line = shift @grdinfo;
-	if ($line =~
-		/^grdinfo\(core\)\s+(\S+)\s+\S+/)
-		{
-		($gmt_version) = $line =~
-			/^grdinfo\(core\)\s+(\S+)\s+\S+/;
-		}
-	}
+$gmt_version = `gmt --version`;
 
 # Get the current working directory.
 $current_working_dir = `pwd`;

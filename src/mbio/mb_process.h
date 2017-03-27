@@ -689,6 +689,59 @@
 #define MB_PR_FILE_NOT_EXIST		2
 #define MB_PR_NO_PARAMETER_FILE		3
 
+/* mbpreprocess defines */
+#define MB_PR_SSSOURCE_UNKNOWN              0
+#define MB_PR_SSSOURCE_SNIPPET              1
+#define MB_PR_SSSOURCE_CALIBRATEDSNIPPET    2
+#define MB_PR_SSSOURCE_WIDEBEAMBACKSCATTER  3
+#define MB_PR_KLUGE_NUM_MAX     10
+#define MB_PR_KLUGE_PAR_SIZE    64
+#define MB_PR_KLUGE_BEAMTWEAK                   1
+#define MB_PR_KLUGE_ZEROATTITUDECORRECTION      2
+#define MB_PR_KLUGE_ZEROALONGTRACKANGLES        3
+
+/* structure holding mbpreprocess parameters to be passed to preprocess
+ * functions of i/o modules */
+struct mb_preprocess_struct
+    {
+    int target_sensor;
+    
+    int timestamp_changed;
+    double time_d;
+    
+	int n_nav;
+    double *nav_time_d;
+    double *nav_lon;
+    double *nav_lat;
+	double *nav_speed;
+    
+	int n_sensordepth;
+    double *sensordepth_time_d;
+	double *sensordepth_sensordepth;
+    
+	int n_heading;
+    double *heading_time_d;
+    double *heading_heading;
+    
+	int n_altitude;
+    double *altitude_time_d;
+    double *altitude_altitude;
+    
+	int n_attitude;
+    double *attitude_time_d;
+    double *attitude_roll;
+	double *attitude_pitch;
+    double *attitude_heave;
+    
+    int no_change_survey;
+    int multibeam_sidescan_source;
+    int recalculate_bathymetry;
+    
+    int n_kluge;
+    int kluge_id[MB_PR_KLUGE_NUM_MAX];
+    char kluge_pars[MB_PR_KLUGE_NUM_MAX * MB_PR_KLUGE_PAR_SIZE];
+    };
+
 /* structure holding mbprocess parameters */
 struct mb_process_struct
 	{

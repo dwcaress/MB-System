@@ -229,6 +229,18 @@
 #define	MBSYS_SIMRAD3_BUFFER_SIZE	2048
 #define	MBSYS_SIMRAD3_MAXQUALITYFACTORS 4
 
+/* set precision of iterative raytracing depth & distance matching */
+#define MBSYS_SIMRAD3_BATH_RECALC_PRECISION 				0.0001
+#define MBSYS_SIMRAD3_BATH_RECALC_NCALCMAX 				50
+#define MBSYS_SIMRAD3_BATH_RECALC_ANGLEMODE 				0
+
+/* set source of vertical location */
+#define MBSYS_SIMRAD3_ZMODE_UNKNOWN						0
+#define MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY				1
+#define MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY			2
+#define MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE	3
+
+
 /* datagram start and end byte */
 #define	EM3_START_BYTE		0x02
 #define	EM3_END_BYTE		0x03
@@ -1397,16 +1409,7 @@ int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
             int *ss_type, int *error);
 int mbsys_simrad3_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
-            void *platform_ptr, int platform_target_sensor,
-            int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
-			double *nav_speed,
-            int n_sensordepth, double *sensordepth_time_d,
-			double *sensordepth_sensordepth,
-            int n_heading, double *heading_time_d, double *heading_heading,
-            int n_altitude, double *altitude_time_d, double *altitude_altitude,
-            int n_attitude, double *attitude_time_d, double *attitude_roll,
-			double *attitude_pitch, double *attitude_heave,
-            int *error);
+        void *platform_ptr, void *preprocess_pars_ptr, int *error);
 int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, void **platform_ptr, int *error);
 int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr,

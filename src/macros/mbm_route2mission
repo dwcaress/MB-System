@@ -876,7 +876,12 @@ for ($i = $nmissionpoints-1; $i > 0; $i--)
 	else
 		{
 		$distance = $mdistances[$i] - $mdistances[$i-1];
-		$slope = -($mmissiondepths[$i] - $mmissiondepths[$i-1])/$distance;
+        if ($distance < 1.0) {
+            $slope = 0.0;
+        }
+        else {
+            $slope = -($mmissiondepths[$i] - $mmissiondepths[$i-1])/$distance;
+        }
 		}
 	if ($slope > $maxslope)
 		{

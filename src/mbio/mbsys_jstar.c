@@ -27,6 +27,8 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
 #include <math.h>
 #include <string.h>
 
@@ -35,11 +37,12 @@
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_define.h"
+#include "mb_process.h"
 #include "mb_aux.h"
 #include "mb_segy.h"
 #include "mbsys_jstar.h"
 
-static char rcs_id[]="$Id$";
+static char svn_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr,
@@ -54,7 +57,7 @@ int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -104,7 +107,7 @@ int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -165,7 +168,7 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -243,7 +246,7 @@ int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -295,28 +298,9 @@ int mbsys_jstar_preprocess
 (
 	int verbose,			/* in: verbosity level set on command line 0..N */
 	void *mbio_ptr,			/* in: see mb_io.h:/^struct mb_io_struct/ */
-	void *store_ptr,		/* in: see mbsys_3datdepthlidar.h:/^struct mbsys_3datdepthlidar_struct/ */
+	void *store_ptr,		/* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
 	void *platform_ptr,
-	int platform_target_sensor,
-	int n_nav,
-	double *nav_time_d,
-	double *nav_lon,
-	double *nav_lat,
-	double *nav_speed,
-	int n_sensordepth,
-	double *sensordepth_time_d,
-	double *sensordepth_sensordepth,
-	int n_heading,
-	double *heading_time_d,
-	double *heading_heading,
-	int n_altitude,
-	double *altitude_time_d,
-	double *altitude_altitude,
-	int n_attitude,
-	double *attitude_time_d,
-	double *attitude_roll,
-	double *attitude_pitch,
-	double *attitude_heave,
+	void *preprocess_pars_ptr,
 	int *error
 )
 {
@@ -327,59 +311,109 @@ int mbsys_jstar_preprocess
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ssport;
 	struct mbsys_jstar_channel_struct *ssstbd;
+	struct mb_platform_struct *platform;
+	struct mb_preprocess_struct *pars;
+
 	int	time_i[7], time_j[5];
 	double time_d, navlon, navlat, sensordepth, speed;
 	double heading, roll, pitch, heave, altitude;
-	int	interp_status, interp_error;
+	int	interp_status;
 	int	jnav = 0;
 	int	jsensordepth = 0;
 	int	jheading = 0;
 	int	jaltitude = 0;
 	int	jattitude = 0;
+	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                    %d\n", verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
 		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
-		fprintf(stderr,"dbg2       platform_target_sensor:     %d\n", platform_target_sensor);
-		fprintf(stderr,"dbg2       n_nav:                      %d\n", n_nav);
-		fprintf(stderr,"dbg2       nav_time_d:                 %p\n", nav_time_d);
-		fprintf(stderr,"dbg2       nav_lon:                    %p\n", nav_lon);
-		fprintf(stderr,"dbg2       nav_lat:                    %p\n", nav_lat);
-		fprintf(stderr,"dbg2       nav_speed:                  %p\n", nav_speed);
-		fprintf(stderr,"dbg2       n_sensordepth:              %d\n", n_sensordepth);
-		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n", sensordepth_time_d);
-		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n", sensordepth_sensordepth);
-		fprintf(stderr,"dbg2       n_heading:                  %d\n", n_heading);
-		fprintf(stderr,"dbg2       heading_time_d:             %p\n", heading_time_d);
-		fprintf(stderr,"dbg2       heading_heading:            %p\n", heading_heading);
-		fprintf(stderr,"dbg2       n_altitude:                 %d\n", n_altitude);
-		fprintf(stderr,"dbg2       altitude_time_d:            %p\n", altitude_time_d);
-		fprintf(stderr,"dbg2       altitude_altitude:          %p\n", altitude_altitude);
-		fprintf(stderr,"dbg2       n_attitude:                 %d\n", n_attitude);
-		fprintf(stderr,"dbg2       attitude_time_d:            %p\n", attitude_time_d);
-		fprintf(stderr,"dbg2       attitude_roll:              %p\n", attitude_roll);
-		fprintf(stderr,"dbg2       attitude_pitch:             %p\n", attitude_pitch);
-		fprintf(stderr,"dbg2       attitude_heave:             %p\n", attitude_heave);
+		fprintf(stderr,"dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
 		}
+
+	/* always successful */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+
+	/* check for non-null data */
+	assert(mbio_ptr != NULL);
+	assert(store_ptr != NULL);
+	assert(preprocess_pars_ptr != NULL);
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
-	/* get data structure pointer */
+	/* get data structure pointers */
 	store = (struct mbsys_jstar_struct *) store_ptr;
+	platform = (struct mb_platform_struct *) platform_ptr;
+	pars = (struct mb_preprocess_struct *) preprocess_pars_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       target_sensor:              %d\n", pars->target_sensor);
+		fprintf(stderr,"dbg2       timestamp_changed:          %d\n", pars->timestamp_changed);
+		fprintf(stderr,"dbg2       time_d:                     %f\n", pars->time_d);
+		fprintf(stderr,"dbg2       n_nav:                      %d\n", pars->n_nav);
+		fprintf(stderr,"dbg2       nav_time_d:                 %p\n", pars->nav_time_d);
+		fprintf(stderr,"dbg2       nav_lon:                    %p\n", pars->nav_lon);
+		fprintf(stderr,"dbg2       nav_lat:                    %p\n", pars->nav_lat);
+		fprintf(stderr,"dbg2       nav_speed:                  %p\n", pars->nav_speed);
+		fprintf(stderr,"dbg2       n_sensordepth:              %d\n", pars->n_sensordepth);
+		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n", pars->sensordepth_time_d);
+		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n", pars->sensordepth_sensordepth);
+		fprintf(stderr,"dbg2       n_heading:                  %d\n", pars->n_heading);
+		fprintf(stderr,"dbg2       heading_time_d:             %p\n", pars->heading_time_d);
+		fprintf(stderr,"dbg2       heading_heading:            %p\n", pars->heading_heading);
+		fprintf(stderr,"dbg2       n_altitude:                 %d\n", pars->n_altitude);
+		fprintf(stderr,"dbg2       altitude_time_d:            %p\n", pars->altitude_time_d);
+		fprintf(stderr,"dbg2       altitude_altitude:          %p\n", pars->altitude_altitude);
+		fprintf(stderr,"dbg2       n_attitude:                 %d\n", pars->n_attitude);
+		fprintf(stderr,"dbg2       attitude_time_d:            %p\n", pars->attitude_time_d);
+		fprintf(stderr,"dbg2       attitude_roll:              %p\n", pars->attitude_roll);
+		fprintf(stderr,"dbg2       attitude_pitch:             %p\n", pars->attitude_pitch);
+		fprintf(stderr,"dbg2       attitude_heave:             %p\n", pars->attitude_heave);
+		fprintf(stderr,"dbg2       n_kluge:                    %d\n", pars->n_kluge);
+		for (i=0;i<pars->n_kluge;i++)
+			fprintf(stderr,"dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
+		}
 
 	/* preprocess subbottom data */
 	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 		{
 		/* get channel */
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
+
+		/* change timestamp if indicated */
+		if (pars->timestamp_changed == MB_YES)
+			{
+			time_d = pars->time_d;
+			mb_get_date(verbose, time_d, time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			sbp->year = time_i[0];
+			sbp->day = time_j[1];
+			sbp->hour = time_i[3];
+			sbp->minute = time_i[4];
+			sbp->second = time_i[5];
+			sbp->millisecondsToday = 0.001 * time_i[6]
+						+ 1000 * (time_i[5]
+							+ 60.0 * (time_i[4]
+								+ 60.0 * time_i[3]));
+			fprintf(stderr, "Timestamp changed in function %s: "
+					"%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
+					"| ping_number:%d\n",
+					function_name,
+					time_i[0], time_i[1], time_i[2],
+					time_i[3], time_i[4], time_i[5], time_i[6],
+					sbp->pingNum);
+			}
 
 		/* get time */
 		time_j[0] = sbp->year;
@@ -400,6 +434,39 @@ int mbsys_jstar_preprocess
 		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
 		ssstbd = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
 
+		/* change timestamp if indicated */
+		if (pars->timestamp_changed == MB_YES)
+			{
+			time_d = pars->time_d;
+			mb_get_date(verbose, time_d, time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			ssport->year = time_i[0];
+			ssport->day = time_j[1];
+			ssport->hour = time_i[3];
+			ssport->minute = time_i[4];
+			ssport->second = time_i[5];
+			ssport->millisecondsToday = 0.001 * time_i[6]
+						+ 1000 * (time_i[5]
+							+ 60.0 * (time_i[4]
+								+ 60.0 * time_i[3]));
+			ssstbd->year = time_i[0];
+			ssstbd->day = time_j[1];
+			ssstbd->hour = time_i[3];
+			ssstbd->minute = time_i[4];
+			ssstbd->second = time_i[5];
+			ssstbd->millisecondsToday = 0.001 * time_i[6]
+						+ 1000 * (time_i[5]
+							+ 60.0 * (time_i[4]
+								+ 60.0 * time_i[3]));
+			fprintf(stderr, "Timestamp changed in function %s: "
+					"%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
+					"| ping_number:%d\n",
+					function_name,
+					time_i[0], time_i[1], time_i[2],
+					time_i[3], time_i[4], time_i[5], time_i[6],
+					ssport->pingNum);
+			}
+
 		/* get time */
 		time_j[0] = ssport->year;
 		time_j[1] = ssport->day;
@@ -411,57 +478,55 @@ int mbsys_jstar_preprocess
 		mb_get_time(verbose,time_i,&time_d);
 		}
 
-	/* get nav sensordepth heading attitude values for record timestamp */
-	if (n_nav > 0)
+	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM
+		|| store->kind == MB_DATA_DATA
+		|| store->kind == MB_DATA_SIDESCAN2)
 		{
+		/* get nav sensordepth heading attitude values for record timestamp */
 		interp_status = mb_linear_interp_longitude(verbose,
-					nav_time_d-1, nav_lon-1, n_nav, 
-					time_d, &navlon, &jnav,
-					&interp_error);
+					pars->nav_time_d-1, pars->nav_lon-1,
+					pars->n_nav, time_d, &navlon, &jnav,
+					error);
 		interp_status = mb_linear_interp_latitude(verbose,
-					nav_time_d-1, nav_lat-1, n_nav, 
-					time_d, &navlat, &jnav,
-					&interp_error);
+					pars->nav_time_d-1, pars->nav_lat-1,
+					pars->n_nav, time_d, &navlat, &jnav,
+					error);
 		interp_status = mb_linear_interp(verbose,
-					nav_time_d-1, nav_speed-1, n_nav, 
-					time_d, &speed, &jnav,
-					&interp_error);
-		}
-	if (n_sensordepth > 0)
-		{
+					pars->nav_time_d-1, pars->nav_speed-1,
+					pars->n_nav, time_d, &speed, &jnav,
+					error);
+		
+		/* interpolate sensordepth */
 		interp_status = mb_linear_interp(verbose,
-					sensordepth_time_d-1, sensordepth_sensordepth-1, n_sensordepth, 
-					time_d, &sensordepth, &jsensordepth,
-					&interp_error);
-		}
-	if (n_heading > 0)
-		{
+					pars->sensordepth_time_d-1, pars->sensordepth_sensordepth-1,
+					pars->n_sensordepth, time_d, &sensordepth, &jsensordepth,
+					error);
+		
+		/* interpolate heading */
 		interp_status = mb_linear_interp_heading(verbose,
-					heading_time_d-1, heading_heading-1, n_heading, 
-					time_d, &heading, &jheading,
-					&interp_error);
-		}
-	if (n_altitude > 0)
-		{
+					pars->heading_time_d-1, pars->heading_heading-1,
+					pars->n_heading, time_d, &heading, &jheading,
+					error);
+		
+		/* interpolate altitude */
 		interp_status = mb_linear_interp(verbose,
-					altitude_time_d-1, altitude_altitude-1, n_altitude, 
-					time_d, &altitude, &jaltitude,
-					&interp_error);
-		}
-	if (n_attitude > 0)
-		{
+					pars->altitude_time_d-1, pars->altitude_altitude-1,
+					pars->n_altitude, time_d, &altitude, &jaltitude,
+					error);
+		
+		/* interpolate attitude */
 		interp_status = mb_linear_interp(verbose,
-					attitude_time_d-1, attitude_roll-1, n_attitude, 
-					time_d, &roll, &jattitude,
-					&interp_error);
+					pars->attitude_time_d-1, pars->attitude_roll-1,
+					pars->n_attitude, time_d, &roll, &jattitude,
+					error);
 		interp_status = mb_linear_interp(verbose,
-					attitude_time_d-1, attitude_pitch-1, n_attitude, 
-					time_d, &pitch, &jattitude,
-					&interp_error);
+					pars->attitude_time_d-1, pars->attitude_pitch-1,
+					pars->n_attitude, time_d, &pitch, &jattitude,
+					error);
 		interp_status = mb_linear_interp(verbose,
-					attitude_time_d-1, attitude_heave-1, n_attitude, 
-					time_d, &heave, &jattitude,
-					&interp_error);
+					pars->attitude_time_d-1, pars->attitude_heave-1,
+					pars->n_attitude, time_d, &heave, &jattitude,
+					error);
 		}
 
 	/* preprocess subbottom data */
@@ -597,7 +662,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1000,7 +1065,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -1346,7 +1411,7 @@ int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1436,7 +1501,7 @@ int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1523,7 +1588,7 @@ int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1627,7 +1692,7 @@ int mbsys_jstar_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -1726,7 +1791,7 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -2000,7 +2065,7 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
@@ -2199,7 +2264,7 @@ int mbsys_jstar_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -2251,7 +2316,7 @@ int mbsys_jstar_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
 		fprintf(stderr,"dbg2       sample_interval:   %lf\n",*sample_interval);
@@ -2285,7 +2350,7 @@ int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -2381,7 +2446,7 @@ int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
 		fprintf(stderr,"dbg2       sidescan_type:     %d\n",*sidescan_type);
@@ -2425,7 +2490,7 @@ int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:            %p\n",(void *)mbio_ptr);
@@ -2541,7 +2606,7 @@ int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2573,7 +2638,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
@@ -2815,7 +2880,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:            %p\n",(void *)mbio_ptr);
@@ -3050,7 +3115,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
@@ -3293,7 +3358,7 @@ int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
@@ -3335,7 +3400,7 @@ int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
@@ -3387,7 +3452,7 @@ int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);

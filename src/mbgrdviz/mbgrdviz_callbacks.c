@@ -1546,9 +1546,9 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 	size_t	actionid;
 	size_t	mode;
 	size_t	instance;
-	char    *file_ptr;
-        Cardinal ac = 0;
-        Arg      args[256];
+	char    *file_ptr = NULL;
+    Cardinal ac = 0;
+    Arg      args[256];
 	XmFileSelectionBoxCallbackStruct *acs;
 	acs=(XmFileSelectionBoxCallbackStruct*)call_data;
 
@@ -1563,8 +1563,7 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		}
 
 	/* read the input file name */
-	XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET,
-			&file_ptr);
+	XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &file_ptr);
 	if (strlen(file_ptr) <= 0 && file_ptr != NULL)
 		{
 		XtFree(file_ptr);
@@ -1572,7 +1571,7 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		}
 
 	/* print debug statements */
-	if (verbose >= 4)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg4  Extracted input file name from call_data:\n");
 		fprintf(stderr,"dbg4       call_data:           %p\n",call_data);
@@ -1582,7 +1581,7 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		fprintf(stderr,"dbg4       file_ptr:            %s\n",file_ptr);
 		}
 
-    	/* figure out what kind of file is to be opened */
+    /* figure out what kind of file is to be opened */
 
 	ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &actionid); ac++;
@@ -1857,7 +1856,6 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 			button_name_ptr = testname;
 			}
 
-
 		/* set parameters */
 		sprintf(mbv_title, "MBgrdviz: %s\n", button_name_ptr);
 		mbv_xo = 200;
@@ -1886,106 +1884,106 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 		/* read in the grd file */
 		if (status == MB_SUCCESS
 			&& input_file_ptr != NULL)
-		status = mb_read_gmt_grd(verbose, input_file_ptr,
-			&mbv_primary_grid_projection_mode,
-			mbv_primary_grid_projection_id,
-			&mbv_primary_nodatavalue,
-			&mbv_primary_nxy,
-			&mbv_primary_nx,
-			&mbv_primary_ny,
-			&mbv_primary_min,
-			&mbv_primary_max,
-			&mbv_primary_xmin,
-			&mbv_primary_xmax,
-			&mbv_primary_ymin,
-			&mbv_primary_ymax,
-			&mbv_primary_dx,
-			&mbv_primary_dy,
-			&mbv_primary_data,
+            status = mb_read_gmt_grd(verbose, input_file_ptr,
+                        &mbv_primary_grid_projection_mode,
+                        mbv_primary_grid_projection_id,
+                        &mbv_primary_nodatavalue,
+                        &mbv_primary_nxy,
+                        &mbv_primary_nx,
+                        &mbv_primary_ny,
+                        &mbv_primary_min,
+                        &mbv_primary_max,
+                        &mbv_primary_xmin,
+                        &mbv_primary_xmax,
+                        &mbv_primary_ymin,
+                        &mbv_primary_ymax,
+                        &mbv_primary_dx,
+                        &mbv_primary_dy,
+                        &mbv_primary_data,
                         NULL,
                         NULL,
                         &error);
 
 		else if (status == MB_SUCCESS)
-		status = do_mbgrdviz_opentest(instance,
-			1000.0, 3.0, 2.0,
-			&mbv_primary_grid_projection_mode,
-			mbv_primary_grid_projection_id,
-			&mbv_primary_nodatavalue,
-			&mbv_primary_nxy,
-			&mbv_primary_nx,
-			&mbv_primary_ny,
-			&mbv_primary_min,
-			&mbv_primary_max,
-			&mbv_primary_xmin,
-			&mbv_primary_xmax,
-			&mbv_primary_ymin,
-			&mbv_primary_ymax,
-			&mbv_primary_dx,
-			&mbv_primary_dy,
-			&mbv_primary_data);
+            status = do_mbgrdviz_opentest(instance,
+                        1000.0, 3.0, 2.0,
+                        &mbv_primary_grid_projection_mode,
+                        mbv_primary_grid_projection_id,
+                        &mbv_primary_nodatavalue,
+                        &mbv_primary_nxy,
+                        &mbv_primary_nx,
+                        &mbv_primary_ny,
+                        &mbv_primary_min,
+                        &mbv_primary_max,
+                        &mbv_primary_xmin,
+                        &mbv_primary_xmax,
+                        &mbv_primary_ymin,
+                        &mbv_primary_ymax,
+                        &mbv_primary_dx,
+                        &mbv_primary_dy,
+                        &mbv_primary_data);
 
-		/* set parameters */
-                if (status == MB_SUCCESS)
-                        {
-                        mbv_display_mode = MBV_DISPLAY_2D;
-                        mbv_mouse_mode = MBV_MOUSE_MOVE;
-                        mbv_grid_mode = MBV_GRID_VIEW_PRIMARY;
-                        mbv_primary_histogram = MB_NO;
-                        mbv_primaryslope_histogram = MB_NO;
-                        mbv_secondary_histogram = MB_NO;
-                        mbv_primary_shade_mode = MBV_SHADE_VIEW_SLOPE;
-                        mbv_slope_shade_mode = MBV_SHADE_VIEW_NONE;
-                        mbv_secondary_shade_mode = MBV_SHADE_VIEW_NONE;
-                        mbv_grid_contour_mode = MBV_VIEW_OFF;
-                        mbv_site_view_mode = MBV_VIEW_OFF;
-                        mbv_route_view_mode = MBV_VIEW_OFF;
-                        mbv_nav_view_mode = MBV_VIEW_OFF;
-                        mbv_navdrape_view_mode = MBV_VIEW_OFF;
-                        mbv_vector_view_mode = MBV_VIEW_OFF;
-                        mbv_primary_colortable = MBV_COLORTABLE_HAXBY;
-                        mbv_primary_colortable_mode = MBV_COLORTABLE_NORMAL;
-                        mbv_primary_colortable_min = mbv_primary_min;
-                        mbv_primary_colortable_max = mbv_primary_max;
-                        mbv_slope_colortable = MBV_COLORTABLE_HAXBY;
-                        mbv_slope_colortable_mode = MBV_COLORTABLE_REVERSED;
-                        mbv_slope_colortable_min = 0.0;
-                        mbv_slope_colortable_max = 0.5;
-                        mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
-                        mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
-                        mbv_secondary_colortable_min = 0.0;
-                        mbv_secondary_colortable_max = 0.0;
-                        mbv_exageration = 1.0;
-                        mbv_modelelevation3d = 90.0;
-                        mbv_modelazimuth3d = 0.0;
-                        mbv_viewelevation3d = 90.0;
-                        mbv_viewazimuth3d = 0.0;
-                        mbv_illuminate_magnitude = 1.0;
-                        mbv_illuminate_elevation = 5.0;
-                        mbv_illuminate_azimuth = 90.0;
-                        mbv_slope_magnitude = 1.0;
-                        mbv_overlay_shade_magnitude = 1.0;
-                        mbv_overlay_shade_center = 0.0;
-                        mbv_overlay_shade_mode = MBV_COLORTABLE_NORMAL;
-                        mbv_contour_interval
-                                = pow(10.0, floor(log10(mbv_primary_max
-                                                        - mbv_primary_min)) - 1.0);
+            /* set parameters */
+            if (status == MB_SUCCESS)
+                    {
+                    mbv_display_mode = MBV_DISPLAY_2D;
+                    mbv_mouse_mode = MBV_MOUSE_MOVE;
+                    mbv_grid_mode = MBV_GRID_VIEW_PRIMARY;
+                    mbv_primary_histogram = MB_NO;
+                    mbv_primaryslope_histogram = MB_NO;
+                    mbv_secondary_histogram = MB_NO;
+                    mbv_primary_shade_mode = MBV_SHADE_VIEW_SLOPE;
+                    mbv_slope_shade_mode = MBV_SHADE_VIEW_NONE;
+                    mbv_secondary_shade_mode = MBV_SHADE_VIEW_NONE;
+                    mbv_grid_contour_mode = MBV_VIEW_OFF;
+                    mbv_site_view_mode = MBV_VIEW_OFF;
+                    mbv_route_view_mode = MBV_VIEW_OFF;
+                    mbv_nav_view_mode = MBV_VIEW_OFF;
+                    mbv_navdrape_view_mode = MBV_VIEW_OFF;
+                    mbv_vector_view_mode = MBV_VIEW_OFF;
+                    mbv_primary_colortable = MBV_COLORTABLE_HAXBY;
+                    mbv_primary_colortable_mode = MBV_COLORTABLE_NORMAL;
+                    mbv_primary_colortable_min = mbv_primary_min;
+                    mbv_primary_colortable_max = mbv_primary_max;
+                    mbv_slope_colortable = MBV_COLORTABLE_HAXBY;
+                    mbv_slope_colortable_mode = MBV_COLORTABLE_REVERSED;
+                    mbv_slope_colortable_min = 0.0;
+                    mbv_slope_colortable_max = 0.5;
+                    mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
+                    mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
+                    mbv_secondary_colortable_min = 0.0;
+                    mbv_secondary_colortable_max = 0.0;
+                    mbv_exageration = 1.0;
+                    mbv_modelelevation3d = 90.0;
+                    mbv_modelazimuth3d = 0.0;
+                    mbv_viewelevation3d = 90.0;
+                    mbv_viewazimuth3d = 0.0;
+                    mbv_illuminate_magnitude = 1.0;
+                    mbv_illuminate_elevation = 5.0;
+                    mbv_illuminate_azimuth = 90.0;
+                    mbv_slope_magnitude = 1.0;
+                    mbv_overlay_shade_magnitude = 1.0;
+                    mbv_overlay_shade_center = 0.0;
+                    mbv_overlay_shade_mode = MBV_COLORTABLE_NORMAL;
+                    mbv_contour_interval
+                            = pow(10.0, floor(log10(mbv_primary_max
+                                                    - mbv_primary_min)) - 1.0);
+    
+                    /* set mbview default values */
+                    status = mb_mbview_defaults(verbose,
+                                                &mbv_primary_colortable,
+                            &mbv_primary_colortable_mode,
+                            &mbv_primary_shade_mode,
+                            &mbv_slope_colortable,
+                            &mbv_slope_colortable_mode,
+                            &mbv_secondary_colortable,
+                            &mbv_secondary_colortable_mode,
+                            &mbv_illuminate_magnitude,
+                            &mbv_illuminate_elevation,
+                            &mbv_illuminate_azimuth,
+                            &mbv_slope_magnitude);
+                    }
 
-                        /* set mbview default values */
-                        status = mb_mbview_defaults(verbose,
-                                                    &mbv_primary_colortable,
-					            &mbv_primary_colortable_mode,
-					            &mbv_primary_shade_mode,
-					            &mbv_slope_colortable,
-					            &mbv_slope_colortable_mode,
-					            &mbv_secondary_colortable,
-					            &mbv_secondary_colortable_mode,
-					            &mbv_illuminate_magnitude,
-					            &mbv_illuminate_elevation,
-					            &mbv_illuminate_azimuth,
-					            &mbv_slope_magnitude);
-                        }
-        
                 /* set the display projection */
                 if (status == MB_SUCCESS)
                         {

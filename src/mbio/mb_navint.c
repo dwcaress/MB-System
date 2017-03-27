@@ -3346,7 +3346,6 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d,
 		}
 	else if (time_latency_mode == MB_SENSOR_TIME_LATENCY_STATIC)
 		{
-fprintf(stderr,"Applying time latency: %f to %d data\n",time_latency_static,data_num);
 		for (i=0;i<data_num;i++)
 			{
 			data_time_d[i] -= time_latency_static;

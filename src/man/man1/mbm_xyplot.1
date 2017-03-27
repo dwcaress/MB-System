@@ -1,4 +1,4 @@
-.TH mbm_xyplot 1 "9 January 2015" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_xyplot 1 "20 March 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_xyplot\fP \- Create an executable shellscript which will generate
 a GMT plot of xy data.
@@ -24,7 +24,7 @@ Additional Options:
 Miscellaneous Options:
 .br
 [\fB\-MGD\fP\fIgmtdef/value\fP
-\fB\-MGL\fP[\fIf\fP][\fIx\fP]\fIlon0/lat0/slat/length\fP[\fIunits\fP][\fI+llabel\fP]
+\fB\-MGL\fP\fIscalebar\fP
 \fB\-MGT\fP\fIx/y/size/angle/font/just/text\fP
 \fB\-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP] ]
 
@@ -423,19 +423,39 @@ set the basemap annotation font to Courier, use
 "-MGDANOT_FONT/Courier".
 .TP
 .B \-MGL
-[\fIf\fP][\fIx\fP]\fIlon0/lat0/slat/length\fP[\fIunits\fP][\fI+llabel\fP]
+\fIscalebar\fP
 .br
-Draws a simple map scale centered on \fIlon0/lat0\fP.
-Use \fB\-Lf\fP to get a "fancy" scale [Default is plain].
-Use \fB\-Lx\fP to specify the position in inches instead of map units.
-The scale is calculated at latitude \fIslat\fP; if the string "center" is used
-instead of a numerical value for \fIslat\fP, then the macro will set
-the scaling according to the center of the plot bounds.
-The scale length value \fIlength\fP is in km 
-by default, but the units can be specified as one of e|f|k|M|n|u, where
-e = meters, f = feet, k = kilometers, M = statue miles, n = nautical miles,
-and u = US survey feet. Append \fI+l\fP to label the scale with the
-relevant units, or append \fI+l"label"\fP to set a different label string.
+Draws a simple map scale specified by the arguments in \fIscalebar\fP. The syntax
+used for the \fIscalebar\fP command by the \fBGMT\fP module \fBpsbasemap\fP has
+changed over time; use the syntax appropriate for the \fBGMT\fP version you have
+installed. As of March 2017, the current \fBGMT\fP version is 5.3.2, and the
+scalebar arguments are described in the \fBpsbasemap\fP manual page as:
+.br
+\fI[g|j|J|n|x]refpoint+c[slon/]slat+wlength[e|f|k|M|n|u][+aalign][+f][+jjustify][+l[label]][+odx[/dy]][+u]\fP
+.br
+Draws a simple map scale centered on the reference point specified using one of
+four coordinate systems: (1) Use -Lg for map (user) coordinates,
+(2) use -Lj or -LJ for setting refpoint via a 2-char justification code that
+refers to the (invisible) map domain rectangle, (3) use -Ln for normalized
+(0-1) coordinates, or (4) use -Lx for plot coordinates (inches, cm, etc.).
+Scale is calculated for latitude slat (optionally supply longitude slon for
+oblique projections [Default is central meridian]), length is in km, or
+append unit from e|f|k|M|n|u. Change the label alignment with +aalign
+(choose among l(eft), r(ight), t(op), and b(ottom)). Append +f to get a “fancy”
+scale [Default is plain]. By default, the anchor point on the map scale is
+assumed to be the center of the scale (MC), but this can be changed by
+appending +j followed by a 2-char justification code justify (see pstext for
+list and explanation of codes). Append +l to select the default label, which
+equals the distance unit (meter, foot, km, mile, nautical mile, US survey foot)
+and is justified on top of the scale [t]. Change this by giving your own label
+(append +llabel). Add +o to offset the map scale by dx/dy away from the
+refpoint in the direction implied by justify (or the direction implied by -Dj
+or -DJ). Select +u to append the unit to all distance annotations along the
+scale (for the plain scale, +u will instead select the unit to be appended to
+the distance length). Note: Use FONT_LABEL to change the label font and
+FONT_ANNOT_PRIMARY to change the annotation font. The height of the map scale
+is controlled by MAP_SCALE_HEIGHT, and the pen thickness is set by
+MAP_TICK_PEN_PRIMARY. 
 .TP
 .B \-MGT
 \fIx/y/size/angle/font/just/text\fP

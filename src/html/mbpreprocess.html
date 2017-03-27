@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  14 March 2014 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  18 March 2017 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -32,78 +32,76 @@ Version 5.0
 <BR>
 
 <B>--verbose</B>
-<BR>
-
 <B>--help</B>
-<BR>
-
 <B>--input</B>=<I>FILE</I>
-<BR>
-
-<B>--format</B>=<I>FORMAT</I>
+<B>--format</B>=<I>FORMATID</I>
+<B>--output-sensor-fnv</B>
 <BR>
 
 <B>--nav-file</B>=<I>FILE</I>
-<BR>
-
-<B>--nav-file-format</B>=<I>FORMAT</I>
-<BR>
-
+<B>--nav-file-format</B>=<I>FORMATID</I>
 <B>--nav-async</B>=<I>RECORDTYPE</I>
+<B>--nav-sensor</B>=<I>SENSORID</I>
 <BR>
 
 <B>--sensordepth-file</B>=<I>FILE</I>
-<BR>
-
-<B>--sensordepth-file-format</B>=<I>FILE</I>
-<BR>
-
+<B>--sensordepth-file-format</B>=<I>FORMATID</I>
 <B>--sensordepth-async</B>=<I>RECORDTYPE</I>
+<B>--sensordepth-sensor</B>=<I>SENSORID</I>
 <BR>
 
 <B>--heading-file</B>=<I>FILE</I>
-<BR>
-
-<B>--heading-file-format</B>=<I>FORMAT</I>
-<BR>
-
+<B>--heading-file-format</B>=<I>FORMATID</I>
 <B>--heading-async</B>=<I>RECORDTYPE</I>
+<B>--heading-sensor</B>=<I>SENSORID</I>
+<BR>
+
+<B>--altitude-file</B>=<I>FILE</I>
+<B>--altitude-file-format</B>=<I>FORMATID</I>
+<B>--altitude-async</B>=<I>RECORDTYPE</I>
+<B>--altitude-sensor</B>=<I>SENSORID</I>
 <BR>
 
 <B>--attitude-file</B>=<I>FILE</I>
-<BR>
-
-<B>--attitude-file-format</B>=<I>FORMAT</I>
-<BR>
-
+<B>--attitude-file-format</B>=<I>FORMATID</I>
 <B>--attitude-async</B>=<I>RECORDTYPE</I>
+<B>--attitude-sensor</B>=<I>SENSORID</I>
 <BR>
 
-<B>--timeshift-file</B>=<I>FILE</I>
+<B>--time-latency-file</B>=<I>FILE</I>
+<B>--time-latency-file-format</B>=<I>FORMATID</I>
+<B>--time-latency-constant</B>=<I>SECONDS</I>
+<B>--time-latency-apply-nav</B>
+<B>--time-latency-apply-sensordepth</B>
+<B>--time-latency-apply-heading</B>
+<B>--time-latency-apply-attitude</B>
+<B>--time-latency-apply-altitude</B>
+<B>--time-latency-apply-all-ancilliary</B>
+<B>--time-latency-apply-survey</B>
+<B>--time-latency-apply-all</B>
 <BR>
 
-<B>--timeshift-constant</B>=<I>TIME</I>
+<B>--filter</B>=<I>SECONDS</I>
+<B>--filter-apply-nav</B>
+<B>--filter-apply-sensordepth</B>
+<B>--filter-apply-heading</B>
+<B>--filter-apply-attitude</B>
+<B>--filter-apply-altitude</B>
+<B>--filter-apply-all-ancilliary</B>
 <BR>
 
-<B>--timeshift-apply-nav</B>
+<B>--platform-file</B>=<I>FILE</I>
+<B>--platform-target-sensor</B>=<I>SENSORID</I>
+<B>--no-change-survey</B>
 <BR>
 
-<B>--timeshift-apply-sensordepth</B>
+<B>--kluge-timejumps</B>=<I>SECONDS</I>
 <BR>
 
-<B>--timeshift-apply-heading</B>
 <BR>
 
-<B>--timeshift-apply-attitude</B>
-<BR>
-
-<B>--timeshift-apply-all-ancilliary</B>
-<BR>
-
-<B>--timeshift-apply-survey</B>
-<BR>
-
-<B>--timeshift-apply-all</B>
+<B>--reson7k-kluge</B>=<I>SECONDS</I>
+<P>
 <BR>
 
 ]
@@ -176,7 +174,7 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 14 March 2014</P></CENTER>
+Last Updated: 18 March 2017</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

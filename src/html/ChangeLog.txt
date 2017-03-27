@@ -15,7 +15,9 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
-
+  Version 5.5.2295       March 26, 2017
+  Version 5.5.2294       March 21, 2017
+  Version 5.5.2293       March 6, 2017
   Version 5.5.2290       January 2, 2017
   Version 5.5.2289       December 2, 2016
   Version 5.5.2287       November 29, 2016
@@ -243,6 +245,30 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2295 (March 26, 2017)
+
+Mbm_plot, mbm_grdplot, mbm_xyplot, mbm_3dgrdplot: Changes to the manual pages
+to reflect the new syntax for map scales (the -MGL option in the MB-System plot
+macros) in GMT 5.3.X
+
+Mbnavadjust: Fixed bug in calling scripts within the project directory for users
+that do not include "." in their path environment variable. Problem identified
+by Monica Schwehr.
+
+Mbpreprocess: Added functionality to handle specialized, format-specific
+preprocessing tasks and to handle changes to data timestamps. Currently set to
+work with generic data, Reson 7k data (format 88), and 3DatDepth Lidar data
+(format 231)
+
+Format 88 (MBF_RESON7KR) and Mb7kpreprocess: Mb7kpreprocess is deprecated, with
+preprocessing of Reson 7k data to be done by mbpreprocess.
+
+Format 121 (MBF_GSFGENMB): Integrated latest release of GSF from Leidos (3.07)
+
+-----> 5.5.2294 (March 21, 2017)
+
+Mbsvpselect: Fixes by Ammar Aljuhne and Christian Ferreira of MARUM.
 
 -----> 5.5.2293 (March 6, 2017)
 

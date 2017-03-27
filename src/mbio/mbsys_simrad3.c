@@ -39,6 +39,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <math.h>
 #include <string.h>
 
@@ -47,6 +48,7 @@
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_define.h"
+#include "mb_process.h"
 #include "mbsys_simrad3.h"
 
 static char svn_id[]="$Id$";
@@ -1068,21 +1070,53 @@ int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_simrad3_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
-		void *platform_ptr, int platform_target_sensor,
-		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
-				double *nav_speed,
-		int n_sensordepth, double *sensordepth_time_d,
-				double *sensordepth_sensordepth,
-		int n_heading, double *heading_time_d, double *heading_heading,
-		int n_altitude, double *altitude_time_d, double *altitude_altitude,
-		int n_attitude, double *attitude_time_d, double *attitude_roll,
-				double *attitude_pitch, double *attitude_heave,
-		int *error)
+int mbsys_simrad3_preprocess
+(
+	int verbose,			/* in: verbosity level set on command line 0..N */
+	void *mbio_ptr,			/* in: see mb_io.h:/^struct mb_io_struct/ */
+	void *store_ptr,		/* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
+	void *platform_ptr,
+	void *preprocess_pars_ptr,
+	int *error
+)
 {
 	char	*function_name = "mbsys_simrad3_preprocess";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
+	struct mb_io_struct *mb_io_ptr = NULL;
+	struct mbsys_simrad3_struct *store = NULL;
+	struct mbsys_simrad3_ping_struct *ping = NULL;
+	struct mb_platform_struct *platform = NULL;
+	struct mb_preprocess_struct *pars = NULL;
+
+	int	time_i[7];
+	double	time_d;
+	double	transmit_time_d, transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
+	double	receive_time_d, receive_heading, receive_heave, receive_roll, receive_pitch;
+	double navlon, navlat, sensordepth, speed, heading, roll, pitch, heave, altitude; 
+	
+	/* transmit and receive array offsets */
+	double	tx_x, tx_y, tx_z, tx_h, tx_r, tx_p;
+	double	rx_x, rx_y, rx_z, rx_h, rx_r, rx_p;
+	
+	/* depth sensor offsets - used in place of heave for underwater platforms */
+	int	depthsensor_mode = MBSYS_SIMRAD3_ZMODE_UNKNOWN;
+	
+	/* variables for beam angle calculation */
+	mb_3D_orientation tx_align;
+	mb_3D_orientation tx_orientation;
+	double tx_steer;
+	mb_3D_orientation rx_align;
+	mb_3D_orientation rx_orientation;
+	double rx_steer;
+	double reference_heading;
+	double beamAzimuth;
+	double beamDepression;
+	double	*pixel_size, *swath_width;
+	mb_u_char detection_mask;
+
+	int interp_status = MB_SUCCESS;
+	int i;
+	int jnav, jsensordepth, jheading, jaltitude, jattitude;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1094,30 +1128,514 @@ int mbsys_simrad3_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
 		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
-		fprintf(stderr,"dbg2       platform_target_sensor:     %d\n", platform_target_sensor);
-		fprintf(stderr,"dbg2       n_nav:                      %d\n", n_nav);
-		fprintf(stderr,"dbg2       nav_time_d:                 %p\n", nav_time_d);
-		fprintf(stderr,"dbg2       nav_lon:                    %p\n", nav_lon);
-		fprintf(stderr,"dbg2       nav_lat:                    %p\n", nav_lat);
-		fprintf(stderr,"dbg2       nav_speed:                  %p\n", nav_speed);
-		fprintf(stderr,"dbg2       n_sensordepth:              %d\n", n_sensordepth);
-		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n", sensordepth_time_d);
-		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n", sensordepth_sensordepth);
-		fprintf(stderr,"dbg2       n_heading:                  %d\n", n_heading);
-		fprintf(stderr,"dbg2       heading_time_d:             %p\n", heading_time_d);
-		fprintf(stderr,"dbg2       heading_heading:            %p\n", heading_heading);
-		fprintf(stderr,"dbg2       n_altitude:                 %d\n", n_altitude);
-		fprintf(stderr,"dbg2       altitude_time_d:            %p\n", altitude_time_d);
-		fprintf(stderr,"dbg2       altitude_altitude:          %p\n", altitude_altitude);
-		fprintf(stderr,"dbg2       n_attitude:                 %d\n", n_attitude);
-		fprintf(stderr,"dbg2       attitude_time_d:            %p\n", attitude_time_d);
-		fprintf(stderr,"dbg2       attitude_roll:              %p\n", attitude_roll);
-		fprintf(stderr,"dbg2       attitude_pitch:             %p\n", attitude_pitch);
-		fprintf(stderr,"dbg2       attitude_heave:             %p\n", attitude_heave);
+		fprintf(stderr,"dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
 		}
+
+	/* check for non-null data */
+	assert(mbio_ptr != NULL);
+	assert(store_ptr != NULL);
+	assert(preprocess_pars_ptr != NULL);
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointers */
+	store = (struct mbsys_simrad3_struct *) store_ptr;
+	ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
+	platform = (struct mb_platform_struct *) platform_ptr;
+	pars = (struct mb_preprocess_struct *) preprocess_pars_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       target_sensor:              %d\n", pars->target_sensor);
+		fprintf(stderr,"dbg2       timestamp_changed:          %d\n", pars->timestamp_changed);
+		fprintf(stderr,"dbg2       time_d:                     %f\n", pars->time_d);
+		fprintf(stderr,"dbg2       n_nav:                      %d\n", pars->n_nav);
+		fprintf(stderr,"dbg2       nav_time_d:                 %p\n", pars->nav_time_d);
+		fprintf(stderr,"dbg2       nav_lon:                    %p\n", pars->nav_lon);
+		fprintf(stderr,"dbg2       nav_lat:                    %p\n", pars->nav_lat);
+		fprintf(stderr,"dbg2       nav_speed:                  %p\n", pars->nav_speed);
+		fprintf(stderr,"dbg2       n_sensordepth:              %d\n", pars->n_sensordepth);
+		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n", pars->sensordepth_time_d);
+		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n", pars->sensordepth_sensordepth);
+		fprintf(stderr,"dbg2       n_heading:                  %d\n", pars->n_heading);
+		fprintf(stderr,"dbg2       heading_time_d:             %p\n", pars->heading_time_d);
+		fprintf(stderr,"dbg2       heading_heading:            %p\n", pars->heading_heading);
+		fprintf(stderr,"dbg2       n_altitude:                 %d\n", pars->n_altitude);
+		fprintf(stderr,"dbg2       altitude_time_d:            %p\n", pars->altitude_time_d);
+		fprintf(stderr,"dbg2       altitude_altitude:          %p\n", pars->altitude_altitude);
+		fprintf(stderr,"dbg2       n_attitude:                 %d\n", pars->n_attitude);
+		fprintf(stderr,"dbg2       attitude_time_d:            %p\n", pars->attitude_time_d);
+		fprintf(stderr,"dbg2       attitude_roll:              %p\n", pars->attitude_roll);
+		fprintf(stderr,"dbg2       attitude_pitch:             %p\n", pars->attitude_pitch);
+		fprintf(stderr,"dbg2       attitude_heave:             %p\n", pars->attitude_heave);
+		fprintf(stderr,"dbg2       n_kluge:                    %d\n", pars->n_kluge);
+		for (i=0;i<pars->n_kluge;i++)
+			fprintf(stderr,"dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
+		}
+	
+	/* deal with a survey record */
+	if (store->kind == MB_DATA_DATA)
+		{
+		/*--------------------------------------------------------------*/
+		/* get depth sensor mode from the start record */
+		/*--------------------------------------------------------------*/
+		if (store->par_dsh[0] == 'I')
+			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY;
+		else if (store->par_dsh[0] == 'N')
+			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE;
+		else
+			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
+
+		/*--------------------------------------------------------------*/
+		/* change timestamp if indicated */
+		/*--------------------------------------------------------------*/
+		if (pars->timestamp_changed == MB_YES)
+			{
+			time_d = pars->time_d;
+			mb_get_date(verbose, time_d, time_i);
+
+			/* set time */
+			ping->png_date = 10000 * time_i[0]
+						+ 100 * time_i[1]
+						+ time_i[2];
+			ping->png_msec = 3600000 * time_i[3]
+						+ 60000 * time_i[4]
+						+ 1000 * time_i[5]
+						+ 0.001 * time_i[6];
+			store->date = ping->png_date;
+			store->msec = ping->png_msec;
+			fprintf(stderr, "Timestamp changed in function %s: "
+					"%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
+					"| ping_number:%d\n",
+				function_name,
+				time_i[0], time_i[1], time_i[2],
+				time_i[3], time_i[4], time_i[5], time_i[6],
+				ping->png_count);
+			}
+		
+		/*--------------------------------------------------------------*/
+		/* interpolate ancilliary values from arrays provided by mbpreprocess  */
+		/*--------------------------------------------------------------*/
+		
+		/* get time */
+		time_i[0] = ping->png_date / 10000;
+		time_i[1] = (ping->png_date % 10000) / 100;
+		time_i[2] = ping->png_date % 100;
+		time_i[3] = ping->png_msec / 3600000;
+		time_i[4] = (ping->png_msec % 3600000) / 60000;
+		time_i[5] = (ping->png_msec % 60000) / 1000;
+		time_i[6] = (ping->png_msec % 1000) * 1000;
+		mb_get_time(verbose,time_i, &time_d);
+
+		interp_status = mb_linear_interp_longitude(verbose,
+					pars->nav_time_d-1, pars->nav_lon-1,
+					pars->n_nav, time_d, &navlon, &jnav,
+					error);
+		if (navlon < -180.0)
+			navlon += 360.0;
+		else if (navlon > 180.0)
+			navlon -= 360.0;
+		interp_status = mb_linear_interp_latitude(verbose,
+					pars->nav_time_d-1, pars->nav_lat-1,
+					pars->n_nav, time_d, &navlat, &jnav,
+					error);
+		interp_status = mb_linear_interp(verbose,
+					pars->nav_time_d-1, pars->nav_speed-1,
+					pars->n_nav, time_d, &speed, &jnav,
+					error);
+		
+		/* interpolate sensordepth */
+		interp_status = mb_linear_interp(verbose,
+					pars->sensordepth_time_d-1, pars->sensordepth_sensordepth-1,
+					pars->n_sensordepth, time_d, &sensordepth, &jsensordepth,
+					error);
+		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY)
+			{
+			sensordepth = 0.0;
+			}
+		
+		/* interpolate heading */
+		interp_status = mb_linear_interp_heading(verbose,
+					pars->heading_time_d-1, pars->heading_heading-1,
+					pars->n_heading, time_d, &heading, &jheading,
+					error);
+		if (heading < 0.0)
+			heading += 360.0;
+		else if (heading >= 360.0)
+			heading -= 360.0;
+		
+		/* interpolate altitude */
+		interp_status = mb_linear_interp(verbose,
+					pars->altitude_time_d-1, pars->altitude_altitude-1,
+					pars->n_altitude, time_d, &altitude, &jaltitude,
+					error);
+		
+		/* interpolate attitude */
+		interp_status = mb_linear_interp(verbose,
+					pars->attitude_time_d-1, pars->attitude_roll-1,
+					pars->n_attitude, time_d, &roll, &jattitude,
+					error);
+		interp_status = mb_linear_interp(verbose,
+					pars->attitude_time_d-1, pars->attitude_pitch-1,
+					pars->n_attitude, time_d, &pitch, &jattitude,
+					error);
+		interp_status = mb_linear_interp(verbose,
+					pars->attitude_time_d-1, pars->attitude_heave-1,
+					pars->n_attitude, time_d, &heave, &jattitude,
+					error);
+		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY)
+			{
+			heave = 0.0;
+			}
+
+		/* insert navigation */
+		ping->png_longitude = 10000000 * navlon;
+		ping->png_latitude = 20000000 * navlat;
+		
+		/* insert sonardepth */
+		ping->png_xducer_depth = sensordepth;
+
+		/* insert heading */
+		if (heading < 0.0)
+			heading += 360.0;
+		else if (heading > 360.0)
+			heading -= 360.0;
+		ping->png_heading = (int) rint(heading * 100);
+
+		/* insert roll pitch and heave */
+		ping->png_roll = (int) rint(roll / 0.01);
+		ping->png_pitch = (int) rint(pitch / 0.01);
+		ping->png_heave = (int) rint(heave / 0.01);
+
+		/*--------------------------------------------------------------*/
+		/* get transducer offsets */
+		/*--------------------------------------------------------------*/
+		if (store->par_stc == 0)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+			}
+		else if (store->par_stc == 1)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s1x;
+			rx_y = store->par_s1y;
+			rx_z = store->par_s1z;
+			rx_h = store->par_s1h;
+			rx_r = store->par_s1r;
+			rx_p = store->par_s1p;
+			}
+		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_1)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s1x;
+			rx_y = store->par_s1y;
+			rx_z = store->par_s1z;
+			rx_h = store->par_s1h;
+			rx_r = store->par_s1r;
+			rx_p = store->par_s1p;
+			}
+		else if (store->par_stc == 2 && ping->png_serial == store->par_serial_2)
+			{
+			tx_x = store->par_s2x;
+			tx_y = store->par_s2y;
+			tx_z = store->par_s2z;
+			tx_h = store->par_s2h;
+			tx_r = store->par_s2r;
+			tx_p = store->par_s2p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+			}
+		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_1)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+			}
+		else if (store->par_stc == 3 && ping->png_serial == store->par_serial_2)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s3x;
+			rx_y = store->par_s3y;
+			rx_z = store->par_s3z;
+			rx_h = store->par_s3h;
+			rx_r = store->par_s3r;
+			rx_p = store->par_s3p;
+			}
+		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_1)
+			{
+			tx_x = store->par_s0x;
+			tx_y = store->par_s0y;
+			tx_z = store->par_s0z;
+			tx_h = store->par_s0h;
+			tx_r = store->par_s0r;
+			tx_p = store->par_s0p;
+			rx_x = store->par_s2x;
+			rx_y = store->par_s2y;
+			rx_z = store->par_s2z;
+			rx_h = store->par_s2h;
+			rx_r = store->par_s2r;
+			rx_p = store->par_s2p;
+			}
+		else if (store->par_stc == 4 && ping->png_serial == store->par_serial_2)
+			{
+			tx_x = store->par_s1x;
+			tx_y = store->par_s1y;
+			tx_z = store->par_s1z;
+			tx_h = store->par_s1h;
+			tx_r = store->par_s1r;
+			tx_p = store->par_s1p;
+			rx_x = store->par_s3x;
+			rx_y = store->par_s3y;
+			rx_z = store->par_s3z;
+			rx_h = store->par_s3h;
+			rx_r = store->par_s3r;
+			rx_p = store->par_s3p;
+			}
+
+		/*--------------------------------------------------------------*/
+		/* calculate corrected ranges, angles, and bathymetry for each beam */
+		/*--------------------------------------------------------------*/
+		for (i=0;i<ping->png_nbeams;i++)
+			{
+			/* calculate time of transmit and receive */
+			transmit_time_d = time_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
+			receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
+
+			/* merge heading from best available source */
+			interp_status = mb_linear_interp_heading(verbose,
+						pars->heading_time_d-1, pars->heading_heading-1,
+						pars->n_heading, transmit_time_d, &transmit_heading, &jheading,
+						error);
+			interp_status = mb_linear_interp_heading(verbose,
+						pars->heading_time_d-1, pars->heading_heading-1,
+						pars->n_heading, receive_time_d, &receive_heading, &jheading,
+						error);
+			if (transmit_heading < 0.0)
+				transmit_heading += 360.0;
+			else if (transmit_heading >= 360.0)
+				transmit_heading -= 360.0;
+			if (receive_heading < 0.0)
+				receive_heading += 360.0;
+			else if (receive_heading >= 360.0)
+				receive_heading -= 360.0;
+
+			/* get attitude from best available source */
+			interp_status = mb_linear_interp(verbose,
+						pars->attitude_time_d-1, pars->attitude_roll-1,
+						pars->n_attitude, transmit_time_d, &transmit_roll, &jattitude,
+						error);
+			if (interp_status == MB_SUCCESS)
+			interp_status = mb_linear_interp(verbose,
+						pars->attitude_time_d-1, pars->attitude_roll-1,
+						pars->n_attitude, transmit_time_d, &transmit_pitch, &jattitude,
+						error);
+			if (interp_status == MB_SUCCESS)
+			interp_status = mb_linear_interp(verbose,
+						pars->attitude_time_d-1, pars->attitude_roll-1,
+						pars->n_attitude, transmit_time_d, &transmit_heave, &jattitude,
+						error);
+			interp_status = mb_linear_interp(verbose,
+						pars->attitude_time_d-1, pars->attitude_roll-1,
+						pars->n_attitude, receive_time_d, &receive_roll, &jattitude,
+						error);
+			if (interp_status == MB_SUCCESS)
+			interp_status = mb_linear_interp(verbose,
+						pars->attitude_time_d-1, pars->attitude_roll-1,
+						pars->n_attitude, receive_time_d, &receive_pitch, &jattitude,
+						error);
+			if (interp_status == MB_SUCCESS)
+			interp_status = mb_linear_interp(verbose,
+						pars->attitude_time_d-1, pars->attitude_roll-1,
+						pars->n_attitude, receive_time_d, &receive_heave, &jattitude,
+						error);
+				
+			/* use sensordepth instead of heave for submerged platforms */
+			if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY)
+				{
+				interp_status = mb_linear_interp(verbose,
+							pars->sensordepth_time_d-1, pars->sensordepth_sensordepth-1,
+							pars->n_sensordepth, transmit_time_d, &transmit_heave, &jsensordepth,
+							error);
+				interp_status = mb_linear_interp(verbose,
+							pars->sensordepth_time_d-1, pars->sensordepth_sensordepth-1,
+							pars->n_sensordepth, receive_time_d, &receive_heave, &jsensordepth,
+							error);
+				heave = transmit_heave;
+				}
+
+			/* get ssv and range */
+			if (ping->png_ssv <= 0)
+				ping->png_ssv = 150;
+			ping->png_range[i] = ping->png_raw_rxrange[i];
+			
+			/* ping->png_bheave[i] is the difference between the heave at the ping timestamp time that is factored
+			 * into the ping->png_xducer_depth value and the average heave at the sector transmit time and the beam receive time */
+			ping->png_bheave[i] = 0.5 *(receive_heave + transmit_heave) - heave;
+/* fprintf(stderr,"AAA png_count:%d beam:%d heave_ping:%f i:%d transmit_heave:%f receive_heave:%f bheave:%f\n",
+ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i]); */
+				
+			/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
+				Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
+				Surface Sound Speed Measurements in Post-Processing for Multi-Sector
+				Multibeam Echosounders : International Hydrographic Review, v.5, no.3,
+				p.26-31.
+				(http://www.omg.unb.ca/omg/papers/beaudoin_IHR_nov2004.pdf).
+			   note complexity if transducer arrays are reverse mounted, as determined
+			   by a mount heading angle of about 180 degrees rather than about 0 degrees.
+			   If a receive array or a transmit array are reverse mounted then:
+				1) subtract 180 from the heading mount angle of the array
+				2) flip the sign of the pitch and roll mount offsets of the array
+				3) flip the sign of the beam steering angle from that array
+					(reverse TX means flip sign of TX steer, reverse RX
+					means flip sign of RX steer) */
+			if (tx_h <= 90.0 || tx_h >= 270.0)
+				{
+				tx_align.roll = tx_r;
+				tx_align.pitch = tx_p;
+				tx_align.heading = tx_h;
+				tx_steer = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
+				}
+			else
+				{
+				tx_align.roll = -tx_r;
+				tx_align.pitch = -tx_p;
+				tx_align.heading = tx_h - 180.0;
+				tx_steer = -(0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]);
+				}
+			tx_orientation.roll = transmit_roll;
+			tx_orientation.pitch = transmit_pitch;
+			tx_orientation.heading = transmit_heading;
+			if (rx_h <= 90.0 || rx_h >= 270.0)
+				{
+				rx_align.roll = rx_r;
+				rx_align.pitch = rx_p;
+				rx_align.heading = rx_h;
+				rx_steer = (0.01 * (double)ping->png_raw_rxpointangle[i]);
+				}
+			else
+				{
+				rx_align.roll = -rx_r;
+				rx_align.pitch = -rx_p;
+				rx_align.heading = rx_h - 180.0;
+				rx_steer = -(0.01 * (double)ping->png_raw_rxpointangle[i]);
+				}
+			rx_orientation.roll = receive_roll;
+			rx_orientation.pitch = receive_pitch;
+			rx_orientation.heading = receive_heading;
+			reference_heading = heading;
+
+			status = mb_beaudoin(verbose,
+						tx_align,
+						tx_orientation,
+						tx_steer,
+						rx_align,
+						rx_orientation,
+						rx_steer,
+						reference_heading,
+						&beamAzimuth,
+						&beamDepression,
+						error);
+			ping->png_depression[i] = 90.0 - beamDepression;
+			ping->png_azimuth[i] = 90.0 + beamAzimuth;
+			if (ping->png_azimuth[i] < 0.0)
+				ping->png_azimuth[i] += 360.0;
+//fprintf(stderr,"mb_beaudoin result: i:%d tx steer:%f rph: %f %f %f  rx steer:%f rph: %f %f %f  beam: %f %f\n",
+//i,tx_steer,tx_orientation.roll,tx_orientation.pitch,tx_orientation.heading,
+//i,rx_steer,rx_orientation.roll,rx_orientation.pitch,rx_orientation.heading,
+//beamDepression,beamAzimuth);
+/* fprintf(stderr,"i:%d %f %f     %f %f\n",
+i,beamDepression,beamAzimuth,ping->png_depression[i],ping->png_azimuth[i]);*/
+
+			/* calculate beamflag */
+			detection_mask = (mb_u_char) ping->png_raw_rxdetection[i];
+			if (store->sonar == MBSYS_SIMRAD3_M3 && (ping->png_detection[i] & 128) == 128)
+				{
+				ping->png_beamflag[i] = MB_FLAG_NULL;
+				ping->png_raw_rxdetection[i] = ping->png_raw_rxdetection[i] | 128;
+				}
+			else if ((detection_mask & 128) == 128 && (detection_mask & 112) != 0)
+				{
+				ping->png_beamflag[i] = MB_FLAG_NULL;
+/* fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
+i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
+				}
+			else if ((detection_mask & 128) == 128)
+				{
+				ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+/*fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
+i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
+				}
+			else if (ping->png_clean[i] != 0)
+				{
+				ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+				}
+			else
+				{
+				ping->png_beamflag[i] = MB_FLAG_NONE;
+				}
+				
+			/* check for NaN value */
+			if (isnan(ping->png_depth[i]))
+				{
+				ping->png_beamflag[i] = MB_FLAG_NULL;
+				ping->png_depth[i] = 0.0;
+				}
+			}
+
+		/* generate processed sidescan */
+		pixel_size = (double *) &mb_io_ptr->saved1;
+		swath_width = (double *) &mb_io_ptr->saved2;
+		ping->png_pixel_size = 0;
+		ping->png_pixels_ss = 0;
+		status = mbsys_simrad3_makess(verbose,
+				mbio_ptr, store_ptr,
+				MB_NO, pixel_size,
+				MB_NO, swath_width,
+				1,
+				error);
+
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
