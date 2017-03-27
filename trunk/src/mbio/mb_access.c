@@ -550,16 +550,7 @@ int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
-		void *platform_ptr, int platform_target_sensor,
-		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
-				double *nav_speed,
-		int n_sensordepth, double *sensordepth_time_d,
-				double *sensordepth_sensordepth,
-		int n_heading, double *heading_time_d, double *heading_heading,
-		int n_altitude, double *altitude_time_d, double *altitude_altitude,
-		int n_attitude, double *attitude_time_d, double *attitude_roll,
-				double *attitude_pitch, double *attitude_heave,
-		int *error)
+		void *platform_ptr, void *preprocess_pars_ptr, int *error)
 {
 	char	*function_name = "mb_preprocess";
 	int	status;
@@ -575,26 +566,7 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
 		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
-		fprintf(stderr,"dbg2       platform_target_sensor:     %d\n", platform_target_sensor);
-		fprintf(stderr,"dbg2       n_nav:                      %d\n", n_nav);
-		fprintf(stderr,"dbg2       nav_time_d:                 %p\n",nav_time_d);
-		fprintf(stderr,"dbg2       nav_lon:                    %p\n",nav_lon);
-		fprintf(stderr,"dbg2       nav_lat:                    %p\n",nav_lat);
-		fprintf(stderr,"dbg2       nav_speed:                  %p\n",nav_speed);
-		fprintf(stderr,"dbg2       n_sensordepth:              %d\n",n_sensordepth);
-		fprintf(stderr,"dbg2       sensordepth_time_d:         %p\n",sensordepth_time_d);
-		fprintf(stderr,"dbg2       sensordepth_sensordepth:    %p\n",sensordepth_sensordepth);
-		fprintf(stderr,"dbg2       n_heading:                  %d\n",n_heading);
-		fprintf(stderr,"dbg2       heading_time_d:             %p\n",heading_time_d);
-		fprintf(stderr,"dbg2       heading_heading:            %p\n",heading_heading);
-		fprintf(stderr,"dbg2       n_altitude:                 %d\n",n_altitude);
-		fprintf(stderr,"dbg2       altitude_time_d:            %p\n",altitude_time_d);
-		fprintf(stderr,"dbg2       altitude_altitude:          %p\n",altitude_altitude);
-		fprintf(stderr,"dbg2       n_attitude:                 %d\n",n_attitude);
-		fprintf(stderr,"dbg2       attitude_time_d:            %p\n",attitude_time_d);
-		fprintf(stderr,"dbg2       attitude_roll:              %p\n",attitude_roll);
-		fprintf(stderr,"dbg2       attitude_pitch:             %p\n",attitude_pitch);
-		fprintf(stderr,"dbg2       attitude_heave:             %p\n",attitude_heave);
+		fprintf(stderr,"dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -604,12 +576,7 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 	if (mb_io_ptr->mb_io_preprocess != NULL)
 		{
 		status = (*mb_io_ptr->mb_io_preprocess)
-				(verbose, mbio_ptr, store_ptr, platform_ptr, platform_target_sensor,
-				n_nav, nav_time_d, nav_lon, nav_lat, nav_speed,
-				n_sensordepth, sensordepth_time_d, sensordepth_sensordepth,
-				n_heading, heading_time_d, heading_heading,
-				n_altitude, altitude_time_d, altitude_altitude,
-				n_attitude, attitude_time_d, attitude_roll, attitude_pitch, attitude_heave,
+				(verbose, mbio_ptr, store_ptr, platform_ptr, preprocess_pars_ptr,
 				error);
 		}
 		

@@ -10375,7 +10375,7 @@ mbnavadjust_updategrid()
 			do_info_add(message, MB_NO);
 			if (mbna_verbose == 0)
 				fprintf(stderr,"%s",message);
-			sprintf(command, "cd %s ; mbgrid_adj.cmd", project.datadir);
+			sprintf(command, "cd %s ; ./mbgrid_adj.cmd", project.datadir);
 			fprintf(stderr,"Executing:\n%s\n\n",command);
 			shellstatus = system(command);
 			project.grid_status = MBNA_GRID_CURRENT;

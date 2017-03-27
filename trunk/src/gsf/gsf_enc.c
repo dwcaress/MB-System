@@ -216,7 +216,7 @@ gsfEncodeHeader(unsigned char *sptr, gsfHeader * header)
 
     memset(header->version, 0, sizeof(header->version));
     strncpy(header->version, GSF_VERSION, sizeof(header->version)-1);
-    header->version[sizeof(header->version)-1] = 0;
+    header->version[sizeof(header->version)-1] = 0; // changed "sizeof(header->version)" to "sizeof(header->version)-1" for MB-System DW Caress 21 March 2017
     memcpy(p, header->version, sizeof(gsfHeader));
     p += sizeof(gsfHeader);
 

@@ -169,26 +169,13 @@
 #define OPTLK
 #endif
 
-#ifdef WIN32
-#	define R_OK 04
-#	define W_OK 02
-#	define X_OK 01
-#	define F_OK 00
-#	ifndef __WINDOWS__              /* I, Joaquim Luis, understand nothing of this mess on the ways to detect if we are on Windows */
-#		define __WINDOWS__
-#	endif
-#	ifndef _WIN32
-#		define _WIN32
-#	endif
-#endif
-
 #ifdef __cplusplus
 extern          "C"
 {
 #endif
 
 /* Define this version of the GSF library (MAXIMUM 11 characters) */
-#define GSF_VERSION       "GSF-v03.06"
+#define GSF_VERSION       "GSF-v03.07"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    524288
@@ -416,7 +403,16 @@ gsfDataID;
 
 /* define Posix.4 proposed structure for internal storage of time */
 /* timespec is defined in __MINGW64__ but it appears that they don't set a macro for it.  JCD  */
-#if (!defined (_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC) && !defined (_SYS_TIMESPEC_H) && !defined (__timespec_defined) && !defined (__MINGW64__) && !defined (HAVE_STRUCT_TIMESPEC) && !defined _TIMESPEC_DEFINED)
+#if (!defined (_STRUCT_TIMESPEC_) && \
+     !defined (_TIMESPEC_T) && \
+     !defined (_STRUCT_TIMESPEC) && \
+     !defined (_SYS_TIMESPEC_H) && \
+     !defined (__timespec_defined) && \
+     !defined (__MINGW64__) && \
+     !defined (HAVE_STRUCT_TIMESPEC) && \
+     !defined (_TIMESPEC_DEFINED_) && \
+     !defined (_TIMESPEC_DEFINED) && \
+     !defined (__struct_timespec_defined))
 #define HAVE_STRUCT_TIMESPEC
 #define _STRUCT_TIMESPEC_
 #define _TIMESPEC_T
@@ -424,6 +420,7 @@ gsfDataID;
 #define _SYS_TIMESPEC_H
 #define __timespec_defined
 #define _TIMESPEC_DEFINED
+#define __struct_timespec_defined
 /* MAC OSX is a different bird, and while doesn't have the structures defined */
 /* above, does have the timespec structure defined. __APPLE__ will be set when  */
 /* compiled with Apple's gcc on OSX and other third party compilers, so we use it to */
@@ -2866,24 +2863,6 @@ int gsfStat (const char *filename, long long *sz);
  * Error Conditions :
  *     GSF_FOPEN_ERROR
  *     GSF_UNRECOGNIZED_FILE
- *
- ********************************************************************/
-
-int gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping);
-/********************************************************************
- *
- * Function Name : gsfSetDefaultScaleFactor
- *
- * Description : This function is used to estimate and set scale
- *               factors for a ping record
- *
- * Inputs :
- *    mb_ping - a pointer to a ping record.  The scale factors
- *              will be set in this record.
- *
- * Returns : This function returns 0.
- *
- * Error Conditions : none
  *
  ********************************************************************/
 

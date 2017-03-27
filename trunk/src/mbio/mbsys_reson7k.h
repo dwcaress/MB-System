@@ -2526,16 +2526,7 @@ int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
 int mbsys_reson7k_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
-        void *platform_ptr, int platform_target_sensor,
-		int n_nav, double *nav_time_d, double *nav_lon, double *nav_lat,
-				double *nav_speed,
-		int n_sensordepth, double *sensordepth_time_d,
-				double *sensordepth_sensordepth,
-		int n_heading, double *heading_time_d, double *heading_heading,
-		int n_altitude, double *altitude_time_d, double *altitude_altitude,
-		int n_attitude, double *attitude_time_d, double *attitude_roll,
-				double *attitude_pitch, double *attitude_heave,
-		int *error);
+        void *platform_ptr, void *preprocess_pars_ptr, int *error);
 int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, void **platform_ptr, int *error);
 int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,

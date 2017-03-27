@@ -109,7 +109,8 @@
 #include "gsf_indx.h"
 #include "gsf_ft.h"
 
-#ifndef USE_DEFAULT_FILE_FUNCTIONS
+/* Macros required for this module */
+#ifndef USE_DEFAULT_FILE_FUNCTIONS   // Added USE_DEFAULT_FILE_FUNCTIONS test for MB-System DW Caress 21 March 2017
 
 #undef fseek
 #undef ftell
@@ -1139,13 +1140,13 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     long long        current;
     int              endian = 0x00010203;
     int              l_temp;
-    long long        u_temp;
+    long long        u_temp, indx_addy;
     FILE            *temp[NUM_REC_TYPES];
     gsfDataID        data_id;
     gsfRecords       records;
     INDEX_REC        index_rec;
     GSF_INDEX_HEADER index_header;
-    long long        save_pos;
+    // long long        save_pos; // Removed for MB-System DW Caress 21 March 2017
 
     /* Clear the index header data structure */
     memset (&index_header, 0, sizeof(index_header));
@@ -1306,8 +1307,6 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             return(-1);
         }
     }
-    gsfSeek(handle, GSF_PREVIOUS_RECORD);
-    save_pos = ftell(ft->fp);
 
     /* If the last indexed record is not the ping record we just loaded, then
      * go load the last indexed record so that the gsf file pointer is one
@@ -1337,7 +1336,6 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             return(-1);
         }
     }
-    fseek(ft->fp, save_pos, SEEK_SET);
 
     /*  Get the address of the end of file so we can compute percentage
      *  processed for creating the index file.
@@ -1779,7 +1777,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
      */
     fclose (ft->index_data.fp);
 
-    if ((ft->index_data.fp = fopen(ndx_file, "rb+")) == NULL)
+    if ((ft->index_data.fp = fopen(ndx_file, "wb+")) == NULL)
     {
         gsfError = GSF_INDEX_FILE_OPEN_ERROR;
         /*  Get rid of the temp files.  */
@@ -1834,15 +1832,46 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 
     /* Set the library's table entry for the number of record types for this file */
     ft->index_data.number_of_types = index_header.number_record_types;
+    // getting the start addresses
+    indx_addy = ftell(ft->index_data.fp);
+    indx_addy += (ft->index_data.number_of_types * 16);
 
-    /*  Clear the space for the information (write dummy info for the
-     *  record type, number_of_records, and start address).
-     */
-    for (i = 0, j = 0; i < ft->index_data.number_of_types; i++)
+    /*  Write the pertinent information for this record type.  
+    *  The offset is computed as follows :
+    *  j is the counter for the record types stored in the
+    *  index file, times 16 (size of the header info for each
+    *  record type), plus 48 bytes for the format version
+    *  id, gsf file size, endian indicator, total number of record
+    *  types, and reserved space.
+    */
+    for (i = 0, j = 0; j < ft->index_data.number_of_types; i++)
     {
-        fwrite(&j, 4, 1, ft->index_data.fp);
-        fwrite(&j, 4, 1, ft->index_data.fp);
-        fwrite(&j, 8, 1, ft->index_data.fp);
+        if(ft->index_data.number_of_records[i] > 0)
+        {
+            l_temp = ft->index_data.record_type[i];
+            if (ft->index_data.swap)
+            {
+                SwapLong((unsigned int *) &l_temp, 1);
+            }
+            fwrite(&l_temp, 4, 1, ft->index_data.fp);
+            
+            u_temp = indx_addy;
+            if (ft->index_data.swap)
+            {
+                SwapLongLong((long long *) &u_temp, 1);
+            }
+            fwrite(&u_temp, 8, 1, ft->index_data.fp);
+            ft->index_data.start_addr[i] = u_temp;
+            
+            l_temp = ft->index_data.number_of_records[i];
+            if (ft->index_data.swap)
+            {
+                SwapLong((unsigned int *) &l_temp, 1);
+            }
+            fwrite(&l_temp, 4, 1, ft->index_data.fp);
+            indx_addy += (ft->index_data.number_of_records[i] * sizeof(INDEX_REC));
+            j++;
+        }
     }
 
     /*  Read the temp files and build the final index file.   */
@@ -1859,7 +1888,6 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
              *  type.
              */
             fseek(temp[i], 0, 0);
-            ft->index_data.start_addr[i] = ftell(ft->index_data.fp);
             ft->index_data.record_type[i] = i;
 
             /*  Read through the temp file and write to the final file. */
@@ -1872,39 +1900,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                 }
                 fwrite(&index_rec, sizeof(INDEX_REC), 1, ft->index_data.fp);
             }
-
-            /*  Move to the beginning of the final file and write the
-             *  pertinent information for this record type.  The offset
-             *  is computed as follows :
-             *  j is the counter for the record types stored in the
-             *  index file, times 16 (size of the header info for each
-             *  record type), plus 48 bytes for the format version
-             *  id, gsf file size, endian indicator, total number of record
-             *  types, and reserved space.
-             */
-            fseek(ft->index_data.fp, (j * 16) + 48, 0);
-
-            l_temp = ft->index_data.record_type[i];
-            if (ft->index_data.swap)
-            {
-                SwapLong((unsigned int *) &l_temp, 1);
-            }
-            fwrite(&l_temp, 4, 1, ft->index_data.fp);
-
-            u_temp = ft->index_data.start_addr[i];
-            if (ft->index_data.swap)
-            {
-                SwapLongLong((long long *) &u_temp, 1);
-            }
-            fwrite(&u_temp, 8, 1, ft->index_data.fp);
-
-            l_temp = ft->index_data.number_of_records[i];
-            if (ft->index_data.swap)
-            {
-                SwapLong((unsigned int *) &l_temp, 1);
-            }
-            fwrite(&l_temp, 4, 1, ft->index_data.fp);
-
+            
             /* Advance to the end of the index file */
             fseek(ft->index_data.fp, 0, SEEK_END);
 

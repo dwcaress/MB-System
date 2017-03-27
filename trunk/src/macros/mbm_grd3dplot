@@ -210,17 +210,7 @@ $PI = 3.1415926;
 $DTR = $PI / 180.0;
 
 # Determine the GMT version
-@grdinfo = `gmt grdinfo 2>&1`;
-while (@grdinfo)
-	{
-	$line = shift @grdinfo;
-	if ($line =~
-		/^gmt grdinfo\s+(\S+)\s+\S+/)
-		{
-		($gmt_version) = $line =~
-			/^gmt grdinfo\s+(\S+)\s+\S+/;
-		}
-	}
+$gmt_version = `gmt --version`;
 
 # Deal with command line arguments
 $command_line = "@ARGV";

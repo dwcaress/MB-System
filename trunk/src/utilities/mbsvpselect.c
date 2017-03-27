@@ -736,7 +736,6 @@ void fill_struct_inf
     FILE *fileName;
     inf_hold->file_name = holder;
     struct tm *ptr;
-    char *result;
     
     /* reading relative inf file */
     fileName = fopen(inf_hold->file_name, "r");
@@ -867,8 +866,7 @@ void fill_struct_svp
     char *ptr_caris = NULL;
     char *ptr_mb1 = NULL;
     char *ptr_mb2 = NULL;
-    char *result;
-    
+   
     /* reading relative svp file */
     fileName = fopen(svp_hold->file_name, "r");
     
@@ -1043,7 +1041,6 @@ int read_recursive(char *fileName){
     trim_newline(fileName);
     int counter = 0;
     char str[BUFSIZ];
-    char *lineRead;
     FILE *dataFile;
     char caris_str[] = "Section";
     char mb1_str[] = "## MB-SVP";
@@ -1092,23 +1089,14 @@ void read_list
     int j=0;
     FILE *fDatalist;
     FILE *fSvp;
-    FILE *testOpen;
     FILE *fresult;
-    FILE *sdHold_file;
     inf *inf_hold = NULL;
-    svp *svp_hold = NULL;
-    
-
-    /* double dist_time[size][size_2]; */
-    double min_time[size];
-    double min_dis[size];
-    /* double max_dist[size]; */
+    svp *svp_hold = NULL; 
     int n = 0;
     struct geod_geodesic g;
     double azi1, azi2;
-    int count;
-    char *result;
     int shellstatus;
+    int count_size2;
     
     atexit(pause_screen);				/* pause the screen */
     
@@ -1134,7 +1122,7 @@ void read_list
     }
     /* ------------------------------ */
     while (( fgets(dBuffer, sizeof dBuffer, fDatalist)) != NULL){
-        int count_size2 = read_recursive2(dBuffer);
+        count_size2 = read_recursive2(dBuffer);
     }
     
     /* ------------------------------ */
@@ -1473,11 +1461,9 @@ void read_list
                            "\nCalculating the nearest svp in position within %d time period for for %s\n",
                            p_3_time,
                            inf_hold[i].file_name);
-                double temp_time = 0;
                 double temp_dist = 0;
                 double temp_dist2=0;
                 int count =0;
-                int n_time = 0;
                 int n_pos_time = 0;
                 int n_pos=0;
                 for(j=0; j<size_2; j++)
@@ -1580,7 +1566,6 @@ void read_list
                 double temp_day2 = -9999;
                 double temp_hour2 = -9999;
                 double temp_min2 = -9999;
-                double temp_dist2=0;
                 int count =0;
                 int n_time_noSeason = 0;
                 int n_time_season = 0;

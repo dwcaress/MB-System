@@ -1729,9 +1729,9 @@ int mb_platform_lever(int verbose, void *platform_ptr,
 		if (targetsensor < 0 || targetsensor >= platform->num_sensors
 				|| platform->source_position < 0 || platform->source_position >= platform->num_sensors
 				|| platform->source_depth < 0 || platform->source_depth >= platform->num_sensors)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_BAD_PARAMETER;
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_PARAMETER;
 			}
 			
 		/* else proceed */

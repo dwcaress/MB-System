@@ -226,17 +226,7 @@ $ncpt = 11;
 	@cptbb9 = (100,  75,  50,  45,  40,  30,  24,   7,   0,   0,   0);
 
 # Determine the GMT version
-@grdinfo = `gmt grdinfo 2>&1`;
-while (@grdinfo)
-	{
-	$line = shift @grdinfo;
-	if ($lgrdinfoine =~
-		/^grdinfo\(core\)\s+(\S+)\s+\S+/)
-		{
-		($gmt_version) = $line =~
-			/^grdinfo\(core\)\s+(\S+)\s+\S+/;
-		}
-	}
+$gmt_version = `gmt --version`;
 
 # Deal with command line arguments
 $command_line = "@ARGV";
