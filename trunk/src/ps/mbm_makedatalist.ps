@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0
 %%Creator: groff version 1.19.2
-%%CreationDate: Mon Mar 27 00:22:42 2017
+%%CreationDate: Fri Mar 31 18:46:51 2017
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
@@ -236,71 +236,150 @@ BP
 (acro to generate a datalist of the sw)-2.5 E
 (ath \214les in a speci\214ed directory)-.1 E(.)-.65 E F1(VERSION)72
 124.8 Q F0 -1.11(Ve)108 136.8 S(rsion 5.0)1.11 E F1(SYNOPSIS)72 165.6 Q
-F2(mbm_mak)108 177.6 Q(edatalist)-.1 E F0([)2.5 E F2<ad49>A/F3 10
-/Times-Italic@0 SF(dir)A(ectory)-.37 E F2<ad4f>2.5 E F3(datalist)A F2
-<ad4820ad56>2.5 E F0(])A F1(DESCRIPTION)72 206.4 Q F2(Mbm_mak)108 218.4
-Q(edatalist)-.1 E F0 1.178(is a macro to generate an MB-System datalist\
- \214le referencing all identi\214able sw)3.678 F(ath)-.1 E
+F2(mbm_mak)108 177.6 Q(edatalist)-.1 E F0([)2.5 E F2<ad46>A/F3 10
+/Times-Italic@0 SF(format)A F2<ad49>2.5 E F3(dir)A(ectory)-.37 E F2
+<ad4f>2.5 E F3(datalist)A F2(-S)2.5 E F3(suf)A<8c78>-.18 E F2
+(\255T -H \255V)2.5 E F0(])A F1(DESCRIPTION)72 206.4 Q F2(Mbm_mak)108
+218.4 Q(edatalist)-.1 E F0 1.178(is a macro to generate an MB-System da\
+talist \214le referencing all identi\214able sw)3.678 F(ath)-.1 E
 (\214les in the speci\214ed tar)108 230.4 Q(get directory)-.18 E(.)-.65
-E 1.581(The output datalist will be placed in the current w)108 254.4 R
-1.581(orking directory)-.1 F 4.081(.T)-.65 G 1.582
-(he output datalist is named datal-)-4.081 F .454(ist.mb-1 by def)108
-266.4 R .454(ault, b)-.1 F .454(ut can be speci\214ed with the)-.2 F F2
-<ad4f>2.954 E F0 2.954(option. If)2.954 F .454(no tar)2.954 F .453
-(get directory is speci\214ed with the)-.18 F F2<ad49>2.953 E F0 .311
-(option, then the current w)108 278.4 R .312
-(orking directory is used. In order for sw)-.1 F .312
-(ath \214les to be recognized and included in)-.1 F .115
-(the datalist, the)108 290.4 R 2.615(ym)-.15 G .115
-(ust conform to the MB-System sw)-2.615 F .115(ath \214le naming con)-.1
-F -.15(ve)-.4 G .114(ntion \(see the).15 F F2(mbsystem)2.614 E F0
-(manual)2.614 E(page for details\).)108 302.4 Q F1 -.548(AU)72 331.2 S
-(THORSHIP).548 E F0(Da)108 343.2 Q(vid W)-.2 E 2.5(.C)-.92 G
-(aress \(caress@mbari.or)-2.5 E(g\))-.18 E(Montere)113 355.2 Q 2.5(yB)
--.15 G(ay Aquarium Research Institute)-2.5 E
-(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 367.2 Q
-(Lamont-Doherty Earth Observ)113 379.2 Q(atory)-.25 E F1(OPTIONS)72 408
-Q F2<ad48>108 420 Q F0 .162(This "help" \215ag cause the program to pri\
-nt out a description of its operation and then e)22.52 F .162
-(xit immedi-)-.15 F(ately)144 432 Q(.)-.65 E F2<ad49>108 448.8 Q F3(dir)
-26.41 E(ectory)-.37 E F0(Sets the path of the tar)144 460.8 Q
-(get directory)-.18 E(.)-.65 E F2<ad4f>108 477.6 Q F3(datalist)22.52 E
-F0(Sets the name of the output datalist \214le. Def)144 489.6 Q
-(ault: datalist.mb-1)-.1 E F2<ad56>108 506.4 Q F0(The)23.08 E F2<ad56>
-2.5 E F0(option causes)2.5 E F2(mbm_mak)2.5 E(edatalist)-.1 E F0
-(to print out status messages.)2.5 E F1(EXAMPLES)72 535.2 Q F0 .937
-(Suppose we ha)108 547.2 R 1.237 -.15(ve a s)-.2 H .937(et of sw).15 F
-.937(ath \214les in a directory and we w)-.1 F .937
-(ant to construct a datalist referring to those)-.1 F
-(\214les. A simple directory listing sho)108 559.2 Q(ws four \214les:)
--.25 E(20051019_154030.mb88)144 571.2 Q(20051019_162540.mb88)144 583.2 Q
-(20051019_171756.mb88)144 595.2 Q(junk.txt)144 607.2 Q .196
-(of which three are identi\214able as sw)108 619.2 R .197
-(ath \214les because of the ".mb88" \214le suf)-.1 F .197
-(\214x. Running)-.25 F F2(mbm_mak)2.697 E(edatal-)-.1 E(ist)108 631.2 Q
-F0(in this directory with no ar)2.5 E(guments other than v)-.18 E
-(erbosity:)-.15 E(mbm_mak)144 643.2 Q(edatalist \255V)-.1 E(produces a \
-datalist \214le named datalist.mb-1. The contents of this \214le are:)
-108 655.2 Q(./20051019_154030.mb88 88)144 667.2 Q
-(./20051019_162540.mb88 88)144 679.2 Q(./20051019_171756.mb88 88)144
-691.2 Q(where the \214le junk.txt has been ignored.)108 703.2 Q
-(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(1)204.835 E 0
-Cg EP
+E .623(Datalists are fundamental structures in)108 254.4 R F2(MB-System)
+3.124 E F0 -.1(wo)3.124 G(rk\215o).1 E .624(ws because the)-.25 F 3.124
+(ya)-.15 G(llo)-3.124 E 3.124(wp)-.25 G .624(rograms to operate on)
+-3.124 F 1.064(sets of sw)108 266.4 R 1.064(ath data \214les.)-.1 F
+1.064(Datalist \214les are te)6.064 F 1.064(xt lists of sw)-.15 F 1.064
+(ath data \214les and their format ids with each \214le)-.1 F .657(entr\
+y taking up a single line. These lists may contain references to other \
+datalists, making them recursi)108 278.4 R -.15(ve)-.25 G(.).15 E .864
+(Datalists may also contain comments and parsing directi)108 290.4 R
+-.15(ve)-.25 G 3.364(st).15 G .864(hat, for e)-3.364 F .863
+(xample, determine whether parsing)-.15 F .018(returns references to ra)
+108 302.4 R 2.519(wo)-.15 G 2.519(rp)-2.519 G .019
+(rocessed data \214les. See the)-2.519 F F2(MB-System)2.519 E F0 .019
+(manual page for details on the format)5.019 F
+(and structure of datalists.)108 314.4 Q .032
+(This macro is used to easily construct a datalist referencing sw)108
+338.4 R .031(ath \214les in a directory)-.1 F 2.531(,o)-.65 G .031
+(ften as part of setting)-2.531 F .716(up the)108 350.4 R F2(MB-System)
+3.216 E F0 .716(processing en)3.216 F .716(vironment for a ne)-.4 F
+3.216(ws)-.25 G .716(ea\215oor mapping dataset. By def)-3.216 F(ault,)
+-.1 E F2(mbm_mak)3.217 E(e-)-.1 E(datalist)108 362.4 Q F0 .438(tests al\
+l of the \214lenames in the local directory for adherence to the)2.938 F
+F2(MB-System)2.937 E F0(sw)2.937 E .437(ath \214le naming)-.1 F(con)108
+374.4 Q -.15(ve)-.4 G .811(ntion \(see the).15 F F2(mbsystem)3.312 E F0
+.812(manual page for details\), and mak)3.312 F .812
+(es an output datalist including all of the)-.1 F .175
+(\214les that can be recognized as sw)108 386.4 R .174
+(ath data. This can include \214les with suf)-.1 F<8c78>-.25 E .174
+(es such as ".mb88", that are rec-)-.15 F .242(ognized as format 88 \(R\
+eson s7k\) \214les, and \214les with recognized v)108 398.4 R .242
+(endor format suf)-.15 F<8c78>-.25 E .242(es, such as "_ra)-.15 F -.65
+(w.)-.15 G(all").65 E .371(or ".all" for old and recent K)108 410.4 R
+(ongsber)-.35 E 2.871(gm)-.18 G .371(ultibeam data, respecti)-2.871 F
+-.15(ve)-.25 G(ly).15 E 2.871(.T)-.65 G .37(he suf)-2.871 F .37
+(\214x of the \214les to be considered)-.25 F .595
+(can be speci\214ed with the)108 422.4 R F2(-S)3.096 E F3(suf)A<8c78>
+-.18 E F0 .596
+(option; under most circumstances this is the best approach as it pre)
+3.096 F -.15(ve)-.25 G(nts).15 E F2(mbm_mak)108 434.4 Q(edatalist)-.1 E
+F0 .828(from including \214les that are not intended for inclusion by t\
+he user yet satisfy one of)3.329 F .184(the man)108 446.4 R 2.684(yr)
+-.15 G .184(ecognized naming con)-2.684 F -.15(ve)-.4 G .184
+(ntions. By def).15 F(ault,)-.1 E F2(mbm_mak)2.685 E(edatalist)-.1 E F0
+.185(infers the format id of included)5.185 F
+(\214les using the naming con)108 458.4 Q -.15(ve)-.4 G
+(ntions. The format id can be speci\214ed using the).15 E F2(-F)2.5 E F3
+(format)A F0(option.)2.5 E 1.581
+(The output datalist will be placed in the current w)108 482.4 R 1.581
+(orking directory)-.1 F 4.081(.T)-.65 G 1.581
+(he output datalist is named datal-)-4.081 F .453(ist.mb-1 by def)108
+494.4 R .453(ault, b)-.1 F .453(ut can be speci\214ed with the)-.2 F F2
+<ad4f>2.954 E F0 2.954(option. If)2.954 F .454(no tar)2.954 F .454
+(get directory is speci\214ed with the)-.18 F F2<ad49>2.954 E F0 .312
+(option, then the current w)108 506.4 R .312
+(orking directory is used. In order for sw)-.1 F .311
+(ath \214les to be recognized and included in)-.1 F .114
+(the datalist, the)108 518.4 R 2.614(ym)-.15 G .115
+(ust conform to the MB-System sw)-2.614 F .115(ath \214le naming con)-.1
+F -.15(ve)-.4 G .115(ntion \(see the).15 F F2(mbsystem)2.615 E F0
+(manual)2.615 E(page for details\).)108 530.4 Q .353(Most sea\215oor ma\
+pping sonars and datalogging packages produce original sw)108 554.4 R
+.353(ath data \214les with names con-)-.1 F .181
+(structed so that standard directory listings are in time order)108
+566.4 R 2.681(.H)-.55 G -.25(ow)-2.681 G -2.15 -.25(ev e).25 H .981 -.4
+(r, K).25 H(ongsber).05 E 2.681(gm)-.18 G .181
+(ultibeam data \214lenames)-2.681 F .503(usually start with a surv)108
+578.4 R .803 -.15(ey \214)-.15 H .503
+(le number that restarts at 0001 whene).15 F -.15(ve)-.25 G 3.002(rd).15
+G .502(atalogging is stopped and restarted.)-3.002 F(Consequently)108
+590.4 Q 3.63(,w)-.65 G 1.131(hen data from multiple instances of loggin\
+g are present in a single directory)-3.63 F 3.631(,t)-.65 G 1.131
+(he simple)-3.631 F .486
+(listing of \214les will not in general be in time order)108 602.4 R
+2.985(.I)-.55 G 2.985(ft)-2.985 G .485(he \214le suf)-2.985 F .485
+(\214x is declared to be ".all" or ".ALL" using)-.25 F(the)108 614.4 Q
+F2(-S)2.552 E F0 .052(option, then)2.552 F F2(mbm_mak)2.552 E(edatalist)
+-.1 E F0 .052(will attempt to sort the sw)2.552 F .053
+(ath \214les into time order before generating)-.1 F
+(the \214nal datalist. This beha)108 626.4 Q
+(vior can be disabled by specifying the)-.2 E F2(-T)2.5 E F0(option.)2.5
+E F1 -.548(AU)72 655.2 S(THORSHIP).548 E F0(Da)108 667.2 Q(vid W)-.2 E
+2.5(.C)-.92 G(aress \(caress@mbari.or)-2.5 E(g\))-.18 E(Montere)113
+679.2 Q 2.5(yB)-.15 G(ay Aquarium Research Institute)-2.5 E
+(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 691.2 Q
+(Lamont-Doherty Earth Observ)113 703.2 Q(atory)-.25 E(MB-System 5.0)72
+768 Q(31 March 2017)140.11 E(1)198.45 E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbm_mak)72 48 Q 112.16(edatalist\(1\) MB-System)
 -.1 F 112.16(5.0 mbm_mak)2.5 F(edatalist\(1\))-.1 E/F1 10.95
-/Times-Bold@0 SF(SEE ALSO)72 84 Q/F2 10/Times-Bold@0 SF(mbsystem)108 96
-Q F0(\(1\),)A F2(mbdatalist)2.5 E F0(\(1\),)A F2(mbinf)2.5 E(o)-.25 E F0
-(\(1\))A F1 -.11(BU)72 124.8 S(GS).11 E F0 2(This macro doesn')108 136.8
-R 4.5(ty)-.18 G 2(et recognize when one sw)-4.5 F 1.999(ath \214le deri)
--.1 F -.15(ve)-.25 G 4.499(sf).15 G 1.999
-(rom another \(e.g. line1p.mb57 can be)-4.499 F
-(inferred to be a processed v)108 148.8 Q(ersion of line1.mb57\).)-.15 E
-(MB-System 5.0)72 768 Q 2.5(3J)146.495 G(une 2013)-2.5 E(2)204.835 E 0
-Cg EP
+/Times-Bold@0 SF(OPTIONS)72 84 Q/F2 10/Times-Bold@0 SF<ad48>108 96 Q F0
+.162(This "help" \215ag cause the program to print out a description of\
+ its operation and then e)22.52 F .161(xit immedi-)-.15 F(ately)144 108
+Q(.)-.65 E F2<ad49>108 124.8 Q/F3 10/Times-Italic@0 SF(dir)26.41 E
+(ectory)-.37 E F0(Sets the path of the tar)144 136.8 Q(get directory)
+-.18 E(.)-.65 E F2<ad4f>108 153.6 Q F3(datalist)22.52 E F0
+(Sets the name of the output datalist \214le. Def)144 165.6 Q
+(ault: datalist.mb-1)-.1 E F2<ad53>108 182.4 Q F3(suf)24.74 E<8c78>-.18
+E F0 .758(Sets the \214lename suf)144 194.4 R .758(\214x of sw)-.25 F
+.758(ath \214les considered for inclusion in the output datalist. Under\
+ most)-.1 F .742(circumstances using this option e)144 206.4 R .742
+(xplicitly is the best approach as it pre)-.15 F -.15(ve)-.25 G(nts).15
+E F2(mbm_mak)3.241 E(edatalist)-.1 E F0 .252(from including \214les tha\
+t are not intended for inclusion by the user yet satisfy one of the man)
+144 218.4 R 2.753(yr)-.15 G(ec-)-2.753 E(ognized naming con)144 230.4 Q
+-.15(ve)-.4 G(ntions.).15 E F2<ad46>108 247.2 Q F3(format)24.19 E F0
+.971(By def)144 259.2 R(ault,)-.1 E F2(mbm_mak)3.471 E(edatalist)-.1 E
+F0 .971(infers the format id of included \214les using the naming con)
+5.971 F -.15(ve)-.4 G(n-).15 E
+(tions. This option speci\214es the format id that is assigned.)144
+271.2 Q F2<ad56>108 288 Q F0(The)23.08 E F2<ad56>2.5 E F0(option causes)
+2.5 E F2(mbm_mak)2.5 E(edatalist)-.1 E F0(to print out status messages.)
+2.5 E F1(EXAMPLES)72 316.8 Q F0 .937(Suppose we ha)108 328.8 R 1.237
+-.15(ve a s)-.2 H .937(et of sw).15 F .937
+(ath \214les in a directory and we w)-.1 F .937
+(ant to construct a datalist referring to those)-.1 F
+(\214les. A simple directory listing sho)108 340.8 Q(ws four \214les:)
+-.25 E(20051019_154030.mb88)144 352.8 Q(20051019_162540.mb88)144 364.8 Q
+(20051019_171756.mb88)144 376.8 Q(junk.txt)144 388.8 Q .197
+(of which three are identi\214able as sw)108 400.8 R .197
+(ath \214les because of the ".mb88" \214le suf)-.1 F .196
+(\214x. Running)-.25 F F2(mbm_mak)2.696 E(edatal-)-.1 E(ist)108 412.8 Q
+F0(in this directory with no ar)2.5 E(guments other than v)-.18 E
+(erbosity:)-.15 E(mbm_mak)144 424.8 Q(edatalist \255V)-.1 E(produces a \
+datalist \214le named datalist.mb-1. The contents of this \214le are:)
+108 436.8 Q(20051019_154030.mb88 88)144 448.8 Q(20051019_162540.mb88 88)
+144 460.8 Q(20051019_171756.mb88 88)144 472.8 Q
+(where the \214le junk.txt has been ignored.)108 484.8 Q F1(SEE ALSO)72
+513.6 Q F2(mbsystem)108 525.6 Q F0(\(1\),)A F2(mbdatalist)2.5 E F0
+(\(1\),)A F2(mbinf)2.5 E(o)-.25 E F0(\(1\))A F1 -.11(BU)72 554.4 S(GS)
+.11 E F0 1.999(This macro doesn')108 566.4 R 4.499(ty)-.18 G 1.999
+(et recognize when one sw)-4.499 F 1.999(ath \214le deri)-.1 F -.15(ve)
+-.25 G 4.499(sf).15 G 2(rom another \(e.g. line1p.mb57 can be)-4.499 F
+(inferred to be a processed v)108 578.4 Q(ersion of line1.mb57\).)-.15 E
+(MB-System 5.0)72 768 Q(31 March 2017)140.11 E(2)198.45 E 0 Cg EP
 %%Trailer
 end
 %%EOF
