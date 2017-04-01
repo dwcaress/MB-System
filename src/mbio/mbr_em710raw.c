@@ -75,9 +75,9 @@ extern int isnanf(float x);
 /* #define MBR_EM710RAW_BATH_RECALC_TWEAK_ANGLE_RANGE 1 */
 
 /* turn on debug statements here */
-/* #define MBR_EM710RAW_DEBUG 1 */
-/* #define MBR_EM710RAW_DEBUG2 1 */
-/* #define MBR_EM710RAW_DEBUG3 1 */
+// #define MBR_EM710RAW_DEBUG 1
+// #define MBR_EM710RAW_DEBUG2 1
+// #define MBR_EM710RAW_DEBUG3 1
 
 /* essential function prototypes */
 int mbr_register_em710raw(int verbose, void *mbio_ptr,
@@ -847,13 +847,13 @@ ping->png_count,ping->png_raw_count,ping->png_ss_count,ping->png_nbeams,ping->pn
 		    /* check for some indicators of broken records */
 		    if (ping->png_nbeams < ping->png_nbeams_ss
 			|| ping->png_nbeams > ping->png_nbeams_ss + 1)
-			{
+				{
 		    	if (verbose > 1)
 			    	fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
 					function_name, time_i[0], time_i[1], time_i[2],
 					time_i[3], time_i[4], time_i[5], time_i[6],
 					ping->png_nbeams, ping->png_nbeams_ss);
-			}
+				}
 		    }
 		}
 
@@ -2182,6 +2182,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 
 		/* check for valid sonarunswap */
 		if (sonarunswap == MBSYS_SIMRAD3_EM710
+			|| sonarunswap == MBSYS_SIMRAD3_EM712
 			|| sonarunswap == MBSYS_SIMRAD3_EM850
 			|| sonarunswap == MBSYS_SIMRAD3_EM3002
 			|| sonarunswap == MBSYS_SIMRAD3_EM302
@@ -2199,6 +2200,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 
 		/* check for valid sonarswap */
 		if (sonarswap == MBSYS_SIMRAD3_EM710
+			|| sonarswap == MBSYS_SIMRAD3_EM712
 			|| sonarswap == MBSYS_SIMRAD3_EM850
 			|| sonarswap == MBSYS_SIMRAD3_EM3002
 			|| sonarswap == MBSYS_SIMRAD3_EM302
@@ -2248,6 +2250,7 @@ typegood,mb_io_ptr->byteswapped,sonarunswapgood,sonarswapgood,*databyteswapped,*
 
 	/* check for valid sonar */
 	if (*sonar != MBSYS_SIMRAD3_EM710
+		&& *sonar != MBSYS_SIMRAD3_EM712
 		&& *sonar != MBSYS_SIMRAD3_EM850
 		&& *sonar != MBSYS_SIMRAD3_EM3002
 		&& *sonar != MBSYS_SIMRAD3_EM302
@@ -5699,8 +5702,8 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap,
 		    ping->png_tvg_crossover = (int) ((unsigned short) short_val);
 		mb_get_binary_short(swap, &line[26], &short_val);
 		    ping->png_nbeams_ss = (int) ((unsigned short) short_val);
-/*fprintf(stderr," ping->png_ss_date:%d  ping->png_ss_msec:%d  ping->png_ss_count:%d  ping->png_nbeams_ss:%d\n",
-ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
+//fprintf(stderr," ping->png_ss_date:%d  ping->png_ss_msec:%d  ping->png_ss_count:%d  ping->png_nbeams_ss:%d\n",
+//ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);
 		}
 
 	/* check for some indicators of a broken record

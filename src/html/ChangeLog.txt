@@ -246,6 +246,19 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.5.2296 (March 31, 2017)
+
+Mbm_makedatalist: Major capability augmentation for this tool, preparing for
+automated setup of the processing environment. This macro will now construct
+datalists from files matching a user specified  filename suffix, and will
+attempt to sort raw Kongsberg multibeam data files into time order.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Fixed to handle EM712 data and
+other Kongsberg multibeams now generating more than 512 beams.
+
+Mbm_grd2arc: Fix provided by Monica Schwehr for compatibility to *.grd files
+generated with the current GMT.
+
 -----> 5.5.2295 (March 26, 2017)
 
 Mbm_plot, mbm_grdplot, mbm_xyplot, mbm_3dgrdplot: Changes to the manual pages
@@ -259,7 +272,8 @@ by Monica Schwehr.
 Mbpreprocess: Added functionality to handle specialized, format-specific
 preprocessing tasks and to handle changes to data timestamps. Currently set to
 work with generic data, Reson 7k data (format 88), and 3DatDepth Lidar data
-(format 231)
+(format 231). Code written for mbpreprocess to work with Kongsberg data, but
+not yet tested.
 
 Format 88 (MBF_RESON7KR) and Mb7kpreprocess: Mb7kpreprocess is deprecated, with
 preprocessing of Reson 7k data to be done by mbpreprocess.

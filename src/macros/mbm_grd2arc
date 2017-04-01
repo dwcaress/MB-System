@@ -115,6 +115,12 @@ while (@grdinfo)
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+name:\s+(.+)\s+nx:\s+(\S+)/;
 		}
 	elsif ($line =~
+            /\S+\s+x_min:\s+\S+\s+x_max:\s+\S+\s+x_inc:\s+\S+\s+name:\s+.+\s+n_columns:\s+\S+/)
+        {
+        ($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~
+            /\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+name:\s+(.+)\s+n_columns:\s+(\S+)/;
+        }
+    elsif ($line =~
 		/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
 		{
 		($xmin_f,$xmax_f) = $line =~
@@ -130,6 +136,11 @@ while (@grdinfo)
 		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~
 			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+name:\s+(.+)\s+ny:\s+(\S+)/;
 		}
+    elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:\s+\S+\s+name:\s+.+\s+n_rows:\s+\S+/)
+        {
+        ($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~
+            /\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+name:\s+(.+)\s+n_rows:\s+(\S+)/;
+        }
 	elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:/)
 		{
 		($ymin_f,$ymax_f) = $line =~

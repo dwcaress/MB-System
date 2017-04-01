@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2296       March 31, 2017
   Version 5.5.2295       March 26, 2017
   Version 5.5.2294       March 21, 2017
   Version 5.5.2293       March 6, 2017
@@ -245,6 +246,19 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2296 (March 31, 2017)
+
+Mbm_makedatalist: Major capability augmentation for this tool, preparing for
+automated setup of the processing environment. This macro will now construct
+datalists from files matching a user specified  filename suffix, and will
+attempt to sort raw Kongsberg multibeam data files into time order.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Fixed to handle EM712 data and
+other Kongsberg multibeams now generating more than 512 beams.
+
+Mbm_grd2arc: Fix provided by Monica Schwehr for compatibility to *.grd files
+generated with the current GMT.
 
 -----> 5.5.2295 (March 26, 2017)
 

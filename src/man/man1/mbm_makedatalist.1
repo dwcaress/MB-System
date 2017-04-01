@@ -1,4 +1,4 @@
-.TH mbm_makedatalist 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_makedatalist 1 "31 March 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_makedatalist\fP \- Macro to generate a datalist of the swath
 files in a specified directory.
@@ -7,12 +7,38 @@ files in a specified directory.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_makedatalist\fP [\fB\-I\fP\fIdirectory\fP \fB\-O\fP\fIdatalist\fP \fB\-H \-V\fP]
+\fBmbm_makedatalist\fP [\fB\-F\fP\fIformat\fP \fB\-I\fP\fIdirectory\fP
+\fB\-O\fP\fIdatalist\fP \fB-S\fP\fIsuffix\fP \fB\-T -H \-V\fP]
 
 .SH DESCRIPTION
-\fBMbm_makedatalist\fP is a macro to generate an MB-System
-datalist file referencing all identifiable swath files in
-the specified target directory.
+\fBMbm_makedatalist\fP is a macro to generate an MB-System datalist file
+referencing all identifiable swath files in the specified target directory.
+
+Datalists are fundamental structures in \fBMB-System\fP workflows because they
+allow programs to operate on sets of swath data files.
+Datalist files are text lists of swath data files and their format ids with each
+file entry taking up a single line. These lists may contain references to other
+datalists, making them recursive. Datalists may also contain comments and parsing
+directives that, for example, determine whether parsing returns references to
+raw or processed data files. See the \fBMB-System\fP  manual page for details
+on the format and structure of datalists.  
+
+This macro is used to easily construct a datalist referencing swath files in a
+directory, often as part of setting up the \fBMB-System\fP processing environment
+for a new seafloor mapping dataset. By default, \fBmbm_makedatalist\fP tests
+all of the filenames in the local directory for adherence to the \fBMB-System\fP
+swath file naming convention (see the \fBmbsystem\fP manual page for details),
+and makes an output datalist including all of the files that can be recognized
+as swath data. This can include files with suffixes such as ".mb88", that are
+recognized as format 88 (Reson s7k) files, and files with recognized vendor
+format suffixes, such as "_raw.all" or ".all" for old and recent Kongsberg
+multibeam data, respectively. The suffix of the files to be considered can be
+specified with the \fB-S\fP\fIsuffix\fP option; under most circumstances this is
+the best approach as it prevents \fBmbm_makedatalist\fP from including files that
+are not intended for inclusion by the user yet satisfy one of the many recognized
+naming conventions. By default, \fBmbm_makedatalist\fP  infers the format id
+of included files using the naming conventions. The format id can be specified
+using the \fB-F\fP\fIformat\fP option.
 
 The output datalist will be placed in the current working
 directory. The output datalist is named datalist.mb-1
@@ -22,6 +48,17 @@ option, then the current working directory is used. In order
 for swath files to be recognized and included in the datalist,
 they must conform to the MB-System swath file naming convention
 (see the \fBmbsystem\fP manual page for details).
+
+Most seafloor mapping sonars and datalogging packages produce original swath
+data files with names constructed so that standard directory listings are in
+time order. However, Kongsberg multibeam data filenames usually start with a survey
+file number that restarts at 0001 whenever datalogging is stopped and restarted.
+Consequently, when data from multiple instances of logging are present in a
+single directory, the simple listing of files will not in general be in time
+order. If the file suffix is declared to be ".all" or ".ALL" using the \fB-S\fP
+option, then \fBmbm_makedatalist\fP will attempt to sort the swath files into
+time order before generating the final datalist. This behavior can be disabled
+by specifying the \fB-T\fP option.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -48,6 +85,22 @@ Sets the path of the target directory.
 .br
 Sets the name of the output datalist file. Default: datalist.mb-1
 .TP
+.B \-S
+\fIsuffix\fP
+.br
+Sets the filename suffix of swath files considered for inclusion in the output
+datalist. Under most circumstances using this option explicitly is the best
+approach as it prevents \fBmbm_makedatalist\fP from including files that
+are not intended for inclusion by the user yet satisfy one of the many recognized
+naming conventions. 
+.TP
+.B \-F
+\fIformat\fP
+.br
+By default, \fBmbm_makedatalist\fP  infers the format id
+of included files using the naming conventions. This option specifies the
+format id that is assigned.
+.TP
 .B \-V
 The \fB\-V\fP option causes \fBmbm_makedatalist\fP to print out status messages.
 
@@ -70,9 +123,9 @@ directory with no arguments other than verbosity:
 produces a datalist file named datalist.mb-1. The contents of
 this file are:
 .br
- 	./20051019_154030.mb88 88
- 	./20051019_162540.mb88 88
- 	./20051019_171756.mb88 88
+ 	20051019_154030.mb88 88
+ 	20051019_162540.mb88 88
+ 	20051019_171756.mb88 88
 .br
 where the file junk.txt has been ignored.
 
