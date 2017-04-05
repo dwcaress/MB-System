@@ -97,8 +97,9 @@ int mbr_info_em710raw(int verbose,
 			int *beam_flagging,
 			int *platform_source,
 			int *nav_source,
+			int *sensordepth_source,
 			int *heading_source,
-			int *vru_source,
+			int *attitude_source,
 			int *svp_source,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
@@ -252,8 +253,9 @@ int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->beam_flagging,
 			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
+			&mb_io_ptr->sensordepth_source,
 			&mb_io_ptr->heading_source,
-			&mb_io_ptr->vru_source,
+			&mb_io_ptr->attitude_source,
 			&mb_io_ptr->svp_source,
 			&mb_io_ptr->beamwidth_xtrack,
 			&mb_io_ptr->beamwidth_ltrack,
@@ -308,8 +310,9 @@ int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
 		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
+		fprintf(stderr,"dbg2       sensordepth_source: %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
-		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
+		fprintf(stderr,"dbg2       attitude_source:    %d\n",mb_io_ptr->attitude_source);
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
@@ -358,8 +361,9 @@ int mbr_info_em710raw(int verbose,
 			int *beam_flagging,
 			int *platform_source,
 			int *nav_source,
+			int *sensordepth_source,
 			int *heading_source,
-			int *vru_source,
+			int *attitude_source,
 			int *svp_source,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
@@ -394,8 +398,9 @@ int mbr_info_em710raw(int verbose,
 	*beam_flagging = MB_NO;
 	*platform_source = MB_DATA_START;
 	*nav_source = MB_DATA_NAV;
-	*heading_source = MB_DATA_DATA;
-	*vru_source = MB_DATA_ATTITUDE;
+	*sensordepth_source = MB_DATA_HEIGHT;
+	*heading_source = MB_DATA_NAV;
+	*attitude_source = MB_DATA_ATTITUDE;
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
@@ -419,8 +424,9 @@ int mbr_info_em710raw(int verbose,
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
 		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
+		fprintf(stderr,"dbg2       sensordepth_source: %d\n",*sensordepth_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
-		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
+		fprintf(stderr,"dbg2       attitude_source:      %d\n",*attitude_source);
 		fprintf(stderr,"dbg2       svp_source:         %d\n",*svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
@@ -646,7 +652,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* save attitude if "active" attitude data
-		- note that the mb_io_ptr->vru_source value will be set dynamically
+		- note that the mb_io_ptr->attitude_source value will be set dynamically
 			to reflect the actual attitude source used in realtime
 			by the sonar.
 		- attitude records from the sensors are
@@ -660,8 +666,8 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			from the active attitude sensor */
 		if ((attitude->att_sensordescriptor & 14) == 0)
 			{
-			/* set the vru_source */
-			mb_io_ptr->vru_source = store->kind;
+			/* set the attitude_source */
+			mb_io_ptr->attitude_source = store->kind;
 
 			/* get attitude time */
 			time_i[0] = attitude->att_date / 10000;
@@ -688,18 +694,18 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 
 		/* else this record is not from the active vru sensor
-			- make sure the vru_source does not point to this sensor */
-		else if (mb_io_ptr->vru_source == store->kind)
+			- make sure the attitude_source does not point to this sensor */
+		else if (mb_io_ptr->attitude_source == store->kind)
 			{
 			if (store->kind == MB_DATA_ATTITUDE)
-				mb_io_ptr->vru_source = MB_DATA_ATTITUDE1;
+				mb_io_ptr->attitude_source = MB_DATA_ATTITUDE1;
 			else
-				mb_io_ptr->vru_source = MB_DATA_ATTITUDE;
+				mb_io_ptr->attitude_source = MB_DATA_ATTITUDE;
 			}
 		}
 
 	/* save netattitude if "active" attitude data
-		- note that the mb_io_ptr->vru_source value will be set dynamically
+		- note that the mb_io_ptr->attitude_source value will be set dynamically
 			to reflect the actual attitude source used in realtime
 			by the sonar.
 		- attitude records from the sensors are
@@ -713,8 +719,8 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			from the active attitude sensor */
 		if ((netattitude->nat_sensordescriptor & 14) == 0)
 			{
-			/* set the vru_source */
-			mb_io_ptr->vru_source = store->kind;
+			/* set the attitude_source */
+			mb_io_ptr->attitude_source = store->kind;
 
 			/* get attitude time */
 			time_i[0] = netattitude->nat_date / 10000;
@@ -741,10 +747,10 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 
 		/* else this record is not from the active vru sensor
-			- make sure the vru_source does not point to this sensor */
-		else if (mb_io_ptr->vru_source == store->kind)
+			- make sure the attitude_source does not point to this sensor */
+		else if (mb_io_ptr->attitude_source == store->kind)
 			{
-			mb_io_ptr->vru_source = MB_DATA_ATTITUDE;
+			mb_io_ptr->attitude_source = MB_DATA_ATTITUDE;
 			}
 		}
 
@@ -1249,17 +1255,28 @@ i,beamDepression,beamAzimuth,ping->png_depression[i],ping->png_azimuth[i]);*/
 				ping->png_beamflag[i] = MB_FLAG_NULL;
 				ping->png_raw_rxdetection[i] = ping->png_raw_rxdetection[i] | 128;
 				}
-			else if ((detection_mask & 128) == 128 && (detection_mask & 112) != 0)
-				{
-				ping->png_beamflag[i] = MB_FLAG_NULL;
-/* fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
-i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
-				}
 			else if ((detection_mask & 128) == 128)
 				{
-				ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
-/*fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
-i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
+				if ((detection_mask & 15) == 0)
+					{
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+					}
+				else if ((detection_mask & 15) == 1)
+					{
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_INTERPOLATE;
+					}
+				else if ((detection_mask & 15) == 2)
+					{
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_INTERPOLATE;
+					}
+				else if ((detection_mask & 15) == 3)
+					{
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;;
+					}
+				else if ((detection_mask & 15) == 4)
+					{
+					ping->png_beamflag[i] = MB_FLAG_NULL;
+					}
 				}
 			else if (ping->png_clean[i] != 0)
 				{
@@ -5351,7 +5368,7 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:            %d\n",store->date);
 		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
-		fprintf(stderr,"dbg5       png_raw_read:               %d\n",ping->png_raw_read);
+		fprintf(stderr,"dbg5       png_raw_read:                %d\n",ping->png_raw_read);
 		fprintf(stderr,"dbg5       png_raw_date:                %d\n",ping->png_raw_date);
 		fprintf(stderr,"dbg5       png_raw_msec:                %d\n",ping->png_raw_msec);
 		fprintf(stderr,"dbg5       png_raw_count:               %d\n",ping->png_raw_count);

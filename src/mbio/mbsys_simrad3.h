@@ -545,30 +545,30 @@ struct mbsys_simrad3_ping_struct
 								A) If the most significant bit (bit7) is zero, this beam has a valid
 									detection. Bit 0-3 is used to specify how the range for this beam
 									is calculated
-									0: Amplitude detect
-									1: Phase detect
+									0: Amplitude detect (0xxx 0000)
+									1: Phase detect (0xxx 0001)
 									2-15: Future use
-								B) If the most significant bit is 1, this beam has an invalid
-									detection. Bit 4-6 is used to specify how the range (and x,y,z
+								B) If the most significant bit  (bit7) is 1, this beam has an invalid
+									detection. Bit 0-3 is used to specify how the range (and x,y,z
 									parameters) for this beam is calculated
-									0: Normal detection
-									1: Interpolated or extrapolated from neighbour detections
-									2: Estimated
-									3: Rejected candidate
+									0: Normal detection (1xxx 0000)
+									1: Interpolated or extrapolated from neighbour detections (1xxx 0001)
+									2: Estimated (1xxx 0010)
+									3: Rejected candidate (1xxx 0011)
 									4: No detection data is available for this beam (all parameters
-										are set to zero)
+										are set to zero) (1xxx 0100)
 									5-7: Future use
 								The invalid range has been used to fill in amplitude samples in
 								the seabed image datagram.
 									bit 7: 0 = good detection
 									bit 7: 1 = bad detection
-									bit 3: 0 = amplitude detect
-									bit 3: 1 = phase detect
-									bits 4-6: 0 = normal detection
-									bits 4-6: 1 = interpolated from neighbor detections
-									bits 4-6: 2 = estimated
-									bits 4-6: 3 = rejected
-									bits 4-6: 4 = no detection available
+									bit 0: 0 = amplitude detect
+									bit 0: 1 = phase detect
+									bits 1-3: 0 = normal detection
+									bits 1-3: 1 = interpolated from neighbor detections
+									bits 1-3: 2 = estimated
+									bits 1-3: 3 = rejected
+									bits 1-3: 4 = no detection available == NULL
 									other bits : future use */
 	int	png_raw_rxwindow[MBSYS_SIMRAD3_MAXBEAMS];	/* length of detection window */
 	int	png_raw_rxquality[MBSYS_SIMRAD3_MAXBEAMS];	/* beam quality flag

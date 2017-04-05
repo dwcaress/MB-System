@@ -476,8 +476,9 @@ int mb_format_register(int verbose,
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
 		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
+		fprintf(stderr,"dbg2       sensordepth_source: %d\n",mb_io_ptr->sensordepth_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
-		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
+		fprintf(stderr,"dbg2       attitude_source:    %d\n",mb_io_ptr->attitude_source);
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
@@ -523,8 +524,9 @@ int mb_format_info(int verbose,
 			int *beam_flagging,
 			int *platform_source,
 			int *nav_source,
+			int *sensordepth_source,
 			int *heading_source,
-			int *vru_source,
+			int *attitude_source,
 			int *svp_source,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
@@ -588,7 +590,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -599,7 +602,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -610,7 +614,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -621,7 +626,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -632,7 +638,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -643,7 +650,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -654,7 +662,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -665,7 +674,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -676,7 +686,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -687,7 +698,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -698,7 +710,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -709,7 +722,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -720,7 +734,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -731,7 +746,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -742,7 +758,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -753,7 +770,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -764,7 +782,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -775,7 +794,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -786,7 +806,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -797,7 +818,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -808,7 +830,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -819,7 +842,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -830,7 +854,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -841,7 +866,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -852,7 +878,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -863,7 +890,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -874,7 +902,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -885,7 +914,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -896,7 +926,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -907,7 +938,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -918,7 +950,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -929,7 +962,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -940,7 +974,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -951,7 +986,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -962,7 +998,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -973,7 +1010,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -984,7 +1022,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -995,7 +1034,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1006,7 +1046,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1017,7 +1058,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1028,7 +1070,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1039,7 +1082,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1050,7 +1094,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1061,7 +1106,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1072,7 +1118,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1083,7 +1130,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1094,7 +1142,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1105,7 +1154,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1116,7 +1166,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1127,7 +1178,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1138,7 +1190,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1149,7 +1202,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1160,7 +1214,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1171,7 +1226,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1182,7 +1238,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1193,7 +1250,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1204,7 +1262,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1215,7 +1274,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1226,7 +1286,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1237,7 +1298,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1248,7 +1310,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1259,7 +1322,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1270,7 +1334,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1281,7 +1346,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1292,7 +1358,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1303,7 +1370,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1314,7 +1382,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1325,7 +1394,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1336,7 +1406,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1347,7 +1418,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1358,7 +1430,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1369,7 +1442,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1380,7 +1454,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1391,7 +1466,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 		}
@@ -1402,7 +1478,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error); 
 		}
@@ -1413,7 +1490,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error); 
 		}
@@ -1424,7 +1502,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error); 
 		}
@@ -1435,7 +1514,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error); 
 		}
@@ -1446,7 +1526,8 @@ int mb_format_info(int verbose,
 			format_name, system_name, format_description,
 			numfile, filetype,
 			variable_beams, traveltime, beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error); 
 		}
@@ -1468,8 +1549,9 @@ int mb_format_info(int verbose,
 		*beam_flagging = MB_NO;
 		*platform_source = MB_DATA_NONE;
 		*nav_source = MB_DATA_NONE;
+		*sensordepth_source = MB_DATA_NONE;
 		*heading_source = MB_DATA_NONE;
-		*vru_source = MB_DATA_NONE;
+		*attitude_source = MB_DATA_NONE;
 		*svp_source = MB_DATA_NONE;
 		*beamwidth_xtrack = 0.0;
 		*beamwidth_ltrack = 0.0;
@@ -1493,8 +1575,9 @@ int mb_format_info(int verbose,
 		*beam_flagging = MB_NO;
 		*platform_source = MB_DATA_NONE;
 		*nav_source = MB_DATA_NONE;
+		*sensordepth_source = MB_DATA_NONE;
 		*heading_source = MB_DATA_NONE;
-		*vru_source = MB_DATA_NONE;
+		*attitude_source = MB_DATA_NONE;
 		*svp_source = MB_DATA_NONE;
 		*beamwidth_xtrack = 0.0;
 		*beamwidth_ltrack = 0.0;
@@ -1523,8 +1606,9 @@ int mb_format_info(int verbose,
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
 		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
+		fprintf(stderr,"dbg2       sensordepth_source: %d\n",*sensordepth_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
-		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
+		fprintf(stderr,"dbg2       attitude_source:    %d\n",*attitude_source);
 		fprintf(stderr,"dbg2       svp_source:         %d\n",*svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
@@ -1558,8 +1642,9 @@ int mb_format(int verbose, int *format, int *error)
 	int	beam_flagging;	/* if true then beam flagging supported */
 	int	platform_source;	/* data record type containing sensor offsets */
 	int	nav_source;	/* data record types containing the primary navigation */
+	int	sensordepth_source;	/* data record types containing the primary sensordepth */
 	int	heading_source;	/* data record types containing the primary heading */
-	int	vru_source;	/* data record types containing the primary vru */
+	int	attitude_source;	/* data record types containing the primary attitude */
 	int	svp_source;	/* data record types containing the primary svp */
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
@@ -1581,7 +1666,8 @@ int mb_format(int verbose, int *format, int *error)
 			format_name, system_name, format_description,
 			&numfile, &filetype,
 			&variable_beams, &traveltime, &beam_flagging,
-			&platform_source, &nav_source, &heading_source, &vru_source, &svp_source,
+			&platform_source, &nav_source, &sensordepth_source,
+			&heading_source, &attitude_source, &svp_source,
 			&beamwidth_xtrack, &beamwidth_ltrack,
 			error);
 
@@ -1622,8 +1708,9 @@ int mb_format_system(int verbose, int *format, int *system, int *error)
 	int	beam_flagging;	/* if true then beam flagging supported */
 	int	platform_source; /* data record type containing sensor offsets */
 	int	nav_source;	/* data record types containing the primary navigation */
+	int	sensordepth_source;	/* data record types containing the primary sensordepth */
 	int	heading_source;	/* data record types containing the primary heading */
-	int	vru_source;	/* data record types containing the primary vru */
+	int	attitude_source;	/* data record types containing the primary attitude */
 	int	svp_source;	/* data record types containing the primary svp */
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
@@ -1645,7 +1732,8 @@ int mb_format_system(int verbose, int *format, int *system, int *error)
 			format_name, system_name, format_description,
 			&numfile, &filetype,
 			&variable_beams, &traveltime, &beam_flagging,
-			&platform_source, &nav_source, &heading_source, &vru_source, &svp_source,
+			&platform_source, &nav_source, &sensordepth_source,
+			&heading_source, &attitude_source, &svp_source,
 			&beamwidth_xtrack, &beamwidth_ltrack,
 			error);
 	if (status == MB_FAILURE)
@@ -1690,8 +1778,9 @@ int mb_format_dimensions(int verbose, int *format,
 	int	beam_flagging;	/* if true then beam flagging supported */
 	int	platform_source;	/* data record type containing sensor offsets */
 	int	nav_source;	/* data record types containing the primary navigation */
+	int	sensordepth_source;	/* data record types containing the primary sensordepth */
 	int	heading_source;	/* data record types containing the primary heading */
-	int	vru_source;	/* data record types containing the primary vru */
+	int	attitude_source;	/* data record types containing the primary attitude */
 	int	svp_source;	/* data record types containing the primary svp */
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
@@ -1713,7 +1802,8 @@ int mb_format_dimensions(int verbose, int *format,
 			format_name, system_name, format_description,
 			&numfile, &filetype,
 			&variable_beams, &traveltime, &beam_flagging,
-			&platform_source, &nav_source, &heading_source, &vru_source, &svp_source,
+			&platform_source, &nav_source, &sensordepth_source,
+			&heading_source, &attitude_source, &svp_source,
 			&beamwidth_xtrack, &beamwidth_ltrack,
 			error);
 	if (status == MB_FAILURE)
@@ -1763,8 +1853,9 @@ int mb_format_description(int verbose, int *format, char *description, int *erro
 	int	beam_flagging;	/* if true then beam flagging supported */
 	int	platform_source;	/* data record type containing sensor offsets */
 	int	nav_source;	/* data record types containing the primary navigation */
+	int	sensordepth_source;	/* data record types containing the primary sensordepth */
 	int	heading_source;	/* data record types containing the primary heading */
-	int	vru_source;	/* data record types containing the primary vru */
+	int	attitude_source;	/* data record types containing the primary attitude */
 	int	svp_source;	/* data record types containing the primary svp */
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
@@ -1786,7 +1877,8 @@ int mb_format_description(int verbose, int *format, char *description, int *erro
 			format_name, system_name, description,
 			&numfile, &filetype,
 			&variable_beams, &traveltime, &beam_flagging,
-			&platform_source, &nav_source, &heading_source, &vru_source, &svp_source,
+			&platform_source, &nav_source, &sensordepth_source,
+			&heading_source, &attitude_source, &svp_source,
 			&beamwidth_xtrack, &beamwidth_ltrack,
 			error);
 
@@ -1828,8 +1920,9 @@ int mb_format_flags(int verbose, int *format,
 	int	filetype;	/* type of files used (normal, xdr, or gsf) */
 	int	platform_source;	/* data record type containing sensor offsets */
 	int	nav_source;	/* data record types containing the primary navigation */
+	int	sensordepth_source;	/* data record types containing the primary sensordepth */
 	int	heading_source;	/* data record types containing the primary heading */
-	int	vru_source;	/* data record types containing the primary vru */
+	int	attitude_source;	/* data record types containing the primary attitude */
 	int	svp_source;	/* data record types containing the primary svp */
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
@@ -1851,7 +1944,8 @@ int mb_format_flags(int verbose, int *format,
 			format_name, system_name, format_description,
 			&numfile, &filetype,
 			variable_beams, traveltime, beam_flagging,
-			&platform_source, &nav_source, &heading_source, &vru_source, &svp_source,
+			&platform_source, &nav_source, &sensordepth_source,
+			&heading_source, &attitude_source, &svp_source,
 			&beamwidth_xtrack, &beamwidth_ltrack,
 			error);
 	if (status == MB_FAILURE)
@@ -1881,8 +1975,8 @@ int mb_format_flags(int verbose, int *format,
 }
 /*--------------------------------------------------------------------*/
 int mb_format_source(int verbose, int *format,
-		int *platform_source, int *nav_source, int *heading_source,
-		int *vru_source, int *svp_source,
+		int *platform_source, int *nav_source, int *sensordepth_source,
+		int *heading_source, int *attitude_source, int *svp_source,
 		int *error)
 {
   static char rcs_id[]="$Id$";
@@ -1923,15 +2017,18 @@ int mb_format_source(int verbose, int *format,
 			format_name, system_name, format_description,
 			&numfile, &filetype,
 			&variable_beams, &traveltime, &beam_flagging,
-			platform_source, nav_source, heading_source, vru_source, svp_source,
+			platform_source, nav_source, sensordepth_source,
+			heading_source, attitude_source, svp_source,
 			&beamwidth_xtrack, &beamwidth_ltrack,
 			error);
 	if (status == MB_FAILURE)
 		{
 		*platform_source = MB_DATA_NONE;
 		*nav_source = MB_DATA_NONE;
+		*sensordepth_source = MB_DATA_NONE;
 		*heading_source = MB_DATA_NONE;
-		*vru_source = MB_DATA_NONE;
+		*attitude_source = MB_DATA_NONE;
+		*svp_source = MB_DATA_NONE;
 		}
 
 	/* print output debug statements */
@@ -1940,11 +2037,13 @@ int mb_format_source(int verbose, int *format,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       format:         %d\n",*format);
-		fprintf(stderr,"dbg2       platform_source:%d\n",*platform_source);
-		fprintf(stderr,"dbg2       nav_source:     %d\n",*nav_source);
-		fprintf(stderr,"dbg2       heading_source: %d\n",*heading_source);
-		fprintf(stderr,"dbg2       vru_source:     %d\n",*vru_source);
+		fprintf(stderr,"dbg2       format:             %d\n",*format);
+		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
+		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
+		fprintf(stderr,"dbg2       sensordepth_source: %d\n",*sensordepth_source);
+		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
+		fprintf(stderr,"dbg2       attitude_source:    %d\n",*attitude_source);
+		fprintf(stderr,"dbg2       svp_source:         %d\n",*svp_source);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
 		fprintf(stderr,"dbg2       error:          %d\n",*error);
@@ -1978,8 +2077,9 @@ int mb_format_beamwidth(int verbose, int *format,
 	int	beam_flagging;	/* if true then beam flagging supported */
 	int	platform_source;	/* data record type containing sensor offsets */
  	int nav_source;     /* data record types containing the primary navigation */
+    int sensordepth_source;	/* data record types containing the primary sensordepth */
     int heading_source;	/* data record types containing the primary heading */
-    int vru_source;	/* data record types containing the primary vru */
+    int attitude_source;	/* data record types containing the primary attitude */
     int svp_source;	/* data record types containing the primary svp */
 
 	/* print input debug statements */
@@ -1999,7 +2099,8 @@ int mb_format_beamwidth(int verbose, int *format,
 			format_name, system_name, format_description,
 			&numfile, &filetype,
 			&variable_beams, &traveltime, &beam_flagging,
-			&platform_source, &nav_source, &heading_source, &vru_source, &svp_source,
+			&platform_source, &nav_source, &sensordepth_source,
+			&heading_source, &attitude_source, &svp_source,
 			beamwidth_xtrack, beamwidth_ltrack,
 			error);
 	if (status == MB_FAILURE)

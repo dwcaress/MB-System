@@ -166,8 +166,9 @@ and mbedit edit save files.\n";
 	void	*ombio_ptr = NULL;
 	int		platform_source;
     int     nav_source;
+	int		sensordepth_source;
     int     heading_source;
-	int     vru_source;
+	int     attitude_source;
     int     svp_source;
 
 	/* mbio read and write values */
@@ -3496,9 +3497,9 @@ and mbedit edit save files.\n";
 
 	/* get data kind sources for input format */
 	mb_format_source(verbose, &(process.mbp_format),
-	&platform_source, &nav_source, &heading_source,
-	&vru_source, &svp_source,
-	&error);
+				&platform_source, &nav_source, &sensordepth_source,
+				&heading_source, &attitude_source, &svp_source,
+				&error);
 
 	/*--------------------------------------------
 	  read the input file to get first ssv if necessary

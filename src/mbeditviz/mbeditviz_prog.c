@@ -967,7 +967,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 						ping->beamflag[ibeam] = beamflag[ibeam];
 						ping->beamflagorg[ibeam] = beamflag[ibeam];
 						ping->beamcolor[ibeam] = MBV_COLOR_BLACK;
-						if (!mb_beam_check_flag_null(ping->beamflag[ibeam])
+						if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam])
 							&& (isnan(bath[ibeam]) || isnan(bathacrosstrack[ibeam]) || isnan(bathalongtrack[ibeam])))
 							
 {							ping->beamflag[ibeam] = MB_FLAG_NULL;
@@ -976,7 +976,7 @@ fprintf(stderr,"     Ping time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
 	ping->time_i[0],ping->time_i[1],ping->time_i[2],ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6]);
 fprintf(stderr,"     Beam bathymetry: %d %f %f %f\n",ibeam,ping->bath[ibeam],ping->bathacrosstrack[ibeam],ping->bathalongtrack[ibeam]);
 							}
-						if (!mb_beam_check_flag_null(ping->beamflag[ibeam]))
+						if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam]))
 							{
 							/* copy bath */
 							ping->bath[ibeam] = bath[ibeam];
@@ -1045,7 +1045,7 @@ fprintf(stderr,"     Beam bathymetry: %d %f %f %f\n",ibeam,ping->bath[ibeam],pin
 						stbddistance = 0.0;
 						for (ibeam=0;ibeam<beams_bath;ibeam++)
 							{
-							if (!mb_beam_check_flag_null(beamflag[ibeam]))
+							if (!mb_beam_check_flag_unusable(beamflag[ibeam]))
 								{
 								if (icenter == -1
 									|| fabs(bathacrosstrack[ibeam]) < centerdistance)
@@ -2646,7 +2646,7 @@ int mbeditviz_project_soundings()
 							&mbev_error);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
-						if (!mb_beam_check_flag_null(ping->beamflag[ibeam]))
+						if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam]))
 							{
 							mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
@@ -3240,7 +3240,7 @@ mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);
 					ping = &(file->pings[iping]);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
-						if (!mb_beam_check_flag_null(ping->beamflag[ibeam]))
+						if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam]))
 							{
 							mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
@@ -3356,7 +3356,7 @@ ifile,file->load_status,file->esf_open);
 							action = MBP_EDIT_FILTER;
 						else if (mb_beam_check_flag_filter(ping->beamflag[ibeam]))
 							action = MBP_EDIT_FILTER;
-						else if (!mb_beam_check_flag_null(ping->beamflag[ibeam]))
+						else if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam]))
 							action = MBP_EDIT_FLAG;
 						else
 							action = MBP_EDIT_ZERO;
@@ -3529,7 +3529,7 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 					mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
-						if (!mb_beam_check_flag_null(ping->beamflag[ibeam]))
+						if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam]))
 							{
 							if (ping->bathx[ibeam] >= xmin
 								&& ping->bathx[ibeam] <= xmax
@@ -3710,7 +3710,7 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 					mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
-						if (!mb_beam_check_flag_null(ping->beamflag[ibeam]))
+						if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam]))
 							{
 							x = ping->bathx[ibeam] - mbev_selected.xorigin;
 							y = ping->bathy[ibeam] - mbev_selected.yorigin;
@@ -3879,7 +3879,7 @@ fprintf(stderr,"mbeditviz_selectnav: \n");
 						mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
 						for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 							{
-							if (!mb_beam_check_flag_null(ping->beamflag[ibeam]))
+							if (!mb_beam_check_flag_unusable(ping->beamflag[ibeam]))
 								{
 								/* allocate memory if needed */
 								if (mbev_selected.num_soundings
@@ -4113,7 +4113,7 @@ ifile, iping, ibeam, beamflag, flush); */
 					action = MBP_EDIT_FILTER;
 				else if (mb_beam_check_flag_filter(beamflag))
 					action = MBP_EDIT_FILTER;
-				else if (!mb_beam_check_flag_null(beamflag))
+				else if (!mb_beam_check_flag_unusable(beamflag))
 					action = MBP_EDIT_FLAG;
 				else
 					action = MBP_EDIT_ZERO;

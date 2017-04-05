@@ -244,7 +244,8 @@ int mb_format_info(int verbose, int *format, int *system,
 		char *format_name, char *system_name, char *format_description,
 		int *numfile, int *filetype, int *variable_beams,
 		int *traveltime, int *beam_flagging,
-		int *platform_source, int *nav_source, int *heading_source, int *vru_source, int *svp_source,
+		int *platform_source, int *nav_source, int *sonardepth_source,
+        int *heading_source, int *attitude_source, int *svp_source,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error);
 int mb_format(int verbose, int *format, int *error);
@@ -258,8 +259,8 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging,
 		int *error);
 int mb_format_source(int verbose, int *format,
-		int *platform_source, int *nav_source, int *heading_source,
-		int *vru_source, int *svp_source,
+		int *platform_source, int *nav_source, int *sonardepth_source,
+        int *heading_source, int *attitude_source, int *svp_source,
 		int *error);
 int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,

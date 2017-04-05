@@ -1181,6 +1181,61 @@ int main (int argc, char **argv)
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
 		{
+		/* if origin of the ancilliary data has not been specified, figure out
+		   defaults based on the first file's format */
+		if (nav_mode == MBPREPROCESS_MERGE_OFF)
+			{
+			if  (iformat == MBF_EMOLDRAW
+				|| iformat == MBF_EM300RAW
+				|| iformat == MBF_EM710RAW)
+				{
+				nav_mode = MBPREPROCESS_MERGE_ASYNC;
+				nav_async = MB_DATA_NAV;
+				}
+			else if (iformat == MBF_RESON7KR)
+				{
+				nav_mode = MBPREPROCESS_MERGE_ASYNC;
+				nav_async = MB_DATA_NAV1;
+				}
+			}
+		if (sensordepth_mode == MBPREPROCESS_MERGE_OFF)
+			{
+			if  (iformat == MBF_EMOLDRAW
+				|| iformat == MBF_EM300RAW
+				|| iformat == MBF_EM710RAW
+				|| iformat == MBF_RESON7KR)
+				{
+				sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
+				sensordepth_async = MB_DATA_HEIGHT;
+				}
+			}
+		if (heading_mode == MBPREPROCESS_MERGE_OFF)
+			{
+			if  (iformat == MBF_EMOLDRAW
+				|| iformat == MBF_EM300RAW
+				|| iformat == MBF_EM710RAW)
+				{
+				heading_mode = MBPREPROCESS_MERGE_ASYNC;
+				heading_async = MB_DATA_NAV;
+				}
+			else if  (iformat == MBF_RESON7KR)
+				{
+				heading_mode = MBPREPROCESS_MERGE_ASYNC;
+				heading_async = MB_DATA_HEADING;
+				}
+			}
+		if (attitude_mode == MBPREPROCESS_MERGE_OFF)
+			{
+			if  (iformat == MBF_EMOLDRAW
+				|| iformat == MBF_EM300RAW
+				|| iformat == MBF_EM710RAW
+				|| iformat == MBF_RESON7KR)
+				{
+				attitude_mode = MBPREPROCESS_MERGE_ASYNC;
+				attitude_async = MB_DATA_ATTITUDE;
+				}
+			}
+
 		if (verbose > 0)
 			fprintf(stderr,"\nPass 1: Opening file %s %d\n", ifile, iformat);
 			

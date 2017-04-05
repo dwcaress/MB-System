@@ -1141,7 +1141,7 @@ int mb_swathbounds(int verbose, int checkgood,
 	found = MB_NO;
 	for (i=0;i<nbath;i++)
 		{
-		if ((checkgood && mb_beam_ok(beamflag[i])) || !mb_beam_check_flag_null(beamflag[i]))
+		if ((checkgood && mb_beam_ok(beamflag[i])) || !mb_beam_check_flag_unusable(beamflag[i]))
 			{
 			if (found == MB_NO)
 				{

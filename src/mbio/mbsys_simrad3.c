@@ -1594,17 +1594,28 @@ i,beamDepression,beamAzimuth,ping->png_depression[i],ping->png_azimuth[i]);*/
 				ping->png_beamflag[i] = MB_FLAG_NULL;
 				ping->png_raw_rxdetection[i] = ping->png_raw_rxdetection[i] | 128;
 				}
-			else if ((detection_mask & 128) == 128 && (detection_mask & 112) != 0)
-				{
-				ping->png_beamflag[i] = MB_FLAG_NULL;
-/* fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
-i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
-				}
 			else if ((detection_mask & 128) == 128)
 				{
-				ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
-/*fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
-i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
+				if ((detection_mask & 15) == 0)
+					{
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+					}
+				else if ((detection_mask & 15) == 1)
+					{
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_INTERPOLATE;
+					}
+				else if ((detection_mask & 15) == 2)
+					{
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_INTERPOLATE;
+					}
+				else if ((detection_mask & 15) == 3)
+					{
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;;
+					}
+				else if ((detection_mask & 15) == 4)
+					{
+					ping->png_beamflag[i] = MB_FLAG_NULL;
+					}
 				}
 			else if (ping->png_clean[i] != 0)
 				{
@@ -1745,6 +1756,9 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 				case MBSYS_SIMRAD3_EM710:
 					strcpy(multibeam_model, "EM710");
 					break;
+				case MBSYS_SIMRAD3_EM712:
+					strcpy(multibeam_model, "EM712");
+					break;
 				case MBSYS_SIMRAD3_EM850:
 					strcpy(multibeam_model, "EM850");
 					break;
@@ -1812,7 +1826,7 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 					strcpy(multibeam_model, "EM1000");
 					break;
 				default:
-					strcpy(multibeam_model, "Unknown");
+					sprintf(multibeam_model, "Unknown sonar model %d", store->sonar);
 				}
 			sprintf(multibeam_serial, "%d", store->par_serial_1);
 			capability1 = MB_SENSOR_CAPABILITY1_NONE;
@@ -2073,7 +2087,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			}
 		
-		/* set position sensor 1, add it if necessary */
+		/* set position sensor 1, add it if necessary
+		   - note that sometimes the start datagrams may have the active position
+		     sensor set == 0 (which means position system 1 is active) while
+		     having the position system 1 quality flag set to off  - in this case
+		     force the position system 1 quality flag to on so that the sensor
+		     structure is created */
+		if (store->par_aps == 0 && store->par_p1q == 0)
+			store->par_p1q = 1;
 		if (platform->source_position1 < 0 && store->par_p1q)
 			{
 			/* set sensor 1 (position) */
@@ -2161,7 +2182,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			}
 		
-		/* set position sensor 2, add it if necessary */
+		/* set position sensor 2, add it if necessary 
+		   - note that sometimes the start datagrams may have the active position
+		     sensor set == 1 (which means position system 2 is active) while
+		     having the position system 2 quality flag set to off  - in this case
+		     force the position system 2 quality flag to on so that the sensor
+		     structure is created */
+		if (store->par_aps == 1 && store->par_p2q == 0)
+			store->par_p2q = 1;
 		if (platform->source_position2 < 0 && store->par_p2q)
 			{
 			/* set sensor 2 (position) */
@@ -2249,7 +2277,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			}
 		
-		/* set position sensor 3, add it if necessary */
+		/* set position sensor 3, add it if necessary 
+		   - note that sometimes the start datagrams may have the active position
+		     sensor set == 2 (which means position system 3 is active) while
+		     having the position system 3 quality flag set to off  - in this case
+		     force the position system 3 quality flag to on so that the sensor
+		     structure is created */
+		if (store->par_aps == 2 && store->par_p3q == 0)
+			store->par_p3q = 1;
 		if (platform->source_position3 < 0 && store->par_p3q)
 			{
 			/* set sensor 3 (position) */
@@ -3426,16 +3461,19 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		ping = (struct mbsys_simrad3_ping_struct *) &(store->pings[store->ping_index]);
 
 		*nbeams = ping->png_nbeams;
-		for (j=0;j<ping->png_nbeams;j++)
-			{
-			detects[j] = MB_DETECT_UNKNOWN;
-			}
 		for (i=0;i<ping->png_nbeams;i++)
 			{
-			if (ping->png_detection[i] & 1)
-				detects[i] = MB_DETECT_PHASE;
+			if (ping->png_detection[i] & 128)
+				{
+				detects[i] = MB_DETECT_UNKNOWN;
+				}
 			else
-				detects[i] = MB_DETECT_AMPLITUDE;
+				{
+				if (ping->png_detection[i] & 1)
+					detects[i] = MB_DETECT_PHASE;
+				else
+					detects[i] = MB_DETECT_AMPLITUDE;
+				}
 			}
 
 		/* set status */

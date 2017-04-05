@@ -647,45 +647,45 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 				if (esf->edit[j].beam == ibeam
 					&& esf->edit[j].use < 100)
 					{
-					/* apply edit */
-					if (esf->edit[j].action == MBP_EDIT_FLAG
-					&& !mb_beam_check_flag_null(beamflag[i]))
+					/* some actions only work on non-null beams */
+					if (!mb_beam_check_flag_unusable(beamflag[i]))
 						{
-//	fprintf(stderr,"beam:%4.4d edit:%d time_d:%.6f MBP_EDIT_FLAG  flag:%d ",i,j,esf->edit[j].time_d,beamflag[i]);
-						beamflag[i] = mb_beam_set_flag_manual(beamflag[i]);
-						esf->edit[j].use++;
-						apply = MB_YES;
-						action = esf->edit[j].action;
-//	fprintf(stderr," %d\n",beamflag[i]);
-						}
-					else if (esf->edit[j].action == MBP_EDIT_FILTER
-					&& !mb_beam_check_flag_null(beamflag[i]))
-						{
-//	fprintf(stderr,"beam:%4.4d edit:%d time_d:%.6f MBP_EDIT_FILTER  flag:%d ",i,j,esf->edit[j].time_d,beamflag[i]);
-						beamflag[i] = mb_beam_set_flag_filter(beamflag[i]);
-						esf->edit[j].use++;
-						apply = MB_YES;
-						action = esf->edit[j].action;
-//	fprintf(stderr," %d\n",beamflag[i]);
-						}
-					else if (esf->edit[j].action == MBP_EDIT_UNFLAG
-					&& !mb_beam_check_flag_null(beamflag[i]))
-						{
-//	fprintf(stderr,"beam:%4.4d edit:%d time_d:%.6f MBP_EDIT_UNFLAG  flag:%d ",i,j,esf->edit[j].time_d,beamflag[i]);
-						beamflag[i] = mb_beam_set_flag_none(beamflag[i]);
-						esf->edit[j].use++;
-						apply = MB_YES;
-						action = esf->edit[j].action;
-//	fprintf(stderr," %d\n",beamflag[i]);
-						}
-					else if (esf->edit[j].action == MBP_EDIT_ZERO)
-						{
-//	fprintf(stderr,"beam:%4.4d edit:%d time_d:%.6f MBP_EDIT_ZERO  flag:%d ",i,j,esf->edit[j].time_d,beamflag[i]);
-						beamflag[i] = mb_beam_set_flag_null(beamflag[i]);
-						esf->edit[j].use++;
-						apply = MB_YES;
-						action = esf->edit[j].action;
-//	fprintf(stderr," %d\n",beamflag[i]);
+						if (esf->edit[j].action == MBP_EDIT_FLAG)
+							{
+	//	fprintf(stderr,"beam:%4.4d edit:%d time_d:%.6f MBP_EDIT_FLAG  flag:%d ",i,j,esf->edit[j].time_d,beamflag[i]);
+							beamflag[i] = mb_beam_set_flag_manual(beamflag[i]);
+							esf->edit[j].use++;
+							apply = MB_YES;
+							action = esf->edit[j].action;
+	//	fprintf(stderr," %d\n",beamflag[i]);
+							}
+						else if (esf->edit[j].action == MBP_EDIT_FILTER)
+							{
+	//	fprintf(stderr,"beam:%4.4d edit:%d time_d:%.6f MBP_EDIT_FILTER  flag:%d ",i,j,esf->edit[j].time_d,beamflag[i]);
+							beamflag[i] = mb_beam_set_flag_filter(beamflag[i]);
+							esf->edit[j].use++;
+							apply = MB_YES;
+							action = esf->edit[j].action;
+	//	fprintf(stderr," %d\n",beamflag[i]);
+							}
+						else if (esf->edit[j].action == MBP_EDIT_UNFLAG)
+							{
+	//	fprintf(stderr,"beam:%4.4d edit:%d time_d:%.6f MBP_EDIT_UNFLAG  flag:%d ",i,j,esf->edit[j].time_d,beamflag[i]);
+							beamflag[i] = mb_beam_set_flag_none(beamflag[i]);
+							esf->edit[j].use++;
+							apply = MB_YES;
+							action = esf->edit[j].action;
+	//	fprintf(stderr," %d\n",beamflag[i]);
+							}
+						else if (esf->edit[j].action == MBP_EDIT_ZERO)
+							{
+	//	fprintf(stderr,"beam:%4.4d edit:%d time_d:%.6f MBP_EDIT_ZERO  flag:%d ",i,j,esf->edit[j].time_d,beamflag[i]);
+							beamflag[i] = mb_beam_set_flag_null(beamflag[i]);
+							esf->edit[j].use++;
+							apply = MB_YES;
+							action = esf->edit[j].action;
+	//	fprintf(stderr," %d\n",beamflag[i]);
+							}
 						}
 					else
 						{
@@ -727,7 +727,6 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 	/* return success */
 	return(status);
 }
-
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_save saves one edit event to an esf file. */

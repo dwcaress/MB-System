@@ -460,7 +460,7 @@ int main (int argc, char **argv)
 						beam_ok_write++;
 						}
 					}
-				else if (mb_beam_check_flag_null(beamflag[i]))
+				else if (mb_beam_check_flag_unusable(beamflag[i]))
 					{
 					beam_null++;
 					if (mode == MBGETESF_FLAGNULL || mode == MBGETESF_ALL)

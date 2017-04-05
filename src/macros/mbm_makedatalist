@@ -40,12 +40,13 @@ $program_name = "mbm_makedatalist";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('HhF:f:I:i:O:o:S:s:TtVv');
+&MBGetopts('HhF:f:I:i:O:o:PpS:s:TtVv');
 
 $format_specified =	($opt_F || $opt_f);
 $help =    			($opt_H || $opt_h);
 $directory = 		($opt_I || $opt_i);
 $datalist =    		($opt_O || $opt_o || "datalist.mb-1");
+$ignoreprocessed = 	($opt_P || $opt_p);
 $suffix =    		($opt_S || $opt_s);
 $disablesorting =   ($opt_T || $opt_t);
 $verbose = 			($opt_V || $opt_v);
@@ -68,7 +69,7 @@ if ($help) {
 	print "directives that, for example, determine whether parsing returns references to\n";
 	print "raw or processed data files. See the \fBMB-System\fP  manual page for details\n";
 	print "on the format and structure of datalists.  \n";
-	print "\nBasic Usage:\n\tmbm_makedatalist [-Fformat -Idirectory -Odatalist -Ssuffix -T -H -V]\n";
+	print "\nBasic Usage:\n\tmbm_makedatalist [-Fformat -Idirectory -Odatalist -P -Ssuffix -T -H -V]\n";
 	exit 0;
 }
 
@@ -82,6 +83,10 @@ if ($verbose) {
 	}
 	if ($suffix) {
         print " - Checking for files with suffix $suffix\n";
+		if ($ignoreprocessed) {
+            print " - Ignoring files with specified suffix preceded by letter p, e.g. p$suffix\n";
+        }
+        
     } else {
 		print " - Checking all files for those that meet swath data naming conventions\n";
 	}
@@ -107,6 +112,8 @@ if ($verbose) {
 # get list of files in specified directory, with desired suffix if specified
 if ($suffix && $directory) {
     @filelist = `/bin/ls -1 $directory/*$suffix`;
+} elsif ($suffix && $ignoreprocessed) {
+    @filelist = `/bin/ls -1 *$suffix | grep -v p$suffix`;
 } elsif ($suffix) {
     @filelist = `/bin/ls -1 *$suffix`;
 } elsif ($directory) {

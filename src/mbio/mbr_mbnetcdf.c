@@ -61,8 +61,9 @@ int mbr_info_mbnetcdf(int verbose,
 			int *beam_flagging,
 			int *platform_source,
 			int *nav_source,
+			int *sensordepth_source,
 			int *heading_source,
-			int *vru_source,
+			int *attitude_source,
 			int *svp_source,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
@@ -82,8 +83,9 @@ int mbr_info_mbncdfxt(int verbose,
 			int *beam_flagging,
 			int *platform_source,
 			int *nav_source,
+			int *sensordepth_source,
 			int *heading_source,
-			int *vru_source,
+			int *attitude_source,
 			int *svp_source,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
@@ -132,8 +134,9 @@ int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->beam_flagging,
 			&mb_io_ptr->platform_source,
 			&mb_io_ptr->nav_source,
+			&mb_io_ptr->sensordepth_source,
 			&mb_io_ptr->heading_source,
-			&mb_io_ptr->vru_source,
+			&mb_io_ptr->attitude_source,
 			&mb_io_ptr->svp_source,
 			&mb_io_ptr->beamwidth_xtrack,
 			&mb_io_ptr->beamwidth_ltrack,
@@ -180,8 +183,9 @@ int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
 		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
+		fprintf(stderr,"dbg2       sensordepth_source: %d\n",mb_io_ptr->nav_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
-		fprintf(stderr,"dbg2       vru_source:         %d\n",mb_io_ptr->vru_source);
+		fprintf(stderr,"dbg2       attitude_source:    %d\n",mb_io_ptr->attitude_source);
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
@@ -229,8 +233,9 @@ int mbr_info_mbnetcdf(int verbose,
 			int *beam_flagging,
 			int *platform_source,
 			int *nav_source,
+			int *sensordepth_source,
 			int *heading_source,
-			int *vru_source,
+			int *attitude_source,
 			int *svp_source,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
@@ -265,8 +270,9 @@ int mbr_info_mbnetcdf(int verbose,
 	*beam_flagging = MB_YES;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
+	*sensordepth_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
-	*vru_source = MB_DATA_DATA;
+	*attitude_source = MB_DATA_DATA;
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
@@ -290,8 +296,9 @@ int mbr_info_mbnetcdf(int verbose,
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
 		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
+		fprintf(stderr,"dbg2       sensordepth_source: %d\n",*sensordepth_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
-		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
+		fprintf(stderr,"dbg2       attitude_source:      %d\n",*attitude_source);
 		fprintf(stderr,"dbg2       svp_source:         %d\n",*svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
@@ -320,8 +327,9 @@ int mbr_info_mbncdfxt(int verbose,
 			int *beam_flagging,
 			int *platform_source,
 			int *nav_source,
+			int *sensordepth_source,
 			int *heading_source,
-			int *vru_source,
+			int *attitude_source,
 			int *svp_source,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
@@ -356,8 +364,9 @@ int mbr_info_mbncdfxt(int verbose,
 	*beam_flagging = MB_YES;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_DATA;
+	*sensordepth_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
-	*vru_source = MB_DATA_DATA;
+	*attitude_source = MB_DATA_DATA;
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
@@ -381,8 +390,9 @@ int mbr_info_mbncdfxt(int verbose,
 		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
 		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
 		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
+		fprintf(stderr,"dbg2       sensordepth_source: %d\n",*sensordepth_source);
 		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
-		fprintf(stderr,"dbg2       vru_source:         %d\n",*vru_source);
+		fprintf(stderr,"dbg2       attitude_source:      %d\n",*attitude_source);
 		fprintf(stderr,"dbg2       svp_source:         %d\n",*svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
