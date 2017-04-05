@@ -136,8 +136,9 @@ static char	*message = NULL;
 /* MBIO control parameters */
 static int  platform_source;
 static int	nav_source;
+static int	sensordepth_source;
 static int	heading_source;
-static int	vru_source;
+static int	attitude_source;
 static int	svp_source;
 static int	pings;
 static int	lonflip;
@@ -757,8 +758,8 @@ int mbnavedit_open_file(int useprevious)
 
 		/* initialize reading the input multibeam file */
 		status = mb_format_source(verbose, &format_use,
-				&platform_source, &nav_source, &heading_source,
-				&vru_source, &svp_source,
+				&platform_source, &nav_source, &sensordepth_source,
+				&heading_source, &attitude_source, &svp_source,
 				&error);
 		if ((status = mb_read_init(
 			verbose,ifile_use,format_use,pings,lonflip,bounds,

@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2297       April 5, 2017
   Version 5.5.2296       March 31, 2017
   Version 5.5.2295       March 26, 2017
   Version 5.5.2294       March 21, 2017
@@ -246,6 +247,25 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2297 (April 5, 2017)
+
+All i/o modules: Added sensordepth_source to the arguments of the
+mbr_info_XXXXXXXX() functions in the i/o modules.
+
+Mbpreprocess: Added ability to define default sources (in terms of data record
+types) for the various asynchronous ancilliary data types in Kongsberg and Reson
+data.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Kongsberg reports some bathymetry
+bottom picks that are interpolated or extrapolated from valid soundings. Until
+now MB-System has treated these interpolated soundings as valid but flagged.
+MB-System now recognizes interpolated soundings as a different type, neither
+valid nor null. These soundings can no longer be seen or edited with MBedit or
+MBeditviz.
+
+Mbm_makedatalist: Added option to suppress processed files (e.g. *p.mb88) from
+inclusion in the output datalist.
 
 -----> 5.5.2296 (March 31, 2017)
 

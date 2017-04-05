@@ -1659,7 +1659,7 @@ fprintf(stderr,"do_mbeditviz_update_gui status:%d\n", mbev_status);
 				ping = &(file->pings[j]);
 				for (k=0;k<ping->beams_bath;k++)
 					{
-					if (!mb_beam_check_flag_null(ping->beamflag[k]))
+					if (!mb_beam_check_flag_unusable(ping->beamflag[k]))
 						mbev_num_soundings_loaded ++;
 					}
 				}

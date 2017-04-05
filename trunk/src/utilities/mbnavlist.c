@@ -96,7 +96,8 @@ int main (int argc, char **argv)
 	int	platform_source;
 	int	nav_source;
 	int	heading_source;
-	int	vru_source;
+	int sensordepth_source;
+	int	attitude_source;
 	int	svp_source;
 	int	aux_nav_channel = -1;
 	int	data_kind = -1;
@@ -434,8 +435,8 @@ int main (int argc, char **argv)
 	{
 	/* check format and get data sources */
 	if ((status = mb_format_source(verbose, &format,
-			&platform_source, &nav_source, &heading_source,
-			&vru_source, &svp_source,
+			&platform_source, &nav_source, &sensordepth_source,
+			&heading_source, &attitude_source, &svp_source,
 			&error)) == MB_FAILURE)
 		{
 		mb_error(verbose,error,&message);

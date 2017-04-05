@@ -125,10 +125,9 @@ int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr
 //int mbsys_templatesystem_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 //                        int *ss_type, int *error);
 //int mbsys_templatesystem_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
-//                        double time_d, double navlon, double navlat,
-//                        double speed, double heading, double sonardepth,
-//                        double roll, double pitch, double heave,
-//                        int *error);
+//        void *platform_ptr, void *preprocess_pars_ptr, int *error);
+//int mbsys_templatesystem_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
+//		int *kind, void **platform_ptr, int *error);
 int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

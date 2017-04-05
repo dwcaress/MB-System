@@ -2940,7 +2940,7 @@ int main (int argc, char **argv)
                                                 fprintf(output[i],"%u",beamflag[k]);
 					    else
                                                 {
-                                                if (mb_beam_check_flag_null(beamflag[k]))
+                                                if (mb_beam_check_flag_unusable(beamflag[k]))
                                                     fprintf(output[i],"-");
                                                else if (mb_beam_ok(beamflag[k]))
                                                     fprintf(output[i],"G");
@@ -2953,8 +2953,6 @@ int main (int argc, char **argv)
                                                else if (mb_beam_check_flag_gt_1x_iho(beamflag[k]))
                                                     fprintf(output[i],"F");
                                                else if (mb_beam_check_flag_gt_2x_iho(beamflag[k]))
-                                                    fprintf(output[i],"F");
-                                               else if (mb_beam_check_flag_footprint(beamflag[k]))
                                                     fprintf(output[i],"F");
                                                else if (mb_beam_check_flag_sonar(beamflag[k]))
                                                     fprintf(output[i],"S");

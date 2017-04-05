@@ -448,8 +448,9 @@ struct mb_io_struct
 	int	beam_flagging;	/* if true then beam flagging supported */
 	int	platform_source;	/* data record type containing sensor offsets */
 	int	nav_source;	/* data record type containing the primary navigation */
+	int	sensordepth_source;	/* data record type containing the primary sensordepth */
 	int	heading_source;	/* data record type containing the primary heading */
-	int	vru_source;	/* data record type containing the primary vru */
+	int	attitude_source;	/* data record type containing the primary attitude */
 	int	svp_source;	/* data record type containing the primary svp */
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */

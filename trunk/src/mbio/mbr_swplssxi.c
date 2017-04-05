@@ -49,15 +49,28 @@
 
 /* essential function prototypes */
 int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error);
-int mbr_info_swplssxi(int verbose, int *system, int *beams_bath_max,
-	int *beams_amp_max, int *pixels_ss_max, char *format_name,
-	char *system_name, char *format_description, int *numfile,
-	int *filetype, int *variable_beams, int *traveltime,
-	int *beam_flagging, int *platform_source,
-	int *nav_source, int *heading_source,
-	int *vru_source, int *svp_source,
-	double *beamwidth_xtrack, double *beamwidth_ltrack,
-	int *error);
+int mbr_info_swplssxi(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *platform_source,
+			int *nav_source,
+			int *sensordepth_source,
+			int *heading_source,
+			int *attitude_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
 int mbr_alm_swplssxi(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_swplssxi(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error);
@@ -88,21 +101,24 @@ int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error)
 
 	/* set format info parameters */
 	status = mbr_info_swplssxi(verbose, &mb_io_ptr->system,
-		&mb_io_ptr->beams_bath_max,
-		&mb_io_ptr->beams_amp_max,
-		&mb_io_ptr->pixels_ss_max,
-		mb_io_ptr->format_name, mb_io_ptr->system_name,
-		mb_io_ptr->format_description,
-		&mb_io_ptr->numfile, &mb_io_ptr->filetype,
-		&mb_io_ptr->variable_beams,
-		&mb_io_ptr->traveltime,
-		&mb_io_ptr->beam_flagging,
-		&mb_io_ptr->platform_source,
-		&mb_io_ptr->nav_source,
-		&mb_io_ptr->heading_source,
-		&mb_io_ptr->vru_source, &mb_io_ptr->svp_source,
-		&mb_io_ptr->beamwidth_xtrack,
-		&mb_io_ptr->beamwidth_ltrack, error);
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name, mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile, &mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->platform_source,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->sensordepth_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->attitude_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
+			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_swplssxi;
@@ -173,8 +189,8 @@ int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error)
 			mb_io_ptr->nav_source);
 		fprintf(stderr, "dbg2       heading_source:     %d\n",
 			mb_io_ptr->heading_source);
-		fprintf(stderr, "dbg2       vru_source:         %d\n",
-			mb_io_ptr->vru_source);
+		fprintf(stderr, "dbg2       attitude_source:         %d\n",
+			mb_io_ptr->attitude_source);
 		fprintf(stderr, "dbg2       svp_source:         %d\n",
 			mb_io_ptr->svp_source);
 		fprintf(stderr, "dbg2       beamwidth_xtrack:   %f\n",
@@ -236,15 +252,28 @@ int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error)
 	return (status);
 } /* mbr_register_swplssxi */
 /*--------------------------------------------------------------------*/
-int mbr_info_swplssxi(int verbose, int *system, int *beams_bath_max,
-	int *beams_amp_max, int *pixels_ss_max, char *format_name,
-	char *system_name, char *format_description, int *numfile,
-	int *filetype, int *variable_beams, int *traveltime,
-	int *beam_flagging, int *platform_source,
-	int *nav_source, int *heading_source,
-	int *vru_source, int *svp_source,
-	double *beamwidth_xtrack, double *beamwidth_ltrack,
-	int *error)
+int mbr_info_swplssxi(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *platform_source,
+			int *nav_source,
+			int *sensordepth_source,
+			int *heading_source,
+			int *attitude_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error)
 {
 	char *function_name = "mbr_info_swplssxi";
 	int status = MB_SUCCESS;
@@ -280,8 +309,9 @@ int mbr_info_swplssxi(int verbose, int *system, int *beams_bath_max,
 	*beam_flagging = MB_YES;
 	*platform_source = MB_DATA_NONE;
 	*nav_source = MB_DATA_NAV;
+	*sensordepth_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_ATTITUDE;
-	*vru_source = MB_DATA_ATTITUDE;
+	*attitude_source = MB_DATA_ATTITUDE;
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = SWPLS_TYPE_M_BEAM_WIDTH;
 	*beamwidth_ltrack = SWPLS_TYPE_M_BEAM_WIDTH;
@@ -308,7 +338,7 @@ int mbr_info_swplssxi(int verbose, int *system, int *beams_bath_max,
         fprintf(stderr, "dbg2       platform_source:    %d\n", *platform_source);
 		fprintf(stderr, "dbg2       nav_source:         %d\n", *nav_source);
 		fprintf(stderr, "dbg2       heading_source:     %d\n", *heading_source);
-		fprintf(stderr, "dbg2       vru_source:         %d\n", *vru_source);
+		fprintf(stderr, "dbg2       attitude_source:         %d\n", *attitude_source);
 		fprintf(stderr, "dbg2       svp_source:         %d\n", *svp_source);
 		fprintf(stderr, "dbg2       beamwidth_xtrack:   %f\n",
 			*beamwidth_xtrack);
