@@ -1,4 +1,4 @@
-.TH mbdatalist 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbdatalist 1 "7 April 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdatalist\fP \- parses recursive datalist files and outputs the
 complete list of data files, formats, and file weights.
@@ -7,7 +7,7 @@ complete list of data files, formats, and file weights.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbdatalist\fP [\fB\-C\fP \fB\-F\fP\fIformat\fP \fB\-I\fP\fIfilename\fP \fB\-N \-O \-P \-Q \-R \-S \-U \-Y \-Z \-V \-H\fP]
+\fBmbdatalist\fP [\fB\-C -D\fP \fB\-F\fP\fIformat\fP \fB\-I\fP\fIfilename\fP \fB\-N \-O \-P \-Q \-R \-S \-U \-Y \-Z \-V \-H\fP]
 
 .SH DESCRIPTION
 \fBMBdatalist\fP is a utility for parsing datalist files.
@@ -115,6 +115,10 @@ the lock file when it is done. Orphaned lock files may be left if \fBmbprocess\f
 crashes or is interrupted. These will prevent reprocessing by \fBmbprocess\fP,
 but can be both detected with the \fB\-S\fP option and removed using the \fB\-Y\fP option.
 
+The \fB-D\fP option causes \fBmbdatalist\fP to list the datalist files rather
+than the swath files referenced through the datalists. Each datalist file path
+is preceded by its recursion level within the overall datalist structure.
+
 Finally, this program can be used to copy the swath files referenced in a
 datalist structure to a single directory and to create a datalist there
 (names "datalist.mb-1") that references those swath files. This is
@@ -144,6 +148,13 @@ functions will modify which swath files are copied. Any ancilliary files
 (e.g. *inf metadata files) will also be copied, but processed data
 files derived from the target copied files will not be copied.
 .TP
+.B \-D
+.br
+.TP
+Causes a listing to be printed of the unique datalist files referenced through
+the recursive datalist structure. Each line begins with the recursion level
+of that datalist file within the overall structure followed by the full path of
+the datalist file indented by a number of tabs equal to the recursion level.
 .B \-F
 \fIformat\fP
 .br
@@ -295,11 +306,11 @@ will have the following contents:
 Suppose we have two swath data files from an EM3000 multibeam
 and another two from an Hydrosweep MD multibeam. We might
 construct two datalist files. For the EM3000 we might
-have a file dlst_em3000.mb-1 containing:
+have a file datalist_em3000.mb-1 containing:
  	0004_20010705_165004_raw.mb57 57
  	0005_20010705_172010_raw.mb57 57
 .br
-For the Hydrosweep MD data we might have a file dlst_hsmd.mb-1
+For the Hydrosweep MD data we might have a file datalist_hsmd.mb-1
 containing:
  	al10107051649.mb102 102
  	al10107051719.mb102 102
@@ -312,7 +323,7 @@ called 0005_20010705_172010_rawp.mb57 and
 al10107051719p.mb102.
 
 If we run:
- 	mbdatalist \-I dlst_em3000.mb-1
+ 	mbdatalist \-I datalist_em3000.mb-1
 .br
 the output is:
  	0004_20010705_165004_raw.mb57 57 1.000000
@@ -322,7 +333,7 @@ Here the file name is followed by the format and then
 by a third column containing the default file weight of 1.0.
 
 Similarly, if we run:
- 	mbdatalist \-I dlst_hsmd.mb-1
+ 	mbdatalist \-I datalist_hsmd.mb-1
 .br
 the output is:
  	al10107051649.mb102 102 1.000000
@@ -331,29 +342,29 @@ the output is:
 If we insert a line
  	$PROCESSED
 .br
-at the top of both dlst_hsmd.mb-1 and dlst_em3000.mb-1,
+at the top of both datalist_hsmd.mb-1 and datalist_em3000.mb-1,
 then the output of \fBmbdatalist\fP changes so that:
- 	mbdatalist \-I dlst_em3000.mb-1
+ 	mbdatalist \-I datalist_em3000.mb-1
 .br
 yields:
  	0004_20010705_165004_raw.mb57 57 1.000000
  	0005_20010705_172010_rawp.mb57 57 1.000000
 and:
- 	mbdatalist \-I dlst_hsmd.mb-1
+ 	mbdatalist \-I datalist_hsmd.mb-1
 .br
 yields:
  	al10107051649.mb102 102 1.000000
  	al10107051719p.mb102 102 1.000000
 
-Now suppose we create a datalist file called dlst_all.mb-1
+Now suppose we create a datalist file called datalist_all.mb-1
 that refers to the two datalists shown above (without the
-$PROCESSED tags). If the contents of dlst_all.mb-1 are:
- 	dlst_em3000.mb-1 \-1 100.0
- 	dlst_hsmd.mb-1   \-1   1.0
+$PROCESSED tags). If the contents of datalist_all.mb-1 are:
+ 	datalist_em3000.mb-1 \-1 100.0
+ 	datalist_hsmd.mb-1   \-1   1.0
 .br
 where we have specified different file weights for the
 two datalists, then:
- 	mbdatalist \-I dlst_all.mb-1
+ 	mbdatalist \-I datalist_all.mb-1
 .br
 yields:
  	0004_20010705_165004_raw.mb57 57 100.000000
@@ -363,13 +374,59 @@ yields:
 
 Now, if we use the \fB\-P\fP option to force \fBmbdatalist\fP
 to output processed data file names when possible, then:
- 	mbdatalist \-I dlst_all.mb-1 \-P
+ 	mbdatalist \-I datalist_all.mb-1 \-P
 .br
 yields:
  	0004_20010705_165004_raw.mb57 57 100.000000
  	0005_20010705_172010_rawp.mb57 57 100.000000
  	al10107051649.mb102 102 1.000000
  	al10107051719p.mb102 102 1.000000
+
+To demonstrate the datalist file listing function, consider the datalist file
+named datalist.mb-1 that is located at the top of MBARI's shipboard swath mapping
+database structure. This file references datalists under directories for each of
+the institutions that we have sourced survey data from (e.g. CCOM, GEOMAR, IFREMER,
+etc.), and each of those datalists reference datalist files in directories for
+individual surveys or expedition legs, which in turn reference swath files for
+those surveys (or in some cases reference more datalists if the expedition leg
+is organized into multiple surveys). We use the \fB\-D\fP option to obtain
+the following listing (which actually runs a lot longer than shown here):
+.br
+yields:
+ 	<00> datalist.mb-1
+ 	<01> 	CCOM/datalist.mb-1
+ 	<02> 		CCOM/NR07-1/datalist.mb-1
+ 	<01> 	GEOMAR/datalist.mb-1
+ 	<02> 		GEOMAR/SONNE100/datalist.mb-1
+ 	<02> 		GEOMAR/SONNE47/datalist.mb-1
+ 	<02> 		GEOMAR/SO108/datalist.mb-1
+ 	<02> 		GEOMAR/GEOMETEP/datalist.mb-1
+ 	<02> 		GEOMAR/SO83/datalist.mb-1
+ 	<02> 		GEOMAR/SO92/datalist.mb-1
+ 	<02> 		GEOMAR/SO99/datalist.mb-1
+ 	<02> 		GEOMAR/SO109-1/datalist.mb-1
+ 	<02> 		GEOMAR/SO109-2/datalist.mb-1
+ 	<02> 		GEOMAR/SO111/datalist.mb-1
+ 	<02> 		GEOMAR/SO112/datalist.mb-1
+ 	<02> 		GEOMAR/SO141/datalist.mb-1
+ 	<02> 		GEOMAR/SO142/datalist.mb-1
+ 	<01> 	IFREMER/datalist.mb-1
+ 	<02> 		IFREMER/CHARCOT/datalist.mb-1
+ 	<02> 		IFREMER/FOUNDATION/datalist_mb71.mb-1
+ 	<02> 		IFREMER/GEOMETEP4/datalist.mb-1
+ 	<02> 		IFREMER/MANZPA/datalist.mb-1
+ 	<02> 		IFREMER/NOUPA/datalist.mb-1
+ 	<02> 		IFREMER/OLIPAC/datalist.mb-1
+ 	<02> 		IFREMER/PAPNOU87/datalist.mb-1
+ 	<02> 		IFREMER/PAPNOU99/datalist.mb-1
+ 	<02> 		IFREMER/POLYNAUT/datalist.mb-1
+ 	<02> 		IFREMER/SEAPOS/datalist.mb-1
+ 	<02> 		IFREMER/ZEPOLYF1/datalist.mb-1
+ 	<02> 		IFREMER/ZEPOLYF2/datalist.mb-1
+ 	<02> 		IFREMER/ZEPOLYF3/datalist.mb-1
+ 	<02> 		IFREMER/BENTHAUS/datalist.mb-1
+ 	<02> 		IFREMER/SISMITA/datalist.mb-1
+ 	<02> 		IFREMER/ACT/datalist.mb-1
 
 .SH SEE ALSO
 \fBmbsystem\fP(1)

@@ -235,6 +235,7 @@ The default input and output streams are stdin and stdout.\n";
 	int	obeams_amp;
 	int	opixels_ss;
 	char	file[MB_PATH_MAXLINE];
+	char	dfile[MB_PATH_MAXLINE];
 	void	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
@@ -642,7 +643,7 @@ The default input and output streams are stdin and stdout.\n";
 		exit(error);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error))
+			    file,dfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1433,7 +1434,7 @@ nunload,nwrite,verbose,error,ombio_ptr,omb_io_ptr->store_data);*/
         if (read_datalist == MB_YES)
                 {
 		if ((status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error))
+			    file,dfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

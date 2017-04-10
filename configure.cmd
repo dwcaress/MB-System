@@ -351,12 +351,7 @@ autoheader
 automake --add-missing --include-deps
 autoconf
 autoupdate
-
 autoreconf --force --install --warnings=all
-
-# We used to have to force configure.ac to reduce the autoconf version
-# requirement from 2.69 to 2.65 but we don't anymore
-#sed -i.bak s/2\.69/2\.65/ configure.ac
 
 CFLAGS="-g -Wall -Wmissing-prototypes -I/opt/X11/include " LDFLAGS="-L/opt/X11/lib" \
 ./configure \

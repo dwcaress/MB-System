@@ -1179,7 +1179,9 @@ int mbsys_simrad3_preprocess
 	if (store->kind == MB_DATA_DATA)
 		{
 		/*--------------------------------------------------------------*/
-		/* get depth sensor mode from the start record */
+		/* get depth sensor mode from the start record
+			NI => Use heave
+			IN => Depth sensor */
 		/*--------------------------------------------------------------*/
 		if (store->par_dsh[0] == 'I')
 			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY;
@@ -1251,10 +1253,6 @@ int mbsys_simrad3_preprocess
 					pars->sensordepth_time_d-1, pars->sensordepth_sensordepth-1,
 					pars->n_sensordepth, time_d, &sensordepth, &jsensordepth,
 					error);
-		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY)
-			{
-			sensordepth = 0.0;
-			}
 		
 		/* interpolate heading */
 		interp_status = mb_linear_interp_heading(verbose,
@@ -1285,17 +1283,10 @@ int mbsys_simrad3_preprocess
 					pars->attitude_time_d-1, pars->attitude_heave-1,
 					pars->n_attitude, time_d, &heave, &jattitude,
 					error);
-		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY)
-			{
-			heave = 0.0;
-			}
 
 		/* insert navigation */
 		ping->png_longitude = 10000000 * navlon;
 		ping->png_latitude = 20000000 * navlat;
-		
-		/* insert sonardepth */
-		ping->png_xducer_depth = sensordepth;
 
 		/* insert heading */
 		if (heading < 0.0)
@@ -1431,6 +1422,18 @@ int mbsys_simrad3_preprocess
 			rx_h = store->par_s3h;
 			rx_r = store->par_s3r;
 			rx_p = store->par_s3p;
+			}
+//fprintf(stderr,"Sensordepth values:  txz:%f rxz:%f wlz:%f heave:%f height:%f  ping->png_xducer_depth:%f\n",
+//tx_z, rx_z, store->par_wlz, heave, sensordepth, ping->png_xducer_depth);
+		
+		/* insert sonardepth if requested */
+		if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY)
+			{
+			//ping->png_xducer_depth = sensordepth;
+			}
+		else
+			{
+			//ping->png_xducer_depth = 0.5 * (tx_z + rx_z) - store->par_wlz + heave;
 			}
 
 		/*--------------------------------------------------------------*/
@@ -3126,24 +3129,24 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			for (i=0;i<nbath;i++)
 			    {
 			    if (beamflag[i] != MB_FLAG_NULL)
-				{
-				ping->png_depth[i] = bath[i] - ping->png_xducer_depth;
-				ping->png_beamflag[i] = beamflag[i];
-				ping->png_acrosstrack[i] = bathacrosstrack[i];
-				ping->png_alongtrack[i] = bathalongtrack[i];
-				ping->png_amp[i] = (int) rint(amp[i] / reflscale);
-				ping->png_nbeams++;
-				ping->png_nbeams_valid++;
-				}
+					{
+					ping->png_depth[i] = bath[i] - ping->png_xducer_depth;
+					ping->png_beamflag[i] = beamflag[i];
+					ping->png_acrosstrack[i] = bathacrosstrack[i];
+					ping->png_alongtrack[i] = bathalongtrack[i];
+					ping->png_amp[i] = (int) rint(amp[i] / reflscale);
+					ping->png_nbeams++;
+					ping->png_nbeams_valid++;
+					}
 			    else
-				{
-				ping->png_depth[i] = 0.0;
-				ping->png_beamflag[i] = MB_FLAG_NULL;
-				ping->png_acrosstrack[i] = 0.0;
-				ping->png_alongtrack[i] = 0.0;
-				ping->png_amp[i] = 0;
-				ping->png_nbeams++;
-				}
+					{
+					ping->png_depth[i] = 0.0;
+					ping->png_beamflag[i] = MB_FLAG_NULL;
+					ping->png_acrosstrack[i] = 0.0;
+					ping->png_alongtrack[i] = 0.0;
+					ping->png_amp[i] = 0;
+					ping->png_nbeams++;
+					}
 			    }
 			ping->png_nbeams = nbath;
 			}
@@ -3431,7 +3434,7 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)

@@ -313,6 +313,7 @@ int main (int argc, char **argv)
 	double	speedmin;
 	double	timegap;
 	mb_path	ifile;
+	mb_path	dfile;
 	mb_path	ofile;
 	mb_path	fileroot;
 	int	beams_bath;
@@ -453,6 +454,7 @@ int main (int argc, char **argv)
 	memset(platform_file, 0, sizeof(mb_path));
 	memset(read_file, 0, sizeof(mb_path));
 	memset(ifile, 0, sizeof(mb_path));
+	memset(dfile, 0, sizeof(mb_path));
 	memset(ofile, 0, sizeof(mb_path));
 	memset(fileroot, 0, sizeof(mb_path));
 	memset(afile, 0, sizeof(mb_path));
@@ -1164,7 +1166,7 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&iformat,&file_weight,&error))
+			    ifile,dfile,&iformat,&file_weight,&error))
 			    == MB_SUCCESS)
 			read_data = MB_YES;
 	    else
@@ -1646,7 +1648,7 @@ int main (int argc, char **argv)
 		if (read_datalist == MB_YES)
 			{
 			if ((status = mb_datalist_read(verbose,datalist,
-				    ifile,&iformat,&file_weight,&error))
+				    ifile,dfile,&iformat,&file_weight,&error))
 				    == MB_SUCCESS)
 				read_data = MB_YES;
 			else
@@ -2027,7 +2029,7 @@ fprintf(stderr,"Outputting sensor %d offset %d\n",isensor,ioffset);
 		exit(error);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&iformat,&file_weight,&error))
+			    ifile,dfile,&iformat,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -2827,7 +2829,7 @@ fprintf(stderr,"\n");
 		if (read_datalist == MB_YES)
 			{
 			if ((status = mb_datalist_read(verbose,datalist,
-				    ifile,&format,&file_weight,&error))
+				    ifile,dfile,&format,&file_weight,&error))
 				    == MB_SUCCESS)
 				read_data = MB_YES;
 			else

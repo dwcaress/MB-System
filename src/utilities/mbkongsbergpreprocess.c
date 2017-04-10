@@ -116,6 +116,7 @@ int main (int argc, char **argv)
 	double	speedmin;
 	double	timegap;
 	char	ifile[MB_PATH_MAXLINE];
+	char	dfile[MB_PATH_MAXLINE];
 	char	ofile[MB_PATH_MAXLINE];
 	int	ofile_set = MB_NO;
 	char	odir[MB_PATH_MAXLINE];
@@ -804,7 +805,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 		exit(error);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error))
+			    ifile,dfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1713,7 +1714,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 		if (read_datalist == MB_YES)
 			{
 			if ((status = mb_datalist_read(verbose,datalist,
-				ifile,&format,&file_weight,&error))
+				ifile,dfile,&format,&file_weight,&error))
 				== MB_SUCCESS)
 						read_data = MB_YES;
 				else
@@ -2015,7 +2016,7 @@ fprintf(stderr,"Applying running Gaussian mean filtering to %d sonardepth nav da
 		exit(error);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error))
+			    ifile,dfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -2651,14 +2652,14 @@ fprintf(stderr,"Applying running Gaussian mean filtering to %d sonardepth nav da
 			/* apply sonardepth/heave mode - if on a submerged platform usually
 			 * don't use heave - if on a surface platform usually don't use
 			 * a variable sonar depth */
-			if (depthsensor_mode == MBKONSBERGPREPROCESS_ZMODE_USE_HEAVE_ONLY)
-				{
-				sonardepth = 0.0;
-				}
-			else if (depthsensor_mode == MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_ONLY)
-				{
-				heave = 0.0;
-				}
+			//if (depthsensor_mode == MBKONSBERGPREPROCESS_ZMODE_USE_HEAVE_ONLY)
+			//	{
+			//	sonardepth = 0.0;
+			//	}
+			//else if (depthsensor_mode == MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_ONLY)
+			//	{
+			//	heave = 0.0;
+			//	}
 
 			/* Disable this section - Kongsberg SIS logs sensordepth values
 			 * already compensated for lever arms
@@ -3102,7 +3103,7 @@ i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality
         if (read_datalist == MB_YES)
                 {
 		if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error))
+			    ifile,dfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

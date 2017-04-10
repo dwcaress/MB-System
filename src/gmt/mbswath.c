@@ -685,6 +685,7 @@ int GMT_mbswath (void *V_API, int mode, void *args)
 	char	*message = NULL;
 
 	mb_path file;
+	mb_path dfile;
 	int     format;
 	int     file_in_bounds;
 	int     read_data;
@@ -836,7 +837,7 @@ int GMT_mbswath (void *V_API, int mode, void *args)
 			exit(error);
 			}
 	    if ((status = mb_datalist_read(verbose, Ctrl->datalist,
-			     file, &format, &Ctrl->file_weight, &error))
+			     file, dfile, &format, &Ctrl->file_weight, &error))
 			    == MB_SUCCESS)
 			read_data = MB_YES;
 	    else
@@ -1236,7 +1237,7 @@ int GMT_mbswath (void *V_API, int mode, void *args)
 	    /* figure out whether and what to read next */
 	    if (Ctrl->read_datalist == MB_YES)
                 {
-		if ((status = mb_datalist_read(verbose, Ctrl->datalist, file, &format, &Ctrl->file_weight, &error))
+		if ((status = mb_datalist_read(verbose, Ctrl->datalist, file, dfile, &format, &Ctrl->file_weight, &error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

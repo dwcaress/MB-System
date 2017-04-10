@@ -104,6 +104,7 @@ int main (int argc, char **argv)
 	double	file_weight;
 	mb_path	swath_file;
 	mb_path	file;
+	mb_path	dfile;
 	int	format;
 	int	pings;
 	int	lonflip;
@@ -610,7 +611,7 @@ int main (int argc, char **argv)
 			exit(error);
 			}
 		    if ((status = mb_datalist_read(verbose,datalist,
-				    file,&format,&file_weight,&error))
+				    file,dfile,&format,&file_weight,&error))
 				    == MB_SUCCESS)
 			read_data = MB_YES;
 		    else
@@ -874,7 +875,7 @@ int main (int argc, char **argv)
         		if (read_datalist == MB_YES)
                 		{
 				if ((status = mb_datalist_read(verbose,datalist,
-					    file,&format,&file_weight,&error))
+					    file,dfile,&format,&file_weight,&error))
 					    == MB_SUCCESS)
                         		read_data = MB_YES;
                 		else

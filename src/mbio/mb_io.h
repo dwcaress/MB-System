@@ -816,9 +816,10 @@ struct mb_datalist_struct {
 	int	look_processed;
 	int	local_weight;
 	int	weight_set;
-	double	weight;
-	FILE	*fp;
-	char	path[MB_PATH_MAXLINE];
+	double weight;
+	FILE *fp;
+	char path[MB_PATH_MAXLINE];
+    int printed;
 	struct mb_datalist_struct *datalist;
 	};
 

@@ -627,6 +627,7 @@ do_parse_datalist( char *file, int form)
 	int     fileformat;
 	char    fileraw[MB_PATH_MAXLINE];
 	char    fileprocessed[MB_PATH_MAXLINE];
+	char    dfile[MB_PATH_MAXLINE];
 	int     datalist_status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
 	int	format;
@@ -659,7 +660,7 @@ fprintf(stderr,"Called do_parse_datalist:%s %d\n",file,form);
 			while (done == MB_NO)
 				{
 				if ((datalist_status = mb_datalist_read2(verbose, datalist,
-						&filestatus, fileraw, fileprocessed, &fileformat, &weight, &error))
+						&filestatus, fileraw, fileprocessed, dfile, &fileformat, &weight, &error))
 						== MB_SUCCESS)
 					{
 					if (numfiles < NUM_FILES_MAX)

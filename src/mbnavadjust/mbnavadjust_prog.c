@@ -966,6 +966,7 @@ int mbnavadjust_import_data(char *path, int iformat)
 	struct mbna_section *section;
 	int	done;
 	char	filename[STRING_MAX];
+	char	dfile[STRING_MAX];
 	double	weight;
 	int	form;
 	int	firstfile;
@@ -999,7 +1000,7 @@ int mbnavadjust_import_data(char *path, int iformat)
 				while (done == MB_NO)
 					{
 					if ((status = mb_datalist_read(mbna_verbose,datalist,
-							filename,&form,&weight,&error))
+							filename,dfile,&form,&weight,&error))
 							== MB_SUCCESS)
 						{
 						status = mbnavadjust_import_file(filename,form,firstfile);

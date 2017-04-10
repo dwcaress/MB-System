@@ -4448,6 +4448,7 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr)
 	int	swathfilestatus;
 	mb_path	swathfileraw;
 	mb_path	swathfileprocessed;
+    mb_path dfile;
 	int	format;
 	int	formatorg;
 	double	weight;
@@ -4480,7 +4481,7 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr)
 			while (done == MB_NO)
 				{
 				if ((status = mb_datalist_read2(verbose,datalist,
-						&swathfilestatus,swathfileraw,swathfileprocessed,
+						&swathfilestatus,swathfileraw,swathfileprocessed,dfile,
 						&format,&weight,&error))
 						== MB_SUCCESS)
 					{

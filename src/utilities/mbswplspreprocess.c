@@ -200,6 +200,7 @@ int main(int argc, char **argv)
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
 	mb_path ifile;
+	mb_path dfile;
 
 	/* MBIO read values */
 	int read_data;
@@ -281,7 +282,7 @@ int main(int argc, char **argv)
 			}
 
 		if ((status =
-			mb_datalist_read(opts.verbose, datalist, ifile, &(opts.format),
+			mb_datalist_read(opts.verbose, datalist, ifile, dfile, &(opts.format),
 				&file_weight, &error)) == MB_SUCCESS)
 			{
 			read_data = MB_YES;
@@ -329,7 +330,7 @@ int main(int argc, char **argv)
 		if (read_datalist == MB_YES)
 			{
 			if ((status =
-				mb_datalist_read(opts.verbose, datalist, ifile, &(opts.format),
+				mb_datalist_read(opts.verbose, datalist, ifile, dfile, &(opts.format),
 					&file_weight, &error)) == MB_SUCCESS)
 				{
 				read_data = MB_YES;

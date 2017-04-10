@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2297],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2298],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "5 April 2017", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "10 April 2017", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -69,9 +69,6 @@ AS_ECHO([" "])
 AS_ECHO(["        # To update configure files use the following:"])
 AS_ECHO(["        autoupdate"])
 AS_ECHO(["        autoreconf --force --install --warnings=all"])
-AS_ECHO([" "])
-AS_ECHO(["        # Reset the autotools version to 2.65 to accomodate some Linux distributions"])
-AS_ECHO(["        sed -i.bak s/2\.69/2\.65/ configure.ac"])
 AS_ECHO([" "])
 AS_ECHO(["    When you run ./configure, a number of configure options are saved to a"])
 AS_ECHO(["    header file:"])
@@ -210,11 +207,14 @@ AC_SUBST(OTPS_DIR)
 
 dnl--------------------------------------------------------------------
 dnl NetCDF Section
-dnl Always try looking for nc-config unless explicitly given "no"
+dnl Use specified nc-config or look for nc-config in the path
 dnl--------------------------------------------------------------------
 dnl
-if test "X$with_nc_config" != "Xno" ; then
- 	AC_PATH_PROG([NC_CONF], [nc-config], [$with_nc_config])
+
+if test "X$with_netcdf_config" != "X" ; then
+    NC_CONF=`$with_netcdf_config`
+else
+	AC_PATH_PROG([NC_CONF], [nc-config], [/usr/local/netcdf/bin/nc-config])
 fi
 
 if test -x "$NC_CONF" && test "X$NETCDF_INC" = "X" && test "X$NETCDF_LIB" = "X" ; then
@@ -253,6 +253,9 @@ else
 	libnetcdf_LIBS="-L$NETCDF_LIB -R $NETCDF_LIB -lnetcdf"
     libnetcdf_LDFLAGS="-L$NETCDF_LIB"
 	libnetcdf_CPPFLAGS="-I$NETCDF_INC"
+fi
+if test ! -x "$NC_CONF" || test ! -d $NETCDF_LIB; then
+    AC_MSG_ERROR(["Did not find nc-config program or netCDF installation, use --with-nc-config to set the location"])
 fi
 dnl
 dnl Done checking for netCDF headers and libraries
@@ -360,8 +363,10 @@ dnl GDAL Section
 dnl We use gdal-config to set GDAL paths and settings
 dnl--------------------------------------------------------------------
 
-if test "X$with_gdal_config" != "Xno" ; then
-	AC_PATH_PROG([GDAL_CONF], [gdal-config], [$with_gdal_config])
+if test "X$with_gdal_config" != "X" ; then
+    GDAL_CONF=`$with_gdal_config`
+else
+	AC_PATH_PROG([GDAL_CONF], [gdal-config])
 fi
 if test -x "$GDAL_CONF" && test "X$GDAL_INC" = "X" && test "X$GDAL_LIB" = "X" ; then
 	AC_MSG_CHECKING(for GDAL includes)
@@ -376,6 +381,9 @@ if test -x "$GDAL_CONF" && test "X$GDAL_INC" = "X" && test "X$GDAL_LIB" = "X" ; 
     libgdal_CPPFLAGS="$GDAL_INC"
     libgdal_LIBS="-L$GDAL_LIB_PATH -R $GDAL_LIB_PATH -lgdal"
     libgdal_LDFLAGS="-L$GDAL_LIB_PATH"
+else
+    AS_ECHO(["Did not find gdal-config program, use --with-gdal-config to set the location"])
+    AC_MSG_ERROR(["Did not find gdal-config program, use --with-gdal-config to set the location"])
 fi
 
 dnl Substitute GDAL library and header arguments
@@ -388,8 +396,10 @@ dnl GMT Section
 dnl We use gmt-config to set GMT5 paths and settings
 dnl--------------------------------------------------------------------
 
-if test "X$with_gmt_config" != "Xno" ; then
-	AC_PATH_PROG([GMT_CONF], [gmt-config], [$with_gmt_config])
+if test "X$with_gmt_config" != "X" ; then
+    GMT_CONF=`$with_gmt_config`
+else
+	AC_PATH_PROG([GMT_CONF], [gmt-config])
 fi
 if test -x "$GMT_CONF" && test "X$GMT_INC" = "X" && test "X$GMT_LIB" = "X" ; then
 	AC_MSG_CHECKING(for GMT includes)
@@ -413,6 +423,9 @@ if test -x "$GMT_CONF" && test "X$GMT_INC" = "X" && test "X$GMT_LIB" = "X" ; the
     libgmt_CPPFLAGS="$GMT_INC"
     libgmt_LIBS="-L$GMT_LIB_PATH -R $GMT_LIB_PATH -lgmt -lpostscriptlight"
     libgmt_LDFLAGS="-L$GMT_LIB_PATH"
+else
+    AS_ECHO(["Did not find gmt-config program, use --with-gmt-config to set the location"])
+    AC_MSG_ERROR(["Did not find gmt-config program, use --with-gmt-config to set the location"])
 fi
 
 dnl Substitute GMT library and header arguments

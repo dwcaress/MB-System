@@ -756,18 +756,18 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* save sonar depth value if survey data */
 	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_DATA)
+		&& store->kind == MB_DATA_HEIGHT)
 		{
-		time_i[0] = ping->png_date / 10000;
-		time_i[1] = (ping->png_date % 10000) / 100;
-		time_i[2] = ping->png_date % 100;
-		time_i[3] = ping->png_msec / 3600000;
-		time_i[4] = (ping->png_msec % 3600000) / 60000;
-		time_i[5] = (ping->png_msec % 60000) / 1000;
-		time_i[6] = (ping->png_msec % 1000) * 1000;
+		time_i[0] = store->hgt_date / 10000;
+		time_i[1] = (store->hgt_date % 10000) / 100;
+		time_i[2] = store->hgt_date % 100;
+		time_i[3] = store->hgt_msec / 3600000;
+		time_i[4] = (store->hgt_msec % 3600000) / 60000;
+		time_i[5] = (store->hgt_msec % 60000) / 1000;
+		time_i[6] = (store->hgt_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &btime_d);
 		mb_depint_add(verbose, mbio_ptr,
-				btime_d,(double)ping->png_xducer_depth,
+				btime_d,(0.01 * ((double)store->hgt_height)),
 				error);
 		}
 
@@ -2907,7 +2907,7 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap,
 	/* now set the data kind */
 	if (status == MB_SUCCESS)
 		{
-		if (strlen(store->par_com) > 0)
+		if (store->type == EM3_START && store->par_date == 0)
 		    store->kind = MB_DATA_COMMENT;
 		else if (store->type == EM3_START)
 		    store->kind = MB_DATA_START;

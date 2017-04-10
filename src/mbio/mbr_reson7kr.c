@@ -2887,7 +2887,7 @@ int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer,
 		}
 	else if (recordid == R7KRECID_7kTVGData)
 		{
-		index = offset + 4;
+		index = offset + 12;
 		mb_get_binary_int(MB_YES, &buffer[index], ping_number);
 		status = MB_SUCCESS;
 		}

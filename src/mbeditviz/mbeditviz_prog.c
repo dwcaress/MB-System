@@ -343,6 +343,7 @@ int mbeditviz_open_data(char *path, int format)
 	int	filestatus;
 	char	fileraw[MB_PATH_MAXLINE];
 	char	fileprocessed[MB_PATH_MAXLINE];
+	char	dfile[MB_PATH_MAXLINE];
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -375,7 +376,7 @@ int mbeditviz_open_data(char *path, int format)
 				while (done == MB_NO)
 					{
 					if ((mbev_status = mb_datalist_read2(mbev_verbose,datalist,
-							&filestatus,fileraw,fileprocessed,&format,&weight,&mbev_error))
+							&filestatus,fileraw,fileprocessed,dfile,&format,&weight,&mbev_error))
 							== MB_SUCCESS)
 						{
 						mbev_status = mbeditviz_import_file(fileraw,format);

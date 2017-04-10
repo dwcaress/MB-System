@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mblist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  28 January 2017 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  8 April 2017 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -694,7 +694,11 @@ is a single character, then the output is a multiple segment
 file of the sort accepted by the <B>GMT</B> program <B>psxy</B>.
 This option only works with ascii output, and is thus disabled
 when the <B>-A</B> option is specified. The most common usage
-is <B>-Z</B>I&gt;.
+is <B>-Z</B>I&gt;. If <I>segment</I> is the string &quot;swathfile&quot;
+then the segment lines will consist of the '#' character followed
+by the path for the source swath file. If <I>segment</I> is the string &quot;datalist&quot;
+then the segment lines will consist of the '#' character followed
+by the path for the source datalist file.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -8390,7 +8394,7 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 28 January 2017</P></CENTER>
+Last Updated: 8 April 2017</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
