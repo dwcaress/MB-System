@@ -345,6 +345,7 @@ int main (int argc, char **argv)
 	double	speedmin;
 	double	timegap;
 	mb_path	ifile;
+	mb_path	dfile;
 	mb_path	ofile;
 	int	beams_bath;
 	int	beams_amp;
@@ -1526,7 +1527,7 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&iformat,&file_weight,&error))
+			    ifile,dfile,&iformat,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1993,7 +1994,7 @@ int main (int argc, char **argv)
 		if (read_datalist == MB_YES)
 			{
 			if ((status = mb_datalist_read(verbose,datalist,
-				    ifile,&iformat,&file_weight,&error))
+				    ifile,dfile,&iformat,&file_weight,&error))
 				    == MB_SUCCESS)
 				read_data = MB_YES;
 			else
@@ -2211,7 +2212,7 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    ifile,&iformat,&file_weight,&error))
+			    ifile,dfile,&iformat,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -3007,7 +3008,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 		if (read_datalist == MB_YES)
 			{
 			if ((status = mb_datalist_read(verbose,datalist,
-				    ifile,&format,&file_weight,&error))
+				    ifile,dfile,&format,&file_weight,&error))
 				    == MB_SUCCESS)
 				read_data = MB_YES;
 			else

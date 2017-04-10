@@ -334,6 +334,7 @@ int main (int argc, char **argv)
 	int	pstatus;
 	char	path[MB_PATH_MAXLINE];
 	char	ppath[MB_PATH_MAXLINE];
+	char	dpath[MB_PATH_MAXLINE];
 	char	ifile[MB_PATH_MAXLINE];
 	char	ofile[MB_PATH_MAXLINE];
 	char	dfile[MB_PATH_MAXLINE];
@@ -1621,7 +1622,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		exit(error);
 		}
 	while ((status = mb_datalist_read2(verbose,datalist,
-			&pstatus,path,ppath,&format,&file_weight,&error))
+			&pstatus,path,ppath,dpath,&format,&file_weight,&error))
 			== MB_SUCCESS)
 		{
 		ndatafile = 0;
@@ -2258,7 +2259,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		exit(error);
 		}
 	while ((status = mb_datalist_read2(verbose,datalist,
-			&pstatus,path,ppath,&format,&file_weight,&error))
+			&pstatus,path,ppath,dpath,&format,&file_weight,&error))
 			== MB_SUCCESS)
 		{
 		ndatafile = 0;

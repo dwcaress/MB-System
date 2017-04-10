@@ -263,6 +263,7 @@ and mbedit edit save files.\n";
 	int	mbp_ifile_specified;
 	char	mbp_ifile[MBP_FILENAMESIZE];
 	char	mbp_pfile[MBP_FILENAMESIZE];
+	char	mbp_dfile[MBP_FILENAMESIZE];
 	int	mbp_ofile_specified;
 	char	mbp_ofile[MBP_FILENAMESIZE];
 	int	mbp_format_specified;
@@ -585,7 +586,7 @@ and mbedit edit save files.\n";
 		exit(error);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    mbp_ifile,&mbp_format,&file_weight,&error))
+			    mbp_ifile,mbp_dfile,&mbp_format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -6844,7 +6845,7 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]); 
         if (read_datalist == MB_YES)
                 {
 		if ((status = mb_datalist_read(verbose,datalist,
-			    mbp_ifile,&format,&file_weight,&error))
+			    mbp_ifile,mbp_dfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

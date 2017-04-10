@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbdatalist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  7 April 2017 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,7 +28,7 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbdatalist</B> [<B>-C</B> <B>-F</B><I>format</I> <B>-I</B><I>filename</I> <B>-N -O -P -Q -R -S -U -Y -Z -V -H</B>]
+<B>mbdatalist</B> [<B>-C -D</B> <B>-F</B><I>format</I> <B>-I</B><I>filename</I> <B>-N -O -P -Q -R -S -U -Y -Z -V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -140,6 +140,10 @@ the lock file when it is done. Orphaned lock files may be left if <B>mbprocess</
 crashes or is interrupted. These will prevent reprocessing by <B>mbprocess</B>,
 but can be both detected with the <B>-S</B> option and removed using the <B>-Y</B> option.
 <P>
+The <B>-D</B> option causes <B>mbdatalist</B> to list the datalist files rather
+than the swath files referenced through the datalists. Each datalist file path
+is preceded by its recursion level within the overall datalist structure.
+<P>
 Finally, this program can be used to copy the swath files referenced in a
 datalist structure to a single directory and to create a datalist there
 (names &quot;datalist.mb-1&quot;) that references those swath files. This is
@@ -178,9 +182,17 @@ If the <I>-P</I>, <I>-R</I>, and <I>-U</I> options are specified these
 functions will modify which swath files are copied. Any ancilliary files
 (e.g. *inf metadata files) will also be copied, but processed data
 files derived from the target copied files will not be copied.
-<DT><B>-F</B>
+<DT><B>-D</B>
 
 <DD>
+<BR>
+
+<DT>Causes a listing to be printed of the unique datalist files referenced through<DD>
+the recursive datalist structure. Each line begins with the recursion level
+of that datalist file within the overall structure followed by the full path of
+the datalist file indented by a number of tabs equal to the recursion level.
+<B>-F</B>
+
 <I>format</I>
 <BR>
 
@@ -355,12 +367,12 @@ will have the following contents:
 Suppose we have two swath data files from an EM3000 multibeam
 and another two from an Hydrosweep MD multibeam. We might
 construct two datalist files. For the EM3000 we might
-have a file dlst_em3000.mb-1 containing:
+have a file datalist_em3000.mb-1 containing:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0004_20010705_165004_raw.mb57&nbsp;57<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0005_20010705_172010_raw.mb57&nbsp;57<BR>
 <BR>
 
-For the Hydrosweep MD data we might have a file dlst_hsmd.mb-1
+For the Hydrosweep MD data we might have a file datalist_hsmd.mb-1
 containing:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>al10107051649.mb102&nbsp;102<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>al10107051719.mb102&nbsp;102<BR>
@@ -373,7 +385,7 @@ called 0005_20010705_172010_rawp.mb57 and
 al10107051719p.mb102.
 <P>
 If we run:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;dlst_em3000.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_em3000.mb-1<BR>
 <BR>
 
 the output is:
@@ -385,7 +397,7 @@ Here the file name is followed by the format and then
 by a third column containing the default file weight of 1.0.
 <P>
 Similarly, if we run:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;dlst_hsmd.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_hsmd.mb-1<BR>
 <BR>
 
 the output is:
@@ -396,32 +408,32 @@ If we insert a line
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>$PROCESSED<BR>
 <BR>
 
-at the top of both dlst_hsmd.mb-1 and dlst_em3000.mb-1,
+at the top of both datalist_hsmd.mb-1 and datalist_em3000.mb-1,
 then the output of <B>mbdatalist</B> changes so that:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;dlst_em3000.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_em3000.mb-1<BR>
 <BR>
 
 yields:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0004_20010705_165004_raw.mb57&nbsp;57&nbsp;1.000000<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0005_20010705_172010_rawp.mb57&nbsp;57&nbsp;1.000000<BR>
 and:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;dlst_hsmd.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_hsmd.mb-1<BR>
 <BR>
 
 yields:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>al10107051649.mb102&nbsp;102&nbsp;1.000000<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>al10107051719p.mb102&nbsp;102&nbsp;1.000000<BR>
 <P>
-Now suppose we create a datalist file called dlst_all.mb-1
+Now suppose we create a datalist file called datalist_all.mb-1
 that refers to the two datalists shown above (without the
-$PROCESSED tags). If the contents of dlst_all.mb-1 are:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>dlst_em3000.mb-1&nbsp;-1&nbsp;100.0<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>dlst_hsmd.mb-1&nbsp;&nbsp;&nbsp;-1&nbsp;&nbsp;&nbsp;1.0<BR>
+$PROCESSED tags). If the contents of datalist_all.mb-1 are:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datalist_em3000.mb-1&nbsp;-1&nbsp;100.0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datalist_hsmd.mb-1&nbsp;&nbsp;&nbsp;-1&nbsp;&nbsp;&nbsp;1.0<BR>
 <BR>
 
 where we have specified different file weights for the
 two datalists, then:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;dlst_all.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_all.mb-1<BR>
 <BR>
 
 yields:
@@ -432,7 +444,7 @@ yields:
 <P>
 Now, if we use the <B>-P</B> option to force <B>mbdatalist</B>
 to output processed data file names when possible, then:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;dlst_all.mb-1&nbsp;-P<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_all.mb-1&nbsp;-P<BR>
 <BR>
 
 yields:
@@ -440,6 +452,53 @@ yields:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0005_20010705_172010_rawp.mb57&nbsp;57&nbsp;100.000000<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>al10107051649.mb102&nbsp;102&nbsp;1.000000<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>al10107051719p.mb102&nbsp;102&nbsp;1.000000<BR>
+<P>
+To demonstrate the datalist file listing function, consider the datalist file
+named datalist.mb-1 that is located at the top of MBARI's shipboard swath mapping
+database structure. This file references datalists under directories for each of
+the institutions that we have sourced survey data from (e.g. CCOM, GEOMAR, IFREMER,
+etc.), and each of those datalists reference datalist files in directories for
+individual surveys or expedition legs, which in turn reference swath files for
+those surveys (or in some cases reference more datalists if the expedition leg
+is organized into multiple surveys). We use the <B>-D</B> option to obtain
+the following listing (which actually runs a lot longer than shown here):
+<BR>
+
+yields:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;00&gt;&nbsp;datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;01&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT>CCOM/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>CCOM/NR07-1/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;01&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT>GEOMAR/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SONNE100/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SONNE47/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SO108/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/GEOMETEP/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SO83/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SO92/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SO99/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SO109-1/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SO109-2/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SO111/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SO112/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SO141/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GEOMAR/SO142/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;01&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT>IFREMER/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/CHARCOT/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/FOUNDATION/datalist_mb71.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/GEOMETEP4/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/MANZPA/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/NOUPA/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/OLIPAC/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/PAPNOU87/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/PAPNOU99/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/POLYNAUT/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/SEAPOS/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/ZEPOLYF1/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/ZEPOLYF2/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/ZEPOLYF3/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/BENTHAUS/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/SISMITA/datalist.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&lt;02&gt;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>IFREMER/ACT/datalist.mb-1<BR>
 <P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
@@ -472,7 +531,7 @@ files. Copying of processed files should also be an option.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 7 April 2017</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

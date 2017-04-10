@@ -70,6 +70,7 @@ int main (int argc, char **argv)
 	/* Files and formats */
 	char	swathdata[MB_PATH_MAXLINE];
 	char	swathfile[MB_PATH_MAXLINE];
+	char	dfile[MB_PATH_MAXLINE];
 	char	swathroot[MB_PATH_MAXLINE];
 	char	outroot[MB_PATH_MAXLINE];
 	char	outroot_defined = MB_NO;
@@ -388,7 +389,7 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    swathfile,&format,&file_weight,&error))
+			    swathfile,dfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -680,7 +681,7 @@ int main (int argc, char **argv)
         	if (read_datalist == MB_YES)
                 	{
 			if ((status = mb_datalist_read(verbose,datalist,
-				    swathfile,&format,&file_weight,&error))
+				    swathfile,dfile,&format,&file_weight,&error))
 				    == MB_SUCCESS)
                         	read_data = MB_YES;
                 	else

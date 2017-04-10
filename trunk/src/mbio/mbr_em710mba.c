@@ -2409,7 +2409,7 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap,
 	/* now set the data kind */
 	if (status == MB_SUCCESS)
 		{
-		if (strlen(store->par_com) > 0)
+		if (store->type == EM3_START && store->par_date == 0)
 		    store->kind = MB_DATA_COMMENT;
 		else if (store->type == EM3_START)
 		    store->kind = MB_DATA_START;

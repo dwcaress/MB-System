@@ -46,7 +46,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mbdatalist";
 	char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
-	char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Q -Rw/e/s/n -S -U -Y -Z -V -H]";
+	char usage_message[] = "mbdatalist [-C -D -Fformat -Ifile -N -O -P -Q -Rw/e/s/n -S -U -Y -Z -V -H]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -64,6 +64,7 @@ int main (int argc, char **argv)
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	int	look_bounds = MB_NO;
 	int	copyfiles = MB_NO;
+	int reportdatalists = MB_NO;
 	int	file_in_bounds = MB_NO;
 	double	file_weight = 1.0;
 	int	format;
@@ -76,6 +77,8 @@ int main (int argc, char **argv)
 	double	timegap;
 	char	fileroot[MB_PATH_MAXLINE];
 	char	file[MB_PATH_MAXLINE];
+	char	dfile[MB_PATH_MAXLINE];
+	char	dfilelast[MB_PATH_MAXLINE];
 	char	pwd[MB_PATH_MAXLINE];
 	char	command[MB_PATH_MAXLINE];
 	char	*filename;
@@ -91,6 +94,7 @@ int main (int argc, char **argv)
 	int	nproblemfiles = 0;
 	int	remove_locks = MB_NO;
 	int	make_datalistp = MB_NO;
+	int recursion = -1;
 
 	int	prstatus = MB_PR_FILE_UP_TO_DATE;
 	int	lock_status;
@@ -119,12 +123,17 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhCcF:f:I:i:NnOoPpQqR:r:SsUuYyZz")) != -1)
+	while ((c = getopt(argc, argv, "VvHhCcDdF:f:I:i:NnOoPpQqR:r:SsUuYyZz")) != -1)
 	  switch (c)
 		{
 		case 'C':
 		case 'c':
 			copyfiles = MB_YES;
+			flag++;
+			break;
+		case 'D':
+		case 'd':
+			reportdatalists = MB_YES;
 			flag++;
 			break;
 		case 'F':
@@ -225,40 +234,41 @@ int main (int argc, char **argv)
 		fprintf(output,"dbg2  Version %s\n",rcs_id);
 		fprintf(output,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(output,"dbg2  Control Parameters:\n");
-		fprintf(output,"dbg2       verbose:        %d\n",verbose);
-		fprintf(output,"dbg2       help:           %d\n",help);
-		fprintf(output,"dbg2       file:           %s\n",read_file);
-		fprintf(output,"dbg2       format:         %d\n",format);
-		fprintf(output,"dbg2       look_processed: %d\n",look_processed);
-		fprintf(output,"dbg2       copyfiles:      %d\n",copyfiles);
-		fprintf(output,"dbg2       make_inf:       %d\n",make_inf);
-		fprintf(output,"dbg2       force_update:   %d\n",force_update);
-		fprintf(output,"dbg2       status_report:  %d\n",status_report);
-		fprintf(output,"dbg2       problem_report: %d\n",problem_report);
-		fprintf(output,"dbg2       make_datalistp: %d\n",make_datalistp);
-		fprintf(output,"dbg2       remove_locks:   %d\n",remove_locks);
-		fprintf(output,"dbg2       pings:          %d\n",pings);
-		fprintf(output,"dbg2       lonflip:        %d\n",lonflip);
-		fprintf(output,"dbg2       bounds[0]:      %f\n",bounds[0]);
-		fprintf(output,"dbg2       bounds[1]:      %f\n",bounds[1]);
-		fprintf(output,"dbg2       bounds[2]:      %f\n",bounds[2]);
-		fprintf(output,"dbg2       bounds[3]:      %f\n",bounds[3]);
-		fprintf(output,"dbg2       btime_i[0]:     %d\n",btime_i[0]);
-		fprintf(output,"dbg2       btime_i[1]:     %d\n",btime_i[1]);
-		fprintf(output,"dbg2       btime_i[2]:     %d\n",btime_i[2]);
-		fprintf(output,"dbg2       btime_i[3]:     %d\n",btime_i[3]);
-		fprintf(output,"dbg2       btime_i[4]:     %d\n",btime_i[4]);
-		fprintf(output,"dbg2       btime_i[5]:     %d\n",btime_i[5]);
-		fprintf(output,"dbg2       btime_i[6]:     %d\n",btime_i[6]);
-		fprintf(output,"dbg2       etime_i[0]:     %d\n",etime_i[0]);
-		fprintf(output,"dbg2       etime_i[1]:     %d\n",etime_i[1]);
-		fprintf(output,"dbg2       etime_i[2]:     %d\n",etime_i[2]);
-		fprintf(output,"dbg2       etime_i[3]:     %d\n",etime_i[3]);
-		fprintf(output,"dbg2       etime_i[4]:     %d\n",etime_i[4]);
-		fprintf(output,"dbg2       etime_i[5]:     %d\n",etime_i[5]);
-		fprintf(output,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
-		fprintf(output,"dbg2       speedmin:       %f\n",speedmin);
-		fprintf(output,"dbg2       timegap:        %f\n",timegap);
+		fprintf(output,"dbg2       verbose:             %d\n",verbose);
+		fprintf(output,"dbg2       help:                %d\n",help);
+		fprintf(output,"dbg2       file:                %s\n",read_file);
+		fprintf(output,"dbg2       format:              %d\n",format);
+		fprintf(output,"dbg2       look_processed:      %d\n",look_processed);
+		fprintf(output,"dbg2       copyfiles:           %d\n",copyfiles);
+		fprintf(output,"dbg2       reportdatalists:     %d\n",reportdatalists);
+		fprintf(output,"dbg2       make_inf:            %d\n",make_inf);
+		fprintf(output,"dbg2       force_update:        %d\n",force_update);
+		fprintf(output,"dbg2       status_report:       %d\n",status_report);
+		fprintf(output,"dbg2       problem_report:      %d\n",problem_report);
+		fprintf(output,"dbg2       make_datalistp:      %d\n",make_datalistp);
+		fprintf(output,"dbg2       remove_locks:        %d\n",remove_locks);
+		fprintf(output,"dbg2       pings:               %d\n",pings);
+		fprintf(output,"dbg2       lonflip:             %d\n",lonflip);
+		fprintf(output,"dbg2       bounds[0]:           %f\n",bounds[0]);
+		fprintf(output,"dbg2       bounds[1]:           %f\n",bounds[1]);
+		fprintf(output,"dbg2       bounds[2]:           %f\n",bounds[2]);
+		fprintf(output,"dbg2       bounds[3]:           %f\n",bounds[3]);
+		fprintf(output,"dbg2       btime_i[0]:          %d\n",btime_i[0]);
+		fprintf(output,"dbg2       btime_i[1]:          %d\n",btime_i[1]);
+		fprintf(output,"dbg2       btime_i[2]:          %d\n",btime_i[2]);
+		fprintf(output,"dbg2       btime_i[3]:          %d\n",btime_i[3]);
+		fprintf(output,"dbg2       btime_i[4]:          %d\n",btime_i[4]);
+		fprintf(output,"dbg2       btime_i[5]:          %d\n",btime_i[5]);
+		fprintf(output,"dbg2       btime_i[6]:          %d\n",btime_i[6]);
+		fprintf(output,"dbg2       etime_i[0]:          %d\n",etime_i[0]);
+		fprintf(output,"dbg2       etime_i[1]:          %d\n",etime_i[1]);
+		fprintf(output,"dbg2       etime_i[2]:          %d\n",etime_i[2]);
+		fprintf(output,"dbg2       etime_i[3]:          %d\n",etime_i[3]);
+		fprintf(output,"dbg2       etime_i[4]:          %d\n",etime_i[4]);
+		fprintf(output,"dbg2       etime_i[5]:          %d\n",etime_i[5]);
+		fprintf(output,"dbg2       etime_i[6]:          %d\n",etime_i[6]);
+		fprintf(output,"dbg2       speedmin:            %f\n",speedmin);
+		fprintf(output,"dbg2       timegap:             %f\n",timegap);
 		}
 
 	/* if help desired then print it and exit */
@@ -321,77 +331,77 @@ int main (int argc, char **argv)
 		    {
 		    /* check for mbinfo file if bounds checking enabled */
 		    if (look_bounds == MB_YES)
-			{
-			status = mb_check_info(verbose, read_file, lonflip, bounds,
-				    &file_in_bounds, &error);
-			if (status == MB_FAILURE)
-			    {
-			    file_in_bounds = MB_YES;
-			    status = MB_SUCCESS;
-			    error = MB_ERROR_NO_ERROR;
-			    }
-			}
+				{
+				status = mb_check_info(verbose, read_file, lonflip, bounds,
+						&file_in_bounds, &error);
+				if (status == MB_FAILURE)
+					{
+					file_in_bounds = MB_YES;
+					status = MB_SUCCESS;
+					error = MB_ERROR_NO_ERROR;
+					}
+				}
 
 		    /* ouput file if no bounds checking or in bounds */
 		    if (look_bounds == MB_NO || file_in_bounds == MB_YES)
-			{
-			if (verbose > 0)
-				fprintf(output, "%s %d %f\n", read_file, format, file_weight);
-			else
-				fprintf(output, "%s %d %f", read_file, format, file_weight);
-
-			/* check status if desired */
-			if (status_report == MB_YES)
-			    {
-			    status = mb_pr_checkstatus(verbose, read_file, &prstatus, &error);
-			    if (verbose > 0)
-				{
-				if (prstatus == MB_PR_FILE_UP_TO_DATE)
-				    fprintf(output, "\tStatus: up to date\n");
-				else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
-				    fprintf(output, "\tStatus: out of date - needs processing\n");
-				else if (prstatus == MB_PR_FILE_NOT_EXIST)
-				    fprintf(output, "\tStatus: file does not exist\n");
-				else if (prstatus == MB_PR_NO_PARAMETER_FILE)
-				    fprintf(output, "\tStatus: no parameter file - processing undefined\n");
-				}
-			    else
-				{
-				if (prstatus == MB_PR_FILE_UP_TO_DATE)
-				    fprintf(output, "\t<Up-to-date>");
-				else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
-				    fprintf(output, "\t<Needs-processing>");
-				else if (prstatus == MB_PR_FILE_NOT_EXIST)
-				    fprintf(output, "\t<Does-not-exist>");
-				else if (prstatus == MB_PR_NO_PARAMETER_FILE)
-				    fprintf(output, "\t<No-parameter-file>");
-				}
-			    }
-
-			/* check locks if desired */
-			if (status_report == MB_YES || remove_locks == MB_YES)
-			    {
-			    lock_status = mb_pr_lockinfo(verbose, read_file, &locked,
-							    &lock_purpose, lock_program, lock_user,
-							    lock_cpu, lock_date, &lock_error);
-			    if (locked == MB_YES && status_report == MB_YES)
 				{
 				if (verbose > 0)
-					fprintf(output,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n",
-						lock_program, lock_user, lock_cpu, lock_date);
+					fprintf(output, "%s %d %f\n", read_file, format, file_weight);
 				else
-					fprintf(output,"\t<Locked>");
-				}
-			    if (locked == MB_YES && remove_locks == MB_YES)
-			        {
-				sprintf(lockfile, "%s.lck", file);
-				sprintf(command, "/bin/rm -f %s", lockfile);
-				}
-			    }
+					fprintf(output, "%s %d %f", read_file, format, file_weight);
+	
+				/* check status if desired */
+				if (status_report == MB_YES)
+					{
+					status = mb_pr_checkstatus(verbose, read_file, &prstatus, &error);
+					if (verbose > 0)
+						{
+						if (prstatus == MB_PR_FILE_UP_TO_DATE)
+							fprintf(output, "\tStatus: up to date\n");
+						else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
+							fprintf(output, "\tStatus: out of date - needs processing\n");
+						else if (prstatus == MB_PR_FILE_NOT_EXIST)
+							fprintf(output, "\tStatus: file does not exist\n");
+						else if (prstatus == MB_PR_NO_PARAMETER_FILE)
+							fprintf(output, "\tStatus: no parameter file - processing undefined\n");
+						}
+					else
+						{
+						if (prstatus == MB_PR_FILE_UP_TO_DATE)
+							fprintf(output, "\t<Up-to-date>");
+						else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
+							fprintf(output, "\t<Needs-processing>");
+						else if (prstatus == MB_PR_FILE_NOT_EXIST)
+							fprintf(output, "\t<Does-not-exist>");
+						else if (prstatus == MB_PR_NO_PARAMETER_FILE)
+							fprintf(output, "\t<No-parameter-file>");
+						}
+					}
 
-			if (verbose == 0)
-				fprintf(output, "\n");
-			}
+				/* check locks if desired */
+				if (status_report == MB_YES || remove_locks == MB_YES)
+					{
+					lock_status = mb_pr_lockinfo(verbose, read_file, &locked,
+									&lock_purpose, lock_program, lock_user,
+									lock_cpu, lock_date, &lock_error);
+					if (locked == MB_YES && status_report == MB_YES)
+						{
+						if (verbose > 0)
+							fprintf(output,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n",
+								lock_program, lock_user, lock_cpu, lock_date);
+						else
+							fprintf(output,"\t<Locked>");
+						}
+					if (locked == MB_YES && remove_locks == MB_YES)
+						{
+						sprintf(lockfile, "%s.lck", file);
+						sprintf(command, "/bin/rm -f %s", lockfile);
+						}
+					}
+	
+				if (verbose == 0)
+					fprintf(output, "\n");
+				}
 		    }
 		}
 
@@ -409,17 +419,22 @@ int main (int argc, char **argv)
 		    exit(error);
 		    }
 		while ((status = mb_datalist_read(verbose,datalist,
-					    file,&format,&file_weight,&error))
+					    file,dfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 			{
 			nfile++;
 			bufptr = getcwd(pwd, MB_PATH_MAXLINE);
 			mb_get_relative_path(verbose, file, pwd, &error);
+			mb_get_relative_path(verbose, dfile, pwd, &error);
+			
+			/* generate inf fnv fbt files */
 			if (make_inf == MB_YES)
 			    {
 			    status = mb_make_info(verbose, force_update,
 							file, format, &error);
 			    }
+				
+			/* or generate problem reports */
 			else if (problem_report == MB_YES)
 			    {
 			    status = mb_pr_check(verbose, file, &nparproblem, &ndataproblem, &error);
@@ -428,117 +443,130 @@ int main (int argc, char **argv)
 		    	    nparproblemtot += nparproblem;
 		    	    ndataproblemtot += ndataproblem;
 			    }
+				
+			/* or copy files */
 			else if (copyfiles == MB_YES)
 			    {
 			    /* check for mbinfo file if bounds checking enabled */
 			    if (look_bounds == MB_YES)
-				{
-				status = mb_check_info(verbose, file, lonflip, bounds,
-					    &file_in_bounds, &error);
-				if (status == MB_FAILURE)
-				    {
-				    file_in_bounds = MB_YES;
-				    status = MB_SUCCESS;
-				    error = MB_ERROR_NO_ERROR;
-				    }
-				}
+					{
+					status = mb_check_info(verbose, file, lonflip, bounds,
+							&file_in_bounds, &error);
+					if (status == MB_FAILURE)
+						{
+						file_in_bounds = MB_YES;
+						status = MB_SUCCESS;
+						error = MB_ERROR_NO_ERROR;
+						}
+					}
 
 			    /* copy file if no bounds checking or in bounds */
 			    if (look_bounds == MB_NO || file_in_bounds == MB_YES)
-				{
-				fprintf(output, "Copying %s %d %f\n", file, format, file_weight);
-				sprintf(command, "cp %s* .", file);
-				shellstatus = system(command);
-				if ((filename = strrchr(file, '/')) != NULL)
-					filename++;
-				else
-					filename = file;
-				if (nfile == 1)
-					shellstatus = system("rm datalist.mb-1");
-			    	sprintf(command, "echo %s %d %f >> datalist.mb-1",
-					filename, format, file_weight);
-				shellstatus = system(command);
+					{
+					fprintf(output, "Copying %s %d %f\n", file, format, file_weight);
+					sprintf(command, "cp %s* .", file);
+					shellstatus = system(command);
+					if ((filename = strrchr(file, '/')) != NULL)
+						filename++;
+					else
+						filename = file;
+					if (nfile == 1)
+						shellstatus = system("rm datalist.mb-1");
+						sprintf(command, "echo %s %d %f >> datalist.mb-1",
+						filename, format, file_weight);
+					shellstatus = system(command);
 			    	}
 			    }
+			
+			/* or list the datalists parsed through the recursive datalist structure */
+			else if (reportdatalists == MB_YES)
+				{
+//fprintf(stderr,"dfile:%s dfilelast:%s file:%s\n",dfile,dfilelast,file);
+				if (strcmp(dfile, dfilelast) != 0)
+					status = mb_datalist_recursion(verbose, datalist, MB_YES, &recursion, &error);
+				strcpy(dfilelast, dfile);
+				}
+				
+			/* or list the files returned from parsing the recursive datalist
+				structure, with bounds checking if desired */
 			else
 			    {
 			    /* check for mbinfo file if bounds checking enabled */
 			    if (look_bounds == MB_YES)
-				{
-				status = mb_check_info(verbose, file, lonflip, bounds,
-					    &file_in_bounds, &error);
-				if (status == MB_FAILURE)
-				    {
-				    file_in_bounds = MB_YES;
-				    status = MB_SUCCESS;
-				    error = MB_ERROR_NO_ERROR;
-				    }
-				}
+					{
+					status = mb_check_info(verbose, file, lonflip, bounds,
+							&file_in_bounds, &error);
+					if (status == MB_FAILURE)
+						{
+						file_in_bounds = MB_YES;
+						status = MB_SUCCESS;
+						error = MB_ERROR_NO_ERROR;
+						}
+					}
 
 			    /* ouput file if no bounds checking or in bounds */
 			    if (look_bounds == MB_NO || file_in_bounds == MB_YES)
-				{
-				if (verbose > 0)
-					fprintf(output, "%s %d %f\n", file, format, file_weight);
-				else
-					fprintf(output, "%s %d %f", file, format, file_weight);
-
-				/* check status if desired */
-				if (status_report == MB_YES)
-				    {
-				    status = mb_pr_checkstatus(verbose, file, &prstatus, &error);
-				    if (verbose > 0)
 					{
-					if (prstatus == MB_PR_FILE_UP_TO_DATE)
-					    fprintf(output, "\tStatus: up to date\n");
-					else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
-					    fprintf(output, "\tStatus: out of date - needs processing\n");
-					else if (prstatus == MB_PR_FILE_NOT_EXIST)
-					    fprintf(output, "\tStatus: file does not exist\n");
-					else if (prstatus == MB_PR_NO_PARAMETER_FILE)
-					    fprintf(output, "\tStatus: no parameter file - processing undefined\n");
-					}
-				    else
-					{
-					if (prstatus == MB_PR_FILE_UP_TO_DATE)
-					    fprintf(output, "\t<Up-to-date>");
-					else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
-					    fprintf(output, "\t<Needs-processing>");
-					else if (prstatus == MB_PR_FILE_NOT_EXIST)
-					    fprintf(output, "\t<Does-not-exist>");
-					else if (prstatus == MB_PR_NO_PARAMETER_FILE)
-					    fprintf(output, "\t<No-parameter-file>");
-					}
-				    }
+					if (verbose > 0)
+						fprintf(output, "%s %d %f\n", file, format, file_weight);
+					else
+						fprintf(output, "%s %d %f", file, format, file_weight);
+	
+					/* check status if desired */
+					if (status_report == MB_YES)
+						{
+						status = mb_pr_checkstatus(verbose, file, &prstatus, &error);
+						if (verbose > 0)
+							{
+							if (prstatus == MB_PR_FILE_UP_TO_DATE)
+								fprintf(output, "\tStatus: up to date\n");
+							else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
+								fprintf(output, "\tStatus: out of date - needs processing\n");
+							else if (prstatus == MB_PR_FILE_NOT_EXIST)
+								fprintf(output, "\tStatus: file does not exist\n");
+							else if (prstatus == MB_PR_NO_PARAMETER_FILE)
+								fprintf(output, "\tStatus: no parameter file - processing undefined\n");
+							}
+						else
+							{
+							if (prstatus == MB_PR_FILE_UP_TO_DATE)
+								fprintf(output, "\t<Up-to-date>");
+							else if (prstatus == MB_PR_FILE_NEEDS_PROCESSING)
+								fprintf(output, "\t<Needs-processing>");
+							else if (prstatus == MB_PR_FILE_NOT_EXIST)
+								fprintf(output, "\t<Does-not-exist>");
+							else if (prstatus == MB_PR_NO_PARAMETER_FILE)
+								fprintf(output, "\t<No-parameter-file>");
+							}
+						}
 
-				/* check locks if desired */
-				if (status_report == MB_YES || remove_locks == MB_YES)
-				    {
-				    lock_status = mb_pr_lockinfo(verbose, file, &locked,
-								    &lock_purpose, lock_program, lock_user,
-								    lock_cpu, lock_date, &lock_error);
-				    if (locked == MB_YES && status_report == MB_YES)
-					    {
-					    if (verbose > 0)
-						    fprintf(output,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n",
-							    lock_program, lock_user, lock_cpu, lock_date);
-					    else
-						    fprintf(output,"\t<Locked>");
-					    }
-				    if (locked == MB_YES && remove_locks == MB_YES)
-					{
-					sprintf(lockfile, "%s.lck", file);
-					fprintf(output, "\tRemoving lock file %s\n", lockfile);
-					sprintf(command, "/bin/rm -f %s", lockfile);
-					shellstatus = system(command);
+					/* check locks if desired */
+					if (status_report == MB_YES || remove_locks == MB_YES)
+						{
+						lock_status = mb_pr_lockinfo(verbose, file, &locked,
+										&lock_purpose, lock_program, lock_user,
+										lock_cpu, lock_date, &lock_error);
+						if (locked == MB_YES && status_report == MB_YES)
+							{
+							if (verbose > 0)
+								fprintf(output,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n",
+									lock_program, lock_user, lock_cpu, lock_date);
+							else
+								fprintf(output,"\t<Locked>");
+							}
+						if (locked == MB_YES && remove_locks == MB_YES)
+							{
+							sprintf(lockfile, "%s.lck", file);
+							fprintf(output, "\tRemoving lock file %s\n", lockfile);
+							sprintf(command, "/bin/rm -f %s", lockfile);
+							shellstatus = system(command);
+							}
+						}
+	
+					if (verbose == 0)
+						fprintf(output, "\n");
 					}
-				    }
-
-				if (verbose == 0)
-					fprintf(output, "\n");
-				}
 			    }
-
 			}
 		mb_datalist_close(verbose,&datalist,&error);
 		}
@@ -552,10 +580,10 @@ int main (int argc, char **argv)
 	    fprintf(output, "\nTotal swath files:         %d\n", nfile);
 	    if (problem_report == MB_YES)
 	    	{
-		fprintf(output, "Total files with problems: %d\n", nproblemfiles);
-		fprintf(output, "Total parameter problems:  %d\n", nparproblemtot);
-		fprintf(output, "Total data problems:       %d\n", ndataproblemtot);
-		}
+			fprintf(output, "Total files with problems: %d\n", nproblemfiles);
+			fprintf(output, "Total parameter problems:  %d\n", nparproblemtot);
+			fprintf(output, "Total data problems:       %d\n", ndataproblemtot);
+			}
 	    }
 
 	/* check memory */

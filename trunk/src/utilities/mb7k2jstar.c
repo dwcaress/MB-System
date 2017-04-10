@@ -99,6 +99,7 @@ int main (int argc, char **argv)
 	double	speedmin;
 	double	timegap;
 	char	file[MB_PATH_MAXLINE];
+	char	dfile[MB_PATH_MAXLINE];
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -607,7 +608,7 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error))
+			    file,dfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -2467,7 +2468,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
         if (read_datalist == MB_YES)
                 {
 		if ((status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error))
+			    file,dfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

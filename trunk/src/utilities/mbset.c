@@ -101,6 +101,7 @@ the manual pages for mbprocess and mbset. \n\n";
 	int	fstat;
  	int	format = 0;
 	char	mbp_ifile[MBP_FILENAMESIZE];
+	char	mbp_dfile[MBP_FILENAMESIZE];
 	int	mbp_format;
 	int	write_parameter_file = MB_NO;
 	int	nscan;
@@ -225,7 +226,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		exit(error);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    mbp_ifile,&mbp_format,&file_weight,&error))
+			    mbp_ifile,mbp_dfile,&mbp_format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1542,7 +1543,7 @@ the manual pages for mbprocess and mbset. \n\n";
         if (read_datalist == MB_YES)
                 {
 		if ((status = mb_datalist_read(verbose,datalist,
-			    mbp_ifile,&format,&file_weight,&error))
+			    mbp_ifile,mbp_dfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

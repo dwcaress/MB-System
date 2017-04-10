@@ -1,4 +1,4 @@
-.TH mbnavlist 1 "20 February 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavlist 1 "8 April 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavlist\fP \- List navigation data in swath sonar data files.
 
@@ -439,7 +439,11 @@ is a single character, then the output is a multiple segment
 file of the sort accepted by the \fBGMT\fP program \fBpsxy\fP.
 This option only works with ascii output, and is thus disabled
 when the \fB\-A\fP option is specified. The most common usage
-is \fB\-Z\fP\I>\fP.
+is \fB\-Z\fP\I>\fP. If \fIsegment\fP is the string "swathfile"
+then the segment lines will consist of the '#' character followed
+by the path for the source swath file. If \fIsegment\fP is the string "datalist"
+then the segment lines will consist of the '#' character followed
+by the path for the source datalist file.
 
 .SH EXAMPLES
 Suppose one wishes to obtain a navigation list from a Simrad EM300 data file

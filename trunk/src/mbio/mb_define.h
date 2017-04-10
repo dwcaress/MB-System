@@ -268,20 +268,25 @@ int mb_format_beamwidth(int verbose, int *format,
 int mb_get_format(int verbose, char *filename, char *fileroot,
 		    int *format, int *error);
 int mb_datalist_open(int verbose,
-		void **datalist,
+		void **datalist_ptr,
 		char *path,
 		int look_processed,
 		int *error);
 int mb_datalist_read(int verbose,
-		void *datalist,
-		char *path, int *format, double *weight,
+		void *datalist_ptr,
+		char *path, char *dpath, int *format, double *weight,
 		int *error);
 int mb_datalist_read2(int verbose,
-		void *datalist,
-		int *pstatus, char *path, char *ppath, int *format, double *weight,
+		void *datalist_ptr,
+		int *pstatus, char *path, char *ppath, char *dpath, int *format, double *weight,
+		int *error);
+int mb_datalist_recursion(int verbose,
+		void *datalist_ptr,
+        int print,
+		int *recursion,
 		int *error);
 int mb_datalist_close(int verbose,
-		void **datalist, int *error);
+		void **datalist_ptr, int *error);
 int mb_get_relative_path(int verbose,
 		char *path,
 		char *pwd,

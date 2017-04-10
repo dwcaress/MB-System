@@ -226,6 +226,7 @@ int main (int argc, char **argv)
 	/* MBIO read control parameters */
 	int		read_datalist = MB_NO;
 	mb_path	swath_file;
+	mb_path	dfile;
 	void	*datalist;
 	int		look_processed = MB_DATALIST_LOOK_UNSET;
 	int		read_data;
@@ -795,7 +796,7 @@ int main (int argc, char **argv)
 							program_name);
 						exit(error);
 						}
-					if ((status = mb_datalist_read(verbose, datalist, swath_file,
+					if ((status = mb_datalist_read(verbose, datalist, swath_file, dfile, 
 												   &input_swath_format, &file_weight, &error))
 							== MB_SUCCESS)
 						read_data = MB_YES;
@@ -845,8 +846,8 @@ int main (int argc, char **argv)
 					store_ptr = (void *) mb_io_ptr->store_data;
 								
 					/* read data */
-fprintf(stderr,"Look for platform data in file? error:%d input_swath_platform_defined:%d\n",
-error,input_swath_platform_defined);
+//fprintf(stderr,"Look for platform data in file? error:%d input_swath_platform_defined:%d\n",
+//error,input_swath_platform_defined);
 					while (error <= MB_ERROR_NO_ERROR
 						   && input_swath_platform_defined == MB_NO)
 						{
@@ -854,15 +855,15 @@ error,input_swath_platform_defined);
 									&kind, &error);
 				
 						/* if platform_source kind then extract platform definition */
-fprintf(stderr,"error:%d kind:%d platform_source:%d YES/NO:%d\n",
-error,kind,platform_source,
-(error <= MB_ERROR_NO_ERROR && kind == platform_source && platform_source != MB_DATA_NONE));
+//fprintf(stderr,"error:%d kind:%d platform_source:%d YES/NO:%d\n",
+//error,kind,platform_source,
+//(error <= MB_ERROR_NO_ERROR && kind == platform_source && platform_source != MB_DATA_NONE));
 						if (error <= MB_ERROR_NO_ERROR
 							&& kind == platform_source
 							&& platform_source != MB_DATA_NONE)
 							{
 							/* extract platform */
-							status = mb_extract_platform(5, mbio_ptr, store_ptr,
+							status = mb_extract_platform(verbose, mbio_ptr, store_ptr,
 										&kind, (void **) &platform,
 										&error);
 							
@@ -882,7 +883,7 @@ error,kind,platform_source,
 					if (read_datalist == MB_YES)
 						{
 						if ((status = mb_datalist_read(verbose,datalist,
-								swath_file, &input_swath_format, &file_weight,
+								swath_file, dfile, &input_swath_format, &file_weight,
 								&error))
 								== MB_SUCCESS)
 							read_data = MB_YES;

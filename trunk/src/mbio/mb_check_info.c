@@ -1348,6 +1348,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format,
 	char	*function_name = "mb_get_info_datalist";
 	int	status = MB_SUCCESS;
 	char	swathfile[MB_PATH_MAXLINE];
+	char	dfile[MB_PATH_MAXLINE];
 	struct mb_info_struct mb_info_file;
 	int	read_datalist = MB_NO;
 	void	*datalist;
@@ -1395,7 +1396,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format,
 		exit(status);
 		}
 	    if ((status = mb_datalist_read(verbose,datalist,
-			    swathfile,format,&file_weight,error))
+			    swathfile,dfile,format,&file_weight,error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1529,7 +1530,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format,
         	if (read_datalist == MB_YES)
                 	{
 			if ((status = mb_datalist_read(verbose,datalist,
-				    swathfile,format,&file_weight,error))
+				    swathfile,dfile,format,&file_weight,error))
 				    == MB_SUCCESS)
                         	read_data = MB_YES;
                 	else
