@@ -19,7 +19,7 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2298],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2299],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
@@ -254,7 +254,7 @@ else
     libnetcdf_LDFLAGS="-L$NETCDF_LIB"
 	libnetcdf_CPPFLAGS="-I$NETCDF_INC"
 fi
-if test ! -x "$NC_CONF" || test ! -d $NETCDF_LIB; then
+if test ! -x "$NC_CONF" && test ! -d $NETCDF_LIB; then
     AC_MSG_ERROR(["Did not find nc-config program or netCDF installation, use --with-nc-config to set the location"])
 fi
 dnl

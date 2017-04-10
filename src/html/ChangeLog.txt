@@ -15,7 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
-  Version 5.5.2298       April 10, 2017
+  Version 5.5.2299       April 10, 2017
   Version 5.5.2297       April 5, 2017
   Version 5.5.2296       March 31, 2017
   Version 5.5.2295       March 26, 2017
@@ -249,7 +249,8 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2298 (April 10, 2017)
+-----> 5.5.2299 (April 10, 2017)
+
 Formats 58 and 59 (MBF_EM710RAW and MBF_EM710MBA): Fixed handling of sensordepth
 and heave data during preprocessing. Program mbkongsbergpreprocess is now
 deprecated and will be removed from the distribution soon. Users should now
