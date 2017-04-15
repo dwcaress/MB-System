@@ -3509,7 +3509,7 @@ int mbr_em710mba_rd_extraparameters(int verbose, void *mbio_ptr, int swap,
 	/* allocate memory if necessary */
 	if (status == MB_SUCCESS && extraparameters->xtr_data_size > extraparameters->xtr_nalloc)
 		{
-		status = mb_mallocd(verbose, __FILE__, __LINE__, extraparameters->xtr_data_size,
+		status = mb_reallocd(verbose, __FILE__, __LINE__, extraparameters->xtr_data_size,
 							(void **)&extraparameters->xtr_data, error);
 		if (status == MB_SUCCESS)
 			extraparameters->xtr_nalloc = extraparameters->xtr_data_size;

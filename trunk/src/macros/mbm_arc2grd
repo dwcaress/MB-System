@@ -41,13 +41,23 @@
 #
 
 $program_name = "mbm_arc2grd";
+$version = "$Id$program_name";
+
+$zname = "Unknown [unknown]";
+$title = "Unknown";
 
 # Deal with command line arguments
-&Getopts('I:i:N:n:O:o:VvHh');
-$ifile =    ($opt_I || $opt_i);
-$ofile =    ($opt_O || $opt_o);
-$help =     ($opt_H || $opt_h);
-$verbose =  ($opt_V || $opt_v);
+&Getopts('HhI:i:J:j:N:n:O:o:T:t:VvX:x:Y:y:Z:z:');
+$help =     	($opt_H || $opt_h);
+$ifile =    	($opt_I || $opt_i);
+$projection = 	($opt_J || $opt_j) || "Geographic";
+$nodata = 		($opt_N || $opt_n);
+$ofile =    	($opt_O || $opt_o);
+$title =     	($opt_T || $opt_t);
+$verbose =  	($opt_V || $opt_v);
+$xname =     	($opt_X || $opt_x);
+$yname =     	($opt_Y || $opt_y);
+$zname =     	($opt_Z || $opt_z);
 
 #--------------------------------------------------------------------
 
@@ -55,14 +65,31 @@ $verbose =  ($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id$\n";
-	print "\nMacro to convert a ArcView ASCII grid to an GMT grid file in the \n";
+	print "Version: $version\n";
+    print "Macro to convert an ArcView ASCII grid to a GMT  grid file in the\n";
 	print "GMT NetCDF grid format. This allows users to import the grid\n";
-	print "into GMT. The grid will have the same grid interval in both \n";
-	print "longitude and latitude.\n";
+	print "into GMT. If the grid is not in geographic coordinates (longitude \n";
+	print "and latitude), then the projected coordinate system must be specified\n";
+	print "using the -J option\n";
 	print "\nBasic Usage: \n";
-	print "\t$program_name -Igrdfile -Oarcfile [-H -Nnodata -V]\n";
+	print "\t$program_name -Iarcfile -Ogrdfile [-H -Jprojection -Nnodata -Ttitle -V -Xxname -Yyname -Zzname]\n";
 	exit 0;
+	}
+	
+# output control parameters
+if ($verbose)
+	{
+	print "\n$program_name:\n";
+	print "Version: $version\n";
+	print "Input Arc ASCII grid file:                 $ifile\n";
+	print "Output GMT grd (netcdf COARDS) grid file:  $ofile\n";
+	print "No data value:      $nodata\n";
+    print "Projection:         $projection\n";
+    print "X name:             $xname\n";
+    print "Y name:             $yname\n";
+    print "Z name:             $zname\n";
+    print "Title:              $title\n";
+    print "Verbose:            $verbose\n";
 	}
 
 # check for input file
@@ -71,82 +98,66 @@ if (!$ifile)
 	print "\a";
 	die "No input file specified\nMacro $program_name aborted\n";
 	}
-elsif (!open(INP,"<$ifile"))
+elsif (! -e $ifile)
 	{
 	print "\a";
-	die "Specified input file $ifile cannot be opened\nMacro $program_name aborted\n";
+	die "Specified input file $ifile does not exist\nMacro $program_name aborted\n";
 	}
 if (!$ofile)
 	{
 	print "\a";
 	die "No output file specified\nMacro $program_name aborted\n";
 	}
-$tmpfile = $program_name . "_tmp_" . "$$";
-if (!open(TMP,">$tmpfile"))
+	
+# if $nodata not specified get existing value from input file
+if (! $nodata)
 	{
-	print "\a";
-	die "Cannot open temporary file $tmpfile\nMacro $program_name aborted.\n";
+	$nodatastring = `grep nodata_value $ifile`;
+	$nodata = $nodatastring =~ /"nodata_value\s+(\S+)/;
 	}
 
-# read header of ascii Arc grid file
-$cnt = 0;
-$nodata = "NaN";
-while (<INP>) {
-	$cnt++;
-	$line = lc($_);
-	if ($cnt == 1) {
-		($ncols) = $line =~ /ncols\s+(\S+)/;
-	}
-	elsif ($cnt == 2) {
-		($nrows) = $line =~ /nrows\s+(\S+)/;
-	}
-	elsif ($cnt == 3) {
-		($xllcorner) = $line =~ /xllcorner\s+(\S+)/;
-	}
-	elsif ($cnt == 4) {
-		($yllcorner) = $line =~ /yllcorner\s+(\S+)/;
-	}
-	elsif ($cnt == 5) {
-		($cellsize) = $line =~ /cellsize\s+(\S+)/;
-	}
-	elsif ($cnt == 6) {
-		($nodata) = $line =~ /nodata_value\s+(\S+)/i;
-		$xmin_f = $xllcorner + 0.5 * $cellsize;
-		$xmax_f = $xllcorner + $cellsize * ($ncols - 0.5);
-		$ymin_f = $yllcorner + 0.5 * $cellsize;
-		$ymax_f = $yllcorner + $cellsize * ($nrows - 0.5);
-	}
-	elsif ($cnt > 6) {
-		chop($_);
-		@values = split(/\s+/, $_);
-		foreach $value (@values) {
-			$ndata++;
-			print TMP "$value\n";
+# construct the gmt grdedit control string
+if ($projection == "Geographic")
+	{
+	if (! $xname)
+		{
+        $xname = "Longitude [degrees]";
 		}
+	if (! $yname)
+		{
+        $yname = "Latitude [degrees]";
+		}
+	$remark = "__Projection: $projection";
 	}
-}
-close(INP);
-close(TMP);
+else
+	{
+	if (! $xname)
+		{
+        $xname = "Easting [m]";
+		}
+	if (! $yname)
+		{
+        $yname = "Northing [m]";
+		}
+	$remark = "__Projection: $projection";
+	}
+$controlstring = "\"$xname/$yname/$zname/1/0/$nodata/$title/$remark\"";
 
-# tell the world we got started
+# run gmt grdconvert
+$cmd = "gmt grdconvert $ifile=ef $ofile -V";
 if ($verbose)
 	{
-	print "\nProgram $program_name status:\n";
-	print "\tInput ArcView ASCII  file: $ifile\n";
-	print "\tOutput GRD file:           $ofile\n";
-	print "\tGrid dimensions:  $ncols  $nrows\n";
-	print "\tGrid cell sizes:  $cellsize  $cellsize\n";
-	print "\tGrid bounds:      $xmin_f  $xmax_f    $ymin_f  $ymax_f\n";
-	}
-
-# run xyz2grd
-$cmd = "gmt xyz2grd $tmpfile -G$ofile -H0 -I$cellsize/$cellsize -R$xmin_f/$xmax_f/$ymin_f/$ymax_f -N$nodata -ZTLa -V";
-if ($verbose)
-	{
-	print "\nRunning gmt xyz2grd...\n$cmd\n";
+	print "\nRunning gmt grdconvert...\n$cmd\n";
 	}
 `$cmd`;
-#`rm -f $tmpfile`;
+
+# run gmt grdedit
+$cmd = "gmt grdedit $ofile -V -D$controlstring";
+if ($verbose)
+	{
+	print "\nRunning gmt grdedit on $ofile...\n$cmd\n";
+	}
+`$cmd`;
 
 exit 0;
 

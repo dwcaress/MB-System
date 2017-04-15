@@ -1,0 +1,124 @@
+.TH mbsslayout 1 "12 April 2017" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbsslayout\fP \- translates time-based sidescan sonar data into backscatter
+layed out onto a topographic model of the seafloor.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbsslayout\fP [ 
+.br
+\fB--verbose\fP
+\fB--help\fP
+.br
+\fB--input\fP=\fIdatalist\fP
+\fB--format\fP=\fIformat\fP
+.br
+\fB--platform-file\fP=\fIFILE\fP
+\fB--platform-target-sensor\fP=\fISENSORID\fP
+.br
+\fB--output_source\fP=\fIrecord_kind\fP
+\fB--output_name1\fP=\fIname\fP
+\fB--output_name2\fP=\fIname\fP
+.br
+\fB--line_nameroot\fP=\fIname\fP
+\fB--line_time_list\fP=\fIfilename\fP
+\fB--line_route\fP=\fIfilename\fP
+\fB--line_check_bearing\fP
+\fB--line_range_threshold\fP=\fIvalue\fP
+.br
+\fB--topo_grid_file\fP=\fIfilename\fP
+\fB--altitude_altitude\fP
+\fB--altitude_bottomppick\fP
+\fB--altitude_bottompick_threshold\fP=\fIvalue\fP
+\fB--altitude_topo_grid\fP
+\fB--channel_swap\fP
+\fB--swath_width\fP=\fIvalue\fP
+\fB--gain\fP=\fIvalue\fP
+\fB--interpolation\fP=\fIvalue\fP
+.br
+\fB--nav_file\fP=\fIfilename\fP
+\fB--nav_file_format\fP=\fIformat_id\fP
+\fB--nav_async\fP=\fIrecord_kind\fP
+\fB--sensordepth_file\fP=\fIfilename\fP
+\fB--sensordepth_file_format\fP=\fIformat_id\fP
+\fB--sensordepth_async\fP=\fIrecord_kind\fP
+\fB--altitude_file\fP=\fIfilename\fP
+\fB--altitude_file_format\fP=\fIformat_id\fP
+\fB--altitude_async\fP=\fIrecord_kind\fP
+\fB--heading_file\fP=\fIfilename\fP
+\fB--heading_file_format\fP=\fIformat_id\fP
+\fB--heading_async\fP=\fIrecord_kind\fP
+\fB--attitude_file\fP=\fIfilename\fP
+\fB--attitude_file_format\fP=\fIformat_id\fP
+\fB--attitude_async\fP=\fIrecord_kind\fP
+\fB--soundspeed_constant\fP=\fIvalue\fP
+\fB--soundspeed_file\fP=\fIfilename\fP
+\fB--soundspeed_file_format\fP=\fIformat_id\fP
+\fB--soundspeed_async\fP=\fIrecord_kind\fP
+\fB--timeshift_file\fP=\fIfilename\fP
+\fB--timeshift_constant\fP=\fIvalue\fP
+\fB--timeshift_apply_nav\fP
+\fB--timeshift_apply_sensordepth\fP
+\fB--timeshift_apply_altitude\fP
+\fB--timeshift_apply_heading\fP
+\fB--timeshift_apply_attitude\fP
+\fB--timeshift_apply_all_ancilliary\fP
+\fB--timeshift_apply_survey\fP
+\fB--timeshift_apply_all\fP
+.br
+]
+
+.SH DESCRIPTION
+MBsslayout translates time-based sidescan sonar data into backscatter
+layed out onto a topographic model of the seafloor. The input should be a datalist
+referencing data files in a format containing time based sidescan sonar data
+(typically both port and starboard time series) without swath
+bathymetry data. The output will be sidescan data in the MBF_MBLDEOIH format
+(MBIO format id 71). The sidescan can be laid out using a flat bottom assumption,
+but is generally laid out onto a gridded topographic model derived from bathymetric
+mapping with other sensors. The gridded bathymetry data may be collected
+simultaneously with the sidescan from the same platform, or it may derive from
+other surveys.
+
+Navigation, attitude, and water sound speed values will by default, if available,
+derive from values contained in the time-based sidescan files. If necessary or
+desired, the ancilliary values can be merged from separate files. Time latency
+corrections can be made to the ancilliary data time series if needed.
+
+Once the sidescan data have been laid out onto the seafloor, they can be further
+processed using \fBMB-System\fP tools such as \fBmbbackangle\fP followed by
+\fBmbprocess\fP.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B --verbose
+By default \fBmbsslayout\fP outputs minimal information to the shell. This option
+causes the program to indicate it's progress as it runs. Goody.
+
+.SH EXAMPLES
+To be written.....
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbdatalist\fP(1), \fBmbprocess\fP(1)
+
+.SH BUGS
+Oh yeah.

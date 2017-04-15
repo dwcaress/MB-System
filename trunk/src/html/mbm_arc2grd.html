@@ -11,14 +11,14 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_arc2grd</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  11 April 2017 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbm_arc2grd</B> - Macro to convert an ArcView ASCII grid 
-to a GMT  grid file in the GMT NetCDF grid format. 
+<B>mbm_arc2grd</B> - Macro to convert an ArcGIS ASCII grid 
+to a GMT grid file in the GMT NetCDF grid format. 
 <P>
 <A NAME="lbAC">&nbsp;</A>
 <H2>VERSION</H2>
@@ -28,36 +28,47 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-mbm_arc2grd <B>-I</B><I>arcfile</I> <B>-O</B><I>grdfile</I> [<B>-H -V</B>]
+mbm_arc2grd <B>-I</B><I>arcfile</I> <B>-O</B><I>grdfile</I> 
+[<B>-H</B> <B>-J</B><I>projection</I> <B>-N</B><I>nodata</I> <B>-T</B><I>title</I> <B>-V</B>
+<B>-X</B><I>xname</I> <B>-Y</B><I>yname</I> <B>-Z</B><I>zname</I>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbm_arc2grd</B> is a macro to convert a ArcView 
-ASCII grid to an GMT grid file in the 
-GMT NetCDF grid format. This allows users to import the grid
-into GMT. The grid will have the same grid interval in both 
-longitude and latitude.
-The macro first obtains the bounds, dimensions, and grid
-cell size of the grid by parsing the six line header.
-The macro then reformats the gridded data as xyz data,
-writing it to a temporary file. This temporary file is 
-processed using the GMT program <B>xyz2grd</B>,
-yielding a GMT GRD format grid file.
+<B>mbm_arc2grd</B> is a macro to convert a ArcGIS ASCII grid to an GMT grid file
+in the GMT NetCDF grid format. This allows users to import the grid
+into GMT. If the grid is not in geographic coordinates (longitude
+and latitude), then the projected coordinate system must be specified
+using the <B>-J</B> option.
+<P>
+This macro was substantially rewritten in 2017 to
+use the <B>GMT</B> modules <B>grdconvert</B> and <B>grdedit</B>.
 <P>
 <A NAME="lbAF">&nbsp;</A>
-<H2>AUTHORSHIP</H2>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
 
-David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+David W. Caress
 <BR>
 
 <BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
-Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+Dale N. Chayes
 <BR>
 
-<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
 <A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
@@ -74,15 +85,107 @@ of its operation and then exit immediately.
 <I>arcfile</I>
 <BR>
 
-Sets the filename of the input ArcView ASCII grid.
+Sets the filename of the input ArcGIS ASCII grid.
+<DT><B>-J</B>
+
+<DD>
+<I>projection</I>
+<BR>
+
+This option specifies the projected coordinate system used for the ArcGIS ASCII
+grid to be translated to a <B>GMT</B> netCDF grid.
+<P>
+ArcGIS ASCII grid files do not internally specify the coordinate system used.
+<B>GMT</B> grids also do not necessarily include information about the coordinate
+system. However, <B>MB-System</B> generates <B>GMT</B> grids that do have a
+coordinate system definition embedded in the <B>GMT</B> grid header remark field,
+and then uses that information when displaying the gridded data, either interactively
+with <B>mbgrdviz</B> or in plots or GeoTiffs generated using the plotting
+macros <B>mbm_grdplot</B>, <B>mbm_grd3dplot</B>, and <B>mbm_grdtiff</B>. By default,
+<B>mbgrid</B> and <B>mbmosaic</B> generate grids in Geographic coordinates,
+meaning that position is defined in longitude and latitude using the WGS84
+geographic coordinate system. In both programs, the <B>-J</B> option can be
+used to specify an alternate, projected coordinate system (PCS). When a PCS
+is used, position will be defined in eastings and northings (meters) relative
+to the origin of the particular PCS. Universal Transverse Mercator is the
+most commonly used PCS in the oceanographic community, but <B>MB-System</B> supports a
+large number of other PCS's as well. The underlying projection functions derive
+from the PROJ.4 library originated by Gerald Evenden, then of the U.S. Geological
+Survey.
+<P>
+If the ArcGIS grid that is to be translated for use with MB-System is in
+geographic components, then no special arguments to <B>mbm_arc2grd</B> are
+required. However, if the grid is in a projected coordinate system, then that
+coordinate system must be specified with the <B>-J</B><I>projection</I> option
+using a PCS identifier from the projection definition list provided at the end
+of the <B>mbgrid</B> manualbpage.
+<P>
+For instance, to fully specify a particular northern UTM zone, set
+projection = UTMXXN where XX gives the UTM zone (defined from 01 to 60). As an
+example, a northern UTM zone 12 projection can be specifiedb using
+<B>-J</B><I>UTM12N</I>. Southern UTM zones are specified as UTMXXS. The European
+Petroleum Survey Group (EPSG) has defined a large number of PCS's used worldwide
+and assigned number id's to each; one can also specify the northern UTM zone 12
+projection using its EPSG designation, or <B>-J</B><I>epsg32612</I>.
+<DT><B>-N</B>
+
+<DD>
+<I>nodata</I>
+<BR>
+
+<B>ArcGIS</B> ASCII grids use a value defined in the grid header to delineate
+regions with no data. By default, <B>mbm_arc2grd</B> translates grid values that
+match the <I>nodata</I> value in the header to NaN (not-a-number) values in the
+output <B>GMT</B> grid. This option allows the user to set a different <I>nodata</I>
+value to be used in the translation.
 <DT><B>-O</B>
 
 <DD>
-<I>grdname</I>
+<I>grdfile</I>
 <BR>
 
 Sets the filename of the output GMT grid file. This file will be
-in the GMT NetCDF GRD format. 
+in the <B>GMT</B> COARDS NetCDF floating point format. 
+<DT><B>-T</B>
+
+<DD>
+<I>title</I>
+<BR>
+
+This option sets the title string to be embedded in the output <B>GMT</B> netcdf
+grid file.
+<DT><B>-X</B>
+
+<DD>
+<I>xname</I>
+<BR>
+
+This option sets the <I>xname</I> string to be embedded in the output <B>GMT</B> netcdf
+grid file. This string generally provides both the common name and the relevant
+units of the x-axis of the grid. For geographic grids this will by default be
+<I>xname</I> = &quot;Longitude (degrees)&quot;. For PCS grids this will typically be
+<I>xname</I> = &quot;Easting (m)&quot;.
+<DT><B>-Y</B>
+
+<DD>
+<I>yname</I>
+<BR>
+
+This option sets the <I>yname</I> string to be embedded in the output <B>GMT</B> netcdf
+grid file. This string generally provides both the common name and the relevant
+units of the y-axis of the grid. For geographic grids this will by default be
+<I>yname</I> = &quot;Latitude (degrees)&quot;. For PCS grids this will typically be
+<I>yname</I> = &quot;Northing (m)&quot;.
+<DT><B>-Z</B>
+
+<DD>
+<I>zname</I>
+<BR>
+
+This option sets the <I>zname</I> string to be embedded in the output <B>GMT</B> netcdf
+grid file. This string generally provides both the common name and the relevant
+units of the z-axis of the grid. Commoon values include <I>zname</I> = &quot;Topography (m)&quot;
+or  <I>zname</I> = &quot;Bathymetry (m)&quot;.
 <DT><B>-V</B>
 
 <DD>
@@ -92,35 +195,89 @@ The <B>-V</B> option causes <B>mbm_arc2grd</B> to print out status messages.
 <A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
-Suppose that we have obtained an ascii ArcView grid called
-kohalab.asc. To translate this file to a GMT grd file,
-the following will suffice:
-<BR>
-
-<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_arc2grd&nbsp;-I&nbsp;kohalab.asc&nbsp;-O&nbsp;kohalab.grd&nbsp;-V<BR>
-<BR>
-
-Running the example above produced the following output:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbm_arc2grd&nbsp;status:<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;ArcView&nbsp;ASCII&nbsp;&nbsp;file:&nbsp;kohalab.asc<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;GRD&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kohalab.grd<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Grid&nbsp;dimensions:&nbsp;&nbsp;1597&nbsp;&nbsp;1431<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Grid&nbsp;cell&nbsp;sizes:&nbsp;&nbsp;0.0001914456033&nbsp;&nbsp;0.0001914456033<BR>
-<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Grid&nbsp;bounds:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.72855&nbsp;&nbsp;-155.423002817133&nbsp;&nbsp;&nbsp;&nbsp;20.1318&nbsp;&nbsp;20.405567212719<BR>
+Suppose that we have been provided two versions of a topography grid in ArcGIS
+ASCII format, one in geographic coordinates (PatchTopoGeoSq.asc) and another
+in UTM zone 10N coordinates (PatchTopoUTM.asc). We would like to be able to
+display both grids in <B>mbgrdviz</B>.
 <P>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Running&nbsp;xyz2grd...<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>xyz2grd:&nbsp;nx&nbsp;=&nbsp;1597&nbsp;&nbsp;ny&nbsp;=&nbsp;1431<BR>
+To convert the geographic grid, no special arguments are required:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbm_arc2grd&nbsp;-I&nbsp;PatchTopoGeoSq.asc&nbsp;-O&nbsp;PatchTopoGeoSqTr.grd&nbsp;-V
+<BR>
+
+with the following output to the shell:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbm_arc2grd:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Version:&nbsp;:&nbsp;mbm_grd2arc&nbsp;2296&nbsp;2017-04-01&nbsp;01:48:27Z&nbsp;caress&nbsp;mbm_arc2grd
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;Arc&nbsp;ASCII&nbsp;grid&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PatchTopoGeoSq.asc
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;GMT&nbsp;grd&nbsp;(netcdf&nbsp;COARDS)&nbsp;grid&nbsp;file:&nbsp;&nbsp;PatchTopoGeoSqTr.grd
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;No&nbsp;data&nbsp;value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Projection:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Geographic
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;X&nbsp;name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Y&nbsp;name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Z&nbsp;name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Title:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Verbose:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Running&nbsp;gmt&nbsp;grdconvert...
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;gmt&nbsp;grdconvert&nbsp;PatchTopoGeoSq.asc=ef&nbsp;PatchTopoGeoSqTr.grd&nbsp;-V
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdconvert:&nbsp;Translating&nbsp;file&nbsp;PatchTopoGeoSq.asc&nbsp;(format&nbsp;ef&nbsp;=&nbsp;ESRI&nbsp;Arc/Info&nbsp;ASCII&nbsp;Grid&nbsp;Interchange&nbsp;format&nbsp;(ASCII&nbsp;float))&nbsp;to&nbsp;file&nbsp;PatchTopoGeoSqTr.grd&nbsp;(format&nbsp;nf&nbsp;=&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(32-bit&nbsp;float),&nbsp;COARDS,&nbsp;CF-1.5)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Running&nbsp;gmt&nbsp;grdedit&nbsp;on&nbsp;PatchTopoGeoSqTr.grd...
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;gmt&nbsp;grdedit&nbsp;PatchTopoGeoSqTr.grd&nbsp;-V&nbsp;-D&quot;Longitude&nbsp;[degrees]/Latitude&nbsp;[degrees]//1/0///__Projection:&nbsp;Geographic&quot;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdedit:&nbsp;Editing&nbsp;parameters&nbsp;for&nbsp;grid&nbsp;PatchTopoGeoSqTr.grd:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdedit:&nbsp;Decode&nbsp;and&nbsp;change&nbsp;attributes&nbsp;in&nbsp;file&nbsp;PatchTopoGeoSqTr.grd
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdedit:&nbsp;File&nbsp;PatchTopoGeoSqTr.grd&nbsp;updated.
+<BR>
+
+<P>
+To convert the UTM grid, the projection must be defined:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbm_arc2grd&nbsp;-I&nbsp;PatchTopoUTM.asc&nbsp;-O&nbsp;PatchTopoUTMTr.grd&nbsp;-JUTM10N&nbsp;-V
+<BR>
+
+with the following output to the shell:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbm_arc2grd:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Version:&nbsp;:&nbsp;mbm_grd2arc&nbsp;2296&nbsp;2017-04-01&nbsp;01:48:27Z&nbsp;caress&nbsp;mbm_arc2grd
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Input&nbsp;Arc&nbsp;ASCII&nbsp;grid&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PatchTopoUTM.asc
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Output&nbsp;GMT&nbsp;grd&nbsp;(netcdf&nbsp;COARDS)&nbsp;grid&nbsp;file:&nbsp;&nbsp;PatchTopoUTMTr.grd
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;No&nbsp;data&nbsp;value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Projection:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UTM10N
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;X&nbsp;name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Y&nbsp;name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Z&nbsp;name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Title:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Verbose:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Running&nbsp;gmt&nbsp;grdconvert...
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;gmt&nbsp;grdconvert&nbsp;PatchTopoUTM.asc=ef&nbsp;PatchTopoUTMTr.grd&nbsp;-V
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdconvert:&nbsp;Translating&nbsp;file&nbsp;PatchTopoUTM.asc&nbsp;(format&nbsp;ef&nbsp;=&nbsp;ESRI&nbsp;Arc/Info&nbsp;ASCII&nbsp;Grid&nbsp;Interchange&nbsp;format&nbsp;(ASCII&nbsp;float))&nbsp;to&nbsp;file&nbsp;PatchTopoUTMTr.grd&nbsp;(format&nbsp;nf&nbsp;=&nbsp;GMT&nbsp;netCDF&nbsp;format&nbsp;(32-bit&nbsp;float),&nbsp;COARDS,&nbsp;CF-1.5)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Running&nbsp;gmt&nbsp;grdedit&nbsp;on&nbsp;PatchTopoUTMTr.grd...
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;gmt&nbsp;grdedit&nbsp;PatchTopoUTMTr.grd&nbsp;-V&nbsp;-D&quot;Longitude&nbsp;[degrees]/Latitude&nbsp;[degrees]//1/0///__Projection:&nbsp;UTM10N&quot;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdedit:&nbsp;Editing&nbsp;parameters&nbsp;for&nbsp;grid&nbsp;PatchTopoUTMTr.grd:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdedit:&nbsp;Decode&nbsp;and&nbsp;change&nbsp;attributes&nbsp;in&nbsp;file&nbsp;PatchTopoUTMTr.grd
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grdedit:&nbsp;File&nbsp;PatchTopoUTMTr.grd&nbsp;updated.
+<BR>
+
+<P>
+In both cases, additional options could have been used to specify the name
+strings or the nodata value.
 <P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbm_grd2arc.html">mbm_grd2arc</A></B>(1),
-<B><A HREF="mbm_grid.html">mbm_grid</A></B>(1)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbm_grd2arc.html">mbm_grd2arc</A></B>(1), <B><A HREF="mbgrid.html">mbgrid</A></B>(1)
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
-Perhaps.
+Before we rewrote it, maybe. Now that it has been completely rewritten, perhaps.
 <P>
 <P>
 <P>
@@ -132,7 +289,7 @@ Perhaps.
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
 <DT><A HREF="#lbAG">OPTIONS</A><DD>
 <DT><A HREF="#lbAH">EXAMPLES</A><DD>
 <DT><A HREF="#lbAI">SEE ALSO</A><DD>
@@ -142,7 +299,7 @@ Perhaps.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 11 April 2017</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

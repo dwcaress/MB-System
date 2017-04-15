@@ -1,6 +1,6 @@
 #! /bin/sh
-# Generated automatically by config.status (mbsystem) 5.5.2299
-# Libtool was configured on host mbari1926.shore.mbari.org:
+# Generated automatically by config.status (mbsystem) 5.5.2300
+# Libtool was configured on host heezen.local:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
 # Provide generalized library-building support services.

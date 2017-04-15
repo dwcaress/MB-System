@@ -7763,8 +7763,8 @@ int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error)
 		{
 		tvg->nalloc = nalloc;
 		if (status == MB_SUCCESS)
-		status = mb_reallocd(verbose, __FILE__, __LINE__, tvg->nalloc,
-					(void **)&(tvg->tvg), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, tvg->nalloc,
+									(void **)&(tvg->tvg), error);
 		if (status != MB_SUCCESS)
 			{
 			tvg->nalloc = 0;

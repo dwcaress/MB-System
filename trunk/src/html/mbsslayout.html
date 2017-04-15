@@ -10,18 +10,189 @@
 <BODY>
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
-You tried to retrieve an incorrect manpage.
-The page does not contain a manpage header and will
-not produce any output.
-If the page is a formatted manpage, you might want to use
-a different man2html (or cat2html) converter.
-You can also try to load the
-<A HREF="file://localhost">plain file</A>
+<H1>mbsslayout</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  12 April 2017 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbsslayout</B> - translates time-based sidescan sonar data into backscatter
+layed out onto a topographic model of the seafloor.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbsslayout</B> [ 
+<BR>
+
+<B>--verbose</B>
+<B>--help</B>
+<BR>
+
+<B>--input</B>=<I>datalist</I>
+<B>--format</B>=<I>format</I>
+<BR>
+
+<B>--platform-file</B>=<I>FILE</I>
+<B>--platform-target-sensor</B>=<I>SENSORID</I>
+<BR>
+
+<B>--output_source</B>=<I>record_kind</I>
+<B>--output_name1</B>=<I>name</I>
+<B>--output_name2</B>=<I>name</I>
+<BR>
+
+<B>--line_nameroot</B>=<I>name</I>
+<B>--line_time_list</B>=<I>filename</I>
+<B>--line_route</B>=<I>filename</I>
+<B>--line_check_bearing</B>
+<B>--line_range_threshold</B>=<I>value</I>
+<BR>
+
+<B>--topo_grid_file</B>=<I>filename</I>
+<B>--altitude_altitude</B>
+<B>--altitude_bottomppick</B>
+<B>--altitude_bottompick_threshold</B>=<I>value</I>
+<B>--altitude_topo_grid</B>
+<B>--channel_swap</B>
+<B>--swath_width</B>=<I>value</I>
+<B>--gain</B>=<I>value</I>
+<B>--interpolation</B>=<I>value</I>
+<BR>
+
+<B>--nav_file</B>=<I>filename</I>
+<B>--nav_file_format</B>=<I>format_id</I>
+<B>--nav_async</B>=<I>record_kind</I>
+<B>--sensordepth_file</B>=<I>filename</I>
+<B>--sensordepth_file_format</B>=<I>format_id</I>
+<B>--sensordepth_async</B>=<I>record_kind</I>
+<B>--altitude_file</B>=<I>filename</I>
+<B>--altitude_file_format</B>=<I>format_id</I>
+<B>--altitude_async</B>=<I>record_kind</I>
+<B>--heading_file</B>=<I>filename</I>
+<B>--heading_file_format</B>=<I>format_id</I>
+<B>--heading_async</B>=<I>record_kind</I>
+<B>--attitude_file</B>=<I>filename</I>
+<B>--attitude_file_format</B>=<I>format_id</I>
+<B>--attitude_async</B>=<I>record_kind</I>
+<B>--soundspeed_constant</B>=<I>value</I>
+<B>--soundspeed_file</B>=<I>filename</I>
+<B>--soundspeed_file_format</B>=<I>format_id</I>
+<B>--soundspeed_async</B>=<I>record_kind</I>
+<B>--timeshift_file</B>=<I>filename</I>
+<B>--timeshift_constant</B>=<I>value</I>
+<B>--timeshift_apply_nav</B>
+<B>--timeshift_apply_sensordepth</B>
+<B>--timeshift_apply_altitude</B>
+<B>--timeshift_apply_heading</B>
+<B>--timeshift_apply_attitude</B>
+<B>--timeshift_apply_all_ancilliary</B>
+<B>--timeshift_apply_survey</B>
+<B>--timeshift_apply_all</B>
+<BR>
+
+]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+MBsslayout translates time-based sidescan sonar data into backscatter
+layed out onto a topographic model of the seafloor. The input should be a datalist
+referencing data files in a format containing time based sidescan sonar data
+(typically both port and starboard time series) without swath
+bathymetry data. The output will be sidescan data in the MBF_MBLDEOIH format
+(MBIO format id 71). The sidescan can be laid out using a flat bottom assumption,
+but is generally laid out onto a gridded topographic model derived from bathymetric
+mapping with other sensors. The gridded bathymetry data may be collected
+simultaneously with the sidescan from the same platform, or it may derive from
+other surveys.
+<P>
+Navigation, attitude, and water sound speed values will by default, if available,
+derive from values contained in the time-based sidescan files. If necessary or
+desired, the ancilliary values can be merged from separate files. Time latency
+corrections can be made to the ancilliary data time series if needed.
+<P>
+Once the sidescan data have been laid out onto the seafloor, they can be further
+processed using <B>MB-System</B> tools such as <B>mbbackangle</B> followed by
+<B>mbprocess</B>.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--verbose</B>
+
+<DD>
+By default <B>mbsslayout</B> outputs minimal information to the shell. This option
+causes the program to indicate it's progress as it runs. Goody.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+To be written.....
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbdatalist.html">mbdatalist</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Oh yeah.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
 <HR>
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: </P></CENTER>
+Last Updated: 12 April 2017</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
