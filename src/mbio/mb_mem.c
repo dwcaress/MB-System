@@ -384,21 +384,21 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 	    {
 	    /* if pointer non-NULL update it */
 	    if (size > 0 && *ptr != NULL)
-		{
-		mb_alloc_ptr[iptr] = *ptr;
-		mb_alloc_size[iptr] = size;
-		}
+			{
+			mb_alloc_ptr[iptr] = *ptr;
+			mb_alloc_size[iptr] = size;
+			}
 
 	    /* else remove it from list */
 	    else
-		{
-		for (i=iptr;i<n_mb_alloc-1;i++)
 			{
-			mb_alloc_ptr[i] = mb_alloc_ptr[i+1];
-			mb_alloc_size[i] = mb_alloc_size[i+1];
+			for (i=iptr;i<n_mb_alloc-1;i++)
+				{
+				mb_alloc_ptr[i] = mb_alloc_ptr[i+1];
+				mb_alloc_size[i] = mb_alloc_size[i+1];
+				}
+			n_mb_alloc--;
 			}
-		n_mb_alloc--;
-		}
 	    }
 
 	/* else add to list if possible if size > 0 */
@@ -406,18 +406,18 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 	    && size > 0)
 	    {
 	    if (n_mb_alloc < MB_MEMORY_HEAP_MAX)
-		{
-		mb_alloc_ptr[n_mb_alloc] = *ptr;
-		mb_alloc_size[n_mb_alloc] = size;
-		n_mb_alloc++;
-		}
+			{
+			mb_alloc_ptr[n_mb_alloc] = *ptr;
+			mb_alloc_size[n_mb_alloc] = size;
+			n_mb_alloc++;
+			}
 	    else
-		{
-		mb_alloc_overflow = MB_YES;
+			{
+			mb_alloc_overflow = MB_YES;
 #ifdef MB_MEM_DEBUG
 		fprintf(stderr,"NOTICE: mbm_mem overflow pointer allocated %p in function %s\n",*ptr, function_name);
 #endif
-		}
+			}
 	    }
 
 	/* print debug statements */

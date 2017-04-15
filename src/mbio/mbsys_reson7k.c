@@ -1210,6 +1210,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	s7kr_v2firmwarehardwareconfiguration	*v2firmwarehardwareconfiguration;
 	s7kr_backscatter	*backscatter;
 	s7kr_beam		*beam;
+	s7kr_tvg		*tvg;
 	s7kr_image		*image;
 	s7kr_v2pingmotion	*v2pingmotion;
 	s7kr_v2amplitudephase	*amplitudephase;
@@ -1385,6 +1386,18 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		if (beam->snippets[i].phase != NULL)
 			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(beam->snippets[i].phase),error);
 		}
+
+	/* Reson 7k tvg data (record 7010) */
+	tvg = &store->tvg;
+	tvg->serial_number = 0;
+	tvg->ping_number = 0;
+	tvg->multi_ping = 0;
+	tvg->n = 0;
+	for (i=0;i<8;i++)
+		tvg->reserved[i] = 0;
+	tvg->nalloc = 0;
+	if (tvg->tvg != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(tvg->tvg),error);
 
 	/* Reson 7k image data (record 7011) */
 	image = &store->image;

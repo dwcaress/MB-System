@@ -889,11 +889,8 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error)
 		}
 
 	/* deallocate the arrays */
-	if (esf->nedit != 0)
-		{
-		if (esf->edit != NULL)
-			status = mb_freed(verbose,__FILE__, __LINE__,(void **)&(esf->edit), error);
-		}
+	if (esf->edit != NULL)
+		status = mb_freed(verbose,__FILE__, __LINE__,(void **)&(esf->edit), error);
 	esf->nedit = 0;
 
 	/* close the esf file */

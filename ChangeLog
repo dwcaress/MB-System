@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+* Version 5.5.2300       April 15, 2017
   Version 5.5.2299       April 10, 2017
   Version 5.5.2297       April 5, 2017
   Version 5.5.2296       March 31, 2017
@@ -248,6 +249,17 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2300 (April 15, 2017)
+
+Formats 58 and 59 (MBF_EM710RAW and MBF_EM710MBA): Fixed memory leak.
+
+Formats 59 (MBF_EM710MBA): Fixed calculation of interpolated heave when
+recalculating bathymetry by raytracing.
+
+Format 88 (MBF_RESON7KR): Fixed memory leaks.
+
+Mbm_arc2grd: Rewritten to use GMT modules grdconvert and grdedit.
 
 -----> 5.5.2299 (April 10, 2017)
 

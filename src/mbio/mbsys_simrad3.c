@@ -695,6 +695,7 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	char	*function_name = "mbsys_simrad3_deall";
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
+	struct mbsys_simrad3_extraparameters_struct *extraparameters;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -713,8 +714,9 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	/* deallocate memory for extraparameters data structure */
 	if (store->extraparameters != NULL)
 		{
-		if (store->extraparameters->xtr_data != NULL)
-			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->extraparameters->xtr_data),error);
+		extraparameters = (struct mbsys_simrad3_extraparameters_struct *) store->extraparameters;
+		if (extraparameters->xtr_data != NULL)
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(extraparameters->xtr_data),error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->extraparameters),error);
 		}
 
@@ -1470,12 +1472,12 @@ int mbsys_simrad3_preprocess
 						error);
 			if (interp_status == MB_SUCCESS)
 			interp_status = mb_linear_interp(verbose,
-						pars->attitude_time_d-1, pars->attitude_roll-1,
+						pars->attitude_time_d-1, pars->attitude_pitch-1,
 						pars->n_attitude, transmit_time_d, &transmit_pitch, &jattitude,
 						error);
 			if (interp_status == MB_SUCCESS)
 			interp_status = mb_linear_interp(verbose,
-						pars->attitude_time_d-1, pars->attitude_roll-1,
+						pars->attitude_time_d-1, pars->attitude_heave-1,
 						pars->n_attitude, transmit_time_d, &transmit_heave, &jattitude,
 						error);
 			interp_status = mb_linear_interp(verbose,
@@ -1484,12 +1486,12 @@ int mbsys_simrad3_preprocess
 						error);
 			if (interp_status == MB_SUCCESS)
 			interp_status = mb_linear_interp(verbose,
-						pars->attitude_time_d-1, pars->attitude_roll-1,
+						pars->attitude_time_d-1, pars->attitude_pitch-1,
 						pars->n_attitude, receive_time_d, &receive_pitch, &jattitude,
 						error);
 			if (interp_status == MB_SUCCESS)
 			interp_status = mb_linear_interp(verbose,
-						pars->attitude_time_d-1, pars->attitude_roll-1,
+						pars->attitude_time_d-1, pars->attitude_heave-1,
 						pars->n_attitude, receive_time_d, &receive_heave, &jattitude,
 						error);
 				
@@ -1515,8 +1517,8 @@ int mbsys_simrad3_preprocess
 			/* ping->png_bheave[i] is the difference between the heave at the ping timestamp time that is factored
 			 * into the ping->png_xducer_depth value and the average heave at the sector transmit time and the beam receive time */
 			ping->png_bheave[i] = 0.5 *(receive_heave + transmit_heave) - heave;
-/* fprintf(stderr,"AAA png_count:%d beam:%d heave_ping:%f i:%d transmit_heave:%f receive_heave:%f bheave:%f\n",
-ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i]); */
+//fprintf(stderr,"AAA png_count:%d beam:%d times: %f %f %f   heave:%f %f transmit_heave:%f receive_heave:%f bheave:%f\n",
+//ping->png_count,i,time_d,transmit_time_d,receive_time_d,0.01 * ping->png_heave,heave,transmit_heave,receive_heave,ping->png_bheave[i]);
 				
 			/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
 				Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
