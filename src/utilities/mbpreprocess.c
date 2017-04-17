@@ -142,8 +142,9 @@ int main (int argc, char **argv)
 	 * 		--filter-apply-all-ancilliary
 	 * 		
 	 * 		--no-change-survey
+	 * 		--multibeam-sidescan-source=recordid
 	 * 		
-	 * 		--kluge-time-jumps
+	 * 		--kluge-time-jumps=threshold
 	 *      --kluge-beam-tweak=factor
 	 *      --kluge-zero-attitude-correction
 	 *      --kluge-zero-alongtrack-angles
@@ -195,7 +196,7 @@ int main (int argc, char **argv)
 		{"filter-apply-attitude",			no_argument, 		NULL, 		0},
 		{"filter-apply-all-ancilliary",		no_argument, 		NULL, 		0},
 		{"no-change-survey",				no_argument,		NULL,		0},
-		{"multibeam-sidescan-source",		no_argument,		NULL,		0},
+		{"multibeam-sidescan-source",		required_argument,	NULL,		0},
 		{"kluge-time-jumps",				required_argument, 	NULL, 		0},
 		{"kluge-beam-tweak",				required_argument, 	NULL, 		0},
 		{"kluge-zero-attitude-correction",	no_argument, 		NULL, 		0},
@@ -855,6 +856,7 @@ int main (int argc, char **argv)
 					dptr = (double *)&preprocess_pars.kluge_pars[preprocess_pars.n_kluge * MB_PR_KLUGE_PAR_SIZE];
 					*dptr = kluge_beamtweak_factor;
 					preprocess_pars.n_kluge++;
+					preprocess_pars.recalculate_bathymetry = MB_YES;
 					}
 				}
 			
@@ -987,6 +989,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Miscellaneous controls:\n");
 		fprintf(stderr,"dbg2       no_change_survey:           %d\n",preprocess_pars.no_change_survey);
 		fprintf(stderr,"dbg2       multibeam_sidescan_source:  %d\n",preprocess_pars.multibeam_sidescan_source);
+		fprintf(stderr,"dbg2       recalculate_bathymetry:     %d\n",preprocess_pars.recalculate_bathymetry);
 		fprintf(stderr,"dbg2  Various data fixes (kluges):\n");
 		fprintf(stderr,"dbg2       kluge_timejumps:            %d\n",kluge_timejumps);
 		fprintf(stderr,"dbg2       kluge_timejumps_threshold:  %f\n",kluge_timejumps_threshold);
@@ -1052,9 +1055,12 @@ int main (int argc, char **argv)
 		fprintf(stderr,"Miscellaneous controls:\n");
 		fprintf(stderr,"     no_change_survey:           %d\n",preprocess_pars.no_change_survey);
 		fprintf(stderr,"     multibeam_sidescan_source:  %d\n",preprocess_pars.multibeam_sidescan_source);
+		fprintf(stderr,"     recalculate_bathymetry:     %d\n",preprocess_pars.recalculate_bathymetry);
 		fprintf(stderr,"Various data fixes (kluges):\n");
 		fprintf(stderr,"     kluge_timejumps:            %d\n",kluge_timejumps);
 		fprintf(stderr,"     kluge_timejumps_threshold:  %f\n",kluge_timejumps_threshold);
+		fprintf(stderr,"     kluge_beamtweak:            %d\n",kluge_beamtweak);
+		fprintf(stderr,"     kluge_beamtweak_factor:     %f\n",kluge_beamtweak_factor);
 		fprintf(stderr,"Additional output:\n");
 		fprintf(stderr,"     output_sensor_fnv:          %d\n",output_sensor_fnv);
 		}

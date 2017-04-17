@@ -250,6 +250,11 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.5.2301 (April 17, 2017)
+
+Mbpreprocess and Format 88 (MBF_RESON7KR): Fixed application of kluge-beam-tweak
+option for Reson 7k (format 88) data.
+
 -----> 5.5.2300 (April 15, 2017)
 
 Formats 58 and 59 (MBF_EM710RAW and MBF_EM710MBA): Fixed memory leak.

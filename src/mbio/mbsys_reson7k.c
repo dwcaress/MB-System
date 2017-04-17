@@ -5838,7 +5838,22 @@ int mbsys_reson7k_preprocess
 		fprintf(stderr,"dbg2       multibeam_sidescan_source:  %d\n", pars->multibeam_sidescan_source);
 		fprintf(stderr,"dbg2       n_kluge:                    %d\n", pars->n_kluge);
 		for (i=0;i<pars->n_kluge;i++)
+			{
 			fprintf(stderr,"dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
+			if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK)
+				{
+				fprintf(stderr,"dbg2       kluge_beampatternsnell:        %d\n", kluge_beampatternsnell);
+				fprintf(stderr,"dbg2       kluge_beampatternsnellfactor:  %f\n", kluge_beampatternsnellfactor);
+				}
+			else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROATTITUDECORRECTION)
+				{
+				fprintf(stderr,"dbg2       kluge_zeroattitudecorrection:  %d\n", kluge_zeroattitudecorrection);
+				}
+			else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROALONGTRACKANGLES)
+				{
+				fprintf(stderr,"dbg2       kluge_zeroalongtrackangles:    %d\n", kluge_zeroalongtrackangles);
+				}
+			}
 		}
 	
 	/* deal with a survey record */
@@ -6403,8 +6418,7 @@ int mbsys_reson7k_preprocess
 					}
 					
 				/* if requested apply kluge scaling of rx beam angles */
-				if (kluge_beampatternsnell == MB_YES)
-					{
+				if (kluge_beampatternsnell == MB_YES) {
 					/*
 					 * v2rawdetection record
 					 */
