@@ -153,7 +153,6 @@ int main (int argc, char **argv)
 		{
 		{"verbose",							no_argument, 		NULL, 		0},
 		{"help",							no_argument, 		NULL, 		0},
-		{"verbose",							no_argument, 		NULL, 		0},
 		{"input",							required_argument, 	NULL, 		0},
 		{"format",							required_argument, 	NULL, 		0},
 		{"platform-file",					required_argument, 	NULL, 		0},
@@ -2335,7 +2334,6 @@ int main (int argc, char **argv)
 					if (n_rf_data == 1)
 						start_time_d = time_d;
 					end_time_d = time_d;
-fprintf(stderr,"KLUGE_TIMEJUMPS: %d time_d:%f last_time_d:%f ", n_rf_data, time_d, last_time_d);
 					if (n_rf_data > 2)
 						{
 						dtime_d_expect = (last_time_d - start_time_d) / (n_rf_data - 1);
@@ -2345,9 +2343,7 @@ fprintf(stderr,"KLUGE_TIMEJUMPS: %d time_d:%f last_time_d:%f ", n_rf_data, time_
 							time_d = last_time_d + dtime_d_expect;
 							timestamp_changed = MB_YES;
 							}
-fprintf(stderr,"dt: %f %f   time_d:%f", dtime_d, dtime_d_expect, time_d);
 						}
-fprintf(stderr,"\n");
 					last_time_d = time_d;					
 					}
 					

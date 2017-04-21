@@ -15,7 +15,9 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
-* Version 5.5.2300       April 15, 2017
+* Version 5.5.2302       April 20, 2017
+  Version 5.5.2301       April 17, 2017
+  Version 5.5.2300       April 15, 2017
   Version 5.5.2299       April 10, 2017
   Version 5.5.2297       April 5, 2017
   Version 5.5.2296       March 31, 2017
@@ -249,6 +251,21 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2302 (April 20, 2017)
+
+Formats 56 and 57 (MBF_EM300RAW and MBF_EM300MBA): Fixed handling of sensordepth
+and heave data by mbpreprocess and mbprocess. Tide correction and recalculation
+by raytracing work correctly again. Added preprocessing function to the i/o
+module. Users should now use mbpreprocess for preprocessing old Kongsberg
+multibeam data so that navigation is properly interpolated and beam flagging
+works correctly.
+
+Mbm_plot, mbm_grdplot, mbm_xyplot: The plotting macros now handle negative scaled
+(reverse) axes properly (e.g. sound speed plots with depth increasing downwards).
+
+Mbdatalist: Now supports long command line options (old short options are
+deprecated but still work).
 
 -----> 5.5.2301 (April 17, 2017)
 

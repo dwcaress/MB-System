@@ -241,7 +241,6 @@
 #define MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY			2
 #define MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE	3
 
-
 /* datagram start and end byte */
 #define	EM3_START_BYTE		0x02
 #define	EM3_END_BYTE		0x03
@@ -673,7 +672,7 @@ struct mbsys_simrad3_ping_struct
 /* internal data structure for extra parameters */
 struct mbsys_simrad3_extraparameters_struct
 	{
-        int     xtr_date;	/* extra parameters date = year*10000 + month*100 + day
+    int     xtr_date;	/* extra parameters date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
 	int	xtr_msec;	/* extra parameters time since midnight in msec
 				    08:12:51.234 = 29570234 */
@@ -685,44 +684,44 @@ struct mbsys_simrad3_extraparameters_struct
                                     3:  Sound velocity at transducer
                                     4:  Sound velocity profile
                                     5:  Multicast RX status */
-        int     xtr_data_size;
-        int     xtr_nalloc;
-        char    *xtr_data;          /* variable array following from content identifier and record size */
+    int     xtr_data_size;
+    int     xtr_nalloc;
+    char    *xtr_data;          /* variable array following from content identifier and record size */
 
-        /* case xtr_id == 2: Log all heights (positioning system quality factors) */
-        int     xtr_pqf_activepositioning;  /* active positioning system (0-2) */
-        short   xtr_pqf_qfsetting[3];       /* quality factor setting for each positioning system
-                                                    0: External PU decode
-                                                    1: PU decodes Q-factor (default)
-                                                Each positioning system has its own individual setting.
-                                                Value ‘1’ indicates that the PU should decode the quality
-                                                factors in the traditional way. This is the default.
-                                                Value ‘0’ indicates that the PU should skip quality factor
-                                                decoding as this is performed externally. The PU should
-                                                always transmit the height datagram ‘h’.*/
-        int     xtr_pqf_nqualityfactors[3]; /* number of quality factors for each positioning system
-                                                Each positioning system have an independent set of
-                                                additional quality factors. The number of quality
-                                                factors for each system must be specified.
-                                                Default value is 0.*/
-                                            /* Each quality factor is described by two entries, the
-                                               quality factor itself and a limit, forming a pair.
-                                               This results in a variable number of such pairs,
-                                               depending on how many additional quality factors is set
-                                               by the operator. If no quality factors are defined,
-                                               no pairs are included. The sequence of pairs is important.
-                                               First, all pairs for positioning system 1 is listed,
-                                               if any. Next any pairs for positioning system 2 and at
-                                               the end, any pairs for positioning system 3. */
-        int     xtr_pqf_qfvalues[3][MBSYS_SIMRAD3_MAXQUALITYFACTORS];
-                                            /* A quality factor is a positive number. Currently no
-                                               upper limit is imposed. */
-         int     xtr_pqf_qflimits[3][MBSYS_SIMRAD3_MAXQUALITYFACTORS];
-                                            /* Uncertainty in position fix in cm. This uncertainty
-                                               is associated with the quality factor value.
-                                               Currently not used. */
+    /* case xtr_id == 2: Log all heights (positioning system quality factors) */
+    int     xtr_pqf_activepositioning;  /* active positioning system (0-2) */
+    short   xtr_pqf_qfsetting[3];       /* quality factor setting for each positioning system
+                                                0: External PU decode
+                                                1: PU decodes Q-factor (default)
+                                            Each positioning system has its own individual setting.
+                                            Value ‘1’ indicates that the PU should decode the quality
+                                            factors in the traditional way. This is the default.
+                                            Value ‘0’ indicates that the PU should skip quality factor
+                                            decoding as this is performed externally. The PU should
+                                            always transmit the height datagram ‘h’.*/
+    int     xtr_pqf_nqualityfactors[3]; /* number of quality factors for each positioning system
+                                            Each positioning system have an independent set of
+                                            additional quality factors. The number of quality
+                                            factors for each system must be specified.
+                                            Default value is 0.*/
+                                        /* Each quality factor is described by two entries, the
+                                           quality factor itself and a limit, forming a pair.
+                                           This results in a variable number of such pairs,
+                                           depending on how many additional quality factors is set
+                                           by the operator. If no quality factors are defined,
+                                           no pairs are included. The sequence of pairs is important.
+                                           First, all pairs for positioning system 1 is listed,
+                                           if any. Next any pairs for positioning system 2 and at
+                                           the end, any pairs for positioning system 3. */
+    int     xtr_pqf_qfvalues[3][MBSYS_SIMRAD3_MAXQUALITYFACTORS];
+                                        /* A quality factor is a positive number. Currently no
+                                           upper limit is imposed. */
+     int     xtr_pqf_qflimits[3][MBSYS_SIMRAD3_MAXQUALITYFACTORS];
+                                        /* Uncertainty in position fix in cm. This uncertainty
+                                           is associated with the quality factor value.
+                                           Currently not used. */
 
-        };
+    };
 
 /* internal data structure for water column time series */
 struct mbsys_simrad3_wcbeam_struct
