@@ -27,6 +27,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <getopt.h>
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
@@ -48,10 +49,49 @@ int main (int argc, char **argv)
 	char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
 	char usage_message[] = "mbdatalist [-C -D -Fformat -Ifile -N -O -P -Q -Rw/e/s/n -S -U -Y -Z -V -H]";
 	extern char *optarg;
+	int	option_index;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
 	int	flag = 0;
+
+	/* command line option definitions */
+	/* mbdatalist
+	 * 		--verbose
+	 * 		--help
+	 * 		--copy 					-C
+	 * 		--report				-D
+	 * 		--format=FORMATID		-F format
+	 * 		--input=FILE			-I inputfile
+	 * 		--make-ancilliary		-N
+	 * 		--update-ancilliary		-O
+	 * 		--processed				-P
+	 * 		--problem				-Q
+	 * 		--bounds=W/E/S/N		-R west/east/south/north
+	 * 		--status				-S
+	 * 		--raw					-U
+	 * 		--unlock				-Y
+	 * 		--datalistp				-Z
+	 */
+	static struct option options[] =
+		{
+		{"verbose",						no_argument, 		NULL, 		0},
+		{"help",						no_argument, 		NULL, 		0},
+		{"copy",						no_argument, 		NULL, 		0},
+		{"report",						no_argument, 		NULL, 		0},
+		{"format=FORMATID",				required_argument, 	NULL, 		0},
+		{"input=FILE",					required_argument, 	NULL, 		0},
+		{"make-ancilliary",				no_argument, 		NULL, 		0},
+		{"update-ancilliary",			no_argument, 		NULL, 		0},
+		{"processed",					no_argument, 		NULL, 		0},
+		{"problem",						no_argument, 		NULL, 		0},
+		{"bounds",						required_argument, 	NULL, 		0},
+		{"status",						no_argument, 		NULL, 		0},
+		{"raw",							no_argument, 		NULL, 		0},
+		{"unlock",						no_argument, 		NULL, 		0},
+		{"datalistp",					no_argument, 		NULL, 		0},
+		{NULL,							0, 					NULL, 		0}
+		};
 
 	/* MBIO status variables */
 	int	status = MB_SUCCESS;
@@ -123,9 +163,119 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhCcDdF:f:I:i:NnOoPpQqR:r:SsUuYyZz")) != -1)
+	while ((c = getopt_long(argc, argv, "VvHhCcDdF:f:I:i:NnOoPpQqR:r:SsUuYyZz", options, &option_index)) != -1)
 	  switch (c)
 		{
+		/* long options */
+		case 0:
+			
+			/* verbose */
+			if (strcmp("verbose", options[option_index].name) == 0)
+				{
+				verbose++;
+				}
+			
+			/* help */
+			else if (strcmp("help", options[option_index].name) == 0)
+				{
+				help = MB_YES;
+				}
+			
+			/* copy files */
+			else if (strcmp("copy", options[option_index].name) == 0)
+				{
+				copyfiles = MB_YES;
+				flag++;
+				}
+			
+			/* report datalists */
+			else if (strcmp("report", options[option_index].name) == 0)
+				{
+				copyfiles = MB_YES;
+				flag++;
+				}
+			
+			/* format */
+			else if (strcmp("format", options[option_index].name) == 0)
+				{
+				sscanf (optarg,"%d", &format);
+				flag++;
+				}
+			
+			/* input */
+			else if (strcmp("input", options[option_index].name) == 0)
+				{
+				sscanf (optarg,"%s", read_file);
+				flag++;
+				}
+			
+			/* make ancilliary files */
+			else if (strcmp("make-ancilliary", options[option_index].name) == 0)
+				{
+				force_update = MB_YES;
+				make_inf = MB_YES;
+				flag++;
+				}
+			
+			/* update ancilliary files */
+			else if (strcmp("update-ancilliary", options[option_index].name) == 0)
+				{
+				make_inf = MB_YES;
+				flag++;
+				}
+			
+			/* look for processed files */
+			else if (strcmp("processed", options[option_index].name) == 0)
+				{
+				look_processed = MB_DATALIST_LOOK_YES;
+				flag++;
+				}
+			
+			/* problem report */
+			else if (strcmp("problem", options[option_index].name) == 0)
+				{
+				problem_report = MB_YES;
+				flag++;
+				}
+			
+			/* bounds */
+			else if (strcmp("bounds", options[option_index].name) == 0)
+				{
+				mb_get_bounds(optarg, bounds);
+				look_bounds = MB_YES;
+				}
+			
+			/* status report */
+			else if (strcmp("status", options[option_index].name) == 0)
+				{
+				status_report = MB_YES;
+				flag++;
+				}
+			
+			/* look for raw (unprocessed) files */
+			else if (strcmp("raw", options[option_index].name) == 0)
+				{
+				look_processed = MB_DATALIST_LOOK_NO;
+				flag++;
+				}
+			
+			/* removed file locks */
+			else if (strcmp("unlock", options[option_index].name) == 0)
+				{
+				remove_locks = MB_YES;
+				flag++;
+				}
+			
+			/* make datalistp file */
+			else if (strcmp("datalistp", options[option_index].name) == 0)
+				{
+				make_datalistp = MB_YES;
+				flag++;
+				}
+			
+			break;
+			
+		/* short options (deprecated) */
 		case 'C':
 		case 'c':
 			copyfiles = MB_YES;

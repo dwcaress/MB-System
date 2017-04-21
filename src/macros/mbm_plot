@@ -1570,9 +1570,9 @@ elsif ($use_width)
 	}
 
 # place the origin so plot is more or less centered
-$xoffset = ($width - $plot_width
+$xoffset = ($width - abs($plot_width)
 	- $space_left - $space_right) / 2 + $space_left;
-$yoffset = ($height - $plot_height
+$yoffset = ($height - abs($plot_height)
 	- $space_bottom - $space_top) / 2 + $space_bottom;
 
 # get plot degree annotation for geographic maps

@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbdatalist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  7 April 2017 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  18 April 2017 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,7 +28,58 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbdatalist</B> [<B>-C -D</B> <B>-F</B><I>format</I> <B>-I</B><I>filename</I> <B>-N -O -P -Q -R -S -U -Y -Z -V -H</B>]
+<B>mbdatalist</B>
+<BR>
+
+[
+<BR>
+
+<B>--verbose</B>   {<B>-V</B>}
+<BR>
+
+<B>--help</B>   {<B>-H</B>}
+<BR>
+
+<B>--copy</B>   {<B>-C</B>}
+<BR>
+
+<B>--report</B>   {<B>-D</B>}
+<BR>
+
+<B>--format</B>=<I>FORMATID</I>   {<B>-F</B><I>FORMATID</I>}
+<BR>
+
+<B>--input</B>=<I>FILE</I>   {<B>-I</B><I>FILE</I>}
+<BR>
+
+<B>--make-ancilliary</B>   {<B>-N</B>}
+<BR>
+
+<B>--update-ancilliary</B>   {<B>-O</B>}
+<BR>
+
+<B>--processed</B>   {<B>-P</B>}
+<BR>
+
+<B>--problem</B>   {<B>-Q</B>}
+<BR>
+
+<B>--bounds</B>=<I>W/E/S/N</I>   {<B>-R</B><I>W/E/S/N</I>}
+<BR>
+
+<B>--status</B>   {<B>-S</B>}
+<BR>
+
+<B>--raw</B>   {<B>-U</B>}
+<BR>
+
+<B>--unlock</B>   {<B>-Y</B>}
+<BR>
+
+<B>--datalistp</B>   {<B>-Z</B>}
+<BR>
+
+]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -62,18 +113,18 @@ or it may be set first by the calling program. The flag may also
 be set to preclude reporting &quot;processed&quot; file names (embedding &quot;$RAW&quot;
 in a datalist accomplishes this). When setting this flag within
 datalists, the first encounter of a $PROCESSED or $RAW tag will
-prevail over later instances of either tag. The <B>-P</B> and <B>-U</B>
+prevail over later instances of either tag. The <B>--processed</B> and <B>--raw</B>
 options force <B>mbdatalist</B> to output processed file names
-when they exist (<B>-P</B>) or to only output unprocessed
-(raw) file names (<B>-U</B>).
+when they exist (<B>--processed</B>) or to only output unprocessed
+(raw) file names (<B>--raw</B>).
 <P>
 Programs such as <B>mbgrid</B> try to check statistics or &quot;inf&quot;
 files to see if the corresponding data files include data within
 the specified geographic bounds. Other programs look for
 &quot;fast bathymetry&quot; or &quot;fast navigation&quot; (&quot;fbt&quot; or &quot;fnv&quot;) files
-in order to read the data more quickly. The <B>-N</B> option causes
+in order to read the data more quickly. The <B>--make-ancilliary</B> option causes
 <B>mbdatalist</B> to create these three types of ancillary files
-for each swath data file. The <B>-O</B> option causes <B>mbdatalist</B>
+for each swath data file. The <B>--update-ancilliary</B> option causes <B>mbdatalist</B>
 to create the &quot;inf&quot;, &quot;fbt&quot;, and &quot;fnv&quot; files only when they don't
 already exist or are out of date (older than the data file).
 <P>
@@ -91,14 +142,14 @@ in the datalist, or in a datalist higher up in the structure.
 See the <B>MB-System</B> manual page for a more complete
 description.
 <P>
-The <B>-R</B><I>w/e/s/n</I> option causes the program to check each
+The <B>--bounds</B><I>W/E/S/N</I> option causes the program to check each
 data file with an &quot;inf&quot; file for overlap with the desired bounds,
 and only report those files with data in the desired area (or no
 &quot;inf&quot; file to check). This behavior mimics that of <B>mbgrid</B>,
 allowing users to check what data files will contribute to gridding
 some particular area.
 <P>
-The <B>-Q</B> option causes the program to check each data file for
+The <B>--problem</B> option causes the program to check each data file for
 the existence of any ancillary files (e.g. navigation files, edit
 save files, etc.) referenced in its mbprocess parameter file
 (if the parameter file exists). The program will list any problem
@@ -112,7 +163,7 @@ include:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sounding&nbsp;depth&nbsp;exceeds&nbsp;11000&nbsp;m
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Unsupported&nbsp;Simrad&nbsp;datagram
 <P>
-The <B>-Z</B> option causes the program to generate a datalist file
+The <B>--datalistp</B> option causes the program to generate a datalist file
 named &quot;datalistp.mb-1&quot; and then exit. This datalist has the following form:
 <BR>
 
@@ -126,7 +177,7 @@ the datalist &quot;datalist.mb-1&quot; with the $PROCESSED flag on. So, in order
 grid the processed bathymetry rather than the raw bathymetry, run <B>mbgrid</B>
 with &quot;datalistp.mb-1&quot; as the input rather than &quot;datalist.mb-1&quot;.
 <P>
-The <B>-S</B> option causes <B>mbdatalist</B> to report the status of the files
+The <B>--status</B> option causes <B>mbdatalist</B> to report the status of the files
 it lists, including whether the file is up to date or needs reprocessing,
 and if the file is locked. <B>MBprocess</B> sets locks while operating on
 a swath file to prevent other instances of <B>mbprocess</B> from simultaneously
@@ -138,18 +189,18 @@ named by appending &quot;.lck&quot; to the swath filename; while this file exist
 other programs will not modify the locked file. The locking program deletes
 the lock file when it is done. Orphaned lock files may be left if <B>mbprocess</B>
 crashes or is interrupted. These will prevent reprocessing by <B>mbprocess</B>,
-but can be both detected with the <B>-S</B> option and removed using the <B>-Y</B> option.
+but can be both detected with the <B>--status</B> option and removed using the <B>--unlock</B> option.
 <P>
-The <B>-D</B> option causes <B>mbdatalist</B> to list the datalist files rather
+The <B>--report</B> option causes <B>mbdatalist</B> to list the datalist files rather
 than the swath files referenced through the datalists. Each datalist file path
 is preceded by its recursion level within the overall datalist structure.
 <P>
 Finally, this program can be used to copy the swath files referenced in a
 datalist structure to a single directory and to create a datalist there
 (names &quot;datalist.mb-1&quot;) that references those swath files. This is
-accomplished using the <I>-C</I> option. The <I>-C</I> copy function will
-not be done if the <I>-N</I>, <I>-O</I>, or <I>-Q</I> options are specified,
-but is compatible with the <I>-P</I>, <I>-R</I>, and <I>-U</I> options.
+accomplished using the <B>--copy</B> option. The <B>--copy</B> copy function will
+not be done if the <B>--make-ancilliary</B>, <B>--update-ancilliary</B>, or <B>--problem</B> options are specified,
+but is compatible with the <B>--processed</B>, <B>--bounds</B>, and <B>--raw</B> options.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -181,7 +232,7 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-C</B>
+<DT><B>--copy</B>
 
 <DD>
 <BR>
@@ -189,40 +240,41 @@ Christian do Santos Ferreira
 Causes the swath files referenced in the input datalist structure to be
 copied to the current directory and creates a datalist
 (names &quot;datalist.mb-1&quot;) that references the copied swath files.
-The copy function will not be done if the <I>-N</I>, <I>-O</I>, or <I>-Q</I> options are specified.
-If the <I>-P</I>, <I>-R</I>, and <I>-U</I> options are specified these
+The copy function will not be done if the <I>--make-ancilliary</I>, <I>--update-ancilliary</I>, or <I>--problem</I> options are specified.
+If the <I>--processed</I>, <I>--bounds</I>, and <I>--raw</I> options are specified these
 functions will modify which swath files are copied. Any ancilliary files
 (e.g. *inf metadata files) will also be copied, but processed data
 files derived from the target copied files will not be copied.
-<DT><B>-D</B>
+<DT><B>--report</B>
 
 <DD>
 <BR>
 
-<DT>Causes a listing to be printed of the unique datalist files referenced through<DD>
+Causes a listing to be printed of the unique datalist files referenced through
 the recursive datalist structure. Each line begins with the recursion level
 of that datalist file within the overall structure followed by the full path of
 the datalist file indented by a number of tabs equal to the recursion level.
-<B>-F</B>
+<DT><B>--format</B>
 
+<DD>
 <I>format</I>
 <BR>
 
 Sets the data format associated with the datalist or swath data
-file specified with the <B>-I</B> option. By default, this program
+file specified with the <B>--input</B> option. By default, this program
 will attempt to determine the format from the input file suffix
 (e.g. a file ending in .mb57 has a format id of 57, and a file
 ending in .mb-1 has a format id of -1). A datalist has a format id
 of -1.
-<DT><B>-H</B>
+<DT><B>--help</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input</B>
 
 <DD>
-<I>filename</I>
+<I>FILE</I>
 <BR>
 
 Sets the input filename. If <I>format</I> &gt; 0 (set with the
@@ -233,7 +285,7 @@ is treated as a datalist file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will parse
 the datalist (recursively, if necessary) and output each swath filename
 and the associated format and file weight.
-<DT><B>-N</B>
+<DT><B>--make-ancilliary</B>
 
 <DD>
 This argument causes <B>MBdatalist</B> to generate three types of ancillary
@@ -251,25 +303,25 @@ plotting and gridding functions. The &quot;fast bath&quot; or &quot;fbt&quot; fi
 are generated by copying the swath bathymetry to a sparse,
 quickly read format (format 71). The &quot;fast nav&quot; or &quot;fnv&quot; files
 are just ASCII lists of navigation generated using <B>mblist</B>
-with a <B>-O</B><I>tMXYHSc</I> option. Programs such as <B>mbgrid</B>,
+with a <B>--update-ancilliary</B><I>tMXYHSc</I> option. Programs such as <B>mbgrid</B>,
 <B>mbswath</B>, and <B>mbcontour</B> will try to read &quot;fbt&quot; and &quot;fnv&quot; files
 instead of the full data files whenever only bathymetry or
 navigation information are required.
-<DT><B>-O</B>
+<DT><B>--update-ancilliary</B>
 
 <DD>
 This argument causes <B>MBdatalist</B> to generate the three ancillary
 data files (&quot;inf&quot;, &quot;fbt&quot;, and &quot;fnv&quot;) if
 these files don't already exist or are out of date.
-<DT><B>-P</B>
+<DT><B>--processed</B>
 
 <DD>
 Normally, <B>mbdatalist</B> allows $PROCESSED and $RAW tags within
 the datalist files to determine whether processed file names are
 reported when available ($PROCESSED) or only raw file names are
-reported ($RAW). The <B>-P</B> option forces <B>mbdatalist</B>
+reported ($RAW). The <B>--processed</B> option forces <B>mbdatalist</B>
 to output processed file names when they exist.
-<DT><B>-Q</B>
+<DT><B>--problem</B>
 
 <DD>
 This option causes the program to check each
@@ -280,10 +332,10 @@ files include edit save files generated by <B>mbedit</B>
 or <B>mbclean</B>, navigation files generated by <B>mbnavedit</B>
 or <B>mbnavadjust</B>, tide files, and svp files. An error message
 is output for each missing ancillary file.
-<DT><B>-R</B>
+<DT><B>--bounds</B>
 
 <DD>
-<I>w/e/s/n</I>
+<I>W/E/S/N</I>
 <BR>
 
 The bounds of the desired area are set in longitude
@@ -295,7 +347,7 @@ files with data in the desired area (or no
 &quot;inf&quot; file to check). This behavior mimics that of
 <B>mbgrid</B>, allowing users to check what data files will
 contribute to gridding some particular area.
-<DT><B>-S</B>
+<DT><B>--status</B>
 
 <DD>
 This option causes <B>mbdatalist</B> to report the status of the files
@@ -308,22 +360,22 @@ other programs will not modify the locked file. The locking program deletes
 the lock file when it is done. Orphaned lock files may be left if <B>mbprocess</B>
 crashes or is interrupted. These will prevent reprocessing by <B>mbprocess</B>,
 but can be both detected and removed using <B>mbdatalist</B>.
-<DT><B>-U</B>
+<DT><B>--raw</B>
 
 <DD>
 Normally, <B>mbdatalist</B> allows $PROCESSED and $RAW tags within
 the datalist files to determine whether processed file names are
 reported when available ($PROCESSED) or
 only (raw) unprocessed file names are
-reported ($RAW). The <B>-U</B> option forces <B>mbdatalist</B>
+reported ($RAW). The <B>--raw</B> option forces <B>mbdatalist</B>
 to only output raw file names.
-<DT><B>-V</B>
+<DT><B>--verbose</B>
 
 <DD>
 Normally, <B>mbdatalist</B> only prints out the filenames and formats.
-If the <B>-V</B> flag is given, then <B>mbinfo</B> works in a &quot;verbose&quot; mode and
+If the <B>--verbose</B> flag is given, then <B>mbinfo</B> works in a &quot;verbose&quot; mode and
 outputs the program version being used.
-<DT><B>-Y</B>
+<DT><B>--unlock</B>
 
 <DD>
 This option causes <B>mbdatalist</B> to remove any processing locks on files
@@ -333,14 +385,14 @@ operating on that same file.The consists of creating a small text file
 named by appending &quot;.lck&quot; to the swath filename; while this file exists
 other programs will not modify the locked file. The locking program deletes
 the lock file when it is done. Orphaned lock files may be left if <B>MB-System</B>
-programs crash or are interrupted. These can be detected using the <B>-S</B>
+programs crash or are interrupted. These can be detected using the <B>--status</B>
 option of <B>mbdatalist</B>.
-<DT><B>-Z</B>
+<DT><B>--datalistp</B>
 
 <DD>
-The <B>-Z</B> option causes the program to generate a datalist file that
+The <B>--datalistp</B> option causes the program to generate a datalist file that
 will first set a $PROCESSED flag and then reference the input
-file specified using the <B>-I</B><I>filename</I> option.
+file specified using the <B>--input</B>=<I>FILE</I> option.
 The output datalist is named
 by adding a &quot;p.mb-1&quot; suffix to the root of the input file (the root is
 the portion before any <B>MB-System</B> suffix).
@@ -397,7 +449,7 @@ called 0005_20010705_172010_rawp.mb57 and
 al10107051719p.mb102.
 <P>
 If we run:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_em3000.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;--input=datalist_em3000.mb-1<BR>
 <BR>
 
 the output is:
@@ -409,7 +461,7 @@ Here the file name is followed by the format and then
 by a third column containing the default file weight of 1.0.
 <P>
 Similarly, if we run:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_hsmd.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;--input=datalist_hsmd.mb-1<BR>
 <BR>
 
 the output is:
@@ -422,14 +474,14 @@ If we insert a line
 
 at the top of both datalist_hsmd.mb-1 and datalist_em3000.mb-1,
 then the output of <B>mbdatalist</B> changes so that:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_em3000.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;--input=datalist_em3000.mb-1<BR>
 <BR>
 
 yields:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0004_20010705_165004_raw.mb57&nbsp;57&nbsp;1.000000<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0005_20010705_172010_rawp.mb57&nbsp;57&nbsp;1.000000<BR>
 and:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_hsmd.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;--input=datalist_hsmd.mb-1<BR>
 <BR>
 
 yields:
@@ -445,7 +497,7 @@ $PROCESSED tags). If the contents of datalist_all.mb-1 are:
 
 where we have specified different file weights for the
 two datalists, then:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_all.mb-1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;--input=datalist_all.mb-1<BR>
 <BR>
 
 yields:
@@ -454,9 +506,9 @@ yields:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>al10107051649.mb102&nbsp;102&nbsp;1.000000<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>al10107051719.mb102&nbsp;102&nbsp;1.000000<BR>
 <P>
-Now, if we use the <B>-P</B> option to force <B>mbdatalist</B>
+Now, if we use the <B>--processed</B> option to force <B>mbdatalist</B>
 to output processed data file names when possible, then:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;-I&nbsp;datalist_all.mb-1&nbsp;-P<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbdatalist&nbsp;--input=datalist_all.mb-1&nbsp;--processed<BR>
 <BR>
 
 yields:
@@ -472,7 +524,7 @@ the institutions that we have sourced survey data from (e.g. CCOM, GEOMAR, IFREM
 etc.), and each of those datalists reference datalist files in directories for
 individual surveys or expedition legs, which in turn reference swath files for
 those surveys (or in some cases reference more datalists if the expedition leg
-is organized into multiple surveys). We use the <B>-D</B> option to obtain
+is organized into multiple surveys). We use the <B>--report</B> option to obtain
 the following listing (which actually runs a lot longer than shown here):
 <BR>
 
@@ -543,7 +595,7 @@ files. Copying of processed files should also be an option.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 7 April 2017</P></CENTER>
+Last Updated: 18 April 2017</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

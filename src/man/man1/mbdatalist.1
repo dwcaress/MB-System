@@ -1,4 +1,4 @@
-.TH mbdatalist 1 "7 April 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbdatalist 1 "18 April 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdatalist\fP \- parses recursive datalist files and outputs the
 complete list of data files, formats, and file weights.
@@ -7,7 +7,41 @@ complete list of data files, formats, and file weights.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbdatalist\fP [\fB\-C -D\fP \fB\-F\fP\fIformat\fP \fB\-I\fP\fIfilename\fP \fB\-N \-O \-P \-Q \-R \-S \-U \-Y \-Z \-V \-H\fP]
+\fBmbdatalist\fP
+.br
+[
+.br
+\fB--verbose\fP   {\fB-V\fP}
+.br
+\fB--help\fP   {\fB-H\fP}
+.br
+\fB--copy\fP   {\fB-C\fP}
+.br
+\fB--report\fP   {\fB-D\fP}
+.br
+\fB--format\fP=\fIFORMATID\fP   {\fB-F\fP\fIFORMATID\fP}
+.br
+\fB--input\fP=\fIFILE\fP   {\fB-I\fP\fIFILE\fP}
+.br
+\fB--make-ancilliary\fP   {\fB-N\fP}
+.br
+\fB--update-ancilliary\fP   {\fB-O\fP}
+.br
+\fB--processed\fP   {\fB-P\fP}
+.br
+\fB--problem\fP   {\fB-Q\fP}
+.br
+\fB--bounds\fP=\fIW/E/S/N\fP   {\fB-R\fP\fIW/E/S/N\fP}
+.br
+\fB--status\fP   {\fB-S\fP}
+.br
+\fB--raw\fP   {\fB-U\fP}
+.br
+\fB--unlock\fP   {\fB-Y\fP}
+.br
+\fB--datalistp\fP   {\fB-Z\fP}
+.br
+]
 
 .SH DESCRIPTION
 \fBMBdatalist\fP is a utility for parsing datalist files.
@@ -39,18 +73,18 @@ or it may be set first by the calling program. The flag may also
 be set to preclude reporting "processed" file names (embedding "$RAW"
 in a datalist accomplishes this). When setting this flag within
 datalists, the first encounter of a $PROCESSED or $RAW tag will
-prevail over later instances of either tag. The \fB\-P\fP and \fB\-U\fP
+prevail over later instances of either tag. The \fB--processed\fP and \fB--raw\fP
 options force \fBmbdatalist\fP to output processed file names
-when they exist (\fB\-P\fP) or to only output unprocessed
-(raw) file names (\fB\-U\fP).
+when they exist (\fB--processed\fP) or to only output unprocessed
+(raw) file names (\fB--raw\fP).
 
 Programs such as \fBmbgrid\fP try to check statistics or "inf"
 files to see if the corresponding data files include data within
 the specified geographic bounds. Other programs look for
 "fast bathymetry" or "fast navigation" ("fbt" or "fnv") files
-in order to read the data more quickly. The \fB\-N\fP option causes
+in order to read the data more quickly. The \fB--make-ancilliary\fP option causes
 \fBmbdatalist\fP to create these three types of ancillary files
-for each swath data file. The \fB\-O\fP option causes \fBmbdatalist\fP
+for each swath data file. The \fB--update-ancilliary\fP option causes \fBmbdatalist\fP
 to create the "inf", "fbt", and "fnv" files only when they don't
 already exist or are out of date (older than the data file).
 
@@ -68,14 +102,14 @@ in the datalist, or in a datalist higher up in the structure.
 See the \fBMB-System\fP manual page for a more complete
 description.
 
-The \fB\-R\fP\fIw/e/s/n\fP option causes the program to check each
+The \fB--bounds\fP\fIW/E/S/N\fP option causes the program to check each
 data file with an "inf" file for overlap with the desired bounds,
 and only report those files with data in the desired area (or no
 "inf" file to check). This behavior mimics that of \fBmbgrid\fP,
 allowing users to check what data files will contribute to gridding
 some particular area.
 
-The \fB\-Q\fP option causes the program to check each data file for
+The \fB--problem\fP option causes the program to check each data file for
 the existence of any ancillary files (e.g. navigation files, edit
 save files, etc.) referenced in its mbprocess parameter file
 (if the parameter file exists). The program will list any problem
@@ -89,7 +123,7 @@ include:
         Sounding depth exceeds 11000 m
         Unsupported Simrad datagram
 
-The \fB\-Z\fP option causes the program to generate a datalist file
+The \fB--datalistp\fP option causes the program to generate a datalist file
 named "datalistp.mb-1" and then exit. This datalist has the following form:
 .br
  	$PROCESSED
@@ -101,7 +135,7 @@ the datalist "datalist.mb-1" with the $PROCESSED flag on. So, in order to
 grid the processed bathymetry rather than the raw bathymetry, run \fBmbgrid\fP
 with "datalistp.mb-1" as the input rather than "datalist.mb-1".
 
-The \fB\-S\fP option causes \fBmbdatalist\fP to report the status of the files
+The \fB--status\fP option causes \fBmbdatalist\fP to report the status of the files
 it lists, including whether the file is up to date or needs reprocessing,
 and if the file is locked. \fBMBprocess\fP sets locks while operating on
 a swath file to prevent other instances of \fBmbprocess\fP from simultaneously
@@ -113,18 +147,18 @@ named by appending ".lck" to the swath filename; while this file exists
 other programs will not modify the locked file. The locking program deletes
 the lock file when it is done. Orphaned lock files may be left if \fBmbprocess\fP
 crashes or is interrupted. These will prevent reprocessing by \fBmbprocess\fP,
-but can be both detected with the \fB\-S\fP option and removed using the \fB\-Y\fP option.
+but can be both detected with the \fB--status\fP option and removed using the \fB--unlock\fP option.
 
-The \fB-D\fP option causes \fBmbdatalist\fP to list the datalist files rather
+The \fB--report\fP option causes \fBmbdatalist\fP to list the datalist files rather
 than the swath files referenced through the datalists. Each datalist file path
 is preceded by its recursion level within the overall datalist structure.
 
 Finally, this program can be used to copy the swath files referenced in a
 datalist structure to a single directory and to create a datalist there
 (names "datalist.mb-1") that references those swath files. This is
-accomplished using the \fI-C\fP option. The \fI-C\fP copy function will
-not be done if the \fI-N\fP, \fI-O\fP, or \fI-Q\fP options are specified,
-but is compatible with the \fI-P\fP, \fI-R\fP, and \fI-U\fP options.
+accomplished using the \fB--copy\fP option. The \fB--copy\fP copy function will
+not be done if the \fB--make-ancilliary\fP, \fB--update-ancilliary\fP, or \fB--problem\fP options are specified,
+but is compatible with the \fB--processed\fP, \fB--bounds\fP, and \fB--raw\fP options.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -145,40 +179,40 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-C
+.B --copy
 .br
 Causes the swath files referenced in the input datalist structure to be
 copied to the current directory and creates a datalist
 (names "datalist.mb-1") that references the copied swath files.
-The copy function will not be done if the \fI-N\fP, \fI-O\fP, or \fI-Q\fP options are specified.
-If the \fI-P\fP, \fI-R\fP, and \fI-U\fP options are specified these
+The copy function will not be done if the \fI--make-ancilliary\fP, \fI--update-ancilliary\fP, or \fI--problem\fP options are specified.
+If the \fI--processed\fP, \fI--bounds\fP, and \fI--raw\fP options are specified these
 functions will modify which swath files are copied. Any ancilliary files
 (e.g. *inf metadata files) will also be copied, but processed data
 files derived from the target copied files will not be copied.
 .TP
-.B \-D
+.B --report
 .br
-.TP
 Causes a listing to be printed of the unique datalist files referenced through
 the recursive datalist structure. Each line begins with the recursion level
 of that datalist file within the overall structure followed by the full path of
 the datalist file indented by a number of tabs equal to the recursion level.
-.B \-F
+.TP
+.B --format
 \fIformat\fP
 .br
 Sets the data format associated with the datalist or swath data
-file specified with the \fB\-I\fP option. By default, this program
+file specified with the \fB--input\fP option. By default, this program
 will attempt to determine the format from the input file suffix
 (e.g. a file ending in .mb57 has a format id of 57, and a file
 ending in .mb-1 has a format id of \-1). A datalist has a format id
 of \-1.
 .TP
-.B \-H
+.B --help
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIfilename\fP
+.B --input
+\fIFILE\fP
 .br
 Sets the input filename. If \fIformat\fP > 0 (set with the
 \fB\-f\fP option) then the swath data filename specified by \fIinfile\fP
@@ -189,7 +223,7 @@ data files to be processed and their formats.  The program will parse
 the datalist (recursively, if necessary) and output each swath filename
 and the associated format and file weight.
 .TP
-.B \-N
+.B --make-ancilliary
 This argument causes \fBMBdatalist\fP to generate three types of ancillary
 data files ("inf", "fbt", and "fnv").
 In all cases,
@@ -205,24 +239,24 @@ plotting and gridding functions. The "fast bath" or "fbt" files
 are generated by copying the swath bathymetry to a sparse,
 quickly read format (format 71). The "fast nav" or "fnv" files
 are just ASCII lists of navigation generated using \fBmblist\fP
-with a \fB\-O\fP\fItMXYHSc\fP option. Programs such as \fBmbgrid\fP,
+with a \fB--update-ancilliary\fP\fItMXYHSc\fP option. Programs such as \fBmbgrid\fP,
 \fBmbswath\fP, and \fBmbcontour\fP will try to read "fbt" and "fnv" files
 instead of the full data files whenever only bathymetry or
 navigation information are required.
 .TP
-.B \-O
+.B --update-ancilliary
 This argument causes \fBMBdatalist\fP to generate the three ancillary
 data files ("inf", "fbt", and "fnv") if
 these files don't already exist or are out of date.
 .TP
-.B \-P
+.B --processed
 Normally, \fBmbdatalist\fP allows $PROCESSED and $RAW tags within
 the datalist files to determine whether processed file names are
 reported when available ($PROCESSED) or only raw file names are
-reported ($RAW). The \fB\-P\fP option forces \fBmbdatalist\fP
+reported ($RAW). The \fB--processed\fP option forces \fBmbdatalist\fP
 to output processed file names when they exist.
 .TP
-.B \-Q
+.B --problem
 This option causes the program to check each
 data file for the existence of any ancillary files
 referenced in its mbprocess parameter file
@@ -232,8 +266,8 @@ or \fBmbclean\fP, navigation files generated by \fBmbnavedit\fP
 or \fBmbnavadjust\fP, tide files, and svp files. An error message
 is output for each missing ancillary file.
 .TP
-.B \-R
-\fIw/e/s/n\fP
+.B --bounds
+\fIW/E/S/N\fP
 .br
 The bounds of the desired area are set in longitude
 and latitude using w=west, e=east, s=south, and n=north.
@@ -245,7 +279,7 @@ files with data in the desired area (or no
 \fBmbgrid\fP, allowing users to check what data files will
 contribute to gridding some particular area.
 .TP
-.B \-S
+.B --status
 This option causes \fBmbdatalist\fP to report the status of the files
 it lists, including whether the file is up to date or needs reprocessing,
 and if the file is locked. \fBMBprocess\fP sets locks while operating on
@@ -257,20 +291,20 @@ the lock file when it is done. Orphaned lock files may be left if \fBmbprocess\f
 crashes or is interrupted. These will prevent reprocessing by \fBmbprocess\fP,
 but can be both detected and removed using \fBmbdatalist\fP.
 .TP
-.B \-U
+.B --raw
 Normally, \fBmbdatalist\fP allows $PROCESSED and $RAW tags within
 the datalist files to determine whether processed file names are
 reported when available ($PROCESSED) or
 only (raw) unprocessed file names are
-reported ($RAW). The \fB\-U\fP option forces \fBmbdatalist\fP
+reported ($RAW). The \fB--raw\fP option forces \fBmbdatalist\fP
 to only output raw file names.
 .TP
-.B \-V
+.B --verbose
 Normally, \fBmbdatalist\fP only prints out the filenames and formats.
-If the \fB\-V\fP flag is given, then \fBmbinfo\fP works in a "verbose" mode and
+If the \fB--verbose\fP flag is given, then \fBmbinfo\fP works in a "verbose" mode and
 outputs the program version being used.
 .TP
-.B \-Y
+.B --unlock
 This option causes \fBmbdatalist\fP to remove any processing locks on files
 it parses. \fBMBprocess\fP and other programs may set locks while
 operating on a swath file to prevent other programs from simultaneously
@@ -278,13 +312,13 @@ operating on that same file.The consists of creating a small text file
 named by appending ".lck" to the swath filename; while this file exists
 other programs will not modify the locked file. The locking program deletes
 the lock file when it is done. Orphaned lock files may be left if \fBMB-System\fP
-programs crash or are interrupted. These can be detected using the \fB\-S\fP
+programs crash or are interrupted. These can be detected using the \fB--status\fP
 option of \fBmbdatalist\fP.
 .TP
-.B \-Z
-The \fB\-Z\fP option causes the program to generate a datalist file that
+.B --datalistp
+The \fB--datalistp\fP option causes the program to generate a datalist file that
 will first set a $PROCESSED flag and then reference the input
-file specified using the \fB\-I\fP\fIfilename\fP option.
+file specified using the \fB--input\fP=\fIFILE\fP option.
 The output datalist is named
 by adding a "p.mb-1" suffix to the root of the input file (the root is
 the portion before any \fBMB-System\fP suffix).
@@ -331,7 +365,7 @@ called 0005_20010705_172010_rawp.mb57 and
 al10107051719p.mb102.
 
 If we run:
- 	mbdatalist \-I datalist_em3000.mb-1
+ 	mbdatalist --input=datalist_em3000.mb-1
 .br
 the output is:
  	0004_20010705_165004_raw.mb57 57 1.000000
@@ -341,7 +375,7 @@ Here the file name is followed by the format and then
 by a third column containing the default file weight of 1.0.
 
 Similarly, if we run:
- 	mbdatalist \-I datalist_hsmd.mb-1
+ 	mbdatalist --input=datalist_hsmd.mb-1
 .br
 the output is:
  	al10107051649.mb102 102 1.000000
@@ -352,13 +386,13 @@ If we insert a line
 .br
 at the top of both datalist_hsmd.mb-1 and datalist_em3000.mb-1,
 then the output of \fBmbdatalist\fP changes so that:
- 	mbdatalist \-I datalist_em3000.mb-1
+ 	mbdatalist --input=datalist_em3000.mb-1
 .br
 yields:
  	0004_20010705_165004_raw.mb57 57 1.000000
  	0005_20010705_172010_rawp.mb57 57 1.000000
 and:
- 	mbdatalist \-I datalist_hsmd.mb-1
+ 	mbdatalist --input=datalist_hsmd.mb-1
 .br
 yields:
  	al10107051649.mb102 102 1.000000
@@ -372,7 +406,7 @@ $PROCESSED tags). If the contents of datalist_all.mb-1 are:
 .br
 where we have specified different file weights for the
 two datalists, then:
- 	mbdatalist \-I datalist_all.mb-1
+ 	mbdatalist --input=datalist_all.mb-1
 .br
 yields:
  	0004_20010705_165004_raw.mb57 57 100.000000
@@ -380,9 +414,9 @@ yields:
  	al10107051649.mb102 102 1.000000
  	al10107051719.mb102 102 1.000000
 
-Now, if we use the \fB\-P\fP option to force \fBmbdatalist\fP
+Now, if we use the \fB--processed\fP option to force \fBmbdatalist\fP
 to output processed data file names when possible, then:
- 	mbdatalist \-I datalist_all.mb-1 \-P
+ 	mbdatalist --input=datalist_all.mb-1 --processed
 .br
 yields:
  	0004_20010705_165004_raw.mb57 57 100.000000
@@ -397,7 +431,7 @@ the institutions that we have sourced survey data from (e.g. CCOM, GEOMAR, IFREM
 etc.), and each of those datalists reference datalist files in directories for
 individual surveys or expedition legs, which in turn reference swath files for
 those surveys (or in some cases reference more datalists if the expedition leg
-is organized into multiple surveys). We use the \fB\-D\fP option to obtain
+is organized into multiple surveys). We use the \fB--report\fP option to obtain
 the following listing (which actually runs a lot longer than shown here):
 .br
 yields:

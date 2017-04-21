@@ -2378,7 +2378,7 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 			
 		/* add depth sensor if needed */
-		if (platform->source_depth1 < 0 && store->par_dsh[0] == 'I' && store->par_dsh[0] == 'N')
+		if (platform->source_depth1 < 0 && store->par_dsh[0] == 'I' && store->par_dsh[1] == 'N')
 			{
 			capability1 = MB_SENSOR_CAPABILITY1_DEPTH;
 			capability2 = MB_SENSOR_CAPABILITY2_NONE;
@@ -2607,7 +2607,7 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			platform->source_rollpitch = platform->source_rollpitch2;
 		else
 			platform->source_rollpitch = platform->source_rollpitch1;
-		if (store->par_dsh[0] == 'I' && store->par_dsh[0] == 'N')
+		if (store->par_dsh[0] == 'I' && store->par_dsh[1] == 'N')
 			platform->source_depth = platform->source_depth1;
 		if (store->par_ahe == 2 || store->par_ahe == 8)
 			platform->source_heave = platform->source_rollpitch1;

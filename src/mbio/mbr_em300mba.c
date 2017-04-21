@@ -100,6 +100,9 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad2_struct *store,
 		short sonar, int *error);
+int mbr_em300mba_rd_extraparameters(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad2_struct *store,
+		short sonar, int *error);
 int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad2_struct *store,
 		short sonar, int *error);
@@ -146,6 +149,8 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad2_struct *store, int *error);
+int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad2_struct *store, int *error);
@@ -220,6 +225,10 @@ int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_em300mba;
 	mb_io_ptr->mb_io_dimensions = &mbsys_simrad2_dimensions;
 	mb_io_ptr->mb_io_pingnumber = &mbsys_simrad2_pingnumber;
+	mb_io_ptr->mb_io_sonartype = &mbsys_simrad2_sonartype;
+	mb_io_ptr->mb_io_sidescantype = &mbsys_simrad2_sidescantype;
+	mb_io_ptr->mb_io_preprocess = &mbsys_simrad2_preprocess;
+	mb_io_ptr->mb_io_extract_platform = &mbsys_simrad2_extract_platform;
 	mb_io_ptr->mb_io_extract = &mbsys_simrad2_extract;
 	mb_io_ptr->mb_io_insert = &mbsys_simrad2_insert;
 	mb_io_ptr->mb_io_extract_nnav = &mbsys_simrad2_extract_nnav;
@@ -231,6 +240,7 @@ int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_insert_svp = &mbsys_simrad2_insert_svp;
 	mb_io_ptr->mb_io_ttimes = &mbsys_simrad2_ttimes;
 	mb_io_ptr->mb_io_detects = &mbsys_simrad2_detects;
+	mb_io_ptr->mb_io_pulses = &mbsys_simrad2_pulses;
 	mb_io_ptr->mb_io_gains = &mbsys_simrad2_gains;
 	mb_io_ptr->mb_io_copyrecord = &mbsys_simrad2_copy;
 	mb_io_ptr->mb_io_extract_rawss = NULL;
@@ -340,7 +350,7 @@ int mbr_info_em300mba(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
-	*platform_source = MB_DATA_NONE;
+	*platform_source = MB_DATA_START;
 	*nav_source = MB_DATA_DATA;
 	*sensordepth_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
@@ -752,6 +762,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
+	struct mbsys_simrad2_extraparameters_struct *extraparameters;
 	FILE	*mbfp;
 	int	swap = -1;
 	int	done;
@@ -931,6 +942,33 @@ Have a nice day...\n");
 #endif
 
 		/* allocate secondary data structure for
+			extraparameters data if needed */
+		if (status == MB_SUCCESS &&
+			(type == EM2_EXTRAPARAMETERS))
+			{
+			if (store->extraparameters == NULL)
+				{
+				status = mbsys_simrad2_extraparameters_alloc(
+						verbose,mbio_ptr,
+						store_ptr,error);
+				}
+			if (status == MB_SUCCESS && store->extraparameters != NULL)
+				{
+				extraparameters = (struct mbsys_simrad2_extraparameters_struct *) store->extraparameters;
+				extraparameters->xtr_data_size = *record_size_save - EM2_EXTRAPARAMETERS_HEADER_SIZE - 8;
+				if (extraparameters->xtr_data_size > extraparameters->xtr_nalloc)
+					{
+					status = mb_reallocd(verbose, __FILE__, __LINE__, extraparameters->xtr_data_size,
+										(void **)&extraparameters->xtr_data, error);
+					if (status == MB_SUCCESS)
+						extraparameters->xtr_nalloc = extraparameters->xtr_data_size;
+					else
+						extraparameters->xtr_nalloc = 0;
+					}
+				}
+			}
+
+		/* allocate secondary data structure for
 			heading data if needed */
 		if (status == MB_SUCCESS &&
 			(type == EM2_HEADING)
@@ -1023,6 +1061,7 @@ Have a nice day...\n");
 		else if (type !=  EM2_STOP2
 			&& type != EM2_STATUS
 			&& type != EM2_ON
+			&& type != EM2_EXTRAPARAMETERS
 			&& type != EM2_ATTITUDE
 			&& type != EM2_CLOCK
 			&& type != EM2_BATH
@@ -1215,6 +1254,26 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300mba_rd_tilt type %x\n",type);
 #endif
 			status = mbr_em300mba_rd_tilt(
+				verbose,mbfp,swap,store,sonar,error);
+			if (status == MB_SUCCESS)
+				{
+				done = MB_YES;
+				if (expect != EM2_NONE)
+					{
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					}
+				else
+					*expect_save_flag = MB_NO;
+				}
+			}
+		else if (type == EM2_EXTRAPARAMETERS)
+			{
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr,"call mbr_em300mba_rd_extraparameters type %x\n",type);
+#endif
+			status = mbr_em300mba_rd_extraparameters(
 				verbose,mbfp,swap,store,sonar,error);
 			if (status == MB_SUCCESS)
 				{
@@ -1636,6 +1695,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		(typebyte == EM2_ID_STOP2
 		|| typebyte == EM2_ID_STATUS
 		|| typebyte == EM2_ID_ON
+		|| typebyte == EM2_ID_EXTRAPARAMETERS
 		|| typebyte == EM2_ID_ATTITUDE
 		|| typebyte == EM2_ID_CLOCK
 		|| typebyte == EM2_ID_BATH
@@ -2090,7 +2150,7 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp, int swap,
 	/* now set the data kind */
 	if (status == MB_SUCCESS)
 		{
-		if (strlen(store->par_com) > 0)
+		if (strlen(store->par_com) > 0 && store->par_date == 0)
 		    store->kind = MB_DATA_COMMENT;
 		else if (store->type == EM2_START)
 		    store->kind = MB_DATA_START;
@@ -3048,6 +3108,168 @@ int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, int swap,
 		for (i=0;i<tilt->tlt_ndata;i++)
 			fprintf(stderr,"dbg5        %4d      %7d          %7d\n",
 				i, tilt->tlt_time[i], tilt->tlt_tilt[i]);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em300mba_rd_extraparameters(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad2_struct *store,
+		short sonar, int *error)
+{
+	char	*function_name = "mbr_em710raw_rd_extraparameters";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad2_extraparameters_struct *extraparameters;
+	char	line[EM2_EXTRAPARAMETERS_HEADER_SIZE];
+	short	short_val;
+	size_t	read_len;
+	int	index;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
+		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		}
+
+	/* get  storage structure */
+	extraparameters = (struct mbsys_simrad2_extraparameters_struct *) store->extraparameters;
+
+	/* set kind and type values */
+	store->kind = MB_DATA_PARAMETER;
+	store->type = EM2_EXTRAPARAMETERS;
+	store->sonar = sonar;
+
+	/* read binary header values into char array */
+	read_len = fread(line,1,EM2_EXTRAPARAMETERS_HEADER_SIZE,mbfp);
+	if (read_len == EM2_EXTRAPARAMETERS_HEADER_SIZE)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_get_binary_int(swap, &line[0], &extraparameters->xtr_date);
+		    store->date = extraparameters->xtr_date;
+		mb_get_binary_int(swap, &line[4], &extraparameters->xtr_msec);
+		    store->msec = extraparameters->xtr_msec;
+		mb_get_binary_short(swap, &line[8], &short_val);
+		    extraparameters->xtr_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[10], &short_val);
+		    extraparameters->xtr_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[12], &short_val);
+		    extraparameters->xtr_id = (int) ((unsigned short) short_val);
+		}
+
+	/* read data */
+	if (status == MB_SUCCESS)
+		{
+		read_len = fread((char *)extraparameters->xtr_data,1,extraparameters->xtr_data_size,mbfp);
+		if (read_len == extraparameters->xtr_data_size)
+			status = MB_SUCCESS;
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		}
+
+	/* parse data if possible */
+	if (status == MB_SUCCESS && extraparameters->xtr_id == 2)
+		{
+		index = 0;
+		mb_get_binary_int(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_activepositioning);
+		for (i=0;i<3;i++)
+			{
+			mb_get_binary_short(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_qfsetting[i]); index += 2;
+			}
+		for (i=0;i<3;i++)
+			{
+			mb_get_binary_int(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_nqualityfactors[i]); index += 4;
+			}
+		for (i=0;i<3;i++)
+			{
+			for (j=0;j<extraparameters->xtr_pqf_nqualityfactors[i];j++)
+				{
+				mb_get_binary_int(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_qfvalues[i][j]); index += 4;
+				mb_get_binary_int(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_qflimits[i][j]); index += 4;
+				}
+			}
+		}
+
+	/* now get last bytes of record */
+	if (status == MB_SUCCESS)
+		{
+		read_len = fread(&line[0],1,4,mbfp);
+		if (read_len == 4)
+			{
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			/* return success here because all of the
+			    important information in this record has
+			    already been read - next attempt to read
+			    file will return error */
+			status = MB_SUCCESS;
+			}
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[1], line[1],
+		line[2], line[2],
+		line[3], line[3]);
+#endif
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
+		fprintf(stderr,"dbg5       xtr_date:        %d\n",extraparameters->xtr_date);
+		fprintf(stderr,"dbg5       xtr_msec:        %d\n",extraparameters->xtr_msec);
+		fprintf(stderr,"dbg5       xtr_count:       %d\n",extraparameters->xtr_count);
+		fprintf(stderr,"dbg5       xtr_serial:      %d\n",extraparameters->xtr_serial);
+		fprintf(stderr,"dbg5       xtr_id:          %d\n",extraparameters->xtr_id);
+		fprintf(stderr,"dbg5       xtr_data_size:   %d\n",extraparameters->xtr_data_size);
+		fprintf(stderr,"dbg5       xtr_nalloc:      %d\n",extraparameters->xtr_nalloc);
+		if (extraparameters->xtr_id == 2)
+			{
+			fprintf(stderr,"dbg5       xtr_pqf_activepositioning:          %d\n",extraparameters->xtr_pqf_activepositioning);
+			for (i=0;i<3;i++)
+				{
+				fprintf(stderr,"dbg5       positioning system:%d qfsetting:%d nqf:%d\n",
+					i,extraparameters->xtr_pqf_qfsetting[i],extraparameters->xtr_pqf_nqualityfactors[i]);
+				for (j=0;j<extraparameters->xtr_pqf_nqualityfactors[i];j++)
+				fprintf(stderr,"dbg5       quality factor:%d value:%d limit:%d\n",
+					j,extraparameters->xtr_pqf_qfvalues[i][j],extraparameters->xtr_pqf_qflimits[i][j]);
+				}
+			}
 		}
 
 	/* print output debug statements */
@@ -5399,6 +5621,13 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 		status = mbr_em300mba_wr_tilt(verbose,mbfp,swap,store,error);
 		}
+	else if (store->kind == MB_DATA_PARAMETER)
+		{
+#ifdef MBR_EM710RAW_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_extraparameters kind:%d type %x\n",store->kind,store->type);
+#endif
+		status = mbr_em300mba_wr_extraparameters(verbose,mbfp,swap,store,error);
+		}
 	else if (store->kind == MB_DATA_ATTITUDE)
 		{
 #ifdef MBR_EM300MBA_DEBUG
@@ -7025,6 +7254,207 @@ int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 		/* write out data */
 		write_len = fwrite(line,1,EM2_TILT_SLICE_SIZE,mbfp);
 		if (write_len != EM2_TILT_SLICE_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output end of record */
+	if (status == MB_SUCCESS)
+		{
+		line[0] = 0;
+		line[1] = 0x03;
+
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		checksum += uchar_ptr[0];
+
+		/* set checksum */
+		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
+
+		/* write out data */
+		write_len = fwrite(line,1,4,mbfp);
+		if (write_len != 4)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad2_struct *store, int *error)
+{
+	char	*function_name = "mbr_em710raw_wr_extraparameters";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad2_extraparameters_struct *extraparameters;
+	char	line[EM2_EXTRAPARAMETERS_HEADER_SIZE];
+	short	label;
+	size_t	write_len;
+	int	write_size;
+	unsigned short checksum;
+	mb_u_char   *uchar_ptr;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
+		fprintf(stderr,"dbg2       store:      %p\n",(void *)store);
+		}
+
+	/* get storage structure */
+	extraparameters = (struct mbsys_simrad2_extraparameters_struct *) store->extraparameters;
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
+		fprintf(stderr,"dbg5       xtr_date:        %d\n",extraparameters->xtr_date);
+		fprintf(stderr,"dbg5       xtr_msec:        %d\n",extraparameters->xtr_msec);
+		fprintf(stderr,"dbg5       xtr_count:       %d\n",extraparameters->xtr_count);
+		fprintf(stderr,"dbg5       xtr_serial:      %d\n",extraparameters->xtr_serial);
+		fprintf(stderr,"dbg5       xtr_id:          %d\n",extraparameters->xtr_id);
+		fprintf(stderr,"dbg5       xtr_data_size:   %d\n",extraparameters->xtr_data_size);
+		fprintf(stderr,"dbg5       xtr_nalloc:      %d\n",extraparameters->xtr_nalloc);
+		if (extraparameters->xtr_id == 2)
+			{
+			fprintf(stderr,"dbg5       xtr_pqf_activepositioning:          %d\n",extraparameters->xtr_pqf_activepositioning);
+			for (i=0;i<3;i++)
+				{
+				fprintf(stderr,"dbg5       positioning system:%d qfsetting:%d nqf:%d\n",
+					i,extraparameters->xtr_pqf_qfsetting[i],extraparameters->xtr_pqf_nqualityfactors[i]);
+				for (j=0;j<extraparameters->xtr_pqf_nqualityfactors[i];j++)
+				fprintf(stderr,"dbg5       quality factor:%d value:%d limit:%d\n",
+					j,extraparameters->xtr_pqf_qfvalues[i][j],extraparameters->xtr_pqf_qflimits[i][j]);
+				}
+			}
+		}
+
+	/* zero checksum */
+	checksum = 0;
+
+	/* write the record size */
+	mb_put_binary_int(swap, (int) (EM2_EXTRAPARAMETERS_HEADER_SIZE
+			+ extraparameters->xtr_data_size + 8), (void *) &write_size);
+	write_len = fwrite((char *)&write_size,1,4,mbfp);
+	if (write_len != 4)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	else
+		status = MB_SUCCESS;
+
+	/* write the record label */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(swap, (short) (EM2_EXTRAPARAMETERS), (void *) &label);
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[1];
+		}
+
+	/* write the sonar id */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[0];
+		checksum += uchar_ptr[1];
+		}
+
+	/* output binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_int(swap, (int) extraparameters->xtr_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) extraparameters->xtr_msec, (void *) &line[4]);
+		mb_put_binary_short(swap, (unsigned short) extraparameters->xtr_count, (void *) &line[8]);
+		mb_put_binary_short(swap, (unsigned short) extraparameters->xtr_serial, (void *) &line[10]);
+		mb_put_binary_short(swap, (unsigned short) extraparameters->xtr_id, (void *) &line[12]);
+
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_EXTRAPARAMETERS_HEADER_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_EXTRAPARAMETERS_HEADER_SIZE,mbfp);
+		if (write_len != EM2_EXTRAPARAMETERS_HEADER_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output binary extraparameters data */
+	if (status == MB_SUCCESS)
+		{
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) extraparameters->xtr_data;
+		for (j=0;j<extraparameters->xtr_data_size;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,extraparameters->xtr_data_size,mbfp);
+		if (write_len != extraparameters->xtr_data_size)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
