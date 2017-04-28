@@ -452,6 +452,8 @@ int main (int argc, char **argv)
 	int	jaltitude = 0;
 	int	jattitude = 0;
 	double *dptr = NULL;
+	int index;
+	char buffer[16];
 	int	i, n;
 
 	/* get current default values */
@@ -2187,7 +2189,7 @@ int main (int argc, char **argv)
 			}
 			
 		/* open synchronous attitude file */
-		sprintf(afile,"%s.sta",ofile);
+		sprintf(afile,"%s.bsa",ofile);
 		if ((afp = fopen(afile, "w")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
@@ -2625,7 +2627,14 @@ int main (int argc, char **argv)
 					
 				/* output synchronous attitude */
 				if (kind == MB_DATA_DATA)
-					fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", time_d, roll, pitch);
+					{
+					index = 0;
+					mb_put_binary_double(MB_YES, time_d, &buffer[index]); index += 8;
+					mb_put_binary_float(MB_YES, (float)roll, &buffer[index]); index += 4;
+					mb_put_binary_float(MB_YES, (float)pitch, &buffer[index]); index += 4;
+					fwrite(buffer, (size_t)index, 1, afp);
+					//fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", time_d, roll, pitch);
+					}
 
 				/* count records */
 				if (kind == MB_DATA_DATA)
@@ -2781,7 +2790,7 @@ int main (int argc, char **argv)
 				}
 			if (iend > istart)
 				{
-				sprintf(afile,"%s.ath",ofile);
+				sprintf(afile,"%s.bah",ofile);
 				if ((afp = fopen(afile, "w")) == NULL)
 					{
 					error = MB_ERROR_OPEN_FAIL;
@@ -2790,10 +2799,14 @@ int main (int argc, char **argv)
 						program_name);
 					exit(error);
 					}
-				fprintf(stderr, "Generating ath file for %s\n", ofile);
+				fprintf(stderr, "Generating bah file for %s\n", ofile);
 				for (i=0;i<n_heading;i++)
 					{
-					fprintf(afp, "%0.6f\t%7.3f\n", heading_time_d[i], heading_heading[i]);
+					index = 0;
+					mb_put_binary_double(MB_YES, heading_time_d[i], &buffer[index]); index += 8;
+					mb_put_binary_float(MB_YES, (float)heading_heading[i], &buffer[index]); index += 4;
+					fwrite(buffer, (size_t)index, 1, afp);
+					//fprintf(afp, "%0.6f\t%7.3f\n", heading_time_d[i], heading_heading[i]);
 					}
 				fclose(afp);
 				}
@@ -2813,7 +2826,7 @@ int main (int argc, char **argv)
 				}
 			if (iend > istart)
 				{
-				sprintf(afile,"%s.ats",ofile);
+				sprintf(afile,"%s.bas",ofile);
 				if ((afp = fopen(afile, "w")) == NULL)
 					{
 					error = MB_ERROR_OPEN_FAIL;
@@ -2822,10 +2835,14 @@ int main (int argc, char **argv)
 						program_name);
 					exit(error);
 					}
-				fprintf(stderr, "Generating ats file for %s\n", ofile);
+				fprintf(stderr, "Generating bas file for %s\n", ofile);
 				for (i=0;i<n_sensordepth;i++)
 					{
-					fprintf(afp, "%0.6f\t%7.3f\n", sensordepth_time_d[i], sensordepth_sensordepth[i]);
+					index = 0;
+					mb_put_binary_double(MB_YES, sensordepth_time_d[i], &buffer[index]); index += 8;
+					mb_put_binary_float(MB_YES, (float)sensordepth_sensordepth[i], &buffer[index]); index += 4;
+					fwrite(buffer, (size_t)index, 1, afp);
+					//fprintf(afp, "%0.6f\t%7.3f\n", sensordepth_time_d[i], sensordepth_sensordepth[i]);
 					}
 				fclose(afp);
 				}
@@ -2845,7 +2862,7 @@ int main (int argc, char **argv)
 				}
 			if (iend > istart)
 				{
-				sprintf(afile,"%s.ata",ofile);
+				sprintf(afile,"%s.baa",ofile);
 				if ((afp = fopen(afile, "w")) == NULL)
 					{
 					error = MB_ERROR_OPEN_FAIL;
@@ -2854,10 +2871,15 @@ int main (int argc, char **argv)
 						program_name);
 					exit(error);
 					}
-				fprintf(stderr, "Generating ata file for %s\n", ofile);
+				fprintf(stderr, "Generating baa file for %s\n", ofile);
 				for (i=0;i<n_attitude;i++)
 					{
-					fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", attitude_time_d[i], attitude_roll[i], attitude_pitch[i]);
+					index = 0;
+					mb_put_binary_double(MB_YES, attitude_time_d[i], &buffer[index]); index += 8;
+					mb_put_binary_float(MB_YES, (float)attitude_roll[i], &buffer[index]); index += 4;
+					mb_put_binary_float(MB_YES, (float)attitude_pitch[i], &buffer[index]); index += 4;
+					fwrite(buffer, (size_t)index, 1, afp);
+					//fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", attitude_time_d[i], attitude_roll[i], attitude_pitch[i]);
 					}
 				fclose(afp);
 				}
