@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2302],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2303],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "20 April 2017", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "28 April 2017", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -34,7 +34,7 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO(["    The MB-system:	configure	12/7/2011"])
 AS_ECHO(["    $Id$"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2016 by"])
+AS_ECHO(["    Copyright (c) 2011-2017 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])
@@ -206,65 +206,6 @@ AC_ARG_WITH(otps_dir, [ --with-otps-dir=DIR    Location of OSU Tidal Prediction 
 AC_SUBST(OTPS_DIR)
 
 dnl--------------------------------------------------------------------
-dnl NetCDF Section
-dnl Use specified nc-config or look for nc-config in the path
-dnl--------------------------------------------------------------------
-dnl
-
-if test "X$with_netcdf_config" != "X" ; then
-    NC_CONF=`$with_netcdf_config`
-else
-	AC_PATH_PROG([NC_CONF], [nc-config], [/usr/local/netcdf/bin/nc-config])
-fi
-
-if test -x "$NC_CONF" && test "X$NETCDF_INC" = "X" && test "X$NETCDF_LIB" = "X" ; then
-	AC_MSG_CHECKING(for netCDF includes)
-	libnetcdf_CPPFLAGS=-I`$NC_CONF --includedir | sed -e 's/^-I//'`
-	AC_MSG_RESULT($libnetcdf_CPPFLAGS)
-	AC_MSG_CHECKING(for netCDF libs)
-	libnetcdf_LIBS=`$NC_CONF --libs`
-	AC_MSG_RESULT($libnetcdf_LIBS)
-	NETCDF_LIB=`echo $libnetcdf_LIBS | sed 's/^-L//;s/\ .*//'`
-    libnetcdf_LDFLAGS="-L$NETCDF_LIB"
-else
-	if test "X$enable_netcdf" = "X" || test "X$enable_netcdf" = "Xyes" ; then
-		AC_PATH_PROG([NETCDF], [ncdump], [/usr/local/netcdf/bin/ncdump])
-		NETCDF=`dirname $NETCDF`
-		NETCDF=`dirname $NETCDF`
-	else
-		NETCDF=$enable_netcdf
-	fi
-	AC_MSG_CHECKING(for netCDF include directory)
-	if test "X$NETCDF_INC" = "X"; then
-		NETCDF_INC=$NETCDF/include
-	fi
-	AC_MSG_RESULT($NETCDF_INC)
-	if test ! -f $NETCDF_INC/netcdf.h; then
-		AC_MSG_WARN([[netcdf.h can not be found in $NETCDF_INC]])
-	fi
-	AC_MSG_CHECKING(for netCDF library directory)
-	if test "X$NETCDF_LIB" = "X"; then
-		NETCDF_LIB=$NETCDF/lib
-	fi
-	AC_MSG_RESULT($NETCDF_LIB)
-	if test ! -d $NETCDF_LIB; then
-		AC_MSG_WARN([[No such directory: $NETCDF_LIB]])
-	fi
-	libnetcdf_LIBS="-L$NETCDF_LIB -R $NETCDF_LIB -lnetcdf"
-    libnetcdf_LDFLAGS="-L$NETCDF_LIB"
-	libnetcdf_CPPFLAGS="-I$NETCDF_INC"
-fi
-if test ! -x "$NC_CONF" && test ! -d $NETCDF_LIB; then
-    AC_MSG_ERROR(["Did not find nc-config program or netCDF installation, use --with-nc-config to set the location"])
-fi
-dnl
-dnl Done checking for netCDF headers and libraries
-
-dnl Substitute netCDF library and header arguments
-AC_SUBST([libnetcdf_LIBS], [$libnetcdf_LIBS])
-AC_SUBST([libnetcdf_CPPFLAGS], [$libnetcdf_CPPFLAGS])
-
-dnl--------------------------------------------------------------------
 dnl PROJ Section
 dnl--------------------------------------------------------------------
 
@@ -359,16 +300,80 @@ AC_SUBST([libproj_LIBS], [$libproj_LIBS])
 AC_SUBST([libproj_CPPFLAGS], [$libproj_CPPFLAGS])
 
 dnl--------------------------------------------------------------------
+dnl NetCDF Section
+dnl Use specified nc-config or look for nc-config in the path
+dnl--------------------------------------------------------------------
+dnl
+
+if test "X$with_netcdf_config" != "X" ; then
+    NC_CONF="$with_netcdf_config/nc-config"
+	AC_MSG_CHECKING(for netCDF nc-config using --with-netcdf-config=$with_netcdf_config )
+    AC_MSG_RESULT($NC_CONF)
+else
+	AC_PATH_PROG([NC_CONF], [nc-config] )
+fi
+
+if test -x "$NC_CONF" ; then
+	AC_MSG_CHECKING(for netCDF includes)
+	libnetcdf_CPPFLAGS=-I`$NC_CONF --includedir | sed -e 's/^-I//'`
+	AC_MSG_RESULT($libnetcdf_CPPFLAGS)
+	AC_MSG_CHECKING(for netCDF libs)
+	libnetcdf_LIBS=`$NC_CONF --libs`
+	AC_MSG_RESULT($libnetcdf_LIBS)
+	NETCDF_LIB=`echo $libnetcdf_LIBS | sed 's/^-L//;s/\ .*//'`
+    libnetcdf_LDFLAGS="-L$NETCDF_LIB"
+else
+	if test "X$enable_netcdf" = "X" || test "X$enable_netcdf" = "Xyes" ; then
+		AC_PATH_PROG([NETCDF], [ncdump], [/usr/local/netcdf/bin/ncdump])
+		NETCDF=`dirname $NETCDF`
+		NETCDF=`dirname $NETCDF`
+	else
+		NETCDF=$enable_netcdf
+	fi
+	AC_MSG_CHECKING(for netCDF include directory)
+	if test "X$NETCDF_INC" = "X"; then
+		NETCDF_INC=$NETCDF/include
+	fi
+	AC_MSG_RESULT($NETCDF_INC)
+	if test ! -f $NETCDF_INC/netcdf.h; then
+		AC_MSG_WARN([[netcdf.h can not be found in $NETCDF_INC]])
+	fi
+	AC_MSG_CHECKING(for netCDF library directory)
+	if test "X$NETCDF_LIB" = "X"; then
+		NETCDF_LIB=$NETCDF/lib
+	fi
+	AC_MSG_RESULT($NETCDF_LIB)
+	if test ! -d $NETCDF_LIB; then
+		AC_MSG_WARN([[No such directory: $NETCDF_LIB]])
+	fi
+	libnetcdf_LIBS="-L$NETCDF_LIB -R $NETCDF_LIB -lnetcdf"
+    libnetcdf_LDFLAGS="-L$NETCDF_LIB"
+	libnetcdf_CPPFLAGS="-I$NETCDF_INC"
+fi
+if test ! -x "$NC_CONF" && test ! -d $NETCDF_LIB; then
+    AC_MSG_ERROR(["Did not find nc-config program or netCDF installation, use --with-nc-config to set the location"])
+fi
+dnl
+dnl Done checking for netCDF headers and libraries
+
+dnl Substitute netCDF library and header arguments
+AC_SUBST([libnetcdf_LIBS], [$libnetcdf_LIBS])
+AC_SUBST([libnetcdf_CPPFLAGS], [$libnetcdf_CPPFLAGS])
+
+dnl--------------------------------------------------------------------
 dnl GDAL Section
 dnl We use gdal-config to set GDAL paths and settings
 dnl--------------------------------------------------------------------
 
 if test "X$with_gdal_config" != "X" ; then
-    GDAL_CONF=`$with_gdal_config`
+    GDAL_CONF="$with_gdal_config/gdal-config"
+	AC_MSG_CHECKING(for GDAL gdal-config using --with-gdal-config=$with_gdal_config )
+    AC_MSG_RESULT($GDAL_CONF)
 else
 	AC_PATH_PROG([GDAL_CONF], [gdal-config])
 fi
-if test -x "$GDAL_CONF" && test "X$GDAL_INC" = "X" && test "X$GDAL_LIB" = "X" ; then
+
+if test -x "$GDAL_CONF" ; then
 	AC_MSG_CHECKING(for GDAL includes)
 	GDAL_INC=`$GDAL_CONF --cflags`
 	AC_MSG_RESULT($GDAL_INC)
@@ -397,11 +402,13 @@ dnl We use gmt-config to set GMT5 paths and settings
 dnl--------------------------------------------------------------------
 
 if test "X$with_gmt_config" != "X" ; then
-    GMT_CONF=`$with_gmt_config`
+    GMT_CONF="$with_gmt_config/gmt-config"
+	AC_MSG_CHECKING(for GMT gmt-config using --with-gmt-config=$with_gmt_config )
+    AC_MSG_RESULT($GMT_CONF)
 else
 	AC_PATH_PROG([GMT_CONF], [gmt-config])
 fi
-if test -x "$GMT_CONF" && test "X$GMT_INC" = "X" && test "X$GMT_LIB" = "X" ; then
+if test -x "$GMT_CONF" ; then
 	AC_MSG_CHECKING(for GMT includes)
 	GMT_INC=`$GMT_CONF --cflags`
 	AC_MSG_RESULT($GMT_INC)
