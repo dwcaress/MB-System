@@ -9,6 +9,7 @@ mbauvloglist.1 \
 mbauvnavusbl.1 \
 mbbackangle.1 \
 mbclean.1 \
+mbconfig.1 \
 mbcontour.1 \
 mbcopy.1 \
 mbctdlist.1 \
@@ -87,8 +88,5 @@ mbvelocitytool.1
 if BUILD_PROJ
   man_PROJ = proj.1 geod.1 
 endif
-
-
-
 
 EXTRA_DIST = $(man_MANS) $(man_PROJ)

@@ -15,7 +15,8 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
-* Version 5.5.2303       April 28, 2017
+  Version 5.5.2304       May 6, 2017
+  Version 5.5.2303       April 28, 2017
   Version 5.5.2302       April 20, 2017
   Version 5.5.2301       April 17, 2017
   Version 5.5.2300       April 15, 2017
@@ -253,6 +254,24 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.5.2304 (May 6, 2017)
+
+MBpreprocess: Fixed generation of *.baa, *.bsa, and *.bah files so they include
+only data relevant to the associated swath file, which means samples from
+10 seconds before the first survey data through 10 seconds after the last survey
+data. The program now removes any pre-existing *.ata, *.sta, *.ath, *.baa,
+*.bsa, and *.bah files.
+
+MBconfig: New program to provide command line access to the MB-System version
+and the locations of the Levitus database and the OTPS tide prediction software.
+
+MBlevitus: The variable storing the location of the Levitus database file has
+been changed from "ifile" to "levitusfile".
+
+Datalist parsing: The mb_datalist_read() function changed with the 5.5.2299
+revision, including adding a new argument. The old version of that function is
+now available within the API as mb_datalist_readorg().
+
 -----> 5.5.2303 (April 28, 2017)
 
 MBpreprocess and MBeditviz: Changed the ancilliary files used to store the
@@ -266,7 +285,7 @@ is improved as well.
 Configure script: Fixed problems with specifying the location of the netCDF,
 GDAL, and GMT config programs.
 
-mbswath: Fixed bug that caused occasional crashes.
+MBswath: Fixed bug that caused occasional crashes.
 
 -----> 5.5.2302 (April 20, 2017)
 

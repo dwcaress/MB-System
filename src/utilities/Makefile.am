@@ -2,7 +2,8 @@ if BUILD_FFTW
  FFTW_PROG = mbsegypsd
 endif
 
-bin_PROGRAMS = mb7k2jstar \
+bin_PROGRAMS = mbconfig \
+		mb7k2jstar \
         mb7k2ss \
         mb7kpreprocess \
         mbabsorption \
@@ -69,6 +70,7 @@ LIBS =  ${top_builddir}/src/mbio/libmbio.la \
        	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
         $(LIBM)
 
+mbconfig_SOURCES = mbconfig.c
 mb7k2jstar_SOURCES = mb7k2jstar.c
 mb7k2ss_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mb7k2ss_SOURCES = mb7k2ss.c
@@ -144,4 +146,5 @@ CLEANFILES = levitus.h
 DISTCLEANFILES = levitus.h
 
 levitus.h: Makefile
-	echo 'char *ifile = "$(mbsystemdatadir)/LevitusAnnual82.dat";' >$@
+	echo 'char *levitusfile = "$(mbsystemdatadir)/LevitusAnnual82.dat";' >$@
+	echo 'char *otps_location = "$(OTPS_DIR)";' >>$@
