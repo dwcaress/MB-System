@@ -292,9 +292,8 @@ int main (int argc, char **argv)
 	/* kluge various data fixes */
 	int kluge_timejumps = MB_NO;
 	double kluge_timejumps_threshold = 0.0;
-	double start_time_d;
-	double end_time_d;
-	double last_time_d;
+	double kluge_first_time_d;
+	double kluge_last_time_d;
 	double dtime_d_expect;
 	double dtime_d;
 	int kluge_beamtweak = MB_NO;
@@ -438,6 +437,10 @@ int main (int argc, char **argv)
 	
 	mb_path afile;
 	FILE *afp;
+	struct stat file_status;
+	int fstat;
+	double start_time_d;
+	double end_time_d;
 	int	istart, iend;
 	
 	mb_path fnvfile;
@@ -2188,6 +2191,64 @@ int main (int argc, char **argv)
 			exit(error);
 			}
 			
+		/* delete old synchronous and synchronous files */
+		sprintf(afile,"%s.ata",ofile);
+		if ((fstat = stat(afile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+				}
+		sprintf(afile,"%s.ath",ofile);
+		if ((fstat = stat(afile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+				}
+		sprintf(afile,"%s.ats",ofile);
+		if ((fstat = stat(afile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+				}
+		sprintf(afile,"%s.sta",ofile);
+		if ((fstat = stat(afile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+				}
+		sprintf(afile,"%s.baa",ofile);
+		if ((fstat = stat(afile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+				}
+		sprintf(afile,"%s.bah",ofile);
+		if ((fstat = stat(afile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+				}
+		sprintf(afile,"%s.bas",ofile);
+		if ((fstat = stat(afile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+				}
+		sprintf(afile,"%s.bsa",ofile);
+		if ((fstat = stat(afile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+				}
+			
 		/* open synchronous attitude file */
 		sprintf(afile,"%s.bsa",ofile);
 		if ((afp = fopen(afile, "w")) == NULL)
@@ -2254,6 +2315,9 @@ int main (int argc, char **argv)
 			/* count records */
 			if (kind == MB_DATA_DATA)
 				{
+				if (n_rf_data == 0)
+					start_time_d = time_d;
+				end_time_d = time_d;
 				n_rf_data++;
 				n_rt_data++;
 				}
@@ -2334,19 +2398,18 @@ int main (int argc, char **argv)
 				if (kluge_timejumps == MB_YES)
 					{
 					if (n_rf_data == 1)
-						start_time_d = time_d;
-					end_time_d = time_d;
+						kluge_first_time_d = time_d;
 					if (n_rf_data > 2)
 						{
-						dtime_d_expect = (last_time_d - start_time_d) / (n_rf_data - 1);
-						dtime_d = time_d - last_time_d;
+						dtime_d_expect = (kluge_last_time_d - kluge_first_time_d) / (n_rf_data - 1);
+						dtime_d = time_d - kluge_last_time_d;
 						if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_threshold)
 							{
-							time_d = last_time_d + dtime_d_expect;
+							time_d = kluge_last_time_d + dtime_d_expect;
 							timestamp_changed = MB_YES;
 							}
 						}
-					last_time_d = time_d;					
+					kluge_last_time_d = time_d;					
 					}
 					
 				/* apply time latency correction called for in the platform file */
@@ -2779,15 +2842,20 @@ int main (int argc, char **argv)
 		/* generate asynchronous heading file */
 		if (n_heading > 0)
 			{
+			/* use only the samples relevant to survey data for this file, but
+			 * allow 10 seconds before and after to insure time latency corrections
+			 * do not overshoot the data */
 			istart = 0;
-			iend = n_heading - 1;
+			iend = 0;
 			for (i=0;i<n_heading;i++)
 				{
-				if (heading_time_d[i] < start_time_d)
+				if (heading_time_d[i] < start_time_d - 10.0)
 					istart = i;
-				if (heading_time_d[i] < end_time_d)
+				if (heading_time_d[i] < end_time_d + 10.0)
 					iend = i;
 				}
+			if (iend < n_heading - 1)
+				iend++;
 			if (iend > istart)
 				{
 				sprintf(afile,"%s.bah",ofile);
@@ -2799,8 +2867,9 @@ int main (int argc, char **argv)
 						program_name);
 					exit(error);
 					}
-				fprintf(stderr, "Generating bah file for %s\n", ofile);
-				for (i=0;i<n_heading;i++)
+				fprintf(stderr, "Generating bah file for %s using samples %d:%d out of %d\n",
+						ofile, istart, iend, n_heading);
+				for (i=istart;i<iend;i++)
 					{
 					index = 0;
 					mb_put_binary_double(MB_YES, heading_time_d[i], &buffer[index]); index += 8;
@@ -2815,15 +2884,20 @@ int main (int argc, char **argv)
 		/* generate asynchronous sensordepth file */
 		if (n_sensordepth > 0)
 			{
+			/* use only the samples relevant to survey data for this file, but
+			 * allow 10 seconds before and after to insure time latency corrections
+			 * do not overshoot the data */
 			istart = 0;
-			iend = n_sensordepth - 1;
+			iend = 0;
 			for (i=0;i<n_sensordepth;i++)
 				{
-				if (sensordepth_time_d[i] < start_time_d)
+				if (sensordepth_time_d[i] < start_time_d - 10.0)
 					istart = i;
-				if (sensordepth_time_d[i] < end_time_d)
+				if (sensordepth_time_d[i] < end_time_d + 10.0)
 					iend = i;
 				}
+			if (iend < n_sensordepth - 1)
+				iend++;
 			if (iend > istart)
 				{
 				sprintf(afile,"%s.bas",ofile);
@@ -2835,8 +2909,9 @@ int main (int argc, char **argv)
 						program_name);
 					exit(error);
 					}
-				fprintf(stderr, "Generating bas file for %s\n", ofile);
-				for (i=0;i<n_sensordepth;i++)
+				fprintf(stderr, "Generating bas file for %s using samples %d:%d out of %d\n",
+						ofile, istart, iend, n_sensordepth);
+				for (i=istart;i<iend;i++)
 					{
 					index = 0;
 					mb_put_binary_double(MB_YES, sensordepth_time_d[i], &buffer[index]); index += 8;
@@ -2851,15 +2926,20 @@ int main (int argc, char **argv)
 		/* generate asynchronous attitude file */
 		if (n_attitude > 0)
 			{
+			/* use only the samples relevant to survey data for this file, but
+			 * allow 10 seconds before and after to insure time latency corrections
+			 * do not overshoot the data */
 			istart = 0;
-			iend = n_attitude - 1;
+			iend = 0;
 			for (i=0;i<n_attitude;i++)
 				{
-				if (attitude_time_d[i] < start_time_d)
+				if (attitude_time_d[i] < start_time_d - 10.0)
 					istart = i;
-				if (attitude_time_d[i] < end_time_d)
+				if (attitude_time_d[i] < end_time_d + 10.0)
 					iend = i;
 				}
+			if (iend < n_attitude - 1)
+				iend++;
 			if (iend > istart)
 				{
 				sprintf(afile,"%s.baa",ofile);
@@ -2871,8 +2951,9 @@ int main (int argc, char **argv)
 						program_name);
 					exit(error);
 					}
-				fprintf(stderr, "Generating baa file for %s\n", ofile);
-				for (i=0;i<n_attitude;i++)
+				fprintf(stderr, "Generating baa file for %s using samples %d:%d out of %d\n",
+						ofile, istart, iend, n_attitude);
+				for (i=istart;i<iend;i++)
 					{
 					index = 0;
 					mb_put_binary_double(MB_YES, attitude_time_d[i], &buffer[index]); index += 8;

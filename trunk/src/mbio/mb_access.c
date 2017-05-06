@@ -36,7 +36,6 @@
 #include "mb_segy.h"
 
 static char svn_id[]="$Id$";
-
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
 		    void **store_ptr, int *error)

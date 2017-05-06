@@ -13,6 +13,7 @@ Version 5.0
 \fB--help\fP
 \fB--input\fP=\fIFILE\fP
 \fB--format\fP=\fIFORMATID\fP
+.br
 \fB--output-sensor-fnv\fP
 .br
 \fB--nav-file\fP=\fIFILE\fP
@@ -43,32 +44,40 @@ Version 5.0
 \fB--time-latency-file\fP=\fIFILE\fP
 \fB--time-latency-file-format\fP=\fIFORMATID\fP
 \fB--time-latency-constant\fP=\fISECONDS\fP
+.br
 \fB--time-latency-apply-nav\fP
 \fB--time-latency-apply-sensordepth\fP
 \fB--time-latency-apply-heading\fP
+.br
 \fB--time-latency-apply-attitude\fP
 \fB--time-latency-apply-altitude\fP
 \fB--time-latency-apply-all-ancilliary\fP
+.br
 \fB--time-latency-apply-survey\fP
 \fB--time-latency-apply-all\fP
 .br
 \fB--filter\fP=\fISECONDS\fP
+.br
 \fB--filter-apply-nav\fP
 \fB--filter-apply-sensordepth\fP
 \fB--filter-apply-heading\fP
+.br
 \fB--filter-apply-attitude\fP
 \fB--filter-apply-altitude\fP
 \fB--filter-apply-all-ancilliary\fP
 .br
 \fB--platform-file\fP=\fIFILE\fP
 \fB--platform-target-sensor\fP=\fIRECORDID\fP
+.br
 \fB--no-change-survey\fP
-\fBmultibeam-sidescan-source\fP=\fISECONDS\fP
-\fBkluge-time-jumps\fP=\fISECONDS\fP
-\fBkluge-beam-tweak\fP=\fIFACTOR\fP
-\fBkluge-zero-attitude-correction\fP
-\fBkluge-zero-alongtrack-angles\fP
-
+.br
+\fB--multibeam-sidescan-source\fP=\fISECONDS\fP
+.br
+\fB--kluge-time-jumps\fP=\fISECONDS\fP
+\fB--kluge-beam-tweak\fP=\fIFACTOR\fP
+.br
+\fB--kluge-zero-attitude-correction\fP
+\fB--kluge-zero-alongtrack-angles\fP
 .br
 ]
 
@@ -97,9 +106,133 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
+.B --help
+This option causes \fBmbconfig\fP to print out its usage options and exit.
+.TP
 .B --verbose
 By default \fBmbpreprocess\fP outputs minimal information to the shell. This option
-causes the program to indicate it's progress as it runs. Goody.
+causes the program to indicate it's progress as it runs.
+
+.TP
+.B --input=\fIFILE\fP
+Swath data file from which the input data will be read, or a datalist file
+containing a list of input swath data files and/or other datalist files.
+If \fIFILE\fP is a datalist file, then mbpreprocess will attempt to preprocess
+all data files identified by recursively reading the datalist structure
+referenced in \fIFILE\fP.
+.TP
+.B --format=\fIFORMATID\fP
+Sets the \fBMBIO\fP integer format identifier
+for the input file \fIFILE\fP specified with the
+\fB\--input\fP option. By default, \fBmbpreprocess\fP
+infers the format from the "*.mbXX" \fBMB\-System\fP suffix
+convention.
+.TP
+.B --output-sensor-fnv
+Causes \fBmbpreprocess\fP to output "fast navigation" or *.fnv files for each
+of the sensors described in the platform file specified with the \fB--platform-file\fP
+option. These *.fnv files will be corrected for the lever arms specified by the
+positional and angular offsets defined in the platform file.
+.br
+.TP
+.B --nav-file=\fIFILE\fP
+.TP
+.B --nav-file-format=\fIFORMATID\fP
+.TP
+.B --nav-async=\fIRECORDTYPE\fP
+.TP
+.B --nav-sensor=\fISENSORID\fP
+.br
+.TP
+.B --sensordepth-file=\fIFILE\fP
+.TP
+.B --sensordepth-file-format=\fIFORMATID\fP
+.TP
+.B --sensordepth-async=\fIRECORDTYPE\fP
+.TP
+.B --sensordepth-sensor=\fISENSORID\fP
+.br
+.TP
+.B --heading-file=\fIFILE\fP
+.TP
+.B --heading-file-format=\fIFORMATID\fP
+.TP
+.B --heading-async=\fIRECORDTYPE\fP
+.TP
+.B --heading-sensor=\fISENSORID\fP
+.br
+.TP
+.B --altitude-file=\fIFILE\fP
+.TP
+.B --altitude-file-format=\fIFORMATID\fP
+.TP
+.B --altitude-async=\fIRECORDTYPE\fP
+.TP
+.B --altitude-sensor=\fISENSORID\fP
+.br
+.TP
+.B --attitude-file=\fIFILE\fP
+.TP
+.B --attitude-file-format=\fIFORMATID\fP
+.TP
+.B --attitude-async=\fIRECORDTYPE\fP
+.TP
+.B --attitude-sensor=\fISENSORID\fP
+.br
+.TP
+.B --time-latency-file=\fIFILE\fP
+.TP
+.B --time-latency-file-format=\fIFORMATID\fP
+.TP
+.B --time-latency-constant=\fISECONDS\fP
+.TP
+.B --time-latency-apply-nav
+.TP
+.B --time-latency-apply-sensordepth
+.TP
+.B --time-latency-apply-heading
+.TP
+.B --time-latency-apply-attitude
+.TP
+.B --time-latency-apply-altitude
+.TP
+.B --time-latency-apply-all-ancilliary
+.TP
+.B --time-latency-apply-survey
+.TP
+.B --time-latency-apply-all
+.br
+.TP
+.B --filter=\fISECONDS\fP
+.TP
+.B --filter-apply-nav
+.TP
+.B --filter-apply-sensordepth
+.TP
+.B --filter-apply-heading
+.TP
+.B --filter-apply-attitude
+.TP
+.B --filter-apply-altitude
+.TP
+.B --filter-apply-all-ancilliary
+.br
+.TP
+.B --platform-file=\fIFILE\fP
+.TP
+.B --platform-target-sensor=\fIRECORDID\fP
+.TP
+.B --no-change-survey
+.TP
+\fBmultibeam-sidescan-source=\fISECONDS\fP
+.TP
+\fBkluge-time-jumps=\fISECONDS\fP
+.TP
+\fBkluge-beam-tweak=\fIFACTOR\fP
+.TP
+\fBkluge-zero-attitude-correction
+.TP
+\fBkluge-zero-alongtrack-angles
 
 .SH EXAMPLES
 To be written.....

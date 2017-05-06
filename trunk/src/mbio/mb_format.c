@@ -56,10 +56,6 @@ static int format_alias_table[] =
 	};
 
 /* local prototypes not found in mb_define.h */
-int mb_datalist_readorg(int verbose,
-		void *datalist,
-		char *path, int *format, double *weight,
-		int *error);
 int cvt_to_nix_path(char *path);
 
 static char svn_id[]="$Id$";
@@ -3869,6 +3865,74 @@ int mb_datalist_close(int verbose,
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:        %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_datalist_readorg(int verbose,
+		void *datalist_ptr,
+		char *path, int *format, double *weight,
+		int *error)
+{
+	/* local variables */
+	char	*function_name = "mb_datalist_readorg";
+	int	status = MB_SUCCESS;
+	struct mb_datalist_struct *datalist;
+	char	ppath[MB_PATH_MAXLINE];
+	char	dpath[MB_PATH_MAXLINE];
+	int	pstatus;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       svn_id:                     %s\n",svn_id);
+		fprintf(stderr,"dbg2       verbose:                    %d\n",verbose);
+		fprintf(stderr,"dbg2       datalist_ptr:               %p\n",(void *)datalist_ptr);
+		}
+
+	/* get datalist pointer */
+	datalist = (struct mb_datalist_struct *) datalist_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       datalist->open:             %d\n",datalist->open);
+		fprintf(stderr,"dbg2       datalist->fp:               %p\n",(void *)datalist->fp);
+		fprintf(stderr,"dbg2       datalist->recursion:        %d\n",datalist->recursion);
+		fprintf(stderr,"dbg2       datalist->path:             %s\n",datalist->path);
+		fprintf(stderr,"dbg2       datalist->printed:          %d\n",datalist->printed);
+		fprintf(stderr,"dbg2       datalist->datalist:         %p\n",(void *)datalist->datalist);
+		fprintf(stderr,"dbg2       datalist->look_processed:   %d\n",datalist->look_processed);
+		}
+
+	/* call mb_datalist_read2() */
+	status = mb_datalist_read2(verbose, datalist_ptr, &pstatus, path, ppath, dpath, format, weight, error);
+
+	/* deal with pstatus */
+	if (status == MB_SUCCESS && *error == MB_ERROR_NO_ERROR)
+		{
+		if (pstatus == MB_PROCESSED_USE)
+			{
+			strcpy(path, ppath);
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       path:                       %s\n",path);
+		fprintf(stderr,"dbg2       format:                     %d\n",*format);
+		fprintf(stderr,"dbg2       weight:                     %f\n",*weight);
+		fprintf(stderr,"dbg2       error:                      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                     %d\n",status);
 		}
 
 	return(status);

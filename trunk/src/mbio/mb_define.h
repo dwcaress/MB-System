@@ -217,6 +217,9 @@ typedef char mb_longname[MB_LONGNAME_LENGTH];
 #define	MB_PROJECTION_PROJECTED		1
 
 /* MBIO core function prototypes */
+int mb_version(int verbose, char *version_string, int *version_id,
+		int *version_major, int *version_minor, int *version_archive,
+		int *error);
 int mb_defaults(int verbose, int *format, int *pings,
 		int *lonflip, double bounds[4],
 		int *btime_i, int *etime_i,
@@ -279,6 +282,10 @@ int mb_datalist_read(int verbose,
 int mb_datalist_read2(int verbose,
 		void *datalist_ptr,
 		int *pstatus, char *path, char *ppath, char *dpath, int *format, double *weight,
+		int *error);
+int mb_datalist_readorg(int verbose,
+		void *datalist_ptr,
+		char *path, int *format, double *weight,
 		int *error);
 int mb_datalist_recursion(int verbose,
 		void *datalist_ptr,
@@ -387,7 +394,7 @@ int mb_alloc(int verbose, void *mbio_ptr,
 int mb_deall(int verbose, void *mbio_ptr,
 		void **store_ptr, int *error);
 int mb_get_store(int verbose, void *mbio_ptr,
-		    void **store_ptr, int *error);
+		void **store_ptr, int *error);
 int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error);
 int mb_pingnumber(int verbose, void *mbio_ptr,
