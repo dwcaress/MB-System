@@ -41,7 +41,7 @@ $program_name = "mbm_makesvp";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('AaD:d:F:f:HhI:i:M:m:O:o:Vv');
+&MBGetopts('AaD:d:F:f:HhI:i:M:m:O:o:T:t:Vv');
 $help =    				($opt_H || $opt_h);
 $addtopbottom =    		($opt_A || $opt_a);
 $depthinterval =    	($opt_D || $opt_d || 25);
@@ -49,6 +49,7 @@ $format =    			($opt_F || $opt_f);
 $inputfile =    		($opt_I || $opt_i | "datalist.mb-1");
 $mode =    				($opt_M || $opt_m || 0);
 $output =    			($opt_O || $opt_o);
+$factor =    			($opt_T || $opt_t || 1.0);
 $verbose = 				($opt_V || $opt_v);
 
 # print out help message if required
@@ -68,8 +69,10 @@ if ($help)
 	print "depth value equal to the shallowest calculated value, and appended with a\n";
 	print "full ocean depth (11000 meters) value equal to the deepest calculated\n";
 	print "corrected for pressure using a correction of 0.0167 * delta_depth in m/sec.\n";
+	print "If -Tfacctor is specified, then the sound speed values are multiplied by\n";
+	print "factor before the model is output.\n";
 	print "Basic Usage: \n";
-	print "\t$program_name -Iinputfile [-A -Ddepthinterval -H -Mmode -Ooutput-V]\n";
+	print "\t$program_name -Iinputfile [-A -Ddepthinterval -H -Mmode -Ooutput -Tfactor -V]\n";
 	exit 0;
 	}
 
@@ -94,7 +97,12 @@ if ($verbose)
 # loop over all files referenced in datalist
 if ($verbose)
 	{
-	print "\nGetting depth and sound speed data using mbctdlist...\n\n";
+	print "\nGetting depth and sound speed data using mbctdlist...\n";
+	if ($factor != 1.0)
+		{
+		print "Sound speed values multiplied by $factor\n";
+		}
+	print "\n";
 	}
 if (!$format)
     {
@@ -124,6 +132,7 @@ while (@soundspeedlist)
 		{
 		($depth,$soundspeed) = $line =~ /(\S+)\s+(\S+)/;
 		push(@depths, $depth);
+		$soundspeed *= $factor;
 		push(@soundspeeds, $soundspeed);
 		$nsoundspeed++;
 		if ($nsoundspeed == 1)

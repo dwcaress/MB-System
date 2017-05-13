@@ -79,8 +79,8 @@ int main (int argc, char **argv)
 		{"help",						no_argument, 		NULL, 		0},
 		{"copy",						no_argument, 		NULL, 		0},
 		{"report",						no_argument, 		NULL, 		0},
-		{"format=FORMATID",				required_argument, 	NULL, 		0},
-		{"input=FILE",					required_argument, 	NULL, 		0},
+		{"format",						required_argument, 	NULL, 		0},
+		{"input",						required_argument, 	NULL, 		0},
 		{"make-ancilliary",				no_argument, 		NULL, 		0},
 		{"update-ancilliary",			no_argument, 		NULL, 		0},
 		{"processed",					no_argument, 		NULL, 		0},
@@ -168,7 +168,6 @@ int main (int argc, char **argv)
 		{
 		/* long options */
 		case 0:
-			
 			/* verbose */
 			if (strcmp("verbose", options[option_index].name) == 0)
 				{

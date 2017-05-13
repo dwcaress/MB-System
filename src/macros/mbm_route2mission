@@ -69,7 +69,8 @@ $program_name = "mbm_route2mission";
 $durationfactorwaypoint = 6.0;
 $durationfactormission = 1.5;
 $durationmax = 28800;
-$batterylife = 68400; # 19 hours
+$batterylife = 75600; # 21 hours
+#$batterylife = 68400; # 19 hours
 $safetymargin = 1800;
 
 # set defaults

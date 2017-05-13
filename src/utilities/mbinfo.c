@@ -2509,14 +2509,20 @@ int main (int argc, char **argv)
 			fprintf(output,"\t\t<minimum_altitude>%.4f</minimum_altitude>\n",altmin);
 			fprintf(output,"\t\t<maximum_altitude>%.4f</maximum_altitude>\n",altmax);
 			if (ngdbeams > 0 || verbose >= 1)
+				{
 				fprintf(output,"\t\t<minimum_depth>%.4f</minimum_depth>\n",bathy_scale*bathmin);
 				fprintf(output,"\t\t<maximum_depth>%.4f</maximum_depth>\n",bathy_scale*bathmax);
+				}
 			if (ngabeams > 0 || verbose >= 1)
+				{
 				fprintf(output,"\t\t<minimum_amplitude>%.4f</minimum_amplitude>\n",ampmin);
 				fprintf(output,"\t\t<maximum_amplitude>%.4f</maximum_amplitude>\n",ampmax);
+				}
 			if (ngsbeams > 0 || verbose >= 1)
+				{
 				fprintf(output,"\t\t<minimum_sidescan>%.4f</minimum_sidescan>\n",ssmin);
 				fprintf(output,"\t\t<maximum_sidescan>%.4f</maximum_sidescan>\n",ssmax);
+				}
 			fprintf(output,"\t</limits>\n");
 			break;
 		case '?':

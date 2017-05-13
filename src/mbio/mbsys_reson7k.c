@@ -5707,7 +5707,9 @@ int mbsys_reson7k_preprocess
 	
 	/* kluge parameters */
 	int kluge_beampatternsnell = MB_NO;
-	double kluge_beampatternsnellfactor;
+	double kluge_beampatternsnellfactor = 1.0;
+	int kluge_soundspeedsnell = MB_NO;
+	double kluge_soundspeedsnellfactor = 1.0;
 	int kluge_zeroattitudecorrection = MB_NO;
 	int kluge_zeroalongtrackangles = MB_NO;
 	
@@ -5799,6 +5801,11 @@ int mbsys_reson7k_preprocess
 			kluge_beampatternsnell = MB_YES;
 			kluge_beampatternsnellfactor = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
 			}
+		else if (pars->kluge_id[i] == MB_PR_KLUGE_SOUNDSPEEDTWEAK)
+			{
+			kluge_soundspeedsnell = MB_YES;
+			kluge_soundspeedsnellfactor = *((double *)&pars->kluge_pars[i * MB_PR_KLUGE_PAR_SIZE]);
+			}
 		else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROATTITUDECORRECTION)
 			{
 			kluge_zeroattitudecorrection = MB_YES;
@@ -5844,6 +5851,11 @@ int mbsys_reson7k_preprocess
 				{
 				fprintf(stderr,"dbg2       kluge_beampatternsnell:        %d\n", kluge_beampatternsnell);
 				fprintf(stderr,"dbg2       kluge_beampatternsnellfactor:  %f\n", kluge_beampatternsnellfactor);
+				}
+			else if (pars->kluge_id[i] == MB_PR_KLUGE_SOUNDSPEEDTWEAK)
+				{
+				fprintf(stderr,"dbg2       kluge_soundspeedsnell:         %d\n", kluge_soundspeedsnell);
+				fprintf(stderr,"dbg2       kluge_soundspeedsnellfactor:   %f\n", kluge_soundspeedsnellfactor);
 				}
 			else if (pars->kluge_id[i] == MB_PR_KLUGE_ZEROATTITUDECORRECTION)
 				{
@@ -6443,6 +6455,43 @@ int mbsys_reson7k_preprocess
 					if (store->read_beamgeometry == MB_YES) {
 						for (i = 0; i < bathymetry->number_beams; i++) {
 							beamgeometry->angle_acrosstrack[i] = asin(kluge_beampatternsnellfactor * sin(beamgeometry->angle_acrosstrack[i]));
+						}
+					}
+				}
+					
+				/* if requested apply kluge scaling of sound speed - which means
+					changing beam angles by Snell's law and changing the sound
+					speed used to calculate bathymetry */
+				if (kluge_soundspeedsnell == MB_YES) {
+					/*
+					 * sound speed
+					 */
+					soundspeed *= kluge_soundspeedsnellfactor;
+					
+					/*
+					 * v2rawdetection record
+					 */
+					if (store->read_v2rawdetection == MB_YES) {
+						for (i = 0; i < v2rawdetection->number_beams; i++) {
+							v2rawdetection->rx_angle[i] = asin(MIN(1.0, kluge_soundspeedsnellfactor * sin(v2rawdetection->rx_angle[i])));
+						}
+					}
+					
+					/*
+					 * v2detection record with or without v2detectionsetup
+					 */
+					if (store->read_v2detection == MB_YES) {
+						for (i = 0; i < v2detection->number_beams; i++) {
+							v2detection->angle_x[i] = asin(MIN(1.0, kluge_soundspeedsnellfactor * sin(v2detection->angle_x[i])));
+						}
+					}
+					
+					/*
+					 * beamgeometry record
+					 */
+					if (store->read_beamgeometry == MB_YES) {
+						for (i = 0; i < bathymetry->number_beams; i++) {
+							beamgeometry->angle_acrosstrack[i] = asin(MIN(1.0, kluge_soundspeedsnellfactor * sin(beamgeometry->angle_acrosstrack[i])));
 						}
 					}
 				}
