@@ -57,6 +57,15 @@
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
+/* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
+#undef MBSYSTEM_BUNDLED_PROJ
+
+/* Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h */
+#undef MBSYSTEM_INSTALL_PREFIX
+
+/* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
+#undef MBSYSTEM_OTPS_LOCATION
+
 /* Name of package */
 #undef PACKAGE
 

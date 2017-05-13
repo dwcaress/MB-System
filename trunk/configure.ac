@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2304],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2305],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "6 May 2017", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "13 May 2017", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -77,7 +77,7 @@ AS_ECHO(["    This file has a template:"])
 AS_ECHO(["        ./src/mbio/mb_config.h.in"])
 AS_ECHO(["    This file is conditionally included by:"])
 AS_ECHO(["        ./src/mbio/mb_define.h"])
-AS_ECHO(["    which is in turn included by essentially every MB-System C source file."])
+AS_ECHO(["    which is in turn included by almost every MB-System C source file."])
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["    To use the build system..."])
@@ -194,6 +194,18 @@ AC_CHECK_FUNC(xdrmem_create, XDR_LIB=, [
    [ AC_MSG_ERROR([*** Unable to locate XDR functions.]) ], -lws2_32 )
 ], -lws2_32 )])])])])
 AC_SUBST(XDR_LIB)
+
+dnl--------------------------------------------------------------------
+dnl Shared Data Section
+dnl--------------------------------------------------------------------
+
+dnl variables for shared data
+mbsystemdatadir="$datadir/$PACKAGE"
+AC_SUBST(mbsystemdatadir)
+mbsystemhtmldir="$docdir/html"
+AC_SUBST(mbsystemhtmldir)
+mbsystempsdir="$docdir/ps"
+AC_SUBST(mbsystempsdir)
 
 dnl--------------------------------------------------------------------
 dnl OTPS Section
@@ -741,16 +753,14 @@ else
 fi
 
 dnl--------------------------------------------------------------------
-dnl Shared Data Section
+dnl Add some variables to be exported to the src/mbio/mb_config.h file
 dnl--------------------------------------------------------------------
 
-dnl variables for shared data
-mbsystemdatadir="$datadir/$PACKAGE"
-AC_SUBST(mbsystemdatadir)
-mbsystemhtmldir="$docdir/html"
-AC_SUBST(mbsystemhtmldir)
-mbsystempsdir="$docdir/ps"
-AC_SUBST(mbsystempsdir)
+AC_DEFINE_UNQUOTED(MBSYSTEM_INSTALL_PREFIX, "$prefix", [Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h])
+AC_DEFINE_UNQUOTED(MBSYSTEM_OTPS_LOCATION, "$OTPS_DIR", [Set MBSYSTEM_OTPS_LOCATION define in mb_config.h])
+if test "$bundledproj" = "yes" ; then
+AC_DEFINE_UNQUOTED(MBSYSTEM_BUNDLED_PROJ, 1, [Set MBSYSTEM_OTPS_LOCATION define in mb_config.h])
+fi
 
 dnl--------------------------------------------------------------------
 dnl Generate Makefiles
@@ -775,7 +785,9 @@ AC_CONFIG_FILES([src/proj/Makefile])
 fi
 AC_OUTPUT
 
+dnl--------------------------------------------------------------------
 dnl Summary Report
+dnl--------------------------------------------------------------------
 AS_ECHO([""])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["MB-System Configure Summary"])
@@ -827,8 +839,8 @@ fi
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["Key Variables:"])
 AS_ECHO(["    prefix:                   ${prefix}"])
-AS_ECHO(["    exec_prefix:              ${exec_prefix}"])
-AS_ECHO(["    datarootdir:              ${datarootdir}"])
+AS_ECHO(["    exec_prefix:              ${exec_prefix}          $exec_prefix"])
+AS_ECHO(["    datarootdir:              ${datarootdir}          $datarootdir"])
 AS_ECHO(["    PACKAGE_TARNAME:          ${PACKAGE_TARNAME}"])
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["Installation Locations:"])

@@ -73,7 +73,6 @@ int main (int argc, char **argv)
 	int	read_datalist = MB_NO;
 	mb_path	read_file;
 	mb_path	output_file;
-	mb_path	output_list_file;
 	int	output_file_set = MB_NO;
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
@@ -199,7 +198,6 @@ int main (int argc, char **argv)
 	int	linechange;
 	double	dx, dy;
 	FILE	*fp = NULL;
-	FILE	*cfp = NULL;
 	char	*result;
 	int	nget;
 	int	point_ok;
@@ -837,8 +835,6 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 				    {
 				    fclose(fp);
 				    fp = NULL;
-				    fclose(cfp);
-				    cfp = NULL;
 
 				    /* output count of segy records */
 				    fprintf(stderr,"%d records output to segy file %s\n",
@@ -944,7 +940,7 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 
 					//sprintf(command, "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -trim -quality 75 %s_%4.4d_%2.2d_sectionplot.jpg\n\n",
 					//		lineroot, linenumber, i + 1, lineroot, linenumber, i + 1);
-					sprintf(command, "gmt psconvert %s_%4.4d_%2.2d_sectionplot.ps -Tj -A -E300\n\n",
+					sprintf(command, "gmt psconvert %s_%4.4d_%2.2d_sectionplot.ps -Tj -A -E300 -P\n\n",
 							lineroot, linenumber, i + 1);
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
@@ -1109,17 +1105,6 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				/* output info on file output */
 				fprintf(stderr,"Outputting subbottom data to segy file %s\n",
 					output_file);
-				}
-			sprintf(output_list_file,"%s.txt",output_file);
-			if ((cfp = fopen(output_list_file, "w")) == NULL)
-				{
-				status = MB_FAILURE;
-				error = MB_ERROR_WRITE_FAIL;
-				fprintf(stderr,"\nError opening output segy list file:\n%s\n",
-					output_list_file);
-				fprintf(stderr,"\nProgram <%s> Terminated\n",
-					program_name);
-				exit(error);
 				}
 			}
 

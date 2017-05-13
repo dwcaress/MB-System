@@ -35,6 +35,8 @@ Version 5.0
 <B>--help</B>
 <B>--input</B>=<I>FILE</I>
 <B>--format</B>=<I>FORMATID</I>
+<BR>
+
 <B>--output-sensor-fnv</B>
 <BR>
 
@@ -71,20 +73,30 @@ Version 5.0
 <B>--time-latency-file</B>=<I>FILE</I>
 <B>--time-latency-file-format</B>=<I>FORMATID</I>
 <B>--time-latency-constant</B>=<I>SECONDS</I>
+<BR>
+
 <B>--time-latency-apply-nav</B>
 <B>--time-latency-apply-sensordepth</B>
 <B>--time-latency-apply-heading</B>
+<BR>
+
 <B>--time-latency-apply-attitude</B>
 <B>--time-latency-apply-altitude</B>
 <B>--time-latency-apply-all-ancilliary</B>
+<BR>
+
 <B>--time-latency-apply-survey</B>
 <B>--time-latency-apply-all</B>
 <BR>
 
 <B>--filter</B>=<I>SECONDS</I>
+<BR>
+
 <B>--filter-apply-nav</B>
 <B>--filter-apply-sensordepth</B>
 <B>--filter-apply-heading</B>
+<BR>
+
 <B>--filter-apply-attitude</B>
 <B>--filter-apply-altitude</B>
 <B>--filter-apply-all-ancilliary</B>
@@ -92,13 +104,20 @@ Version 5.0
 
 <B>--platform-file</B>=<I>FILE</I>
 <B>--platform-target-sensor</B>=<I>RECORDID</I>
+<BR>
+
 <B>--no-change-survey</B>
-<B>multibeam-sidescan-source</B>=<I>SECONDS</I>
-<B>kluge-time-jumps</B>=<I>SECONDS</I>
-<B>kluge-beam-tweak</B>=<I>FACTOR</I>
-<B>kluge-zero-attitude-correction</B>
-<B>kluge-zero-alongtrack-angles</B>
-<P>
+<BR>
+
+<B>--multibeam-sidescan-source</B>=<I>SECONDS</I>
+<BR>
+
+<B>--kluge-time-jumps</B>=<I>SECONDS</I>
+<B>--kluge-beam-tweak</B>=<I>FACTOR</I>
+<BR>
+
+<B>--kluge-zero-attitude-correction</B>
+<B>--kluge-zero-alongtrack-angles</B>
 <BR>
 
 ]
@@ -141,14 +160,186 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
+<DT><B>--help</B>
+
+<DD>
+This option causes <B>mbconfig</B> to print out its usage options and exit.
 <DT><B>--verbose</B>
 
 <DD>
 By default <B>mbpreprocess</B> outputs minimal information to the shell. This option
-causes the program to indicate it's progress as it runs. Goody.
+causes the program to indicate it's progress as it runs.
+<P>
+<DT><B>--input=</B><I>FILE</I>
+
+<DD>
+Swath data file from which the input data will be read, or a datalist file
+containing a list of input swath data files and/or other datalist files.
+If <I>FILE</I> is a datalist file, then mbpreprocess will attempt to preprocess
+all data files identified by recursively reading the datalist structure
+referenced in <I>FILE</I>.
+<DT><B>--format=</B><I>FORMATID</I>
+
+<DD>
+Sets the <B>MBIO</B> integer format identifier
+for the input file <I>FILE</I> specified with the
+<B>--input</B> option. By default, <B>mbpreprocess</B>
+infers the format from the &quot;*.mbXX&quot; <B>MB-System</B> suffix
+convention.
+<DT><B>--output-sensor-fnv</B>
+
+<DD>
+Causes <B>mbpreprocess</B> to output &quot;fast navigation&quot; or *.fnv files for each
+of the sensors described in the platform file specified with the <B>--platform-file</B>
+option. These *.fnv files will be corrected for the lever arms specified by the
+positional and angular offsets defined in the platform file.
+<BR>
+
+<DT><B>--nav-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--nav-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--nav-async=</B><I>RECORDTYPE</I>
+
+<DD>
+<DT><B>--nav-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
+<DT><B>--sensordepth-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--sensordepth-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--sensordepth-async=</B><I>RECORDTYPE</I>
+
+<DD>
+<DT><B>--sensordepth-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
+<DT><B>--heading-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--heading-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--heading-async=</B><I>RECORDTYPE</I>
+
+<DD>
+<DT><B>--heading-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
+<DT><B>--altitude-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--altitude-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--altitude-async=</B><I>RECORDTYPE</I>
+
+<DD>
+<DT><B>--altitude-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
+<DT><B>--attitude-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--attitude-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--attitude-async=</B><I>RECORDTYPE</I>
+
+<DD>
+<DT><B>--attitude-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
+<DT><B>--time-latency-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--time-latency-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--time-latency-constant=</B><I>SECONDS</I>
+
+<DD>
+<DT><B>--time-latency-apply-nav</B>
+
+<DD>
+<DT><B>--time-latency-apply-sensordepth</B>
+
+<DD>
+<DT><B>--time-latency-apply-heading</B>
+
+<DD>
+<DT><B>--time-latency-apply-attitude</B>
+
+<DD>
+<DT><B>--time-latency-apply-altitude</B>
+
+<DD>
+<DT><B>--time-latency-apply-all-ancilliary</B>
+
+<DD>
+<DT><B>--time-latency-apply-survey</B>
+
+<DD>
+<DT><B>--time-latency-apply-all</B>
+
+<DD>
+<BR>
+
+<DT><B>--filter=</B><I>SECONDS</I>
+
+<DD>
+<DT><B>--filter-apply-nav</B>
+
+<DD>
+<DT><B>--filter-apply-sensordepth</B>
+
+<DD>
+<DT><B>--filter-apply-heading</B>
+
+<DD>
+<DT><B>--filter-apply-attitude</B>
+
+<DD>
+<DT><B>--filter-apply-altitude</B>
+
+<DD>
+<DT><B>--filter-apply-all-ancilliary</B>
+
+<DD>
+<BR>
+
+<DT><B>--platform-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--platform-target-sensor=</B><I>RECORDID</I>
+
+<DD>
+<DT><B>--no-change-survey</B>
+
+<DD>
+<DT><B>multibeam-sidescan-source=</B><I>SECONDS</I><DD>
+<DT><B>kluge-time-jumps=</B><I>SECONDS</I><DD>
+<DT><B>kluge-beam-tweak=</B><I>FACTOR</I><DD>
+<DT><B>kluge-zero-attitude-correction<DD>
+<DT>kluge-zero-alongtrack-angles<DD>
 <P>
 </DL>
-<A NAME="lbAH">&nbsp;</A>
+</B><A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
 To be written.....
