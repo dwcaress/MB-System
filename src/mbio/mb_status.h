@@ -67,95 +67,96 @@
 #define	MB_DATA_PARAMETER		9	/* general */
 #define	MB_DATA_START			10	/* Simrad */
 #define	MB_DATA_STOP			11	/* Simrad */
-#define	MB_DATA_NAV			12	/* Simrad, Reson 7k */
-#define	MB_DATA_RUN_PARAMETER		13	/* Simrad */
+#define	MB_DATA_NAV			    12	/* Simrad, Reson 7k */
+#define	MB_DATA_RUN_PARAMETER	13	/* Simrad */
 #define	MB_DATA_CLOCK			14	/* Simrad */
 #define	MB_DATA_TIDE			15	/* Simrad, Reson 7k */
 #define	MB_DATA_HEIGHT			16	/* Simrad */
 #define	MB_DATA_HEADING			17	/* Simrad, Hypack */
 #define	MB_DATA_ATTITUDE		18	/* Simrad, Hypack, Reson 7k */
-#define	MB_DATA_SSV			19	/* Simrad */
+#define	MB_DATA_SSV			    19	/* Simrad */
 #define	MB_DATA_ANGLE			20	/* HSMD */
 #define	MB_DATA_EVENT			21	/* HSMD */
 #define	MB_DATA_HISTORY			22	/* GSF */
 #define	MB_DATA_SUMMARY			23	/* GSF */
 #define	MB_DATA_PROCESSING_PARAMETERS	24	/* GSF */
-#define	MB_DATA_SENSOR_PARAMETERS	25	/* GSF */
-#define	MB_DATA_NAVIGATION_ERROR	26	/* GSF */
-#define	MB_DATA_RAW_LINE		27	/* uninterpretable line for ascii formats */
-#define	MB_DATA_NAV1			28	/* ancillary nav system 1 */
-#define	MB_DATA_NAV2			29	/* ancillary nav system 2 */
-#define	MB_DATA_NAV3			30	/* ancillary nav system 3 */
-#define	MB_DATA_TILT			31	/* Simrad */
-#define	MB_DATA_MOTION			32	/* Reson 7k */
-#define	MB_DATA_CTD			33	/* Reson 7k */
-#define	MB_DATA_SUBBOTTOM_MCS		34	/* Reson 7k */
-#define	MB_DATA_SUBBOTTOM_CNTRBEAM	35	/* Simrad */
-#define	MB_DATA_SUBBOTTOM_SUBBOTTOM	36	/* Reson 7k, XTF */
-#define	MB_DATA_SIDESCAN2		37	/* Reson 7k, XTF */
-#define	MB_DATA_SIDESCAN3		38	/* Reson 7k, XTF */
-#define	MB_DATA_IMAGE			39	/* Reson 7k */
-#define	MB_DATA_ROLL			40	/* Reson 7k */
-#define	MB_DATA_PITCH			41	/* Reson 7k */
-#define	MB_DATA_ABSORPTIONLOSS		42	/* Reson 7k */
-#define	MB_DATA_SPREADINGLOSS		43	/* Reson 7k */
-#define	MB_DATA_INSTALLATION		44	/* Reson 7k */
-#define	MB_DATA_WATER_COLUMN		45	/* Simrad */
-#define	MB_DATA_STATUS			46	/* Simrad, XTF */
-#define	MB_DATA_DVL			47	/* JSTAR */
-#define	MB_DATA_NMEA_RMC		48	/* NMEA */
-#define	MB_DATA_NMEA_DBT		49	/* NMEA */
-#define	MB_DATA_NMEA_DPT		50	/* NMEA */
-#define	MB_DATA_NMEA_ZDA		51	/* NMEA */
-#define	MB_DATA_NMEA_GLL		52	/* NMEA */
-#define	MB_DATA_NMEA_GGA		53	/* NMEA */
-#define	MB_DATA_SURVEY_LINE		54	/* Reson 7k */
-#define	MB_DATA_ATTITUDE1		55	/* ancillary attitude system 1 */
-#define	MB_DATA_ATTITUDE2		56      /* ancillary attitude system 2 */
-#define	MB_DATA_ATTITUDE3		57	/* ancillary attitude system 3 */
-#define	MB_DATA_SONARDEPTH		58	/* HYSWEEP dynamic draft */
-#define	MB_DATA_ALTITUDE		59	/* HYSWEEP single beam echosounder */
-#define	MB_DATA_GEN_SENS		60	/* WASSP generic sensor data */
-#define	MB_DATA_WC_PICKS 		61	/* WASSP water column picks */
+#define	MB_DATA_SENSOR_PARAMETERS	    25	/* GSF */
+#define	MB_DATA_NAVIGATION_ERROR	    26	/* GSF */
+#define	MB_DATA_SINGLE_BEAM_PING	    27	/* GSF */
+#define	MB_DATA_RAW_LINE		28	/* uninterpretable line for ascii formats */
+#define	MB_DATA_NAV1			29	/* ancillary nav system 1 */
+#define	MB_DATA_NAV2			30	/* ancillary nav system 2 */
+#define	MB_DATA_NAV3			31	/* ancillary nav system 3 */
+#define	MB_DATA_TILT			32	/* Simrad */
+#define	MB_DATA_MOTION			33	/* Reson 7k */
+#define	MB_DATA_CTD			    34	/* Reson 7k */
+#define	MB_DATA_SUBBOTTOM_MCS		35	/* Reson 7k */
+#define	MB_DATA_SUBBOTTOM_CNTRBEAM	36	/* Simrad */
+#define	MB_DATA_SUBBOTTOM_SUBBOTTOM	37	/* Reson 7k, XTF */
+#define	MB_DATA_SIDESCAN2		38	/* Reson 7k, XTF */
+#define	MB_DATA_SIDESCAN3		39	/* Reson 7k, XTF */
+#define	MB_DATA_IMAGE			40	/* Reson 7k */
+#define	MB_DATA_ROLL			41	/* Reson 7k */
+#define	MB_DATA_PITCH			42	/* Reson 7k */
+#define	MB_DATA_ABSORPTIONLOSS		43	/* Reson 7k */
+#define	MB_DATA_SPREADINGLOSS		44	/* Reson 7k */
+#define	MB_DATA_INSTALLATION		45	/* Reson 7k */
+#define	MB_DATA_WATER_COLUMN		46	/* Simrad */
+#define	MB_DATA_STATUS			47	/* Simrad, XTF */
+#define	MB_DATA_DVL			    48	/* JSTAR */
+#define	MB_DATA_NMEA_RMC		49	/* NMEA */
+#define	MB_DATA_NMEA_DBT		50	/* NMEA */
+#define	MB_DATA_NMEA_DPT		51	/* NMEA */
+#define	MB_DATA_NMEA_ZDA		52	/* NMEA */
+#define	MB_DATA_NMEA_GLL		53	/* NMEA */
+#define	MB_DATA_NMEA_GGA		54	/* NMEA */
+#define	MB_DATA_SURVEY_LINE		55	/* Reson 7k */
+#define	MB_DATA_ATTITUDE1		56	/* ancillary attitude system 1 */
+#define	MB_DATA_ATTITUDE2		57  /* ancillary attitude system 2 */
+#define	MB_DATA_ATTITUDE3		58	/* ancillary attitude system 3 */
+#define	MB_DATA_SONARDEPTH		59	/* HYSWEEP dynamic draft */
+#define	MB_DATA_ALTITUDE		60	/* HYSWEEP single beam echosounder */
+#define	MB_DATA_GEN_SENS		61	/* WASSP generic sensor data */
+#define	MB_DATA_WC_PICKS 		62	/* WASSP water column picks */
 
 /* MBIO function status convention */
-#define	MB_SUCCESS			1
-#define	MB_FAILURE			0
+#define	MB_SUCCESS			        1
+#define	MB_FAILURE			        0
 
 /* MBIO minimum and maximum error values */
-#define	MB_ERROR_MIN			-24
-#define	MB_ERROR_MAX			16
+#define	MB_ERROR_MIN			    -24
+#define	MB_ERROR_MAX			    16
 
 /* MBIO function fatal error values */
-#define	MB_ERROR_NO_ERROR		0
+#define	MB_ERROR_NO_ERROR		    0
 #define	MB_ERROR_MEMORY_FAIL		1
-#define	MB_ERROR_OPEN_FAIL		2
-#define	MB_ERROR_BAD_FORMAT		3
-#define	MB_ERROR_EOF			4
-#define	MB_ERROR_WRITE_FAIL		5
+#define	MB_ERROR_OPEN_FAIL		    2
+#define	MB_ERROR_BAD_FORMAT		    3
+#define	MB_ERROR_EOF			    4
+#define	MB_ERROR_WRITE_FAIL		    5
 #define	MB_ERROR_NONE_IN_BOUNDS		6
 #define	MB_ERROR_NONE_IN_TIME		7
 #define	MB_ERROR_BAD_DESCRIPTOR		8
-#define	MB_ERROR_BAD_USAGE		9
+#define	MB_ERROR_BAD_USAGE		    9
 #define	MB_ERROR_NO_PINGS_BINNED	10
-#define	MB_ERROR_BAD_KIND		11
+#define	MB_ERROR_BAD_KIND		    11
 #define MB_ERROR_BAD_PARAMETER		12
 #define	MB_ERROR_BAD_BUFFER_ID		13
-#define	MB_ERROR_BAD_SYSTEM		14
-#define	MB_ERROR_BAD_DATA		15
+#define	MB_ERROR_BAD_SYSTEM		    14
+#define	MB_ERROR_BAD_DATA		    15
 #define	MB_ERROR_MISSING_DATA		16
 
 /* MBIO function nonfatal error values */
-#define	MB_ERROR_TIME_GAP		-1
-#define	MB_ERROR_OUT_BOUNDS		-2
-#define	MB_ERROR_OUT_TIME		-3
+#define	MB_ERROR_TIME_GAP		    -1
+#define	MB_ERROR_OUT_BOUNDS		    -2
+#define	MB_ERROR_OUT_TIME		    -3
 #define	MB_ERROR_SPEED_TOO_SMALL	-4
-#define	MB_ERROR_COMMENT		-5
-#define	MB_ERROR_SUBBOTTOM		-6
+#define	MB_ERROR_COMMENT		    -5
+#define	MB_ERROR_SUBBOTTOM		    -6
 #define	MB_ERROR_WATER_COLUMN		-7
-#define	MB_ERROR_OTHER			-8
+#define	MB_ERROR_OTHER			    -8
 #define	MB_ERROR_UNINTELLIGIBLE		-9
-#define	MB_ERROR_IGNORE			-10
+#define	MB_ERROR_IGNORE			    -10
 #define	MB_ERROR_NO_DATA_REQUESTED	-11
 #define	MB_ERROR_BUFFER_FULL		-12
 #define	MB_ERROR_NO_DATA_LOADED		-13
@@ -169,7 +170,7 @@
 #define	MB_ERROR_NOT_ENOUGH_DATA	-21
 #define	MB_ERROR_FILE_NOT_FOUND		-22
 #define	MB_ERROR_FILE_LOCKED		-23
-#define	MB_ERROR_INIT_FAIL		-24
+#define	MB_ERROR_INIT_FAIL		    -24
 
 /* MBIO problem values */
 #define	MB_PROBLEM_MAX			6
