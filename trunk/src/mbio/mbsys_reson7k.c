@@ -1031,7 +1031,8 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	for (i=0;i<128;i++)
 		installation->s7k_version[i] = 0;
 	installation->protocal_version_len = 0;
-	installation->protocal_version[i] = 0;
+	for (i=0;i<128;i++)
+		installation->protocal_version[i] = 0;
 	installation->transmit_x = 0.0;
 	installation->transmit_y = 0.0;
 	installation->transmit_z = 0.0;
@@ -11701,7 +11702,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    && nbathsort > 0)
 			{
 			/* calculate pixel size implied using swath width and nadir altitude */
-			qsort((char *)bathsort, nbathsort, sizeof(double),(void *)mb_double_compare);
+			qsort((void *)bathsort, nbathsort, sizeof(double),(void *)mb_double_compare);
 			pixel_size_calc = 2.1 * tan(DTR * (*swath_width)) * bathsort[nbathsort/2] / nss;
 
 			/* use pixel size based on actual swath width if that is larger than the first value */
@@ -12050,7 +12051,7 @@ ibeam,k,kk,ss_cnt[kk],ss[kk], xtrackss, (k-nss/2)*(*pixel_size), ssalongtrack[kk
 				if (k2 <= k)
 					{
 					k2 = k+1;
-					while (ss_cnt[k2] <= 0 && k2 < last)
+					while (k2 < last && ss_cnt[k2] <= 0)
 					    k2++;
 					}
 				if (k2 - k1 <= pixel_int_use)

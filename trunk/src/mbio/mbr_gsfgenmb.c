@@ -424,6 +424,7 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* read next record from file */
 	ret = gsfRead((int)mb_io_ptr->gsfid, GSF_NEXT_RECORD, dataID, records, NULL, 0);
 
+
 	/* deal with errors */
 	if (ret < 0)
 	    {
@@ -448,62 +449,12 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* else deal with data */
 	else
 	    {
-	    if (dataID->recordID == GSF_RECORD_HISTORY)
+
+	    if (dataID->recordID == GSF_RECORD_HEADER)
 			{
-			data->kind = MB_DATA_HISTORY;
+			data->kind = MB_DATA_HEADER;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
-			}
-
-	    else if (dataID->recordID == GSF_RECORD_SWATH_BATHY_SUMMARY)
-			{
-			data->kind = MB_DATA_SUMMARY;
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
-			}
-
-	    else if (dataID->recordID == GSF_RECORD_PROCESSING_PARAMETERS)
-			{
-			data->kind = MB_DATA_PROCESSING_PARAMETERS;
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
-			}
-
-	    else if (dataID->recordID == GSF_RECORD_SENSOR_PARAMETERS)
-			{
-			data->kind = MB_DATA_PROCESSING_PARAMETERS;
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
-			}
-
-	    else if (dataID->recordID == GSF_RECORD_NAVIGATION_ERROR)
-			{
-			data->kind = MB_DATA_NAVIGATION_ERROR;
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
-			}
-
-	    else if (dataID->recordID == GSF_RECORD_SOUND_VELOCITY_PROFILE)
-			{
-			data->kind = MB_DATA_VELOCITY_PROFILE;
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
-			}
-
-	    else if (dataID->recordID == GSF_RECORD_COMMENT)
-			{
-			/* copy comment */
-			data->kind = MB_DATA_COMMENT;
-			if (records->comment.comment != NULL)
-				{
-				status = MB_SUCCESS;
-				*error = MB_ERROR_NO_ERROR;
-				}
-			else
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_UNINTELLIGIBLE;
-				}
 			}
 
 	    else if (dataID->recordID == GSF_RECORD_SWATH_BATHYMETRY_PING)
@@ -536,6 +487,85 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				for (i=0;i<mb_ping->number_beams;i++)
 				mb_ping->along_track[i] = 0.0;
 				}
+			}
+
+	    else if (dataID->recordID == GSF_RECORD_SOUND_VELOCITY_PROFILE)
+			{
+			data->kind = MB_DATA_VELOCITY_PROFILE;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+
+	    else if (dataID->recordID == GSF_RECORD_PROCESSING_PARAMETERS)
+			{
+			data->kind = MB_DATA_PROCESSING_PARAMETERS;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+
+	    else if (dataID->recordID == GSF_RECORD_SENSOR_PARAMETERS)
+			{
+			data->kind = MB_DATA_PROCESSING_PARAMETERS;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+
+	    else if (dataID->recordID == GSF_RECORD_COMMENT)
+			{
+			/* copy comment */
+			data->kind = MB_DATA_COMMENT;
+			if (records->comment.comment != NULL)
+				{
+				status = MB_SUCCESS;
+				*error = MB_ERROR_NO_ERROR;
+				}
+			else
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				}
+			}
+			
+	    else if (dataID->recordID == GSF_RECORD_HISTORY)
+			{
+			data->kind = MB_DATA_HISTORY;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+
+	    else if (dataID->recordID == GSF_RECORD_NAVIGATION_ERROR) /* 10/19/98 This record is obsolete */
+			{
+			data->kind = MB_DATA_NAVIGATION_ERROR;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+
+	    else if (dataID->recordID == GSF_RECORD_SWATH_BATHY_SUMMARY)
+			{
+			data->kind = MB_DATA_SUMMARY;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+
+	    else if (dataID->recordID == GSF_RECORD_SINGLE_BEAM_PING)
+			{
+			data->kind = MB_DATA_SINGLE_BEAM_PING;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+
+	    else if (dataID->recordID == GSF_RECORD_HV_NAVIGATION_ERROR) /* This record replaces GSF_RECORD_NAVIGATION_ERROR */
+			{
+			data->kind = MB_DATA_NAVIGATION_ERROR;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+
+	    else if (dataID->recordID == GSF_RECORD_ATTITUDE)
+			{
+			data->kind = MB_DATA_ATTITUDE;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
 			}
 
 	    else
@@ -691,62 +721,48 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		fprintf(stderr,"\ndbg4  New record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg4  New record kind:\n");
-		fprintf(stderr,"dbg4       kind:              %d\n",
-			data->kind);
+		fprintf(stderr,"dbg4       kind:              %d\n", data->kind);
 		}
 	if (verbose >= 4 && data->kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"\ndbg4  New comment to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg4  New comment values:\n");
-		fprintf(stderr,"dbg4       kind:              %d\n",
-			data->kind);
-		fprintf(stderr,"dbg4       comment time sec:  %ld\n",
-			records->comment.comment_time.tv_sec);
-		fprintf(stderr,"dbg4       comment time nsec: %ld\n",
-			records->comment.comment_time.tv_nsec);
-		fprintf(stderr,"dbg4       comment length:    %d\n",
-			records->comment.comment_length);
-		fprintf(stderr,"dbg4       comment:           %s\n",
-			records->comment.comment);
+		fprintf(stderr,"dbg4       kind:              %d\n", data->kind);
+		fprintf(stderr,"dbg4       comment time sec:  %ld\n", records->comment.comment_time.tv_sec);
+		fprintf(stderr,"dbg4       comment time nsec: %ld\n", records->comment.comment_time.tv_nsec);
+		fprintf(stderr,"dbg4       comment length:    %d\n", records->comment.comment_length);
+		fprintf(stderr,"dbg4       comment:           %s\n", records->comment.comment);
 		}
 	if (verbose >= 4 && data->kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"\ndbg4  New ping to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg4  New ping values:\n");
-		fprintf(stderr,"dbg4       kind:       %d\n",
-			data->kind);
-		fprintf(stderr,"dbg4       time sec:   %ld\n",
-			mb_ping->ping_time.tv_sec);
-		fprintf(stderr,"dbg4       time nsec:  %ld\n",
-			mb_ping->ping_time.tv_nsec);
-		fprintf(stderr,"dbg4       longitude:  %f\n",
-			mb_ping->longitude);
-		fprintf(stderr,"dbg4       latitude:   %f\n",
-			mb_ping->latitude);
-		fprintf(stderr,"dbg4       speed:      %f\n",
-			mb_ping->speed);
-		fprintf(stderr,"dbg4       heading:    %f\n",
-			mb_ping->heading);
-		fprintf(stderr,"dbg4       beams:      %d\n",
-			mb_ping->number_beams);
+		fprintf(stderr,"dbg4       kind:       %d\n", data->kind);
+		fprintf(stderr,"dbg4       time sec:   %ld\n", mb_ping->ping_time.tv_sec);
+		fprintf(stderr,"dbg4       time nsec:  %ld\n", mb_ping->ping_time.tv_nsec);
+		fprintf(stderr,"dbg4       longitude:  %f\n", mb_ping->longitude);
+		fprintf(stderr,"dbg4       latitude:   %f\n", mb_ping->latitude);
+		fprintf(stderr,"dbg4       speed:      %f\n", mb_ping->speed);
+		fprintf(stderr,"dbg4       heading:    %f\n", mb_ping->heading);
+		fprintf(stderr,"dbg4       beams:      %d\n", mb_ping->number_beams);
 		for (i=0;i<mb_ping->number_beams;i++)
-		  fprintf(stderr,"dbg4       beam:%d  flag:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,mb_ping->beam_flags[i],
-			mb_ping->depth[i],
-			mb_ping->across_track[i],
-			mb_ping->along_track[i]);
+			fprintf(stderr,"dbg4       beam:%d  flag:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+					i,mb_ping->beam_flags[i],
+					mb_ping->depth[i],
+					mb_ping->across_track[i],
+					mb_ping->along_track[i]);
 		if (mb_ping->mc_amplitude != NULL)
-		for (i=0;i<mb_ping->number_beams;i++)
-		  fprintf(stderr,"dbg4       beam:%d  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,mb_ping->mc_amplitude[i],
-			mb_ping->across_track[i],
-			mb_ping->along_track[i]);
+			for (i=0;i<mb_ping->number_beams;i++)
+				fprintf(stderr,"dbg4       beam:%d  amp:%f  acrosstrack:%f  alongtrack:%f\n",
+						i,mb_ping->mc_amplitude[i],
+						mb_ping->across_track[i],
+						mb_ping->along_track[i]);
 		if (mb_ping->mr_amplitude != NULL)
-		for (i=0;i<mb_ping->number_beams;i++)
-		  fprintf(stderr,"dbg4       beam:%d  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,mb_ping->mr_amplitude[i],
-			mb_ping->across_track[i],
-			mb_ping->along_track[i]);
+			for (i=0;i<mb_ping->number_beams;i++)
+				fprintf(stderr,"dbg4       beam:%d  amp:%f  acrosstrack:%f  alongtrack:%f\n",
+						i,mb_ping->mr_amplitude[i],
+						mb_ping->across_track[i],
+						mb_ping->along_track[i]);
 		}
 
 	/* write gsf data to file */
@@ -756,27 +772,27 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    	output the processing parameters */
 	    if (data->kind == MB_DATA_DATA && mb_io_ptr->save1 == MB_NO)
 	    	{
-		/* write a processing parameter record */
-		dataID->recordID = GSF_RECORD_PROCESSING_PARAMETERS;
-		if ((ret = gsfWrite((int)mb_io_ptr->gsfid, dataID, records)) < 0)
-		    {
-		    status = MB_FAILURE;
-		    *error = MB_ERROR_WRITE_FAIL;
-		    }
-		dataID->recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
-		mb_io_ptr->save1 = MB_YES;
-		}
+			/* write a processing parameter record */
+			dataID->recordID = GSF_RECORD_PROCESSING_PARAMETERS;
+			if ((ret = gsfWrite((int)mb_io_ptr->gsfid, dataID, records)) < 0)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_WRITE_FAIL;
+				}
+			dataID->recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
+			mb_io_ptr->save1 = MB_YES;
+			}
 		
 	    /* if a processing parameter record is output, keep track of it */
 	    else if (data->kind == MB_DATA_PROCESSING_PARAMETERS)
-		mb_io_ptr->save1 = MB_YES; 
+			mb_io_ptr->save1 = MB_YES; 
 
 	    /* write the record */
 	    if ((ret = gsfWrite((int)mb_io_ptr->gsfid, dataID, records)) < 0)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-		}
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
 	    }
 
 	/* print output debug statements */
