@@ -371,7 +371,7 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	char	line[MB_COMMENT_MAXLINE];
+	char	line[MB_COMMENT_MAXLINE] = "";
 	char	*line_ptr;
 	int	*read_count;
 	int	nget;
@@ -525,7 +525,7 @@ int mbr_wt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	char	line[MB_COMMENT_MAXLINE];
+	char	line[MB_COMMENT_MAXLINE] = "";
 	int	*write_count;
 	int	len;
 

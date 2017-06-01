@@ -5877,11 +5877,19 @@ int mbsys_reson7k_preprocess
 		v2detectionsetup = &(store->v2detectionsetup);
 		v2rawdetection = &(store->v2rawdetection);
 		bluefin = &(store->bluefin);
+		volatilesettings = &(store->volatilesettings);
+		matchfilter = &(store->matchfilter);
+		beamgeometry = &(store->beamgeometry);
+		remotecontrolsettings = &(store->remotecontrolsettings);
+		backscatter = &(store->backscatter);
+		beam = &(store->beam);
+		verticaldepth = &(store->verticaldepth);
+		image = &(store->image);
+		bathymetry = &(store->bathymetry);
 
 		/* print out record headers */
 		if (store->read_volatilesettings == MB_YES)
 			{
-			volatilesettings = &(store->volatilesettings);
 			header = &(volatilesettings->header);
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
@@ -5898,7 +5906,6 @@ int mbsys_reson7k_preprocess
 			}
 		if (store->read_matchfilter == MB_YES)
 			{
-			matchfilter = &(store->matchfilter);
 			header = &(matchfilter->header);
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
@@ -5915,7 +5922,6 @@ int mbsys_reson7k_preprocess
 			}
 		if (store->read_beamgeometry == MB_YES)
 			{
-			beamgeometry = &(store->beamgeometry);
 			header = &(beamgeometry->header);
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
@@ -5932,7 +5938,6 @@ int mbsys_reson7k_preprocess
 			}
 		if (store->read_remotecontrolsettings == MB_YES)
 			{
-			remotecontrolsettings = &(store->remotecontrolsettings);
 			header = &(remotecontrolsettings->header);
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
@@ -5949,7 +5954,6 @@ int mbsys_reson7k_preprocess
 			}
 		if (store->read_backscatter == MB_YES)
 			{
-			backscatter = &(store->backscatter);
 			header = &(backscatter->header);
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
@@ -5966,7 +5970,6 @@ int mbsys_reson7k_preprocess
 			}
 		if (store->read_beam == MB_YES)
 			{
-			beam = &(store->beam);
 			header = &(beam->header);
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
@@ -5983,7 +5986,6 @@ int mbsys_reson7k_preprocess
 			}
 		if (store->read_verticaldepth == MB_YES)
 			{
-			verticaldepth = &(store->verticaldepth);
 			header = &(verticaldepth->header);
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
@@ -6000,7 +6002,6 @@ int mbsys_reson7k_preprocess
 			}
 		if (store->read_image == MB_YES)
 			{
-			image = &(store->image);
 			header = &(image->header);
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
@@ -6022,7 +6023,6 @@ int mbsys_reson7k_preprocess
 			}
 		else
 			{
-			bathymetry = &(store->bathymetry);
 			header = &(bathymetry->header);
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
@@ -7702,7 +7702,7 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 		/* get edgetech sidescan header */
 		if (*kind == MB_DATA_SIDESCAN2)
 			fsdwssheader = &(fsdwsslo->ssheader[0]);
-		else if (*kind == MB_DATA_SIDESCAN3)
+		else //if (*kind == MB_DATA_SIDESCAN3)
 			fsdwssheader = &(fsdwsshi->ssheader[0]);
 
 		/* get time */
@@ -8152,7 +8152,7 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 		/* get edgetech sidescan header */
 		if (store->kind == MB_DATA_SIDESCAN2)
 			fsdwssheader = &(fsdwsslo->ssheader[0]);
-		else if (store->kind == MB_DATA_SIDESCAN3)
+		else //if (store->kind == MB_DATA_SIDESCAN3)
 			fsdwssheader = &(fsdwsshi->ssheader[0]);
 
 		/* get time */
@@ -9105,7 +9105,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get edgetech sidescan header */
 		if (*kind == MB_DATA_SIDESCAN2)
 			fsdwssheader = &(fsdwsslo->ssheader[0]);
-		else if (*kind == MB_DATA_SIDESCAN3)
+		else //if (*kind == MB_DATA_SIDESCAN3)
 			fsdwssheader = &(fsdwsshi->ssheader[0]);
 
 		/* get time */
@@ -10096,71 +10096,75 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
-		fprintf(stderr,"dbg2       seq_num:           %d\n",mb_segytraceheader_ptr->seq_num);
-		fprintf(stderr,"dbg2       seq_reel:          %d\n",mb_segytraceheader_ptr->seq_reel);
-		fprintf(stderr,"dbg2       shot_num:          %d\n",mb_segytraceheader_ptr->shot_num);
-		fprintf(stderr,"dbg2       shot_tr:           %d\n",mb_segytraceheader_ptr->shot_tr);
-		fprintf(stderr,"dbg2       espn:              %d\n",mb_segytraceheader_ptr->espn);
-		fprintf(stderr,"dbg2       rp_num:            %d\n",mb_segytraceheader_ptr->rp_num);
-		fprintf(stderr,"dbg2       rp_tr:             %d\n",mb_segytraceheader_ptr->rp_tr);
-		fprintf(stderr,"dbg2       trc_id:            %d\n",mb_segytraceheader_ptr->trc_id);
-		fprintf(stderr,"dbg2       num_vstk:          %d\n",mb_segytraceheader_ptr->num_vstk);
-		fprintf(stderr,"dbg2       cdp_fold:          %d\n",mb_segytraceheader_ptr->cdp_fold);
-		fprintf(stderr,"dbg2       use:               %d\n",mb_segytraceheader_ptr->use);
-		fprintf(stderr,"dbg2       range:             %d\n",mb_segytraceheader_ptr->range);
-		fprintf(stderr,"dbg2       grp_elev:          %d\n",mb_segytraceheader_ptr->grp_elev);
-		fprintf(stderr,"dbg2       src_elev:          %d\n",mb_segytraceheader_ptr->src_elev);
-		fprintf(stderr,"dbg2       src_depth:         %d\n",mb_segytraceheader_ptr->src_depth);
-		fprintf(stderr,"dbg2       grp_datum:         %d\n",mb_segytraceheader_ptr->grp_datum);
-		fprintf(stderr,"dbg2       src_datum:         %d\n",mb_segytraceheader_ptr->src_datum);
-		fprintf(stderr,"dbg2       src_wbd:           %d\n",mb_segytraceheader_ptr->src_wbd);
-		fprintf(stderr,"dbg2       grp_wbd:           %d\n",mb_segytraceheader_ptr->grp_wbd);
-		fprintf(stderr,"dbg2       elev_scalar:       %d\n",mb_segytraceheader_ptr->elev_scalar);
-		fprintf(stderr,"dbg2       coord_scalar:      %d\n",mb_segytraceheader_ptr->coord_scalar);
-		fprintf(stderr,"dbg2       src_long:          %d\n",mb_segytraceheader_ptr->src_long);
-		fprintf(stderr,"dbg2       src_lat:           %d\n",mb_segytraceheader_ptr->src_lat);
-		fprintf(stderr,"dbg2       grp_long:          %d\n",mb_segytraceheader_ptr->grp_long);
-		fprintf(stderr,"dbg2       grp_lat:           %d\n",mb_segytraceheader_ptr->grp_lat);
-		fprintf(stderr,"dbg2       coord_units:       %d\n",mb_segytraceheader_ptr->coord_units);
-		fprintf(stderr,"dbg2       wvel:              %d\n",mb_segytraceheader_ptr->wvel);
-		fprintf(stderr,"dbg2       sbvel:             %d\n",mb_segytraceheader_ptr->sbvel);
-		fprintf(stderr,"dbg2       src_up_vel:        %d\n",mb_segytraceheader_ptr->src_up_vel);
-		fprintf(stderr,"dbg2       grp_up_vel:        %d\n",mb_segytraceheader_ptr->grp_up_vel);
-		fprintf(stderr,"dbg2       src_static:        %d\n",mb_segytraceheader_ptr->src_static);
-		fprintf(stderr,"dbg2       grp_static:        %d\n",mb_segytraceheader_ptr->grp_static);
-		fprintf(stderr,"dbg2       tot_static:        %d\n",mb_segytraceheader_ptr->tot_static);
-		fprintf(stderr,"dbg2       laga:              %d\n",mb_segytraceheader_ptr->laga);
-		fprintf(stderr,"dbg2       delay_mils:        %d\n",mb_segytraceheader_ptr->delay_mils);
-		fprintf(stderr,"dbg2       smute_mils:        %d\n",mb_segytraceheader_ptr->smute_mils);
-		fprintf(stderr,"dbg2       emute_mils:        %d\n",mb_segytraceheader_ptr->emute_mils);
-		fprintf(stderr,"dbg2       nsamps:            %d\n",mb_segytraceheader_ptr->nsamps);
-		fprintf(stderr,"dbg2       si_micros:         %d\n",mb_segytraceheader_ptr->si_micros);
-		for (i=0;i<19;i++)
-		fprintf(stderr,"dbg2       other_1[%2d]:       %d\n",i,mb_segytraceheader_ptr->other_1[i]);
-		fprintf(stderr,"dbg2       year:              %d\n",mb_segytraceheader_ptr->year);
-		fprintf(stderr,"dbg2       day_of_yr:         %d\n",mb_segytraceheader_ptr->day_of_yr);
-		fprintf(stderr,"dbg2       hour:              %d\n",mb_segytraceheader_ptr->hour);
-		fprintf(stderr,"dbg2       min:               %d\n",mb_segytraceheader_ptr->min);
-		fprintf(stderr,"dbg2       sec:               %d\n",mb_segytraceheader_ptr->sec);
-		fprintf(stderr,"dbg2       mils:              %d\n",mb_segytraceheader_ptr->mils);
-		fprintf(stderr,"dbg2       tr_weight:         %d\n",mb_segytraceheader_ptr->tr_weight);
-		for (i=0;i<5;i++)
-		fprintf(stderr,"dbg2       other_2[%2d]:       %d\n",i,mb_segytraceheader_ptr->other_2[i]);
-		fprintf(stderr,"dbg2       delay:             %f\n",mb_segytraceheader_ptr->delay);
-		fprintf(stderr,"dbg2       smute_sec:         %f\n",mb_segytraceheader_ptr->smute_sec);
-		fprintf(stderr,"dbg2       emute_sec:         %f\n",mb_segytraceheader_ptr->emute_sec);
-		fprintf(stderr,"dbg2       si_secs:           %f\n",mb_segytraceheader_ptr->si_secs);
-		fprintf(stderr,"dbg2       wbt_secs:          %f\n",mb_segytraceheader_ptr->wbt_secs);
-		fprintf(stderr,"dbg2       end_of_rp:         %d\n",mb_segytraceheader_ptr->end_of_rp);
-		fprintf(stderr,"dbg2       dummy1:            %f\n",mb_segytraceheader_ptr->dummy1);
-		fprintf(stderr,"dbg2       dummy2:            %f\n",mb_segytraceheader_ptr->dummy2);
-		fprintf(stderr,"dbg2       dummy3:            %f\n",mb_segytraceheader_ptr->dummy3);
-		fprintf(stderr,"dbg2       dummy4:            %f\n",mb_segytraceheader_ptr->dummy4);
-		fprintf(stderr,"dbg2       soundspeed:        %f\n",mb_segytraceheader_ptr->soundspeed);
-		fprintf(stderr,"dbg2       distance:          %f\n",mb_segytraceheader_ptr->distance);
-		fprintf(stderr,"dbg2       roll:              %f\n",mb_segytraceheader_ptr->roll);
-		fprintf(stderr,"dbg2       pitch:             %f\n",mb_segytraceheader_ptr->pitch);
-		fprintf(stderr,"dbg2       heading:           %f\n",mb_segytraceheader_ptr->heading);
+		if (*kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
+			{
+			mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *) segytraceheader_ptr;
+			fprintf(stderr,"dbg2       seq_num:           %d\n",mb_segytraceheader_ptr->seq_num);
+			fprintf(stderr,"dbg2       seq_reel:          %d\n",mb_segytraceheader_ptr->seq_reel);
+			fprintf(stderr,"dbg2       shot_num:          %d\n",mb_segytraceheader_ptr->shot_num);
+			fprintf(stderr,"dbg2       shot_tr:           %d\n",mb_segytraceheader_ptr->shot_tr);
+			fprintf(stderr,"dbg2       espn:              %d\n",mb_segytraceheader_ptr->espn);
+			fprintf(stderr,"dbg2       rp_num:            %d\n",mb_segytraceheader_ptr->rp_num);
+			fprintf(stderr,"dbg2       rp_tr:             %d\n",mb_segytraceheader_ptr->rp_tr);
+			fprintf(stderr,"dbg2       trc_id:            %d\n",mb_segytraceheader_ptr->trc_id);
+			fprintf(stderr,"dbg2       num_vstk:          %d\n",mb_segytraceheader_ptr->num_vstk);
+			fprintf(stderr,"dbg2       cdp_fold:          %d\n",mb_segytraceheader_ptr->cdp_fold);
+			fprintf(stderr,"dbg2       use:               %d\n",mb_segytraceheader_ptr->use);
+			fprintf(stderr,"dbg2       range:             %d\n",mb_segytraceheader_ptr->range);
+			fprintf(stderr,"dbg2       grp_elev:          %d\n",mb_segytraceheader_ptr->grp_elev);
+			fprintf(stderr,"dbg2       src_elev:          %d\n",mb_segytraceheader_ptr->src_elev);
+			fprintf(stderr,"dbg2       src_depth:         %d\n",mb_segytraceheader_ptr->src_depth);
+			fprintf(stderr,"dbg2       grp_datum:         %d\n",mb_segytraceheader_ptr->grp_datum);
+			fprintf(stderr,"dbg2       src_datum:         %d\n",mb_segytraceheader_ptr->src_datum);
+			fprintf(stderr,"dbg2       src_wbd:           %d\n",mb_segytraceheader_ptr->src_wbd);
+			fprintf(stderr,"dbg2       grp_wbd:           %d\n",mb_segytraceheader_ptr->grp_wbd);
+			fprintf(stderr,"dbg2       elev_scalar:       %d\n",mb_segytraceheader_ptr->elev_scalar);
+			fprintf(stderr,"dbg2       coord_scalar:      %d\n",mb_segytraceheader_ptr->coord_scalar);
+			fprintf(stderr,"dbg2       src_long:          %d\n",mb_segytraceheader_ptr->src_long);
+			fprintf(stderr,"dbg2       src_lat:           %d\n",mb_segytraceheader_ptr->src_lat);
+			fprintf(stderr,"dbg2       grp_long:          %d\n",mb_segytraceheader_ptr->grp_long);
+			fprintf(stderr,"dbg2       grp_lat:           %d\n",mb_segytraceheader_ptr->grp_lat);
+			fprintf(stderr,"dbg2       coord_units:       %d\n",mb_segytraceheader_ptr->coord_units);
+			fprintf(stderr,"dbg2       wvel:              %d\n",mb_segytraceheader_ptr->wvel);
+			fprintf(stderr,"dbg2       sbvel:             %d\n",mb_segytraceheader_ptr->sbvel);
+			fprintf(stderr,"dbg2       src_up_vel:        %d\n",mb_segytraceheader_ptr->src_up_vel);
+			fprintf(stderr,"dbg2       grp_up_vel:        %d\n",mb_segytraceheader_ptr->grp_up_vel);
+			fprintf(stderr,"dbg2       src_static:        %d\n",mb_segytraceheader_ptr->src_static);
+			fprintf(stderr,"dbg2       grp_static:        %d\n",mb_segytraceheader_ptr->grp_static);
+			fprintf(stderr,"dbg2       tot_static:        %d\n",mb_segytraceheader_ptr->tot_static);
+			fprintf(stderr,"dbg2       laga:              %d\n",mb_segytraceheader_ptr->laga);
+			fprintf(stderr,"dbg2       delay_mils:        %d\n",mb_segytraceheader_ptr->delay_mils);
+			fprintf(stderr,"dbg2       smute_mils:        %d\n",mb_segytraceheader_ptr->smute_mils);
+			fprintf(stderr,"dbg2       emute_mils:        %d\n",mb_segytraceheader_ptr->emute_mils);
+			fprintf(stderr,"dbg2       nsamps:            %d\n",mb_segytraceheader_ptr->nsamps);
+			fprintf(stderr,"dbg2       si_micros:         %d\n",mb_segytraceheader_ptr->si_micros);
+			for (i=0;i<19;i++)
+				fprintf(stderr,"dbg2       other_1[%2d]:       %d\n",i,mb_segytraceheader_ptr->other_1[i]);
+			fprintf(stderr,"dbg2       year:              %d\n",mb_segytraceheader_ptr->year);
+			fprintf(stderr,"dbg2       day_of_yr:         %d\n",mb_segytraceheader_ptr->day_of_yr);
+			fprintf(stderr,"dbg2       hour:              %d\n",mb_segytraceheader_ptr->hour);
+			fprintf(stderr,"dbg2       min:               %d\n",mb_segytraceheader_ptr->min);
+			fprintf(stderr,"dbg2       sec:               %d\n",mb_segytraceheader_ptr->sec);
+			fprintf(stderr,"dbg2       mils:              %d\n",mb_segytraceheader_ptr->mils);
+			fprintf(stderr,"dbg2       tr_weight:         %d\n",mb_segytraceheader_ptr->tr_weight);
+			for (i=0;i<5;i++)
+				fprintf(stderr,"dbg2       other_2[%2d]:       %d\n",i,mb_segytraceheader_ptr->other_2[i]);
+			fprintf(stderr,"dbg2       delay:             %f\n",mb_segytraceheader_ptr->delay);
+			fprintf(stderr,"dbg2       smute_sec:         %f\n",mb_segytraceheader_ptr->smute_sec);
+			fprintf(stderr,"dbg2       emute_sec:         %f\n",mb_segytraceheader_ptr->emute_sec);
+			fprintf(stderr,"dbg2       si_secs:           %f\n",mb_segytraceheader_ptr->si_secs);
+			fprintf(stderr,"dbg2       wbt_secs:          %f\n",mb_segytraceheader_ptr->wbt_secs);
+			fprintf(stderr,"dbg2       end_of_rp:         %d\n",mb_segytraceheader_ptr->end_of_rp);
+			fprintf(stderr,"dbg2       dummy1:            %f\n",mb_segytraceheader_ptr->dummy1);
+			fprintf(stderr,"dbg2       dummy2:            %f\n",mb_segytraceheader_ptr->dummy2);
+			fprintf(stderr,"dbg2       dummy3:            %f\n",mb_segytraceheader_ptr->dummy3);
+			fprintf(stderr,"dbg2       dummy4:            %f\n",mb_segytraceheader_ptr->dummy4);
+			fprintf(stderr,"dbg2       soundspeed:        %f\n",mb_segytraceheader_ptr->soundspeed);
+			fprintf(stderr,"dbg2       distance:          %f\n",mb_segytraceheader_ptr->distance);
+			fprintf(stderr,"dbg2       roll:              %f\n",mb_segytraceheader_ptr->roll);
+			fprintf(stderr,"dbg2       pitch:             %f\n",mb_segytraceheader_ptr->pitch);
+			fprintf(stderr,"dbg2       heading:           %f\n",mb_segytraceheader_ptr->heading);
+			}
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:            %d\n",status);

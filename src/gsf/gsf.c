@@ -422,6 +422,14 @@ gsfOpen(const char *filename, const int mode, int *handle)
     }
   }
 
+    /* If no available slot return with error */
+    if (fileTableIndex == GSF_MAX_OPEN_FILES)
+    {
+        gsfError = GSF_TOO_MANY_OPEN_FILES;
+        fclose(fp);
+        return (-1);
+    }
+
   gsfFileTable[fileTableIndex].fp = fp;
   gsfFileTable[fileTableIndex].buf_size = GSF_STREAM_BUF_SIZE;
   gsfFileTable[fileTableIndex].occupied = 1;
@@ -758,6 +766,14 @@ gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_size)
         }
     }
 
+    /* If no available slot return with error */
+    if (fileTableIndex == GSF_MAX_OPEN_FILES)
+    {
+        gsfError = GSF_TOO_MANY_OPEN_FILES;
+        fclose(fp);
+        return (-1);
+    }
+    
     gsfFileTable[fileTableIndex].fp = fp;
     gsfFileTable[fileTableIndex].buf_size = buf_size;
     gsfFileTable[fileTableIndex].occupied = 1;
@@ -4151,7 +4167,7 @@ static int
 gsfSetParam(int handle, int index, char *val, gsfRecords *rec)
 {
     int             len;
-    char           *ptr;
+    char           *ptr, *nptr;
 
     if ((handle < 1) || (handle > GSF_MAX_OPEN_FILES))
     {
@@ -4182,11 +4198,16 @@ gsfSetParam(int handle, int index, char *val, gsfRecords *rec)
             gsfError = GSF_PARAM_SIZE_FIXED;
             return(-1);
         }
-        ptr = (char *) realloc((void *) ptr, len + 1);
-        if (ptr == (char *) NULL)
+        nptr = (char *) realloc((void *) ptr, len + 1);
+        if (nptr == (char *) NULL)
         {
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+            free(ptr);
             return (-1);
+        }
+        else
+        {
+            ptr = nptr;
         }
     }
     gsfFileTable[handle-1].rec.process_parameters.param[index] = ptr;

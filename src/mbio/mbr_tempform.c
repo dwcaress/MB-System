@@ -494,7 +494,7 @@ int mbr_tempform_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
-	int	read_kind;
+	int	read_kind = MB_DATA_NONE;
 
 	/* print input debug statements */
 	if (verbose >= 2)

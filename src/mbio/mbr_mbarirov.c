@@ -597,7 +597,7 @@ int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mbarirov_struct *data;
-	char	line[MBF_MBARIROV_MAXLINE+1];
+	char	line[MBF_MBARIROV_MAXLINE+1] = "";
 	int	year,jday;
 	double	timetag;
 	char	*line_ptr;
@@ -808,7 +808,7 @@ int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mbarirov_struct *data;
-	char	line[MBF_MBARIROV_MAXLINE+1];
+	char	line[MBF_MBARIROV_MAXLINE+1] = "";
 	int	time_j[6],year,jday,timetag;
 	int	len;
 	int	*write_count;

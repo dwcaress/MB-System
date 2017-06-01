@@ -1020,7 +1020,7 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	char	line[MB_COMMENT_MAXLINE+1];
+	char	line[MB_COMMENT_MAXLINE+1] = "";
 	char	flag;
 	char	*line_ptr;
 	int	nread;
@@ -1207,7 +1207,7 @@ int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	char	line[MB_COMMENT_MAXLINE+1];
+	char	line[MB_COMMENT_MAXLINE+1] = "";
 	int	len;
 	char	flag;
 	double	depth;

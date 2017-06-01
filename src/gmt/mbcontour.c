@@ -98,7 +98,7 @@
 #include "mb_define.h"
 #include "mb_aux.h"
 
-EXTERN_MSC int GMT_mbcontour(void *API, int mode, void *args);
+EXTERN_MSC int GMT_mbcontour(void *V_API, int mode, void *args);
 
 /* Control structure for mbcontour */
 struct MBCONTOUR_CTRL {
@@ -627,26 +627,26 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 	int	plot_contours = MB_NO;
 	int	plot_triangles = MB_NO;
 	int	set_contours = MB_NO;
-	double	cont_int;
-	double	col_int;
-	double	tick_int;
-	double	label_int;
-	double	tick_len;
-	double	label_hgt;
-	double	label_spacing;
-	double	tick_len_map;
-	double	label_hgt_map;
+	double	cont_int = 25.;
+	double	col_int = 100.;
+	double	tick_int = 100.;
+	double	label_int = 100.;
+	double	tick_len = 0.05;
+	double	label_hgt = 0.1;
+	double	label_spacing = 0.0;
+	double	tick_len_map = 0.05;
+	double	label_hgt_map = 0.1;
 	double	label_spacing_map;
 	int 	plot_name = MB_NO;
 	int	plotted_name = MB_NO;
 	int	plot_track = MB_NO;
-	double	time_tick_int;
-	double	time_annot_int;
-	double	date_annot_int;
-	double	time_tick_len;
-	double	time_tick_len_map;
-	double	name_hgt;
-	double	name_hgt_map;
+	double	time_tick_int = 0.25;
+	double	time_annot_int = 1.0;
+	double	date_annot_int = 4.0;
+	double	time_tick_len = 0.1;
+	double	time_tick_len_map = 0.1;
+	double	name_hgt = 0.1;
+	double	name_hgt_map = 0.1;
 	int	name_perp = MB_NO;
 	int	bathy_in_feet = MB_NO;
 	int	plot_pingnumber = MB_NO;
@@ -660,8 +660,6 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 	mb_path	labelstr, tickstr;
 	int	count;
 	int	setcolors;
-	double	navlon_old;
-	double	navlat_old;
 	double  clipx[4], clipy[4];
 	int	i;
 
@@ -1230,8 +1228,6 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 			    {
                             nping_read += pings_read;
                             (*npings)++;
-                            navlon_old = navlon;
-                            navlat_old = navlat;
 			    }
 
 		    /* decide whether to plot, whether to
@@ -1403,7 +1399,7 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       one:        %d\n",one);
 		fprintf(stderr,"dbg2       two:        %d\n",two);
-		fprintf(stderr,"dbg2       swath:      %lu\n",(size_t)swath);
+		fprintf(stderr,"dbg2       swath:      %p\n",swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
                 fprintf(stderr,"dbg2       time_i[two]:%4d  %4d %2d %2d %2d %2d %2d %6.6d\n",
                                                 two,swath->pings[two].time_i[0],
@@ -1483,17 +1479,32 @@ void mb_set_colors(int ncolor, int *red, int *green, int *blue)
 void mbcontour_plot(double x, double y, int ipen)
 {
 	double	xx, yy;
+	double	*p;
 
         /* make sure contour arrays are large enough */
 	if (ncontour_plot >= ncontour_plot_alloc)
 	    {
 	    ncontour_plot_alloc += MBCONTOUR_PLOT_ALLOC_INC;
-	    contour_x = (double *) realloc(contour_x,
-			sizeof(double) * (ncontour_plot_alloc));
-	    contour_y = (double *) realloc(contour_y,
-			sizeof(double) * (ncontour_plot_alloc));
-	    if (contour_x == NULL)
-		ncontour_plot_alloc = 0;
+	    if ((p = (double *) realloc(contour_x, sizeof(double) * (ncontour_plot_alloc))) != NULL)
+			{
+			contour_x = p;
+			}
+		else
+			{
+			free(contour_x);
+			contour_x = NULL;
+			ncontour_plot_alloc = 0;
+			}
+	    if ((p = (double *) realloc(contour_y, sizeof(double) * (ncontour_plot_alloc))) != NULL)
+			{
+			contour_y = p;
+			}
+		else
+			{
+			free(contour_y);
+			contour_y = NULL;
+			ncontour_plot_alloc = 0;
+			}
 	    }
             
         /* convert to map units */

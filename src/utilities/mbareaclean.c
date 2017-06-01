@@ -492,8 +492,9 @@ int main (int argc, char **argv)
 	if (areaboundsset == MB_NO)
 		{
 		formatread = format;
+		memset(&mb_info, 0, sizeof(struct mb_info_struct));
 		status = mb_get_info_datalist(verbose, read_file, &formatread,
-				&mb_info, lonflip, &error);
+										&mb_info, lonflip, &error);
 
 		areabounds[0] = mb_info.lon_min;
 		areabounds[1] = mb_info.lon_max;
@@ -772,8 +773,8 @@ int main (int argc, char **argv)
 		{
 		nfile_alloc += FILEALLOCNUM;
 		status = mb_reallocd(verbose, __FILE__, __LINE__,
-				nfile_alloc * sizeof(struct mbareaclean_file_struct),
-				(void **)&files, &error);
+						nfile_alloc * sizeof(struct mbareaclean_file_struct),
+						(void **)&files, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -1352,7 +1353,9 @@ fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f
 		mb_freed(verbose,__FILE__, __LINE__, (void **)&(files[nfile-1].ping_time_d),&error);
 		mb_freed(verbose,__FILE__, __LINE__, (void **)&(files[nfile-1].pingmultiplicity),&error);
 		mb_freed(verbose,__FILE__, __LINE__, (void **)&(files[nfile-1].ping_altitude),&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&(files[nfile-1].sndg),&error);
 		}
+	mb_freed(verbose,__FILE__, __LINE__, (void **)&files,&error);
 
 	/* set program status */
 	status = MB_SUCCESS;

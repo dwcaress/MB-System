@@ -26,6 +26,8 @@
 #ifndef MB_INFO_DEF
 #define MB_INFO_DEF
 
+#define MB_INFO_MASK_DIM 20
+
  /* structure holding output of mbinfo -N -G */
 struct mb_info_struct
 	{
@@ -96,12 +98,12 @@ struct mb_info_struct
 	int	problem_toodeep;
 	int	problem_baddatagram;
 
-	int	mask_nx;
-	int	mask_ny;
-	double	mask_dx;
-	double	mask_dy;
-	int	mask_alloc;
-	int	*mask;
+	//int	mask_nx;
+	//int	mask_ny;
+	//double	mask_dx;
+	//double	mask_dy;
+	//int	mask_alloc;
+	//int	*mask;
 
 	};
 

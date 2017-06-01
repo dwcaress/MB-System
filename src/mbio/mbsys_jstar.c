@@ -315,9 +315,17 @@ int mbsys_jstar_preprocess
 	struct mb_preprocess_struct *pars;
 
 	int	time_i[7], time_j[5];
-	double time_d, navlon, navlat, sensordepth, speed;
-	double heading, roll, pitch, heave, altitude;
-	int	interp_status;
+	double time_d = 0.0;
+	double navlon = 0.0;
+	double navlat = 0.0;
+	double sensordepth = 0.0;
+	double speed = 0.0;
+	double heading = 0.0;
+	double roll = 0.0;
+	double pitch = 0.0;
+	double heave = 0.0;
+	double altitude = 0.0; 
+	int	interp_status = MB_SUCCESS;
 	int	jnav = 0;
 	int	jsensordepth = 0;
 	int	jheading = 0;

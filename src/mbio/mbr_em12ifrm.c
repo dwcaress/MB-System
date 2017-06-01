@@ -1146,7 +1146,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 	int	ptime_i[7];
 	double	ptime_d;
 	int	read_status;
-	char	line[MBF_EM12IFRM_RECORD_SIZE];
+	char	line[MBF_EM12IFRM_RECORD_SIZE] = "";
 	int	shift;
 	short	short_value;
 	int	len;
@@ -1369,7 +1369,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 			mb_get_int(&len, &line[shift], 3); shift += 4;
 			strncpy(data->comment, &line[shift],
 				MIN(len, MBSYS_SIMRAD_COMMENT_LENGTH-1));
-			data->comment[MIN(len+1, MBSYS_SIMRAD_COMMENT_LENGTH)] = '\0';
+			data->comment[MIN(len+1, MBSYS_SIMRAD_COMMENT_LENGTH-1)] = '\0';
 			done = MB_YES;
 			}
 		}
@@ -1689,7 +1689,7 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_em12ifrm_struct *data;
-	char	line[MBF_EM12IFRM_RECORD_SIZE];
+	char	line[MBF_EM12IFRM_RECORD_SIZE] = "";
 	int	shift;
 	short	short_value;
 	char	char_value;

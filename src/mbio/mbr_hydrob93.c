@@ -376,9 +376,9 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_hydrob93";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_singlebeam_struct *store;
-	char	line[MBF_HYDROB93_RECORD_LENGTH];
+	struct mb_io_struct *mb_io_ptr = NULL;
+	struct mbsys_singlebeam_struct *store = NULL;
+	char	line[MBF_HYDROB93_RECORD_LENGTH] = "";
 	int	ilongitude, ilatitude, idepth;
 	short	itype;
 
@@ -507,9 +507,9 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_hydrob93";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_singlebeam_struct *store;
-	char	line[MBF_HYDROB93_RECORD_LENGTH];
+	struct mb_io_struct *mb_io_ptr = NULL;
+	struct mbsys_singlebeam_struct *store = NULL;
+	char	line[MBF_HYDROB93_RECORD_LENGTH] = "";
 	int	ilongitude, ilatitude, idepth;
 	short	itype;
 

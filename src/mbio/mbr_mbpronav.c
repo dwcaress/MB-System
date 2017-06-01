@@ -615,7 +615,7 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mbpronav_struct *data;
-	char	line[MBF_MBPRONAV_MAXLINE+1];
+	char	line[MBF_MBPRONAV_MAXLINE+1] = "";
 	char	*line_ptr;
 	int	nread;
 	double  sec;

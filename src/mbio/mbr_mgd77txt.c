@@ -778,7 +778,7 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77txt_struct *data;
 	int	*header_read;
-	char	line[MB_COMMENT_MAXLINE];
+	char	line[MB_COMMENT_MAXLINE] = "";
 	char	*read_ptr;
 	int	shift;
 	int 	neg_unit;
@@ -831,7 +831,7 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error)
 	    {
 	    data->kind = MB_DATA_HEADER;
 	    (*header_read)++;
-	    strncpy(data->comment, line, strlen(line)-2);
+	    strncpy(data->comment, line, MAX(strlen(line)-2,0));
 	    }
 	else if (status == MB_SUCCESS
 	    && (line[0] == '1' || line[0] == '4'))
@@ -1047,7 +1047,7 @@ int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77txt_struct *data;
-	char	line[MB_COMMENT_MAXLINE];
+	char	line[MB_COMMENT_MAXLINE] = "";
 	int	itmp;
 	int	write_status;
 	int	shift;

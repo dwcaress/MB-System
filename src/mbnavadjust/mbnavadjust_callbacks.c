@@ -2858,7 +2858,7 @@ void do_update_visualization_status()
     struct mbview_shareddata_struct *shareddata;
 	struct mbna_file *file_1, *file_2;
 	struct mbna_crossing *crossing;
-    mb_path name;
+    mb_path name = "";
 
 //fprintf(stderr,"do_update_visualization_status: mbna_crossing_select:%d mbna_tie_select:%d\n",
 //mbna_crossing_select,mbna_tie_select);

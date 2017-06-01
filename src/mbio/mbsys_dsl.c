@@ -111,7 +111,7 @@ int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->bat_sampleSize = 0.0;
 	store->bat_p_flags = 0;
 	store->bat_max_range = 0.0;
-	for (i=0;i<10;i++)
+	for (i=0;i<9;i++)
 		store->bat_future[i] = 0;
 	for (i=0;i<MBSYS_DSL_MAXBEAMS_SIDE;i++)
 		{
@@ -126,7 +126,7 @@ int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->amp_p_flags = 0;
 	store->amp_max_range = 0.0;
 	store->amp_channel = 0.0;
-	for (i=0;i<9;i++)
+	for (i=0;i<8;i++)
 		store->amp_future[i] = 0;
 	for (i=0;i<MBSYS_DSL_MAXBEAMS_SIDE;i++)
 		{

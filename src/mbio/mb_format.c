@@ -3770,6 +3770,15 @@ int mb_datalist_open(int verbose,
 		{
 		/* get datalist pointer */
 		datalist = (struct mb_datalist_struct *) *datalist_ptr;
+		strcpy(datalist->path, "");
+		datalist->printed = MB_NO;
+		datalist->open = MB_NO;
+		datalist->recursion = 0;
+		datalist->look_processed = look_processed;
+		datalist->local_weight = MB_YES;
+		datalist->weight_set = MB_NO;
+		datalist->weight = 0.0;
+		datalist->datalist = NULL;
 
 		if ((datalist->fp = fopen(path,"r")) == NULL)
 			{
@@ -3780,14 +3789,7 @@ int mb_datalist_open(int verbose,
 		else
 			{
 			strcpy(datalist->path, path);
-			datalist->printed = MB_NO;
 			datalist->open = MB_YES;
-			datalist->recursion = 0;
-			datalist->look_processed = look_processed;
-			datalist->local_weight = MB_YES;
-			datalist->weight_set = MB_NO;
-			datalist->weight = 0.0;
-			datalist->datalist = NULL;
 			}
 
 		}

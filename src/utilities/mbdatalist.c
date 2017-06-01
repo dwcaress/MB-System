@@ -137,15 +137,15 @@ int main (int argc, char **argv)
 	int recursion = -1;
 
 	int	prstatus = MB_PR_FILE_UP_TO_DATE;
-	int	lock_status;
-	int	lock_error;
-	int	locked;
-	int	lock_purpose;
-	mb_path	lock_program;
-	mb_path lock_cpu;
-	mb_path lock_user;
-	char	lock_date[25];
-	mb_path	lockfile;
+	int	lock_status = MB_SUCCESS;
+	int	lock_error = MB_ERROR_NO_ERROR;
+	int	locked = MB_NO;
+	int	lock_purpose = 0;
+	mb_path	lock_program = "";
+	mb_path lock_cpu = "";
+	mb_path lock_user = "";
+	char	lock_date[25] = "";
+	mb_path	lockfile = "";
 
 	char	*bufptr;
 	int	shellstatus;

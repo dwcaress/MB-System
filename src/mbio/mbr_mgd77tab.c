@@ -1389,7 +1389,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77tab_struct *data;
 	int	*header_read;
-	char	line[MB_COMMENT_MAXLINE];
+	char	line[MB_COMMENT_MAXLINE] = "";
 	int	line_len;
 	char	*read_ptr;
 	int	ntabs;
@@ -1903,7 +1903,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77tab_struct *data;
-	char	line[MB_COMMENT_MAXLINE];
+	char	line[MB_COMMENT_MAXLINE] = "";
 	int	write_status;
 	int	shift;
 

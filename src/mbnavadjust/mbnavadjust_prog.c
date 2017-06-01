@@ -1084,19 +1084,19 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile)
 	char	*function_name = "mbnavadjust_import_file";
 	int	status = MB_SUCCESS;
 	struct stat file_status;
-	int	fstat;
+	int	fstat = 0;
 	char	ipath[STRING_MAX];
 	char	mb_suffix[STRING_MAX];
 	char	npath[STRING_MAX];
 	char	opath[STRING_MAX];
-	char	*root;
+	char	*root = NULL;
 
 	/* mbio read and write values */
 	void	*imbio_ptr = NULL;
 	void	*ombio_ptr = NULL;
 	void	*istore_ptr = NULL;
 	void	*ostore_ptr = NULL;
-	int	kind;
+	int	kind = MB_DATA_NONE;
 	int	time_i[7];
 	double	time_d;
 	double	navlon;
@@ -1144,11 +1144,15 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile)
 	double	lon, lat;
 	double	navlon_old, navlat_old;
 	FILE	*nfp;
-	struct mbna_file *file, *cfile;
-	struct mbna_section *section, *csection;
-	struct mbsys_ldeoih_struct *ostore;
-	struct mb_io_struct *omb_io_ptr;
-	int	new_pings, new_crossings;
+	struct mbna_file *file = NULL;
+	struct mbna_section *section = NULL;
+	struct mbna_file *cfile = NULL;
+	struct mbna_section *csection = NULL;
+	struct mbsys_ldeoih_struct *ostore = NULL;
+	struct mb_io_struct *omb_io_ptr = NULL;
+	int	new_sections = 0;
+	int new_pings = 0;
+	int new_crossings = 0;
 	double	dx1, dy1;
 	int	mbp_heading_mode;
 	double	mbp_headingbias;
@@ -1157,6 +1161,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile)
 	double	mbp_rollbias_port;
 	double	mbp_rollbias_stbd;
 	double	depthmax, distmax, depthscale, distscale;
+	void *tptr;
  	int	i, j, k;
 	int	ii1, jj1;
 
@@ -1227,6 +1232,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile)
 	output_open = MB_NO;
 	project.inversion_status = MBNA_INVERSION_NONE;
 	project.grid_status = MBNA_GRID_OLD;
+	new_sections = 0;
 	new_pings = 0;
 	new_crossings = 0;
 	good_beams = 0;
@@ -1234,12 +1240,16 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile)
 	/* allocate mbna_file array if needed */
 	if (project.num_files_alloc <= project.num_files)
 		{
-		project.files = (struct mbna_file *) realloc(project.files,
+		tptr = realloc(project.files,
 			sizeof(struct mbna_file) * (project.num_files_alloc + ALLOC_NUM));
 		if (project.files != NULL)
+			{
+			project.files = (struct mbna_file *) tptr;
 			project.num_files_alloc += ALLOC_NUM;
+			}
 		else
 			{
+			free(project.files);
 			status = MB_FAILURE;
 			error = MB_ERROR_MEMORY_FAIL;
 			}
@@ -1640,6 +1650,7 @@ section->distance, distance, project.section_length);*/
 
 				/* initialize new section */
 				file->num_sections++;
+				new_sections++;
 				section = &file->sections[file->num_sections-1];
 				section->num_pings = 0;
 				section->num_beams = 0;
@@ -2090,7 +2101,7 @@ fprintf(stderr, "\n");
 	if (status == MB_SUCCESS && new_pings > 0)
 		{
 		sprintf(message, "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n",
-			iformat, path, new_pings, file->num_sections, new_crossings);
+			iformat, path, new_pings, new_sections, new_crossings);
 		do_info_add(message, MB_YES);
 		}
 	else
@@ -5456,16 +5467,16 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy)
 		fprintf(stderr,"dbg2       iy:           %d\n",iy);
 		}
 
-     	if (mbna_naverr_load == MB_YES)
-    		{
-    		/* get position in lon and lat */
-	    	x = ix / mbna_plotx_scale +  mbna_plot_lon_min;
-	    	y = (cont_borders[3] - iy) / mbna_ploty_scale +  mbna_plot_lat_min;
+	if (mbna_naverr_load == MB_YES)
+		{
+		/* get position in lon and lat */
+		x = ix / mbna_plotx_scale +  mbna_plot_lon_min;
+		y = (cont_borders[3] - iy) / mbna_ploty_scale +  mbna_plot_lat_min;
 		crossing = &project.crossings[mbna_current_crossing];
 
 	    	/* get closest snav point in swath 1 */
 		section = &project.files[crossing->file_id_1].sections[crossing->section_1];
-	    	distance = 999999.999;
+	    distance = 999999.999;
 		for (i=0;i<section->num_snav;i++)
 			{
 	    		dx = (section->snav_lon[i] - x) / mbna_mtodeglon;
@@ -5483,7 +5494,7 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy)
 
 	    	/* get closest snav point in swath 2 */
 		section = &project.files[crossing->file_id_2].sections[crossing->section_2];
-	    	distance = 999999.999;
+	    distance = 999999.999;
 		for (i=0;i<section->num_snav;i++)
 			{
 	    		dx = (section->snav_lon[i] + mbna_offset_x - x) / mbna_mtodeglon;
@@ -5504,32 +5515,37 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy)
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  snav point selected in MBnavadjust function <%s>\n",
+		fprintf(stderr,"\ndbg2  snav point selection in MBnavadjust function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg2  snav values:\n");
-		section = &project.files[crossing->file_id_1].sections[crossing->section_1];
-		fprintf(stderr,"dbg2       mbna_snav_1:        %d\n",mbna_snav_1);
-		fprintf(stderr,"dbg2       mbna_snav_1_time_d: %f\n",mbna_snav_1_time_d);
-		fprintf(stderr,"dbg2       mbna_snav_1_lon:    %.10f\n",mbna_snav_1_lon);
-		fprintf(stderr,"dbg2       mbna_snav_1_lat:    %.10f\n",mbna_snav_1_lat);
-		fprintf(stderr,"dbg2       section->num_snav:  %d\n",section->num_snav);
-		for (i=0;i<section->num_snav;i++)
+		fprintf(stderr,"dbg2  mbna_naverr_load:        %d\n", mbna_naverr_load);
+		fprintf(stderr,"dbg2  mbna_current_crossing:   %d\n", mbna_current_crossing);
+		if (mbna_naverr_load == MB_YES)
 			{
-			fprintf(stderr,"dbg2       section1->snav_time_d[%d]: %f\n",i,section->snav_time_d[i]);
-			fprintf(stderr,"dbg2       section1->snav_lon[%d]:    %.10f\n",i,section->snav_lon[i]);
-			fprintf(stderr,"dbg2       section1->snav_lat[%d]:    %.10f\n",i,section->snav_lat[i]);
-			}
-		section = &project.files[crossing->file_id_2].sections[crossing->section_2];
-		fprintf(stderr,"dbg2       mbna_snav_2:        %d\n",mbna_snav_2);
-		fprintf(stderr,"dbg2       mbna_snav_2_time_d: %f\n",mbna_snav_2_time_d);
-		fprintf(stderr,"dbg2       mbna_snav_2_lon:    %.10f\n",mbna_snav_2_lon);
-		fprintf(stderr,"dbg2       mbna_snav_2_lat:    %.10f\n",mbna_snav_2_lat);
-		fprintf(stderr,"dbg2       section->num_snav:  %d\n",section->num_snav);
-		for (i=0;i<section->num_snav;i++)
-			{
-			fprintf(stderr,"dbg2       section2->snav_time_d[%d]: %f\n",i,section->snav_time_d[i]);
-			fprintf(stderr,"dbg2       section2->snav_lon[%d]:    %.10f\n",i,section->snav_lon[i]);
-			fprintf(stderr,"dbg2       section2->snav_lat[%d]:    %.10f\n",i,section->snav_lat[i]);
+			fprintf(stderr,"dbg2  snav values:\n");
+			section = &project.files[crossing->file_id_1].sections[crossing->section_1];
+			fprintf(stderr,"dbg2       mbna_snav_1:        %d\n",mbna_snav_1);
+			fprintf(stderr,"dbg2       mbna_snav_1_time_d: %f\n",mbna_snav_1_time_d);
+			fprintf(stderr,"dbg2       mbna_snav_1_lon:    %.10f\n",mbna_snav_1_lon);
+			fprintf(stderr,"dbg2       mbna_snav_1_lat:    %.10f\n",mbna_snav_1_lat);
+			fprintf(stderr,"dbg2       section->num_snav:  %d\n",section->num_snav);
+			for (i=0;i<section->num_snav;i++)
+				{
+				fprintf(stderr,"dbg2       section1->snav_time_d[%d]: %f\n",i,section->snav_time_d[i]);
+				fprintf(stderr,"dbg2       section1->snav_lon[%d]:    %.10f\n",i,section->snav_lon[i]);
+				fprintf(stderr,"dbg2       section1->snav_lat[%d]:    %.10f\n",i,section->snav_lat[i]);
+				}
+			section = &project.files[crossing->file_id_2].sections[crossing->section_2];
+			fprintf(stderr,"dbg2       mbna_snav_2:        %d\n",mbna_snav_2);
+			fprintf(stderr,"dbg2       mbna_snav_2_time_d: %f\n",mbna_snav_2_time_d);
+			fprintf(stderr,"dbg2       mbna_snav_2_lon:    %.10f\n",mbna_snav_2_lon);
+			fprintf(stderr,"dbg2       mbna_snav_2_lat:    %.10f\n",mbna_snav_2_lat);
+			fprintf(stderr,"dbg2       section->num_snav:  %d\n",section->num_snav);
+			for (i=0;i<section->num_snav;i++)
+				{
+				fprintf(stderr,"dbg2       section2->snav_time_d[%d]: %f\n",i,section->snav_time_d[i]);
+				fprintf(stderr,"dbg2       section2->snav_lon[%d]:    %.10f\n",i,section->snav_lon[i]);
+				fprintf(stderr,"dbg2       section2->snav_lat[%d]:    %.10f\n",i,section->snav_lat[i]);
+				}
 			}
 		}
 
@@ -5638,6 +5654,7 @@ int mbnavadjust_get_misfit()
 	int	i1, i2, j1, j2, k1, k2;
 	int	imin, jmin, kmin;
 	int	i, j, k, l, ll;
+	void *tptr;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -5646,18 +5663,18 @@ int mbnavadjust_get_misfit()
 			function_name);
 		}
 
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
-    		&& mbna_current_crossing >= 0
+    if (project.open == MB_YES
+    	&& project.num_crossings > 0
+    	&& mbna_current_crossing >= 0
 		&& mbna_naverr_load == MB_YES)
-    		{
+    	{
 /* fprintf(stderr,"\nDEBUG %s %d: mbnavadjust_get_misfit: mbna_plot minmax: %f %f %f %f\n",
 __FILE__,__LINE__,
 mbna_plot_lon_min,mbna_plot_lon_max,mbna_plot_lat_min,mbna_plot_lat_max); */
 
-    		/* set message on */
-    		if (mbna_verbose > 1)
-			fprintf(stderr,"Making misfit grid for crossing %d\n",mbna_current_crossing);
+    	/* set message on */
+    	if (mbna_verbose > 1)
+		fprintf(stderr,"Making misfit grid for crossing %d\n",mbna_current_crossing);
 		sprintf(message,"Making misfit grid for crossing %d\n",mbna_current_crossing);
 		do_message_update(message);
 
@@ -5727,20 +5744,104 @@ __FILE__,__LINE__,
 mbna_misfit_offset_z,project.zoffsetwidth,nzmisfitcalc,zmin,zmax,zoff_dz); */
 
 		/* allocate and initialize grids and arrays */
-		grid1 = (double *) realloc(grid1, sizeof(double) * (grid_nxy));
-		grid2 = (double *) realloc(grid2, sizeof(double) * (grid_nxy));
-		gridm = (double *) realloc(gridm, sizeof(double) * (gridm_nxyz));
-		gridmeq = (double *) realloc(gridmeq, sizeof(double) * (gridm_nxyz));
-		gridn1 = (int *) realloc(gridn1, sizeof(int) * (grid_nxy));
-		gridn2 = (int *) realloc(gridn2, sizeof(int) * (grid_nxy));
-		gridnm = (int *) realloc(gridnm, sizeof(int) * (gridm_nxyz));
-		memset(grid1, 0, sizeof(double) * (grid_nxy));
-		memset(grid2, 0, sizeof(double) * (grid_nxy));
-		memset(gridm, 0, sizeof(double) * (gridm_nxyz));
-		memset(gridmeq, 0, sizeof(double) * (gridm_nxyz));
-		memset(gridn1, 0, sizeof(int) * (grid_nxy));
-		memset(gridn2, 0, sizeof(int) * (grid_nxy));
-		memset(gridnm, 0, sizeof(int) * (gridm_nxyz));
+		if (status == MB_SUCCESS)
+			{
+			tptr = (double *) realloc(grid1, sizeof(double) * (grid_nxy));
+			if (tptr != NULL)
+				{
+				grid1 = tptr;
+				memset(grid1, 0, sizeof(double) * (grid_nxy));
+				}
+			else
+				{
+				free(grid1);
+				status = MB_FAILURE;
+				}
+			}
+		if (status == MB_SUCCESS)
+			{
+			tptr = (double *) realloc(grid2, sizeof(double) * (grid_nxy));
+			if (tptr != NULL)
+				{
+				grid2 = tptr;
+				memset(grid2, 0, sizeof(double) * (grid_nxy));
+				}
+			else
+				{
+				free(grid2);
+				status = MB_FAILURE;
+				}
+			}
+		if (status == MB_SUCCESS)
+			{
+			tptr = (double *) realloc(gridm, sizeof(double) * (gridm_nxyz));
+			if (tptr != NULL)
+				{
+				gridm = tptr;
+				memset(gridm, 0, sizeof(double) * (gridm_nxyz));
+				}
+			else
+				{
+				free(gridm);
+				status = MB_FAILURE;
+				}
+			}
+		if (status == MB_SUCCESS)
+			{
+			tptr = (double *) realloc(gridmeq, sizeof(double) * (gridm_nxyz));
+			if (tptr != NULL)
+				{
+				gridmeq = tptr;
+				memset(gridmeq, 0, sizeof(double) * (gridm_nxyz));
+				}
+			else
+				{
+				free(gridmeq);
+				status = MB_FAILURE;
+				}
+			}
+		if (status == MB_SUCCESS)
+			{
+			tptr = (int *) realloc(gridn1, sizeof(int) * (grid_nxy));
+			if (tptr != NULL)
+				{
+				gridn1 = tptr;
+				memset(gridn1, 0, sizeof(int) * (grid_nxy));
+				}
+			else
+				{
+				free(gridn1);
+				status = MB_FAILURE;
+				}
+			}
+		if (status == MB_SUCCESS)
+			{
+			tptr = (int *) realloc(gridn2, sizeof(int) * (grid_nxy));
+			if (tptr != NULL)
+				{
+				gridn2 = tptr;
+				memset(gridn2, 0, sizeof(int) * (grid_nxy));
+				}
+			else
+				{
+				free(gridn2);
+				status = MB_FAILURE;
+				}
+			}
+		if (status == MB_SUCCESS)
+			{
+			tptr = (int *) realloc(gridnm, sizeof(int) * (gridm_nxyz));
+			if (tptr != NULL)
+				{
+				gridnm = tptr;
+				memset(gridnm, 0, sizeof(int) * (gridm_nxyz));
+				}
+			else
+				{
+				free(gridnm);
+				status = MB_FAILURE;
+				}
+			}
 
 	    	/* loop over all beams */
 	    	for (i=0;i<swath1->npings;i++)

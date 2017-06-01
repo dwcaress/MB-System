@@ -728,12 +728,10 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error)
 		data->sec = time_j[3];
 
 		/* do nav */
-		data->lon2u = (short int) 60.0 * data->lon[center];
-		data->lon2b = (short int) (600000.0
-			* (data->lon[center] - data->lon2u / 60.0));
-		data->lat2u = (short int) 60.0 * (90.0 + data->lat[center]);
-		data->lat2b = (short int) (600000.0
-			* (data->lat[center] + 90.0 - data->lat2u/60.0));
+		data->lon2u = (unsigned short) 60.0 * data->lon[center];
+		data->lon2b = (unsigned short) (600000.0 * (data->lon[center] - data->lon2u / 60.0));
+		data->lat2u = (unsigned short) 60.0 * (90.0 + data->lat[center]);
+		data->lat2b = (unsigned short) (600000.0 * (data->lat[center] + 90.0 - data->lat2u/60.0));
 
 		/* get coordinate scaling */
 		mb_coor_scale(verbose,data->lat[center],&mtodeglon,&mtodeglat);

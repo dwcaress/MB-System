@@ -479,13 +479,11 @@ int mbsys_sb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get navigation */
 		if (navlon < 0.0) navlon = navlon + 360.0;
-		store->lon2u = (short int) 60.0*navlon;
-		store->lon2b = (short int) (600000.0*(navlon
-			- store->lon2u/60.0));
+		store->lon2u = (unsigned short) 60.0*navlon;
+		store->lon2b = (unsigned short) (600000.0*(navlon - store->lon2u/60.0));
 		navlat = navlat + 90.0;
-		store->lat2u = (short int) 60.0*navlat;
-		store->lat2b = (short int) (600000.0*(navlat
-			- store->lat2u/60.0));
+		store->lat2u = (unsigned short) 60.0*navlat;
+		store->lat2b = (unsigned short) (600000.0*(navlat - store->lat2u/60.0));
 
 		/* get heading (360 degrees = 65536) */
 		store->sbhdg = 182.044444*heading;

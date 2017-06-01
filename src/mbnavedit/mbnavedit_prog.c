@@ -609,9 +609,9 @@ int mbnavedit_open_file(int useprevious)
 	int	format_error;
 	struct stat file_status;
 	int	fstat;
-	mb_path	error1;
-	mb_path	error2;
-	mb_path	error3;
+	mb_path	error1 = "";
+	mb_path	error2 = "";
+	mb_path	error3 = "";
 
 	/* swath file locking variables */
 	int	lock_status;

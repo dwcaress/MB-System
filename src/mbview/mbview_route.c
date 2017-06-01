@@ -2551,9 +2551,10 @@ int mbview_route_setdistance(size_t instance, int working_route)
 	/* local variables */
 	char	*function_name = "mbview_route_setdistance";
 	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	struct mbview_route_struct *route;
+	struct mbview_world_struct *view = NULL;
+	struct mbview_struct *data = NULL;
+	struct mbview_route_struct *route = NULL;
+	int		valid_route = MB_NO;
 	double	distlateral, distovertopo;
 	double	routelon0, routelon1;
 	double	routelat0, routelat1;
@@ -2583,6 +2584,7 @@ int mbview_route_setdistance(size_t instance, int working_route)
 		{
 		/* get route pointer */
 		route = &(shared.shareddata.routes[working_route]);
+		valid_route = MB_YES;
 
 		/* loop over the route segments */
 		route->distancelateral = 0.0;
@@ -2681,8 +2683,17 @@ int mbview_route_setdistance(size_t instance, int working_route)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       routedistancelateral:      %f\n", route->distancelateral);
-		fprintf(stderr,"dbg2       routedistancetopo:         %f\n", route->distancetopo);
+		if (valid_route == MB_YES)
+			{
+			route = &(shared.shareddata.routes[working_route]);
+			fprintf(stderr,"dbg2       routedistancelateral:      %f\n", route->distancelateral);
+			fprintf(stderr,"dbg2       routedistancetopo:         %f\n", route->distancetopo);
+			}
+		else
+			{
+			route = &(shared.shareddata.routes[working_route]);
+			fprintf(stderr,"dbg2       invalid working route:     %d\n", working_route);
+			}
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
 		}

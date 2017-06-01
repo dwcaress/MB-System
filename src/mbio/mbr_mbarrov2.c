@@ -596,7 +596,7 @@ int mbr_mbarrov2_rd_data(int verbose, void *mbio_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mbarrov2_struct *data;
-	char	line[MBF_MBARROV2_MAXLINE+1];
+	char	line[MBF_MBARROV2_MAXLINE+1] = "";
 	char	*line_ptr;
 	int	nread;
 
@@ -800,7 +800,7 @@ int mbr_mbarrov2_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mbarrov2_struct *data;
-	char	line[MBF_MBARROV2_MAXLINE+1];
+	char	line[MBF_MBARROV2_MAXLINE+1] = "";
 	int	len;
 	int	*write_count;
 

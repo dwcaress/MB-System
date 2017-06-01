@@ -506,7 +506,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char	buffer[MBF_3DDEPTHP_BUFFER_SIZE];
 	size_t	read_len;
 	size_t	index;
-	unsigned short magic_number;
+	unsigned short magic_number = 0;
 	unsigned int *newscancheck, newscancheckvalue;
 	int time_i[7];
 	int	done;

@@ -3340,7 +3340,7 @@ do_mbview_set_projection_label(size_t instance)
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	projectionid;
-	mb_path	tmptext;
+	mb_path	tmptext = "";
 
 	/* get view */
 	view = &(mbviews[instance]);

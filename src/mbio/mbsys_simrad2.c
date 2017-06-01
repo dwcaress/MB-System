@@ -4606,10 +4606,10 @@ int mbsys_simrad2_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 	char	*function_name = "mbsys_simrad2_extract_nnav";
 	int	status = MB_SUCCESS;
 	int	interp_error = MB_ERROR_NO_ERROR;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_simrad2_struct *store;
-	struct mbsys_simrad2_ping_struct *ping;
-	struct mbsys_simrad2_attitude_struct *attitude;
+	struct mb_io_struct *mb_io_ptr = NULL;
+	struct mbsys_simrad2_struct *store = NULL;
+	struct mbsys_simrad2_ping_struct *ping = NULL;
+	struct mbsys_simrad2_attitude_struct *attitude = NULL;
 	double	atime_d;
 	int	atime_i[7];
 	int	i, inav;
@@ -4694,7 +4694,7 @@ int mbsys_simrad2_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		{
                 /* get survey data structure */
 		if (store->ping != NULL)
-                	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+            ping = (struct mbsys_simrad2_ping_struct *) store->ping;
 
 		/* just one navigation value */
 		*n = 1;
@@ -4732,7 +4732,7 @@ int mbsys_simrad2_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 			*speed = 0.0;
 
 		/* get draft  */
-		if (store->ping != NULL)
+		if (ping != NULL)
 			*draft = 0.01 * ping->png_xducer_depth
 				+ 655.36 * ping->png_offset_multiplier
 				 - 0.01 * ping->png_heave;
@@ -4852,9 +4852,9 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 {
 	char	*function_name = "mbsys_simrad2_extract_nav";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_simrad2_struct *store;
-	struct mbsys_simrad2_ping_struct *ping;
+	struct mb_io_struct *mb_io_ptr = NULL;
+	struct mbsys_simrad2_struct *store = NULL;
+	struct mbsys_simrad2_ping_struct *ping = NULL;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4977,7 +4977,7 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		{
                 /* get survey data structure */
 		if (store->ping != NULL)
-                	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+            ping = (struct mbsys_simrad2_ping_struct *) store->ping;
 
 		/* get time */
 		time_i[0] = store->pos_date / 10000;
@@ -5012,7 +5012,7 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			*speed = 0.0;
 
 		/* get draft  */
-		if (store->ping != NULL)
+		if (ping != NULL)
 			*draft = 0.01 * ping->png_xducer_depth
 				+ 655.36 * ping->png_offset_multiplier
 				- 0.01 * ping->png_heave;

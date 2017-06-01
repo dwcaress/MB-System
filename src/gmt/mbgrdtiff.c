@@ -714,21 +714,21 @@ int GMT_mbgrdtiff (void *V_API, int mode, void *args)
 	size_t image_size = 0;
 	int	modeltype;
 	int	projectionid;
-        mb_path projectionname;
+    mb_path projectionname;
 	char    tiff_header[TIFF_HEADER_SIZE];
 	void    *tiff_image = NULL;
 	char	tiff_comment[TIFF_COMMENT_MAXLINE];
 	char	NorS;
-        FILE    *tfp;
+    FILE    *tfp;
 	int	nscan;
 	int	utmzone;
-        int     keyindex;
+    int     keyindex;
         
-        short   value_short;
-        int     value_int;
+    short   value_short;
+    int     value_int;
 	double  value_double;
-        size_t  write_size;
-        int     i;
+    size_t  write_size;
+    int     i;
         
 	bool done, need_to_project, normal_x, normal_y, resampled = false, gray_only = false;
 	bool nothing_inside = false, use_intensity_grid;
@@ -1536,12 +1536,14 @@ int GMT_mbgrdtiff (void *V_API, int mode, void *args)
 	/* write the header */
 	if ((write_size = fwrite(tiff_header,1,TIFF_HEADER_SIZE,tfp)) != TIFF_HEADER_SIZE) {
                 API->error++;
+                fclose(tfp);
                 return(API->error);
 	}
 
 	/* write the image */
 	if ((write_size = fwrite(tiff_image,1,image_size,tfp)) != image_size) {
                 API->error++;
+                fclose(tfp);
                 return(API->error);
 	}
 

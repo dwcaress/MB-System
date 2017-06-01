@@ -52,10 +52,10 @@ struct mbsys_sb_struct
 	int	kind;
 
 	/* position */
-	short	lon2u;		/* minutes east of prime meridian */
-	short	lon2b;		/* fraction of minute times 10000 */
-	short	lat2u;		/* number of minutes north of 90S */
-	short	lat2b;		/* fraction of minute times 10000 */
+	unsigned short	lon2u;		/* minutes east of prime meridian */
+	unsigned short	lon2b;		/* fraction of minute times 10000 */
+	unsigned short	lat2u;		/* number of minutes north of 90S */
+	unsigned short	lat2b;		/* fraction of minute times 10000 */
 
 	/* time stamp */
 	int	year;		/* year (4 digits) */

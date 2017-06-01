@@ -803,13 +803,11 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			/* position */
 			lon = 0.0000001*data->lon;
 			if (lon < 0.0) lon = lon + 360.0;
-			store->lon2u = (short) 60.0*lon;
-			store->lon2b = (short) ROUND(600000.0*
-				(lon - store->lon2u/60.0));
+			store->lon2u = (unsigned short) 60.0*lon;
+			store->lon2b = (unsigned short) ROUND(600000.0*(lon - store->lon2u/60.0));
 			lat = 0.0000001*data->lat + 90.0;
-			store->lat2u = (short) 60.0*lat;
-			store->lat2b = (short) ROUND(600000.0*
-				(lat - store->lat2u/60.0));
+			store->lat2u = (unsigned short) 60.0*lat;
+			store->lat2b = (unsigned short) ROUND(600000.0*(lat - store->lat2u/60.0));
 
 			/* time stamp */
 			store->year = data->year;

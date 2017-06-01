@@ -2416,12 +2416,13 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error)
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:                 %d\n", 
-			*error);
-		fprintf(stderr, "dbg2       store->projection_set: %d\n", 
-			store->projection_set);
-		fprintf(stderr, "dbg2       store->projection_id:  %s\n",
-			projection->projection_id);
+		fprintf(stderr, "dbg2       error:                 %d\n", *error);
+		fprintf(stderr, "dbg2       store->projection_set: %d\n", store->projection_set);
+		if (store->projection_set == MB_YES)
+			{
+			projection = &(store->projection);
+			fprintf(stderr, "dbg2       projection->projection_id:  %s\n", projection->projection_id);
+			}
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 		}
