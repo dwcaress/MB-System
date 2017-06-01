@@ -306,6 +306,7 @@ printMBPing(int rec_number)
 {
 
     char            str[512];
+    char            tstr[512];
     char           *ptr;
     int             i, j;
     int             ret;
@@ -335,63 +336,64 @@ printMBPing(int rec_number)
     sprintf(str, "   Beam");
     if (gsfRec.mb_ping.depth != NULL)
     {
-        sprintf(str, "%s   Depth", str);
+        //sprintf(str, "%s   Depth", str);
+        strncat(str, "   Depth", (512 - strlen(str) - 1));
     }
     if (gsfRec.mb_ping.across_track != NULL)
     {
-        sprintf(str, "%s  XTrack", str);
+        strncat(str, "  XTrack", (512 - strlen(str) - 1));
     }
     if (gsfRec.mb_ping.along_track != NULL)
     {
-        sprintf(str, "%s  ATrack", str);
+        strncat(str, "  ATrack", (512 - strlen(str) - 1));
     }
     if (gsfRec.mb_ping.travel_time != NULL)
     {
-        sprintf(str, "%s   TTime", str);
+        strncat(str, "   TTime", (512 - strlen(str) - 1));
     }
     if (gsfRec.mb_ping.beam_angle != NULL)
     {
-        sprintf(str, "%s   Angle", str);
+        strncat(str, "   Angle", (512 - strlen(str) - 1));
     }
     if (gsfRec.mb_ping.beam_angle_forward != NULL)
     {
-        sprintf(str, "%s Ang Fwd", str);
+        strncat(str, " Ang Fwd", (512 - strlen(str) - 1));
     }
     if (gsfRec.mb_ping.mc_amplitude != NULL)
     {
-        sprintf(str, "%s Cal Amp", str);
+        strncat(str, " Cal Amp", (512 - strlen(str) - 1));
     }
     if (gsfRec.mb_ping.mr_amplitude != NULL)
     {
-        sprintf(str, "%s Rel Amp", str);
+        strncat(str, " Rel Amp", (512 - strlen(str) - 1));
     }
     if (gsfRec.mb_ping.echo_width != NULL)
     {
-        sprintf(str, "%s   Width", str);
+        strncat(str, "   Width", (512 - strlen(str) - 1));
     }
     if (gsfRec.mb_ping.quality_factor != NULL)
     {
-        sprintf(str, "%s  Qualit", str);
+        strncat(str, "  Qualit", (512 - strlen(str) - 1));
     
     }
     if (gsfRec.mb_ping.receive_heave != NULL)
     {
-        sprintf(str, "%s   Heave", str);
+        strncat(str, "   Heave", (512 - strlen(str) - 1));
     }
     if (gsfRec.mb_ping.brb_inten != NULL)
     {
-        sprintf(str, "%s Samples", str);  /* number of intensity samples in the beam */
-        sprintf(str, "%s BotSmpl", str);  /* index to the bottom detect sample */
-        sprintf(str, "%s MaxInt.", str);  /* max intensity value for the beam */
+        strncat(str, " Samples", (512 - strlen(str) - 1));  /* number of intensity samples in the beam */
+        strncat(str, " BotSmpl", (512 - strlen(str) - 1));  /* index to the bottom detect sample */
+        strncat(str, " MaxInt.", (512 - strlen(str) - 1));  /* max intensity value for the beam */
     }
     if (gsfRec.mb_ping.quality_flags != NULL)
     {
-        sprintf(str, "%s Q Flags", str);
+        strncat(str, " Q Flags", (512 - strlen(str) - 1));
     
     }
     if (gsfRec.mb_ping.beam_flags != NULL)
     {
-        sprintf(str, "%s B Flags", str);
+        strncat(str, " B Flags", (512 - strlen(str) - 1));
     
     }
     fprintf(stdout, "%s\n", str);
@@ -403,57 +405,71 @@ printMBPing(int rec_number)
         {
             if (gsfRec.mb_ping.depth[i] < 100.0)
             {
-                sprintf(str, "%s %07.2f", str, gsfRec.mb_ping.depth[i]);
+                sprintf(tstr, " %07.2f", gsfRec.mb_ping.depth[i]);
+                strncat(str, tstr, (512 - strlen(str) - 1));
             }
             else
             {
-                sprintf(str, "%s %07.1f", str, gsfRec.mb_ping.depth[i]);
+                sprintf(tstr, " %07.1f", gsfRec.mb_ping.depth[i]);
+                strncat(str, tstr, (512 - strlen(str) - 1));
             }
         }
         if (gsfRec.mb_ping.across_track != NULL)
         {
-            sprintf(str, "%s %+07.1f", str, gsfRec.mb_ping.across_track[i]);
+            sprintf(tstr, " %+07.1f", gsfRec.mb_ping.across_track[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.along_track != NULL)
         {
-            sprintf(str, "%s %+07.1f", str, gsfRec.mb_ping.along_track[i]);
+            sprintf(tstr, " %+07.1f", gsfRec.mb_ping.along_track[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.travel_time != NULL)
         {
-            sprintf(str, "%s %07.5f", str, gsfRec.mb_ping.travel_time[i]);
+            sprintf(tstr, " %07.5f", gsfRec.mb_ping.travel_time[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.beam_angle != NULL)
         {
-            sprintf(str, "%s %07.1f", str, gsfRec.mb_ping.beam_angle[i]);
+            sprintf(tstr, " %07.1f", gsfRec.mb_ping.beam_angle[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.beam_angle_forward != NULL)
         {
-            sprintf(str, "%s %07.1f", str, gsfRec.mb_ping.beam_angle_forward[i]);
+            sprintf(tstr, " %07.1f", gsfRec.mb_ping.beam_angle_forward[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.mc_amplitude != NULL)
         {
-            sprintf(str, "%s %07.1f", str, gsfRec.mb_ping.mc_amplitude[i]);
+            sprintf(tstr, " %07.1f", gsfRec.mb_ping.mc_amplitude[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.mr_amplitude != NULL)
         {
-            sprintf(str, "%s %07.1f", str, gsfRec.mb_ping.mr_amplitude[i]);
+            sprintf(tstr, " %07.1f", gsfRec.mb_ping.mr_amplitude[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.echo_width != NULL)
         {
-            sprintf(str, "%s %07.1f", str, gsfRec.mb_ping.echo_width[i]);
+            sprintf(tstr, " %07.1f", gsfRec.mb_ping.echo_width[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.quality_factor != NULL)
         {
-            sprintf(str, "%s %07.1f", str, gsfRec.mb_ping.quality_factor[i]);
+            sprintf(tstr, " %07.1f", gsfRec.mb_ping.quality_factor[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.receive_heave != NULL)
         {
-            sprintf(str, "%s %0.7f", str, gsfRec.mb_ping.receive_heave[i]);
+            sprintf(tstr, " %0.7f", gsfRec.mb_ping.receive_heave[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.brb_inten != NULL)
         {
-            sprintf(str, "%s %7d", str, gsfRec.mb_ping.brb_inten->time_series[i].sample_count);
-            sprintf(str, "%s %7d", str, gsfRec.mb_ping.brb_inten->time_series[i].detect_sample);
+            sprintf(tstr, " %7d", gsfRec.mb_ping.brb_inten->time_series[i].sample_count);
+            strncat(str, tstr, (512 - strlen(str) - 1));
+            sprintf(tstr, " %7d", gsfRec.mb_ping.brb_inten->time_series[i].detect_sample);
+            strncat(str, tstr, (512 - strlen(str) - 1));
             max_intensity_sample = 0;
             for (j = 0; j < gsfRec.mb_ping.brb_inten->time_series[i].sample_count; j++)
             {
@@ -462,15 +478,18 @@ printMBPing(int rec_number)
                     max_intensity_sample = gsfRec.mb_ping.brb_inten->time_series[i].samples[j];
                 }
             }
-            sprintf(str, "%s %07lX", str, max_intensity_sample);
+            sprintf(tstr, " %07lX", max_intensity_sample);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.quality_flags != NULL)
         {
-            sprintf(str, "%s %0.7d", str, gsfRec.mb_ping.quality_flags[i]);
+            sprintf(tstr, " %0.7d", gsfRec.mb_ping.quality_flags[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         if (gsfRec.mb_ping.beam_flags != NULL)
         {
-            sprintf(str, "%s %0.7d", str, gsfRec.mb_ping.beam_flags[i]);
+            sprintf(tstr, " %0.7d", gsfRec.mb_ping.beam_flags[i]);
+            strncat(str, tstr, (512 - strlen(str) - 1));
         }
         fprintf(stdout, "%s\n", str);
         if (line > 20)

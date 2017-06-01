@@ -444,7 +444,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbf_oicgeoda_header_struct *header;
 	struct mbf_oicgeoda_data_struct *data;
 	struct mbsys_oic_struct *store;
-	char	buffer[MBF_OICGEODA_HEADER_SIZE];
+	char	buffer[MBF_OICGEODA_HEADER_SIZE] = "";
 	char	*comment;
 	int	read_size;
 	int	data_size;
@@ -1558,7 +1558,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbf_oicgeoda_header_struct *header;
 	struct mbf_oicgeoda_data_struct *data;
 	struct mbsys_oic_struct *store;
-	char	buffer[MBF_OICGEODA_HEADER_SIZE];
+	char	buffer[MBF_OICGEODA_HEADER_SIZE] = "";
 	char	*comment;
 	int	write_size;
 	int	data_size;

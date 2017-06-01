@@ -126,8 +126,8 @@ int main (int argc, char **argv)
 
 	/* save file control variables */
 	int	sofile_set = MB_NO;
-	char	sofile[MB_PATH_MAXLINE];
-	FILE	*sofp;
+	mb_path sofile = "";
+	FILE	*sofp = NULL;
 	int	i;
 
 	/* get current default values */

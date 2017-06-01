@@ -132,7 +132,7 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b,
 
 /* output stream for basic stuff (stdout if verbose <= 1,
 	stderr if verbose > 1) */
-FILE	*outfp;
+FILE	*outfp = NULL;
 
 /* program identifiers */
 static char rcs_id[] = "$Id$";
@@ -331,7 +331,8 @@ int main (int argc, char **argv)
 	float	NaN;
 
 	/* other variables */
-	FILE	*dfp, *rfp;
+	FILE *dfp = NULL;
+	FILE *rfp = NULL;
 	int	i, j, k, ii, jj, iii, jjj, kkk, ir, n;
 	int	i1, i2, j1, j2, k1, k2;
 	double	r;
@@ -350,8 +351,8 @@ int main (int argc, char **argv)
 	double	prx[5], pry[5];
 	int	use_weight;
 	int	fork_status;
-        char    *bufptr;
-        size_t  freadsize;
+    char    *bufptr;
+    size_t  freadsize;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -5454,7 +5455,7 @@ int write_ascii(int verbose, char *outfile, float *grid,
 {
 	char	*function_name = "write_ascii";
 	int	status = MB_SUCCESS;
-	FILE	*fp;
+	FILE	*fp = NULL;
 	int	i;
 	time_t	right_now;
 	char	date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
@@ -5488,7 +5489,7 @@ int write_ascii(int verbose, char *outfile, float *grid,
 		}
 
 	/* output grid */
-	if (status == MB_SUCCESS)
+	else
 		{
 		fprintf(fp,"grid created by program MBGRID\n");
 		right_now = time((time_t *)0);
@@ -5537,7 +5538,7 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 {
 	char	*function_name = "write_ascii";
 	int	status = MB_SUCCESS;
-	FILE	*fp;
+	FILE	*fp = NULL;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -5568,7 +5569,7 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 		}
 
 	/* output grid */
-	if (status == MB_SUCCESS)
+	else
 		{
 		fprintf(fp, "ncols %d\n", nx);
 		fprintf(fp, "nrows %d\n", ny);
@@ -5617,7 +5618,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 {
 	char	*function_name = "write_oldgrd";
 	int	status = MB_SUCCESS;
-	FILE	*fp;
+	FILE	*fp = NULL;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5646,7 +5647,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 		}
 
 	/* output grid */
-	if (status == MB_SUCCESS)
+	else
 		{
 		fwrite ((char *)&nx, 1, 4, fp);
 		fwrite ((char *)&ny, 1, 4, fp);

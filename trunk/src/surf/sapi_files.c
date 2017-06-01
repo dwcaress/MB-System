@@ -338,6 +338,8 @@ void recalculateData(void)
  double minHeave,maxHeave;
  double cmean;
 
+ memset(&fanParam, 0, sizeof(FanParam));
+ 
  if(sapiToSurfData!=NULL)
  {
   toGlobalData = sapiToSurfData->toGlobalData;

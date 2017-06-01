@@ -1772,15 +1772,15 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	struct mb_io_struct *mb_io_ptr;
 	mb_u_char	startbyte;
 	mb_u_char	typebyte;
-	short	*sonar_save;
-	short	sonarunswap;
-	short	sonarswap;
-	int	swap;
-	int	*databyteswapped;
-	int	typegood;
-	int	sonargood;
-	int	sonarswapgood;
-	int	sonarunswapgood;
+	short	*sonar_save = NULL;
+	short	sonarunswap = MB_YES;
+	short	sonarswap = MB_YES;
+	int	swap = MB_YES;
+	int	*databyteswapped = NULL;
+	int	typegood = MB_YES;
+	int	sonargood = MB_YES;
+	int	sonarswapgood = MB_YES;
+	int	sonarunswapgood = MB_YES;
 
 	/* print input debug statements */
 	if (verbose >= 2)

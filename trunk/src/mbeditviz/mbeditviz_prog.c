@@ -60,10 +60,10 @@ static char usage_message[] = "mbeditviz [-H -T -V]";
 
 /* status variables */
 char	*error_message;
-char	message[MB_PATH_MAXLINE];
-char	error1[MB_PATH_MAXLINE];
-char	error2[MB_PATH_MAXLINE];
-char	error3[MB_PATH_MAXLINE];
+char	message[MB_PATH_MAXLINE] = "";
+char	error1[MB_PATH_MAXLINE] = "";
+char	error2[MB_PATH_MAXLINE] = "";
+char	error3[MB_PATH_MAXLINE] = "";
 
 /* data file parameters */
 void	*datalist;
@@ -416,6 +416,8 @@ int mbeditviz_import_file(char *path, int format)
 	struct mbev_file_struct *file;
 	struct stat file_status;
 	int	fstatus;
+	void *nptr;
+	
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -440,12 +442,17 @@ int mbeditviz_import_file(char *path, int format)
 	mbev_status = MB_SUCCESS;
 	if (mbev_num_files_alloc <= mbev_num_files)
 		{
-		mbev_files = (struct mbev_file_struct *) realloc(mbev_files,
+		nptr = realloc(mbev_files,
 				sizeof(struct mbev_file_struct) * (mbev_num_files_alloc + MBEV_ALLOC_NUM));
-		if (mbev_files != NULL)
+		if (nptr != NULL)
+			{
+			mbev_files = (struct mbev_file_struct *) nptr;
 			mbev_num_files_alloc += MBEV_ALLOC_NUM;
+			}
 		else
 			{
+			free(mbev_files);
+			mbev_files = NULL;
 			mbev_status = MB_FAILURE;
 			mbev_error = MB_ERROR_MEMORY_FAIL;
 			}
@@ -533,29 +540,30 @@ int mbeditviz_load_file(int ifile)
 	char	*function_name = "mbeditviz_load_file";
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
-	mb_path	swathfile;
+	mb_path	swathfile = "";
 	struct stat file_status;
 	int	fstatus;
 	FILE	*afp;
-	mb_path	asyncfile;
-	mb_path	geffile;
-	char	buffer[MBP_FILENAMESIZE], *result;
-	char	command[MBP_FILENAMESIZE];
+	mb_path	asyncfile = "";
+	mb_path	geffile = "";
+	char	buffer[MBP_FILENAMESIZE] = "";
+	char 	*result = NULL;
+	char	command[MBP_FILENAMESIZE] = "";
 	int	nread;
 	int n_unused;
 
-	mb_path	error1;
-	mb_path	error2;
-	mb_path	error3;
+	mb_path	error1 = "";
+	mb_path	error2 = "";
+	mb_path	error3 = "";
 
 	/* swath file locking variables */
 	int	lock_status;
 	int	locked;
 	int	lock_purpose;
-	mb_path	lock_program;
-	mb_path lock_cpu;
-	mb_path lock_user;
-	char	lock_date[25];
+	mb_path	lock_program = "";
+	mb_path lock_cpu = "";
+	mb_path lock_user = "";
+	char	lock_date[25] = "";
 
 	/* mbio read and write values */
 	int	format;
@@ -4993,7 +5001,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode,
 							double *headingbias_best, double *timelag_best)
 {
 	char	*function_name = "mbeditviz_mb3dsoundings_optimizebiasvalues";
-	mb_path message_string;
+	mb_path message_string = "";
 	double 	*local_grid_first = NULL;
 	double 	*local_grid_sum = NULL;
 	double 	*local_grid_sum2 = NULL;

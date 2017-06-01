@@ -283,13 +283,13 @@ int main (int argc, char **argv)
 	char *result = NULL;
 	int	nscan;
 	int	shellstatus;
-	mb_path	command;
-	mb_path filename;
+	mb_path	command = "";
+	mb_path filename = "";
 	double	mtodeglon, mtodeglat;
 	int	found, current_crossing;
 	int	imod, ifile, icrossing, itie, itie_set, isection, isnav;
 	double timediff, timediffmin;
-	mb_path tmp_mb_path;
+	mb_path tmp_mb_path = "";
 	int tmp_int;
 	double tmp_double;
 	int done;

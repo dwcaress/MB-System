@@ -71,12 +71,12 @@ int main (int argc, char **argv)
 
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
-	mb_path	read_file;
-	mb_path	output_file;
+	mb_path	read_file = "";
+	mb_path	output_file = "";
 	int	output_file_set = MB_NO;
-	void	*datalist;
+	void	*datalist = NULL;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
-	double	file_weight;
+	double	file_weight = 1.0;
 	int	format;
 	int	pings;
 	int	lonflip;
@@ -87,8 +87,8 @@ int main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	mb_path	file;
-	mb_path	dfile;
+	mb_path	file = "";
+	mb_path	dfile = "";
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -136,11 +136,11 @@ int main (int argc, char **argv)
 	int	ntimepoint = 0;
 	int	ntimepointalloc = 0;
 	double	*routetime_d = NULL;
-	mb_path	route_file;
+	mb_path	route_file = "";
 	int	route_file_set = MB_NO;
 	int	checkroutebearing = MB_NO;
 	int	rawroutefile = MB_NO;
-	mb_path	lineroot;
+	mb_path	lineroot = "";
 	int	nroutepoint = 0;
 	int	nroutepointalloc = 0;
 	double	lon;
@@ -151,17 +151,17 @@ int main (int argc, char **argv)
 	double	*routelat = NULL;
 	double	*routeheading = NULL;
 	int	*routewaypoint = NULL;
-	double	range;
+	double	range = 0.0;
 	double	rangethreshold = 25.0;
-	double	rangelast;
+	double	rangelast = 0.0;
 	int	activewaypoint = 0;
 	int	startline = 1;
-	int	linenumber;
+	int	linenumber = 0;
 
 	/* auto plotting */
 	FILE	*sfp = NULL;
-	mb_path	scriptfile;
-	int	recalculatesweep;
+	mb_path	scriptfile = "";
+	int	recalculatesweep = MB_NO;
 	double	seafloordepthmin = -1.0;
 	double	seafloordepthmax = -1.0;
 	double	seafloordepthminplot[MBES_NUM_PLOT_MAX];
@@ -182,11 +182,11 @@ int main (int argc, char **argv)
 	double	xscale = 0.01;
 	double	yscale = 50.0;
 	double	maxwidth = 30.0;
-	mb_path	zbounds;
+	mb_path	zbounds = "";
 	double	zmax = 50;
 
-	mb_path	command;
-	mb_path	scale;
+	mb_path	command = "";
+	mb_path	scale = "";
 	double	mtodeglon, mtodeglat;
 	double	lastlon;
 	double	lastlat;

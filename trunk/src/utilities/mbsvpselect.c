@@ -992,6 +992,7 @@ int read_recursive2(char *fname){
         my_strcpy(holder[surveyLines_total],fname);
         counter +=1;
         surveyLines_total+=1;
+        fclose(dataFile);
         return counter;
     }
     else{
@@ -1021,6 +1022,7 @@ int read_recursive2(char *fname){
                     }
                     //counter +=tmp;
                 }
+                fclose(dataFile2);
             }
         }
         else{
@@ -1032,7 +1034,6 @@ int read_recursive2(char *fname){
             int tmp2 = read_recursive2(strHolder);
             counter+=tmp2;
         }
-        
     }
     return counter;
 }
@@ -1070,7 +1071,7 @@ int read_recursive(char *fileName){
         else {
             read_recursive(str);
         }
-        
+        fclose(dataFile);
     }
     return counter;
 }

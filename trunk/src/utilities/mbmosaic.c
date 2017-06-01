@@ -279,18 +279,18 @@ int main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	file[MB_PATH_MAXLINE];
+	mb_path file = "";
 	int	file_in_bounds;
-	void	*mbio_ptr = NULL;
-        struct mb_io_struct *mb_io_ptr = NULL;
-        void    *store_ptr;
+	void *mbio_ptr = NULL;
+    struct mb_io_struct *mb_io_ptr = NULL;
+    void *store_ptr = NULL;
 
 	/* mbmosaic control variables */
-	char	filelist[MB_PATH_MAXLINE];
-	char	fileroot[MB_PATH_MAXLINE];
-	void	*datalist;
+	mb_path filelist = "";
+	mb_path fileroot = "";
+	void	*datalist = NULL;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
-	double	file_weight;
+	double	file_weight = 1.0;
 	int	xdim = 0;
 	int	ydim = 0;
 	int	spacing_priority = MB_NO;
@@ -300,7 +300,7 @@ int main (int argc, char **argv)
 	double	dy_set = 0.0;
 	double	dx = 0.0;
 	double	dy = 0.0;
-	char	units[MB_PATH_MAXLINE];
+	mb_path units = "";
 	int	clip = 0;
 	int	clipmode = MBMOSAIC_INTERP_NONE;
 	double	tension = 0.0;
@@ -314,7 +314,7 @@ int main (int argc, char **argv)
 	double	clipvalue = NO_DATA_FLAG;
 	float	outclipvalue = NO_DATA_FLAG;
 	double	scale = 1.0;
-        double  boundsfactor = 0.0;
+    double  boundsfactor = 0.0;
 	double	border = 0.0;
 	double	extend = 0.0;
 	int	priority_mode = MBMOSAIC_PRIORITY_NONE;
@@ -329,22 +329,22 @@ int main (int argc, char **argv)
 	double	*priority_angle_angle = NULL;
 	double	*priority_angle_priority = NULL;
 	int	weight_priorities = 0;
-        int     usetopogrid = MB_NO;
+    int     usetopogrid = MB_NO;
 	double	altitude_default = 1000.0;
 	int	pstatus;
-	char	path[MB_PATH_MAXLINE];
-	char	ppath[MB_PATH_MAXLINE];
-	char	dpath[MB_PATH_MAXLINE];
-	char	ifile[MB_PATH_MAXLINE];
-	char	ofile[MB_PATH_MAXLINE];
-	char	dfile[MB_PATH_MAXLINE];
-	char	plot_cmd[MB_COMMENT_MAXLINE];
+	mb_path path = "";
+	mb_path ppath = "";
+	mb_path dpath = "";
+	mb_path ifile = "";
+	mb_path ofile = "";
+	mb_path dfile = "";
+	char plot_cmd[MB_COMMENT_MAXLINE] = "";
 	int	plot_status;
 	int	use_beams = MB_NO;
 	int 	use_slope = MB_NO;
 
 	/* topography parameters */
-        mb_path topogridfile;
+    mb_path topogridfile = "";
 	void	*topogrid_ptr = NULL;
 
 	/* mbio read values */
@@ -379,10 +379,10 @@ int main (int argc, char **argv)
 	int	formatread;
 	double	beamwidth_xtrack;
 	double	beamwidth_ltrack;
-        double  draft;
-        double  roll;
-        double  pitch;
-        double  heave;
+    double  draft;
+    double  roll;
+    double  pitch;
+    double  heave;
 
 	/* grid variables */
 	double	gbnd[4], wbnd[4], obnd[4];
@@ -399,7 +399,7 @@ int main (int argc, char **argv)
 	float	*sdata = NULL;
 	float	*output = NULL;
 	float	*sgrid = NULL;
-        double  bdata_origin_x, bdata_origin_y;
+    double  bdata_origin_x, bdata_origin_y;
 	double	sxmin, symin;
 	float	xmin, ymin, ddx, ddy, zflag, cay;
 	void	*work1 = NULL;
@@ -420,16 +420,16 @@ int main (int argc, char **argv)
 	double	table_ltrack[MB7K2SS_NUM_ANGLES];
 	double	table_altitude[MB7K2SS_NUM_ANGLES];
 	double	table_range[MB7K2SS_NUM_ANGLES];
-        int     table_status = MB_SUCCESS;
-        int     table_error = MB_ERROR_NO_ERROR;
+    int     table_status = MB_SUCCESS;
+    int     table_error = MB_ERROR_NO_ERROR;
 
 	/* projected grid parameters */
 	int	use_projection = MB_NO;
 	int	projection_pars_f = MB_NO;
 	double	reference_lon, reference_lat;
 	int	utm_zone = 1;
-	char	projection_pars[MB_PATH_MAXLINE];
-	char	projection_id[MB_PATH_MAXLINE];
+	mb_path projection_pars = "";
+	mb_path projection_id = "";
 	int	proj_status;
 	void	*pjptr;
 	double	deglontokm, deglattokm;
@@ -437,12 +437,12 @@ int main (int argc, char **argv)
 	double	headingx, headingy;
 
 	/* output char strings */
-	char	xlabel[MB_PATH_MAXLINE];
-	char	ylabel[MB_PATH_MAXLINE];
-	char	zlabel[MB_PATH_MAXLINE];
-	char	title[MB_PATH_MAXLINE];
-	char	nlabel[MB_PATH_MAXLINE];
-	char	sdlabel[MB_PATH_MAXLINE];
+	mb_path xlabel = "";
+	mb_path ylabel = "";
+	mb_path zlabel = "";
+	mb_path title = "";
+	mb_path nlabel = "";
+	mb_path sdlabel = "";
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		stderr if verbose > 1) */
@@ -452,19 +452,21 @@ int main (int argc, char **argv)
 	float	NaN;
 
 	/* other variables */
-	FILE	*dfp, *fp;
-	char	buffer[MB_PATH_MAXLINE], *result;
+	FILE *dfp = NULL;
+    FILE *fp = NULL;
+	mb_path buffer = "";
+    char *result = NULL;
 	double	norm_weight;
 	double	xsmin, xsmax;
-        double  xx1, yy1;
+    double  xx1, yy1;
 	int	ismin, ismax;
 	int	footprint_mode;
 	int	inside;
 	double	acrosstrackspacing;
-        double  slope;
+    double  slope;
 	int	i, j, ii, jj, iii, jjj, kkk, n;
 	int	i1, i2, j1, j2;
-        int     ir;
+    int     ir;
 	double	r;
 	int	dmask[9];
 	int	kgrid, kout, kint, ib;
@@ -815,7 +817,7 @@ int main (int argc, char **argv)
 		fprintf(outfp,"dbg2       usefiltered:          %d\n",usefiltered);
 		fprintf(outfp,"dbg2       grid format:          %d\n",gridkind);
 		if (gridkind == MBMOSAIC_GMTGRD)
-		fprintf(outfp,"dbg2       gmt grid format id:   %s\n",gridkindstring);
+            fprintf(outfp,"dbg2       gmt grid format id:   %s\n",gridkindstring);
 		fprintf(outfp,"dbg2       scale:                %f\n",scale);
 		fprintf(outfp,"dbg2       border:               %f\n",border);
 		fprintf(outfp,"dbg2       extend:               %f\n",extend);
@@ -3774,7 +3776,7 @@ int write_ascii(int verbose, char *outfile, float *grid,
 {
 	char	*function_name = "write_ascii";
 	int	status = MB_SUCCESS;
-	FILE	*fp;
+	FILE	*fp = NULL;
 	int	i;
 	time_t	right_now;
 	char	date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
@@ -3808,7 +3810,7 @@ int write_ascii(int verbose, char *outfile, float *grid,
 		}
 
 	/* output grid */
-	if (status == MB_SUCCESS)
+	else
 		{
 		fprintf(fp,"grid created by program mbmosaic\n");
 		right_now = time((time_t *)0);
@@ -3857,7 +3859,7 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 {
 	char	*function_name = "write_ascii";
 	int	status = MB_SUCCESS;
-	FILE	*fp;
+	FILE	*fp = NULL;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -3888,7 +3890,7 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 		}
 
 	/* output grid */
-	if (status == MB_SUCCESS)
+	else
 		{
 		fprintf(fp, "ncols %d\n", nx);
 		fprintf(fp, "nrows %d\n", ny);
@@ -3937,7 +3939,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 {
 	char	*function_name = "write_oldgrd";
 	int	status = MB_SUCCESS;
-	FILE	*fp;
+	FILE	*fp = NULL;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3966,7 +3968,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 		}
 
 	/* output grid */
-	if (status == MB_SUCCESS)
+	else
 		{
 		fwrite ((char *)&nx, 1, 4, fp);
 		fwrite ((char *)&ny, 1, 4, fp);

@@ -4661,18 +4661,18 @@ int mbedit_open_file(char *file, int form, int savemode)
 	int	status = MB_SUCCESS;
 	int	outputmode;
 	int	i;
-	mb_path	error1;
-	mb_path	error2;
-	mb_path	error3;
+	mb_path	error1 = "";
+	mb_path	error2 = "";
+	mb_path	error3 = "";
 
 	/* swath file locking variables */
 	int	lock_status;
 	int	locked;
 	int	lock_purpose;
-	mb_path	lock_program;
-	mb_path lock_cpu;
-	mb_path lock_user;
-	char	lock_date[25];
+	mb_path	lock_program = "";
+	mb_path lock_cpu = "";
+	mb_path lock_user = "";
+	char	lock_date[25] = "";
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4925,8 +4925,8 @@ int mbedit_close_file()
 	/* local variables */
 	char	*function_name = "mbedit_close_file";
 	int	status = MB_SUCCESS;
-	char	command[MB_PATH_MAXLINE];
-        int     shellstatus;
+	char	command[MB_PATH_MAXLINE] = "";
+    int     shellstatus;
 	int	i;
 
 	/* print input debug statements */

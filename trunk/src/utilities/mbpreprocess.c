@@ -261,7 +261,7 @@ int main (int argc, char **argv)
 
 	/* asynchronous navigation, heading, attitude data */
 	int	nav_mode = MBPREPROCESS_MERGE_OFF;
-	mb_path	nav_file;
+	mb_path	nav_file = "";
 	int	nav_file_format = 0;
 	int	nav_async = MB_DATA_DATA;
 	int	nav_sensor = -1;
@@ -283,7 +283,7 @@ int main (int argc, char **argv)
 	double	*sensordepth_sensordepth = NULL;
 
 	int	heading_mode = MBPREPROCESS_MERGE_OFF;
-	mb_path	heading_file;
+	mb_path	heading_file = "";
 	int	heading_file_format = 0;
 	int	heading_async = MB_DATA_DATA;
 	int	heading_sensor = -1;
@@ -293,7 +293,7 @@ int main (int argc, char **argv)
 	double	*heading_heading = NULL;
 
 	int	altitude_mode = MBPREPROCESS_MERGE_OFF;
-	mb_path	altitude_file;
+	mb_path	altitude_file = "";
 	int	altitude_file_format = 0;
 	int	altitude_async = MB_DATA_DATA;
 	int	altitude_sensor = -1;
@@ -303,7 +303,7 @@ int main (int argc, char **argv)
 	double	*altitude_altitude = NULL;
 
 	int	attitude_mode = MBPREPROCESS_MERGE_OFF;
-	mb_path	attitude_file;
+	mb_path	attitude_file = "";
 	int	attitude_file_format = 0;
 	int	attitude_async = MB_DATA_DATA;
 	int	attitude_sensor = -1;
@@ -316,7 +316,7 @@ int main (int argc, char **argv)
 
 	int	time_latency_mode = MB_SENSOR_TIME_LATENCY_NONE;
 	mb_u_char time_latency_apply = MBPREPROCESS_TIME_LATENCY_APPLY_NONE;
-	mb_path	time_latency_file;
+	mb_path	time_latency_file = "";
 	int	time_latency_format = 1;
 	int	time_latency_num = 0;
 	int	time_latency_alloc = 0;
@@ -329,7 +329,7 @@ int main (int argc, char **argv)
 	double	filter_length = 0.0;
 	
 	/* platform definition file */
-	mb_path	platform_file;
+	mb_path	platform_file = "";
 	int	use_platform_file = MB_NO;
 	struct mb_platform_struct *platform = NULL;
 	struct mb_sensor_struct *sensor_bathymetry = NULL;
@@ -369,8 +369,8 @@ int main (int argc, char **argv)
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	int	read_data;
-	mb_path	read_file;
-	void	*datalist;
+	mb_path	read_file = "";
+	void	*datalist = NULL;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format = 0;
@@ -385,10 +385,10 @@ int main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	mb_path	ifile;
-	mb_path	dfile;
-	mb_path	ofile;
-	mb_path	fileroot;
+	mb_path	ifile = "";
+	mb_path	dfile = "";
+	mb_path	ofile = "";
+	mb_path	fileroot = "";
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -493,17 +493,17 @@ int main (int argc, char **argv)
 	int	n_wt_att3 = 0;
 
 	int shellstatus;
-	mb_path command;
+	mb_path command = "";
 	
-	mb_path afile;
-	FILE *afp;
+	mb_path afile = "";
+	FILE *afp = NULL;
 	struct stat file_status;
 	int fstat;
 	double start_time_d;
 	double end_time_d;
 	int	istart, iend;
 	
-	mb_path fnvfile;
+	mb_path fnvfile = "";
 	int	isensor, ioffset;
 	
 	int	testformat;
@@ -515,8 +515,8 @@ int main (int argc, char **argv)
 	int	jaltitude = 0;
 	int	jattitude = 0;
 	double *dptr = NULL;
-	int index;
-	char buffer[16];
+	int index = 0;
+	char buffer[16] = "";
 	int	i, n;
 
 	/* get current default values */

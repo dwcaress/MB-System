@@ -411,11 +411,11 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	short   altitude_bin;
 	int	range_mode;
 	int	channel_mode;
-	double	range_per_bin;
-	double  range;
-	double  range_delay;
-	double  altitude;
-	double	frequency;
+	double	range_per_bin = 0.0;
+	double  range = 0.0;
+	double  range_delay = 0.0;
+	double  altitude = 0.0;
+	double	frequency = 0.0;
 	short	sonar_gain[16];
 	int	navsize;
 	int	navtime1, navtime2;

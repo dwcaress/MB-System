@@ -526,8 +526,10 @@ int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->free_air = data->free_air;
 		store->seismic_line = data->seismic_line;
 		store->seismic_shot = data->seismic_shot;
-		for (i=0;i<MB_COMMENT_MAXLINE;i++)
+		for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
 		    store->comment[i] = data->comment[i];
+		for (i=MBF_MGD77DAT_DATA_LEN;i<MB_COMMENT_MAXLINE;i++)
+		    store->comment[i] = 0;
 		}
 
 	/* print output debug statements */
@@ -606,7 +608,7 @@ int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->free_air = store->free_air;
 		data->seismic_line = store->seismic_line;
 		data->seismic_shot = store->seismic_shot;
-		for (i=0;i<MB_COMMENT_MAXLINE;i++)
+		for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
 		    data->comment[i] = store->comment[i];
 		}
 
@@ -634,7 +636,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77dat_struct *data;
 	int	*header_read;
-	char	line[MBF_MGD77DAT_DATA_LEN];
+	char	line[MBF_MGD77DAT_DATA_LEN] = "";
 	size_t	read_len;
 	size_t	skip;
 	int	shift;
@@ -729,7 +731,8 @@ fprintf(stderr,"\n");*/
 	    data->kind = MB_DATA_HEADER;
 	    (*header_read)++;
 	    for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
-		data->comment[i] = line[i];
+			data->comment[i] = line[i];
+		
 	    }
 	else if (status == MB_SUCCESS
 	    && (line[0] == '1' || line[0] == '4'))
@@ -737,7 +740,7 @@ fprintf(stderr,"\n");*/
 	    data->kind = MB_DATA_HEADER;
 	    (*header_read) = 1;
 	    for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
-		data->comment[i] = line[i];
+			data->comment[i] = line[i];
 	    }
 	else if (status == MB_SUCCESS
 	    && line[0] == '#')
@@ -946,7 +949,7 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77dat_struct *data;
-	char	line[MBF_MGD77DAT_DATA_LEN+1];
+	char	line[MBF_MGD77DAT_DATA_LEN+1] = "";
 	int	itmp;
 	int	write_len;
 	int	shift;
@@ -974,14 +977,14 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	    {
 	    strcpy(line, data->comment);
 	    for (i=strlen(line);i<MBF_MGD77DAT_DATA_LEN;i++)
-		line[i] = ' ';
+			line[i] = ' ';
 	    }
 	else if (data->kind == MB_DATA_COMMENT)
 	    {
 	    line[0] = '#';
             strncpy(&line[1],data->comment,MBF_MGD77DAT_DATA_LEN-1);
 	    for (i=strlen(line);i<MBF_MGD77DAT_DATA_LEN;i++)
-		line[i] = ' ';
+			line[i] = ' ';
 	    }
 	else if (data->kind == MB_DATA_DATA)
 	    {

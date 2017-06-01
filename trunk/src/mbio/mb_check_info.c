@@ -112,138 +112,138 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 
 		    /* read the inf file */
 		    while (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			{
-			if (strncmp(line, "Number of Records:", 18) == 0)
-			    {
-			    nscan = sscanf(line, "Number of Records: %d",
-					    &nrecords_read);
-			    if (nscan == 1)
-				nrecords = nrecords_read;
-			    }
-			else if (strncmp(line, "Minimum Longitude:", 18) == 0)
-			    sscanf(line, "Minimum Longitude: %lf Maximum Longitude: %lf",
-				    &lon_min, &lon_max);
-			else if (strncmp(line, "Minimum Latitude:", 17) == 0)
-			    sscanf(line, "Minimum Latitude: %lf Maximum Latitude: %lf",
-				    &lat_min, &lat_max);
-			else if (strncmp(line, "CM dimensions:", 14) == 0)
-			    {
-			    sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
-			    status = mb_mallocd(verbose,__FILE__, __LINE__,mask_nx*mask_ny*sizeof(int),
-							(void **)&mask,error);
-			    for (j=mask_ny-1;j>=0;j--)
 				{
-				if ((startptr = fgets(line, 128, fp)) != NULL)
-				    {
-				    startptr = &line[6];
-				    for (i=0;i<mask_nx;i++)
+				if (strncmp(line, "Number of Records:", 18) == 0)
 					{
-					k = i + j * mask_nx;
-					mask[k] = strtol(startptr, &endptr, 0);
-					startptr = endptr;
+					nscan = sscanf(line, "Number of Records: %d",
+							&nrecords_read);
+					if (nscan == 1)
+					nrecords = nrecords_read;
 					}
-				    }
+				else if (strncmp(line, "Minimum Longitude:", 18) == 0)
+					sscanf(line, "Minimum Longitude: %lf Maximum Longitude: %lf",
+						&lon_min, &lon_max);
+				else if (strncmp(line, "Minimum Latitude:", 17) == 0)
+					sscanf(line, "Minimum Latitude: %lf Maximum Latitude: %lf",
+						&lat_min, &lat_max);
+				else if (strncmp(line, "CM dimensions:", 14) == 0)
+					{
+					sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
+					status = mb_mallocd(verbose,__FILE__, __LINE__,mask_nx*mask_ny*sizeof(int),
+								(void **)&mask,error);
+					for (j=mask_ny-1;j>=0;j--)
+						{
+						if ((startptr = fgets(line, 128, fp)) != NULL)
+							{
+							startptr = &line[6];
+							for (i=0;i<mask_nx;i++)
+								{
+								k = i + j * mask_nx;
+								mask[k] = strtol(startptr, &endptr, 0);
+								startptr = endptr;
+								}
+							}
+						}
+					}
 				}
-			    }
-			}
 
-		    /* check bounds if there is data */
-		    if (nrecords > 0)
-			{
-			/* set lon lat min max according to lonflip */
-			if (lonflip == -1
-			    && lon_min > 0.0)
-			    {
-			    lon_min -= 360.0;
-			    lon_max -= 360.0;
-			    }
-			else if (lonflip == 0
-			    && lon_max < -180.0)
-			    {
-			    lon_min += 360.0;
-			    lon_max += 360.0;
-			    }
-			else if (lonflip == 0
-			    && lon_min > 180.0)
-			    {
-			    lon_min -= 360.0;
-			    lon_max -= 360.0;
-			    }
-			else if (lonflip == 1
-			    && lon_max < 0.0)
-			    {
-			    lon_min += 360.0;
-			    lon_max += 360.0;
-			    }
-
-			/* check for lonflip conflict with bounds */
-			if (lon_min > lon_max || lat_min > lat_max)
-			    *file_in_bounds = MB_YES;
-
-			/* else check mask against desired input bounds */
-			else if (mask_nx > 0 && mask_ny > 0)
-			    {
-			    *file_in_bounds = MB_NO;
-			    mask_dx = (lon_max - lon_min) / mask_nx;
-			    mask_dy = (lat_max - lat_min) / mask_ny;
-			    for (i=0; i<mask_nx && *file_in_bounds == MB_NO; i++)
-				for (j=0; j<mask_ny && *file_in_bounds == MB_NO; j++)
-				    {
-				    k = i + j * mask_nx;
-				    lonwest = lon_min + i * mask_dx;
-				    loneast = lonwest + mask_dx;
-				    latsouth = lat_min + j * mask_dy;
-				    latnorth = latsouth + mask_dy;
-				    if (mask[k] == 1
-					&& lonwest < bounds[1] && loneast > bounds[0]
-					&& latsouth < bounds[3] && latnorth > bounds[2])
+			/* check bounds if there is data */
+			if (nrecords > 0)
+				{
+				/* set lon lat min max according to lonflip */
+				if (lonflip == -1
+					&& lon_min > 0.0)
+					{
+					lon_min -= 360.0;
+					lon_max -= 360.0;
+					}
+				else if (lonflip == 0
+					&& lon_max < -180.0)
+					{
+					lon_min += 360.0;
+					lon_max += 360.0;
+					}
+				else if (lonflip == 0
+					&& lon_min > 180.0)
+					{
+					lon_min -= 360.0;
+					lon_max -= 360.0;
+					}
+				else if (lonflip == 1
+					&& lon_max < 0.0)
+					{
+					lon_min += 360.0;
+					lon_max += 360.0;
+					}
+	
+				/* check for lonflip conflict with bounds */
+				if (lon_min > lon_max || lat_min > lat_max)
 					*file_in_bounds = MB_YES;
-				    }
-			    mb_freed(verbose,__FILE__, __LINE__,(void **) &mask, error);
-			    }
-
-			/* else check whole file against desired input bounds */
-			else
-			    {
-			    if (lon_min < bounds[1] && lon_max > bounds[0]
-				&& lat_min < bounds[3] && lat_max > bounds[2])
-				*file_in_bounds = MB_YES;
-			    else
+	
+				/* else check mask against desired input bounds */
+				else if (mask_nx > 0 && mask_ny > 0)
+					{
+					*file_in_bounds = MB_NO;
+					mask_dx = (lon_max - lon_min) / mask_nx;
+					mask_dy = (lat_max - lat_min) / mask_ny;
+					for (i=0; i<mask_nx && *file_in_bounds == MB_NO; i++)
+						for (j=0; j<mask_ny && *file_in_bounds == MB_NO; j++)
+							{
+							k = i + j * mask_nx;
+							lonwest = lon_min + i * mask_dx;
+							loneast = lonwest + mask_dx;
+							latsouth = lat_min + j * mask_dy;
+							latnorth = latsouth + mask_dy;
+							if (mask[k] == 1
+							&& lonwest < bounds[1] && loneast > bounds[0]
+							&& latsouth < bounds[3] && latnorth > bounds[2])
+							*file_in_bounds = MB_YES;
+							}
+					mb_freed(verbose,__FILE__, __LINE__,(void **) &mask, error);
+					}
+	
+				/* else check whole file against desired input bounds */
+				else
+					{
+					if (lon_min < bounds[1] && lon_max > bounds[0]
+					&& lat_min < bounds[3] && lat_max > bounds[2])
+					*file_in_bounds = MB_YES;
+					else
+					*file_in_bounds = MB_NO;
+					}
+	
+							/*print debug statements */
+							if (verbose >= 4)
+					{
+								fprintf(stderr,"dbg4  Bounds from inf file:\n");
+								fprintf(stderr,"dbg4      lon_min: %f\n", lon_min);
+								fprintf(stderr,"dbg4      lon_max: %f\n", lon_max);
+								fprintf(stderr,"dbg4      lat_min: %f\n", lat_min);
+								fprintf(stderr,"dbg4      lat_max: %f\n", lat_max);
+					}
+				}
+	
+			/* else if no data records in inf file
+				treat file as out of bounds */
+			else if (nrecords == 0)
+				{
 				*file_in_bounds = MB_NO;
-			    }
-
-                        /*print debug statements */
-                        if (verbose >= 4)
-			    {
-                            fprintf(stderr,"dbg4  Bounds from inf file:\n");
-                            fprintf(stderr,"dbg4      lon_min: %f\n", lon_min);
-                            fprintf(stderr,"dbg4      lon_max: %f\n", lon_max);
-                            fprintf(stderr,"dbg4      lat_min: %f\n", lat_min);
-                            fprintf(stderr,"dbg4      lat_max: %f\n", lat_max);
-			    }
-			}
-
-		    /* else if no data records in inf file
-			treat file as out of bounds */
-		    else if (nrecords == 0)
-			{
-			*file_in_bounds = MB_NO;
-
-             		/*print debug statements */
-                    	if (verbose >= 4)
-                        	fprintf(stderr,"dbg4  The inf file shows zero records so out of bounds...\n");
-			}
-
-		    /* else if no data assume inf file is botched so
+	
+						/*print debug statements */
+							if (verbose >= 4)
+								fprintf(stderr,"dbg4  The inf file shows zero records so out of bounds...\n");
+				}
+	
+			/* else if no data assume inf file is botched so
 			assume file has data in bounds */
-		    else
-			{
-			*file_in_bounds = MB_YES;
-
-             		/*print debug statements */
-                    	if (verbose >= 4)
-                        	fprintf(stderr,"dbg4  No data listed in inf file so cannot check bounds...\n");
-			}
+			else
+				{
+				*file_in_bounds = MB_YES;
+	
+						/*print debug statements */
+							if (verbose >= 4)
+								fprintf(stderr,"dbg4  No data listed in inf file so cannot check bounds...\n");
+				}
 
 		    /* close the file */
 		    fclose(fp);
@@ -287,12 +287,15 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
 	char	line[MB_PATH_MAXLINE];
-	char	*startptr, *endptr;
+	char	*startptr;
+	//char	*endptr;
 	FILE	*fp;
 	int	time_i[7];
 	double	speedkts;
 	int	nscan, nproblem, problemid;
-	int	i, j, k;
+	int mask_nx, mask_ny;
+	//int	i, j, k;
+	int		j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -516,37 +519,40 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 			    sscanf(line, "PN: %d DATA PROBLEM (ID=%d):",
 				    &nproblem,&problemid);
 			    if (problemid == MB_PROBLEM_NO_DATA)
-				mb_info->problem_nodata += nproblem;
+					mb_info->problem_nodata += nproblem;
 			    else if (problemid == MB_PROBLEM_ZERO_NAV)
-				mb_info->problem_zeronav += nproblem;
+					mb_info->problem_zeronav += nproblem;
 			    else if (problemid == MB_PROBLEM_TOO_FAST)
-			 	mb_info->problem_toofast += nproblem;
+					mb_info->problem_toofast += nproblem;
 			    else if (problemid == MB_PROBLEM_AVG_TOO_FAST)
-				mb_info->problem_avgtoofast += nproblem;
+					mb_info->problem_avgtoofast += nproblem;
 			    else if (problemid == MB_PROBLEM_TOO_DEEP)
-				mb_info->problem_toodeep += nproblem;
+					mb_info->problem_toodeep += nproblem;
 			    else if (problemid == MB_PROBLEM_BAD_DATAGRAM)
-				mb_info->problem_baddatagram += nproblem;
+					mb_info->problem_baddatagram += nproblem;
 			    }
 
 			else if (strncmp(line, "CM dimensions:", 14) == 0)
 			    {
-			    sscanf(line, "CM dimensions: %d %d", &mb_info->mask_nx, &mb_info->mask_ny);
-			    status = mb_mallocd(verbose,__FILE__, __LINE__,mb_info->mask_nx*mb_info->mask_ny*sizeof(int),
-							(void **)&mb_info->mask,error);
-			    for (j=mb_info->mask_ny-1;j>=0;j--)
-				{
-				if ((startptr = fgets(line, 128, fp)) != NULL)
-				    {
-				    startptr = &line[6];
-				    for (i=0;i<mb_info->mask_nx;i++)
-					{
-					k = i + j * mb_info->mask_nx;
-					mb_info->mask[k] = strtol(startptr, &endptr, 0);
-					startptr = endptr;
-					}
-				    }
-				}
+			    sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
+			    for (j=0;j<mask_ny;j++)
+					fgets(line, 128, fp);
+			    //sscanf(line, "CM dimensions: %d %d", &mb_info->mask_nx, &mb_info->mask_ny);
+			    //status = mb_mallocd(verbose,__FILE__, __LINE__,mb_info->mask_nx*mb_info->mask_ny*sizeof(int),
+				//			(void **)&mb_info->mask,error);
+			    //for (j=mb_info->mask_ny-1;j>=0;j--)
+				//	{
+				//	if ((startptr = fgets(line, 128, fp)) != NULL)
+				//		{
+				//		startptr = &line[6];
+				//		for (i=0;i<mb_info->mask_nx;i++)
+				//			{
+				//			k = i + j * mb_info->mask_nx;
+				//			mb_info->mask[k] = strtol(startptr, &endptr, 0);
+				//			startptr = endptr;
+				//			}
+				//		}
+				//	}
 			    }
 			}
 
@@ -658,21 +664,22 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		fprintf(stderr,"dbg2       problem_avgtoofast:       %d\n",mb_info->problem_avgtoofast);
 		fprintf(stderr,"dbg2       problem_toodeep:          %d\n",mb_info->problem_toodeep);
 		fprintf(stderr,"dbg2       problem_baddatagram:      %d\n",mb_info->problem_baddatagram);
-		fprintf(stderr,"dbg2       mask_nx:                  %d\n",mb_info->mask_nx);
-		fprintf(stderr,"dbg2       mask_ny:                  %d\n",mb_info->mask_ny);
-		fprintf(stderr,"dbg2       mask_dx:                  %f\n",mb_info->mask_dx);
-		fprintf(stderr,"dbg2       mask_dy:                  %f\n",mb_info->mask_dy);
-		fprintf(stderr,"dbg2       mask:\n");
-		for (j=mb_info->mask_ny-1;j>=0;j--)
-			{
-			fprintf(stderr, "dbg2       ");
-			for (i=0;i<mb_info->mask_nx;i++)
-				{
-				k = i + j * mb_info->mask_nx;
-				fprintf(stderr, " %1d", mb_info->mask[k]);
-				}
-			fprintf(stderr, "\n");
-			}
+		//fprintf(stderr,"dbg2       mask_nx:                  %d\n",mb_info->mask_nx);
+		//fprintf(stderr,"dbg2       mask_ny:                  %d\n",mb_info->mask_ny);
+		//fprintf(stderr,"dbg2       mask_dx:                  %g\n",mb_info->mask_dx);
+		//fprintf(stderr,"dbg2       mask_dy:                  %g\n",mb_info->mask_dy);
+		//fprintf(stderr,"dbg2       mask:                     %p\n",mb_info->mask);
+		//fprintf(stderr,"dbg2       mask:\n");
+		//for (j=mb_info->mask_ny-1;j>=0;j--)
+		//	{
+		//	fprintf(stderr, "dbg2       ");
+		//	for (i=0;i<mb_info->mask_nx;i++)
+		//		{
+		//		k = i + j * mb_info->mask_nx;
+		//		fprintf(stderr, " %1d", mb_info->mask[k]);
+		//		}
+		//	fprintf(stderr, "\n");
+		//	}
 		fprintf(stderr,"dbg2       error:                    %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -1318,12 +1325,12 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 	mb_info->problem_toodeep = 0;
 	mb_info->problem_baddatagram = 0;
 
-	mb_info->mask_nx = 0;
-	mb_info->mask_ny = 0;
-	mb_info->mask_dx = 0;
-	mb_info->mask_dy = 0;
-	mb_info->mask_alloc = 0;
-	mb_info->mask = NULL;
+	//mb_info->mask_nx = 0;
+	//mb_info->mask_ny = 0;
+	//mb_info->mask_dx = 0;
+	//mb_info->mask_dy = 0;
+	//mb_info->mask_alloc = 0;
+	//mb_info->mask = NULL;
 
 	*error = MB_ERROR_NO_ERROR;
 
@@ -1356,7 +1363,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format,
 	int	read_data;
 	double	file_weight;
 	int	nfile = 0;
-	int	i, j, k;
+	//int	i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1543,7 +1550,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format,
 
 		/* end loop over files in list */
 		}
-        if (read_datalist == MB_YES)
+    if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,error);
 
 	/* check memory */
@@ -1620,21 +1627,21 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format,
 		fprintf(stderr,"dbg2       problem_avgtoofast:       %d\n",mb_info->problem_avgtoofast);
 		fprintf(stderr,"dbg2       problem_toodeep:          %d\n",mb_info->problem_toodeep);
 		fprintf(stderr,"dbg2       problem_baddatagram:      %d\n",mb_info->problem_baddatagram);
-		fprintf(stderr,"dbg2       mask_nx:                  %d\n",mb_info->mask_nx);
-		fprintf(stderr,"dbg2       mask_ny:                  %d\n",mb_info->mask_ny);
-		fprintf(stderr,"dbg2       mask_dx:                  %f\n",mb_info->mask_dx);
-		fprintf(stderr,"dbg2       mask_dy:                  %f\n",mb_info->mask_dy);
-		fprintf(stderr,"dbg2       mask:\n");
-		for (j=mb_info->mask_ny-1;j>=0;j--)
-			{
-			fprintf(stderr, "dbg2       ");
-			for (i=0;i<mb_info->mask_nx;i++)
-				{
-				k = i + j * mb_info->mask_nx;
-				fprintf(stderr, " %1d", mb_info->mask[k]);
-				}
-			fprintf(stderr, "\n");
-			}
+		//fprintf(stderr,"dbg2       mask_nx:                  %d\n",mb_info->mask_nx);
+		//fprintf(stderr,"dbg2       mask_ny:                  %d\n",mb_info->mask_ny);
+		//fprintf(stderr,"dbg2       mask_dx:                  %g\n",mb_info->mask_dx);
+		//fprintf(stderr,"dbg2       mask_dy:                  %g\n",mb_info->mask_dy);
+		//fprintf(stderr,"dbg2       mask:\n");
+		//for (j=mb_info->mask_ny-1;j>=0;j--)
+		//	{
+		//	fprintf(stderr, "dbg2       ");
+		//	for (i=0;i<mb_info->mask_nx;i++)
+		//		{
+		//		k = i + j * mb_info->mask_nx;
+		//		fprintf(stderr, " %1d", mb_info->mask[k]);
+		//		}
+		//	fprintf(stderr, "\n");
+		//	}
 		fprintf(stderr,"dbg2       error:          %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);

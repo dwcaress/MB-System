@@ -279,11 +279,7 @@ int mb_esf_open(int verbose, char *program_name, char *esffile,
 				}
 
 		    /* open and read the old edit file */
-#ifdef WIN32
-		    strcpy(fmode,"r+b");
-#else
-		    strcpy(fmode,"rw");
-#endif
+		    strcpy(fmode,"rb");
 		    if (status == MB_SUCCESS && esf->nedit > 0 && (esffp = fopen(esffile,fmode)) == NULL)
 				{
 				fprintf(stderr, "\nnedit:%d\n", esf->nedit);

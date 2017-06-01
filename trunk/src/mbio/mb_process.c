@@ -2288,7 +2288,7 @@ int mb_pr_check(int verbose, char *ifile,
 	char	ofile[MBP_FILENAMESIZE];
 	int	format;
 	char	line[MB_PATH_MAXLINE];
-	FILE	*fp;
+	FILE	*fp = NULL;
 	int	unexpected_format = MB_NO;
 	int	unexpected_output = MB_NO;
 	int	missing_ifile = MB_NO;
@@ -2457,18 +2457,18 @@ int mb_pr_check(int verbose, char *ifile,
 		    {
 		    /* read the inf file */
 		    while (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			{
-			if (strncmp(line, "PN: ", 4) == 0)
-			    {
-			    if (*ndataproblem == 0 && verbose > 0)
-			    	fprintf(output, "\nData File Problems: %s\n", ifile);
-			    fprintf(output, "%s: %s", ifile, &line[4]);
-			    (*ndataproblem)++;
-			    }
-			}
+				{
+				if (strncmp(line, "PN: ", 4) == 0)
+					{
+					if (*ndataproblem == 0 && verbose > 0)
+						fprintf(output, "\nData File Problems: %s\n", ifile);
+					fprintf(output, "%s: %s", ifile, &line[4]);
+					(*ndataproblem)++;
+					}
+				}
+			fclose(fp);
 		    }
 	    }
-
 
 	/* output results */
 	if (*nparproblem > 0 && verbose > 0)

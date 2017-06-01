@@ -445,9 +445,9 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	short	short_altitude;
 	short	short_beams_bath, short_beams_amp, short_pixels_ss, short_spare1;
 	int	header_length;
-	char	buffer[MBF_MBLDEOIH_V4HEADERSIZE];
+	char	buffer[MBF_MBLDEOIH_V5HEADERSIZE];
 	int	index;
-	double	newdepthscale;
+	double	newdepthscale = 1.0;
 	double	depthmax;
 	int	time_i[7], time_j[6];
 	int	version;
@@ -467,6 +467,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* get pointer to mbio descriptor and data structure */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	store = (struct mbsys_ldeoih_struct *) store_ptr;
+	memset((void *)&oldstore, 0, sizeof(struct mbsys_ldeoih_old_struct));
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -1065,7 +1066,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	write_size;
 	short	*flag;
 	int	header_length;
-	char	buffer[MBF_MBLDEOIH_V4HEADERSIZE];
+	char	buffer[MBF_MBLDEOIH_V5HEADERSIZE];
 	int	index;
 	double	depthscale, newdepthscale;
 	double	depthmax, transducer_depth;

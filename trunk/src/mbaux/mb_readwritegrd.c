@@ -71,7 +71,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile,
 	struct GMT_GRID_HEADER *header;		/* GMT grid header structure pointer */
 	int	modeltype;
 	int	projectionid;
-        mb_path    projectionname;
+    mb_path    projectionname = "";;
 	int	nscan;
 	int	utmzone;
 	char	NorS;
@@ -382,10 +382,10 @@ int mb_write_gmt_grd(int verbose,
 	int	modeltype;
 	int	projectionid;
 	int	grid_projection_mode;
-        mb_path	projectionname;
-	mb_path	grid_projection_id;
-	mb_path	program_name;
-	mb_path	remark;
+    mb_path	projectionname = "";
+	mb_path	grid_projection_id = "";
+	mb_path	program_name = "";
+	mb_path	remark = "";
 	int	nscan;
 	int	utmzone;
 	char	NorS;

@@ -886,16 +886,16 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_hsldeoih_rd_data";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbf_hsldeoih_struct *data;
-	char	*data_ptr;
-	FILE	*mbfp;
-	int	label;
-	char	*labelchar;
-	int	label_test;
-	int	record_size;
-	short int	tmp;
-	int	i;
+	struct mb_io_struct *mb_io_ptr = NULL;
+	struct mbf_hsldeoih_struct *data = NULL;
+	char	*data_ptr = NULL;
+	FILE	*mbfp = NULL;
+	unsigned int	label = 0;
+	char	*labelchar = NULL;
+	unsigned int	label_test = 0;
+	int	record_size = 0;
+	short int	tmp = 0;
+	int	i = 0;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2485,7 +2485,7 @@ int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsldeoih_struct *data;
 	FILE	*mbfp;
-	int	label;
+	unsigned int	label;
 	short int shortkind;
 
 	/* print input debug statements */

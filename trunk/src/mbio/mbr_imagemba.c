@@ -386,7 +386,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_image83p_struct *store;
-	char	buffer[MBF_IMAGEMBA_BUFFER_SIZE];
+	char	buffer[MBF_IMAGEMBA_BUFFER_SIZE] = "";
 	int	done;
 	int	index;
 	int	swap = MB_NO;
@@ -762,13 +762,14 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_image83p_struct *store;
-	char	buffer[MBF_IMAGEMBA_BUFFER_SIZE];
+	char	buffer[MBF_IMAGEMBA_BUFFER_SIZE] = "";
 	int	swap = MB_NO;
 	int	seconds_hundredths;
 	int	degrees;
 	double	minutes;
 	char	NorS;
-	int	write_len, index;
+	int	write_len = 0;
+	int index;
 	int	i;
 
 	/* print input debug statements */
