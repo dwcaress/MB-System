@@ -15,7 +15,6 @@
  *
  */
 
-
 /* Begin user code block <file_comments> */
 
 #ifndef SANS
@@ -78,58 +77,57 @@ extern void do_mbpingedit_dismiss(Widget, XtPointer, XtPointer);
 /**
  * Create the mbpingedit_window hierarchy of widgets.
  */
-Widget
-Creatembpingedit_window(Widget parent)
-{
-    Cardinal ac = 0;
-    Arg      args[256];
-    Cardinal cdc = 0;
-    Boolean  argok = False;
-    Widget   mbpingedit_dialogShell;
-    static MBpeditData mBpedit;
+Widget Creatembpingedit_window(Widget parent) {
+	Cardinal ac = 0;
+	Arg args[256];
+	Cardinal cdc = 0;
+	Boolean argok = False;
+	Widget mbpingedit_dialogShell;
+	static MBpeditData mBpedit;
 
-    /**
-     * Register the converters for the widgets.
-     */
-    RegisterBxConverters(XtWidgetToApplicationContext(parent));
-    XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
+	/**
+	 * Register the converters for the widgets.
+	 */
+	RegisterBxConverters(XtWidgetToApplicationContext(parent));
+	XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
 
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 135); ac++;
-    XtSetArg(args[ac], XmNy, 180); ac++;
-    XtSetArg(args[ac], XmNwidth, 143); ac++;
-    XtSetArg(args[ac], XmNheight, 52); ac++;
-    mbpingedit_window = XmCreateMainWindow(parent,
-        (char *)"mbpingedit_window",
-        args,
-        ac);
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 135);
+	ac++;
+	XtSetArg(args[ac], XmNy, 180);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 143);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 52);
+	ac++;
+	mbpingedit_window = XmCreateMainWindow(parent, (char *)"mbpingedit_window", args, ac);
 
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "MBeditviz Swath View"); ac++;
-    XtSetArg(args[ac], XmNwidth, 1004); ac++;
-    XtSetArg(args[ac], XmNheight, 694); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
-    mbpingedit_dialogShell = XmCreateDialogShell(mbpingedit_window,
-        (char *)"mbpingedit_dialogShell",
-        args,
-        ac);
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "MBeditviz Swath View");
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 1004);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 694);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
+	ac++;
+	mbpingedit_dialogShell = XmCreateDialogShell(mbpingedit_window, (char *)"mbpingedit_dialogShell", args, ac);
 
-    MBpeditCreate(&(mBpedit),
-        mbpingedit_dialogShell,
-        "mBpedit",
-        args,
-        ac);
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 518); ac++;
-    XtSetArg(args[ac], XmNy, 310); ac++;
-    XtSetArg(args[ac], XmNwidth, 1004); ac++;
-    XtSetArg(args[ac], XmNheight, 694); ac++;
-    XtSetValues(mBpedit.MBpedit, args, ac);
+	MBpeditCreate(&(mBpedit), mbpingedit_dialogShell, "mBpedit", args, ac);
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 518);
+	ac++;
+	XtSetArg(args[ac], XmNy, 310);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 1004);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 694);
+	ac++;
+	XtSetValues(mBpedit.MBpedit, args, ac);
 
-
-    /* Begin user code block <end_Creatembpingedit_window> */
-    /* End user code block <end_Creatembpingedit_window> */
-    return( mbpingedit_window );
+	/* Begin user code block <end_Creatembpingedit_window> */
+	/* End user code block <end_Creatembpingedit_window> */
+	return (mbpingedit_window);
 }

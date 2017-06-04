@@ -2,7 +2,7 @@
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
  *    $Id$
  *
- *    Copyright (c) 2002-2016 by
+ *    Copyright (c) 2002-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,7 +24,6 @@
  *
  */
 #include <Xm/Xm.h>
-
 
 /*
  * Standard includes for builtins.
@@ -58,27 +57,27 @@
 #endif
 
 /* fileSelectionBox modes */
-#define MBGRDVIZ_OPENGRID		0
-#define MBGRDVIZ_OPENOVERLAY		1
-#define MBGRDVIZ_OPENSITE		2
-#define MBGRDVIZ_OPENROUTE		3
-#define MBGRDVIZ_OPENVECTOR		4
-#define MBGRDVIZ_OPENNAV		5
-#define MBGRDVIZ_OPENSWATH		6
-#define MBGRDVIZ_SAVEROUTE		7
-#define MBGRDVIZ_SAVERISISCRIPT		8
-#define MBGRDVIZ_SAVEWINFROGPTS		9
-#define MBGRDVIZ_SAVEWINFROGWPT		10
-#define MBGRDVIZ_SAVEDEGDECMIN		11
-#define MBGRDVIZ_SAVELNW		12
-#define MBGRDVIZ_SAVESITE		13
-#define MBGRDVIZ_SAVEPROFILE		14
-#define MBGRDVIZ_REALTIME		15
+#define MBGRDVIZ_OPENGRID 0
+#define MBGRDVIZ_OPENOVERLAY 1
+#define MBGRDVIZ_OPENSITE 2
+#define MBGRDVIZ_OPENROUTE 3
+#define MBGRDVIZ_OPENVECTOR 4
+#define MBGRDVIZ_OPENNAV 5
+#define MBGRDVIZ_OPENSWATH 6
+#define MBGRDVIZ_SAVEROUTE 7
+#define MBGRDVIZ_SAVERISISCRIPT 8
+#define MBGRDVIZ_SAVEWINFROGPTS 9
+#define MBGRDVIZ_SAVEWINFROGWPT 10
+#define MBGRDVIZ_SAVEDEGDECMIN 11
+#define MBGRDVIZ_SAVELNW 12
+#define MBGRDVIZ_SAVESITE 13
+#define MBGRDVIZ_SAVEPROFILE 14
+#define MBGRDVIZ_REALTIME 15
 
 /* Projection defines */
-#define ModelTypeProjected	     1
-#define ModelTypeGeographic	     2
-#define GCS_WGS_84		  4326
+#define ModelTypeProjected 1
+#define ModelTypeGeographic 2
+#define GCS_WGS_84 4326
 
 /* Site and route file versions */
 #define MBGRDVIZ_SITE_VERSION "1.00"
@@ -87,75 +86,75 @@
 #define MBGRDVIZ_RISISCRIPT_VERSION "1.00"
 
 /* Survey planning parameters */
-#define MBGRDVIZ_SURVEY_MODE_UNIFORM			0
-#define MBGRDVIZ_SURVEY_MODE_VARIABLE			1
-#define MBGRDVIZ_SURVEY_PLATFORM_SURFACE		0
-#define MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE	1
-#define MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH	2
-#define MBGRDVIZ_SURVEY_DIRECTION_SW			0
-#define MBGRDVIZ_SURVEY_DIRECTION_SE			1
-#define MBGRDVIZ_SURVEY_DIRECTION_NW			2
-#define MBGRDVIZ_SURVEY_DIRECTION_NE			3
-#define	MBGRDVIZ_REALTIME_ICON_SHIP			0
-#define	MBGRDVIZ_REALTIME_ICON_ROV			1
-#define	MBGRDVIZ_REALTIME_ICON_AUV			2
-#define	MBGRDVIZ_REALTIME_OFF				0
-#define	MBGRDVIZ_REALTIME_ON				1
-#define	MBGRDVIZ_REALTIME_PAUSE				2
-static int	working_route = -1;
-static int	survey_instance = 0;
-static int	survey_mode = MBGRDVIZ_SURVEY_MODE_UNIFORM;
-static int	survey_platform = MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE;
-static int	survey_interleaving = 1;
-static int	survey_direction = MBGRDVIZ_SURVEY_DIRECTION_SW;
-static int	survey_crosslines_last = MB_NO;
-static int	survey_crosslines = 0;
-static int	survey_linespacing = 200;
-static int	survey_swathwidth = 120;
-static int	survey_depth = 0;
-static int	survey_altitude = 150;
-static int	survey_color = MBV_COLOR_BLACK;
-static char	survey_name[MB_PATH_MAXLINE];
+#define MBGRDVIZ_SURVEY_MODE_UNIFORM 0
+#define MBGRDVIZ_SURVEY_MODE_VARIABLE 1
+#define MBGRDVIZ_SURVEY_PLATFORM_SURFACE 0
+#define MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE 1
+#define MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH 2
+#define MBGRDVIZ_SURVEY_DIRECTION_SW 0
+#define MBGRDVIZ_SURVEY_DIRECTION_SE 1
+#define MBGRDVIZ_SURVEY_DIRECTION_NW 2
+#define MBGRDVIZ_SURVEY_DIRECTION_NE 3
+#define MBGRDVIZ_REALTIME_ICON_SHIP 0
+#define MBGRDVIZ_REALTIME_ICON_ROV 1
+#define MBGRDVIZ_REALTIME_ICON_AUV 2
+#define MBGRDVIZ_REALTIME_OFF 0
+#define MBGRDVIZ_REALTIME_ON 1
+#define MBGRDVIZ_REALTIME_PAUSE 2
+static int working_route = -1;
+static int survey_instance = 0;
+static int survey_mode = MBGRDVIZ_SURVEY_MODE_UNIFORM;
+static int survey_platform = MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE;
+static int survey_interleaving = 1;
+static int survey_direction = MBGRDVIZ_SURVEY_DIRECTION_SW;
+static int survey_crosslines_last = MB_NO;
+static int survey_crosslines = 0;
+static int survey_linespacing = 200;
+static int survey_swathwidth = 120;
+static int survey_depth = 0;
+static int survey_altitude = 150;
+static int survey_color = MBV_COLOR_BLACK;
+static char survey_name[MB_PATH_MAXLINE];
 
 /* id variables */
 static char rcs_id[] = "$Id$";
 static char program_name[] = "MBgrdviz";
 
 /* status variables */
-static int	verbose;
-static int	error;
-static int	pargc;
-static char	**pargv;
+static int verbose;
+static int error;
+static int pargc;
+static char **pargv;
 
 /* widgets */
-static int	mbview_id[MBV_MAX_WINDOWS];
-extern 	Widget mainWindow;
-static Widget	fileSelectionList;
-static Widget	fileSelectionText;
+static int mbview_id[MBV_MAX_WINDOWS];
+extern Widget mainWindow;
+static Widget fileSelectionList;
+static Widget fileSelectionText;
 
 /* function prototypes */
 int do_mbgrdviz_init(int argc, char **argv, int verbosity);
 void do_mbgrdviz_sensitivity(void);
 int do_mbgrdviz_dismiss_notify(size_t instance);
-void do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_openvector( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_saverisiscript( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_savedegdecmin( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_savelnw( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_saveprofile( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_realtime( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_close( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_quit( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_close(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_quit(Widget w, XtPointer client_data, XtPointer call_data);
 int do_mbgrdviz_openprimary(char *input_file_ptr);
 int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr);
@@ -170,69 +169,39 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr);
-int do_mbgrdviz_readnav(size_t instance, char *swathfile,
-				int pathstatus, char *pathraw, char *pathprocessed,
-				int format, int formatorg, double weight, int *error);
-int do_mbgrdviz_readgrd(size_t instance, char *grdfile,
-			int	*grid_projection_mode,
-			char	*grid_projection_id,
-			float	*nodatavalue,
-			int	*nxy,
-			int	*nx,
-			int	*ny,
-			double	*min,
-			double	*max,
-			double	*xmin,
-			double	*xmax,
-			double	*ymin,
-			double	*ymax,
-			double	*dx,
-			double	*dy,
-			float	**data);
-int do_mbgrdviz_opentest(size_t instance,
-			double	factor1,
-			double	factor2,
-			double	factor3,
-			int	*grid_projection_mode,
-			char	*grid_projection_id,
-			float	*nodatavalue,
-			int	*nxy,
-			int	*nx,
-			int	*ny,
-			double	*min,
-			double	*max,
-			double	*xmin,
-			double	*xmax,
-			double	*ymin,
-			double	*ymax,
-			double	*dx,
-			double	*dy,
-			float	**data);
-void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_open_mbedit( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_open_mbeditviz( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_open_mbnavedit( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_open_mbvelocitytool( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_arearoute_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_arearoute_parameterchange( Widget w, XtPointer client_data, XtPointer call_data);
+int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *pathraw, char *pathprocessed, int format,
+                        int formatorg, double weight, int *error);
+int do_mbgrdviz_readgrd(size_t instance, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue,
+                        int *nxy, int *nx, int *ny, double *min, double *max, double *xmin, double *xmax, double *ymin,
+                        double *ymax, double *dx, double *dy, float **data);
+int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double factor3, int *grid_projection_mode,
+                         char *grid_projection_id, float *nodatavalue, int *nxy, int *nx, int *ny, double *min, double *max,
+                         double *xmin, double *xmax, double *ymin, double *ymax, double *dx, double *dy, float **data);
+void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_make_survey(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_dismiss(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_parameterchange(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_arearoute_recalc(size_t instance);
 void do_mbgrdviz_arearoute_info(size_t instance);
-void do_mbgrdviz_arearoute_linespacing_increment( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_arearoute_altitude_increment( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_arearoute_depth_increment( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtime_start( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_path_reset( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtime_pause( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtime_stop( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtime_resume( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_path_apply( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_icon( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_path_browse( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_updaterate( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_path_test( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_pathmode( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_linespacing_increment(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_altitude_increment(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_depth_increment(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_start(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_reset(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_pause(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_stop(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_resume(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_apply(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_icon(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_browse(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_updaterate(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_test(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_pathmode(Widget w, XtPointer client_data, XtPointer call_data);
 
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
 void BxManageCB(Widget w, XtPointer client, XtPointer call);
@@ -261,30 +230,29 @@ void BxSetValuesCB(Widget w, XtPointer client, XtPointer call);
  */
 #ifndef ARGLIST
 #if (NeedFunctionPrototypes == 0)
-#define PROTOTYPE(p)	()
-#define ARGLIST(p)	p
-#define ARG(a, b)	a b;
-#define GRA(a, b)	a b;
-#define UARG(a, b)      a b;
-#define GRAU(a, b)      a b;
+#define PROTOTYPE(p) ()
+#define ARGLIST(p) p
+#define ARG(a, b) a b;
+#define GRA(a, b) a b;
+#define UARG(a, b) a b;
+#define GRAU(a, b) a b;
 #else
-#define PROTOTYPE(p)	p
+#define PROTOTYPE(p) p
 #define ARGLIST(p)	(
-#define ARG(a, b)	a b,
+#define ARG(a, b) a b,
 #define GRA(a, b)	a b)
 #ifdef __cplusplus
-#define UARG(a, b)      a,
+#define UARG(a, b) a,
 #define GRAU(a, b)      a)
 #else
-#define UARG(a, b)      a b,
+#define UARG(a, b) a b,
 #define GRAU(a, b)      a b)
 #endif
 #endif
 #endif
 
-Widget		BxFindTopShell PROTOTYPE((Widget));
-WidgetList	BxWidgetIdsFromNames PROTOTYPE((Widget, char*, char*));
-
+Widget BxFindTopShell PROTOTYPE((Widget));
+WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
 
 /*      Function Name:	BxExitCB
  *
@@ -302,14 +270,9 @@ WidgetList	BxWidgetIdsFromNames PROTOTYPE((Widget, char*, char*));
 #endif
 
 /* ARGSUSED */
-void
-BxExitCB ARGLIST((w, client, call))
-UARG( Widget, w)
-ARG( XtPointer, client)
-GRAU( XtPointer, call)
-{
-    long	exitValue = EXIT_FAILURE;
-    exit(exitValue);
+void BxExitCB ARGLIST((w, client, call)) UARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+	long exitValue = EXIT_FAILURE;
+	exit(exitValue);
 }
 
 /*      Function Name: 	BxManageCB
@@ -329,28 +292,22 @@ GRAU( XtPointer, call)
  */
 
 /* ARGSUSED */
-void
-BxManageCB ARGLIST((w, client, call))
-ARG( Widget, w)
-ARG( XtPointer, client)
-GRAU( XtPointer, call)
-{
-    WidgetList		widgets;
-    int			i;
+void BxManageCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+	WidgetList widgets;
+	int i;
 
-    /*
-     * This function returns a NULL terminated WidgetList.  The memory for
-     * the list needs to be freed when it is no longer needed.
-     */
-    widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
+	/*
+	 * This function returns a NULL terminated WidgetList.  The memory for
+	 * the list needs to be freed when it is no longer needed.
+	 */
+	widgets = BxWidgetIdsFromNames(w, "BxManageCB", (String)client);
 
-    i = 0;
-    while( widgets && widgets[i] != NULL )
-    {
-	XtManageChild(widgets[i]);
-	i++;
-    }
-    XtFree((char *)widgets);
+	i = 0;
+	while (widgets && widgets[i] != NULL) {
+		XtManageChild(widgets[i]);
+		i++;
+	}
+	XtFree((char *)widgets);
 }
 
 /*      Function Name: 	BxUnmanageCB
@@ -370,28 +327,22 @@ GRAU( XtPointer, call)
  */
 
 /* ARGSUSED */
-void
-BxUnmanageCB ARGLIST((w, client, call))
-ARG( Widget, w)
-ARG( XtPointer, client)
-GRAU( XtPointer, call)
-{
-    WidgetList		widgets;
-    int			i;
+void BxUnmanageCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+	WidgetList widgets;
+	int i;
 
-    /*
-     * This function returns a NULL terminated WidgetList.  The memory for
-     * the list needs to be freed when it is no longer needed.
-     */
-    widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
+	/*
+	 * This function returns a NULL terminated WidgetList.  The memory for
+	 * the list needs to be freed when it is no longer needed.
+	 */
+	widgets = BxWidgetIdsFromNames(w, "BxUnmanageCB", (String)client);
 
-    i = 0;
-    while( widgets && widgets[i] != NULL )
-    {
-	XtUnmanageChild(widgets[i]);
-	i++;
-    }
-    XtFree((char *)widgets);
+	i = 0;
+	while (widgets && widgets[i] != NULL) {
+		XtUnmanageChild(widgets[i]);
+		i++;
+	}
+	XtFree((char *)widgets);
 }
 /*      Function Name:	BxPopdownCB
  *
@@ -415,36 +366,29 @@ GRAU( XtPointer, call)
  */
 
 /* ARGSUSED */
-void
-BxPopdownCB ARGLIST((w, client, call))
-ARG( Widget, w)
-ARG( XtPointer, client)
-GRAU( XtPointer, call)
-{
-    WidgetList		widgets;
-    int			i;
+void BxPopdownCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+	WidgetList widgets;
+	int i;
 
-    /*
-     * This function returns a NULL terminated WidgetList.  The memory for
-     * the list needs to be freed when it is no longer needed.
-     */
-    widgets = BxWidgetIdsFromNames(w, "BxPopdownCB", (String)client);
+	/*
+	 * This function returns a NULL terminated WidgetList.  The memory for
+	 * the list needs to be freed when it is no longer needed.
+	 */
+	widgets = BxWidgetIdsFromNames(w, "BxPopdownCB", (String)client);
 
-    i = 0;
-    while ( widgets && widgets[i] != NULL )
-    {
-	if ( XtIsShell(widgets[i]) )
-	{
-	    XtPopdown(widgets[i]);
+	i = 0;
+	while (widgets && widgets[i] != NULL) {
+		if (XtIsShell(widgets[i])) {
+			XtPopdown(widgets[i]);
+		}
+		else {
+			printf("Callback Error (BxPopdownCB):\n\t\
+Object %s is not a Shell\n",
+			       XtName(widgets[i]));
+		}
+		i++;
 	}
-	else
-	{
-	    printf("Callback Error (BxPopdownCB):\n\t\
-Object %s is not a Shell\n", XtName(widgets[i]));
-	}
-	i++;
-    }
-    XtFree((char *)widgets);
+	XtFree((char *)widgets);
 }
 
 /*      Function Name:	BxPopupCB
@@ -469,59 +413,50 @@ Object %s is not a Shell\n", XtName(widgets[i]));
  */
 
 /* ARGSUSED */
-void
-BxPopupCB ARGLIST((w, client, call))
-ARG( Widget, w)
-ARG( XtPointer, client)
-GRAU( XtPointer, call)
-{
-    WidgetList		widgets;
-    int			i;
+void BxPopupCB ARGLIST((w, client, call)) ARG(Widget, w) ARG(XtPointer, client) GRAU(XtPointer, call) {
+	WidgetList widgets;
+	int i;
 
-    /*
-     * This function returns a NULL terminated WidgetList.  The memory for
-     * the list needs to be freed when it is no longer needed.
-     */
-    widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
+	/*
+	 * This function returns a NULL terminated WidgetList.  The memory for
+	 * the list needs to be freed when it is no longer needed.
+	 */
+	widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
 
-    i = 0;
-    while( widgets && widgets[i] != NULL )
-    {
-	if ( XtIsShell(widgets[i]) )
-	{
-	    XtPopup(widgets[i], XtGrabNone);
+	i = 0;
+	while (widgets && widgets[i] != NULL) {
+		if (XtIsShell(widgets[i])) {
+			XtPopup(widgets[i], XtGrabNone);
+		}
+		else {
+			printf("Callback Error (BxPopupCB):\n\t\
+Object %s is not a Shell\n",
+			       XtName(widgets[i]));
+		}
+		i++;
 	}
-	else
-	{
-	    printf("Callback Error (BxPopupCB):\n\t\
-Object %s is not a Shell\n", XtName(widgets[i]));
-	}
-	i++;
-    }
-    XtFree((char *)widgets);
+	XtFree((char *)widgets);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_init(int argc, char **argv, int verbosity)
-{
+int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
 	char function_name[] = "do_mbgrdviz_init";
-        Cardinal ac = 0;
-        Arg      args[256];
-	char	value_text[MB_PATH_MAXLINE];
-	XmStringTable	str_list;
-	int	i;
+	Cardinal ac = 0;
+	Arg args[256];
+	char value_text[MB_PATH_MAXLINE];
+	XmStringTable str_list;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       argc:           %d\n",argc);
-		fprintf(stderr,"dbg2       argv:\n");
-		for (i=0;i<argc;i++)
-			fprintf(stderr,"dbg2       argv[%d]:    %s\n",i,argv[i]);
-		fprintf(stderr,"dbg2       verbosity:   %d\n",verbosity);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       argc:           %d\n", argc);
+		fprintf(stderr, "dbg2       argv:\n");
+		for (i = 0; i < argc; i++)
+			fprintf(stderr, "dbg2       argv[%d]:    %s\n", i, argv[i]);
+		fprintf(stderr, "dbg2       verbosity:   %d\n", verbosity);
+	}
 
 	pargc = 1;
 	pargv = argv;
@@ -529,44 +464,40 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity)
 	error = MB_ERROR_NO_ERROR;
 
 	/* set about version label */
-	sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"",
-		MB_VERSION, MB_BUILD_DATE);
+	sprintf(value_text, "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION, MB_BUILD_DATE);
 	set_mbview_label_multiline_string(label_about_version, value_text);
 
 	/* get additional widgets */
-	fileSelectionList = (Widget)
-	    XmFileSelectionBoxGetChild(fileSelectionBox,
-					XmDIALOG_LIST);
-	fileSelectionText = (Widget)
-	    XmFileSelectionBoxGetChild(fileSelectionBox,
-					XmDIALOG_TEXT);
-	XtUnmanageChild(
-		(Widget) XmFileSelectionBoxGetChild(
-					fileSelectionBox,
-					XmDIALOG_HELP_BUTTON));
+	fileSelectionList = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
+	fileSelectionText = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_TEXT);
+	XtUnmanageChild((Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_HELP_BUTTON));
 
 	/* set up survey planning widgets */
 
 	/* set up line control */
-	str_list = (XmStringTable) XtMalloc(2 * sizeof(XmString *));
+	str_list = (XmStringTable)XtMalloc(2 * sizeof(XmString *));
 	str_list[0] = XmStringCreateLocalized("Uniform");
 	str_list[1] = XmStringCreateLocalized("Variable by Swath Width");
 	ac = 0;
-	XtSetArg(args[ac], XmNnumValues, 2); ac++;
-	XtSetArg(args[ac], XmNvalues, str_list); ac++;
+	XtSetArg(args[ac], XmNnumValues, 2);
+	ac++;
+	XtSetArg(args[ac], XmNvalues, str_list);
+	ac++;
 	XtSetValues(spinText_arearoute_linecontrol, args, ac);
 	XmStringFree(str_list[0]);
 	XmStringFree(str_list[1]);
 	XtFree((XtPointer)str_list);
 
 	/* set up platform type */
-	str_list = (XmStringTable) XtMalloc(3 * sizeof(XmString *));
+	str_list = (XmStringTable)XtMalloc(3 * sizeof(XmString *));
 	str_list[0] = XmStringCreateLocalized("Surface Vessel");
 	str_list[1] = XmStringCreateLocalized("Submerged - constant altitude");
 	str_list[2] = XmStringCreateLocalized("Submerged - constant depth");
 	ac = 0;
-	XtSetArg(args[ac], XmNnumValues, 3); ac++;
-	XtSetArg(args[ac], XmNvalues, str_list); ac++;
+	XtSetArg(args[ac], XmNnumValues, 3);
+	ac++;
+	XtSetArg(args[ac], XmNvalues, str_list);
+	ac++;
 	XtSetValues(spinText_arearoute_platform, args, ac);
 	XmStringFree(str_list[0]);
 	XmStringFree(str_list[1]);
@@ -574,26 +505,30 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity)
 	XtFree((XtPointer)str_list);
 
 	/* set up crosslinesfirstlast type */
-	str_list = (XmStringTable) XtMalloc(2 * sizeof(XmString *));
+	str_list = (XmStringTable)XtMalloc(2 * sizeof(XmString *));
 	str_list[0] = XmStringCreateLocalized("Crosslines first");
 	str_list[1] = XmStringCreateLocalized("Crosslines last");
 	ac = 0;
-	XtSetArg(args[ac], XmNnumValues, 2); ac++;
-	XtSetArg(args[ac], XmNvalues, str_list); ac++;
+	XtSetArg(args[ac], XmNnumValues, 2);
+	ac++;
+	XtSetArg(args[ac], XmNvalues, str_list);
+	ac++;
 	XtSetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
 	XmStringFree(str_list[0]);
 	XmStringFree(str_list[1]);
 	XtFree((XtPointer)str_list);
 
 	/* set up survey direction */
-	str_list = (XmStringTable) XtMalloc(4 * sizeof(XmString *));
+	str_list = (XmStringTable)XtMalloc(4 * sizeof(XmString *));
 	str_list[0] = XmStringCreateLocalized("SW");
 	str_list[1] = XmStringCreateLocalized("SE");
 	str_list[2] = XmStringCreateLocalized("NW");
 	str_list[3] = XmStringCreateLocalized("NE");
 	ac = 0;
-	XtSetArg(args[ac], XmNnumValues, 4); ac++;
-	XtSetArg(args[ac], XmNvalues, str_list); ac++;
+	XtSetArg(args[ac], XmNnumValues, 4);
+	ac++;
+	XtSetArg(args[ac], XmNvalues, str_list);
+	ac++;
 	XtSetValues(spinText_arearoute_direction, args, ac);
 	XmStringFree(str_list[0]);
 	XmStringFree(str_list[1]);
@@ -602,7 +537,7 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity)
 	XtFree((XtPointer)str_list);
 
 	/* set up survey color */
-	str_list = (XmStringTable) XtMalloc(6 * sizeof(XmString *));
+	str_list = (XmStringTable)XtMalloc(6 * sizeof(XmString *));
 	str_list[0] = XmStringCreateLocalized("Black");
 	str_list[1] = XmStringCreateLocalized("Yellow");
 	str_list[2] = XmStringCreateLocalized("Green");
@@ -610,8 +545,10 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity)
 	str_list[4] = XmStringCreateLocalized("Blue");
 	str_list[5] = XmStringCreateLocalized("Purple");
 	ac = 0;
-	XtSetArg(args[ac], XmNnumValues, 6); ac++;
-	XtSetArg(args[ac], XmNvalues, str_list); ac++;
+	XtSetArg(args[ac], XmNnumValues, 6);
+	ac++;
+	XtSetArg(args[ac], XmNvalues, str_list);
+	ac++;
 	XtSetValues(spinText_arearoute_color, args, ac);
 	XmStringFree(str_list[0]);
 	XmStringFree(str_list[1]);
@@ -624,90 +561,85 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity)
 	/* set up realtime control widgets */
 
 	/* set up realtime display icon */
-	str_list = (XmStringTable) XtMalloc(3 * sizeof(XmString *));
+	str_list = (XmStringTable)XtMalloc(3 * sizeof(XmString *));
 	str_list[0] = XmStringCreateLocalized("Ship");
 	str_list[1] = XmStringCreateLocalized("ROV");
 	str_list[2] = XmStringCreateLocalized("AUV");
 	ac = 0;
-	XtSetArg(args[ac], XmNnumValues, 3); ac++;
-	XtSetArg(args[ac], XmNvalues, str_list); ac++;
+	XtSetArg(args[ac], XmNnumValues, 3);
+	ac++;
+	XtSetArg(args[ac], XmNvalues, str_list);
+	ac++;
 	XtSetValues(spinText_realtimesetup_icon, args, ac);
 	XmStringFree(str_list[0]);
 	XmStringFree(str_list[1]);
 	XtFree((XtPointer)str_list);
 
 	/* initialize mbview_id list */
-	for (i=0;i<MBV_MAX_WINDOWS;i++)
-	    {
-	    mbview_id[i] = MB_NO;
-	    }
+	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+		mbview_id[i] = MB_NO;
+	}
 
 	/* set sensitivity of widgets that require an mbview instance to be active */
-	do_mbgrdviz_sensitivity( );
+	do_mbgrdviz_sensitivity();
 
-	return(0);
+	return (0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_sensitivity()
-{
+void do_mbgrdviz_sensitivity() {
 	char function_name[] = "do_mbgrdviz_sensitivity";
-   	int	mbview_active;
-   	int	mbview_allactive;
-        Cardinal ac = 0;
-        Arg	args[256];
-	size_t	instance;
-	int	nsite, nroute;
-	int	i;
+	int mbview_active;
+	int mbview_allactive;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	int nsite, nroute;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+	}
 
-/* fprintf(stderr,"do_mbgrdviz_sensitivity called\n");*/
-    	/* set file opening menu items only if an mbview instance is active */
+	/* fprintf(stderr,"do_mbgrdviz_sensitivity called\n");*/
+	/* set file opening menu items only if an mbview instance is active */
 	mbview_active = MB_NO;
 	mbview_allactive = MB_YES;
 	instance = MBV_NO_WINDOW;
-	for (i=0;i<MBV_MAX_WINDOWS;i++)
-		{
-		if (mbview_id[i] == MB_YES)
-			{
+	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
+		if (mbview_id[i] == MB_YES) {
 			mbview_active = MB_YES;
 			if (instance == MBV_NO_WINDOW)
 				instance = i;
-			}
+		}
 		else
 			mbview_allactive = MB_NO;
-		}
+	}
 
-    	/* set file opening menu item only if not all mbview instances are active */
-	if (mbview_allactive != MB_YES)
-		{
+	/* set file opening menu item only if not all mbview instances are active */
+	if (mbview_allactive != MB_YES) {
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
-		}
-	else
-		{
+		XtSetArg(args[ac], XmNsensitive, True);
+		ac++;
+	}
+	else {
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, False); ac++;
-		}
+		XtSetArg(args[ac], XmNsensitive, False);
+		ac++;
+	}
 	XtSetValues(pushButton_file_openprimary, args, ac);
 
-    	/* set other file opening menu items only if an mbview instance is active */
-	if (mbview_active == MB_YES)
-		{
+	/* set other file opening menu items only if an mbview instance is active */
+	if (mbview_active == MB_YES) {
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
-		}
-	else
-		{
+		XtSetArg(args[ac], XmNsensitive, True);
+		ac++;
+	}
+	else {
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, False); ac++;
-		}
+		XtSetArg(args[ac], XmNsensitive, False);
+		ac++;
+	}
 	XtSetValues(pushButton_opensite, args, ac);
 	XtSetValues(pushButton_openroute, args, ac);
 	XtSetValues(pushButton_opennav, args, ac);
@@ -715,876 +647,825 @@ do_mbgrdviz_sensitivity()
 	XtSetValues(pushButton_openvector, args, ac);
 
 	mbview_getsitecount(verbose, instance, &nsite, &error);
-	if (mbview_active == MB_YES && nsite > 0)
-		{
+	if (mbview_active == MB_YES && nsite > 0) {
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
-		}
-	else
-		{
+		XtSetArg(args[ac], XmNsensitive, True);
+		ac++;
+	}
+	else {
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, False); ac++;
-		}
+		XtSetArg(args[ac], XmNsensitive, False);
+		ac++;
+	}
 	XtSetValues(pushButton_savesite, args, ac);
 
 	mbview_getroutecount(verbose, instance, &nroute, &error);
-	if (mbview_active == MB_YES && nroute > 0)
-		{
+	if (mbview_active == MB_YES && nroute > 0) {
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
-		}
-	else
-		{
+		XtSetArg(args[ac], XmNsensitive, True);
+		ac++;
+	}
+	else {
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, False); ac++;
-		}
+		XtSetArg(args[ac], XmNsensitive, False);
+		ac++;
+	}
 	XtSetValues(pushButton_saveroute, args, ac);
-
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox";
- 	size_t	actionid;
-	size_t	mode;
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-        XmString	tmp0;
-	Boolean	argok;
+	size_t actionid;
+	size_t mode;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* figure out what kind of file is to be opened */
-	actionid = (size_t) client_data;
+	/* figure out what kind of file is to be opened */
+	actionid = (size_t)client_data;
 	mode = actionid / MBV_MAX_WINDOWS;
 	instance = actionid - mode * MBV_MAX_WINDOWS;
 
 	/* set title to open primary grid */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Open GMT Grid File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Open GMT Grid File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
-
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* open primary grid */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.grd",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.grd", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_openoverlay";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Open Overlay GMT Grid File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Open Overlay GMT Grid File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.grd",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.grd", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_OPENOVERLAY * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_opensite";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Open Site File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Open Site File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.ste",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.ste", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_OPENSITE * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_openroute";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Open Route File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Open Route File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.rte",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.rte", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_OPENROUTE * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_opennav";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Open Navigation Datalist File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Open Navigation Datalist File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.mb-1",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.mb-1", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_OPENNAV * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_openswath";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Open Swath Datalist File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Open Swath Datalist File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.mb-1",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*.mb-1", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_OPENSWATH * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_openvector( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_openvector";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Open Vector File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Open Vector File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_OPENVECTOR * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_savesite";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Save Site File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Save Site File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_SAVESITE * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_saveroute";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Save Route File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Save Route File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_SAVEROUTE * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_saverisiscript( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_saverisiscript";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Save Risi Script File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Save Risi Script File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_SAVERISISCRIPT * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_savewinfrogpts";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Save Route as Winfrog PTS File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Save Route as Winfrog PTS File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_SAVEWINFROGPTS * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_savewinfrogwpt";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Save Route as Winfrog WPT File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Save Route as Winfrog WPT File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_SAVEWINFROGWPT * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_savedegdecmin( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_savedegdecmin";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Save Route as Degrees + Decimal Minutes File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Save Route as Degrees + Decimal Minutes File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_SAVEDEGDECMIN * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_savelnw( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_savelnw";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Save Route as Hypack LNW File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Save Route as Hypack LNW File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_SAVELNW * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_saveprofile( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_saveprofile";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
-	instance = (size_t) client_data;
+	/* get instance */
+	instance = (size_t)client_data;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Save Profile File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Save Profile File");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_SAVEPROFILE * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_realtime( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_realtime";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	size_t	actionid;
-        XmString	tmp0;
-	Boolean	argok;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* get instance */
+	/* get instance */
 	instance = 0;
 
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Set Realtime Navigation Source"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Set Realtime Navigation Source");
+	ac++;
 	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*",
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
 	actionid = MBGRDVIZ_REALTIME * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
 	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-
+	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_close( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_close(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_close";
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-void
-do_mbgrdviz_quit( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_quit";
 	int status = MB_SUCCESS;
 	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
-	
+	acs = (XmAnyCallbackStruct *)call_data;
+
 	/* close any active mbview instances */
 	status = mbview_quit(verbose, &error);
-	
+
 	XtUnmanageChild(XtParent(mainWindow));
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_dismiss_notify(size_t instance)
-{
+int do_mbgrdviz_dismiss_notify(size_t instance) {
 	char function_name[] = "do_mbgrdviz_dismiss_notify";
-	int	status = MB_SUCCESS;
-	int	verbose = 0;
-	int	i;
+	int status = MB_SUCCESS;
+	int verbose = 0;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:  %zu\n",instance);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:  %zu\n", instance);
+	}
 
 	/* set mbview window <id> to inactive */
-	if (instance != MBV_NO_WINDOW && instance < MBV_MAX_WINDOWS
-		&& mbview_id[instance] == MB_YES)
-		{
+	if (instance != MBV_NO_WINDOW && instance < MBV_MAX_WINDOWS && mbview_id[instance] == MB_YES) {
 		mbview_id[instance] = MB_NO;
-	   	/* fprintf(stderr, "Freeing mbview window %d in local list...\n",
-				instance); */
-		}
-	else
-	    	{
-	   	/* fprintf(stderr, "Unable to free mbview - mbview window %d not found in local list...\n",
-				instance); */
-	    	}
+		/* fprintf(stderr, "Freeing mbview window %d in local list...\n",
+		        instance); */
+	}
+	else {
+		/* fprintf(stderr, "Unable to free mbview - mbview window %d not found in local list...\n",
+		        instance); */
+	}
 
 	/* update widgets of remaining mbview windows */
-	for (i=0;i<MBV_MAX_WINDOWS;i++)
-		{
+	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (mbview_id[i] == MB_YES)
 			status = mbview_update(verbose, i, &error);
-		}
+	}
 
 	/* set sensitivity of widgets that require an mbview instance to be active */
-	do_mbgrdviz_sensitivity( );
+	do_mbgrdviz_sensitivity();
 
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-void
-do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_openfile";
-	int	status = MB_SUCCESS;
-	size_t	actionid;
-	size_t	mode;
-	size_t	instance;
-	char    *file_ptr = NULL;
-    Cardinal ac = 0;
-    Arg      args[256];
+	int status = MB_SUCCESS;
+	size_t actionid;
+	size_t mode;
+	size_t instance;
+	char *file_ptr = NULL;
+	Cardinal ac = 0;
+	Arg args[256];
 	XmFileSelectionBoxCallbackStruct *acs;
-	acs=(XmFileSelectionBoxCallbackStruct*)call_data;
+	acs = (XmFileSelectionBoxCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
 	/* read the input file name */
 	XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &file_ptr);
-	if (strlen(file_ptr) <= 0 && file_ptr != NULL)
-		{
+	if (strlen(file_ptr) <= 0 && file_ptr != NULL) {
 		XtFree(file_ptr);
 		file_ptr = NULL;
-		}
+	}
 
 	/* print debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg4  Extracted input file name from call_data:\n");
-		fprintf(stderr,"dbg4       call_data:           %p\n",call_data);
-		fprintf(stderr,"dbg4       acs:                 %p\n",acs);
-		fprintf(stderr,"dbg4       acs->value:          %p\n",acs->value);
-		fprintf(stderr,"dbg4       file_ptr:            %p\n",file_ptr);
-		fprintf(stderr,"dbg4       file_ptr:            %s\n",file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg4  Extracted input file name from call_data:\n");
+		fprintf(stderr, "dbg4       call_data:           %p\n", call_data);
+		fprintf(stderr, "dbg4       acs:                 %p\n", acs);
+		fprintf(stderr, "dbg4       acs->value:          %p\n", acs->value);
+		fprintf(stderr, "dbg4       file_ptr:            %p\n", file_ptr);
+		fprintf(stderr, "dbg4       file_ptr:            %s\n", file_ptr);
+	}
 
-    /* figure out what kind of file is to be opened */
+	/* figure out what kind of file is to be opened */
 
 	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &actionid); ac++;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)&actionid);
+	ac++;
 	XtGetValues(fileSelectionBox, args, ac);
 
 	mode = actionid / MBV_MAX_WINDOWS;
@@ -1594,147 +1475,128 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		instance = 0;
 
 	/* print debug statements */
-	if (verbose >= 4)
-		{
-		fprintf(stderr,"\ndbg4  Extracted user data from widget fileSelectionBox:\n");
-		fprintf(stderr,"dbg4       fileSelectionBox:    %p\n",fileSelectionBox);
-		fprintf(stderr,"dbg4       actionid:            %zu\n",actionid);
-		fprintf(stderr,"dbg4       mode:                %zu\n",mode);
-		}
+	if (verbose >= 4) {
+		fprintf(stderr, "\ndbg4  Extracted user data from widget fileSelectionBox:\n");
+		fprintf(stderr, "dbg4       fileSelectionBox:    %p\n", fileSelectionBox);
+		fprintf(stderr, "dbg4       actionid:            %zu\n", actionid);
+		fprintf(stderr, "dbg4       mode:                %zu\n", mode);
+	}
 
 	/* open primary grid */
-	if (mode <= MBGRDVIZ_OPENGRID)
-		{
+	if (mode <= MBGRDVIZ_OPENGRID) {
 		/* read the grid and open mbview window */
 		status = do_mbgrdviz_openprimary(file_ptr);
-		}
+	}
 
 	/* else open overlay grid */
-	else if (mode == MBGRDVIZ_OPENOVERLAY)
-		{
+	else if (mode == MBGRDVIZ_OPENOVERLAY) {
 		/* read the grid and update mbview window */
 		do_mbview_message_on("Reading overlay grid...", instance);
 		status = do_mbgrdviz_openoverlay(instance, file_ptr);
-		}
+	}
 
 	/* else open site data */
-	else if (mode == MBGRDVIZ_OPENSITE)
-		{
+	else if (mode == MBGRDVIZ_OPENSITE) {
 		/* read site file and update mbview window */
 		do_mbview_message_on("Reading site data...", instance);
 		status = do_mbgrdviz_opensite(instance, file_ptr);
-		}
+	}
 
 	/* else open route data */
-	else if (mode == MBGRDVIZ_OPENROUTE)
-		{
+	else if (mode == MBGRDVIZ_OPENROUTE) {
 		/* read route file and update mbview window */
 		do_mbview_message_on("Reading route data...", instance);
 		status = do_mbgrdviz_openroute(instance, file_ptr);
-		}
+	}
 
 	/* else open nav data */
-	else if (mode == MBGRDVIZ_OPENNAV)
-		{
+	else if (mode == MBGRDVIZ_OPENNAV) {
 		/* read nav file and update mbview window */
 		do_mbview_message_on("Reading navigation data...", instance);
 		status = do_mbgrdviz_opennav(instance, MB_NO, file_ptr);
-		}
+	}
 
 	/* else open swath data */
-	else if (mode == MBGRDVIZ_OPENSWATH)
-		{
+	else if (mode == MBGRDVIZ_OPENSWATH) {
 		/* read nav file and update mbview window */
 		do_mbview_message_on("Reading swath data...", instance);
 		status = do_mbgrdviz_opennav(instance, MB_YES, file_ptr);
-		}
+	}
 
 	/* else open vector data */
-	else if (mode == MBGRDVIZ_OPENVECTOR)
-		{
+	else if (mode == MBGRDVIZ_OPENVECTOR) {
 		/* read vector file and update mbview window */
 		do_mbview_message_on("Reading vector data...", instance);
 		status = do_mbgrdviz_openvector(instance, file_ptr);
-		}
+	}
 
 	/* else write site data */
-	else if (mode == MBGRDVIZ_SAVESITE)
-		{
+	else if (mode == MBGRDVIZ_SAVESITE) {
 		/* write site file */
 		do_mbview_message_on("Saving site data...", instance);
 		status = do_mbgrdviz_savesite(instance, file_ptr);
-		}
+	}
 
 	/* else write route data */
-	else if (mode == MBGRDVIZ_SAVEROUTE)
-		{
+	else if (mode == MBGRDVIZ_SAVEROUTE) {
 		/* write route file */
 		do_mbview_message_on("Saving route data...", instance);
 		status = do_mbgrdviz_saveroute(instance, file_ptr);
-		}
+	}
 
 	/* else write route data */
-	else if (mode == MBGRDVIZ_SAVERISISCRIPT)
-		{
+	else if (mode == MBGRDVIZ_SAVERISISCRIPT) {
 		/* write route file */
 		do_mbview_message_on("Saving route as Risi script...", instance);
 		status = do_mbgrdviz_saverisiscript(instance, file_ptr);
-		}
+	}
 
 	/* else write route data as Winfrog pts file */
-	else if (mode == MBGRDVIZ_SAVEWINFROGPTS)
-		{
+	else if (mode == MBGRDVIZ_SAVEWINFROGPTS) {
 		/* write route file */
 		do_mbview_message_on("Saving route as Winfrog PTS file...", instance);
 		status = do_mbgrdviz_savewinfrogpts(instance, file_ptr);
-		}
+	}
 
 	/* else write route data as Winfrog wpt file */
-	else if (mode == MBGRDVIZ_SAVEWINFROGWPT)
-		{
+	else if (mode == MBGRDVIZ_SAVEWINFROGWPT) {
 		/* write route file */
 		do_mbview_message_on("Saving route as Winfrog WPT file...", instance);
 		status = do_mbgrdviz_savewinfrogwpt(instance, file_ptr);
-		}
+	}
 
 	/* else write route data as degrees decimal minutes file */
-	else if (mode == MBGRDVIZ_SAVEDEGDECMIN)
-		{
+	else if (mode == MBGRDVIZ_SAVEDEGDECMIN) {
 		/* write route file */
 		do_mbview_message_on("Saving route as degrees + decimal minutes file...", instance);
 		status = do_mbgrdviz_savedegdecmin(instance, file_ptr);
-		}
+	}
 
 	/* else write route data as Hypack lnw file */
-	else if (mode == MBGRDVIZ_SAVELNW)
-		{
+	else if (mode == MBGRDVIZ_SAVELNW) {
 		/* write route file */
 		do_mbview_message_on("Saving route as Hypack LNW file...", instance);
 		status = do_mbgrdviz_savelnw(instance, file_ptr);
-		}
+	}
 
 	/* else write route data */
-	else if (mode == MBGRDVIZ_SAVEPROFILE)
-		{
+	else if (mode == MBGRDVIZ_SAVEPROFILE) {
 		/* write route file */
 		do_mbview_message_on("Saving profile data...", instance);
 		status = do_mbgrdviz_saveprofile(instance, file_ptr);
-		}
+	}
 
 	/* else set realtime data source */
-	else if (mode == MBGRDVIZ_REALTIME)
-		{
+	else if (mode == MBGRDVIZ_REALTIME) {
 		/* Set realtime source path */
 		XmTextSetString(textField_realtimesetup_path, file_ptr);
-
-		}
+	}
 
 	/* free the string */
-	if (file_ptr != NULL)
-		{
+	if (file_ptr != NULL) {
 		XtFree(file_ptr);
 		file_ptr = NULL;
-		}
+	}
 
 	/* close the message */
 	if (mode > MBGRDVIZ_OPENGRID && mode != MBGRDVIZ_REALTIME)
@@ -1742,119 +1604,112 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_openprimary(char *input_file_ptr)
-{
+int do_mbgrdviz_openprimary(char *input_file_ptr) {
 	char function_name[] = "do_mbgrdviz_openprimary";
-	int	status = MB_SUCCESS;
-	char    *button_name_ptr;
-	size_t	instance;
-	char	*testname = "Internal Test Grid";
-	int	projectionid, utmzone;
-	double	reference_lon;
+	int status = MB_SUCCESS;
+	char *button_name_ptr;
+	size_t instance;
+	char *testname = "Internal Test Grid";
+	int projectionid, utmzone;
+	double reference_lon;
 
 	/* mbview parameters */
-	char	mbv_title[MB_PATH_MAXLINE];
-	int	mbv_xo;
-	int	mbv_yo;
-	int	mbv_width;
-	int	mbv_height;
-	int	mbv_lorez_dimension;
-	int	mbv_hirez_dimension;
-	int	mbv_lorez_navdecimate;
-	int	mbv_hirez_navdecimate;
-	int	mbv_display_mode;
-	int	mbv_mouse_mode;
-	int	mbv_grid_mode;
-	int	mbv_primary_histogram;
-	int	mbv_primaryslope_histogram;
-	int	mbv_secondary_histogram;
-	int	mbv_primary_shade_mode;
-	int	mbv_slope_shade_mode;
-	int	mbv_secondary_shade_mode;
-	int	mbv_grid_contour_mode;
-	int	mbv_site_view_mode;
-	int	mbv_route_view_mode;
-	int	mbv_nav_view_mode;
-	int	mbv_navdrape_view_mode;
-	int	mbv_vector_view_mode;
-	int	mbv_primary_colortable;
-	int	mbv_primary_colortable_mode;
-	double	mbv_primary_colortable_min;
-	double	mbv_primary_colortable_max;
-	int	mbv_slope_colortable;
-	int	mbv_slope_colortable_mode;
-	double	mbv_slope_colortable_min;
-	double	mbv_slope_colortable_max;
-	int	mbv_secondary_colortable;
-	int	mbv_secondary_colortable_mode;
-	double	mbv_secondary_colortable_min;
-	double	mbv_secondary_colortable_max;
-	double	mbv_exageration;
-	double	mbv_modelelevation3d;
-	double	mbv_modelazimuth3d;
-	double	mbv_viewelevation3d;
-	double	mbv_viewazimuth3d;
-	double	mbv_illuminate_magnitude;
-	double	mbv_illuminate_elevation;
-	double	mbv_illuminate_azimuth;
-	double	mbv_slope_magnitude;
-	double	mbv_overlay_shade_magnitude;
-	double	mbv_overlay_shade_center;
-	int	mbv_overlay_shade_mode;
-	double	mbv_contour_interval;
-	int	mbv_primary_grid_projection_mode;
-	char	mbv_primary_grid_projection_id[MB_PATH_MAXLINE];
-	int	mbv_display_projection_mode;
-	char	mbv_display_projection_id[MB_PATH_MAXLINE];
-	float	mbv_primary_nodatavalue;
-	int	mbv_primary_nxy;
-	int	mbv_primary_nx;
-	int	mbv_primary_ny;
-	double	mbv_primary_min;
-	double	mbv_primary_max;
-	double	mbv_primary_xmin;
-	double	mbv_primary_xmax;
-	double	mbv_primary_ymin;
-	double	mbv_primary_ymax;
-	double	mbv_primary_dx;
-	double	mbv_primary_dy;
-	float	*mbv_primary_data;
+	char mbv_title[MB_PATH_MAXLINE];
+	int mbv_xo;
+	int mbv_yo;
+	int mbv_width;
+	int mbv_height;
+	int mbv_lorez_dimension;
+	int mbv_hirez_dimension;
+	int mbv_lorez_navdecimate;
+	int mbv_hirez_navdecimate;
+	int mbv_display_mode;
+	int mbv_mouse_mode;
+	int mbv_grid_mode;
+	int mbv_primary_histogram;
+	int mbv_primaryslope_histogram;
+	int mbv_secondary_histogram;
+	int mbv_primary_shade_mode;
+	int mbv_slope_shade_mode;
+	int mbv_secondary_shade_mode;
+	int mbv_grid_contour_mode;
+	int mbv_site_view_mode;
+	int mbv_route_view_mode;
+	int mbv_nav_view_mode;
+	int mbv_navdrape_view_mode;
+	int mbv_vector_view_mode;
+	int mbv_primary_colortable;
+	int mbv_primary_colortable_mode;
+	double mbv_primary_colortable_min;
+	double mbv_primary_colortable_max;
+	int mbv_slope_colortable;
+	int mbv_slope_colortable_mode;
+	double mbv_slope_colortable_min;
+	double mbv_slope_colortable_max;
+	int mbv_secondary_colortable;
+	int mbv_secondary_colortable_mode;
+	double mbv_secondary_colortable_min;
+	double mbv_secondary_colortable_max;
+	double mbv_exageration;
+	double mbv_modelelevation3d;
+	double mbv_modelazimuth3d;
+	double mbv_viewelevation3d;
+	double mbv_viewazimuth3d;
+	double mbv_illuminate_magnitude;
+	double mbv_illuminate_elevation;
+	double mbv_illuminate_azimuth;
+	double mbv_slope_magnitude;
+	double mbv_overlay_shade_magnitude;
+	double mbv_overlay_shade_center;
+	int mbv_overlay_shade_mode;
+	double mbv_contour_interval;
+	int mbv_primary_grid_projection_mode;
+	char mbv_primary_grid_projection_id[MB_PATH_MAXLINE];
+	int mbv_display_projection_mode;
+	char mbv_display_projection_id[MB_PATH_MAXLINE];
+	float mbv_primary_nodatavalue;
+	int mbv_primary_nxy;
+	int mbv_primary_nx;
+	int mbv_primary_ny;
+	double mbv_primary_min;
+	double mbv_primary_max;
+	double mbv_primary_xmin;
+	double mbv_primary_xmax;
+	double mbv_primary_ymin;
+	double mbv_primary_ymax;
+	double mbv_primary_dx;
+	double mbv_primary_dy;
+	float *mbv_primary_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
+	}
 
 	/* get next instance number */
 	status = mbview_init(verbose, &instance, &error);
-	if (instance == MBV_NO_WINDOW)
-		{
-		fprintf(stderr, "Unable to create mbview - %d mbview windows already created\n",
-		MBV_MAX_WINDOWS);
-		}
+	if (instance == MBV_NO_WINDOW) {
+		fprintf(stderr, "Unable to create mbview - %d mbview windows already created\n", MBV_MAX_WINDOWS);
+	}
 
-	else
-		{
+	else {
 		/* get button name */
-		if (input_file_ptr != NULL)
-			{
+		if (input_file_ptr != NULL) {
 #ifdef WIN32
-			button_name_ptr = strrchr(input_file_ptr, '/');		/* This one should work for gcc as well */
+			button_name_ptr = strrchr(input_file_ptr, '/'); /* This one should work for gcc as well */
 #else
-			button_name_ptr = (char *) rindex(input_file_ptr, '/');
+			button_name_ptr = (char *)rindex(input_file_ptr, '/');
 #endif
 			if (button_name_ptr == NULL)
 				button_name_ptr = input_file_ptr;
 			else
 				button_name_ptr++;
-			}
-		else
-			{
+		}
+		else {
 			button_name_ptr = testname;
-			}
+		}
 
 		/* set parameters */
 		sprintf(mbv_title, "MBgrdviz: %s\n", button_name_ptr);
@@ -1868,263 +1723,158 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 		mbv_hirez_navdecimate = 1;
 
 		/* set basic mbview window parameters */
-		status = mbview_setwindowparms(verbose, instance,
-					&do_mbgrdviz_dismiss_notify,
-					mbv_title,
-					mbv_xo,
-					mbv_yo,
-					mbv_width,
-					mbv_height,
-					mbv_lorez_dimension,
-					mbv_hirez_dimension,
-					mbv_lorez_navdecimate,
-					mbv_hirez_navdecimate,
-					&error);
+		status = mbview_setwindowparms(verbose, instance, &do_mbgrdviz_dismiss_notify, mbv_title, mbv_xo, mbv_yo, mbv_width,
+		                               mbv_height, mbv_lorez_dimension, mbv_hirez_dimension, mbv_lorez_navdecimate,
+		                               mbv_hirez_navdecimate, &error);
 
 		/* read in the grd file */
-		if (status == MB_SUCCESS
-			&& input_file_ptr != NULL)
-            status = mb_read_gmt_grd(verbose, input_file_ptr,
-                        &mbv_primary_grid_projection_mode,
-                        mbv_primary_grid_projection_id,
-                        &mbv_primary_nodatavalue,
-                        &mbv_primary_nxy,
-                        &mbv_primary_nx,
-                        &mbv_primary_ny,
-                        &mbv_primary_min,
-                        &mbv_primary_max,
-                        &mbv_primary_xmin,
-                        &mbv_primary_xmax,
-                        &mbv_primary_ymin,
-                        &mbv_primary_ymax,
-                        &mbv_primary_dx,
-                        &mbv_primary_dy,
-                        &mbv_primary_data,
-                        NULL,
-                        NULL,
-                        &error);
+		if (status == MB_SUCCESS && input_file_ptr != NULL)
+			status = mb_read_gmt_grd(verbose, input_file_ptr, &mbv_primary_grid_projection_mode, mbv_primary_grid_projection_id,
+			                         &mbv_primary_nodatavalue, &mbv_primary_nxy, &mbv_primary_nx, &mbv_primary_ny,
+			                         &mbv_primary_min, &mbv_primary_max, &mbv_primary_xmin, &mbv_primary_xmax, &mbv_primary_ymin,
+			                         &mbv_primary_ymax, &mbv_primary_dx, &mbv_primary_dy, &mbv_primary_data, NULL, NULL, &error);
 
 		else if (status == MB_SUCCESS)
-            status = do_mbgrdviz_opentest(instance,
-                        1000.0, 3.0, 2.0,
-                        &mbv_primary_grid_projection_mode,
-                        mbv_primary_grid_projection_id,
-                        &mbv_primary_nodatavalue,
-                        &mbv_primary_nxy,
-                        &mbv_primary_nx,
-                        &mbv_primary_ny,
-                        &mbv_primary_min,
-                        &mbv_primary_max,
-                        &mbv_primary_xmin,
-                        &mbv_primary_xmax,
-                        &mbv_primary_ymin,
-                        &mbv_primary_ymax,
-                        &mbv_primary_dx,
-                        &mbv_primary_dy,
-                        &mbv_primary_data);
+			status =
+			    do_mbgrdviz_opentest(instance, 1000.0, 3.0, 2.0, &mbv_primary_grid_projection_mode,
+			                         mbv_primary_grid_projection_id, &mbv_primary_nodatavalue, &mbv_primary_nxy, &mbv_primary_nx,
+			                         &mbv_primary_ny, &mbv_primary_min, &mbv_primary_max, &mbv_primary_xmin, &mbv_primary_xmax,
+			                         &mbv_primary_ymin, &mbv_primary_ymax, &mbv_primary_dx, &mbv_primary_dy, &mbv_primary_data);
 
-            /* set parameters */
-            if (status == MB_SUCCESS)
-                    {
-                    mbv_display_mode = MBV_DISPLAY_2D;
-                    mbv_mouse_mode = MBV_MOUSE_MOVE;
-                    mbv_grid_mode = MBV_GRID_VIEW_PRIMARY;
-                    mbv_primary_histogram = MB_NO;
-                    mbv_primaryslope_histogram = MB_NO;
-                    mbv_secondary_histogram = MB_NO;
-                    mbv_primary_shade_mode = MBV_SHADE_VIEW_SLOPE;
-                    mbv_slope_shade_mode = MBV_SHADE_VIEW_NONE;
-                    mbv_secondary_shade_mode = MBV_SHADE_VIEW_NONE;
-                    mbv_grid_contour_mode = MBV_VIEW_OFF;
-                    mbv_site_view_mode = MBV_VIEW_OFF;
-                    mbv_route_view_mode = MBV_VIEW_OFF;
-                    mbv_nav_view_mode = MBV_VIEW_OFF;
-                    mbv_navdrape_view_mode = MBV_VIEW_OFF;
-                    mbv_vector_view_mode = MBV_VIEW_OFF;
-                    mbv_primary_colortable = MBV_COLORTABLE_HAXBY;
-                    mbv_primary_colortable_mode = MBV_COLORTABLE_NORMAL;
-                    mbv_primary_colortable_min = mbv_primary_min;
-                    mbv_primary_colortable_max = mbv_primary_max;
-                    mbv_slope_colortable = MBV_COLORTABLE_HAXBY;
-                    mbv_slope_colortable_mode = MBV_COLORTABLE_REVERSED;
-                    mbv_slope_colortable_min = 0.0;
-                    mbv_slope_colortable_max = 0.5;
-                    mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
-                    mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
-                    mbv_secondary_colortable_min = 0.0;
-                    mbv_secondary_colortable_max = 0.0;
-                    mbv_exageration = 1.0;
-                    mbv_modelelevation3d = 90.0;
-                    mbv_modelazimuth3d = 0.0;
-                    mbv_viewelevation3d = 90.0;
-                    mbv_viewazimuth3d = 0.0;
-                    mbv_illuminate_magnitude = 1.0;
-                    mbv_illuminate_elevation = 5.0;
-                    mbv_illuminate_azimuth = 90.0;
-                    mbv_slope_magnitude = 1.0;
-                    mbv_overlay_shade_magnitude = 1.0;
-                    mbv_overlay_shade_center = 0.0;
-                    mbv_overlay_shade_mode = MBV_COLORTABLE_NORMAL;
-                    mbv_contour_interval
-                            = pow(10.0, floor(log10(mbv_primary_max
-                                                    - mbv_primary_min)) - 1.0);
-    
-                    /* set mbview default values */
-                    status = mb_mbview_defaults(verbose,
-                                                &mbv_primary_colortable,
-                            &mbv_primary_colortable_mode,
-                            &mbv_primary_shade_mode,
-                            &mbv_slope_colortable,
-                            &mbv_slope_colortable_mode,
-                            &mbv_secondary_colortable,
-                            &mbv_secondary_colortable_mode,
-                            &mbv_illuminate_magnitude,
-                            &mbv_illuminate_elevation,
-                            &mbv_illuminate_azimuth,
-                            &mbv_slope_magnitude);
-                    }
+		/* set parameters */
+		if (status == MB_SUCCESS) {
+			mbv_display_mode = MBV_DISPLAY_2D;
+			mbv_mouse_mode = MBV_MOUSE_MOVE;
+			mbv_grid_mode = MBV_GRID_VIEW_PRIMARY;
+			mbv_primary_histogram = MB_NO;
+			mbv_primaryslope_histogram = MB_NO;
+			mbv_secondary_histogram = MB_NO;
+			mbv_primary_shade_mode = MBV_SHADE_VIEW_SLOPE;
+			mbv_slope_shade_mode = MBV_SHADE_VIEW_NONE;
+			mbv_secondary_shade_mode = MBV_SHADE_VIEW_NONE;
+			mbv_grid_contour_mode = MBV_VIEW_OFF;
+			mbv_site_view_mode = MBV_VIEW_OFF;
+			mbv_route_view_mode = MBV_VIEW_OFF;
+			mbv_nav_view_mode = MBV_VIEW_OFF;
+			mbv_navdrape_view_mode = MBV_VIEW_OFF;
+			mbv_vector_view_mode = MBV_VIEW_OFF;
+			mbv_primary_colortable = MBV_COLORTABLE_HAXBY;
+			mbv_primary_colortable_mode = MBV_COLORTABLE_NORMAL;
+			mbv_primary_colortable_min = mbv_primary_min;
+			mbv_primary_colortable_max = mbv_primary_max;
+			mbv_slope_colortable = MBV_COLORTABLE_HAXBY;
+			mbv_slope_colortable_mode = MBV_COLORTABLE_REVERSED;
+			mbv_slope_colortable_min = 0.0;
+			mbv_slope_colortable_max = 0.5;
+			mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
+			mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
+			mbv_secondary_colortable_min = 0.0;
+			mbv_secondary_colortable_max = 0.0;
+			mbv_exageration = 1.0;
+			mbv_modelelevation3d = 90.0;
+			mbv_modelazimuth3d = 0.0;
+			mbv_viewelevation3d = 90.0;
+			mbv_viewazimuth3d = 0.0;
+			mbv_illuminate_magnitude = 1.0;
+			mbv_illuminate_elevation = 5.0;
+			mbv_illuminate_azimuth = 90.0;
+			mbv_slope_magnitude = 1.0;
+			mbv_overlay_shade_magnitude = 1.0;
+			mbv_overlay_shade_center = 0.0;
+			mbv_overlay_shade_mode = MBV_COLORTABLE_NORMAL;
+			mbv_contour_interval = pow(10.0, floor(log10(mbv_primary_max - mbv_primary_min)) - 1.0);
 
-                /* set the display projection */
-                if (status == MB_SUCCESS)
-                        {
-                        /* if grid projected then use the same projected coordinate system by default */
-                        if (mbv_primary_grid_projection_mode == MBV_PROJECTION_PROJECTED)
-                                {
-                                mbv_display_projection_mode = mbv_primary_grid_projection_mode;
-                                strcpy(mbv_display_projection_id,mbv_primary_grid_projection_id);
-                                }
-        
-                        /* else if grid geographic and covers much of the world use spheroid */
-                        else if (mbv_primary_xmax - mbv_primary_xmin > 15.0
-                                || mbv_primary_ymax - mbv_primary_ymin > 15.0)
-                                {
-                                mbv_display_projection_mode = MBV_PROJECTION_SPHEROID;
-                                sprintf(mbv_display_projection_id, "SPHEROID");
-                                }
-        
-                        /* else if grid geographic then use appropriate UTM zone for non-polar grids */
-                        else if (mbv_primary_ymax > -80.0
-                                && mbv_primary_ymin < 84.0)
-                                {
-                                mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
-                                reference_lon = 0.5 * (mbv_primary_xmin + mbv_primary_xmax);
-                                if (reference_lon > 180.0)
-                                        reference_lon -= 360.0;
-                                utmzone = (int)(((reference_lon + 183.0)
-                                                / 6.0) + 0.5);
-                                if (0.5 * (mbv_primary_ymin + mbv_primary_ymax) >= 0.0)
-                                        projectionid = 32600 + utmzone;
-                                else
-                                        projectionid = 32700 + utmzone;
-                                sprintf(mbv_display_projection_id, "epsg%d", projectionid);
-                                }
-        
-                        /* else if grid geographic and more northerly than 84 deg N then use
-                                North Univeral Polar Stereographic Projection */
-                        else if (mbv_primary_ymin > 84.0)
-                                {
-                                mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
-                                projectionid = 32661;
-                                sprintf(mbv_display_projection_id, "epsg%d", projectionid);
-                                }
-        
-                        /* else if grid geographic and more southerly than 80 deg S then use
-                                South Univeral Polar Stereographic Projection */
-                        else if (mbv_primary_ymax < 80.0)
-                                {
-                                mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
-                                projectionid = 32761;
-                                sprintf(mbv_display_projection_id, "epsg%d", projectionid);
-                                }
-        
-                        /* else just use geographic */
-                        else
-                                {
-                                mbv_display_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-                                sprintf(mbv_display_projection_id, "epsg%d", GCS_WGS_84);
-                                }
-                        }
+			/* set mbview default values */
+			status = mb_mbview_defaults(verbose, &mbv_primary_colortable, &mbv_primary_colortable_mode, &mbv_primary_shade_mode,
+			                            &mbv_slope_colortable, &mbv_slope_colortable_mode, &mbv_secondary_colortable,
+			                            &mbv_secondary_colortable_mode, &mbv_illuminate_magnitude, &mbv_illuminate_elevation,
+			                            &mbv_illuminate_azimuth, &mbv_slope_magnitude);
+		}
+
+		/* set the display projection */
+		if (status == MB_SUCCESS) {
+			/* if grid projected then use the same projected coordinate system by default */
+			if (mbv_primary_grid_projection_mode == MBV_PROJECTION_PROJECTED) {
+				mbv_display_projection_mode = mbv_primary_grid_projection_mode;
+				strcpy(mbv_display_projection_id, mbv_primary_grid_projection_id);
+			}
+
+			/* else if grid geographic and covers much of the world use spheroid */
+			else if (mbv_primary_xmax - mbv_primary_xmin > 15.0 || mbv_primary_ymax - mbv_primary_ymin > 15.0) {
+				mbv_display_projection_mode = MBV_PROJECTION_SPHEROID;
+				sprintf(mbv_display_projection_id, "SPHEROID");
+			}
+
+			/* else if grid geographic then use appropriate UTM zone for non-polar grids */
+			else if (mbv_primary_ymax > -80.0 && mbv_primary_ymin < 84.0) {
+				mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
+				reference_lon = 0.5 * (mbv_primary_xmin + mbv_primary_xmax);
+				if (reference_lon > 180.0)
+					reference_lon -= 360.0;
+				utmzone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+				if (0.5 * (mbv_primary_ymin + mbv_primary_ymax) >= 0.0)
+					projectionid = 32600 + utmzone;
+				else
+					projectionid = 32700 + utmzone;
+				sprintf(mbv_display_projection_id, "epsg%d", projectionid);
+			}
+
+			/* else if grid geographic and more northerly than 84 deg N then use
+			        North Univeral Polar Stereographic Projection */
+			else if (mbv_primary_ymin > 84.0) {
+				mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
+				projectionid = 32661;
+				sprintf(mbv_display_projection_id, "epsg%d", projectionid);
+			}
+
+			/* else if grid geographic and more southerly than 80 deg S then use
+			        South Univeral Polar Stereographic Projection */
+			else if (mbv_primary_ymax < 80.0) {
+				mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
+				projectionid = 32761;
+				sprintf(mbv_display_projection_id, "epsg%d", projectionid);
+			}
+
+			/* else just use geographic */
+			else {
+				mbv_display_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
+				sprintf(mbv_display_projection_id, "epsg%d", GCS_WGS_84);
+			}
+		}
 
 		/* set basic mbview view controls */
 		if (status == MB_SUCCESS)
-		status = mbview_setviewcontrols(verbose, instance,
-					mbv_display_mode,
-					mbv_mouse_mode,
-					mbv_grid_mode,
-					mbv_primary_histogram,
-					mbv_primaryslope_histogram,
-					mbv_secondary_histogram,
-					mbv_primary_shade_mode,
-					mbv_slope_shade_mode,
-					mbv_secondary_shade_mode,
-					mbv_grid_contour_mode,
-					mbv_site_view_mode,
-					mbv_route_view_mode,
-					mbv_nav_view_mode,
-					mbv_navdrape_view_mode,
-					mbv_vector_view_mode,
-					mbv_exageration,
-					mbv_modelelevation3d,
-					mbv_modelazimuth3d,
-					mbv_viewelevation3d,
-					mbv_viewazimuth3d,
-					mbv_illuminate_magnitude,
-					mbv_illuminate_elevation,
-					mbv_illuminate_azimuth,
-					mbv_slope_magnitude,
-					mbv_overlay_shade_magnitude,
-					mbv_overlay_shade_center,
-					mbv_overlay_shade_mode,
-					mbv_contour_interval,
-					mbv_display_projection_mode,
-					mbv_display_projection_id,
-					&error);
+			status = mbview_setviewcontrols(
+			    verbose, instance, mbv_display_mode, mbv_mouse_mode, mbv_grid_mode, mbv_primary_histogram,
+			    mbv_primaryslope_histogram, mbv_secondary_histogram, mbv_primary_shade_mode, mbv_slope_shade_mode,
+			    mbv_secondary_shade_mode, mbv_grid_contour_mode, mbv_site_view_mode, mbv_route_view_mode, mbv_nav_view_mode,
+			    mbv_navdrape_view_mode, mbv_vector_view_mode, mbv_exageration, mbv_modelelevation3d, mbv_modelazimuth3d,
+			    mbv_viewelevation3d, mbv_viewazimuth3d, mbv_illuminate_magnitude, mbv_illuminate_elevation,
+			    mbv_illuminate_azimuth, mbv_slope_magnitude, mbv_overlay_shade_magnitude, mbv_overlay_shade_center,
+			    mbv_overlay_shade_mode, mbv_contour_interval, mbv_display_projection_mode, mbv_display_projection_id, &error);
 
 		/* set primary grid data */
 		if (status == MB_SUCCESS)
-		status = mbview_setprimarygrid(verbose, instance,
-					mbv_primary_grid_projection_mode,
-					mbv_primary_grid_projection_id,
-					mbv_primary_nodatavalue,
-					mbv_primary_nx,
-					mbv_primary_ny,
-					mbv_primary_min,
-					mbv_primary_max,
-					mbv_primary_xmin,
-					mbv_primary_xmax,
-					mbv_primary_ymin,
-					mbv_primary_ymax,
-					mbv_primary_dx,
-					mbv_primary_dy,
-					mbv_primary_data,
-					&error);
+			status = mbview_setprimarygrid(verbose, instance, mbv_primary_grid_projection_mode, mbv_primary_grid_projection_id,
+			                               mbv_primary_nodatavalue, mbv_primary_nx, mbv_primary_ny, mbv_primary_min,
+			                               mbv_primary_max, mbv_primary_xmin, mbv_primary_xmax, mbv_primary_ymin,
+			                               mbv_primary_ymax, mbv_primary_dx, mbv_primary_dy, mbv_primary_data, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_primary_data, &error);
 
 		/* set more mbview control values */
 		if (status == MB_SUCCESS)
-		status = mbview_setprimarycolortable(verbose, instance,
-					mbv_primary_colortable,
-					mbv_primary_colortable_mode,
-					mbv_primary_colortable_min,
-					mbv_primary_colortable_max,
-					&error);
+			status = mbview_setprimarycolortable(verbose, instance, mbv_primary_colortable, mbv_primary_colortable_mode,
+			                                     mbv_primary_colortable_min, mbv_primary_colortable_max, &error);
 		if (status == MB_SUCCESS)
-		status = mbview_setslopecolortable(verbose, instance,
-					mbv_slope_colortable,
-					mbv_slope_colortable_mode,
-					mbv_slope_colortable_min,
-					mbv_slope_colortable_max,
-					&error);
+			status = mbview_setslopecolortable(verbose, instance, mbv_slope_colortable, mbv_slope_colortable_mode,
+			                                   mbv_slope_colortable_min, mbv_slope_colortable_max, &error);
 		if (status == MB_SUCCESS)
-		status = mbview_enableeditsites(verbose, instance,
-					&error);
+			status = mbview_enableeditsites(verbose, instance, &error);
 		if (status == MB_SUCCESS)
-		status = mbview_enableeditroutes(verbose, instance,
-					&error);
+			status = mbview_enableeditroutes(verbose, instance, &error);
 
 		/* open up mbview window */
-		if (status == MB_SUCCESS)
-			{
+		if (status == MB_SUCCESS) {
 			status = mbview_open(verbose, instance, &error);
 			if (status == MB_SUCCESS)
 				mbview_id[instance] = MB_YES;
@@ -2132,2523 +1882,1919 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 				mbview_id[instance] = MB_NO;
 
 			/* set sensitivity callback routine */
-			if (status == MB_SUCCESS)
-				{
-				mbview_setsensitivitynotify(verbose, instance,
-					do_mbgrdviz_sensitivity, &error);
-				}
+			if (status == MB_SUCCESS) {
+				mbview_setsensitivitynotify(verbose, instance, do_mbgrdviz_sensitivity, &error);
+			}
 
 			/* add action button */
-			if (status == MB_SUCCESS)
-				{
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_openoverlay,
-					"Open Overlay Grid",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_opensite,
-					"Open Site File",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_openroute,
-					"Open Route File",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_opennav,
-					"Open Navigation",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_openswath,
-					"Open Swath Data",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_openvector,
-					"Open Vector File",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savesite,
-					"Save Site File",
-					MBV_EXISTMASK_SITE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_saveroute,
-					"Save Route File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_saverisiscript,
-					"Save Risi Script File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savewinfrogpts,
-					"Save Route as Winfrog PTS File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savewinfrogwpt,
-					"Save Route as Winfrog WPT File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savedegdecmin,
-					"Save Route as Degrees + Decimal Minutes File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savelnw,
-					"Save Route as Hypack LNW File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_saveprofile,
-					"Save Profile File",
-					MBV_PICKMASK_TWOPOINT + MBV_PICKMASK_ROUTE + MBV_PICKMASK_NAVTWOPOINT,
-					&error);
+			if (status == MB_SUCCESS) {
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openoverlay, "Open Overlay Grid",
+				                 MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_opensite, "Open Site File", MBV_PICKMASK_NONE,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openroute, "Open Route File", MBV_PICKMASK_NONE,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_opennav, "Open Navigation", MBV_PICKMASK_NONE,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openswath, "Open Swath Data", MBV_PICKMASK_NONE,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openvector, "Open Vector File",
+				                 MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savesite, "Save Site File", MBV_EXISTMASK_SITE,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveroute, "Save Route File",
+				                 MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saverisiscript, "Save Risi Script File",
+				                 MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savewinfrogpts, "Save Route as Winfrog PTS File",
+				                 MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savewinfrogwpt, "Save Route as Winfrog WPT File",
+				                 MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savedegdecmin,
+				                 "Save Route as Degrees + Decimal Minutes File", MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savelnw, "Save Route as Hypack LNW File",
+				                 MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveprofile, "Save Profile File",
+				                 MBV_PICKMASK_TWOPOINT + MBV_PICKMASK_ROUTE + MBV_PICKMASK_NAVTWOPOINT, &error);
 
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_open_mbedit,
-					"Open Selected Nav in MBedit",
-					MBV_PICKMASK_NAVANY,
-					&error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_open_mbeditviz,
-					"Open Selected Nav in MBeditviz",
-					MBV_PICKMASK_NAVANY,
-					&error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_open_mbnavedit,
-					"Open Selected Nav in MBnavedit",
-					MBV_PICKMASK_NAVANY,
-					&error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_open_mbvelocitytool,
-					"Open Selected Nav in MBvelocitytool",
-					MBV_PICKMASK_NAVANY,
-					&error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_open_mbedit, "Open Selected Nav in MBedit", MBV_PICKMASK_NAVANY,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_open_mbeditviz, "Open Selected Nav in MBeditviz",
+				                 MBV_PICKMASK_NAVANY, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_open_mbnavedit, "Open Selected Nav in MBnavedit",
+				                 MBV_PICKMASK_NAVANY, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_open_mbvelocitytool, "Open Selected Nav in MBvelocitytool",
+				                 MBV_PICKMASK_NAVANY, &error);
 
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_open_region,
-					"Open Region as New View",
-					MBV_PICKMASK_REGION + MBV_PICKMASK_NEWINSTANCE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_make_survey,
-					"Generate Survey Route from Area",
-					MBV_PICKMASK_AREA, &error);
-				}
+				mbview_addaction(verbose, instance, do_mbgrdviz_open_region, "Open Region as New View",
+				                 MBV_PICKMASK_REGION + MBV_PICKMASK_NEWINSTANCE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_make_survey, "Generate Survey Route from Area", MBV_PICKMASK_AREA,
+				                 &error);
 			}
 		}
+	}
 
 	/* set sensitivity of widgets that require an mbview instance to be active */
-	do_mbgrdviz_sensitivity( );
+	do_mbgrdviz_sensitivity();
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr)
-{
+int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr) {
 	char function_name[] = "do_mbgrdviz_openoverlay";
-	int	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	/* mbview parameters */
-	int	mbv_secondary_colortable;
-	int	mbv_secondary_colortable_mode;
-	double	mbv_secondary_colortable_min;
-	double	mbv_secondary_colortable_max;
-	int	mbv_secondary_grid_projection_mode;
-	char	mbv_secondary_grid_projection_id[MB_PATH_MAXLINE];
-	float	mbv_secondary_nodatavalue;
-	int	mbv_secondary_nxy;
-	int	mbv_secondary_nx;
-	int	mbv_secondary_ny;
-	double	mbv_secondary_min;
-	double	mbv_secondary_max;
-	double	mbv_secondary_xmin;
-	double	mbv_secondary_xmax;
-	double	mbv_secondary_ymin;
-	double	mbv_secondary_ymax;
-	double	mbv_secondary_dx;
-	double	mbv_secondary_dy;
-	float	*mbv_secondary_data;
-	double	mbv_overlay_shade_magnitude;
-	double	mbv_overlay_shade_center;
-	int	mbv_overlay_shade_mode;
+	int mbv_secondary_colortable;
+	int mbv_secondary_colortable_mode;
+	double mbv_secondary_colortable_min;
+	double mbv_secondary_colortable_max;
+	int mbv_secondary_grid_projection_mode;
+	char mbv_secondary_grid_projection_id[MB_PATH_MAXLINE];
+	float mbv_secondary_nodatavalue;
+	int mbv_secondary_nxy;
+	int mbv_secondary_nx;
+	int mbv_secondary_ny;
+	double mbv_secondary_min;
+	double mbv_secondary_max;
+	double mbv_secondary_xmin;
+	double mbv_secondary_xmax;
+	double mbv_secondary_ymin;
+	double mbv_secondary_ymax;
+	double mbv_secondary_dx;
+	double mbv_secondary_dy;
+	float *mbv_secondary_data;
+	double mbv_overlay_shade_magnitude;
+	double mbv_overlay_shade_center;
+	int mbv_overlay_shade_mode;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
+	}
 
 	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-		{
+	if (instance != MBV_NO_WINDOW) {
 
 		/* read in the grd file */
-		if (status == MB_SUCCESS
-			&& input_file_ptr != NULL)
-		status = mb_read_gmt_grd(verbose, input_file_ptr,
-			&mbv_secondary_grid_projection_mode,
-			mbv_secondary_grid_projection_id,
-			&mbv_secondary_nodatavalue,
-			&mbv_secondary_nxy,
-			&mbv_secondary_nx,
-			&mbv_secondary_ny,
-			&mbv_secondary_min,
-			&mbv_secondary_max,
-			&mbv_secondary_xmin,
-			&mbv_secondary_xmax,
-			&mbv_secondary_ymin,
-			&mbv_secondary_ymax,
-			&mbv_secondary_dx,
-			&mbv_secondary_dy,
-			&mbv_secondary_data,
-                        NULL,
-                        NULL,
-                        &error);
+		if (status == MB_SUCCESS && input_file_ptr != NULL)
+			status = mb_read_gmt_grd(verbose, input_file_ptr, &mbv_secondary_grid_projection_mode,
+			                         mbv_secondary_grid_projection_id, &mbv_secondary_nodatavalue, &mbv_secondary_nxy,
+			                         &mbv_secondary_nx, &mbv_secondary_ny, &mbv_secondary_min, &mbv_secondary_max,
+			                         &mbv_secondary_xmin, &mbv_secondary_xmax, &mbv_secondary_ymin, &mbv_secondary_ymax,
+			                         &mbv_secondary_dx, &mbv_secondary_dy, &mbv_secondary_data, NULL, NULL, &error);
 
 		else if (status == MB_SUCCESS)
-		status = do_mbgrdviz_opentest(instance,
-			1000.0, 6.0, 1.5,
-			&mbv_secondary_grid_projection_mode,
-			mbv_secondary_grid_projection_id,
-			&mbv_secondary_nodatavalue,
-			&mbv_secondary_nxy,
-			&mbv_secondary_nx,
-			&mbv_secondary_ny,
-			&mbv_secondary_min,
-			&mbv_secondary_max,
-			&mbv_secondary_xmin,
-			&mbv_secondary_xmax,
-			&mbv_secondary_ymin,
-			&mbv_secondary_ymax,
-			&mbv_secondary_dx,
-			&mbv_secondary_dy,
-			&mbv_secondary_data);
+			status = do_mbgrdviz_opentest(instance, 1000.0, 6.0, 1.5, &mbv_secondary_grid_projection_mode,
+			                              mbv_secondary_grid_projection_id, &mbv_secondary_nodatavalue, &mbv_secondary_nxy,
+			                              &mbv_secondary_nx, &mbv_secondary_ny, &mbv_secondary_min, &mbv_secondary_max,
+			                              &mbv_secondary_xmin, &mbv_secondary_xmax, &mbv_secondary_ymin, &mbv_secondary_ymax,
+			                              &mbv_secondary_dx, &mbv_secondary_dy, &mbv_secondary_data);
 
 		/* set parameters */
-		if (status == MB_SUCCESS)
-                        {
-                        mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
-                        mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
-                        mbv_secondary_colortable_min = mbv_secondary_min;
-                        mbv_secondary_colortable_max = mbv_secondary_max;
-                        mbv_overlay_shade_magnitude = 1.0;
-                        mbv_overlay_shade_center = 0.5 * (mbv_secondary_max + mbv_secondary_min);
-                        mbv_overlay_shade_mode = MBV_COLORTABLE_NORMAL;
-                        }
+		if (status == MB_SUCCESS) {
+			mbv_secondary_colortable = MBV_COLORTABLE_HAXBY;
+			mbv_secondary_colortable_mode = MBV_COLORTABLE_NORMAL;
+			mbv_secondary_colortable_min = mbv_secondary_min;
+			mbv_secondary_colortable_max = mbv_secondary_max;
+			mbv_overlay_shade_magnitude = 1.0;
+			mbv_overlay_shade_center = 0.5 * (mbv_secondary_max + mbv_secondary_min);
+			mbv_overlay_shade_mode = MBV_COLORTABLE_NORMAL;
+		}
 
 		/* set more mbview control values */
+		if (status == MB_SUCCESS) {
+			status =
+			    mbview_setsecondarygrid(verbose, instance, mbv_secondary_grid_projection_mode, mbv_secondary_grid_projection_id,
+			                            mbv_secondary_nodatavalue, mbv_secondary_nx, mbv_secondary_ny, mbv_secondary_min,
+			                            mbv_secondary_max, mbv_secondary_xmin, mbv_secondary_xmax, mbv_secondary_ymin,
+			                            mbv_secondary_ymax, mbv_secondary_dx, mbv_secondary_dy, mbv_secondary_data, &error);
+			mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_secondary_data, &error);
+		}
 		if (status == MB_SUCCESS)
-                        {
-                        status = mbview_setsecondarygrid(verbose, instance,
-					mbv_secondary_grid_projection_mode,
-					mbv_secondary_grid_projection_id,
-					mbv_secondary_nodatavalue,
-					mbv_secondary_nx,
-					mbv_secondary_ny,
-					mbv_secondary_min,
-					mbv_secondary_max,
-					mbv_secondary_xmin,
-					mbv_secondary_xmax,
-					mbv_secondary_ymin,
-					mbv_secondary_ymax,
-					mbv_secondary_dx,
-					mbv_secondary_dy,
-					mbv_secondary_data,
-					&error);
-                        mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_secondary_data, &error);
-                        }
-		if (status == MB_SUCCESS)
-		status = mbview_setsecondarycolortable(verbose, instance,
-					mbv_secondary_colortable,
-					mbv_secondary_colortable_mode,
-					mbv_secondary_colortable_min,
-					mbv_secondary_colortable_max,
-					mbv_overlay_shade_magnitude,
-					mbv_overlay_shade_center,
-					mbv_overlay_shade_mode,
-					&error);
+			status = mbview_setsecondarycolortable(verbose, instance, mbv_secondary_colortable, mbv_secondary_colortable_mode,
+			                                       mbv_secondary_colortable_min, mbv_secondary_colortable_max,
+			                                       mbv_overlay_shade_magnitude, mbv_overlay_shade_center, mbv_overlay_shade_mode,
+			                                       &error);
 
 		/* update widgets */
 		if (status == MB_SUCCESS)
-		status = mbview_update(verbose, instance, &error);
-
-		}
+			status = mbview_update(verbose, instance, &error);
+	}
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr)
-{
+int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
 	char function_name[] = "do_mbgrdviz_opensite";
-	int	status = MB_SUCCESS;
-	FILE	*sfp;
-	char	buffer[MB_PATH_MAXLINE];
-	int	nsite;
-	double	*sitelon;
-	double	*sitelat;
-	double	*sitetopo;
-	int	*sitecolor;
-	int	*sitesize;
-	mb_path	*sitename;
-	char	*result;
-	char	*name;
-	int	nget;
-	int	site_ok;
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	char buffer[MB_PATH_MAXLINE];
+	int nsite;
+	double *sitelon;
+	double *sitelat;
+	double *sitetopo;
+	int *sitecolor;
+	int *sitesize;
+	mb_path *sitename;
+	char *result;
+	char *name;
+	int nget;
+	int site_ok;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
+	}
 
 	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
+	if (instance != MBV_NO_WINDOW) {
 
-	    /* count the sites in the input file */
-	    nsite = 0;
-	    if ((sfp = fopen(input_file_ptr, "r")) == NULL)
-		    {
-		    error = MB_ERROR_OPEN_FAIL;
-		    fprintf(stderr,"\nUnable to Open Site File <%s> for reading\n",input_file_ptr);
-		    XBell((Display *) XtDisplay(mainWindow),100);
-		    status = MB_FAILURE;
-		    return(status);
-		    }
-	    while ((result = fgets(buffer,MB_PATH_MAXLINE,sfp)) == buffer)
-		    {
-		    if (buffer[0] != '#')
-		    	nsite++;
-		    }
-	    fclose(sfp);
-
-	    /* allocate arrays for sites */
-	    if (nsite > 0)
-		{
-		/* allocate the arrays */
-		sitelon = NULL;
-		sitelat = NULL;
-		sitetopo = NULL;
-		sitecolor = NULL;
-		sitesize = NULL;
-		sitename = NULL;
-		status = mbview_allocsitearrays(verbose,
-			nsite, &sitelon, &sitelat, &sitetopo,
-			&sitecolor, &sitesize, &sitename, &error);
-
-		/* if error initializing memory then cancel dealing with sites */
-		if (status == MB_FAILURE)
-			{
-			nsite = 0;
-			fprintf(stderr,"\nUnable to allocate arrays for %d sites\n",nsite);
-			XBell((Display *) XtDisplay(mainWindow),100);
-			return(status);
-			}
-		}
-
-	    /* read the sites from the input file */
-	    if (nsite > 0)
-	    	{
+		/* count the sites in the input file */
 		nsite = 0;
-		if ((sfp = fopen(input_file_ptr, "r")) == NULL)
-			{
+		if ((sfp = fopen(input_file_ptr, "r")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nUnable to Open Site File <%s> for reading\n", input_file_ptr);
+			XBell((Display *)XtDisplay(mainWindow), 100);
 			status = MB_FAILURE;
-			fprintf(stderr,"\nUnable to open site file <%s> for reading\n",input_file_ptr);
-			XBell((Display *) XtDisplay(mainWindow),100);
-			return(status);
-			}
-		while ((result = fgets(buffer,MB_PATH_MAXLINE,sfp)) == buffer)
-		    {
-		    site_ok = MB_NO;
-
-		    /* deal with site in form: lon lat topo color size name */
-		    if (buffer[0] != '#')
-		    	{
-			nget = sscanf(buffer,"%lf %lf %lf %d %d %[^\n]",
-			    &sitelon[nsite], &sitelat[nsite], &sitetopo[nsite],
-			    &sitecolor[nsite], &sitesize[nsite],
-			    sitename[nsite]);
-		    	if (nget >= 2)
-			    site_ok = MB_YES;
-			}
-		    if (site_ok == MB_YES)
-			{
-		    	if (nget < 6)
-		    	    {
-			    name = (char *) sitename[nsite];
-			    name[0] = '\0';
-			    }
-		    	if (nget < 5)
-			    sitesize[nsite] = 0;
-		    	if (nget < 4)
-			    sitecolor[nsite] = 0;
-		    	if (nget < 3)
-			    sitetopo[nsite] = MBV_DEFAULT_NODATA;
-			}
-
-		    /* output some debug values */
-		    if (verbose > 0 && site_ok == MB_YES)
-			    {
-			    fprintf(stderr,"\ndbg5  Site point read in program <%s>\n",program_name);
-			    fprintf(stderr,"dbg5       site[%d]: %f %f %f  %d %d  %s\n",
-				    nsite,sitelon[nsite],sitelat[nsite],sitetopo[nsite],
-				    sitecolor[nsite],sitesize[nsite],
-				    sitename[nsite]);
-			    }
-		    else if (verbose > 0 && site_ok == MB_NO)
-			    {
-			    fprintf(stderr,"\ndbg5  Unintelligible line read from site file in program <%s>\n",program_name);
-			    fprintf(stderr,"dbg5       buffer:  %s\n",
-				   buffer);
-			    }
-
-		    strncpy(buffer,"\0",sizeof(buffer));
-		    if (site_ok == MB_YES)
-		    	nsite++;
-		    }
+			return (status);
+		}
+		while ((result = fgets(buffer, MB_PATH_MAXLINE, sfp)) == buffer) {
+			if (buffer[0] != '#')
+				nsite++;
+		}
 		fclose(sfp);
+
+		/* allocate arrays for sites */
+		if (nsite > 0) {
+			/* allocate the arrays */
+			sitelon = NULL;
+			sitelat = NULL;
+			sitetopo = NULL;
+			sitecolor = NULL;
+			sitesize = NULL;
+			sitename = NULL;
+			status =
+			    mbview_allocsitearrays(verbose, nsite, &sitelon, &sitelat, &sitetopo, &sitecolor, &sitesize, &sitename, &error);
+
+			/* if error initializing memory then cancel dealing with sites */
+			if (status == MB_FAILURE) {
+				nsite = 0;
+				fprintf(stderr, "\nUnable to allocate arrays for %d sites\n", nsite);
+				XBell((Display *)XtDisplay(mainWindow), 100);
+				return (status);
+			}
 		}
 
-	    /* add the sites */
-	    if (nsite > 0)
-	    	{
-	    	status = mbview_addsites(verbose, instance,
-			nsite, sitelon, sitelat, sitetopo,
-			sitecolor, sitesize, sitename,
-			&error);
+		/* read the sites from the input file */
+		if (nsite > 0) {
+			nsite = 0;
+			if ((sfp = fopen(input_file_ptr, "r")) == NULL) {
+				error = MB_ERROR_OPEN_FAIL;
+				status = MB_FAILURE;
+				fprintf(stderr, "\nUnable to open site file <%s> for reading\n", input_file_ptr);
+				XBell((Display *)XtDisplay(mainWindow), 100);
+				return (status);
+			}
+			while ((result = fgets(buffer, MB_PATH_MAXLINE, sfp)) == buffer) {
+				site_ok = MB_NO;
 
-	    	/* update widgets */
-	    	if (status == MB_SUCCESS)
-	    	status = mbview_update(verbose, instance, &error);
+				/* deal with site in form: lon lat topo color size name */
+				if (buffer[0] != '#') {
+					nget = sscanf(buffer, "%lf %lf %lf %d %d %[^\n]", &sitelon[nsite], &sitelat[nsite], &sitetopo[nsite],
+					              &sitecolor[nsite], &sitesize[nsite], sitename[nsite]);
+					if (nget >= 2)
+						site_ok = MB_YES;
+				}
+				if (site_ok == MB_YES) {
+					if (nget < 6) {
+						name = (char *)sitename[nsite];
+						name[0] = '\0';
+					}
+					if (nget < 5)
+						sitesize[nsite] = 0;
+					if (nget < 4)
+						sitecolor[nsite] = 0;
+					if (nget < 3)
+						sitetopo[nsite] = MBV_DEFAULT_NODATA;
+				}
+
+				/* output some debug values */
+				if (verbose > 0 && site_ok == MB_YES) {
+					fprintf(stderr, "\ndbg5  Site point read in program <%s>\n", program_name);
+					fprintf(stderr, "dbg5       site[%d]: %f %f %f  %d %d  %s\n", nsite, sitelon[nsite], sitelat[nsite],
+					        sitetopo[nsite], sitecolor[nsite], sitesize[nsite], sitename[nsite]);
+				}
+				else if (verbose > 0 && site_ok == MB_NO) {
+					fprintf(stderr, "\ndbg5  Unintelligible line read from site file in program <%s>\n", program_name);
+					fprintf(stderr, "dbg5       buffer:  %s\n", buffer);
+				}
+
+				strncpy(buffer, "\0", sizeof(buffer));
+				if (site_ok == MB_YES)
+					nsite++;
+			}
+			fclose(sfp);
 		}
 
-	    /* deallocate memory */
-	    if (nsite > 0)
-	    	{
-		status = mbview_freesitearrays(verbose,
-			&sitelon, &sitelat, &sitetopo,
-			&sitecolor, &sitesize, &sitename, &error);
+		/* add the sites */
+		if (nsite > 0) {
+			status = mbview_addsites(verbose, instance, nsite, sitelon, sitelat, sitetopo, sitecolor, sitesize, sitename, &error);
+
+			/* update widgets */
+			if (status == MB_SUCCESS)
+				status = mbview_update(verbose, instance, &error);
 		}
 
-	    }
+		/* deallocate memory */
+		if (nsite > 0) {
+			status = mbview_freesitearrays(verbose, &sitelon, &sitelat, &sitetopo, &sitecolor, &sitesize, &sitename, &error);
+		}
+	}
 
 	/* set sensitivity of widgets that require an mbview instance to be active */
-	do_mbgrdviz_sensitivity( );
+	do_mbgrdviz_sensitivity();
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr)
-{
+int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
 	char function_name[] = "do_mbgrdviz_savesite";
-	int	status = MB_SUCCESS;
-	FILE	*sfp;
-	int	nsite;
-	double	*sitelon;
-	double	*sitelat;
-	double	*sitetopo;
-	int	*sitecolor;
-	int	*sitesize;
-	mb_path	*sitename;
-	int	i;
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	int nsite;
+	double *sitelon;
+	double *sitelat;
+	double *sitetopo;
+	int *sitecolor;
+	int *sitesize;
+	mb_path *sitename;
+	int i;
 
 	/* time, user, host variables */
-	time_t	right_now;
-	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
-	char	*unknown = "Unknown";
+	time_t right_now;
+	char date[32], *user_ptr, host[MB_PATH_MAXLINE];
+	char *unknown = "Unknown";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
+	}
 
 	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
+	if (instance != MBV_NO_WINDOW) {
 
-	    /* get the number of sites to be written to the outpuf file */
-	    status = mbview_getsitecount(verbose, instance, &nsite, &error);
-	    if (status == MB_SUCCESS && nsite <= 0)
-	    	{
-		fprintf(stderr,"Unable to write site file...\nCurrently %d sites defined for instance %zu!\n",
-			nsite, instance);
-		XBell((Display *) XtDisplay(mainWindow),100);
-		status = MB_FAILURE;
+		/* get the number of sites to be written to the outpuf file */
+		status = mbview_getsitecount(verbose, instance, &nsite, &error);
+		if (status == MB_SUCCESS && nsite <= 0) {
+			fprintf(stderr, "Unable to write site file...\nCurrently %d sites defined for instance %zu!\n", nsite, instance);
+			XBell((Display *)XtDisplay(mainWindow), 100);
+			status = MB_FAILURE;
 		}
 
-	    /* allocate arrays for sites */
-	    if (status == MB_SUCCESS && nsite > 0)
-		{
-		/* allocate the arrays */
-		sitelon = NULL;
-		sitelat = NULL;
-		sitetopo = NULL;
-		sitecolor = NULL;
-		sitesize = NULL;
-		sitename = NULL;
-		status = mbview_allocsitearrays(verbose,
-			nsite, &sitelon, &sitelat, &sitetopo,
-			&sitecolor, &sitesize, &sitename, &error);
+		/* allocate arrays for sites */
+		if (status == MB_SUCCESS && nsite > 0) {
+			/* allocate the arrays */
+			sitelon = NULL;
+			sitelat = NULL;
+			sitetopo = NULL;
+			sitecolor = NULL;
+			sitesize = NULL;
+			sitename = NULL;
+			status =
+			    mbview_allocsitearrays(verbose, nsite, &sitelon, &sitelat, &sitetopo, &sitecolor, &sitesize, &sitename, &error);
 
-		/* if error initializing memory then cancel dealing with sites */
-		if (status == MB_FAILURE)
-	    		{
-			nsite = 0;
-			fprintf(stderr,"Unable to write site file...\nArray allocation for %d sites failed for instance %zu!\n",
-				nsite, instance);
-			XBell((Display *) XtDisplay(mainWindow),100);
+			/* if error initializing memory then cancel dealing with sites */
+			if (status == MB_FAILURE) {
+				nsite = 0;
+				fprintf(stderr, "Unable to write site file...\nArray allocation for %d sites failed for instance %zu!\n", nsite,
+				        instance);
+				XBell((Display *)XtDisplay(mainWindow), 100);
 			}
 		}
 
-	    /* get the sites */
-	    if (status == MB_SUCCESS)
-	    	{
-	    	status = mbview_getsites(verbose, instance,
-			&nsite, sitelon, sitelat, sitetopo,
-			sitecolor, sitesize, sitename,
-			&error);
+		/* get the sites */
+		if (status == MB_SUCCESS) {
+			status =
+			    mbview_getsites(verbose, instance, &nsite, sitelon, sitelat, sitetopo, sitecolor, sitesize, sitename, &error);
 		}
 
-	    /* write the sites to the output file */
-	    if (status == MB_SUCCESS)
-	    	{
-		/* open the output file */
-		if ((sfp = fopen(output_file_ptr, "w")) != NULL)
-			{
-			/* write the site file header */
-			fprintf(sfp, "## Site File Version %s\n", MBGRDVIZ_SITE_VERSION);
-			fprintf(sfp, "## Output by Program %s\n",program_name);
-			fprintf(sfp, "## Program Version %s\n",rcs_id);
-			fprintf(sfp, "## MB-System Version %s\n",MB_VERSION);
-			right_now = time((time_t *)0);
-			strcpy(date,ctime(&right_now));
-                        date[strlen(date)-1] = '\0';
-			if ((user_ptr = getenv("USER")) == NULL)
-				if ((user_ptr = getenv("LOGNAME")) == NULL)
-					user_ptr = unknown;
-			gethostname(host,MB_PATH_MAXLINE);
-			fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n",
-				user_ptr,host,date);
-			fprintf(sfp, "## Number of sites: %d\n",nsite);
+		/* write the sites to the output file */
+		if (status == MB_SUCCESS) {
+			/* open the output file */
+			if ((sfp = fopen(output_file_ptr, "w")) != NULL) {
+				/* write the site file header */
+				fprintf(sfp, "## Site File Version %s\n", MBGRDVIZ_SITE_VERSION);
+				fprintf(sfp, "## Output by Program %s\n", program_name);
+				fprintf(sfp, "## Program Version %s\n", rcs_id);
+				fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
+				right_now = time((time_t *)0);
+				strcpy(date, ctime(&right_now));
+				date[strlen(date) - 1] = '\0';
+				if ((user_ptr = getenv("USER")) == NULL)
+					if ((user_ptr = getenv("LOGNAME")) == NULL)
+						user_ptr = unknown;
+				gethostname(host, MB_PATH_MAXLINE);
+				fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+				fprintf(sfp, "## Number of sites: %d\n", nsite);
 
-			/* loop over the sites */
-			for (i=0;i<nsite;i++)
-				{
-				fprintf(sfp,"%12.7f %12.7f %10.3f %2d %2d %s\n",
-			 	   	sitelon[i], sitelat[i], sitetopo[i],
-			    		sitecolor[i], sitesize[i],
-			    		sitename[i]);
-
+				/* loop over the sites */
+				for (i = 0; i < nsite; i++) {
+					fprintf(sfp, "%12.7f %12.7f %10.3f %2d %2d %s\n", sitelon[i], sitelat[i], sitetopo[i], sitecolor[i],
+					        sitesize[i], sitename[i]);
 				}
+
+				/* close the output file */
+				fclose(sfp);
+			}
+
+			/* output error message */
+			else {
+				error = MB_ERROR_OPEN_FAIL;
+				fprintf(stderr, "\nUnable to Open Site File <%s> for writing\n", output_file_ptr);
+				XBell((Display *)XtDisplay(mainWindow), 100);
+				status = MB_FAILURE;
+			}
+		}
+
+		/* deallocate arrays for sites */
+		if (nsite > 0) {
+			status = mbview_freesitearrays(verbose, &sitelon, &sitelat, &sitetopo, &sitecolor, &sitesize, &sitename, &error);
+		}
+	}
+
+	/* all done */
+	return (status);
+}
+/*---------------------------------------------------------------------------------------*/
+
+int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
+	char function_name[] = "do_mbgrdviz_openroute";
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	char buffer[MB_PATH_MAXLINE];
+	int npoint = 0;
+	int npointalloc = 0;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	double lon, lat, topo;
+	int *routewaypoint = NULL;
+	int routecolor;
+	int routesize;
+	int routeeditmode;
+	mb_path routename;
+	int iroute;
+	int waypoint;
+	int rawroutefile = MB_YES;
+	char *result;
+	int nget;
+	int point_ok;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
+	}
+
+	/* read data for valid instance */
+	if (instance != MBV_NO_WINDOW) {
+		/* initialize route values */
+		routecolor = MBV_COLOR_BLUE;
+		routesize = 1;
+		routeeditmode = MB_YES;
+		routename[0] = '\0';
+		rawroutefile = MB_YES;
+		npoint = 0;
+		npointalloc = 0;
+
+		/* open the input file */
+		if ((sfp = fopen(input_file_ptr, "r")) == NULL) {
+			error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", input_file_ptr);
+			XBell((Display *)XtDisplay(mainWindow), 100);
+		}
+
+		/* loop over reading */
+		if (status == MB_SUCCESS) {
+			while ((result = fgets(buffer, MB_PATH_MAXLINE, sfp)) == buffer) {
+				/* deal with comments */
+				if (buffer[0] == '#') {
+					if (rawroutefile == MB_YES && strncmp(buffer, "## Route File Version", 21) == 0) {
+						rawroutefile = MB_NO;
+					}
+					else if (strncmp(buffer, "## ROUTENAME", 12) == 0) {
+						strcpy(routename, &buffer[13]);
+						if (routename[strlen(routename) - 1] == '\n')
+							routename[strlen(routename) - 1] = '\0';
+						if (routename[strlen(routename) - 1] == '\r')
+							routename[strlen(routename) - 1] = '\0';
+					}
+					else if (strncmp(buffer, "## ROUTECOLOR", 13) == 0) {
+						sscanf(buffer, "## ROUTECOLOR %d", &routecolor);
+					}
+					else if (strncmp(buffer, "## ROUTESIZE", 12) == 0) {
+						sscanf(buffer, "## ROUTESIZE %d", &routesize);
+					}
+					else if (strncmp(buffer, "## ROUTEEDITMODE", 16) == 0) {
+						sscanf(buffer, "## ROUTEEDITMODE %d", &routeeditmode);
+					}
+				}
+
+				/* deal with route segment marker */
+				else if (buffer[0] == '>') {
+					/* if data accumulated call mbview_addroute() */
+					if (npoint > 0) {
+						status = mbview_addroute(verbose, instance, npoint, routelon, routelat, routewaypoint, routecolor,
+						                         routesize, routeeditmode, routename, &iroute, &error);
+						npoint = 0;
+					}
+				}
+
+				/* deal with data */
+				else {
+					/* read the data from the buffer */
+					nget = sscanf(buffer, "%lf %lf %lf %d", &lon, &lat, &topo, &waypoint);
+					if ((rawroutefile == MB_YES && nget >= 2) ||
+					    (rawroutefile == MB_NO && nget >= 3 && waypoint > MBV_ROUTE_WAYPOINT_NONE))
+						point_ok = MB_YES;
+					else
+						point_ok = MB_NO;
+
+					/* if good data check for need to allocate more space */
+					if (point_ok == MB_YES && npoint + 1 > npointalloc) {
+						npointalloc += MBV_ALLOC_NUM;
+						status = mbview_allocroutearrays(verbose, npointalloc, &routelon, &routelat, &routewaypoint, NULL, NULL,
+						                                 NULL, NULL, NULL, &error);
+						if (status != MB_SUCCESS) {
+							npointalloc = 0;
+						}
+					}
+
+					/* add good point to route */
+					if (point_ok == MB_YES && npointalloc > npoint) {
+						routelon[npoint] = lon;
+						routelat[npoint] = lat;
+						routewaypoint[npoint] = waypoint;
+						npoint++;
+					}
+				}
+			}
+
+			/* add last route if not already handled */
+			if (npoint > 0) {
+				status = mbview_addroute(verbose, instance, npoint, routelon, routelat, routewaypoint, routecolor, routesize,
+				                         routeeditmode, routename, &iroute, &error);
+				npoint = 0;
+			}
+
+			/* free the memory */
+			if (npointalloc > 0)
+				status =
+				    mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, NULL, NULL, NULL, NULL, NULL, &error);
+
+			/* close the input file */
+			fclose(sfp);
+		}
+
+		/* update widgets */
+		mbview_updateroutelist();
+		status = mbview_update(verbose, instance, &error);
+	}
+
+	/* set sensitivity of widgets that require an mbview instance to be active */
+	do_mbgrdviz_sensitivity();
+
+	/* all done */
+	return (status);
+}
+/*---------------------------------------------------------------------------------------*/
+
+int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
+	char function_name[] = "do_mbgrdviz_saveroute";
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	int nroute = 0;
+	int nroutewrite = 0;
+	int npoint = 0;
+	int nintpoint = 0;
+	int npointtotal = 0;
+	int npointalloc = 0;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	int *routewaypoint = NULL;
+	double *routetopo = NULL;
+	double *routebearing = NULL;
+	double *distlateral = NULL;
+	double *distovertopo = NULL;
+	double *slope = NULL;
+	int routecolor;
+	int routesize;
+	mb_path routename;
+	int selected;
+	int iroute, j;
+
+	/* time, user, host variables */
+	time_t right_now;
+	char date[32], *user_ptr, host[MB_PATH_MAXLINE];
+	char *unknown = "Unknown";
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
+	}
+
+	/* read data for valid instance */
+	if (instance != MBV_NO_WINDOW) {
+
+		/* get the number of routes to be written to the outpuf file */
+		status = mbview_getroutecount(verbose, instance, &nroute, &error);
+		for (iroute = 0; iroute < nroute; iroute++) {
+			mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
+			if (selected == MB_YES)
+				nroutewrite++;
+		}
+		if (nroutewrite == 0)
+			nroutewrite = nroute;
+		if (nroute <= 0) {
+			fprintf(stderr, "Unable to write route file...\nCurrently %d routes defined for instance %zu!\n", nroute, instance);
+			XBell((Display *)XtDisplay(mainWindow), 100);
+			status = MB_FAILURE;
+		}
+
+		/* initialize the output file */
+		if (status == MB_SUCCESS && nroutewrite > 0) {
+			/* open the output file */
+			if ((sfp = fopen(output_file_ptr, "w")) != NULL) {
+				/* write the route file header */
+				fprintf(sfp, "## Route File Version %s\n", MBGRDVIZ_ROUTE_VERSION);
+				fprintf(sfp, "## Output by Program %s\n", program_name);
+				fprintf(sfp, "## Program Version %s\n", rcs_id);
+				fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
+				right_now = time((time_t *)0);
+				strcpy(date, ctime(&right_now));
+				date[strlen(date) - 1] = '\0';
+				if ((user_ptr = getenv("USER")) == NULL)
+					if ((user_ptr = getenv("LOGNAME")) == NULL)
+						user_ptr = unknown;
+				gethostname(host, MB_PATH_MAXLINE);
+				fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+				fprintf(sfp, "## Number of routes: %d\n", nroutewrite);
+				fprintf(sfp, "## Route point format:\n");
+				fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)> <bearing (deg)> "
+				             "<lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n");
+			}
+
+			/* output error message */
+			else {
+				error = MB_ERROR_OPEN_FAIL;
+				status = MB_FAILURE;
+				fprintf(stderr, "\nUnable to Open route file <%s> for writing\n", output_file_ptr);
+				XBell((Display *)XtDisplay(mainWindow), 100);
+			}
+		}
+
+		/* if all ok proceed to extract and output routes */
+		if (status == MB_SUCCESS && nroutewrite > 0) {
+			/* loop over routes */
+			for (iroute = 0; iroute < nroute; iroute++) {
+				/* check if this route is selected for writing */
+				if (nroutewrite == nroute)
+					selected = MB_YES;
+				else
+					mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
+
+				/* output if selected */
+				if (selected == MB_YES) {
+					/* get point count for current route */
+					status = mbview_getroutepointcount(verbose, instance, iroute, &npoint, &nintpoint, &error);
+
+					/* allocate route arrays */
+					npointtotal = npoint + nintpoint;
+					if (status == MB_SUCCESS && npointalloc < npointtotal) {
+						status = mbview_allocroutearrays(verbose, npointtotal, &routelon, &routelat, &routewaypoint, &routetopo,
+						                                 &routebearing, &distlateral, &distovertopo, &slope, &error);
+						if (status == MB_SUCCESS) {
+							npointalloc = npointtotal;
+						}
+
+						/* if error initializing memory then cancel dealing with this route */
+						else {
+							fprintf(stderr, "Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
+							        npointtotal, instance);
+							XBell((Display *)XtDisplay(mainWindow), 100);
+							npoint = 0;
+							nintpoint = 0;
+							npointtotal = 0;
+						}
+					}
+
+					/* extract data for route */
+					status = mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint,
+					                         routetopo, routebearing, distlateral, distovertopo, slope, &routecolor, &routesize,
+					                         routename, &error);
+
+					/* write the route header */
+					fprintf(sfp, "## ROUTENAME %s\n", routename);
+					fprintf(sfp, "## ROUTESIZE %d\n", routesize);
+					fprintf(sfp, "## ROUTECOLOR %d\n", routecolor);
+					fprintf(sfp, "## ROUTEPOINTS %d\n", npointtotal);
+					fprintf(sfp, "> ## STARTROUTE\n");
+
+					/* write the route points */
+					for (j = 0; j < npointtotal; j++) {
+						fprintf(sfp, "%f %f %f %d %f %f %f %f", routelon[j], routelat[j], routetopo[j], routewaypoint[j],
+						        routebearing[j], distlateral[j], distovertopo[j], slope[j]);
+						if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_SIMPLE)
+							fprintf(sfp, " ## WAYPOINT\n");
+						else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_TRANSIT)
+							fprintf(sfp, " ## WAYPOINT TRANSIT\n");
+						else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE)
+							fprintf(sfp, " ## WAYPOINT STARTLINE\n");
+						else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE)
+							fprintf(sfp, " ## WAYPOINT ENDLINE\n");
+						else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE2)
+							fprintf(sfp, " ## WAYPOINT STARTLINE2\n");
+						else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE2)
+							fprintf(sfp, " ## WAYPOINT ENDLINE2\n");
+						else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE3)
+							fprintf(sfp, " ## WAYPOINT STARTLINE3\n");
+						else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE3)
+							fprintf(sfp, " ## WAYPOINT ENDLINE3\n");
+						else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE4)
+							fprintf(sfp, " ## WAYPOINT STARTLINE4\n");
+						else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE4)
+							fprintf(sfp, " ## WAYPOINT ENDLINE4\n");
+						else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE5)
+							fprintf(sfp, " ## WAYPOINT STARTLINE5\n");
+						else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE5)
+							fprintf(sfp, " ## WAYPOINT ENDLINE5\n");
+						else
+							fprintf(sfp, "\n");
+					}
+
+					/* write the route end */
+					fprintf(sfp, "> ## ENDROUTE\n");
+				}
+
+				/* deallocate arrays */
+				if (npointalloc > 0) {
+					status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
+					                                &distlateral, &distovertopo, &slope, &error);
+				}
+			}
 
 			/* close the output file */
 			fclose(sfp);
-			}
-
-		/* output error message */
-		else
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr,"\nUnable to Open Site File <%s> for writing\n",output_file_ptr);
-			XBell((Display *) XtDisplay(mainWindow),100);
-			status = MB_FAILURE;
-			}
 		}
-
-	    /* deallocate arrays for sites */
-	    if (nsite > 0)
-	    	{
-		status = mbview_freesitearrays(verbose,
-			&sitelon, &sitelat, &sitetopo,
-			&sitecolor, &sitesize, &sitename, &error);
-		}
-
-	    }
+	}
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
-{
-	char function_name[] = "do_mbgrdviz_openroute";
-	int	status = MB_SUCCESS;
-	FILE	*sfp;
-	char	buffer[MB_PATH_MAXLINE];
-	int	npoint = 0;
-	int	npointalloc = 0;
-	double	*routelon = NULL;
-	double	*routelat = NULL;
-	double	lon, lat, topo;
-	int	*routewaypoint = NULL;
-	int	routecolor;
-	int	routesize;
-	int	routeeditmode;
-	mb_path	routename;
-	int	iroute;
-	int	waypoint;
-	int	rawroutefile = MB_YES;
-	char	*result;
-	int	nget;
-	int	point_ok;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
-		}
-
-	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
-	    /* initialize route values */
-	    routecolor = MBV_COLOR_BLUE;
-	    routesize = 1;
-            routeeditmode = MB_YES;
-	    routename[0] = '\0';
-	    rawroutefile = MB_YES;
-	    npoint = 0;
-	    npointalloc = 0;
-
-	    /* open the input file */
-	    if ((sfp = fopen(input_file_ptr, "r")) == NULL)
-		    {
-		    error = MB_ERROR_OPEN_FAIL;
-		    status = MB_FAILURE;
-		    fprintf(stderr,"\nUnable to open route file <%s> for reading\n",input_file_ptr);
-		    XBell((Display *) XtDisplay(mainWindow),100);
-		    }
-
-	    /* loop over reading */
-	    if (status == MB_SUCCESS)
-	    	{
-            while ((result = fgets(buffer,MB_PATH_MAXLINE,sfp)) == buffer)
-                {
-                /* deal with comments */
-                if (buffer[0] == '#')
-                    {
-                    if (rawroutefile == MB_YES
-                        && strncmp(buffer,"## Route File Version", 21) == 0)
-                        {
-                        rawroutefile = MB_NO;
-                        }
-                    else if (strncmp(buffer,"## ROUTENAME", 12) == 0)
-                        {
-                                        strcpy(routename, &buffer[13]);
-                                        if (routename[strlen(routename)-1] == '\n')
-                                            routename[strlen(routename)-1] = '\0';
-                                        if (routename[strlen(routename)-1] == '\r')
-                                            routename[strlen(routename)-1] = '\0';
-                        }
-                    else if (strncmp(buffer,"## ROUTECOLOR", 13) == 0)
-                        {
-                        sscanf(buffer,"## ROUTECOLOR %d", &routecolor);
-                        }
-                    else if (strncmp(buffer,"## ROUTESIZE", 12) == 0)
-                        {
-                        sscanf(buffer,"## ROUTESIZE %d", &routesize);
-                        }
-                    else if (strncmp(buffer,"## ROUTEEDITMODE", 16) == 0)
-                        {
-                        sscanf(buffer,"## ROUTEEDITMODE %d", &routeeditmode);
-                        }
-                    }
-
-                /* deal with route segment marker */
-                else if (buffer[0] == '>')
-                    {
-                    /* if data accumulated call mbview_addroute() */
-                    if (npoint > 0)
-                        {
-                        status = mbview_addroute(verbose, instance,
-                                        npoint, routelon, routelat, routewaypoint,
-                                    routecolor, routesize, routeeditmode, routename,
-                                    &iroute, &error);
-                        npoint = 0;
-                        }
-                    }
-
-                /* deal with data */
-                else
-                    {
-                    /* read the data from the buffer */
-                    nget = sscanf(buffer,"%lf %lf %lf %d",
-                        &lon, &lat, &topo, &waypoint);
-                        if ((rawroutefile == MB_YES && nget >= 2)
-                        || (rawroutefile == MB_NO && nget >= 3 && waypoint > MBV_ROUTE_WAYPOINT_NONE))
-                        point_ok = MB_YES;
-                    else
-                        point_ok = MB_NO;
-        
-                    /* if good data check for need to allocate more space */
-                    if (point_ok == MB_YES
-                        && npoint + 1 > npointalloc)
-                        {
-                        npointalloc += MBV_ALLOC_NUM;
-                        status = mbview_allocroutearrays(verbose,
-                                    npointalloc,
-                                    &routelon,
-                                    &routelat,
-                                    &routewaypoint,
-                                    NULL,
-                                    NULL,
-                                    NULL,
-                                    NULL,
-                                    NULL,
-                                    &error);
-                        if (status != MB_SUCCESS)
-                            {
-                            npointalloc = 0;
-                            }
-                        }
-        
-                    /* add good point to route */
-                    if (point_ok == MB_YES && npointalloc > npoint)
-                        {
-                        routelon[npoint] = lon;
-                        routelat[npoint] = lat;
-                        routewaypoint[npoint] = waypoint;
-                        npoint++;
-                        }
-                    }
-                }
-
-            /* add last route if not already handled */
-            if (npoint > 0)
-                {
-                status = mbview_addroute(verbose, instance,
-                                npoint, routelon, routelat, routewaypoint,
-                            routecolor, routesize, routeeditmode, routename,
-                            &iroute, &error);
-                npoint = 0;
-                }
-    
-            /* free the memory */
-            if (npointalloc > 0)
-                status = mbview_freeroutearrays(verbose,
-                                &routelon,
-                                &routelat,
-                                &routewaypoint,
-                                NULL,
-                                NULL,
-                                NULL,
-                                NULL,
-                                NULL,
-                                &error);
-
-            /* close the input file */
-            fclose(sfp);
-            }
-
-        /* update widgets */
-        mbview_updateroutelist();
-        status = mbview_update(verbose, instance, &error);
-	    }
-
-	/* set sensitivity of widgets that require an mbview instance to be active */
-	do_mbgrdviz_sensitivity( );
-
-	/* all done */
-	return(status);
-}
-/*---------------------------------------------------------------------------------------*/
-
-int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
-{
-	char function_name[] = "do_mbgrdviz_saveroute";
-	int	status = MB_SUCCESS;
-	FILE	*sfp;
-	int	nroute = 0;
-	int	nroutewrite = 0;
-	int	npoint = 0;
-	int	nintpoint = 0;
-	int	npointtotal = 0;
-	int	npointalloc = 0;
-	double	*routelon = NULL;
-	double	*routelat = NULL;
-	int	*routewaypoint = NULL;
-	double	*routetopo = NULL;
-	double	*routebearing = NULL;
-	double	*distlateral = NULL;
-	double	*distovertopo = NULL;
-	double	*slope = NULL;
-	int	routecolor;
-	int	routesize;
-	mb_path	routename;
-	int	selected;
-	int	iroute, j;
-
-	/* time, user, host variables */
-	time_t	right_now;
-	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
-	char	*unknown = "Unknown";
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
-		}
-
-	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
-
-	    /* get the number of routes to be written to the outpuf file */
-	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
-	    for (iroute=0;iroute<nroute;iroute++)
-	    	{
-		mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
-		if (selected == MB_YES)
-			nroutewrite++;
-		}
-	    if (nroutewrite == 0)
-	    	nroutewrite = nroute;
-	    if (nroute <= 0)
-	    	{
-		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
-			nroute, instance);
-		XBell((Display *) XtDisplay(mainWindow),100);
-		status = MB_FAILURE;
-		}
-
-	    /* initialize the output file */
-	    if (status == MB_SUCCESS && nroutewrite > 0)
-	    	{
-		/* open the output file */
-		if ((sfp = fopen(output_file_ptr, "w")) != NULL)
-			{
-			/* write the route file header */
-			fprintf(sfp, "## Route File Version %s\n", MBGRDVIZ_ROUTE_VERSION);
-			fprintf(sfp, "## Output by Program %s\n",program_name);
-			fprintf(sfp, "## Program Version %s\n",rcs_id);
-			fprintf(sfp, "## MB-System Version %s\n",MB_VERSION);
-			right_now = time((time_t *)0);
-			strcpy(date,ctime(&right_now));
-                        date[strlen(date)-1] = '\0';
-			if ((user_ptr = getenv("USER")) == NULL)
-				if ((user_ptr = getenv("LOGNAME")) == NULL)
-					user_ptr = unknown;
-			gethostname(host,MB_PATH_MAXLINE);
-			fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n",
-				user_ptr,host,date);
-			fprintf(sfp, "## Number of routes: %d\n",nroutewrite);
-			fprintf(sfp, "## Route point format:\n");
-			fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <topography (m)> <waypoint (boolean)> <bearing (deg)> <lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n");
-			}
-
-		/* output error message */
-		else
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
-			fprintf(stderr,"\nUnable to Open route file <%s> for writing\n",output_file_ptr);
-			XBell((Display *) XtDisplay(mainWindow),100);
-			}
-		}
-
-	    /* if all ok proceed to extract and output routes */
-	    if (status == MB_SUCCESS && nroutewrite > 0)
-	    	{
-	        /* loop over routes */
-		for (iroute=0;iroute<nroute;iroute++)
-	    	    {
-		    /* check if this route is selected for writing */
-		    if (nroutewrite == nroute)
-		    	selected = MB_YES;
-		    else
-			mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
-
-		    /* output if selected */
-		    if (selected == MB_YES)
-		    	{
-			/* get point count for current route */
-			status = mbview_getroutepointcount(verbose, instance,
-				iroute, &npoint, &nintpoint, &error);
-
-			/* allocate route arrays */
-			npointtotal = npoint + nintpoint;
-			if (status == MB_SUCCESS
-				&& npointalloc < npointtotal)
-				{
-				status = mbview_allocroutearrays(verbose,
-							npointtotal,
-							&routelon,
-							&routelat,
-							&routewaypoint,
-							&routetopo,
-							&routebearing,
-							&distlateral,
-							&distovertopo,
-							&slope,
-							&error);
-				if (status == MB_SUCCESS)
-					{
-					npointalloc = npointtotal;
-					}
-
-				/* if error initializing memory then cancel dealing with this route */
-				else
-	    				{
-					fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
-						npointtotal, instance);
-					XBell((Display *) XtDisplay(mainWindow),100);
-					npoint = 0;
-					nintpoint = 0;
-					npointtotal = 0;
-					}
-				}
-
-			/* extract data for route */
-			status = mbview_getroute(verbose, instance,
-						iroute,
-						&npointtotal,
-						routelon,
-						routelat,
-						routewaypoint,
-						routetopo,
-						routebearing,
-						distlateral,
-						distovertopo,
-						slope,
-						&routecolor,
-						&routesize,
-						routename,
-						&error);
-
-			/* write the route header */
-			fprintf(sfp,"## ROUTENAME %s\n", routename);
-			fprintf(sfp,"## ROUTESIZE %d\n", routesize);
-			fprintf(sfp,"## ROUTECOLOR %d\n", routecolor);
-			fprintf(sfp,"## ROUTEPOINTS %d\n", npointtotal);
-			fprintf(sfp,"> ## STARTROUTE\n");
-
-			/* write the route points */
-			for (j=0;j<npointtotal;j++)
-				{
-				fprintf(sfp,"%f %f %f %d %f %f %f %f",
-					routelon[j], routelat[j],
-					routetopo[j],
-					routewaypoint[j], routebearing[j],
-					distlateral[j], distovertopo[j], slope[j]);
-				if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_SIMPLE)
-			    	    fprintf(sfp," ## WAYPOINT\n");
-				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_TRANSIT)
-			    	    fprintf(sfp," ## WAYPOINT TRANSIT\n");
-				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE)
-			    	    fprintf(sfp," ## WAYPOINT STARTLINE\n");
-				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE)
-			    	    fprintf(sfp," ## WAYPOINT ENDLINE\n");
-				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE2)
-			    	    fprintf(sfp," ## WAYPOINT STARTLINE2\n");
-				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE2)
-			    	    fprintf(sfp," ## WAYPOINT ENDLINE2\n");
-				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE3)
-			    	    fprintf(sfp," ## WAYPOINT STARTLINE3\n");
-				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE3)
-			    	    fprintf(sfp," ## WAYPOINT ENDLINE3\n");
-				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE4)
-			    	    fprintf(sfp," ## WAYPOINT STARTLINE4\n");
-				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE4)
-			    	    fprintf(sfp," ## WAYPOINT ENDLINE4\n");
-				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE5)
-			    	    fprintf(sfp," ## WAYPOINT STARTLINE5\n");
-				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE5)
-			    	    fprintf(sfp," ## WAYPOINT ENDLINE5\n");
-				else
-			    	    fprintf(sfp,"\n");
-				}
-
-			/* write the route end */
-			fprintf(sfp,"> ## ENDROUTE\n");
-			}
-
-		    /* deallocate arrays */
-		    if (npointalloc > 0)
-	    		{
-			status = mbview_freeroutearrays(verbose,
-						&routelon,
-						&routelat,
-						&routewaypoint,
-						&routetopo,
-						&routebearing,
-						&distlateral,
-						&distovertopo,
-						&slope,
-						&error);
-			}
-		    }
-
-		/* close the output file */
-		fclose(sfp);
-
-		}
-	    }
-
-	/* all done */
-	return(status);
-}
-/*---------------------------------------------------------------------------------------*/
-
-int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr)
-{
+int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 	char function_name[] = "do_mbgrdviz_saverisiscript";
-	int	status = MB_SUCCESS;
-	FILE	*sfp;
-	int	nroute = 0;
-	int	nroutewrite = 0;
-	int	npoint = 0;
-	int	nintpoint = 0;
-	int	npointtotal = 0;
-	int	npointalloc = 0;
-	double	*routelon = NULL;
-	double	*routelat = NULL;
-	int	*routewaypoint = NULL;
-	double	*routetopo = NULL;
-	double	*routebearing = NULL;
-	double	*distlateral = NULL;
-	double	*distovertopo = NULL;
-	double	*slope = NULL;
-	int	routecolor;
-	int	routesize;
-	mb_path	routename;
-	int	selected;
-	int	iroute, j;
-        int     projection_initialized = MB_NO;
-        double  lon_origin, lat_origin;
-        double  mtodeglon, mtodeglat;
-        int     iscript;
-        double  xx, yy, zz;
-        double  vvspeed = 0.2;
-        double  settlingtime = 3.0;
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	int nroute = 0;
+	int nroutewrite = 0;
+	int npoint = 0;
+	int nintpoint = 0;
+	int npointtotal = 0;
+	int npointalloc = 0;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	int *routewaypoint = NULL;
+	double *routetopo = NULL;
+	double *routebearing = NULL;
+	double *distlateral = NULL;
+	double *distovertopo = NULL;
+	double *slope = NULL;
+	int routecolor;
+	int routesize;
+	mb_path routename;
+	int selected;
+	int iroute, j;
+	int projection_initialized = MB_NO;
+	double lon_origin, lat_origin;
+	double mtodeglon, mtodeglat;
+	int iscript;
+	double xx, yy, zz;
+	double vvspeed = 0.2;
+	double settlingtime = 3.0;
 
 	/* time, user, host variables */
-	time_t	right_now;
-	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
-	char	*unknown = "Unknown";
+	time_t right_now;
+	char date[32], *user_ptr, host[MB_PATH_MAXLINE];
+	char *unknown = "Unknown";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
+	}
 
 	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
+	if (instance != MBV_NO_WINDOW) {
 
-	    /* get the number of routes to be written to the outpuf file */
-	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
-	    for (iroute=0;iroute<nroute;iroute++)
-	    	{
-		mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
-		if (selected == MB_YES)
-			nroutewrite++;
-		}
-	    if (nroutewrite == 0)
-	    	nroutewrite = nroute;
-	    if (nroute <= 0)
-	    	{
-		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
-			nroute, instance);
-		XBell((Display *) XtDisplay(mainWindow),100);
-		status = MB_FAILURE;
-		}
-
-	    /* initialize the output file */
-	    if (status == MB_SUCCESS && nroutewrite > 0)
-	    	{
-		/* open the output file */
-		if ((sfp = fopen(output_file_ptr, "w")) != NULL)
-			{
-			/* write the route file header */
-			fprintf(sfp, "## Risi Script Version %s\r\n", MBGRDVIZ_RISISCRIPT_VERSION);
-			fprintf(sfp, "## Output by Program %s\r\n",program_name);
-			fprintf(sfp, "## Program Version %s\r\n",rcs_id);
-			fprintf(sfp, "## MB-System Version %s\r\n",MB_VERSION);
-			right_now = time((time_t *)0);
-			strcpy(date,ctime(&right_now));
-                        date[strlen(date)-1] = '\0';
-			if ((user_ptr = getenv("USER")) == NULL)
-				if ((user_ptr = getenv("LOGNAME")) == NULL)
-					user_ptr = unknown;
-			gethostname(host,MB_PATH_MAXLINE);
-			fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\r\n",
-				user_ptr,host,date);
-			fprintf(sfp, "## Number of routes: %d\r\n",nroutewrite);
-			fprintf(sfp, "## Risi script format:\r\n");
-			fprintf(sfp, "##   <id (starting at 1)> <x (m)> <y (m)> <z (m but ignored)> <speed (m/s)> <settling time (sec)>\r\n");
-			}
-
-		/* output error message */
-		else
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
-			fprintf(stderr,"\nUnable to Open route file <%s> for writing\r\n",output_file_ptr);
-			XBell((Display *) XtDisplay(mainWindow),100);
-			}
-		}
-
-	    /* if all ok proceed to extract and output routes */
-	    if (status == MB_SUCCESS && nroutewrite > 0)
-	    	{
-	        /* loop over routes */
-		for (iroute=0;iroute<nroute;iroute++)
-	    	    {
-		    /* check if this route is selected for writing */
-		    if (nroutewrite == nroute)
-		    	selected = MB_YES;
-		    else
+		/* get the number of routes to be written to the outpuf file */
+		status = mbview_getroutecount(verbose, instance, &nroute, &error);
+		for (iroute = 0; iroute < nroute; iroute++) {
 			mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
-
-		    /* output if selected */
-		    if (selected == MB_YES)
-		    	{
-			/* get point count for current route */
-			status = mbview_getroutepointcount(verbose, instance,
-				iroute, &npoint, &nintpoint, &error);
-
-			/* allocate route arrays */
-			npointtotal = npoint + nintpoint;
-			if (status == MB_SUCCESS
-				&& npointalloc < npointtotal)
-				{
-				status = mbview_allocroutearrays(verbose,
-							npointtotal,
-							&routelon,
-							&routelat,
-							&routewaypoint,
-							&routetopo,
-							&routebearing,
-							&distlateral,
-							&distovertopo,
-							&slope,
-							&error);
-				if (status == MB_SUCCESS)
-					{
-					npointalloc = npointtotal;
-					}
-
-				/* if error initializing memory then cancel dealing with this route */
-				else
-	    				{
-					fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
-						npointtotal, instance);
-					XBell((Display *) XtDisplay(mainWindow),100);
-					npoint = 0;
-					nintpoint = 0;
-					npointtotal = 0;
-					}
-				}
-
-			/* extract data for route */
-			status = mbview_getroute(verbose, instance,
-						iroute,
-						&npointtotal,
-						routelon,
-						routelat,
-						routewaypoint,
-						routetopo,
-						routebearing,
-						distlateral,
-						distovertopo,
-						slope,
-						&routecolor,
-						&routesize,
-						routename,
-						&error);
-
-			/* write the route header */
-			fprintf(sfp,"## ROUTENAME %s\r\n", routename);
-			fprintf(sfp,"## ROUTEPOINTS %d\r\n", npointtotal);
-			fprintf(sfp,"## STARTROUTE\r\n");
-
-			/* write the route points */
-                        iscript = 0;
-                        vvspeed = 0.2;
-                        settlingtime = 3.0;
-			for (j=0;j<npointtotal;j++)
-				{
-                if (projection_initialized == MB_NO)
-                    {
-                    mb_coor_scale(verbose, routelat[j], &mtodeglon, &mtodeglat);
-                    lon_origin = routelon[j];
-                    lat_origin = routelat[j];
-                    projection_initialized = MB_YES;
-                    }
-				if (routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE)
-                    {
-                    iscript++;
-                    xx = (routelon[j] - lon_origin) / mtodeglon;
-                    yy = (routelat[j] - lat_origin) / mtodeglat;
-                    zz = 0.0;
-			    	fprintf(sfp,"%d, %.3f, %.3f, %.3f, %.3f, %.3f\r\n",
-                                            iscript, xx, yy, zz, vvspeed, settlingtime);
-                    }
-				}
-
-			/* write the route end */
-			fprintf(sfp,"## ENDROUTE\r\n");
-			}
-
-		    /* deallocate arrays */
-		    if (npointalloc > 0)
-	    		{
-			status = mbview_freeroutearrays(verbose,
-						&routelon,
-						&routelat,
-						&routewaypoint,
-						&routetopo,
-						&routebearing,
-						&distlateral,
-						&distovertopo,
-						&slope,
-						&error);
-			}
-		    }
-
-		/* close the output file */
-		fclose(sfp);
-
+			if (selected == MB_YES)
+				nroutewrite++;
 		}
-	    }
+		if (nroutewrite == 0)
+			nroutewrite = nroute;
+		if (nroute <= 0) {
+			fprintf(stderr, "Unable to write route file...\nCurrently %d routes defined for instance %zu!\n", nroute, instance);
+			XBell((Display *)XtDisplay(mainWindow), 100);
+			status = MB_FAILURE;
+		}
+
+		/* initialize the output file */
+		if (status == MB_SUCCESS && nroutewrite > 0) {
+			/* open the output file */
+			if ((sfp = fopen(output_file_ptr, "w")) != NULL) {
+				/* write the route file header */
+				fprintf(sfp, "## Risi Script Version %s\r\n", MBGRDVIZ_RISISCRIPT_VERSION);
+				fprintf(sfp, "## Output by Program %s\r\n", program_name);
+				fprintf(sfp, "## Program Version %s\r\n", rcs_id);
+				fprintf(sfp, "## MB-System Version %s\r\n", MB_VERSION);
+				right_now = time((time_t *)0);
+				strcpy(date, ctime(&right_now));
+				date[strlen(date) - 1] = '\0';
+				if ((user_ptr = getenv("USER")) == NULL)
+					if ((user_ptr = getenv("LOGNAME")) == NULL)
+						user_ptr = unknown;
+				gethostname(host, MB_PATH_MAXLINE);
+				fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\r\n", user_ptr, host, date);
+				fprintf(sfp, "## Number of routes: %d\r\n", nroutewrite);
+				fprintf(sfp, "## Risi script format:\r\n");
+				fprintf(sfp,
+				        "##   <id (starting at 1)> <x (m)> <y (m)> <z (m but ignored)> <speed (m/s)> <settling time (sec)>\r\n");
+			}
+
+			/* output error message */
+			else {
+				error = MB_ERROR_OPEN_FAIL;
+				status = MB_FAILURE;
+				fprintf(stderr, "\nUnable to Open route file <%s> for writing\r\n", output_file_ptr);
+				XBell((Display *)XtDisplay(mainWindow), 100);
+			}
+		}
+
+		/* if all ok proceed to extract and output routes */
+		if (status == MB_SUCCESS && nroutewrite > 0) {
+			/* loop over routes */
+			for (iroute = 0; iroute < nroute; iroute++) {
+				/* check if this route is selected for writing */
+				if (nroutewrite == nroute)
+					selected = MB_YES;
+				else
+					mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
+
+				/* output if selected */
+				if (selected == MB_YES) {
+					/* get point count for current route */
+					status = mbview_getroutepointcount(verbose, instance, iroute, &npoint, &nintpoint, &error);
+
+					/* allocate route arrays */
+					npointtotal = npoint + nintpoint;
+					if (status == MB_SUCCESS && npointalloc < npointtotal) {
+						status = mbview_allocroutearrays(verbose, npointtotal, &routelon, &routelat, &routewaypoint, &routetopo,
+						                                 &routebearing, &distlateral, &distovertopo, &slope, &error);
+						if (status == MB_SUCCESS) {
+							npointalloc = npointtotal;
+						}
+
+						/* if error initializing memory then cancel dealing with this route */
+						else {
+							fprintf(stderr, "Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
+							        npointtotal, instance);
+							XBell((Display *)XtDisplay(mainWindow), 100);
+							npoint = 0;
+							nintpoint = 0;
+							npointtotal = 0;
+						}
+					}
+
+					/* extract data for route */
+					status = mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint,
+					                         routetopo, routebearing, distlateral, distovertopo, slope, &routecolor, &routesize,
+					                         routename, &error);
+
+					/* write the route header */
+					fprintf(sfp, "## ROUTENAME %s\r\n", routename);
+					fprintf(sfp, "## ROUTEPOINTS %d\r\n", npointtotal);
+					fprintf(sfp, "## STARTROUTE\r\n");
+
+					/* write the route points */
+					iscript = 0;
+					vvspeed = 0.2;
+					settlingtime = 3.0;
+					for (j = 0; j < npointtotal; j++) {
+						if (projection_initialized == MB_NO) {
+							mb_coor_scale(verbose, routelat[j], &mtodeglon, &mtodeglat);
+							lon_origin = routelon[j];
+							lat_origin = routelat[j];
+							projection_initialized = MB_YES;
+						}
+						if (routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE) {
+							iscript++;
+							xx = (routelon[j] - lon_origin) / mtodeglon;
+							yy = (routelat[j] - lat_origin) / mtodeglat;
+							zz = 0.0;
+							fprintf(sfp, "%d, %.3f, %.3f, %.3f, %.3f, %.3f\r\n", iscript, xx, yy, zz, vvspeed, settlingtime);
+						}
+					}
+
+					/* write the route end */
+					fprintf(sfp, "## ENDROUTE\r\n");
+				}
+
+				/* deallocate arrays */
+				if (npointalloc > 0) {
+					status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
+					                                &distlateral, &distovertopo, &slope, &error);
+				}
+			}
+
+			/* close the output file */
+			fclose(sfp);
+		}
+	}
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr)
-{
+int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr) {
 	char function_name[] = "do_mbgrdviz_savewinfrogpts";
-	int	status = MB_SUCCESS;
-	FILE	*sfp;
-	int	nroute = 0;
-	int	npoint = 0;
-	int	nintpoint = 0;
-	int	npointtotal = 0;
-	int	npointalloc = 0;
-	double	*routelon = NULL;
-	double	*routelat = NULL;
-	int	*routewaypoint = NULL;
-	double	*routetopo = NULL;
-	double	*routebearing = NULL;
-	double	*distlateral = NULL;
-	double	*distovertopo = NULL;
-	double	*slope = NULL;
-	int	routecolor;
-	int	routesize;
-	mb_path	routename;
-	int	iroute, j;
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	int nroute = 0;
+	int npoint = 0;
+	int nintpoint = 0;
+	int npointtotal = 0;
+	int npointalloc = 0;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	int *routewaypoint = NULL;
+	double *routetopo = NULL;
+	double *routebearing = NULL;
+	double *distlateral = NULL;
+	double *distovertopo = NULL;
+	double *slope = NULL;
+	int routecolor;
+	int routesize;
+	mb_path routename;
+	int iroute, j;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
+	}
 
 	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
+	if (instance != MBV_NO_WINDOW) {
 
-	    /* get the number of routes to be written to the outpuf file */
-	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
-	    if (nroute <= 0)
-	    	{
-		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
-			nroute, instance);
-		XBell((Display *) XtDisplay(mainWindow),100);
-		status = MB_FAILURE;
+		/* get the number of routes to be written to the outpuf file */
+		status = mbview_getroutecount(verbose, instance, &nroute, &error);
+		if (nroute <= 0) {
+			fprintf(stderr, "Unable to write route file...\nCurrently %d routes defined for instance %zu!\n", nroute, instance);
+			XBell((Display *)XtDisplay(mainWindow), 100);
+			status = MB_FAILURE;
 		}
 
-	    /* initialize the output file */
-	    if (status == MB_SUCCESS && nroute > 0)
-	    	{
-		/* open the output file */
-		if ((sfp = fopen(output_file_ptr, "w")) == NULL)
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
-			fprintf(stderr,"\nUnable to Open route file <%s> for writing\n",output_file_ptr);
-			XBell((Display *) XtDisplay(mainWindow),100);
+		/* initialize the output file */
+		if (status == MB_SUCCESS && nroute > 0) {
+			/* open the output file */
+			if ((sfp = fopen(output_file_ptr, "w")) == NULL) {
+				error = MB_ERROR_OPEN_FAIL;
+				status = MB_FAILURE;
+				fprintf(stderr, "\nUnable to Open route file <%s> for writing\n", output_file_ptr);
+				XBell((Display *)XtDisplay(mainWindow), 100);
 			}
 		}
 
-	    /* if all ok proceed to extract and output routes */
-	    if (status == MB_SUCCESS)
-	    	{
-	        /* loop over routes */
-		for (iroute=0;iroute<nroute;iroute++)
-	    	    {
-		    /* get point count for current route */
-		    status = mbview_getroutepointcount(verbose, instance,
-			    iroute, &npoint, &nintpoint, &error);
+		/* if all ok proceed to extract and output routes */
+		if (status == MB_SUCCESS) {
+			/* loop over routes */
+			for (iroute = 0; iroute < nroute; iroute++) {
+				/* get point count for current route */
+				status = mbview_getroutepointcount(verbose, instance, iroute, &npoint, &nintpoint, &error);
 
-		    /* allocate route arrays */
-		    npointtotal = npoint + nintpoint;
-		    if (status == MB_SUCCESS
-			    && npointalloc < npointtotal)
-			    {
-			    status = mbview_allocroutearrays(verbose,
-						    npointtotal,
-						    &routelon,
-						    &routelat,
-						    &routewaypoint,
-						    &routetopo,
-						    &routebearing,
-						    &distlateral,
-						    &distovertopo,
-						    &slope,
-						    &error);
-			    if (status == MB_SUCCESS)
-				    {
-				    npointalloc = npointtotal;
-				    }
+				/* allocate route arrays */
+				npointtotal = npoint + nintpoint;
+				if (status == MB_SUCCESS && npointalloc < npointtotal) {
+					status = mbview_allocroutearrays(verbose, npointtotal, &routelon, &routelat, &routewaypoint, &routetopo,
+					                                 &routebearing, &distlateral, &distovertopo, &slope, &error);
+					if (status == MB_SUCCESS) {
+						npointalloc = npointtotal;
+					}
 
-			    /* if error initializing memory then cancel dealing with this route */
-			    else
-	    			    {
-				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
-					    npointtotal, instance);
-				    XBell((Display *) XtDisplay(mainWindow),100);
-				    npoint = 0;
-				    nintpoint = 0;
-				    npointtotal = 0;
-				    }
-			    }
+					/* if error initializing memory then cancel dealing with this route */
+					else {
+						fprintf(stderr, "Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
+						        npointtotal, instance);
+						XBell((Display *)XtDisplay(mainWindow), 100);
+						npoint = 0;
+						nintpoint = 0;
+						npointtotal = 0;
+					}
+				}
 
-		    /* extract data for route */
-		    status = mbview_getroute(verbose, instance,
-					    iroute,
-					    &npointtotal,
-					    routelon,
-					    routelat,
-					    routewaypoint,
-					    routetopo,
-					    routebearing,
-					    distlateral,
-					    distovertopo,
-					    slope,
-					    &routecolor,
-					    &routesize,
-					    routename,
-					    &error);
+				/* extract data for route */
+				status =
+				    mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint, routetopo,
+				                    routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, routename, &error);
 
-		    /* write the route header */
-		    fprintf(sfp, "0,%s,0,0.000,0.000,1,2,65280,0,0.200,0,0,1.000\r\n", routename);
+				/* write the route header */
+				fprintf(sfp, "0,%s,0,0.000,0.000,1,2,65280,0,0.200,0,0,1.000\r\n", routename);
 
-		    /* write the route points */
-		    for (j=0;j<npointtotal;j++)
-			    {
-			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
- 			        fprintf(sfp,"1,%.10f,%.10f,0.00m,0.00m,0.00,0.00,%.3f\r\n", routelat[j], routelon[j], distlateral[j]);
-			    }
-		    }
+				/* write the route points */
+				for (j = 0; j < npointtotal; j++) {
+					if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
+						fprintf(sfp, "1,%.10f,%.10f,0.00m,0.00m,0.00,0.00,%.3f\r\n", routelat[j], routelon[j], distlateral[j]);
+				}
+			}
 
-		/* close the output file */
-		fclose(sfp);
+			/* close the output file */
+			fclose(sfp);
 
-		/* deallocate arrays */
-		if (npointalloc > 0)
-	    	    {
-		    status = mbview_freeroutearrays(verbose,
-					    &routelon,
-					    &routelat,
-					    &routewaypoint,
-					    &routetopo,
-					    &routebearing,
-					    &distlateral,
-					    &distovertopo,
-					    &slope,
-					    &error);
-		    }
+			/* deallocate arrays */
+			if (npointalloc > 0) {
+				status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
+				                                &distlateral, &distovertopo, &slope, &error);
+			}
 		}
-	    }
+	}
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr)
-{
+int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr) {
 	char function_name[] = "do_mbgrdviz_savewinfrogwpt";
-	int	status = MB_SUCCESS;
-	FILE	*sfp;
-	int	nroute = 0;
-	int	npoint = 0;
-	int	nintpoint = 0;
-	int	npointtotal = 0;
-	int	npointalloc = 0;
-	double	*routelon = NULL;
-	double	*routelat = NULL;
-	int	*routewaypoint = NULL;
-	double	*routetopo = NULL;
-	double	*routebearing = NULL;
-	double	*distlateral = NULL;
-	double	*distovertopo = NULL;
-	double	*slope = NULL;
-	int	routecolor;
-	int	routesize;
-	mb_path	routename;
-	int	iroute, j, n;
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	int nroute = 0;
+	int npoint = 0;
+	int nintpoint = 0;
+	int npointtotal = 0;
+	int npointalloc = 0;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	int *routewaypoint = NULL;
+	double *routetopo = NULL;
+	double *routebearing = NULL;
+	double *distlateral = NULL;
+	double *distovertopo = NULL;
+	double *slope = NULL;
+	int routecolor;
+	int routesize;
+	mb_path routename;
+	int iroute, j, n;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
+	}
 
 	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
+	if (instance != MBV_NO_WINDOW) {
 
-	    /* get the number of routes to be written to the outpuf file */
-	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
-	    if (nroute <= 0)
-	    	{
-		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
-			nroute, instance);
-		XBell((Display *) XtDisplay(mainWindow),100);
-		status = MB_FAILURE;
+		/* get the number of routes to be written to the outpuf file */
+		status = mbview_getroutecount(verbose, instance, &nroute, &error);
+		if (nroute <= 0) {
+			fprintf(stderr, "Unable to write route file...\nCurrently %d routes defined for instance %zu!\n", nroute, instance);
+			XBell((Display *)XtDisplay(mainWindow), 100);
+			status = MB_FAILURE;
 		}
 
-	    /* initialize the output file */
-	    if (status == MB_SUCCESS && nroute > 0)
-	    	{
-		/* open the output file */
-		if ((sfp = fopen(output_file_ptr, "w")) == NULL)
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
-			fprintf(stderr,"\nUnable to Open route file <%s> for writing\n",output_file_ptr);
-			XBell((Display *) XtDisplay(mainWindow),100);
+		/* initialize the output file */
+		if (status == MB_SUCCESS && nroute > 0) {
+			/* open the output file */
+			if ((sfp = fopen(output_file_ptr, "w")) == NULL) {
+				error = MB_ERROR_OPEN_FAIL;
+				status = MB_FAILURE;
+				fprintf(stderr, "\nUnable to Open route file <%s> for writing\n", output_file_ptr);
+				XBell((Display *)XtDisplay(mainWindow), 100);
 			}
 		}
 
-	    /* if all ok proceed to extract and output routes */
-	    if (status == MB_SUCCESS)
-	    	{
-	        /* loop over routes */
-		for (iroute=0;iroute<nroute;iroute++)
-	    	    {
-		    /* get point count for current route */
-		    status = mbview_getroutepointcount(verbose, instance,
-			    iroute, &npoint, &nintpoint, &error);
+		/* if all ok proceed to extract and output routes */
+		if (status == MB_SUCCESS) {
+			/* loop over routes */
+			for (iroute = 0; iroute < nroute; iroute++) {
+				/* get point count for current route */
+				status = mbview_getroutepointcount(verbose, instance, iroute, &npoint, &nintpoint, &error);
 
-		    /* allocate route arrays */
-		    npointtotal = npoint + nintpoint;
-		    if (status == MB_SUCCESS
-			    && npointalloc < npointtotal)
-			    {
-			    status = mbview_allocroutearrays(verbose,
-						    npointtotal,
-						    &routelon,
-						    &routelat,
-						    &routewaypoint,
-						    &routetopo,
-						    &routebearing,
-						    &distlateral,
-						    &distovertopo,
-						    &slope,
-						    &error);
-			    if (status == MB_SUCCESS)
-				    {
-				    npointalloc = npointtotal;
-				    }
+				/* allocate route arrays */
+				npointtotal = npoint + nintpoint;
+				if (status == MB_SUCCESS && npointalloc < npointtotal) {
+					status = mbview_allocroutearrays(verbose, npointtotal, &routelon, &routelat, &routewaypoint, &routetopo,
+					                                 &routebearing, &distlateral, &distovertopo, &slope, &error);
+					if (status == MB_SUCCESS) {
+						npointalloc = npointtotal;
+					}
 
-			    /* if error initializing memory then cancel dealing with this route */
-			    else
-	    			    {
-				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
-					    npointtotal, instance);
-				    XBell((Display *) XtDisplay(mainWindow),100);
-				    npoint = 0;
-				    nintpoint = 0;
-				    npointtotal = 0;
-				    }
-			    }
+					/* if error initializing memory then cancel dealing with this route */
+					else {
+						fprintf(stderr, "Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
+						        npointtotal, instance);
+						XBell((Display *)XtDisplay(mainWindow), 100);
+						npoint = 0;
+						nintpoint = 0;
+						npointtotal = 0;
+					}
+				}
 
-		    /* extract data for route */
-		    status = mbview_getroute(verbose, instance,
-					    iroute,
-					    &npointtotal,
-					    routelon,
-					    routelat,
-					    routewaypoint,
-					    routetopo,
-					    routebearing,
-					    distlateral,
-					    distovertopo,
-					    slope,
-					    &routecolor,
-					    &routesize,
-					    routename,
-					    &error);
+				/* extract data for route */
+				status =
+				    mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint, routetopo,
+				                    routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, routename, &error);
 
-		    /* write the route points */
-		    n = 0;
-		    for (j=0;j<npointtotal;j++)
-			    {
-			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
-			    	{
-                    n++;
- 			        fprintf(sfp,"%s %d,%.10f,%.10f,17,100.0,0.00,0.00,255,0.00\r\n",
-						routename, n, routelat[j], routelon[j]);
-                    }
-			    }
-		    }
+				/* write the route points */
+				n = 0;
+				for (j = 0; j < npointtotal; j++) {
+					if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE) {
+						n++;
+						fprintf(sfp, "%s %d,%.10f,%.10f,17,100.0,0.00,0.00,255,0.00\r\n", routename, n, routelat[j], routelon[j]);
+					}
+				}
+			}
 
-		/* close the output file */
-		fclose(sfp);
+			/* close the output file */
+			fclose(sfp);
 
-		/* deallocate arrays */
-		if (npointalloc > 0)
-	    	    {
-		    status = mbview_freeroutearrays(verbose,
-					    &routelon,
-					    &routelat,
-					    &routewaypoint,
-					    &routetopo,
-					    &routebearing,
-					    &distlateral,
-					    &distovertopo,
-					    &slope,
-					    &error);
-		    }
+			/* deallocate arrays */
+			if (npointalloc > 0) {
+				status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
+				                                &distlateral, &distovertopo, &slope, &error);
+			}
 		}
-	    }
+	}
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr)
-{
+int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr) {
 	char function_name[] = "do_mbgrdviz_savedegdecmin";
-	int	status = MB_SUCCESS;
-	FILE	*sfp;
-	int	nroute = 0;
-	int	npoint = 0;
-	int	nintpoint = 0;
-	int	npointtotal = 0;
-	int	npointalloc = 0;
-	double	*routelon = NULL;
-	double	*routelat = NULL;
-	int	*routewaypoint = NULL;
-	double	*routetopo = NULL;
-	double	*routebearing = NULL;
-	double	*distlateral = NULL;
-	double	*distovertopo = NULL;
-	double	*slope = NULL;
-	int	routecolor;
-	int	routesize;
-	mb_path	routename;
-	char	latNS, lonEW;
-	int	latDeg, lonDeg;
-	double	latMin, lonMin;
-	int	iroute, j, n;
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	int nroute = 0;
+	int npoint = 0;
+	int nintpoint = 0;
+	int npointtotal = 0;
+	int npointalloc = 0;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	int *routewaypoint = NULL;
+	double *routetopo = NULL;
+	double *routebearing = NULL;
+	double *distlateral = NULL;
+	double *distovertopo = NULL;
+	double *slope = NULL;
+	int routecolor;
+	int routesize;
+	mb_path routename;
+	char latNS, lonEW;
+	int latDeg, lonDeg;
+	double latMin, lonMin;
+	int iroute, j, n;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
+	}
 
 	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
+	if (instance != MBV_NO_WINDOW) {
 
-	    /* get the number of routes to be written to the outpuf file */
-	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
-	    if (nroute <= 0)
-	    	{
-		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
-			nroute, instance);
-		XBell((Display *) XtDisplay(mainWindow),100);
-		status = MB_FAILURE;
+		/* get the number of routes to be written to the outpuf file */
+		status = mbview_getroutecount(verbose, instance, &nroute, &error);
+		if (nroute <= 0) {
+			fprintf(stderr, "Unable to write route file...\nCurrently %d routes defined for instance %zu!\n", nroute, instance);
+			XBell((Display *)XtDisplay(mainWindow), 100);
+			status = MB_FAILURE;
 		}
 
-	    /* initialize the output file */
-	    if (status == MB_SUCCESS && nroute > 0)
-	    	{
-		/* open the output file */
-		if ((sfp = fopen(output_file_ptr, "w")) == NULL)
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
-			fprintf(stderr,"\nUnable to Open route file <%s> for writing\n",output_file_ptr);
-			XBell((Display *) XtDisplay(mainWindow),100);
+		/* initialize the output file */
+		if (status == MB_SUCCESS && nroute > 0) {
+			/* open the output file */
+			if ((sfp = fopen(output_file_ptr, "w")) == NULL) {
+				error = MB_ERROR_OPEN_FAIL;
+				status = MB_FAILURE;
+				fprintf(stderr, "\nUnable to Open route file <%s> for writing\n", output_file_ptr);
+				XBell((Display *)XtDisplay(mainWindow), 100);
 			}
 		}
 
-	    /* if all ok proceed to extract and output routes */
-	    if (status == MB_SUCCESS)
-	    	{
-	        /* loop over routes */
-		for (iroute=0;iroute<nroute;iroute++)
-	    	    {
-		    /* get point count for current route */
-		    status = mbview_getroutepointcount(verbose, instance,
-			    iroute, &npoint, &nintpoint, &error);
+		/* if all ok proceed to extract and output routes */
+		if (status == MB_SUCCESS) {
+			/* loop over routes */
+			for (iroute = 0; iroute < nroute; iroute++) {
+				/* get point count for current route */
+				status = mbview_getroutepointcount(verbose, instance, iroute, &npoint, &nintpoint, &error);
 
-		    /* allocate route arrays */
-		    npointtotal = npoint + nintpoint;
-		    if (status == MB_SUCCESS
-			    && npointalloc < npointtotal)
-			    {
-			    status = mbview_allocroutearrays(verbose,
-						    npointtotal,
-						    &routelon,
-						    &routelat,
-						    &routewaypoint,
-						    &routetopo,
-						    &routebearing,
-						    &distlateral,
-						    &distovertopo,
-						    &slope,
-						    &error);
-			    if (status == MB_SUCCESS)
-				    {
-				    npointalloc = npointtotal;
-				    }
+				/* allocate route arrays */
+				npointtotal = npoint + nintpoint;
+				if (status == MB_SUCCESS && npointalloc < npointtotal) {
+					status = mbview_allocroutearrays(verbose, npointtotal, &routelon, &routelat, &routewaypoint, &routetopo,
+					                                 &routebearing, &distlateral, &distovertopo, &slope, &error);
+					if (status == MB_SUCCESS) {
+						npointalloc = npointtotal;
+					}
 
-			    /* if error initializing memory then cancel dealing with this route */
-			    else
-	    			    {
-				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
-					    npointtotal, instance);
-				    XBell((Display *) XtDisplay(mainWindow),100);
-				    npoint = 0;
-				    nintpoint = 0;
-				    npointtotal = 0;
-				    }
-			    }
+					/* if error initializing memory then cancel dealing with this route */
+					else {
+						fprintf(stderr, "Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
+						        npointtotal, instance);
+						XBell((Display *)XtDisplay(mainWindow), 100);
+						npoint = 0;
+						nintpoint = 0;
+						npointtotal = 0;
+					}
+				}
 
-		    /* extract data for route */
-		    status = mbview_getroute(verbose, instance,
-					    iroute,
-					    &npointtotal,
-					    routelon,
-					    routelat,
-					    routewaypoint,
-					    routetopo,
-					    routebearing,
-					    distlateral,
-					    distovertopo,
-					    slope,
-					    &routecolor,
-					    &routesize,
-					    routename,
-					    &error);
+				/* extract data for route */
+				status =
+				    mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint, routetopo,
+				                    routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, routename, &error);
 
-		    /* write the route points */
-		    n = 0;
-		    for (j=0;j<npointtotal;j++)
-			    {
-			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
-			    	{
-                    n++;
-                    }
-			    }
-		    if (iroute > 0)
-			fprintf(sfp,"#\r\n");
-		    fprintf(sfp,"# Route: %s\r\n",routename);
-		    fprintf(sfp,"# Number of waypoints: %d\r\n",n);
-		    for (j=0;j<npointtotal;j++)
-			    {
-			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
-			    	{
-                    if (routelat[j] >= 0.0)
-                        latNS = 'N';
-                    else
-                        latNS = 'S';
-                    latDeg = (int)(floor(fabs(routelat[j])));
-                    latMin = (fabs(routelat[j]) - (double)latDeg) * 60.0;
-                    if (routelon[j] >= 0.0)
-                        lonEW = 'E';
-                    else
-                        lonEW = 'W';
-                    lonDeg = (int)(floor(fabs(routelon[j])));
-            		lonMin = (fabs(routelon[j]) - (double)lonDeg) * 60.0;
+				/* write the route points */
+				n = 0;
+				for (j = 0; j < npointtotal; j++) {
+					if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE) {
+						n++;
+					}
+				}
+				if (iroute > 0)
+					fprintf(sfp, "#\r\n");
+				fprintf(sfp, "# Route: %s\r\n", routename);
+				fprintf(sfp, "# Number of waypoints: %d\r\n", n);
+				for (j = 0; j < npointtotal; j++) {
+					if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE) {
+						if (routelat[j] >= 0.0)
+							latNS = 'N';
+						else
+							latNS = 'S';
+						latDeg = (int)(floor(fabs(routelat[j])));
+						latMin = (fabs(routelat[j]) - (double)latDeg) * 60.0;
+						if (routelon[j] >= 0.0)
+							lonEW = 'E';
+						else
+							lonEW = 'W';
+						lonDeg = (int)(floor(fabs(routelon[j])));
+						lonMin = (fabs(routelon[j]) - (double)lonDeg) * 60.0;
 
- 			        fprintf(sfp,"%c %3d %9.6f   %c %3d %9.6f \r\n",
-						latNS,latDeg,latMin,lonEW,lonDeg,lonMin);
-                    }
-			    }
-		    }
+						fprintf(sfp, "%c %3d %9.6f   %c %3d %9.6f \r\n", latNS, latDeg, latMin, lonEW, lonDeg, lonMin);
+					}
+				}
+			}
 
-		/* close the output file */
-		fclose(sfp);
+			/* close the output file */
+			fclose(sfp);
 
-		/* deallocate arrays */
-		if (npointalloc > 0)
-	    	    {
-		    status = mbview_freeroutearrays(verbose,
-					    &routelon,
-					    &routelat,
-					    &routewaypoint,
-					    &routetopo,
-					    &routebearing,
-					    &distlateral,
-					    &distovertopo,
-					    &slope,
-					    &error);
-		    }
+			/* deallocate arrays */
+			if (npointalloc > 0) {
+				status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
+				                                &distlateral, &distovertopo, &slope, &error);
+			}
 		}
-	    }
+	}
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr)
-{
+int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr) {
 	char function_name[] = "do_mbgrdviz_savelnw";
-	int	status = MB_SUCCESS;
-	FILE	*sfp;
-	int	nroute = 0;
-	int	npoint = 0;
-	int	nintpoint = 0;
-	int	npointtotal = 0;
-	int	npointalloc = 0;
-	double	*routelon = NULL;
-	double	*routelat = NULL;
-	int	*routewaypoint = NULL;
-	double	*routetopo = NULL;
-	double	*routebearing = NULL;
-	double	*distlateral = NULL;
-	double	*distovertopo = NULL;
-	double	*slope = NULL;
-	int	routecolor;
-	int	routesize;
-	mb_path	routename;
-	char	*error_message;
-	char	projection_id[MB_PATH_MAXLINE];
-	void	*pjptr = NULL;
-	int	proj_status;
-	int	utm_zone;
-	double	reference_lon, reference_lat;
-	double	easting, northing;
-	int	iroute, j, n;
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	int nroute = 0;
+	int npoint = 0;
+	int nintpoint = 0;
+	int npointtotal = 0;
+	int npointalloc = 0;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	int *routewaypoint = NULL;
+	double *routetopo = NULL;
+	double *routebearing = NULL;
+	double *distlateral = NULL;
+	double *distovertopo = NULL;
+	double *slope = NULL;
+	int routecolor;
+	int routesize;
+	mb_path routename;
+	char *error_message;
+	char projection_id[MB_PATH_MAXLINE];
+	void *pjptr = NULL;
+	int proj_status;
+	int utm_zone;
+	double reference_lon, reference_lat;
+	double easting, northing;
+	int iroute, j, n;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
+	}
 
 	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
+	if (instance != MBV_NO_WINDOW) {
 
-	    /* get the number of routes to be written to the outpuf file */
-	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
-	    if (nroute <= 0)
-	    	{
-		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %zu!\n",
-			nroute, instance);
-		XBell((Display *) XtDisplay(mainWindow),100);
-		status = MB_FAILURE;
-		}
-
-	    /* initialize the output file */
-	    if (status == MB_SUCCESS && nroute > 0)
-	    	{
-		/* open the output file */
-		if ((sfp = fopen(output_file_ptr, "w")) == NULL)
-			{
-			error = MB_ERROR_OPEN_FAIL;
+		/* get the number of routes to be written to the outpuf file */
+		status = mbview_getroutecount(verbose, instance, &nroute, &error);
+		if (nroute <= 0) {
+			fprintf(stderr, "Unable to write route file...\nCurrently %d routes defined for instance %zu!\n", nroute, instance);
+			XBell((Display *)XtDisplay(mainWindow), 100);
 			status = MB_FAILURE;
-			fprintf(stderr,"\nUnable to Open route file <%s> for writing\n",output_file_ptr);
-			XBell((Display *) XtDisplay(mainWindow),100);
+		}
+
+		/* initialize the output file */
+		if (status == MB_SUCCESS && nroute > 0) {
+			/* open the output file */
+			if ((sfp = fopen(output_file_ptr, "w")) == NULL) {
+				error = MB_ERROR_OPEN_FAIL;
+				status = MB_FAILURE;
+				fprintf(stderr, "\nUnable to Open route file <%s> for writing\n", output_file_ptr);
+				XBell((Display *)XtDisplay(mainWindow), 100);
 			}
 		}
 
-	    /* if all ok proceed to extract and output routes */
-	    if (status == MB_SUCCESS)
-	    	{
-		/* output number of routes */
-		fprintf(sfp,"LNS %d\r\n",nroute);
+		/* if all ok proceed to extract and output routes */
+		if (status == MB_SUCCESS) {
+			/* output number of routes */
+			fprintf(sfp, "LNS %d\r\n", nroute);
 
-	        /* loop over routes */
-		for (iroute=0;iroute<nroute;iroute++)
-	    	    {
-		    /* get point count for current route */
-		    status = mbview_getroutepointcount(verbose, instance,
-			    iroute, &npoint, &nintpoint, &error);
+			/* loop over routes */
+			for (iroute = 0; iroute < nroute; iroute++) {
+				/* get point count for current route */
+				status = mbview_getroutepointcount(verbose, instance, iroute, &npoint, &nintpoint, &error);
 
-		    /* allocate route arrays */
-		    npointtotal = npoint + nintpoint;
-		    if (status == MB_SUCCESS
-			    && npointalloc < npointtotal)
-			    {
-			    status = mbview_allocroutearrays(verbose,
-						    npointtotal,
-						    &routelon,
-						    &routelat,
-						    &routewaypoint,
-						    &routetopo,
-						    &routebearing,
-						    &distlateral,
-						    &distovertopo,
-						    &slope,
-						    &error);
-			    if (status == MB_SUCCESS)
-				    {
-				    npointalloc = npointtotal;
-				    }
+				/* allocate route arrays */
+				npointtotal = npoint + nintpoint;
+				if (status == MB_SUCCESS && npointalloc < npointtotal) {
+					status = mbview_allocroutearrays(verbose, npointtotal, &routelon, &routelat, &routewaypoint, &routetopo,
+					                                 &routebearing, &distlateral, &distovertopo, &slope, &error);
+					if (status == MB_SUCCESS) {
+						npointalloc = npointtotal;
+					}
 
-			    /* if error initializing memory then cancel dealing with this route */
-			    else
-	    			    {
-				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
-					    npointtotal, instance);
-				    XBell((Display *) XtDisplay(mainWindow),100);
-				    npoint = 0;
-				    nintpoint = 0;
-				    npointtotal = 0;
-				    }
-			    }
-
-		    /* extract data for route */
-		    status = mbview_getroute(verbose, instance,
-					    iroute,
-					    &npointtotal,
-					    routelon,
-					    routelat,
-					    routewaypoint,
-					    routetopo,
-					    routebearing,
-					    distlateral,
-					    distovertopo,
-					    slope,
-					    &routecolor,
-					    &routesize,
-					    routename,
-					    &error);
-
-		    /* if the is the first route define the projection */
-		    if (pjptr == NULL && npointtotal > 0)
-			{
-			reference_lon = 0.0;
-			reference_lat = 0.0;
-			for (j=0;j<npointtotal;j++)
-			    {
-			    reference_lon += routelon[j];
-			    reference_lat += routelat[j];
-			    }
-			reference_lon = reference_lon / npointtotal;
-			reference_lat = reference_lat / npointtotal;
-			if (reference_lon < 180.0)
-				reference_lon += 360.0;
-			if (reference_lon >= 180.0)
-				reference_lon -= 360.0;
-			utm_zone = (int)(((reference_lon + 183.0)
-				/ 6.0) + 0.5);
-			if (reference_lat >= 0.0)
-				sprintf(projection_id, "UTM%2.2dN", utm_zone);
-			else
-				sprintf(projection_id, "UTM%2.2dS", utm_zone);
-			fprintf(stderr,"Reference longitude: %.9f latitude:%.9f\nOutput lnw file in projection:%s\n",
-				reference_lon,reference_lat,projection_id);
-
-			/* initialize appropriate UTM projection */
-			proj_status = mb_proj_init(verbose, projection_id, &(pjptr), &error);
-
-			/* quit if projection fails */
-			if (proj_status != MB_SUCCESS)
-				{
-				mb_error(verbose,error,&error_message);
-				fprintf(stderr,"\nMBIO Error initializing projection:\n%s\n",
-					error_message);
-				fprintf(stderr,"\nProgram terminated in <%s>\n",
-					function_name);
-				mb_memory_clear(verbose, &error);
-				exit(error);
+					/* if error initializing memory then cancel dealing with this route */
+					else {
+						fprintf(stderr, "Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
+						        npointtotal, instance);
+						XBell((Display *)XtDisplay(mainWindow), 100);
+						npoint = 0;
+						nintpoint = 0;
+						npointtotal = 0;
+					}
 				}
+
+				/* extract data for route */
+				status =
+				    mbview_getroute(verbose, instance, iroute, &npointtotal, routelon, routelat, routewaypoint, routetopo,
+				                    routebearing, distlateral, distovertopo, slope, &routecolor, &routesize, routename, &error);
+
+				/* if the is the first route define the projection */
+				if (pjptr == NULL && npointtotal > 0) {
+					reference_lon = 0.0;
+					reference_lat = 0.0;
+					for (j = 0; j < npointtotal; j++) {
+						reference_lon += routelon[j];
+						reference_lat += routelat[j];
+					}
+					reference_lon = reference_lon / npointtotal;
+					reference_lat = reference_lat / npointtotal;
+					if (reference_lon < 180.0)
+						reference_lon += 360.0;
+					if (reference_lon >= 180.0)
+						reference_lon -= 360.0;
+					utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+					if (reference_lat >= 0.0)
+						sprintf(projection_id, "UTM%2.2dN", utm_zone);
+					else
+						sprintf(projection_id, "UTM%2.2dS", utm_zone);
+					fprintf(stderr, "Reference longitude: %.9f latitude:%.9f\nOutput lnw file in projection:%s\n", reference_lon,
+					        reference_lat, projection_id);
+
+					/* initialize appropriate UTM projection */
+					proj_status = mb_proj_init(verbose, projection_id, &(pjptr), &error);
+
+					/* quit if projection fails */
+					if (proj_status != MB_SUCCESS) {
+						mb_error(verbose, error, &error_message);
+						fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", error_message);
+						fprintf(stderr, "\nProgram terminated in <%s>\n", function_name);
+						mb_memory_clear(verbose, &error);
+						exit(error);
+					}
+				}
+
+				/* write the route points */
+				n = 0;
+				for (j = 0; j < npointtotal; j++) {
+					if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE) {
+						n++;
+					}
+				}
+				fprintf(sfp, "LIN %d\r\n", n);
+				for (j = 0; j < npointtotal; j++) {
+					if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE) {
+						proj_status = mb_proj_forward(verbose, pjptr, routelon[j], routelat[j], &easting, &northing, &error);
+						fprintf(sfp, "PTS %.2f %.2f\r\n", easting, northing);
+					}
+				}
+				fprintf(sfp, "LNN %d\r\nEOL\r\n", iroute + 1);
 			}
 
-		    /* write the route points */
-		    n = 0;
-		    for (j=0;j<npointtotal;j++)
-			    {
-			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
-			    	{
-                    n++;
-                    }
-			    }
-		    fprintf(sfp,"LIN %d\r\n",n);
-		    for (j=0;j<npointtotal;j++)
-			    {
-			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
-			    	{
-                    proj_status = mb_proj_forward(verbose,
-							pjptr,
-							routelon[j], routelat[j],
-							&easting,
-							&northing,
-							&error);
- 			        fprintf(sfp,"PTS %.2f %.2f\r\n",easting,northing);
-                    }
-			    }
-		    fprintf(sfp,"LNN %d\r\nEOL\r\n",iroute+1);
-		    }
+			/* free the projection */
+			mb_proj_free(verbose, &pjptr, &error);
 
-		/* free the projection */
-		mb_proj_free(verbose, &pjptr, &error);
+			/* close the output file */
+			fclose(sfp);
 
-		/* close the output file */
-		fclose(sfp);
-
-		/* deallocate arrays */
-		if (npointalloc > 0)
-	    	    {
-		    status = mbview_freeroutearrays(verbose,
-					    &routelon,
-					    &routelat,
-					    &routewaypoint,
-					    &routetopo,
-					    &routebearing,
-					    &distlateral,
-					    &distovertopo,
-					    &slope,
-					    &error);
-		    }
+			/* deallocate arrays */
+			if (npointalloc > 0) {
+				status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
+				                                &distlateral, &distovertopo, &slope, &error);
+			}
 		}
-	    }
+	}
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr)
-{
+int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr) {
 	char function_name[] = "do_mbgrdviz_openvector";
-	int	status = MB_SUCCESS;
-	FILE	*sfp;
-	char	buffer[MB_PATH_MAXLINE];
-	int	npoint = 0;
-	int	npointalloc = 0;
-	double	*vectorlon = NULL;
-	double	*vectorlat = NULL;
-	double	*vectorz = NULL;
-	double	*vectordata = NULL;
-	double	lon, lat, z, data;
-	int	vectorcolor;
-	int	vectorsize;
-	double	vectordatamin;
-	double	vectordatamax;
-	int	minmax_set = MB_NO;
-	mb_path	vectorname;
-	int	rawvectorfile = MB_YES;
-	char	*result;
-	int	nget;
-	int	point_ok;
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	char buffer[MB_PATH_MAXLINE];
+	int npoint = 0;
+	int npointalloc = 0;
+	double *vectorlon = NULL;
+	double *vectorlat = NULL;
+	double *vectorz = NULL;
+	double *vectordata = NULL;
+	double lon, lat, z, data;
+	int vectorcolor;
+	int vectorsize;
+	double vectordatamin;
+	double vectordatamax;
+	int minmax_set = MB_NO;
+	mb_path vectorname;
+	int rawvectorfile = MB_YES;
+	char *result;
+	int nget;
+	int point_ok;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
+	}
 
 	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
-	    /* initialize vector values */
-	    vectorcolor = MBV_COLOR_BLUE;
-	    vectorsize = 4;
-	    vectorname[0] = '\0';
-	    rawvectorfile = MB_YES;
-	    npoint = 0;
-	    npointalloc = 0;
-	    vectordatamin = 0.0;
-	    vectordatamax = 0.0;
-	    minmax_set = MB_NO;
+	if (instance != MBV_NO_WINDOW) {
+		/* initialize vector values */
+		vectorcolor = MBV_COLOR_BLUE;
+		vectorsize = 4;
+		vectorname[0] = '\0';
+		rawvectorfile = MB_YES;
+		npoint = 0;
+		npointalloc = 0;
+		vectordatamin = 0.0;
+		vectordatamax = 0.0;
+		minmax_set = MB_NO;
 
-	    /* open the input file */
-	    if ((sfp = fopen(input_file_ptr, "r")) == NULL)
-		    {
-		    error = MB_ERROR_OPEN_FAIL;
-		    status = MB_FAILURE;
-		    fprintf(stderr,"\nUnable to open vector file <%s> for reading\n",input_file_ptr);
-		    XBell((Display *) XtDisplay(mainWindow),100);
-		    }
-
-	    /* loop over reading */
-	    if (status == MB_SUCCESS)
-	    	{
-fprintf(stderr,"Reading from vector file:%s\n",input_file_ptr);
-		while ((result = fgets(buffer,MB_PATH_MAXLINE,sfp)) == buffer)
-		    {
-		    /* deal with comments */
-		    if (buffer[0] == '#')
-		    	{
-			if (rawvectorfile == MB_YES
-				&& strncmp(buffer,"## Vector File Version", 21) == 0)
-				{
-				rawvectorfile = MB_NO;
-				}
-			else if (strncmp(buffer,"## VECTORNAME", 12) == 0)
-				{
-				sscanf(buffer,"## VECTORNAME %s", vectorname);
-				}
-			else if (strncmp(buffer,"## VECTORCOLOR", 13) == 0)
-				{
-				sscanf(buffer,"## ROUTECOLOR %d", &vectorcolor);
-				}
-			else if (strncmp(buffer,"## ROUTESIZE", 12) == 0)
-				{
-				sscanf(buffer,"## ROUTESIZE %d", &vectorsize);
-				}
-			else if (strncmp(buffer,"## MIN", 6) == 0)
-				{
-				sscanf(buffer,"## MIN %lf", &vectordatamin);
-				minmax_set = MB_YES;
-				}
-			else if (strncmp(buffer,"## MAX", 6) == 0)
-				{
-				sscanf(buffer,"## MAX %lf", &vectordatamax);
-				minmax_set = MB_YES;
-				}
-			}
-
-		    /* deal with vector segment marker */
-		    else if (buffer[0] == '>')
-		    	{
-			/* if data accumulated call mbview_addvector() */
-			if (npoint > 0)
-			    {
-			    status = mbview_addvector(verbose, instance,
-			    				npoint, vectorlon, vectorlat, vectorz, vectordata,
-							vectorcolor, vectorsize, vectorname,
-							vectordatamin, vectordatamax,
-							&error);
-			    npoint = 0;
-			    }
-			}
-
-		    /* deal with data */
-		    else
-		        {
-			/* read the data from the buffer */
-			nget = sscanf(buffer,"%lf %lf %lf %lf",
-			    		&lon, &lat, &z, &data);
-		    	if (nget == 4)
-			    point_ok = MB_YES;
-			else
-			    point_ok = MB_NO;
-
-			/* if good data check for need to allocate more space */
-			if (point_ok == MB_YES
-				&& npoint + 1 > npointalloc)
-			    {
-			    npointalloc += MBV_ALLOC_NUM;
-			    status = mbview_allocvectorarrays(verbose,
-						    npointalloc,
-						    &vectorlon,
-						    &vectorlat,
-						    &vectorz,
-						    &vectordata,
-						    &error);
-			    if (status != MB_SUCCESS)
-				    {
-				    npointalloc = 0;
-				    }
-			    }
-
-			/* add good point to vector */
-			if (point_ok == MB_YES && npointalloc > npoint)
-			    {
-			    vectorlon[npoint] = lon;
-			    vectorlat[npoint] = lat;
-			    vectorz[npoint] = z;
-			    vectordata[npoint] = data;
-
-			    /* get min max bounds if not set in file header */
-			    if (minmax_set == MB_NO)
-			    	{
-				if (npoint == 0)
-			    	    {
-				    vectordatamin = data;
-				    vectordatamax = data;
-				    }
-				else
-			    	    {
-				    vectordatamin = MIN(vectordatamin, data);
-				    vectordatamax = MAX(vectordatamax, data);
-				    }
-				}
-
-			    /* increment the counter */
-			    npoint++;
-			    }
-			}
-		    }
-
-		/* add last vector if not already handled */
-		if (npoint > 0)
-		    {
-fprintf(stderr,"Adding vector npoints:%d\n",npoint);
-		    status = mbview_addvector(verbose, instance,
-			    			npoint, vectorlon, vectorlat, vectorz, vectordata,
-						vectorcolor, vectorsize, vectorname,
-						vectordatamin, vectordatamax,
-						&error);
-		    npoint = 0;
-		    }
-
-		/* free the memory */
-		if (npointalloc > 0)
-		status = mbview_freevectorarrays(verbose,
-						    &vectorlon,
-						    &vectorlat,
-						    &vectorz,
-						    &vectordata,
-						    &error);
-
-		/* close the input file */
-		fclose(sfp);
+		/* open the input file */
+		if ((sfp = fopen(input_file_ptr, "r")) == NULL) {
+			error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			fprintf(stderr, "\nUnable to open vector file <%s> for reading\n", input_file_ptr);
+			XBell((Display *)XtDisplay(mainWindow), 100);
 		}
 
-	    /* update widgets */
-	    mbview_enableviewvectors(verbose, instance, &error);
-	    status = mbview_update(verbose, instance, &error);
-	    }
+		/* loop over reading */
+		if (status == MB_SUCCESS) {
+			fprintf(stderr, "Reading from vector file:%s\n", input_file_ptr);
+			while ((result = fgets(buffer, MB_PATH_MAXLINE, sfp)) == buffer) {
+				/* deal with comments */
+				if (buffer[0] == '#') {
+					if (rawvectorfile == MB_YES && strncmp(buffer, "## Vector File Version", 21) == 0) {
+						rawvectorfile = MB_NO;
+					}
+					else if (strncmp(buffer, "## VECTORNAME", 12) == 0) {
+						sscanf(buffer, "## VECTORNAME %s", vectorname);
+					}
+					else if (strncmp(buffer, "## VECTORCOLOR", 13) == 0) {
+						sscanf(buffer, "## ROUTECOLOR %d", &vectorcolor);
+					}
+					else if (strncmp(buffer, "## ROUTESIZE", 12) == 0) {
+						sscanf(buffer, "## ROUTESIZE %d", &vectorsize);
+					}
+					else if (strncmp(buffer, "## MIN", 6) == 0) {
+						sscanf(buffer, "## MIN %lf", &vectordatamin);
+						minmax_set = MB_YES;
+					}
+					else if (strncmp(buffer, "## MAX", 6) == 0) {
+						sscanf(buffer, "## MAX %lf", &vectordatamax);
+						minmax_set = MB_YES;
+					}
+				}
+
+				/* deal with vector segment marker */
+				else if (buffer[0] == '>') {
+					/* if data accumulated call mbview_addvector() */
+					if (npoint > 0) {
+						status = mbview_addvector(verbose, instance, npoint, vectorlon, vectorlat, vectorz, vectordata,
+						                          vectorcolor, vectorsize, vectorname, vectordatamin, vectordatamax, &error);
+						npoint = 0;
+					}
+				}
+
+				/* deal with data */
+				else {
+					/* read the data from the buffer */
+					nget = sscanf(buffer, "%lf %lf %lf %lf", &lon, &lat, &z, &data);
+					if (nget == 4)
+						point_ok = MB_YES;
+					else
+						point_ok = MB_NO;
+
+					/* if good data check for need to allocate more space */
+					if (point_ok == MB_YES && npoint + 1 > npointalloc) {
+						npointalloc += MBV_ALLOC_NUM;
+						status =
+						    mbview_allocvectorarrays(verbose, npointalloc, &vectorlon, &vectorlat, &vectorz, &vectordata, &error);
+						if (status != MB_SUCCESS) {
+							npointalloc = 0;
+						}
+					}
+
+					/* add good point to vector */
+					if (point_ok == MB_YES && npointalloc > npoint) {
+						vectorlon[npoint] = lon;
+						vectorlat[npoint] = lat;
+						vectorz[npoint] = z;
+						vectordata[npoint] = data;
+
+						/* get min max bounds if not set in file header */
+						if (minmax_set == MB_NO) {
+							if (npoint == 0) {
+								vectordatamin = data;
+								vectordatamax = data;
+							}
+							else {
+								vectordatamin = MIN(vectordatamin, data);
+								vectordatamax = MAX(vectordatamax, data);
+							}
+						}
+
+						/* increment the counter */
+						npoint++;
+					}
+				}
+			}
+
+			/* add last vector if not already handled */
+			if (npoint > 0) {
+				fprintf(stderr, "Adding vector npoints:%d\n", npoint);
+				status = mbview_addvector(verbose, instance, npoint, vectorlon, vectorlat, vectorz, vectordata, vectorcolor,
+				                          vectorsize, vectorname, vectordatamin, vectordatamax, &error);
+				npoint = 0;
+			}
+
+			/* free the memory */
+			if (npointalloc > 0)
+				status = mbview_freevectorarrays(verbose, &vectorlon, &vectorlat, &vectorz, &vectordata, &error);
+
+			/* close the input file */
+			fclose(sfp);
+		}
+
+		/* update widgets */
+		mbview_enableviewvectors(verbose, instance, &error);
+		status = mbview_update(verbose, instance, &error);
+	}
 
 	/* set sensitivity of widgets that require an mbview instance to be active */
-	do_mbgrdviz_sensitivity( );
+	do_mbgrdviz_sensitivity();
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr)
-{
+int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
 	char function_name[] = "do_mbgrdviz_saveprofile";
-	int	status = MB_SUCCESS;
-	FILE	*sfp;
-	int	npoints = 0;
-	int	npointalloc = 0;
-	double	*prdistance = NULL;
-	double	*prtopo = NULL;
-	int	*prboundary = NULL;
-	double	*prlon = NULL;
-	double	*prlat = NULL;
-	double	*prdistovertopo = NULL;
-	double	*prbearing = NULL;
-	double	*prslope = NULL;
-	mb_path	prsourcename;
-	double	prlength;
-	double	przmin;
-	double	przmax;
-	int	j;
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	int npoints = 0;
+	int npointalloc = 0;
+	double *prdistance = NULL;
+	double *prtopo = NULL;
+	int *prboundary = NULL;
+	double *prlon = NULL;
+	double *prlat = NULL;
+	double *prdistovertopo = NULL;
+	double *prbearing = NULL;
+	double *prslope = NULL;
+	mb_path prsourcename;
+	double prlength;
+	double przmin;
+	double przmax;
+	int j;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       output_file_ptr: %s\n",output_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
+	}
 
 	/* time, user, host variables */
-	time_t	right_now;
-	char	date[32], *user_ptr, host[MB_PATH_MAXLINE];
-	char	*unknown = "Unknown";
+	time_t right_now;
+	char date[32], *user_ptr, host[MB_PATH_MAXLINE];
+	char *unknown = "Unknown";
 
 	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
+	if (instance != MBV_NO_WINDOW) {
 
-	    /* get the number of profiles to be written to the outpuf file */
-	    status = mbview_getprofilecount(verbose, instance, &npoints, &error);
-	    if (npoints <= 0)
-	    	{
-		fprintf(stderr,"Unable to write profile file...\nCurrently %d profile points defined for instance %zu!\n",
-			npoints, instance);
-		XBell((Display *) XtDisplay(mainWindow),100);
-		status = MB_FAILURE;
-		}
-
-	    /* initialize the output file */
-	    if (status == MB_SUCCESS && npoints > 0)
-	    	{
-		/* open the output file */
-		if ((sfp = fopen(output_file_ptr, "w")) != NULL)
-			{
-			/* write the profile file header */
-			fprintf(sfp, "## Profile File Version %s\n", MBGRDVIZ_PROFILE_VERSION);
-			fprintf(sfp, "## Output by Program %s\n",program_name);
-			fprintf(sfp, "## Program Version %s\n",rcs_id);
-			fprintf(sfp, "## MB-System Version %s\n",MB_VERSION);
-			right_now = time((time_t *)0);
-			strcpy(date,ctime(&right_now));
-                        date[strlen(date)-1] = '\0';
-			if ((user_ptr = getenv("USER")) == NULL)
-				if ((user_ptr = getenv("LOGNAME")) == NULL)
-					user_ptr = unknown;
-			gethostname(host,MB_PATH_MAXLINE);
-			fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n",
-				user_ptr,host,date);
-			fprintf(sfp, "## Number of profile points: %d\n",npoints);
-			fprintf(sfp, "## Profile point format:\n");
-			fprintf(sfp, "##   <lateral distance (m)> <topography (m)> <boundary (boolean)> <longitude (deg)> <latitude (deg)> <distance over topo (m)> <bearing (deg)> <slope (m/m)>\n");
-			}
-
-		/* output error message */
-		else
-			{
-			error = MB_ERROR_OPEN_FAIL;
+		/* get the number of profiles to be written to the outpuf file */
+		status = mbview_getprofilecount(verbose, instance, &npoints, &error);
+		if (npoints <= 0) {
+			fprintf(stderr, "Unable to write profile file...\nCurrently %d profile points defined for instance %zu!\n", npoints,
+			        instance);
+			XBell((Display *)XtDisplay(mainWindow), 100);
 			status = MB_FAILURE;
-			fprintf(stderr,"\nUnable to Open profile file <%s> for writing\n",output_file_ptr);
-			XBell((Display *) XtDisplay(mainWindow),100);
+		}
+
+		/* initialize the output file */
+		if (status == MB_SUCCESS && npoints > 0) {
+			/* open the output file */
+			if ((sfp = fopen(output_file_ptr, "w")) != NULL) {
+				/* write the profile file header */
+				fprintf(sfp, "## Profile File Version %s\n", MBGRDVIZ_PROFILE_VERSION);
+				fprintf(sfp, "## Output by Program %s\n", program_name);
+				fprintf(sfp, "## Program Version %s\n", rcs_id);
+				fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
+				right_now = time((time_t *)0);
+				strcpy(date, ctime(&right_now));
+				date[strlen(date) - 1] = '\0';
+				if ((user_ptr = getenv("USER")) == NULL)
+					if ((user_ptr = getenv("LOGNAME")) == NULL)
+						user_ptr = unknown;
+				gethostname(host, MB_PATH_MAXLINE);
+				fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+				fprintf(sfp, "## Number of profile points: %d\n", npoints);
+				fprintf(sfp, "## Profile point format:\n");
+				fprintf(sfp, "##   <lateral distance (m)> <topography (m)> <boundary (boolean)> <longitude (deg)> <latitude "
+				             "(deg)> <distance over topo (m)> <bearing (deg)> <slope (m/m)>\n");
+			}
+
+			/* output error message */
+			else {
+				error = MB_ERROR_OPEN_FAIL;
+				status = MB_FAILURE;
+				fprintf(stderr, "\nUnable to Open profile file <%s> for writing\n", output_file_ptr);
+				XBell((Display *)XtDisplay(mainWindow), 100);
 			}
 		}
 
-	    /* if all ok proceed to extract and output profiles */
-	    if (status == MB_SUCCESS)
-		{
-		/* allocate profile arrays */
-		if (status == MB_SUCCESS
-			&& npointalloc < npoints)
-			{
-			status = mbview_allocprofilearrays(verbose,
-						npoints,
-						&prdistance,
-						&prtopo,
-						&prboundary,
-						&prlon,
-						&prlat,
-						&prdistovertopo,
-						&prbearing,
-						&prslope,
-						&error);
-			if (status == MB_SUCCESS)
-				{
-				npointalloc = npoints;
+		/* if all ok proceed to extract and output profiles */
+		if (status == MB_SUCCESS) {
+			/* allocate profile arrays */
+			if (status == MB_SUCCESS && npointalloc < npoints) {
+				status = mbview_allocprofilearrays(verbose, npoints, &prdistance, &prtopo, &prboundary, &prlon, &prlat,
+				                                   &prdistovertopo, &prbearing, &prslope, &error);
+				if (status == MB_SUCCESS) {
+					npointalloc = npoints;
 				}
 
-			/* if error initializing memory then cancel dealing with this profile */
-			else
-	    			{
-				fprintf(stderr,"Unable to write profile...\nArray allocation for %d points failed for instance %zu!\n",
-					npoints, instance);
-				XBell((Display *) XtDisplay(mainWindow),100);
-				npoints = 0;
+				/* if error initializing memory then cancel dealing with this profile */
+				else {
+					fprintf(stderr, "Unable to write profile...\nArray allocation for %d points failed for instance %zu!\n",
+					        npoints, instance);
+					XBell((Display *)XtDisplay(mainWindow), 100);
+					npoints = 0;
 				}
 			}
 
-		/* extract data for profile */
-		status = mbview_getprofile(verbose, instance,
-					prsourcename,
-					&prlength,
-					&przmin,
-					&przmax,
-					&npoints,
-					prdistance,
-					prtopo,
-					prboundary,
-					prlon,
-					prlat,
-					prdistovertopo,
-					prbearing,
-					prslope,
-					&error);
+			/* extract data for profile */
+			status = mbview_getprofile(verbose, instance, prsourcename, &prlength, &przmin, &przmax, &npoints, prdistance, prtopo,
+			                           prboundary, prlon, prlat, prdistovertopo, prbearing, prslope, &error);
 
-		/* write the profile header */
-		fprintf(sfp,"## PROFILESOURCE %s\n", prsourcename);
-		fprintf(sfp,"## PROFILELENGTH %f\n", prlength);
-		fprintf(sfp,"## PROFILEZMIN %f\n", przmin);
-		fprintf(sfp,"## PROFILEZMAX %f\n", przmax);
-		fprintf(sfp,"## PROFILEPOINTS %d\n", npoints);
+			/* write the profile header */
+			fprintf(sfp, "## PROFILESOURCE %s\n", prsourcename);
+			fprintf(sfp, "## PROFILELENGTH %f\n", prlength);
+			fprintf(sfp, "## PROFILEZMIN %f\n", przmin);
+			fprintf(sfp, "## PROFILEZMAX %f\n", przmax);
+			fprintf(sfp, "## PROFILEPOINTS %d\n", npoints);
 
-		/* write the profile points */
-		for (j=0;j<npoints;j++)
-			{
-			fprintf(sfp,"%f %f %d %f %f %f %f %f\n",
-				prdistance[j], prtopo[j], prboundary[j],
-				prlon[j], prlat[j], prdistovertopo[j],
-				prbearing[j], prslope[j]);
+			/* write the profile points */
+			for (j = 0; j < npoints; j++) {
+				fprintf(sfp, "%f %f %d %f %f %f %f %f\n", prdistance[j], prtopo[j], prboundary[j], prlon[j], prlat[j],
+				        prdistovertopo[j], prbearing[j], prslope[j]);
 			}
 
-		 /* close the output file */
-		 fclose(sfp);
+			/* close the output file */
+			fclose(sfp);
 
-		 /* deallocate arrays */
-		 if (npointalloc > 0)
-	    	    {
-		    status = mbview_freeprofilearrays(verbose,
-					    &prdistance,
-					    &prtopo,
-					    &prboundary,
-					    &prlon,
-					    &prlat,
-					    &prdistovertopo,
-					    &prbearing,
-					    &prslope,
-					    &error);
-		    }
+			/* deallocate arrays */
+			if (npointalloc > 0) {
+				status = mbview_freeprofilearrays(verbose, &prdistance, &prtopo, &prboundary, &prlon, &prlat, &prdistovertopo,
+				                                  &prbearing, &prslope, &error);
+			}
 		}
-	    }
+	}
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr)
-{
+int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) {
 	char function_name[] = "do_mbgrdviz_opennav";
-	int	status = MB_SUCCESS;
-	void	*datalist;
-	mb_path	swathfile;
-	int	swathfilestatus;
-	mb_path	swathfileraw;
-	mb_path	swathfileprocessed;
-    mb_path dfile;
-	int	format;
-	int	formatorg;
-	double	weight;
-	int	done;
-	mb_path	messagestr;
-	char	*lastslash;
-	int	nfiledatalist = 0;
-	int	nfileread = 0;
+	int status = MB_SUCCESS;
+	void *datalist;
+	mb_path swathfile;
+	int swathfilestatus;
+	mb_path swathfileraw;
+	mb_path swathfileprocessed;
+	mb_path dfile;
+	int format;
+	int formatorg;
+	double weight;
+	int done;
+	mb_path messagestr;
+	char *lastslash;
+	int nfiledatalist = 0;
+	int nfileread = 0;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       swathbounds:     %d\n",swathbounds);
-		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       swathbounds:     %d\n", swathbounds);
+		fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
+	}
 
 	/* read data for valid instance */
-	if (instance != MBV_NO_WINDOW)
-	    {
-	    done = MB_NO;
-	    while (done == MB_NO)
-		{
-		if ((status = mb_datalist_open(verbose,&datalist,
-						input_file_ptr,
-						MB_DATALIST_LOOK_UNSET,&error)) == MB_SUCCESS)
-			{
-			while (done == MB_NO)
-				{
-				if ((status = mb_datalist_read2(verbose,datalist,
-						&swathfilestatus,swathfileraw,swathfileprocessed,dfile,
-						&format,&weight,&error))
-						== MB_SUCCESS)
-					{
-					nfiledatalist++;
-					if (format != MBF_ASCIIXYZ
-						&& format != MBF_ASCIIYXZ
-						&& format != MBF_ASCIIXYT
-						&& format != MBF_ASCIIYXT)
-						{
-						/* check for available nav file if that is
-						   all that is needed */
-						if (swathfilestatus == MB_PROCESSED_USE)
-							strcpy(swathfile, swathfileprocessed);
-						else
-							strcpy(swathfile, swathfileraw);
-						formatorg = format;
-						if (swathbounds == MB_NO)
-							mb_get_fnv(verbose, swathfile, &format, &error);
+	if (instance != MBV_NO_WINDOW) {
+		done = MB_NO;
+		while (done == MB_NO) {
+			if ((status = mb_datalist_open(verbose, &datalist, input_file_ptr, MB_DATALIST_LOOK_UNSET, &error)) == MB_SUCCESS) {
+				while (done == MB_NO) {
+					if ((status = mb_datalist_read2(verbose, datalist, &swathfilestatus, swathfileraw, swathfileprocessed, dfile,
+					                                &format, &weight, &error)) == MB_SUCCESS) {
+						nfiledatalist++;
+						if (format != MBF_ASCIIXYZ && format != MBF_ASCIIYXZ && format != MBF_ASCIIXYT &&
+						    format != MBF_ASCIIYXT) {
+							/* check for available nav file if that is
+							   all that is needed */
+							if (swathfilestatus == MB_PROCESSED_USE)
+								strcpy(swathfile, swathfileprocessed);
+							else
+								strcpy(swathfile, swathfileraw);
+							formatorg = format;
+							if (swathbounds == MB_NO)
+								mb_get_fnv(verbose, swathfile, &format, &error);
 
-						/* else check for available fbt file  */
-						else
-							mb_get_fbt(verbose, swathfile, &format, &error);
+							/* else check for available fbt file  */
+							else
+								mb_get_fbt(verbose, swathfile, &format, &error);
 
-						/* read the swath or nav data using mbio calls */
+							/* read the swath or nav data using mbio calls */
 
-						/* update message */
-						if (swathbounds == MB_NO)
-							strcpy(messagestr, "Reading navigation: ");
-						else
-							strcpy(messagestr, "Reading swath data: ");
-						lastslash = strrchr(swathfile, '/');
-						if ((lastslash = strrchr(swathfile, '/')) != NULL)
-							strcat(messagestr,&(lastslash[1]));
-						else
-							strcat(messagestr,swathfile);
-						do_mbview_message_on(messagestr, instance);
-fprintf(stderr,"%s\n",messagestr);
+							/* update message */
+							if (swathbounds == MB_NO)
+								strcpy(messagestr, "Reading navigation: ");
+							else
+								strcpy(messagestr, "Reading swath data: ");
+							lastslash = strrchr(swathfile, '/');
+							if ((lastslash = strrchr(swathfile, '/')) != NULL)
+								strcat(messagestr, &(lastslash[1]));
+							else
+								strcat(messagestr, swathfile);
+							do_mbview_message_on(messagestr, instance);
+							fprintf(stderr, "%s\n", messagestr);
 
-						/* read the data */
-						nfileread++;
-						do_mbgrdviz_readnav(instance, swathfile,
-							swathfilestatus, swathfileraw, swathfileprocessed,
-							format, formatorg, weight, &error);
+							/* read the data */
+							nfileread++;
+							do_mbgrdviz_readnav(instance, swathfile, swathfilestatus, swathfileraw, swathfileprocessed, format,
+							                    formatorg, weight, &error);
 						}
-else
-fprintf(stderr,"Skipped xyz data: %s\n",swathfile);
+						else
+							fprintf(stderr, "Skipped xyz data: %s\n", swathfile);
 					}
-				else
-					{
-					mb_datalist_close(verbose,&datalist,&error);
-					done = MB_YES;
+					else {
+						mb_datalist_close(verbose, &datalist, &error);
+						done = MB_YES;
 					}
 				}
 			}
 		}
-fprintf(stderr,"Attempted to load %d files, actually read %d files\n",nfiledatalist,nfileread);
+		fprintf(stderr, "Attempted to load %d files, actually read %d files\n", nfiledatalist, nfileread);
 
-	    /* update widgets */
-	    mbview_enableviewnavs(verbose, instance, &error);
-	    status = mbview_update(verbose, instance, &error);
-	    }
+		/* update widgets */
+		mbview_enableviewnavs(verbose, instance, &error);
+		status = mbview_update(verbose, instance, &error);
+	}
 
 	/* all done */
-	return(status);
-
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_readnav(size_t instance, char *swathfile,
-				int pathstatus, char *pathraw, char *pathprocessed,
-				int format, int formatorg, double weight, int *error)
-{
+int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *pathraw, char *pathprocessed, int format,
+                        int formatorg, double weight, int *error) {
 	char function_name[] = "do_mbgrdviz_readnav";
-	int	status = MB_SUCCESS;
-	char	*error_message;
+	int status = MB_SUCCESS;
+	char *error_message;
 
 	/* MBIO control parameters */
-	int	pings = 1;
-	int	lonflip;
-	double	bounds[4];
-	int	btime_i[7];
-	int	etime_i[7];
-	double	btime_d;
-	double	etime_d;
-	double	speedmin;
-	double	timegap;
-	int	beams_bath;
-	int	beams_amp;
-	int	pixels_ss;
-	void	*mbio_ptr = NULL;
+	int pings = 1;
+	int lonflip;
+	double bounds[4];
+	int btime_i[7];
+	int etime_i[7];
+	double btime_d;
+	double etime_d;
+	double speedmin;
+	double timegap;
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+	void *mbio_ptr = NULL;
 
 	/* mbio read and write values */
-	void	*store_ptr = NULL;
-	int	kind;
-	int	time_i[7];
-	double	time_d;
-	double	lon;
-	double	lat;
-	double	speed;
-	double	heading;
-	double	distance;
-	double	altitude;
-	double	sonardepth;
-	char	*beamflag = NULL;
-	double	*bath = NULL;
-	double	*bathacrosstrack = NULL;
-	double	*bathalongtrack = NULL;
-	double	*amp = NULL;
-	double	*ss = NULL;
-	double	*ssacrosstrack = NULL;
-	double	*ssalongtrack = NULL;
-	char	comment[MB_COMMENT_MAXLINE];
+	void *store_ptr = NULL;
+	int kind;
+	int time_i[7];
+	double time_d;
+	double lon;
+	double lat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	char comment[MB_COMMENT_MAXLINE];
 
-	int	npoint;
-	int	npointread;
-	int	npointalloc;
-	double	*navtime_d = NULL;
-	double	*navlon = NULL;
-	double	*navlat = NULL;
-	double	*navz = NULL;
-	double	*navheading = NULL;
-	double	*navspeed = NULL;
-	double	*navportlon = NULL;
-	double	*navportlat = NULL;
-	double	*navstbdlon = NULL;
-	double	*navstbdlat = NULL;
-	int	*navline = NULL;
-	int	*navshot = NULL;
-	int	*navcdp = NULL;
-	int	color;
-	int	size;
-	mb_path	name;
-	int	swathbounds;
-	int	line;
-	int	shot;
-	int	cdp;
-	int	decimation;
+	int npoint;
+	int npointread;
+	int npointalloc;
+	double *navtime_d = NULL;
+	double *navlon = NULL;
+	double *navlat = NULL;
+	double *navz = NULL;
+	double *navheading = NULL;
+	double *navspeed = NULL;
+	double *navportlon = NULL;
+	double *navportlat = NULL;
+	double *navstbdlon = NULL;
+	double *navstbdlat = NULL;
+	int *navline = NULL;
+	int *navshot = NULL;
+	int *navcdp = NULL;
+	int color;
+	int size;
+	mb_path name;
+	int swathbounds;
+	int line;
+	int shot;
+	int cdp;
+	int decimation;
 
 	struct mbview_struct *data;
 
-	double	mtodeglon, mtodeglat;
-	double	headingx, headingy;
-	double	xd, yd, zd;
+	double mtodeglon, mtodeglat;
+	double headingx, headingy;
+	double xd, yd, zd;
 
-	double	cellsize;
-	double	distancealongtrack;
+	double cellsize;
+	double distancealongtrack;
 
-	int	form;
-	int	icenter, iport, istbd;
-	double	centerdistance, portdistance, stbddistance;
-	char	*lastslash;
-	int	i;
+	int form;
+	int icenter, iport, istbd;
+	double centerdistance, portdistance, stbddistance;
+	char *lastslash;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       swathfile:       %s\n",swathfile);
-		fprintf(stderr,"dbg2       pathstatus:      %d\n",pathstatus);
-		fprintf(stderr,"dbg2       pathraw:         %s\n",pathraw);
-		fprintf(stderr,"dbg2       pathprocessed:   %s\n",pathprocessed);
-		fprintf(stderr,"dbg2       format:          %d\n",format);
-		fprintf(stderr,"dbg2       formatorg:       %d\n",formatorg);
-		fprintf(stderr,"dbg2       weight:          %f\n",weight);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       swathfile:       %s\n", swathfile);
+		fprintf(stderr, "dbg2       pathstatus:      %d\n", pathstatus);
+		fprintf(stderr, "dbg2       pathraw:         %s\n", pathraw);
+		fprintf(stderr, "dbg2       pathprocessed:   %s\n", pathprocessed);
+		fprintf(stderr, "dbg2       format:          %d\n", format);
+		fprintf(stderr, "dbg2       formatorg:       %d\n", formatorg);
+		fprintf(stderr, "dbg2       weight:          %f\n", weight);
+	}
 
 	*error = MB_ERROR_NO_ERROR;
 
@@ -4658,9 +3804,9 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile,
 	name[0] = '\0';
 	lastslash = strrchr(swathfile, '/');
 	if ((lastslash = strrchr(swathfile, '/')) != NULL)
-		strcpy(name,&(lastslash[1]));
+		strcpy(name, &(lastslash[1]));
 	else
-		strcpy(name,swathfile);
+		strcpy(name, swathfile);
 
 	swathbounds = MB_NO;
 	line = MB_NO;
@@ -4672,218 +3818,162 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile,
 	distancealongtrack = 0.0;
 
 	/* set mbio default values */
-	status = mb_defaults(verbose,&form,&pings,&lonflip,bounds,
-		btime_i,etime_i,&speedmin,&timegap);
+	status = mb_defaults(verbose, &form, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* get data structure of current instance */
 	status = mbview_getdataptr(verbose, instance, &data, error);
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		bounds[0] = data->primary_xmin;
 		bounds[1] = data->primary_xmax;
 		bounds[2] = data->primary_ymin;
 		bounds[3] = data->primary_ymax;
-		status = mbview_projectforward(instance, MB_YES,
-				data->primary_xmin, data->primary_ymin,
-				0.5 * (data->primary_min + data->primary_max),
-				&bounds[0], &bounds[2],
-				&xd, &yd, &zd);
-		status = mbview_projectforward(instance, MB_YES,
-				data->primary_xmax, data->primary_ymax,
-				0.5 * (data->primary_min + data->primary_max),
-				&bounds[1], &bounds[3],
-				&xd, &yd, &zd);
+		status = mbview_projectforward(instance, MB_YES, data->primary_xmin, data->primary_ymin,
+		                               0.5 * (data->primary_min + data->primary_max), &bounds[0], &bounds[2], &xd, &yd, &zd);
+		status = mbview_projectforward(instance, MB_YES, data->primary_xmax, data->primary_ymax,
+		                               0.5 * (data->primary_min + data->primary_max), &bounds[1], &bounds[3], &xd, &yd, &zd);
 		mb_coor_scale(verbose, 0.5 * (bounds[2] + bounds[3]), &mtodeglon, &mtodeglat);
-		cellsize = 0.0005 * (((bounds[3] - bounds[2]) / ((double)data->primary_ny) / mtodeglat)
-				+ ((bounds[1] - bounds[0]) / ((double)data->primary_nx) / mtodeglon));
-		}
+		cellsize = 0.0005 * (((bounds[3] - bounds[2]) / ((double)data->primary_ny) / mtodeglat) +
+		                     ((bounds[1] - bounds[0]) / ((double)data->primary_nx) / mtodeglon));
+	}
 
 	/* rationalize bounds and lonflip */
-	if (bounds[1] > 180.0)
-		{
+	if (bounds[1] > 180.0) {
 		lonflip = 1;
-		}
-	else if (bounds[0] < -180.0)
-		{
+	}
+	else if (bounds[0] < -180.0) {
 		lonflip = -1;
-		}
-	else
-		{
+	}
+	else {
 		lonflip = 0;
-		}
+	}
 
 	/* initialize reading the swath file */
-	if ((status = mb_read_init(
-		verbose,swathfile,format,pings,lonflip,bounds,
-		btime_i,etime_i,speedmin,timegap,
-		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_amp,&pixels_ss,error)) != MB_SUCCESS)
-		{
-		mb_error(verbose,*error,&error_message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",error_message);
-		fprintf(stderr,"\nSwath sonar File <%s> not initialized for reading\n",swathfile);
-		}
+	if ((status = mb_read_init(verbose, swathfile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr,
+	                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, error)) != MB_SUCCESS) {
+		mb_error(verbose, *error, &error_message);
+		fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
+		fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", swathfile);
+	}
 	/* allocate memory for data arrays */
-	if (status == MB_SUCCESS)
-		{
-		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
-					(void **)&beamflag,error);
+	if (status == MB_SUCCESS) {
+		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&beamflag, error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
-						(void **)&bath,error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bath, error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
-						(void **)&bathacrosstrack,error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathacrosstrack, error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
-						(void **)&bathalongtrack,error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&bathalongtrack, error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),
-						(void **)&amp,error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_amp * sizeof(double), (void **)&amp, error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
-						(void **)&ss,error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ss, error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
-						(void **)&ssacrosstrack,error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssacrosstrack, error);
 		if (status == MB_SUCCESS)
-			status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
-						(void **)&ssalongtrack,error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, pixels_ss * sizeof(double), (void **)&ssalongtrack, error);
 
 		/* if error initializing memory then don't read the file */
-		if (*error != MB_ERROR_NO_ERROR)
-			{
-			mb_error(verbose,*error,&error_message);
-			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-				error_message);
-			}
- 		}
+		if (*error != MB_ERROR_NO_ERROR) {
+			mb_error(verbose, *error, &error_message);
+			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+		}
+	}
 
 	/* read data */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* set swathbounds true if nore than one beam is expected */
 		if (beams_bath > 1)
 			swathbounds = MB_YES;
 
 		/* enable line and cdp values if segy data */
-		if (format == MBF_SEGYSEGY)
-			{
+		if (format == MBF_SEGYSEGY) {
 			line = MB_YES;
 			cdp = MB_YES;
-			}
+		}
 
 		/* loop over successful reads and nonfatal errors
 		   until a fatal error is encountered */
-		while (*error <= MB_ERROR_NO_ERROR)
-			{
+		while (*error <= MB_ERROR_NO_ERROR) {
 			/* read a ping of data */
-			status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
-				time_i,&time_d,&lon,&lat,&speed,
-				&heading,&distance,&altitude,&sonardepth,
-				&beams_bath,&beams_amp,&pixels_ss,
-				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				comment,error);
+			status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &lon, &lat, &speed, &heading, &distance,
+			                    &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack,
+			                    bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 
 			/* ignore minor errors */
-			if (kind == MB_DATA_DATA
-				&& (*error == MB_ERROR_TIME_GAP
-					|| *error == MB_ERROR_OUT_TIME
-					|| *error == MB_ERROR_SPEED_TOO_SMALL))
-				{
+			if (kind == MB_DATA_DATA &&
+			    (*error == MB_ERROR_TIME_GAP || *error == MB_ERROR_OUT_TIME || *error == MB_ERROR_SPEED_TOO_SMALL)) {
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
-				}
+			}
 
-			if (kind == MB_DATA_DATA
-				&& *error == MB_ERROR_NO_ERROR)
-				{
-/*fprintf(stderr,"Ping %d: %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%.6.6d %f %f\n",
-npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon,lat);*/
+			if (kind == MB_DATA_DATA && *error == MB_ERROR_NO_ERROR) {
+				/*fprintf(stderr,"Ping %d: %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%.6.6d %f %f\n",
+				npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon,lat);*/
 				/* overwrite previous nav point if distance change does not
-					exceed cell size */
-				if (npoint == 0)
-					{
-					distancealongtrack  = 0.0;
-					}
-				else if (distancealongtrack < cellsize)
-					{
+				    exceed cell size */
+				if (npoint == 0) {
+					distancealongtrack = 0.0;
+				}
+				else if (distancealongtrack < cellsize) {
 					npoint--;
 					distancealongtrack += distance;
-					}
-				else
-					{
+				}
+				else {
 					distancealongtrack = 0.0;
-					}
+				}
 
 				/* allocate memory if required */
-				if (npoint >= npointalloc)
-					{
+				if (npoint >= npointalloc) {
 					npointalloc += MBV_ALLOC_NUM;
-					status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
-								(void **)&navtime_d,error);
+					status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(double), (void **)&navtime_d, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
-									(void **)&navlon,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(double), (void **)&navlon, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
-									(void **)&navlat,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(double), (void **)&navlat, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
-									(void **)&navz,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(double), (void **)&navz, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
-									(void **)&navheading,error);
+						status =
+						    mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(double), (void **)&navheading, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
-									(void **)&navspeed,error);
+						status =
+						    mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(double), (void **)&navspeed, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
-									(void **)&navportlon,error);
+						status =
+						    mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(double), (void **)&navportlon, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
-									(void **)&navportlat,error);
+						status =
+						    mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(double), (void **)&navportlat, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
-									(void **)&navstbdlon,error);
+						status =
+						    mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(double), (void **)&navstbdlon, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
-									(void **)&navstbdlat,error);
+						status =
+						    mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(double), (void **)&navstbdlat, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(int),
-									(void **)&navline,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(int), (void **)&navline, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(int),
-									(void **)&navshot,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(int), (void **)&navshot, error);
 					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(int),
-									(void **)&navcdp,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc * sizeof(int), (void **)&navcdp, error);
 
 					/* if error initializing memory then don't read the file */
-					if (*error != MB_ERROR_NO_ERROR)
-						{
+					if (*error != MB_ERROR_NO_ERROR) {
 						npointalloc = 0;
-						mb_error(verbose,*error,&error_message);
-						fprintf(stderr,"\nMBIO Error allocating navigation data arrays:\n%s\n",
-							error_message);
-						}
+						mb_error(verbose, *error, &error_message);
+						fprintf(stderr, "\nMBIO Error allocating navigation data arrays:\n%s\n", error_message);
 					}
+				}
 
 				/* get swathbounds */
-				if (format == MBF_MBPRONAV)
-					{
-					status = mbsys_singlebeam_swathbounds(verbose, mbio_ptr, store_ptr, &kind,
-										&navportlon[npoint], &navportlat[npoint],
-										&navstbdlon[npoint], &navstbdlat[npoint],
-										error);
-					if (navportlon[npoint] != navstbdlon[npoint]
-						|| navportlat[npoint] != navstbdlat[npoint])
+				if (format == MBF_MBPRONAV) {
+					status = mbsys_singlebeam_swathbounds(verbose, mbio_ptr, store_ptr, &kind, &navportlon[npoint],
+					                                      &navportlat[npoint], &navstbdlon[npoint], &navstbdlat[npoint], error);
+					if (navportlon[npoint] != navstbdlon[npoint] || navportlat[npoint] != navstbdlat[npoint])
 						swathbounds = MB_YES;
-					}
+				}
 
-				else
-					{
+				else {
 					/* find centermost beam */
 					icenter = -1;
 					iport = -1;
@@ -4891,57 +3981,43 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 					centerdistance = 0.0;
 					portdistance = 0.0;
 					stbddistance = 0.0;
-					for (i=0;i<beams_bath;i++)
-						{
-						if (mb_beam_ok(beamflag[i]))
-							{
-							if (icenter == -1
-								|| fabs(bathacrosstrack[i]) < centerdistance)
-								{
+					for (i = 0; i < beams_bath; i++) {
+						if (mb_beam_ok(beamflag[i])) {
+							if (icenter == -1 || fabs(bathacrosstrack[i]) < centerdistance) {
 								icenter = i;
 								centerdistance = bathacrosstrack[i];
-								}
-							if (iport == -1
-								|| bathacrosstrack[i] < portdistance)
-								{
+							}
+							if (iport == -1 || bathacrosstrack[i] < portdistance) {
 								iport = i;
 								portdistance = bathacrosstrack[i];
-								}
-							if (istbd == -1
-								|| bathacrosstrack[i] > stbddistance)
-								{
+							}
+							if (istbd == -1 || bathacrosstrack[i] > stbddistance) {
 								istbd = i;
 								stbddistance = bathacrosstrack[i];
-								}
 							}
 						}
+					}
 
-					mb_coor_scale(verbose,lat,&mtodeglon,&mtodeglat);
+					mb_coor_scale(verbose, lat, &mtodeglon, &mtodeglat);
 					headingx = sin(heading * DTR);
 					headingy = cos(heading * DTR);
-					if (icenter >= 0)
-						{
-						navportlon[npoint] = lon
-							+ headingy * mtodeglon * bathacrosstrack[iport]
-							+ headingx * mtodeglon * bathalongtrack[iport];
-						navportlat[npoint] = lat
-							- headingx * mtodeglat * bathacrosstrack[iport]
-							+ headingy * mtodeglat * bathalongtrack[iport];
-						navstbdlon[npoint] = lon
-							+ headingy * mtodeglon * bathacrosstrack[istbd]
-							+ headingx * mtodeglon * bathalongtrack[istbd];
-						navstbdlat[npoint] = lat
-							- headingx * mtodeglat * bathacrosstrack[istbd]
-							+ headingy * mtodeglat * bathalongtrack[istbd];
-						}
-					else
-						{
+					if (icenter >= 0) {
+						navportlon[npoint] =
+						    lon + headingy * mtodeglon * bathacrosstrack[iport] + headingx * mtodeglon * bathalongtrack[iport];
+						navportlat[npoint] =
+						    lat - headingx * mtodeglat * bathacrosstrack[iport] + headingy * mtodeglat * bathalongtrack[iport];
+						navstbdlon[npoint] =
+						    lon + headingy * mtodeglon * bathacrosstrack[istbd] + headingx * mtodeglon * bathalongtrack[istbd];
+						navstbdlat[npoint] =
+						    lat - headingx * mtodeglat * bathacrosstrack[istbd] + headingy * mtodeglat * bathalongtrack[istbd];
+					}
+					else {
 						navportlon[npoint] = lon;
 						navportlat[npoint] = lat;
 						navstbdlon[npoint] = lon;
 						navstbdlat[npoint] = lat;
-						}
 					}
+				}
 
 				/* store the navigation values */
 				navtime_d[npoint] = time_d;
@@ -4951,270 +4027,210 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 				navheading[npoint] = heading;
 				navspeed[npoint] = speed;
 
-				mb_segynumber(verbose, mbio_ptr, &(navline[npoint]), &(navshot[npoint]),
-							&(navcdp[npoint]), error);
+				mb_segynumber(verbose, mbio_ptr, &(navline[npoint]), &(navshot[npoint]), &(navcdp[npoint]), error);
 
 				/* increment npoint */
 				npoint++;
 				npointread++;
-				}
 			}
+		}
 
 		/* close the swath file */
-		status = mb_close(verbose,&mbio_ptr,error);
+		status = mb_close(verbose, &mbio_ptr, error);
 
 		/* insert nav data to mbview */
-		if (npoint > 0)
-			{
+		if (npoint > 0) {
 			decimation = npointread / npoint;
-			status = mbview_addnav(verbose, instance,
-				npoint,
-				navtime_d,
-				navlon,
-				navlat,
-				navz,
-				navheading,
-				navspeed,
-				navportlon,
-				navportlat,
-				navstbdlon,
-				navstbdlat,
-				navline,
-				navshot,
-				navcdp,
-				color,
-				size,
-				name,
-				pathstatus,
-				pathraw,
-				pathprocessed,
-				formatorg,
-				swathbounds,
-				line,
-				shot,
-				cdp,
-				decimation,
-				error);
-			}
-else
-fprintf(stderr,"    Skipping %s because of 0 nav points read\n",name);
+			status = mbview_addnav(verbose, instance, npoint, navtime_d, navlon, navlat, navz, navheading, navspeed, navportlon,
+			                       navportlat, navstbdlon, navstbdlat, navline, navshot, navcdp, color, size, name, pathstatus,
+			                       pathraw, pathprocessed, formatorg, swathbounds, line, shot, cdp, decimation, error);
+		}
+		else
+			fprintf(stderr, "    Skipping %s because of 0 nav points read\n", name);
 
-	/* deallocate memory used for data arrays */
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&bathacrosstrack, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&bathalongtrack, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&ssacrosstrack, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&ssalongtrack, error);
+		/* deallocate memory used for data arrays */
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&bathacrosstrack, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&bathalongtrack, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&ssacrosstrack, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&ssalongtrack, error);
 
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navtime_d, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navlon, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navlat, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navz, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navheading, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navspeed, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navportlon, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navportlat, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navstbdlon, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navstbdlat, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navline, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navshot, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navcdp, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navtime_d, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navlon, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navlat, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navz, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navheading, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navspeed, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navportlon, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navportlat, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navstbdlon, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navstbdlat, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navline, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navshot, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&navcdp, error);
 	}
 
 	/* all done */
-	return(status);
-
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_opentest(size_t instance,
-			double	factor1,
-			double	factor2,
-			double	factor3,
-			int	*grid_projection_mode,
-			char	*grid_projection_id,
-			float	*nodatavalue,
-			int	*nxy,
-			int	*nx,
-			int	*ny,
-			double	*min,
-			double	*max,
-			double	*xmin,
-			double	*xmax,
-			double	*ymin,
-			double	*ymax,
-			double	*dx,
-			double	*dy,
-			float	**data)
-{
+int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double factor3, int *grid_projection_mode,
+                         char *grid_projection_id, float *nodatavalue, int *nxy, int *nx, int *ny, double *min, double *max,
+                         double *xmin, double *xmax, double *ymin, double *ymax, double *dx, double *dy, float **data) {
 	char function_name[] = "do_mbgrdviz_opentest";
-	int	status = MB_SUCCESS;
-	double	xx, yy;
-	float	*usedata;
-	int	i, j, k;
+	int status = MB_SUCCESS;
+	double xx, yy;
+	float *usedata;
+	int i, j, k;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:        %zu\n",instance);
-		fprintf(stderr,"dbg2       factor1:         %f\n",factor1);
-		fprintf(stderr,"dbg2       factor2:         %f\n",factor2);
-		fprintf(stderr,"dbg2       factor3:         %f\n",factor3);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       factor1:         %f\n", factor1);
+		fprintf(stderr, "dbg2       factor2:         %f\n", factor2);
+		fprintf(stderr, "dbg2       factor3:         %f\n", factor3);
+	}
 
 	*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
 	sprintf(grid_projection_id, "epsg%d", GCS_WGS_84);
-    	*nodatavalue = MBV_DEFAULT_NODATA;
-    	*nx = 501;
-    	*ny = 501;
-    	*nxy = *nx * *ny;
-    	*xmin = -1.0;
-    	*xmax = 1.0;
-    	*ymin = -1.0;
-    	*ymax = 1.0;
-    	*dx = (*xmax - *xmin) / (*nx -1);
-    	*dy = (*ymax - *ymin) / (*ny -1);
-    	*min = 0.0;
-    	*max = 1000.0;
-    	*min = 0.0;
-    	*max = 0.0;
+	*nodatavalue = MBV_DEFAULT_NODATA;
+	*nx = 501;
+	*ny = 501;
+	*nxy = *nx * *ny;
+	*xmin = -1.0;
+	*xmax = 1.0;
+	*ymin = -1.0;
+	*ymax = 1.0;
+	*dx = (*xmax - *xmin) / (*nx - 1);
+	*dy = (*ymax - *ymin) / (*ny - 1);
+	*min = 0.0;
+	*max = 1000.0;
+	*min = 0.0;
+	*max = 0.0;
 
-    	if (status == MB_SUCCESS)
-    	status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * (*nxy),
-    				(void **)data,&error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * (*nxy), (void **)data, &error);
 	usedata = *data;
-	if (status != MB_SUCCESS)
-	    {
-	    fprintf(stderr,"\nUnable to allocate memory to store test data...\n");
-	    fprintf(stderr,"\nProgram <%s> Terminated\n",
-		    program_name);
-	    exit(error);
-	    }
+	if (status != MB_SUCCESS) {
+		fprintf(stderr, "\nUnable to allocate memory to store test data...\n");
+		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+		exit(error);
+	}
 
-	for (i=0;i<*nx;i++)
-		for (j=0;j<*ny;j++)
-			{
+	for (i = 0; i < *nx; i++)
+		for (j = 0; j < *ny; j++) {
 			k = i * *ny + j;
 			xx = *xmin + i * *dx;
 			yy = *ymin + j * *dy;
-			usedata[k] = factor1 * sin(factor2 * M_PI * xx)
-							* sin(factor2 * M_PI * yy)
-							* exp(-factor3 * xx * yy);
-    			*min = MIN(*min, usedata[k]);
-    			*max = MAX(*max, usedata[k]);
-			}
+			usedata[k] = factor1 * sin(factor2 * M_PI * xx) * sin(factor2 * M_PI * yy) * exp(-factor3 * xx * yy);
+			*min = MIN(*min, usedata[k]);
+			*max = MAX(*max, usedata[k]);
+		}
 
 	/* all done */
-	return(status);
+	return (status);
 }
 /*---------------------------------------------------------------------------------------*/
 
-void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_open_region";
-	int	status = MB_SUCCESS;
-	int	ixmin, ixmax, jymin, jymax;
-	int	i, j, k, ksource;
+	int status = MB_SUCCESS;
+	int ixmin, ixmax, jymin, jymax;
+	int i, j, k, ksource;
 
 	/* existing mbview instance */
-	size_t	instance_source;
+	size_t instance_source;
 	struct mbview_struct *data_source;
-	char	button_name_source[MB_PATH_MAXLINE];
+	char button_name_source[MB_PATH_MAXLINE];
 
 	/* new mbview instance */
-	size_t	instance;
-	char	button_name[MB_PATH_MAXLINE];
+	size_t instance;
+	char button_name[MB_PATH_MAXLINE];
 
 	/* mbview parameters */
-	char	mbv_title[MB_PATH_MAXLINE];
-	int	mbv_xo;
-	int	mbv_yo;
-	int	mbv_width;
-	int	mbv_height;
-	int	mbv_lorez_dimension;
-	int	mbv_hirez_dimension;
-	int	mbv_lorez_navdecimate;
-	int	mbv_hirez_navdecimate;
-	int	mbv_primary_nxy;
-	int	mbv_primary_nx;
-	int	mbv_primary_ny;
-	double	mbv_primary_min;
-	double	mbv_primary_max;
-	double	mbv_primary_xmin;
-	double	mbv_primary_xmax;
-	double	mbv_primary_ymin;
-	double	mbv_primary_ymax;
-	double	mbv_primary_dx;
-	double	mbv_primary_dy;
-	float	*mbv_primary_data;
-	int	mbv_secondary_nxy;
-	int	mbv_secondary_nx;
-	int	mbv_secondary_ny;
-	double	mbv_secondary_min;
-	double	mbv_secondary_max;
-	double	mbv_secondary_xmin;
-	double	mbv_secondary_xmax;
-	double	mbv_secondary_ymin;
-	double	mbv_secondary_ymax;
-	double	mbv_secondary_dx;
-	double	mbv_secondary_dy;
-	float	*mbv_secondary_data;
+	char mbv_title[MB_PATH_MAXLINE];
+	int mbv_xo;
+	int mbv_yo;
+	int mbv_width;
+	int mbv_height;
+	int mbv_lorez_dimension;
+	int mbv_hirez_dimension;
+	int mbv_lorez_navdecimate;
+	int mbv_hirez_navdecimate;
+	int mbv_primary_nxy;
+	int mbv_primary_nx;
+	int mbv_primary_ny;
+	double mbv_primary_min;
+	double mbv_primary_max;
+	double mbv_primary_xmin;
+	double mbv_primary_xmax;
+	double mbv_primary_ymin;
+	double mbv_primary_ymax;
+	double mbv_primary_dx;
+	double mbv_primary_dy;
+	float *mbv_primary_data;
+	int mbv_secondary_nxy;
+	int mbv_secondary_nx;
+	int mbv_secondary_ny;
+	double mbv_secondary_min;
+	double mbv_secondary_max;
+	double mbv_secondary_xmin;
+	double mbv_secondary_xmax;
+	double mbv_secondary_ymin;
+	double mbv_secondary_ymax;
+	double mbv_secondary_dx;
+	double mbv_secondary_dy;
+	float *mbv_secondary_data;
 
-    	/* get source mbview instance */
-	instance_source = (size_t) client_data;
-/*fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);*/
+	/* get source mbview instance */
+	instance_source = (size_t)client_data;
+	/*fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);*/
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
 	/* get new instance number */
-	if (instance_source != MBV_NO_WINDOW && instance_source < MBV_MAX_WINDOWS)
-		{
+	if (instance_source != MBV_NO_WINDOW && instance_source < MBV_MAX_WINDOWS) {
 		status = mbview_init(verbose, &instance, &error);
-		if (instance == MBV_NO_WINDOW)
-			{
-			fprintf(stderr, "Unable to create mbview - %d mbview windows already created\n",
-			MBV_MAX_WINDOWS);
+		if (instance == MBV_NO_WINDOW) {
+			fprintf(stderr, "Unable to create mbview - %d mbview windows already created\n", MBV_MAX_WINDOWS);
 			status = MB_FAILURE;
-			}
 		}
-	else
-		{
+	}
+	else {
 		status = MB_FAILURE;
-		}
+	}
 
-    	/* check data source for region to extract */
-	if (status == MB_SUCCESS)
-		{
+	/* check data source for region to extract */
+	if (status == MB_SUCCESS) {
 		/* get source data */
 		mbview_getdataptr(verbose, instance_source, &data_source, &error);
 
 		/* extract the grid from the source */
 		if (data_source->region_type != MBV_REGION_QUAD)
 			status = MB_FAILURE;
-		}
+	}
 
-    	/* extract data from source and create new mbview instance */
-	if (status == MB_SUCCESS)
-		{
+	/* extract data from source and create new mbview instance */
+	if (status == MB_SUCCESS) {
 		/* get source data */
 		mbview_getdataptr(verbose, instance_source, &data_source, &error);
 
 		/* get button name */
-		sscanf(data_source->title,"MBgrdviz: %s", button_name_source);
-		sprintf(button_name,"Region from %s", button_name_source);
+		sscanf(data_source->title, "MBgrdviz: %s", button_name_source);
+		sprintf(button_name, "Region from %s", button_name_source);
 
 		/* set parameters */
 		sprintf(mbv_title, "MBgrdviz: %s\n", button_name);
@@ -5228,42 +4244,21 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 		mbv_hirez_navdecimate = data_source->hirez_navdecimate;
 
 		/* set basic mbview window parameters */
-		status = mbview_setwindowparms(verbose, instance,
-					&do_mbgrdviz_dismiss_notify,
-					mbv_title,
-					mbv_xo,
-					mbv_yo,
-					mbv_width,
-					mbv_height,
-					mbv_lorez_dimension,
-					mbv_hirez_dimension,
-					mbv_lorez_navdecimate,
-					mbv_hirez_navdecimate,
-					&error);
+		status = mbview_setwindowparms(verbose, instance, &do_mbgrdviz_dismiss_notify, mbv_title, mbv_xo, mbv_yo, mbv_width,
+		                               mbv_height, mbv_lorez_dimension, mbv_hirez_dimension, mbv_lorez_navdecimate,
+		                               mbv_hirez_navdecimate, &error);
 
 		/* extract the primary grid from the source */
 		mbv_primary_dx = data_source->primary_dx;
 		mbv_primary_dy = data_source->primary_dy;
-		mbv_primary_xmin = MIN(data_source->region.cornerpoints[0].xgrid,
-					data_source->region.cornerpoints[3].xgrid);
-		mbv_primary_xmax = MAX(data_source->region.cornerpoints[0].xgrid,
-					data_source->region.cornerpoints[3].xgrid);
-		mbv_primary_ymin = MIN(data_source->region.cornerpoints[0].ygrid,
-					data_source->region.cornerpoints[3].ygrid);
-		mbv_primary_ymax = MAX(data_source->region.cornerpoints[0].ygrid,
-					data_source->region.cornerpoints[3].ygrid);
-		ixmin = (mbv_primary_xmin
-				- data_source->primary_xmin)
-				/ mbv_primary_dx;
-		ixmax = ((mbv_primary_xmax
-				- data_source->primary_xmin)
-				/ mbv_primary_dx) + 1;
-		jymin = (mbv_primary_ymin
-				- data_source->primary_ymin)
-				/ mbv_primary_dy;
-		jymax = ((mbv_primary_ymax
-				- data_source->primary_ymin)
-				/ mbv_primary_dy) + 1;
+		mbv_primary_xmin = MIN(data_source->region.cornerpoints[0].xgrid, data_source->region.cornerpoints[3].xgrid);
+		mbv_primary_xmax = MAX(data_source->region.cornerpoints[0].xgrid, data_source->region.cornerpoints[3].xgrid);
+		mbv_primary_ymin = MIN(data_source->region.cornerpoints[0].ygrid, data_source->region.cornerpoints[3].ygrid);
+		mbv_primary_ymax = MAX(data_source->region.cornerpoints[0].ygrid, data_source->region.cornerpoints[3].ygrid);
+		ixmin = (mbv_primary_xmin - data_source->primary_xmin) / mbv_primary_dx;
+		ixmax = ((mbv_primary_xmax - data_source->primary_xmin) / mbv_primary_dx) + 1;
+		jymin = (mbv_primary_ymin - data_source->primary_ymin) / mbv_primary_dy;
+		jymax = ((mbv_primary_ymax - data_source->primary_ymin) / mbv_primary_dy) + 1;
 		ixmin = MAX(ixmin, 0);
 		ixmax = MIN(ixmax, data_source->primary_nx - 1);
 		jymin = MAX(jymin, 0);
@@ -5275,237 +4270,129 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 		mbv_primary_nx = ixmax - ixmin + 1;
 		mbv_primary_ny = jymax - jymin + 1;
 		mbv_primary_nxy = mbv_primary_nx * mbv_primary_ny;
-		status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * mbv_primary_nxy,
-    				(void **)&mbv_primary_data,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * mbv_primary_nxy, (void **)&mbv_primary_data, &error);
 		mbv_primary_min = data_source->primary_nodatavalue;
 		mbv_primary_max = data_source->primary_nodatavalue;
-		for (i=0;i<mbv_primary_nx;i++)
-			{
-			for (j=0;j<mbv_primary_ny;j++)
-				{
+		for (i = 0; i < mbv_primary_nx; i++) {
+			for (j = 0; j < mbv_primary_ny; j++) {
 				k = i * mbv_primary_ny + j;
 				ksource = (i + ixmin) * data_source->primary_ny + (j + jymin);
 				mbv_primary_data[k] = data_source->primary_data[ksource];
-				if (mbv_primary_data[k] != data_source->primary_nodatavalue)
-					{
-					if (mbv_primary_min == data_source->primary_nodatavalue
-						|| mbv_primary_data[k] < mbv_primary_min)
-						{
+				if (mbv_primary_data[k] != data_source->primary_nodatavalue) {
+					if (mbv_primary_min == data_source->primary_nodatavalue || mbv_primary_data[k] < mbv_primary_min) {
 						mbv_primary_min = mbv_primary_data[k];
-						}
-					if (mbv_primary_max == data_source->primary_nodatavalue
-						|| mbv_primary_data[k] > mbv_primary_max)
-						{
+					}
+					if (mbv_primary_max == data_source->primary_nodatavalue || mbv_primary_data[k] > mbv_primary_max) {
 						mbv_primary_max = mbv_primary_data[k];
-						}
 					}
 				}
 			}
+		}
 
 		/* set basic mbview view controls */
 		if (status == MB_SUCCESS)
-		status = mbview_setviewcontrols(verbose, instance,
-					data_source->display_mode,
-					data_source->mouse_mode,
-					data_source->grid_mode,
-					data_source->primary_histogram,
-					data_source->primaryslope_histogram,
-					data_source->secondary_histogram,
-					data_source->primary_shade_mode,
-					data_source->slope_shade_mode,
-					data_source->secondary_shade_mode,
-					data_source->grid_contour_mode,
-					data_source->site_view_mode,
-					data_source->route_view_mode,
-					data_source->nav_view_mode,
-					data_source->navdrape_view_mode,
-					data_source->vector_view_mode,
-					data_source->exageration,
-					data_source->modelelevation3d,
-					data_source->modelazimuth3d,
-					data_source->viewelevation3d,
-					data_source->viewazimuth3d,
-					data_source->illuminate_magnitude,
-					data_source->illuminate_elevation,
-					data_source->illuminate_azimuth,
-					data_source->slope_magnitude,
-					data_source->overlay_shade_magnitude,
-					data_source->overlay_shade_center,
-					data_source->overlay_shade_mode,
-					data_source->contour_interval,
-					data_source->display_projection_mode,
-					data_source->display_projection_id,
-					&error);
+			status = mbview_setviewcontrols(
+			    verbose, instance, data_source->display_mode, data_source->mouse_mode, data_source->grid_mode,
+			    data_source->primary_histogram, data_source->primaryslope_histogram, data_source->secondary_histogram,
+			    data_source->primary_shade_mode, data_source->slope_shade_mode, data_source->secondary_shade_mode,
+			    data_source->grid_contour_mode, data_source->site_view_mode, data_source->route_view_mode,
+			    data_source->nav_view_mode, data_source->navdrape_view_mode, data_source->vector_view_mode,
+			    data_source->exageration, data_source->modelelevation3d, data_source->modelazimuth3d,
+			    data_source->viewelevation3d, data_source->viewazimuth3d, data_source->illuminate_magnitude,
+			    data_source->illuminate_elevation, data_source->illuminate_azimuth, data_source->slope_magnitude,
+			    data_source->overlay_shade_magnitude, data_source->overlay_shade_center, data_source->overlay_shade_mode,
+			    data_source->contour_interval, data_source->display_projection_mode, data_source->display_projection_id, &error);
 
 		/* set more mbview control values */
 		if (status == MB_SUCCESS)
-		status = mbview_setprimarygrid(verbose, instance,
-					data_source->primary_grid_projection_mode,
-					data_source->primary_grid_projection_id,
-					data_source->primary_nodatavalue,
-					mbv_primary_nx,
-					mbv_primary_ny,
-					mbv_primary_min,
-					mbv_primary_max,
-					mbv_primary_xmin,
-					mbv_primary_xmax,
-					mbv_primary_ymin,
-					mbv_primary_ymax,
-					mbv_primary_dx,
-					mbv_primary_dy,
-					mbv_primary_data,
-					&error);
+			status = mbview_setprimarygrid(verbose, instance, data_source->primary_grid_projection_mode,
+			                               data_source->primary_grid_projection_id, data_source->primary_nodatavalue,
+			                               mbv_primary_nx, mbv_primary_ny, mbv_primary_min, mbv_primary_max, mbv_primary_xmin,
+			                               mbv_primary_xmax, mbv_primary_ymin, mbv_primary_ymax, mbv_primary_dx, mbv_primary_dy,
+			                               mbv_primary_data, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_primary_data, &error);
 		if (status == MB_SUCCESS)
-		status = mbview_setprimarycolortable(verbose, instance,
-					data_source->primary_colortable,
-					data_source->primary_colortable_mode,
-					data_source->primary_colortable_min,
-					data_source->primary_colortable_max,
-					&error);
+			status = mbview_setprimarycolortable(verbose, instance, data_source->primary_colortable,
+			                                     data_source->primary_colortable_mode, data_source->primary_colortable_min,
+			                                     data_source->primary_colortable_max, &error);
 		if (status == MB_SUCCESS)
-		status = mbview_setslopecolortable(verbose, instance,
-					data_source->slope_colortable,
-					data_source->slope_colortable_mode,
-					data_source->slope_colortable_min,
-					data_source->slope_colortable_max,
-					&error);
+			status =
+			    mbview_setslopecolortable(verbose, instance, data_source->slope_colortable, data_source->slope_colortable_mode,
+			                              data_source->slope_colortable_min, data_source->slope_colortable_max, &error);
 		if (status == MB_SUCCESS)
-		status = mbview_enableeditsites(verbose, instance,
-					&error);
+			status = mbview_enableeditsites(verbose, instance, &error);
 		if (status == MB_SUCCESS)
-		status = mbview_enableeditroutes(verbose, instance,
-					&error);
+			status = mbview_enableeditroutes(verbose, instance, &error);
 
 		/* open up mbview window */
-		if (status == MB_SUCCESS)
-			{
-/*fprintf(stderr,"about to open mbview instance:%zu\n",instance);*/
+		if (status == MB_SUCCESS) {
+			/*fprintf(stderr,"about to open mbview instance:%zu\n",instance);*/
 			status = mbview_open(verbose, instance, &error);
 			if (status == MB_SUCCESS)
 				mbview_id[instance] = MB_YES;
 			else
 				mbview_id[instance] = MB_NO;
-/*fprintf(stderr,"done opening mbview instance:%zu\n",instance);*/
+			/*fprintf(stderr,"done opening mbview instance:%zu\n",instance);*/
 
 			/* add action button */
-			if (status == MB_SUCCESS)
-				{
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_openoverlay,
-					"Open Overlay Grid",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_opensite,
-					"Open Site File",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_openroute,
-					"Open Route File",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_openvector,
-					"Open Vector File",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_opennav,
-					"Open Navigation",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_openswath,
-					"Open Swath Data",
-					MBV_PICKMASK_NONE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savesite,
-					"Save Site File",
-					MBV_EXISTMASK_SITE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_saveroute,
-					"Save Route File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_saverisiscript,
-					"Save Risi Script File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savewinfrogpts,
-					"Save Route as Winfrog PTS File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savewinfrogwpt,
-					"Save Route as Winfrog WPT File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savedegdecmin,
-					"Save Route as Degrees + Decimal Minutes File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savelnw,
-					"Save Route as Hypack LNW File",
-					MBV_EXISTMASK_ROUTE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_saveprofile,
-					"Save Profile File",
-					MBV_PICKMASK_TWOPOINT + MBV_PICKMASK_ROUTE + MBV_PICKMASK_NAVTWOPOINT,
-					&error);
+			if (status == MB_SUCCESS) {
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openoverlay, "Open Overlay Grid",
+				                 MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_opensite, "Open Site File", MBV_PICKMASK_NONE,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openroute, "Open Route File", MBV_PICKMASK_NONE,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openvector, "Open Vector File",
+				                 MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_opennav, "Open Navigation", MBV_PICKMASK_NONE,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openswath, "Open Swath Data", MBV_PICKMASK_NONE,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savesite, "Save Site File", MBV_EXISTMASK_SITE,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveroute, "Save Route File",
+				                 MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saverisiscript, "Save Risi Script File",
+				                 MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savewinfrogpts, "Save Route as Winfrog PTS File",
+				                 MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savewinfrogwpt, "Save Route as Winfrog WPT File",
+				                 MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savedegdecmin,
+				                 "Save Route as Degrees + Decimal Minutes File", MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savelnw, "Save Route as Hypack LNW File",
+				                 MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveprofile, "Save Profile File",
+				                 MBV_PICKMASK_TWOPOINT + MBV_PICKMASK_ROUTE + MBV_PICKMASK_NAVTWOPOINT, &error);
 
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_open_mbedit,
-					"Open Selected Nav in MBedit",
-					MBV_PICKMASK_NAVANY,
-					&error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_open_mbeditviz,
-					"Open Selected Nav in MBeditviz",
-					MBV_PICKMASK_NAVANY,
-					&error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_open_mbnavedit,
-					"Open Selected Nav in MBnavedit",
-					MBV_PICKMASK_NAVANY,
-					&error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_open_mbvelocitytool,
-					"Open Selected Nav in MBvelocitytool",
-					MBV_PICKMASK_NAVANY,
-					&error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_open_mbedit, "Open Selected Nav in MBedit", MBV_PICKMASK_NAVANY,
+				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_open_mbeditviz, "Open Selected Nav in MBeditviz",
+				                 MBV_PICKMASK_NAVANY, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_open_mbnavedit, "Open Selected Nav in MBnavedit",
+				                 MBV_PICKMASK_NAVANY, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_open_mbvelocitytool, "Open Selected Nav in MBvelocitytool",
+				                 MBV_PICKMASK_NAVANY, &error);
 
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_open_region,
-					"Open Region as New View",
-					MBV_PICKMASK_REGION + MBV_PICKMASK_NEWINSTANCE, &error);
-				mbview_addaction(verbose, instance,
-					do_mbgrdviz_make_survey,
-					"Generate Survey Route from Area",
-					MBV_PICKMASK_AREA, &error);
-				}
+				mbview_addaction(verbose, instance, do_mbgrdviz_open_region, "Open Region as New View",
+				                 MBV_PICKMASK_REGION + MBV_PICKMASK_NEWINSTANCE, &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_make_survey, "Generate Survey Route from Area", MBV_PICKMASK_AREA,
+				                 &error);
 			}
+		}
 
 		/* extract the secondary grid, if it exists, from the source */
-		if (data_source->secondary_nxy > 0 && data_source->secondary_data != NULL)
-			{
+		if (data_source->secondary_nxy > 0 && data_source->secondary_data != NULL) {
 			mbv_secondary_dx = data_source->secondary_dx;
 			mbv_secondary_dy = data_source->secondary_dy;
-			mbv_secondary_xmin = MIN(data_source->region.cornerpoints[0].xgrid,
-						data_source->region.cornerpoints[3].xgrid);
-			mbv_secondary_xmax = MAX(data_source->region.cornerpoints[0].xgrid,
-						data_source->region.cornerpoints[3].xgrid);
-			mbv_secondary_ymin = MIN(data_source->region.cornerpoints[0].ygrid,
-						data_source->region.cornerpoints[3].ygrid);
-			mbv_secondary_ymax = MAX(data_source->region.cornerpoints[0].ygrid,
-						data_source->region.cornerpoints[3].ygrid);
-			ixmin = (mbv_secondary_xmin
-					- data_source->secondary_xmin)
-					/ mbv_secondary_dx;
-			ixmax = ((mbv_secondary_xmax
-					- data_source->secondary_xmin)
-					/ mbv_secondary_dx) + 1;
-			jymin = (mbv_secondary_ymin
-					- data_source->secondary_ymin)
-					/ mbv_secondary_dy;
-			jymax = ((mbv_secondary_ymax
-					- data_source->secondary_ymin)
-					/ mbv_secondary_dy) + 1;
+			mbv_secondary_xmin = MIN(data_source->region.cornerpoints[0].xgrid, data_source->region.cornerpoints[3].xgrid);
+			mbv_secondary_xmax = MAX(data_source->region.cornerpoints[0].xgrid, data_source->region.cornerpoints[3].xgrid);
+			mbv_secondary_ymin = MIN(data_source->region.cornerpoints[0].ygrid, data_source->region.cornerpoints[3].ygrid);
+			mbv_secondary_ymax = MAX(data_source->region.cornerpoints[0].ygrid, data_source->region.cornerpoints[3].ygrid);
+			ixmin = (mbv_secondary_xmin - data_source->secondary_xmin) / mbv_secondary_dx;
+			ixmax = ((mbv_secondary_xmax - data_source->secondary_xmin) / mbv_secondary_dx) + 1;
+			jymin = (mbv_secondary_ymin - data_source->secondary_ymin) / mbv_secondary_dy;
+			jymax = ((mbv_secondary_ymax - data_source->secondary_ymin) / mbv_secondary_dy) + 1;
 			ixmin = MAX(ixmin, 0);
 			ixmax = MIN(ixmax, data_source->secondary_nx - 1);
 			jymin = MAX(jymin, 0);
@@ -5517,424 +4404,373 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 			mbv_secondary_nx = ixmax - ixmin + 1;
 			mbv_secondary_ny = jymax - jymin + 1;
 			mbv_secondary_nxy = mbv_secondary_nx * mbv_secondary_ny;
-			status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * mbv_secondary_nxy,
-    					(void **)&mbv_secondary_data,&error);
+			status =
+			    mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * mbv_secondary_nxy, (void **)&mbv_secondary_data, &error);
 			mbv_secondary_min = data_source->secondary_nodatavalue;
 			mbv_secondary_max = data_source->secondary_nodatavalue;
-			for (i=0;i<mbv_secondary_nx;i++)
-				{
-				for (j=0;j<mbv_secondary_ny;j++)
-					{
+			for (i = 0; i < mbv_secondary_nx; i++) {
+				for (j = 0; j < mbv_secondary_ny; j++) {
 					k = i * mbv_secondary_ny + j;
 					ksource = (i + ixmin) * data_source->secondary_ny + (j + jymin);
 					mbv_secondary_data[k] = data_source->secondary_data[ksource];
-					if (mbv_secondary_data[k] != data_source->secondary_nodatavalue)
-						{
-						if (mbv_secondary_min == data_source->secondary_nodatavalue
-							|| mbv_secondary_data[k] < mbv_secondary_min)
-							{
+					if (mbv_secondary_data[k] != data_source->secondary_nodatavalue) {
+						if (mbv_secondary_min == data_source->secondary_nodatavalue ||
+						    mbv_secondary_data[k] < mbv_secondary_min) {
 							mbv_secondary_min = mbv_secondary_data[k];
-							}
-						if (mbv_secondary_max == data_source->secondary_nodatavalue
-							|| mbv_secondary_data[k] > mbv_secondary_max)
-							{
+						}
+						if (mbv_secondary_max == data_source->secondary_nodatavalue ||
+						    mbv_secondary_data[k] > mbv_secondary_max) {
 							mbv_secondary_max = mbv_secondary_data[k];
-							}
 						}
 					}
 				}
+			}
 
 			/* set more mbview control values */
 			if (status == MB_SUCCESS)
-			status = mbview_setsecondarygrid(verbose, instance,
-						data_source->secondary_grid_projection_mode,
-						data_source->secondary_grid_projection_id,
-						data_source->secondary_nodatavalue,
-						mbv_secondary_nx,
-						mbv_secondary_ny,
-						mbv_secondary_min,
-						mbv_secondary_max,
-						mbv_secondary_xmin,
-						mbv_secondary_xmax,
-						mbv_secondary_ymin,
-						mbv_secondary_ymax,
-						mbv_secondary_dx,
-						mbv_secondary_dy,
-						mbv_secondary_data,
-						&error);
+				status = mbview_setsecondarygrid(verbose, instance, data_source->secondary_grid_projection_mode,
+				                                 data_source->secondary_grid_projection_id, data_source->secondary_nodatavalue,
+				                                 mbv_secondary_nx, mbv_secondary_ny, mbv_secondary_min, mbv_secondary_max,
+				                                 mbv_secondary_xmin, mbv_secondary_xmax, mbv_secondary_ymin, mbv_secondary_ymax,
+				                                 mbv_secondary_dx, mbv_secondary_dy, mbv_secondary_data, &error);
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_secondary_data, &error);
 			if (status == MB_SUCCESS)
-			status = mbview_setsecondarycolortable(verbose, instance,
-						data_source->secondary_colortable,
-						data_source->secondary_colortable_mode,
-						data_source->secondary_colortable_min,
-						data_source->secondary_colortable_max,
-						data_source->overlay_shade_magnitude,
-						data_source->overlay_shade_center,
-						data_source->overlay_shade_mode,
-						&error);
-			}
-
+				status =
+				    mbview_setsecondarycolortable(verbose, instance, data_source->secondary_colortable,
+				                                  data_source->secondary_colortable_mode, data_source->secondary_colortable_min,
+				                                  data_source->secondary_colortable_max, data_source->overlay_shade_magnitude,
+				                                  data_source->overlay_shade_center, data_source->overlay_shade_mode, &error);
 		}
+	}
 
 	/* update widgets */
 	status = mbview_update(verbose, instance, &error);
 
 	/* set sensitivity of widgets that require an mbview instance to be active */
-	do_mbgrdviz_sensitivity( );
+	do_mbgrdviz_sensitivity();
 }
 /*---------------------------------------------------------------------------------------*/
 
-void do_mbgrdviz_open_mbedit( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_open_mbedit";
-	int	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	/* mbview instance */
-	size_t	instance;
+	size_t instance;
 	struct mbview_struct *data;
 	struct mbview_shareddata_struct *shareddata;
 	struct mbview_nav_struct *nav;
-	mb_path	mbedit_cmd;
-	mb_path	filearg;
-	int	nselected;
-        int     shellstatus;
-	int	i;
+	mb_path mbedit_cmd;
+	mb_path filearg;
+	int nselected;
+	int shellstatus;
+	int i;
 
-    	/* get source mbview instance */
-	instance = (size_t) client_data;
+	/* get source mbview instance */
+	instance = (size_t)client_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
 	/* getting instance from client_data doesn't seem
-		to work so use survey_instance instead */
+	    to work so use survey_instance instead */
 	instance = survey_instance;
-fprintf(stderr,"Called do_mbgrdviz_open_mbedit instance:%zu\n", instance);
+	fprintf(stderr, "Called do_mbgrdviz_open_mbedit instance:%zu\n", instance);
 
-    	/* check data source for area to bounding desired survey */
+	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
 	status = mbview_getsharedptr(verbose, &shareddata, &error);
 
 	/* check if any nav is selected */
 	nselected = 0;
 	sprintf(mbedit_cmd, "mbedit");
-	if (status == MB_SUCCESS && shareddata->nnav > 0)
-		{
-		for (i=0;i<shareddata->nnav;i++)
-			{
-			nav = (struct mbview_nav_struct *) &(shareddata->navs[i]);
-fprintf(stderr,"Nav %d name:%s path:%s format:%d nselected:%d\n",
-i, nav->name, nav->pathraw, nav->format, nav->nselected);
-			if (nav->nselected > 0)
-				{
+	if (status == MB_SUCCESS && shareddata->nnav > 0) {
+		for (i = 0; i < shareddata->nnav; i++) {
+			nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+			fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n", i, nav->name, nav->pathraw, nav->format,
+			        nav->nselected);
+			if (nav->nselected > 0) {
 				sprintf(filearg, " -F%d -I%s", nav->format, nav->pathraw);
-				strncat(mbedit_cmd, filearg, MB_PATH_MAXLINE-3);
+				strncat(mbedit_cmd, filearg, MB_PATH_MAXLINE - 3);
 				nselected += nav->nselected;
-fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselected, filearg);
-				}
+				fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n", nav->nselected, nselected, filearg);
 			}
 		}
+	}
 
 	/* open all data files with selected nav into mbedit */
-	if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0)
-		{
+	if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
 		strncat(mbedit_cmd, " &", MB_PATH_MAXLINE);
-fprintf(stderr,"Calling mbedit: %s\n", mbedit_cmd);
+		fprintf(stderr, "Calling mbedit: %s\n", mbedit_cmd);
 		shellstatus = system(mbedit_cmd);
-		}
+	}
 
 	/* update widgets of all mbview windows */
 	status = mbview_update(verbose, instance, &error);
-	for (i=0;i<MBV_MAX_WINDOWS;i++)
-		{
+	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (i != instance && mbview_id[i] == MB_YES)
 			status = mbview_update(verbose, i, &error);
-		}
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-void do_mbgrdviz_open_mbeditviz( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_open_mbeditviz";
-	int	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	/* mbview instance */
-	size_t	instance;
+	size_t instance;
 	struct mbview_struct *data;
 	struct mbview_shareddata_struct *shareddata;
 	struct mbview_nav_struct *nav;
-	mb_path	mbeditviz_cmd;
-	mb_path	filearg;
-	int	nselected;
-        int     shellstatus;
-	int	i;
+	mb_path mbeditviz_cmd;
+	mb_path filearg;
+	int nselected;
+	int shellstatus;
+	int i;
 
-    	/* get source mbview instance */
-	instance = (size_t) client_data;
+	/* get source mbview instance */
+	instance = (size_t)client_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
 	/* getting instance from client_data doesn't seem
-		to work so use survey_instance instead */
+	    to work so use survey_instance instead */
 	instance = survey_instance;
-fprintf(stderr,"Called do_mbgrdviz_open_mbeditviz instance:%zu\n", instance);
+	fprintf(stderr, "Called do_mbgrdviz_open_mbeditviz instance:%zu\n", instance);
 
-    	/* check data source for area to bounding desired survey */
+	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
 	status = mbview_getsharedptr(verbose, &shareddata, &error);
 
 	/* check if any nav is selected */
 	nselected = 0;
 	sprintf(mbeditviz_cmd, "mbeditviz");
-	if (status == MB_SUCCESS && shareddata->nnav > 0)
-		{
-		for (i=0;i<shareddata->nnav;i++)
-			{
-			nav = (struct mbview_nav_struct *) &(shareddata->navs[i]);
-fprintf(stderr,"Nav %d name:%s path:%s format:%d nselected:%d\n",
-i, nav->name, nav->pathraw, nav->format, nav->nselected);
+	if (status == MB_SUCCESS && shareddata->nnav > 0) {
+		for (i = 0; i < shareddata->nnav; i++) {
+			nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+			fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n", i, nav->name, nav->pathraw, nav->format,
+			        nav->nselected);
 			nselected += nav->nselected;
-			if (nav->nselected > 0)
-				{
+			if (nav->nselected > 0) {
 				sprintf(filearg, " -F%d -I%s", nav->format, nav->pathraw);
-				strncat(mbeditviz_cmd, filearg, MB_PATH_MAXLINE-3);
-fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselected, filearg);
-				}
+				strncat(mbeditviz_cmd, filearg, MB_PATH_MAXLINE - 3);
+				fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n", nav->nselected, nselected, filearg);
 			}
 		}
+	}
 
 	/* open all data files with selected nav into mbeditviz */
-	if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0)
-		{
+	if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
 		strncat(mbeditviz_cmd, " &", MB_PATH_MAXLINE);
-fprintf(stderr,"Calling mbeditviz: %s\n", mbeditviz_cmd);
+		fprintf(stderr, "Calling mbeditviz: %s\n", mbeditviz_cmd);
 		shellstatus = system(mbeditviz_cmd);
-		}
+	}
 
 	/* update widgets of all mbview windows */
 	status = mbview_update(verbose, instance, &error);
-	for (i=0;i<MBV_MAX_WINDOWS;i++)
-		{
+	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (i != instance && mbview_id[i] == MB_YES)
 			status = mbview_update(verbose, i, &error);
-		}
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-void do_mbgrdviz_open_mbnavedit( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_open_mbnavedit";
-	int	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	/* mbview instance */
-	size_t	instance;
+	size_t instance;
 	struct mbview_struct *data;
 	struct mbview_shareddata_struct *shareddata;
 	struct mbview_nav_struct *nav;
-	mb_path	mbnavedit_cmd;
-	mb_path	filearg;
-	int	nselected;
-        int     shellstatus;
-	int	i;
+	mb_path mbnavedit_cmd;
+	mb_path filearg;
+	int nselected;
+	int shellstatus;
+	int i;
 
-    	/* get source mbview instance */
-	instance = (size_t) client_data;
+	/* get source mbview instance */
+	instance = (size_t)client_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
 	/* getting instance from client_data doesn't seem
-		to work so use survey_instance instead */
+	    to work so use survey_instance instead */
 	instance = survey_instance;
-fprintf(stderr,"Called do_mbgrdviz_open_mbnavedit instance:%zu\n", instance);
+	fprintf(stderr, "Called do_mbgrdviz_open_mbnavedit instance:%zu\n", instance);
 
-    	/* check data source for area to bounding desired survey */
+	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
 	status = mbview_getsharedptr(verbose, &shareddata, &error);
 
 	/* check if any nav is selected */
 	nselected = 0;
 	sprintf(mbnavedit_cmd, "mbnavedit");
-	if (status == MB_SUCCESS && shareddata->nnav > 0)
-		{
-		for (i=0;i<shareddata->nnav;i++)
-			{
-			nav = (struct mbview_nav_struct *) &(shareddata->navs[i]);
-fprintf(stderr,"Nav %d name:%s path:%s format:%d nselected:%d\n",
-i, nav->name, nav->pathraw, nav->format, nav->nselected);
-			if (nav->nselected > 0)
-				{
+	if (status == MB_SUCCESS && shareddata->nnav > 0) {
+		for (i = 0; i < shareddata->nnav; i++) {
+			nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+			fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n", i, nav->name, nav->pathraw, nav->format,
+			        nav->nselected);
+			if (nav->nselected > 0) {
 				sprintf(filearg, " -F%d -I%s", nav->format, nav->pathraw);
-				strncat(mbnavedit_cmd, filearg, MB_PATH_MAXLINE-3);
+				strncat(mbnavedit_cmd, filearg, MB_PATH_MAXLINE - 3);
 				nselected += nav->nselected;
-fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselected, filearg);
-				}
+				fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n", nav->nselected, nselected, filearg);
 			}
 		}
+	}
 
 	/* open all data files with selected nav into mbnavedit */
-	if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0)
-		{
+	if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
 		strncat(mbnavedit_cmd, " &", MB_PATH_MAXLINE);
-fprintf(stderr,"Calling mbnavedit: %s\n", mbnavedit_cmd);
+		fprintf(stderr, "Calling mbnavedit: %s\n", mbnavedit_cmd);
 		shellstatus = system(mbnavedit_cmd);
-		}
+	}
 
 	/* update widgets of all mbview windows */
 	status = mbview_update(verbose, instance, &error);
-	for (i=0;i<MBV_MAX_WINDOWS;i++)
-		{
+	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (i != instance && mbview_id[i] == MB_YES)
 			status = mbview_update(verbose, i, &error);
-		}
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-void do_mbgrdviz_open_mbvelocitytool( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_open_mbvelocitytool";
-	int	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	/* mbview instance */
-	size_t	instance;
+	size_t instance;
 	struct mbview_struct *data;
 	struct mbview_shareddata_struct *shareddata;
 	struct mbview_nav_struct *nav;
-	mb_path	mbvelocitytool_cmd;
-	mb_path	filearg;
-	int	nselected;
-        int     shellstatus;
-	int	i;
+	mb_path mbvelocitytool_cmd;
+	mb_path filearg;
+	int nselected;
+	int shellstatus;
+	int i;
 
-    	/* get source mbview instance */
-	instance = (size_t) client_data;
+	/* get source mbview instance */
+	instance = (size_t)client_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
 	/* getting instance from client_data doesn't seem
-		to work so use survey_instance instead */
+	    to work so use survey_instance instead */
 	instance = survey_instance;
-fprintf(stderr,"Called do_mbgrdviz_open_mbvelocitytool instance:%zu\n", instance);
+	fprintf(stderr, "Called do_mbgrdviz_open_mbvelocitytool instance:%zu\n", instance);
 
-    	/* check data source for area to bounding desired survey */
+	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
 	status = mbview_getsharedptr(verbose, &shareddata, &error);
 
 	/* check if any nav is selected */
 	nselected = 0;
 	sprintf(mbvelocitytool_cmd, "mbvelocitytool");
-	if (status == MB_SUCCESS && shareddata->nnav > 0)
-		{
-		for (i=0;i<shareddata->nnav;i++)
-			{
-			nav = (struct mbview_nav_struct *) &(shareddata->navs[i]);
-fprintf(stderr,"Nav %d name:%s path:%s format:%d nselected:%d\n",
-i, nav->name, nav->pathraw, nav->format, nav->nselected);
-			if (nav->nselected > 0)
-				{
+	if (status == MB_SUCCESS && shareddata->nnav > 0) {
+		for (i = 0; i < shareddata->nnav; i++) {
+			nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+			fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n", i, nav->name, nav->pathraw, nav->format,
+			        nav->nselected);
+			if (nav->nselected > 0) {
 				sprintf(filearg, " -F%d -I%s", nav->format, nav->pathraw);
-				strncat(mbvelocitytool_cmd, filearg, MB_PATH_MAXLINE-3);
+				strncat(mbvelocitytool_cmd, filearg, MB_PATH_MAXLINE - 3);
 				nselected += nav->nselected;
-fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselected, filearg);
-				}
+				fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n", nav->nselected, nselected, filearg);
 			}
 		}
+	}
 
 	/* open all data files with selected nav into mbvelocitytool */
-	if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0)
-		{
+	if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
 		strncat(mbvelocitytool_cmd, " &", MB_PATH_MAXLINE);
-fprintf(stderr,"Calling mbvelocitytool: %s\n", mbvelocitytool_cmd);
+		fprintf(stderr, "Calling mbvelocitytool: %s\n", mbvelocitytool_cmd);
 		shellstatus = system(mbvelocitytool_cmd);
-		}
+	}
 
 	/* update widgets of all mbview windows */
 	status = mbview_update(verbose, instance, &error);
-	for (i=0;i<MBV_MAX_WINDOWS;i++)
-		{
+	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (i != instance && mbview_id[i] == MB_YES)
 			status = mbview_update(verbose, i, &error);
-		}
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_make_survey(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_make_survey";
-	int	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	/* mbview instance */
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
 	struct mbview_struct *data;
 
-    	/* get source mbview instance */
-	instance = (size_t) client_data;
+	/* get source mbview instance */
+	instance = (size_t)client_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* check data source for area to bounding desired survey */
+	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
 
 	/* check if area is currently defined */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		if (data->area_type != MBV_AREA_QUAD)
 			status = MB_FAILURE;
-		}
+	}
 
-    	/* set parameters and display the survey generation dialog */
-	if (status == MB_SUCCESS)
-		{
+	/* set parameters and display the survey generation dialog */
+	if (status == MB_SUCCESS) {
 
 		/* set title to open primary grid */
 		ac = 0;
-		XtSetArg(args[ac], XmNtitle, "Generate Survey Lines from Area"); ac++;
+		XtSetArg(args[ac], XmNtitle, "Generate Survey Lines from Area");
+		ac++;
 		XtSetValues(bulletinBoard_arearoute, args, ac);
 
 		/* set instance into XmNuserData resources */
 		ac = 0;
-		XtSetArg(args[ac], XmNuserData, (XtPointer)instance); ac++;
+		XtSetArg(args[ac], XmNuserData, (XtPointer)instance);
+		ac++;
 		XtSetValues(bulletinBoard_arearoute, args, ac);
 		XtSetValues(textField_arearoute_name, args, ac);
 		XtSetValues(spinBox_arearoute_color, args, ac);
@@ -5963,56 +4799,65 @@ void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_da
 		XtSetValues(pushButton_arearoute_ok, args, ac);
 
 		/* setting instance into XmNuserData resources
-			doesn't seem to work, so set survey_instance as well */
+		    doesn't seem to work, so set survey_instance as well */
 		survey_instance = instance;
+	}
 
-		}
-
-    	/* set widgets */
-	if (status == MB_SUCCESS)
-		{
+	/* set widgets */
+	if (status == MB_SUCCESS) {
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_mode); ac++;
+		XtSetArg(args[ac], XmNposition, survey_mode);
+		ac++;
 		XtSetValues(spinText_arearoute_linecontrol, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_direction); ac++;
+		XtSetArg(args[ac], XmNposition, survey_direction);
+		ac++;
 		XtSetValues(spinText_arearoute_direction, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_crosslines); ac++;
+		XtSetArg(args[ac], XmNposition, survey_crosslines);
+		ac++;
 		XtSetValues(spinText_arearoute_crosslines, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_crosslines_last); ac++;
+		XtSetArg(args[ac], XmNposition, survey_crosslines_last);
+		ac++;
 		XtSetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_interleaving); ac++;
+		XtSetArg(args[ac], XmNposition, survey_interleaving);
+		ac++;
 		XtSetValues(spinText_arearoute_interleaving, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_color); ac++;
+		XtSetArg(args[ac], XmNposition, survey_color);
+		ac++;
 		XtSetValues(spinText_arearoute_color, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_linespacing); ac++;
+		XtSetArg(args[ac], XmNposition, survey_linespacing);
+		ac++;
 		XtSetValues(spinText_arearoute_linespacing, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_platform); ac++;
+		XtSetArg(args[ac], XmNposition, survey_platform);
+		ac++;
 		XtSetValues(spinText_arearoute_platform, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_swathwidth); ac++;
+		XtSetArg(args[ac], XmNposition, survey_swathwidth);
+		ac++;
 		XtSetValues(spinText_arearoute_swathwidth, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_altitude); ac++;
+		XtSetArg(args[ac], XmNposition, survey_altitude);
+		ac++;
 		XtSetValues(spinText_arearoute_altitude, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_depth); ac++;
+		XtSetArg(args[ac], XmNposition, survey_depth);
+		ac++;
 		XtSetValues(spinText_arearoute_depth, args, ac);
 
 		XmTextSetString(textField_arearoute_name, survey_name);
@@ -6020,98 +4865,90 @@ void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_da
 		do_mbgrdviz_arearoute_recalc(instance);
 
 		/* put up the dialog */
-		BxManageCB(w, (XtPointer)"bulletinBoard_arearoute", call_data);
-		}
+		BxManageCB(w, (XtPointer) "bulletinBoard_arearoute", call_data);
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_generate_survey";
-	int	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	/* mbview instance */
-	size_t	instance;
+	size_t instance;
 	struct mbview_struct *data;
 
 	/* survey construction parameters */
-	int	color;
-	double	line_spacing;
-	double	line_spacing_use;
-	double	crossline_spacing;
-	double	sonar_depth;
-	double	sonar_altitude;
-	double	maxtopo;
+	int color;
+	double line_spacing;
+	double line_spacing_use;
+	double crossline_spacing;
+	double sonar_depth;
+	double sonar_altitude;
+	double maxtopo;
 	struct mbview_linesegment_struct segment;
-	int	nlines;
-	int	nlinegroups, npoints;
+	int nlines;
+	int nlinegroups, npoints;
 	double xgrid, ygrid;
 	double xlon, ylat, zdata;
 	double xdisplay, ydisplay, zdisplay;
-	double	dsign;
-	int	waypoint;
-	int	first;
-	double	dsigna[4] = {1.0, -1.0, 1.0, -1.0};
-	int	jendpointa[4] = {0, 0, 1, 1};
+	double dsign;
+	int waypoint;
+	int first;
+	double dsigna[4] = {1.0, -1.0, 1.0, -1.0};
+	int jendpointa[4] = {0, 0, 1, 1};
 
-	char	*error_message;
-	double	*xx = NULL;
-	double	dx, dy, r, dxuse, dyuse, dxd, dyd, dxextra, dyextra;
-	double	rrr[4], xxx, yyy;
-	int	iline, jendpoint, ok;
-	int	startcorner, endcorner, jstart, kend;
-	int	nlines_alloc = 0;
-	int	i, j, k;
+	char *error_message;
+	double *xx = NULL;
+	double dx, dy, r, dxuse, dyuse, dxd, dyd, dxextra, dyextra;
+	double rrr[4], xxx, yyy;
+	int iline, jendpoint, ok;
+	int startcorner, endcorner, jstart, kend;
+	int nlines_alloc = 0;
+	int i, j, k;
 
-    	/* get source mbview instance */
-	instance = (size_t) client_data;
+	/* get source mbview instance */
+	instance = (size_t)client_data;
 
 	/* getting instance from client_data doesn't seem
-		to work so use survey_instance instead */
+	    to work so use survey_instance instead */
 	instance = survey_instance;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* check data source for area to bounding desired survey */
+	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
 
 	/* check if area is currently defined */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		if (data->area_type != MBV_AREA_QUAD)
 			status = MB_FAILURE;
-		}
+	}
 
-    	/* generate survey lines from area and add as new route */
-	if (status == MB_SUCCESS)
-		{
+	/* generate survey lines from area and add as new route */
+	if (status == MB_SUCCESS) {
 		/* delete current working route if defined */
-		if (working_route > -1)
-			{
+		if (working_route > -1) {
 			mbview_deleteroute(verbose, instance, working_route, &error);
 			working_route = -1;
-			}
+		}
 
 		/* get unit vector for survey area boundaries */
-		dx = data->area.cornerpoints[1].xdisplay
-			- data->area.cornerpoints[0].xdisplay;
-		dy = data->area.cornerpoints[1].ydisplay
-			- data->area.cornerpoints[0].ydisplay;
+		dx = data->area.cornerpoints[1].xdisplay - data->area.cornerpoints[0].xdisplay;
+		dy = data->area.cornerpoints[1].ydisplay - data->area.cornerpoints[0].ydisplay;
 		r = sqrt(dx * dx + dy * dy);
 		dx = dx / r;
 		dy = dy / r;
 
 		/* get parameters */
-		if (data->area.bearing >= 315.0 || data->area.bearing < 45.0)
-			{
+		if (data->area.bearing >= 315.0 || data->area.bearing < 45.0) {
 			if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
 				k = 0;
 			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
@@ -6120,9 +4957,8 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 				k = 2;
 			else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
 				k = 3;
-			}
-		else if (data->area.bearing >= 45.0 && data->area.bearing < 135.0)
-			{
+		}
+		else if (data->area.bearing >= 45.0 && data->area.bearing < 135.0) {
 			if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
 				k = 1;
 			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
@@ -6131,9 +4967,8 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 				k = 0;
 			else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
 				k = 2;
-			}
-		else if (data->area.bearing >= 135.0 && data->area.bearing < 225.0)
-			{
+		}
+		else if (data->area.bearing >= 135.0 && data->area.bearing < 225.0) {
 			if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
 				k = 3;
 			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
@@ -6142,9 +4977,9 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 				k = 1;
 			else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
 				k = 0;
-			}
+		}
 		else /* if (data->area.bearing >= 225.0 && data->area.bearing < 315.0) */
-			{
+		{
 			if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
 				k = 2;
 			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
@@ -6153,7 +4988,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 				k = 3;
 			else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
 				k = 1;
-			}
+		}
 		dsign = dsigna[k];
 		jendpoint = jendpointa[k];
 		if (survey_color == 0)
@@ -6174,210 +5009,169 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 		first = MB_YES;
 
 		/* do uniform line spacing */
-		if (survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM)
-			{
+		if (survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM) {
 			/* get number of lines */
-			line_spacing = (double) survey_linespacing;
+			line_spacing = (double)survey_linespacing;
 			line_spacing_use = line_spacing * r / data->area.width;
 			nlines = (data->area.width / line_spacing) + 1;
 
 			/* allocate space for line position array */
-			status = mb_mallocd(verbose,__FILE__,__LINE__, nlines * sizeof(double), (void **)&xx, &error);
-			if (status != MB_SUCCESS)
-				{
+			status = mb_mallocd(verbose, __FILE__, __LINE__, nlines * sizeof(double), (void **)&xx, &error);
+			if (status != MB_SUCCESS) {
 				nlines_alloc = 0;
-				mb_error(verbose,error,&error_message);
-				fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-					error_message);
-				}
+				mb_error(verbose, error, &error_message);
+				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+			}
 			else
 				nlines_alloc = nlines;
 
 			/* calculate line positions */
 			if (status == MB_SUCCESS)
-			for (i=0;i<nlines;i++)
-				{
-				/* get line position in survey area */
-				xx[i] = dsign * line_spacing_use * (((double)i) - 0.5 * (nlines - 1.0));
+				for (i = 0; i < nlines; i++) {
+					/* get line position in survey area */
+					xx[i] = dsign * line_spacing_use * (((double)i) - 0.5 * (nlines - 1.0));
 				}
-			}
+		}
 
 		/* do variable line spacing with constant altitude */
-		else if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE
-			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE)
-			{
+		else if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE && survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE) {
 			/* get number of lines */
-			line_spacing = (double) survey_altitude * 2.0 * tan(DTR * 0.5 * (double) survey_swathwidth);
+			line_spacing = (double)survey_altitude * 2.0 * tan(DTR * 0.5 * (double)survey_swathwidth);
 			line_spacing_use = line_spacing * r / data->area.width;
 			nlines = (data->area.width / line_spacing) + 1;
 
 			/* allocate space for line position array */
-			status = mb_mallocd(verbose,__FILE__,__LINE__, nlines * sizeof(double), (void **)&xx, &error);
-			if (status != MB_SUCCESS)
-				{
+			status = mb_mallocd(verbose, __FILE__, __LINE__, nlines * sizeof(double), (void **)&xx, &error);
+			if (status != MB_SUCCESS) {
 				nlines_alloc = 0;
-				mb_error(verbose,error,&error_message);
-				fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-					error_message);
-				}
+				mb_error(verbose, error, &error_message);
+				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+			}
 			else
 				nlines_alloc = nlines;
 
 			/* calculate line positions */
 			if (status == MB_SUCCESS)
-			for (i=0;i<nlines;i++)
-				{
-				/* get line position in survey area */
-				xx[i] = dsign * line_spacing_use * (((double)i) - 0.5 * (nlines - 1.0));
+				for (i = 0; i < nlines; i++) {
+					/* get line position in survey area */
+					xx[i] = dsign * line_spacing_use * (((double)i) - 0.5 * (nlines - 1.0));
 				}
-			}
+		}
 
 		/* do variable line spacing with variable altitude */
-		else if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE)
-			{
+		else if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE) {
 			/* get platform depth */
-			if (survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH)
-				{
-				sonar_depth = (double) survey_depth;
-				}
-			else
-				{
+			if (survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH) {
+				sonar_depth = (double)survey_depth;
+			}
+			else {
 				sonar_depth = 0.0;
-				}
+			}
 
 			/* allocate space for line position array */
 			nlines_alloc += 100;
 			status = mb_mallocd(verbose, __FILE__, __LINE__, nlines_alloc * sizeof(double), (void **)&xx, &error);
-			if (status != MB_SUCCESS)
-				{
+			if (status != MB_SUCCESS) {
 				nlines_alloc = 0;
-				mb_error(verbose,error,&error_message);
-				fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-					error_message);
-				}
+				mb_error(verbose, error, &error_message);
+				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+			}
 
 			/* start on the port side of the survey */
 			/* find range of altitude along each line and calculate the swath width
-				from the smallest altitude */
+			    from the smallest altitude */
 			xx[0] = -dsign * 0.5 * r;
 			nlines = 1;
 			segment.nls = 0;
 			segment.nls_alloc = 0;
 			segment.lspoints = NULL;
 
-			while (nlines == 1 || fabs(xx[nlines-1] + dsign * 0.5 * line_spacing_use) < 0.5 * r)
-				{
+			while (nlines == 1 || fabs(xx[nlines - 1] + dsign * 0.5 * line_spacing_use) < 0.5 * r) {
 				/* allocate more space for xx if needed */
-				if (nlines_alloc <= nlines)
-					{
+				if (nlines_alloc <= nlines) {
 					nlines_alloc += 100;
 					status = mb_reallocd(verbose, __FILE__, __LINE__, nlines_alloc * sizeof(double), (void **)&xx, &error);
-					if (status != MB_SUCCESS)
-						{
+					if (status != MB_SUCCESS) {
 						nlines_alloc = 0;
-						mb_error(verbose,error,&error_message);
-						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-							error_message);
-						}
+						mb_error(verbose, error, &error_message);
+						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
 					}
+				}
 				/* get offset from last xx */
-				dxuse = dx * xx[nlines-1];
-				dyuse = dy * xx[nlines-1];
+				dxuse = dx * xx[nlines - 1];
+				dyuse = dy * xx[nlines - 1];
 
 				/* get first point */
 				segment.endpoints[0].xdisplay = data->area.endpoints[0].xdisplay + dxuse;
 				segment.endpoints[0].ydisplay = data->area.endpoints[0].ydisplay + dyuse;
 				segment.endpoints[0].zdisplay = data->area.endpoints[0].zdisplay;
-				mbview_projectinverse(instance, MB_YES,
-						segment.endpoints[0].xdisplay,
-						segment.endpoints[0].ydisplay,
-						segment.endpoints[0].zdisplay,
-						&segment.endpoints[0].xlon,
-						&segment.endpoints[0].ylat,
-						&segment.endpoints[0].xgrid,
-						&segment.endpoints[0].ygrid);
-				mbview_getzdata(instance,
-						segment.endpoints[0].xgrid, segment.endpoints[0].ygrid,
-						&ok, &segment.endpoints[0].zdata);
+				mbview_projectinverse(instance, MB_YES, segment.endpoints[0].xdisplay, segment.endpoints[0].ydisplay,
+				                      segment.endpoints[0].zdisplay, &segment.endpoints[0].xlon, &segment.endpoints[0].ylat,
+				                      &segment.endpoints[0].xgrid, &segment.endpoints[0].ygrid);
+				mbview_getzdata(instance, segment.endpoints[0].xgrid, segment.endpoints[0].ygrid, &ok,
+				                &segment.endpoints[0].zdata);
 
 				/* get second point */
 				segment.endpoints[1].xdisplay = data->area.endpoints[1].xdisplay + dxuse;
 				segment.endpoints[1].ydisplay = data->area.endpoints[1].ydisplay + dyuse;
 				segment.endpoints[1].zdisplay = data->area.endpoints[1].zdisplay;
-				mbview_projectinverse(instance, MB_YES,
-						segment.endpoints[1].xdisplay,
-						segment.endpoints[1].ydisplay,
-						segment.endpoints[1].zdisplay,
-						&segment.endpoints[1].xlon,
-						&segment.endpoints[1].ylat,
-						&segment.endpoints[1].xgrid,
-						&segment.endpoints[1].ygrid);
-				mbview_getzdata(instance,
-						segment.endpoints[1].xgrid, segment.endpoints[1].ygrid,
-						&ok, &segment.endpoints[1].zdata);
+				mbview_projectinverse(instance, MB_YES, segment.endpoints[1].xdisplay, segment.endpoints[1].ydisplay,
+				                      segment.endpoints[1].zdisplay, &segment.endpoints[1].xlon, &segment.endpoints[1].ylat,
+				                      &segment.endpoints[1].xgrid, &segment.endpoints[1].ygrid);
+				mbview_getzdata(instance, segment.endpoints[1].xgrid, segment.endpoints[1].ygrid, &ok,
+				                &segment.endpoints[1].zdata);
 
 				/* drape line and get max topo */
 				mbview_drapesegment(instance, &(segment));
 				maxtopo = -9999999.9;
-				if (segment.endpoints[0].zdata < -sonar_depth)
-					{
+				if (segment.endpoints[0].zdata < -sonar_depth) {
 					maxtopo = segment.endpoints[0].zdata;
-					}
-				if (segment.endpoints[1].zdata < -sonar_depth
-					&& segment.endpoints[1].zdata > maxtopo)
-					{
+				}
+				if (segment.endpoints[1].zdata < -sonar_depth && segment.endpoints[1].zdata > maxtopo) {
 					maxtopo = segment.endpoints[1].zdata;
-					}
-				for (i=0;i<segment.nls;i++)
-					{
+				}
+				for (i = 0; i < segment.nls; i++) {
 					if (segment.lspoints[i].zdata < -sonar_depth)
 						maxtopo = MAX(maxtopo, segment.lspoints[i].zdata);
-					}
+				}
 
 				/* figure minimum swath width and location of next line */
 				sonar_altitude = -maxtopo - sonar_depth;
-				line_spacing = sonar_altitude * 2.0 * tan(DTR * 0.5 * (double) survey_swathwidth);
+				line_spacing = sonar_altitude * 2.0 * tan(DTR * 0.5 * (double)survey_swathwidth);
 				line_spacing_use = line_spacing * r / data->area.width;
-				xx[nlines] = xx[nlines-1] + dsign * line_spacing_use;
+				xx[nlines] = xx[nlines - 1] + dsign * line_spacing_use;
 				nlines++;
-				}
-
-			/* deallocate segment points */
-			if (segment.lspoints != NULL)
-				{
-				mb_freed(verbose, __FILE__, __LINE__, (void **)&(segment.lspoints), &error);
-				segment.nls_alloc = 0;
-				}
 			}
 
+			/* deallocate segment points */
+			if (segment.lspoints != NULL) {
+				mb_freed(verbose, __FILE__, __LINE__, (void **)&(segment.lspoints), &error);
+				segment.nls_alloc = 0;
+			}
+		}
+
 		/* do crosslines if requested */
-		if (survey_crosslines > 0 && survey_crosslines_last == MB_NO && status == MB_SUCCESS)
-			{
+		if (survey_crosslines > 0 && survey_crosslines_last == MB_NO && status == MB_SUCCESS) {
 			/* figure out which corner the main lines start at */
 			dxuse = dx * xx[0];
 			dyuse = dy * xx[0];
 			dxextra = 0.0;
 			dyextra = 0.0;
-			xdisplay = data->area.endpoints[jendpoint].xdisplay
-				+ dxuse + dxextra;
-			ydisplay = data->area.endpoints[jendpoint].ydisplay
-				+ dyuse + dyextra;
-			for (i=0;i<4;i++)
-				{
+			xdisplay = data->area.endpoints[jendpoint].xdisplay + dxuse + dxextra;
+			ydisplay = data->area.endpoints[jendpoint].ydisplay + dyuse + dyextra;
+			for (i = 0; i < 4; i++) {
 				xxx = xdisplay - data->area.cornerpoints[i].xdisplay;
 				yyy = ydisplay - data->area.cornerpoints[i].ydisplay;
 				rrr[i] = sqrt(xxx * xxx + yyy * yyy);
-				}
+			}
 			startcorner = 0;
-			for (i=1;i<4;i++)
-				{
+			for (i = 1; i < 4; i++) {
 				if (rrr[i] < rrr[startcorner])
 					startcorner = i;
-				}
+			}
 
 			/* figure out which corner the cross lines should start at */
-			if (survey_crosslines % 2 == 0)
-				{
+			if (survey_crosslines % 2 == 0) {
 				if (startcorner == 0)
 					startcorner = 3;
 				else if (startcorner == 1)
@@ -6386,9 +5180,8 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 					startcorner = 1;
 				else if (startcorner == 3)
 					startcorner = 0;
-				}
-			else
-				{
+			}
+			else {
 				if (startcorner == 0)
 					startcorner = 2;
 				else if (startcorner == 1)
@@ -6397,23 +5190,17 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 					startcorner = 0;
 				else if (startcorner == 3)
 					startcorner = 1;
-				}
+			}
 
 			/* get crossline vector */
-			if (startcorner == 0 || startcorner == 3)
-				{
-				dx = data->area.cornerpoints[1].xdisplay
-					- data->area.cornerpoints[0].xdisplay;
-				dy = data->area.cornerpoints[1].ydisplay
-					- data->area.cornerpoints[0].ydisplay;
-				}
-			else
-				{
-				dx = data->area.cornerpoints[0].xdisplay
-					- data->area.cornerpoints[1].xdisplay;
-				dy = data->area.cornerpoints[0].ydisplay
-					- data->area.cornerpoints[1].ydisplay;
-				}
+			if (startcorner == 0 || startcorner == 3) {
+				dx = data->area.cornerpoints[1].xdisplay - data->area.cornerpoints[0].xdisplay;
+				dy = data->area.cornerpoints[1].ydisplay - data->area.cornerpoints[0].ydisplay;
+			}
+			else {
+				dx = data->area.cornerpoints[0].xdisplay - data->area.cornerpoints[1].xdisplay;
+				dy = data->area.cornerpoints[0].ydisplay - data->area.cornerpoints[1].ydisplay;
+			}
 			r = sqrt(dx * dx + dy * dy);
 			dxd = dx / r;
 			dyd = dy / r;
@@ -6427,67 +5214,45 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 				kend = jstart + 1;
 			else
 				kend = jstart - 1;
-			dx = (data->area.endpoints[1].xdisplay
-				- data->area.endpoints[0].xdisplay) / (survey_crosslines + 1);
-			dy = (data->area.endpoints[1].ydisplay
-				- data->area.endpoints[0].ydisplay) / (survey_crosslines + 1);
-			if (startcorner >= 2)
-				{
+			dx = (data->area.endpoints[1].xdisplay - data->area.endpoints[0].xdisplay) / (survey_crosslines + 1);
+			dy = (data->area.endpoints[1].ydisplay - data->area.endpoints[0].ydisplay) / (survey_crosslines + 1);
+			if (startcorner >= 2) {
 				dx = -dx;
 				dy = -dy;
-				}
+			}
 			j = jstart;
-			for (i=0;i<survey_crosslines;i++)
-				{
+			for (i = 0; i < survey_crosslines; i++) {
 				/* get offset from corners */
 				dxuse = (i + 1) * dx;
 				dyuse = (i + 1) * dy;
-				if (j == jstart)
-					{
+				if (j == jstart) {
 					dxextra = -dxd * line_spacing_use;
 					dyextra = -dyd * line_spacing_use;
-					}
-				else
-					{
+				}
+				else {
 					dxextra = dxd * line_spacing_use;
 					dyextra = dyd * line_spacing_use;
-					}
+				}
 
 				/* get first point */
 				waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
-				xdisplay = data->area.cornerpoints[j].xdisplay
-					+ dxuse + dxextra;
-				ydisplay = data->area.cornerpoints[j].ydisplay
-					+ dyuse + dyextra;
+				xdisplay = data->area.cornerpoints[j].xdisplay + dxuse + dxextra;
+				ydisplay = data->area.cornerpoints[j].ydisplay + dyuse + dyextra;
 				zdisplay = data->area.cornerpoints[j].zdisplay;
-				mbview_projectinverse(instance, MB_YES,
-						xdisplay, ydisplay, zdisplay,
-						&xlon, &ylat,
-						&xgrid, &ygrid);
-				mbview_getzdata(instance,
-						xgrid, ygrid,
-						&ok, &zdata);
+				mbview_projectinverse(instance, MB_YES, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+				mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
 				if (ok == MB_NO)
 					zdata = data->area.cornerpoints[jendpoint].zdata;
-				mbview_projectll2display(instance,
-					xlon, ylat, zdata,
-					&xdisplay, &ydisplay, &zdisplay);
-				if (first == MB_YES)
-					{
-					mbview_addroute(verbose, instance,
-							1, &xlon, &ylat, &waypoint,
-							color, 2, MB_YES, 
-							survey_name,
-							&working_route, &error);
+				mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+				if (first == MB_YES) {
+					mbview_addroute(verbose, instance, 1, &xlon, &ylat, &waypoint, color, 2, MB_YES, survey_name, &working_route,
+					                &error);
 					first = MB_NO;
-					}
-				else
-					{
-					mbview_route_add(verbose, instance, working_route, npoints, waypoint,
-							xgrid, ygrid,
-							xlon, ylat, zdata,
-							xdisplay, ydisplay, zdisplay);
-					}
+				}
+				else {
+					mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata,
+					                 xdisplay, ydisplay, zdisplay);
+				}
 				npoints++;
 
 				/* get second point */
@@ -6495,52 +5260,36 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 					j = kend;
 				else
 					j = jstart;
-				if (j == jstart)
-					{
+				if (j == jstart) {
 					dxextra = -dxd * line_spacing_use;
 					dyextra = -dyd * line_spacing_use;
-					}
-				else
-					{
+				}
+				else {
 					dxextra = dxd * line_spacing_use;
 					dyextra = dyd * line_spacing_use;
-					}
+				}
 
 				/* get second point */
 				waypoint = MBV_ROUTE_WAYPOINT_ENDLINE;
-				xdisplay = data->area.cornerpoints[j].xdisplay
-					+ dxuse + dxextra;
-				ydisplay = data->area.cornerpoints[j].ydisplay
-					+ dyuse + dyextra;
+				xdisplay = data->area.cornerpoints[j].xdisplay + dxuse + dxextra;
+				ydisplay = data->area.cornerpoints[j].ydisplay + dyuse + dyextra;
 				zdisplay = data->area.cornerpoints[j].zdisplay;
-				mbview_projectinverse(instance, MB_YES,
-						xdisplay, ydisplay, zdisplay,
-						&xlon, &ylat,
-						&xgrid, &ygrid);
-				mbview_getzdata(instance,
-						xgrid, ygrid,
-						&ok, &zdata);
+				mbview_projectinverse(instance, MB_YES, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+				mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
 				if (ok == MB_NO)
 					zdata = data->area.cornerpoints[jendpoint].zdata;
-				mbview_projectll2display(instance,
-					xlon, ylat, zdata,
-					&xdisplay, &ydisplay, &zdisplay);
-				mbview_route_add(verbose, instance, working_route, npoints, waypoint,
-						xgrid, ygrid,
-						xlon, ylat, zdata,
-						xdisplay, ydisplay, zdisplay);
+				mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+				mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata, xdisplay,
+				                 ydisplay, zdisplay);
 				npoints++;
-				}
 			}
+		}
 
 		/* generate the lines */
-		if (nlines > 0 && status == MB_SUCCESS)
-			{
+		if (nlines > 0 && status == MB_SUCCESS) {
 			/* get unit vector for survey area boundaries */
-			dx = data->area.cornerpoints[1].xdisplay
-				- data->area.cornerpoints[0].xdisplay;
-			dy = data->area.cornerpoints[1].ydisplay
-				- data->area.cornerpoints[0].ydisplay;
+			dx = data->area.cornerpoints[1].xdisplay - data->area.cornerpoints[0].xdisplay;
+			dy = data->area.cornerpoints[1].ydisplay - data->area.cornerpoints[0].ydisplay;
 			r = sqrt(dx * dx + dy * dy);
 			dx = dx / r;
 			dy = dy / r;
@@ -6548,154 +5297,112 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 			/* generate points */
 			/* work in display coordinates */
 			nlinegroups = nlines / survey_interleaving + 1;
-			for (j=0;j<survey_interleaving;j++)
-			for (i=0;i<nlinegroups;i++)
-				{
-				/* get line number */
-				iline = i * survey_interleaving + j;
+			for (j = 0; j < survey_interleaving; j++)
+				for (i = 0; i < nlinegroups; i++) {
+					/* get line number */
+					iline = i * survey_interleaving + j;
 
-				if (iline < nlines)
-					{
-					/* get line position in survey area */
-					dxuse = dx * xx[iline];
-					dyuse = dy * xx[iline];
+					if (iline < nlines) {
+						/* get line position in survey area */
+						dxuse = dx * xx[iline];
+						dyuse = dy * xx[iline];
 
-					/* add a bit of transit before later interleaved lines */
-					if (jendpoint == 1)
-						{
-						dxextra = -dy * j * 0.25 * line_spacing_use;
-						dyextra = dx * j * 0.25 * line_spacing_use;
+						/* add a bit of transit before later interleaved lines */
+						if (jendpoint == 1) {
+							dxextra = -dy * j * 0.25 * line_spacing_use;
+							dyextra = dx * j * 0.25 * line_spacing_use;
 						}
-					else
-						{
-						dxextra = dy * j * 0.25 * line_spacing_use;
-						dyextra = -dx * j * 0.25 * line_spacing_use;
+						else {
+							dxextra = dy * j * 0.25 * line_spacing_use;
+							dyextra = -dx * j * 0.25 * line_spacing_use;
 						}
 
-					/* get first point */
-					waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
-					xdisplay = data->area.endpoints[jendpoint].xdisplay
-						+ dxuse + dxextra;
-					ydisplay = data->area.endpoints[jendpoint].ydisplay
-						+ dyuse + dyextra;
-					zdisplay = data->area.endpoints[jendpoint].zdisplay;
-					mbview_projectinverse(instance, MB_YES,
-							xdisplay, ydisplay, zdisplay,
-							&xlon, &ylat,
-							&xgrid, &ygrid);
-					mbview_getzdata(instance,
-							xgrid, ygrid,
-							&ok, &zdata);
-					if (ok == MB_NO)
-						zdata = data->area.endpoints[jendpoint].zdata;
-					mbview_projectll2display(instance,
-						xlon, ylat, zdata,
-						&xdisplay, &ydisplay, &zdisplay);
-fprintf(stderr,"\nSurvey Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n",
-iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay);
+						/* get first point */
+						waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
+						xdisplay = data->area.endpoints[jendpoint].xdisplay + dxuse + dxextra;
+						ydisplay = data->area.endpoints[jendpoint].ydisplay + dyuse + dyextra;
+						zdisplay = data->area.endpoints[jendpoint].zdisplay;
+						mbview_projectinverse(instance, MB_YES, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+						mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
+						if (ok == MB_NO)
+							zdata = data->area.endpoints[jendpoint].zdata;
+						mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+						fprintf(stderr, "\nSurvey Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n", iline, jendpoint,
+						        xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay);
 
-					/* add new route for first point, just add single point
-						after that */
-					if (first == MB_YES)
-						{
-						mbview_addroute(verbose, instance,
-								1, &xlon, &ylat, &waypoint,
-								color, 2, MB_YES, 
-								survey_name,
-								&working_route, &error);
-						first = MB_NO;
+						/* add new route for first point, just add single point
+						    after that */
+						if (first == MB_YES) {
+							mbview_addroute(verbose, instance, 1, &xlon, &ylat, &waypoint, color, 2, MB_YES, survey_name,
+							                &working_route, &error);
+							first = MB_NO;
 						}
-					else
-						{
-						mbview_route_add(verbose, instance, working_route, npoints, waypoint,
-								xgrid, ygrid,
-								xlon, ylat, zdata,
-								xdisplay, ydisplay, zdisplay);
+						else {
+							mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata,
+							                 xdisplay, ydisplay, zdisplay);
 						}
-					npoints++;
+						npoints++;
 
-					/* switch endpoint */
-					jendpoint = (jendpoint + 1) % 2;
+						/* switch endpoint */
+						jendpoint = (jendpoint + 1) % 2;
 
-					/* add a bit of transit before interleaved lines */
-					if (jendpoint == 1)
-						{
-						dxextra = -dy * j * 0.25 * line_spacing_use;
-						dyextra = dx * j * 0.25 * line_spacing_use;
+						/* add a bit of transit before interleaved lines */
+						if (jendpoint == 1) {
+							dxextra = -dy * j * 0.25 * line_spacing_use;
+							dyextra = dx * j * 0.25 * line_spacing_use;
 						}
-					else
-						{
-						dxextra = dy * j * 0.25 * line_spacing_use;
-						dyextra = -dx * j * 0.25 * line_spacing_use;
+						else {
+							dxextra = dy * j * 0.25 * line_spacing_use;
+							dyextra = -dx * j * 0.25 * line_spacing_use;
 						}
 
-					/* get second point */
-					waypoint = MBV_ROUTE_WAYPOINT_ENDLINE;
-					xdisplay = data->area.endpoints[jendpoint].xdisplay
-						+ dxuse + dxextra;
-					ydisplay = data->area.endpoints[jendpoint].ydisplay
-						+ dyuse + dyextra;
-					zdisplay = data->area.endpoints[jendpoint].zdisplay;
-					mbview_projectinverse(instance, MB_YES,
-							xdisplay, ydisplay, zdisplay,
-							&xlon, &ylat,
-							&xgrid, &ygrid);
-					mbview_getzdata(instance,
-							xgrid, ygrid,
-							&ok, &zdata);
-					if (ok == MB_NO)
-						zdata = data->area.endpoints[jendpoint].zdata;
-					mbview_projectll2display(instance,
-						xlon, ylat, zdata,
-						&xdisplay, &ydisplay, &zdisplay);
-fprintf(stderr,"Survey Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n",
-iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay);
+						/* get second point */
+						waypoint = MBV_ROUTE_WAYPOINT_ENDLINE;
+						xdisplay = data->area.endpoints[jendpoint].xdisplay + dxuse + dxextra;
+						ydisplay = data->area.endpoints[jendpoint].ydisplay + dyuse + dyextra;
+						zdisplay = data->area.endpoints[jendpoint].zdisplay;
+						mbview_projectinverse(instance, MB_YES, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+						mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
+						if (ok == MB_NO)
+							zdata = data->area.endpoints[jendpoint].zdata;
+						mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+						fprintf(stderr, "Survey Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n", iline, jendpoint, xlon,
+						        ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay);
 
-					/* add single point */
-					mbview_route_add(verbose, instance, working_route, npoints, waypoint,
-							xgrid, ygrid,
-							xlon, ylat, zdata,
-							xdisplay, ydisplay, zdisplay);
-					npoints++;
+						/* add single point */
+						mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata,
+						                 xdisplay, ydisplay, zdisplay);
+						npoints++;
 					}
 				}
 
 			/* deallocate line position array */
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&xx, &error);
-			}
+		}
 
 		/* do crosslines if requested */
-		if (survey_crosslines > 0 && survey_crosslines_last == MB_YES && status == MB_SUCCESS)
-			{
+		if (survey_crosslines > 0 && survey_crosslines_last == MB_YES && status == MB_SUCCESS) {
 			/* figure out which corner the mail lines ended at */
-			for (i=0;i<4;i++)
-				{
+			for (i = 0; i < 4; i++) {
 				xxx = xdisplay - data->area.cornerpoints[i].xdisplay;
 				yyy = ydisplay - data->area.cornerpoints[i].ydisplay;
 				rrr[i] = sqrt(xxx * xxx + yyy * yyy);
-				}
+			}
 			endcorner = 0;
-			for (i=1;i<4;i++)
-				{
+			for (i = 1; i < 4; i++) {
 				if (rrr[i] < rrr[endcorner])
 					endcorner = i;
-				}
+			}
 
 			/* get crossline vector */
-			if (endcorner == 0 || endcorner == 3)
-				{
-				dx = data->area.cornerpoints[1].xdisplay
-					- data->area.cornerpoints[0].xdisplay;
-				dy = data->area.cornerpoints[1].ydisplay
-					- data->area.cornerpoints[0].ydisplay;
-				}
-			else
-				{
-				dx = data->area.cornerpoints[0].xdisplay
-					- data->area.cornerpoints[1].xdisplay;
-				dy = data->area.cornerpoints[0].ydisplay
-					- data->area.cornerpoints[1].ydisplay;
-				}
+			if (endcorner == 0 || endcorner == 3) {
+				dx = data->area.cornerpoints[1].xdisplay - data->area.cornerpoints[0].xdisplay;
+				dy = data->area.cornerpoints[1].ydisplay - data->area.cornerpoints[0].ydisplay;
+			}
+			else {
+				dx = data->area.cornerpoints[0].xdisplay - data->area.cornerpoints[1].xdisplay;
+				dy = data->area.cornerpoints[0].ydisplay - data->area.cornerpoints[1].ydisplay;
+			}
 			r = sqrt(dx * dx + dy * dy);
 			dxd = dx / r;
 			dyd = dy / r;
@@ -6709,55 +5416,38 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 				kend = jstart + 1;
 			else
 				kend = jstart - 1;
-			dx = (data->area.endpoints[1].xdisplay
-				- data->area.endpoints[0].xdisplay) / (survey_crosslines + 1);
-			dy = (data->area.endpoints[1].ydisplay
-				- data->area.endpoints[0].ydisplay) / (survey_crosslines + 1);
-			if (endcorner >= 2)
-				{
+			dx = (data->area.endpoints[1].xdisplay - data->area.endpoints[0].xdisplay) / (survey_crosslines + 1);
+			dy = (data->area.endpoints[1].ydisplay - data->area.endpoints[0].ydisplay) / (survey_crosslines + 1);
+			if (endcorner >= 2) {
 				dx = -dx;
 				dy = -dy;
-				}
+			}
 			j = jstart;
-			for (i=0;i<survey_crosslines;i++)
-				{
+			for (i = 0; i < survey_crosslines; i++) {
 				/* get offset from corners */
 				dxuse = (i + 1) * dx;
 				dyuse = (i + 1) * dy;
-				if (j == jstart)
-					{
+				if (j == jstart) {
 					dxextra = -dxd * line_spacing_use;
 					dyextra = -dyd * line_spacing_use;
-					}
-				else
-					{
+				}
+				else {
 					dxextra = dxd * line_spacing_use;
 					dyextra = dyd * line_spacing_use;
-					}
+				}
 
 				/* get first point */
 				waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
-				xdisplay = data->area.cornerpoints[j].xdisplay
-					+ dxuse + dxextra;
-				ydisplay = data->area.cornerpoints[j].ydisplay
-					+ dyuse + dyextra;
+				xdisplay = data->area.cornerpoints[j].xdisplay + dxuse + dxextra;
+				ydisplay = data->area.cornerpoints[j].ydisplay + dyuse + dyextra;
 				zdisplay = data->area.cornerpoints[j].zdisplay;
-				mbview_projectinverse(instance, MB_YES,
-						xdisplay, ydisplay, zdisplay,
-						&xlon, &ylat,
-						&xgrid, &ygrid);
-				mbview_getzdata(instance,
-						xgrid, ygrid,
-						&ok, &zdata);
+				mbview_projectinverse(instance, MB_YES, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+				mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
 				if (ok == MB_NO)
 					zdata = data->area.cornerpoints[jendpoint].zdata;
-				mbview_projectll2display(instance,
-					xlon, ylat, zdata,
-					&xdisplay, &ydisplay, &zdisplay);
-				mbview_route_add(verbose, instance, working_route, npoints, waypoint,
-						xgrid, ygrid,
-						xlon, ylat, zdata,
-						xdisplay, ydisplay, zdisplay);
+				mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+				mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata, xdisplay,
+				                 ydisplay, zdisplay);
 				npoints++;
 
 				/* get second point */
@@ -6765,422 +5455,384 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 					j = kend;
 				else
 					j = jstart;
-				if (j == jstart)
-					{
+				if (j == jstart) {
 					dxextra = -dxd * line_spacing_use;
 					dyextra = -dyd * line_spacing_use;
-					}
-				else
-					{
+				}
+				else {
 					dxextra = dxd * line_spacing_use;
 					dyextra = dyd * line_spacing_use;
-					}
+				}
 
 				/* get second point */
 				waypoint = MBV_ROUTE_WAYPOINT_ENDLINE;
-				xdisplay = data->area.cornerpoints[j].xdisplay
-					+ dxuse + dxextra;
-				ydisplay = data->area.cornerpoints[j].ydisplay
-					+ dyuse + dyextra;
+				xdisplay = data->area.cornerpoints[j].xdisplay + dxuse + dxextra;
+				ydisplay = data->area.cornerpoints[j].ydisplay + dyuse + dyextra;
 				zdisplay = data->area.cornerpoints[j].zdisplay;
-				mbview_projectinverse(instance, MB_YES,
-						xdisplay, ydisplay, zdisplay,
-						&xlon, &ylat,
-						&xgrid, &ygrid);
-				mbview_getzdata(instance,
-						xgrid, ygrid,
-						&ok, &zdata);
+				mbview_projectinverse(instance, MB_YES, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+				mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
 				if (ok == MB_NO)
 					zdata = data->area.cornerpoints[jendpoint].zdata;
-				mbview_projectll2display(instance,
-					xlon, ylat, zdata,
-					&xdisplay, &ydisplay, &zdisplay);
-				mbview_route_add(verbose, instance, working_route, npoints, waypoint,
-						xgrid, ygrid,
-						xlon, ylat, zdata,
-						xdisplay, ydisplay, zdisplay);
+				mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+				mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata, xdisplay,
+				                 ydisplay, zdisplay);
 				npoints++;
-				}
-
 			}
+		}
 
 		/* free the memory for xx */
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&xx, &error);
-        
- 		/* update widgets */
-        mbview_updateroutelist();
+
+		/* update widgets */
+		mbview_updateroutelist();
 		do_mbgrdviz_arearoute_info(instance);
 		mbview_enableviewnavs(verbose, instance, &error);
 		status = mbview_update(verbose, instance, &error);
-		}
+	}
 
 	/* update widgets of remaining mbview windows */
-	for (i=0;i<MBV_MAX_WINDOWS;i++)
-		{
+	for (i = 0; i < MBV_MAX_WINDOWS; i++) {
 		if (i != instance && mbview_id[i] == MB_YES)
 			status = mbview_update(verbose, i, &error);
-		}
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-
-void
-do_mbgrdviz_arearoute_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_arearoute_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_arearoute_dismiss";
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 	/* reset current working route so the last one generated is saved */
 	working_route = -1;
 }
 /*---------------------------------------------------------------------------------------*/
 
-void
-do_mbgrdviz_arearoute_parameterchange( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_arearoute_parameterchange(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_arearoute_parameterchange";
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
-	int	status = MB_SUCCESS;
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
+	int status = MB_SUCCESS;
 
 	/* mbview instance */
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
 	struct mbview_struct *data;
-	char	*tmp;
+	char *tmp;
 
-    	/* get source mbview instance */
-	instance = (size_t) client_data;
+	/* get source mbview instance */
+	instance = (size_t)client_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-    	/* check data source for area to bounding desired survey */
+	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
 
 	/* check if area is currently defined */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		if (data->area_type != MBV_AREA_QUAD)
 			status = MB_FAILURE;
-		}
+	}
 
-    	/* get parameters */
-	if (status == MB_SUCCESS)
-		{
+	/* get parameters */
+	if (status == MB_SUCCESS) {
 		/* get values */
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_mode); ac++;
+		XtSetArg(args[ac], XmNposition, (XtPointer)&survey_mode);
+		ac++;
 		XtGetValues(spinText_arearoute_linecontrol, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_direction); ac++;
+		XtSetArg(args[ac], XmNposition, (XtPointer)&survey_direction);
+		ac++;
 		XtGetValues(spinText_arearoute_direction, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_crosslines); ac++;
+		XtSetArg(args[ac], XmNposition, (XtPointer)&survey_crosslines);
+		ac++;
 		XtGetValues(spinText_arearoute_crosslines, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_crosslines_last); ac++;
+		XtSetArg(args[ac], XmNposition, (XtPointer)&survey_crosslines_last);
+		ac++;
 		XtGetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_interleaving); ac++;
+		XtSetArg(args[ac], XmNposition, (XtPointer)&survey_interleaving);
+		ac++;
 		XtGetValues(spinText_arearoute_interleaving, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_color); ac++;
+		XtSetArg(args[ac], XmNposition, (XtPointer)&survey_color);
+		ac++;
 		XtGetValues(spinText_arearoute_color, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_linespacing); ac++;
+		XtSetArg(args[ac], XmNposition, (XtPointer)&survey_linespacing);
+		ac++;
 		XtGetValues(spinText_arearoute_linespacing, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_platform); ac++;
+		XtSetArg(args[ac], XmNposition, (XtPointer)&survey_platform);
+		ac++;
 		XtGetValues(spinText_arearoute_platform, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_swathwidth); ac++;
+		XtSetArg(args[ac], XmNposition, (XtPointer)&survey_swathwidth);
+		ac++;
 		XtGetValues(spinText_arearoute_swathwidth, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_altitude); ac++;
+		XtSetArg(args[ac], XmNposition, (XtPointer)&survey_altitude);
+		ac++;
 		XtGetValues(spinText_arearoute_altitude, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_depth); ac++;
+		XtSetArg(args[ac], XmNposition, (XtPointer)&survey_depth);
+		ac++;
 		XtGetValues(spinText_arearoute_depth, args, ac);
 
 		tmp = XmTextGetString(textField_arearoute_name);
 		if (tmp != NULL && strlen(tmp) > 0)
-			strcpy(survey_name,tmp);
-		else
-			{
+			strcpy(survey_name, tmp);
+		else {
 			if (strlen(survey_name) <= 0)
 				sprintf(survey_name, "Survey");
 			XmTextSetString(textField_arearoute_name, survey_name);
-			}
+		}
 		if (tmp != NULL)
 			XtFree(tmp);
 
-fprintf(stderr,"\nIn do_mbgrdviz_arearoute_parameterchange:\n");
-fprintf(stderr,"  survey_mode:                %d\n",survey_mode);
-fprintf(stderr,"  survey_platform:            %d\n",survey_platform);
-fprintf(stderr,"  survey_interleaving:        %d\n",survey_interleaving);
-fprintf(stderr,"  survey_direction:           %d\n",survey_direction);
-fprintf(stderr,"  survey_crosslines_last:     %d\n",survey_crosslines_last);
-fprintf(stderr,"  survey_crosslines:          %d\n",survey_crosslines);
-fprintf(stderr,"  survey_linespacing:         %d\n",survey_linespacing);
-fprintf(stderr,"  survey_swathwidth:          %d\n",survey_swathwidth);
-fprintf(stderr,"  survey_depth:               %d\n",survey_depth);
-fprintf(stderr,"  survey_altitude:            %d\n",survey_altitude);
-fprintf(stderr,"  survey_color:               %d\n",survey_color);
-fprintf(stderr,"  survey_name:                %s\n",survey_name);
+		fprintf(stderr, "\nIn do_mbgrdviz_arearoute_parameterchange:\n");
+		fprintf(stderr, "  survey_mode:                %d\n", survey_mode);
+		fprintf(stderr, "  survey_platform:            %d\n", survey_platform);
+		fprintf(stderr, "  survey_interleaving:        %d\n", survey_interleaving);
+		fprintf(stderr, "  survey_direction:           %d\n", survey_direction);
+		fprintf(stderr, "  survey_crosslines_last:     %d\n", survey_crosslines_last);
+		fprintf(stderr, "  survey_crosslines:          %d\n", survey_crosslines);
+		fprintf(stderr, "  survey_linespacing:         %d\n", survey_linespacing);
+		fprintf(stderr, "  survey_swathwidth:          %d\n", survey_swathwidth);
+		fprintf(stderr, "  survey_depth:               %d\n", survey_depth);
+		fprintf(stderr, "  survey_altitude:            %d\n", survey_altitude);
+		fprintf(stderr, "  survey_color:               %d\n", survey_color);
+		fprintf(stderr, "  survey_name:                %s\n", survey_name);
 
 		/* reset widgets accordingly (sensitivity and info) */
 		do_mbgrdviz_arearoute_recalc(instance);
-
-		}
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-void
-do_mbgrdviz_arearoute_recalc(size_t instance)
-{
+void do_mbgrdviz_arearoute_recalc(size_t instance) {
 	char function_name[] = "do_mbgrdviz_arearoute_recalc";
-	int	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	/* mbview instance */
-        Cardinal ac = 0;
-        Arg      args[256];
+	Cardinal ac = 0;
+	Arg args[256];
 	struct mbview_struct *data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:   %zu\n",instance);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:   %zu\n", instance);
+	}
 
-    	/* check data source for area to bounding desired survey */
+	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
 
 	/* check if area is currently defined */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		if (data->area_type != MBV_AREA_QUAD)
 			status = MB_FAILURE;
-		}
+	}
 
-    	/* set widgets */
-	if (status == MB_SUCCESS)
-		{
+	/* set widgets */
+	if (status == MB_SUCCESS) {
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
+		XtSetArg(args[ac], XmNsensitive, True);
+		ac++;
 		XtSetValues(spinText_arearoute_linecontrol, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
+		XtSetArg(args[ac], XmNsensitive, True);
+		ac++;
 		XtSetValues(spinText_arearoute_direction, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
+		XtSetArg(args[ac], XmNsensitive, True);
+		ac++;
 		XtSetValues(spinText_arearoute_crosslines, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
+		XtSetArg(args[ac], XmNsensitive, True);
+		ac++;
 		XtSetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
+		XtSetArg(args[ac], XmNsensitive, True);
+		ac++;
 		XtSetValues(spinText_arearoute_interleaving, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNsensitive, True); ac++;
+		XtSetArg(args[ac], XmNsensitive, True);
+		ac++;
 		XtSetValues(spinText_arearoute_color, args, ac);
 
 		ac = 0;
-		if (survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM)
-			{
-			XtSetArg(args[ac], XmNsensitive, True); ac++;
-			}
-		else
-			{
-			XtSetArg(args[ac], XmNsensitive, False); ac++;
-			}
+		if (survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM) {
+			XtSetArg(args[ac], XmNsensitive, True);
+			ac++;
+		}
+		else {
+			XtSetArg(args[ac], XmNsensitive, False);
+			ac++;
+		}
 		XtSetValues(spinText_arearoute_linespacing, args, ac);
 
 		ac = 0;
-		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE)
-			{
-			XtSetArg(args[ac], XmNsensitive, True); ac++;
-			}
-		else
-			{
-			XtSetArg(args[ac], XmNsensitive, False); ac++;
-			}
+		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE) {
+			XtSetArg(args[ac], XmNsensitive, True);
+			ac++;
+		}
+		else {
+			XtSetArg(args[ac], XmNsensitive, False);
+			ac++;
+		}
 		XtSetValues(spinText_arearoute_platform, args, ac);
 
 		ac = 0;
-		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE)
-			{
-			XtSetArg(args[ac], XmNsensitive, True); ac++;
-			}
-		else
-			{
-			XtSetArg(args[ac], XmNsensitive, False); ac++;
-			}
+		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE) {
+			XtSetArg(args[ac], XmNsensitive, True);
+			ac++;
+		}
+		else {
+			XtSetArg(args[ac], XmNsensitive, False);
+			ac++;
+		}
 		XtSetValues(spinText_arearoute_swathwidth, args, ac);
 
 		ac = 0;
-		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE
-			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE)
-			{
-			XtSetArg(args[ac], XmNsensitive, True); ac++;
-			}
-		else
-			{
-			XtSetArg(args[ac], XmNsensitive, False); ac++;
-			}
+		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE && survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE) {
+			XtSetArg(args[ac], XmNsensitive, True);
+			ac++;
+		}
+		else {
+			XtSetArg(args[ac], XmNsensitive, False);
+			ac++;
+		}
 		XtSetValues(spinText_arearoute_altitude, args, ac);
 
 		ac = 0;
-		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE
-			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH)
-			{
-			XtSetArg(args[ac], XmNsensitive, True); ac++;
-			}
-		else
-			{
-			XtSetArg(args[ac], XmNsensitive, False); ac++;
-			}
+		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE && survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH) {
+			XtSetArg(args[ac], XmNsensitive, True);
+			ac++;
+		}
+		else {
+			XtSetArg(args[ac], XmNsensitive, False);
+			ac++;
+		}
 		XtSetValues(spinText_arearoute_depth, args, ac);
 
 		do_mbgrdviz_arearoute_info(instance);
-
-		}
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-void
-do_mbgrdviz_arearoute_info(size_t instance)
-{
+void do_mbgrdviz_arearoute_info(size_t instance) {
 	char function_name[] = "do_mbgrdviz_arearoute_info";
-	int	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	/* mbview instance */
 	struct mbview_struct *data;
-	int	nroutewaypoint;
-	int	nroutpoint;
-	char	routename[MB_PATH_MAXLINE];
-	int	routecolor;
-	int	routesize;
-	double	routedistancelateral;
-	double	routedistancetopo;
-	char	info_text[MB_PATH_MAXLINE];
+	int nroutewaypoint;
+	int nroutpoint;
+	char routename[MB_PATH_MAXLINE];
+	int routecolor;
+	int routesize;
+	double routedistancelateral;
+	double routedistancetopo;
+	char info_text[MB_PATH_MAXLINE];
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:   %zu\n",instance);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:   %zu\n", instance);
+	}
 
-    	/* check data source for area to bounding desired survey */
+	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
 
 	/* check if area is currently defined */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		if (data->area_type != MBV_AREA_QUAD)
 			status = MB_FAILURE;
 		sprintf(info_text, ":::t\"No Current Area:\"");
-		}
+	}
 
-    	/* set widgets */
-	if (status == MB_SUCCESS)
-		{
-		if (working_route >= 0)
-			{
+	/* set widgets */
+	if (status == MB_SUCCESS) {
+		if (working_route >= 0) {
 			/* get info for working route */
-			status = mbview_getrouteinfo(verbose, instance,
-			    		working_route, &nroutewaypoint, &nroutpoint,
-					routename, &routecolor, &routesize,
-					&routedistancelateral, &routedistancetopo,
-					&error);
+			status = mbview_getrouteinfo(verbose, instance, working_route, &nroutewaypoint, &nroutpoint, routename, &routecolor,
+			                             &routesize, &routedistancelateral, &routedistancetopo, &error);
 
 			sprintf(info_text,
-			":::t\"Current Area:\":t\" Length: %.1f m  Width: %.1f m  Bearing: %.1f deg\":t\"New Route: %d  Name: %s\":t\" Waypoints: %d  Total Points:%d\":t\" Distance: %.1f m (lateral) %.1f m (over bottom)\"",
-				data->area.length,
-				data->area.width,
-				data->area.bearing,
-				working_route,
-				routename,
-				nroutewaypoint,
-				nroutpoint,
-				routedistancelateral,
-				routedistancetopo);
-			}
-		else
-			{
-			sprintf(info_text,
-			":::t\"Current Area:\":t\" Length: %.3f m\":t\" Width: %.3f m\":t\" Bearing: %.1f deg\"",
-				data->area.length,
-				data->area.width,
-				data->area.bearing);
-			}
-		set_mbview_label_multiline_string(label_arearoute_info, info_text);
+			        ":::t\"Current Area:\":t\" Length: %.1f m  Width: %.1f m  Bearing: %.1f deg\":t\"New Route: %d  Name: "
+			        "%s\":t\" Waypoints: %d  Total Points:%d\":t\" Distance: %.1f m (lateral) %.1f m (over bottom)\"",
+			        data->area.length, data->area.width, data->area.bearing, working_route, routename, nroutewaypoint, nroutpoint,
+			        routedistancelateral, routedistancetopo);
 		}
+		else {
+			sprintf(info_text, ":::t\"Current Area:\":t\" Length: %.3f m\":t\" Width: %.3f m\":t\" Bearing: %.1f deg\"",
+			        data->area.length, data->area.width, data->area.bearing);
+		}
+		set_mbview_label_multiline_string(label_arearoute_info, info_text);
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-void
-do_mbgrdviz_arearoute_linespacing_increment( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_arearoute_linespacing_increment(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_arearoute_linespacing_increment";
-        Cardinal ac = 0;
-        Arg      args[256];
-	int	linespacing;
-	int	increment;
+	Cardinal ac = 0;
+	Arg args[256];
+	int linespacing;
+	int increment;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
 	/* reset line spacing spinbox increment as value changes */
-  	ac = 0;
-	XtSetArg(args[ac], XmNposition, (XtPointer) &linespacing); ac++;
+	ac = 0;
+	XtSetArg(args[ac], XmNposition, (XtPointer)&linespacing);
+	ac++;
 	XtGetValues(spinText_arearoute_linespacing, args, ac);
 	if (linespacing < 25)
 		increment = 1;
@@ -7194,36 +5846,35 @@ do_mbgrdviz_arearoute_linespacing_increment( Widget w, XtPointer client_data, Xt
 		increment = 50;
 	else
 		increment = 100;
- 	ac = 0;
-	XtSetArg(args[ac], XmNincrementValue, increment); ac++;
+	ac = 0;
+	XtSetArg(args[ac], XmNincrementValue, increment);
+	ac++;
 	XtSetValues(spinText_arearoute_linespacing, args, ac);
- }
+}
 /*---------------------------------------------------------------------------------------*/
 
-void
-do_mbgrdviz_arearoute_altitude_increment( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_arearoute_altitude_increment(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_arearoute_altitude_increment";
-        Cardinal ac = 0;
-        Arg      args[256];
-	int	altitude;
-	int	increment;
+	Cardinal ac = 0;
+	Arg args[256];
+	int altitude;
+	int increment;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
 	/* reset line spacing spinbox increment as value changes */
-  	ac = 0;
-	XtSetArg(args[ac], XmNposition, (XtPointer) &altitude); ac++;
+	ac = 0;
+	XtSetArg(args[ac], XmNposition, (XtPointer)&altitude);
+	ac++;
 	XtGetValues(spinText_arearoute_altitude, args, ac);
 	if (altitude < 25)
 		increment = 1;
@@ -7237,38 +5888,36 @@ do_mbgrdviz_arearoute_altitude_increment( Widget w, XtPointer client_data, XtPoi
 		increment = 50;
 	else
 		increment = 100;
- 	ac = 0;
-	XtSetArg(args[ac], XmNincrementValue, increment); ac++;
+	ac = 0;
+	XtSetArg(args[ac], XmNincrementValue, increment);
+	ac++;
 	XtSetValues(spinText_arearoute_altitude, args, ac);
 }
 /*---------------------------------------------------------------------------------------*/
 
-
-void
-do_mbgrdviz_arearoute_depth_increment( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_arearoute_depth_increment(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_arearoute_depth_increment";
-	int	status = MB_SUCCESS;
-        Cardinal ac = 0;
-        Arg      args[256];
-	int	depth;
-	int	increment;
+	int status = MB_SUCCESS;
+	Cardinal ac = 0;
+	Arg args[256];
+	int depth;
+	int increment;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
 	/* reset line spacing spinbox increment as value changes */
-  	ac = 0;
-	XtSetArg(args[ac], XmNposition, (XtPointer) &depth); ac++;
+	ac = 0;
+	XtSetArg(args[ac], XmNposition, (XtPointer)&depth);
+	ac++;
 	XtGetValues(spinText_arearoute_depth, args, ac);
 	if (depth < 25)
 		increment = 1;
@@ -7282,221 +5931,185 @@ do_mbgrdviz_arearoute_depth_increment( Widget w, XtPointer client_data, XtPointe
 		increment = 50;
 	else
 		increment = 100;
- 	ac = 0;
-	XtSetArg(args[ac], XmNincrementValue, increment); ac++;
+	ac = 0;
+	XtSetArg(args[ac], XmNincrementValue, increment);
+	ac++;
 	XtSetValues(spinText_arearoute_depth, args, ac);
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:       %d\n",error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:      %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:       %d\n", error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:      %d\n", status);
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
-void
-do_mbgrdviz_realtime_start( Widget w, XtPointer client_data, XtPointer call_data)
-{
+void do_mbgrdviz_realtime_start(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_realtime_start";
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }
 
-void
-do_mbgrdviz_realtimesetup_path_reset( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_realtimesetup_path_reset(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_realtimesetup_path_reset";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }
 
-void
-do_mbgrdviz_realtime_pause( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_realtime_pause(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_realtime_pause";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }
 
-void
-do_mbgrdviz_realtime_stop( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_realtime_stop(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_realtime_stop";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }
 
-void
-do_mbgrdviz_realtime_resume( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_realtime_resume(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_realtime_resume";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }
 
-void
-do_mbgrdviz_realtimesetup_path_apply( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_realtimesetup_path_apply(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_realtimesetup_path_apply";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }
 
-
-void
-do_mbgrdviz_realtimesetup_icon( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_realtimesetup_icon(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_realtimesetup_icon";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }
 
-void
-do_mbgrdviz_realtimesetup_path_browse( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_realtimesetup_path_browse(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_realtimesetup_path_browse";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 
-	do_mbgrdviz_fileSelectionBox_realtime( w, client_data, call_data);
-
+	do_mbgrdviz_fileSelectionBox_realtime(w, client_data, call_data);
 }
 
-void
-do_mbgrdviz_realtimesetup_updaterate( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_realtimesetup_updaterate(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_realtimesetup_updaterate";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }
 
-void
-do_mbgrdviz_realtimesetup_path_test( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_realtimesetup_path_test(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_realtimesetup_path_test";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }
 
-void
-do_mbgrdviz_realtimesetup_pathmode( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs;
-    acs = (XmAnyCallbackStruct*)call_data;
+void do_mbgrdviz_realtimesetup_pathmode(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
 	char function_name[] = "do_mbgrdviz_realtimesetup_pathmode";
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %p\n",w);
-		fprintf(stderr,"dbg2       client_data: %p\n",client_data);
-		fprintf(stderr,"dbg2       call_data:   %p\n",call_data);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
 }

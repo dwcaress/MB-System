@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_dsl.h	8/5/94
  *	$Id$
  *
- *    Copyright (c) 1996-2016 by
+ *    Copyright (c) 1996-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -83,132 +83,104 @@
  */
 
 /* maximum number of beams and pixels */
-#define	MBSYS_DSL_MAXBEAMS_SIDE	    1024
-#define	MBSYS_DSL_MAXBEAMS	    2 * MBSYS_DSL_MAXBEAMS_SIDE
-#define	MBSYS_DSL_MAXPIXELS_SIDE    4096
-#define	MBSYS_DSL_MAXPIXELS	    2 * MBSYS_DSL_MAXPIXELS_SIDE
-#define	MBSYS_DSL_COMMENT_LENGTH	80
+#define MBSYS_DSL_MAXBEAMS_SIDE 1024
+#define MBSYS_DSL_MAXBEAMS 2 * MBSYS_DSL_MAXBEAMS_SIDE
+#define MBSYS_DSL_MAXPIXELS_SIDE 4096
+#define MBSYS_DSL_MAXPIXELS 2 * MBSYS_DSL_MAXPIXELS_SIDE
+#define MBSYS_DSL_COMMENT_LENGTH 80
 
 /* datagram types */
-#define	DSL_NONE		0x00000000L
-#define	DSL_HEADER		0x44534C20L	/* "DSL " */
-#define	DSL_BATH		0x42415448L	/* "BATH" */
-#define	DSL_AMP			0x414D5020L	/* "AMP " */
-#define	DSL_COMMENT		0x434f4d4dL	/* "COMM" */
+#define DSL_NONE 0x00000000L
+#define DSL_HEADER 0x44534C20L  /* "DSL " */
+#define DSL_BATH 0x42415448L    /* "BATH" */
+#define DSL_AMP 0x414D5020L     /* "AMP " */
+#define DSL_COMMENT 0x434f4d4dL /* "COMM" */
 
 /* internal data structure */
-struct mbsys_dsl_struct
-	{
+struct mbsys_dsl_struct {
 	/* type of data record */
-	int	kind;			/* Data vs Comment */
+	int kind; /* Data vs Comment */
 
 	/* record header */
-	int	rec_type;		/* always "DSL " */
-	int	rec_len;
-	int	rec_hdr_len;
-	unsigned int p_flags;		/* processing flags */
-	int	num_data_types;		/* number of data types in rec */
-   	int	ping;			/* ping number */
-   	char	sonar_cmd[4];		/* sonar parameters */
-   	char	time_stamp[24];		/* ascii event time */
-  	float	nav_x;			/* x position */
-   	float	nav_y;			/* y position */
-   	float	depth;			/* depth - meters */
-   	float	heading;		/* heading of vehicle - degrees */
-   	float	pitch;			/* pitch - degrees */
-   	float	roll;			/* roll - degrees */
-   	float	alt;			/* altitude - meters */
-   	float	ang_offset;	 	/* pointing ang relative to nose - deg*/
-   	int	transmit_pwr;  		/* transmit power decibels */
-   	int	gain_port;		/* db - not sure if belongs here */
-   	int	gain_starbd;		/* db - not sure if belongs here */
-   	float	pulse_width;		/* pulse width */
-   	int	swath_width;		/* meters */
-   	char	side;			/* 0 - port, 1 - stbd for fwd scan */
-   	char	swapped;		/* data,header: 00-PC 01-SunHdr 11-Sun*/
-	int	tv_sec;			/* seconds */
-	int	tv_usec;		/* and microseconds */
-   	short	digitalinterface;       /* digital interface: 0,1,or 2 -
-					 * must be specified in config file */
-    	short reserved[5];
+	int rec_type; /* always "DSL " */
+	int rec_len;
+	int rec_hdr_len;
+	unsigned int p_flags;   /* processing flags */
+	int num_data_types;     /* number of data types in rec */
+	int ping;               /* ping number */
+	char sonar_cmd[4];      /* sonar parameters */
+	char time_stamp[24];    /* ascii event time */
+	float nav_x;            /* x position */
+	float nav_y;            /* y position */
+	float depth;            /* depth - meters */
+	float heading;          /* heading of vehicle - degrees */
+	float pitch;            /* pitch - degrees */
+	float roll;             /* roll - degrees */
+	float alt;              /* altitude - meters */
+	float ang_offset;       /* pointing ang relative to nose - deg*/
+	int transmit_pwr;       /* transmit power decibels */
+	int gain_port;          /* db - not sure if belongs here */
+	int gain_starbd;        /* db - not sure if belongs here */
+	float pulse_width;      /* pulse width */
+	int swath_width;        /* meters */
+	char side;              /* 0 - port, 1 - stbd for fwd scan */
+	char swapped;           /* data,header: 00-PC 01-SunHdr 11-Sun*/
+	int tv_sec;             /* seconds */
+	int tv_usec;            /* and microseconds */
+	short digitalinterface; /* digital interface: 0,1,or 2 -
+	                         * must be specified in config file */
+	short reserved[5];
 
 	/* bathymetry record */
-	int	bat_type;		/* always "BATH" */
-	int	bat_len;
-	int	bat_hdr_len;
-	int	bat_num_bins;
-	float	bat_sampleSize;
+	int bat_type; /* always "BATH" */
+	int bat_len;
+	int bat_hdr_len;
+	int bat_num_bins;
+	float bat_sampleSize;
 	unsigned int bat_p_flags;
-	float	bat_max_range; /* meters */
-	int	bat_future[9];
-	float	bat_port[MBSYS_DSL_MAXBEAMS_SIDE];
-	float	bat_stbd[MBSYS_DSL_MAXBEAMS_SIDE];
+	float bat_max_range; /* meters */
+	int bat_future[9];
+	float bat_port[MBSYS_DSL_MAXBEAMS_SIDE];
+	float bat_stbd[MBSYS_DSL_MAXBEAMS_SIDE];
 
 	/* amplitude record */
-	int	amp_type;		/* always "AMP " */
-	int	amp_len;
-	int	amp_hdr_len;
-	int	amp_num_samp;
-	float	amp_sampleSize;
+	int amp_type; /* always "AMP " */
+	int amp_len;
+	int amp_hdr_len;
+	int amp_num_samp;
+	float amp_sampleSize;
 	unsigned int amp_p_flags; /* offset/slr, ... */
-	float	amp_max_range; /* meters */
-	int	amp_channel;     /* 1-upper/0-lower */
-	int	amp_future[8];
-	float	amp_port[MBSYS_DSL_MAXPIXELS];
-	float	amp_stbd[MBSYS_DSL_MAXPIXELS_SIDE];
+	float amp_max_range;      /* meters */
+	int amp_channel;          /* 1-upper/0-lower */
+	int amp_future[8];
+	float amp_port[MBSYS_DSL_MAXPIXELS];
+	float amp_stbd[MBSYS_DSL_MAXPIXELS_SIDE];
 
 	/* comment */
-	char	comment[MBSYS_DSL_COMMENT_LENGTH];
-	};
+	char comment[MBSYS_DSL_COMMENT_LENGTH];
+};
 
 /* system specific function prototypes */
-int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_dsl_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_dsl_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_dsl_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_dsl_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *detects, int *error);
-int mbsys_dsl_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-int mbsys_dsl_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_dsl_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_dsl_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
+int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_dsl_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_dsl_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                      double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
+                      double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                      double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                     double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                     double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                     double *ssalongtrack, char *comment, int *error);
+int mbsys_dsl_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                     double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                     double *ssv, int *error);
+int mbsys_dsl_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+int mbsys_dsl_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                               double *altitude, int *error);
+int mbsys_dsl_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                          double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
+                          double *heave, int *error);
+int mbsys_dsl_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
+                         double speed, double heading, double draft, double roll, double pitch, double heave, int *error);
+int mbsys_dsl_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_swap.c	7/6/94
  *    $Id$
  *
- *    Copyright (c) 1993-2016 by
+ *    Copyright (c) 1993-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -43,39 +43,36 @@
 
 /*--------------------------------------------------------------------*/
 /* function mb_swap_check determines if the cpu is byteswapped */
-int mb_swap_check()
-{
+int mb_swap_check() {
 	unsigned short testshort = 255;
-	char		*testchar;
-	int	byteswapped;
-	testchar = (char *) &testshort;
+	char *testchar;
+	int byteswapped;
+	testchar = (char *)&testshort;
 	if (testchar[0] == 0)
 		byteswapped = MB_NO;
 	else
 		byteswapped = MB_YES;
 
-	return(byteswapped);
+	return (byteswapped);
 }
 
 /*--------------------------------------------------------------------*/
 /* function mb_swap_float swaps the bytes of an 4 byte float value */
-int mb_swap_float(float *a)
-{
-	unsigned int	*t;
-	t = (unsigned int *) a;
+int mb_swap_float(float *a) {
+	unsigned int *t;
+	t = (unsigned int *)a;
 	*t = mb_swap_int(*t);
 
-	return(MB_SUCCESS);
+	return (MB_SUCCESS);
 }
 
 /*--------------------------------------------------------------------*/
 /* function mb_swap_double swaps the bytes of an 8 byte double value */
-int mb_swap_double(double *a)
-{
+int mb_swap_double(double *a) {
 	mb_u_char bc[8];
 	mb_u_char *ac;
 
-	ac = (mb_u_char *) a;
+	ac = (mb_u_char *)a;
 	bc[0] = ac[7];
 	bc[1] = ac[6];
 	bc[2] = ac[5];
@@ -93,16 +90,15 @@ int mb_swap_double(double *a)
 	ac[6] = bc[6];
 	ac[7] = bc[7];
 
-	return(MB_SUCCESS);
+	return (MB_SUCCESS);
 }
 /*--------------------------------------------------------------------*/
 /* function mb_swap_long swaps the bytes of an 8 byte long value */
-int mb_swap_long(mb_s_long *a)
-{
+int mb_swap_long(mb_s_long *a) {
 	mb_u_char bc[8];
 	mb_u_char *ac;
 
-	ac = (mb_u_char *) a;
+	ac = (mb_u_char *)a;
 	bc[0] = ac[7];
 	bc[1] = ac[6];
 	bc[2] = ac[5];
@@ -120,6 +116,6 @@ int mb_swap_long(mb_s_long *a)
 	ac[6] = bc[6];
 	ac[7] = bc[7];
 
-	return(MB_SUCCESS);
+	return (MB_SUCCESS);
 }
 /*--------------------------------------------------------------------*/

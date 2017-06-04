@@ -2,7 +2,7 @@
  *    The MB-system:	mbvelocity.h	10/15/2009
  *    $Id$
  *
- *    Copyright (c); 2009-2016 by
+ *    Copyright (c); 2009-2017 by
  *    David W. Caress (caress@mbari.org);
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -30,67 +30,65 @@
 /*--------------------------------------------------------------------*/
 
 /* mbvelocitytool control defines */
-#define	MAX_PROFILES	100
-#define	PICK_DISTANCE	50
-#define	NUM_EDIT_START	6
+#define MAX_PROFILES 100
+#define PICK_DISTANCE 50
+#define NUM_EDIT_START 6
 
 /* velocity profile structure definition */
-struct profile
-	{
-	int	n;
-	int	nalloc;
-	mb_path	name;
-	double	*depth;
-	double	*velocity;
-	};
+struct profile {
+	int n;
+	int nalloc;
+	mb_path name;
+	double *depth;
+	double *velocity;
+};
 
 /* ping structure definition */
-struct mbvt_ping_struct
-	{
-	int	allocated;
-	int	time_i[7];
-	double	time_d;
-	double	navlon;
-	double	navlat;
-	double	speed;
-	double	heading;
-	double	sonardepth;
-	double	ssv;
-	int	beams_bath;
-	char	*beamflag;
-	double	*bath;
-	double	*bathacrosstrack;
-	double	*bathalongtrack;
-	double	*ttimes;
-	double	*angles;
-	double	*angles_forward;
-	double	*angles_null;
-	double	*heave;
-	double	*alongtrack_offset;
-	};
+struct mbvt_ping_struct {
+	int allocated;
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double sonardepth;
+	double ssv;
+	int beams_bath;
+	char *beamflag;
+	double *bath;
+	double *bathacrosstrack;
+	double *bathalongtrack;
+	double *ttimes;
+	double *angles;
+	double *angles_forward;
+	double *angles_null;
+	double *heave;
+	double *alongtrack_offset;
+};
 
 /* function prototypes */
 void do_mbvelocity_init(int argc, char **argv);
 void do_set_controls(void);
-void do_velrange( Widget w, XtPointer client_data, XtPointer call_data);
-void do_velcenter( Widget w, XtPointer client_data, XtPointer call_data);
-void do_process_mb( Widget w, XtPointer client_data, XtPointer call_data);
-void do_maxdepth( Widget w, XtPointer client_data, XtPointer call_data);
-void do_anglemode( Widget w, XtPointer client_data, XtPointer call_data);
-void do_quit( Widget w, XtPointer client_data, XtPointer call_data);
-void do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data);
-void do_open( Widget w, XtPointer client_data, XtPointer call_data);
+void do_velrange(Widget w, XtPointer client_data, XtPointer call_data);
+void do_velcenter(Widget w, XtPointer client_data, XtPointer call_data);
+void do_process_mb(Widget w, XtPointer client_data, XtPointer call_data);
+void do_maxdepth(Widget w, XtPointer client_data, XtPointer call_data);
+void do_anglemode(Widget w, XtPointer client_data, XtPointer call_data);
+void do_quit(Widget w, XtPointer client_data, XtPointer call_data);
+void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data);
+void do_open(Widget w, XtPointer client_data, XtPointer call_data);
 void do_open_commandline(char *wfile, char *sfile, char *file, int format);
-void do_new_profile( Widget w, XtPointer client_data, XtPointer call_data);
-void do_residual_range( Widget w, XtPointer client_data, XtPointer call_data);
-void do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data);
-void do_save_swath_svp( Widget w, XtPointer client_data, XtPointer call_data);
-void do_save_residuals( Widget w, XtPointer client_data, XtPointer call_data);
-void do_io_mode_mb( Widget w, XtPointer client_data, XtPointer call_data);
-void do_io_mode_open_svp_display( Widget w, XtPointer client_data, XtPointer call_data);
-void do_io_mode_save_svp( Widget w, XtPointer client_data, XtPointer call_data);
-void do_io_mode_open_svp_edit( Widget w, XtPointer client_data, XtPointer call_data);
-void do_expose( Widget w, XtPointer client_data, XtPointer call_data);
+void do_new_profile(Widget w, XtPointer client_data, XtPointer call_data);
+void do_residual_range(Widget w, XtPointer client_data, XtPointer call_data);
+void do_canvas_event(Widget w, XtPointer client_data, XtPointer call_data);
+void do_save_swath_svp(Widget w, XtPointer client_data, XtPointer call_data);
+void do_save_residuals(Widget w, XtPointer client_data, XtPointer call_data);
+void do_io_mode_mb(Widget w, XtPointer client_data, XtPointer call_data);
+void do_io_mode_open_svp_display(Widget w, XtPointer client_data, XtPointer call_data);
+void do_io_mode_save_svp(Widget w, XtPointer client_data, XtPointer call_data);
+void do_io_mode_open_svp_edit(Widget w, XtPointer client_data, XtPointer call_data);
+void do_expose(Widget w, XtPointer client_data, XtPointer call_data);
 int do_wait_until_viewed(XtAppContext app);
 int do_message_on(char *message);
 int do_message_off(void);
@@ -102,12 +100,10 @@ void get_text_string(Widget w, String str);
 int mbvt_init(int argc, char **argv);
 int mbvt_quit(void);
 int mbvt_set_graphics(void *xgid, int *brdr, int ncol, unsigned int *pixels);
-int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
-	double *s_velrange, double *s_velcenter, double *s_resrange,
-	int *s_anglemode, int *s_format);
-int mbvt_set_values(int s_edit, int s_ndisplay,
-		double s_maxdepth, double s_velrange, double s_velcenter,
-		double s_resrange, int s_anglemode);
+int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth, double *s_velrange, double *s_velcenter, double *s_resrange,
+                    int *s_anglemode, int *s_format);
+int mbvt_set_values(int s_edit, int s_ndisplay, double s_maxdepth, double s_velrange, double s_velcenter, double s_resrange,
+                    int s_anglemode);
 int mbvt_open_edit_profile(char *file);
 int mbvt_new_edit_profile(void);
 int mbvt_save_edit_profile(char *file);
@@ -126,7 +122,6 @@ int mbvt_get_format(char *file, int *form);
 int mbvt_open_swath_file(char *file, int form, int *numload);
 int mbvt_deallocate_swath(void);
 int mbvt_process_multibeam(void);
-
 
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
 void BxManageCB(Widget w, XtPointer client, XtPointer call);

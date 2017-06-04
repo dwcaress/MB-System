@@ -15,7 +15,6 @@
  *
  */
 
-
 /* Begin user code block <file_comments> */
 
 #ifndef SANS
@@ -70,59 +69,57 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 /**
  * Create the mb3dsdg_mainWindow hierarchy of widgets.
  */
-Widget
-Createmb3dsdg_mainWindow(Widget parent)
-{
-    Cardinal ac = 0;
-    Arg      args[256];
-    Cardinal cdc = 0;
-    Boolean  argok = False;
-    Widget   mb3dsdg_mainWindow;
-    Widget   mb3dsdg_dialogShell;
-    static Mb3dsdgData mb3dsdg;
+Widget Createmb3dsdg_mainWindow(Widget parent) {
+	Cardinal ac = 0;
+	Arg args[256];
+	Cardinal cdc = 0;
+	Boolean argok = False;
+	Widget mb3dsdg_mainWindow;
+	Widget mb3dsdg_dialogShell;
+	static Mb3dsdgData mb3dsdg;
 
-    /**
-     * Register the converters for the widgets.
-     */
-    RegisterBxConverters(XtWidgetToApplicationContext(parent));
-    XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
+	/**
+	 * Register the converters for the widgets.
+	 */
+	RegisterBxConverters(XtWidgetToApplicationContext(parent));
+	XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
 
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 747); ac++;
-    XtSetArg(args[ac], XmNy, 78); ac++;
-    XtSetArg(args[ac], XmNwidth, 197); ac++;
-    XtSetArg(args[ac], XmNheight, 104); ac++;
-    mb3dsdg_mainWindow = XmCreateMainWindow(parent,
-        (char *)"mb3dsdg_mainWindow",
-        args,
-        ac);
-    XtAddCallback(mb3dsdg_mainWindow, XmNdestroyCallback, BxExitCB, (XtPointer)0);
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 747);
+	ac++;
+	XtSetArg(args[ac], XmNy, 78);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 197);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 104);
+	ac++;
+	mb3dsdg_mainWindow = XmCreateMainWindow(parent, (char *)"mb3dsdg_mainWindow", args, ac);
+	XtAddCallback(mb3dsdg_mainWindow, XmNdestroyCallback, BxExitCB, (XtPointer)0);
 
-    ac = 0;
-    XtSetArg(args[ac], XmNwidth, 1011); ac++;
-    XtSetArg(args[ac], XmNheight, 660); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
-    mb3dsdg_dialogShell = XmCreateDialogShell(mb3dsdg_mainWindow,
-        (char *)"mb3dsdg_dialogShell",
-        args,
-        ac);
+	ac = 0;
+	XtSetArg(args[ac], XmNwidth, 1011);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 660);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
+	ac++;
+	mb3dsdg_dialogShell = XmCreateDialogShell(mb3dsdg_mainWindow, (char *)"mb3dsdg_dialogShell", args, ac);
 
-    Mb3dsdgCreate(&(mb3dsdg),
-        mb3dsdg_dialogShell,
-        "mb3dsdg",
-        args,
-        ac);
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1007); ac++;
-    XtSetArg(args[ac], XmNwidth, 1011); ac++;
-    XtSetArg(args[ac], XmNheight, 660); ac++;
-    XtSetValues(mb3dsdg.Mb3dsdg, args, ac);
+	Mb3dsdgCreate(&(mb3dsdg), mb3dsdg_dialogShell, "mb3dsdg", args, ac);
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1007);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 1011);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 660);
+	ac++;
+	XtSetValues(mb3dsdg.Mb3dsdg, args, ac);
 
-
-    /* Begin user code block <end_Createmb3dsdg_mainWindow> */
-    /* End user code block <end_Createmb3dsdg_mainWindow> */
-    return( mb3dsdg_mainWindow );
+	/* Begin user code block <end_Createmb3dsdg_mainWindow> */
+	/* End user code block <end_Createmb3dsdg_mainWindow> */
+	return (mb3dsdg_mainWindow);
 }

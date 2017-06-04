@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_sbsiomrg.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1993-2016 by
+ *    Copyright (c) 1993-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -47,41 +47,39 @@
  * of the binary data structure used in the MBF_SBSIOMRG format.
  */
 
- /* size of data records */
-#define MBF_SBSIOMRG_RECORD_SIZE	100
+/* size of data records */
+#define MBF_SBSIOMRG_RECORD_SIZE 100
 
 /* number of beams in raw and processed pings */
-#define	MB_BEAMS_RAW_SBSIOMRG	16
-#define	MB_BEAMS_PROC_SBSIOMRG	19
+#define MB_BEAMS_RAW_SBSIOMRG 16
+#define MB_BEAMS_PROC_SBSIOMRG 19
 
-struct mbf_sbsiomrg_data_struct
-	{
-	short	year;		/* year (4 digits) */
-	short	day;		/* julian day (1-366) */
-	short	min;		/* minutes from beginning of day (0-1439) */
-	short	sec;		/* seconds from beginning of minute (0-59) */
-	short	lon2u;		/* minutes east of prime meridian */
-	short	lon2b;		/* fraction of minute times 10000 */
-	short	lat2u;		/* number of minutes north of 90S */
-	short	lat2b;		/* fraction of minute times 10000 */
-	short	spare1[3];	/* unused */
-	unsigned short	sbtim;	/* Sea Beam computer clock time in 10ths of
-					seconds from start of hour (0-3600) */
-	unsigned short	sbhdg;	/* Sea Beam gyro heading
-					0 = 0 degrees
-					1 = 0.0055 degrees
-					16384 = 90 degrees
-					65535 = 359.9945 degrees
-					0 = 360 degrees */
-	short	deph[16];	/* 16 depths from Sea Beam in meters
-					assuming 1500 m/s water velocity */
-	short	dist[16];	/* 16 cross track distances in meters from port
-					(negative) to starboard (positive) */
-	short	spare2[5];	/* unused */
-	};
+struct mbf_sbsiomrg_data_struct {
+	short year;           /* year (4 digits) */
+	short day;            /* julian day (1-366) */
+	short min;            /* minutes from beginning of day (0-1439) */
+	short sec;            /* seconds from beginning of minute (0-59) */
+	short lon2u;          /* minutes east of prime meridian */
+	short lon2b;          /* fraction of minute times 10000 */
+	short lat2u;          /* number of minutes north of 90S */
+	short lat2b;          /* fraction of minute times 10000 */
+	short spare1[3];      /* unused */
+	unsigned short sbtim; /* Sea Beam computer clock time in 10ths of
+	              seconds from start of hour (0-3600) */
+	unsigned short sbhdg; /* Sea Beam gyro heading
+	              0 = 0 degrees
+	              1 = 0.0055 degrees
+	              16384 = 90 degrees
+	              65535 = 359.9945 degrees
+	              0 = 360 degrees */
+	short deph[16];       /* 16 depths from Sea Beam in meters
+	                  assuming 1500 m/s water velocity */
+	short dist[16];       /* 16 cross track distances in meters from port
+	                  (negative) to starboard (positive) */
+	short spare2[5];      /* unused */
+};
 
-struct mbf_sbsiomrg_struct
-	{
-	int	kind;
+struct mbf_sbsiomrg_struct {
+	int kind;
 	struct mbf_sbsiomrg_data_struct data;
-	};
+};

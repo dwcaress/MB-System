@@ -33,16 +33,16 @@
 PJ_CVSID("$Id$");
 
 static projCtx_t default_context;
-static int       default_context_initialized = 0;
+static int default_context_initialized = 0;
 
 /************************************************************************/
 /*                             pj_get_ctx()                             */
 /************************************************************************/
 
-projCtx pj_get_ctx( projPJ pj )
+projCtx pj_get_ctx(projPJ pj)
 
 {
-    return pj->ctx;
+	return pj->ctx;
 }
 
 /************************************************************************/
@@ -51,10 +51,10 @@ projCtx pj_get_ctx( projPJ pj )
 /*      Note we do not deallocate the old context!                      */
 /************************************************************************/
 
-void pj_set_ctx( projPJ pj, projCtx ctx )
+void pj_set_ctx(projPJ pj, projCtx ctx)
 
 {
-    pj->ctx = ctx;
+	pj->ctx = ctx;
 }
 
 /************************************************************************/
@@ -64,28 +64,26 @@ void pj_set_ctx( projPJ pj, projCtx ctx )
 projCtx pj_get_default_ctx()
 
 {
-    pj_acquire_lock();
+	pj_acquire_lock();
 
-    if( !default_context_initialized )
-    {
-        default_context_initialized = 1;
-        default_context.last_errno = 0;
-        default_context.debug_level = PJ_LOG_NONE;
-        default_context.logger = pj_stderr_logger;
-        default_context.app_data = NULL;
+	if (!default_context_initialized) {
+		default_context_initialized = 1;
+		default_context.last_errno = 0;
+		default_context.debug_level = PJ_LOG_NONE;
+		default_context.logger = pj_stderr_logger;
+		default_context.app_data = NULL;
 
-        if( getenv("PROJ_DEBUG") != NULL )
-        {
-            if( atoi(getenv("PROJ_DEBUG")) > 0 )
-                default_context.debug_level = atoi(getenv("PROJ_DEBUG"));
-            else
-                default_context.debug_level = PJ_LOG_DEBUG_MINOR;
-        }
-    }
+		if (getenv("PROJ_DEBUG") != NULL) {
+			if (atoi(getenv("PROJ_DEBUG")) > 0)
+				default_context.debug_level = atoi(getenv("PROJ_DEBUG"));
+			else
+				default_context.debug_level = PJ_LOG_DEBUG_MINOR;
+		}
+	}
 
-    pj_release_lock();
+	pj_release_lock();
 
-    return &default_context;
+	return &default_context;
 }
 
 /************************************************************************/
@@ -95,31 +93,31 @@ projCtx pj_get_default_ctx()
 projCtx pj_ctx_alloc()
 
 {
-    projCtx ctx = (projCtx_t *) malloc(sizeof(projCtx_t));
-    memcpy( ctx, pj_get_default_ctx(), sizeof(projCtx_t) );
-    ctx->last_errno = 0;
+	projCtx ctx = (projCtx_t *)malloc(sizeof(projCtx_t));
+	memcpy(ctx, pj_get_default_ctx(), sizeof(projCtx_t));
+	ctx->last_errno = 0;
 
-    return ctx;
+	return ctx;
 }
 
 /************************************************************************/
 /*                            pj_ctx_free()                             */
 /************************************************************************/
 
-void pj_ctx_free( projCtx ctx )
+void pj_ctx_free(projCtx ctx)
 
 {
-    free( ctx );
+	free(ctx);
 }
 
 /************************************************************************/
 /*                          pj_ctx_get_errno()                          */
 /************************************************************************/
 
-int pj_ctx_get_errno( projCtx ctx )
+int pj_ctx_get_errno(projCtx ctx)
 
 {
-    return ctx->last_errno;
+	return ctx->last_errno;
 }
 
 /************************************************************************/
@@ -128,52 +126,50 @@ int pj_ctx_get_errno( projCtx ctx )
 /*      Also sets the global errno.                                     */
 /************************************************************************/
 
-void pj_ctx_set_errno( projCtx ctx, int new_errno )
+void pj_ctx_set_errno(projCtx ctx, int new_errno)
 
 {
-    ctx->last_errno = new_errno;
-    if( new_errno != 0 )
-        pj_errno = new_errno;
+	ctx->last_errno = new_errno;
+	if (new_errno != 0)
+		pj_errno = new_errno;
 }
 
 /************************************************************************/
 /*                          pj_ctx_set_debug()                          */
 /************************************************************************/
 
-void pj_ctx_set_debug( projCtx ctx, int new_debug )
+void pj_ctx_set_debug(projCtx ctx, int new_debug)
 
 {
-    ctx->debug_level = new_debug;
+	ctx->debug_level = new_debug;
 }
 
 /************************************************************************/
 /*                         pj_ctx_set_logger()                          */
 /************************************************************************/
 
-void pj_ctx_set_logger( projCtx ctx, void (*new_logger)(void*,int,const char*) )
+void pj_ctx_set_logger(projCtx ctx, void (*new_logger)(void *, int, const char *))
 
 {
-    ctx->logger = new_logger;
+	ctx->logger = new_logger;
 }
 
 /************************************************************************/
 /*                        pj_ctx_set_app_data()                         */
 /************************************************************************/
 
-void pj_ctx_set_app_data( projCtx ctx, void *new_app_data )
+void pj_ctx_set_app_data(projCtx ctx, void *new_app_data)
 
 {
-    ctx->app_data = new_app_data;
+	ctx->app_data = new_app_data;
 }
 
 /************************************************************************/
 /*                        pj_ctx_get_app_data()                         */
 /************************************************************************/
 
-void *pj_ctx_get_app_data( projCtx ctx )
+void *pj_ctx_get_app_data(projCtx ctx)
 
 {
-    return ctx->app_data;
+	return ctx->app_data;
 }
-
-

@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hsmd.h	8/12/95
  *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.h,v 5.5 2005/11/05 00:48:04 caress Exp $
  *
- *    Copyright (c) 1995-2016 by
+ *    Copyright (c) 1995-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -83,140 +83,112 @@
  *      the data compatible with Atlas software.
  */
 
-
 /* maximum number of depth-velocity pairs */
-#define MBSYS_HSMD_MAXVEL 20	/* As dimensioned in the Atlas code */
+#define MBSYS_HSMD_MAXVEL 20 /* As dimensioned in the Atlas code */
 
 /* array sizes */
-#define MBSYS_HSMD_BEAMS	79
-#define MBSYS_HSMD_PIXELS	319
-#define MBSYS_HSMD_BEAMS_PING	40
-#define MBSYS_HSMD_PIXELS_PING	160
-#define MBSYS_HSMD_COMMENT	128	/* length of a comment string */
+#define MBSYS_HSMD_BEAMS 79
+#define MBSYS_HSMD_PIXELS 319
+#define MBSYS_HSMD_BEAMS_PING 40
+#define MBSYS_HSMD_PIXELS_PING 160
+#define MBSYS_HSMD_COMMENT 128 /* length of a comment string */
 
-struct mbsys_hsmd_struct
-	{
-	int	kind;
+struct mbsys_hsmd_struct {
+	int kind;
 
 	/* ------------------------------- Header data */
-	char	scsid[4];		/* Typically "DXT" */
-	char	scsart[4];		/* Typically "REI" or "RMM" */
-	int	scslng;			/* length of subsequent data */
-	int	scsext;			/* seems to be 0 */
-	int	scsblcnt;		/* seems to be ping number */
-	double	scsres1;		/* seems to be 0 */
-	int	transid;		/* ID of the type of data to follow */
-	double	reftime;		/* Internal time of day reference */
+	char scsid[4];  /* Typically "DXT" */
+	char scsart[4]; /* Typically "REI" or "RMM" */
+	int scslng;     /* length of subsequent data */
+	int scsext;     /* seems to be 0 */
+	int scsblcnt;   /* seems to be ping number */
+	double scsres1; /* seems to be 0 */
+	int transid;    /* ID of the type of data to follow */
+	double reftime; /* Internal time of day reference */
 
-					/* data from a "Raw Event" */
-	double	datuhr;			/* Unix epoch time + decimal seconds */
-	char	mksysint[8];		/* Text message eg. "START" */
-	char	mktext[84];		/* Text message eg.  "KAE HMS Start-Marke" */
+	/* data from a "Raw Event" */
+	double datuhr;    /* Unix epoch time + decimal seconds */
+	char mksysint[8]; /* Text message eg. "START" */
+	char mktext[84];  /* Text message eg.  "KAE HMS Start-Marke" */
 
 	/* -------------------------------- Navigation data */
-	int	navid;			/* Which nav input  */
-	int	year;			/* "Date" type */
-	int	month;			/* month */
-	int	day;			/* day of the month */
-	int	hour;			/* hour of the day */
-	int	minute;			/* minute of the hour */
-	int	second;			/* seconds of the minute */
-	double	secf;			/* seconds of the minute */
-	int	millisecond;
-	double	PingTime;		/* floating point time */
+	int navid;   /* Which nav input  */
+	int year;    /* "Date" type */
+	int month;   /* month */
+	int day;     /* day of the month */
+	int hour;    /* hour of the day */
+	int minute;  /* minute of the hour */
+	int second;  /* seconds of the minute */
+	double secf; /* seconds of the minute */
+	int millisecond;
+	double PingTime; /* floating point time */
 
-	double	lat;			/* Position, decimal degrees */
-	double	lon;			/* North and East are positive */
-	char	pos_sens[2];		/* "G"== GPS,  "I"== Integrated */
+	double lat;       /* Position, decimal degrees */
+	double lon;       /* North and East are positive */
+	char pos_sens[2]; /* "G"== GPS,  "I"== Integrated */
 
 	/* ------------------------------- From "Raw" data record */
-	double	ckeel;			/* sound speed at the keel */
-	double	cmean;			/* mean sound speed for water column */
-	int	Port;			/* Port or Starboard ping (beamside)*/
-	int	noho;			/* Indicates beam "hopping" mode */
-	int	skals;			/* scale factor flag (0 -> .1, else .01 */
-	int	spfb[MBSYS_HSMD_BEAMS_PING];		/* unscaled travel times */
-	double	depth[MBSYS_HSMD_BEAMS_PING];		/* cross track depths */
-	double	distance[MBSYS_HSMD_BEAMS_PING];	/* cross track distances */
-	double	ss_range;				/* distance to outermost
-								sidescan
-								sample (meters) */
-	mb_u_char	ss[MBSYS_HSMD_PIXELS_PING];	/* sidescan pixels */
-	double	heading_tx;		/* Heading at transmit */
-	double	heading_rx[5];		/* Heading during the receive window */
-	double	roll_tx;		/* Roll at transmit */
-	double	roll_rx[5];		/* Roll during receive window */
-	double	pitch_tx;		/* Pitch at transmit */
-	double	pitch_rx[5];		/* Pitch during receive window */
+	double ckeel;                           /* sound speed at the keel */
+	double cmean;                           /* mean sound speed for water column */
+	int Port;                               /* Port or Starboard ping (beamside)*/
+	int noho;                               /* Indicates beam "hopping" mode */
+	int skals;                              /* scale factor flag (0 -> .1, else .01 */
+	int spfb[MBSYS_HSMD_BEAMS_PING];        /* unscaled travel times */
+	double depth[MBSYS_HSMD_BEAMS_PING];    /* cross track depths */
+	double distance[MBSYS_HSMD_BEAMS_PING]; /* cross track distances */
+	double ss_range;                        /* distance to outermost
+	                                    sidescan
+	                                    sample (meters) */
+	mb_u_char ss[MBSYS_HSMD_PIXELS_PING];   /* sidescan pixels */
+	double heading_tx;                      /* Heading at transmit */
+	double heading_rx[5];                   /* Heading during the receive window */
+	double roll_tx;                         /* Roll at transmit */
+	double roll_rx[5];                      /* Roll during receive window */
+	double pitch_tx;                        /* Pitch at transmit */
+	double pitch_rx[5];                     /* Pitch during receive window */
 
 	/* ------------------------------- From the Angle data record */
-	double	angle[MBSYS_HSMD_BEAMS_PING];	/* Table of beam angles */
+	double angle[MBSYS_HSMD_BEAMS_PING]; /* Table of beam angles */
 
-	int	evid;			/* from MD Events */
-	char	evtext[84];
+	int evid; /* from MD Events */
+	char evtext[84];
 
 	/* ------------------------------- Theoretical data from Sound Speed record */
 
-	int	num_vel;		/* number of Depth/Sound Speed pairs */
-	double	vdepth[20];		/* array of depths */
-	double	velocity[20];		/* array of sound speeds */
+	int num_vel;         /* number of Depth/Sound Speed pairs */
+	double vdepth[20];   /* array of depths */
+	double velocity[20]; /* array of sound speeds */
 
 	/* ----------------- derived data --------------------------------  */
 
-	char	comment[MBSYS_HSMD_COMMENT]; /* I guess we will have comments
-						    for MB records some day? */
-	double	heave;
-	double	speed;			/* not provided in HSMD */
-	};
+	char comment[MBSYS_HSMD_COMMENT]; /* I guess we will have comments
+	                     for MB records some day? */
+	double heave;
+	double speed; /* not provided in HSMD */
+};
 
 /* system specific function prototypes */
-int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_hsmd_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_hsmd_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_hsmd_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *detects, int *error);
-int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-int mbsys_hsmd_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_hsmd_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_hsmd_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
+int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_hsmd_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_hsmd_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                       double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
+                       double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                      double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                      double *ssalongtrack, char *comment, int *error);
+int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                      double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                      double *ssv, int *error);
+int mbsys_hsmd_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                                double *altitude, int *error);
+int mbsys_hsmd_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                           double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
+                           double *heave, int *error);
+int mbsys_hsmd_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
+                          double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
+                          int *error);
+int mbsys_hsmd_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);

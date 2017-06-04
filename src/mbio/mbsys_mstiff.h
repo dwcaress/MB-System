@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_mstiff.h	4/10/98
  *	$Id$
  *
- *    Copyright (c) 1998-2016 by
+ *    Copyright (c) 1998-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -106,82 +106,55 @@
  */
 
 /* number of sidescan pixels for Sea Scan sidescan sonars */
-#define MBSYS_MSTIFF_PIXELS	1024
+#define MBSYS_MSTIFF_PIXELS 1024
 
-struct mbsys_mstiff_struct
-	{
+struct mbsys_mstiff_struct {
 	/* time stamp */
-	double	time_d;		/* unix time */
+	double time_d; /* unix time */
 
 	/* position */
-	double	lat;		/* latitude in degrees */
-	double	lon;		/* longitude in degrees */
+	double lat; /* latitude in degrees */
+	double lon; /* longitude in degrees */
 
 	/* other values */
-	double	heading;	/* heading in degrees */
-	double	course;	    	/* course made good in degrees */
-	double	speed;		/* fore-aft speed in km/hr */
-	double	altitude;	/* altitude in m */
-	double	slant_range_max;    /* meters */
-	double	range_delay;	    /* meters */
-	double	sample_interval;    /* meters */
-	double	sonar_depth;	    /* sonar depth in meters */
-	double	frequency;    /* sonar frequency in Hz */
+	double heading;         /* heading in degrees */
+	double course;          /* course made good in degrees */
+	double speed;           /* fore-aft speed in km/hr */
+	double altitude;        /* altitude in m */
+	double slant_range_max; /* meters */
+	double range_delay;     /* meters */
+	double sample_interval; /* meters */
+	double sonar_depth;     /* sonar depth in meters */
+	double frequency;       /* sonar frequency in Hz */
 
 	/* sidescan data */
-	int	pixels_ss;	/* number of pixels */
-	unsigned char	ss[MBSYS_MSTIFF_PIXELS];
-	double	ssacrosstrack[MBSYS_MSTIFF_PIXELS];
-	};
+	int pixels_ss; /* number of pixels */
+	unsigned char ss[MBSYS_MSTIFF_PIXELS];
+	double ssacrosstrack[MBSYS_MSTIFF_PIXELS];
+};
 
 /* system specific function prototypes */
-int mbsys_mstiff_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_mstiff_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_mstiff_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_mstiff_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_mstiff_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_mstiff_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *detects, int *error);
-int mbsys_mstiff_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_mstiff_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-int mbsys_mstiff_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_mstiff_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_mstiff_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
+int mbsys_mstiff_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_mstiff_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_mstiff_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_mstiff_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                         double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
+                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_mstiff_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                        double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                        double *ssalongtrack, char *comment, int *error);
+int mbsys_mstiff_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+int mbsys_mstiff_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                        double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                        double *ssv, int *error);
+int mbsys_mstiff_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                                  double *altitude, int *error);
+int mbsys_mstiff_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
+                             double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
+                             double *pitch, double *heave, int *error);
+int mbsys_mstiff_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
+                            double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
+                            int *error);
+int mbsys_mstiff_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);

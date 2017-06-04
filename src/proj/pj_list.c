@@ -4,8 +4,8 @@
 #define PJ_LIST_H "pj_list.h"
 #include "projects.h"
 
-struct PJ_LIST  *pj_get_list_ref()
+struct PJ_LIST *pj_get_list_ref()
 
 {
-    return pj_list;
+	return pj_list;
 }

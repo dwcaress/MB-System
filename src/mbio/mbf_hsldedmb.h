@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hsldedmb.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1993-2016 by
+ *    Copyright (c) 1993-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -46,31 +46,29 @@
  * of the binary data structure used in the MBF_HSLDEDMB format.
  */
 
-struct mbf_hsldedmb_data_struct
-	{
-	unsigned int	seconds;	/* seconds since 1/1/70 00:00:00 */
-	unsigned int	microseconds;	/* microseconds */
-	unsigned int	alt_seconds;	/* seconds since last survey header */
-	unsigned int	alt_microseconds;	/* microseconds */
-	int	lat;		/* latitude in degrees times 10000000 */
-	int	lon;		/* latitude in degrees times 10000000 */
-	short	heading;	/* heading in degrees times 10 */
-	short	course;		/* course in degrees times 10 */
-	short	speed;		/* speed in m/s times 10 */
-	short	pitch;		/* pitch in degrees times 10 */
-	short	scale;		/* multiplicative scale times 100 for depth
-					and range values */
-	short	depth[59];	/* depths in scaled meters assuming
-					1500 m/s water velocity */
-	short	range[59];	/* cross track distances in meters */
-	mb_u_char	speed_ref;	/* speed reference
-					("B": bottom track) */
-	mb_u_char	quality;	/* quality flag */
-	unsigned int	flag[4];
-	};
+struct mbf_hsldedmb_data_struct {
+	unsigned int seconds;          /* seconds since 1/1/70 00:00:00 */
+	unsigned int microseconds;     /* microseconds */
+	unsigned int alt_seconds;      /* seconds since last survey header */
+	unsigned int alt_microseconds; /* microseconds */
+	int lat;                       /* latitude in degrees times 10000000 */
+	int lon;                       /* latitude in degrees times 10000000 */
+	short heading;                 /* heading in degrees times 10 */
+	short course;                  /* course in degrees times 10 */
+	short speed;                   /* speed in m/s times 10 */
+	short pitch;                   /* pitch in degrees times 10 */
+	short scale;                   /* multiplicative scale times 100 for depth
+	                           and range values */
+	short depth[59];               /* depths in scaled meters assuming
+	                           1500 m/s water velocity */
+	short range[59];               /* cross track distances in meters */
+	mb_u_char speed_ref;           /* speed reference
+	                       ("B": bottom track) */
+	mb_u_char quality;             /* quality flag */
+	unsigned int flag[4];
+};
 
-struct mbf_hsldedmb_struct
-	{
-	int	kind;
+struct mbf_hsldedmb_struct {
+	int kind;
 	struct mbf_hsldedmb_data_struct data;
-	};
+};

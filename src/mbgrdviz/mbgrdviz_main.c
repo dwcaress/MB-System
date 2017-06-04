@@ -4,7 +4,7 @@
  *    The MB-system:	mbgrdviz_main.c		10/9/2002
  *    $Id$
  *
- *    Copyright (c) 2002-2016 by
+ *    Copyright (c) 2002-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -29,7 +29,6 @@
  *
  */
 
-
 /* Begin user code block <file_comments> */
 /* #define MBGRDVIZ_DEBUG 1 */
 /* End user code block <file_comments> */
@@ -46,7 +45,6 @@
 /**
  * Globally included information.
  */
-
 
 /*
  * Headers for classes used in this program
@@ -82,7 +80,7 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 
 /* Avoid conflict due to BOOL redefinitions (Xm vs Win headers) */
 #ifdef WIN32
-#	undef BOOL
+#undef BOOL
 #endif
 
 /* MBIO include files */
@@ -100,16 +98,16 @@ Widget CreatemainWindow_mbgrdviz(Widget parent);
 int do_mbgrdviz_init(int argc, char **argv, int verbosity);
 void do_mbgrdviz_sensitivity();
 int do_mbgrdviz_dismiss_notify(size_t instance);
-void do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPointer call_data);
 int do_mbgrdviz_openprimary(char *input_file_ptr);
 int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr);
@@ -120,86 +118,56 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr);
-int do_mbgrdviz_readnav(size_t instance, char *swathfile,
-				int pathstatus, char *pathraw, char *pathprocessed,
-				int format, int formatorg, double weight, int *error);
-int do_mbgrdviz_readgrd(size_t instance, char *grdfile,
-			int	*grid_projection_mode,
-			char	*grid_projection_id,
-			float	*nodatavalue,
-			int	*nxy,
-			int	*nx,
-			int	*ny,
-			double	*min,
-			double	*max,
-			double	*xmin,
-			double	*xmax,
-			double	*ymin,
-			double	*ymax,
-			double	*dx,
-			double	*dy,
-			float	**data);
-int do_mbgrdviz_opentest(size_t instance,
-			double	factor1,
-			double	factor2,
-			double	factor3,
-			int	*grid_projection_mode,
-			char	*grid_projection_id,
-			float	*nodatavalue,
-			int	*nxy,
-			int	*nx,
-			int	*ny,
-			double	*min,
-			double	*max,
-			double	*xmin,
-			double	*xmax,
-			double	*ymin,
-			double	*ymax,
-			double	*dx,
-			double	*dy,
-			float	**data);
-void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_open_mbeditviz( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_arearoute_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_arearoute_parameterchange( Widget w, XtPointer client_data, XtPointer call_data);
+int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *pathraw, char *pathprocessed, int format,
+                        int formatorg, double weight, int *error);
+int do_mbgrdviz_readgrd(size_t instance, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue,
+                        int *nxy, int *nx, int *ny, double *min, double *max, double *xmin, double *xmax, double *ymin,
+                        double *ymax, double *dx, double *dy, float **data);
+int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double factor3, int *grid_projection_mode,
+                         char *grid_projection_id, float *nodatavalue, int *nxy, int *nx, int *ny, double *min, double *max,
+                         double *xmin, double *xmax, double *ymin, double *ymax, double *dx, double *dy, float **data);
+void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_make_survey(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_dismiss(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_parameterchange(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_arearoute_recalc(size_t instance);
 void do_mbgrdviz_arearoute_info(size_t instance);
-void do_mbgrdviz_arearoute_linespacing_increment( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_arearoute_altitude_increment( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_arearoute_depth_increment( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtime_start( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_path_reset( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtime_pause( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtime_stop( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtime_resume( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_path_apply( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_icon( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_path_browse( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_updaterate( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_path_test( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_realtimesetup_pathmode( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_linespacing_increment(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_altitude_increment(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_depth_increment(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_start(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_reset(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_pause(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_stop(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_resume(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_apply(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_icon(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_browse(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_updaterate(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_test(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_pathmode(Widget w, XtPointer client_data, XtPointer call_data);
 
 static char rcs_id[] = "$Id$";
 static char program_name[] = "MBgrdviz";
-static char help_message[] =  "MBgrdviz provides simple interactive 2D/3Dvizualization of GMT grids.";
+static char help_message[] = "MBgrdviz provides simple interactive 2D/3Dvizualization of GMT grids.";
 static char usage_message[] = "mbgrdviz [-Igrdfile -T -V -H]";
-char	ifile[MB_PATH_MAXLINE];
-char	jfile[MB_PATH_MAXLINE];
+char ifile[MB_PATH_MAXLINE];
+char jfile[MB_PATH_MAXLINE];
 
 /* parsing variables */
 extern char *optarg;
 extern int optkind;
-int	errflg = 0;
-int	c;
-int	help = 0;
-int	flag = 0;
+int errflg = 0;
+int c;
+int help = 0;
+int flag = 0;
 
 /* use these parameters only when debugging X events */
 #ifdef MBGRDVIZ_DEBUG
-char	eventname[64];
-XEvent	event;
+char eventname[64];
+XEvent event;
 XAnyEvent *xany;
 XKeyEvent *xkey;
 XButtonEvent *xbutton;
@@ -240,29 +208,26 @@ XKeymapEvent *xkeymap;
  */
 #define BX_APP_CLASS "MB-System"
 
-int main( int argc, char **argv)
-{
-    Widget       parent;
-    XtAppContext app;
-    Arg          args[256];
-    Cardinal     ac;
-    Widget   topLevelShell;
-    Widget   mainWindow_mbgrdviz;
+int main(int argc, char **argv) {
+	Widget parent;
+	XtAppContext app;
+	Arg args[256];
+	Cardinal ac;
+	Widget topLevelShell;
+	Widget mainWindow_mbgrdviz;
 
-    /* Begin user code block <declarations> */
-	int	error = MB_ERROR_NO_ERROR;
-	int	verbose = 0;
-	int	ifileflag = 0;
-	int	jfileflag = 0;
-	int	testflag = 0;
-	//sessionShellWidgetClass widget_class;
-	//widget_class.core_class.class_inited = NULL;
+	/* Begin user code block <declarations> */
+	int error = MB_ERROR_NO_ERROR;
+	int verbose = 0;
+	int ifileflag = 0;
+	int jfileflag = 0;
+	int testflag = 0;
+	// sessionShellWidgetClass widget_class;
+	// widget_class.core_class.class_inited = NULL;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhI:i:J:j:Tt")) != -1)
-	  {
-	  switch (c)
-		{
+	while ((c = getopt(argc, argv, "VvHhI:i:J:j:Tt")) != -1) {
+		switch (c) {
 		case 'H':
 		case 'h':
 			help++;
@@ -273,13 +238,13 @@ int main( int argc, char **argv)
 			break;
 		case 'I':
 		case 'i':
-			sscanf (optarg,"%s", ifile);
+			sscanf(optarg, "%s", ifile);
 			flag++;
 			ifileflag++;
 			break;
 		case 'J':
 		case 'j':
-			sscanf (optarg,"%s", jfile);
+			sscanf(optarg, "%s", jfile);
 			flag++;
 			jfileflag++;
 			break;
@@ -291,122 +256,108 @@ int main( int argc, char **argv)
 		case '?':
 			errflg++;
 		}
-	    }
+	}
 
 	/* if error flagged then print it and exit */
-	if (errflg)
-		{
-		fprintf(stderr,"usage: %s\n", usage_message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
+	if (errflg) {
+		fprintf(stderr, "usage: %s\n", usage_message);
+		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		error = MB_ERROR_BAD_USAGE;
 		exit(error);
-		}
+	}
 
 	/* print starting message */
-	if (verbose == 1 || help)
-		{
-		fprintf(stderr,"\nProgram %s\n",program_name);
-		fprintf(stderr,"Version %s\n",rcs_id);
-		fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
-		}
+	if (verbose == 1 || help) {
+		fprintf(stderr, "\nProgram %s\n", program_name);
+		fprintf(stderr, "Version %s\n", rcs_id);
+		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+	}
 
 	/* print starting message */
-	if (help)
-		{
-		fprintf(stderr,"\n%s\n\nUsage: %s\n", help_message, usage_message);
+	if (help) {
+		fprintf(stderr, "\n%s\n\nUsage: %s\n", help_message, usage_message);
 		error = MB_ERROR_NO_ERROR;
 		exit(error);
-		}
+	}
 
-    /* End user code block <declarations> */
+	/* End user code block <declarations> */
 
-    /*
-     * Initialize Xt.
-     */
+	/*
+	 * Initialize Xt.
+	 */
 
-    // XtSetLanguageProc(NULL, (XtLanguageProc) NULL, NULL);
+	// XtSetLanguageProc(NULL, (XtLanguageProc) NULL, NULL);
 
-    /*
-     * The applicationShell is created as an unrealized
-     * parent for multiple topLevelShells.  The topLevelShells
-     * are created as popup children of the applicationShell.
-     * This is a recommendation of Paul Asente & Ralph Swick in
-     * _X_Window_System_Toolkit_ p. 677.
-     */
+	/*
+	 * The applicationShell is created as an unrealized
+	 * parent for multiple topLevelShells.  The topLevelShells
+	 * are created as popup children of the applicationShell.
+	 * This is a recommendation of Paul Asente & Ralph Swick in
+	 * _X_Window_System_Toolkit_ p. 677.
+	 */
 
-    parent = XtVaOpenApplication ( &app,
-                                   BX_APP_CLASS,
-                                   NULL,
-                                   0,
-                                   &argc,
-                                   argv,
-                                   NULL,
-                                   sessionShellWidgetClass,
-                                   NULL );
+	parent = XtVaOpenApplication(&app, BX_APP_CLASS, NULL, 0, &argc, argv, NULL, sessionShellWidgetClass, NULL);
 
-    RegisterBxConverters(app);
-    XmRepTypeInstallTearOffModelConverter();
+	RegisterBxConverters(app);
+	XmRepTypeInstallTearOffModelConverter();
 
-    /* Begin user code block <create_shells> */
-    /* End user code block <create_shells> */
+	/* Begin user code block <create_shells> */
+	/* End user code block <create_shells> */
 
-    /*
-     * Create classes and widgets used in this program.
-     */
+	/*
+	 * Create classes and widgets used in this program.
+	 */
 
-    /* Begin user code block <create_topLevelShell> */
-    /* End user code block <create_topLevelShell> */
+	/* Begin user code block <create_topLevelShell> */
+	/* End user code block <create_topLevelShell> */
 
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "MBgrdviz"); ac++;
-    XtSetArg(args[ac], XmNx, 108); ac++;
-    XtSetArg(args[ac], XmNy, 241); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 215); ac++;
-    topLevelShell = XtCreatePopupShell((char *)"topLevelShell",
-        topLevelShellWidgetClass,
-        parent,
-        args,
-        ac);
-    XtAddCallback(topLevelShell, XmNdestroyCallback, do_mbgrdviz_quit, (XtPointer)0);
-    XtAddCallback(topLevelShell, XmNdestroyCallback, BxExitCB, (XtPointer)0);
-    mainWindow_mbgrdviz = (Widget)CreatemainWindow_mbgrdviz(topLevelShell);
-    XtManageChild(mainWindow_mbgrdviz);
-    XtPopup(XtParent(mainWindow_mbgrdviz), XtGrabNone);
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "MBgrdviz");
+	ac++;
+	XtSetArg(args[ac], XmNx, 108);
+	ac++;
+	XtSetArg(args[ac], XmNy, 241);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 215);
+	ac++;
+	topLevelShell = XtCreatePopupShell((char *)"topLevelShell", topLevelShellWidgetClass, parent, args, ac);
+	XtAddCallback(topLevelShell, XmNdestroyCallback, do_mbgrdviz_quit, (XtPointer)0);
+	XtAddCallback(topLevelShell, XmNdestroyCallback, BxExitCB, (XtPointer)0);
+	mainWindow_mbgrdviz = (Widget)CreatemainWindow_mbgrdviz(topLevelShell);
+	XtManageChild(mainWindow_mbgrdviz);
+	XtPopup(XtParent(mainWindow_mbgrdviz), XtGrabNone);
 
-    /* Begin user code block <app_procedures> */
+	/* Begin user code block <app_procedures> */
 
-    /* set top level widget */
-    mainWindow = mainWindow_mbgrdviz;
+	/* set top level widget */
+	mainWindow = mainWindow_mbgrdviz;
 
-    /* End user code block <app_procedures> */
+	/* End user code block <app_procedures> */
 
-    /* Begin user code block <main_loop> */
+	/* Begin user code block <main_loop> */
 
-    /* initialize the vizualization widgets code */
-    mbview_startup(verbose, parent, app, &error);
+	/* initialize the vizualization widgets code */
+	mbview_startup(verbose, parent, app, &error);
 
-    /* open the file specified on the command line */
-    do_mbgrdviz_init(argc,argv, verbose);
-    if (ifileflag > 0)
-    	{
-    	do_mbgrdviz_openprimary(ifile);
-	if (jfileflag > 0)
-		{
-		do_mbgrdviz_openoverlay(0,jfile);
+	/* open the file specified on the command line */
+	do_mbgrdviz_init(argc, argv, verbose);
+	if (ifileflag > 0) {
+		do_mbgrdviz_openprimary(ifile);
+		if (jfileflag > 0) {
+			do_mbgrdviz_openoverlay(0, jfile);
 		}
 	}
-    else if (testflag > 0)
-    	{
-        do_mbgrdviz_openprimary(NULL);
+	else if (testflag > 0) {
+		do_mbgrdviz_openprimary(NULL);
 	}
-    /* End user code block <main_loop> */
+	/* End user code block <main_loop> */
 
-    XtAppMainLoop(app);
+	XtAppMainLoop(app);
 
-    /*
-     * A return value regardless of whether or not the main loop ends.
-     */
-     return(0);
+	/*
+	 * A return value regardless of whether or not the main loop ends.
+	 */
+	return (0);
 }

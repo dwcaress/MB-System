@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_navnetcdf.h	5/4/2002
  *	$Id$
  *
- *    Copyright (c) 2002-2016 by
+ *    Copyright (c) 2002-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -33,17 +33,16 @@
  */
 
 /* dimension lengths */
-#define MBSYS_NAVNETCDF_COMMENTLEN	    256
-#define MBSYS_NAVNETCDF_ATTRIBUTELEN   64
-#define MBSYS_NAVNETCDF_NAMELEN	    20
+#define MBSYS_NAVNETCDF_COMMENTLEN 256
+#define MBSYS_NAVNETCDF_ATTRIBUTELEN 64
+#define MBSYS_NAVNETCDF_NAMELEN 20
 
 /* seconds in day */
-#define SECINDAY     86400.0
+#define SECINDAY 86400.0
 
 /* internal data structure */
-struct mbsys_navnetcdf_struct
-	{
-	int	 kind;
+struct mbsys_navnetcdf_struct {
+	int kind;
 
 	/* global attributes */
 	short mbVersion;
@@ -102,16 +101,16 @@ struct mbsys_navnetcdf_struct
 	int mbPFlag_id;
 
 	/* variables */
-        int *mbHistDate;
-        int *mbHistTime;
-        char *mbHistCode;
-        char *mbHistAutor;
-        char *mbHistModule;
-        char *mbHistComment;
-        int mbDate;
-        int mbTime;
-        int mbOrdinate;
-        int mbAbscissa;
+	int *mbHistDate;
+	int *mbHistTime;
+	char *mbHistCode;
+	char *mbHistAutor;
+	char *mbHistModule;
+	char *mbHistComment;
+	int mbDate;
+	int mbTime;
+	int mbOrdinate;
+	int mbAbscissa;
 	short mbAltitude;
 	short mbImmersion;
 	int mbHeading;
@@ -328,69 +327,38 @@ struct mbsys_navnetcdf_struct
 	int mbPFlag_missing_value;
 
 	/* storage comment string */
-	char	comment[MBSYS_NAVNETCDF_COMMENTLEN];
-	};
+	char comment[MBSYS_NAVNETCDF_COMMENTLEN];
+};
 
 /* system specific function prototypes */
-int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *detects, int *error);
-int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			double transducer_depth, double altitude,
-			int *error);
-int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_navnetcdf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind,
-			int *nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_navnetcdf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
+int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
+                               int *error);
+int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
+                            double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
+                            char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
+                            double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                           double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag,
+                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                           double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                           double *ssv, int *error);
+int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                                     double *altitude, int *error);
+int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude,
+                                    int *error);
+int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
+                                double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
+                                double *pitch, double *heave, int *error);
+int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
+                               double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
+                               int *error);
+int mbsys_navnetcdf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth,
+                                double *velocity, int *error);
+int mbsys_navnetcdf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
+                               int *error);
+int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);

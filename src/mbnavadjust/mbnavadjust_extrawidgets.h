@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavedit_extrawidgets.h	8/7/95
  *    $Id$
  *
- *    Copyright (c) 2000-2016 by
+ *    Copyright (c) 2000-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -39,7 +39,7 @@
 
 /* Global Widget Declarations Added By Hand */
 
-MBNAVADJUST_EXTERNAL Widget       fileSelectionBox_list;
-MBNAVADJUST_EXTERNAL Widget       fileSelectionBox_text;
+MBNAVADJUST_EXTERNAL Widget fileSelectionBox_list;
+MBNAVADJUST_EXTERNAL Widget fileSelectionBox_text;
 
 /*--------------------------------------------------------------------*/

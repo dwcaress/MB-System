@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_oicmbari.h	1/8/99
  *	$Id$
  *
- *    Copyright (c) 1999-2016 by
+ *    Copyright (c) 1999-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -55,139 +55,134 @@
  */
 
 /* defines sizes of things */
-#define	MBF_OICMBARI_HEADER_SIZE	276
-#define	MBF_OICMBARI_MAX_CLIENT		252
-#define	MBF_OICMBARI_MAX_COMMENT	MBF_OICMBARI_MAX_CLIENT
-#define	MBF_OICMBARI_MAX_CHANNELS	8
+#define MBF_OICMBARI_HEADER_SIZE 276
+#define MBF_OICMBARI_MAX_CLIENT 252
+#define MBF_OICMBARI_MAX_COMMENT MBF_OICMBARI_MAX_CLIENT
+#define MBF_OICMBARI_MAX_CHANNELS 8
 
 /* define maximum number of beams */
-#define	MBF_OICMBARI_MAX_BEAMS		1024
-#define	MBF_OICMBARI_MAX_PIXELS		2048
+#define MBF_OICMBARI_MAX_BEAMS 1024
+#define MBF_OICMBARI_MAX_PIXELS 2048
 
-struct mbf_oicmbari_channel_struct
-	{
-	int		offset;		/* offset in bytes to channel data */
-	mb_u_char	type;		/* sonar type:
-					    0 = sidescan
-					    1 = angle
-					    2 = multibeam */
-	mb_u_char	side;		/* sonar side:
-					    0 = port
-					    1 = starboard */
-	mb_u_char	size;		/* data sample type and size:
-					    0 = 1 byte integer
-					    1 = 2 byte integer
-					    2 = 4 byte integer
-					    3 = 4 byte float
-					    4 = 12 byte set of three
-						floats - range, theta, amp */
-	mb_u_char	empty;		/* spare */
-	int		frequency;	/* Hz */
-	int		num_samples;	/* number of samples stored for
-					    sidescan and angle sonar types,
-					    number of beams for multibeam */
-	};
+struct mbf_oicmbari_channel_struct {
+	int offset;      /* offset in bytes to channel data */
+	mb_u_char type;  /* sonar type:
+	             0 = sidescan
+	             1 = angle
+	             2 = multibeam */
+	mb_u_char side;  /* sonar side:
+	             0 = port
+	             1 = starboard */
+	mb_u_char size;  /* data sample type and size:
+	             0 = 1 byte integer
+	             1 = 2 byte integer
+	             2 = 4 byte integer
+	             3 = 4 byte float
+	             4 = 12 byte set of three
+	             floats - range, theta, amp */
+	mb_u_char empty; /* spare */
+	int frequency;   /* Hz */
+	int num_samples; /* number of samples stored for
+	             sidescan and angle sonar types,
+	             number of beams for multibeam */
+};
 
-struct mbf_oicmbari_data_struct
-	{
-	int		rawsize[MBF_OICMBARI_MAX_CHANNELS];
-	char		*raw[MBF_OICMBARI_MAX_CHANNELS];
-	int		beams_bath_alloc;
-	int		beams_amp_alloc;
-	int		pixels_ss_alloc;
-	char		*beamflag;
-	float		*bath;
-	float		*amp;
-	float		*bathacrosstrack;
-	float		*bathalongtrack;
-	float		*tt;
-	float		*angle;
-	float		*ss;
-	float		*ssacrosstrack;
-	float		*ssalongtrack;
-	};
+struct mbf_oicmbari_data_struct {
+	int rawsize[MBF_OICMBARI_MAX_CHANNELS];
+	char *raw[MBF_OICMBARI_MAX_CHANNELS];
+	int beams_bath_alloc;
+	int beams_amp_alloc;
+	int pixels_ss_alloc;
+	char *beamflag;
+	float *bath;
+	float *amp;
+	float *bathacrosstrack;
+	float *bathalongtrack;
+	float *tt;
+	float *angle;
+	float *ss;
+	float *ssacrosstrack;
+	float *ssalongtrack;
+};
 
-struct mbf_oicmbari_seaview_struct
-	{
-	double		longitude;	/* longitude in degrees */
-	double		latitude;	/* latitude in degrees */
-	int		x;		/* local x coordinates in yards */
-	int		y;		/* local y coordinates in yards */
-	int		uncertainty;	/* navigation uncertainty in yards */
-	float		speed;		/* speed over ground in knots */
-	float		altitude;	/* platform altitude in feet */
-	float		depth;		/* platform depth in feet */
-	float		sound_velocity;	/* sound velocity in feet/sec */
-	char		id[20];		/* client id string */
-	};
+struct mbf_oicmbari_seaview_struct {
+	double longitude;     /* longitude in degrees */
+	double latitude;      /* latitude in degrees */
+	int x;                /* local x coordinates in yards */
+	int y;                /* local y coordinates in yards */
+	int uncertainty;      /* navigation uncertainty in yards */
+	float speed;          /* speed over ground in knots */
+	float altitude;       /* platform altitude in feet */
+	float depth;          /* platform depth in feet */
+	float sound_velocity; /* sound velocity in feet/sec */
+	char id[20];          /* client id string */
+};
 
-struct mbf_oicmbari_header_struct
-	{
-	mb_u_char	type;		/* Magic number:
-					    0 - EG&G sonar
-					    1 - SEAVIEW sonar
-					    2 - DEEPSCAN sonar
-					    3 - STEST SEAVIEW test
-					    4 - QTEST QMIPs test
-					    5 - SM2 SeaMARC2 test
-					    22 - WHOI DSL AMS120 */
-	int		proc_status;	/* OIC processing status in
-					    bit mask form */
-	int		data_size;
-	mb_u_char	client_size;
-	mb_u_char	fish_status;	/* status bit field:
-						0:  FocusAutoManual
-						1:  FocusManualDisableEnable
-						2:  PingRate AutoManual
-						3:  TvgAutoManual
-						4:  CalibOffOn
-						5:  OutputModeProcRaw
-						6:  ShadowMask
-						7:  QualityBit */
-	mb_s_char	nav_used;
-	mb_s_char	nav_type;	/*  0 = UTM coordinates in m
-					    1 = Local coordinates in m
-					    2 = Latitude and longitude */
-	int		utm_zone;
-	float		ship_x;		/* meters or degrees  */
-	float		ship_y;		/* meters or degrees  */
-	float		ship_course;	/* degrees */
-	float		ship_speed;	/* m/sec */
-	int		sec;
-	int		usec;
-	float		spare_gain;
-	float		fish_heading;	/* degrees */
-	float		fish_depth;	/* meters */
-	float		fish_range;	/* meters */
-	float		fish_pulse_width;   /* msec */
-	float		gain_c0;
-	float		gain_c1;
-	float		gain_c2;
-	float		fish_pitch;	/* degrees */
-	float		fish_roll;	/* degrees */
-	float		fish_yaw;	/* degrees */
-	float		fish_x;		/* meters or degrees  */
-	float		fish_y;		/* meters or degrees  */
-	float		fish_layback;	/* meters */
-	float		fish_altitude;	/* meters */
-	int		fish_altitude_samples;
-	float		fish_ping_period;   /* seconds per ping */
-	float		sound_velocity;	/* m/sec */
-	int		num_chan;
-	int		beams_bath;
-	int		beams_amp;
-	int		bath_chan_port;
-	int		bath_chan_stbd;
-	int		pixels_ss;
-	int		ss_chan_port;
-	int		ss_chan_stbd;
+struct mbf_oicmbari_header_struct {
+	mb_u_char type;  /* Magic number:
+	             0 - EG&G sonar
+	             1 - SEAVIEW sonar
+	             2 - DEEPSCAN sonar
+	             3 - STEST SEAVIEW test
+	             4 - QTEST QMIPs test
+	             5 - SM2 SeaMARC2 test
+	             22 - WHOI DSL AMS120 */
+	int proc_status; /* OIC processing status in
+	             bit mask form */
+	int data_size;
+	mb_u_char client_size;
+	mb_u_char fish_status; /* status bit field:
+	               0:  FocusAutoManual
+	               1:  FocusManualDisableEnable
+	               2:  PingRate AutoManual
+	               3:  TvgAutoManual
+	               4:  CalibOffOn
+	               5:  OutputModeProcRaw
+	               6:  ShadowMask
+	               7:  QualityBit */
+	mb_s_char nav_used;
+	mb_s_char nav_type; /*  0 = UTM coordinates in m
+	                1 = Local coordinates in m
+	                2 = Latitude and longitude */
+	int utm_zone;
+	float ship_x;      /* meters or degrees  */
+	float ship_y;      /* meters or degrees  */
+	float ship_course; /* degrees */
+	float ship_speed;  /* m/sec */
+	int sec;
+	int usec;
+	float spare_gain;
+	float fish_heading;     /* degrees */
+	float fish_depth;       /* meters */
+	float fish_range;       /* meters */
+	float fish_pulse_width; /* msec */
+	float gain_c0;
+	float gain_c1;
+	float gain_c2;
+	float fish_pitch;    /* degrees */
+	float fish_roll;     /* degrees */
+	float fish_yaw;      /* degrees */
+	float fish_x;        /* meters or degrees  */
+	float fish_y;        /* meters or degrees  */
+	float fish_layback;  /* meters */
+	float fish_altitude; /* meters */
+	int fish_altitude_samples;
+	float fish_ping_period; /* seconds per ping */
+	float sound_velocity;   /* m/sec */
+	int num_chan;
+	int beams_bath;
+	int beams_amp;
+	int bath_chan_port;
+	int bath_chan_stbd;
+	int pixels_ss;
+	int ss_chan_port;
+	int ss_chan_stbd;
 	struct mbf_oicmbari_channel_struct channel[MBF_OICMBARI_MAX_CHANNELS];
-	};
+};
 
-struct mbf_oicmbari_struct
-	{
-	int	kind;
+struct mbf_oicmbari_struct {
+	int kind;
 	struct mbf_oicmbari_header_struct header;
-	char	client[MBF_OICMBARI_MAX_CLIENT];
+	char client[MBF_OICMBARI_MAX_CLIENT];
 	struct mbf_oicmbari_data_struct data;
-	};
+};

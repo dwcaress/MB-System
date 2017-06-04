@@ -2,7 +2,7 @@
  *    The MB-system:	mbbs_iomrv1.c	3/3/2014
  *	$Id$
  *
- *    Copyright (c) 2014-2016 by
+ *    Copyright (c) 2014-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -46,8 +46,7 @@ extern int bs_ionaninit;
 extern float bs_ionanf;
 extern double bs_ionand;
 
-int
-mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
+int mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
 /*
    Internal routine.
    Does XDR decoding of an MR1 version 1 ping header.
@@ -58,19 +57,19 @@ mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
 	unsigned long sidebc;
 	int mr1_xdrsidev1(PingSide *, XDR *, unsigned long *);
 
-	bs_iobytecnt= 0;
+	bs_iobytecnt = 0;
 
 	/* output in obsolete format not allowed! */
 	if (xdrs->x_op == XDR_ENCODE)
 		return 0;
 
 	if (!bs_ionaninit) {
-		bs_ionanf= mbbs_nanf();
-		bs_ionand= mbbs_nand();
-		bs_ionaninit= 1;
+		bs_ionanf = mbbs_nanf();
+		bs_ionand = mbbs_nand();
+		bs_ionaninit = 1;
 	}
 
-	png->png_flags= PNG_BTYSSFLAGSABSENT;
+	png->png_flags = PNG_BTYSSFLAGSABSENT;
 
 	/* depending upon the platform, the size of the timeval
 	   struct's fields may be 4 or 8 bytes; for backward
@@ -78,94 +77,93 @@ mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
 	   we use 4-byte primitives */
 	if (!xdr_int(xdrs, &tvsec))
 		return 0;
-	bs_iobytecnt+= 4;
-	png->png_tm.tv_sec= tvsec;
+	bs_iobytecnt += 4;
+	png->png_tm.tv_sec = tvsec;
 	if (!xdr_int(xdrs, &tvusec))
 		return 0;
-	bs_iobytecnt+= 4;
-	png->png_tm.tv_usec= tvusec;
+	bs_iobytecnt += 4;
+	png->png_tm.tv_usec = tvusec;
 
-	png->png_period= bs_ionanf;
-	png->png_slon= bs_ionand;
-	png->png_slat= bs_ionand;
-	png->png_scourse= bs_ionanf;
-	png->png_laybackrng= bs_ionanf;
-	png->png_laybackbrg= bs_ionanf;
+	png->png_period = bs_ionanf;
+	png->png_slon = bs_ionand;
+	png->png_slat = bs_ionand;
+	png->png_scourse = bs_ionanf;
+	png->png_laybackrng = bs_ionanf;
+	png->png_laybackbrg = bs_ionanf;
 
 	if (!xdr_double(xdrs, &(png->png_tlon)))
 		return 0;
-	bs_iobytecnt+= 8;
+	bs_iobytecnt += 8;
 	if (!xdr_double(xdrs, &(png->png_tlat)))
 		return 0;
-	bs_iobytecnt+= 8;
+	bs_iobytecnt += 8;
 	if (!xdr_float(xdrs, &(png->png_tcourse)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 
-	png->png_compass.sns_int= bs_ionanf;
-	png->png_compass.sns_nsamps= 0;
+	png->png_compass.sns_int = bs_ionanf;
+	png->png_compass.sns_nsamps = 0;
 	if (!xdr_float(xdrs, &(png->png_compass.sns_repval)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 
-	png->png_depth.sns_int= bs_ionanf;
-	png->png_depth.sns_nsamps= 0;
+	png->png_depth.sns_int = bs_ionanf;
+	png->png_depth.sns_nsamps = 0;
 	if (!xdr_float(xdrs, &(png->png_depth.sns_repval)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 
 	if (!xdr_float(xdrs, &(png->png_alt)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 
-	png->png_pitch.sns_int= bs_ionanf;
-	png->png_pitch.sns_nsamps= 0;
+	png->png_pitch.sns_int = bs_ionanf;
+	png->png_pitch.sns_nsamps = 0;
 	if (!xdr_float(xdrs, &(png->png_pitch.sns_repval)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 
-	png->png_roll.sns_int= bs_ionanf;
-	png->png_roll.sns_nsamps= 0;
+	png->png_roll.sns_int = bs_ionanf;
+	png->png_roll.sns_nsamps = 0;
 	if (!xdr_float(xdrs, &(png->png_roll.sns_repval)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 
-	png->png_snspad= 0;
+	png->png_snspad = 0;
 
 	if (!xdr_float(xdrs, &(png->png_temp)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_ssincr)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 
-	png->png_ssyoffsetmode= PNG_SSYOM_UNKNOWN;
-	png->png_magcorr= bs_ionanf;
-	png->png_sndvel= bs_ionanf;
-	png->png_cond= bs_ionanf;
-	png->png_magx= bs_ionanf;
-	png->png_magy= bs_ionanf;
-	png->png_magz= bs_ionanf;
+	png->png_ssyoffsetmode = PNG_SSYOM_UNKNOWN;
+	png->png_magcorr = bs_ionanf;
+	png->png_sndvel = bs_ionanf;
+	png->png_cond = bs_ionanf;
+	png->png_magx = bs_ionanf;
+	png->png_magy = bs_ionanf;
+	png->png_magz = bs_ionanf;
 
 	if (!mr1_xdrsidev1(&(png->png_sides[ACP_PORT]), xdrs, &sidebc))
 		return 0;
-	bs_iobytecnt+= sidebc;
-	png->png_sides[ACP_PORT].ps_bdrange= png->png_alt;
-	png->png_sides[ACP_PORT].ps_ssndrmask= 0.;
-	png->png_sides[ACP_PORT].ps_ssyoffset= bs_ionanf;
+	bs_iobytecnt += sidebc;
+	png->png_sides[ACP_PORT].ps_bdrange = png->png_alt;
+	png->png_sides[ACP_PORT].ps_ssndrmask = 0.;
+	png->png_sides[ACP_PORT].ps_ssyoffset = bs_ionanf;
 
 	if (!mr1_xdrsidev1(&(png->png_sides[ACP_STBD]), xdrs, &sidebc))
 		return 0;
-	bs_iobytecnt+= sidebc;
-	png->png_sides[ACP_STBD].ps_bdrange= png->png_alt;
-	png->png_sides[ACP_STBD].ps_ssndrmask= 0.;
-	png->png_sides[ACP_STBD].ps_ssyoffset= bs_ionanf;
+	bs_iobytecnt += sidebc;
+	png->png_sides[ACP_STBD].ps_bdrange = png->png_alt;
+	png->png_sides[ACP_STBD].ps_ssndrmask = 0.;
+	png->png_sides[ACP_STBD].ps_ssyoffset = bs_ionanf;
 
 	return 1;
 }
 
-int
-mr1_xdrsidev1(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
+int mr1_xdrsidev1(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
 /*
    Internal routine.
    Does XDR decoding of an obsolete MR1 version 1 PingSide header.
@@ -173,16 +171,16 @@ mr1_xdrsidev1(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
    Returns 1 if successful, 0 otherwise.
 */
 {
-	*bytecnt= 0;
+	*bytecnt = 0;
 
 	/* output in obsolete format not allowed! */
 	if (xdrs->x_op == XDR_ENCODE)
 		return 0;
 
 	if (!bs_ionaninit) {
-		bs_ionanf= mbbs_nanf();
-		bs_ionand= mbbs_nand();
-		bs_ionaninit= 1;
+		bs_ionanf = mbbs_nanf();
+		bs_ionand = mbbs_nand();
+		bs_ionaninit = 1;
 	}
 
 	/* HMRG code never archived anything to the old ps_trans[]
@@ -191,11 +189,11 @@ mr1_xdrsidev1(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
 	   to the new ps_xmitpwr field */
 	if (!xdr_float(xdrs, &(ps->ps_xmitpwr)))
 		return 0;
-	*bytecnt+= 4;
+	*bytecnt += 4;
 	if (!xdr_float(xdrs, &(ps->ps_xmitpwr)))
 		return 0;
-	*bytecnt+= 4;
-	ps->ps_xmitpwr= bs_ionanf;
+	*bytecnt += 4;
+	ps->ps_xmitpwr = bs_ionanf;
 
 	/* HMRG code never archived anything to the ps_gain field
 	   prior to the format MR1 version 2 changeover -- this code
@@ -203,8 +201,8 @@ mr1_xdrsidev1(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
 	   to the ps_gain field */
 	if (!xdr_float(xdrs, &(ps->ps_gain)))
 		return 0;
-	*bytecnt+= 4;
-	ps->ps_gain= bs_ionanf;
+	*bytecnt += 4;
+	ps->ps_gain = bs_ionanf;
 
 	/* HMRG code never archived anything to the ps_pulse field
 	   prior to the format MR1 version 2 changeover with the exception
@@ -213,23 +211,23 @@ mr1_xdrsidev1(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
 	   it is non-zero */
 	if (!xdr_float(xdrs, &(ps->ps_pulse)))
 		return 0;
-	*bytecnt+= 4;
+	*bytecnt += 4;
 	if (ps->ps_pulse == 0.)
-		ps->ps_pulse= bs_ionanf;
+		ps->ps_pulse = bs_ionanf;
 
 	if (!xdr_int(xdrs, &(ps->ps_btycount)))
 		return 0;
-	*bytecnt+= 4;
+	*bytecnt += 4;
 	if (xdrs->x_op == XDR_DECODE)
-		ps->ps_btypad= 0;
+		ps->ps_btypad = 0;
 	if (!xdr_float(xdrs, &(ps->ps_ssxoffset)))
 		return 0;
-	*bytecnt+= 4;
+	*bytecnt += 4;
 	if (!xdr_int(xdrs, &(ps->ps_sscount)))
 		return 0;
-	*bytecnt+= 4;
+	*bytecnt += 4;
 	if (xdrs->x_op == XDR_DECODE)
-		ps->ps_sspad= 0;
+		ps->ps_sspad = 0;
 
 	return 1;
 }

@@ -3,8 +3,7 @@
 **
 ** Copyright (c) 2003, 2006   Gerald I. Evenden
 */
-static const char
-LIBPROJ_ID[] = "$Id$";
+static const char LIBPROJ_ID[] = "$Id$";
 /*
 ** Permission is hereby granted, free of charge, to any person obtaining
 ** a copy of this software and associated documentation files (the
@@ -41,24 +40,23 @@ struct MDIST {
 	double b[1];
 };
 #define B ((struct MDIST *)b)
-	void *
-proj_mdist_ini(double es) {
+void *proj_mdist_ini(double es) {
 	double numf, numfi, twon1, denf, denfi, ens, T, twon;
 	double den, El, Es;
 	double E[MAX_ITER];
 	struct MDIST *b;
 	int i, j;
 
-/* generate E(e^2) and its terms E[] */
+	/* generate E(e^2) and its terms E[] */
 	ens = es;
 	numf = twon1 = denfi = 1.;
 	denf = 1.;
 	twon = 4.;
 	Es = El = E[0] = 1.;
-	for (i = 1; i < MAX_ITER ; ++i) {
+	for (i = 1; i < MAX_ITER; ++i) {
 		numf *= (twon1 * twon1);
 		den = twon * denf * denf * twon1;
-		T = numf/den;
+		T = numf / den;
 		Es -= (E[i] = T * ens);
 		ens *= es;
 		twon *= 4.;
@@ -68,9 +66,8 @@ proj_mdist_ini(double es) {
 			break;
 		El = Es;
 	}
-	if ((b = (struct MDIST *)malloc(sizeof(struct MDIST)+
-		(i*sizeof(double)))) == NULL)
-		return(NULL);
+	if ((b = (struct MDIST *)malloc(sizeof(struct MDIST) + (i * sizeof(double)))) == NULL)
+		return (NULL);
 	b->nb = i - 1;
 	b->es = es;
 	b->E = Es;
@@ -89,8 +86,7 @@ proj_mdist_ini(double es) {
 	}
 	return (b);
 }
-	double
-proj_mdist(double phi, double sphi, double cphi, const void *b) {
+double proj_mdist(double phi, double sphi, double cphi, const void *b) {
 	double sc, sum, sphi2, D;
 	int i;
 
@@ -98,26 +94,25 @@ proj_mdist(double phi, double sphi, double cphi, const void *b) {
 	sphi2 = sphi * sphi;
 	D = phi * B->E - B->es * sc / sqrt(1. - B->es * sphi2);
 	sum = B->b[i = B->nb];
-	while (i) sum = B->b[--i] + sphi2 * sum;
-	return(D + sc * sum);
+	while (i)
+		sum = B->b[--i] + sphi2 * sum;
+	return (D + sc * sum);
 }
-	double
-proj_inv_mdist(projCtx ctx, double dist, const void *b) {
+double proj_inv_mdist(projCtx ctx, double dist, const void *b) {
 	double s, t, phi, k;
 	int i;
 
-	k = 1./(1.- B->es);
+	k = 1. / (1. - B->es);
 	i = MAX_ITER;
 	phi = dist;
-	while ( i-- ) {
+	while (i--) {
 		s = sin(phi);
 		t = 1. - B->es * s * s;
-		phi -= t = (proj_mdist(phi, s, cos(phi), b) - dist) *
-			(t * sqrt(t)) * k;
+		phi -= t = (proj_mdist(phi, s, cos(phi), b) - dist) * (t * sqrt(t)) * k;
 		if (fabs(t) < TOL) /* that is no change */
 			return phi;
 	}
-		/* convergence failed */
+	/* convergence failed */
 	pj_ctx_set_errno(ctx, -17);
 	return phi;
 }

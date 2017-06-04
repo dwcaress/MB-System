@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_sbsiolsi.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1993-2016 by
+ *    Copyright (c) 1993-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -47,33 +47,31 @@
  * of the binary data structure used in the MBF_SBSIOLSI format.
  */
 
-struct mbf_sbsiolsi_data_struct
-	{
-	short	deph[19];	/* 16 depths from Sea Beam in meters
-					assuming 1500 m/s water velocity */
-	short	dist[19];	/* 16 cross track distances in meters from port
-					(negative) to starboard (positive) */
-	short	axis;		/* navigation error ellipse major axis angle */
-	short	major;		/* navigation error ellipse major axis */
-	short	minor;		/* navigation error ellipse minor axis */
-	unsigned short	sbhdg;	/* Sea Beam gyro heading
-					0 = 0 degrees
-					1 = 0.0055 degrees
-					16384 = 90 degrees
-					65535 = 359.9945 degrees
-					0 = 360 degrees */
-	short	lat2b;		/* fraction of minute times 10000 */
-	short	lat2u;		/* number of minutes north of 90S */
-	short	lon2b;		/* fraction of minute times 10000 */
-	short	lon2u;		/* minutes east of prime meridian */
-	short	sec;		/* seconds from beginning of minute (0-59) */
-	short	min;		/* minutes from beginning of day (0-1439) */
-	short	day;		/* julian day (1-366) */
-	short	year;		/* year (4 digits) */
-	};
+struct mbf_sbsiolsi_data_struct {
+	short deph[19];       /* 16 depths from Sea Beam in meters
+	                  assuming 1500 m/s water velocity */
+	short dist[19];       /* 16 cross track distances in meters from port
+	                  (negative) to starboard (positive) */
+	short axis;           /* navigation error ellipse major axis angle */
+	short major;          /* navigation error ellipse major axis */
+	short minor;          /* navigation error ellipse minor axis */
+	unsigned short sbhdg; /* Sea Beam gyro heading
+	              0 = 0 degrees
+	              1 = 0.0055 degrees
+	              16384 = 90 degrees
+	              65535 = 359.9945 degrees
+	              0 = 360 degrees */
+	short lat2b;          /* fraction of minute times 10000 */
+	short lat2u;          /* number of minutes north of 90S */
+	short lon2b;          /* fraction of minute times 10000 */
+	short lon2u;          /* minutes east of prime meridian */
+	short sec;            /* seconds from beginning of minute (0-59) */
+	short min;            /* minutes from beginning of day (0-1439) */
+	short day;            /* julian day (1-366) */
+	short year;           /* year (4 digits) */
+};
 
-struct mbf_sbsiolsi_struct
-	{
-	int	kind;
+struct mbf_sbsiolsi_struct {
+	int kind;
 	struct mbf_sbsiolsi_data_struct data;
-	};
+};

@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hs10.h	12/4/00
  *	$Id$
  *
- *    Copyright (c) 2000-2016 by
+ *    Copyright (c) 2000-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -145,84 +145,57 @@
 /* length of comment record */
 #define MBSYS_HS10_COMMENT 256
 
-struct mbsys_hs10_struct
-	{
+struct mbsys_hs10_struct {
 	/* type of data record */
-	int	kind;
+	int kind;
 
 	/* time stamp */
-	int	year;
-	int	month;
-	int	day;
-	int	hour;
-	int	minute;
-	int	tenth_second;
+	int year;
+	int month;
+	int day;
+	int hour;
+	int minute;
+	int tenth_second;
 
 	/* navigation */
-	char	NorS;
-	int	latdeg;
-	int	latmin;
-	int	EorW;
-	int	londeg;
-	int	lonmin;
-	int	heading;
-	int	center_depth;
-	int	depth[MBSYS_HS10_BEAMS];
-	int	acrosstrack[MBSYS_HS10_BEAMS];
-	int	amplitude[MBSYS_HS10_BEAMS];
+	char NorS;
+	int latdeg;
+	int latmin;
+	int EorW;
+	int londeg;
+	int lonmin;
+	int heading;
+	int center_depth;
+	int depth[MBSYS_HS10_BEAMS];
+	int acrosstrack[MBSYS_HS10_BEAMS];
+	int amplitude[MBSYS_HS10_BEAMS];
 
 	/* comment */
-	char	comment[MBSYS_HS10_COMMENT];
-	};
+	char comment[MBSYS_HS10_COMMENT];
+};
 
 /* system specific function prototypes */
-int mbsys_hs10_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_hs10_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_hs10_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_hs10_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_hs10_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_hs10_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_hs10_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *detects, int *error);
-int mbsys_hs10_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-int mbsys_hs10_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_hs10_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_hs10_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
+int mbsys_hs10_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_hs10_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_hs10_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_hs10_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                       double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
+                       double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_hs10_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                      double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                      double *ssalongtrack, char *comment, int *error);
+int mbsys_hs10_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                      double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                      double *ssv, int *error);
+int mbsys_hs10_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+int mbsys_hs10_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                                double *altitude, int *error);
+int mbsys_hs10_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                           double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
+                           double *heave, int *error);
+int mbsys_hs10_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
+                          double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
+                          int *error);
+int mbsys_hs10_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);

@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_gsf.h	6/10/97
  *	$Id$
  *
- *    Copyright (c) 1998-2016 by
+ *    Copyright (c) 1998-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -46,79 +46,40 @@
 #include "gsf_enc.h"
 
 /* internal data structure */
-struct mbsys_gsf_struct
-	{
-	int	    kind;
-	gsfDataID   dataID;
-	gsfRecords  records;
-	};
-
+struct mbsys_gsf_struct {
+	int kind;
+	gsfDataID dataID;
+	gsfRecords records;
+};
 
 /* system specific function prototypes */
-int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
-		int *sonartype, int *error);
-int mbsys_gsf_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
-		int *ss_type, int *error);
-int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *detects, int *error);
-int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			double transducer_depth, double altitude,
-			int *error);
-int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind,
-			int *nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_gsf_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
+int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
+int mbsys_gsf_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
+int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                      double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
+                      double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                      double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                     double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                     double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                     double *ssalongtrack, char *comment, int *error);
+int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                     double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                     double *ssv, int *error);
+int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                               double *altitude, int *error);
+int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude, int *error);
+int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                          double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
+                          double *heave, int *error);
+int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
+                         double speed, double heading, double draft, double roll, double pitch, double heave, int *error);
+int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
+                          int *error);
+int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
+int mbsys_gsf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_ping, int *error);

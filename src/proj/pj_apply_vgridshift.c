@@ -43,166 +43,137 @@
 /*      now.                                                            */
 /************************************************************************/
 
-int pj_apply_vgridshift( PJ *defn, const char *listname,
-                         PJ_GRIDINFO ***gridlist_p, 
-                         int *gridlist_count_p,
-                         int inverse, 
-                         long point_count, int point_offset,
-                         double *x, double *y, double *z )
+int pj_apply_vgridshift(PJ *defn, const char *listname, PJ_GRIDINFO ***gridlist_p, int *gridlist_count_p, int inverse,
+                        long point_count, int point_offset, double *x, double *y, double *z)
 
 {
-    int  i;
-    static int debug_count = 0;
-    PJ_GRIDINFO **tables;
+	int i;
+	static int debug_count = 0;
+	PJ_GRIDINFO **tables;
 
-    if( *gridlist_p == NULL )
-    {
-        *gridlist_p = 
-            pj_gridlist_from_nadgrids( pj_get_ctx(defn), 
-                                       pj_param(defn->ctx,defn->params,listname).s,
-                                       gridlist_count_p );
+	if (*gridlist_p == NULL) {
+		*gridlist_p =
+		    pj_gridlist_from_nadgrids(pj_get_ctx(defn), pj_param(defn->ctx, defn->params, listname).s, gridlist_count_p);
 
-        if( *gridlist_p == NULL || *gridlist_count_p == 0 )
-            return defn->ctx->last_errno;
-    }
-     
-    if( *gridlist_count_p == 0 )
-    {
-        pj_ctx_set_errno( defn->ctx, -38);
-        return -38;
-    }
+		if (*gridlist_p == NULL || *gridlist_count_p == 0)
+			return defn->ctx->last_errno;
+	}
 
-    tables = *gridlist_p;
-    defn->ctx->last_errno = 0;
+	if (*gridlist_count_p == 0) {
+		pj_ctx_set_errno(defn->ctx, -38);
+		return -38;
+	}
 
-    for( i = 0; i < point_count; i++ )
-    {
-        long io = i * point_offset;
-        LP   input;
-        int  itable;
-        double value = HUGE_VAL;
+	tables = *gridlist_p;
+	defn->ctx->last_errno = 0;
 
-        input.phi = y[io];
-        input.lam = x[io];
+	for (i = 0; i < point_count; i++) {
+		long io = i * point_offset;
+		LP input;
+		int itable;
+		double value = HUGE_VAL;
 
-        /* keep trying till we find a table that works */
-        for( itable = 0; itable < *gridlist_count_p; itable++ )
-        {
-            PJ_GRIDINFO *gi = tables[itable];
-            struct CTABLE *ct = gi->ct;
-            double grid_x, grid_y;
-            int    grid_ix, grid_iy;
-            float  *cvs;
+		input.phi = y[io];
+		input.lam = x[io];
 
-            /* skip tables that don't match our point at all.  */
-            if( ct->ll.phi > input.phi || ct->ll.lam > input.lam
-                || ct->ll.phi + (ct->lim.phi-1) * ct->del.phi < input.phi
-                || ct->ll.lam + (ct->lim.lam-1) * ct->del.lam < input.lam )
-                continue;
+		/* keep trying till we find a table that works */
+		for (itable = 0; itable < *gridlist_count_p; itable++) {
+			PJ_GRIDINFO *gi = tables[itable];
+			struct CTABLE *ct = gi->ct;
+			double grid_x, grid_y;
+			int grid_ix, grid_iy;
+			float *cvs;
 
-            /* If we have child nodes, check to see if any of them apply. */
-            if( gi->child != NULL )
-            {
-                PJ_GRIDINFO *child;
+			/* skip tables that don't match our point at all.  */
+			if (ct->ll.phi > input.phi || ct->ll.lam > input.lam || ct->ll.phi + (ct->lim.phi - 1) * ct->del.phi < input.phi ||
+			    ct->ll.lam + (ct->lim.lam - 1) * ct->del.lam < input.lam)
+				continue;
 
-                for( child = gi->child; child != NULL; child = child->next )
-                {
-                    struct CTABLE *ct1 = child->ct;
+			/* If we have child nodes, check to see if any of them apply. */
+			if (gi->child != NULL) {
+				PJ_GRIDINFO *child;
 
-                    if( ct1->ll.phi > input.phi || ct1->ll.lam > input.lam
-                      || ct1->ll.phi+(ct1->lim.phi-1)*ct1->del.phi < input.phi
-                      || ct1->ll.lam+(ct1->lim.lam-1)*ct1->del.lam < input.lam)
-                        continue;
+				for (child = gi->child; child != NULL; child = child->next) {
+					struct CTABLE *ct1 = child->ct;
 
-                    break;
-                }
+					if (ct1->ll.phi > input.phi || ct1->ll.lam > input.lam ||
+					    ct1->ll.phi + (ct1->lim.phi - 1) * ct1->del.phi < input.phi ||
+					    ct1->ll.lam + (ct1->lim.lam - 1) * ct1->del.lam < input.lam)
+						continue;
 
-                /* we found a more refined child node to use */
-                if( child != NULL )
-                {
-                    gi = child;
-                    ct = child->ct;
-                }
-            }
+					break;
+				}
 
-            /* load the grid shift info if we don't have it. */
-            if( ct->cvs == NULL && !pj_gridinfo_load( pj_get_ctx(defn), gi ) )
-            {
-                pj_ctx_set_errno( defn->ctx, -38 );
-                return -38;
-            }
+				/* we found a more refined child node to use */
+				if (child != NULL) {
+					gi = child;
+					ct = child->ct;
+				}
+			}
 
-            /* Interpolation a location within the grid */
-            grid_x = (input.lam - ct->ll.lam) / ct->del.lam;
-            grid_y = (input.phi - ct->ll.phi) / ct->del.phi;
-            grid_ix = (int) floor(grid_x);
-            grid_iy = (int) floor(grid_y);
-            grid_x -= grid_ix;
-            grid_y -= grid_iy;
+			/* load the grid shift info if we don't have it. */
+			if (ct->cvs == NULL && !pj_gridinfo_load(pj_get_ctx(defn), gi)) {
+				pj_ctx_set_errno(defn->ctx, -38);
+				return -38;
+			}
 
-            cvs = (float *) ct->cvs;
-            value = cvs[grid_ix + grid_iy * ct->lim.lam] 
-                * (1.0-grid_x) * (1.0-grid_y)
-                + cvs[grid_ix + 1 + grid_iy * ct->lim.lam] 
-                * (grid_x) * (1.0-grid_y)
-                + cvs[grid_ix + (grid_iy+1) * ct->lim.lam] 
-                * (1.0-grid_x) * (grid_y)
-                + cvs[grid_ix + 1 + (grid_iy+1) * ct->lim.lam] 
-                * (grid_x) * (grid_y);
+			/* Interpolation a location within the grid */
+			grid_x = (input.lam - ct->ll.lam) / ct->del.lam;
+			grid_y = (input.phi - ct->ll.phi) / ct->del.phi;
+			grid_ix = (int)floor(grid_x);
+			grid_iy = (int)floor(grid_y);
+			grid_x -= grid_ix;
+			grid_y -= grid_iy;
 
-            if( value > 1000 || value < -1000 ) /* nodata? */
-                value = HUGE_VAL;
-            else
-            {
-                if( inverse )
-                    z[io] -= value;
-                else
-                    z[io] += value;
-            }
-                
-            if( value != HUGE_VAL )
-            {
-                if( debug_count++ < 20 )
-                    pj_log( defn->ctx, PJ_LOG_DEBUG_MINOR, 
-                            "pj_apply_gridshift(): used %s",
-                            ct->id );
-                break;
-            }
-        }
+			cvs = (float *)ct->cvs;
+			value = cvs[grid_ix + grid_iy * ct->lim.lam] * (1.0 - grid_x) * (1.0 - grid_y) +
+			        cvs[grid_ix + 1 + grid_iy * ct->lim.lam] * (grid_x) * (1.0 - grid_y) +
+			        cvs[grid_ix + (grid_iy + 1) * ct->lim.lam] * (1.0 - grid_x) * (grid_y) +
+			        cvs[grid_ix + 1 + (grid_iy + 1) * ct->lim.lam] * (grid_x) * (grid_y);
 
-        if( value == HUGE_VAL )
-        {
-            char gridlist[3000];
+			if (value > 1000 || value < -1000) /* nodata? */
+				value = HUGE_VAL;
+			else {
+				if (inverse)
+					z[io] -= value;
+				else
+					z[io] += value;
+			}
 
-            pj_log( defn->ctx, PJ_LOG_DEBUG_MAJOR,
-                    "pj_apply_vgridshift(): failed to find a grid shift table for\n"
-                    "                       location (%.7fdW,%.7fdN)",
-                    x[io] * RAD_TO_DEG, 
-                    y[io] * RAD_TO_DEG );
+			if (value != HUGE_VAL) {
+				if (debug_count++ < 20)
+					pj_log(defn->ctx, PJ_LOG_DEBUG_MINOR, "pj_apply_gridshift(): used %s", ct->id);
+				break;
+			}
+		}
 
-            gridlist[0] = '\0';
-            for( itable = 0; itable < *gridlist_count_p; itable++ )
-            {
-                PJ_GRIDINFO *gi = tables[itable];
-                if( strlen(gridlist) + strlen(gi->gridname) > sizeof(gridlist)-100 )
-                {
-                    strcat( gridlist, "..." );
-                    break;
-                }
+		if (value == HUGE_VAL) {
+			char gridlist[3000];
 
-                if( itable == 0 )
-                    sprintf( gridlist, "   tried: %s", gi->gridname );
-                else
-                    sprintf( gridlist+strlen(gridlist), ",%s", gi->gridname );
-            }
-            pj_log( defn->ctx, PJ_LOG_DEBUG_MAJOR,
-                    "%s", gridlist );
-                
-            pj_ctx_set_errno( defn->ctx, PJD_ERR_GRID_AREA );
-            return PJD_ERR_GRID_AREA;
-        }
-    }
+			pj_log(defn->ctx, PJ_LOG_DEBUG_MAJOR,
+			       "pj_apply_vgridshift(): failed to find a grid shift table for\n"
+			       "                       location (%.7fdW,%.7fdN)",
+			       x[io] * RAD_TO_DEG, y[io] * RAD_TO_DEG);
 
-    return 0;
+			gridlist[0] = '\0';
+			for (itable = 0; itable < *gridlist_count_p; itable++) {
+				PJ_GRIDINFO *gi = tables[itable];
+				if (strlen(gridlist) + strlen(gi->gridname) > sizeof(gridlist) - 100) {
+					strcat(gridlist, "...");
+					break;
+				}
+
+				if (itable == 0)
+					sprintf(gridlist, "   tried: %s", gi->gridname);
+				else
+					sprintf(gridlist + strlen(gridlist), ",%s", gi->gridname);
+			}
+			pj_log(defn->ctx, PJ_LOG_DEBUG_MAJOR, "%s", gridlist);
+
+			pj_ctx_set_errno(defn->ctx, PJD_ERR_GRID_AREA);
+			return PJD_ERR_GRID_AREA;
+		}
+	}
+
+	return 0;
 }
-

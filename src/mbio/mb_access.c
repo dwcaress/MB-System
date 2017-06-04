@@ -2,7 +2,7 @@
  *    The MB-system:	mb_access.c	11/1/00
  *    $Id$
  *
- *    Copyright (c) 2000-2016 by
+ *    Copyright (c) 2000-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -35,319 +35,274 @@
 #include "mb_define.h"
 #include "mb_segy.h"
 
-static char svn_id[]="$Id$";
+static char svn_id[] = "$Id$";
 /*--------------------------------------------------------------------*/
-int mb_alloc(int verbose, void *mbio_ptr,
-		    void **store_ptr, int *error)
-{
-	char	*function_name = "mb_alloc";
-	int	status = MB_SUCCESS;
+int mb_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
+	char *function_name = "mb_alloc";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call appropriate memory allocation routine */
-	if (mb_io_ptr->mb_io_store_alloc != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_store_alloc)
-				(verbose,mbio_ptr,store_ptr,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_store_alloc != NULL) {
+		status = (*mb_io_ptr->mb_io_store_alloc)(verbose, mbio_ptr, store_ptr, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)*store_ptr);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_deall(int verbose, void *mbio_ptr,
-			void **store_ptr, int *error)
-{
-	char	*function_name = "mb_deall";
-	int	status = MB_SUCCESS;
+int mb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
+	char *function_name = "mb_deall";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)*store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call appropriate memory deallocation routine */
-	if (mb_io_ptr->mb_io_store_free != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_store_free)
-				(verbose,mbio_ptr,store_ptr,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_store_free != NULL) {
+		status = (*mb_io_ptr->mb_io_store_free)(verbose, mbio_ptr, store_ptr, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_get_store(int verbose, void *mbio_ptr,
-		    void **store_ptr, int *error)
-{
-	char	*function_name = "mb_get_store";
-	int	status = MB_SUCCESS;
+int mb_get_store(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
+	char *function_name = "mb_get_store";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get store pointer */
-	*store_ptr = (void *) mb_io_ptr->store_data;
+	*store_ptr = (void *)mb_io_ptr->store_data;
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)*store_ptr);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)*store_ptr);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, int *nbath, int *namp, int *nss, int *error)
-{
-	char	*function_name = "mb_dimensions";
-	int	status;
+int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
+	char *function_name = "mb_dimensions";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_extract != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_dimensions)
-				(verbose, mbio_ptr, store_ptr,
-				kind, nbath, namp, nss, error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_extract != NULL) {
+		status = (*mb_io_ptr->mb_io_dimensions)(verbose, mbio_ptr, store_ptr, kind, nbath, namp, nss, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
-		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
-		fprintf(stderr,"dbg2       namp:       %d\n",*namp);
-		fprintf(stderr,"dbg2       nss:        %d\n",*nss);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
+		fprintf(stderr, "dbg2       namp:       %d\n", *namp);
+		fprintf(stderr, "dbg2       nss:        %d\n", *nss);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pingnumber(int verbose, void *mbio_ptr,
-		int *pingnumber, int *error)
-{
-	char	*function_name = "mb_pingnumber";
-	int	status = MB_SUCCESS;
+int mb_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error) {
+	char *function_name = "mb_pingnumber";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_pingnumber != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_pingnumber)
-				(verbose, mbio_ptr,
-				pingnumber, error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_pingnumber != NULL) {
+		status = (*mb_io_ptr->mb_io_pingnumber)(verbose, mbio_ptr, pingnumber, error);
+	}
+	else {
 		*pingnumber = mb_io_ptr->ping_count;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       pingnumber: %d\n",*pingnumber);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       pingnumber: %d\n", *pingnumber);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_segynumber(int verbose, void *mbio_ptr,
-		int *line, int *shot, int *cdp, int *error)
-{
-	char	*function_name = "mb_segynumber";
-	int	status = MB_SUCCESS;
+int mb_segynumber(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, int *error) {
+	char *function_name = "mb_segynumber";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_segynumber != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_segynumber)
-				(verbose, mbio_ptr,
-				line, shot, cdp, error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_segynumber != NULL) {
+		status = (*mb_io_ptr->mb_io_segynumber)(verbose, mbio_ptr, line, shot, cdp, error);
+	}
+	else {
 		*line = 0;
 		*shot = mb_io_ptr->ping_count;
 		*cdp = 0;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       line:       %d\n",*line);
-		fprintf(stderr,"dbg2       shot:       %d\n",*shot);
-		fprintf(stderr,"dbg2       cdp:        %d\n",*cdp);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       line:       %d\n", *line);
+		fprintf(stderr, "dbg2       shot:       %d\n", *shot);
+		fprintf(stderr, "dbg2       cdp:        %d\n", *cdp);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_beamwidths(int verbose, void *mbio_ptr,
-		double *beamwidth_xtrack, double *beamwidth_ltrack, int *error)
-{
-	char	*function_name = "mb_beamwidths";
-	int	status = MB_SUCCESS;
+int mb_beamwidths(int verbose, void *mbio_ptr, double *beamwidth_xtrack, double *beamwidth_ltrack, int *error) {
+	char *function_name = "mb_beamwidths";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:           %p\n",(void *)mbio_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:           %p\n", (void *)mbio_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* extract the values from the mb_io structure */
 	*beamwidth_xtrack = mb_io_ptr->beamwidth_xtrack;
@@ -356,831 +311,669 @@ int mb_beamwidths(int verbose, void *mbio_ptr,
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       beamwidth_xtrack: %f\n",*beamwidth_xtrack);
-		fprintf(stderr,"dbg2       beamwidth_ltrack: %f\n",*beamwidth_ltrack);
-		fprintf(stderr,"dbg2       error:            %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:           %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       beamwidth_xtrack: %f\n", *beamwidth_xtrack);
+		fprintf(stderr, "dbg2       beamwidth_ltrack: %f\n", *beamwidth_ltrack);
+		fprintf(stderr, "dbg2       error:            %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:           %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
-		int *sonartype, int *error)
-{
-	char	*function_name = "mb_sonartype";
-	int	status = MB_SUCCESS;
+int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
+	char *function_name = "mb_sonartype";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
 	/* start off with sonartype unknown */
 	*sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
 
 	/* call the appropriate mbsys_ sonartype routine
-			mb_io_ptr->system == MB_SYS_LDEOIH
-			mb_io_ptr->system == MB_SYS_GSF
-			mb_io_ptr->system == MB_SYS_HDCS
-			mb_io_ptr->system == MB_SYS_HYSWEEP */
-	if (mb_io_ptr->mb_io_sonartype != NULL)
-		{
+	        mb_io_ptr->system == MB_SYS_LDEOIH
+	        mb_io_ptr->system == MB_SYS_GSF
+	        mb_io_ptr->system == MB_SYS_HDCS
+	        mb_io_ptr->system == MB_SYS_HYSWEEP */
+	if (mb_io_ptr->mb_io_sonartype != NULL) {
 		if (store_ptr == NULL)
-			store_ptr = (void *) mb_io_ptr->store_data;
-		status = (*mb_io_ptr->mb_io_sonartype)
-				(verbose, mbio_ptr, store_ptr, sonartype, error);
-		}
+			store_ptr = (void *)mb_io_ptr->store_data;
+		status = (*mb_io_ptr->mb_io_sonartype)(verbose, mbio_ptr, store_ptr, sonartype, error);
+	}
 
 	/* Some systems are definitively echosounders */
-	else if (mb_io_ptr->system == MB_SYS_SINGLEBEAM)
-		{
-		if (mb_io_ptr->format == MBF_ASCIIXYZ
-			|| mb_io_ptr->format == MBF_ASCIIYXZ
-			|| mb_io_ptr->format == MBF_ASCIIYXT
-			|| mb_io_ptr->format == MBF_ASCIIYXT)
-			{
+	else if (mb_io_ptr->system == MB_SYS_SINGLEBEAM) {
+		if (mb_io_ptr->format == MBF_ASCIIXYZ || mb_io_ptr->format == MBF_ASCIIYXZ || mb_io_ptr->format == MBF_ASCIIYXT ||
+		    mb_io_ptr->format == MBF_ASCIIYXT) {
 			*sonartype = MB_TOPOGRAPHY_TYPE_POINT;
-			}
-		else
-			{
-			*sonartype = MB_TOPOGRAPHY_TYPE_ECHOSOUNDER;
-			}
 		}
+		else {
+			*sonartype = MB_TOPOGRAPHY_TYPE_ECHOSOUNDER;
+		}
+	}
 
 	/* Some systems are definitively multibeams */
-	else if (mb_io_ptr->system == MB_SYS_SB
-			|| mb_io_ptr->system == MB_SYS_HSDS
-			|| mb_io_ptr->system == MB_SYS_SB2000
-			|| mb_io_ptr->system == MB_SYS_SB2100
-			|| mb_io_ptr->system == MB_SYS_SIMRAD
-			|| mb_io_ptr->system == MB_SYS_SIMRAD2
-			|| mb_io_ptr->system == MB_SYS_SIMRAD3
-			|| mb_io_ptr->system == MB_SYS_RESON
-			|| mb_io_ptr->system == MB_SYS_RESON8K
-			|| mb_io_ptr->system == MB_SYS_ELAC
-			|| mb_io_ptr->system == MB_SYS_ELACMK2
-			|| mb_io_ptr->system == MB_SYS_HSMD
-			|| mb_io_ptr->system == MB_SYS_XSE
-			|| mb_io_ptr->system == MB_SYS_NETCDF
-			|| mb_io_ptr->system == MB_SYS_HS10
-			|| mb_io_ptr->system == MB_SYS_ATLAS
-			|| mb_io_ptr->system == MB_SYS_SURF
-			|| mb_io_ptr->system == MB_SYS_RESON7K
-			|| mb_io_ptr->system == MB_SYS_WASSP)
-		{
+	else if (mb_io_ptr->system == MB_SYS_SB || mb_io_ptr->system == MB_SYS_HSDS || mb_io_ptr->system == MB_SYS_SB2000 ||
+	         mb_io_ptr->system == MB_SYS_SB2100 || mb_io_ptr->system == MB_SYS_SIMRAD || mb_io_ptr->system == MB_SYS_SIMRAD2 ||
+	         mb_io_ptr->system == MB_SYS_SIMRAD3 || mb_io_ptr->system == MB_SYS_RESON || mb_io_ptr->system == MB_SYS_RESON8K ||
+	         mb_io_ptr->system == MB_SYS_ELAC || mb_io_ptr->system == MB_SYS_ELACMK2 || mb_io_ptr->system == MB_SYS_HSMD ||
+	         mb_io_ptr->system == MB_SYS_XSE || mb_io_ptr->system == MB_SYS_NETCDF || mb_io_ptr->system == MB_SYS_HS10 ||
+	         mb_io_ptr->system == MB_SYS_ATLAS || mb_io_ptr->system == MB_SYS_SURF || mb_io_ptr->system == MB_SYS_RESON7K ||
+	         mb_io_ptr->system == MB_SYS_WASSP) {
 		*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
-		}
+	}
 
 	/* Some systems are definitively sidescans */
-	else if (mb_io_ptr->system == MB_SYS_MSTIFF
-			|| mb_io_ptr->system == MB_SYS_JSTAR
-			|| mb_io_ptr->system == MB_SYS_BENTHOS
-			|| mb_io_ptr->system == MB_SYS_IMAGE83P)
-		{
+	else if (mb_io_ptr->system == MB_SYS_MSTIFF || mb_io_ptr->system == MB_SYS_JSTAR || mb_io_ptr->system == MB_SYS_BENTHOS ||
+	         mb_io_ptr->system == MB_SYS_IMAGE83P) {
 		*sonartype = MB_TOPOGRAPHY_TYPE_SIDESCAN;
-		}
+	}
 
 	/* Some systems are definitively interferometric sonars */
-	else if (mb_io_ptr->system == MB_SYS_MR1
-			|| mb_io_ptr->system == MB_SYS_MR1B
-			|| mb_io_ptr->system == MB_SYS_MR1V2001
-			|| mb_io_ptr->system == MB_SYS_DSL
-			|| mb_io_ptr->system == MB_SYS_OIC
-			|| mb_io_ptr->system == MB_SYS_SWATHPLUS)
-		{
+	else if (mb_io_ptr->system == MB_SYS_MR1 || mb_io_ptr->system == MB_SYS_MR1B || mb_io_ptr->system == MB_SYS_MR1V2001 ||
+	         mb_io_ptr->system == MB_SYS_DSL || mb_io_ptr->system == MB_SYS_OIC || mb_io_ptr->system == MB_SYS_SWATHPLUS) {
 		*sonartype = MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC;
-		}
+	}
 
 	/* Some systems are definitively lidars */
-	else if (mb_io_ptr->system == MB_SYS_3DATDEPTHLIDAR)
-		{
+	else if (mb_io_ptr->system == MB_SYS_3DATDEPTHLIDAR) {
 		*sonartype = MB_TOPOGRAPHY_TYPE_LIDAR;
-		}
+	}
 
 	/* Some systems are definitively stereo cameras */
-	else if (mb_io_ptr->system == MB_SYS_STEREOPAIR)
-		{
+	else if (mb_io_ptr->system == MB_SYS_STEREOPAIR) {
 		*sonartype = MB_TOPOGRAPHY_TYPE_CAMERA;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       sonartype:  %d\n",*sonartype);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       sonartype:  %d\n", *sonartype);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
-		int *ss_type, int *error)
-{
-	char	*function_name = "mb_sidescantype";
-	int	status = MB_SUCCESS;
+int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
+	char *function_name = "mb_sidescantype";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_sidescantype != NULL)
-		{
+	if (mb_io_ptr->mb_io_sidescantype != NULL) {
 		if (store_ptr == NULL)
-			store_ptr = (void *) mb_io_ptr->store_data;
-		status = (*mb_io_ptr->mb_io_sidescantype)
-				(verbose, mbio_ptr, store_ptr, ss_type, error);
-		}
-	else
-		{
+			store_ptr = (void *)mb_io_ptr->store_data;
+		status = (*mb_io_ptr->mb_io_sidescantype)(verbose, mbio_ptr, store_ptr, ss_type, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       ss_type:    %d\n",*ss_type);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       ss_type:    %d\n", *ss_type);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
-		void *platform_ptr, void *preprocess_pars_ptr, int *error)
-{
-	char	*function_name = "mb_preprocess";
-	int	status;
+int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr, int *error) {
+	char *function_name = "mb_preprocess";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:                    %d\n", verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:                  %p\n", (void *)store_ptr);
-		fprintf(stderr,"dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
-		fprintf(stderr,"dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:                  %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
+		fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_preprocess != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_preprocess)
-				(verbose, mbio_ptr, store_ptr, platform_ptr, preprocess_pars_ptr,
-				error);
-		}
-		
-	else
-		{
+	if (mb_io_ptr->mb_io_preprocess != NULL) {
+		status = (*mb_io_ptr->mb_io_preprocess)(verbose, mbio_ptr, store_ptr, platform_ptr, preprocess_pars_ptr, error);
+	}
+
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:         %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:        %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:         %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:        %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, void **platform_ptr, int *error)
-{
-	char	*function_name = "mb_extract_platform";
-	int	status;
+int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
+	char *function_name = "mb_extract_platform";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
 	struct mb_platform_struct *platform;
-	int	i, j;
+	int i, j;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:      %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       platform_ptr:   %p\n",(void *)platform_ptr);
-		fprintf(stderr,"dbg2       *platform_ptr:  %p\n",(void *)*platform_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:         %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:      %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       platform_ptr:   %p\n", (void *)platform_ptr);
+		fprintf(stderr, "dbg2       *platform_ptr:  %p\n", (void *)*platform_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_extract_platform != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_extract_platform)
-						(verbose, mbio_ptr, store_ptr,
-							kind, platform_ptr, error);
-				
-		if (status == MB_SUCCESS && *platform_ptr == NULL)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_BAD_SYSTEM; 
-				}
+	if (mb_io_ptr->mb_io_extract_platform != NULL) {
+		status = (*mb_io_ptr->mb_io_extract_platform)(verbose, mbio_ptr, store_ptr, kind, platform_ptr, error);
+
+		if (status == MB_SUCCESS && *platform_ptr == NULL) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_SYSTEM;
 		}
-	else
-		{
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
-		}
-	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
-		{
-		platform = (struct mb_platform_struct *) *platform_ptr;
-		fprintf(stderr,"dbg2       platform:		     		    %p\n", platform);
-		fprintf(stderr,"dbg2       platform->type:		     		%d\n", platform->type);
-		fprintf(stderr,"dbg2       platform->name:		     		%s\n", platform->name);
-		fprintf(stderr,"dbg2       platform->organization:	     	%s\n", platform->organization);
-		fprintf(stderr,"dbg2       platform->source_bathymetry1:  	%d\n", platform->source_bathymetry1);
-		fprintf(stderr,"dbg2       platform->source_bathymetry2:  	%d\n", platform->source_bathymetry2);
-		fprintf(stderr,"dbg2       platform->source_bathymetry3:  	%d\n", platform->source_bathymetry3);
-		fprintf(stderr,"dbg2       platform->source_backscatter1:  	%d\n", platform->source_backscatter1);
-		fprintf(stderr,"dbg2       platform->source_backscatter2:  	%d\n", platform->source_backscatter2);
-		fprintf(stderr,"dbg2       platform->source_backscatter3:  	%d\n", platform->source_backscatter3);
-		fprintf(stderr,"dbg2       platform->source_position1:  	%d\n", platform->source_position1);
-		fprintf(stderr,"dbg2       platform->source_position2:  	%d\n", platform->source_position2);
-		fprintf(stderr,"dbg2       platform->source_position3:  	%d\n", platform->source_position3);
-		fprintf(stderr,"dbg2       platform->source_depth1:  		%d\n", platform->source_depth1);
-		fprintf(stderr,"dbg2       platform->source_depth2:  		%d\n", platform->source_depth2);
-		fprintf(stderr,"dbg2       platform->source_depth3:  		%d\n", platform->source_depth3);
-		fprintf(stderr,"dbg2       platform->source_heading1:  		%d\n", platform->source_heading1);
-		fprintf(stderr,"dbg2       platform->source_heading2:  		%d\n", platform->source_heading2);
-		fprintf(stderr,"dbg2       platform->source_heading3:  		%d\n", platform->source_heading3);
-		fprintf(stderr,"dbg2       platform->source_rollpitch1:  	%d\n", platform->source_rollpitch1);
-		fprintf(stderr,"dbg2       platform->source_rollpitch2:  	%d\n", platform->source_rollpitch2);
-		fprintf(stderr,"dbg2       platform->source_rollpitch3:  	%d\n", platform->source_rollpitch3);
-		fprintf(stderr,"dbg2       platform->source_heave1:  		%d\n", platform->source_heave1);
-		fprintf(stderr,"dbg2       platform->source_heave2:  		%d\n", platform->source_heave2);
-		fprintf(stderr,"dbg2       platform->source_heave3:  		%d\n", platform->source_heave3);
-		fprintf(stderr,"dbg2       platform->num_sensors:	     	%d\n", platform->num_sensors);
-		for (i=0;i<platform->num_sensors;i++)
-			{
-			fprintf(stderr,"dbg2       platform->sensors[%2d].type:                 %d\n", i, platform->sensors[i].type);
-			fprintf(stderr,"dbg2       platform->sensors[%2d].model:                %s\n", i, platform->sensors[i].model);
-			fprintf(stderr,"dbg2       platform->sensors[%2d].manufacturer:         %s\n", i, platform->sensors[i].manufacturer);
-			fprintf(stderr,"dbg2       platform->sensors[%2d].serialnumber:         %s\n", i, platform->sensors[i].serialnumber);
-			fprintf(stderr,"dbg2       platform->sensors[%2d].capability1:          %d\n", i, platform->sensors[i].capability1);
-			fprintf(stderr,"dbg2       platform->sensors[%2d].capability2:          %d\n", i, platform->sensors[i].capability2);
-			fprintf(stderr,"dbg2       platform->sensors[%2d].num_offsets:          %d\n", i, platform->sensors[i].num_offsets);
-			for (j=0;j<platform->sensors[i].num_offsets;j++)
-				{
-				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_mode:	        %d\n", i, j, platform->sensors[i].offsets[j].position_offset_mode);
-				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_x:	        %f\n", i, j, platform->sensors[i].offsets[j].position_offset_x);
-				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_y:	        %f\n", i, j, platform->sensors[i].offsets[j].position_offset_y);
-				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].position_offset_z:	        %f\n", i, j, platform->sensors[i].offsets[j].position_offset_z);
-				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_mode:	        %d\n", i, j, platform->sensors[i].offsets[j].attitude_offset_mode);
-				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_heading:	    %f\n", i, j, platform->sensors[i].offsets[j].attitude_offset_heading);
-				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_roll:	        %f\n", i, j, platform->sensors[i].offsets[j].attitude_offset_roll);
-				fprintf(stderr,"dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_pitch:	    %f\n", i, j, platform->sensors[i].offsets[j].attitude_offset_pitch);
-				}
-		    fprintf(stderr,"dbg2       platform->sensors[%2d].time_latency_mode:	%d\n", i, platform->sensors[i].time_latency_mode);
-		    fprintf(stderr,"dbg2       platform->sensors[%2d].time_latency_static:	%f\n", i, platform->sensors[i].time_latency_static);
-		    fprintf(stderr,"dbg2       platform->sensors[%2d].num_time_latency:		%d\n", i, platform->sensors[i].num_time_latency);
-		    for (j=0;j<platform->sensors[i].num_time_latency;j++)
-				{
-				fprintf(stderr,"dbg2       platform->sensors[%2d].time_latency[%2d]:		%16.6f %8.6f\n", i, j,
-						platform->sensors[i].time_latency_time_d[j],platform->sensors[i].time_latency_value[j]);
-				}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+	}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
+		platform = (struct mb_platform_struct *)*platform_ptr;
+		fprintf(stderr, "dbg2       platform:		     		    %p\n", platform);
+		fprintf(stderr, "dbg2       platform->type:		     		%d\n", platform->type);
+		fprintf(stderr, "dbg2       platform->name:		     		%s\n", platform->name);
+		fprintf(stderr, "dbg2       platform->organization:	     	%s\n", platform->organization);
+		fprintf(stderr, "dbg2       platform->source_bathymetry1:  	%d\n", platform->source_bathymetry1);
+		fprintf(stderr, "dbg2       platform->source_bathymetry2:  	%d\n", platform->source_bathymetry2);
+		fprintf(stderr, "dbg2       platform->source_bathymetry3:  	%d\n", platform->source_bathymetry3);
+		fprintf(stderr, "dbg2       platform->source_backscatter1:  	%d\n", platform->source_backscatter1);
+		fprintf(stderr, "dbg2       platform->source_backscatter2:  	%d\n", platform->source_backscatter2);
+		fprintf(stderr, "dbg2       platform->source_backscatter3:  	%d\n", platform->source_backscatter3);
+		fprintf(stderr, "dbg2       platform->source_position1:  	%d\n", platform->source_position1);
+		fprintf(stderr, "dbg2       platform->source_position2:  	%d\n", platform->source_position2);
+		fprintf(stderr, "dbg2       platform->source_position3:  	%d\n", platform->source_position3);
+		fprintf(stderr, "dbg2       platform->source_depth1:  		%d\n", platform->source_depth1);
+		fprintf(stderr, "dbg2       platform->source_depth2:  		%d\n", platform->source_depth2);
+		fprintf(stderr, "dbg2       platform->source_depth3:  		%d\n", platform->source_depth3);
+		fprintf(stderr, "dbg2       platform->source_heading1:  		%d\n", platform->source_heading1);
+		fprintf(stderr, "dbg2       platform->source_heading2:  		%d\n", platform->source_heading2);
+		fprintf(stderr, "dbg2       platform->source_heading3:  		%d\n", platform->source_heading3);
+		fprintf(stderr, "dbg2       platform->source_rollpitch1:  	%d\n", platform->source_rollpitch1);
+		fprintf(stderr, "dbg2       platform->source_rollpitch2:  	%d\n", platform->source_rollpitch2);
+		fprintf(stderr, "dbg2       platform->source_rollpitch3:  	%d\n", platform->source_rollpitch3);
+		fprintf(stderr, "dbg2       platform->source_heave1:  		%d\n", platform->source_heave1);
+		fprintf(stderr, "dbg2       platform->source_heave2:  		%d\n", platform->source_heave2);
+		fprintf(stderr, "dbg2       platform->source_heave3:  		%d\n", platform->source_heave3);
+		fprintf(stderr, "dbg2       platform->num_sensors:	     	%d\n", platform->num_sensors);
+		for (i = 0; i < platform->num_sensors; i++) {
+			fprintf(stderr, "dbg2       platform->sensors[%2d].type:                 %d\n", i, platform->sensors[i].type);
+			fprintf(stderr, "dbg2       platform->sensors[%2d].model:                %s\n", i, platform->sensors[i].model);
+			fprintf(stderr, "dbg2       platform->sensors[%2d].manufacturer:         %s\n", i, platform->sensors[i].manufacturer);
+			fprintf(stderr, "dbg2       platform->sensors[%2d].serialnumber:         %s\n", i, platform->sensors[i].serialnumber);
+			fprintf(stderr, "dbg2       platform->sensors[%2d].capability1:          %d\n", i, platform->sensors[i].capability1);
+			fprintf(stderr, "dbg2       platform->sensors[%2d].capability2:          %d\n", i, platform->sensors[i].capability2);
+			fprintf(stderr, "dbg2       platform->sensors[%2d].num_offsets:          %d\n", i, platform->sensors[i].num_offsets);
+			for (j = 0; j < platform->sensors[i].num_offsets; j++) {
+				fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_mode:	        %d\n", i, j,
+				        platform->sensors[i].offsets[j].position_offset_mode);
+				fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_x:	        %f\n", i, j,
+				        platform->sensors[i].offsets[j].position_offset_x);
+				fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_y:	        %f\n", i, j,
+				        platform->sensors[i].offsets[j].position_offset_y);
+				fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_z:	        %f\n", i, j,
+				        platform->sensors[i].offsets[j].position_offset_z);
+				fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_mode:	        %d\n", i, j,
+				        platform->sensors[i].offsets[j].attitude_offset_mode);
+				fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_heading:	    %f\n", i, j,
+				        platform->sensors[i].offsets[j].attitude_offset_heading);
+				fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_roll:	        %f\n", i, j,
+				        platform->sensors[i].offsets[j].attitude_offset_roll);
+				fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_pitch:	    %f\n", i, j,
+				        platform->sensors[i].offsets[j].attitude_offset_pitch);
 			}
-		fprintf(stderr,"dbg2       error:			     %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:			     %d\n",status);
+			fprintf(stderr, "dbg2       platform->sensors[%2d].time_latency_mode:	%d\n", i,
+			        platform->sensors[i].time_latency_mode);
+			fprintf(stderr, "dbg2       platform->sensors[%2d].time_latency_static:	%f\n", i,
+			        platform->sensors[i].time_latency_static);
+			fprintf(stderr, "dbg2       platform->sensors[%2d].num_time_latency:		%d\n", i,
+			        platform->sensors[i].num_time_latency);
+			for (j = 0; j < platform->sensors[i].num_time_latency; j++) {
+				fprintf(stderr, "dbg2       platform->sensors[%2d].time_latency[%2d]:		%16.6f %8.6f\n", i, j,
+				        platform->sensors[i].time_latency_time_d[j], platform->sensors[i].time_latency_value[j]);
+			}
 		}
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+		fprintf(stderr, "dbg2       error:			     %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:			     %d\n", status);
+	}
+	if (verbose >= 2) {
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, int time_i[7], double *time_d,
-		double *navlon, double *navlat,
-		double *speed, double *heading,
-		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp,
-		double *bathacrosstrack, double *bathalongtrack,
-		double *ss, double *ssacrosstrack, double *ssalongtrack,
-		char *comment, int *error)
-{
-	char	*function_name = "mb_extract";
-	int	status;
+int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+               double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag, double *bath,
+               double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+               double *ssalongtrack, char *comment, int *error) {
+	char *function_name = "mb_extract";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	double	easting, northing;
-	int	i;
+	double easting, northing;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_extract != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_extract)
-				(verbose, mbio_ptr, store_ptr,
-				kind, time_i, time_d,
-				navlon, navlat,
-				speed, heading,
-				nbath, namp, nss,
-				beamflag, bath, amp,
-				bathacrosstrack, bathalongtrack,
-				ss, ssacrosstrack, ssalongtrack,
-				comment, error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_extract != NULL) {
+		status = (*mb_io_ptr->mb_io_extract)(verbose, mbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
+		                                     nbath, namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
+		                                     ssacrosstrack, ssalongtrack, comment, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* apply projection and lonflip if necessary */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* apply inverse projection if required */
-		if (mb_io_ptr->projection_initialized == MB_YES)
-			{
+		if (mb_io_ptr->projection_initialized == MB_YES) {
 			easting = *navlon;
 			northing = *navlat;
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr,
-							easting, northing,
-							navlon, navlat,
-							error);
-			}
+			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, navlon, navlat, error);
+		}
 
 		/* apply lonflip */
-		if (mb_io_ptr->lonflip < 0)
-			{
+		if (mb_io_ptr->lonflip < 0) {
 			if (*navlon > 0.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < -360.)
 				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
+		}
+		else if (mb_io_ptr->lonflip == 0) {
 			if (*navlon > 180.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < -180.)
 				*navlon = *navlon + 360.;
-			}
-		else
-			{
+		}
+		else {
 			if (*navlon > 360.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < 0.)
 				*navlon = *navlon + 360.;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
-		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
-		&& *kind == MB_DATA_COMMENT)
-		{
-		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
-			comment);
-		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
-		&& *kind != MB_DATA_COMMENT)
-		{
-		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
-		fprintf(stderr,"dbg2       time_i[1]:     %d\n",time_i[1]);
-		fprintf(stderr,"dbg2       time_i[2]:     %d\n",time_i[2]);
-		fprintf(stderr,"dbg2       time_i[3]:     %d\n",time_i[3]);
-		fprintf(stderr,"dbg2       time_i[4]:     %d\n",time_i[4]);
-		fprintf(stderr,"dbg2       time_i[5]:     %d\n",time_i[5]);
-		fprintf(stderr,"dbg2       time_i[6]:     %d\n",time_i[6]);
-		fprintf(stderr,"dbg2       time_d:        %f\n",*time_d);
-		fprintf(stderr,"dbg2       longitude:     %f\n",*navlon);
-		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
-		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
-		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
-		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
-		&& *kind == MB_DATA_DATA)
-		{
-		fprintf(stderr,"dbg2       nbath:      %d\n",
-			*nbath);
-		for (i=0;i<*nbath;i++)
-		  fprintf(stderr,"dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,beamflag[i],bath[i],
-			bathacrosstrack[i],bathalongtrack[i]);
-		fprintf(stderr,"dbg2        namp:     %d\n",
-			*namp);
-		for (i=0;i<*namp;i++)
-		  fprintf(stderr,"dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
-		fprintf(stderr,"dbg2        nss:      %d\n",
-			*nss);
-		for (i=0;i<*nss;i++)
-		  fprintf(stderr,"dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
-		}
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+	}
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_COMMENT) {
+		fprintf(stderr, "dbg2       comment:     \ndbg2       %s\n", comment);
+	}
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind != MB_DATA_COMMENT) {
+		fprintf(stderr, "dbg2       time_i[0]:     %d\n", time_i[0]);
+		fprintf(stderr, "dbg2       time_i[1]:     %d\n", time_i[1]);
+		fprintf(stderr, "dbg2       time_i[2]:     %d\n", time_i[2]);
+		fprintf(stderr, "dbg2       time_i[3]:     %d\n", time_i[3]);
+		fprintf(stderr, "dbg2       time_i[4]:     %d\n", time_i[4]);
+		fprintf(stderr, "dbg2       time_i[5]:     %d\n", time_i[5]);
+		fprintf(stderr, "dbg2       time_i[6]:     %d\n", time_i[6]);
+		fprintf(stderr, "dbg2       time_d:        %f\n", *time_d);
+		fprintf(stderr, "dbg2       longitude:     %f\n", *navlon);
+		fprintf(stderr, "dbg2       latitude:      %f\n", *navlat);
+		fprintf(stderr, "dbg2       speed:         %f\n", *speed);
+		fprintf(stderr, "dbg2       heading:       %f\n", *heading);
+	}
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
+		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
+		for (i = 0; i < *nbath; i++)
+			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
+			        bathacrosstrack[i], bathalongtrack[i]);
+		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
+		for (i = 0; i < *namp; i++)
+			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
+			        bathalongtrack[i]);
+		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
+		for (i = 0; i < *nss; i++)
+			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
+			        ssalongtrack[i]);
+	}
+	if (verbose >= 2) {
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
-		int kind, int time_i[7], double time_d,
-		double navlon, double navlat,
-		double speed, double heading,
-		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp,
-		double *bathacrosstrack, double *bathalongtrack,
-		double *ss, double *ssacrosstrack, double *ssalongtrack,
-		char *comment, int *error)
-{
-	char	*function_name = "mb_insert";
-	int	status;
+int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon, double navlat,
+              double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath, double *amp,
+              double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack, double *ssalongtrack,
+              char *comment, int *error) {
+	char *function_name = "mb_insert";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	double	easting, northing;
-	int	i;
+	double easting, northing;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       kind:       %d\n",kind);
-		}
-	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
-		{
-		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
-		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
-		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
-		fprintf(stderr,"dbg2       time_i[3]:  %d\n",time_i[3]);
-		fprintf(stderr,"dbg2       time_i[4]:  %d\n",time_i[4]);
-		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
-		fprintf(stderr,"dbg2       time_i[6]:  %d\n",time_i[6]);
-		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
-		fprintf(stderr,"dbg2       navlon:     %f\n",navlon);
-		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
-		fprintf(stderr,"dbg2       speed:      %f\n",speed);
-		fprintf(stderr,"dbg2       heading:    %f\n",heading);
-		}
-	if (verbose >= 2 && kind == MB_DATA_DATA)
-		{
-		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       kind:       %d\n", kind);
+	}
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
+		fprintf(stderr, "dbg2       time_i[0]:  %d\n", time_i[0]);
+		fprintf(stderr, "dbg2       time_i[1]:  %d\n", time_i[1]);
+		fprintf(stderr, "dbg2       time_i[2]:  %d\n", time_i[2]);
+		fprintf(stderr, "dbg2       time_i[3]:  %d\n", time_i[3]);
+		fprintf(stderr, "dbg2       time_i[4]:  %d\n", time_i[4]);
+		fprintf(stderr, "dbg2       time_i[5]:  %d\n", time_i[5]);
+		fprintf(stderr, "dbg2       time_i[6]:  %d\n", time_i[6]);
+		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
+		fprintf(stderr, "dbg2       navlon:     %f\n", navlon);
+		fprintf(stderr, "dbg2       navlat:     %f\n", navlat);
+		fprintf(stderr, "dbg2       speed:      %f\n", speed);
+		fprintf(stderr, "dbg2       heading:    %f\n", heading);
+	}
+	if (verbose >= 2 && kind == MB_DATA_DATA) {
+		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-		 for (i=0;i<nbath;i++)
-		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,beamflag[i],bath[i],
-			bathacrosstrack[i],bathalongtrack[i]);
-		fprintf(stderr,"dbg2       namp:       %d\n",namp);
+			for (i = 0; i < nbath; i++)
+				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
+				        bathacrosstrack[i], bathalongtrack[i]);
+		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-		 for (i=0;i<namp;i++)
-		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
-		fprintf(stderr,"dbg2        nss:       %d\n",nss);
+			for (i = 0; i < namp; i++)
+				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
+				        bathalongtrack[i]);
+		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-		 for (i=0;i<nss;i++)
-		  fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
-			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
-		}
-	if (verbose >= 2 && kind == MB_DATA_COMMENT)
-		{
-		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
-			comment);
-		}
+			for (i = 0; i < nss; i++)
+				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
+				        ssalongtrack[i]);
+	}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT) {
+		fprintf(stderr, "dbg2       comment:     \ndbg2       %s\n", comment);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* check that io arrays are large enough, allocate larger arrays if necessary */
-	if (nbath > mb_io_ptr->beams_bath_alloc
-		|| namp > mb_io_ptr->beams_amp_alloc
-		|| nss > mb_io_ptr->pixels_ss_alloc)
-		{
-		status = mb_update_arrays(verbose, mbio_ptr,
-			nbath, namp, nss, error);
-		}
+	if (nbath > mb_io_ptr->beams_bath_alloc || namp > mb_io_ptr->beams_amp_alloc || nss > mb_io_ptr->pixels_ss_alloc) {
+		status = mb_update_arrays(verbose, mbio_ptr, nbath, namp, nss, error);
+	}
 	mb_io_ptr->beams_bath_max = MAX(mb_io_ptr->beams_bath_max, nbath);
 	mb_io_ptr->beams_amp_max = MAX(mb_io_ptr->beams_amp_max, namp);
 	mb_io_ptr->pixels_ss_max = MAX(mb_io_ptr->pixels_ss_max, nss);
 
 	/* apply inverse projection if required */
-	if (mb_io_ptr->projection_initialized == MB_YES)
-		{
-		mb_proj_forward(verbose, mb_io_ptr->pjptr,
-						navlon, navlat,
-						&easting, &northing,
-						error);
+	if (mb_io_ptr->projection_initialized == MB_YES) {
+		mb_proj_forward(verbose, mb_io_ptr->pjptr, navlon, navlat, &easting, &northing, error);
 		navlon = easting;
 		navlat = northing;
-		}
+	}
 
 	/* call the appropriate mbsys_ insertion routine */
-	if (mb_io_ptr->mb_io_insert != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_insert)
-				(verbose, mbio_ptr, store_ptr,
-				kind, time_i, time_d,
-				navlon, navlat,
-				speed, heading,
-				nbath, namp, nss,
-				beamflag, bath, amp,
-				bathacrosstrack, bathalongtrack,
-				ss, ssacrosstrack, ssalongtrack,
-				comment, error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_insert != NULL) {
+		status = (*mb_io_ptr->mb_io_insert)(verbose, mbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
+		                                    nbath, namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
+		                                    ssacrosstrack, ssalongtrack, comment, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:             %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:            %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:             %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:            %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
-	int time_i[7], double *time_d,
-	double *navlon, double *navlat,
-	double *speed, double *heading, double *draft,
-	double *roll, double *pitch, double *heave,
-	int *error)
-{
-	char	*function_name = "mb_extract_nav";
-	int	status;
+int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                   double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch, double *heave,
+                   int *error) {
+	char *function_name = "mb_extract_nav";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	double	easting, northing;
+	double easting, northing;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_extract_nav != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_extract_nav)
-				(verbose,mbio_ptr,store_ptr,
-				kind,time_i,time_d,
-				navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave,
-				error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_extract_nav != NULL) {
+		status = (*mb_io_ptr->mb_io_extract_nav)(verbose, mbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed,
+		                                         heading, draft, roll, pitch, heave, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* apply projection and lonflip if necessary */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* apply inverse projection if required */
-		if (mb_io_ptr->projection_initialized == MB_YES)
-			{
+		if (mb_io_ptr->projection_initialized == MB_YES) {
 			easting = *navlon;
 			northing = *navlat;
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr,
-							easting, northing,
-							navlon, navlat,
-							error);
-			}
+			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, navlon, navlat, error);
+		}
 
 		/* apply lonflip */
-		if (mb_io_ptr->lonflip < 0)
-			{
+		if (mb_io_ptr->lonflip < 0) {
 			if (*navlon > 0.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < -360.)
 				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
+		}
+		else if (mb_io_ptr->lonflip == 0) {
 			if (*navlon > 180.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < -180.)
 				*navlon = *navlon + 360.;
-			}
-		else
-			{
+		}
+		else {
 			if (*navlon > 360.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < 0.)
 				*navlon = *navlon + 360.;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
-		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
-		fprintf(stderr,"dbg2       time_i[1]:     %d\n",time_i[1]);
-		fprintf(stderr,"dbg2       time_i[2]:     %d\n",time_i[2]);
-		fprintf(stderr,"dbg2       time_i[3]:     %d\n",time_i[3]);
-		fprintf(stderr,"dbg2       time_i[4]:     %d\n",time_i[4]);
-		fprintf(stderr,"dbg2       time_i[5]:     %d\n",time_i[5]);
-		fprintf(stderr,"dbg2       time_i[6]:     %d\n",time_i[6]);
-		fprintf(stderr,"dbg2       time_d:        %f\n",*time_d);
-		fprintf(stderr,"dbg2       longitude:     %f\n",*navlon);
-		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
-		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
-		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
-		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
-		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
-		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
-		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+		fprintf(stderr, "dbg2       time_i[0]:     %d\n", time_i[0]);
+		fprintf(stderr, "dbg2       time_i[1]:     %d\n", time_i[1]);
+		fprintf(stderr, "dbg2       time_i[2]:     %d\n", time_i[2]);
+		fprintf(stderr, "dbg2       time_i[3]:     %d\n", time_i[3]);
+		fprintf(stderr, "dbg2       time_i[4]:     %d\n", time_i[4]);
+		fprintf(stderr, "dbg2       time_i[5]:     %d\n", time_i[5]);
+		fprintf(stderr, "dbg2       time_i[6]:     %d\n", time_i[6]);
+		fprintf(stderr, "dbg2       time_d:        %f\n", *time_d);
+		fprintf(stderr, "dbg2       longitude:     %f\n", *navlon);
+		fprintf(stderr, "dbg2       latitude:      %f\n", *navlat);
+		fprintf(stderr, "dbg2       speed:         %f\n", *speed);
+		fprintf(stderr, "dbg2       heading:       %f\n", *heading);
+		fprintf(stderr, "dbg2       draft:         %f\n", *draft);
+		fprintf(stderr, "dbg2       roll:          %f\n", *roll);
+		fprintf(stderr, "dbg2       pitch:         %f\n", *pitch);
+		fprintf(stderr, "dbg2       heave:         %f\n", *heave);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
-	int nmax, int *kind, int *n,
-	int *time_i, double *time_d,
-	double *navlon, double *navlat,
-	double *speed, double *heading, double *draft,
-	double *roll, double *pitch, double *heave,
-	int *error)
-{
-	char	*function_name = "mb_extract_nnav";
-	int	status;
+int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i, double *time_d,
+                    double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
+                    double *heave, int *error) {
+	char *function_name = "mb_extract_nnav";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	double	easting, northing;
-	int	i, inav;
+	double easting, northing;
+	int i, inav;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_extract_nnav != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_extract_nnav)
-				(verbose,mbio_ptr,store_ptr,
-				nmax,kind,n,
-				time_i,time_d,
-				navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave,
-				error);
-		}
-	else if (mb_io_ptr->mb_io_extract_nav != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_extract_nav)
-				(verbose,mbio_ptr,store_ptr,
-				kind,time_i,time_d,
-				navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave,
-				error);
+	if (mb_io_ptr->mb_io_extract_nnav != NULL) {
+		status = (*mb_io_ptr->mb_io_extract_nnav)(verbose, mbio_ptr, store_ptr, nmax, kind, n, time_i, time_d, navlon, navlat,
+		                                          speed, heading, draft, roll, pitch, heave, error);
+	}
+	else if (mb_io_ptr->mb_io_extract_nav != NULL) {
+		status = (*mb_io_ptr->mb_io_extract_nav)(verbose, mbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed,
+		                                         heading, draft, roll, pitch, heave, error);
 		if (status == MB_SUCCESS)
 			*n = 1;
 		else
 			*n = 0;
-		}
-	else
-		{
+	}
+	else {
 		*n = 0;
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* if call was made for an unsupported record type ("kind") then try to get the
-		values out of the asynchronous data interpolation buffers
-		The time stamp must be sensible for this to work. */
-	if (status == MB_FAILURE && *error == MB_ERROR_OTHER && *time_d > 0.0)
-		{
+	    values out of the asynchronous data interpolation buffers
+	    The time stamp must be sensible for this to work. */
+	if (status == MB_FAILURE && *error == MB_ERROR_OTHER && *time_d > 0.0) {
 		/* reset status */
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
@@ -1194,398 +987,327 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get longitude, latitude, and speed */
 		*speed = 0.0;
 		if (status == MB_SUCCESS)
-		status = mb_navint_interp(verbose, mbio_ptr, *time_d, *heading, *speed,
-				   navlon, navlat, speed, error);
+			status = mb_navint_interp(verbose, mbio_ptr, *time_d, *heading, *speed, navlon, navlat, speed, error);
 
 		/* get roll pitch and heave */
 		if (status == MB_SUCCESS)
-		status = mb_attint_interp(verbose, mbio_ptr, *time_d,
-				    &(heave[0]), &(roll[0]), &(pitch[0]), error);
+			status = mb_attint_interp(verbose, mbio_ptr, *time_d, &(heave[0]), &(roll[0]), &(pitch[0]), error);
 
 		/* get draft  */
 		if (status == MB_SUCCESS)
-		status = mb_depint_interp(verbose, mbio_ptr, *time_d,
-				    draft, error);
+			status = mb_depint_interp(verbose, mbio_ptr, *time_d, draft, error);
 
 		/* get roll pitch and heave */
 		if (status == MB_SUCCESS)
-		status = mb_attint_interp(verbose, mbio_ptr, *time_d,
-				    heave, roll, pitch, error);
-		}
+			status = mb_attint_interp(verbose, mbio_ptr, *time_d, heave, roll, pitch, error);
+	}
 
 	/* apply projection and lonflip if necessary */
-	if (status == MB_SUCCESS)
-		{
-		for (inav=0;inav<*n;inav++)
-			{
+	if (status == MB_SUCCESS) {
+		for (inav = 0; inav < *n; inav++) {
 			/* apply inverse projection if required */
-			if (mb_io_ptr->projection_initialized == MB_YES)
-				{
+			if (mb_io_ptr->projection_initialized == MB_YES) {
 				easting = navlon[inav];
 				northing = navlat[inav];
-				mb_proj_inverse(verbose, mb_io_ptr->pjptr,
-								easting, northing,
-								&(navlon[inav]), &(navlat[inav]),
-								error);
-				}
+				mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &(navlon[inav]), &(navlat[inav]), error);
+			}
 
 			/* apply lonflip */
-			if (mb_io_ptr->lonflip < 0)
-				{
+			if (mb_io_ptr->lonflip < 0) {
 				if (navlon[inav] > 0.)
 					navlon[inav] = navlon[inav] - 360.;
 				else if (navlon[inav] < -360.)
 					navlon[inav] = navlon[inav] + 360.;
-				}
-			else if (mb_io_ptr->lonflip == 0)
-				{
+			}
+			else if (mb_io_ptr->lonflip == 0) {
 				if (navlon[inav] > 180.)
 					navlon[inav] = navlon[inav] - 360.;
 				else if (navlon[inav] < -180.)
 					navlon[inav] = navlon[inav] + 360.;
-				}
-			else
-				{
+			}
+			else {
 				if (navlon[inav] > 360.)
 					navlon[inav] = navlon[inav] - 360.;
 				else if (navlon[inav] < 0.)
 					navlon[inav] = navlon[inav] + 360.;
-				}
 			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
-		fprintf(stderr,"dbg2       n:          %d\n",*n);
-		for (inav=0;inav<*n;inav++)
-			{
-			for (i=0;i<7;i++)
-				fprintf(stderr,"dbg2       %d time_i[%d]:     %d\n",inav,i,time_i[inav * 7 + i]);
-			fprintf(stderr,"dbg2       %d time_d:        %f\n",inav,time_d[inav]);
-			fprintf(stderr,"dbg2       %d longitude:     %f\n",inav,navlon[inav]);
-			fprintf(stderr,"dbg2       %d latitude:      %f\n",inav,navlat[inav]);
-			fprintf(stderr,"dbg2       %d speed:         %f\n",inav,speed[inav]);
-			fprintf(stderr,"dbg2       %d heading:       %f\n",inav,heading[inav]);
-			fprintf(stderr,"dbg2       %d draft:         %f\n",inav,draft[inav]);
-			fprintf(stderr,"dbg2       %d roll:          %f\n",inav,roll[inav]);
-			fprintf(stderr,"dbg2       %d pitch:         %f\n",inav,pitch[inav]);
-			fprintf(stderr,"dbg2       %d heave:         %f\n",inav,heave[inav]);
-			}
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+		fprintf(stderr, "dbg2       n:          %d\n", *n);
+		for (inav = 0; inav < *n; inav++) {
+			for (i = 0; i < 7; i++)
+				fprintf(stderr, "dbg2       %d time_i[%d]:     %d\n", inav, i, time_i[inav * 7 + i]);
+			fprintf(stderr, "dbg2       %d time_d:        %f\n", inav, time_d[inav]);
+			fprintf(stderr, "dbg2       %d longitude:     %f\n", inav, navlon[inav]);
+			fprintf(stderr, "dbg2       %d latitude:      %f\n", inav, navlat[inav]);
+			fprintf(stderr, "dbg2       %d speed:         %f\n", inav, speed[inav]);
+			fprintf(stderr, "dbg2       %d heading:       %f\n", inav, heading[inav]);
+			fprintf(stderr, "dbg2       %d draft:         %f\n", inav, draft[inav]);
+			fprintf(stderr, "dbg2       %d roll:          %f\n", inav, roll[inav]);
+			fprintf(stderr, "dbg2       %d pitch:         %f\n", inav, pitch[inav]);
+			fprintf(stderr, "dbg2       %d heave:         %f\n", inav, heave[inav]);
 		}
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-	int time_i[7], double time_d,
-	double navlon, double navlat,
-	double speed, double heading, double draft,
-	double roll, double pitch, double heave,
-	int *error)
-{
-	char	*function_name = "mb_insert_nav";
-	int	status;
+int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
+                  double speed, double heading, double draft, double roll, double pitch, double heave, int *error) {
+	char *function_name = "mb_insert_nav";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	double	easting, northing;
+	double easting, northing;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:        %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:     %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
-		fprintf(stderr,"dbg2       time_i[1]:     %d\n",time_i[1]);
-		fprintf(stderr,"dbg2       time_i[2]:     %d\n",time_i[2]);
-		fprintf(stderr,"dbg2       time_i[3]:     %d\n",time_i[3]);
-		fprintf(stderr,"dbg2       time_i[4]:     %d\n",time_i[4]);
-		fprintf(stderr,"dbg2       time_i[5]:     %d\n",time_i[5]);
-		fprintf(stderr,"dbg2       time_i[6]:     %d\n",time_i[6]);
-		fprintf(stderr,"dbg2       time_d:        %f\n",time_d);
-		fprintf(stderr,"dbg2       longitude:     %f\n",navlon);
-		fprintf(stderr,"dbg2       latitude:      %f\n",navlat);
-		fprintf(stderr,"dbg2       speed:         %f\n",speed);
-		fprintf(stderr,"dbg2       heading:       %f\n",heading);
-		fprintf(stderr,"dbg2       draft:         %f\n",draft);
-		fprintf(stderr,"dbg2       roll:          %f\n",roll);
-		fprintf(stderr,"dbg2       pitch:         %f\n",pitch);
-		fprintf(stderr,"dbg2       heave:         %f\n",heave);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:        %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:     %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       time_i[0]:     %d\n", time_i[0]);
+		fprintf(stderr, "dbg2       time_i[1]:     %d\n", time_i[1]);
+		fprintf(stderr, "dbg2       time_i[2]:     %d\n", time_i[2]);
+		fprintf(stderr, "dbg2       time_i[3]:     %d\n", time_i[3]);
+		fprintf(stderr, "dbg2       time_i[4]:     %d\n", time_i[4]);
+		fprintf(stderr, "dbg2       time_i[5]:     %d\n", time_i[5]);
+		fprintf(stderr, "dbg2       time_i[6]:     %d\n", time_i[6]);
+		fprintf(stderr, "dbg2       time_d:        %f\n", time_d);
+		fprintf(stderr, "dbg2       longitude:     %f\n", navlon);
+		fprintf(stderr, "dbg2       latitude:      %f\n", navlat);
+		fprintf(stderr, "dbg2       speed:         %f\n", speed);
+		fprintf(stderr, "dbg2       heading:       %f\n", heading);
+		fprintf(stderr, "dbg2       draft:         %f\n", draft);
+		fprintf(stderr, "dbg2       roll:          %f\n", roll);
+		fprintf(stderr, "dbg2       pitch:         %f\n", pitch);
+		fprintf(stderr, "dbg2       heave:         %f\n", heave);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* apply inverse projection if required */
-	if (mb_io_ptr->projection_initialized == MB_YES)
-		{
-		mb_proj_forward(verbose, mb_io_ptr->pjptr,
-						navlon, navlat,
-						&easting, &northing,
-						error);
+	if (mb_io_ptr->projection_initialized == MB_YES) {
+		mb_proj_forward(verbose, mb_io_ptr->pjptr, navlon, navlat, &easting, &northing, error);
 		navlon = easting;
 		navlat = northing;
-		}
+	}
 
 	/* call the appropriate mbsys_ insertion routine */
-	if (mb_io_ptr->mb_io_insert_nav != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_insert_nav)
-				(verbose,mbio_ptr,store_ptr,
-				time_i,time_d,
-				navlon,navlat,
-				speed,heading,draft,
-				roll,pitch,heave,
-				error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_insert_nav != NULL) {
+		status = (*mb_io_ptr->mb_io_insert_nav)(verbose, mbio_ptr, store_ptr, time_i, time_d, navlon, navlat, speed, heading,
+		                                        draft, roll, pitch, heave, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind,
-		double *transducer_depth, double *altitude,
-		int *error)
-{
-	char	*function_name = "mb_extract_altitude";
-	int	status;
+int mb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth, double *altitude,
+                        int *error) {
+	char *function_name = "mb_extract_altitude";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_extract_altitude != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_extract_altitude)
-				(verbose,mbio_ptr,store_ptr,
-				kind,transducer_depth,altitude,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_extract_altitude != NULL) {
+		status = (*mb_io_ptr->mb_io_extract_altitude)(verbose, mbio_ptr, store_ptr, kind, transducer_depth, altitude, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
-		fprintf(stderr,"dbg2       transducer_depth:  %f\n",*transducer_depth);
-		fprintf(stderr,"dbg2       altitude:          %f\n",*altitude);
-		fprintf(stderr,"dbg2       error:             %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:            %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
+		fprintf(stderr, "dbg2       transducer_depth:  %f\n", *transducer_depth);
+		fprintf(stderr, "dbg2       altitude:          %f\n", *altitude);
+		fprintf(stderr, "dbg2       error:             %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:            %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-		double transducer_depth, double altitude,
-		int *error)
-{
-	char	*function_name = "mb_insert_altitude";
-	int	status;
+int mb_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude, int *error) {
+	char *function_name = "mb_insert_altitude";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:            %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:         %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       transducer_depth:  %f\n",transducer_depth);
-		fprintf(stderr,"dbg2       altitude:          %f\n",altitude);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:            %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:         %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       transducer_depth:  %f\n", transducer_depth);
+		fprintf(stderr, "dbg2       altitude:          %f\n", altitude);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ insertion routine */
-	if (mb_io_ptr->mb_io_insert_altitude != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_insert_altitude)
-				(verbose,mbio_ptr,store_ptr,
-				transducer_depth,altitude,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_insert_altitude != NULL) {
+		status = (*mb_io_ptr->mb_io_insert_altitude)(verbose, mbio_ptr, store_ptr, transducer_depth, altitude, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:             %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:            %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:             %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:            %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind,
-		int *nsvp,
-		double *depth, double *velocity,
-		int *error)
-{
-	char	*function_name = "mb_extract_svp";
-	int	status;
+int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
+                   int *error) {
+	char *function_name = "mb_extract_svp";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_extract_svp != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_extract_svp)
-				(verbose,mbio_ptr,store_ptr,
-				kind,nsvp,depth,velocity,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_extract_svp != NULL) {
+		status = (*mb_io_ptr->mb_io_extract_svp)(verbose, mbio_ptr, store_ptr, kind, nsvp, depth, velocity, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
-		fprintf(stderr,"dbg2       nsvp:              %d\n",*nsvp);
-		for (i=0;i<*nsvp;i++)
-		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
-		fprintf(stderr,"dbg2       error:             %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:            %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
+		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
+		for (i = 0; i < *nsvp; i++)
+			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
+		fprintf(stderr, "dbg2       error:             %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:            %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-		int nsvp,
-		double *depth, double *velocity,
-		int *error)
-{
-	char	*function_name = "mb_insert_svp";
-	int	status;
+int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
+	char *function_name = "mb_insert_svp";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:            %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:         %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       nsvp:              %d\n",nsvp);
-		for (i=0;i<nsvp;i++)
-		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:            %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:         %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       nsvp:              %d\n", nsvp);
+		for (i = 0; i < nsvp; i++)
+			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ insertion routine */
-	if (mb_io_ptr->mb_io_insert_svp != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_insert_svp)
-				(verbose,mbio_ptr,store_ptr,
-				nsvp,depth,velocity,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_insert_svp != NULL) {
+		status = (*mb_io_ptr->mb_io_insert_svp)(verbose, mbio_ptr, store_ptr, nsvp, depth, velocity, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:             %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:            %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:             %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:            %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
 /*
@@ -1754,1032 +1476,882 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
  * and then applies whatever roll and pitch corrections are
  * set interactively by the user.
  *
-*
+ *
  */
 /*--------------------------------------------------------------------*/
-int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, int *nbeams,
-	double *ttimes, double	*angles,
-	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset,
-	double *draft, double *ssv, int *error)
-{
-	char	*function_name = "mb_ttimes";
-	int	status;
+int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+              double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft, double *ssv,
+              int *error) {
+	char *function_name = "mb_ttimes";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_ttimes != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_ttimes)
-				(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,ttimes,
-				angles,angles_forward,angles_null,
-				heave,alongtrack_offset,
-				draft,ssv,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_ttimes != NULL) {
+		status = (*mb_io_ptr->mb_io_ttimes)(verbose, mbio_ptr, store_ptr, kind, nbeams, ttimes, angles, angles_forward,
+		                                    angles_null, heave, alongtrack_offset, draft, ssv, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
-		}
-	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
-		{
-		fprintf(stderr,"dbg2       draft:      %f\n",*draft);
-		fprintf(stderr,"dbg2       ssv:        %f\n",*ssv);
-		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
-		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  heave:%f  ltrk_off:%f\n",
-				i,ttimes[i],angles[i],
-				angles_forward[i],angles_null[i],
-				heave[i],alongtrack_offset[i]);
-		}
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+	}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
+		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
+		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
+		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
+		for (i = 0; i < *nbeams; i++)
+			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  heave:%f  ltrk_off:%f\n", i,
+			        ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
+	}
+	if (verbose >= 2) {
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_detects(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, int *nbeams, int *detects, int *error)
-{
-	char	*function_name = "mb_detects";
-	int	status;
+int mb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
+	char *function_name = "mb_detects";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_detects != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_detects)
-				(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,detects,error);
-		}
-	else
-		{
-		for (i=0;i<*nbeams;i++)
+	if (mb_io_ptr->mb_io_detects != NULL) {
+		status = (*mb_io_ptr->mb_io_detects)(verbose, mbio_ptr, store_ptr, kind, nbeams, detects, error);
+	}
+	else {
+		for (i = 0; i < *nbeams; i++)
 			detects[i] = MB_DETECT_UNKNOWN;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
-		}
-	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
-		{
-		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
-		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: detects:%d\n",
-				i,detects[i]);
-		}
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+	}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
+		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
+		for (i = 0; i < *nbeams; i++)
+			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
+	}
+	if (verbose >= 2) {
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, int *nbeams, int *pulses, int *error)
-{
-	char	*function_name = "mb_pulses";
-	int	status;
+int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error) {
+	char *function_name = "mb_pulses";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_pulses != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_pulses)
-				(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,pulses,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_pulses != NULL) {
+		status = (*mb_io_ptr->mb_io_pulses)(verbose, mbio_ptr, store_ptr, kind, nbeams, pulses, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
-		}
-	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
-		{
-		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
-		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: pulses:%d\n",
-				i,pulses[i]);
-		}
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+	}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
+		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
+		for (i = 0; i < *nbeams; i++)
+			fprintf(stderr, "dbg2       beam %d: pulses:%d\n", i, pulses[i]);
+	}
+	if (verbose >= 2) {
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_gains(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transmit_gain, double *pulse_length,
-	double *receive_gain, int *error)
-{
-	char	*function_name = "mb_gains";
-	int	status;
+int mb_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
+             double *receive_gain, int *error) {
+	char *function_name = "mb_gains";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_gains != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_gains)
-				(verbose,mbio_ptr,store_ptr,
-				kind,transmit_gain,pulse_length,receive_gain,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_gains != NULL) {
+		status = (*mb_io_ptr->mb_io_gains)(verbose, mbio_ptr, store_ptr, kind, transmit_gain, pulse_length, receive_gain, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
-		}
-	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
-		{
-		fprintf(stderr,"dbg2       transmit_gain: %f\n",*transmit_gain);
-		fprintf(stderr,"dbg2       pulse_length:  %f\n",*pulse_length);
-		fprintf(stderr,"dbg2       receive_gain:  %f\n",*receive_gain);
-		}
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+	}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
+		fprintf(stderr, "dbg2       transmit_gain: %f\n", *transmit_gain);
+		fprintf(stderr, "dbg2       pulse_length:  %f\n", *pulse_length);
+		fprintf(stderr, "dbg2       receive_gain:  %f\n", *receive_gain);
+	}
+	if (verbose >= 2) {
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-	int mb_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, double *sample_interval,
-		int *num_samples_port, int *num_samples_stbd, int *error)
-{
-	char	*function_name = "mb_io_extract_rawsssdimensions";
-	int	status;
+int mb_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *sample_interval,
+                               int *num_samples_port, int *num_samples_stbd, int *error) {
+	char *function_name = "mb_io_extract_rawsssdimensions";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_extract_rawssdimensions != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_extract_rawssdimensions)
-				(verbose,mbio_ptr,store_ptr,
-				kind,sample_interval,
-				num_samples_port,num_samples_stbd,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_extract_rawssdimensions != NULL) {
+		status = (*mb_io_ptr->mb_io_extract_rawssdimensions)(verbose, mbio_ptr, store_ptr, kind, sample_interval,
+		                                                     num_samples_port, num_samples_stbd, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
-		fprintf(stderr,"dbg2       sample_interval:   %lf\n",*sample_interval);
-		fprintf(stderr,"dbg2       num_samples_port:  %d\n",*num_samples_port);
-		fprintf(stderr,"dbg2       num_samples_stbd:  %d\n",*num_samples_stbd);
-		fprintf(stderr,"dbg2       error:             %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:            %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
+		fprintf(stderr, "dbg2       sample_interval:   %lf\n", *sample_interval);
+		fprintf(stderr, "dbg2       num_samples_port:  %d\n", *num_samples_port);
+		fprintf(stderr, "dbg2       num_samples_stbd:  %d\n", *num_samples_stbd);
+		fprintf(stderr, "dbg2       error:             %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:            %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, int *sidescan_type, double *sample_interval,
-		double *beamwidth_xtrack, double *beamwidth_ltrack,
-		int *num_samples_port, double *rawss_port, 
-		int *num_samples_stbd, double *rawss_stbd, int *error)
-{
-	char	*function_name = "mb_extract_rawss";
-	int	status;
+int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *sidescan_type, double *sample_interval,
+                     double *beamwidth_xtrack, double *beamwidth_ltrack, int *num_samples_port, double *rawss_port,
+                     int *num_samples_stbd, double *rawss_stbd, int *error) {
+	char *function_name = "mb_extract_rawss";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_extract_rawss != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_extract_rawss)
-				(verbose, mbio_ptr, store_ptr,
-				kind, sidescan_type, sample_interval,
-				beamwidth_xtrack, beamwidth_ltrack,
-				num_samples_port, rawss_port,
-				num_samples_stbd, rawss_stbd,
-				error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_extract_rawss != NULL) {
+		status = (*mb_io_ptr->mb_io_extract_rawss)(verbose, mbio_ptr, store_ptr, kind, sidescan_type, sample_interval,
+		                                           beamwidth_xtrack, beamwidth_ltrack, num_samples_port, rawss_port,
+		                                           num_samples_stbd, rawss_stbd, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
-		fprintf(stderr,"dbg2       sidescan_type:     %d\n",*sidescan_type);
-		fprintf(stderr,"dbg2       sample_interval:   %lf\n",*sample_interval);
-		fprintf(stderr,"dbg2       beamwidth_xtrack:  %lf\n",*beamwidth_xtrack);
-		fprintf(stderr,"dbg2       beamwidth_ltrack:  %lf\n",*beamwidth_ltrack);
-		fprintf(stderr,"dbg2       num_samples_port:  %d\n",*num_samples_port);
-		for (i=0;i<*num_samples_port;i++)
-		    fprintf(stderr,"dbg2       sample: %d  rawss_port:%f\n",
-			    i, rawss_port[i]);
-		fprintf(stderr,"dbg2       num_samples_stbd:  %d\n",*num_samples_stbd);
-		for (i=0;i<*num_samples_stbd;i++)
-		    fprintf(stderr,"dbg2       sample: %d  rawss_stbd:%f\n",
-			    i, rawss_stbd[i]);
-		fprintf(stderr,"dbg2       error:             %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:            %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
+		fprintf(stderr, "dbg2       sidescan_type:     %d\n", *sidescan_type);
+		fprintf(stderr, "dbg2       sample_interval:   %lf\n", *sample_interval);
+		fprintf(stderr, "dbg2       beamwidth_xtrack:  %lf\n", *beamwidth_xtrack);
+		fprintf(stderr, "dbg2       beamwidth_ltrack:  %lf\n", *beamwidth_ltrack);
+		fprintf(stderr, "dbg2       num_samples_port:  %d\n", *num_samples_port);
+		for (i = 0; i < *num_samples_port; i++)
+			fprintf(stderr, "dbg2       sample: %d  rawss_port:%f\n", i, rawss_port[i]);
+		fprintf(stderr, "dbg2       num_samples_stbd:  %d\n", *num_samples_stbd);
+		for (i = 0; i < *num_samples_stbd; i++)
+			fprintf(stderr, "dbg2       sample: %d  rawss_stbd:%f\n", i, rawss_stbd[i]);
+		fprintf(stderr, "dbg2       error:             %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:            %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
-		int kind, int sidescan_type, double sample_interval,
-		double beamwidth_xtrack, double beamwidth_ltrack,
-		int num_samples_port, double *rawss_port,
-		int num_samples_stbd, double *rawss_stbd, int *error)
-{
-	char	*function_name = "mb_insert_rawss";
-	int	status;
+int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int kind, int sidescan_type, double sample_interval,
+                    double beamwidth_xtrack, double beamwidth_ltrack, int num_samples_port, double *rawss_port,
+                    int num_samples_stbd, double *rawss_stbd, int *error) {
+	char *function_name = "mb_insert_rawss";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:            %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:         %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       kind:              %d\n",kind);
-		fprintf(stderr,"dbg2       sidescan_type:     %d\n",sidescan_type);
-		fprintf(stderr,"dbg2       sample_interval:   %lf\n",sample_interval);
-		fprintf(stderr,"dbg2       beamwidth_xtrack:  %lf\n",beamwidth_xtrack);
-		fprintf(stderr,"dbg2       beamwidth_ltrack:  %lf\n",beamwidth_ltrack);
-		fprintf(stderr,"dbg2       num_samples_port:  %d\n",num_samples_port);
-		for (i=0;i<num_samples_port;i++)
-		    fprintf(stderr,"dbg2       sample: %d  rawss_port:%f\n",
-			    i, rawss_port[i]);
-		fprintf(stderr,"dbg2       num_samples_stbd:  %d\n",num_samples_stbd);
-		for (i=0;i<num_samples_stbd;i++)
-		    fprintf(stderr,"dbg2       sample: %d  rawss_stbd:%f\n",
-			    i, rawss_stbd[i]);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:            %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:         %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       kind:              %d\n", kind);
+		fprintf(stderr, "dbg2       sidescan_type:     %d\n", sidescan_type);
+		fprintf(stderr, "dbg2       sample_interval:   %lf\n", sample_interval);
+		fprintf(stderr, "dbg2       beamwidth_xtrack:  %lf\n", beamwidth_xtrack);
+		fprintf(stderr, "dbg2       beamwidth_ltrack:  %lf\n", beamwidth_ltrack);
+		fprintf(stderr, "dbg2       num_samples_port:  %d\n", num_samples_port);
+		for (i = 0; i < num_samples_port; i++)
+			fprintf(stderr, "dbg2       sample: %d  rawss_port:%f\n", i, rawss_port[i]);
+		fprintf(stderr, "dbg2       num_samples_stbd:  %d\n", num_samples_stbd);
+		for (i = 0; i < num_samples_stbd; i++)
+			fprintf(stderr, "dbg2       sample: %d  rawss_stbd:%f\n", i, rawss_stbd[i]);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ insertion routine */
-	if (mb_io_ptr->mb_io_insert_rawss != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_insert_rawss)
-				(verbose,mbio_ptr,store_ptr,
-				kind, sidescan_type, sample_interval,
-				beamwidth_xtrack, beamwidth_ltrack,
-				num_samples_port,rawss_port,
-				num_samples_stbd,rawss_stbd,
-				error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_insert_rawss != NULL) {
+		status =
+		    (*mb_io_ptr->mb_io_insert_rawss)(verbose, mbio_ptr, store_ptr, kind, sidescan_type, sample_interval, beamwidth_xtrack,
+		                                     beamwidth_ltrack, num_samples_port, rawss_port, num_samples_stbd, rawss_stbd, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:             %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:            %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:             %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:            %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind,
-		void *segytraceheader_ptr,
-		int *error)
-{
-	char	*function_name = "mb_extract_segytraceheader";
-	int	status;
+int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void *segytraceheader_ptr, int *error) {
+	char *function_name = "mb_extract_segytraceheader";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
 	struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:      %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       kind:           %d\n",*kind);
-		fprintf(stderr,"dbg2       segytraceheader_ptr: %p\n",(void *)segytraceheader_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:         %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:      %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       kind:           %d\n", *kind);
+		fprintf(stderr, "dbg2       segytraceheader_ptr: %p\n", (void *)segytraceheader_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *) segytraceheader_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segytraceheader_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_extract_segy != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_extract_segytraceheader)
-				(verbose,mbio_ptr,store_ptr,
-				kind,segytraceheader_ptr,
-				error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_extract_segy != NULL) {
+		status = (*mb_io_ptr->mb_io_extract_segytraceheader)(verbose, mbio_ptr, store_ptr, kind, segytraceheader_ptr, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
-		fprintf(stderr,"dbg2       seq_num:           %d\n",mb_segytraceheader_ptr->seq_num);
-		fprintf(stderr,"dbg2       seq_reel:          %d\n",mb_segytraceheader_ptr->seq_reel);
-		fprintf(stderr,"dbg2       shot_num:          %d\n",mb_segytraceheader_ptr->shot_num);
-		fprintf(stderr,"dbg2       shot_tr:           %d\n",mb_segytraceheader_ptr->shot_tr);
-		fprintf(stderr,"dbg2       espn:              %d\n",mb_segytraceheader_ptr->espn);
-		fprintf(stderr,"dbg2       rp_num:            %d\n",mb_segytraceheader_ptr->rp_num);
-		fprintf(stderr,"dbg2       rp_tr:             %d\n",mb_segytraceheader_ptr->rp_tr);
-		fprintf(stderr,"dbg2       trc_id:            %d\n",mb_segytraceheader_ptr->trc_id);
-		fprintf(stderr,"dbg2       num_vstk:          %d\n",mb_segytraceheader_ptr->num_vstk);
-		fprintf(stderr,"dbg2       cdp_fold:          %d\n",mb_segytraceheader_ptr->cdp_fold);
-		fprintf(stderr,"dbg2       use:               %d\n",mb_segytraceheader_ptr->use);
-		fprintf(stderr,"dbg2       range:             %d\n",mb_segytraceheader_ptr->range);
-		fprintf(stderr,"dbg2       grp_elev:          %d\n",mb_segytraceheader_ptr->grp_elev);
-		fprintf(stderr,"dbg2       src_elev:          %d\n",mb_segytraceheader_ptr->src_elev);
-		fprintf(stderr,"dbg2       src_depth:         %d\n",mb_segytraceheader_ptr->src_depth);
-		fprintf(stderr,"dbg2       grp_datum:         %d\n",mb_segytraceheader_ptr->grp_datum);
-		fprintf(stderr,"dbg2       src_datum:         %d\n",mb_segytraceheader_ptr->src_datum);
-		fprintf(stderr,"dbg2       src_wbd:           %d\n",mb_segytraceheader_ptr->src_wbd);
-		fprintf(stderr,"dbg2       grp_wbd:           %d\n",mb_segytraceheader_ptr->grp_wbd);
-		fprintf(stderr,"dbg2       elev_scalar:       %d\n",mb_segytraceheader_ptr->elev_scalar);
-		fprintf(stderr,"dbg2       coord_scalar:      %d\n",mb_segytraceheader_ptr->coord_scalar);
-		fprintf(stderr,"dbg2       src_long:          %d\n",mb_segytraceheader_ptr->src_long);
-		fprintf(stderr,"dbg2       src_lat:           %d\n",mb_segytraceheader_ptr->src_lat);
-		fprintf(stderr,"dbg2       grp_long:          %d\n",mb_segytraceheader_ptr->grp_long);
-		fprintf(stderr,"dbg2       grp_lat:           %d\n",mb_segytraceheader_ptr->grp_lat);
-		fprintf(stderr,"dbg2       coord_units:       %d\n",mb_segytraceheader_ptr->coord_units);
-		fprintf(stderr,"dbg2       wvel:              %d\n",mb_segytraceheader_ptr->wvel);
-		fprintf(stderr,"dbg2       sbvel:             %d\n",mb_segytraceheader_ptr->sbvel);
-		fprintf(stderr,"dbg2       src_up_vel:        %d\n",mb_segytraceheader_ptr->src_up_vel);
-		fprintf(stderr,"dbg2       grp_up_vel:        %d\n",mb_segytraceheader_ptr->grp_up_vel);
-		fprintf(stderr,"dbg2       src_static:        %d\n",mb_segytraceheader_ptr->src_static);
-		fprintf(stderr,"dbg2       grp_static:        %d\n",mb_segytraceheader_ptr->grp_static);
-		fprintf(stderr,"dbg2       tot_static:        %d\n",mb_segytraceheader_ptr->tot_static);
-		fprintf(stderr,"dbg2       laga:              %d\n",mb_segytraceheader_ptr->laga);
-		fprintf(stderr,"dbg2       delay_mils:        %d\n",mb_segytraceheader_ptr->delay_mils);
-		fprintf(stderr,"dbg2       smute_mils:        %d\n",mb_segytraceheader_ptr->smute_mils);
-		fprintf(stderr,"dbg2       emute_mils:        %d\n",mb_segytraceheader_ptr->emute_mils);
-		fprintf(stderr,"dbg2       nsamps:            %d\n",mb_segytraceheader_ptr->nsamps);
-		fprintf(stderr,"dbg2       si_micros:         %d\n",mb_segytraceheader_ptr->si_micros);
-		for (i=0;i<19;i++)
-		fprintf(stderr,"dbg2       other_1[%2d]:       %d\n",i,mb_segytraceheader_ptr->other_1[i]);
-		fprintf(stderr,"dbg2       year:              %d\n",mb_segytraceheader_ptr->year);
-		fprintf(stderr,"dbg2       day_of_yr:         %d\n",mb_segytraceheader_ptr->day_of_yr);
-		fprintf(stderr,"dbg2       hour:              %d\n",mb_segytraceheader_ptr->hour);
-		fprintf(stderr,"dbg2       min:               %d\n",mb_segytraceheader_ptr->min);
-		fprintf(stderr,"dbg2       sec:               %d\n",mb_segytraceheader_ptr->sec);
-		fprintf(stderr,"dbg2       mils:              %d\n",mb_segytraceheader_ptr->mils);
-		fprintf(stderr,"dbg2       tr_weight:         %d\n",mb_segytraceheader_ptr->tr_weight);
-		for (i=0;i<5;i++)
-		fprintf(stderr,"dbg2       other_2[%2d]:       %d\n",i,mb_segytraceheader_ptr->other_2[i]);
-		fprintf(stderr,"dbg2       delay:             %f\n",mb_segytraceheader_ptr->delay);
-		fprintf(stderr,"dbg2       smute_sec:         %f\n",mb_segytraceheader_ptr->smute_sec);
-		fprintf(stderr,"dbg2       emute_sec:         %f\n",mb_segytraceheader_ptr->emute_sec);
-		fprintf(stderr,"dbg2       si_secs:           %f\n",mb_segytraceheader_ptr->si_secs);
-		fprintf(stderr,"dbg2       wbt_secs:          %f\n",mb_segytraceheader_ptr->wbt_secs);
-		fprintf(stderr,"dbg2       end_of_rp:         %d\n",mb_segytraceheader_ptr->end_of_rp);
-		fprintf(stderr,"dbg2       dummy1:            %f\n",mb_segytraceheader_ptr->dummy1);
-		fprintf(stderr,"dbg2       dummy2:            %f\n",mb_segytraceheader_ptr->dummy2);
-		fprintf(stderr,"dbg2       dummy3:            %f\n",mb_segytraceheader_ptr->dummy3);
-		fprintf(stderr,"dbg2       dummy4:            %f\n",mb_segytraceheader_ptr->dummy4);
-		fprintf(stderr,"dbg2       soundspeed:        %f\n",mb_segytraceheader_ptr->soundspeed);
-		fprintf(stderr,"dbg2       distance:          %f\n",mb_segytraceheader_ptr->distance);
-		fprintf(stderr,"dbg2       dummy7:            %f\n",mb_segytraceheader_ptr->roll);
-		fprintf(stderr,"dbg2       dummy8:            %f\n",mb_segytraceheader_ptr->pitch);
-		fprintf(stderr,"dbg2       heading:           %f\n",mb_segytraceheader_ptr->heading);
-		fprintf(stderr,"dbg2       error:             %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:            %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
+		fprintf(stderr, "dbg2       seq_num:           %d\n", mb_segytraceheader_ptr->seq_num);
+		fprintf(stderr, "dbg2       seq_reel:          %d\n", mb_segytraceheader_ptr->seq_reel);
+		fprintf(stderr, "dbg2       shot_num:          %d\n", mb_segytraceheader_ptr->shot_num);
+		fprintf(stderr, "dbg2       shot_tr:           %d\n", mb_segytraceheader_ptr->shot_tr);
+		fprintf(stderr, "dbg2       espn:              %d\n", mb_segytraceheader_ptr->espn);
+		fprintf(stderr, "dbg2       rp_num:            %d\n", mb_segytraceheader_ptr->rp_num);
+		fprintf(stderr, "dbg2       rp_tr:             %d\n", mb_segytraceheader_ptr->rp_tr);
+		fprintf(stderr, "dbg2       trc_id:            %d\n", mb_segytraceheader_ptr->trc_id);
+		fprintf(stderr, "dbg2       num_vstk:          %d\n", mb_segytraceheader_ptr->num_vstk);
+		fprintf(stderr, "dbg2       cdp_fold:          %d\n", mb_segytraceheader_ptr->cdp_fold);
+		fprintf(stderr, "dbg2       use:               %d\n", mb_segytraceheader_ptr->use);
+		fprintf(stderr, "dbg2       range:             %d\n", mb_segytraceheader_ptr->range);
+		fprintf(stderr, "dbg2       grp_elev:          %d\n", mb_segytraceheader_ptr->grp_elev);
+		fprintf(stderr, "dbg2       src_elev:          %d\n", mb_segytraceheader_ptr->src_elev);
+		fprintf(stderr, "dbg2       src_depth:         %d\n", mb_segytraceheader_ptr->src_depth);
+		fprintf(stderr, "dbg2       grp_datum:         %d\n", mb_segytraceheader_ptr->grp_datum);
+		fprintf(stderr, "dbg2       src_datum:         %d\n", mb_segytraceheader_ptr->src_datum);
+		fprintf(stderr, "dbg2       src_wbd:           %d\n", mb_segytraceheader_ptr->src_wbd);
+		fprintf(stderr, "dbg2       grp_wbd:           %d\n", mb_segytraceheader_ptr->grp_wbd);
+		fprintf(stderr, "dbg2       elev_scalar:       %d\n", mb_segytraceheader_ptr->elev_scalar);
+		fprintf(stderr, "dbg2       coord_scalar:      %d\n", mb_segytraceheader_ptr->coord_scalar);
+		fprintf(stderr, "dbg2       src_long:          %d\n", mb_segytraceheader_ptr->src_long);
+		fprintf(stderr, "dbg2       src_lat:           %d\n", mb_segytraceheader_ptr->src_lat);
+		fprintf(stderr, "dbg2       grp_long:          %d\n", mb_segytraceheader_ptr->grp_long);
+		fprintf(stderr, "dbg2       grp_lat:           %d\n", mb_segytraceheader_ptr->grp_lat);
+		fprintf(stderr, "dbg2       coord_units:       %d\n", mb_segytraceheader_ptr->coord_units);
+		fprintf(stderr, "dbg2       wvel:              %d\n", mb_segytraceheader_ptr->wvel);
+		fprintf(stderr, "dbg2       sbvel:             %d\n", mb_segytraceheader_ptr->sbvel);
+		fprintf(stderr, "dbg2       src_up_vel:        %d\n", mb_segytraceheader_ptr->src_up_vel);
+		fprintf(stderr, "dbg2       grp_up_vel:        %d\n", mb_segytraceheader_ptr->grp_up_vel);
+		fprintf(stderr, "dbg2       src_static:        %d\n", mb_segytraceheader_ptr->src_static);
+		fprintf(stderr, "dbg2       grp_static:        %d\n", mb_segytraceheader_ptr->grp_static);
+		fprintf(stderr, "dbg2       tot_static:        %d\n", mb_segytraceheader_ptr->tot_static);
+		fprintf(stderr, "dbg2       laga:              %d\n", mb_segytraceheader_ptr->laga);
+		fprintf(stderr, "dbg2       delay_mils:        %d\n", mb_segytraceheader_ptr->delay_mils);
+		fprintf(stderr, "dbg2       smute_mils:        %d\n", mb_segytraceheader_ptr->smute_mils);
+		fprintf(stderr, "dbg2       emute_mils:        %d\n", mb_segytraceheader_ptr->emute_mils);
+		fprintf(stderr, "dbg2       nsamps:            %d\n", mb_segytraceheader_ptr->nsamps);
+		fprintf(stderr, "dbg2       si_micros:         %d\n", mb_segytraceheader_ptr->si_micros);
+		for (i = 0; i < 19; i++)
+			fprintf(stderr, "dbg2       other_1[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_1[i]);
+		fprintf(stderr, "dbg2       year:              %d\n", mb_segytraceheader_ptr->year);
+		fprintf(stderr, "dbg2       day_of_yr:         %d\n", mb_segytraceheader_ptr->day_of_yr);
+		fprintf(stderr, "dbg2       hour:              %d\n", mb_segytraceheader_ptr->hour);
+		fprintf(stderr, "dbg2       min:               %d\n", mb_segytraceheader_ptr->min);
+		fprintf(stderr, "dbg2       sec:               %d\n", mb_segytraceheader_ptr->sec);
+		fprintf(stderr, "dbg2       mils:              %d\n", mb_segytraceheader_ptr->mils);
+		fprintf(stderr, "dbg2       tr_weight:         %d\n", mb_segytraceheader_ptr->tr_weight);
+		for (i = 0; i < 5; i++)
+			fprintf(stderr, "dbg2       other_2[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_2[i]);
+		fprintf(stderr, "dbg2       delay:             %f\n", mb_segytraceheader_ptr->delay);
+		fprintf(stderr, "dbg2       smute_sec:         %f\n", mb_segytraceheader_ptr->smute_sec);
+		fprintf(stderr, "dbg2       emute_sec:         %f\n", mb_segytraceheader_ptr->emute_sec);
+		fprintf(stderr, "dbg2       si_secs:           %f\n", mb_segytraceheader_ptr->si_secs);
+		fprintf(stderr, "dbg2       wbt_secs:          %f\n", mb_segytraceheader_ptr->wbt_secs);
+		fprintf(stderr, "dbg2       end_of_rp:         %d\n", mb_segytraceheader_ptr->end_of_rp);
+		fprintf(stderr, "dbg2       dummy1:            %f\n", mb_segytraceheader_ptr->dummy1);
+		fprintf(stderr, "dbg2       dummy2:            %f\n", mb_segytraceheader_ptr->dummy2);
+		fprintf(stderr, "dbg2       dummy3:            %f\n", mb_segytraceheader_ptr->dummy3);
+		fprintf(stderr, "dbg2       dummy4:            %f\n", mb_segytraceheader_ptr->dummy4);
+		fprintf(stderr, "dbg2       soundspeed:        %f\n", mb_segytraceheader_ptr->soundspeed);
+		fprintf(stderr, "dbg2       distance:          %f\n", mb_segytraceheader_ptr->distance);
+		fprintf(stderr, "dbg2       dummy7:            %f\n", mb_segytraceheader_ptr->roll);
+		fprintf(stderr, "dbg2       dummy8:            %f\n", mb_segytraceheader_ptr->pitch);
+		fprintf(stderr, "dbg2       heading:           %f\n", mb_segytraceheader_ptr->heading);
+		fprintf(stderr, "dbg2       error:             %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:            %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
-		int *sampleformat,
-		int *kind,
-		void *segytraceheader_ptr,
-		float *segydata,
-		int *error)
-{
-	char	*function_name = "mb_extract_segy";
-	int	status;
+int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *sampleformat, int *kind, void *segytraceheader_ptr,
+                    float *segydata, int *error) {
+	char *function_name = "mb_extract_segy";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
 	struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:      %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       sampleformat:   %d\n",*sampleformat);
-		fprintf(stderr,"dbg2       segytraceheader_ptr: %p\n",(void *)segytraceheader_ptr);
-		fprintf(stderr,"dbg2       segydata:       %p\n",(void *)segydata);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:         %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:      %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       sampleformat:   %d\n", *sampleformat);
+		fprintf(stderr, "dbg2       segytraceheader_ptr: %p\n", (void *)segytraceheader_ptr);
+		fprintf(stderr, "dbg2       segydata:       %p\n", (void *)segydata);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *) segytraceheader_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segytraceheader_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
-	if (mb_io_ptr->mb_io_extract_segy != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_extract_segy)
-				(verbose,mbio_ptr,store_ptr,sampleformat,
-				kind,segytraceheader_ptr,segydata,
-				error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_extract_segy != NULL) {
+		status = (*mb_io_ptr->mb_io_extract_segy)(verbose, mbio_ptr, store_ptr, sampleformat, kind, segytraceheader_ptr, segydata,
+		                                          error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       sampleformat:   %d\n",*sampleformat);
-		fprintf(stderr,"dbg2       kind:           %d\n",*kind);
-		fprintf(stderr,"dbg2       seq_num:        %d\n",mb_segytraceheader_ptr->seq_num);
-		fprintf(stderr,"dbg2       seq_reel:       %d\n",mb_segytraceheader_ptr->seq_reel);
-		fprintf(stderr,"dbg2       shot_num:       %d\n",mb_segytraceheader_ptr->shot_num);
-		fprintf(stderr,"dbg2       shot_tr:        %d\n",mb_segytraceheader_ptr->shot_tr);
-		fprintf(stderr,"dbg2       espn:           %d\n",mb_segytraceheader_ptr->espn);
-		fprintf(stderr,"dbg2       rp_num:         %d\n",mb_segytraceheader_ptr->rp_num);
-		fprintf(stderr,"dbg2       rp_tr:          %d\n",mb_segytraceheader_ptr->rp_tr);
-		fprintf(stderr,"dbg2       trc_id:         %d\n",mb_segytraceheader_ptr->trc_id);
-		fprintf(stderr,"dbg2       num_vstk:       %d\n",mb_segytraceheader_ptr->num_vstk);
-		fprintf(stderr,"dbg2       cdp_fold:       %d\n",mb_segytraceheader_ptr->cdp_fold);
-		fprintf(stderr,"dbg2       use:            %d\n",mb_segytraceheader_ptr->use);
-		fprintf(stderr,"dbg2       range:          %d\n",mb_segytraceheader_ptr->range);
-		fprintf(stderr,"dbg2       grp_elev:       %d\n",mb_segytraceheader_ptr->grp_elev);
-		fprintf(stderr,"dbg2       src_elev:       %d\n",mb_segytraceheader_ptr->src_elev);
-		fprintf(stderr,"dbg2       src_depth:      %d\n",mb_segytraceheader_ptr->src_depth);
-		fprintf(stderr,"dbg2       grp_datum:      %d\n",mb_segytraceheader_ptr->grp_datum);
-		fprintf(stderr,"dbg2       src_datum:      %d\n",mb_segytraceheader_ptr->src_datum);
-		fprintf(stderr,"dbg2       src_wbd:        %d\n",mb_segytraceheader_ptr->src_wbd);
-		fprintf(stderr,"dbg2       grp_wbd:        %d\n",mb_segytraceheader_ptr->grp_wbd);
-		fprintf(stderr,"dbg2       elev_scalar:    %d\n",mb_segytraceheader_ptr->elev_scalar);
-		fprintf(stderr,"dbg2       coord_scalar:   %d\n",mb_segytraceheader_ptr->coord_scalar);
-		fprintf(stderr,"dbg2       src_long:       %d\n",mb_segytraceheader_ptr->src_long);
-		fprintf(stderr,"dbg2       src_lat:        %d\n",mb_segytraceheader_ptr->src_lat);
-		fprintf(stderr,"dbg2       grp_long:       %d\n",mb_segytraceheader_ptr->grp_long);
-		fprintf(stderr,"dbg2       grp_lat:        %d\n",mb_segytraceheader_ptr->grp_lat);
-		fprintf(stderr,"dbg2       coord_units:    %d\n",mb_segytraceheader_ptr->coord_units);
-		fprintf(stderr,"dbg2       wvel:           %d\n",mb_segytraceheader_ptr->wvel);
-		fprintf(stderr,"dbg2       sbvel:          %d\n",mb_segytraceheader_ptr->sbvel);
-		fprintf(stderr,"dbg2       src_up_vel:     %d\n",mb_segytraceheader_ptr->src_up_vel);
-		fprintf(stderr,"dbg2       grp_up_vel:     %d\n",mb_segytraceheader_ptr->grp_up_vel);
-		fprintf(stderr,"dbg2       src_static:     %d\n",mb_segytraceheader_ptr->src_static);
-		fprintf(stderr,"dbg2       grp_static:     %d\n",mb_segytraceheader_ptr->grp_static);
-		fprintf(stderr,"dbg2       tot_static:     %d\n",mb_segytraceheader_ptr->tot_static);
-		fprintf(stderr,"dbg2       laga:           %d\n",mb_segytraceheader_ptr->laga);
-		fprintf(stderr,"dbg2       delay_mils:     %d\n",mb_segytraceheader_ptr->delay_mils);
-		fprintf(stderr,"dbg2       smute_mils:     %d\n",mb_segytraceheader_ptr->smute_mils);
-		fprintf(stderr,"dbg2       emute_mils:     %d\n",mb_segytraceheader_ptr->emute_mils);
-		fprintf(stderr,"dbg2       nsamps:         %d\n",mb_segytraceheader_ptr->nsamps);
-		fprintf(stderr,"dbg2       si_micros:      %d\n",mb_segytraceheader_ptr->si_micros);
-		for (i=0;i<19;i++)
-		fprintf(stderr,"dbg2       other_1[%2d]:       %d\n",i,mb_segytraceheader_ptr->other_1[i]);
-		fprintf(stderr,"dbg2       year:           %d\n",mb_segytraceheader_ptr->year);
-		fprintf(stderr,"dbg2       day_of_yr:      %d\n",mb_segytraceheader_ptr->day_of_yr);
-		fprintf(stderr,"dbg2       hour:           %d\n",mb_segytraceheader_ptr->hour);
-		fprintf(stderr,"dbg2       min:            %d\n",mb_segytraceheader_ptr->min);
-		fprintf(stderr,"dbg2       sec:            %d\n",mb_segytraceheader_ptr->sec);
-		fprintf(stderr,"dbg2       mils:           %d\n",mb_segytraceheader_ptr->mils);
-		fprintf(stderr,"dbg2       tr_weight:      %d\n",mb_segytraceheader_ptr->tr_weight);
-		for (i=0;i<5;i++)
-		fprintf(stderr,"dbg2       other_2[%2d]:       %d\n",i,mb_segytraceheader_ptr->other_2[i]);
-		fprintf(stderr,"dbg2       delay:          %f\n",mb_segytraceheader_ptr->delay);
-		fprintf(stderr,"dbg2       smute_sec:      %f\n",mb_segytraceheader_ptr->smute_sec);
-		fprintf(stderr,"dbg2       emute_sec:      %f\n",mb_segytraceheader_ptr->emute_sec);
-		fprintf(stderr,"dbg2       si_secs:        %f\n",mb_segytraceheader_ptr->si_secs);
-		fprintf(stderr,"dbg2       wbt_secs:       %f\n",mb_segytraceheader_ptr->wbt_secs);
-		fprintf(stderr,"dbg2       end_of_rp:      %d\n",mb_segytraceheader_ptr->end_of_rp);
-		fprintf(stderr,"dbg2       dummy1:         %f\n",mb_segytraceheader_ptr->dummy1);
-		fprintf(stderr,"dbg2       dummy2:         %f\n",mb_segytraceheader_ptr->dummy2);
-		fprintf(stderr,"dbg2       dummy3:         %f\n",mb_segytraceheader_ptr->dummy3);
-		fprintf(stderr,"dbg2       dummy4:         %f\n",mb_segytraceheader_ptr->dummy4);
-		fprintf(stderr,"dbg2       soundspeed:     %f\n",mb_segytraceheader_ptr->soundspeed);
-		fprintf(stderr,"dbg2       distance:       %f\n",mb_segytraceheader_ptr->distance);
-		fprintf(stderr,"dbg2       dummy7:         %f\n",mb_segytraceheader_ptr->roll);
-		fprintf(stderr,"dbg2       dummy8:         %f\n",mb_segytraceheader_ptr->pitch);
-		fprintf(stderr,"dbg2       heading:        %f\n",mb_segytraceheader_ptr->heading);
-		for (i=0;i<mb_segytraceheader_ptr->nsamps;i++)
-		    fprintf(stderr,"dbg2       sample:%d  data:%f\n", i, segydata[i]);
-		fprintf(stderr,"dbg2       error:          %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:         %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       sampleformat:   %d\n", *sampleformat);
+		fprintf(stderr, "dbg2       kind:           %d\n", *kind);
+		fprintf(stderr, "dbg2       seq_num:        %d\n", mb_segytraceheader_ptr->seq_num);
+		fprintf(stderr, "dbg2       seq_reel:       %d\n", mb_segytraceheader_ptr->seq_reel);
+		fprintf(stderr, "dbg2       shot_num:       %d\n", mb_segytraceheader_ptr->shot_num);
+		fprintf(stderr, "dbg2       shot_tr:        %d\n", mb_segytraceheader_ptr->shot_tr);
+		fprintf(stderr, "dbg2       espn:           %d\n", mb_segytraceheader_ptr->espn);
+		fprintf(stderr, "dbg2       rp_num:         %d\n", mb_segytraceheader_ptr->rp_num);
+		fprintf(stderr, "dbg2       rp_tr:          %d\n", mb_segytraceheader_ptr->rp_tr);
+		fprintf(stderr, "dbg2       trc_id:         %d\n", mb_segytraceheader_ptr->trc_id);
+		fprintf(stderr, "dbg2       num_vstk:       %d\n", mb_segytraceheader_ptr->num_vstk);
+		fprintf(stderr, "dbg2       cdp_fold:       %d\n", mb_segytraceheader_ptr->cdp_fold);
+		fprintf(stderr, "dbg2       use:            %d\n", mb_segytraceheader_ptr->use);
+		fprintf(stderr, "dbg2       range:          %d\n", mb_segytraceheader_ptr->range);
+		fprintf(stderr, "dbg2       grp_elev:       %d\n", mb_segytraceheader_ptr->grp_elev);
+		fprintf(stderr, "dbg2       src_elev:       %d\n", mb_segytraceheader_ptr->src_elev);
+		fprintf(stderr, "dbg2       src_depth:      %d\n", mb_segytraceheader_ptr->src_depth);
+		fprintf(stderr, "dbg2       grp_datum:      %d\n", mb_segytraceheader_ptr->grp_datum);
+		fprintf(stderr, "dbg2       src_datum:      %d\n", mb_segytraceheader_ptr->src_datum);
+		fprintf(stderr, "dbg2       src_wbd:        %d\n", mb_segytraceheader_ptr->src_wbd);
+		fprintf(stderr, "dbg2       grp_wbd:        %d\n", mb_segytraceheader_ptr->grp_wbd);
+		fprintf(stderr, "dbg2       elev_scalar:    %d\n", mb_segytraceheader_ptr->elev_scalar);
+		fprintf(stderr, "dbg2       coord_scalar:   %d\n", mb_segytraceheader_ptr->coord_scalar);
+		fprintf(stderr, "dbg2       src_long:       %d\n", mb_segytraceheader_ptr->src_long);
+		fprintf(stderr, "dbg2       src_lat:        %d\n", mb_segytraceheader_ptr->src_lat);
+		fprintf(stderr, "dbg2       grp_long:       %d\n", mb_segytraceheader_ptr->grp_long);
+		fprintf(stderr, "dbg2       grp_lat:        %d\n", mb_segytraceheader_ptr->grp_lat);
+		fprintf(stderr, "dbg2       coord_units:    %d\n", mb_segytraceheader_ptr->coord_units);
+		fprintf(stderr, "dbg2       wvel:           %d\n", mb_segytraceheader_ptr->wvel);
+		fprintf(stderr, "dbg2       sbvel:          %d\n", mb_segytraceheader_ptr->sbvel);
+		fprintf(stderr, "dbg2       src_up_vel:     %d\n", mb_segytraceheader_ptr->src_up_vel);
+		fprintf(stderr, "dbg2       grp_up_vel:     %d\n", mb_segytraceheader_ptr->grp_up_vel);
+		fprintf(stderr, "dbg2       src_static:     %d\n", mb_segytraceheader_ptr->src_static);
+		fprintf(stderr, "dbg2       grp_static:     %d\n", mb_segytraceheader_ptr->grp_static);
+		fprintf(stderr, "dbg2       tot_static:     %d\n", mb_segytraceheader_ptr->tot_static);
+		fprintf(stderr, "dbg2       laga:           %d\n", mb_segytraceheader_ptr->laga);
+		fprintf(stderr, "dbg2       delay_mils:     %d\n", mb_segytraceheader_ptr->delay_mils);
+		fprintf(stderr, "dbg2       smute_mils:     %d\n", mb_segytraceheader_ptr->smute_mils);
+		fprintf(stderr, "dbg2       emute_mils:     %d\n", mb_segytraceheader_ptr->emute_mils);
+		fprintf(stderr, "dbg2       nsamps:         %d\n", mb_segytraceheader_ptr->nsamps);
+		fprintf(stderr, "dbg2       si_micros:      %d\n", mb_segytraceheader_ptr->si_micros);
+		for (i = 0; i < 19; i++)
+			fprintf(stderr, "dbg2       other_1[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_1[i]);
+		fprintf(stderr, "dbg2       year:           %d\n", mb_segytraceheader_ptr->year);
+		fprintf(stderr, "dbg2       day_of_yr:      %d\n", mb_segytraceheader_ptr->day_of_yr);
+		fprintf(stderr, "dbg2       hour:           %d\n", mb_segytraceheader_ptr->hour);
+		fprintf(stderr, "dbg2       min:            %d\n", mb_segytraceheader_ptr->min);
+		fprintf(stderr, "dbg2       sec:            %d\n", mb_segytraceheader_ptr->sec);
+		fprintf(stderr, "dbg2       mils:           %d\n", mb_segytraceheader_ptr->mils);
+		fprintf(stderr, "dbg2       tr_weight:      %d\n", mb_segytraceheader_ptr->tr_weight);
+		for (i = 0; i < 5; i++)
+			fprintf(stderr, "dbg2       other_2[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_2[i]);
+		fprintf(stderr, "dbg2       delay:          %f\n", mb_segytraceheader_ptr->delay);
+		fprintf(stderr, "dbg2       smute_sec:      %f\n", mb_segytraceheader_ptr->smute_sec);
+		fprintf(stderr, "dbg2       emute_sec:      %f\n", mb_segytraceheader_ptr->emute_sec);
+		fprintf(stderr, "dbg2       si_secs:        %f\n", mb_segytraceheader_ptr->si_secs);
+		fprintf(stderr, "dbg2       wbt_secs:       %f\n", mb_segytraceheader_ptr->wbt_secs);
+		fprintf(stderr, "dbg2       end_of_rp:      %d\n", mb_segytraceheader_ptr->end_of_rp);
+		fprintf(stderr, "dbg2       dummy1:         %f\n", mb_segytraceheader_ptr->dummy1);
+		fprintf(stderr, "dbg2       dummy2:         %f\n", mb_segytraceheader_ptr->dummy2);
+		fprintf(stderr, "dbg2       dummy3:         %f\n", mb_segytraceheader_ptr->dummy3);
+		fprintf(stderr, "dbg2       dummy4:         %f\n", mb_segytraceheader_ptr->dummy4);
+		fprintf(stderr, "dbg2       soundspeed:     %f\n", mb_segytraceheader_ptr->soundspeed);
+		fprintf(stderr, "dbg2       distance:       %f\n", mb_segytraceheader_ptr->distance);
+		fprintf(stderr, "dbg2       dummy7:         %f\n", mb_segytraceheader_ptr->roll);
+		fprintf(stderr, "dbg2       dummy8:         %f\n", mb_segytraceheader_ptr->pitch);
+		fprintf(stderr, "dbg2       heading:        %f\n", mb_segytraceheader_ptr->heading);
+		for (i = 0; i < mb_segytraceheader_ptr->nsamps; i++)
+			fprintf(stderr, "dbg2       sample:%d  data:%f\n", i, segydata[i]);
+		fprintf(stderr, "dbg2       error:          %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:         %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
-		int kind,
-		void *segytraceheader_ptr,
-		float *segydata,
-		int *error)
-{
-	char	*function_name = "mb_insert_segy";
-	int	status;
+int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void *segytraceheader_ptr, float *segydata,
+                   int *error) {
+	char *function_name = "mb_insert_segy";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
 	struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
-	int	i;
+	int i;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *) segytraceheader_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segytraceheader_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:         %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:      %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       segytraceheader_ptr: %p\n",(void *)segytraceheader_ptr);
-		fprintf(stderr,"dbg2       segydata:       %p\n",(void *)segydata);
-		fprintf(stderr,"dbg2       kind:           %d\n",kind);
-		fprintf(stderr,"dbg2       seq_num:        %d\n",mb_segytraceheader_ptr->seq_num);
-		fprintf(stderr,"dbg2       seq_reel:       %d\n",mb_segytraceheader_ptr->seq_reel);
-		fprintf(stderr,"dbg2       shot_num:       %d\n",mb_segytraceheader_ptr->shot_num);
-		fprintf(stderr,"dbg2       shot_tr:        %d\n",mb_segytraceheader_ptr->shot_tr);
-		fprintf(stderr,"dbg2       espn:           %d\n",mb_segytraceheader_ptr->espn);
-		fprintf(stderr,"dbg2       rp_num:         %d\n",mb_segytraceheader_ptr->rp_num);
-		fprintf(stderr,"dbg2       rp_tr:          %d\n",mb_segytraceheader_ptr->rp_tr);
-		fprintf(stderr,"dbg2       trc_id:         %d\n",mb_segytraceheader_ptr->trc_id);
-		fprintf(stderr,"dbg2       num_vstk:       %d\n",mb_segytraceheader_ptr->num_vstk);
-		fprintf(stderr,"dbg2       cdp_fold:       %d\n",mb_segytraceheader_ptr->cdp_fold);
-		fprintf(stderr,"dbg2       use:            %d\n",mb_segytraceheader_ptr->use);
-		fprintf(stderr,"dbg2       range:          %d\n",mb_segytraceheader_ptr->range);
-		fprintf(stderr,"dbg2       grp_elev:       %d\n",mb_segytraceheader_ptr->grp_elev);
-		fprintf(stderr,"dbg2       src_elev:       %d\n",mb_segytraceheader_ptr->src_elev);
-		fprintf(stderr,"dbg2       src_depth:      %d\n",mb_segytraceheader_ptr->src_depth);
-		fprintf(stderr,"dbg2       grp_datum:      %d\n",mb_segytraceheader_ptr->grp_datum);
-		fprintf(stderr,"dbg2       src_datum:      %d\n",mb_segytraceheader_ptr->src_datum);
-		fprintf(stderr,"dbg2       src_wbd:        %d\n",mb_segytraceheader_ptr->src_wbd);
-		fprintf(stderr,"dbg2       grp_wbd:        %d\n",mb_segytraceheader_ptr->grp_wbd);
-		fprintf(stderr,"dbg2       elev_scalar:    %d\n",mb_segytraceheader_ptr->elev_scalar);
-		fprintf(stderr,"dbg2       coord_scalar:   %d\n",mb_segytraceheader_ptr->coord_scalar);
-		fprintf(stderr,"dbg2       src_long:       %d\n",mb_segytraceheader_ptr->src_long);
-		fprintf(stderr,"dbg2       src_lat:        %d\n",mb_segytraceheader_ptr->src_lat);
-		fprintf(stderr,"dbg2       grp_long:       %d\n",mb_segytraceheader_ptr->grp_long);
-		fprintf(stderr,"dbg2       grp_lat:        %d\n",mb_segytraceheader_ptr->grp_lat);
-		fprintf(stderr,"dbg2       coord_units:    %d\n",mb_segytraceheader_ptr->coord_units);
-		fprintf(stderr,"dbg2       wvel:           %d\n",mb_segytraceheader_ptr->wvel);
-		fprintf(stderr,"dbg2       sbvel:          %d\n",mb_segytraceheader_ptr->sbvel);
-		fprintf(stderr,"dbg2       src_up_vel:     %d\n",mb_segytraceheader_ptr->src_up_vel);
-		fprintf(stderr,"dbg2       grp_up_vel:     %d\n",mb_segytraceheader_ptr->grp_up_vel);
-		fprintf(stderr,"dbg2       src_static:     %d\n",mb_segytraceheader_ptr->src_static);
-		fprintf(stderr,"dbg2       grp_static:     %d\n",mb_segytraceheader_ptr->grp_static);
-		fprintf(stderr,"dbg2       tot_static:     %d\n",mb_segytraceheader_ptr->tot_static);
-		fprintf(stderr,"dbg2       laga:           %d\n",mb_segytraceheader_ptr->laga);
-		fprintf(stderr,"dbg2       delay_mils:     %d\n",mb_segytraceheader_ptr->delay_mils);
-		fprintf(stderr,"dbg2       smute_mils:     %d\n",mb_segytraceheader_ptr->smute_mils);
-		fprintf(stderr,"dbg2       emute_mils:     %d\n",mb_segytraceheader_ptr->emute_mils);
-		fprintf(stderr,"dbg2       nsamps:         %d\n",mb_segytraceheader_ptr->nsamps);
-		fprintf(stderr,"dbg2       si_micros:      %d\n",mb_segytraceheader_ptr->si_micros);
-		for (i=0;i<19;i++)
-		fprintf(stderr,"dbg2       other_1[%2d]:       %d\n",i,mb_segytraceheader_ptr->other_1[i]);
-		fprintf(stderr,"dbg2       year:           %d\n",mb_segytraceheader_ptr->year);
-		fprintf(stderr,"dbg2       day_of_yr:      %d\n",mb_segytraceheader_ptr->day_of_yr);
-		fprintf(stderr,"dbg2       hour:           %d\n",mb_segytraceheader_ptr->hour);
-		fprintf(stderr,"dbg2       min:            %d\n",mb_segytraceheader_ptr->min);
-		fprintf(stderr,"dbg2       sec:            %d\n",mb_segytraceheader_ptr->sec);
-		fprintf(stderr,"dbg2       mils:           %d\n",mb_segytraceheader_ptr->mils);
-		fprintf(stderr,"dbg2       tr_weight:      %d\n",mb_segytraceheader_ptr->tr_weight);
-		for (i=0;i<5;i++)
-		fprintf(stderr,"dbg2       other_2[%2d]:       %d\n",i,mb_segytraceheader_ptr->other_2[i]);
-		fprintf(stderr,"dbg2       delay:          %f\n",mb_segytraceheader_ptr->delay);
-		fprintf(stderr,"dbg2       smute_sec:      %f\n",mb_segytraceheader_ptr->smute_sec);
-		fprintf(stderr,"dbg2       emute_sec:      %f\n",mb_segytraceheader_ptr->emute_sec);
-		fprintf(stderr,"dbg2       si_secs:        %f\n",mb_segytraceheader_ptr->si_secs);
-		fprintf(stderr,"dbg2       wbt_secs:       %f\n",mb_segytraceheader_ptr->wbt_secs);
-		fprintf(stderr,"dbg2       end_of_rp:      %d\n",mb_segytraceheader_ptr->end_of_rp);
-		fprintf(stderr,"dbg2       dummy1:         %f\n",mb_segytraceheader_ptr->dummy1);
-		fprintf(stderr,"dbg2       dummy2:         %f\n",mb_segytraceheader_ptr->dummy2);
-		fprintf(stderr,"dbg2       dummy3:         %f\n",mb_segytraceheader_ptr->dummy3);
-		fprintf(stderr,"dbg2       dummy4:         %f\n",mb_segytraceheader_ptr->dummy4);
-		fprintf(stderr,"dbg2       soundspeed:     %f\n",mb_segytraceheader_ptr->soundspeed);
-		fprintf(stderr,"dbg2       distance:       %f\n",mb_segytraceheader_ptr->distance);
-		fprintf(stderr,"dbg2       roll:           %f\n",mb_segytraceheader_ptr->roll);
-		fprintf(stderr,"dbg2       pitch:          %f\n",mb_segytraceheader_ptr->pitch);
-		fprintf(stderr,"dbg2       heading:        %f\n",mb_segytraceheader_ptr->heading);
-		for (i=0;i<mb_segytraceheader_ptr->nsamps;i++)
-		    fprintf(stderr,"dbg2       sample:%d  data:%f\n", i, segydata[i]);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:         %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:      %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       segytraceheader_ptr: %p\n", (void *)segytraceheader_ptr);
+		fprintf(stderr, "dbg2       segydata:       %p\n", (void *)segydata);
+		fprintf(stderr, "dbg2       kind:           %d\n", kind);
+		fprintf(stderr, "dbg2       seq_num:        %d\n", mb_segytraceheader_ptr->seq_num);
+		fprintf(stderr, "dbg2       seq_reel:       %d\n", mb_segytraceheader_ptr->seq_reel);
+		fprintf(stderr, "dbg2       shot_num:       %d\n", mb_segytraceheader_ptr->shot_num);
+		fprintf(stderr, "dbg2       shot_tr:        %d\n", mb_segytraceheader_ptr->shot_tr);
+		fprintf(stderr, "dbg2       espn:           %d\n", mb_segytraceheader_ptr->espn);
+		fprintf(stderr, "dbg2       rp_num:         %d\n", mb_segytraceheader_ptr->rp_num);
+		fprintf(stderr, "dbg2       rp_tr:          %d\n", mb_segytraceheader_ptr->rp_tr);
+		fprintf(stderr, "dbg2       trc_id:         %d\n", mb_segytraceheader_ptr->trc_id);
+		fprintf(stderr, "dbg2       num_vstk:       %d\n", mb_segytraceheader_ptr->num_vstk);
+		fprintf(stderr, "dbg2       cdp_fold:       %d\n", mb_segytraceheader_ptr->cdp_fold);
+		fprintf(stderr, "dbg2       use:            %d\n", mb_segytraceheader_ptr->use);
+		fprintf(stderr, "dbg2       range:          %d\n", mb_segytraceheader_ptr->range);
+		fprintf(stderr, "dbg2       grp_elev:       %d\n", mb_segytraceheader_ptr->grp_elev);
+		fprintf(stderr, "dbg2       src_elev:       %d\n", mb_segytraceheader_ptr->src_elev);
+		fprintf(stderr, "dbg2       src_depth:      %d\n", mb_segytraceheader_ptr->src_depth);
+		fprintf(stderr, "dbg2       grp_datum:      %d\n", mb_segytraceheader_ptr->grp_datum);
+		fprintf(stderr, "dbg2       src_datum:      %d\n", mb_segytraceheader_ptr->src_datum);
+		fprintf(stderr, "dbg2       src_wbd:        %d\n", mb_segytraceheader_ptr->src_wbd);
+		fprintf(stderr, "dbg2       grp_wbd:        %d\n", mb_segytraceheader_ptr->grp_wbd);
+		fprintf(stderr, "dbg2       elev_scalar:    %d\n", mb_segytraceheader_ptr->elev_scalar);
+		fprintf(stderr, "dbg2       coord_scalar:   %d\n", mb_segytraceheader_ptr->coord_scalar);
+		fprintf(stderr, "dbg2       src_long:       %d\n", mb_segytraceheader_ptr->src_long);
+		fprintf(stderr, "dbg2       src_lat:        %d\n", mb_segytraceheader_ptr->src_lat);
+		fprintf(stderr, "dbg2       grp_long:       %d\n", mb_segytraceheader_ptr->grp_long);
+		fprintf(stderr, "dbg2       grp_lat:        %d\n", mb_segytraceheader_ptr->grp_lat);
+		fprintf(stderr, "dbg2       coord_units:    %d\n", mb_segytraceheader_ptr->coord_units);
+		fprintf(stderr, "dbg2       wvel:           %d\n", mb_segytraceheader_ptr->wvel);
+		fprintf(stderr, "dbg2       sbvel:          %d\n", mb_segytraceheader_ptr->sbvel);
+		fprintf(stderr, "dbg2       src_up_vel:     %d\n", mb_segytraceheader_ptr->src_up_vel);
+		fprintf(stderr, "dbg2       grp_up_vel:     %d\n", mb_segytraceheader_ptr->grp_up_vel);
+		fprintf(stderr, "dbg2       src_static:     %d\n", mb_segytraceheader_ptr->src_static);
+		fprintf(stderr, "dbg2       grp_static:     %d\n", mb_segytraceheader_ptr->grp_static);
+		fprintf(stderr, "dbg2       tot_static:     %d\n", mb_segytraceheader_ptr->tot_static);
+		fprintf(stderr, "dbg2       laga:           %d\n", mb_segytraceheader_ptr->laga);
+		fprintf(stderr, "dbg2       delay_mils:     %d\n", mb_segytraceheader_ptr->delay_mils);
+		fprintf(stderr, "dbg2       smute_mils:     %d\n", mb_segytraceheader_ptr->smute_mils);
+		fprintf(stderr, "dbg2       emute_mils:     %d\n", mb_segytraceheader_ptr->emute_mils);
+		fprintf(stderr, "dbg2       nsamps:         %d\n", mb_segytraceheader_ptr->nsamps);
+		fprintf(stderr, "dbg2       si_micros:      %d\n", mb_segytraceheader_ptr->si_micros);
+		for (i = 0; i < 19; i++)
+			fprintf(stderr, "dbg2       other_1[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_1[i]);
+		fprintf(stderr, "dbg2       year:           %d\n", mb_segytraceheader_ptr->year);
+		fprintf(stderr, "dbg2       day_of_yr:      %d\n", mb_segytraceheader_ptr->day_of_yr);
+		fprintf(stderr, "dbg2       hour:           %d\n", mb_segytraceheader_ptr->hour);
+		fprintf(stderr, "dbg2       min:            %d\n", mb_segytraceheader_ptr->min);
+		fprintf(stderr, "dbg2       sec:            %d\n", mb_segytraceheader_ptr->sec);
+		fprintf(stderr, "dbg2       mils:           %d\n", mb_segytraceheader_ptr->mils);
+		fprintf(stderr, "dbg2       tr_weight:      %d\n", mb_segytraceheader_ptr->tr_weight);
+		for (i = 0; i < 5; i++)
+			fprintf(stderr, "dbg2       other_2[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_2[i]);
+		fprintf(stderr, "dbg2       delay:          %f\n", mb_segytraceheader_ptr->delay);
+		fprintf(stderr, "dbg2       smute_sec:      %f\n", mb_segytraceheader_ptr->smute_sec);
+		fprintf(stderr, "dbg2       emute_sec:      %f\n", mb_segytraceheader_ptr->emute_sec);
+		fprintf(stderr, "dbg2       si_secs:        %f\n", mb_segytraceheader_ptr->si_secs);
+		fprintf(stderr, "dbg2       wbt_secs:       %f\n", mb_segytraceheader_ptr->wbt_secs);
+		fprintf(stderr, "dbg2       end_of_rp:      %d\n", mb_segytraceheader_ptr->end_of_rp);
+		fprintf(stderr, "dbg2       dummy1:         %f\n", mb_segytraceheader_ptr->dummy1);
+		fprintf(stderr, "dbg2       dummy2:         %f\n", mb_segytraceheader_ptr->dummy2);
+		fprintf(stderr, "dbg2       dummy3:         %f\n", mb_segytraceheader_ptr->dummy3);
+		fprintf(stderr, "dbg2       dummy4:         %f\n", mb_segytraceheader_ptr->dummy4);
+		fprintf(stderr, "dbg2       soundspeed:     %f\n", mb_segytraceheader_ptr->soundspeed);
+		fprintf(stderr, "dbg2       distance:       %f\n", mb_segytraceheader_ptr->distance);
+		fprintf(stderr, "dbg2       roll:           %f\n", mb_segytraceheader_ptr->roll);
+		fprintf(stderr, "dbg2       pitch:          %f\n", mb_segytraceheader_ptr->pitch);
+		fprintf(stderr, "dbg2       heading:        %f\n", mb_segytraceheader_ptr->heading);
+		for (i = 0; i < mb_segytraceheader_ptr->nsamps; i++)
+			fprintf(stderr, "dbg2       sample:%d  data:%f\n", i, segydata[i]);
+	}
 
 	/* call the appropriate mbsys_ insertion routine */
-	if (mb_io_ptr->mb_io_insert_segy != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_insert_segy)
-				(verbose,mbio_ptr,store_ptr,
-				kind,segytraceheader_ptr,segydata,
-				error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_insert_segy != NULL) {
+		status = (*mb_io_ptr->mb_io_insert_segy)(verbose, mbio_ptr, store_ptr, kind, segytraceheader_ptr, segydata, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:             %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:            %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:             %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:            %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, int *nctd, double *time_d,
-	double *conductivity, double *temperature,
-	double *depth, double *salinity, double *soundspeed, int *error)
-{
-	char	*function_name = "mb_ctd";
-	int	status;
+int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, double *time_d, double *conductivity,
+           double *temperature, double *depth, double *salinity, double *soundspeed, int *error) {
+	char *function_name = "mb_ctd";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
 	/* note: the arrays should be allocated to MB_CTD_MAX length */
-	if (mb_io_ptr->mb_io_ctd != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_ctd)
-				(verbose,mbio_ptr,store_ptr,
-				kind,nctd,time_d,conductivity,
-				temperature,depth,salinity,
-				soundspeed,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_ctd != NULL) {
+		status = (*mb_io_ptr->mb_io_ctd)(verbose, mbio_ptr, store_ptr, kind, nctd, time_d, conductivity, temperature, depth,
+		                                 salinity, soundspeed, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+	}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
+		fprintf(stderr, "dbg2       nctd:          %d\n", *nctd);
+		for (i = 0; i < *nctd; i++) {
+			fprintf(stderr, "dbg2       time_d:        %f\n", time_d[i]);
+			fprintf(stderr, "dbg2       conductivity:  %f\n", conductivity[i]);
+			fprintf(stderr, "dbg2       temperature:   %f\n", temperature[i]);
+			fprintf(stderr, "dbg2       depth:         %f\n", depth[i]);
+			fprintf(stderr, "dbg2       salinity:      %f\n", salinity[i]);
+			fprintf(stderr, "dbg2       soundspeed:    %f\n", soundspeed[i]);
 		}
-	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
-		{
-		fprintf(stderr,"dbg2       nctd:          %d\n",*nctd);
-		for (i=0;i<*nctd;i++)
-			{
-			fprintf(stderr,"dbg2       time_d:        %f\n",time_d[i]);
-			fprintf(stderr,"dbg2       conductivity:  %f\n",conductivity[i]);
-			fprintf(stderr,"dbg2       temperature:   %f\n",temperature[i]);
-			fprintf(stderr,"dbg2       depth:         %f\n",depth[i]);
-			fprintf(stderr,"dbg2       salinity:      %f\n",salinity[i]);
-			fprintf(stderr,"dbg2       soundspeed:    %f\n",soundspeed[i]);
-			}
-		}
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	}
+	if (verbose >= 2) {
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, int *nsensor, double *time_d,
-	double *sensor1, double *sensor2, double *sensor3,
-	double *sensor4, double *sensor5, double *sensor6,
-	double *sensor7, double *sensor8, int *error)
-{
-	char	*function_name = "mb_ancilliarysensor";
-	int	status;
+int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsensor, double *time_d, double *sensor1,
+                        double *sensor2, double *sensor3, double *sensor4, double *sensor5, double *sensor6, double *sensor7,
+                        double *sensor8, int *error) {
+	char *function_name = "mb_ancilliarysensor";
+	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
 	/* note: the arrays should be allocated to MB_CTD_MAX length */
-	if (mb_io_ptr->mb_io_ancilliarysensor != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_ancilliarysensor)
-				(verbose,mbio_ptr,store_ptr,
-				kind, nsensor, time_d,
-				sensor1, sensor2, sensor3,
-				sensor4, sensor5, sensor6,
-				sensor7, sensor8, error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_ancilliarysensor != NULL) {
+		status = (*mb_io_ptr->mb_io_ancilliarysensor)(verbose, mbio_ptr, store_ptr, kind, nsensor, time_d, sensor1, sensor2,
+		                                              sensor3, sensor4, sensor5, sensor6, sensor7, sensor8, error);
+	}
+	else {
 		*nsensor = 0;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+	}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
+		fprintf(stderr, "dbg2       nsensor:       %d\n", *nsensor);
+		for (i = 0; i < *nsensor; i++) {
+			fprintf(stderr, "dbg2       time_d:        %f\n", time_d[i]);
+			fprintf(stderr, "dbg2       sensor1:       %f\n", sensor1[i]);
+			fprintf(stderr, "dbg2       sensor2:       %f\n", sensor2[i]);
+			fprintf(stderr, "dbg2       sensor3:       %f\n", sensor3[i]);
+			fprintf(stderr, "dbg2       sensor4:       %f\n", sensor4[i]);
+			fprintf(stderr, "dbg2       sensor5:       %f\n", sensor5[i]);
+			fprintf(stderr, "dbg2       sensor6:       %f\n", sensor6[i]);
+			fprintf(stderr, "dbg2       sensor7:       %f\n", sensor7[i]);
+			fprintf(stderr, "dbg2       sensor8:       %f\n", sensor8[i]);
+			fprintf(stderr, "dbg2       sensor1:       %f\n", sensor1[i]);
 		}
-	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
-		{
-		fprintf(stderr,"dbg2       nsensor:       %d\n",*nsensor);
-		for (i=0;i<*nsensor;i++)
-			{
-			fprintf(stderr,"dbg2       time_d:        %f\n",time_d[i]);
-			fprintf(stderr,"dbg2       sensor1:       %f\n",sensor1[i]);
-			fprintf(stderr,"dbg2       sensor2:       %f\n",sensor2[i]);
-			fprintf(stderr,"dbg2       sensor3:       %f\n",sensor3[i]);
-			fprintf(stderr,"dbg2       sensor4:       %f\n",sensor4[i]);
-			fprintf(stderr,"dbg2       sensor5:       %f\n",sensor5[i]);
-			fprintf(stderr,"dbg2       sensor6:       %f\n",sensor6[i]);
-			fprintf(stderr,"dbg2       sensor7:       %f\n",sensor7[i]);
-			fprintf(stderr,"dbg2       sensor8:       %f\n",sensor8[i]);
-			fprintf(stderr,"dbg2       sensor1:       %f\n",sensor1[i]);
-			}
-		}
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	}
+	if (verbose >= 2) {
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_copyrecord(int verbose, void *mbio_ptr,
-		    void *store_ptr, void *copy_ptr, int *error)
-{
-	char	*function_name = "mb_copy_record";
-	int	status = MB_SUCCESS;
+int mb_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
+	char *function_name = "mb_copy_record";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %p\n",(void *)copy_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       copy_ptr:   %p\n", (void *)copy_ptr);
+	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call appropriate memory copy routine */
-	if (mb_io_ptr->mb_io_copyrecord != NULL)
-		{
-		status = (*mb_io_ptr->mb_io_copyrecord)
-				(verbose,mbio_ptr,
-				store_ptr,copy_ptr,error);
-		}
-	else
-		{
+	if (mb_io_ptr->mb_io_copyrecord != NULL) {
+		status = (*mb_io_ptr->mb_io_copyrecord)(verbose, mbio_ptr, store_ptr, copy_ptr, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",svn_id);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/

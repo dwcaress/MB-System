@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_sb2100.h	2/4/94
  *	$Id$
  *
- *    Copyright (c) 1994-2016 by
+ *    Copyright (c) 1994-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -180,87 +180,83 @@
 /* maximum number of sidescan pixels for SeaBeam 1000/2100 */
 #define MBSYS_SB2100_PIXELS 2000
 
-struct mbsys_sb2100_svp_struct
-	{
-	float	depth;			/* m */
-	float	velocity;		/* m/sec */
-	};
+struct mbsys_sb2100_svp_struct {
+	float depth;    /* m */
+	float velocity; /* m/sec */
+};
 
-struct mbsys_sb2100_beam_struct
-	{
-	float	depth;			/* m */
-	float	acrosstrack;		/* m */
-	float	alongtrack;		/* m */
-	float	range;			/* seconds */
-	float	angle_across;		/* degrees */
-	float	angle_forward;		/* degrees */
-	short	amplitude;		/* 0.25 dB */
-	short	signal_to_noise;	/* dB */
-	short	echo_length;		/* samples */
-	char	quality;		/* 0=no data,
-						Q=poor quality,
-						blank otherwise */
-	char	source;			/* B=BDI, W=WMT */
-	};
+struct mbsys_sb2100_beam_struct {
+	float depth;           /* m */
+	float acrosstrack;     /* m */
+	float alongtrack;      /* m */
+	float range;           /* seconds */
+	float angle_across;    /* degrees */
+	float angle_forward;   /* degrees */
+	short amplitude;       /* 0.25 dB */
+	short signal_to_noise; /* dB */
+	short echo_length;     /* samples */
+	char quality;          /* 0=no data,
+	                   Q=poor quality,
+	                   blank otherwise */
+	char source;           /* B=BDI, W=WMT */
+};
 
-struct mbsys_sb2100_ss_struct
-	{
-	float	amplitude;		/* sidescan value */
-	float	alongtrack;		/* m */
-	};
+struct mbsys_sb2100_ss_struct {
+	float amplitude;  /* sidescan value */
+	float alongtrack; /* m */
+};
 
-struct mbsys_sb2100_struct
-	{
+struct mbsys_sb2100_struct {
 	/* type of data record */
-	int	kind;
+	int kind;
 
 	/* sonar parameters (SB21BIPR) */
-	float	roll_bias_port;			/* deg */
-	float	roll_bias_starboard;		/* deg */
-	float	pitch_bias;			/* deg */
-	float	ship_draft;			/* m */
-	float	offset_x;			/* m */
-	float	offset_y;			/* m */
-	float	offset_z;			/* m */
-	int	num_svp;
-	struct mbsys_sb2100_svp_struct  svp[MBSYS_SB2100_MAXVEL];
+	float roll_bias_port;      /* deg */
+	float roll_bias_starboard; /* deg */
+	float pitch_bias;          /* deg */
+	float ship_draft;          /* m */
+	float offset_x;            /* m */
+	float offset_y;            /* m */
+	float offset_z;            /* m */
+	int num_svp;
+	struct mbsys_sb2100_svp_struct svp[MBSYS_SB2100_MAXVEL];
 
 	/* sonar data header (SB21BIDH) */
-	short	year;
-	short	jday;
-	short	hour;
-	short	minute;
-	short	sec;
-	short	msec;
-	short	spare1;
-	short	spare2;
-	double	longitude;		/* degrees */
-	double	latitude;		/* degrees */
-	float	heading;		/* degrees */
-	float	speed;			/* m/sec */
-	float	roll;			/* degrees */
-	float	pitch;			/* degrees */
-	float	heave;			/* m */
-	float	ssv;			/* m/sec */
-	char	frequency;		/* L=12kHz; H=36kHz */
-	char	depth_gate_mode;	/* A=Auto, M=Manual */
-	char	ping_gain;		/* dB */
-	char	ping_pulse_width;	/* msec */
-	char	transmitter_attenuation;    /* dB */
-	char	ssv_source;		/* V=Velocimeter, M=Manual,
-						T=Temperature */
-	char	svp_correction;		/* 0=None; A=True Xtrack
-						and Apparent Depth;
-						T=True Xtrack and True Depth */
-	char	pixel_algorithm;	/* pixel intensity algorithm
-						D = logarithm, L = linear */
-	float	pixel_size;		/* m */
-	int	nbeams;			/* up to 151 */
-	int	npixels;		/* up to 2000 */
-	short	spare3;
-	short	spare4;
-	short	spare5;
-	short	spare6;
+	short year;
+	short jday;
+	short hour;
+	short minute;
+	short sec;
+	short msec;
+	short spare1;
+	short spare2;
+	double longitude;             /* degrees */
+	double latitude;              /* degrees */
+	float heading;                /* degrees */
+	float speed;                  /* m/sec */
+	float roll;                   /* degrees */
+	float pitch;                  /* degrees */
+	float heave;                  /* m */
+	float ssv;                    /* m/sec */
+	char frequency;               /* L=12kHz; H=36kHz */
+	char depth_gate_mode;         /* A=Auto, M=Manual */
+	char ping_gain;               /* dB */
+	char ping_pulse_width;        /* msec */
+	char transmitter_attenuation; /* dB */
+	char ssv_source;              /* V=Velocimeter, M=Manual,
+	                          T=Temperature */
+	char svp_correction; /* 0=None; A=True Xtrack
+	             and Apparent Depth;
+	             T=True Xtrack and True Depth */
+	char pixel_algorithm; /* pixel intensity algorithm
+	              D = logarithm, L = linear */
+	float pixel_size;     /* m */
+	int nbeams;           /* up to 151 */
+	int npixels;          /* up to 2000 */
+	short spare3;
+	short spare4;
+	short spare5;
+	short spare6;
 
 	/* bathymetry record (SB21BIBR) */
 	struct mbsys_sb2100_beam_struct beams[MBSYS_SB2100_BEAMS];
@@ -269,86 +265,52 @@ struct mbsys_sb2100_struct
 	struct mbsys_sb2100_ss_struct pixels[MBSYS_SB2100_PIXELS];
 
 	/* parameters unique to MBF_SB2100RW format */
-	char	range_scale; 		/* D = m; I = 0.1 m; S = 0.01 m */
-	char	spare_dr[2];
-	int	num_algorithms;		/* If 1 then only "best" algorithm
-						recorded, else multiple
-						algorithm results recorded */
-	char	algorithm_order[4];	/* blank if num_algorithms=1;
-						W=WMT and B=BDI */
-	char	svp_corr_ss;		/* 0=off; 1=on */
-	int	ss_data_length;		/* number of bytes of sidescan data */
-	char	pixel_size_scale;
-	char	spare_ss;
+	char range_scale; /* D = m; I = 0.1 m; S = 0.01 m */
+	char spare_dr[2];
+	int num_algorithms; /* If 1 then only "best" algorithm
+	                recorded, else multiple
+	                algorithm results recorded */
+	char algorithm_order[4]; /* blank if num_algorithms=1;
+	                 W=WMT and B=BDI */
+	char svp_corr_ss;        /* 0=off; 1=on */
+	int ss_data_length;      /* number of bytes of sidescan data */
+	char pixel_size_scale;
+	char spare_ss;
 
 	/* comment (SB21BITR) - comments are stored by
 	    recasting pointer to roll_bias_port to a char ptr
 	    and writing over up to MBSYS_SB2100_MAXLINE
 	    bytes in structure */
-	char	*comment;
+	char *comment;
 };
 
-
 /* system specific function prototypes */
-int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_sb2100_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_sb2100_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *detects, int *error);
-int mbsys_sb2100_gains(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transmit_gain, double *pulse_length,
-			double *receive_gain, int *error);
-int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-int mbsys_sb2100_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_sb2100_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind,
-			int *nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_sb2100_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
+int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_sb2100_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_sb2100_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                         double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
+                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                        double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                        double *ssalongtrack, char *comment, int *error);
+int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                        double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                        double *ssv, int *error);
+int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+int mbsys_sb2100_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
+                       double *receive_gain, int *error);
+int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                                  double *altitude, int *error);
+int mbsys_sb2100_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
+                             double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
+                             double *pitch, double *heave, int *error);
+int mbsys_sb2100_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
+                            double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
+                            int *error);
+int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
+                             int *error);
+int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
+int mbsys_sb2100_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);

@@ -1,8 +1,7 @@
 /* Determine nad table correction value */
 #define PJ_LIB__
 #include <projects.h>
-	LP
-nad_intr(LP t, struct CTABLE *ct) {
+LP nad_intr(LP t, struct CTABLE *ct) {
 	LP val, frct;
 	ILP indx;
 	double m00, m10, m01, m11;
@@ -19,26 +18,32 @@ nad_intr(LP t, struct CTABLE *ct) {
 		if (indx.lam == -1 && frct.lam > 0.99999999999) {
 			++indx.lam;
 			frct.lam = 0.;
-		} else
+		}
+		else
 			return val;
-	} else if ((in = indx.lam + 1) >= ct->lim.lam) {
+	}
+	else if ((in = indx.lam + 1) >= ct->lim.lam) {
 		if (in == ct->lim.lam && frct.lam < 1e-11) {
 			--indx.lam;
 			frct.lam = 1.;
-		} else
+		}
+		else
 			return val;
 	}
 	if (indx.phi < 0) {
 		if (indx.phi == -1 && frct.phi > 0.99999999999) {
 			++indx.phi;
 			frct.phi = 0.;
-		} else
+		}
+		else
 			return val;
-	} else if ((in = indx.phi + 1) >= ct->lim.phi) {
+	}
+	else if ((in = indx.phi + 1) >= ct->lim.phi) {
 		if (in == ct->lim.phi && frct.phi < 1e-11) {
 			--indx.phi;
 			frct.phi = 1.;
-		} else
+		}
+		else
 			return val;
 	}
 	index = indx.phi * ct->lim.lam + indx.lam;
@@ -54,9 +59,7 @@ nad_intr(LP t, struct CTABLE *ct) {
 	frct.phi = 1. - frct.phi;
 	m00 *= frct.phi;
 	m10 *= frct.phi;
-	val.lam = m00 * f00->lam + m10 * f10->lam +
-			  m01 * f01->lam + m11 * f11->lam;
-	val.phi = m00 * f00->phi + m10 * f10->phi +
-			  m01 * f01->phi + m11 * f11->phi;
+	val.lam = m00 * f00->lam + m10 * f10->lam + m01 * f01->lam + m11 * f11->lam;
+	val.phi = m00 * f00->phi + m10 * f10->phi + m01 * f01->phi + m11 * f11->phi;
 	return val;
 }

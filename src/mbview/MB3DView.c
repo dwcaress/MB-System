@@ -135,8 +135,8 @@ extern void do_mbview_projection_popdown(Widget, XtPointer, XtPointer);
 extern void do_mbview_display_geographic(Widget, XtPointer, XtPointer);
 extern void do_mbview_display_utm(Widget, XtPointer, XtPointer);
 extern void do_mbview_display_spheroid(Widget, XtPointer, XtPointer);
-extern void do_mbview_annotation_degreesminutes( Widget w, XtPointer client_data, XtPointer call_data);
-extern void do_mbview_annotation_degreesdecimal( Widget w, XtPointer client_data, XtPointer call_data);
+extern void do_mbview_annotation_degreesminutes(Widget w, XtPointer client_data, XtPointer call_data);
+extern void do_mbview_annotation_degreesdecimal(Widget w, XtPointer client_data, XtPointer call_data);
 extern void do_mbview_profile_width(Widget, XtPointer, XtPointer);
 extern void do_mbview_profile_slope(Widget, XtPointer, XtPointer);
 extern void do_mbview_profile_exager(Widget, XtPointer, XtPointer);
@@ -150,5118 +150,6069 @@ extern void do_mbview_profile_dismiss(Widget, XtPointer, XtPointer);
  * its own app-defaults values. This table must be NULL terminated.
  */
 typedef struct _UIAppDefault {
-    char*      cName;       /* Class name */
-    char*      wName;       /* Widget name */
-    char*      cInstName;   /* Name of class instance (nested class) */
-    char*      wRsc;        /* Widget resource */
-    char*      value;       /* value read from app-defaults */
+	char *cName;     /* Class name */
+	char *wName;     /* Widget name */
+	char *cInstName; /* Name of class instance (nested class) */
+	char *wRsc;      /* Widget resource */
+	char *value;     /* value read from app-defaults */
 } UIAppDefault;
 
 static Boolean doInitAppDefaults = True;
-static UIAppDefault  appDefaults[] = {
-    {NULL, NULL, NULL, NULL, NULL}
-};
+static UIAppDefault appDefaults[] = {{NULL, NULL, NULL, NULL, NULL}};
 /*
  * The functions to call in the apputils.c
  */
-extern void InitAppDefaults(Widget, UIAppDefault*);
-extern void SetAppDefaults(Widget, UIAppDefault*, char*, Boolean);
-
-MB3DViewDataPtr
-MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList args_in, Cardinal ac_in)
-{
-    Cardinal ac = 0;
-    Arg      args[256];
-    Boolean  argok = False;
-
-    /**
-     * Register the converters for the widgets.
-     */
-    RegisterBxConverters(XtWidgetToApplicationContext(parent));
-    XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmScrolledWindowWidgetClass);
-    /**
-     * Setup app-defaults fallback table if not already done.
-     */
-    if (doInitAppDefaults)
-    {
-        InitAppDefaults(parent, appDefaults);
-        doInitAppDefaults = False;
-    }
-    /**
-     * Now set the app-defaults for this instance.
-     */
-    SetAppDefaults(parent, appDefaults, name, False);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 76); ac++;
-    XtSetArg(args[ac], XmNy, 447); ac++;
-    XtSetArg(args[ac], XmNwidth, 801); ac++;
-    XtSetArg(args[ac], XmNheight, 814); ac++;
-    class_in->MB3DView = XmCreateBulletinBoard(parent,
-        (char *)name,
-        args,
-        ac);
-    XtAddCallback(class_in->MB3DView, XmNdestroyCallback, do_mbview_goaway, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->MB3DView, (char *)"Clear",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 110); ac++;
-        XtSetArg(args[ac], XmNy, 410); ac++;
-        XtSetArg(args[ac], XmNwidth, 60); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_clearpicks = XmCreatePushButton(class_in->MB3DView,
-            (char *)"mbview_pushButton_clearpicks",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_clearpicks);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_clearpicks, XmNactivateCallback, do_mbview_clearpicks, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->MB3DView, (char *)"Reset",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 60); ac++;
-        XtSetArg(args[ac], XmNy, 410); ac++;
-        XtSetArg(args[ac], XmNwidth, 50); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_reset = XmCreatePushButton(class_in->MB3DView,
-            (char *)"mbview_pushButton_reset",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_reset);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_reset, XmNactivateCallback, do_mbview_reset_view, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNborderWidth, 2); ac++;
-    XtSetArg(args[ac], XmNspacing, 0); ac++;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 490); ac++;
-    XtSetArg(args[ac], XmNwidth, 131); ac++;
-    XtSetArg(args[ac], XmNheight, 294); ac++;
-    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
-    class_in->mbview_radioBox_mouse = XmCreateRadioBox(class_in->MB3DView,
-        (char *)"mbview_radioBox_mouse",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_radioBox_mouse);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Pan & Zoom",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNheight, 32); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_rmove = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
-            (char *)"mbview_toggleButton_mode_rmove",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_rmove);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_rmove, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Rotate Model",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_rrotate = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
-            (char *)"mbview_toggleButton_mode_rrotate",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_rrotate);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_rrotate, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Rotate View",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_rviewpoint = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
-            (char *)"mbview_toggleButton_mode_rviewpoint",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_rviewpoint);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_rviewpoint, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Shading",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_rshade = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
-            (char *)"mbview_toggleButton_mode_rshade",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_rshade);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_rshade, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Pick Area",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_rarea = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
-            (char *)"mbview_toggleButton_mode_rarea",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_rarea);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_rarea, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Edit Sites",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNwidth, 125); ac++;
-        XtSetArg(args[ac], XmNheight, 32); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_rsite = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
-            (char *)"mbview_toggleButton_mode_rsite",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_rsite);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_rsite, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Edit Routes",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNwidth, 125); ac++;
-        XtSetArg(args[ac], XmNheight, 32); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_rroute = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
-            (char *)"mbview_toggleButton_mode_rroute",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_rroute);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_rroute, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Pick Nav",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNwidth, 125); ac++;
-        XtSetArg(args[ac], XmNheight, 32); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_rnav = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
-            (char *)"mbview_toggleButton_mode_rnav",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_rnav);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_rnav, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Pick Nav File",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNwidth, 125); ac++;
-        XtSetArg(args[ac], XmNheight, 32); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_rnavfile = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
-            (char *)"mbview_toggleButton_mode_rnavfile",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_rnavfile);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_rnavfile, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->MB3DView, (char *)"Done.",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNborderWidth, 1); ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNbackground,
-            BX_CONVERT(class_in->MB3DView, (char *)"White",
-            XmRPixel, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 450); ac++;
-        XtSetArg(args[ac], XmNwidth, 160); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_status = XmCreateLabel(class_in->MB3DView,
-            (char *)"mbview_label_status",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_status);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->MB3DView, (char *)"Full",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 410); ac++;
-        XtSetArg(args[ac], XmNwidth, 50); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_fullrez = XmCreatePushButton(class_in->MB3DView,
-            (char *)"mbview_pushButton_fullrez",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_fullrez);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_fullrez, XmNactivateCallback, do_mbview_full_render, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->MB3DView, (char *)":::t\"Pick Info:\":t\"Lon 1: -122.894345 W\":t\"Lat 1: 37.308996 N\":t\"Depth 1: -324.314 m\":t\"Lon 2: -122.545680 W\":t\"Lat 2: 36.640972 N\":t\"Depth 2: -2338.025 m\":t\"Bearing: 157.4 deg\"\"Distance: 80333.459 m\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNborderWidth, 1); ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNbackground,
-            BX_CONVERT(class_in->MB3DView, (char *)"White",
-            XmRPixel, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 240); ac++;
-        XtSetArg(args[ac], XmNwidth, 160); ac++;
-        XtSetArg(args[ac], XmNheight, 160); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_pickinfo = XmCreateLabel(class_in->MB3DView,
-            (char *)"mbview_label_pickinfo",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_pickinfo);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNorientation, XmVERTICAL); ac++;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 10); ac++;
-    XtSetArg(args[ac], XmNwidth, 87); ac++;
-    XtSetArg(args[ac], XmNheight, 130); ac++;
-    class_in->mbview_menuBar_mbview = XmCreateMenuBar(class_in->MB3DView,
-        (char *)"mbview_menuBar_mbview",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_menuBar_mbview);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"View",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 5); ac++;
-        XtSetArg(args[ac], XmNy, 5); ac++;
-        XtSetArg(args[ac], XmNwidth, 77); ac++;
-        XtSetArg(args[ac], XmNheight, 24); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_cascadeButton_view = XmCreateCascadeButton(class_in->mbview_menuBar_mbview,
-            (char *)"mbview_cascadeButton_view",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_cascadeButton_view);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 168); ac++;
-    XtSetArg(args[ac], XmNy, 462); ac++;
-    XtSetArg(args[ac], XmNwidth, 211); ac++;
-    XtSetArg(args[ac], XmNheight, 568); ac++;
-    class_in->mbview_pulldownMenu_view = XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_view),
-        (char *)"mbview_pulldownMenu_view",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Map Display",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_display_2D = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_display_2D",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_display_2D);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_display_2D, XmNvalueChangedCallback, do_mbview_display_2D, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"3D Display",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_display_3D = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_display_3D",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_display_3D);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_display_3D, XmNvalueChangedCallback, do_mbview_display_3D, (XtPointer)0);
-
-    ac = 0;
-    class_in->mbview_separator10 = XmCreateSeparator(class_in->mbview_pulldownMenu_view,
-        (char *)"mbview_separator10",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator10);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Topography",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_data_primary = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_data_primary",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_data_primary);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_data_primary, XmNvalueChangedCallback, do_mbview_data_primary, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Topography Slope",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_data_primaryslope = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_data_primaryslope",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_data_primaryslope);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_data_primaryslope, XmNvalueChangedCallback, do_mbview_data_primaryslope, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Overlay",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_data_secondary = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_data_secondary",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_data_secondary);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_data_secondary, XmNvalueChangedCallback, do_mbview_data_secondary, (XtPointer)0);
-
-    ac = 0;
-    class_in->mbview_separator = XmCreateSeparator(class_in->mbview_pulldownMenu_view,
-        (char *)"mbview_separator",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Histogram Equalization",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_histogram = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_histogram",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_histogram);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_histogram, XmNvalueChangedCallback, do_mbview_histogram, (XtPointer)0);
-
-    ac = 0;
-    class_in->mbview_separator21 = XmCreateSeparator(class_in->mbview_pulldownMenu_view,
-        (char *)"mbview_separator21",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator21);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"No Shading",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_overlay_none = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_overlay_none",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_overlay_none);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_overlay_none, XmNvalueChangedCallback, do_mbview_overlay_none, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Shading by Illumination",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_overlay_illumination = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_overlay_illumination",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_overlay_illumination);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_overlay_illumination, XmNvalueChangedCallback, do_mbview_overlay_illumination, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Shading by Slope",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_overlay_slope = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_overlay_slope",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_overlay_slope);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_overlay_slope, XmNvalueChangedCallback, do_mbview_overlay_slope, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Shading by Overlay",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_overlay_secondary = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_overlay_secondary",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_overlay_secondary);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_overlay_secondary, XmNvalueChangedCallback, do_mbview_overlay_secondary, (XtPointer)0);
-
-    ac = 0;
-    class_in->mbview_separator1 = XmCreateSeparator(class_in->mbview_pulldownMenu_view,
-        (char *)"mbview_separator1",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator1);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Topography Contours",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_overlay_contour = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_overlay_contour",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_overlay_contour);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_overlay_contour, XmNvalueChangedCallback, do_mbview_overlay_contour, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Sites",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_site = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_site",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_site);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_site, XmNvalueChangedCallback, do_mbview_site, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Routes",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_route = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_route",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_route);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_route, XmNvalueChangedCallback, do_mbview_route, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Navigation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_nav = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_nav",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_nav);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_nav, XmNvalueChangedCallback, do_mbview_nav, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Draped Navigation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_navdrape = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_navdrape",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_navdrape);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_navdrape, XmNvalueChangedCallback, do_mbview_navdrape, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Vector",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_vector = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_vector",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_vector);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_vector, XmNvalueChangedCallback, do_mbview_vector, (XtPointer)0);
-
-    ac = 0;
-    class_in->mbview_separator8 = XmCreateSeparator(class_in->mbview_pulldownMenu_view,
-        (char *)"mbview_separator8",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator8);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Haxby Colortable",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_colortable_haxby = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_colortable_haxby",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_colortable_haxby);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_colortable_haxby, XmNvalueChangedCallback, do_mbview_colortable_haxby, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Bright Rainbow Colortable",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_colortable_bright = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_colortable_bright",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_colortable_bright);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_colortable_bright, XmNvalueChangedCallback, do_mbview_colortable_bright, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Muted Rainbow Colortable",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_colortable_muted = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_colortable_muted",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_colortable_muted);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_colortable_muted, XmNvalueChangedCallback, do_mbview_colortable_muted, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Grayscale Colortable",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_colortable_gray = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_colortable_gray",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_colortable_gray);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_colortable_gray, XmNvalueChangedCallback, do_mbview_colortable_gray, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Flat Gray Colortable",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_colortable_flat = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_colortable_flat",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_colortable_flat);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_colortable_flat, XmNvalueChangedCallback, do_mbview_colortable_flat, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Sealevel1 Colortable",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_colortable_sealevel1 = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_colortable_sealevel1",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_colortable_sealevel1);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_colortable_sealevel1, XmNvalueChangedCallback, do_mbview_colortable_sealevel1, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Sealevel2 Colortable",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_colortable_sealevel2 = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_colortable_sealevel2",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_colortable_sealevel2);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_colortable_sealevel2, XmNvalueChangedCallback, do_mbview_colortable_sealevel2, (XtPointer)0);
-
-    ac = 0;
-    class_in->separator1 = XmCreateSeparator(class_in->mbview_pulldownMenu_view,
-        (char *)"separator1",
-        args,
-        ac);
-    XtManageChild(class_in->separator1);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Profile",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_profile = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
-            (char *)"mbview_toggleButton_profile",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_profile);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_profile, XmNvalueChangedCallback, do_mbview_view_profile, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_view); ac++;
-    XtSetValues(class_in->mbview_cascadeButton_view, args, ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"Controls",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 5); ac++;
-        XtSetArg(args[ac], XmNy, 29); ac++;
-        XtSetArg(args[ac], XmNwidth, 77); ac++;
-        XtSetArg(args[ac], XmNheight, 24); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_cascadeButton_controls = XmCreateCascadeButton(class_in->mbview_menuBar_mbview,
-            (char *)"mbview_cascadeButton_controls",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_cascadeButton_controls);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 144); ac++;
-    XtSetArg(args[ac], XmNheight, 220); ac++;
-    class_in->mbview_pulldownMenu_controls = XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_controls),
-        (char *)"mbview_pulldownMenu_controls",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Colors & Contours",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_colorbounds = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
-            (char *)"mbview_pushButton_colorbounds",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_colorbounds);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_colorbounds, XmNactivateCallback, do_mbview_colorboundspopup, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"2D Controls",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_2dview = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
-            (char *)"mbview_pushButton_2dview",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_2dview);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_2dview, XmNactivateCallback, do_mbview_2dparmspopup, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"3D Controls",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_3dview = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
-            (char *)"mbview_pushButton_3dview",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_3dview);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_3dview, XmNactivateCallback, do_mbview_3dparmspopup, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Shading",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_shadeparms = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
-            (char *)"mbview_pushButton_shadeparms",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_shadeparms);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_shadeparms, XmNactivateCallback, do_mbview_shadeparmspopup, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Resolution",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_resolution = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
-            (char *)"mbview_pushButton_resolution",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_resolution);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_resolution, XmNactivateCallback, do_mbview_resolutionpopup, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Projections",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_projections = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
-            (char *)"mbview_pushButton_projections",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_projections);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_projections, XmNactivateCallback, do_mbview_projection_popup, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Site List",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_sitelist = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
-            (char *)"mbview_pushButton_sitelist",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_sitelist);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_sitelist, XmNactivateCallback, do_mbview_sitelistpopup, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Route List",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_routelist = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
-            (char *)"mbview_pushButton_routelist",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_routelist);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_routelist, XmNactivateCallback, do_mbview_routelistpopup, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Navigation List",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_navlist = XmCreatePushButton(class_in->mbview_pulldownMenu_controls,
-            (char *)"mbview_pushButton_navlist",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_navlist);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_navlist, XmNactivateCallback, do_mbview_navlistpopup, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_controls); ac++;
-    XtSetValues(class_in->mbview_cascadeButton_controls, args, ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"Mouse",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 5); ac++;
-        XtSetArg(args[ac], XmNy, 53); ac++;
-        XtSetArg(args[ac], XmNwidth, 77); ac++;
-        XtSetArg(args[ac], XmNheight, 24); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_cascadeButton_mouse = XmCreateCascadeButton(class_in->mbview_menuBar_mbview,
-            (char *)"mbview_cascadeButton_mouse",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_cascadeButton_mouse);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 129); ac++;
-    XtSetArg(args[ac], XmNheight, 220); ac++;
-    class_in->mbview_pulldownMenu_mouse = XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_mouse),
-        (char *)"mbview_pulldownMenu_mouse",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Pan & Zoom",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_move = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
-            (char *)"mbview_toggleButton_mode_move",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_move);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_move, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Rotate Model",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_rotate = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
-            (char *)"mbview_toggleButton_mode_rotate",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_rotate);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_rotate, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Rotate View",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_viewpoint = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
-            (char *)"mbview_toggleButton_mode_viewpoint",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_viewpoint);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_viewpoint, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Shading",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_shade = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
-            (char *)"mbview_toggleButton_mode_shade",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_shade);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_shade, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Pick Area",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_area = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
-            (char *)"mbview_toggleButton_mode_area",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_area);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_area, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Edit Sites",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_site = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
-            (char *)"mbview_toggleButton_mode_site",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_site);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_site, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Edit Routes",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_route = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
-            (char *)"mbview_toggleButton_mode_route",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_route);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_route, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Select Nav",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_nav = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
-            (char *)"mbview_toggleButton_mode_nav",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_nav);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_nav, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Select Nav File",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_mode_navfile = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
-            (char *)"mbview_toggleButton_mode_navfile",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_mode_navfile);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_mode_navfile, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_mouse); ac++;
-    XtSetValues(class_in->mbview_cascadeButton_mouse, args, ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"Action",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 5); ac++;
-        XtSetArg(args[ac], XmNy, 77); ac++;
-        XtSetArg(args[ac], XmNwidth, 77); ac++;
-        XtSetArg(args[ac], XmNheight, 24); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_cascadeButton_action = XmCreateCascadeButton(class_in->mbview_menuBar_mbview,
-            (char *)"mbview_cascadeButton_action",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_cascadeButton_action);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 123); ac++;
-    XtSetArg(args[ac], XmNheight, 28); ac++;
-    class_in->mbview_pulldownMenu_action = XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_action),
-        (char *)"mbview_pulldownMenu_action",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_action, (char *)"About MBview...",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_help_about = XmCreatePushButton(class_in->mbview_pulldownMenu_action,
-            (char *)"mbview_pushButton_help_about",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_help_about);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_help_about, XmNactivateCallback, do_mbview_aboutpopup, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_action); ac++;
-    XtSetValues(class_in->mbview_cascadeButton_action, args, ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 5); ac++;
-        XtSetArg(args[ac], XmNy, 101); ac++;
-        XtSetArg(args[ac], XmNwidth, 77); ac++;
-        XtSetArg(args[ac], XmNheight, 24); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_cascadeButton_dismiss = XmCreateCascadeButton(class_in->mbview_menuBar_mbview,
-            (char *)"mbview_cascadeButton_dismiss",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_cascadeButton_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 67); ac++;
-    XtSetArg(args[ac], XmNheight, 28); ac++;
-    class_in->mbview_pulldownMenu_dismiss = XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_dismiss),
-        (char *)"mbview_pulldownMenu_dismiss",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_dismiss, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_pulldownMenu_dismiss, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_dismiss = XmCreatePushButton(class_in->mbview_pulldownMenu_dismiss,
-            (char *)"mbview_pushButton_dismiss",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_dismiss, XmNactivateCallback, do_mbview_dismiss, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_dismiss); ac++;
-    XtSetValues(class_in->mbview_cascadeButton_dismiss, args, ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->MB3DView, (char *)":::t\"Mouse Mode:\":t\"  R: Pick\":t\"  L: Pan\"\"  M: Zoom\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNborderWidth, 1); ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNbackground,
-            BX_CONVERT(class_in->MB3DView, (char *)"White",
-            XmRPixel, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 150); ac++;
-        XtSetArg(args[ac], XmNwidth, 160); ac++;
-        XtSetArg(args[ac], XmNheight, 80); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->MB3DView, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_mouse = XmCreateLabel(class_in->MB3DView,
-            (char *)"mbview_label_mouse",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_mouse);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNborderWidth, 1); ac++;
-    XtSetArg(args[ac], XmNbackground,
-        BX_CONVERT(class_in->MB3DView, (char *)"white",
-        XmRPixel, 0, &argok)); if (argok) ac++;
-    XtSetArg(args[ac], XmNmarginHeight, 0); ac++;
-    XtSetArg(args[ac], XmNmarginWidth, 0); ac++;
-    XtSetArg(args[ac], XmNx, 180); ac++;
-    XtSetArg(args[ac], XmNy, 10); ac++;
-    XtSetArg(args[ac], XmNwidth, 590); ac++;
-    XtSetArg(args[ac], XmNheight, 490); ac++;
-    class_in->mbview_drawingArea_mbview = XmCreateDrawingArea(class_in->MB3DView,
-        (char *)"mbview_drawingArea_mbview",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_drawingArea_mbview);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 814); ac++;
-    XtSetArg(args[ac], XmNy, 1149); ac++;
-    XtSetArg(args[ac], XmNwidth, 934); ac++;
-    XtSetArg(args[ac], XmNheight, 375); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
-    class_in->mbview_dialogShell_profile = XmCreateDialogShell(class_in->MB3DView,
-        (char *)"mbview_dialogShell_profile",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_profile, (char *)"MBview Profile Display",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 814); ac++;
-        XtSetArg(args[ac], XmNy, 1149); ac++;
-        XtSetArg(args[ac], XmNwidth, 934); ac++;
-        XtSetArg(args[ac], XmNheight, 375); ac++;
-        class_in->mbview_form_profile = XtCreateWidget((char *)"mbview_form_profile",
-            xmFormWidgetClass,
-            class_in->mbview_dialogShell_profile,
-            args,
-            ac);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_form_profile, (char *)"Display Width Multiple",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNminimum, 1); ac++;
-        XtSetArg(args[ac], XmNdecimalPoints, 0); ac++;
-        XtSetArg(args[ac], XmNvalue, 1); ac++;
-        XtSetArg(args[ac], XmNmaximum, 5); ac++;
-        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
-        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 263); ac++;
-        XtSetArg(args[ac], XmNwidth, 270); ac++;
-        XtSetArg(args[ac], XmNheight, 62); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_scale_profile_width = XmCreateScale(class_in->mbview_form_profile,
-            (char *)"mbview_scale_profile_width",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_scale_profile_width);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_scale_profile_width, XmNvalueChangedCallback, do_mbview_profile_width, (XtPointer)0);
-    XtAddCallback(class_in->mbview_scale_profile_width, XmNdragCallback, do_mbview_profile_width, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_form_profile, (char *)"Slope Threshold",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNminimum, 1); ac++;
-        XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
-        XtSetArg(args[ac], XmNvalue, 200); ac++;
-        XtSetArg(args[ac], XmNmaximum, 200); ac++;
-        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
-        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 200); ac++;
-        XtSetArg(args[ac], XmNwidth, 270); ac++;
-        XtSetArg(args[ac], XmNheight, 63); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_scale_profile_slope = XmCreateScale(class_in->mbview_form_profile,
-            (char *)"mbview_scale_profile_slope",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_scale_profile_slope);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_scale_profile_slope, XmNvalueChangedCallback, do_mbview_profile_slope, (XtPointer)0);
-    XtAddCallback(class_in->mbview_scale_profile_slope, XmNdragCallback, do_mbview_profile_slope, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNscrollingPolicy, XmAUTOMATIC); ac++;
-    XtSetArg(args[ac], XmNx, 290); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 638); ac++;
-    XtSetArg(args[ac], XmNheight, 365); ac++;
-    class_in->mbview_scrolledWindow_profile = XmCreateScrolledWindow(class_in->mbview_form_profile,
-        (char *)"mbview_scrolledWindow_profile",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_scrolledWindow_profile);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNborderWidth, 1); ac++;
-    XtSetArg(args[ac], XmNbackground,
-        BX_CONVERT(class_in->mbview_scrolledWindow_profile, (char *)"White",
-        XmRPixel, 0, &argok)); if (argok) ac++;
-    XtSetArg(args[ac], XmNwidth, 500); ac++;
-    XtSetArg(args[ac], XmNheight, 240); ac++;
-    class_in->mbview_drawingArea_profile = XmCreateDrawingArea(class_in->mbview_scrolledWindow_profile,
-        (char *)"mbview_drawingArea_profile",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_drawingArea_profile);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_form_profile, (char *)":::t\"Profile Source: Route \":t\"Length: 1.0 km\":t\"Vertical Range: -100.5 to 512.0 m\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNborderWidth, 1); ac++;
-        XtSetArg(args[ac], XmNbackground,
-            BX_CONVERT(class_in->mbview_form_profile, (char *)"white",
-            XmRPixel, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 0); ac++;
-        XtSetArg(args[ac], XmNwidth, 270); ac++;
-        XtSetArg(args[ac], XmNheight, 130); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_profile_label_info = XmCreateLabel(class_in->mbview_form_profile,
-            (char *)"mbview_profile_label_info",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_profile_label_info);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_form_profile, (char *)"Vertical Exageration",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
-        XtSetArg(args[ac], XmNvalue, 10); ac++;
-        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 140); ac++;
-        XtSetArg(args[ac], XmNwidth, 270); ac++;
-        XtSetArg(args[ac], XmNheight, 60); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_scale_profile_exager = XmCreateScale(class_in->mbview_form_profile,
-            (char *)"mbview_scale_profile_exager",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_scale_profile_exager);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_scale_profile_exager, XmNvalueChangedCallback, do_mbview_profile_exager, (XtPointer)0);
-    XtAddCallback(class_in->mbview_scale_profile_exager, XmNdragCallback, do_mbview_profile_exager, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_form_profile, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 90); ac++;
-        XtSetArg(args[ac], XmNy, 330); ac++;
-        XtSetArg(args[ac], XmNwidth, 110); ac++;
-        XtSetArg(args[ac], XmNheight, 32); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_profile_pushButton_dismiss = XmCreatePushButton(class_in->mbview_form_profile,
-            (char *)"mbview_profile_pushButton_dismiss",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_profile_pushButton_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_profile_pushButton_dismiss, XmNactivateCallback, do_mbview_profile_dismiss, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "Projections"); ac++;
-    XtSetArg(args[ac], XmNx, 1098); ac++;
-    XtSetArg(args[ac], XmNy, 1193); ac++;
-    XtSetArg(args[ac], XmNwidth, 365); ac++;
-    XtSetArg(args[ac], XmNheight, 288); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
-    class_in->mbview_dialogShell_projection = XmCreateDialogShell(class_in->MB3DView,
-        (char *)"mbview_dialogShell_projection",
-        args,
-        ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1098); ac++;
-    XtSetArg(args[ac], XmNy, 1193); ac++;
-    XtSetArg(args[ac], XmNwidth, 365); ac++;
-    XtSetArg(args[ac], XmNheight, 288); ac++;
-    class_in->mbview_bulletinBoard_projection = XtCreateWidget((char *)"mbview_bulletinBoard_projection",
-        xmBulletinBoardWidgetClass,
-        class_in->mbview_dialogShell_projection,
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"Display Projection:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 210); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 150); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_displayprojection = XmCreateLabel(class_in->mbview_bulletinBoard_projection,
-            (char *)"mbview_label_displayprojection",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_displayprojection);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 220); ac++;
-    XtSetArg(args[ac], XmNy, 40); ac++;
-    XtSetArg(args[ac], XmNwidth, 115); ac++;
-    XtSetArg(args[ac], XmNheight, 96); ac++;
-    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
-    class_in->mbview_radioBox_projection = XmCreateRadioBox(class_in->mbview_bulletinBoard_projection,
-        (char *)"mbview_radioBox_projection",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_radioBox_projection);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"Geographic",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_geographic = XmCreateToggleButton(class_in->mbview_radioBox_projection,
-            (char *)"mbview_toggleButton_geographic",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_geographic);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_geographic, XmNvalueChangedCallback, do_mbview_display_geographic, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"UTM",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_utm = XmCreateToggleButton(class_in->mbview_radioBox_projection,
-            (char *)"mbview_toggleButton_utm",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_utm);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_utm, XmNvalueChangedCallback, do_mbview_display_utm, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"Spheroid",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_spheroid = XmCreateToggleButton(class_in->mbview_radioBox_projection,
-            (char *)"mbview_toggleButton_spheroid",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_spheroid);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_spheroid, XmNvalueChangedCallback, do_mbview_display_spheroid, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"Annotation Style:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
-        XtSetArg(args[ac], XmNy, 140); ac++;
-        XtSetArg(args[ac], XmNwidth, 150); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_annotationstyle = XmCreateLabel(class_in->mbview_bulletinBoard_projection,
-            (char *)"mbview_label_annotationstyle",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_annotationstyle);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 40); ac++;
-    XtSetArg(args[ac], XmNy, 160); ac++;
-    XtSetArg(args[ac], XmNwidth, 115); ac++;
-    XtSetArg(args[ac], XmNheight, 96); ac++;
-    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
-    class_in->mbview_radioBox_annotation = XmCreateRadioBox(class_in->mbview_bulletinBoard_projection,
-        (char *)"mbview_radioBox_annotation",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_radioBox_annotation);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"Degrees + Minutes",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_annotation_degreesminutes = XmCreateToggleButton(class_in->mbview_radioBox_annotation,
-            (char *)"mbview_toggleButton_annotation_degreesminutes",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_annotation_degreesminutes);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_annotation_degreesminutes, XmNvalueChangedCallback, do_mbview_annotation_degreesminutes, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"Decimal Degrees",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_annotation_degreesdecimal = XmCreateToggleButton(class_in->mbview_radioBox_annotation,
-            (char *)"mbview_toggleButton_annotation_degreesdecimal",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_annotation_degreesdecimal);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_toggleButton_annotation_degreesdecimal, XmNvalueChangedCallback, do_mbview_annotation_degreesdecimal, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"Primary Grid Projection:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNborderWidth, 1); ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNbackground,
-            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"white",
-            XmRPixel, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 190); ac++;
-        XtSetArg(args[ac], XmNheight, 220); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_projection = XmCreateLabel(class_in->mbview_bulletinBoard_projection,
-            (char *)"mbview_label_projection",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_projection);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 110); ac++;
-        XtSetArg(args[ac], XmNy, 240); ac++;
-        XtSetArg(args[ac], XmNwidth, 130); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_projection_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_projection,
-            (char *)"mbview_pushButton_projection_dismiss",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_projection_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_projection_dismiss, XmNactivateCallback, do_mbview_projection_popdown, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 1187); ac++;
-    XtSetArg(args[ac], XmNy, 1229); ac++;
-    XtSetArg(args[ac], XmNwidth, 187); ac++;
-    XtSetArg(args[ac], XmNheight, 215); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
-    class_in->mbview_dialogShell_2dparms = XmCreateDialogShell(class_in->MB3DView,
-        (char *)"mbview_dialogShell_2dparms",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_2dparms, (char *)"MBview 2D Parameters",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1187); ac++;
-        XtSetArg(args[ac], XmNy, 1229); ac++;
-        XtSetArg(args[ac], XmNwidth, 187); ac++;
-        XtSetArg(args[ac], XmNheight, 215); ac++;
-        class_in->mbview_bulletinBoard_2dparms = XtCreateWidget((char *)"mbview_bulletinBoard_2dparms",
-            xmBulletinBoardWidgetClass,
-            class_in->mbview_dialogShell_2dparms,
-            args,
-            ac);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 70); ac++;
-    XtSetArg(args[ac], XmNy, 100); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_view_2dzoom = XmCreateTextField(class_in->mbview_bulletinBoard_2dparms,
-        (char *)"mbview_textField_view_2dzoom",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_view_2dzoom);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"Zoom:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 100); ac++;
-        XtSetArg(args[ac], XmNwidth, 60); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_view_2dzoom = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
-            (char *)"mbview_label_view_2dzoom",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_view_2dzoom);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 70); ac++;
-    XtSetArg(args[ac], XmNy, 70); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_view_2doffsety = XmCreateTextField(class_in->mbview_bulletinBoard_2dparms,
-        (char *)"mbview_textField_view_2doffsety",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_view_2doffsety);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"Y:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
-        XtSetArg(args[ac], XmNy, 70); ac++;
-        XtSetArg(args[ac], XmNwidth, 50); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_view_2doffsety = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
-            (char *)"mbview_label_view_2doffsety",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_view_2doffsety);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 130); ac++;
-    XtSetArg(args[ac], XmNwidth, 170); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator14 = XmCreateSeparator(class_in->mbview_bulletinBoard_2dparms,
-        (char *)"mbview_separator14",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator14);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 70); ac++;
-    XtSetArg(args[ac], XmNy, 40); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_view_2doffsetx = XmCreateTextField(class_in->mbview_bulletinBoard_2dparms,
-        (char *)"mbview_textField_view_2doffsetx",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_view_2doffsetx);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"X:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 50); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_view_2doffsetx = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
-            (char *)"mbview_label_view_2doffsetx",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_view_2doffsetx);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"View Offset:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 90); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_2d_offset = XmCreateLabel(class_in->mbview_bulletinBoard_2dparms,
-            (char *)"mbview_label_2d_offset",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_2d_offset);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"Apply",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
-        XtSetArg(args[ac], XmNy, 150); ac++;
-        XtSetArg(args[ac], XmNwidth, 70); ac++;
-        XtSetArg(args[ac], XmNheight, 50); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_view_2d_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_2dparms,
-            (char *)"mbview_pushButton_view_2d_apply",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_view_2d_apply);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_view_2d_apply, XmNactivateCallback, do_mbview_2dparmsapply, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 100); ac++;
-        XtSetArg(args[ac], XmNy, 150); ac++;
-        XtSetArg(args[ac], XmNwidth, 70); ac++;
-        XtSetArg(args[ac], XmNheight, 50); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_view_2d_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_2dparms,
-            (char *)"mbview_pushButton_view_2d_dismiss",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_view_2d_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_view_2d_dismiss, XmNactivateCallback, do_mbview_2dparmspopdown, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 1140); ac++;
-    XtSetArg(args[ac], XmNy, 1098); ac++;
-    XtSetArg(args[ac], XmNwidth, 281); ac++;
-    XtSetArg(args[ac], XmNheight, 478); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
-    class_in->mbview_dialogShell_3dparms = XmCreateDialogShell(class_in->MB3DView,
-        (char *)"mbview_dialogShell_3dparms",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_3dparms, (char *)"MBview 3D Parameters",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1140); ac++;
-        XtSetArg(args[ac], XmNy, 1098); ac++;
-        XtSetArg(args[ac], XmNwidth, 281); ac++;
-        XtSetArg(args[ac], XmNheight, 478); ac++;
-        class_in->mbview_bulletinBoard_3dparms = XtCreateWidget((char *)"mbview_bulletinBoard_3dparms",
-            xmBulletinBoardWidgetClass,
-            class_in->mbview_dialogShell_3dparms,
-            args,
-            ac);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 100); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_model_3dzoom = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_textField_model_3dzoom",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_model_3dzoom);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Zoom:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 60); ac++;
-        XtSetArg(args[ac], XmNy, 100); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_model_3dzoom = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_model_3dzoom",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_model_3dzoom);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 320); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator11 = XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_separator11",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator11);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 240); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_view_3dzoom = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_textField_view_3dzoom",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_view_3dzoom);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Zoom:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 60); ac++;
-        XtSetArg(args[ac], XmNy, 240); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_view_3dzoom = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_view_3dzoom",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_view_3dzoom);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 370); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_view_3doffsety = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_textField_view_3doffsety",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_view_3doffsety);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Y:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 60); ac++;
-        XtSetArg(args[ac], XmNy, 370); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_view_3doffsety = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_view_3doffsety",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_view_3doffsety);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 400); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator20 = XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_separator20",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator20);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 340); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_view_3doffsetx = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_textField_view_3doffsetx",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_view_3doffsetx);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"X:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 100); ac++;
-        XtSetArg(args[ac], XmNy, 340); ac++;
-        XtSetArg(args[ac], XmNwidth, 60); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_view_3doffsetx = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_view_3doffsetx",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_view_3doffsetx);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Pan:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 340); ac++;
-        XtSetArg(args[ac], XmNwidth, 90); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_view_offset = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_view_offset",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_view_offset);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 210); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_view_elevation = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_textField_view_elevation",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_view_elevation);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Elevation (degrees):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 210); ac++;
-        XtSetArg(args[ac], XmNwidth, 150); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_view_elevation = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_view_elevation",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_view_elevation);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 270); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator4 = XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_separator4",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator4);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 180); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_view_azimuth = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_textField_view_azimuth",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_view_azimuth);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Azimuth (degrees):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 180); ac++;
-        XtSetArg(args[ac], XmNwidth, 150); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_view_azimuth = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_view_azimuth",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_view_azimuth);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"View Orientation & Zoom:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 150); ac++;
-        XtSetArg(args[ac], XmNwidth, 200); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_view = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_view",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_view);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 70); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_model_elevation = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_textField_model_elevation",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_model_elevation);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 40); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_model_azimuth = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_textField_model_azimuth",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_model_azimuth);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Elevation (degrees):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 70); ac++;
-        XtSetArg(args[ac], XmNwidth, 150); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_model_elevation = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_model_elevation",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_model_elevation);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Azimuth (degrees):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 140); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_model_azimuth = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_model_azimuth",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_model_azimuth);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Model Orientation & Zoom:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 200); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_model = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_model",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_model);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 130); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator9 = XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_separator9",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator9);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Apply",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
-        XtSetArg(args[ac], XmNy, 420); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 50); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_view_3d_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_pushButton_view_3d_apply",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_view_3d_apply);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_view_3d_apply, XmNactivateCallback, do_mbview_3dparmsapply, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Vertical Exageration:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 290); ac++;
-        XtSetArg(args[ac], XmNwidth, 150); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_exager = XmCreateLabel(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_label_exager",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_exager);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 290); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_exageration = XmCreateTextField(class_in->mbview_bulletinBoard_3dparms,
-        (char *)"mbview_textField_exageration",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_exageration);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 160); ac++;
-        XtSetArg(args[ac], XmNy, 420); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 50); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_view_3d_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_3dparms,
-            (char *)"mbview_pushButton_view_3d_dismiss",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_view_3d_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_view_3d_dismiss, XmNactivateCallback, do_mbview_3dparmspopdown, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 1141); ac++;
-    XtSetArg(args[ac], XmNy, 1117); ac++;
-    XtSetArg(args[ac], XmNwidth, 280); ac++;
-    XtSetArg(args[ac], XmNheight, 440); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
-    class_in->mbview_dialogShell_shadeparms = XmCreateDialogShell(class_in->MB3DView,
-        (char *)"mbview_dialogShell_shadeparms",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_shadeparms, (char *)"MBview Shading Parameters",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1141); ac++;
-        XtSetArg(args[ac], XmNy, 1117); ac++;
-        XtSetArg(args[ac], XmNwidth, 280); ac++;
-        XtSetArg(args[ac], XmNheight, 440); ac++;
-        class_in->mbview_bulletinBoard_shadeparms = XtCreateWidget((char *)"mbview_bulletinBoard_shadeparms",
-            xmBulletinBoardWidgetClass,
-            class_in->mbview_dialogShell_shadeparms,
-            args,
-            ac);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 360); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator13 = XmCreateSeparator(class_in->mbview_bulletinBoard_shadeparms,
-        (char *)"mbview_separator13",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator13);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 300); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_overlay_center = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
-        (char *)"mbview_textField_overlay_center",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_overlay_center);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Center:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 60); ac++;
-        XtSetArg(args[ac], XmNy, 300); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_overlay_center = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
-            (char *)"mbview_label_overlay_center",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_overlay_center);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Shading by Overlay:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 240); ac++;
-        XtSetArg(args[ac], XmNwidth, 200); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_overlayshade = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
-            (char *)"mbview_label_overlayshade",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_overlayshade);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 30); ac++;
-    XtSetArg(args[ac], XmNy, 330); ac++;
-    XtSetArg(args[ac], XmNwidth, 227); ac++;
-    XtSetArg(args[ac], XmNheight, 34); ac++;
-    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
-    class_in->mbview_radioBox_overlay_shade = XmCreateRadioBox(class_in->mbview_bulletinBoard_shadeparms,
-        (char *)"mbview_radioBox_overlay_shade",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_radioBox_overlay_shade);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"Cold-to-Hot",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_overlay_shade_ctoh = XmCreateToggleButton(class_in->mbview_radioBox_overlay_shade,
-            (char *)"mbview_toggleButton_overlay_shade_ctoh",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_overlay_shade_ctoh);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"Hot-to-Cold",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_overlay_shade_htoc = XmCreateToggleButton(class_in->mbview_radioBox_overlay_shade,
-            (char *)"mbview_toggleButton_overlay_shade_htoc",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_overlay_shade_htoc);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 270); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_overlay_amp = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
-        (char *)"mbview_textField_overlay_amp",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_overlay_amp);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Amplitude:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 60); ac++;
-        XtSetArg(args[ac], XmNy, 270); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_overlay_amp = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
-            (char *)"mbview_label_overlay_amp",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_overlay_amp);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 220); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator15 = XmCreateSeparator(class_in->mbview_bulletinBoard_shadeparms,
-        (char *)"mbview_separator15",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator15);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 190); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_slope_amp = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
-        (char *)"mbview_textField_slope_amp",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_slope_amp);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Amplitude:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 50); ac++;
-        XtSetArg(args[ac], XmNy, 190); ac++;
-        XtSetArg(args[ac], XmNwidth, 110); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_slope_amp = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
-            (char *)"mbview_label_slope_amp",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_slope_amp);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Shading by Slope:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 160); ac++;
-        XtSetArg(args[ac], XmNwidth, 200); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_slopeshade = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
-            (char *)"mbview_label_slopeshade",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_slopeshade);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 70); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_illum_azi = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
-        (char *)"mbview_textField_illum_azi",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_illum_azi);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 40); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_illum_amp = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
-        (char *)"mbview_textField_illum_amp",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_illum_amp);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Azimuth (degrees):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
-        XtSetArg(args[ac], XmNy, 70); ac++;
-        XtSetArg(args[ac], XmNwidth, 140); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_illum_azi = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
-            (char *)"mbview_label_illum_azi",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_illum_azi);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Amplitude:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 150); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_illum_amp = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
-            (char *)"mbview_label_illum_amp",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_illum_amp);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Shading by Illumination:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 180); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_illumination = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
-            (char *)"mbview_label_illumination",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_illumination);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 140); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator16 = XmCreateSeparator(class_in->mbview_bulletinBoard_shadeparms,
-        (char *)"mbview_separator16",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator16);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Apply",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
-        XtSetArg(args[ac], XmNy, 380); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 50); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_shadeparms_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_shadeparms,
-            (char *)"mbview_pushButton_shadeparms_apply",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_shadeparms_apply);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_shadeparms_apply, XmNactivateCallback, do_mbview_shadeparmsapply, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Elevation (degrees):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 100); ac++;
-        XtSetArg(args[ac], XmNwidth, 150); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_illum_elev = XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms,
-            (char *)"mbview_label_illum_elev",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_illum_elev);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 100); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_illum_elev = XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms,
-        (char *)"mbview_textField_illum_elev",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_illum_elev);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 160); ac++;
-        XtSetArg(args[ac], XmNy, 380); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 50); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_shadeparms_dismiss2 = XmCreatePushButton(class_in->mbview_bulletinBoard_shadeparms,
-            (char *)"mbview_pushButton_shadeparms_dismiss2",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_shadeparms_dismiss2);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_shadeparms_dismiss2, XmNactivateCallback, do_mbview_shadeparmspopdown, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 1049); ac++;
-    XtSetArg(args[ac], XmNy, 1071); ac++;
-    XtSetArg(args[ac], XmNwidth, 463); ac++;
-    XtSetArg(args[ac], XmNheight, 531); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
-    class_in->mbview_dialogShell_about = XmCreateDialogShell(class_in->MB3DView,
-        (char *)"mbview_dialogShell_about",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_about, (char *)"About MBview...",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1049); ac++;
-        XtSetArg(args[ac], XmNy, 1071); ac++;
-        XtSetArg(args[ac], XmNwidth, 463); ac++;
-        XtSetArg(args[ac], XmNheight, 531); ac++;
-        class_in->mbview_bulletinBoard_about = XtCreateWidget((char *)"mbview_bulletinBoard_about",
-            xmBulletinBoardWidgetClass,
-            class_in->mbview_dialogShell_about,
-            args,
-            ac);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"::#TimesMedium14:t\"MB-System Release 5.0.0\"#TimesMedium14\"August 26, 2003\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 410); ac++;
-        XtSetArg(args[ac], XmNwidth, 440); ac++;
-        XtSetArg(args[ac], XmNheight, 50); ac++;
-        class_in->mbview_label_about_version = XmCreateLabel(class_in->mbview_bulletinBoard_about,
-            (char *)"mbview_label_about_version",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_about_version);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"::#TimesBold14:t\"Created By:\"#TimesBold14\"David W. Caress   and   Dale N. Chayes \"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 280); ac++;
-        XtSetArg(args[ac], XmNwidth, 440); ac++;
-        XtSetArg(args[ac], XmNheight, 60); ac++;
-        class_in->mbview_label_about_authors = XmCreateLabel(class_in->mbview_bulletinBoard_about,
-            (char *)"mbview_label_about_authors",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_about_authors);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"::#TimesBold12:t\"Monterey Bay\"#TimesBold12:t\"Aquarium\"#TimesBold12\"Research Institute\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 70); ac++;
-        XtSetArg(args[ac], XmNy, 340); ac++;
-        XtSetArg(args[ac], XmNwidth, 140); ac++;
-        XtSetArg(args[ac], XmNheight, 80); ac++;
-        class_in->mbview_label_about_MBARI = XmCreateLabel(class_in->mbview_bulletinBoard_about,
-            (char *)"mbview_label_about_MBARI",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_about_MBARI);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"::#TimesBold12:t\"Lamont-Doherty\"#TimesBold12:t\"Earth Observatory\"#TimesBold12\"of Columbia University\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 230); ac++;
-        XtSetArg(args[ac], XmNy, 340); ac++;
-        XtSetArg(args[ac], XmNwidth, 180); ac++;
-        XtSetArg(args[ac], XmNheight, 80); ac++;
-        class_in->mbview_label_about_LDEO = XmCreateLabel(class_in->mbview_bulletinBoard_about,
-            (char *)"mbview_label_about_LDEO",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_about_LDEO);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 260); ac++;
-    XtSetArg(args[ac], XmNwidth, 440); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator6 = XmCreateSeparator(class_in->mbview_bulletinBoard_about,
-        (char *)"mbview_separator6",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator6);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"::#TimesBold14:t\"One component of the\"#TimesBold24\"MB-System\"#TimesBold14:t\"\"#TimesBold14:t\"An open Source Software Package\"#TimesBold14:t\"for Processing and Display\"#TimesBold14\"of Swath Sonar Data\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 120); ac++;
-        XtSetArg(args[ac], XmNwidth, 440); ac++;
-        XtSetArg(args[ac], XmNheight, 140); ac++;
-        class_in->mbview_label_about_mbsystem = XmCreateLabel(class_in->mbview_bulletinBoard_about,
-            (char *)"mbview_label_about_mbsystem",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_about_mbsystem);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 100); ac++;
-    XtSetArg(args[ac], XmNwidth, 440); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator7 = XmCreateSeparator(class_in->mbview_bulletinBoard_about,
-        (char *)"mbview_separator7",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator7);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"::#TimesBold24\"MBview\":t\"\"#TimesBold18\"A 2D/3D Visualization API\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"SERIF"-bold-r-*-*-*-180-*-*-*-*-iso8859-1=TimesBold18,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 440); ac++;
-        XtSetArg(args[ac], XmNheight, 90); ac++;
-        class_in->mbview_label_about_title = XmCreateLabel(class_in->mbview_bulletinBoard_about,
-            (char *)"mbview_label_about_title",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_about_title);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 170); ac++;
-        XtSetArg(args[ac], XmNy, 470); ac++;
-        XtSetArg(args[ac], XmNwidth, 120); ac++;
-        XtSetArg(args[ac], XmNheight, 50); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_about_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_about,
-            (char *)"mbview_pushButton_about_dismiss",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_about_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_about_dismiss, XmNactivateCallback, do_mbview_aboutpopdown, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 1070); ac++;
-    XtSetArg(args[ac], XmNy, 1289); ac++;
-    XtSetArg(args[ac], XmNwidth, 421); ac++;
-    XtSetArg(args[ac], XmNheight, 95); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
-    class_in->mbview_dialogShell_message = XmCreateDialogShell(class_in->MB3DView,
-        (char *)"mbview_dialogShell_message",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_message, (char *)"MBview: Please wait...",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1070); ac++;
-        XtSetArg(args[ac], XmNy, 1289); ac++;
-        XtSetArg(args[ac], XmNwidth, 421); ac++;
-        XtSetArg(args[ac], XmNheight, 95); ac++;
-        class_in->mbview_bulletinBoard_message = XtCreateWidget((char *)"mbview_bulletinBoard_message",
-            xmBulletinBoardWidgetClass,
-            class_in->mbview_dialogShell_message,
-            args,
-            ac);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"MB3Dview is doing something...",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 400); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_message = XmCreateLabel(class_in->mbview_bulletinBoard_message,
-            (char *)"mbview_label_message",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_message);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"Thank you for your patience.",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 50); ac++;
-        XtSetArg(args[ac], XmNwidth, 400); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_thanks = XmCreateLabel(class_in->mbview_bulletinBoard_message,
-            (char *)"mbview_label_thanks",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_thanks);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "MB3DView Rendering Resolution"); ac++;
-    XtSetArg(args[ac], XmNx, 1135); ac++;
-    XtSetArg(args[ac], XmNy, 1111); ac++;
-    XtSetArg(args[ac], XmNwidth, 291); ac++;
-    XtSetArg(args[ac], XmNheight, 451); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
-    class_in->mbview_dialogShell_resolution = XmCreateDialogShell(class_in->MB3DView,
-        (char *)"mbview_dialogShell_resolution",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_resolution, (char *)"MBview Rendering Resolution",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1135); ac++;
-        XtSetArg(args[ac], XmNy, 1111); ac++;
-        XtSetArg(args[ac], XmNwidth, 291); ac++;
-        XtSetArg(args[ac], XmNheight, 451); ac++;
-        class_in->mbview_bulletinBoard_resolution = XtCreateWidget((char *)"mbview_bulletinBoard_resolution",
-            xmBulletinBoardWidgetClass,
-            class_in->mbview_dialogShell_resolution,
-            args,
-            ac);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Medium Resolution Decimation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNminimum, 1); ac++;
-        XtSetArg(args[ac], XmNvalue, 2); ac++;
-        XtSetArg(args[ac], XmNmaximum, 10); ac++;
-        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
-        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 320); ac++;
-        XtSetArg(args[ac], XmNwidth, 260); ac++;
-        XtSetArg(args[ac], XmNheight, 60); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_scale_navmediumresolution = XmCreateScale(class_in->mbview_bulletinBoard_resolution,
-            (char *)"mbview_scale_navmediumresolution",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_scale_navmediumresolution);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_scale_navmediumresolution, XmNvalueChangedCallback, do_mbview_resolutionchange, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Low Resolution Decimation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNminimum, 1); ac++;
-        XtSetArg(args[ac], XmNvalue, 5); ac++;
-        XtSetArg(args[ac], XmNmaximum, 25); ac++;
-        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-        XtSetArg(args[ac], XmNscaleMultiple, 2); ac++;
-        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 240); ac++;
-        XtSetArg(args[ac], XmNwidth, 260); ac++;
-        XtSetArg(args[ac], XmNheight, 60); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_scale_navlowresolution = XmCreateScale(class_in->mbview_bulletinBoard_resolution,
-            (char *)"mbview_scale_navlowresolution",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_scale_navlowresolution);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_scale_navlowresolution, XmNvalueChangedCallback, do_mbview_resolutionchange, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 180); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->separator = XmCreateSeparator(class_in->mbview_bulletinBoard_resolution,
-        (char *)"separator",
-        args,
-        ac);
-    XtManageChild(class_in->separator);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Nav Rendering Decimation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 200); ac++;
-        XtSetArg(args[ac], XmNwidth, 270); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_navrenderdecimation = XmCreateLabel(class_in->mbview_bulletinBoard_resolution,
-            (char *)"mbview_label_navrenderdecimation",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_navrenderdecimation);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Grid Rendering Resolution:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 270); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_gridrenderres = XmCreateLabel(class_in->mbview_bulletinBoard_resolution,
-            (char *)"mbview_label_gridrenderres",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_gridrenderres);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Medium Resolution Dimension",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNminimum, 100); ac++;
-        XtSetArg(args[ac], XmNvalue, 300); ac++;
-        XtSetArg(args[ac], XmNmaximum, 1000); ac++;
-        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-        XtSetArg(args[ac], XmNscaleMultiple, 100); ac++;
-        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 120); ac++;
-        XtSetArg(args[ac], XmNwidth, 260); ac++;
-        XtSetArg(args[ac], XmNheight, 63); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_scale_mediumresolution = XmCreateScale(class_in->mbview_bulletinBoard_resolution,
-            (char *)"mbview_scale_mediumresolution",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_scale_mediumresolution);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_scale_mediumresolution, XmNvalueChangedCallback, do_mbview_resolutionchange, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Low Resolution Dimension",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNminimum, 10); ac++;
-        XtSetArg(args[ac], XmNvalue, 100); ac++;
-        XtSetArg(args[ac], XmNmaximum, 500); ac++;
-        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-        XtSetArg(args[ac], XmNscaleMultiple, 50); ac++;
-        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 50); ac++;
-        XtSetArg(args[ac], XmNwidth, 260); ac++;
-        XtSetArg(args[ac], XmNheight, 63); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_scale_lowresolution = XmCreateScale(class_in->mbview_bulletinBoard_resolution,
-            (char *)"mbview_scale_lowresolution",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_scale_lowresolution);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_scale_lowresolution, XmNvalueChangedCallback, do_mbview_resolutionchange, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 100); ac++;
-        XtSetArg(args[ac], XmNy, 400); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_resolution_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_resolution,
-            (char *)"mbview_pushButton_resolution_dismiss",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_resolution_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_resolution_dismiss, XmNactivateCallback, do_mbview_resolutionpopdown, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "MB3DView Colors & Contours"); ac++;
-    XtSetArg(args[ac], XmNx, 1061); ac++;
-    XtSetArg(args[ac], XmNy, 1114); ac++;
-    XtSetArg(args[ac], XmNwidth, 440); ac++;
-    XtSetArg(args[ac], XmNheight, 445); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING); ac++;
-    class_in->mbview_dialogShell_colorbounds = XmCreateDialogShell(class_in->MB3DView,
-        (char *)"mbview_dialogShell_colorbounds",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_colorbounds, (char *)"MBview Colors and Contours",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1061); ac++;
-        XtSetArg(args[ac], XmNy, 1114); ac++;
-        XtSetArg(args[ac], XmNwidth, 440); ac++;
-        XtSetArg(args[ac], XmNheight, 445); ac++;
-        class_in->mbview_bulletinBoard_colorbounds = XtCreateWidget((char *)"mbview_bulletinBoard_colorbounds",
-            xmBulletinBoardWidgetClass,
-            class_in->mbview_dialogShell_colorbounds,
-            args,
-            ac);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 360); ac++;
-    XtSetArg(args[ac], XmNwidth, 410); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator5 = XmCreateSeparator(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_separator5",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator5);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 30); ac++;
-    XtSetArg(args[ac], XmNy, 330); ac++;
-    XtSetArg(args[ac], XmNwidth, 227); ac++;
-    XtSetArg(args[ac], XmNheight, 34); ac++;
-    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
-    class_in->mbview_radioBox_overlaymode = XmCreateRadioBox(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_radioBox_overlaymode",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_radioBox_overlaymode);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"Cold-to-Hot",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_overlay_ctoh = XmCreateToggleButton(class_in->mbview_radioBox_overlaymode,
-            (char *)"mbview_toggleButton_overlay_ctoh",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_overlay_ctoh);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"Hot-to-Cold",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_overlay_htoc = XmCreateToggleButton(class_in->mbview_radioBox_overlaymode,
-            (char *)"mbview_toggleButton_overlay_htoc",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_overlay_htoc);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 310); ac++;
-    XtSetArg(args[ac], XmNy, 300); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_overlaymax = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_textField_overlaymax",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_overlaymax);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Maximum:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 230); ac++;
-        XtSetArg(args[ac], XmNy, 300); ac++;
-        XtSetArg(args[ac], XmNwidth, 80); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_overlaymax = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_label_overlaymax",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_overlaymax);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 110); ac++;
-    XtSetArg(args[ac], XmNy, 300); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_overlaymin = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_textField_overlaymin",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_overlaymin);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Minimum:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 30); ac++;
-        XtSetArg(args[ac], XmNy, 300); ac++;
-        XtSetArg(args[ac], XmNwidth, 80); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_overlaymin = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_label_overlaymin",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_overlaymin);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Overlay Color Bounds:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 270); ac++;
-        XtSetArg(args[ac], XmNwidth, 200); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_overlaybounds = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_label_overlaybounds",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_overlaybounds);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 250); ac++;
-    XtSetArg(args[ac], XmNwidth, 410); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator3 = XmCreateSeparator(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_separator3",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator3);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 30); ac++;
-    XtSetArg(args[ac], XmNy, 220); ac++;
-    XtSetArg(args[ac], XmNwidth, 227); ac++;
-    XtSetArg(args[ac], XmNheight, 34); ac++;
-    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
-    class_in->mbview_radioBox_slopemode = XmCreateRadioBox(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_radioBox_slopemode",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_radioBox_slopemode);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"Cold-to-Hot",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_slope_ctoh = XmCreateToggleButton(class_in->mbview_radioBox_slopemode,
-            (char *)"mbview_toggleButton_slope_ctoh",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_slope_ctoh);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"Hot-to-Cold",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_slope_htoc = XmCreateToggleButton(class_in->mbview_radioBox_slopemode,
-            (char *)"mbview_toggleButton_slope_htoc",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_slope_htoc);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 310); ac++;
-    XtSetArg(args[ac], XmNy, 190); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_slopemax = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_textField_slopemax",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_slopemax);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Maximum:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 230); ac++;
-        XtSetArg(args[ac], XmNy, 190); ac++;
-        XtSetArg(args[ac], XmNwidth, 80); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_slopemax = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_label_slopemax",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_slopemax);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 110); ac++;
-    XtSetArg(args[ac], XmNy, 190); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_slopemin = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_textField_slopemin",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_slopemin);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Minimum:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 30); ac++;
-        XtSetArg(args[ac], XmNy, 190); ac++;
-        XtSetArg(args[ac], XmNwidth, 80); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_slopemin = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_label_slopemin",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_slopemin);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Data Slope Color Bounds:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 160); ac++;
-        XtSetArg(args[ac], XmNwidth, 200); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_slopebounds = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_label_slopebounds",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_slopebounds);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 30); ac++;
-    XtSetArg(args[ac], XmNy, 70); ac++;
-    XtSetArg(args[ac], XmNwidth, 227); ac++;
-    XtSetArg(args[ac], XmNheight, 34); ac++;
-    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
-    class_in->mbview_radioBox_colormode = XmCreateRadioBox(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_radioBox_colormode",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_radioBox_colormode);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"Cold-to-Hot",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_data_ctoh = XmCreateToggleButton(class_in->mbview_radioBox_colormode,
-            (char *)"mbview_toggleButton_data_ctoh",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_data_ctoh);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"Hot-to-Cold",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 109); ac++;
-        XtSetArg(args[ac], XmNheight, 28); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_toggleButton_data_htoc = XmCreateToggleButton(class_in->mbview_radioBox_colormode,
-            (char *)"mbview_toggleButton_data_htoc",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_toggleButton_data_htoc);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 310); ac++;
-    XtSetArg(args[ac], XmNy, 40); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_datamax = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_textField_datamax",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_datamax);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 110); ac++;
-    XtSetArg(args[ac], XmNy, 40); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_datamin = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_textField_datamin",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_datamin);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Maximum:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 230); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 80); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_colormax = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_label_colormax",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_colormax);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Minimum:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
-        XtSetArg(args[ac], XmNx, 30); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 80); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_colormin = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_label_colormin",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_colormin);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Data Color Bounds:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 180); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_colorbounds = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_label_colorbounds",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_colorbounds);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 140); ac++;
-    XtSetArg(args[ac], XmNwidth, 410); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    class_in->mbview_separator2 = XmCreateSeparator(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_separator2",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_separator2);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Apply",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 110); ac++;
-        XtSetArg(args[ac], XmNy, 380); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 50); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_colorbounds_apply = XmCreatePushButton(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_pushButton_colorbounds_apply",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_colorbounds_apply);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_colorbounds_apply, XmNactivateCallback, do_mbview_colorboundsapply, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Data Contour Interval (meters):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 110); ac++;
-        XtSetArg(args[ac], XmNwidth, 230); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_label_contour = XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_label_contour",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_label_contour);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 310); ac++;
-    XtSetArg(args[ac], XmNy, 110); ac++;
-    XtSetArg(args[ac], XmNwidth, 110); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->mbview_textField_contours = XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds,
-        (char *)"mbview_textField_contours",
-        args,
-        ac);
-    XtManageChild(class_in->mbview_textField_contours);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 240); ac++;
-        XtSetArg(args[ac], XmNy, 380); ac++;
-        XtSetArg(args[ac], XmNwidth, 110); ac++;
-        XtSetArg(args[ac], XmNheight, 50); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-"SANS"-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->mbview_pushButton_colorbounds_dismiss = XmCreatePushButton(class_in->mbview_bulletinBoard_colorbounds,
-            (char *)"mbview_pushButton_colorbounds_dismiss",
-            args,
-            ac);
-        XtManageChild(class_in->mbview_pushButton_colorbounds_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(class_in->mbview_pushButton_colorbounds_dismiss, XmNactivateCallback, do_mbview_colorboundspopdown, (XtPointer)0);
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 263); ac++;
-    XtSetValues(class_in->mbview_scale_profile_width, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 200); ac++;
-    XtSetValues(class_in->mbview_scale_profile_slope, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 10); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 290); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 6); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
-    XtSetValues(class_in->mbview_scrolledWindow_profile, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
-    XtSetValues(class_in->mbview_profile_label_info, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 140); ac++;
-    XtSetValues(class_in->mbview_scale_profile_exager, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 90); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 330); ac++;
-    XtSetValues(class_in->mbview_profile_pushButton_dismiss, args, ac);
-
-
-    /*
-     * Assign functions to class record
-     */
-
-
-    /* Begin user code block <end_MB3DViewCreate> */
-    /* End user code block <end_MB3DViewCreate> */
-
-    return( class_in );
+extern void InitAppDefaults(Widget, UIAppDefault *);
+extern void SetAppDefaults(Widget, UIAppDefault *, char *, Boolean);
+
+MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String name, ArgList args_in, Cardinal ac_in) {
+	Cardinal ac = 0;
+	Arg args[256];
+	Boolean argok = False;
+
+	/**
+	 * Register the converters for the widgets.
+	 */
+	RegisterBxConverters(XtWidgetToApplicationContext(parent));
+	XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmScrolledWindowWidgetClass);
+	/**
+	 * Setup app-defaults fallback table if not already done.
+	 */
+	if (doInitAppDefaults) {
+		InitAppDefaults(parent, appDefaults);
+		doInitAppDefaults = False;
+	}
+	/**
+	 * Now set the app-defaults for this instance.
+	 */
+	SetAppDefaults(parent, appDefaults, name, False);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+	ac++;
+	XtSetArg(args[ac], XmNx, 76);
+	ac++;
+	XtSetArg(args[ac], XmNy, 447);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 801);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 814);
+	ac++;
+	class_in->MB3DView = XmCreateBulletinBoard(parent, (char *)name, args, ac);
+	XtAddCallback(class_in->MB3DView, XmNdestroyCallback, do_mbview_goaway, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->MB3DView, (char *)"Clear", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 110);
+		ac++;
+		XtSetArg(args[ac], XmNy, 410);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 60);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(class_in->MB3DView, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_clearpicks =
+		    XmCreatePushButton(class_in->MB3DView, (char *)"mbview_pushButton_clearpicks", args, ac);
+		XtManageChild(class_in->mbview_pushButton_clearpicks);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_clearpicks, XmNactivateCallback, do_mbview_clearpicks, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->MB3DView, (char *)"Reset", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 60);
+		ac++;
+		XtSetArg(args[ac], XmNy, 410);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 50);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(class_in->MB3DView, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_reset = XmCreatePushButton(class_in->MB3DView, (char *)"mbview_pushButton_reset", args, ac);
+		XtManageChild(class_in->mbview_pushButton_reset);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_reset, XmNactivateCallback, do_mbview_reset_view, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNborderWidth, 2);
+	ac++;
+	XtSetArg(args[ac], XmNspacing, 0);
+	ac++;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 490);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 131);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 294);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	class_in->mbview_radioBox_mouse = XmCreateRadioBox(class_in->MB3DView, (char *)"mbview_radioBox_mouse", args, ac);
+	XtManageChild(class_in->mbview_radioBox_mouse);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Pan & Zoom", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNshadowThickness, 2);
+		ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 32);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_rmove =
+		    XmCreateToggleButton(class_in->mbview_radioBox_mouse, (char *)"mbview_toggleButton_mode_rmove", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_rmove);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_rmove, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Rotate Model", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNshadowThickness, 2);
+		ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_rrotate =
+		    XmCreateToggleButton(class_in->mbview_radioBox_mouse, (char *)"mbview_toggleButton_mode_rrotate", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_rrotate);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_rrotate, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Rotate View", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNshadowThickness, 2);
+		ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_rviewpoint =
+		    XmCreateToggleButton(class_in->mbview_radioBox_mouse, (char *)"mbview_toggleButton_mode_rviewpoint", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_rviewpoint);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_rviewpoint, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Shading", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNshadowThickness, 2);
+		ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_rshade =
+		    XmCreateToggleButton(class_in->mbview_radioBox_mouse, (char *)"mbview_toggleButton_mode_rshade", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_rshade);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_rshade, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Pick Area", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNshadowThickness, 2);
+		ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_rarea =
+		    XmCreateToggleButton(class_in->mbview_radioBox_mouse, (char *)"mbview_toggleButton_mode_rarea", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_rarea);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_rarea, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Edit Sites", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNshadowThickness, 2);
+		ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 125);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 32);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_rsite =
+		    XmCreateToggleButton(class_in->mbview_radioBox_mouse, (char *)"mbview_toggleButton_mode_rsite", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_rsite);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_rsite, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Edit Routes", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNshadowThickness, 2);
+		ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 125);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 32);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_rroute =
+		    XmCreateToggleButton(class_in->mbview_radioBox_mouse, (char *)"mbview_toggleButton_mode_rroute", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_rroute);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_rroute, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Pick Nav", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNshadowThickness, 2);
+		ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 125);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 32);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_rnav =
+		    XmCreateToggleButton(class_in->mbview_radioBox_mouse, (char *)"mbview_toggleButton_mode_rnav", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_rnav);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_rnav, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Pick Nav File", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNshadowThickness, 2);
+		ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 125);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 32);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_rnavfile =
+		    XmCreateToggleButton(class_in->mbview_radioBox_mouse, (char *)"mbview_toggleButton_mode_rnavfile", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_rnavfile);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_rnavfile, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->MB3DView, (char *)"Done.", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNborderWidth, 1);
+		ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNbackground, BX_CONVERT(class_in->MB3DView, (char *)"White", XmRPixel, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 450);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 160);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(class_in->MB3DView, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_status = XmCreateLabel(class_in->MB3DView, (char *)"mbview_label_status", args, ac);
+		XtManageChild(class_in->mbview_label_status);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->MB3DView, (char *)"Full", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 410);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 50);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(class_in->MB3DView, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_fullrez =
+		    XmCreatePushButton(class_in->MB3DView, (char *)"mbview_pushButton_fullrez", args, ac);
+		XtManageChild(class_in->mbview_pushButton_fullrez);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_fullrez, XmNactivateCallback, do_mbview_full_render, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->MB3DView,
+		                            (char *)":::t\"Pick Info:\":t\"Lon 1: -122.894345 W\":t\"Lat 1: 37.308996 N\":t\"Depth 1: "
+		                                    "-324.314 m\":t\"Lon 2: -122.545680 W\":t\"Lat 2: 36.640972 N\":t\"Depth 2: "
+		                                    "-2338.025 m\":t\"Bearing: 157.4 deg\"\"Distance: 80333.459 m\"",
+		                            XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNborderWidth, 1);
+		ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNbackground, BX_CONVERT(class_in->MB3DView, (char *)"White", XmRPixel, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 240);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 160);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 160);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(class_in->MB3DView, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_pickinfo = XmCreateLabel(class_in->MB3DView, (char *)"mbview_label_pickinfo", args, ac);
+		XtManageChild(class_in->mbview_label_pickinfo);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNorientation, XmVERTICAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 10);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 87);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 130);
+	ac++;
+	class_in->mbview_menuBar_mbview = XmCreateMenuBar(class_in->MB3DView, (char *)"mbview_menuBar_mbview", args, ac);
+	XtManageChild(class_in->mbview_menuBar_mbview);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"View", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 5);
+		ac++;
+		XtSetArg(args[ac], XmNy, 5);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 77);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 24);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_cascadeButton_view =
+		    XmCreateCascadeButton(class_in->mbview_menuBar_mbview, (char *)"mbview_cascadeButton_view", args, ac);
+		XtManageChild(class_in->mbview_cascadeButton_view);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 168);
+	ac++;
+	XtSetArg(args[ac], XmNy, 462);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 211);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 568);
+	ac++;
+	class_in->mbview_pulldownMenu_view =
+	    XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_view), (char *)"mbview_pulldownMenu_view", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Map Display", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_display_2D =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_display_2D", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_display_2D);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_display_2D, XmNvalueChangedCallback, do_mbview_display_2D, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"3D Display", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_display_3D =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_display_3D", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_display_3D);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_display_3D, XmNvalueChangedCallback, do_mbview_display_3D, (XtPointer)0);
+
+	ac = 0;
+	class_in->mbview_separator10 = XmCreateSeparator(class_in->mbview_pulldownMenu_view, (char *)"mbview_separator10", args, ac);
+	XtManageChild(class_in->mbview_separator10);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Topography", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_data_primary =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_data_primary", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_data_primary);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_data_primary, XmNvalueChangedCallback, do_mbview_data_primary, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Topography Slope", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_data_primaryslope =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_data_primaryslope", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_data_primaryslope);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_data_primaryslope, XmNvalueChangedCallback, do_mbview_data_primaryslope,
+	              (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Overlay", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_data_secondary =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_data_secondary", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_data_secondary);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_data_secondary, XmNvalueChangedCallback, do_mbview_data_secondary, (XtPointer)0);
+
+	ac = 0;
+	class_in->mbview_separator = XmCreateSeparator(class_in->mbview_pulldownMenu_view, (char *)"mbview_separator", args, ac);
+	XtManageChild(class_in->mbview_separator);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Histogram Equalization", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_histogram =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_histogram", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_histogram);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_histogram, XmNvalueChangedCallback, do_mbview_histogram, (XtPointer)0);
+
+	ac = 0;
+	class_in->mbview_separator21 = XmCreateSeparator(class_in->mbview_pulldownMenu_view, (char *)"mbview_separator21", args, ac);
+	XtManageChild(class_in->mbview_separator21);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"No Shading", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_overlay_none =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_overlay_none", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_overlay_none);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_overlay_none, XmNvalueChangedCallback, do_mbview_overlay_none, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Shading by Illumination", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_overlay_illumination = XmCreateToggleButton(
+		    class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_overlay_illumination", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_overlay_illumination);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_overlay_illumination, XmNvalueChangedCallback, do_mbview_overlay_illumination,
+	              (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Shading by Slope", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_overlay_slope =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_overlay_slope", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_overlay_slope);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_overlay_slope, XmNvalueChangedCallback, do_mbview_overlay_slope, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Shading by Overlay", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_overlay_secondary =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_overlay_secondary", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_overlay_secondary);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_overlay_secondary, XmNvalueChangedCallback, do_mbview_overlay_secondary,
+	              (XtPointer)0);
+
+	ac = 0;
+	class_in->mbview_separator1 = XmCreateSeparator(class_in->mbview_pulldownMenu_view, (char *)"mbview_separator1", args, ac);
+	XtManageChild(class_in->mbview_separator1);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Topography Contours", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_overlay_contour =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_overlay_contour", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_overlay_contour);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_overlay_contour, XmNvalueChangedCallback, do_mbview_overlay_contour,
+	              (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Sites", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_site =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_site", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_site);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_site, XmNvalueChangedCallback, do_mbview_site, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Routes", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_route =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_route", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_route);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_route, XmNvalueChangedCallback, do_mbview_route, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Navigation", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_nav =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_nav", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_nav);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_nav, XmNvalueChangedCallback, do_mbview_nav, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Draped Navigation", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_navdrape =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_navdrape", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_navdrape);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_navdrape, XmNvalueChangedCallback, do_mbview_navdrape, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Vector", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_vector =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_vector", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_vector);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_vector, XmNvalueChangedCallback, do_mbview_vector, (XtPointer)0);
+
+	ac = 0;
+	class_in->mbview_separator8 = XmCreateSeparator(class_in->mbview_pulldownMenu_view, (char *)"mbview_separator8", args, ac);
+	XtManageChild(class_in->mbview_separator8);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Haxby Colortable", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_colortable_haxby =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_colortable_haxby", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_colortable_haxby);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_colortable_haxby, XmNvalueChangedCallback, do_mbview_colortable_haxby,
+	              (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Bright Rainbow Colortable", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_colortable_bright =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_colortable_bright", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_colortable_bright);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_colortable_bright, XmNvalueChangedCallback, do_mbview_colortable_bright,
+	              (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Muted Rainbow Colortable", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_colortable_muted =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_colortable_muted", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_colortable_muted);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_colortable_muted, XmNvalueChangedCallback, do_mbview_colortable_muted,
+	              (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Grayscale Colortable", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_colortable_gray =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_colortable_gray", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_colortable_gray);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_colortable_gray, XmNvalueChangedCallback, do_mbview_colortable_gray,
+	              (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Flat Gray Colortable", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_colortable_flat =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_colortable_flat", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_colortable_flat);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_colortable_flat, XmNvalueChangedCallback, do_mbview_colortable_flat,
+	              (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Sealevel1 Colortable", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_colortable_sealevel1 = XmCreateToggleButton(
+		    class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_colortable_sealevel1", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_colortable_sealevel1);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_colortable_sealevel1, XmNvalueChangedCallback, do_mbview_colortable_sealevel1,
+	              (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Sealevel2 Colortable", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_colortable_sealevel2 = XmCreateToggleButton(
+		    class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_colortable_sealevel2", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_colortable_sealevel2);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_colortable_sealevel2, XmNvalueChangedCallback, do_mbview_colortable_sealevel2,
+	              (XtPointer)0);
+
+	ac = 0;
+	class_in->separator1 = XmCreateSeparator(class_in->mbview_pulldownMenu_view, (char *)"separator1", args, ac);
+	XtManageChild(class_in->separator1);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Profile", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_profile =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_profile", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_profile);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_profile, XmNvalueChangedCallback, do_mbview_view_profile, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_view);
+	ac++;
+	XtSetValues(class_in->mbview_cascadeButton_view, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"Controls", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 5);
+		ac++;
+		XtSetArg(args[ac], XmNy, 29);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 77);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 24);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_cascadeButton_controls =
+		    XmCreateCascadeButton(class_in->mbview_menuBar_mbview, (char *)"mbview_cascadeButton_controls", args, ac);
+		XtManageChild(class_in->mbview_cascadeButton_controls);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 144);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 220);
+	ac++;
+	class_in->mbview_pulldownMenu_controls =
+	    XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_controls), (char *)"mbview_pulldownMenu_controls", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Colors & Contours", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_colorbounds =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_colorbounds", args, ac);
+		XtManageChild(class_in->mbview_pushButton_colorbounds);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_colorbounds, XmNactivateCallback, do_mbview_colorboundspopup, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"2D Controls", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_2dview =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_2dview", args, ac);
+		XtManageChild(class_in->mbview_pushButton_2dview);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_2dview, XmNactivateCallback, do_mbview_2dparmspopup, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"3D Controls", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_3dview =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_3dview", args, ac);
+		XtManageChild(class_in->mbview_pushButton_3dview);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_3dview, XmNactivateCallback, do_mbview_3dparmspopup, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Shading", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_shadeparms =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_shadeparms", args, ac);
+		XtManageChild(class_in->mbview_pushButton_shadeparms);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_shadeparms, XmNactivateCallback, do_mbview_shadeparmspopup, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Resolution", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_resolution =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_resolution", args, ac);
+		XtManageChild(class_in->mbview_pushButton_resolution);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_resolution, XmNactivateCallback, do_mbview_resolutionpopup, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Projections", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_projections =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_projections", args, ac);
+		XtManageChild(class_in->mbview_pushButton_projections);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_projections, XmNactivateCallback, do_mbview_projection_popup, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Site List", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_sitelist =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_sitelist", args, ac);
+		XtManageChild(class_in->mbview_pushButton_sitelist);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_sitelist, XmNactivateCallback, do_mbview_sitelistpopup, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Route List", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_routelist =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_routelist", args, ac);
+		XtManageChild(class_in->mbview_pushButton_routelist);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_routelist, XmNactivateCallback, do_mbview_routelistpopup, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Navigation List", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_navlist =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_navlist", args, ac);
+		XtManageChild(class_in->mbview_pushButton_navlist);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_navlist, XmNactivateCallback, do_mbview_navlistpopup, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_controls);
+	ac++;
+	XtSetValues(class_in->mbview_cascadeButton_controls, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"Mouse", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 5);
+		ac++;
+		XtSetArg(args[ac], XmNy, 53);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 77);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 24);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_cascadeButton_mouse =
+		    XmCreateCascadeButton(class_in->mbview_menuBar_mbview, (char *)"mbview_cascadeButton_mouse", args, ac);
+		XtManageChild(class_in->mbview_cascadeButton_mouse);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 129);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 220);
+	ac++;
+	class_in->mbview_pulldownMenu_mouse =
+	    XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_mouse), (char *)"mbview_pulldownMenu_mouse", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Pan & Zoom", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_move =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse, (char *)"mbview_toggleButton_mode_move", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_move);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_move, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Rotate Model", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_rotate =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse, (char *)"mbview_toggleButton_mode_rotate", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_rotate);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_rotate, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Rotate View", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_viewpoint =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse, (char *)"mbview_toggleButton_mode_viewpoint", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_viewpoint);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_viewpoint, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Shading", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_shade =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse, (char *)"mbview_toggleButton_mode_shade", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_shade);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_shade, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Pick Area", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNvisibleWhenOff, False);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_area =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse, (char *)"mbview_toggleButton_mode_area", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_area);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_area, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Edit Sites", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_site =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse, (char *)"mbview_toggleButton_mode_site", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_site);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_site, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Edit Routes", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_route =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse, (char *)"mbview_toggleButton_mode_route", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_route);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_route, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Select Nav", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_nav =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse, (char *)"mbview_toggleButton_mode_nav", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_nav);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_nav, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Select Nav File", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_mode_navfile =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse, (char *)"mbview_toggleButton_mode_navfile", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_mode_navfile);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_mode_navfile, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_mouse);
+	ac++;
+	XtSetValues(class_in->mbview_cascadeButton_mouse, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"Action", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 5);
+		ac++;
+		XtSetArg(args[ac], XmNy, 77);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 77);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 24);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_cascadeButton_action =
+		    XmCreateCascadeButton(class_in->mbview_menuBar_mbview, (char *)"mbview_cascadeButton_action", args, ac);
+		XtManageChild(class_in->mbview_cascadeButton_action);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 123);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 28);
+	ac++;
+	class_in->mbview_pulldownMenu_action =
+	    XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_action), (char *)"mbview_pulldownMenu_action", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_action, (char *)"About MBview...", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_help_about =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_action, (char *)"mbview_pushButton_help_about", args, ac);
+		XtManageChild(class_in->mbview_pushButton_help_about);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_help_about, XmNactivateCallback, do_mbview_aboutpopup, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_action);
+	ac++;
+	XtSetValues(class_in->mbview_cascadeButton_action, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 5);
+		ac++;
+		XtSetArg(args[ac], XmNy, 101);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 77);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 24);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_menuBar_mbview, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_cascadeButton_dismiss =
+		    XmCreateCascadeButton(class_in->mbview_menuBar_mbview, (char *)"mbview_cascadeButton_dismiss", args, ac);
+		XtManageChild(class_in->mbview_cascadeButton_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 67);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 28);
+	ac++;
+	class_in->mbview_pulldownMenu_dismiss =
+	    XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_dismiss), (char *)"mbview_pulldownMenu_dismiss", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_dismiss, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_dismiss, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_dismiss =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_dismiss, (char *)"mbview_pushButton_dismiss", args, ac);
+		XtManageChild(class_in->mbview_pushButton_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_dismiss, XmNactivateCallback, do_mbview_dismiss, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_dismiss);
+	ac++;
+	XtSetValues(class_in->mbview_cascadeButton_dismiss, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->MB3DView, (char *)":::t\"Mouse Mode:\":t\"  R: Pick\":t\"  L: Pan\"\"  M: Zoom\"",
+		                            XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNborderWidth, 1);
+		ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNbackground, BX_CONVERT(class_in->MB3DView, (char *)"White", XmRPixel, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 150);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 160);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 80);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(class_in->MB3DView, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_mouse = XmCreateLabel(class_in->MB3DView, (char *)"mbview_label_mouse", args, ac);
+		XtManageChild(class_in->mbview_label_mouse);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNborderWidth, 1);
+	ac++;
+	XtSetArg(args[ac], XmNbackground, BX_CONVERT(class_in->MB3DView, (char *)"white", XmRPixel, 0, &argok));
+	if (argok)
+		ac++;
+	XtSetArg(args[ac], XmNmarginHeight, 0);
+	ac++;
+	XtSetArg(args[ac], XmNmarginWidth, 0);
+	ac++;
+	XtSetArg(args[ac], XmNx, 180);
+	ac++;
+	XtSetArg(args[ac], XmNy, 10);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 590);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 490);
+	ac++;
+	class_in->mbview_drawingArea_mbview = XmCreateDrawingArea(class_in->MB3DView, (char *)"mbview_drawingArea_mbview", args, ac);
+	XtManageChild(class_in->mbview_drawingArea_mbview);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 814);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1149);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 934);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 375);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
+	ac++;
+	class_in->mbview_dialogShell_profile =
+	    XmCreateDialogShell(class_in->MB3DView, (char *)"mbview_dialogShell_profile", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_dialogShell_profile, (char *)"MBview Profile Display", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNdialogTitle, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+		ac++;
+		XtSetArg(args[ac], XmNx, 814);
+		ac++;
+		XtSetArg(args[ac], XmNy, 1149);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 934);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 375);
+		ac++;
+		class_in->mbview_form_profile =
+		    XtCreateWidget((char *)"mbview_form_profile", xmFormWidgetClass, class_in->mbview_dialogShell_profile, args, ac);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_form_profile, (char *)"Display Width Multiple", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, 1);
+		ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 0);
+		ac++;
+		XtSetArg(args[ac], XmNvalue, 1);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, 5);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNscaleMultiple, 1);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 263);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 270);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 62);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_scale_profile_width =
+		    XmCreateScale(class_in->mbview_form_profile, (char *)"mbview_scale_profile_width", args, ac);
+		XtManageChild(class_in->mbview_scale_profile_width);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_scale_profile_width, XmNvalueChangedCallback, do_mbview_profile_width, (XtPointer)0);
+	XtAddCallback(class_in->mbview_scale_profile_width, XmNdragCallback, do_mbview_profile_width, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_form_profile, (char *)"Slope Threshold", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, 1);
+		ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 2);
+		ac++;
+		XtSetArg(args[ac], XmNvalue, 200);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, 200);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNscaleMultiple, 1);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 200);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 270);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 63);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_scale_profile_slope =
+		    XmCreateScale(class_in->mbview_form_profile, (char *)"mbview_scale_profile_slope", args, ac);
+		XtManageChild(class_in->mbview_scale_profile_slope);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_scale_profile_slope, XmNvalueChangedCallback, do_mbview_profile_slope, (XtPointer)0);
+	XtAddCallback(class_in->mbview_scale_profile_slope, XmNdragCallback, do_mbview_profile_slope, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNscrollingPolicy, XmAUTOMATIC);
+	ac++;
+	XtSetArg(args[ac], XmNx, 290);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 638);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 365);
+	ac++;
+	class_in->mbview_scrolledWindow_profile =
+	    XmCreateScrolledWindow(class_in->mbview_form_profile, (char *)"mbview_scrolledWindow_profile", args, ac);
+	XtManageChild(class_in->mbview_scrolledWindow_profile);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNborderWidth, 1);
+	ac++;
+	XtSetArg(args[ac], XmNbackground, BX_CONVERT(class_in->mbview_scrolledWindow_profile, (char *)"White", XmRPixel, 0, &argok));
+	if (argok)
+		ac++;
+	XtSetArg(args[ac], XmNwidth, 500);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 240);
+	ac++;
+	class_in->mbview_drawingArea_profile =
+	    XmCreateDrawingArea(class_in->mbview_scrolledWindow_profile, (char *)"mbview_drawingArea_profile", args, ac);
+	XtManageChild(class_in->mbview_drawingArea_profile);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(
+		    class_in->mbview_form_profile,
+		    (char *)":::t\"Profile Source: Route \":t\"Length: 1.0 km\":t\"Vertical Range: -100.5 to 512.0 m\"", XmRXmString, 0,
+		    &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNborderWidth, 1);
+		ac++;
+		XtSetArg(args[ac], XmNbackground, BX_CONVERT(class_in->mbview_form_profile, (char *)"white", XmRPixel, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 0);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 270);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 130);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_profile_label_info =
+		    XmCreateLabel(class_in->mbview_form_profile, (char *)"mbview_profile_label_info", args, ac);
+		XtManageChild(class_in->mbview_profile_label_info);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_form_profile, (char *)"Vertical Exageration", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 1);
+		ac++;
+		XtSetArg(args[ac], XmNvalue, 10);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 140);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 270);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 60);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_scale_profile_exager =
+		    XmCreateScale(class_in->mbview_form_profile, (char *)"mbview_scale_profile_exager", args, ac);
+		XtManageChild(class_in->mbview_scale_profile_exager);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_scale_profile_exager, XmNvalueChangedCallback, do_mbview_profile_exager, (XtPointer)0);
+	XtAddCallback(class_in->mbview_scale_profile_exager, XmNdragCallback, do_mbview_profile_exager, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_form_profile, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 90);
+		ac++;
+		XtSetArg(args[ac], XmNy, 330);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 110);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 32);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_profile_pushButton_dismiss =
+		    XmCreatePushButton(class_in->mbview_form_profile, (char *)"mbview_profile_pushButton_dismiss", args, ac);
+		XtManageChild(class_in->mbview_profile_pushButton_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_profile_pushButton_dismiss, XmNactivateCallback, do_mbview_profile_dismiss, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Projections");
+	ac++;
+	XtSetArg(args[ac], XmNx, 1098);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1193);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 365);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 288);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
+	ac++;
+	class_in->mbview_dialogShell_projection =
+	    XmCreateDialogShell(class_in->MB3DView, (char *)"mbview_dialogShell_projection", args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+	ac++;
+	XtSetArg(args[ac], XmNx, 1098);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1193);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 365);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 288);
+	ac++;
+	class_in->mbview_bulletinBoard_projection = XtCreateWidget(
+	    (char *)"mbview_bulletinBoard_projection", xmBulletinBoardWidgetClass, class_in->mbview_dialogShell_projection, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"Display Projection:", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 210);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_displayprojection =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_projection, (char *)"mbview_label_displayprojection", args, ac);
+		XtManageChild(class_in->mbview_label_displayprojection);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 220);
+	ac++;
+	XtSetArg(args[ac], XmNy, 40);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 115);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 96);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	class_in->mbview_radioBox_projection =
+	    XmCreateRadioBox(class_in->mbview_bulletinBoard_projection, (char *)"mbview_radioBox_projection", args, ac);
+	XtManageChild(class_in->mbview_radioBox_projection);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"Geographic", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_geographic =
+		    XmCreateToggleButton(class_in->mbview_radioBox_projection, (char *)"mbview_toggleButton_geographic", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_geographic);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_geographic, XmNvalueChangedCallback, do_mbview_display_geographic, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"UTM", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_utm =
+		    XmCreateToggleButton(class_in->mbview_radioBox_projection, (char *)"mbview_toggleButton_utm", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_utm);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_utm, XmNvalueChangedCallback, do_mbview_display_utm, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"Spheroid", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_projection, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_spheroid =
+		    XmCreateToggleButton(class_in->mbview_radioBox_projection, (char *)"mbview_toggleButton_spheroid", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_spheroid);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_spheroid, XmNvalueChangedCallback, do_mbview_display_spheroid, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"Annotation Style:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 20);
+		ac++;
+		XtSetArg(args[ac], XmNy, 140);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_annotationstyle =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_projection, (char *)"mbview_label_annotationstyle", args, ac);
+		XtManageChild(class_in->mbview_label_annotationstyle);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 40);
+	ac++;
+	XtSetArg(args[ac], XmNy, 160);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 115);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 96);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	class_in->mbview_radioBox_annotation =
+	    XmCreateRadioBox(class_in->mbview_bulletinBoard_projection, (char *)"mbview_radioBox_annotation", args, ac);
+	XtManageChild(class_in->mbview_radioBox_annotation);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"Degrees + Minutes", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_annotation_degreesminutes = XmCreateToggleButton(
+		    class_in->mbview_radioBox_annotation, (char *)"mbview_toggleButton_annotation_degreesminutes", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_annotation_degreesminutes);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_annotation_degreesminutes, XmNvalueChangedCallback,
+	              do_mbview_annotation_degreesminutes, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"Decimal Degrees", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_annotation, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_annotation_degreesdecimal = XmCreateToggleButton(
+		    class_in->mbview_radioBox_annotation, (char *)"mbview_toggleButton_annotation_degreesdecimal", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_annotation_degreesdecimal);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_annotation_degreesdecimal, XmNvalueChangedCallback,
+	              do_mbview_annotation_degreesdecimal, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"Primary Grid Projection:", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNborderWidth, 1);
+		ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNbackground,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"white", XmRPixel, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 190);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 220);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_projection =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_projection, (char *)"mbview_label_projection", args, ac);
+		XtManageChild(class_in->mbview_label_projection);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 110);
+		ac++;
+		XtSetArg(args[ac], XmNy, 240);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 130);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_projection, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_projection_dismiss = XmCreatePushButton(
+		    class_in->mbview_bulletinBoard_projection, (char *)"mbview_pushButton_projection_dismiss", args, ac);
+		XtManageChild(class_in->mbview_pushButton_projection_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_projection_dismiss, XmNactivateCallback, do_mbview_projection_popdown,
+	              (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 1187);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1229);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 187);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 215);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
+	ac++;
+	class_in->mbview_dialogShell_2dparms =
+	    XmCreateDialogShell(class_in->MB3DView, (char *)"mbview_dialogShell_2dparms", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_dialogShell_2dparms, (char *)"MBview 2D Parameters", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNdialogTitle, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNautoUnmanage, False);
+		ac++;
+		XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+		ac++;
+		XtSetArg(args[ac], XmNx, 1187);
+		ac++;
+		XtSetArg(args[ac], XmNy, 1229);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 187);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 215);
+		ac++;
+		class_in->mbview_bulletinBoard_2dparms = XtCreateWidget(
+		    (char *)"mbview_bulletinBoard_2dparms", xmBulletinBoardWidgetClass, class_in->mbview_dialogShell_2dparms, args, ac);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 70);
+	ac++;
+	XtSetArg(args[ac], XmNy, 100);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_view_2dzoom =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_2dparms, (char *)"mbview_textField_view_2dzoom", args, ac);
+	XtManageChild(class_in->mbview_textField_view_2dzoom);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"Zoom:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 100);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 60);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_view_2dzoom =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_2dparms, (char *)"mbview_label_view_2dzoom", args, ac);
+		XtManageChild(class_in->mbview_label_view_2dzoom);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 70);
+	ac++;
+	XtSetArg(args[ac], XmNy, 70);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_view_2doffsety =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_2dparms, (char *)"mbview_textField_view_2doffsety", args, ac);
+	XtManageChild(class_in->mbview_textField_view_2doffsety);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"Y:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 20);
+		ac++;
+		XtSetArg(args[ac], XmNy, 70);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 50);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_view_2doffsety =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_2dparms, (char *)"mbview_label_view_2doffsety", args, ac);
+		XtManageChild(class_in->mbview_label_view_2doffsety);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 130);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 170);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator14 =
+	    XmCreateSeparator(class_in->mbview_bulletinBoard_2dparms, (char *)"mbview_separator14", args, ac);
+	XtManageChild(class_in->mbview_separator14);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 70);
+	ac++;
+	XtSetArg(args[ac], XmNy, 40);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_view_2doffsetx =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_2dparms, (char *)"mbview_textField_view_2doffsetx", args, ac);
+	XtManageChild(class_in->mbview_textField_view_2doffsetx);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"X:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 20);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 50);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_view_2doffsetx =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_2dparms, (char *)"mbview_label_view_2doffsetx", args, ac);
+		XtManageChild(class_in->mbview_label_view_2doffsetx);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"View Offset:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 90);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_2d_offset =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_2dparms, (char *)"mbview_label_2d_offset", args, ac);
+		XtManageChild(class_in->mbview_label_2d_offset);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"Apply", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 20);
+		ac++;
+		XtSetArg(args[ac], XmNy, 150);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 70);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 50);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_view_2d_apply =
+		    XmCreatePushButton(class_in->mbview_bulletinBoard_2dparms, (char *)"mbview_pushButton_view_2d_apply", args, ac);
+		XtManageChild(class_in->mbview_pushButton_view_2d_apply);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_view_2d_apply, XmNactivateCallback, do_mbview_2dparmsapply, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 100);
+		ac++;
+		XtSetArg(args[ac], XmNy, 150);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 70);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 50);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_2dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_view_2d_dismiss =
+		    XmCreatePushButton(class_in->mbview_bulletinBoard_2dparms, (char *)"mbview_pushButton_view_2d_dismiss", args, ac);
+		XtManageChild(class_in->mbview_pushButton_view_2d_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_view_2d_dismiss, XmNactivateCallback, do_mbview_2dparmspopdown, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 1140);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1098);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 281);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 478);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
+	ac++;
+	class_in->mbview_dialogShell_3dparms =
+	    XmCreateDialogShell(class_in->MB3DView, (char *)"mbview_dialogShell_3dparms", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_dialogShell_3dparms, (char *)"MBview 3D Parameters", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNdialogTitle, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNautoUnmanage, False);
+		ac++;
+		XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+		ac++;
+		XtSetArg(args[ac], XmNx, 1140);
+		ac++;
+		XtSetArg(args[ac], XmNy, 1098);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 281);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 478);
+		ac++;
+		class_in->mbview_bulletinBoard_3dparms = XtCreateWidget(
+		    (char *)"mbview_bulletinBoard_3dparms", xmBulletinBoardWidgetClass, class_in->mbview_dialogShell_3dparms, args, ac);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 100);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_model_3dzoom =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_textField_model_3dzoom", args, ac);
+	XtManageChild(class_in->mbview_textField_model_3dzoom);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Zoom:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 60);
+		ac++;
+		XtSetArg(args[ac], XmNy, 100);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_model_3dzoom =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_model_3dzoom", args, ac);
+		XtManageChild(class_in->mbview_label_model_3dzoom);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 320);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator11 =
+	    XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_separator11", args, ac);
+	XtManageChild(class_in->mbview_separator11);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 240);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_view_3dzoom =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_textField_view_3dzoom", args, ac);
+	XtManageChild(class_in->mbview_textField_view_3dzoom);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Zoom:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 60);
+		ac++;
+		XtSetArg(args[ac], XmNy, 240);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_view_3dzoom =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_view_3dzoom", args, ac);
+		XtManageChild(class_in->mbview_label_view_3dzoom);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 370);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_view_3doffsety =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_textField_view_3doffsety", args, ac);
+	XtManageChild(class_in->mbview_textField_view_3doffsety);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Y:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 60);
+		ac++;
+		XtSetArg(args[ac], XmNy, 370);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_view_3doffsety =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_view_3doffsety", args, ac);
+		XtManageChild(class_in->mbview_label_view_3doffsety);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 400);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator20 =
+	    XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_separator20", args, ac);
+	XtManageChild(class_in->mbview_separator20);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 340);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_view_3doffsetx =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_textField_view_3doffsetx", args, ac);
+	XtManageChild(class_in->mbview_textField_view_3doffsetx);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"X:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 100);
+		ac++;
+		XtSetArg(args[ac], XmNy, 340);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 60);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_view_3doffsetx =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_view_3doffsetx", args, ac);
+		XtManageChild(class_in->mbview_label_view_3doffsetx);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Pan:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 340);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 90);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_view_offset =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_view_offset", args, ac);
+		XtManageChild(class_in->mbview_label_view_offset);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 210);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_view_elevation =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_textField_view_elevation", args, ac);
+	XtManageChild(class_in->mbview_textField_view_elevation);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Elevation (degrees):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 210);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_view_elevation =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_view_elevation", args, ac);
+		XtManageChild(class_in->mbview_label_view_elevation);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 270);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator4 =
+	    XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_separator4", args, ac);
+	XtManageChild(class_in->mbview_separator4);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 180);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_view_azimuth =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_textField_view_azimuth", args, ac);
+	XtManageChild(class_in->mbview_textField_view_azimuth);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Azimuth (degrees):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 180);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_view_azimuth =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_view_azimuth", args, ac);
+		XtManageChild(class_in->mbview_label_view_azimuth);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"View Orientation & Zoom:", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 150);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 200);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_view =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_view", args, ac);
+		XtManageChild(class_in->mbview_label_view);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 70);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_model_elevation =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_textField_model_elevation", args, ac);
+	XtManageChild(class_in->mbview_textField_model_elevation);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 40);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_model_azimuth =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_textField_model_azimuth", args, ac);
+	XtManageChild(class_in->mbview_textField_model_azimuth);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Elevation (degrees):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 70);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_model_elevation =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_model_elevation", args, ac);
+		XtManageChild(class_in->mbview_label_model_elevation);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Azimuth (degrees):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 20);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 140);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_model_azimuth =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_model_azimuth", args, ac);
+		XtManageChild(class_in->mbview_label_model_azimuth);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Model Orientation & Zoom:", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 200);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_model =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_model", args, ac);
+		XtManageChild(class_in->mbview_label_model);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 130);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator9 =
+	    XmCreateSeparator(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_separator9", args, ac);
+	XtManageChild(class_in->mbview_separator9);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Apply", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 20);
+		ac++;
+		XtSetArg(args[ac], XmNy, 420);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 50);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_view_3d_apply =
+		    XmCreatePushButton(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_pushButton_view_3d_apply", args, ac);
+		XtManageChild(class_in->mbview_pushButton_view_3d_apply);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_view_3d_apply, XmNactivateCallback, do_mbview_3dparmsapply, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Vertical Exageration:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 290);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_exager =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_label_exager", args, ac);
+		XtManageChild(class_in->mbview_label_exager);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 290);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_exageration =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_textField_exageration", args, ac);
+	XtManageChild(class_in->mbview_textField_exageration);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 160);
+		ac++;
+		XtSetArg(args[ac], XmNy, 420);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 50);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_3dparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_view_3d_dismiss =
+		    XmCreatePushButton(class_in->mbview_bulletinBoard_3dparms, (char *)"mbview_pushButton_view_3d_dismiss", args, ac);
+		XtManageChild(class_in->mbview_pushButton_view_3d_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_view_3d_dismiss, XmNactivateCallback, do_mbview_3dparmspopdown, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 1141);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1117);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 280);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 440);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
+	ac++;
+	class_in->mbview_dialogShell_shadeparms =
+	    XmCreateDialogShell(class_in->MB3DView, (char *)"mbview_dialogShell_shadeparms", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_dialogShell_shadeparms, (char *)"MBview Shading Parameters", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNdialogTitle, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNautoUnmanage, False);
+		ac++;
+		XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+		ac++;
+		XtSetArg(args[ac], XmNx, 1141);
+		ac++;
+		XtSetArg(args[ac], XmNy, 1117);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 280);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 440);
+		ac++;
+		class_in->mbview_bulletinBoard_shadeparms =
+		    XtCreateWidget((char *)"mbview_bulletinBoard_shadeparms", xmBulletinBoardWidgetClass,
+		                   class_in->mbview_dialogShell_shadeparms, args, ac);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 360);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator13 =
+	    XmCreateSeparator(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_separator13", args, ac);
+	XtManageChild(class_in->mbview_separator13);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 300);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_overlay_center =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_textField_overlay_center", args, ac);
+	XtManageChild(class_in->mbview_textField_overlay_center);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Center:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 60);
+		ac++;
+		XtSetArg(args[ac], XmNy, 300);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_overlay_center =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_label_overlay_center", args, ac);
+		XtManageChild(class_in->mbview_label_overlay_center);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Shading by Overlay:", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 240);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 200);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_overlayshade =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_label_overlayshade", args, ac);
+		XtManageChild(class_in->mbview_label_overlayshade);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 30);
+	ac++;
+	XtSetArg(args[ac], XmNy, 330);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 227);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 34);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	class_in->mbview_radioBox_overlay_shade =
+	    XmCreateRadioBox(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_radioBox_overlay_shade", args, ac);
+	XtManageChild(class_in->mbview_radioBox_overlay_shade);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"Cold-to-Hot", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_overlay_shade_ctoh = XmCreateToggleButton(
+		    class_in->mbview_radioBox_overlay_shade, (char *)"mbview_toggleButton_overlay_shade_ctoh", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_overlay_shade_ctoh);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"Hot-to-Cold", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_overlay_shade, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_overlay_shade_htoc = XmCreateToggleButton(
+		    class_in->mbview_radioBox_overlay_shade, (char *)"mbview_toggleButton_overlay_shade_htoc", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_overlay_shade_htoc);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 270);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_overlay_amp =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_textField_overlay_amp", args, ac);
+	XtManageChild(class_in->mbview_textField_overlay_amp);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Amplitude:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 60);
+		ac++;
+		XtSetArg(args[ac], XmNy, 270);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_overlay_amp =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_label_overlay_amp", args, ac);
+		XtManageChild(class_in->mbview_label_overlay_amp);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 220);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator15 =
+	    XmCreateSeparator(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_separator15", args, ac);
+	XtManageChild(class_in->mbview_separator15);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 190);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_slope_amp =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_textField_slope_amp", args, ac);
+	XtManageChild(class_in->mbview_textField_slope_amp);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Amplitude:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 50);
+		ac++;
+		XtSetArg(args[ac], XmNy, 190);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 110);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_slope_amp =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_label_slope_amp", args, ac);
+		XtManageChild(class_in->mbview_label_slope_amp);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Shading by Slope:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 160);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 200);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_slopeshade =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_label_slopeshade", args, ac);
+		XtManageChild(class_in->mbview_label_slopeshade);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 70);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_illum_azi =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_textField_illum_azi", args, ac);
+	XtManageChild(class_in->mbview_textField_illum_azi);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 40);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_illum_amp =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_textField_illum_amp", args, ac);
+	XtManageChild(class_in->mbview_textField_illum_amp);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Azimuth (degrees):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 20);
+		ac++;
+		XtSetArg(args[ac], XmNy, 70);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 140);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_illum_azi =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_label_illum_azi", args, ac);
+		XtManageChild(class_in->mbview_label_illum_azi);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Amplitude:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_illum_amp =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_label_illum_amp", args, ac);
+		XtManageChild(class_in->mbview_label_illum_amp);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Shading by Illumination:", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 180);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_illumination =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_label_illumination", args, ac);
+		XtManageChild(class_in->mbview_label_illumination);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 140);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator16 =
+	    XmCreateSeparator(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_separator16", args, ac);
+	XtManageChild(class_in->mbview_separator16);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Apply", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 20);
+		ac++;
+		XtSetArg(args[ac], XmNy, 380);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 50);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_shadeparms_apply =
+		    XmCreatePushButton(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_pushButton_shadeparms_apply", args, ac);
+		XtManageChild(class_in->mbview_pushButton_shadeparms_apply);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_shadeparms_apply, XmNactivateCallback, do_mbview_shadeparmsapply, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Elevation (degrees):", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 100);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_illum_elev =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_label_illum_elev", args, ac);
+		XtManageChild(class_in->mbview_label_illum_elev);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 100);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_illum_elev =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_textField_illum_elev", args, ac);
+	XtManageChild(class_in->mbview_textField_illum_elev);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 160);
+		ac++;
+		XtSetArg(args[ac], XmNy, 380);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 50);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_shadeparms, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_shadeparms_dismiss2 = XmCreatePushButton(
+		    class_in->mbview_bulletinBoard_shadeparms, (char *)"mbview_pushButton_shadeparms_dismiss2", args, ac);
+		XtManageChild(class_in->mbview_pushButton_shadeparms_dismiss2);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_shadeparms_dismiss2, XmNactivateCallback, do_mbview_shadeparmspopdown,
+	              (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 1049);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1071);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 463);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 531);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
+	ac++;
+	class_in->mbview_dialogShell_about = XmCreateDialogShell(class_in->MB3DView, (char *)"mbview_dialogShell_about", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_dialogShell_about, (char *)"About MBview...", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNdialogTitle, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+		ac++;
+		XtSetArg(args[ac], XmNx, 1049);
+		ac++;
+		XtSetArg(args[ac], XmNy, 1071);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 463);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 531);
+		ac++;
+		class_in->mbview_bulletinBoard_about = XtCreateWidget((char *)"mbview_bulletinBoard_about", xmBulletinBoardWidgetClass,
+		                                                      class_in->mbview_dialogShell_about, args, ac);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_about,
+		                            (char *)"::#TimesMedium14:t\"MB-System Release 5.0.0\"#TimesMedium14\"August 26, 2003\"",
+		                            XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_about,
+		                    (char *)"-*-" SERIF "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 410);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 440);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 50);
+		ac++;
+		class_in->mbview_label_about_version =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_about, (char *)"mbview_label_about_version", args, ac);
+		XtManageChild(class_in->mbview_label_about_version);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_about,
+		                         (char *)"::#TimesBold14:t\"Created By:\"#TimesBold14\"David W. Caress   and   Dale N. Chayes \"",
+		                         XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_about,
+		                    (char *)"-*-" SERIF "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 280);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 440);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 60);
+		ac++;
+		class_in->mbview_label_about_authors =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_about, (char *)"mbview_label_about_authors", args, ac);
+		XtManageChild(class_in->mbview_label_about_authors);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(
+		    class_in->mbview_bulletinBoard_about,
+		    (char *)"::#TimesBold12:t\"Monterey Bay\"#TimesBold12:t\"Aquarium\"#TimesBold12\"Research Institute\"", XmRXmString,
+		    0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_about,
+		                    (char *)"-*-" SERIF "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 70);
+		ac++;
+		XtSetArg(args[ac], XmNy, 340);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 140);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 80);
+		ac++;
+		class_in->mbview_label_about_MBARI =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_about, (char *)"mbview_label_about_MBARI", args, ac);
+		XtManageChild(class_in->mbview_label_about_MBARI);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(
+		    class_in->mbview_bulletinBoard_about,
+		    (char *)"::#TimesBold12:t\"Lamont-Doherty\"#TimesBold12:t\"Earth Observatory\"#TimesBold12\"of Columbia University\"",
+		    XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_about,
+		                    (char *)"-*-" SERIF "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 230);
+		ac++;
+		XtSetArg(args[ac], XmNy, 340);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 180);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 80);
+		ac++;
+		class_in->mbview_label_about_LDEO =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_about, (char *)"mbview_label_about_LDEO", args, ac);
+		XtManageChild(class_in->mbview_label_about_LDEO);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 260);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 440);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator6 = XmCreateSeparator(class_in->mbview_bulletinBoard_about, (char *)"mbview_separator6", args, ac);
+	XtManageChild(class_in->mbview_separator6);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(
+		    class_in->mbview_bulletinBoard_about,
+		    (char *)"::#TimesBold14:t\"One component of the\"#TimesBold24\"MB-System\"#TimesBold14:t\"\"#TimesBold14:t\"An open "
+		            "Source Software Package\"#TimesBold14:t\"for Processing and Display\"#TimesBold14\"of Swath Sonar Data\"",
+		    XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_about,
+		                    (char *)"-*-" SERIF "-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 120);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 440);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 140);
+		ac++;
+		class_in->mbview_label_about_mbsystem =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_about, (char *)"mbview_label_about_mbsystem", args, ac);
+		XtManageChild(class_in->mbview_label_about_mbsystem);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 100);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 440);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator7 = XmCreateSeparator(class_in->mbview_bulletinBoard_about, (char *)"mbview_separator7", args, ac);
+	XtManageChild(class_in->mbview_separator7);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_about,
+		                            (char *)"::#TimesBold24\"MBview\":t\"\"#TimesBold18\"A 2D/3D Visualization API\"",
+		                            XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_about,
+		                    (char *)"-*-" SERIF "-bold-r-*-*-*-180-*-*-*-*-iso8859-1=TimesBold18,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-" SERIF
+		                            "-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 440);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 90);
+		ac++;
+		class_in->mbview_label_about_title =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_about, (char *)"mbview_label_about_title", args, ac);
+		XtManageChild(class_in->mbview_label_about_title);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 170);
+		ac++;
+		XtSetArg(args[ac], XmNy, 470);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 120);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 50);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_about, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_about_dismiss =
+		    XmCreatePushButton(class_in->mbview_bulletinBoard_about, (char *)"mbview_pushButton_about_dismiss", args, ac);
+		XtManageChild(class_in->mbview_pushButton_about_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_about_dismiss, XmNactivateCallback, do_mbview_aboutpopdown, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 1070);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1289);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 421);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 95);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
+	ac++;
+	class_in->mbview_dialogShell_message =
+	    XmCreateDialogShell(class_in->MB3DView, (char *)"mbview_dialogShell_message", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(class_in->mbview_dialogShell_message, (char *)"MBview: Please wait...", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNdialogTitle, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL);
+		ac++;
+		XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+		ac++;
+		XtSetArg(args[ac], XmNx, 1070);
+		ac++;
+		XtSetArg(args[ac], XmNy, 1289);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 421);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 95);
+		ac++;
+		class_in->mbview_bulletinBoard_message = XtCreateWidget(
+		    (char *)"mbview_bulletinBoard_message", xmBulletinBoardWidgetClass, class_in->mbview_dialogShell_message, args, ac);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"MB3Dview is doing something...", XmRXmString,
+		                            0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 400);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_message =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_message, (char *)"mbview_label_message", args, ac);
+		XtManageChild(class_in->mbview_label_message);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"Thank you for your patience.", XmRXmString,
+		                            0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 50);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 400);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_message, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_thanks =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_message, (char *)"mbview_label_thanks", args, ac);
+		XtManageChild(class_in->mbview_label_thanks);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "MB3DView Rendering Resolution");
+	ac++;
+	XtSetArg(args[ac], XmNx, 1135);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1111);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 291);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 451);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
+	ac++;
+	class_in->mbview_dialogShell_resolution =
+	    XmCreateDialogShell(class_in->MB3DView, (char *)"mbview_dialogShell_resolution", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_dialogShell_resolution, (char *)"MBview Rendering Resolution", XmRXmString,
+		                            0, &argok);
+		XtSetArg(args[ac], XmNdialogTitle, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNautoUnmanage, False);
+		ac++;
+		XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+		ac++;
+		XtSetArg(args[ac], XmNx, 1135);
+		ac++;
+		XtSetArg(args[ac], XmNy, 1111);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 291);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 451);
+		ac++;
+		class_in->mbview_bulletinBoard_resolution =
+		    XtCreateWidget((char *)"mbview_bulletinBoard_resolution", xmBulletinBoardWidgetClass,
+		                   class_in->mbview_dialogShell_resolution, args, ac);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Medium Resolution Decimation",
+		                            XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, 1);
+		ac++;
+		XtSetArg(args[ac], XmNvalue, 2);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, 10);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNscaleMultiple, 1);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 320);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 260);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 60);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_scale_navmediumresolution =
+		    XmCreateScale(class_in->mbview_bulletinBoard_resolution, (char *)"mbview_scale_navmediumresolution", args, ac);
+		XtManageChild(class_in->mbview_scale_navmediumresolution);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_scale_navmediumresolution, XmNvalueChangedCallback, do_mbview_resolutionchange, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Low Resolution Decimation", XmRXmString,
+		                            0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, 1);
+		ac++;
+		XtSetArg(args[ac], XmNvalue, 5);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, 25);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNscaleMultiple, 2);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 240);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 260);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 60);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_scale_navlowresolution =
+		    XmCreateScale(class_in->mbview_bulletinBoard_resolution, (char *)"mbview_scale_navlowresolution", args, ac);
+		XtManageChild(class_in->mbview_scale_navlowresolution);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_scale_navlowresolution, XmNvalueChangedCallback, do_mbview_resolutionchange, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 180);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->separator = XmCreateSeparator(class_in->mbview_bulletinBoard_resolution, (char *)"separator", args, ac);
+	XtManageChild(class_in->separator);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Nav Rendering Decimation", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 200);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 270);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_navrenderdecimation =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_resolution, (char *)"mbview_label_navrenderdecimation", args, ac);
+		XtManageChild(class_in->mbview_label_navrenderdecimation);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Grid Rendering Resolution:", XmRXmString,
+		                            0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 270);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_gridrenderres =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_resolution, (char *)"mbview_label_gridrenderres", args, ac);
+		XtManageChild(class_in->mbview_label_gridrenderres);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Medium Resolution Dimension", XmRXmString,
+		                            0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, 100);
+		ac++;
+		XtSetArg(args[ac], XmNvalue, 300);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, 1000);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNscaleMultiple, 100);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 120);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 260);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 63);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_scale_mediumresolution =
+		    XmCreateScale(class_in->mbview_bulletinBoard_resolution, (char *)"mbview_scale_mediumresolution", args, ac);
+		XtManageChild(class_in->mbview_scale_mediumresolution);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_scale_mediumresolution, XmNvalueChangedCallback, do_mbview_resolutionchange, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Low Resolution Dimension", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, 10);
+		ac++;
+		XtSetArg(args[ac], XmNvalue, 100);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, 500);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNscaleMultiple, 50);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 50);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 260);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 63);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_scale_lowresolution =
+		    XmCreateScale(class_in->mbview_bulletinBoard_resolution, (char *)"mbview_scale_lowresolution", args, ac);
+		XtManageChild(class_in->mbview_scale_lowresolution);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_scale_lowresolution, XmNvalueChangedCallback, do_mbview_resolutionchange, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 100);
+		ac++;
+		XtSetArg(args[ac], XmNy, 400);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_resolution, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_resolution_dismiss = XmCreatePushButton(
+		    class_in->mbview_bulletinBoard_resolution, (char *)"mbview_pushButton_resolution_dismiss", args, ac);
+		XtManageChild(class_in->mbview_pushButton_resolution_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_resolution_dismiss, XmNactivateCallback, do_mbview_resolutionpopdown, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "MB3DView Colors & Contours");
+	ac++;
+	XtSetArg(args[ac], XmNx, 1061);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1114);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 440);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 445);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDO_NOTHING);
+	ac++;
+	class_in->mbview_dialogShell_colorbounds =
+	    XmCreateDialogShell(class_in->MB3DView, (char *)"mbview_dialogShell_colorbounds", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_dialogShell_colorbounds, (char *)"MBview Colors and Contours", XmRXmString,
+		                            0, &argok);
+		XtSetArg(args[ac], XmNdialogTitle, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNautoUnmanage, False);
+		ac++;
+		XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+		ac++;
+		XtSetArg(args[ac], XmNx, 1061);
+		ac++;
+		XtSetArg(args[ac], XmNy, 1114);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 440);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 445);
+		ac++;
+		class_in->mbview_bulletinBoard_colorbounds =
+		    XtCreateWidget((char *)"mbview_bulletinBoard_colorbounds", xmBulletinBoardWidgetClass,
+		                   class_in->mbview_dialogShell_colorbounds, args, ac);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 360);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 410);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator5 =
+	    XmCreateSeparator(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_separator5", args, ac);
+	XtManageChild(class_in->mbview_separator5);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 30);
+	ac++;
+	XtSetArg(args[ac], XmNy, 330);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 227);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 34);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	class_in->mbview_radioBox_overlaymode =
+	    XmCreateRadioBox(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_radioBox_overlaymode", args, ac);
+	XtManageChild(class_in->mbview_radioBox_overlaymode);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"Cold-to-Hot", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_overlay_ctoh =
+		    XmCreateToggleButton(class_in->mbview_radioBox_overlaymode, (char *)"mbview_toggleButton_overlay_ctoh", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_overlay_ctoh);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"Hot-to-Cold", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_overlaymode, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_overlay_htoc =
+		    XmCreateToggleButton(class_in->mbview_radioBox_overlaymode, (char *)"mbview_toggleButton_overlay_htoc", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_overlay_htoc);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 310);
+	ac++;
+	XtSetArg(args[ac], XmNy, 300);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_overlaymax =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_textField_overlaymax", args, ac);
+	XtManageChild(class_in->mbview_textField_overlaymax);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Maximum:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 230);
+		ac++;
+		XtSetArg(args[ac], XmNy, 300);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 80);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_overlaymax =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_label_overlaymax", args, ac);
+		XtManageChild(class_in->mbview_label_overlaymax);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 110);
+	ac++;
+	XtSetArg(args[ac], XmNy, 300);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_overlaymin =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_textField_overlaymin", args, ac);
+	XtManageChild(class_in->mbview_textField_overlaymin);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Minimum:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 30);
+		ac++;
+		XtSetArg(args[ac], XmNy, 300);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 80);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_overlaymin =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_label_overlaymin", args, ac);
+		XtManageChild(class_in->mbview_label_overlaymin);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Overlay Color Bounds:", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 270);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 200);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_overlaybounds =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_label_overlaybounds", args, ac);
+		XtManageChild(class_in->mbview_label_overlaybounds);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 250);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 410);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator3 =
+	    XmCreateSeparator(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_separator3", args, ac);
+	XtManageChild(class_in->mbview_separator3);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 30);
+	ac++;
+	XtSetArg(args[ac], XmNy, 220);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 227);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 34);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	class_in->mbview_radioBox_slopemode =
+	    XmCreateRadioBox(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_radioBox_slopemode", args, ac);
+	XtManageChild(class_in->mbview_radioBox_slopemode);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"Cold-to-Hot", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_slope_ctoh =
+		    XmCreateToggleButton(class_in->mbview_radioBox_slopemode, (char *)"mbview_toggleButton_slope_ctoh", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_slope_ctoh);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"Hot-to-Cold", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_slopemode, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_slope_htoc =
+		    XmCreateToggleButton(class_in->mbview_radioBox_slopemode, (char *)"mbview_toggleButton_slope_htoc", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_slope_htoc);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 310);
+	ac++;
+	XtSetArg(args[ac], XmNy, 190);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_slopemax =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_textField_slopemax", args, ac);
+	XtManageChild(class_in->mbview_textField_slopemax);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Maximum:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 230);
+		ac++;
+		XtSetArg(args[ac], XmNy, 190);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 80);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_slopemax =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_label_slopemax", args, ac);
+		XtManageChild(class_in->mbview_label_slopemax);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 110);
+	ac++;
+	XtSetArg(args[ac], XmNy, 190);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_slopemin =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_textField_slopemin", args, ac);
+	XtManageChild(class_in->mbview_textField_slopemin);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Minimum:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 30);
+		ac++;
+		XtSetArg(args[ac], XmNy, 190);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 80);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_slopemin =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_label_slopemin", args, ac);
+		XtManageChild(class_in->mbview_label_slopemin);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Data Slope Color Bounds:", XmRXmString,
+		                            0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 160);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 200);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_slopebounds =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_label_slopebounds", args, ac);
+		XtManageChild(class_in->mbview_label_slopebounds);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 30);
+	ac++;
+	XtSetArg(args[ac], XmNy, 70);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 227);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 34);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	class_in->mbview_radioBox_colormode =
+	    XmCreateRadioBox(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_radioBox_colormode", args, ac);
+	XtManageChild(class_in->mbview_radioBox_colormode);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"Cold-to-Hot", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_data_ctoh =
+		    XmCreateToggleButton(class_in->mbview_radioBox_colormode, (char *)"mbview_toggleButton_data_ctoh", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_data_ctoh);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"Hot-to-Cold", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 109);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 28);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_radioBox_colormode, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_data_htoc =
+		    XmCreateToggleButton(class_in->mbview_radioBox_colormode, (char *)"mbview_toggleButton_data_htoc", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_data_htoc);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 310);
+	ac++;
+	XtSetArg(args[ac], XmNy, 40);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_datamax =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_textField_datamax", args, ac);
+	XtManageChild(class_in->mbview_textField_datamax);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 110);
+	ac++;
+	XtSetArg(args[ac], XmNy, 40);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_datamin =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_textField_datamin", args, ac);
+	XtManageChild(class_in->mbview_textField_datamin);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Maximum:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 230);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 80);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_colormax =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_label_colormax", args, ac);
+		XtManageChild(class_in->mbview_label_colormax);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Minimum:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END);
+		ac++;
+		XtSetArg(args[ac], XmNx, 30);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 80);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_colormin =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_label_colormin", args, ac);
+		XtManageChild(class_in->mbview_label_colormin);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Data Color Bounds:", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 180);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_colorbounds =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_label_colorbounds", args, ac);
+		XtManageChild(class_in->mbview_label_colorbounds);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 140);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 410);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	class_in->mbview_separator2 =
+	    XmCreateSeparator(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_separator2", args, ac);
+	XtManageChild(class_in->mbview_separator2);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Apply", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 110);
+		ac++;
+		XtSetArg(args[ac], XmNy, 380);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 50);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_colorbounds_apply = XmCreatePushButton(
+		    class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_pushButton_colorbounds_apply", args, ac);
+		XtManageChild(class_in->mbview_pushButton_colorbounds_apply);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_colorbounds_apply, XmNactivateCallback, do_mbview_colorboundsapply, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                            (char *)"Data Contour Interval (meters):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 110);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 230);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_label_contour =
+		    XmCreateLabel(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_label_contour", args, ac);
+		XtManageChild(class_in->mbview_label_contour);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 310);
+	ac++;
+	XtSetArg(args[ac], XmNy, 110);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 110);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 30);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	class_in->mbview_textField_contours =
+	    XmCreateTextField(class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_textField_contours", args, ac);
+	XtManageChild(class_in->mbview_textField_contours);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 240);
+		ac++;
+		XtSetArg(args[ac], XmNy, 380);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 110);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 50);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_bulletinBoard_colorbounds,
+		                    (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_colorbounds_dismiss = XmCreatePushButton(
+		    class_in->mbview_bulletinBoard_colorbounds, (char *)"mbview_pushButton_colorbounds_dismiss", args, ac);
+		XtManageChild(class_in->mbview_pushButton_colorbounds_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_colorbounds_dismiss, XmNactivateCallback, do_mbview_colorboundspopdown,
+	              (XtPointer)0);
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 263);
+	ac++;
+	XtSetValues(class_in->mbview_scale_profile_width, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 200);
+	ac++;
+	XtSetValues(class_in->mbview_scale_profile_slope, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 290);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 6);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 0);
+	ac++;
+	XtSetValues(class_in->mbview_scrolledWindow_profile, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 0);
+	ac++;
+	XtSetValues(class_in->mbview_profile_label_info, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 140);
+	ac++;
+	XtSetValues(class_in->mbview_scale_profile_exager, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 90);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 330);
+	ac++;
+	XtSetValues(class_in->mbview_profile_pushButton_dismiss, args, ac);
+
+	/*
+	 * Assign functions to class record
+	 */
+
+	/* Begin user code block <end_MB3DViewCreate> */
+	/* End user code block <end_MB3DViewCreate> */
+
+	return (class_in);
 }
