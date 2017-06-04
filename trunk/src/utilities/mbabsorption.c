@@ -2,7 +2,7 @@
  *    The MB-system:	mbabsorption.c	2/10/2008
  *    $Id$
  *
- *    Copyright (c) 2008-2016 by
+ *    Copyright (c) 2008-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -108,29 +108,29 @@ static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
-int main (int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	char program_name[] = "MBabsorption";
-	char help_message[] = "MBabsorption calculates the absorption of sound in sea water\nin dB/km as a function of frequency, temperature, salinity, \nsound speed, pH, and depth.";
+	char help_message[] = "MBabsorption calculates the absorption of sound in sea water\nin dB/km as a function of frequency, "
+	                      "temperature, salinity, \nsound speed, pH, and depth.";
 	char usage_message[] = "mbabsorption [-Csoundspeed -Ddepth -Ffrequency -Pph -Ssalinity -Ttemperature -V -H]";
 	extern char *optarg;
-	int	errflg = 0;
-	int	c;
-	int	status;
-	int	verbose = 0;
-	int	help = 0;
-	int	flag = 0;
-	int	error = MB_ERROR_NO_ERROR;
-	FILE	*outfp;
+	int errflg = 0;
+	int c;
+	int status;
+	int verbose = 0;
+	int help = 0;
+	int flag = 0;
+	int error = MB_ERROR_NO_ERROR;
+	FILE *outfp;
 
 	/* control parameters */
-	double	absorption; 		/* absorption (dB/km) */
-	double	frequency; 		/* frequency (kHz) */
-	double	temperature; 		/* temperature (deg C) */
-	double	salinity; 		/* salinity (per mil) */
-	double	soundspeed; 		/* speed of sound (m/sec) */
-	double	depth; 			/* depth (m) */
-	double	ph; 			/* pH */
+	double absorption;  /* absorption (dB/km) */
+	double frequency;   /* frequency (kHz) */
+	double temperature; /* temperature (deg C) */
+	double salinity;    /* salinity (per mil) */
+	double soundspeed;  /* speed of sound (m/sec) */
+	double depth;       /* depth (m) */
+	double ph;          /* pH */
 
 	/* set defaults */
 	frequency = 200.0;
@@ -142,8 +142,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhC:c:D:d:F:f:P:p:S:s:T:t:")) != -1)
-	  switch (c)
-		{
+		switch (c) {
 		case 'H':
 		case 'h':
 			help++;
@@ -154,32 +153,32 @@ int main (int argc, char **argv)
 			break;
 		case 'C':
 		case 'c':
-			sscanf (optarg,"%lf", &soundspeed);
+			sscanf(optarg, "%lf", &soundspeed);
 			flag++;
 			break;
 		case 'D':
 		case 'd':
-			sscanf (optarg,"%lf", &depth);
+			sscanf(optarg, "%lf", &depth);
 			flag++;
 			break;
 		case 'F':
 		case 'f':
-			sscanf (optarg,"%lf", &frequency);
+			sscanf(optarg, "%lf", &frequency);
 			flag++;
 			break;
 		case 'P':
 		case 'p':
-			sscanf (optarg,"%lf", &ph);
+			sscanf(optarg, "%lf", &ph);
 			flag++;
 			break;
 		case 'S':
 		case 's':
-			sscanf (optarg,"%lf", &salinity);
+			sscanf(optarg, "%lf", &salinity);
 			flag++;
 			break;
 		case 'T':
 		case 't':
-			sscanf (optarg,"%lf", &temperature);
+			sscanf(optarg, "%lf", &temperature);
 			flag++;
 			break;
 		case '?':
@@ -187,12 +186,11 @@ int main (int argc, char **argv)
 		}
 
 	/* if error flagged then print it and exit */
-	if (errflg)
-		{
-		fprintf(stderr,"usage: %s\n", usage_message);
+	if (errflg) {
+		fprintf(stderr, "usage: %s\n", usage_message);
 		error = MB_ERROR_BAD_USAGE;
 		exit(error);
-		}
+	}
 
 	/* set output stream */
 	if (verbose <= 1)
@@ -201,73 +199,64 @@ int main (int argc, char **argv)
 		outfp = stderr;
 
 	/* print starting message */
-	if (verbose == 1 || help)
-		{
-		fprintf(outfp,"\nProgram %s\n",program_name);
-		fprintf(outfp,"Version %s\n",rcs_id);
-		fprintf(outfp,"MB-system Version %s\n",MB_VERSION);
-		}
+	if (verbose == 1 || help) {
+		fprintf(outfp, "\nProgram %s\n", program_name);
+		fprintf(outfp, "Version %s\n", rcs_id);
+		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
+	}
 
 	/* print starting debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(outfp,"\ndbg2  Program <%s>\n",program_name);
-		fprintf(outfp,"dbg2  Version %s\n",rcs_id);
-		fprintf(outfp,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(outfp,"dbg2  Control Parameters:\n");
-		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
-		fprintf(outfp,"dbg2       help:       %d\n",help);
-		fprintf(outfp,"dbg2       frequency:  %f\n",frequency);
-		fprintf(outfp,"dbg2       temperature:%f\n",temperature);
-		fprintf(outfp,"dbg2       salinity:   %f\n",salinity);
-		fprintf(outfp,"dbg2       soundspeed: %f\n",soundspeed);
-		fprintf(outfp,"dbg2       depth:      %f\n",depth);
-		fprintf(outfp,"dbg2       ph:         %f\n",ph);
-		}
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
+		fprintf(outfp, "dbg2  Version %s\n", rcs_id);
+		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(outfp, "dbg2  Control Parameters:\n");
+		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
+		fprintf(outfp, "dbg2       help:       %d\n", help);
+		fprintf(outfp, "dbg2       frequency:  %f\n", frequency);
+		fprintf(outfp, "dbg2       temperature:%f\n", temperature);
+		fprintf(outfp, "dbg2       salinity:   %f\n", salinity);
+		fprintf(outfp, "dbg2       soundspeed: %f\n", soundspeed);
+		fprintf(outfp, "dbg2       depth:      %f\n", depth);
+		fprintf(outfp, "dbg2       ph:         %f\n", ph);
+	}
 
 	/* if help desired then print it and exit */
-	if (help)
-		{
-		fprintf(outfp,"\n%s\n",help_message);
-		fprintf(outfp,"\nusage: %s\n", usage_message);
+	if (help) {
+		fprintf(outfp, "\n%s\n", help_message);
+		fprintf(outfp, "\nusage: %s\n", usage_message);
 		exit(error);
-		}
+	}
 
 	/* call function to calculate absorption */
-	status = mb_absorption(verbose, frequency, temperature,
-				salinity, depth, ph, soundspeed,
-				&absorption, &error);
+	status = mb_absorption(verbose, frequency, temperature, salinity, depth, ph, soundspeed, &absorption, &error);
 
 	/* print it out */
-	if (verbose > 0)
-		{
-		fprintf(outfp,"\nProgram <%s>\n",program_name);
-		fprintf(outfp,"Version %s\n",rcs_id);
-		fprintf(outfp,"MB-system Version %s\n",MB_VERSION);
-		fprintf(outfp,"Input Parameters:\n");
-		fprintf(outfp,"     Frequency:        %f kHz\n",frequency);
-		fprintf(outfp,"     Temperature:      %f deg C\n",temperature);
-		fprintf(outfp,"     Salinity:         %f per mil\n",salinity);
+	if (verbose > 0) {
+		fprintf(outfp, "\nProgram <%s>\n", program_name);
+		fprintf(outfp, "Version %s\n", rcs_id);
+		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
+		fprintf(outfp, "Input Parameters:\n");
+		fprintf(outfp, "     Frequency:        %f kHz\n", frequency);
+		fprintf(outfp, "     Temperature:      %f deg C\n", temperature);
+		fprintf(outfp, "     Salinity:         %f per mil\n", salinity);
 		if (soundspeed > 0.0)
-			fprintf(outfp,"     Soundspeed:       %f m/sec\n",soundspeed);
-		fprintf(outfp,"     Depth:            %f m\n",depth);
-		fprintf(outfp,"     pH:               %f\n",ph);
-		fprintf(outfp,"Result:\n");
-		fprintf(outfp,"     Sound absorption: %f dB/km\n",absorption);
-		}
-	else
-		{
+			fprintf(outfp, "     Soundspeed:       %f m/sec\n", soundspeed);
+		fprintf(outfp, "     Depth:            %f m\n", depth);
+		fprintf(outfp, "     pH:               %f\n", ph);
+		fprintf(outfp, "Result:\n");
+		fprintf(outfp, "     Sound absorption: %f dB/km\n", absorption);
+	}
+	else {
 		fprintf(outfp, "%f\n", absorption);
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(outfp,"\ndbg2  Program <%s> completed\n",
-			program_name);
-		fprintf(outfp,"dbg2  Ending status:\n");
-		fprintf(outfp,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  Program <%s> completed\n", program_name);
+		fprintf(outfp, "dbg2  Ending status:\n");
+		fprintf(outfp, "dbg2       status:  %d\n", status);
+	}
 
 	/* end it all */
 	exit(error);

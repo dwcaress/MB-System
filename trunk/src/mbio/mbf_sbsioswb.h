@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_sbsioswb.h	9/18/94
  *	$Id$
  *
- *    Copyright (c) 1994-2016 by
+ *    Copyright (c) 1994-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -49,40 +49,38 @@
  */
 
 /* number of beams in pings */
-#define	MB_BEAMS_SBSIOSWB	19
+#define MB_BEAMS_SBSIOSWB 19
 
 /* size in bytes of header records */
-#define	MB_SBSIOSWB_HEADER_SIZE	36
+#define MB_SBSIOSWB_HEADER_SIZE 36
 
-struct mbf_sbsioswb_bath_struct
-	{
-	short	bath;
-	short	bath_acrosstrack;
-	};
+struct mbf_sbsioswb_bath_struct {
+	short bath;
+	short bath_acrosstrack;
+};
 
-struct mbf_sbsioswb_struct
-	{
-	int	kind;
-	short	year;		/* year (4 digits) */
-	short	day;		/* julian day (1-366) */
-	short	min;		/* minutes from beginning of day (0-1439) */
-	short	sec;		/* seconds from beginning of minute (0-59) */
-	int	lat;		/* 1e-7 degrees from equator */
-	int	lon;		/* 1e-7 degrees from prime meridian */
-	short	heading;	/* heading in 0.1 degrees */
-	short	course;		/* course in 0.1 degrees */
-	short	speed;		/* fore-aft speed in 0.1 knots */
-	short	speed_ps;	/* port-starboard speed in 0.1 knots */
-	short	quality;	/* quality value, 0 good, bigger bad */
-	short	sensor_size;	/* size of sensor specific record in bytes */
-	short	data_size;	/* size of data record in bytes */
-	char	speed_ref[2];	/* speed reference */
-	char	sensor_type[2];	/* sensor type */
-	char	data_type[2];	/* type of data recorded */
-	short	eclipse_time;	/* time of day from eclipse computer */
-	short	eclipse_heading;	/* heading at time of ping */
-	short	beams_bath;	/* number of bathymetry beams */
-	short	scale_factor;	/* scale factor */
+struct mbf_sbsioswb_struct {
+	int kind;
+	short year;            /* year (4 digits) */
+	short day;             /* julian day (1-366) */
+	short min;             /* minutes from beginning of day (0-1439) */
+	short sec;             /* seconds from beginning of minute (0-59) */
+	int lat;               /* 1e-7 degrees from equator */
+	int lon;               /* 1e-7 degrees from prime meridian */
+	short heading;         /* heading in 0.1 degrees */
+	short course;          /* course in 0.1 degrees */
+	short speed;           /* fore-aft speed in 0.1 knots */
+	short speed_ps;        /* port-starboard speed in 0.1 knots */
+	short quality;         /* quality value, 0 good, bigger bad */
+	short sensor_size;     /* size of sensor specific record in bytes */
+	short data_size;       /* size of data record in bytes */
+	char speed_ref[2];     /* speed reference */
+	char sensor_type[2];   /* sensor type */
+	char data_type[2];     /* type of data recorded */
+	short eclipse_time;    /* time of day from eclipse computer */
+	short eclipse_heading; /* heading at time of ping */
+	short beams_bath;      /* number of bathymetry beams */
+	short scale_factor;    /* scale factor */
 	struct mbf_sbsioswb_bath_struct bath_struct[MB_BEAMS_SBSIOSWB];
-	char	comment[MBSYS_SB_MAXLINE];
-	};
+	char comment[MBSYS_SB_MAXLINE];
+};

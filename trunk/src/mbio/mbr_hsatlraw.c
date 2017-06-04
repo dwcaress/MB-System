@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
  *	$Id$
  *
- *    Copyright (c) 1993-2016 by
+ *    Copyright (c) 1993-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -40,62 +40,33 @@
 #include "mbf_hsatlraw.h"
 
 /* local defines */
-#define ZERO_ALL    0
-#define ZERO_SOME   1
+#define ZERO_ALL 0
+#define ZERO_SOME 1
 
 /* essential function prototypes */
-int mbr_register_hsatlraw(int verbose, void *mbio_ptr,
-		int *error);
-int mbr_info_hsatlraw(int verbose,
-			int *system,
-			int *beams_bath_max,
-			int *beams_amp_max,
-			int *pixels_ss_max,
-			char *format_name,
-			char *system_name,
-			char *format_description,
-			int *numfile,
-			int *filetype,
-			int *variable_beams,
-			int *traveltime,
-			int *beam_flagging,
-			int *platform_source,
-			int *nav_source,
-			int *sensordepth_source,
-			int *heading_source,
-			int *attitude_source,
-			int *svp_source,
-			double *beamwidth_xtrack,
-			double *beamwidth_ltrack,
-			int *error);
+int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error);
+int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
 int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error);
 int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error);
 int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp,
-		char *line, int *type, int *shift, int *error);
-int mbr_hsatlraw_read_line(int verbose, FILE *mbfp,
-		int minimum_size, char *line, int *error);
-int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error);
-int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *shift, int *error);
+int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line, int *error);
+int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
 
 int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_hsatlraw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);
@@ -112,50 +83,32 @@ int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error
 int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error);
 int mbr_hsatlraw_wr_ldeocmnt(int verbose, FILE *mbfp, void *data_ptr, int *error);
 
-static char rcs_id[]="$Id$";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error)
-{
-	char	*function_name = "mbr_register_hsatlraw";
-	int	status = MB_SUCCESS;
+int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_register_hsatlraw";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hsatlraw(verbose,
-			&mb_io_ptr->system,
-			&mb_io_ptr->beams_bath_max,
-			&mb_io_ptr->beams_amp_max,
-			&mb_io_ptr->pixels_ss_max,
-			mb_io_ptr->format_name,
-			mb_io_ptr->system_name,
-			mb_io_ptr->format_description,
-			&mb_io_ptr->numfile,
-			&mb_io_ptr->filetype,
-			&mb_io_ptr->variable_beams,
-			&mb_io_ptr->traveltime,
-			&mb_io_ptr->beam_flagging,
-			&mb_io_ptr->platform_source,
-			&mb_io_ptr->nav_source,
-			&mb_io_ptr->sensordepth_source,
-			&mb_io_ptr->heading_source,
-			&mb_io_ptr->attitude_source,
-			&mb_io_ptr->svp_source,
-			&mb_io_ptr->beamwidth_xtrack,
-			&mb_io_ptr->beamwidth_ltrack,
-			error);
+	status = mbr_info_hsatlraw(
+	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
+	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
+	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
+	    &mb_io_ptr->nav_source, &mb_io_ptr->sensordepth_source, &mb_io_ptr->heading_source, &mb_io_ptr->attitude_source,
+	    &mb_io_ptr->svp_source, &mb_io_ptr->beamwidth_xtrack, &mb_io_ptr->beamwidth_ltrack, error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_hsatlraw;
@@ -180,93 +133,73 @@ int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
-		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
-		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
-		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",mb_io_ptr->pixels_ss_max);
-		fprintf(stderr,"dbg2       format_name:        %s\n",mb_io_ptr->format_name);
-		fprintf(stderr,"dbg2       system_name:        %s\n",mb_io_ptr->system_name);
-		fprintf(stderr,"dbg2       format_description: %s\n",mb_io_ptr->format_description);
-		fprintf(stderr,"dbg2       numfile:            %d\n",mb_io_ptr->numfile);
-		fprintf(stderr,"dbg2       filetype:           %d\n",mb_io_ptr->filetype);
-		fprintf(stderr,"dbg2       variable_beams:     %d\n",mb_io_ptr->variable_beams);
-		fprintf(stderr,"dbg2       traveltime:         %d\n",mb_io_ptr->traveltime);
-		fprintf(stderr,"dbg2       beam_flagging:      %d\n",mb_io_ptr->beam_flagging);
-		fprintf(stderr,"dbg2       platform_source:    %d\n",mb_io_ptr->platform_source);
-		fprintf(stderr,"dbg2       nav_source:         %d\n",mb_io_ptr->nav_source);
-		fprintf(stderr,"dbg2       sensordepth_source: %d\n",mb_io_ptr->nav_source);
-		fprintf(stderr,"dbg2       heading_source:     %d\n",mb_io_ptr->heading_source);
-		fprintf(stderr,"dbg2       attitude_source:    %d\n",mb_io_ptr->attitude_source);
-		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
-		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
-		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %p\n",(void *)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %p\n",(void *)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %p\n",(void *)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %p\n",(void *)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %p\n",(void *)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %p\n",(void *)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %p\n",(void *)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %p\n",(void *)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %p\n",(void *)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %p\n",(void *)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %p\n",(void *)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %p\n",(void *)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %p\n",(void *)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %p\n",(void *)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %p\n",(void *)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %p\n",(void *)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %p\n",(void *)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %p\n",(void *)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %p\n",(void *)mb_io_ptr->mb_io_copyrecord);
-		fprintf(stderr,"dbg2       error:              %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:         %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
+		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);
+		fprintf(stderr, "dbg2       beams_amp_max:      %d\n", mb_io_ptr->beams_amp_max);
+		fprintf(stderr, "dbg2       pixels_ss_max:      %d\n", mb_io_ptr->pixels_ss_max);
+		fprintf(stderr, "dbg2       format_name:        %s\n", mb_io_ptr->format_name);
+		fprintf(stderr, "dbg2       system_name:        %s\n", mb_io_ptr->system_name);
+		fprintf(stderr, "dbg2       format_description: %s\n", mb_io_ptr->format_description);
+		fprintf(stderr, "dbg2       numfile:            %d\n", mb_io_ptr->numfile);
+		fprintf(stderr, "dbg2       filetype:           %d\n", mb_io_ptr->filetype);
+		fprintf(stderr, "dbg2       variable_beams:     %d\n", mb_io_ptr->variable_beams);
+		fprintf(stderr, "dbg2       traveltime:         %d\n", mb_io_ptr->traveltime);
+		fprintf(stderr, "dbg2       beam_flagging:      %d\n", mb_io_ptr->beam_flagging);
+		fprintf(stderr, "dbg2       platform_source:    %d\n", mb_io_ptr->platform_source);
+		fprintf(stderr, "dbg2       nav_source:         %d\n", mb_io_ptr->nav_source);
+		fprintf(stderr, "dbg2       sensordepth_source: %d\n", mb_io_ptr->nav_source);
+		fprintf(stderr, "dbg2       heading_source:     %d\n", mb_io_ptr->heading_source);
+		fprintf(stderr, "dbg2       attitude_source:    %d\n", mb_io_ptr->attitude_source);
+		fprintf(stderr, "dbg2       svp_source:         %d\n", mb_io_ptr->svp_source);
+		fprintf(stderr, "dbg2       beamwidth_xtrack:   %f\n", mb_io_ptr->beamwidth_xtrack);
+		fprintf(stderr, "dbg2       beamwidth_ltrack:   %f\n", mb_io_ptr->beamwidth_ltrack);
+		fprintf(stderr, "dbg2       format_alloc:       %p\n", (void *)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr, "dbg2       format_free:        %p\n", (void *)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr, "dbg2       store_alloc:        %p\n", (void *)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr, "dbg2       store_free:         %p\n", (void *)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr, "dbg2       read_ping:          %p\n", (void *)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr, "dbg2       write_ping:         %p\n", (void *)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr, "dbg2       extract:            %p\n", (void *)mb_io_ptr->mb_io_extract);
+		fprintf(stderr, "dbg2       insert:             %p\n", (void *)mb_io_ptr->mb_io_insert);
+		fprintf(stderr, "dbg2       extract_nav:        %p\n", (void *)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr, "dbg2       insert_nav:         %p\n", (void *)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr, "dbg2       extract_altitude:   %p\n", (void *)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr, "dbg2       insert_altitude:    %p\n", (void *)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr, "dbg2       extract_svp:        %p\n", (void *)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr, "dbg2       insert_svp:         %p\n", (void *)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr, "dbg2       ttimes:             %p\n", (void *)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr, "dbg2       detects:            %p\n", (void *)mb_io_ptr->mb_io_detects);
+		fprintf(stderr, "dbg2       extract_rawss:      %p\n", (void *)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr, "dbg2       insert_rawss:       %p\n", (void *)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr, "dbg2       copyrecord:         %p\n", (void *)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr, "dbg2       error:              %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:         %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_hsatlraw(int verbose,
-			int *system,
-			int *beams_bath_max,
-			int *beams_amp_max,
-			int *pixels_ss_max,
-			char *format_name,
-			char *system_name,
-			char *format_description,
-			int *numfile,
-			int *filetype,
-			int *variable_beams,
-			int *traveltime,
-			int *beam_flagging,
-			int *platform_source,
-			int *nav_source,
-			int *sensordepth_source,
-			int *heading_source,
-			int *attitude_source,
-			int *svp_source,
-			double *beamwidth_xtrack,
-			double *beamwidth_ltrack,
-			int *error)
-{
-	char	*function_name = "mbr_info_hsatlraw";
-	int	status = MB_SUCCESS;
+int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error) {
+	char *function_name = "mbr_info_hsatlraw";
+	int status = MB_SUCCESS;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+	}
 
 	/* set format info parameters */
 	status = MB_SUCCESS;
@@ -277,7 +210,10 @@ int mbr_info_hsatlraw(int verbose,
 	*pixels_ss_max = 0;
 	strncpy(format_name, "HSATLRAW", MB_NAME_LENGTH);
 	strncpy(system_name, "HSDS", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_HSATLRAW\nInformal Description: Raw Hydrosweep\nAttributes:           Hydrosweep DS, bathymetry and amplitude, 59 beams,\n                      ascii, Atlas Electronik.\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description,
+	        "Format name:          MBF_HSATLRAW\nInformal Description: Raw Hydrosweep\nAttributes:           Hydrosweep DS, "
+	        "bathymetry and amplitude, 59 beams,\n                      ascii, Atlas Electronik.\n",
+	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_NO;
@@ -293,59 +229,56 @@ int mbr_info_hsatlraw(int verbose,
 	*beamwidth_ltrack = 2.0;
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       system:             %d\n",*system);
-		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
-		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
-		fprintf(stderr,"dbg2       pixels_ss_max:      %d\n",*pixels_ss_max);
-		fprintf(stderr,"dbg2       format_name:        %s\n",format_name);
-		fprintf(stderr,"dbg2       system_name:        %s\n",system_name);
-		fprintf(stderr,"dbg2       format_description: %s\n",format_description);
-		fprintf(stderr,"dbg2       numfile:            %d\n",*numfile);
-		fprintf(stderr,"dbg2       filetype:           %d\n",*filetype);
-		fprintf(stderr,"dbg2       variable_beams:     %d\n",*variable_beams);
-		fprintf(stderr,"dbg2       traveltime:         %d\n",*traveltime);
-		fprintf(stderr,"dbg2       beam_flagging:      %d\n",*beam_flagging);
-		fprintf(stderr,"dbg2       platform_source:    %d\n",*platform_source);
-		fprintf(stderr,"dbg2       nav_source:         %d\n",*nav_source);
-		fprintf(stderr,"dbg2       sensordepth_source: %d\n",*sensordepth_source);
-		fprintf(stderr,"dbg2       heading_source:     %d\n",*heading_source);
-		fprintf(stderr,"dbg2       attitude_source:      %d\n",*attitude_source);
-		fprintf(stderr,"dbg2       svp_source:         %d\n",*svp_source);
-		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",*beamwidth_xtrack);
-		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",*beamwidth_ltrack);
-		fprintf(stderr,"dbg2       error:              %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:         %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       system:             %d\n", *system);
+		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
+		fprintf(stderr, "dbg2       beams_amp_max:      %d\n", *beams_amp_max);
+		fprintf(stderr, "dbg2       pixels_ss_max:      %d\n", *pixels_ss_max);
+		fprintf(stderr, "dbg2       format_name:        %s\n", format_name);
+		fprintf(stderr, "dbg2       system_name:        %s\n", system_name);
+		fprintf(stderr, "dbg2       format_description: %s\n", format_description);
+		fprintf(stderr, "dbg2       numfile:            %d\n", *numfile);
+		fprintf(stderr, "dbg2       filetype:           %d\n", *filetype);
+		fprintf(stderr, "dbg2       variable_beams:     %d\n", *variable_beams);
+		fprintf(stderr, "dbg2       traveltime:         %d\n", *traveltime);
+		fprintf(stderr, "dbg2       beam_flagging:      %d\n", *beam_flagging);
+		fprintf(stderr, "dbg2       platform_source:    %d\n", *platform_source);
+		fprintf(stderr, "dbg2       nav_source:         %d\n", *nav_source);
+		fprintf(stderr, "dbg2       sensordepth_source: %d\n", *sensordepth_source);
+		fprintf(stderr, "dbg2       heading_source:     %d\n", *heading_source);
+		fprintf(stderr, "dbg2       attitude_source:      %d\n", *attitude_source);
+		fprintf(stderr, "dbg2       svp_source:         %d\n", *svp_source);
+		fprintf(stderr, "dbg2       beamwidth_xtrack:   %f\n", *beamwidth_xtrack);
+		fprintf(stderr, "dbg2       beamwidth_ltrack:   %f\n", *beamwidth_ltrack);
+		fprintf(stderr, "dbg2       error:              %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:         %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error)
-{
-	char	*function_name = "mbr_alm_hsatlraw";
-	int	status = MB_SUCCESS;
+int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_alm_hsatlraw";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsatlraw_struct *data;
-	char	*data_ptr;
+	char *data_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -353,92 +286,84 @@ int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error)
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_hsatlraw_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size,
-				&mb_io_ptr->raw_data,error);
-	status = mbsys_hsds_alloc(verbose, mbio_ptr, (void **)(&mb_io_ptr->store_data),error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status = mbsys_hsds_alloc(verbose, mbio_ptr, (void **)(&mb_io_ptr->store_data), error);
 
 	/* get pointer to mbio descriptor */
-	data = (struct mbf_hsatlraw_struct *) mb_io_ptr->raw_data;
-	data_ptr = (char *) data;
+	data = (struct mbf_hsatlraw_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
 
 	/* initialize everything to zeros */
-	mbr_zero_hsatlraw(verbose,data_ptr,ZERO_ALL,error);
+	mbr_zero_hsatlraw(verbose, data_ptr, ZERO_ALL, error);
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error)
-{
-	char	*function_name = "mbr_dem_hsatlraw";
-	int	status = MB_SUCCESS;
+int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_dem_hsatlraw";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data,error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data,error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error)
-{
-	char	*function_name = "mbr_zero_hsatlraw";
-	int	status = MB_SUCCESS;
+int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
+	char *function_name = "mbr_zero_hsatlraw";
+	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		fprintf(stderr,"dbg2       mode:       %d\n",mode);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+		fprintf(stderr, "dbg2       mode:       %d\n", mode);
+	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* initialize everything to zeros */
-	if (data != NULL)
-		{
+	if (data != NULL) {
 		/* type of data record */
 		data->kind = MB_DATA_NONE;
 
@@ -466,11 +391,10 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error)
 		data->depth_center = 0.0;
 		data->depth_scale = 0.0;
 		data->spare = 0;
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
-			{
+		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++) {
 			data->distance[i] = 0;
 			data->depth[i] = 0;
-			}
+		}
 
 		/* travel time data (ERGNSLZT) */
 		data->course_ground = 0.0;
@@ -479,9 +403,9 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error)
 		data->roll = 0.0;
 		data->time_center = 0.0;
 		data->time_scale = 0.0;
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
+		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 			data->time[i] = 0;
-		for (i=0;i<11;i++)
+		for (i = 0; i < 11; i++)
 			data->gyro[i] = 0.0;
 
 		/* amplitude data (ERGNAMPL) */
@@ -505,24 +429,21 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error)
 		data->amplitude_center = 0;
 		data->echo_duration_center = 0;
 		data->echo_scale_center = 0;
-		for (i=0;i<16;i++)
-			{
+		for (i = 0; i < 16; i++) {
 			data->gain[i] = 0;
 			data->echo_scale[i] = 0;
-			}
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
-			{
+		}
+		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++) {
 			data->amplitude[i] = 0;
 			data->echo_duration[i] = 0;
-			}
+		}
 
 		/* these values zeroed only when structure
-			is first allocated - this allows
-			these values to be remembered internally
-			once one of these occasional data
-			records is encountered */
-		if (mode == ZERO_ALL)
-			{
+		    is first allocated - this allows
+		    these values to be remembered internally
+		    once one of these occasional data
+		    records is encountered */
+		if (mode == ZERO_ALL) {
 			/* mean velocity (ERGNHYDI) */
 			data->draught = 0.0;
 			data->vel_mean = 0.0;
@@ -531,78 +452,71 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error)
 
 			/* water velocity profile */
 			data->num_vel = 0;
-			for (i=0;i<MBF_HSATLRAW_MAXVEL;i++)
-				{
+			for (i = 0; i < MBF_HSATLRAW_MAXVEL; i++) {
 				data->depth[i] = 0;
 				data->velocity[i] = 0;
-				}
+			}
 
 			/* navigation source (ERGNPOSI) */
 			data->pos_corr_x = 0.0;
 			data->pos_corr_y = 0.0;
-			strncpy(data->sensors,"POS",9);
-			}
+			strncpy(data->sensors, "POS", 9);
+		}
 
 		/* comment (LDEOCOMM) */
-		strncpy(data->comment,"\0",MBF_HSATLRAW_MAXLINE);
-
-		}
+		strncpy(data->comment, "\0", MBF_HSATLRAW_MAXLINE);
+	}
 
 	/* assume success */
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
-{
-	char	*function_name = "mbr_rt_hsatlraw";
-	int	status = MB_SUCCESS;
+int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_hsatlraw";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsatlraw_struct *data;
 	struct mbsys_hsds_struct *store;
-	double	xx, rr, zz, tt;
-	int	i;
+	double xx, rr, zz, tt;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	data = (struct mbf_hsatlraw_struct *) mb_io_ptr->raw_data;
-	store = (struct mbsys_hsds_struct *) store_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	data = (struct mbf_hsatlraw_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_hsds_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_hsatlraw_rd_data(verbose,mbio_ptr,error);
+	status = mbr_hsatlraw_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = data->kind;
 
 	/* translate values to hydrosweep data storage structure */
-	if (status == MB_SUCCESS
-		&& store != NULL)
-		{
+	if (status == MB_SUCCESS && store != NULL) {
 		/* type of data record */
 		store->kind = data->kind;
 
@@ -630,11 +544,10 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->depth_center = data->depth_center;
 		store->depth_scale = data->depth_scale;
 		store->spare = data->spare;
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-			{
+		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->distance[i] = data->distance[i];
 			store->depth[i] = data->depth[i];
-			}
+		}
 
 		/* travel time data (ERGNSLZT) */
 		store->course_ground = data->course_ground;
@@ -643,9 +556,9 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->roll = data->roll;
 		store->time_center = data->time_center;
 		store->time_scale = data->time_scale;
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+		for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
 			store->time[i] = data->time[i];
-		for (i=0;i<11;i++)
+		for (i = 0; i < 11; i++)
 			store->gyro[i] = data->gyro[i];
 
 		/* amplitude data (ERGNAMPL) */
@@ -669,16 +582,14 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->amplitude_center = data->amplitude_center;
 		store->echo_duration_center = data->echo_duration_center;
 		store->echo_scale_center = data->echo_scale_center;
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-			{
+		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->amplitude[i] = data->amplitude[i];
 			store->echo_duration[i] = data->echo_duration[i];
-			}
-		for (i=0;i<16;i++)
-			{
+		}
+		for (i = 0; i < 16; i++) {
 			store->gain[i] = data->gain[i];
 			store->echo_scale[i] = data->echo_scale[i];
-			}
+		}
 
 		/* mean velocity (ERGNHYDI) */
 		store->draught = data->draught;
@@ -688,101 +599,91 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* water velocity profile (HS_ERGNCTDS) */
 		store->num_vel = data->num_vel;
-		for (i=0;i<data->num_vel;i++)
-			{
+		for (i = 0; i < data->num_vel; i++) {
 			store->vdepth[i] = data->vdepth[i];
 			store->velocity[i] = data->velocity[i];
-			}
+		}
 
 		/* navigation source (ERGNPOSI) */
 		store->pos_corr_x = data->pos_corr_x;
 		store->pos_corr_y = data->pos_corr_y;
-		strncpy(store->sensors,data->sensors,8);
+		strncpy(store->sensors, data->sensors, 8);
 
 		/* comment (LDEOCMNT) */
-		strncpy(store->comment,data->comment,MBSYS_HSDS_MAXLINE);
+		strncpy(store->comment, data->comment, MBSYS_HSDS_MAXLINE);
 
 		/* processed backscatter */
 		store->back_scale = 1.0;
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-			{
+		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->back[i] = mb_io_ptr->new_amp[i];
-			}
+		}
 
 		/* deal with missing travel times if needed */
-		if (store->kind == MB_DATA_DATA)
-			{
+		if (store->kind == MB_DATA_DATA) {
 			if (store->vel_mean <= 0.0)
 				store->vel_mean = 1500.0;
 			if (store->vel_keel <= 0.0)
 				store->vel_keel = 1500.0;
 			if (store->time_scale == 0)
 				store->time_scale = 0.01;
-			if (store->time_center <= 0.0 && store->depth_center != 0.0)
-				{
+			if (store->time_center <= 0.0 && store->depth_center != 0.0) {
 				rr = fabs(store->depth_center) + store->draught + store->heave;
 				store->time_center = rr / store->vel_mean;
-				}
-			for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-				{
-				if (data->time[i] <= 0 && store->depth[i] != 0)
-					{
+			}
+			for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+				if (data->time[i] <= 0 && store->depth[i] != 0) {
 					zz = store->depth_scale * (fabs((double)store->depth[i]) + store->draught + store->heave);
 					xx = store->depth_scale * store->distance[i];
 					rr = sqrt(xx * xx + zz * zz);
 					tt = 2 * rr / store->vel_mean;
 					store->time[i] = tt / store->time_scale;
-					}
 				}
 			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
-{
-	char	*function_name = "mbr_wt_hsatlraw";
-	int	status = MB_SUCCESS;
+int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_hsatlraw";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsatlraw_struct *data;
-	char	*data_ptr;
+	char *data_ptr;
 	struct mbsys_hsds_struct *store;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %p\n",(void *)store_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) mb_io_ptr->raw_data;
-	data_ptr = (char *) data;
-	store = (struct mbsys_hsds_struct *) store_ptr;
+	data = (struct mbf_hsatlraw_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
+	store = (struct mbsys_hsds_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
-	if (store != NULL)
-		{
+	if (store != NULL) {
 		/* type of data record */
 		data->kind = store->kind;
 
@@ -810,11 +711,10 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->depth_center = store->depth_center;
 		data->depth_scale = store->depth_scale;
 		data->spare = store->spare;
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-			{
+		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			data->distance[i] = store->distance[i];
 			data->depth[i] = store->depth[i];
-			}
+		}
 
 		/* travel time data (ERGNSLZT) */
 		data->course_ground = store->course_ground;
@@ -823,9 +723,9 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->roll = store->roll;
 		data->time_center = store->time_center;
 		data->time_scale = store->time_scale;
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+		for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
 			data->time[i] = store->time[i];
-		for (i=0;i<11;i++)
+		for (i = 0; i < 11; i++)
 			data->gyro[i] = store->gyro[i];
 
 		/* amplitude data (ERGNAMPL) */
@@ -849,16 +749,14 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->amplitude_center = store->amplitude_center;
 		data->echo_duration_center = store->echo_duration_center;
 		data->echo_scale_center = store->echo_scale_center;
-		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-			{
+		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			data->amplitude[i] = store->amplitude[i];
 			data->echo_duration[i] = store->echo_duration[i];
-			}
-		for (i=0;i<16;i++)
-			{
+		}
+		for (i = 0; i < 16; i++) {
 			data->gain[i] = store->gain[i];
 			data->echo_scale[i] = store->echo_scale[i];
-			}
+		}
 
 		/* mean velocity (ERGNHYDI) */
 		data->draught = store->draught;
@@ -868,56 +766,51 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* water velocity profile (HS_ERGNCTDS) */
 		data->num_vel = store->num_vel;
-		for (i=0;i<store->num_vel;i++)
-			{
+		for (i = 0; i < store->num_vel; i++) {
 			data->vdepth[i] = store->vdepth[i];
 			data->velocity[i] = store->velocity[i];
-			}
+		}
 
 		/* navigation source (ERGNPOSI) */
 		data->pos_corr_x = store->pos_corr_x;
 		data->pos_corr_y = store->pos_corr_y;
-		strncpy(data->sensors,store->sensors,8);
+		strncpy(data->sensors, store->sensors, 8);
 
 		/* comment (LDEOCMNT) */
-		strncpy(data->comment,store->comment,MBSYS_HSDS_MAXLINE);
-
-		}
+		strncpy(data->comment, store->comment, MBSYS_HSDS_MAXLINE);
+	}
 
 	/* check that no bathymetry values are negative */
-	for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-		{
+	for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 		if (data->depth[i] < 0)
 			data->depth[i] = 0;
-		}
+	}
 
 	/* write next data to file */
-	status = mbr_hsatlraw_wr_data(verbose,mbio_ptr,data_ptr,error);
+	status = mbr_hsatlraw_wr_data(verbose, mbio_ptr, data_ptr, error);
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_rd_data";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_rd_data";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsatlraw_struct *data;
-	char	*data_ptr;
-	FILE	*mbfp;
-	int	done;
-	int	expect;
+	char *data_ptr;
+	FILE *mbfp;
+	int done;
+	int expect;
 
 	static int line_save_flag = MB_NO;
 	static char raw_line[MBF_HSATLRAW_MAXLINE] = "\0";
@@ -925,2866 +818,2376 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error)
 	static int shift = 0;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) mb_io_ptr->raw_data;
-	data_ptr = (char *) data;
+	data = (struct mbf_hsatlraw_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
 	mbfp = mb_io_ptr->mbfp;
 
 	/* initialize everything to zeros */
-	mbr_zero_hsatlraw(verbose,data_ptr,ZERO_SOME,error);
+	mbr_zero_hsatlraw(verbose, data_ptr, ZERO_SOME, error);
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	done = MB_NO;
 	expect = MBF_HSATLRAW_NONE;
-	while (done == MB_NO)
-		{
+	while (done == MB_NO) {
 
 		/* get next record label */
-		if (line_save_flag == MB_NO)
-			{
+		if (line_save_flag == MB_NO) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			status = mbr_hsatlraw_rd_label(verbose,mbfp,
-				raw_line,&type,&shift,error);
-			}
+			status = mbr_hsatlraw_rd_label(verbose, mbfp, raw_line, &type, &shift, error);
+		}
 		else
 			line_save_flag = MB_NO;
 
 		/* read the appropriate data records */
-		if (status == MB_FAILURE && expect == MBF_HSATLRAW_NONE)
-			{
+		if (status == MB_FAILURE && expect == MBF_HSATLRAW_NONE) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = MB_YES;
-			}
-		else if (status == MB_FAILURE && expect != MBF_HSATLRAW_NONE)
-			{
+		}
+		else if (status == MB_FAILURE && expect != MBF_HSATLRAW_NONE) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = MB_YES;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else if (type == MBF_HSATLRAW_RAW_LINE)
-			{
-			strcpy(data->comment,raw_line+shift);
+		}
+		else if (type == MBF_HSATLRAW_RAW_LINE) {
+			strcpy(data->comment, raw_line + shift);
 			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = MB_YES;
 			expect = MBF_HSATLRAW_NONE;
 			data->kind = MB_DATA_RAW_LINE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			status = MB_FAILURE;
-			}
-		else if (expect != MBF_HSATLRAW_NONE && expect != type)
-			{
+		}
+		else if (expect != MBF_HSATLRAW_NONE && expect != type) {
 			done = MB_YES;
 			line_save_flag = MB_YES;
-			}
-		else if (type == MBF_HSATLRAW_ERGNHYDI)
-			{
-			status = mbr_hsatlraw_rd_ergnhydi(
-				verbose,mbfp,data,shift,error);
+		}
+		else if (type == MBF_HSATLRAW_ERGNHYDI) {
+			status = mbr_hsatlraw_rd_ergnhydi(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS)
-				{
+			if (status == MB_SUCCESS) {
 				done = MB_YES;
 				data->kind = MB_DATA_MEAN_VELOCITY;
-				}
 			}
-		else if (type == MBF_HSATLRAW_ERGNPARA)
-			{
-			status = mbr_hsatlraw_rd_ergnpara(
-				verbose,mbfp,data,shift,error);
+		}
+		else if (type == MBF_HSATLRAW_ERGNPARA) {
+			status = mbr_hsatlraw_rd_ergnpara(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS)
-				{
+			if (status == MB_SUCCESS) {
 				done = MB_YES;
 				data->kind = MB_DATA_STANDBY;
-				}
 			}
-		else if (type == MBF_HSATLRAW_ERGNPOSI)
-			{
-			status = mbr_hsatlraw_rd_ergnposi(
-				verbose,mbfp,data,shift,error);
+		}
+		else if (type == MBF_HSATLRAW_ERGNPOSI) {
+			status = mbr_hsatlraw_rd_ergnposi(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS)
-				{
+			if (status == MB_SUCCESS) {
 				done = MB_YES;
 				data->kind = MB_DATA_NAV_SOURCE;
-				}
 			}
-		else if (type == MBF_HSATLRAW_ERGNEICH)
-			{
-			status = mbr_hsatlraw_rd_ergneich(
-				verbose,mbfp,data,shift,error);
+		}
+		else if (type == MBF_HSATLRAW_ERGNEICH) {
+			status = mbr_hsatlraw_rd_ergneich(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS)
-				{
+			if (status == MB_SUCCESS) {
 				done = MB_NO;
 				data->kind = MB_DATA_CALIBRATE;
 				expect = MBF_HSATLRAW_ERGNSLZT;
-				}
 			}
-		else if (type == MBF_HSATLRAW_ERGNMESS)
-			{
-			status = mbr_hsatlraw_rd_ergnmess(
-				verbose,mbfp,data,shift,error);
+		}
+		else if (type == MBF_HSATLRAW_ERGNMESS) {
+			status = mbr_hsatlraw_rd_ergnmess(verbose, mbfp, data, shift, error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS)
-				{
+			if (status == MB_SUCCESS) {
 				done = MB_NO;
 				data->kind = MB_DATA_DATA;
 				expect = MBF_HSATLRAW_ERGNSLZT;
-				}
-			}
-		else if (type == MBF_HSATLRAW_ERGNSLZT)
-			{
-			status = mbr_hsatlraw_rd_ergnslzt(
-				verbose,mbfp,data,shift,error);
-			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS && expect == MBF_HSATLRAW_ERGNSLZT)
-				{
-				done = MB_NO;
-				expect = MBF_HSATLRAW_ERGNAMPL;
-				}
-			else if (status == MB_SUCCESS)
-				{
-				done = MB_YES;
-				expect = MBF_HSATLRAW_NONE;
-				*error = MB_ERROR_UNINTELLIGIBLE;
-				status = MB_FAILURE;
-				}
-			}
-		else if (type == MBF_HSATLRAW_ERGNCTDS)
-			{
-			status = mbr_hsatlraw_rd_ergnctds(
-				verbose,mbfp,data,shift,error);
-			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS)
-				{
-				done = MB_YES;
-				data->kind = MB_DATA_VELOCITY_PROFILE;
-				}
-			}
-		else if (type == MBF_HSATLRAW_ERGNAMPL)
-			{
-			status = mbr_hsatlraw_rd_ergnampl(
-				verbose,mbfp,data,shift,error);
-			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS
-				&& expect == MBF_HSATLRAW_ERGNAMPL)
-				{
-				done = MB_YES;
-				expect = MBF_HSATLRAW_NONE;
-				}
-			else if (status == MB_SUCCESS)
-				{
-				done = MB_YES;
-				expect = MBF_HSATLRAW_NONE;
-				*error = MB_ERROR_UNINTELLIGIBLE;
-				status = MB_FAILURE;
-				}
-			}
-		else if (type == MBF_HSATLRAW_LDEOCMNT)
-			{
-			status = mbr_hsatlraw_rd_ldeocmnt(
-				verbose,mbfp,data,shift,error);
-			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS)
-				{
-				done = MB_YES;
-				data->kind = MB_DATA_COMMENT;
-				}
 			}
 		}
+		else if (type == MBF_HSATLRAW_ERGNSLZT) {
+			status = mbr_hsatlraw_rd_ergnslzt(verbose, mbfp, data, shift, error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			if (status == MB_SUCCESS && expect == MBF_HSATLRAW_ERGNSLZT) {
+				done = MB_NO;
+				expect = MBF_HSATLRAW_ERGNAMPL;
+			}
+			else if (status == MB_SUCCESS) {
+				done = MB_YES;
+				expect = MBF_HSATLRAW_NONE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				status = MB_FAILURE;
+			}
+		}
+		else if (type == MBF_HSATLRAW_ERGNCTDS) {
+			status = mbr_hsatlraw_rd_ergnctds(verbose, mbfp, data, shift, error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_VELOCITY_PROFILE;
+			}
+		}
+		else if (type == MBF_HSATLRAW_ERGNAMPL) {
+			status = mbr_hsatlraw_rd_ergnampl(verbose, mbfp, data, shift, error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			if (status == MB_SUCCESS && expect == MBF_HSATLRAW_ERGNAMPL) {
+				done = MB_YES;
+				expect = MBF_HSATLRAW_NONE;
+			}
+			else if (status == MB_SUCCESS) {
+				done = MB_YES;
+				expect = MBF_HSATLRAW_NONE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				status = MB_FAILURE;
+			}
+		}
+		else if (type == MBF_HSATLRAW_LDEOCMNT) {
+			status = mbr_hsatlraw_rd_ldeocmnt(verbose, mbfp, data, shift, error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_COMMENT;
+			}
+		}
+	}
 
 	/* handle Hydrosweep Y2K problem */
 	if (status == MB_SUCCESS && data->year < 1962)
 		data->year = 2000 + (data->year % 100);
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_hsatlraw_rd_label(int verbose, FILE *mbfp,
-		char *line, int *type, int *shift, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_rd_label";
-	int	status = MB_SUCCESS;
-	int	i;
-	int	icmp;
+int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *shift, int *error) {
+	char *function_name = "mbr_hsatlraw_rd_label";
+	int status = MB_SUCCESS;
+	int i;
+	int icmp;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+	}
 
 	/* read next line in file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,0,line,error);
+	status = mbr_hsatlraw_read_line(verbose, mbfp, 0, line, error);
 
 	/* see if we just encountered an identifier record */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		*type = MBF_HSATLRAW_RAW_LINE;
 		*shift = 0;
-		for (i=1;i<MBF_HSATLRAW_RECORDS;i++)
-			{
-			icmp = strncmp(line,mbf_hsatlraw_labels[i],8);
+		for (i = 1; i < MBF_HSATLRAW_RECORDS; i++) {
+			icmp = strncmp(line, mbf_hsatlraw_labels[i], 8);
 			if (icmp == 0)
 				*type = i;
-			}
 		}
+	}
 
 	/* didn't find one with zero shift, try shift = 4 in case this
-		is tape data */
-	if (status == MB_SUCCESS && *type == MBF_HSATLRAW_RAW_LINE)
-		{
+	    is tape data */
+	if (status == MB_SUCCESS && *type == MBF_HSATLRAW_RAW_LINE) {
 		*shift = 4;
-		for (i=1;i<MBF_HSATLRAW_RECORDS;i++)
-			{
-			icmp = strncmp(line+4,mbf_hsatlraw_labels[i],8);
+		for (i = 1; i < MBF_HSATLRAW_RECORDS; i++) {
+			icmp = strncmp(line + 4, mbf_hsatlraw_labels[i], 8);
 			if (icmp == 0)
 				*type = i;
-			}
+		}
 		if (*type == MBF_HSATLRAW_RAW_LINE)
 			*shift = 0;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       line:       %s\n",line);
-		fprintf(stderr,"dbg2       type:       %d\n",*type);
-		fprintf(stderr,"dbg2       shift:      %d\n",*shift);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       line:       %s\n", line);
+		fprintf(stderr, "dbg2       type:       %d\n", *type);
+		fprintf(stderr, "dbg2       shift:      %d\n", *shift);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_hsatlraw_read_line(int verbose, FILE *mbfp,
-		int minimum_size, char *line, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_read_line";
-	int	status = MB_SUCCESS;
-	int	nchars;
-	int	done;
-	char	*result;
-	int	blank;
-	int	i;
+int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line, int *error) {
+	char *function_name = "mbr_hsatlraw_read_line";
+	int status = MB_SUCCESS;
+	int nchars;
+	int done;
+	char *result;
+	int blank;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+	}
 
 	/* read next good line in file */
 	done = MB_NO;
-	do
-		{
+	do {
 		/* read next line in file */
-		strncpy(line,"\0",MBF_HSATLRAW_MAXLINE);
-		result = fgets(line,MBF_HSATLRAW_MAXLINE,mbfp);
-
+		strncpy(line, "\0", MBF_HSATLRAW_MAXLINE);
+		result = fgets(line, MBF_HSATLRAW_MAXLINE, mbfp);
 
 		/* check for eof */
-		if (result == line)
-			{
+		if (result == line) {
 			/* check size of line */
 			nchars = strlen(line);
-			if (nchars >= minimum_size)
-				{
+			if (nchars >= minimum_size) {
 				done = MB_YES;
-			
+
 				/* trim trailing blank characters */
 				blank = MB_YES;
-				for (i=(nchars-1); i>=0 && blank==MB_YES; i--)
-					{
+				for (i = (nchars - 1); i >= 0 && blank == MB_YES; i--) {
 					if (line[i] == ' ' || line[i] == '\r' || line[i] == '\n')
 						line[i] = '\0';
 					else
 						blank = MB_NO;
-					}
-				nchars = strlen(line);
 				}
-				
+				nchars = strlen(line);
+			}
+
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else
-			{
+		}
+		else {
 			done = MB_YES;
 			*error = MB_ERROR_EOF;
 			status = MB_FAILURE;
-			}
+		}
 
 		/* print debug statements */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg5  New line read in function <%s>\n",function_name);
-			fprintf(stderr,"dbg5       line:       %s\n",line);
-			fprintf(stderr,"dbg5       chars:      %d\n",nchars);
-			}
-
+		if (verbose >= 5) {
+			fprintf(stderr, "\ndbg5  New line read in function <%s>\n", function_name);
+			fprintf(stderr, "dbg5       line:       %s\n", line);
+			fprintf(stderr, "dbg5       chars:      %d\n", nchars);
 		}
-	while (done == MB_NO);
+
+	} while (done == MB_NO);
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       line:       %s\n",line);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       line:       %s\n", line);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_rd_ergnhydi";
-	int	status = MB_SUCCESS;
-	char	line[MBF_HSATLRAW_MAXLINE];
+int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+	char *function_name = "mbr_hsatlraw_rd_ergnhydi";
+	int status = MB_SUCCESS;
+	char line[MBF_HSATLRAW_MAXLINE];
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
-		fprintf(stderr,"dbg2       shift:      %d\n",shift);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
-	if (strlen(line) < 69 + shift)
-		{
+	if (strlen(line) < 69 + shift) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_UNINTELLIGIBLE;
-		}
+	}
 
 	/* parse data from first line */
-	if (status == MB_SUCCESS)
-		{
-		mb_get_double( &(data->lon),        line+shift,    12);
-		mb_get_double( &(data->lat),        line+12+shift, 12);
-		mb_get_int(    &(data->year),       line+24+shift,  4);
-		mb_get_int(    &(data->month),      line+28+shift,  2);
-		mb_get_int(    &(data->day),        line+30+shift,  2);
-		mb_get_int(    &(data->hour),       line+32+shift,  2);
-		mb_get_int(    &(data->minute),     line+34+shift,  2);
-		mb_get_int(    &(data->second),     line+36+shift,  2);
-		mb_get_int(    &(data->alt_minute), line+38+shift,  5);
-		mb_get_int(    &(data->alt_second), line+43+shift,  2);
-		mb_get_double( &(data->draught),    line+45+shift,  4);
-		mb_get_double( &(data->vel_mean),   line+49+shift,  7);
-		mb_get_double( &(data->vel_keel),   line+56+shift,  7);
-		mb_get_double( &(data->tide),       line+63+shift,  6);
-		}
+	if (status == MB_SUCCESS) {
+		mb_get_double(&(data->lon), line + shift, 12);
+		mb_get_double(&(data->lat), line + 12 + shift, 12);
+		mb_get_int(&(data->year), line + 24 + shift, 4);
+		mb_get_int(&(data->month), line + 28 + shift, 2);
+		mb_get_int(&(data->day), line + 30 + shift, 2);
+		mb_get_int(&(data->hour), line + 32 + shift, 2);
+		mb_get_int(&(data->minute), line + 34 + shift, 2);
+		mb_get_int(&(data->second), line + 36 + shift, 2);
+		mb_get_int(&(data->alt_minute), line + 38 + shift, 5);
+		mb_get_int(&(data->alt_second), line + 43 + shift, 2);
+		mb_get_double(&(data->draught), line + 45 + shift, 4);
+		mb_get_double(&(data->vel_mean), line + 49 + shift, 7);
+		mb_get_double(&(data->vel_keel), line + 56 + shift, 7);
+		mb_get_double(&(data->tide), line + 63 + shift, 6);
+	}
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       alt minute:       %d\n",
-			data->alt_minute);
-		fprintf(stderr,"dbg5       alt second:       %d\n",
-			data->alt_second);
-		fprintf(stderr,"dbg5       draught:          %f\n",
-			data->draught);
-		fprintf(stderr,"dbg5       mean velocity:    %f\n",
-			data->vel_mean);
-		fprintf(stderr,"dbg5       keel velocity:    %f\n",
-			data->vel_keel);
-		fprintf(stderr,"dbg5       tide:             %f\n",data->tide);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       alt minute:       %d\n", data->alt_minute);
+		fprintf(stderr, "dbg5       alt second:       %d\n", data->alt_second);
+		fprintf(stderr, "dbg5       draught:          %f\n", data->draught);
+		fprintf(stderr, "dbg5       mean velocity:    %f\n", data->vel_mean);
+		fprintf(stderr, "dbg5       keel velocity:    %f\n", data->vel_keel);
+		fprintf(stderr, "dbg5       tide:             %f\n", data->tide);
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_rd_ergnpara";
-	int	status = MB_SUCCESS;
-	char	line[MBF_HSATLRAW_MAXLINE];
+int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+	char *function_name = "mbr_hsatlraw_rd_ergnpara";
+	int status = MB_SUCCESS;
+	char line[MBF_HSATLRAW_MAXLINE];
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
-		fprintf(stderr,"dbg2       shift:      %d\n",shift);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
-	if (strlen(line) < 84 + shift)
-		{
+	if (strlen(line) < 84 + shift) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_UNINTELLIGIBLE;
-		}
+	}
 
 	/* parse data from first line */
-	if (status == MB_SUCCESS)
-		{
-		mb_get_double( &(data->lon),        line+shift,    12);
-		mb_get_double( &(data->lat),        line+12+shift, 12);
-		mb_get_int(    &(data->year),       line+24+shift,  4);
-		mb_get_int(    &(data->month),      line+28+shift,  2);
-		mb_get_int(    &(data->day),        line+30+shift,  2);
-		mb_get_int(    &(data->hour),       line+32+shift,  2);
-		mb_get_int(    &(data->minute),     line+34+shift,  2);
-		mb_get_int(    &(data->second),     line+36+shift,  2);
-		mb_get_int(    &(data->alt_minute), line+38+shift,  5);
-		mb_get_int(    &(data->alt_second), line+43+shift,  2);
-		mb_get_double( &(data->course_true),line+45+shift,  5);
-		mb_get_double( &(data->speed_transverse), line+50+shift, 9);
-		mb_get_double( &(data->speed),      line+59+shift,  9);
-		data->speed_reference[0] = line[68+shift];
-		mb_get_double( &(data->pitch),      line+69+shift,  4);
-		mb_get_int(    &(data->track),      line+73+shift,  4);
-		mb_get_double( &(data->depth_center),line+77+shift, 7);
-		}
+	if (status == MB_SUCCESS) {
+		mb_get_double(&(data->lon), line + shift, 12);
+		mb_get_double(&(data->lat), line + 12 + shift, 12);
+		mb_get_int(&(data->year), line + 24 + shift, 4);
+		mb_get_int(&(data->month), line + 28 + shift, 2);
+		mb_get_int(&(data->day), line + 30 + shift, 2);
+		mb_get_int(&(data->hour), line + 32 + shift, 2);
+		mb_get_int(&(data->minute), line + 34 + shift, 2);
+		mb_get_int(&(data->second), line + 36 + shift, 2);
+		mb_get_int(&(data->alt_minute), line + 38 + shift, 5);
+		mb_get_int(&(data->alt_second), line + 43 + shift, 2);
+		mb_get_double(&(data->course_true), line + 45 + shift, 5);
+		mb_get_double(&(data->speed_transverse), line + 50 + shift, 9);
+		mb_get_double(&(data->speed), line + 59 + shift, 9);
+		data->speed_reference[0] = line[68 + shift];
+		mb_get_double(&(data->pitch), line + 69 + shift, 4);
+		mb_get_int(&(data->track), line + 73 + shift, 4);
+		mb_get_double(&(data->depth_center), line + 77 + shift, 7);
+	}
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       alt minute:       %d\n",
-			data->alt_minute);
-		fprintf(stderr,"dbg5       alt second:       %d\n",
-			data->alt_second);
-		fprintf(stderr,"dbg5       course_true:      %f\n",
-			data->course_true);
-		fprintf(stderr,"dbg5       speed_transverse: %f\n",
-			data->speed_transverse);
-		fprintf(stderr,"dbg5       speed:            %f\n",
-			data->speed);
-		fprintf(stderr,"dbg5       speed_reference:  %c\n",
-			data->speed_reference[0]);
-		fprintf(stderr,"dbg5       pitch:            %f\n",
-			data->pitch);
-		fprintf(stderr,"dbg5       track:            %d\n",
-			data->track);
-		fprintf(stderr,"dbg5       depth_center:     %f\n",
-			data->depth_center);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       alt minute:       %d\n", data->alt_minute);
+		fprintf(stderr, "dbg5       alt second:       %d\n", data->alt_second);
+		fprintf(stderr, "dbg5       course_true:      %f\n", data->course_true);
+		fprintf(stderr, "dbg5       speed_transverse: %f\n", data->speed_transverse);
+		fprintf(stderr, "dbg5       speed:            %f\n", data->speed);
+		fprintf(stderr, "dbg5       speed_reference:  %c\n", data->speed_reference[0]);
+		fprintf(stderr, "dbg5       pitch:            %f\n", data->pitch);
+		fprintf(stderr, "dbg5       track:            %d\n", data->track);
+		fprintf(stderr, "dbg5       depth_center:     %f\n", data->depth_center);
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_rd_ergnposi";
-	int	status = MB_SUCCESS;
-	char	line[MBF_HSATLRAW_MAXLINE];
+int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+	char *function_name = "mbr_hsatlraw_rd_ergnposi";
+	int status = MB_SUCCESS;
+	char line[MBF_HSATLRAW_MAXLINE];
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
-		fprintf(stderr,"dbg2       shift:      %d\n",shift);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
-	if (strlen(line) < 67 + shift)
-		{
+	if (strlen(line) < 67 + shift) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_UNINTELLIGIBLE;
-		}
+	}
 
 	/* parse data from first line */
-	if (status == MB_SUCCESS)
-		{
-		mb_get_double( &(data->lon),        line+shift,    12);
-		mb_get_double( &(data->lat),        line+12+shift, 12);
-		mb_get_int(    &(data->year),       line+24+shift,  4);
-		mb_get_int(    &(data->month),      line+28+shift,  2);
-		mb_get_int(    &(data->day),        line+30+shift,  2);
-		mb_get_int(    &(data->hour),       line+32+shift,  2);
-		mb_get_int(    &(data->minute),     line+34+shift,  2);
-		mb_get_int(    &(data->second),     line+36+shift,  2);
-		mb_get_int(    &(data->alt_minute), line+38+shift,  5);
-		mb_get_int(    &(data->alt_second), line+43+shift,  2);
-		mb_get_double( &(data->pos_corr_x), line+45+shift,  7);
-		mb_get_double( &(data->pos_corr_y), line+52+shift,  7);
-		strncpy(data->sensors,line+59+shift,8);
-		}
+	if (status == MB_SUCCESS) {
+		mb_get_double(&(data->lon), line + shift, 12);
+		mb_get_double(&(data->lat), line + 12 + shift, 12);
+		mb_get_int(&(data->year), line + 24 + shift, 4);
+		mb_get_int(&(data->month), line + 28 + shift, 2);
+		mb_get_int(&(data->day), line + 30 + shift, 2);
+		mb_get_int(&(data->hour), line + 32 + shift, 2);
+		mb_get_int(&(data->minute), line + 34 + shift, 2);
+		mb_get_int(&(data->second), line + 36 + shift, 2);
+		mb_get_int(&(data->alt_minute), line + 38 + shift, 5);
+		mb_get_int(&(data->alt_second), line + 43 + shift, 2);
+		mb_get_double(&(data->pos_corr_x), line + 45 + shift, 7);
+		mb_get_double(&(data->pos_corr_y), line + 52 + shift, 7);
+		strncpy(data->sensors, line + 59 + shift, 8);
+	}
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       alt minute:       %d\n",
-			data->alt_minute);
-		fprintf(stderr,"dbg5       alt second:       %d\n",
-			data->alt_second);
-		fprintf(stderr,"dbg5       pos_corr_x:       %f\n",
-			data->pos_corr_x);
-		fprintf(stderr,"dbg5       pos_corr_y:       %f\n",
-			data->pos_corr_y);
-		fprintf(stderr,"dbg5       sensors:          %s\n",
-			data->sensors);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       alt minute:       %d\n", data->alt_minute);
+		fprintf(stderr, "dbg5       alt second:       %d\n", data->alt_second);
+		fprintf(stderr, "dbg5       pos_corr_x:       %f\n", data->pos_corr_x);
+		fprintf(stderr, "dbg5       pos_corr_y:       %f\n", data->pos_corr_y);
+		fprintf(stderr, "dbg5       sensors:          %s\n", data->sensors);
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_rd_ergneich";
-	int	status = MB_SUCCESS;
-	char	line[MBF_HSATLRAW_MAXLINE];
-	int	i;
-	int	numvals;
+int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+	char *function_name = "mbr_hsatlraw_rd_ergneich";
+	int status = MB_SUCCESS;
+	char line[MBF_HSATLRAW_MAXLINE];
+	int i;
+	int numvals;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
-		fprintf(stderr,"dbg2       shift:      %d\n",shift);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
-	if (strlen(line) < 90 + shift)
-		{
+	if (strlen(line) < 90 + shift) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_UNINTELLIGIBLE;
-		}
+	}
 
 	/* parse data from event record */
-	if (status == MB_SUCCESS)
-		{
-		mb_get_double( &(data->lon),        line+shift,    12);
-		mb_get_double( &(data->lat),        line+12+shift, 12);
-		mb_get_int(    &(data->year),       line+24+shift,  4);
-		mb_get_int(    &(data->month),      line+28+shift,  2);
-		mb_get_int(    &(data->day),        line+30+shift,  2);
-		mb_get_int(    &(data->hour),       line+32+shift,  2);
-		mb_get_int(    &(data->minute),     line+34+shift,  2);
-		mb_get_int(    &(data->second),     line+36+shift,  2);
-		mb_get_int(    &(data->alt_minute), line+38+shift,  5);
-		mb_get_int(    &(data->alt_second), line+43+shift,  2);
-		mb_get_double( &(data->course_true),line+45+shift,  5);
-		mb_get_double( &(data->speed_transverse), line+50+shift, 9);
-		mb_get_double( &(data->speed),      line+59+shift,  9);
-		data->speed_reference[0] = line[68+shift];
-		mb_get_double( &(data->pitch),      line+69+shift,  4);
-		mb_get_int(    &(data->track),      line+73+shift,  4);
-		mb_get_double( &(data->depth_center),line+77+shift, 7);
-		mb_get_double( &(data->depth_scale),line+84+shift,  4);
-		mb_get_int( &(data->spare),line+88+shift,  2);
+	if (status == MB_SUCCESS) {
+		mb_get_double(&(data->lon), line + shift, 12);
+		mb_get_double(&(data->lat), line + 12 + shift, 12);
+		mb_get_int(&(data->year), line + 24 + shift, 4);
+		mb_get_int(&(data->month), line + 28 + shift, 2);
+		mb_get_int(&(data->day), line + 30 + shift, 2);
+		mb_get_int(&(data->hour), line + 32 + shift, 2);
+		mb_get_int(&(data->minute), line + 34 + shift, 2);
+		mb_get_int(&(data->second), line + 36 + shift, 2);
+		mb_get_int(&(data->alt_minute), line + 38 + shift, 5);
+		mb_get_int(&(data->alt_second), line + 43 + shift, 2);
+		mb_get_double(&(data->course_true), line + 45 + shift, 5);
+		mb_get_double(&(data->speed_transverse), line + 50 + shift, 9);
+		mb_get_double(&(data->speed), line + 59 + shift, 9);
+		data->speed_reference[0] = line[68 + shift];
+		mb_get_double(&(data->pitch), line + 69 + shift, 4);
+		mb_get_int(&(data->track), line + 73 + shift, 4);
+		mb_get_double(&(data->depth_center), line + 77 + shift, 7);
+		mb_get_double(&(data->depth_scale), line + 84 + shift, 4);
+		mb_get_int(&(data->spare), line + 88 + shift, 2);
 		if (data->depth_scale > 0.0)
-			data->depth[29] =
-				(int) (data->depth_center/data->depth_scale);
+			data->depth[29] = (int)(data->depth_center / data->depth_scale);
 		else
-			data->depth[29] = (int) data->depth_center;
+			data->depth[29] = (int)data->depth_center;
 		data->distance[29] = 0;
-		}
+	}
 
 	/* read and parse data from first data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-		== MB_SUCCESS)
-		{
-		mb_get_int(&numvals,line+shift,2);
+	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->distance[i+30]),line+i*4+2+shift,4);
-		else
-			{
+			for (i = 0; i < numvals; i++)
+				mb_get_int(&(data->distance[i + 30]), line + i * 4 + 2 + shift, 4);
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* read and parse data from second data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-		== MB_SUCCESS)
-		{
-		mb_get_int(&numvals,line+shift,2);
+	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->depth[i+30]),line+i*4+2+shift,4);
-		else
-			{
+			for (i = 0; i < numvals; i++)
+				mb_get_int(&(data->depth[i + 30]), line + i * 4 + 2 + shift, 4);
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* read and parse data from third data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-		== MB_SUCCESS)
-		{
-		mb_get_int(&numvals,line+shift,2);
+	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-		for (i=0;i<numvals;i++)
-			{
-			mb_get_int(&(data->distance[28-i]),line+i*4+2+shift,4);
-			data->distance[28-i] = -data->distance[28-i];
+			for (i = 0; i < numvals; i++) {
+				mb_get_int(&(data->distance[28 - i]), line + i * 4 + 2 + shift, 4);
+				data->distance[28 - i] = -data->distance[28 - i];
 			}
-		else
-			{
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* read and parse data from fourth data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-		== MB_SUCCESS)
-		{
-		mb_get_int(&numvals,line+shift,2);
+	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->depth[28-i]),line+i*4+2+shift,4);
-		else
-			{
+			for (i = 0; i < numvals; i++)
+				mb_get_int(&(data->depth[28 - i]), line + i * 4 + 2 + shift, 4);
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       alt minute:       %d\n",
-			data->alt_minute);
-		fprintf(stderr,"dbg5       alt second:       %d\n",
-			data->alt_second);
-		fprintf(stderr,"dbg5       course_true:      %f\n",
-			data->course_true);
-		fprintf(stderr,"dbg5       speed_transverse: %f\n",
-			data->speed_transverse);
-		fprintf(stderr,"dbg5       speed:            %f\n",
-			data->speed);
-		fprintf(stderr,"dbg5       speed_reference:  %c\n",
-			data->speed_reference[0]);
-		fprintf(stderr,"dbg5       pitch:            %f\n",
-			data->pitch);
-		fprintf(stderr,"dbg5       track:            %d\n",
-			data->track);
-		fprintf(stderr,"dbg5       depth_center:     %f\n",
-			data->depth_center);
-		fprintf(stderr,"dbg5       depth_scale:      %f\n",
-			data->depth_scale);
-		fprintf(stderr,"dbg5       spare:            %d\n",
-			data->spare);
-		fprintf(stderr,"dbg5       distances and depths:\n");
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
-			fprintf(stderr,"dbg5         %d  %d  %d\n",
-				i,data->distance[i],data->depth[i]);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       alt minute:       %d\n", data->alt_minute);
+		fprintf(stderr, "dbg5       alt second:       %d\n", data->alt_second);
+		fprintf(stderr, "dbg5       course_true:      %f\n", data->course_true);
+		fprintf(stderr, "dbg5       speed_transverse: %f\n", data->speed_transverse);
+		fprintf(stderr, "dbg5       speed:            %f\n", data->speed);
+		fprintf(stderr, "dbg5       speed_reference:  %c\n", data->speed_reference[0]);
+		fprintf(stderr, "dbg5       pitch:            %f\n", data->pitch);
+		fprintf(stderr, "dbg5       track:            %d\n", data->track);
+		fprintf(stderr, "dbg5       depth_center:     %f\n", data->depth_center);
+		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
+		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
+		fprintf(stderr, "dbg5       distances and depths:\n");
+		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_rd_ergnmess";
-	int	status = MB_SUCCESS;
-	char	line[MBF_HSATLRAW_MAXLINE];
-	int	numvals;
-	int	i;
+int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+	char *function_name = "mbr_hsatlraw_rd_ergnmess";
+	int status = MB_SUCCESS;
+	char line[MBF_HSATLRAW_MAXLINE];
+	int numvals;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
-		fprintf(stderr,"dbg2       shift:      %d\n",shift);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
-	if (status == MB_SUCCESS
-		&& (strlen(line) < 90 + shift
-		|| strlen(line) > 92 + shift))
-		{
+	if (status == MB_SUCCESS && (strlen(line) < 90 + shift || strlen(line) > 92 + shift)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_UNINTELLIGIBLE;
-		}
+	}
 
 	/* parse data from event record */
-	if (status == MB_SUCCESS)
-		{
-		mb_get_double( &(data->lon),        line+shift,    12);
-		mb_get_double( &(data->lat),        line+12+shift, 12);
-		mb_get_int(    &(data->year),       line+24+shift,  4);
-		mb_get_int(    &(data->month),      line+28+shift,  2);
-		mb_get_int(    &(data->day),        line+30+shift,  2);
-		mb_get_int(    &(data->hour),       line+32+shift,  2);
-		mb_get_int(    &(data->minute),     line+34+shift,  2);
-		mb_get_int(    &(data->second),     line+36+shift,  2);
-		mb_get_int(    &(data->alt_minute), line+38+shift,  5);
-		mb_get_int(    &(data->alt_second), line+43+shift,  2);
-		mb_get_double( &(data->course_true),line+45+shift,  5);
-		mb_get_double( &(data->speed_transverse), line+50+shift, 9);
-		mb_get_double( &(data->speed),      line+59+shift,  9);
-		data->speed_reference[0] = line[68+shift];
-		mb_get_double( &(data->pitch),      line+69+shift,  4);
-		mb_get_int(    &(data->track),      line+73+shift,  4);
-		mb_get_double( &(data->depth_center),line+77+shift, 7);
-		mb_get_double( &(data->depth_scale),line+84+shift,  4);
-		mb_get_int( &(data->spare),line+88+shift,  2);
+	if (status == MB_SUCCESS) {
+		mb_get_double(&(data->lon), line + shift, 12);
+		mb_get_double(&(data->lat), line + 12 + shift, 12);
+		mb_get_int(&(data->year), line + 24 + shift, 4);
+		mb_get_int(&(data->month), line + 28 + shift, 2);
+		mb_get_int(&(data->day), line + 30 + shift, 2);
+		mb_get_int(&(data->hour), line + 32 + shift, 2);
+		mb_get_int(&(data->minute), line + 34 + shift, 2);
+		mb_get_int(&(data->second), line + 36 + shift, 2);
+		mb_get_int(&(data->alt_minute), line + 38 + shift, 5);
+		mb_get_int(&(data->alt_second), line + 43 + shift, 2);
+		mb_get_double(&(data->course_true), line + 45 + shift, 5);
+		mb_get_double(&(data->speed_transverse), line + 50 + shift, 9);
+		mb_get_double(&(data->speed), line + 59 + shift, 9);
+		data->speed_reference[0] = line[68 + shift];
+		mb_get_double(&(data->pitch), line + 69 + shift, 4);
+		mb_get_int(&(data->track), line + 73 + shift, 4);
+		mb_get_double(&(data->depth_center), line + 77 + shift, 7);
+		mb_get_double(&(data->depth_scale), line + 84 + shift, 4);
+		mb_get_int(&(data->spare), line + 88 + shift, 2);
 		if (data->depth_scale > 0.0)
-			data->depth[29] =
-				(int) (data->depth_center/data->depth_scale);
+			data->depth[29] = (int)(data->depth_center / data->depth_scale);
 		else
-			data->depth[29] = (int) data->depth_center;
+			data->depth[29] = (int)data->depth_center;
 		data->distance[29] = 0;
-		}
+	}
 
 	/* read and parse data from first data record */
-	if (status == MB_SUCCESS
-		&& (status = mbr_hsatlraw_read_line(verbose,mbfp,
-				shift+9,line,error)) == MB_SUCCESS)
-		{
-		mb_get_int(&numvals,line+shift,2);
+	if (status == MB_SUCCESS && (status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i=0;i<numvals;i++)
-				mb_get_int(&(data->distance[i+30]),
-					line+i*4+2+shift,4);
-		else
-			{
+			for (i = 0; i < numvals; i++)
+				mb_get_int(&(data->distance[i + 30]), line + i * 4 + 2 + shift, 4);
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* read and parse data from second data record */
-	if (status == MB_SUCCESS
-		&& (status = mbr_hsatlraw_read_line(verbose,mbfp,
-				shift+9,line,error)) == MB_SUCCESS)
-		{
-		mb_get_int(&numvals,line+shift,2);
+	if (status == MB_SUCCESS && (status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i=0;i<numvals;i++)
-				{
-				mb_get_int(&(data->depth[i+30]),
-					line+i*4+2+shift,4);
-				}
-		else
-			{
+			for (i = 0; i < numvals; i++) {
+				mb_get_int(&(data->depth[i + 30]), line + i * 4 + 2 + shift, 4);
+			}
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* read and parse data from third data record */
-	if (status == MB_SUCCESS
-		&& (status = mbr_hsatlraw_read_line(verbose,mbfp,
-				shift+9,line,error)) == MB_SUCCESS)
-		{
-		mb_get_int(&numvals,line+shift,2);
+	if (status == MB_SUCCESS && (status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i=0;i<numvals;i++)
-				{
-				mb_get_int(&(data->distance[28-i]),
-					line+i*4+2+shift,4);
-				data->distance[28-i] =
-					-data->distance[28-i];
-				}
-		else
-			{
+			for (i = 0; i < numvals; i++) {
+				mb_get_int(&(data->distance[28 - i]), line + i * 4 + 2 + shift, 4);
+				data->distance[28 - i] = -data->distance[28 - i];
+			}
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* read and parse data from fourth data record */
-	if (status == MB_SUCCESS
-		&& (status = mbr_hsatlraw_read_line(verbose,mbfp,
-				shift+9,line,error)) == MB_SUCCESS)
-		{
-		mb_get_int(&numvals,line+shift,2);
+	if (status == MB_SUCCESS && (status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i=0;i<numvals;i++)
-				{
-				mb_get_int(&(data->depth[28-i]),
-					line+i*4+2+shift,4);
-				}
-		else
-			{
+			for (i = 0; i < numvals; i++) {
+				mb_get_int(&(data->depth[28 - i]), line + i * 4 + 2 + shift, 4);
+			}
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       alt minute:       %d\n",
-			data->alt_minute);
-		fprintf(stderr,"dbg5       alt second:       %d\n",
-			data->alt_second);
-		fprintf(stderr,"dbg5       course_true:      %f\n",
-			data->course_true);
-		fprintf(stderr,"dbg5       speed_transverse: %f\n",
-			data->speed_transverse);
-		fprintf(stderr,"dbg5       speed:            %f\n",
-			data->speed);
-		fprintf(stderr,"dbg5       speed_reference:  %c\n",
-			data->speed_reference[0]);
-		fprintf(stderr,"dbg5       pitch:            %f\n",
-			data->pitch);
-		fprintf(stderr,"dbg5       track:            %d\n",
-			data->track);
-		fprintf(stderr,"dbg5       depth_center:     %f\n",
-			data->depth_center);
-		fprintf(stderr,"dbg5       depth_scale:      %f\n",
-			data->depth_scale);
-		fprintf(stderr,"dbg5       spare:            %d\n",
-			data->spare);
-		fprintf(stderr,"dbg5       distances and depths:\n");
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
-			fprintf(stderr,"dbg5         %d  %d  %d\n",
-				i,data->distance[i],data->depth[i]);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       alt minute:       %d\n", data->alt_minute);
+		fprintf(stderr, "dbg5       alt second:       %d\n", data->alt_second);
+		fprintf(stderr, "dbg5       course_true:      %f\n", data->course_true);
+		fprintf(stderr, "dbg5       speed_transverse: %f\n", data->speed_transverse);
+		fprintf(stderr, "dbg5       speed:            %f\n", data->speed);
+		fprintf(stderr, "dbg5       speed_reference:  %c\n", data->speed_reference[0]);
+		fprintf(stderr, "dbg5       pitch:            %f\n", data->pitch);
+		fprintf(stderr, "dbg5       track:            %d\n", data->track);
+		fprintf(stderr, "dbg5       depth_center:     %f\n", data->depth_center);
+		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
+		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
+		fprintf(stderr, "dbg5       distances and depths:\n");
+		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_rd_ergnslzt";
-	int	status = MB_SUCCESS;
-	char	line[MBF_HSATLRAW_MAXLINE];
-	int	i;
-	int	numvals;
+int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+	char *function_name = "mbr_hsatlraw_rd_ergnslzt";
+	int status = MB_SUCCESS;
+	char line[MBF_HSATLRAW_MAXLINE];
+	int i;
+	int numvals;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
-		fprintf(stderr,"dbg2       shift:      %d\n",shift);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
-	if (strlen(line) < 84 + shift)
-		{
+	if (strlen(line) < 84 + shift) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_UNINTELLIGIBLE;
-		}
+	}
 
 	/* parse data from event record */
-	if (status == MB_SUCCESS)
-		{
-		mb_get_double( &(data->lon),        line+shift,    12);
-		mb_get_double( &(data->lat),        line+12+shift, 12);
-		mb_get_int(    &(data->year),       line+24+shift,  4);
-		mb_get_int(    &(data->month),      line+28+shift,  2);
-		mb_get_int(    &(data->day),        line+30+shift,  2);
-		mb_get_int(    &(data->hour),       line+32+shift,  2);
-		mb_get_int(    &(data->minute),     line+34+shift,  2);
-		mb_get_int(    &(data->second),     line+36+shift,  2);
-		mb_get_double( &(data->course_true),line+38+shift,  5);
-		mb_get_double( &(data->course_ground),line+43+shift,5);
-		mb_get_double( &(data->speed_ground),line+48+shift, 9);
-		mb_get_double( &(data->heave),      line+57+shift,  6);
-		mb_get_double( &(data->pitch),      line+63+shift,  4);
-		mb_get_double( &(data->roll),       line+67+shift,  5);
-		mb_get_double( &(data->time_center),line+72+shift,  6);
-		mb_get_double( &(data->time_scale), line+78+shift,  6);
-		data->time[29] = (int) (0.0001*(data->time_center)
-					/(data->time_scale));
-		}
+	if (status == MB_SUCCESS) {
+		mb_get_double(&(data->lon), line + shift, 12);
+		mb_get_double(&(data->lat), line + 12 + shift, 12);
+		mb_get_int(&(data->year), line + 24 + shift, 4);
+		mb_get_int(&(data->month), line + 28 + shift, 2);
+		mb_get_int(&(data->day), line + 30 + shift, 2);
+		mb_get_int(&(data->hour), line + 32 + shift, 2);
+		mb_get_int(&(data->minute), line + 34 + shift, 2);
+		mb_get_int(&(data->second), line + 36 + shift, 2);
+		mb_get_double(&(data->course_true), line + 38 + shift, 5);
+		mb_get_double(&(data->course_ground), line + 43 + shift, 5);
+		mb_get_double(&(data->speed_ground), line + 48 + shift, 9);
+		mb_get_double(&(data->heave), line + 57 + shift, 6);
+		mb_get_double(&(data->pitch), line + 63 + shift, 4);
+		mb_get_double(&(data->roll), line + 67 + shift, 5);
+		mb_get_double(&(data->time_center), line + 72 + shift, 6);
+		mb_get_double(&(data->time_scale), line + 78 + shift, 6);
+		data->time[29] = (int)(0.0001 * (data->time_center) / (data->time_scale));
+	}
 
 	/* read and parse data from first data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-		== MB_SUCCESS)
-		{
-		mb_get_int(&numvals,line+shift,2);
+	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->time[i+30]),line+i*4+2+shift,4);
-		else
-			{
+			for (i = 0; i < numvals; i++)
+				mb_get_int(&(data->time[i + 30]), line + i * 4 + 2 + shift, 4);
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* read and parse data from second data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-		== MB_SUCCESS)
-		{
-		mb_get_int(&numvals,line+shift,2);
+	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->time[28-i]),line+i*4+2+shift,4);
-		else
-			{
+			for (i = 0; i < numvals; i++)
+				mb_get_int(&(data->time[28 - i]), line + i * 4 + 2 + shift, 4);
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* read and parse data from third data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-		== MB_SUCCESS)
-		{
-		for (i=0;i<11;i++)
-			mb_get_double(&(data->gyro[i]),line+i*5+shift,5);
-		}
+	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		for (i = 0; i < 11; i++)
+			mb_get_double(&(data->gyro[i]), line + i * 5 + shift, 5);
+	}
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       course_true:      %f\n",
-			data->course_true);
-		fprintf(stderr,"dbg5       course_ground:    %f\n",
-			data->course_ground);
-		fprintf(stderr,"dbg5       speed_ground:     %f\n",
-			data->speed_ground);
-		fprintf(stderr,"dbg5       heave:            %f\n",
-			data->heave);
-		fprintf(stderr,"dbg5       pitch:            %f\n",
-			data->pitch);
-		fprintf(stderr,"dbg5       roll:             %f\n",
-			data->roll);
-		fprintf(stderr,"dbg5       time_center:      %f\n",
-			data->depth_center);
-		fprintf(stderr,"dbg5       time_scale:       %f\n",
-			data->time_scale);
-		fprintf(stderr,"dbg5       travel times:\n");
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
-			fprintf(stderr,"dbg5         %d  %d\n",
-				i,data->time[i]);
-		fprintf(stderr,"dbg5       gyro headings:\n");
-		for (i=0;i<11;i++)
-			fprintf(stderr,"dbg5         %d  %f\n",
-				i,data->gyro[i]);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       course_true:      %f\n", data->course_true);
+		fprintf(stderr, "dbg5       course_ground:    %f\n", data->course_ground);
+		fprintf(stderr, "dbg5       speed_ground:     %f\n", data->speed_ground);
+		fprintf(stderr, "dbg5       heave:            %f\n", data->heave);
+		fprintf(stderr, "dbg5       pitch:            %f\n", data->pitch);
+		fprintf(stderr, "dbg5       roll:             %f\n", data->roll);
+		fprintf(stderr, "dbg5       time_center:      %f\n", data->depth_center);
+		fprintf(stderr, "dbg5       time_scale:       %f\n", data->time_scale);
+		fprintf(stderr, "dbg5       travel times:\n");
+		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+			fprintf(stderr, "dbg5         %d  %d\n", i, data->time[i]);
+		fprintf(stderr, "dbg5       gyro headings:\n");
+		for (i = 0; i < 11; i++)
+			fprintf(stderr, "dbg5         %d  %f\n", i, data->gyro[i]);
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_rd_ergnctds";
-	int	status = MB_SUCCESS;
-	char	line[MBF_HSATLRAW_MAXLINE];
-	int	i, j, k;
-	int	nlines;
-	int	numvals;
+int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+	char *function_name = "mbr_hsatlraw_rd_ergnctds";
+	int status = MB_SUCCESS;
+	char line[MBF_HSATLRAW_MAXLINE];
+	int i, j, k;
+	int nlines;
+	int numvals;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
-		fprintf(stderr,"dbg2       shift:      %d\n",shift);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
-	if (strlen(line) < 40 + shift)
-		{
+	if (strlen(line) < 40 + shift) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_UNINTELLIGIBLE;
-		}
+	}
 
 	/* parse data from event record */
-	if (status == MB_SUCCESS)
-		{
-		mb_get_double( &(data->lon),        line+shift,    12);
-		mb_get_double( &(data->lat),        line+12+shift, 12);
-		mb_get_int(    &(data->year),       line+24+shift,  4);
-		mb_get_int(    &(data->month),      line+28+shift,  2);
-		mb_get_int(    &(data->day),        line+30+shift,  2);
-		mb_get_int(    &(data->hour),       line+32+shift,  2);
-		mb_get_int(    &(data->minute),     line+34+shift,  2);
-		mb_get_int(    &(data->second),     line+36+shift,  2);
-		mb_get_int(    &(data->num_vel),    line+38+shift,  2);
-		}
+	if (status == MB_SUCCESS) {
+		mb_get_double(&(data->lon), line + shift, 12);
+		mb_get_double(&(data->lat), line + 12 + shift, 12);
+		mb_get_int(&(data->year), line + 24 + shift, 4);
+		mb_get_int(&(data->month), line + 28 + shift, 2);
+		mb_get_int(&(data->day), line + 30 + shift, 2);
+		mb_get_int(&(data->hour), line + 32 + shift, 2);
+		mb_get_int(&(data->minute), line + 34 + shift, 2);
+		mb_get_int(&(data->second), line + 36 + shift, 2);
+		mb_get_int(&(data->num_vel), line + 38 + shift, 2);
+	}
 
 	nlines = 0;
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* figure out how many lines to read */
 		if (data->num_vel > MBF_HSATLRAW_MAXVEL)
 			data->num_vel = MBF_HSATLRAW_MAXVEL;
-		nlines = data->num_vel/10;
-		if (data->num_vel%10 > 0) nlines++;
-		}
+		nlines = data->num_vel / 10;
+		if (data->num_vel % 10 > 0)
+			nlines++;
+	}
 
 	/* read and parse data records from file */
-	for (i=0;i<nlines;i++)
-		{
-		if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-			== MB_SUCCESS)
-			{
+	for (i = 0; i < nlines; i++) {
+		if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 			numvals = 10;
-			if (i == nlines - 1) numvals = data->num_vel%10;
-			for (j=0;j<numvals;j++)
-				{
-				k = j + i*10;
-				mb_get_double(&(data->vdepth[k]),
-					line+j*11+shift,5);
-				mb_get_double(&(data->velocity[k]),
-					line+j*11+5+shift,6);
-				}
+			if (i == nlines - 1)
+				numvals = data->num_vel % 10;
+			for (j = 0; j < numvals; j++) {
+				k = j + i * 10;
+				mb_get_double(&(data->vdepth[k]), line + j * 11 + shift, 5);
+				mb_get_double(&(data->velocity[k]), line + j * 11 + 5 + shift, 6);
 			}
 		}
+	}
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       num_vel:          %d\n",
-			data->num_vel);
-		fprintf(stderr,"dbg5       water depths and velocities:\n");
-		for (i=0;i<11;i++)
-			fprintf(stderr,"dbg5         %d  %f  %f\n",
-				i,data->vdepth[i],data->velocity[i]);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       num_vel:          %d\n", data->num_vel);
+		fprintf(stderr, "dbg5       water depths and velocities:\n");
+		for (i = 0; i < 11; i++)
+			fprintf(stderr, "dbg5         %d  %f  %f\n", i, data->vdepth[i], data->velocity[i]);
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_rd_ergnampl";
-	int	status = MB_SUCCESS;
-	char	line[MBF_HSATLRAW_MAXLINE];
-	int	i;
-	int	numvals;
+int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+	char *function_name = "mbr_hsatlraw_rd_ergnampl";
+	int status = MB_SUCCESS;
+	char line[MBF_HSATLRAW_MAXLINE];
+	int i;
+	int numvals;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
-		fprintf(stderr,"dbg2       shift:      %d\n",shift);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
+	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
-	if (strlen(line) < 90 + shift)
-		{
+	if (strlen(line) < 90 + shift) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_UNINTELLIGIBLE;
-		}
+	}
 
 	/* parse data from event record */
-	if (status == MB_SUCCESS)
-		{
-		mb_get_double( &(data->lon),        line+shift,    12);
-		mb_get_double( &(data->lat),        line+12+shift, 12);
-		mb_get_int(    &(data->year),       line+24+shift,  4);
-		mb_get_int(    &(data->month),      line+28+shift,  2);
-		mb_get_int(    &(data->day),        line+30+shift,  2);
-		mb_get_int(    &(data->hour),       line+32+shift,  2);
-		mb_get_int(    &(data->minute),     line+34+shift,  2);
-		mb_get_int(    &(data->second),     line+36+shift,  2);
-		data->mode[0] = line[38+shift];
-		mb_get_int(    &(data->trans_strbd),line+39+shift,  3);
-		mb_get_int(    &(data->trans_vert), line+42+shift,  3);
-		mb_get_int(    &(data->trans_port), line+45+shift,  3);
-		mb_get_int(    &(data->pulse_len_strbd),line+48+shift,2);
-		mb_get_int(    &(data->pulse_len_vert),line+50+shift,2);
-		mb_get_int(    &(data->pulse_len_port),line+52+shift,2);
-		mb_get_int(    &(data->gain_start), line+54+shift,  2);
-		mb_get_int(    &(data->r_compensation_factor),line+56+shift,2);
-		mb_get_int(    &(data->compensation_start),line+58+shift,4);
-		mb_get_int(    &(data->increase_start),line+62+shift,5);
-		mb_get_int(    &(data->tvc_near),   line+67+shift,  2);
-		mb_get_int(    &(data->tvc_far),    line+69+shift,  2);
-		mb_get_int(    &(data->increase_int_near),line+71+shift,3);
-		mb_get_int(    &(data->increase_int_far),line+74+shift,3);
-		mb_get_int(    &(data->gain_center),line+77+shift,  1);
-		mb_get_double( &(data->filter_gain),line+78+shift,  5);
-		mb_get_int(    &(data->amplitude_center),line+83+shift,3);
-		mb_get_int(    &(data->echo_duration_center),line+86+shift,3);
-		mb_get_int(    &(data->echo_scale_center),line+89+shift,1);
+	if (status == MB_SUCCESS) {
+		mb_get_double(&(data->lon), line + shift, 12);
+		mb_get_double(&(data->lat), line + 12 + shift, 12);
+		mb_get_int(&(data->year), line + 24 + shift, 4);
+		mb_get_int(&(data->month), line + 28 + shift, 2);
+		mb_get_int(&(data->day), line + 30 + shift, 2);
+		mb_get_int(&(data->hour), line + 32 + shift, 2);
+		mb_get_int(&(data->minute), line + 34 + shift, 2);
+		mb_get_int(&(data->second), line + 36 + shift, 2);
+		data->mode[0] = line[38 + shift];
+		mb_get_int(&(data->trans_strbd), line + 39 + shift, 3);
+		mb_get_int(&(data->trans_vert), line + 42 + shift, 3);
+		mb_get_int(&(data->trans_port), line + 45 + shift, 3);
+		mb_get_int(&(data->pulse_len_strbd), line + 48 + shift, 2);
+		mb_get_int(&(data->pulse_len_vert), line + 50 + shift, 2);
+		mb_get_int(&(data->pulse_len_port), line + 52 + shift, 2);
+		mb_get_int(&(data->gain_start), line + 54 + shift, 2);
+		mb_get_int(&(data->r_compensation_factor), line + 56 + shift, 2);
+		mb_get_int(&(data->compensation_start), line + 58 + shift, 4);
+		mb_get_int(&(data->increase_start), line + 62 + shift, 5);
+		mb_get_int(&(data->tvc_near), line + 67 + shift, 2);
+		mb_get_int(&(data->tvc_far), line + 69 + shift, 2);
+		mb_get_int(&(data->increase_int_near), line + 71 + shift, 3);
+		mb_get_int(&(data->increase_int_far), line + 74 + shift, 3);
+		mb_get_int(&(data->gain_center), line + 77 + shift, 1);
+		mb_get_double(&(data->filter_gain), line + 78 + shift, 5);
+		mb_get_int(&(data->amplitude_center), line + 83 + shift, 3);
+		mb_get_int(&(data->echo_duration_center), line + 86 + shift, 3);
+		mb_get_int(&(data->echo_scale_center), line + 89 + shift, 1);
 		data->amplitude[29] = data->amplitude_center;
-		data->echo_duration[29] = (int) data->echo_duration_center;
-		}
+		data->echo_duration[29] = (int)data->echo_duration_center;
+	}
 
 	/* read and parse data from first data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-		== MB_SUCCESS)
-		{
-		for (i=0;i<8;i++)
-			mb_get_int(&(data->gain[i+8]),line+i+shift,1);
-		mb_get_int(&numvals,line+8+shift,2);
+	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		for (i = 0; i < 8; i++)
+			mb_get_int(&(data->gain[i + 8]), line + i + shift, 1);
+		mb_get_int(&numvals, line + 8 + shift, 2);
 		if (numvals == 29)
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->amplitude[i+30]),
-				line+i*3+10+shift,3);
-		else
-			{
+			for (i = 0; i < numvals; i++)
+				mb_get_int(&(data->amplitude[i + 30]), line + i * 3 + 10 + shift, 3);
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* read and parse data from second data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-		== MB_SUCCESS)
-		{
-		for (i=0;i<8;i++)
-			mb_get_int(&(data->gain[i]),line+i+shift,1);
-		mb_get_int(&numvals,line+8+shift,2);
+	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		for (i = 0; i < 8; i++)
+			mb_get_int(&(data->gain[i]), line + i + shift, 1);
+		mb_get_int(&numvals, line + 8 + shift, 2);
 		if (numvals == 29)
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->amplitude[28-i]),
-				line+i*3+10+shift,3);
-		else
-			{
+			for (i = 0; i < numvals; i++)
+				mb_get_int(&(data->amplitude[28 - i]), line + i * 3 + 10 + shift, 3);
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* read and parse data from third data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-		== MB_SUCCESS)
-		{
-		for (i=0;i<8;i++)
-			mb_get_int(&(data->echo_scale[i+8]),line+1+shift,1);
-		mb_get_int(&numvals,line+8+shift,2);
+	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		for (i = 0; i < 8; i++)
+			mb_get_int(&(data->echo_scale[i + 8]), line + 1 + shift, 1);
+		mb_get_int(&numvals, line + 8 + shift, 2);
 		if (numvals == 29)
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->echo_duration[i+30]),
-				line+i*3+10+shift,3);
-		else
-			{
+			for (i = 0; i < numvals; i++)
+				mb_get_int(&(data->echo_duration[i + 30]), line + i * 3 + 10 + shift, 3);
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* read and parse data from fourth data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error))
-		== MB_SUCCESS)
-		{
-		for (i=0;i<8;i++)
-			mb_get_int(&(data->echo_scale[i]),line+1+shift,1);
-		mb_get_int(&numvals,line+8+shift,2);
+	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
+		for (i = 0; i < 8; i++)
+			mb_get_int(&(data->echo_scale[i]), line + 1 + shift, 1);
+		mb_get_int(&numvals, line + 8 + shift, 2);
 		if (numvals == 29)
-		for (i=0;i<numvals;i++)
-			mb_get_int(&(data->echo_duration[28-i]),
-				line+i*3+10+shift,3);
-		else
-			{
+			for (i = 0; i < numvals; i++)
+				mb_get_int(&(data->echo_duration[28 - i]), line + i * 3 + 10 + shift, 3);
+		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
 		}
+	}
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       mode:             %c\n",
-			data->mode[0]);
-		fprintf(stderr,"dbg5       trans_strbd:      %d\n",
-			data->trans_strbd);
-		fprintf(stderr,"dbg5       trans_vert:       %d\n",
-			data->trans_vert);
-		fprintf(stderr,"dbg5       trans_port:       %d\n",
-			data->trans_port);
-		fprintf(stderr,"dbg5       pulse_len_strbd:  %d\n",
-			data->pulse_len_strbd);
-		fprintf(stderr,"dbg5       pulse_len_vert:   %d\n",
-			data->pulse_len_vert);
-		fprintf(stderr,"dbg5       pulse_len_port:   %d\n",
-			data->pulse_len_port);
-		fprintf(stderr,"dbg5       gain_start:       %d\n",
-			data->gain_start);
-		fprintf(stderr,"dbg5       r_comp_factor:    %d\n",
-			data->r_compensation_factor);
-		fprintf(stderr,"dbg5       comp_start:       %d\n",
-			data->compensation_start);
-		fprintf(stderr,"dbg5       increase_start:   %d\n",
-			data->increase_start);
-		fprintf(stderr,"dbg5       tvc_near:         %d\n",
-			data->tvc_near);
-		fprintf(stderr,"dbg5       increase_start:   %d\n",
-			data->increase_start);
-		fprintf(stderr,"dbg5       tvc_far:          %d\n",
-			data->tvc_far);
-		fprintf(stderr,"dbg5       increase_int_near:%d\n",
-			data->increase_int_near);
-		fprintf(stderr,"dbg5       increase_int_far: %d\n",
-			data->increase_int_far);
-		fprintf(stderr,"dbg5       gain_center:      %d\n",
-			data->gain_center);
-		fprintf(stderr,"dbg5       filter_gain:      %f\n",
-			data->filter_gain);
-		fprintf(stderr,"dbg5       amplitude_center: %d\n",
-			data->amplitude_center);
-		fprintf(stderr,"dbg5       echo_dur_center:  %d\n",
-			data->echo_duration_center);
-		fprintf(stderr,"dbg5       echo_scal_center: %d\n",
-			data->echo_scale_center);
-		fprintf(stderr,"dbg5       amplitudes and echo durations:\n");
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
-			fprintf(stderr,"dbg5         %d  %d  %d\n",
-				i,data->amplitude[i],data->echo_duration[i]);
-		fprintf(stderr,"dbg5       gains and echo scales:\n");
-		for (i=0;i<16;i++)
-			fprintf(stderr,"dbg5         %d  %d  %d\n",
-				i,data->gain[i],data->echo_scale[i]);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       mode:             %c\n", data->mode[0]);
+		fprintf(stderr, "dbg5       trans_strbd:      %d\n", data->trans_strbd);
+		fprintf(stderr, "dbg5       trans_vert:       %d\n", data->trans_vert);
+		fprintf(stderr, "dbg5       trans_port:       %d\n", data->trans_port);
+		fprintf(stderr, "dbg5       pulse_len_strbd:  %d\n", data->pulse_len_strbd);
+		fprintf(stderr, "dbg5       pulse_len_vert:   %d\n", data->pulse_len_vert);
+		fprintf(stderr, "dbg5       pulse_len_port:   %d\n", data->pulse_len_port);
+		fprintf(stderr, "dbg5       gain_start:       %d\n", data->gain_start);
+		fprintf(stderr, "dbg5       r_comp_factor:    %d\n", data->r_compensation_factor);
+		fprintf(stderr, "dbg5       comp_start:       %d\n", data->compensation_start);
+		fprintf(stderr, "dbg5       increase_start:   %d\n", data->increase_start);
+		fprintf(stderr, "dbg5       tvc_near:         %d\n", data->tvc_near);
+		fprintf(stderr, "dbg5       increase_start:   %d\n", data->increase_start);
+		fprintf(stderr, "dbg5       tvc_far:          %d\n", data->tvc_far);
+		fprintf(stderr, "dbg5       increase_int_near:%d\n", data->increase_int_near);
+		fprintf(stderr, "dbg5       increase_int_far: %d\n", data->increase_int_far);
+		fprintf(stderr, "dbg5       gain_center:      %d\n", data->gain_center);
+		fprintf(stderr, "dbg5       filter_gain:      %f\n", data->filter_gain);
+		fprintf(stderr, "dbg5       amplitude_center: %d\n", data->amplitude_center);
+		fprintf(stderr, "dbg5       echo_dur_center:  %d\n", data->echo_duration_center);
+		fprintf(stderr, "dbg5       echo_scal_center: %d\n", data->echo_scale_center);
+		fprintf(stderr, "dbg5       amplitudes and echo durations:\n");
+		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->amplitude[i], data->echo_duration[i]);
+		fprintf(stderr, "dbg5       gains and echo scales:\n");
+		for (i = 0; i < 16; i++)
+			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->gain[i], data->echo_scale[i]);
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp,
-		struct mbf_hsatlraw_struct *data, int shift, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_rd_ldeocmnt";
-	int	status = MB_SUCCESS;
-	char	line[MBF_HSATLRAW_MAXLINE];
-	int	nchars;
+int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
+	char *function_name = "mbr_hsatlraw_rd_ldeocmnt";
+	int status = MB_SUCCESS;
+	char line[MBF_HSATLRAW_MAXLINE];
+	int nchars;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data:       %p\n",(void *)data);
-		fprintf(stderr,"dbg2       shift:      %d\n",shift);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+		fprintf(stderr, "dbg2       shift:      %d\n", shift);
+	}
 
 	/* read comment record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift,line,error);
+	status = mbr_hsatlraw_read_line(verbose, mbfp, shift, line, error);
 
 	/* copy comment into data structure */
-	if (status == MB_SUCCESS)
-		{
-		nchars = strlen(line+shift);
+	if (status == MB_SUCCESS) {
+		nchars = strlen(line + shift);
 		if (nchars > 0)
-			strncpy(data->comment,line+shift,nchars);
+			strncpy(data->comment, line + shift, nchars);
 		else
 			data->comment[0] = '\0';
-		}
+	}
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Value read in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       comment:          %s\n",
-			data->comment);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Value read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_data";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_data";
+	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsatlraw_struct *data;
-	FILE	*mbfp;
+	FILE *mbfp;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %p\n",(void *)mbio_ptr);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 	mbfp = mb_io_ptr->mbfp;
 
-	if (data->kind == MB_DATA_RAW_LINE)
-		{
-		status = mbr_hsatlraw_wr_rawline(verbose,mbfp,data,error);
-		}
-	else if (data->kind == MB_DATA_DATA)
-		{
-		status = mbr_hsatlraw_wr_ergnmess(verbose,mbfp,data_ptr,error);
-		status = mbr_hsatlraw_wr_ergnslzt(verbose,mbfp,data_ptr,error);
-		status = mbr_hsatlraw_wr_ergnampl(verbose,mbfp,data_ptr,error);
-		}
-	else if (data->kind == MB_DATA_CALIBRATE)
-		{
-		status = mbr_hsatlraw_wr_ergneich(verbose,mbfp,data_ptr,error);
-		status = mbr_hsatlraw_wr_ergnslzt(verbose,mbfp,data_ptr,error);
-		status = mbr_hsatlraw_wr_ergnampl(verbose,mbfp,data_ptr,error);
-		}
-	else if (data->kind == MB_DATA_MEAN_VELOCITY)
-		{
-		status = mbr_hsatlraw_wr_ergnhydi(verbose,mbfp,data_ptr,error);
-		}
-	else if (data->kind == MB_DATA_VELOCITY_PROFILE)
-		{
-		status = mbr_hsatlraw_wr_ergnctds(verbose,mbfp,data_ptr,error);
-		}
-	else if (data->kind == MB_DATA_STANDBY)
-		{
-		status = mbr_hsatlraw_wr_ergnpara(verbose,mbfp,data_ptr,error);
-		}
-	else if (data->kind == MB_DATA_NAV_SOURCE)
-		{
-		status = mbr_hsatlraw_wr_ergnposi(verbose,mbfp,data_ptr,error);
-		}
-	else if (data->kind == MB_DATA_COMMENT)
-		{
-		status = mbr_hsatlraw_wr_ldeocmnt(verbose,mbfp,data_ptr,error);
-		}
-	else
-		{
+	if (data->kind == MB_DATA_RAW_LINE) {
+		status = mbr_hsatlraw_wr_rawline(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_DATA) {
+		status = mbr_hsatlraw_wr_ergnmess(verbose, mbfp, data_ptr, error);
+		status = mbr_hsatlraw_wr_ergnslzt(verbose, mbfp, data_ptr, error);
+		status = mbr_hsatlraw_wr_ergnampl(verbose, mbfp, data_ptr, error);
+	}
+	else if (data->kind == MB_DATA_CALIBRATE) {
+		status = mbr_hsatlraw_wr_ergneich(verbose, mbfp, data_ptr, error);
+		status = mbr_hsatlraw_wr_ergnslzt(verbose, mbfp, data_ptr, error);
+		status = mbr_hsatlraw_wr_ergnampl(verbose, mbfp, data_ptr, error);
+	}
+	else if (data->kind == MB_DATA_MEAN_VELOCITY) {
+		status = mbr_hsatlraw_wr_ergnhydi(verbose, mbfp, data_ptr, error);
+	}
+	else if (data->kind == MB_DATA_VELOCITY_PROFILE) {
+		status = mbr_hsatlraw_wr_ergnctds(verbose, mbfp, data_ptr, error);
+	}
+	else if (data->kind == MB_DATA_STANDBY) {
+		status = mbr_hsatlraw_wr_ergnpara(verbose, mbfp, data_ptr, error);
+	}
+	else if (data->kind == MB_DATA_NAV_SOURCE) {
+		status = mbr_hsatlraw_wr_ergnposi(verbose, mbfp, data_ptr, error);
+	}
+	else if (data->kind == MB_DATA_COMMENT) {
+		status = mbr_hsatlraw_wr_ldeocmnt(verbose, mbfp, data_ptr, error);
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_KIND;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Data record kind in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       kind:       %d\n",data->kind);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_hsatlraw_wr_label(int verbose, FILE *mbfp, char type, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_label";
-	int	status = MB_SUCCESS;
-	char	line[MBF_HSATLRAW_MAXLINE];
+int mbr_hsatlraw_wr_label(int verbose, FILE *mbfp, char type, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_label";
+	int status = MB_SUCCESS;
+	char line[MBF_HSATLRAW_MAXLINE];
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       type:       %d\n",type);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       type:       %d\n", type);
+	}
 
 	/* write label in file */
-	sprintf(line,"%8s\n",mbf_hsatlraw_labels[(int)type]);
-	status = mbr_hsatlraw_write_line(verbose,mbfp,line,error);
+	sprintf(line, "%8s\n", mbf_hsatlraw_labels[(int)type]);
+	status = mbr_hsatlraw_write_line(verbose, mbfp, line, error);
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_hsatlraw_write_line(int verbose, FILE *mbfp, char *line, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_write_line";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_write_line(int verbose, FILE *mbfp, char *line, int *error) {
+	char *function_name = "mbr_hsatlraw_write_line";
+	int status = MB_SUCCESS;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       line:       %s\n",line);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       line:       %s\n", line);
+	}
 
 	/* write next line in file */
-	if ((status = fputs(line,mbfp)) != EOF)
-		{
+	if ((status = fputs(line, mbfp)) != EOF) {
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
-		}
-	else
-		{
+	}
+	else {
 		*error = MB_ERROR_WRITE_FAIL;
 		status = MB_FAILURE;
-		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_rawline";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_rawline";
+	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       raw line:         %s\n",
-			data->comment);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       raw line:         %s\n", data->comment);
+	}
 
 	/* write out the data */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* output the line */
-		status = fprintf(mbfp,"%s\n",data->comment);
-		if (status >= 0)
-			{
+		status = fprintf(mbfp, "%s\n", data->comment);
+		if (status >= 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else
-			{
+		}
+		else {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnhydi(int verbose, FILE *mbfp, void *data_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_ergnhydi";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_wr_ergnhydi(int verbose, FILE *mbfp, void *data_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_ergnhydi";
+	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       alt minute:       %d\n",
-			data->alt_minute);
-		fprintf(stderr,"dbg5       alt second:       %d\n",
-			data->alt_second);
-		fprintf(stderr,"dbg5       draught:          %f\n",
-			data->draught);
-		fprintf(stderr,"dbg5       mean velocity:    %f\n",
-			data->vel_mean);
-		fprintf(stderr,"dbg5       keel velocity:    %f\n",
-			data->vel_keel);
-		fprintf(stderr,"dbg5       tide:             %f\n",data->tide);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       alt minute:       %d\n", data->alt_minute);
+		fprintf(stderr, "dbg5       alt second:       %d\n", data->alt_second);
+		fprintf(stderr, "dbg5       draught:          %f\n", data->draught);
+		fprintf(stderr, "dbg5       mean velocity:    %f\n", data->vel_mean);
+		fprintf(stderr, "dbg5       keel velocity:    %f\n", data->vel_keel);
+		fprintf(stderr, "dbg5       tide:             %f\n", data->tide);
+	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose,mbfp,
-		MBF_HSATLRAW_ERGNHYDI,error);
+	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNHYDI, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp,"%+12.7f",data->lon);
-		status = fprintf(mbfp,"%+12.7f",data->lat);
-		status = fprintf(mbfp,"%4.4d",data->year);
-		status = fprintf(mbfp,"%2.2d",data->month);
-		status = fprintf(mbfp,"%2.2d",data->day);
-		status = fprintf(mbfp,"%2.2d",data->hour);
-		status = fprintf(mbfp,"%2.2d",data->minute);
-		status = fprintf(mbfp,"%2.2d",data->second);
-		status = fprintf(mbfp,"%5d",data->alt_minute);
-		status = fprintf(mbfp,"%2d",data->alt_second);
-		status = fprintf(mbfp,"%4.1f",data->draught);
-		status = fprintf(mbfp,"%7.2f",data->vel_mean);
-		status = fprintf(mbfp,"%7.2f",data->vel_keel);
-		status = fprintf(mbfp,"%+06.2f\n",data->tide);
+		status = fprintf(mbfp, "%+12.7f", data->lon);
+		status = fprintf(mbfp, "%+12.7f", data->lat);
+		status = fprintf(mbfp, "%4.4d", data->year);
+		status = fprintf(mbfp, "%2.2d", data->month);
+		status = fprintf(mbfp, "%2.2d", data->day);
+		status = fprintf(mbfp, "%2.2d", data->hour);
+		status = fprintf(mbfp, "%2.2d", data->minute);
+		status = fprintf(mbfp, "%2.2d", data->second);
+		status = fprintf(mbfp, "%5d", data->alt_minute);
+		status = fprintf(mbfp, "%2d", data->alt_second);
+		status = fprintf(mbfp, "%4.1f", data->draught);
+		status = fprintf(mbfp, "%7.2f", data->vel_mean);
+		status = fprintf(mbfp, "%7.2f", data->vel_keel);
+		status = fprintf(mbfp, "%+06.2f\n", data->tide);
 
 		/* check for an error */
-		if (status > 0)
-			{
+		if (status > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else
-			{
+		}
+		else {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnpara(int verbose, FILE *mbfp, void *data_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_ergnpara";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_wr_ergnpara(int verbose, FILE *mbfp, void *data_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_ergnpara";
+	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       alt minute:       %d\n",
-			data->alt_minute);
-		fprintf(stderr,"dbg5       alt second:       %d\n",
-			data->alt_second);
-		fprintf(stderr,"dbg5       course_true:      %f\n",
-			data->course_true);
-		fprintf(stderr,"dbg5       speed_transverse: %f\n",
-			data->speed_transverse);
-		fprintf(stderr,"dbg5       speed:            %f\n",
-			data->speed);
-		fprintf(stderr,"dbg5       speed_reference:  %c\n",
-			data->speed_reference[0]);
-		fprintf(stderr,"dbg5       pitch:            %f\n",
-			data->pitch);
-		fprintf(stderr,"dbg5       track:            %d\n",
-			data->track);
-		fprintf(stderr,"dbg5       depth_center:     %f\n",
-			data->depth_center);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       alt minute:       %d\n", data->alt_minute);
+		fprintf(stderr, "dbg5       alt second:       %d\n", data->alt_second);
+		fprintf(stderr, "dbg5       course_true:      %f\n", data->course_true);
+		fprintf(stderr, "dbg5       speed_transverse: %f\n", data->speed_transverse);
+		fprintf(stderr, "dbg5       speed:            %f\n", data->speed);
+		fprintf(stderr, "dbg5       speed_reference:  %c\n", data->speed_reference[0]);
+		fprintf(stderr, "dbg5       pitch:            %f\n", data->pitch);
+		fprintf(stderr, "dbg5       track:            %d\n", data->track);
+		fprintf(stderr, "dbg5       depth_center:     %f\n", data->depth_center);
+	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose,mbfp,
-		MBF_HSATLRAW_ERGNPARA,error);
+	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNPARA, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp,"%+12.7f",data->lon);
-		status = fprintf(mbfp,"%+12.7f",data->lat);
-		status = fprintf(mbfp,"%4.4d",data->year);
-		status = fprintf(mbfp,"%2.2d",data->month);
-		status = fprintf(mbfp,"%2.2d",data->day);
-		status = fprintf(mbfp,"%2.2d",data->hour);
-		status = fprintf(mbfp,"%2.2d",data->minute);
-		status = fprintf(mbfp,"%2.2d",data->second);
-		status = fprintf(mbfp,"%5d",data->alt_minute);
-		status = fprintf(mbfp,"%2d",data->alt_second);
-		status = fprintf(mbfp,"%5.1f",data->course_true);
-		status = fprintf(mbfp,"%+9.1f",data->speed_transverse);
-		status = fprintf(mbfp,"%+9.1f",data->speed);
-		status = fprintf(mbfp,"%c",data->speed_reference[0]);
-		status = fprintf(mbfp,"%+4.1f",data->pitch);
-		status = fprintf(mbfp,"%4.4d",data->track);
-		status = fprintf(mbfp,"%7.1f\n",data->depth_center);
+		status = fprintf(mbfp, "%+12.7f", data->lon);
+		status = fprintf(mbfp, "%+12.7f", data->lat);
+		status = fprintf(mbfp, "%4.4d", data->year);
+		status = fprintf(mbfp, "%2.2d", data->month);
+		status = fprintf(mbfp, "%2.2d", data->day);
+		status = fprintf(mbfp, "%2.2d", data->hour);
+		status = fprintf(mbfp, "%2.2d", data->minute);
+		status = fprintf(mbfp, "%2.2d", data->second);
+		status = fprintf(mbfp, "%5d", data->alt_minute);
+		status = fprintf(mbfp, "%2d", data->alt_second);
+		status = fprintf(mbfp, "%5.1f", data->course_true);
+		status = fprintf(mbfp, "%+9.1f", data->speed_transverse);
+		status = fprintf(mbfp, "%+9.1f", data->speed);
+		status = fprintf(mbfp, "%c", data->speed_reference[0]);
+		status = fprintf(mbfp, "%+4.1f", data->pitch);
+		status = fprintf(mbfp, "%4.4d", data->track);
+		status = fprintf(mbfp, "%7.1f\n", data->depth_center);
 
 		/* check for an error */
-		if (status > 0)
-			{
+		if (status > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else
-			{
+		}
+		else {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnposi(int verbose, FILE *mbfp, void *data_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_ergnposi";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_wr_ergnposi(int verbose, FILE *mbfp, void *data_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_ergnposi";
+	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       alt minute:       %d\n",
-			data->alt_minute);
-		fprintf(stderr,"dbg5       alt second:       %d\n",
-			data->alt_second);
-		fprintf(stderr,"dbg5       pos_corr_x:       %f\n",
-			data->pos_corr_x);
-		fprintf(stderr,"dbg5       pos_corr_y:       %f\n",
-			data->pos_corr_y);
-		fprintf(stderr,"dbg5       sensors:          %s\n",
-			data->sensors);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       alt minute:       %d\n", data->alt_minute);
+		fprintf(stderr, "dbg5       alt second:       %d\n", data->alt_second);
+		fprintf(stderr, "dbg5       pos_corr_x:       %f\n", data->pos_corr_x);
+		fprintf(stderr, "dbg5       pos_corr_y:       %f\n", data->pos_corr_y);
+		fprintf(stderr, "dbg5       sensors:          %s\n", data->sensors);
+	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose,mbfp,
-		MBF_HSATLRAW_ERGNPOSI,error);
+	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNPOSI, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp,"%+12.7f",data->lon);
-		status = fprintf(mbfp,"%+12.7f",data->lat);
-		status = fprintf(mbfp,"%4.4d",data->year);
-		status = fprintf(mbfp,"%2.2d",data->month);
-		status = fprintf(mbfp,"%2.2d",data->day);
-		status = fprintf(mbfp,"%2.2d",data->hour);
-		status = fprintf(mbfp,"%2.2d",data->minute);
-		status = fprintf(mbfp,"%2.2d",data->second);
-		status = fprintf(mbfp,"%5d",data->alt_minute);
-		status = fprintf(mbfp,"%2d",data->alt_second);
-		status = fprintf(mbfp,"%7.0f",data->pos_corr_x);
-		status = fprintf(mbfp,"%7.0f",data->pos_corr_y);
-		status = fprintf(mbfp,"%8s\n",data->sensors);
+		status = fprintf(mbfp, "%+12.7f", data->lon);
+		status = fprintf(mbfp, "%+12.7f", data->lat);
+		status = fprintf(mbfp, "%4.4d", data->year);
+		status = fprintf(mbfp, "%2.2d", data->month);
+		status = fprintf(mbfp, "%2.2d", data->day);
+		status = fprintf(mbfp, "%2.2d", data->hour);
+		status = fprintf(mbfp, "%2.2d", data->minute);
+		status = fprintf(mbfp, "%2.2d", data->second);
+		status = fprintf(mbfp, "%5d", data->alt_minute);
+		status = fprintf(mbfp, "%2d", data->alt_second);
+		status = fprintf(mbfp, "%7.0f", data->pos_corr_x);
+		status = fprintf(mbfp, "%7.0f", data->pos_corr_y);
+		status = fprintf(mbfp, "%8s\n", data->sensors);
 
 		/* check for an error */
-		if (status > 0)
-			{
+		if (status > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else
-			{
+		}
+		else {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_ergneich";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_ergneich";
+	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       alt minute:       %d\n",
-			data->alt_minute);
-		fprintf(stderr,"dbg5       alt second:       %d\n",
-			data->alt_second);
-		fprintf(stderr,"dbg5       course_true:      %f\n",
-			data->course_true);
-		fprintf(stderr,"dbg5       speed_transverse: %f\n",
-			data->speed_transverse);
-		fprintf(stderr,"dbg5       speed:            %f\n",
-			data->speed);
-		fprintf(stderr,"dbg5       speed_reference:  %c\n",
-			data->speed_reference[0]);
-		fprintf(stderr,"dbg5       pitch:            %f\n",
-			data->pitch);
-		fprintf(stderr,"dbg5       track:            %d\n",
-			data->track);
-		fprintf(stderr,"dbg5       depth_center:     %f\n",
-			data->depth_center);
-		fprintf(stderr,"dbg5       depth_scale:      %f\n",
-			data->depth_scale);
-		fprintf(stderr,"dbg5       spare:            %d\n",
-			data->spare);
-		fprintf(stderr,"dbg5       distances and depths:\n");
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
-			fprintf(stderr,"dbg5         %d  %d  %d\n",
-				i,data->distance[i],data->depth[i]);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       alt minute:       %d\n", data->alt_minute);
+		fprintf(stderr, "dbg5       alt second:       %d\n", data->alt_second);
+		fprintf(stderr, "dbg5       course_true:      %f\n", data->course_true);
+		fprintf(stderr, "dbg5       speed_transverse: %f\n", data->speed_transverse);
+		fprintf(stderr, "dbg5       speed:            %f\n", data->speed);
+		fprintf(stderr, "dbg5       speed_reference:  %c\n", data->speed_reference[0]);
+		fprintf(stderr, "dbg5       pitch:            %f\n", data->pitch);
+		fprintf(stderr, "dbg5       track:            %d\n", data->track);
+		fprintf(stderr, "dbg5       depth_center:     %f\n", data->depth_center);
+		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
+		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
+		fprintf(stderr, "dbg5       distances and depths:\n");
+		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
+	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose,mbfp,
-		MBF_HSATLRAW_ERGNEICH,error);
+	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNEICH, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp,"%+12.7f",data->lon);
-		status = fprintf(mbfp,"%+12.7f",data->lat);
-		status = fprintf(mbfp,"%4.4d",data->year);
-		status = fprintf(mbfp,"%2.2d",data->month);
-		status = fprintf(mbfp,"%2.2d",data->day);
-		status = fprintf(mbfp,"%2.2d",data->hour);
-		status = fprintf(mbfp,"%2.2d",data->minute);
-		status = fprintf(mbfp,"%2.2d",data->second);
-		status = fprintf(mbfp,"%5d",data->alt_minute);
-		status = fprintf(mbfp,"%2d",data->alt_second);
-		status = fprintf(mbfp,"%5.1f",data->course_true);
-		status = fprintf(mbfp,"%+9.1f",data->speed_transverse);
-		status = fprintf(mbfp,"%+9.1f",data->speed);
-		status = fprintf(mbfp,"%c",data->speed_reference[0]);
-		status = fprintf(mbfp,"%+4.1f",data->pitch);
-		status = fprintf(mbfp,"%4.4d",data->track);
-		status = fprintf(mbfp,"%7.1f",data->depth_center);
-		status = fprintf(mbfp,"%4.2f",data->depth_scale);
-		status = fprintf(mbfp,"%2d\n",data->spare);
+		status = fprintf(mbfp, "%+12.7f", data->lon);
+		status = fprintf(mbfp, "%+12.7f", data->lat);
+		status = fprintf(mbfp, "%4.4d", data->year);
+		status = fprintf(mbfp, "%2.2d", data->month);
+		status = fprintf(mbfp, "%2.2d", data->day);
+		status = fprintf(mbfp, "%2.2d", data->hour);
+		status = fprintf(mbfp, "%2.2d", data->minute);
+		status = fprintf(mbfp, "%2.2d", data->second);
+		status = fprintf(mbfp, "%5d", data->alt_minute);
+		status = fprintf(mbfp, "%2d", data->alt_second);
+		status = fprintf(mbfp, "%5.1f", data->course_true);
+		status = fprintf(mbfp, "%+9.1f", data->speed_transverse);
+		status = fprintf(mbfp, "%+9.1f", data->speed);
+		status = fprintf(mbfp, "%c", data->speed_reference[0]);
+		status = fprintf(mbfp, "%+4.1f", data->pitch);
+		status = fprintf(mbfp, "%4.4d", data->track);
+		status = fprintf(mbfp, "%7.1f", data->depth_center);
+		status = fprintf(mbfp, "%4.2f", data->depth_scale);
+		status = fprintf(mbfp, "%2d\n", data->spare);
 
 		/* output forward distances */
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%4.4d",data->distance[i+30]);
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%4.4d", data->distance[i + 30]);
+		status = fprintf(mbfp, "\n");
 
 		/* output forward depths */
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%4.4d",data->depth[i+30]);
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%4.4d", data->depth[i + 30]);
+		status = fprintf(mbfp, "\n");
 
 		/* output aft distances */
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%4.4d",(-data->distance[28-i]));
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%4.4d", (-data->distance[28 - i]));
+		status = fprintf(mbfp, "\n");
 
 		/* output aft depths */
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%4.4d",data->depth[28-i]);
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%4.4d", data->depth[28 - i]);
+		status = fprintf(mbfp, "\n");
 
 		/* check for an error */
-		if (status > 0)
-			{
+		if (status > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else
-			{
+		}
+		else {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_ergnmess";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_ergnmess";
+	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
-	int	i;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       alt minute:       %d\n",
-			data->alt_minute);
-		fprintf(stderr,"dbg5       alt second:       %d\n",
-			data->alt_second);
-		fprintf(stderr,"dbg5       course_true:      %f\n",
-			data->course_true);
-		fprintf(stderr,"dbg5       speed_transverse: %f\n",
-			data->speed_transverse);
-		fprintf(stderr,"dbg5       speed:            %f\n",
-			data->speed);
-		fprintf(stderr,"dbg5       speed_reference:  %c\n",
-			data->speed_reference[0]);
-		fprintf(stderr,"dbg5       pitch:            %f\n",
-			data->pitch);
-		fprintf(stderr,"dbg5       track:            %d\n",
-			data->track);
-		fprintf(stderr,"dbg5       depth_center:     %f\n",
-			data->depth_center);
-		fprintf(stderr,"dbg5       depth_scale:      %f\n",
-			data->depth_scale);
-		fprintf(stderr,"dbg5       spare:            %d\n",
-			data->spare);
-		fprintf(stderr,"dbg5       distances and depths:\n");
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
-			fprintf(stderr,"dbg5         %d  %d  %d\n",
-				i,data->distance[i],data->depth[i]);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       alt minute:       %d\n", data->alt_minute);
+		fprintf(stderr, "dbg5       alt second:       %d\n", data->alt_second);
+		fprintf(stderr, "dbg5       course_true:      %f\n", data->course_true);
+		fprintf(stderr, "dbg5       speed_transverse: %f\n", data->speed_transverse);
+		fprintf(stderr, "dbg5       speed:            %f\n", data->speed);
+		fprintf(stderr, "dbg5       speed_reference:  %c\n", data->speed_reference[0]);
+		fprintf(stderr, "dbg5       pitch:            %f\n", data->pitch);
+		fprintf(stderr, "dbg5       track:            %d\n", data->track);
+		fprintf(stderr, "dbg5       depth_center:     %f\n", data->depth_center);
+		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
+		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
+		fprintf(stderr, "dbg5       distances and depths:\n");
+		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
+	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose,mbfp,
-		MBF_HSATLRAW_ERGNMESS,error);
+	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNMESS, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp,"%+12.7f",data->lon);
-		status = fprintf(mbfp,"%+12.7f",data->lat);
-		status = fprintf(mbfp,"%4.4d",data->year);
-		status = fprintf(mbfp,"%2.2d",data->month);
-		status = fprintf(mbfp,"%2.2d",data->day);
-		status = fprintf(mbfp,"%2.2d",data->hour);
-		status = fprintf(mbfp,"%2.2d",data->minute);
-		status = fprintf(mbfp,"%2.2d",data->second);
-		status = fprintf(mbfp,"%5d",data->alt_minute);
-		status = fprintf(mbfp,"%2d",data->alt_second);
-		status = fprintf(mbfp,"%5.1f",data->course_true);
-		status = fprintf(mbfp,"%+9.1f",data->speed_transverse);
-		status = fprintf(mbfp,"%+9.1f",data->speed);
-		status = fprintf(mbfp,"%c",data->speed_reference[0]);
-		status = fprintf(mbfp,"%+4.1f",data->pitch);
-		status = fprintf(mbfp,"%4.4d",data->track);
-		status = fprintf(mbfp,"%7.1f",data->depth_center);
-		status = fprintf(mbfp,"%4.2f",data->depth_scale);
-		status = fprintf(mbfp,"%2d\n",data->spare);
+		status = fprintf(mbfp, "%+12.7f", data->lon);
+		status = fprintf(mbfp, "%+12.7f", data->lat);
+		status = fprintf(mbfp, "%4.4d", data->year);
+		status = fprintf(mbfp, "%2.2d", data->month);
+		status = fprintf(mbfp, "%2.2d", data->day);
+		status = fprintf(mbfp, "%2.2d", data->hour);
+		status = fprintf(mbfp, "%2.2d", data->minute);
+		status = fprintf(mbfp, "%2.2d", data->second);
+		status = fprintf(mbfp, "%5d", data->alt_minute);
+		status = fprintf(mbfp, "%2d", data->alt_second);
+		status = fprintf(mbfp, "%5.1f", data->course_true);
+		status = fprintf(mbfp, "%+9.1f", data->speed_transverse);
+		status = fprintf(mbfp, "%+9.1f", data->speed);
+		status = fprintf(mbfp, "%c", data->speed_reference[0]);
+		status = fprintf(mbfp, "%+4.1f", data->pitch);
+		status = fprintf(mbfp, "%4.4d", data->track);
+		status = fprintf(mbfp, "%7.1f", data->depth_center);
+		status = fprintf(mbfp, "%4.2f", data->depth_scale);
+		status = fprintf(mbfp, "%2d\n", data->spare);
 
 		/* output starboard crosstrack distances */
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%4.4d",data->distance[i+30]);
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%4.4d", data->distance[i + 30]);
+		status = fprintf(mbfp, "\n");
 
 		/* output starboard crosstrack depths */
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%4.4d",data->depth[i+30]);
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%4.4d", data->depth[i + 30]);
+		status = fprintf(mbfp, "\n");
 
 		/* output port crosstrack distances */
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%4.4d",(-data->distance[28-i]));
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%4.4d", (-data->distance[28 - i]));
+		status = fprintf(mbfp, "\n");
 
 		/* output port crosstrack depths */
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%4.4d",data->depth[28-i]);
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%4.4d", data->depth[28 - i]);
+		status = fprintf(mbfp, "\n");
 
 		/* check for an error */
-		if (status > 0)
-			{
+		if (status > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else
-			{
+		}
+		else {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_ergnslzt";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_ergnslzt";
+	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
-	int	datacheck;
-	int	i;
+	int datacheck;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* check if there are data to output */
 	datacheck = MB_NO;
-	for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
+	for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 		if (data->time[i] > 0)
 			datacheck = MB_YES;
 
 	/* print debug statements */
-	if (verbose >= 5 && datacheck == MB_NO)
-		{
-		fprintf(stderr,"\ndbg5  No values to be written in MBIO function <%s>\n",function_name);
-		}
+	if (verbose >= 5 && datacheck == MB_NO) {
+		fprintf(stderr, "\ndbg5  No values to be written in MBIO function <%s>\n", function_name);
+	}
 
 	/* print debug statements */
-	if (verbose >= 5 && datacheck == MB_YES)
-		{
-		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       course_true:      %f\n",
-			data->course_true);
-		fprintf(stderr,"dbg5       course_ground:    %f\n",
-			data->course_ground);
-		fprintf(stderr,"dbg5       speed_ground:     %f\n",
-			data->speed_ground);
-		fprintf(stderr,"dbg5       heave:            %f\n",
-			data->heave);
-		fprintf(stderr,"dbg5       pitch:            %f\n",
-			data->pitch);
-		fprintf(stderr,"dbg5       roll:             %f\n",
-			data->roll);
-		fprintf(stderr,"dbg5       time_center:      %f\n",
-			data->depth_center);
-		fprintf(stderr,"dbg5       time_scale:       %f\n",
-			data->time_scale);
-		fprintf(stderr,"dbg5       travel times:\n");
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
-			fprintf(stderr,"dbg5         %d  %d\n",
-				i,data->time[i]);
-		fprintf(stderr,"dbg5       gyro headings:\n");
-		for (i=0;i<11;i++)
-			fprintf(stderr,"dbg5         %d  %f\n",
-				i,data->gyro[i]);
-		}
+	if (verbose >= 5 && datacheck == MB_YES) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       course_true:      %f\n", data->course_true);
+		fprintf(stderr, "dbg5       course_ground:    %f\n", data->course_ground);
+		fprintf(stderr, "dbg5       speed_ground:     %f\n", data->speed_ground);
+		fprintf(stderr, "dbg5       heave:            %f\n", data->heave);
+		fprintf(stderr, "dbg5       pitch:            %f\n", data->pitch);
+		fprintf(stderr, "dbg5       roll:             %f\n", data->roll);
+		fprintf(stderr, "dbg5       time_center:      %f\n", data->depth_center);
+		fprintf(stderr, "dbg5       time_scale:       %f\n", data->time_scale);
+		fprintf(stderr, "dbg5       travel times:\n");
+		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+			fprintf(stderr, "dbg5         %d  %d\n", i, data->time[i]);
+		fprintf(stderr, "dbg5       gyro headings:\n");
+		for (i = 0; i < 11; i++)
+			fprintf(stderr, "dbg5         %d  %f\n", i, data->gyro[i]);
+	}
 
 	/* write the record label */
 	if (datacheck == MB_YES)
-		status = mbr_hsatlraw_wr_label(verbose,mbfp,
-			MBF_HSATLRAW_ERGNSLZT,error);
+		status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNSLZT, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS && datacheck == MB_YES)
-		{
+	if (status == MB_SUCCESS && datacheck == MB_YES) {
 		/* output the event line */
-		status = fprintf(mbfp,"%+12.7f",data->lon);
-		status = fprintf(mbfp,"%+12.7f",data->lat);
-		status = fprintf(mbfp,"%4.4d",data->year);
-		status = fprintf(mbfp,"%2.2d",data->month);
-		status = fprintf(mbfp,"%2.2d",data->day);
-		status = fprintf(mbfp,"%2.2d",data->hour);
-		status = fprintf(mbfp,"%2.2d",data->minute);
-		status = fprintf(mbfp,"%2.2d",data->second);
-		status = fprintf(mbfp,"%5.1f",data->course_true);
-		status = fprintf(mbfp,"%5.1f",data->course_ground);
-		status = fprintf(mbfp,"%+9.1f",data->speed_ground);
-		status = fprintf(mbfp,"%+6.2f",data->heave);
-		status = fprintf(mbfp,"%+4.1f",data->pitch);
-		status = fprintf(mbfp,"%+5.1f",data->roll);
-		status = fprintf(mbfp,"%06.0f",data->time_center);
-		status = fprintf(mbfp,"%6.4f\n",data->time_scale);
+		status = fprintf(mbfp, "%+12.7f", data->lon);
+		status = fprintf(mbfp, "%+12.7f", data->lat);
+		status = fprintf(mbfp, "%4.4d", data->year);
+		status = fprintf(mbfp, "%2.2d", data->month);
+		status = fprintf(mbfp, "%2.2d", data->day);
+		status = fprintf(mbfp, "%2.2d", data->hour);
+		status = fprintf(mbfp, "%2.2d", data->minute);
+		status = fprintf(mbfp, "%2.2d", data->second);
+		status = fprintf(mbfp, "%5.1f", data->course_true);
+		status = fprintf(mbfp, "%5.1f", data->course_ground);
+		status = fprintf(mbfp, "%+9.1f", data->speed_ground);
+		status = fprintf(mbfp, "%+6.2f", data->heave);
+		status = fprintf(mbfp, "%+4.1f", data->pitch);
+		status = fprintf(mbfp, "%+5.1f", data->roll);
+		status = fprintf(mbfp, "%06.0f", data->time_center);
+		status = fprintf(mbfp, "%6.4f\n", data->time_scale);
 
 		/* output starboard crosstrack travel times */
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%4.4d",data->time[i+30]);
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%4.4d", data->time[i + 30]);
+		status = fprintf(mbfp, "\n");
 
 		/* output port crosstrack travel times */
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%4.4d",data->time[28-i]);
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%4.4d", data->time[28 - i]);
+		status = fprintf(mbfp, "\n");
 
 		/* output gyro headings */
-		for (i=0;i<11;i++)
-			status = fprintf(mbfp,"%05.1f",data->gyro[i]);
-		status = fprintf(mbfp,"\n");
+		for (i = 0; i < 11; i++)
+			status = fprintf(mbfp, "%05.1f", data->gyro[i]);
+		status = fprintf(mbfp, "\n");
 
 		/* check for an error */
-		if (status > 0)
-			{
+		if (status > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else
-			{
+		}
+		else {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_ergnctds";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_ergnctds";
+	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
-	int	i;
-	int	nline, nrem;
+	int i;
+	int nline, nrem;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       num_vel:          %d\n",
-			data->num_vel);
-		fprintf(stderr,"dbg5       water depths and velocities:\n");
-		for (i=0;i<11;i++)
-			fprintf(stderr,"dbg5         %d  %f  %f\n",
-				i,data->vdepth[i],data->velocity[i]);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       num_vel:          %d\n", data->num_vel);
+		fprintf(stderr, "dbg5       water depths and velocities:\n");
+		for (i = 0; i < 11; i++)
+			fprintf(stderr, "dbg5         %d  %f  %f\n", i, data->vdepth[i], data->velocity[i]);
+	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose,mbfp,
-		MBF_HSATLRAW_ERGNCTDS,error);
+	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNCTDS, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp,"%+12.7f",data->lon);
-		status = fprintf(mbfp,"%+12.7f",data->lat);
-		status = fprintf(mbfp,"%4.4d",data->year);
-		status = fprintf(mbfp,"%2.2d",data->month);
-		status = fprintf(mbfp,"%2.2d",data->day);
-		status = fprintf(mbfp,"%2.2d",data->hour);
-		status = fprintf(mbfp,"%2.2d",data->minute);
-		status = fprintf(mbfp,"%2.2d",data->second);
-		status = fprintf(mbfp,"%2d\n",data->num_vel);
+		status = fprintf(mbfp, "%+12.7f", data->lon);
+		status = fprintf(mbfp, "%+12.7f", data->lat);
+		status = fprintf(mbfp, "%4.4d", data->year);
+		status = fprintf(mbfp, "%2.2d", data->month);
+		status = fprintf(mbfp, "%2.2d", data->day);
+		status = fprintf(mbfp, "%2.2d", data->hour);
+		status = fprintf(mbfp, "%2.2d", data->minute);
+		status = fprintf(mbfp, "%2.2d", data->second);
+		status = fprintf(mbfp, "%2d\n", data->num_vel);
 
 		/* figure number of velocity lines to write */
-		nline = data->num_vel/10;
-		nrem = data->num_vel%10;
+		nline = data->num_vel / 10;
+		nrem = data->num_vel % 10;
 
 		/* write all of the full lines */
-		for (i=0;i<nline;i++)
-			{
-			for (i=0;i<10;i++)
-				status = fprintf(mbfp,"%5.0f%6.1f",
-					data->vdepth[i],data->velocity[i]);
-			status = fprintf(mbfp,"\n");
-			}
+		for (i = 0; i < nline; i++) {
+			for (i = 0; i < 10; i++)
+				status = fprintf(mbfp, "%5.0f%6.1f", data->vdepth[i], data->velocity[i]);
+			status = fprintf(mbfp, "\n");
+		}
 
 		/* write the last line as needed */
-		if (nrem > 0)
-			{
-			for (i=0;i<nrem;i++)
-				status = fprintf(mbfp,"%5.0f%6.1f",
-					data->vdepth[i],data->velocity[i]);
-			for (i=0;i<(10-nrem);i++)
-				status = fprintf(mbfp,"           ");
-			status = fprintf(mbfp,"\n");
-			}
+		if (nrem > 0) {
+			for (i = 0; i < nrem; i++)
+				status = fprintf(mbfp, "%5.0f%6.1f", data->vdepth[i], data->velocity[i]);
+			for (i = 0; i < (10 - nrem); i++)
+				status = fprintf(mbfp, "           ");
+			status = fprintf(mbfp, "\n");
+		}
 
 		/* check for an error */
-		if (status > 0)
-			{
+		if (status > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else
-			{
+		}
+		else {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_ergnampl";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_ergnampl";
+	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
-	int	datacheck;
-	int	i;
+	int datacheck;
+	int i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 
-        /* check if there are data to output */
+	/* check if there are data to output */
 	datacheck = MB_NO;
-	for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
+	for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 		if (data->amplitude[i] > 0)
 			datacheck = MB_YES;
 
 	/* print debug statements */
-	if (verbose >= 5 && datacheck == MB_NO)
-		{
-		fprintf(stderr,"\ndbg5  No values to be written in MBIO function <%s>\n",function_name);
-		}
+	if (verbose >= 5 && datacheck == MB_NO) {
+		fprintf(stderr, "\ndbg5  No values to be written in MBIO function <%s>\n", function_name);
+	}
 
 	/* print debug statements */
-	if (verbose >= 5 && datacheck == MB_YES)
-		{
-		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       longitude:        %f\n",data->lon);
-		fprintf(stderr,"dbg5       latitude:         %f\n",data->lat);
-		fprintf(stderr,"dbg5       year:             %d\n",data->year);
-		fprintf(stderr,"dbg5       month:            %d\n",data->month);
-		fprintf(stderr,"dbg5       day:              %d\n",data->day);
-		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
-		fprintf(stderr,"dbg5       minute:           %d\n",
-			data->minute);
-		fprintf(stderr,"dbg5       second:           %d\n",
-			data->second);
-		fprintf(stderr,"dbg5       mode:             %c\n",
-			data->mode[0]);
-		fprintf(stderr,"dbg5       trans_strbd:      %d\n",
-			data->trans_strbd);
-		fprintf(stderr,"dbg5       trans_vert:       %d\n",
-			data->trans_vert);
-		fprintf(stderr,"dbg5       trans_port:       %d\n",
-			data->trans_port);
-		fprintf(stderr,"dbg5       pulse_len_strbd:  %d\n",
-			data->pulse_len_strbd);
-		fprintf(stderr,"dbg5       pulse_len_vert:   %d\n",
-			data->pulse_len_vert);
-		fprintf(stderr,"dbg5       pulse_len_port:   %d\n",
-			data->pulse_len_port);
-		fprintf(stderr,"dbg5       gain_start:       %d\n",
-			data->gain_start);
-		fprintf(stderr,"dbg5       r_comp_factor:    %d\n",
-			data->r_compensation_factor);
-		fprintf(stderr,"dbg5       comp_start:       %d\n",
-			data->compensation_start);
-		fprintf(stderr,"dbg5       increase_start:   %d\n",
-			data->increase_start);
-		fprintf(stderr,"dbg5       tvc_near:         %d\n",
-			data->tvc_near);
-		fprintf(stderr,"dbg5       increase_start:   %d\n",
-			data->increase_start);
-		fprintf(stderr,"dbg5       tvc_far:          %d\n",
-			data->tvc_far);
-		fprintf(stderr,"dbg5       increase_int_near:%d\n",
-			data->increase_int_near);
-		fprintf(stderr,"dbg5       increase_int_far: %d\n",
-			data->increase_int_far);
-		fprintf(stderr,"dbg5       gain_center:      %d\n",
-			data->gain_center);
-		fprintf(stderr,"dbg5       filter_gain:      %f\n",
-			data->filter_gain);
-		fprintf(stderr,"dbg5       amplitude_center: %d\n",
-			data->amplitude_center);
-		fprintf(stderr,"dbg5       echo_dur_center:  %d\n",
-			data->echo_duration_center);
-		fprintf(stderr,"dbg5       echo_scal_center: %d\n",
-			data->echo_scale_center);
-		fprintf(stderr,"dbg5       amplitudes and echo durations:\n");
-		for (i=0;i<MBF_HSATLRAW_BEAMS;i++)
-			fprintf(stderr,"dbg5         %d  %d  %d\n",
-				i,data->amplitude[i],data->echo_duration[i]);
-		fprintf(stderr,"dbg5       gains and echo scales:\n");
-		for (i=0;i<16;i++)
-			fprintf(stderr,"dbg5         %d  %d  %d\n",
-				i,data->gain[i],data->echo_scale[i]);
-		}
+	if (verbose >= 5 && datacheck == MB_YES) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
+		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
+		fprintf(stderr, "dbg5       year:             %d\n", data->year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->minute);
+		fprintf(stderr, "dbg5       second:           %d\n", data->second);
+		fprintf(stderr, "dbg5       mode:             %c\n", data->mode[0]);
+		fprintf(stderr, "dbg5       trans_strbd:      %d\n", data->trans_strbd);
+		fprintf(stderr, "dbg5       trans_vert:       %d\n", data->trans_vert);
+		fprintf(stderr, "dbg5       trans_port:       %d\n", data->trans_port);
+		fprintf(stderr, "dbg5       pulse_len_strbd:  %d\n", data->pulse_len_strbd);
+		fprintf(stderr, "dbg5       pulse_len_vert:   %d\n", data->pulse_len_vert);
+		fprintf(stderr, "dbg5       pulse_len_port:   %d\n", data->pulse_len_port);
+		fprintf(stderr, "dbg5       gain_start:       %d\n", data->gain_start);
+		fprintf(stderr, "dbg5       r_comp_factor:    %d\n", data->r_compensation_factor);
+		fprintf(stderr, "dbg5       comp_start:       %d\n", data->compensation_start);
+		fprintf(stderr, "dbg5       increase_start:   %d\n", data->increase_start);
+		fprintf(stderr, "dbg5       tvc_near:         %d\n", data->tvc_near);
+		fprintf(stderr, "dbg5       increase_start:   %d\n", data->increase_start);
+		fprintf(stderr, "dbg5       tvc_far:          %d\n", data->tvc_far);
+		fprintf(stderr, "dbg5       increase_int_near:%d\n", data->increase_int_near);
+		fprintf(stderr, "dbg5       increase_int_far: %d\n", data->increase_int_far);
+		fprintf(stderr, "dbg5       gain_center:      %d\n", data->gain_center);
+		fprintf(stderr, "dbg5       filter_gain:      %f\n", data->filter_gain);
+		fprintf(stderr, "dbg5       amplitude_center: %d\n", data->amplitude_center);
+		fprintf(stderr, "dbg5       echo_dur_center:  %d\n", data->echo_duration_center);
+		fprintf(stderr, "dbg5       echo_scal_center: %d\n", data->echo_scale_center);
+		fprintf(stderr, "dbg5       amplitudes and echo durations:\n");
+		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->amplitude[i], data->echo_duration[i]);
+		fprintf(stderr, "dbg5       gains and echo scales:\n");
+		for (i = 0; i < 16; i++)
+			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->gain[i], data->echo_scale[i]);
+	}
 
 	/* write the record label */
 	if (datacheck == MB_YES)
-		status = mbr_hsatlraw_wr_label(verbose,mbfp,
-			MBF_HSATLRAW_ERGNAMPL,error);
+		status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNAMPL, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS && datacheck == MB_YES)
-		{
+	if (status == MB_SUCCESS && datacheck == MB_YES) {
 		/* output the event line */
-		status = fprintf(mbfp,"%+12.7f",data->lon);
-		status = fprintf(mbfp,"%+12.7f",data->lat);
-		status = fprintf(mbfp,"%4.4d",data->year);
-		status = fprintf(mbfp,"%2.2d",data->month);
-		status = fprintf(mbfp,"%2.2d",data->day);
-		status = fprintf(mbfp,"%2.2d",data->hour);
-		status = fprintf(mbfp,"%2.2d",data->minute);
-		status = fprintf(mbfp,"%2.2d",data->second);
-		status = fprintf(mbfp,"%c",data->mode[0]);
-		status = fprintf(mbfp,"%3.3d",data->trans_strbd);
-		status = fprintf(mbfp,"%3.3d",data->trans_vert);
-		status = fprintf(mbfp,"%3.3d",data->trans_port);
-		status = fprintf(mbfp,"%2.2d",data->pulse_len_strbd);
-		status = fprintf(mbfp,"%2.2d",data->pulse_len_vert);
-		status = fprintf(mbfp,"%2.2d",data->pulse_len_port);
-		status = fprintf(mbfp,"%2.2d",data->gain_start);
-		status = fprintf(mbfp,"%2.2d",data->r_compensation_factor);
-		status = fprintf(mbfp,"%4.4d",data->compensation_start);
-		status = fprintf(mbfp,"%5.5d",data->increase_start);
-		status = fprintf(mbfp,"%2.2d",data->tvc_near);
-		status = fprintf(mbfp,"%2.2d",data->tvc_far);
-		status = fprintf(mbfp,"%3.3d",data->increase_int_near);
-		status = fprintf(mbfp,"%3.3d",data->increase_int_far);
-		status = fprintf(mbfp,"%1d",data->gain_center);
-		status = fprintf(mbfp,"%+5.1f",data->filter_gain);
-		status = fprintf(mbfp,"%3.3d",data->amplitude_center);
-		status = fprintf(mbfp,"%3.3d",data->echo_duration_center);
-		status = fprintf(mbfp,"%1d\n",data->echo_scale_center);
+		status = fprintf(mbfp, "%+12.7f", data->lon);
+		status = fprintf(mbfp, "%+12.7f", data->lat);
+		status = fprintf(mbfp, "%4.4d", data->year);
+		status = fprintf(mbfp, "%2.2d", data->month);
+		status = fprintf(mbfp, "%2.2d", data->day);
+		status = fprintf(mbfp, "%2.2d", data->hour);
+		status = fprintf(mbfp, "%2.2d", data->minute);
+		status = fprintf(mbfp, "%2.2d", data->second);
+		status = fprintf(mbfp, "%c", data->mode[0]);
+		status = fprintf(mbfp, "%3.3d", data->trans_strbd);
+		status = fprintf(mbfp, "%3.3d", data->trans_vert);
+		status = fprintf(mbfp, "%3.3d", data->trans_port);
+		status = fprintf(mbfp, "%2.2d", data->pulse_len_strbd);
+		status = fprintf(mbfp, "%2.2d", data->pulse_len_vert);
+		status = fprintf(mbfp, "%2.2d", data->pulse_len_port);
+		status = fprintf(mbfp, "%2.2d", data->gain_start);
+		status = fprintf(mbfp, "%2.2d", data->r_compensation_factor);
+		status = fprintf(mbfp, "%4.4d", data->compensation_start);
+		status = fprintf(mbfp, "%5.5d", data->increase_start);
+		status = fprintf(mbfp, "%2.2d", data->tvc_near);
+		status = fprintf(mbfp, "%2.2d", data->tvc_far);
+		status = fprintf(mbfp, "%3.3d", data->increase_int_near);
+		status = fprintf(mbfp, "%3.3d", data->increase_int_far);
+		status = fprintf(mbfp, "%1d", data->gain_center);
+		status = fprintf(mbfp, "%+5.1f", data->filter_gain);
+		status = fprintf(mbfp, "%3.3d", data->amplitude_center);
+		status = fprintf(mbfp, "%3.3d", data->echo_duration_center);
+		status = fprintf(mbfp, "%1d\n", data->echo_scale_center);
 
 		/* output starboard amplitudes */
-		for (i=0;i<8;i++)
-			status = fprintf(mbfp,"%1.1d",data->gain[i+8]);
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%3.3d",data->amplitude[i+30]);
-		status = fprintf(mbfp,"\n");
+		for (i = 0; i < 8; i++)
+			status = fprintf(mbfp, "%1.1d", data->gain[i + 8]);
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%3.3d", data->amplitude[i + 30]);
+		status = fprintf(mbfp, "\n");
 
 		/* output port amplitudes */
-		for (i=0;i<8;i++)
-			status = fprintf(mbfp,"%1.1d",data->gain[i]);
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%3.3d",data->amplitude[28-i]);
-		status = fprintf(mbfp,"\n");
+		for (i = 0; i < 8; i++)
+			status = fprintf(mbfp, "%1.1d", data->gain[i]);
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%3.3d", data->amplitude[28 - i]);
+		status = fprintf(mbfp, "\n");
 
 		/* output starboard echo durations */
-		for (i=0;i<8;i++)
-			status = fprintf(mbfp,"%1.1d",data->echo_scale[i+8]);
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%3.3d",
-				data->echo_duration[i+30]);
-		status = fprintf(mbfp,"\n");
+		for (i = 0; i < 8; i++)
+			status = fprintf(mbfp, "%1.1d", data->echo_scale[i + 8]);
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%3.3d", data->echo_duration[i + 30]);
+		status = fprintf(mbfp, "\n");
 
 		/* output port echo durations */
-		for (i=0;i<8;i++)
-			status = fprintf(mbfp,"%1.1d",data->echo_scale[i]);
-		status = fprintf(mbfp,"29");
-		for (i=0;i<29;i++)
-			status = fprintf(mbfp,"%3.3d",
-				data->echo_duration[28-i]);
-		status = fprintf(mbfp,"\n");
+		for (i = 0; i < 8; i++)
+			status = fprintf(mbfp, "%1.1d", data->echo_scale[i]);
+		status = fprintf(mbfp, "29");
+		for (i = 0; i < 29; i++)
+			status = fprintf(mbfp, "%3.3d", data->echo_duration[28 - i]);
+		status = fprintf(mbfp, "\n");
 
 		/* check for an error */
-		if (status > 0)
-			{
+		if (status > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else
-			{
+		}
+		else {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ldeocmnt(int verbose, FILE *mbfp, void *data_ptr, int *error)
-{
-	char	*function_name = "mbr_hsatlraw_wr_ldeocmnt";
-	int	status = MB_SUCCESS;
+int mbr_hsatlraw_wr_ldeocmnt(int verbose, FILE *mbfp, void *data_ptr, int *error) {
+	char *function_name = "mbr_hsatlraw_wr_ldeocmnt";
+	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %p\n",(void *)mbfp);
-		fprintf(stderr,"dbg2       data_ptr:   %p\n",(void *)data_ptr);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsatlraw_struct *) data_ptr;
+	data = (struct mbf_hsatlraw_struct *)data_ptr;
 
 	/* print debug statements */
-	if (verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"dbg5       comment:          %s\n",data->comment);
-		}
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
+	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose,mbfp,
-		MBF_HSATLRAW_LDEOCMNT,error);
+	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_LDEOCMNT, error);
 
 	/* write out the data */
-	if (status == MB_SUCCESS)
-		{
+	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp,"%s\n",data->comment);
+		status = fprintf(mbfp, "%s\n", data->comment);
 
 		/* check for an error */
-		if (status >= 0)
-			{
+		if (status >= 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			}
-		else
-			{
+		}
+		else {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
-			}
 		}
+	}
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 /*--------------------------------------------------------------------*/

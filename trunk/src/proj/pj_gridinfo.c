@@ -40,9 +40,9 @@
  * Here assert we disable assert() for Windows CE.
  * TODO - mloskot: re-implement porting friendly assert
  */
-# define assert(exp)	((void)0)
+#define assert(exp) ((void)0)
 #else
-# include <assert.h>
+#include <assert.h>
 #endif /* _WIN32_WCE */
 
 /************************************************************************/
@@ -51,60 +51,56 @@
 /*      Convert the byte order of the given word(s) in place.           */
 /************************************************************************/
 
-static int  byte_order_test = 1;
-#define IS_LSB	(((unsigned char *) (&byte_order_test))[0] == 1)
+static int byte_order_test = 1;
+#define IS_LSB (((unsigned char *)(&byte_order_test))[0] == 1)
 
-static void swap_words( unsigned char *data, int word_size, int word_count )
+static void swap_words(unsigned char *data, int word_size, int word_count)
 
 {
-    int	word;
+	int word;
 
-    for( word = 0; word < word_count; word++ )
-    {
-        int	i;
-        
-        for( i = 0; i < word_size/2; i++ )
-        {
-            int	t;
-            
-            t = data[i];
-            data[i] = data[word_size-i-1];
-            data[word_size-i-1] = t;
-        }
-        
-        data += word_size;
-    }
+	for (word = 0; word < word_count; word++) {
+		int i;
+
+		for (i = 0; i < word_size / 2; i++) {
+			int t;
+
+			t = data[i];
+			data[i] = data[word_size - i - 1];
+			data[word_size - i - 1] = t;
+		}
+
+		data += word_size;
+	}
 }
 
 /************************************************************************/
 /*                          pj_gridinfo_free()                          */
 /************************************************************************/
 
-void pj_gridinfo_free( projCtx ctx, PJ_GRIDINFO *gi )
+void pj_gridinfo_free(projCtx ctx, PJ_GRIDINFO *gi)
 
 {
-    if( gi == NULL )
-        return;
+	if (gi == NULL)
+		return;
 
-    if( gi->child != NULL )
-    {
-        PJ_GRIDINFO *child, *next;
+	if (gi->child != NULL) {
+		PJ_GRIDINFO *child, *next;
 
-        for( child = gi->child; child != NULL; child=next)
-        {
-            next=child->next;
-            pj_gridinfo_free( ctx, child );
-        }
-    }
+		for (child = gi->child; child != NULL; child = next) {
+			next = child->next;
+			pj_gridinfo_free(ctx, child);
+		}
+	}
 
-    if( gi->ct != NULL )
-        nad_free( gi->ct );
-    
-    free( gi->gridname );
-    if( gi->filename != NULL )
-        free( gi->filename );
+	if (gi->ct != NULL)
+		nad_free(gi->ct);
 
-    pj_dalloc( gi );
+	free(gi->gridname);
+	if (gi->filename != NULL)
+		free(gi->filename);
+
+	pj_dalloc(gi);
 }
 
 /************************************************************************/
@@ -115,245 +111,218 @@ void pj_gridinfo_free( projCtx ctx, PJ_GRIDINFO *gi )
 /*      stuff are loaded by pj_gridinfo_init().                         */
 /************************************************************************/
 
-int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
+int pj_gridinfo_load(projCtx ctx, PJ_GRIDINFO *gi)
 
 {
-    if( gi == NULL || gi->ct == NULL )
-        return 0;
+	if (gi == NULL || gi->ct == NULL)
+		return 0;
 
-/* -------------------------------------------------------------------- */
-/*      Original platform specific CTable format.                       */
-/* -------------------------------------------------------------------- */
-    if( strcmp(gi->format,"ctable") == 0 )
-    {
-        FILE *fid;
-        int result;
+	/* -------------------------------------------------------------------- */
+	/*      Original platform specific CTable format.                       */
+	/* -------------------------------------------------------------------- */
+	if (strcmp(gi->format, "ctable") == 0) {
+		FILE *fid;
+		int result;
 
-        fid = pj_open_lib( ctx, gi->filename, "rb" );
-        
-        if( fid == NULL )
-        {
-            pj_ctx_set_errno( ctx, -38 );
-            return 0;
-        }
+		fid = pj_open_lib(ctx, gi->filename, "rb");
 
-        result = nad_ctable_load( ctx, gi->ct, fid );
+		if (fid == NULL) {
+			pj_ctx_set_errno(ctx, -38);
+			return 0;
+		}
 
-        fclose( fid );
+		result = nad_ctable_load(ctx, gi->ct, fid);
 
-        return result;
-    }
+		fclose(fid);
 
-/* -------------------------------------------------------------------- */
-/*      CTable2 format.                                                 */
-/* -------------------------------------------------------------------- */
-    else if( strcmp(gi->format,"ctable2") == 0 )
-    {
-        FILE *fid;
-        int result;
+		return result;
+	}
 
-        fid = pj_open_lib( ctx, gi->filename, "rb" );
-        
-        if( fid == NULL )
-        {
-            pj_ctx_set_errno( ctx, -38 );
-            return 0;
-        }
+	/* -------------------------------------------------------------------- */
+	/*      CTable2 format.                                                 */
+	/* -------------------------------------------------------------------- */
+	else if (strcmp(gi->format, "ctable2") == 0) {
+		FILE *fid;
+		int result;
 
-        result = nad_ctable2_load( ctx, gi->ct, fid );
+		fid = pj_open_lib(ctx, gi->filename, "rb");
 
-        fclose( fid );
+		if (fid == NULL) {
+			pj_ctx_set_errno(ctx, -38);
+			return 0;
+		}
 
-        return result;
-    }
+		result = nad_ctable2_load(ctx, gi->ct, fid);
 
-/* -------------------------------------------------------------------- */
-/*      NTv1 format.                                                    */
-/*      We process one line at a time.  Note that the array storage     */
-/*      direction (e-w) is different in the NTv1 file and what          */
-/*      the CTABLE is supposed to have.  The phi/lam are also           */
-/*      reversed, and we have to be aware of byte swapping.             */
-/* -------------------------------------------------------------------- */
-    else if( strcmp(gi->format,"ntv1") == 0 )
-    {
-        double	*row_buf;
-        int	row;
-        FILE *fid;
+		fclose(fid);
 
-        fid = pj_open_lib( ctx, gi->filename, "rb" );
-        
-        if( fid == NULL )
-        {
-            pj_ctx_set_errno( ctx, -38 );
-            return 0;
-        }
+		return result;
+	}
 
-        fseek( fid, gi->grid_offset, SEEK_SET );
+	/* -------------------------------------------------------------------- */
+	/*      NTv1 format.                                                    */
+	/*      We process one line at a time.  Note that the array storage     */
+	/*      direction (e-w) is different in the NTv1 file and what          */
+	/*      the CTABLE is supposed to have.  The phi/lam are also           */
+	/*      reversed, and we have to be aware of byte swapping.             */
+	/* -------------------------------------------------------------------- */
+	else if (strcmp(gi->format, "ntv1") == 0) {
+		double *row_buf;
+		int row;
+		FILE *fid;
 
-        row_buf = (double *) pj_malloc(gi->ct->lim.lam * sizeof(double) * 2);
-        gi->ct->cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
-        if( row_buf == NULL || gi->ct->cvs == NULL )
-        {
-            pj_ctx_set_errno( ctx, -38 );
-            return 0;
-        }
-        
-        for( row = 0; row < gi->ct->lim.phi; row++ )
-        {
-            int	    i;
-            FLP     *cvs;
-            double  *diff_seconds;
+		fid = pj_open_lib(ctx, gi->filename, "rb");
 
-            if( fread( row_buf, sizeof(double), gi->ct->lim.lam * 2, fid ) 
-                != 2 * gi->ct->lim.lam )
-            {
-                pj_dalloc( row_buf );
-                pj_dalloc( gi->ct->cvs );
-                pj_ctx_set_errno( ctx, -38 );
-                return 0;
-            }
+		if (fid == NULL) {
+			pj_ctx_set_errno(ctx, -38);
+			return 0;
+		}
 
-            if( IS_LSB )
-                swap_words( (unsigned char *) row_buf, 8, gi->ct->lim.lam*2 );
+		fseek(fid, gi->grid_offset, SEEK_SET);
 
-            /* convert seconds to radians */
-            diff_seconds = row_buf;
+		row_buf = (double *)pj_malloc(gi->ct->lim.lam * sizeof(double) * 2);
+		gi->ct->cvs = (FLP *)pj_malloc(gi->ct->lim.lam * gi->ct->lim.phi * sizeof(FLP));
+		if (row_buf == NULL || gi->ct->cvs == NULL) {
+			pj_ctx_set_errno(ctx, -38);
+			return 0;
+		}
 
-            for( i = 0; i < gi->ct->lim.lam; i++ )
-            {
-                cvs = gi->ct->cvs + (row) * gi->ct->lim.lam
-                    + (gi->ct->lim.lam - i - 1);
+		for (row = 0; row < gi->ct->lim.phi; row++) {
+			int i;
+			FLP *cvs;
+			double *diff_seconds;
 
-                cvs->phi = *(diff_seconds++) * ((PI/180.0) / 3600.0);
-                cvs->lam = *(diff_seconds++) * ((PI/180.0) / 3600.0);
-            }
-        }
+			if (fread(row_buf, sizeof(double), gi->ct->lim.lam * 2, fid) != 2 * gi->ct->lim.lam) {
+				pj_dalloc(row_buf);
+				pj_dalloc(gi->ct->cvs);
+				pj_ctx_set_errno(ctx, -38);
+				return 0;
+			}
 
-        pj_dalloc( row_buf );
+			if (IS_LSB)
+				swap_words((unsigned char *)row_buf, 8, gi->ct->lim.lam * 2);
 
-        fclose( fid );
+			/* convert seconds to radians */
+			diff_seconds = row_buf;
 
-        return 1;
-    }
+			for (i = 0; i < gi->ct->lim.lam; i++) {
+				cvs = gi->ct->cvs + (row)*gi->ct->lim.lam + (gi->ct->lim.lam - i - 1);
 
-/* -------------------------------------------------------------------- */
-/*      NTv2 format.                                                    */
-/*      We process one line at a time.  Note that the array storage     */
-/*      direction (e-w) is different in the NTv2 file and what          */
-/*      the CTABLE is supposed to have.  The phi/lam are also           */
-/*      reversed, and we have to be aware of byte swapping.             */
-/* -------------------------------------------------------------------- */
-    else if( strcmp(gi->format,"ntv2") == 0 )
-    {
-        float	*row_buf;
-        int	row;
-        FILE *fid;
+				cvs->phi = *(diff_seconds++) * ((PI / 180.0) / 3600.0);
+				cvs->lam = *(diff_seconds++) * ((PI / 180.0) / 3600.0);
+			}
+		}
 
-        pj_log( ctx, PJ_LOG_DEBUG_MINOR, 
-                "NTv2 - loading grid %s", gi->ct->id );
+		pj_dalloc(row_buf);
 
-        fid = pj_open_lib( ctx, gi->filename, "rb" );
-        
-        if( fid == NULL )
-        {
-            pj_ctx_set_errno( ctx, -38 );
-            return 0;
-        }
+		fclose(fid);
 
-        fseek( fid, gi->grid_offset, SEEK_SET );
+		return 1;
+	}
 
-        row_buf = (float *) pj_malloc(gi->ct->lim.lam * sizeof(float) * 4);
-        gi->ct->cvs = (FLP *) pj_malloc(gi->ct->lim.lam*gi->ct->lim.phi*sizeof(FLP));
-        if( row_buf == NULL || gi->ct->cvs == NULL )
-        {
-            pj_ctx_set_errno( ctx, -38 );
-            return 0;
-        }
-        
-        for( row = 0; row < gi->ct->lim.phi; row++ )
-        {
-            int	    i;
-            FLP     *cvs;
-            float   *diff_seconds;
+	/* -------------------------------------------------------------------- */
+	/*      NTv2 format.                                                    */
+	/*      We process one line at a time.  Note that the array storage     */
+	/*      direction (e-w) is different in the NTv2 file and what          */
+	/*      the CTABLE is supposed to have.  The phi/lam are also           */
+	/*      reversed, and we have to be aware of byte swapping.             */
+	/* -------------------------------------------------------------------- */
+	else if (strcmp(gi->format, "ntv2") == 0) {
+		float *row_buf;
+		int row;
+		FILE *fid;
 
-            if( fread( row_buf, sizeof(float), gi->ct->lim.lam*4, fid ) 
-                != 4 * gi->ct->lim.lam )
-            {
-                pj_dalloc( row_buf );
-                pj_dalloc( gi->ct->cvs );
-                gi->ct->cvs = NULL;
-                pj_ctx_set_errno( ctx, -38 );
-                return 0;
-            }
+		pj_log(ctx, PJ_LOG_DEBUG_MINOR, "NTv2 - loading grid %s", gi->ct->id);
 
-            if( !IS_LSB )
-                swap_words( (unsigned char *) row_buf, 4, 
-                            gi->ct->lim.lam*4 );
+		fid = pj_open_lib(ctx, gi->filename, "rb");
 
-            /* convert seconds to radians */
-            diff_seconds = row_buf;
+		if (fid == NULL) {
+			pj_ctx_set_errno(ctx, -38);
+			return 0;
+		}
 
-            for( i = 0; i < gi->ct->lim.lam; i++ )
-            {
-                cvs = gi->ct->cvs + (row) * gi->ct->lim.lam
-                    + (gi->ct->lim.lam - i - 1);
+		fseek(fid, gi->grid_offset, SEEK_SET);
 
-                cvs->phi = *(diff_seconds++) * ((PI/180.0) / 3600.0);
-                cvs->lam = *(diff_seconds++) * ((PI/180.0) / 3600.0);
-                diff_seconds += 2; /* skip accuracy values */
-            }
-        }
+		row_buf = (float *)pj_malloc(gi->ct->lim.lam * sizeof(float) * 4);
+		gi->ct->cvs = (FLP *)pj_malloc(gi->ct->lim.lam * gi->ct->lim.phi * sizeof(FLP));
+		if (row_buf == NULL || gi->ct->cvs == NULL) {
+			pj_ctx_set_errno(ctx, -38);
+			return 0;
+		}
 
-        pj_dalloc( row_buf );
+		for (row = 0; row < gi->ct->lim.phi; row++) {
+			int i;
+			FLP *cvs;
+			float *diff_seconds;
 
-        fclose( fid );
+			if (fread(row_buf, sizeof(float), gi->ct->lim.lam * 4, fid) != 4 * gi->ct->lim.lam) {
+				pj_dalloc(row_buf);
+				pj_dalloc(gi->ct->cvs);
+				gi->ct->cvs = NULL;
+				pj_ctx_set_errno(ctx, -38);
+				return 0;
+			}
 
-        return 1;
-    }
+			if (!IS_LSB)
+				swap_words((unsigned char *)row_buf, 4, gi->ct->lim.lam * 4);
 
-/* -------------------------------------------------------------------- */
-/*      GTX format.                                                     */
-/* -------------------------------------------------------------------- */
-    else if( strcmp(gi->format,"gtx") == 0 )
-    {
-        int   words = gi->ct->lim.lam * gi->ct->lim.phi;
-        FILE *fid;
+			/* convert seconds to radians */
+			diff_seconds = row_buf;
 
-        fid = pj_open_lib( ctx, gi->filename, "rb" );
-        
-        if( fid == NULL )
-        {
-            pj_ctx_set_errno( ctx, -38 );
-            return 0;
-        }
+			for (i = 0; i < gi->ct->lim.lam; i++) {
+				cvs = gi->ct->cvs + (row)*gi->ct->lim.lam + (gi->ct->lim.lam - i - 1);
 
-        fseek( fid, gi->grid_offset, SEEK_SET );
+				cvs->phi = *(diff_seconds++) * ((PI / 180.0) / 3600.0);
+				cvs->lam = *(diff_seconds++) * ((PI / 180.0) / 3600.0);
+				diff_seconds += 2; /* skip accuracy values */
+			}
+		}
 
-        gi->ct->cvs = (FLP *) pj_malloc(words*sizeof(float));
-        if( gi->ct->cvs == NULL )
-        {
-            pj_ctx_set_errno( ctx, -38 );
-            return 0;
-        }
-        
-        if( fread( gi->ct->cvs, sizeof(float), words, fid ) != words )
-        {
-            pj_dalloc( gi->ct->cvs );
-            gi->ct->cvs = NULL;
-            return 0;
-        }
+		pj_dalloc(row_buf);
 
-        if( IS_LSB )
-            swap_words( (unsigned char *) gi->ct->cvs, 4, words );
+		fclose(fid);
 
-        fclose( fid );
-        return 1;
-    }
+		return 1;
+	}
 
-    else
-    {
-        return 0;
-    }
+	/* -------------------------------------------------------------------- */
+	/*      GTX format.                                                     */
+	/* -------------------------------------------------------------------- */
+	else if (strcmp(gi->format, "gtx") == 0) {
+		int words = gi->ct->lim.lam * gi->ct->lim.phi;
+		FILE *fid;
+
+		fid = pj_open_lib(ctx, gi->filename, "rb");
+
+		if (fid == NULL) {
+			pj_ctx_set_errno(ctx, -38);
+			return 0;
+		}
+
+		fseek(fid, gi->grid_offset, SEEK_SET);
+
+		gi->ct->cvs = (FLP *)pj_malloc(words * sizeof(float));
+		if (gi->ct->cvs == NULL) {
+			pj_ctx_set_errno(ctx, -38);
+			return 0;
+		}
+
+		if (fread(gi->ct->cvs, sizeof(float), words, fid) != words) {
+			pj_dalloc(gi->ct->cvs);
+			gi->ct->cvs = NULL;
+			return 0;
+		}
+
+		if (IS_LSB)
+			swap_words((unsigned char *)gi->ct->cvs, 4, words);
+
+		fclose(fid);
+		return 1;
+	}
+
+	else {
+		return 0;
+	}
 }
 
 /************************************************************************/
@@ -362,204 +331,184 @@ int pj_gridinfo_load( projCtx ctx, PJ_GRIDINFO *gi )
 /*      Load a ntv2 (.gsb) file.                                        */
 /************************************************************************/
 
-static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
+static int pj_gridinfo_init_ntv2(projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist)
 
 {
-    unsigned char header[11*16];
-    int num_subfiles, subfile;
+	unsigned char header[11 * 16];
+	int num_subfiles, subfile;
 
-    assert( sizeof(int) == 4 );
-    assert( sizeof(double) == 8 );
-    if( sizeof(int) != 4 || sizeof(double) != 8 )
-    {
-        pj_log( ctx, PJ_LOG_ERROR,
-             "basic types of inappropraiate size in pj_gridinfo_init_ntv2()" );
-        pj_ctx_set_errno( ctx, -38 );
-        return 0;
-    }
+	assert(sizeof(int) == 4);
+	assert(sizeof(double) == 8);
+	if (sizeof(int) != 4 || sizeof(double) != 8) {
+		pj_log(ctx, PJ_LOG_ERROR, "basic types of inappropraiate size in pj_gridinfo_init_ntv2()");
+		pj_ctx_set_errno(ctx, -38);
+		return 0;
+	}
 
-/* -------------------------------------------------------------------- */
-/*      Read the overview header.                                       */
-/* -------------------------------------------------------------------- */
-    if( fread( header, sizeof(header), 1, fid ) != 1 )
-    {
-        pj_ctx_set_errno( ctx, -38 );
-        return 0;
-    }
+	/* -------------------------------------------------------------------- */
+	/*      Read the overview header.                                       */
+	/* -------------------------------------------------------------------- */
+	if (fread(header, sizeof(header), 1, fid) != 1) {
+		pj_ctx_set_errno(ctx, -38);
+		return 0;
+	}
 
-/* -------------------------------------------------------------------- */
-/*      Byte swap interesting fields if needed.                         */
-/* -------------------------------------------------------------------- */
-    if( !IS_LSB )
-    {
-        swap_words( header+8, 4, 1 );
-        swap_words( header+8+16, 4, 1 );
-        swap_words( header+8+32, 4, 1 );
-        swap_words( header+8+7*16, 8, 1 );
-        swap_words( header+8+8*16, 8, 1 );
-        swap_words( header+8+9*16, 8, 1 );
-        swap_words( header+8+10*16, 8, 1 );
-    }
+	/* -------------------------------------------------------------------- */
+	/*      Byte swap interesting fields if needed.                         */
+	/* -------------------------------------------------------------------- */
+	if (!IS_LSB) {
+		swap_words(header + 8, 4, 1);
+		swap_words(header + 8 + 16, 4, 1);
+		swap_words(header + 8 + 32, 4, 1);
+		swap_words(header + 8 + 7 * 16, 8, 1);
+		swap_words(header + 8 + 8 * 16, 8, 1);
+		swap_words(header + 8 + 9 * 16, 8, 1);
+		swap_words(header + 8 + 10 * 16, 8, 1);
+	}
 
-/* -------------------------------------------------------------------- */
-/*      Get the subfile count out ... all we really use for now.        */
-/* -------------------------------------------------------------------- */
-    memcpy( &num_subfiles, header+8+32, 4 );
+	/* -------------------------------------------------------------------- */
+	/*      Get the subfile count out ... all we really use for now.        */
+	/* -------------------------------------------------------------------- */
+	memcpy(&num_subfiles, header + 8 + 32, 4);
 
-/* ==================================================================== */
-/*      Step through the subfiles, creating a PJ_GRIDINFO for each.     */
-/* ==================================================================== */
-    for( subfile = 0; subfile < num_subfiles; subfile++ )
-    {
-        struct CTABLE *ct;
-        LP ur;
-        int gs_count;
-        PJ_GRIDINFO *gi;
+	/* ==================================================================== */
+	/*      Step through the subfiles, creating a PJ_GRIDINFO for each.     */
+	/* ==================================================================== */
+	for (subfile = 0; subfile < num_subfiles; subfile++) {
+		struct CTABLE *ct;
+		LP ur;
+		int gs_count;
+		PJ_GRIDINFO *gi;
 
-/* -------------------------------------------------------------------- */
-/*      Read header.                                                    */
-/* -------------------------------------------------------------------- */
-        if( fread( header, sizeof(header), 1, fid ) != 1 )
-        {
-            pj_ctx_set_errno( ctx, -38 );
-            return 0;
-        }
+		/* -------------------------------------------------------------------- */
+		/*      Read header.                                                    */
+		/* -------------------------------------------------------------------- */
+		if (fread(header, sizeof(header), 1, fid) != 1) {
+			pj_ctx_set_errno(ctx, -38);
+			return 0;
+		}
 
-        if( strncmp((const char *) header,"SUB_NAME",8) != 0 )
-        {
-            pj_ctx_set_errno( ctx, -38 );
-            return 0;
-        }
-        
-/* -------------------------------------------------------------------- */
-/*      Byte swap interesting fields if needed.                         */
-/* -------------------------------------------------------------------- */
-        if( !IS_LSB )
-        {
-            swap_words( header+8+16*4, 8, 1 );
-            swap_words( header+8+16*5, 8, 1 );
-            swap_words( header+8+16*6, 8, 1 );
-            swap_words( header+8+16*7, 8, 1 );
-            swap_words( header+8+16*8, 8, 1 );
-            swap_words( header+8+16*9, 8, 1 );
-            swap_words( header+8+16*10, 4, 1 );
-        }
-        
-/* -------------------------------------------------------------------- */
-/*      Initialize a corresponding "ct" structure.                      */
-/* -------------------------------------------------------------------- */
-        ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
-        strncpy( ct->id, (const char *) header + 8, 8 );
-        ct->id[8] = '\0';
+		if (strncmp((const char *)header, "SUB_NAME", 8) != 0) {
+			pj_ctx_set_errno(ctx, -38);
+			return 0;
+		}
 
-        ct->ll.lam = - *((double *) (header+7*16+8)); /* W_LONG */
-        ct->ll.phi = *((double *) (header+4*16+8));   /* S_LAT */
+		/* -------------------------------------------------------------------- */
+		/*      Byte swap interesting fields if needed.                         */
+		/* -------------------------------------------------------------------- */
+		if (!IS_LSB) {
+			swap_words(header + 8 + 16 * 4, 8, 1);
+			swap_words(header + 8 + 16 * 5, 8, 1);
+			swap_words(header + 8 + 16 * 6, 8, 1);
+			swap_words(header + 8 + 16 * 7, 8, 1);
+			swap_words(header + 8 + 16 * 8, 8, 1);
+			swap_words(header + 8 + 16 * 9, 8, 1);
+			swap_words(header + 8 + 16 * 10, 4, 1);
+		}
 
-        ur.lam = - *((double *) (header+6*16+8));     /* E_LONG */
-        ur.phi = *((double *) (header+5*16+8));       /* N_LAT */
+		/* -------------------------------------------------------------------- */
+		/*      Initialize a corresponding "ct" structure.                      */
+		/* -------------------------------------------------------------------- */
+		ct = (struct CTABLE *)pj_malloc(sizeof(struct CTABLE));
+		strncpy(ct->id, (const char *)header + 8, 8);
+		ct->id[8] = '\0';
 
-        ct->del.lam = *((double *) (header+9*16+8));
-        ct->del.phi = *((double *) (header+8*16+8));
+		ct->ll.lam = -*((double *)(header + 7 * 16 + 8)); /* W_LONG */
+		ct->ll.phi = *((double *)(header + 4 * 16 + 8));  /* S_LAT */
 
-        ct->lim.lam = (int) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
-        ct->lim.phi = (int) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
+		ur.lam = -*((double *)(header + 6 * 16 + 8)); /* E_LONG */
+		ur.phi = *((double *)(header + 5 * 16 + 8));  /* N_LAT */
 
-        pj_log( ctx, PJ_LOG_DEBUG_MINOR,
-                "NTv2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
-                ct->id, 
-                ct->lim.lam, ct->lim.phi,
-                ct->ll.lam/3600.0, ct->ll.phi/3600.0,
-                ur.lam/3600.0, ur.phi/3600.0 );
-        
-        ct->ll.lam *= DEG_TO_RAD/3600.0;
-        ct->ll.phi *= DEG_TO_RAD/3600.0;
-        ct->del.lam *= DEG_TO_RAD/3600.0;
-        ct->del.phi *= DEG_TO_RAD/3600.0;
+		ct->del.lam = *((double *)(header + 9 * 16 + 8));
+		ct->del.phi = *((double *)(header + 8 * 16 + 8));
 
-        memcpy( &gs_count, header + 8 + 16*10, 4 );
-        if( gs_count != ct->lim.lam * ct->lim.phi )
-        {
-            pj_log( ctx, PJ_LOG_ERROR,
-                    "GS_COUNT(%d) does not match expected cells (%dx%d=%d)\n",
-                    gs_count, ct->lim.lam, ct->lim.phi, 
-                    ct->lim.lam * ct->lim.phi );
-            pj_ctx_set_errno( ctx, -38 );
-            return 0;
-        }
+		ct->lim.lam = (int)(fabs(ur.lam - ct->ll.lam) / ct->del.lam + 0.5) + 1;
+		ct->lim.phi = (int)(fabs(ur.phi - ct->ll.phi) / ct->del.phi + 0.5) + 1;
 
-        ct->cvs = NULL;
+		pj_log(ctx, PJ_LOG_DEBUG_MINOR, "NTv2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n", ct->id, ct->lim.lam, ct->lim.phi,
+		       ct->ll.lam / 3600.0, ct->ll.phi / 3600.0, ur.lam / 3600.0, ur.phi / 3600.0);
 
-/* -------------------------------------------------------------------- */
-/*      Create a new gridinfo for this if we aren't processing the      */
-/*      1st subfile, and initialize our grid info.                      */
-/* -------------------------------------------------------------------- */
-        if( subfile == 0 )
-            gi = gilist;
-        else
-        {
-            gi = (PJ_GRIDINFO *) pj_malloc(sizeof(PJ_GRIDINFO));
-            memset( gi, 0, sizeof(PJ_GRIDINFO) );
-    
-            gi->gridname = strdup( gilist->gridname );
-            gi->filename = strdup( gilist->filename );
-            gi->next = NULL;
-        }
+		ct->ll.lam *= DEG_TO_RAD / 3600.0;
+		ct->ll.phi *= DEG_TO_RAD / 3600.0;
+		ct->del.lam *= DEG_TO_RAD / 3600.0;
+		ct->del.phi *= DEG_TO_RAD / 3600.0;
 
-        gi->ct = ct;
-        gi->format = "ntv2";
-        gi->grid_offset = ftell( fid );
+		memcpy(&gs_count, header + 8 + 16 * 10, 4);
+		if (gs_count != ct->lim.lam * ct->lim.phi) {
+			pj_log(ctx, PJ_LOG_ERROR, "GS_COUNT(%d) does not match expected cells (%dx%d=%d)\n", gs_count, ct->lim.lam,
+			       ct->lim.phi, ct->lim.lam * ct->lim.phi);
+			pj_ctx_set_errno(ctx, -38);
+			return 0;
+		}
 
-/* -------------------------------------------------------------------- */
-/*      Attach to the correct list or sublist.                          */
-/* -------------------------------------------------------------------- */
-        if( strncmp((const char *)header+24,"NONE",4) == 0 )
-        {
-            if( gi != gilist )
-            {
-                PJ_GRIDINFO *lnk;
+		ct->cvs = NULL;
 
-                for( lnk = gilist; lnk->next != NULL; lnk = lnk->next ) {}
-                lnk->next = gi;
-            }
-        }
+		/* -------------------------------------------------------------------- */
+		/*      Create a new gridinfo for this if we aren't processing the      */
+		/*      1st subfile, and initialize our grid info.                      */
+		/* -------------------------------------------------------------------- */
+		if (subfile == 0)
+			gi = gilist;
+		else {
+			gi = (PJ_GRIDINFO *)pj_malloc(sizeof(PJ_GRIDINFO));
+			memset(gi, 0, sizeof(PJ_GRIDINFO));
 
-        else
-        {
-            PJ_GRIDINFO *lnk;
-            PJ_GRIDINFO *gp = gilist;
-            
-            while( gp != NULL 
-                   && strncmp(gp->ct->id,(const char*)header+24,8) != 0 )
-                gp = gp->next;
+			gi->gridname = strdup(gilist->gridname);
+			gi->filename = strdup(gilist->filename);
+			gi->next = NULL;
+		}
 
-            if( gp == NULL )
-            {
-                pj_log( ctx, PJ_LOG_ERROR,
-                        "pj_gridinfo_init_ntv2(): "
-                        "failed to find parent %8.8s for %s.\n", 
-                        (const char *) header+24, gi->ct->id );
+		gi->ct = ct;
+		gi->format = "ntv2";
+		gi->grid_offset = ftell(fid);
 
-                for( lnk = gp; lnk->next != NULL; lnk = lnk->next ) {}
-                lnk->next = gi;
-            }
-            else if( gp->child == NULL )
-            {
-                gp->child = gi;
-            }
-            else
-            {
-                for( lnk = gp->child; lnk->next != NULL; lnk = lnk->next ) {}
-                lnk->next = gi;
-            }
-        }
+		/* -------------------------------------------------------------------- */
+		/*      Attach to the correct list or sublist.                          */
+		/* -------------------------------------------------------------------- */
+		if (strncmp((const char *)header + 24, "NONE", 4) == 0) {
+			if (gi != gilist) {
+				PJ_GRIDINFO *lnk;
 
-/* -------------------------------------------------------------------- */
-/*      Seek past the data.                                             */
-/* -------------------------------------------------------------------- */
-        fseek( fid, gs_count * 16, SEEK_CUR );
-    }
+				for (lnk = gilist; lnk->next != NULL; lnk = lnk->next) {
+				}
+				lnk->next = gi;
+			}
+		}
 
-    return 1;
+		else {
+			PJ_GRIDINFO *lnk;
+			PJ_GRIDINFO *gp = gilist;
+
+			while (gp != NULL && strncmp(gp->ct->id, (const char *)header + 24, 8) != 0)
+				gp = gp->next;
+
+			if (gp == NULL) {
+				pj_log(ctx, PJ_LOG_ERROR,
+				       "pj_gridinfo_init_ntv2(): "
+				       "failed to find parent %8.8s for %s.\n",
+				       (const char *)header + 24, gi->ct->id);
+
+				for (lnk = gp; lnk->next != NULL; lnk = lnk->next) {
+				}
+				lnk->next = gi;
+			}
+			else if (gp->child == NULL) {
+				gp->child = gi;
+			}
+			else {
+				for (lnk = gp->child; lnk->next != NULL; lnk = lnk->next) {
+				}
+				lnk->next = gi;
+			}
+		}
+
+		/* -------------------------------------------------------------------- */
+		/*      Seek past the data.                                             */
+		/* -------------------------------------------------------------------- */
+		fseek(fid, gs_count * 16, SEEK_CUR);
+	}
+
+	return 1;
 }
 
 /************************************************************************/
@@ -568,85 +517,77 @@ static int pj_gridinfo_init_ntv2( projCtx ctx, FILE *fid, PJ_GRIDINFO *gilist )
 /*      Load an NTv1 style Canadian grid shift file.                    */
 /************************************************************************/
 
-static int pj_gridinfo_init_ntv1( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
+static int pj_gridinfo_init_ntv1(projCtx ctx, FILE *fid, PJ_GRIDINFO *gi)
 
 {
-    unsigned char header[176];
-    struct CTABLE *ct;
-    LP		ur;
-    
-    assert( sizeof(int) == 4 );
-    assert( sizeof(double) == 8 );
-    if( sizeof(int) != 4 || sizeof(double) != 8 )
-    {
-        pj_log( ctx, PJ_LOG_ERROR,
-                 "basic types of inappropraiate size in nad_load_ntv1()" );
-        pj_ctx_set_errno( ctx, -38 );
-        return 0;
-    }
+	unsigned char header[176];
+	struct CTABLE *ct;
+	LP ur;
 
-/* -------------------------------------------------------------------- */
-/*      Read the header.                                                */
-/* -------------------------------------------------------------------- */
-    if( fread( header, sizeof(header), 1, fid ) != 1 )
-    {
-        pj_ctx_set_errno( ctx, -38 );
-        return 0;
-    }
+	assert(sizeof(int) == 4);
+	assert(sizeof(double) == 8);
+	if (sizeof(int) != 4 || sizeof(double) != 8) {
+		pj_log(ctx, PJ_LOG_ERROR, "basic types of inappropraiate size in nad_load_ntv1()");
+		pj_ctx_set_errno(ctx, -38);
+		return 0;
+	}
 
-/* -------------------------------------------------------------------- */
-/*      Regularize fields of interest.                                  */
-/* -------------------------------------------------------------------- */
-    if( IS_LSB )
-    {
-        swap_words( header+8, 4, 1 );
-        swap_words( header+24, 8, 1 );
-        swap_words( header+40, 8, 1 );
-        swap_words( header+56, 8, 1 );
-        swap_words( header+72, 8, 1 );
-        swap_words( header+88, 8, 1 );
-        swap_words( header+104, 8, 1 );
-    }
+	/* -------------------------------------------------------------------- */
+	/*      Read the header.                                                */
+	/* -------------------------------------------------------------------- */
+	if (fread(header, sizeof(header), 1, fid) != 1) {
+		pj_ctx_set_errno(ctx, -38);
+		return 0;
+	}
 
-    if( *((int *) (header+8)) != 12 )
-    {
-        pj_log( ctx, PJ_LOG_ERROR, 
-                "NTv1 grid shift file has wrong record count, corrupt?" );
-        pj_ctx_set_errno( ctx, -38 );
-        return 0;
-    }
+	/* -------------------------------------------------------------------- */
+	/*      Regularize fields of interest.                                  */
+	/* -------------------------------------------------------------------- */
+	if (IS_LSB) {
+		swap_words(header + 8, 4, 1);
+		swap_words(header + 24, 8, 1);
+		swap_words(header + 40, 8, 1);
+		swap_words(header + 56, 8, 1);
+		swap_words(header + 72, 8, 1);
+		swap_words(header + 88, 8, 1);
+		swap_words(header + 104, 8, 1);
+	}
 
-/* -------------------------------------------------------------------- */
-/*      Fill in CTABLE structure.                                       */
-/* -------------------------------------------------------------------- */
-    ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
-    strcpy( ct->id, "NTv1 Grid Shift File" );
+	if (*((int *)(header + 8)) != 12) {
+		pj_log(ctx, PJ_LOG_ERROR, "NTv1 grid shift file has wrong record count, corrupt?");
+		pj_ctx_set_errno(ctx, -38);
+		return 0;
+	}
 
-    ct->ll.lam = - *((double *) (header+72));
-    ct->ll.phi = *((double *) (header+24));
-    ur.lam = - *((double *) (header+56));
-    ur.phi = *((double *) (header+40));
-    ct->del.lam = *((double *) (header+104));
-    ct->del.phi = *((double *) (header+88));
-    ct->lim.lam = (int) (fabs(ur.lam-ct->ll.lam)/ct->del.lam + 0.5) + 1;
-    ct->lim.phi = (int) (fabs(ur.phi-ct->ll.phi)/ct->del.phi + 0.5) + 1;
+	/* -------------------------------------------------------------------- */
+	/*      Fill in CTABLE structure.                                       */
+	/* -------------------------------------------------------------------- */
+	ct = (struct CTABLE *)pj_malloc(sizeof(struct CTABLE));
+	strcpy(ct->id, "NTv1 Grid Shift File");
 
-    pj_log( ctx, PJ_LOG_DEBUG_MINOR,
-            "NTv1 %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)",
-            ct->lim.lam, ct->lim.phi,
-            ct->ll.lam, ct->ll.phi, ur.lam, ur.phi );
+	ct->ll.lam = -*((double *)(header + 72));
+	ct->ll.phi = *((double *)(header + 24));
+	ur.lam = -*((double *)(header + 56));
+	ur.phi = *((double *)(header + 40));
+	ct->del.lam = *((double *)(header + 104));
+	ct->del.phi = *((double *)(header + 88));
+	ct->lim.lam = (int)(fabs(ur.lam - ct->ll.lam) / ct->del.lam + 0.5) + 1;
+	ct->lim.phi = (int)(fabs(ur.phi - ct->ll.phi) / ct->del.phi + 0.5) + 1;
 
-    ct->ll.lam *= DEG_TO_RAD;
-    ct->ll.phi *= DEG_TO_RAD;
-    ct->del.lam *= DEG_TO_RAD;
-    ct->del.phi *= DEG_TO_RAD;
-    ct->cvs = NULL;
+	pj_log(ctx, PJ_LOG_DEBUG_MINOR, "NTv1 %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)", ct->lim.lam, ct->lim.phi, ct->ll.lam, ct->ll.phi,
+	       ur.lam, ur.phi);
 
-    gi->ct = ct;
-    gi->grid_offset = ftell( fid );
-    gi->format = "ntv1";
+	ct->ll.lam *= DEG_TO_RAD;
+	ct->ll.phi *= DEG_TO_RAD;
+	ct->del.lam *= DEG_TO_RAD;
+	ct->del.phi *= DEG_TO_RAD;
+	ct->cvs = NULL;
 
-    return 1;
+	gi->ct = ct;
+	gi->grid_offset = ftell(fid);
+	gi->format = "ntv1";
+
+	return 1;
 }
 
 /************************************************************************/
@@ -655,101 +596,89 @@ static int pj_gridinfo_init_ntv1( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
 /*      Load a NOAA .gtx vertical datum shift file.                     */
 /************************************************************************/
 
-static int pj_gridinfo_init_gtx( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
+static int pj_gridinfo_init_gtx(projCtx ctx, FILE *fid, PJ_GRIDINFO *gi)
 
 {
-    unsigned char header[40];
-    struct CTABLE *ct;
-    double      xorigin,yorigin,xstep,ystep;
-    int         rows, columns;
+	unsigned char header[40];
+	struct CTABLE *ct;
+	double xorigin, yorigin, xstep, ystep;
+	int rows, columns;
 
-    assert( sizeof(int) == 4 );
-    assert( sizeof(double) == 8 );
-    if( sizeof(int) != 4 || sizeof(double) != 8 )
-    {
-        pj_log( ctx, PJ_LOG_ERROR,
-                "basic types of inappropraiate size in nad_load_gtx()" );
-        pj_ctx_set_errno( ctx, -38 );
-        return 0;
-    }
+	assert(sizeof(int) == 4);
+	assert(sizeof(double) == 8);
+	if (sizeof(int) != 4 || sizeof(double) != 8) {
+		pj_log(ctx, PJ_LOG_ERROR, "basic types of inappropraiate size in nad_load_gtx()");
+		pj_ctx_set_errno(ctx, -38);
+		return 0;
+	}
 
-/* -------------------------------------------------------------------- */
-/*      Read the header.                                                */
-/* -------------------------------------------------------------------- */
-    if( fread( header, sizeof(header), 1, fid ) != 1 )
-    {
-        pj_ctx_set_errno( ctx, -38 );
-        return 0;
-    }
+	/* -------------------------------------------------------------------- */
+	/*      Read the header.                                                */
+	/* -------------------------------------------------------------------- */
+	if (fread(header, sizeof(header), 1, fid) != 1) {
+		pj_ctx_set_errno(ctx, -38);
+		return 0;
+	}
 
-/* -------------------------------------------------------------------- */
-/*      Regularize fields of interest and extract.                      */
-/* -------------------------------------------------------------------- */
-    if( IS_LSB )
-    {
-        swap_words( header+0, 8, 4 );
-        swap_words( header+32, 4, 2 );
-    }
+	/* -------------------------------------------------------------------- */
+	/*      Regularize fields of interest and extract.                      */
+	/* -------------------------------------------------------------------- */
+	if (IS_LSB) {
+		swap_words(header + 0, 8, 4);
+		swap_words(header + 32, 4, 2);
+	}
 
-    memcpy( &yorigin, header+0, 8 );
-    memcpy( &xorigin, header+8, 8 );
-    memcpy( &ystep, header+16, 8 );
-    memcpy( &xstep, header+24, 8 );
+	memcpy(&yorigin, header + 0, 8);
+	memcpy(&xorigin, header + 8, 8);
+	memcpy(&ystep, header + 16, 8);
+	memcpy(&xstep, header + 24, 8);
 
-    memcpy( &rows, header+32, 4 );
-    memcpy( &columns, header+36, 4 );
+	memcpy(&rows, header + 32, 4);
+	memcpy(&columns, header + 36, 4);
 
-    if( xorigin < -360 || xorigin > 360 
-        || yorigin < -90 || yorigin > 90 )
-    {
-        pj_log( ctx, PJ_LOG_ERROR, 
-                "gtx file header has invalid extents, corrupt?");
-        pj_ctx_set_errno( ctx, -38 );
-        return 0;
-    }
+	if (xorigin < -360 || xorigin > 360 || yorigin < -90 || yorigin > 90) {
+		pj_log(ctx, PJ_LOG_ERROR, "gtx file header has invalid extents, corrupt?");
+		pj_ctx_set_errno(ctx, -38);
+		return 0;
+	}
 
-/* -------------------------------------------------------------------- */
-/*      Fill in CTABLE structure.                                       */
-/* -------------------------------------------------------------------- */
-    ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
-    strcpy( ct->id, "GTX Vertical Grid Shift File" );
+	/* -------------------------------------------------------------------- */
+	/*      Fill in CTABLE structure.                                       */
+	/* -------------------------------------------------------------------- */
+	ct = (struct CTABLE *)pj_malloc(sizeof(struct CTABLE));
+	strcpy(ct->id, "GTX Vertical Grid Shift File");
 
-    ct->ll.lam = xorigin;
-    ct->ll.phi = yorigin;
-    ct->del.lam = xstep;
-    ct->del.phi = ystep;
-    ct->lim.lam = columns;
-    ct->lim.phi = rows;
+	ct->ll.lam = xorigin;
+	ct->ll.phi = yorigin;
+	ct->del.lam = xstep;
+	ct->del.phi = ystep;
+	ct->lim.lam = columns;
+	ct->lim.phi = rows;
 
-    /* some GTX files come in 0-360 and we shift them back into the
-       expected -180 to 180 range if possible.  This does not solve 
-       problems with grids spanning the dateline. */
-    if( ct->ll.lam >= 180.0 )
-        ct->ll.lam -= 360.0;
+	/* some GTX files come in 0-360 and we shift them back into the
+	   expected -180 to 180 range if possible.  This does not solve
+	   problems with grids spanning the dateline. */
+	if (ct->ll.lam >= 180.0)
+		ct->ll.lam -= 360.0;
 
-    if( ct->ll.lam >= 0.0 && ct->ll.lam + ct->del.lam * ct->lim.lam > 180.0 )
-    {
-        pj_log( ctx, PJ_LOG_DEBUG_MAJOR,
-                "This GTX spans the dateline!  This will cause problems." );
-    }
+	if (ct->ll.lam >= 0.0 && ct->ll.lam + ct->del.lam * ct->lim.lam > 180.0) {
+		pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "This GTX spans the dateline!  This will cause problems.");
+	}
 
-    pj_log( ctx, PJ_LOG_DEBUG_MINOR,
-            "GTX %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)",
-            ct->lim.lam, ct->lim.phi,
-            ct->ll.lam, ct->ll.phi, 
-            ct->ll.lam + (columns-1)*xstep, ct->ll.phi + (rows-1)*ystep);
-    
-    ct->ll.lam *= DEG_TO_RAD;
-    ct->ll.phi *= DEG_TO_RAD;
-    ct->del.lam *= DEG_TO_RAD;
-    ct->del.phi *= DEG_TO_RAD;
-    ct->cvs = NULL;
+	pj_log(ctx, PJ_LOG_DEBUG_MINOR, "GTX %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)", ct->lim.lam, ct->lim.phi, ct->ll.lam, ct->ll.phi,
+	       ct->ll.lam + (columns - 1) * xstep, ct->ll.phi + (rows - 1) * ystep);
 
-    gi->ct = ct;
-    gi->grid_offset = 40;
-    gi->format = "gtx";
+	ct->ll.lam *= DEG_TO_RAD;
+	ct->ll.phi *= DEG_TO_RAD;
+	ct->del.lam *= DEG_TO_RAD;
+	ct->del.phi *= DEG_TO_RAD;
+	ct->cvs = NULL;
 
-    return 1;
+	gi->ct = ct;
+	gi->grid_offset = 40;
+	gi->format = "gtx";
+
+	return 1;
 }
 
 /************************************************************************/
@@ -761,110 +690,93 @@ static int pj_gridinfo_init_gtx( projCtx ctx, FILE * fid, PJ_GRIDINFO *gi )
 /*      applications.                                                   */
 /************************************************************************/
 
-PJ_GRIDINFO *pj_gridinfo_init( projCtx ctx, const char *gridname )
+PJ_GRIDINFO *pj_gridinfo_init(projCtx ctx, const char *gridname)
 
 {
-    char 	fname[MAX_PATH_FILENAME+1];
-    PJ_GRIDINFO *gilist;
-    FILE 	*fp;
-    char	header[160];
+	char fname[MAX_PATH_FILENAME + 1];
+	PJ_GRIDINFO *gilist;
+	FILE *fp;
+	char header[160];
 
-    errno = pj_errno = 0;
-    ctx->last_errno = 0;
+	errno = pj_errno = 0;
+	ctx->last_errno = 0;
 
-/* -------------------------------------------------------------------- */
-/*      Initialize a GRIDINFO with stub info we would use if it         */
-/*      cannot be loaded.                                               */
-/* -------------------------------------------------------------------- */
-    gilist = (PJ_GRIDINFO *) pj_malloc(sizeof(PJ_GRIDINFO));
-    memset( gilist, 0, sizeof(PJ_GRIDINFO) );
-    
-    gilist->gridname = strdup( gridname );
-    gilist->filename = NULL;
-    gilist->format = "missing";
-    gilist->grid_offset = 0;
-    gilist->ct = NULL;
-    gilist->next = NULL;
+	/* -------------------------------------------------------------------- */
+	/*      Initialize a GRIDINFO with stub info we would use if it         */
+	/*      cannot be loaded.                                               */
+	/* -------------------------------------------------------------------- */
+	gilist = (PJ_GRIDINFO *)pj_malloc(sizeof(PJ_GRIDINFO));
+	memset(gilist, 0, sizeof(PJ_GRIDINFO));
 
-/* -------------------------------------------------------------------- */
-/*      Open the file using the usual search rules.                     */
-/* -------------------------------------------------------------------- */
-    strcpy(fname, gridname);
-    if (!(fp = pj_open_lib(ctx, fname, "rb"))) {
-        ctx->last_errno = 0; /* don't treat as a persistent error */
-        return gilist;
-    }
+	gilist->gridname = strdup(gridname);
+	gilist->filename = NULL;
+	gilist->format = "missing";
+	gilist->grid_offset = 0;
+	gilist->ct = NULL;
+	gilist->next = NULL;
 
-    gilist->filename = strdup(fname);
-    
-/* -------------------------------------------------------------------- */
-/*      Load a header, to determine the file type.                      */
-/* -------------------------------------------------------------------- */
-    if( fread( header, sizeof(header), 1, fp ) != 1 )
-    {
-        fclose( fp );
-        pj_ctx_set_errno( ctx, -38 );
-        return gilist;
-    }
+	/* -------------------------------------------------------------------- */
+	/*      Open the file using the usual search rules.                     */
+	/* -------------------------------------------------------------------- */
+	strcpy(fname, gridname);
+	if (!(fp = pj_open_lib(ctx, fname, "rb"))) {
+		ctx->last_errno = 0; /* don't treat as a persistent error */
+		return gilist;
+	}
 
-    fseek( fp, SEEK_SET, 0 );
+	gilist->filename = strdup(fname);
 
-/* -------------------------------------------------------------------- */
-/*      Determine file type.                                            */
-/* -------------------------------------------------------------------- */
-    if( strncmp(header + 0, "HEADER", 6) == 0 
-        && strncmp(header + 96, "W GRID", 6) == 0 
-        && strncmp(header + 144, "TO      NAD83   ", 16) == 0 )
-    {
-        pj_gridinfo_init_ntv1( ctx, fp, gilist );
-    }
-    
-    else if( strncmp(header + 0, "NUM_OREC", 8) == 0 
-             && strncmp(header + 48, "GS_TYPE", 7) == 0 )
-    {
-        pj_gridinfo_init_ntv2( ctx, fp, gilist );
-    }
+	/* -------------------------------------------------------------------- */
+	/*      Load a header, to determine the file type.                      */
+	/* -------------------------------------------------------------------- */
+	if (fread(header, sizeof(header), 1, fp) != 1) {
+		fclose(fp);
+		pj_ctx_set_errno(ctx, -38);
+		return gilist;
+	}
 
-    else if( strlen(gridname) > 4 
-             && (strcmp(gridname+strlen(gridname)-3,"gtx") == 0 
-                 || strcmp(gridname+strlen(gridname)-3,"GTX") == 0) )
-    {
-        pj_gridinfo_init_gtx( ctx, fp, gilist );
-    }
+	fseek(fp, SEEK_SET, 0);
 
-    else if( strncmp(header + 0,"CTABLE V2",9) == 0 )
-    {
-        struct CTABLE *ct = nad_ctable2_init( ctx, fp );
+	/* -------------------------------------------------------------------- */
+	/*      Determine file type.                                            */
+	/* -------------------------------------------------------------------- */
+	if (strncmp(header + 0, "HEADER", 6) == 0 && strncmp(header + 96, "W GRID", 6) == 0 &&
+	    strncmp(header + 144, "TO      NAD83   ", 16) == 0) {
+		pj_gridinfo_init_ntv1(ctx, fp, gilist);
+	}
 
-        gilist->format = "ctable2";
-        gilist->ct = ct;
+	else if (strncmp(header + 0, "NUM_OREC", 8) == 0 && strncmp(header + 48, "GS_TYPE", 7) == 0) {
+		pj_gridinfo_init_ntv2(ctx, fp, gilist);
+	}
 
-        pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
-                "Ctable2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
-                ct->id, 
-                ct->lim.lam, ct->lim.phi,
-                ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
-                (ct->ll.lam + (ct->lim.lam-1)*ct->del.lam) * RAD_TO_DEG, 
-                (ct->ll.phi + (ct->lim.phi-1)*ct->del.phi) * RAD_TO_DEG );
-    }
+	else if (strlen(gridname) > 4 &&
+	         (strcmp(gridname + strlen(gridname) - 3, "gtx") == 0 || strcmp(gridname + strlen(gridname) - 3, "GTX") == 0)) {
+		pj_gridinfo_init_gtx(ctx, fp, gilist);
+	}
 
-    else
-    {
-        struct CTABLE *ct = nad_ctable_init( ctx, fp );
+	else if (strncmp(header + 0, "CTABLE V2", 9) == 0) {
+		struct CTABLE *ct = nad_ctable2_init(ctx, fp);
 
-        gilist->format = "ctable";
-        gilist->ct = ct;
+		gilist->format = "ctable2";
+		gilist->ct = ct;
 
-        pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
-                "Ctable %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n",
-                ct->id, 
-                ct->lim.lam, ct->lim.phi,
-                ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
-                (ct->ll.lam + (ct->lim.lam-1)*ct->del.lam) * RAD_TO_DEG, 
-                (ct->ll.phi + (ct->lim.phi-1)*ct->del.phi) * RAD_TO_DEG );
-    }
+		pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Ctable2 %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n", ct->id, ct->lim.lam, ct->lim.phi,
+		       ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG, (ct->ll.lam + (ct->lim.lam - 1) * ct->del.lam) * RAD_TO_DEG,
+		       (ct->ll.phi + (ct->lim.phi - 1) * ct->del.phi) * RAD_TO_DEG);
+	}
 
-    fclose(fp);
+	else {
+		struct CTABLE *ct = nad_ctable_init(ctx, fp);
 
-    return gilist;
+		gilist->format = "ctable";
+		gilist->ct = ct;
+
+		pj_log(ctx, PJ_LOG_DEBUG_MAJOR, "Ctable %s %dx%d: LL=(%.9g,%.9g) UR=(%.9g,%.9g)\n", ct->id, ct->lim.lam, ct->lim.phi,
+		       ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG, (ct->ll.lam + (ct->lim.lam - 1) * ct->del.lam) * RAD_TO_DEG,
+		       (ct->ll.phi + (ct->lim.phi - 1) * ct->del.phi) * RAD_TO_DEG);
+	}
+
+	fclose(fp);
+
+	return gilist;
 }

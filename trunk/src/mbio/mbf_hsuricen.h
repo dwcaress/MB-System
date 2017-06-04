@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hsuricen.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1993-2016 by
+ *    Copyright (c) 1993-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -44,29 +44,27 @@
  * of the binary data structure used in the MBF_HSURICEN format.
  */
 
-struct mbf_hsuricen_data_struct
-	{
-	short	sec;		/* seconds x 100 */
-	short	min;		/* minute of the day */
-	short	day;		/* day of the year */
-	short	year;		/* 4-digit year */
-	int	lat;		/* latitude in degrees times 10^7 */
-	int	lon;		/* longitude in degrees times 10^7 */
-	short	hdg;		/* heading in degrees x 10 */
-	short	course;		/* course in degrees x 10 */
-	short	speed;		/* speed in knots x 100 */
-	short	pitch;		/* pitch in degrees x 10 */
-	short	scale;		/* scale factor x 100 */
-	mb_u_char	speed_ref;	/* 'B' or 'W' */
-	mb_u_char	quality;
-	short	deph[59];	/* scaled depths in meters
-					portmost to stbdmost */
-	short	dist[59];	/* scaled cross track distances,
-					port ranges are negative */
-	};
+struct mbf_hsuricen_data_struct {
+	short sec;           /* seconds x 100 */
+	short min;           /* minute of the day */
+	short day;           /* day of the year */
+	short year;          /* 4-digit year */
+	int lat;             /* latitude in degrees times 10^7 */
+	int lon;             /* longitude in degrees times 10^7 */
+	short hdg;           /* heading in degrees x 10 */
+	short course;        /* course in degrees x 10 */
+	short speed;         /* speed in knots x 100 */
+	short pitch;         /* pitch in degrees x 10 */
+	short scale;         /* scale factor x 100 */
+	mb_u_char speed_ref; /* 'B' or 'W' */
+	mb_u_char quality;
+	short deph[59]; /* scaled depths in meters
+	            portmost to stbdmost */
+	short dist[59]; /* scaled cross track distances,
+	            port ranges are negative */
+};
 
-struct mbf_hsuricen_struct
-	{
-	int	kind;
+struct mbf_hsuricen_struct {
+	int kind;
 	struct mbf_hsuricen_data_struct data;
-	};
+};

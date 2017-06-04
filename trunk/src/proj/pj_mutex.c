@@ -27,7 +27,6 @@
  * DEALINGS IN THE SOFTWARE.
  *****************************************************************************/
 
-
 /* projects.h and windows.h conflict - avoid this! */
 
 #ifndef _WIN32
@@ -39,12 +38,12 @@ PJ_CVSID("$Id$");
 
 /* on win32 we always use win32 mutexes, even if pthreads are available */
 #if defined(_WIN32) && !defined(MUTEX_stub)
-#  define MUTEX_win32
-#  undef  MUTEX_pthread
+#define MUTEX_win32
+#undef MUTEX_pthread
 #endif
 
 #if !defined(MUTEX_stub) && !defined(MUTEX_pthread) && !defined(MUTEX_win32)
-#  define MUTEX_stub
+#define MUTEX_stub
 #endif
 
 static void pj_init_lock();
@@ -63,9 +62,7 @@ static void pj_init_lock();
 /*      Acquire the PROJ.4 lock.                                        */
 /************************************************************************/
 
-void pj_acquire_lock()
-{
-}
+void pj_acquire_lock() {}
 
 /************************************************************************/
 /*                            pj_release_lock()                         */
@@ -73,16 +70,12 @@ void pj_acquire_lock()
 /*      Release the PROJ.4 lock.                                        */
 /************************************************************************/
 
-void pj_release_lock()
-{
-}
+void pj_release_lock() {}
 
 /************************************************************************/
 /*                          pj_cleanup_lock()                           */
 /************************************************************************/
-void pj_cleanup_lock()
-{
-}
+void pj_cleanup_lock() {}
 
 #endif // def MUTEX_stub
 
@@ -104,10 +97,7 @@ static pthread_mutex_t pj_core_lock = PTHREAD_MUTEX_INITIALIZER;
 /*      Acquire the PROJ.4 lock.                                        */
 /************************************************************************/
 
-void pj_acquire_lock()
-{
-    pthread_mutex_lock( &pj_core_lock);
-}
+void pj_acquire_lock() { pthread_mutex_lock(&pj_core_lock); }
 
 /************************************************************************/
 /*                          pj_release_lock()                           */
@@ -115,17 +105,12 @@ void pj_acquire_lock()
 /*      Release the PROJ.4 lock.                                        */
 /************************************************************************/
 
-void pj_release_lock()
-{
-    pthread_mutex_unlock( &pj_core_lock );
-}
+void pj_release_lock() { pthread_mutex_unlock(&pj_core_lock); }
 
 /************************************************************************/
 /*                          pj_cleanup_lock()                           */
 /************************************************************************/
-void pj_cleanup_lock()
-{
-}
+void pj_cleanup_lock() {}
 
 #endif // def MUTEX_pthread
 
@@ -147,12 +132,11 @@ static HANDLE mutex_lock = NULL;
 /*      Acquire the PROJ.4 lock.                                        */
 /************************************************************************/
 
-void pj_acquire_lock()
-{
-    if( mutex_lock == NULL )
-        pj_init_lock();
+void pj_acquire_lock() {
+	if (mutex_lock == NULL)
+		pj_init_lock();
 
-    WaitForSingleObject( mutex_lock, INFINITE );
+	WaitForSingleObject(mutex_lock, INFINITE);
 }
 
 /************************************************************************/
@@ -161,24 +145,21 @@ void pj_acquire_lock()
 /*      Release the PROJ.4 lock.                                        */
 /************************************************************************/
 
-void pj_release_lock()
-{
-    if( mutex_lock == NULL )
-        pj_init_lock();
-    else
-        ReleaseMutex( mutex_lock );
+void pj_release_lock() {
+	if (mutex_lock == NULL)
+		pj_init_lock();
+	else
+		ReleaseMutex(mutex_lock);
 }
 
 /************************************************************************/
 /*                          pj_cleanup_lock()                           */
 /************************************************************************/
-void pj_cleanup_lock()
-{
-    if( mutex_lock != NULL )
-    {
-        CloseHandle( mutex_lock );
-        mutex_lock = NULL;
-    }
+void pj_cleanup_lock() {
+	if (mutex_lock != NULL) {
+		CloseHandle(mutex_lock);
+		mutex_lock = NULL;
+	}
 }
 
 /************************************************************************/
@@ -188,9 +169,8 @@ void pj_cleanup_lock()
 static void pj_init_lock()
 
 {
-    if( mutex_lock == NULL )
-        mutex_lock = CreateMutex( NULL, FALSE, NULL );
+	if (mutex_lock == NULL)
+		mutex_lock = CreateMutex(NULL, FALSE, NULL);
 }
 
 #endif // def MUTEX_win32
-

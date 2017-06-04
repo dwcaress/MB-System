@@ -44,76 +44,72 @@
  ********************************************************************/
 
 #ifndef __GSF_INDX__
-    #define __GSF_INDX__
+#define __GSF_INDX__
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
+/* This header has the GSF File Table structure definition */
+#include "gsf_ft.h"
 
-    /* This header has the GSF File Table structure definition */
-    #include "gsf_ft.h"
+/* Define a macro to hold a version tag for gsf index file. Note that
+ * the macro definition for the version size defines the number of bytes
+ * read/written for the version, so this should NOT be changed.
+ */
+#define GSF_INDEX_VERSION "INDEX-GSF-v02.00"
+#define GSF_INDEX_VERSION_SIZE 16
 
-    /* Define a macro to hold a version tag for gsf index file. Note that
-     * the macro definition for the version size defines the number of bytes
-     * read/written for the version, so this should NOT be changed.
-     */
-    #define GSF_INDEX_VERSION       "INDEX-GSF-v02.00"
-    #define GSF_INDEX_VERSION_SIZE  16
+/* Typedef a structure to hold the index file header information */
+typedef struct t_gsfIndexHeader {
+	char version[GSF_INDEX_VERSION_SIZE + 1];
+	long long gsfFileSize;
+	int endian;
+	int number_record_types;
+	int spare1;
+	int spare2;
+	int spare3;
+	int spare4;
+} GSF_INDEX_HEADER;
 
-    /* Typedef a structure to hold the index file header information */
-    typedef struct t_gsfIndexHeader
-    {
-        char        version[GSF_INDEX_VERSION_SIZE+1];
-        long long   gsfFileSize;
-        int         endian;
-        int         number_record_types;
-        int         spare1;
-        int         spare2;
-        int         spare3;
-        int         spare4;
-    } GSF_INDEX_HEADER;
+/* JCD: Typedef for index progress callback */
+typedef void (*GSF_PROGRESS_CALLBACK)(int state, int percent);
 
+/* Prototypes for this module */
+int OPTLK gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft);
+int OPTLK gsfCloseIndex(GSF_FILE_TABLE *ft);
+void OPTLK SwapLong(unsigned int *base, int count);
+void OPTLK SwapLongLong(long long *base_address, int count);
 
-    /* JCD: Typedef for index progress callback */
-    typedef void (*GSF_PROGRESS_CALLBACK) (int state, int percent);
+void OPTLK gsf_register_progress_callback(GSF_PROGRESS_CALLBACK progressCB);
+/*
+ * Description : The gsf_register_progress_callback function registers a callback
+ *                function, defined by the user, to be called to report the progress
+ *                of the index file creation.  If no progress callback is registered,
+ *                status is printed to stdout if the DISPLAY_SPINNER macro is defined
+ *                during compilation of the GSF library.
+ *
+ * Inputs :
+ *    GSF_PROGRESS_CALLBACK progressCB = Name of progress callback function to call
+ *                                       when creating the GSF index file.  The
+ *                                       progress callback will accept two integer
+ *                                       arguments, and this function will be called
+ *                                       whenever the percent complete changes.
+ *                                       The first argument will be one of the
+ *                                       following three values, to represent the
+ *                                       state of the progress:
+ *                                       1 = Reading GSF file
+ *                                       2 = Creating new index file
+ *                                       3 = Appending to existing index file
+ *                                       The second argument contains the percent
+ *                                       complete of the current state.
+ *
+ * Returns : none
+ *
+ * Error Conditions : none
+ */
 
-
-    /* Prototypes for this module */
-    int OPTLK       gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft);
-    int OPTLK       gsfCloseIndex(GSF_FILE_TABLE *ft);
-    void OPTLK      SwapLong(unsigned int *base, int count);
-    void OPTLK      SwapLongLong(long long *base_address, int count);
-
-    void OPTLK      gsf_register_progress_callback (GSF_PROGRESS_CALLBACK progressCB);
-    /*
-     * Description : The gsf_register_progress_callback function registers a callback
-     *                function, defined by the user, to be called to report the progress
-     *                of the index file creation.  If no progress callback is registered,
-     *                status is printed to stdout if the DISPLAY_SPINNER macro is defined
-     *                during compilation of the GSF library.
-     *
-     * Inputs :
-     *    GSF_PROGRESS_CALLBACK progressCB = Name of progress callback function to call
-     *                                       when creating the GSF index file.  The
-     *                                       progress callback will accept two integer
-     *                                       arguments, and this function will be called
-     *                                       whenever the percent complete changes.
-     *                                       The first argument will be one of the
-     *                                       following three values, to represent the
-     *                                       state of the progress:
-     *                                       1 = Reading GSF file
-     *                                       2 = Creating new index file
-     *                                       3 = Appending to existing index file
-     *                                       The second argument contains the percent
-     *                                       complete of the current state.
-     *
-     * Returns : none
-     *
-     * Error Conditions : none
-     */
-
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

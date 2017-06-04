@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_mbpronav.h	5/20/99
  *	$Id$
  *
- *    Copyright (c) 1999-2016 by
+ *    Copyright (c) 1999-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -32,33 +32,32 @@
  *
  */
 
-#define	MBF_MBPRONAV_MAXLINE	256
+#define MBF_MBPRONAV_MAXLINE 256
 
-struct mbf_mbpronav_struct
-	{
+struct mbf_mbpronav_struct {
 	/* type of data record */
-	int	kind;
+	int kind;
 
 	/* time stamp */
-	double	time_d;
-	int	time_i[7];
+	double time_d;
+	int time_i[7];
 
 	/* navigation */
-	double	longitude;
-	double	latitude;
-	double  heading;
-	double  speed;
-	double  sonardepth;
-	double  roll;
-	double  pitch;
-	double  heave;
+	double longitude;
+	double latitude;
+	double heading;
+	double speed;
+	double sonardepth;
+	double roll;
+	double pitch;
+	double heave;
 
 	/* swathbounds */
-	double	portlon;
-	double	portlat;
-	double	stbdlon;
-	double	stbdlat;
+	double portlon;
+	double portlat;
+	double stbdlon;
+	double stbdlat;
 
 	/* comment */
-	char	comment[MBF_MBPRONAV_MAXLINE];
-	};
+	char comment[MBF_MBPRONAV_MAXLINE];
+};

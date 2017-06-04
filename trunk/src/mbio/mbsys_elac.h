@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_elac.h	8/20/94
  *	$Id$
  *
- *    Copyright (c) 1994-2016 by
+ *    Copyright (c) 1994-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -56,221 +56,185 @@
  */
 
 /* sonar types */
-#define	MBSYS_ELAC_UNKNOWN	0
-#define	MBSYS_ELAC_BOTTOMCHART	1
+#define MBSYS_ELAC_UNKNOWN 0
+#define MBSYS_ELAC_BOTTOMCHART 1
 
 /* maximum number of beams and pixels */
-#define	MBSYS_ELAC_MAXBEAMS	56
-#define	MBSYS_ELAC_MAXSVP	500
-#define	MBSYS_ELAC_COMMENT_LENGTH	200
+#define MBSYS_ELAC_MAXBEAMS 56
+#define MBSYS_ELAC_MAXSVP 500
+#define MBSYS_ELAC_COMMENT_LENGTH 200
 
 /* telegram types */
-#define	ELAC_NONE		0
-#define	ELAC_COMMENT		0x0250
-#define	ELAC_POS		0x0251
-#define	ELAC_PARAMETER		0x0252
-#define	ELAC_SVP		0x0253
-#define	ELAC_BATH56		0x0254
-#define	ELAC_BATH40		0x0255
-#define	ELAC_BATH32		0x0256
-#define	ELAC_XBATH56		0x0260
-#define	ELAC_XBATH40		0x0261
-#define	ELAC_XBATH32		0x0262
+#define ELAC_NONE 0
+#define ELAC_COMMENT 0x0250
+#define ELAC_POS 0x0251
+#define ELAC_PARAMETER 0x0252
+#define ELAC_SVP 0x0253
+#define ELAC_BATH56 0x0254
+#define ELAC_BATH40 0x0255
+#define ELAC_BATH32 0x0256
+#define ELAC_XBATH56 0x0260
+#define ELAC_XBATH40 0x0261
+#define ELAC_XBATH32 0x0262
 
 /* telegram sizes */
-#define	ELAC_COMMENT_SIZE	200
-#define	ELAC_POS_SIZE		36
-#define	ELAC_PARAMETER_SIZE	56
-#define	ELAC_SVP_SIZE		2016
-#define	ELAC_BATH56_SIZE	848
-#define	ELAC_BATH40_SIZE	608
-#define	ELAC_BATH32_SIZE	488
-#define	ELAC_XPARAMETER_SIZE	54
-#define	ELAC_XBATH56_SIZE	1072
-#define	ELAC_XBATH40_SIZE	768
-#define	ELAC_XBATH32_SIZE	616
+#define ELAC_COMMENT_SIZE 200
+#define ELAC_POS_SIZE 36
+#define ELAC_PARAMETER_SIZE 56
+#define ELAC_SVP_SIZE 2016
+#define ELAC_BATH56_SIZE 848
+#define ELAC_BATH40_SIZE 608
+#define ELAC_BATH32_SIZE 488
+#define ELAC_XPARAMETER_SIZE 54
+#define ELAC_XBATH56_SIZE 1072
+#define ELAC_XBATH40_SIZE 768
+#define ELAC_XBATH32_SIZE 616
 
 /* internal data structure */
 
-struct mbsys_elac_profile_struct
-	{
-	int	year;
-	int	month;
-	int	day;
-	int	hour;
-	int	minute;
-	int	second;
-	int	hundredth_sec;
-	int	thousandth_sec;
-	int	latitude;		/* 180 deg = 2*pi*e9 */
-	int	longitude;		/* 180 deg = 2*pi*e9 */
-	int	roll;			/* 0.005 degrees */
-	int	pitch;			/* 0.005 degrees */
-	int	heading;		/* PI/180 degrees */
-	int	heave;			/* 0.001 meters */
-	int	bath[8];		/* depths:  0.01 meters */
-	int	bath_acrosstrack[8];
-				/* acrosstrack distances: 0.01 meters */
+struct mbsys_elac_profile_struct {
+	int year;
+	int month;
+	int day;
+	int hour;
+	int minute;
+	int second;
+	int hundredth_sec;
+	int thousandth_sec;
+	int latitude;  /* 180 deg = 2*pi*e9 */
+	int longitude; /* 180 deg = 2*pi*e9 */
+	int roll;      /* 0.005 degrees */
+	int pitch;     /* 0.005 degrees */
+	int heading;   /* PI/180 degrees */
+	int heave;     /* 0.001 meters */
+	int bath[8];   /* depths:  0.01 meters */
+	int bath_acrosstrack[8];
+	/* acrosstrack distances: 0.01 meters */
 	short int bath_alongtrack[8];
-				/* alongtrack distances: 0.01 meters */
-	short int tt[8];	/* travel times:         0.05 msec */
-	short int angle[8];	/* 0.005 degrees */
-	short int quality[8];	/* 0 (bad) to 3 (good) */
-	short int amp[8];	/* ??? */
+	/* alongtrack distances: 0.01 meters */
+	short int tt[8];      /* travel times:         0.05 msec */
+	short int angle[8];   /* 0.005 degrees */
+	short int quality[8]; /* 0 (bad) to 3 (good) */
+	short int amp[8];     /* ??? */
+};
 
-	};
-
-struct mbsys_elac_struct
-	{
+struct mbsys_elac_struct {
 	/* type of data record */
-	int	kind;			/* Data vs Comment */
+	int kind; /* Data vs Comment */
 
 	/* type of sonar */
-	int	sonar;			/* Type of Elac sonar */
+	int sonar; /* Type of Elac sonar */
 
 	/* parameter info (parameter telegrams) */
-	int	par_year;
-	int	par_month;
-	int	par_day;
-	int	par_hour;
-	int	par_minute;
-	int	par_second;
-	int	par_hundredth_sec;
-	int	par_thousandth_sec;
-	short	roll_offset;	/* roll offset (degrees) */
-	short	pitch_offset;	/* pitch offset (degrees) */
-	short	heading_offset;	/* heading offset (degrees) */
-	short	time_delay;	/* positioning system delay (sec) */
-	short	transducer_port_height;
-	short	transducer_starboard_height;
-	short	transducer_port_depth;
-	short	transducer_starboard_depth;
-	short	transducer_port_x;
-	short	transducer_starboard_x;
-	short	transducer_port_y;
-	short	transducer_starboard_y;
-	short	transducer_port_error;
-	short	transducer_starboard_error;
-	short	antenna_height;
-	short	antenna_x;
-	short	antenna_y;
-	short	vru_height;
-	short	vru_x;
-	short	vru_y;
-	short	heave_offset;
-	short	line_number;
-	short	start_or_stop;
-	short	transducer_serial_number;
+	int par_year;
+	int par_month;
+	int par_day;
+	int par_hour;
+	int par_minute;
+	int par_second;
+	int par_hundredth_sec;
+	int par_thousandth_sec;
+	short roll_offset;    /* roll offset (degrees) */
+	short pitch_offset;   /* pitch offset (degrees) */
+	short heading_offset; /* heading offset (degrees) */
+	short time_delay;     /* positioning system delay (sec) */
+	short transducer_port_height;
+	short transducer_starboard_height;
+	short transducer_port_depth;
+	short transducer_starboard_depth;
+	short transducer_port_x;
+	short transducer_starboard_x;
+	short transducer_port_y;
+	short transducer_starboard_y;
+	short transducer_port_error;
+	short transducer_starboard_error;
+	short antenna_height;
+	short antenna_x;
+	short antenna_y;
+	short vru_height;
+	short vru_x;
+	short vru_y;
+	short heave_offset;
+	short line_number;
+	short start_or_stop;
+	short transducer_serial_number;
 
 	/* comment */
-	char	comment[MBSYS_ELAC_COMMENT_LENGTH];
+	char comment[MBSYS_ELAC_COMMENT_LENGTH];
 
 	/* position (position telegrams) */
-	int	pos_year;
-	int	pos_month;
-	int	pos_day;
-	int	pos_hour;
-	int	pos_minute;
-	int	pos_second;
-	int	pos_hundredth_sec;
-	int	pos_thousandth_sec;
-	int	pos_latitude;		/* 180 deg = 2e9 */
-	int	pos_longitude;		/* 180 deg = 2e9 */
-	unsigned int	utm_northing;
-	unsigned int	utm_easting;
-	int	utm_zone_lon;		/* 180 deg = 2e9 */
-	char	utm_zone;
-	char	hemisphere;
-	char	ellipsoid;
-	char	pos_spare;
-	int	semi_major_axis;
-	int	other_quality;
+	int pos_year;
+	int pos_month;
+	int pos_day;
+	int pos_hour;
+	int pos_minute;
+	int pos_second;
+	int pos_hundredth_sec;
+	int pos_thousandth_sec;
+	int pos_latitude;  /* 180 deg = 2e9 */
+	int pos_longitude; /* 180 deg = 2e9 */
+	unsigned int utm_northing;
+	unsigned int utm_easting;
+	int utm_zone_lon; /* 180 deg = 2e9 */
+	char utm_zone;
+	char hemisphere;
+	char ellipsoid;
+	char pos_spare;
+	int semi_major_axis;
+	int other_quality;
 
 	/* sound velocity profile */
-	int	svp_year;
-	int	svp_month;
-	int	svp_day;
-	int	svp_hour;
-	int	svp_minute;
-	int	svp_second;
-	int	svp_hundredth_sec;
-	int	svp_thousandth_sec;
-	int	svp_latitude;		/* 180 deg = 2e9 */
-	int	svp_longitude;		/* 180 deg = 2e9 */
-	int	svp_num;
-	int	svp_depth[MBSYS_ELAC_MAXSVP]; /* 0.1 meters */
-	int	svp_vel[MBSYS_ELAC_MAXSVP];	/* 0.1 meters/sec */
+	int svp_year;
+	int svp_month;
+	int svp_day;
+	int svp_hour;
+	int svp_minute;
+	int svp_second;
+	int svp_hundredth_sec;
+	int svp_thousandth_sec;
+	int svp_latitude;  /* 180 deg = 2e9 */
+	int svp_longitude; /* 180 deg = 2e9 */
+	int svp_num;
+	int svp_depth[MBSYS_ELAC_MAXSVP]; /* 0.1 meters */
+	int svp_vel[MBSYS_ELAC_MAXSVP];   /* 0.1 meters/sec */
 
 	/* bathymetry */
-	int	ping_num;
-	int	sound_vel;
-	int	mode;
-	int	pulse_length;
-	int	source_power;
-	int	receiver_gain;
-	int	profile_num;	/* number of profiles stored */
-	int	beams_bath;	/* number of beams stored */
+	int ping_num;
+	int sound_vel;
+	int mode;
+	int pulse_length;
+	int source_power;
+	int receiver_gain;
+	int profile_num; /* number of profiles stored */
+	int beams_bath;  /* number of beams stored */
 	struct mbsys_elac_profile_struct profile[7];
-	};
+};
 
 /* system specific function prototypes */
-int mbsys_elac_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_elac_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_elac_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_elac_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_elac_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			int *detects, int *error);
-int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-int mbsys_elac_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_elac_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_elac_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind,
-			int *nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_elac_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_elac_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
+int mbsys_elac_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_elac_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_elac_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                       double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
+                       double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                      double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                      double *ssalongtrack, char *comment, int *error);
+int mbsys_elac_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                      double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                      double *ssv, int *error);
+int mbsys_elac_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                                double *altitude, int *error);
+int mbsys_elac_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                           double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
+                           double *heave, int *error);
+int mbsys_elac_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
+                          double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
+                          int *error);
+int mbsys_elac_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
+                           int *error);
+int mbsys_elac_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
+int mbsys_elac_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_process.h	9/11/00
  *    $Id$
  *
- *    Copyright (c) 2000-2016 by
+ *    Copyright (c) 2000-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -567,7 +567,7 @@
 #ifndef MB_PROCESS_DEF
 
 /* header file flag */
-#define	MB_PROCESS_DEF		1
+#define MB_PROCESS_DEF 1
 
 /* include mb_io.h if needed */
 #ifndef MB_IO_DEF
@@ -575,769 +575,489 @@
 #endif
 
 /* mbprocess value defines */
-#define MBP_FILENAMESIZE	MB_PATH_MAXLINE
-#define MBP_METANOVALUE		9999999.
-#define MBP_NAV_OFF		0
-#define MBP_NAV_ON		1
-#define MBP_NAVADJ_OFF		0
-#define MBP_NAVADJ_LL		1
-#define MBP_NAVADJ_LLZ		2
-#define MBP_NAV_LINEAR		0
-#define MBP_NAV_SPLINE		1
-#define MBP_ATTITUDE_OFF	0
-#define MBP_ATTITUDE_ON		1
-#define MBP_SONARDEPTH_OFF	0
-#define MBP_SONARDEPTH_ON	1
-#define	MBP_CUT_DATA_BATH	0
-#define	MBP_CUT_DATA_AMP	1
-#define	MBP_CUT_DATA_SS		2
-#define	MBP_CUT_MODE_NONE	0
-#define	MBP_CUT_MODE_NUMBER   	1
-#define	MBP_CUT_MODE_DISTANCE 	2
-#define	MBP_CUT_MODE_SPEED 	3
-#define	MBP_CUT_NUM_MAX		20
-#define MBP_EDIT_OFF		0
-#define MBP_EDIT_ON		    1
-#define MBP_EDIT_FLAG		1
-#define MBP_EDIT_UNFLAG		2
-#define MBP_EDIT_ZERO		3
-#define MBP_EDIT_FILTER		4
-#define MBP_ESF_NOWRITE		0
-#define MBP_ESF_WRITE		1
-#define MBP_ESF_APPEND		2
-#define MBP_BATHRECALC_OFF	0
-#define MBP_BATHRECALC_RAYTRACE	1
-#define MBP_BATHRECALC_ROTATE	2
-#define MBP_BATHRECALC_OFFSET	3
-#define MBP_SVP_OFF		0
-#define MBP_SVP_ON		1
-#define MBP_SVP_SOUNDSPEEDREF	2
-#define MBP_SSV_OFF		0
-#define MBP_SSV_OFFSET		1
-#define MBP_SSV_SET		2
-#define MBP_TT_OFF		0
-#define MBP_TT_MULTIPLY		1
-#define	MBP_ANGLES_OK		0
-#define	MBP_ANGLES_SNELL	1
-#define	MBP_ANGLES_SNELLNULL	2
-#define MBP_STATIC_OFF		0
-#define MBP_STATIC_BEAM_ON	1
-#define MBP_STATIC_ANGLE_ON	2
-#define MBP_DRAFT_OFF		0
-#define MBP_DRAFT_OFFSET	1
-#define MBP_DRAFT_MULTIPLY	2
-#define MBP_DRAFT_MULTIPLYOFFSET	3
-#define MBP_DRAFT_SET		4
-#define MBP_HEAVE_OFF		0
-#define MBP_HEAVE_OFFSET	1
-#define MBP_HEAVE_MULTIPLY	2
-#define MBP_HEAVE_MULTIPLYOFFSET	3
-#define MBP_LEVER_OFF		0
-#define MBP_LEVER_ON		1
-#define MBP_ROLLBIAS_OFF	0
-#define MBP_ROLLBIAS_SINGLE	1
-#define MBP_ROLLBIAS_DOUBLE	2
-#define MBP_PITCHBIAS_OFF	0
-#define MBP_PITCHBIAS_ON	1
-#define MBP_HEADING_OFF         0
-#define MBP_HEADING_CALC        1
-#define MBP_HEADING_OFFSET      2
-#define MBP_HEADING_CALCOFFSET  3
-#define MBP_TIDE_OFF		0
-#define MBP_TIDE_ON		1
-#define MBP_AMPCORR_OFF		0
-#define MBP_AMPCORR_ON		1
-#define MBP_AMPCORR_UNKNOWN	-1
-#define MBP_AMPCORR_SUBTRACTION	0
-#define MBP_AMPCORR_DIVISION	1
-#define MBP_AMPCORR_ASYMMETRIC	0
-#define MBP_AMPCORR_SYMMETRIC	1
-#define MBP_AMPCORR_IGNORESLOPE	0
-#define MBP_AMPCORR_USESLOPE	1
-#define MBP_AMPCORR_USETOPO	2
-#define MBP_AMPCORR_USETOPOSLOPE	3
-#define MBP_SSCORR_OFF		0
-#define MBP_SSCORR_ON		1
-#define MBP_SSCORR_UNKNOWN	-1
-#define MBP_SSCORR_SUBTRACTION	0
-#define MBP_SSCORR_DIVISION	1
-#define MBP_SSCORR_ASYMMETRIC	0
-#define MBP_SSCORR_SYMMETRIC	1
-#define MBP_SSCORR_IGNORESLOPE	0
-#define MBP_SSCORR_USESLOPE	1
-#define MBP_SSCORR_USETOPO	2
-#define MBP_SSCORR_USETOPOSLOPE	3
-#define MBP_SSRECALC_OFF	0
-#define MBP_SSRECALC_ON		1
-#define MBP_CORRECTION_UNKNOWN	-1
-#define MBP_CORRECTION_NO	0
-#define MBP_CORRECTION_YES	1
+#define MBP_FILENAMESIZE MB_PATH_MAXLINE
+#define MBP_METANOVALUE 9999999.
+#define MBP_NAV_OFF 0
+#define MBP_NAV_ON 1
+#define MBP_NAVADJ_OFF 0
+#define MBP_NAVADJ_LL 1
+#define MBP_NAVADJ_LLZ 2
+#define MBP_NAV_LINEAR 0
+#define MBP_NAV_SPLINE 1
+#define MBP_ATTITUDE_OFF 0
+#define MBP_ATTITUDE_ON 1
+#define MBP_SONARDEPTH_OFF 0
+#define MBP_SONARDEPTH_ON 1
+#define MBP_CUT_DATA_BATH 0
+#define MBP_CUT_DATA_AMP 1
+#define MBP_CUT_DATA_SS 2
+#define MBP_CUT_MODE_NONE 0
+#define MBP_CUT_MODE_NUMBER 1
+#define MBP_CUT_MODE_DISTANCE 2
+#define MBP_CUT_MODE_SPEED 3
+#define MBP_CUT_NUM_MAX 20
+#define MBP_EDIT_OFF 0
+#define MBP_EDIT_ON 1
+#define MBP_EDIT_FLAG 1
+#define MBP_EDIT_UNFLAG 2
+#define MBP_EDIT_ZERO 3
+#define MBP_EDIT_FILTER 4
+#define MBP_ESF_NOWRITE 0
+#define MBP_ESF_WRITE 1
+#define MBP_ESF_APPEND 2
+#define MBP_BATHRECALC_OFF 0
+#define MBP_BATHRECALC_RAYTRACE 1
+#define MBP_BATHRECALC_ROTATE 2
+#define MBP_BATHRECALC_OFFSET 3
+#define MBP_SVP_OFF 0
+#define MBP_SVP_ON 1
+#define MBP_SVP_SOUNDSPEEDREF 2
+#define MBP_SSV_OFF 0
+#define MBP_SSV_OFFSET 1
+#define MBP_SSV_SET 2
+#define MBP_TT_OFF 0
+#define MBP_TT_MULTIPLY 1
+#define MBP_ANGLES_OK 0
+#define MBP_ANGLES_SNELL 1
+#define MBP_ANGLES_SNELLNULL 2
+#define MBP_STATIC_OFF 0
+#define MBP_STATIC_BEAM_ON 1
+#define MBP_STATIC_ANGLE_ON 2
+#define MBP_DRAFT_OFF 0
+#define MBP_DRAFT_OFFSET 1
+#define MBP_DRAFT_MULTIPLY 2
+#define MBP_DRAFT_MULTIPLYOFFSET 3
+#define MBP_DRAFT_SET 4
+#define MBP_HEAVE_OFF 0
+#define MBP_HEAVE_OFFSET 1
+#define MBP_HEAVE_MULTIPLY 2
+#define MBP_HEAVE_MULTIPLYOFFSET 3
+#define MBP_LEVER_OFF 0
+#define MBP_LEVER_ON 1
+#define MBP_ROLLBIAS_OFF 0
+#define MBP_ROLLBIAS_SINGLE 1
+#define MBP_ROLLBIAS_DOUBLE 2
+#define MBP_PITCHBIAS_OFF 0
+#define MBP_PITCHBIAS_ON 1
+#define MBP_HEADING_OFF 0
+#define MBP_HEADING_CALC 1
+#define MBP_HEADING_OFFSET 2
+#define MBP_HEADING_CALCOFFSET 3
+#define MBP_TIDE_OFF 0
+#define MBP_TIDE_ON 1
+#define MBP_AMPCORR_OFF 0
+#define MBP_AMPCORR_ON 1
+#define MBP_AMPCORR_UNKNOWN -1
+#define MBP_AMPCORR_SUBTRACTION 0
+#define MBP_AMPCORR_DIVISION 1
+#define MBP_AMPCORR_ASYMMETRIC 0
+#define MBP_AMPCORR_SYMMETRIC 1
+#define MBP_AMPCORR_IGNORESLOPE 0
+#define MBP_AMPCORR_USESLOPE 1
+#define MBP_AMPCORR_USETOPO 2
+#define MBP_AMPCORR_USETOPOSLOPE 3
+#define MBP_SSCORR_OFF 0
+#define MBP_SSCORR_ON 1
+#define MBP_SSCORR_UNKNOWN -1
+#define MBP_SSCORR_SUBTRACTION 0
+#define MBP_SSCORR_DIVISION 1
+#define MBP_SSCORR_ASYMMETRIC 0
+#define MBP_SSCORR_SYMMETRIC 1
+#define MBP_SSCORR_IGNORESLOPE 0
+#define MBP_SSCORR_USESLOPE 1
+#define MBP_SSCORR_USETOPO 2
+#define MBP_SSCORR_USETOPOSLOPE 3
+#define MBP_SSRECALC_OFF 0
+#define MBP_SSRECALC_ON 1
+#define MBP_CORRECTION_UNKNOWN -1
+#define MBP_CORRECTION_NO 0
+#define MBP_CORRECTION_YES 1
 
 /* mbprocess file locking defines */
-#define MBP_LOCK_NONE		0
-#define MBP_LOCK_PROCESS	1
-#define MBP_LOCK_EDITBATHY	2
-#define MBP_LOCK_EDITNAV	3
-#define MBP_UNLOCK_OVERRIDE	0
-#define MBP_UNLOCK_PROCESS	1
-#define MBP_UNLOCK_EDITBATHY	2
-#define MBP_UNLOCK_EDITNAV	3
+#define MBP_LOCK_NONE 0
+#define MBP_LOCK_PROCESS 1
+#define MBP_LOCK_EDITBATHY 2
+#define MBP_LOCK_EDITNAV 3
+#define MBP_UNLOCK_OVERRIDE 0
+#define MBP_UNLOCK_PROCESS 1
+#define MBP_UNLOCK_EDITBATHY 2
+#define MBP_UNLOCK_EDITNAV 3
 
 /* mbprocess file checking */
-#define MB_PR_FILE_UP_TO_DATE		0
-#define MB_PR_FILE_NEEDS_PROCESSING	1
-#define MB_PR_FILE_NOT_EXIST		2
-#define MB_PR_NO_PARAMETER_FILE		3
+#define MB_PR_FILE_UP_TO_DATE 0
+#define MB_PR_FILE_NEEDS_PROCESSING 1
+#define MB_PR_FILE_NOT_EXIST 2
+#define MB_PR_NO_PARAMETER_FILE 3
 
 /* mbpreprocess defines */
-#define MB_PR_SSSOURCE_UNKNOWN              0
-#define MB_PR_SSSOURCE_SNIPPET              1
-#define MB_PR_SSSOURCE_CALIBRATEDSNIPPET    2
-#define MB_PR_SSSOURCE_WIDEBEAMBACKSCATTER  3
-#define MB_PR_KLUGE_NUM_MAX     10
-#define MB_PR_KLUGE_PAR_SIZE    64
-#define MB_PR_KLUGE_BEAMTWEAK                   1
-#define MB_PR_KLUGE_SOUNDSPEEDTWEAK             2
-#define MB_PR_KLUGE_ZEROATTITUDECORRECTION      3
-#define MB_PR_KLUGE_ZEROALONGTRACKANGLES        4
+#define MB_PR_SSSOURCE_UNKNOWN 0
+#define MB_PR_SSSOURCE_SNIPPET 1
+#define MB_PR_SSSOURCE_CALIBRATEDSNIPPET 2
+#define MB_PR_SSSOURCE_WIDEBEAMBACKSCATTER 3
+#define MB_PR_KLUGE_NUM_MAX 10
+#define MB_PR_KLUGE_PAR_SIZE 64
+#define MB_PR_KLUGE_BEAMTWEAK 1
+#define MB_PR_KLUGE_SOUNDSPEEDTWEAK 2
+#define MB_PR_KLUGE_ZEROATTITUDECORRECTION 3
+#define MB_PR_KLUGE_ZEROALONGTRACKANGLES 4
 
 /* structure holding mbpreprocess parameters to be passed to preprocess
  * functions of i/o modules */
-struct mb_preprocess_struct
-    {
-    int target_sensor;
-    
-    int timestamp_changed;
-    double time_d;
-    
+struct mb_preprocess_struct {
+	int target_sensor;
+
+	int timestamp_changed;
+	double time_d;
+
 	int n_nav;
-    double *nav_time_d;
-    double *nav_lon;
-    double *nav_lat;
+	double *nav_time_d;
+	double *nav_lon;
+	double *nav_lat;
 	double *nav_speed;
-    
+
 	int n_sensordepth;
-    double *sensordepth_time_d;
+	double *sensordepth_time_d;
 	double *sensordepth_sensordepth;
-    
+
 	int n_heading;
-    double *heading_time_d;
-    double *heading_heading;
-    
+	double *heading_time_d;
+	double *heading_heading;
+
 	int n_altitude;
-    double *altitude_time_d;
-    double *altitude_altitude;
-    
+	double *altitude_time_d;
+	double *altitude_altitude;
+
 	int n_attitude;
-    double *attitude_time_d;
-    double *attitude_roll;
+	double *attitude_time_d;
+	double *attitude_roll;
 	double *attitude_pitch;
-    double *attitude_heave;
-    
-    int no_change_survey;
-    int multibeam_sidescan_source;
-    int recalculate_bathymetry;
-    
-    int n_kluge;
-    int kluge_id[MB_PR_KLUGE_NUM_MAX];
-    char kluge_pars[MB_PR_KLUGE_NUM_MAX * MB_PR_KLUGE_PAR_SIZE];
-    };
+	double *attitude_heave;
+
+	int no_change_survey;
+	int multibeam_sidescan_source;
+	int recalculate_bathymetry;
+
+	int n_kluge;
+	int kluge_id[MB_PR_KLUGE_NUM_MAX];
+	char kluge_pars[MB_PR_KLUGE_NUM_MAX * MB_PR_KLUGE_PAR_SIZE];
+};
 
 /* structure holding mbprocess parameters */
-struct mb_process_struct
-	{
+struct mb_process_struct {
 	/* general parameters */
-	int	mbp_ifile_specified;
-	char	mbp_ifile[MBP_FILENAMESIZE];
-	int	mbp_ofile_specified;
-	char	mbp_ofile[MBP_FILENAMESIZE];
-	int	mbp_format_specified;
-	int	mbp_format;
+	int mbp_ifile_specified;
+	char mbp_ifile[MBP_FILENAMESIZE];
+	int mbp_ofile_specified;
+	char mbp_ofile[MBP_FILENAMESIZE];
+	int mbp_format_specified;
+	int mbp_format;
 
 	/* navigation merging */
-	int	mbp_nav_mode;
-	char	mbp_navfile[MBP_FILENAMESIZE];
-	int	mbp_nav_format;
-	int	mbp_nav_heading;
-	int	mbp_nav_speed;
-	int	mbp_nav_draft;
-	int	mbp_nav_attitude;
-	int	mbp_nav_algorithm;
-	double	mbp_nav_timeshift;
-	int	mbp_nav_shift;
-	double	mbp_nav_offsetx;
-	double	mbp_nav_offsety;
-	double	mbp_nav_offsetz;
-	double	mbp_nav_shiftlon;
-	double	mbp_nav_shiftlat;
-	double	mbp_nav_shiftx;
-	double	mbp_nav_shifty;
+	int mbp_nav_mode;
+	char mbp_navfile[MBP_FILENAMESIZE];
+	int mbp_nav_format;
+	int mbp_nav_heading;
+	int mbp_nav_speed;
+	int mbp_nav_draft;
+	int mbp_nav_attitude;
+	int mbp_nav_algorithm;
+	double mbp_nav_timeshift;
+	int mbp_nav_shift;
+	double mbp_nav_offsetx;
+	double mbp_nav_offsety;
+	double mbp_nav_offsetz;
+	double mbp_nav_shiftlon;
+	double mbp_nav_shiftlat;
+	double mbp_nav_shiftx;
+	double mbp_nav_shifty;
 
 	/* adjusted navigation merging */
-	int	mbp_navadj_mode;
-	char	mbp_navadjfile[MBP_FILENAMESIZE];
-	int	mbp_navadj_algorithm;
+	int mbp_navadj_mode;
+	char mbp_navadjfile[MBP_FILENAMESIZE];
+	int mbp_navadj_algorithm;
 
 	/* attitude merging */
-	int	mbp_attitude_mode;
-	char	mbp_attitudefile[MBP_FILENAMESIZE];
-	int	mbp_attitude_format;
+	int mbp_attitude_mode;
+	char mbp_attitudefile[MBP_FILENAMESIZE];
+	int mbp_attitude_format;
 
 	/* sonardepth merging */
-	int	mbp_sonardepth_mode;
-	char	mbp_sonardepthfile[MBP_FILENAMESIZE];
-	int	mbp_sonardepth_format;
+	int mbp_sonardepth_mode;
+	char mbp_sonardepthfile[MBP_FILENAMESIZE];
+	int mbp_sonardepth_format;
 
 	/* data cutting */
-	int	mbp_cut_num;
-	int	mbp_cut_kind[MBP_CUT_NUM_MAX];
-	int	mbp_cut_mode[MBP_CUT_NUM_MAX];
-	double	mbp_cut_min[MBP_CUT_NUM_MAX];
-	double	mbp_cut_max[MBP_CUT_NUM_MAX];
+	int mbp_cut_num;
+	int mbp_cut_kind[MBP_CUT_NUM_MAX];
+	int mbp_cut_mode[MBP_CUT_NUM_MAX];
+	double mbp_cut_min[MBP_CUT_NUM_MAX];
+	double mbp_cut_max[MBP_CUT_NUM_MAX];
 
 	/* bathymetry editing */
-	int	mbp_edit_mode;
-	char	mbp_editfile[MBP_FILENAMESIZE];
+	int mbp_edit_mode;
+	char mbp_editfile[MBP_FILENAMESIZE];
 
 	/* bathymetry recalculation */
-	int	mbp_bathrecalc_mode;
-	int	mbp_svp_mode;
-	char	mbp_svpfile[MBP_FILENAMESIZE];
-	int	mbp_ssv_mode;
-	double	mbp_ssv;
-	int	mbp_tt_mode;
-	double	mbp_tt_mult;
-	int	mbp_angle_mode;
-	int	mbp_corrected;
-	int	mbp_static_mode;
-	char	mbp_staticfile[MBP_FILENAMESIZE];
+	int mbp_bathrecalc_mode;
+	int mbp_svp_mode;
+	char mbp_svpfile[MBP_FILENAMESIZE];
+	int mbp_ssv_mode;
+	double mbp_ssv;
+	int mbp_tt_mode;
+	double mbp_tt_mult;
+	int mbp_angle_mode;
+	int mbp_corrected;
+	int mbp_static_mode;
+	char mbp_staticfile[MBP_FILENAMESIZE];
 
 	/* draft correction */
-	int	mbp_draft_mode;
-	double	mbp_draft;
-	double	mbp_draft_offset;
-	double	mbp_draft_mult;
+	int mbp_draft_mode;
+	double mbp_draft;
+	double mbp_draft_offset;
+	double mbp_draft_mult;
 
 	/* heave correction */
-	int	mbp_heave_mode;
-	double	mbp_heave;
-	double	mbp_heave_mult;
+	int mbp_heave_mode;
+	double mbp_heave;
+	double mbp_heave_mult;
 
 	/* lever correction */
-	int	mbp_lever_mode;
-	double	mbp_vru_offsetx;
-	double	mbp_vru_offsety;
-	double	mbp_vru_offsetz;
-	double	mbp_sonar_offsetx;
-	double	mbp_sonar_offsety;
-	double	mbp_sonar_offsetz;
+	int mbp_lever_mode;
+	double mbp_vru_offsetx;
+	double mbp_vru_offsety;
+	double mbp_vru_offsetz;
+	double mbp_sonar_offsetx;
+	double mbp_sonar_offsety;
+	double mbp_sonar_offsetz;
 
 	/* roll correction */
-	int	mbp_rollbias_mode;
-	double	mbp_rollbias;
-	double	mbp_rollbias_port;
-	double	mbp_rollbias_stbd;
+	int mbp_rollbias_mode;
+	double mbp_rollbias;
+	double mbp_rollbias_port;
+	double mbp_rollbias_stbd;
 
 	/* pitch correction */
-	int	mbp_pitchbias_mode;
-	double	mbp_pitchbias;
+	int mbp_pitchbias_mode;
+	double mbp_pitchbias;
 
 	/* heading correction */
-	int	mbp_heading_mode;
-	double	mbp_headingbias;
+	int mbp_heading_mode;
+	double mbp_headingbias;
 
 	/* tide correction */
-	int	mbp_tide_mode;
-	char	mbp_tidefile[MBP_FILENAMESIZE];
-	int	mbp_tide_format;
+	int mbp_tide_mode;
+	char mbp_tidefile[MBP_FILENAMESIZE];
+	int mbp_tide_format;
 
 	/* amplitude correction */
-	int	mbp_ampcorr_mode;
-	char	mbp_ampcorrfile[MBP_FILENAMESIZE];
-	int	mbp_ampcorr_type;
-	int	mbp_ampcorr_symmetry;
-	double	mbp_ampcorr_angle;
-	int	mbp_ampcorr_slope;
+	int mbp_ampcorr_mode;
+	char mbp_ampcorrfile[MBP_FILENAMESIZE];
+	int mbp_ampcorr_type;
+	int mbp_ampcorr_symmetry;
+	double mbp_ampcorr_angle;
+	int mbp_ampcorr_slope;
 
 	/* sidescan correction */
-	int	mbp_sscorr_mode;
-	char	mbp_sscorrfile[MBP_FILENAMESIZE];
-	int	mbp_sscorr_type;
-	int	mbp_sscorr_symmetry;
-	double	mbp_sscorr_angle;
-	int	mbp_sscorr_slope;
+	int mbp_sscorr_mode;
+	char mbp_sscorrfile[MBP_FILENAMESIZE];
+	int mbp_sscorr_type;
+	int mbp_sscorr_symmetry;
+	double mbp_sscorr_angle;
+	int mbp_sscorr_slope;
 
 	/* amplitude and sidescan correction */
-	char	mbp_ampsscorr_topofile[MBP_FILENAMESIZE];
+	char mbp_ampsscorr_topofile[MBP_FILENAMESIZE];
 
 	/* sidescan recalculation */
-	int	mbp_ssrecalc_mode;
-	double	mbp_ssrecalc_pixelsize;
-	double	mbp_ssrecalc_swathwidth;
-	int	mbp_ssrecalc_interpolate;
+	int mbp_ssrecalc_mode;
+	double mbp_ssrecalc_pixelsize;
+	double mbp_ssrecalc_swathwidth;
+	int mbp_ssrecalc_interpolate;
 
 	/* metadata strings */
-	char	mbp_meta_vessel[MBP_FILENAMESIZE];
-	char	mbp_meta_institution[MBP_FILENAMESIZE];
-	char	mbp_meta_platform[MBP_FILENAMESIZE];
-	char	mbp_meta_sonar[MBP_FILENAMESIZE];
-	char	mbp_meta_sonarversion[MBP_FILENAMESIZE];
-	char	mbp_meta_cruiseid[MBP_FILENAMESIZE];
-	char	mbp_meta_cruisename[MBP_FILENAMESIZE];
-	char	mbp_meta_pi[MBP_FILENAMESIZE];
-	char	mbp_meta_piinstitution[MBP_FILENAMESIZE];
-	char	mbp_meta_client[MBP_FILENAMESIZE];
-	int	mbp_meta_svcorrected;
-	int	mbp_meta_tidecorrected;
-	int	mbp_meta_batheditmanual;
-	int	mbp_meta_batheditauto;
-	double	mbp_meta_rollbias;
-	double	mbp_meta_pitchbias;
-	double	mbp_meta_headingbias;
-	double	mbp_meta_draft;
+	char mbp_meta_vessel[MBP_FILENAMESIZE];
+	char mbp_meta_institution[MBP_FILENAMESIZE];
+	char mbp_meta_platform[MBP_FILENAMESIZE];
+	char mbp_meta_sonar[MBP_FILENAMESIZE];
+	char mbp_meta_sonarversion[MBP_FILENAMESIZE];
+	char mbp_meta_cruiseid[MBP_FILENAMESIZE];
+	char mbp_meta_cruisename[MBP_FILENAMESIZE];
+	char mbp_meta_pi[MBP_FILENAMESIZE];
+	char mbp_meta_piinstitution[MBP_FILENAMESIZE];
+	char mbp_meta_client[MBP_FILENAMESIZE];
+	int mbp_meta_svcorrected;
+	int mbp_meta_tidecorrected;
+	int mbp_meta_batheditmanual;
+	int mbp_meta_batheditauto;
+	double mbp_meta_rollbias;
+	double mbp_meta_pitchbias;
+	double mbp_meta_headingbias;
+	double mbp_meta_draft;
 
 	/* processing kluges */
-	int	mbp_kluge001;
-	int	mbp_kluge002;
-	int	mbp_kluge003;
-	int	mbp_kluge004;
-	int	mbp_kluge005;
-	int	mbp_kluge006;
-	int	mbp_kluge007;
-	int	mbp_kluge008;
-	int	mbp_kluge009;
-	int	mbp_kluge010;
-	};
+	int mbp_kluge001;
+	int mbp_kluge002;
+	int mbp_kluge003;
+	int mbp_kluge004;
+	int mbp_kluge005;
+	int mbp_kluge006;
+	int mbp_kluge007;
+	int mbp_kluge008;
+	int mbp_kluge009;
+	int mbp_kluge010;
+};
 
 /* edit save file definitions */
 #define MB_ESF_MAXTIMEDIFF 0.00011
 #define MB_ESF_MAXTIMEDIFF_X10 0.0011
-#define MB_ESF_MULTIPLICITY_FACTOR	1000000
-struct mb_edit_struct
-	{
-	double	time_d;
-	int	beam;
-	int	action;
-	int	use;
-	};
-struct mb_esf_struct
-	{
-	char	esffile[MB_PATH_MAXLINE];
-	char	esstream[MB_PATH_MAXLINE];
-	int	byteswapped;
-    int version;
-	int	nedit;
-	struct mb_edit_struct	*edit;
-	FILE	*esffp;
-	FILE	*essfp;
-        int     startnextsearch;
-	};
+#define MB_ESF_MULTIPLICITY_FACTOR 1000000
+struct mb_edit_struct {
+	double time_d;
+	int beam;
+	int action;
+	int use;
+};
+struct mb_esf_struct {
+	char esffile[MB_PATH_MAXLINE];
+	char esstream[MB_PATH_MAXLINE];
+	int byteswapped;
+	int version;
+	int nedit;
+	struct mb_edit_struct *edit;
+	FILE *esffp;
+	FILE *essfp;
+	int startnextsearch;
+};
 
-int mb_pr_checkstatus(int verbose, char *file,
-			int *prstatus, int *error);
-int mb_pr_readpar(int verbose, char *file, int lookforfiles,
-			struct mb_process_struct *process,
-			int *error);
-int mb_pr_writepar(int verbose, char *file,
-			struct mb_process_struct *process,
-			int *error);
-int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
-			int *error);
-int mb_pr_default_output(int verbose, struct mb_process_struct *process,
-			int *error);
-int mb_pr_get_output(int verbose, int *format,
-			char *ifile, char *ofile,
-			int *error);
-int mb_pr_check(int verbose, char *ifile,
-			int *nparproblem,
-			int *ndataproblem,
-			int *error);
-int mb_pr_update_ofile(int verbose, char *file,
-			int	mbp_ofile_specified,
-			char	*mbp_ofile,
-			int	*error);
-int mb_pr_update_format(int verbose, char *file,
-			int mbp_format_specified,
-			int mbp_format,
-			int *error);
-int mb_pr_update_rollbias(int verbose, char *file,
-			int	mbp_rollbias_mode,
-			double	mbp_rollbias,
-			double	mbp_rollbias_port,
-			double	mbp_rollbias_stbd,
-			int *error);
-int mb_pr_update_pitchbias(int verbose, char *file,
-			int	mbp_pitchbias_mode,
-			double	mbp_pitchbias,
-			int *error);
-int mb_pr_update_draft(int verbose, char *file,
-			int	mbp_draft_mode,
-			double	mbp_draft,
-			double	mbp_draft_offset,
-			double	mbp_draft_mult,
-			int *error);
-int mb_pr_update_heave(int verbose, char *file,
-			int	mbp_heave_mode,
-			double	mbp_heave,
-			double	mbp_heave_mult,
-			int *error);
-int mb_pr_update_lever(int verbose, char *file,
-			int	mbp_lever_mode,
-			double	mbp_vru_offsetx,
-			double	mbp_vru_offsety,
-			double	mbp_vru_offsetz,
-			double	mbp_sonar_offsetx,
-			double	mbp_sonar_offsety,
-			double	mbp_sonar_offsetz,
-			int *error);
-int mb_pr_update_tide(int verbose, char *file,
-			int	mbp_tide_mode,
-			char *mbp_tidefile,
-			int	mbp_tide_format,
-			int *error);
-int mb_pr_update_tt(int verbose, char *file,
-			int	mbp_tt_mode,
-			double	mbp_tt_mult,
-			int *error);
-int mb_pr_update_ssv(int verbose, char *file,
-			int	mbp_ssv_mode,
-			double	mbp_ssv,
-			int *error);
-int mb_pr_update_svp(int verbose, char *file,
-			int	mbp_svp_mode,
-			char	*mbp_svpfile,
-			int	mbp_angle_mode,
-			int	mbp_corrected,
-			int *error);
-int mb_pr_update_static(int verbose, char *file,
-			int	mbp_static_mode,
-			char	*mbp_staticfile,
-			int *error);
-int mb_pr_update_navadj(int verbose, char *file,
-			int	mbp_navadj_mode,
-			char	*mbp_navadjfile,
-			int	mbp_navadj_algorithm,
-			int *error);
-int mb_pr_update_nav(int verbose, char *file,
-			int	mbp_nav_mode,
-			char	*mbp_navfile,
-			int	mbp_nav_format,
-			int	mbp_nav_heading,
-			int	mbp_nav_speed,
-			int	mbp_nav_draft,
-			int	mbp_nav_attitude,
-			int	mbp_nav_algorithm,
-			double mbp_nav_timeshift,
-			int *error);
-int mb_pr_update_attitude(int verbose, char *file,
-			int	mbp_attitude_mode,
-			char	*mbp_attitudefile,
-			int	mbp_attitude_format,
-			int *error);
-int mb_pr_update_sonardepth(int verbose, char *file,
-			int	mbp_sonardepth_mode,
-			char	*mbp_sonardepthfile,
-			int	mbp_sonardepth_format,
-			int *error);
-int mb_pr_update_navshift(int verbose, char *file,
-			int	mbp_nav_shift,
-			double	mbp_nav_offsetx,
-			double	mbp_nav_offsety,
-			double	mbp_nav_offsetz,
-			double	mbp_nav_shiftlon,
-			double	mbp_nav_shiftlat,
-			double	mbp_nav_shiftx,
-			double	mbp_nav_shifty,
-			int *error);
-int mb_pr_update_heading(int verbose, char *file,
-			int	mbp_heading_mode,
-			double	mbp_headingbias,
-			int *error);
-int mb_pr_update_datacut(int verbose, char *file,
-			int	mbp_cut_num,
-			int	*mbp_cut_kind,
-			int	*mbp_cut_mode,
-			double	*mbp_cut_min,
-			double	*mbp_cut_max,
-			int *error);
-int mb_pr_update_edit(int verbose, char *file,
-			int	mbp_edit_mode,
-			char	*mbp_editfile,
-			int *error);
-int mb_pr_update_ampcorr(int verbose, char *file,
-			int	mbp_ampcorr_mode,
-			char	*mbp_ampcorrfile,
-			int	mbp_ampcorr_type,
-			int	mbp_ampcorr_symmetry,
-			double	mbp_ampcorr_angle,
-			int	mbp_ampcorr_slope,
-			char	*mbp_ampcorr_topofile,
-			int *error);
-int mb_pr_update_sscorr(int verbose, char *file,
-			int	mbp_sscorr_mode,
-			char	*mbp_sscorrfile,
-			int	mbp_sscorr_type,
-			int	mbp_sscorr_symmetry,
-			double	mbp_sscorr_angle,
-			int	mbp_sscorr_slope,
-			char	*mbp_sscorr_topofile,
-			int *error);
-int mb_pr_update_ssrecalc(int verbose, char *file,
-			int	mbp_ssrecalc_mode,
-			double	mbp_ssrecalc_pixelsize,
-			double	mbp_ssrecalc_swathwidth,
-			int	mbp_ssrecalc_interpolate,
-			int *error);
-int mb_pr_update_metadata(int verbose, char *file,
-			char	*mbp_meta_vessel,
-			char	*mbp_meta_institution,
-			char	*mbp_meta_platform,
-			char	*mbp_meta_sonar,
-			char	*mbp_meta_sonarversion,
-			char	*mbp_meta_cruiseid,
-			char	*mbp_meta_cruisename,
-			char	*mbp_meta_pi,
-			char	*mbp_meta_piinstitution,
-			char	*mbp_meta_client,
-			int	mbp_meta_svcorrected,
-			int	mbp_meta_tidecorrected,
-			int	mbp_meta_batheditmanual,
-			int	mbp_meta_batheditauto,
-			double	mbp_meta_rollbias,
-			double	mbp_meta_pitchbias,
-			double	mbp_meta_headingbias,
-			double	mbp_meta_draft,
-			int *error);
-int mb_pr_update_kluges(int verbose, char *file,
-			int	mbp_kluge001,
-			int	mbp_kluge002,
-			int	mbp_kluge003,
-			int	mbp_kluge004,
-			int	mbp_kluge005,
-			int	mbp_kluge006,
-			int	mbp_kluge007,
-			int	mbp_kluge008,
-			int	mbp_kluge009,
-			int	mbp_kluge010,
-			int *error);
-int mb_pr_get_ofile(int verbose, char *file,
-			int	*mbp_ofile_specified,
-			char	*mbp_ofile,
-			int	*error);
-int mb_pr_get_format(int verbose, char *file,
-			int *mbp_format_specified,
-			int *mbp_format,
-			int *error);
-int mb_pr_get_rollbias(int verbose, char *file,
-			int	*mbp_rollbias_mode,
-			double	*mbp_rollbias,
-			double	*mbp_rollbias_port,
-			double	*mbp_rollbias_stbd,
-			int *error);
-int mb_pr_get_pitchbias(int verbose, char *file,
-			int	*mbp_pitchbias_mode,
-			double	*mbp_pitchbias,
-			int *error);
-int mb_pr_get_draft(int verbose, char *file,
-			int	*mbp_draft_mode,
-			double	*mbp_draft,
-			double	*mbp_draft_offset,
-			double	*mbp_draft_mult,
-			int *error);
-int mb_pr_get_heave(int verbose, char *file,
-			int	*mbp_heave_mode,
-			double	*mbp_heave,
-			double	*mbp_heave_mult,
-			int *error);
-int mb_pr_get_lever(int verbose, char *file,
-			int	*mbp_lever_mode,
-			double	*mbp_vru_offsetx,
-			double	*mbp_vru_offsety,
-			double	*mbp_vru_offsetz,
-			double	*mbp_sonar_offsetx,
-			double	*mbp_sonar_offsety,
-			double	*mbp_sonar_offsetz,
-			int *error);
-int mb_pr_get_tide(int verbose, char *file,
-			int	*mbp_tide_mode,
-			char *mbp_tidefile,
-			int	*mbp_tide_format,
-			int *error);
-int mb_pr_get_tt(int verbose, char *file,
-			int	*mbp_tt_mode,
-			double	*mbp_tt_mult,
-			int *error);
-int mb_pr_get_ssv(int verbose, char *file,
-			int	*mbp_ssv_mode,
-			double	*mbp_ssv,
-			int *error);
-int mb_pr_get_svp(int verbose, char *file,
-			int	*mbp_svp_mode,
-			char	*mbp_svpfile,
-			int	*mbp_angle_mode,
-			int	*mbp_corrected,
-			int *error);
-int mb_pr_get_static(int verbose, char *file,
-			int	*mbp_static_mode,
-			char	*mbp_staticfile,
-			int *error);
-int mb_pr_get_navadj(int verbose, char *file,
-			int	*mbp_navadj_mode,
-			char	*mbp_navadjfile,
-			int	*mbp_navadj_algorithm,
-			int *error);
-int mb_pr_get_nav(int verbose, char *file,
-			int	*mbp_nav_mode,
-			char	*mbp_navfile,
-			int	*mbp_nav_format,
-			int	*mbp_nav_heading,
-			int	*mbp_nav_speed,
-			int	*mbp_nav_draft,
-			int	*mbp_nav_attitude,
-			int	*mbp_nav_algorithm,
-			double *mbp_nav_timeshift,
-			int *error);
-int mb_pr_get_attitude(int verbose, char *file,
-			int	*mbp_attitude_mode,
-			char	*mbp_attitudefile,
-			int	*mbp_attitude_format,
-			int *error);
-int mb_pr_get_sonardepth(int verbose, char *file,
-			int	*mbp_sonardepth_mode,
-			char	*mbp_sonardepthfile,
-			int	*mbp_sonardepth_format,
-			int *error);
-int mb_pr_get_navshift(int verbose, char *file,
-			int	*mbp_nav_shift,
-			double	*mbp_nav_offsetx,
-			double	*mbp_nav_offsety,
-			double	*mbp_nav_offsetz,
-			double	*mbp_nav_shiftlon,
-			double	*mbp_nav_shiftlat,
-			double	*mbp_nav_shiftx,
-			double	*mbp_nav_shifty,
-			int *error);
-int mb_pr_get_heading(int verbose, char *file,
-			int	*mbp_heading_mode,
-			double	*mbp_headingbias,
-			int *error);
-int mb_pr_get_datacut(int verbose, char *file,
-			int	*mbp_cut_num,
-			int	*mbp_cut_kind,
-			int	*mbp_cut_mode,
-			double	*mbp_cut_min,
-			double	*mbp_cut_max,
-			int *error);
-int mb_pr_get_edit(int verbose, char *file,
-			int	*mbp_edit_mode,
-			char	*mbp_editfile,
-			int *error);
-int mb_pr_get_ampcorr(int verbose, char *file,
-			int	*mbp_ampcorr_mode,
-			char	*mbp_ampcorrfile,
-			int	*mbp_ampcorr_type,
-			int	*mbp_ampcorr_symmetry,
-			double	*mbp_ampcorr_angle,
-			int	*mbp_ampcorr_slope,
-			char	*mbp_ampcorr_topofile,
-			int *error);
-int mb_pr_get_sscorr(int verbose, char *file,
-			int	*mbp_sscorr_mode,
-			char	*mbp_sscorrfile,
-			int	*mbp_sscorr_type,
-			int	*mbp_sscorr_symmetry,
-			double	*mbp_sscorr_angle,
-			int	*mbp_sscorr_slope,
-			char	*mbp_sscorr_topofile,
-			int *error);
-int mb_pr_get_ssrecalc(int verbose, char *file,
-			int	*mbp_ssrecalc_mode,
-			double	*mbp_ssrecalc_pixelsize,
-			double	*mbp_ssrecalc_swathwidth,
-			int	*mbp_ssrecalc_interpolate,
-			int *error);
-int mb_pr_get_metadata(int verbose, char *file,
-			char	*mbp_meta_vessel,
-			char	*mbp_meta_institution,
-			char	*mbp_meta_platform,
-			char	*mbp_meta_sonar,
-			char	*mbp_meta_sonarversion,
-			char	*mbp_meta_cruiseid,
-			char	*mbp_meta_cruisename,
-			char	*mbp_meta_pi,
-			char	*mbp_meta_piinstitution,
-			char	*mbp_meta_client,
-			int	*mbp_meta_svcorrected,
-			int	*mbp_meta_tidecorrected,
-			int	*mbp_meta_batheditmanual,
-			int	*mbp_meta_batheditauto,
-			double	*mbp_meta_rollbias,
-			double	*mbp_meta_pitchbias,
-			double	*mbp_meta_headingbias,
-			double	*mbp_meta_draft,
-			int *error);
-int mb_pr_get_kluges(int verbose, char *file,
-			int	*mbp_kluge001,
-			int	*mbp_kluge002,
-			int	*mbp_kluge003,
-			int	*mbp_kluge004,
-			int	*mbp_kluge005,
-			int	*mbp_kluge006,
-			int	*mbp_kluge007,
-			int	*mbp_kluge008,
-			int	*mbp_kluge009,
-			int	*mbp_kluge010,
-			int *error);
-int mb_pr_set_bathyslope(int verbose,
-			int nsmooth,
-			int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-			int *ndepths, double *depths, double *depthacrosstrack,
-			int *nslopes, double *slopes, double *slopeacrosstrack,
-			double *depthsmooth,
-			int *error);
-int mb_pr_set_bathyslopenew(int verbose,
-                        int nsmooth,
-                        int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-                        int *ndepths, double *depths, double *depthacrosstrack,
-                        int *nslopes, double *slopes, double *slopeacrosstrack,
-                        double *depthsmooth,
+int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error);
+int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_struct *process, int *error);
+int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, int *error);
+int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error);
+int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *error);
+int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *error);
+int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, int *error);
+int mb_pr_update_ofile(int verbose, char *file, int mbp_ofile_specified, char *mbp_ofile, int *error);
+int mb_pr_update_format(int verbose, char *file, int mbp_format_specified, int mbp_format, int *error);
+int mb_pr_update_rollbias(int verbose, char *file, int mbp_rollbias_mode, double mbp_rollbias, double mbp_rollbias_port,
+                          double mbp_rollbias_stbd, int *error);
+int mb_pr_update_pitchbias(int verbose, char *file, int mbp_pitchbias_mode, double mbp_pitchbias, int *error);
+int mb_pr_update_draft(int verbose, char *file, int mbp_draft_mode, double mbp_draft, double mbp_draft_offset,
+                       double mbp_draft_mult, int *error);
+int mb_pr_update_heave(int verbose, char *file, int mbp_heave_mode, double mbp_heave, double mbp_heave_mult, int *error);
+int mb_pr_update_lever(int verbose, char *file, int mbp_lever_mode, double mbp_vru_offsetx, double mbp_vru_offsety,
+                       double mbp_vru_offsetz, double mbp_sonar_offsetx, double mbp_sonar_offsety, double mbp_sonar_offsetz,
+                       int *error);
+int mb_pr_update_tide(int verbose, char *file, int mbp_tide_mode, char *mbp_tidefile, int mbp_tide_format, int *error);
+int mb_pr_update_tt(int verbose, char *file, int mbp_tt_mode, double mbp_tt_mult, int *error);
+int mb_pr_update_ssv(int verbose, char *file, int mbp_ssv_mode, double mbp_ssv, int *error);
+int mb_pr_update_svp(int verbose, char *file, int mbp_svp_mode, char *mbp_svpfile, int mbp_angle_mode, int mbp_corrected,
+                     int *error);
+int mb_pr_update_static(int verbose, char *file, int mbp_static_mode, char *mbp_staticfile, int *error);
+int mb_pr_update_navadj(int verbose, char *file, int mbp_navadj_mode, char *mbp_navadjfile, int mbp_navadj_algorithm, int *error);
+int mb_pr_update_nav(int verbose, char *file, int mbp_nav_mode, char *mbp_navfile, int mbp_nav_format, int mbp_nav_heading,
+                     int mbp_nav_speed, int mbp_nav_draft, int mbp_nav_attitude, int mbp_nav_algorithm, double mbp_nav_timeshift,
+                     int *error);
+int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *mbp_attitudefile, int mbp_attitude_format,
+                          int *error);
+int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, char *mbp_sonardepthfile, int mbp_sonardepth_format,
+                            int *error);
+int mb_pr_update_navshift(int verbose, char *file, int mbp_nav_shift, double mbp_nav_offsetx, double mbp_nav_offsety,
+                          double mbp_nav_offsetz, double mbp_nav_shiftlon, double mbp_nav_shiftlat, double mbp_nav_shiftx,
+                          double mbp_nav_shifty, int *error);
+int mb_pr_update_heading(int verbose, char *file, int mbp_heading_mode, double mbp_headingbias, int *error);
+int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_kind, int *mbp_cut_mode, double *mbp_cut_min,
+                         double *mbp_cut_max, int *error);
+int mb_pr_update_edit(int verbose, char *file, int mbp_edit_mode, char *mbp_editfile, int *error);
+int mb_pr_update_ampcorr(int verbose, char *file, int mbp_ampcorr_mode, char *mbp_ampcorrfile, int mbp_ampcorr_type,
+                         int mbp_ampcorr_symmetry, double mbp_ampcorr_angle, int mbp_ampcorr_slope, char *mbp_ampcorr_topofile,
+                         int *error);
+int mb_pr_update_sscorr(int verbose, char *file, int mbp_sscorr_mode, char *mbp_sscorrfile, int mbp_sscorr_type,
+                        int mbp_sscorr_symmetry, double mbp_sscorr_angle, int mbp_sscorr_slope, char *mbp_sscorr_topofile,
                         int *error);
-int mb_pr_get_bathyslope(int verbose,
-			int ndepths, double *depths, double *depthacrosstrack,
-			int nslopes, double *slopes, double *slopeacrosstrack,
-			double acrosstrack, double *depth, double *slope,
-			int *error);
-int mb_pr_point_in_quad(int verbose, double px, double py,
-			double *x, double *y, int *error);
-int mb_esf_check(int verbose, char *swathfile, char *esffile,
-			int *found, int *error);
-int mb_esf_load(int verbose, char *program_name, char *swathfile,
-			int load, int output, 
-			char *esffile,
-			struct mb_esf_struct *esf,
-			int *error);
-int mb_esf_open(int verbose, char *program_name, char *esffile,
-			int load, int output, 
-			struct mb_esf_struct *esf,
-			int *error);
-int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf,
-			double time_d, double tolerance, int *error);
-int mb_esf_apply(int verbose, struct mb_esf_struct *esf, 
-			double time_d, int pingmultiplicity, int nbath, char *beamflag,
-			int *error);
-int mb_esf_save(int verbose, struct mb_esf_struct *esf,
-			double time_d, int beam, int action, int *error);
-int mb_ess_save(int verbose, struct mb_esf_struct *esf,
-		double time_d, int beam, int action, int *error);
+int mb_pr_update_ssrecalc(int verbose, char *file, int mbp_ssrecalc_mode, double mbp_ssrecalc_pixelsize,
+                          double mbp_ssrecalc_swathwidth, int mbp_ssrecalc_interpolate, int *error);
+int mb_pr_update_metadata(int verbose, char *file, char *mbp_meta_vessel, char *mbp_meta_institution, char *mbp_meta_platform,
+                          char *mbp_meta_sonar, char *mbp_meta_sonarversion, char *mbp_meta_cruiseid, char *mbp_meta_cruisename,
+                          char *mbp_meta_pi, char *mbp_meta_piinstitution, char *mbp_meta_client, int mbp_meta_svcorrected,
+                          int mbp_meta_tidecorrected, int mbp_meta_batheditmanual, int mbp_meta_batheditauto,
+                          double mbp_meta_rollbias, double mbp_meta_pitchbias, double mbp_meta_headingbias, double mbp_meta_draft,
+                          int *error);
+int mb_pr_update_kluges(int verbose, char *file, int mbp_kluge001, int mbp_kluge002, int mbp_kluge003, int mbp_kluge004,
+                        int mbp_kluge005, int mbp_kluge006, int mbp_kluge007, int mbp_kluge008, int mbp_kluge009,
+                        int mbp_kluge010, int *error);
+int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp_ofile, int *error);
+int mb_pr_get_format(int verbose, char *file, int *mbp_format_specified, int *mbp_format, int *error);
+int mb_pr_get_rollbias(int verbose, char *file, int *mbp_rollbias_mode, double *mbp_rollbias, double *mbp_rollbias_port,
+                       double *mbp_rollbias_stbd, int *error);
+int mb_pr_get_pitchbias(int verbose, char *file, int *mbp_pitchbias_mode, double *mbp_pitchbias, int *error);
+int mb_pr_get_draft(int verbose, char *file, int *mbp_draft_mode, double *mbp_draft, double *mbp_draft_offset,
+                    double *mbp_draft_mult, int *error);
+int mb_pr_get_heave(int verbose, char *file, int *mbp_heave_mode, double *mbp_heave, double *mbp_heave_mult, int *error);
+int mb_pr_get_lever(int verbose, char *file, int *mbp_lever_mode, double *mbp_vru_offsetx, double *mbp_vru_offsety,
+                    double *mbp_vru_offsetz, double *mbp_sonar_offsetx, double *mbp_sonar_offsety, double *mbp_sonar_offsetz,
+                    int *error);
+int mb_pr_get_tide(int verbose, char *file, int *mbp_tide_mode, char *mbp_tidefile, int *mbp_tide_format, int *error);
+int mb_pr_get_tt(int verbose, char *file, int *mbp_tt_mode, double *mbp_tt_mult, int *error);
+int mb_pr_get_ssv(int verbose, char *file, int *mbp_ssv_mode, double *mbp_ssv, int *error);
+int mb_pr_get_svp(int verbose, char *file, int *mbp_svp_mode, char *mbp_svpfile, int *mbp_angle_mode, int *mbp_corrected,
+                  int *error);
+int mb_pr_get_static(int verbose, char *file, int *mbp_static_mode, char *mbp_staticfile, int *error);
+int mb_pr_get_navadj(int verbose, char *file, int *mbp_navadj_mode, char *mbp_navadjfile, int *mbp_navadj_algorithm, int *error);
+int mb_pr_get_nav(int verbose, char *file, int *mbp_nav_mode, char *mbp_navfile, int *mbp_nav_format, int *mbp_nav_heading,
+                  int *mbp_nav_speed, int *mbp_nav_draft, int *mbp_nav_attitude, int *mbp_nav_algorithm,
+                  double *mbp_nav_timeshift, int *error);
+int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mbp_attitudefile, int *mbp_attitude_format,
+                       int *error);
+int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char *mbp_sonardepthfile, int *mbp_sonardepth_format,
+                         int *error);
+int mb_pr_get_navshift(int verbose, char *file, int *mbp_nav_shift, double *mbp_nav_offsetx, double *mbp_nav_offsety,
+                       double *mbp_nav_offsetz, double *mbp_nav_shiftlon, double *mbp_nav_shiftlat, double *mbp_nav_shiftx,
+                       double *mbp_nav_shifty, int *error);
+int mb_pr_get_heading(int verbose, char *file, int *mbp_heading_mode, double *mbp_headingbias, int *error);
+int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_kind, int *mbp_cut_mode, double *mbp_cut_min,
+                      double *mbp_cut_max, int *error);
+int mb_pr_get_edit(int verbose, char *file, int *mbp_edit_mode, char *mbp_editfile, int *error);
+int mb_pr_get_ampcorr(int verbose, char *file, int *mbp_ampcorr_mode, char *mbp_ampcorrfile, int *mbp_ampcorr_type,
+                      int *mbp_ampcorr_symmetry, double *mbp_ampcorr_angle, int *mbp_ampcorr_slope, char *mbp_ampcorr_topofile,
+                      int *error);
+int mb_pr_get_sscorr(int verbose, char *file, int *mbp_sscorr_mode, char *mbp_sscorrfile, int *mbp_sscorr_type,
+                     int *mbp_sscorr_symmetry, double *mbp_sscorr_angle, int *mbp_sscorr_slope, char *mbp_sscorr_topofile,
+                     int *error);
+int mb_pr_get_ssrecalc(int verbose, char *file, int *mbp_ssrecalc_mode, double *mbp_ssrecalc_pixelsize,
+                       double *mbp_ssrecalc_swathwidth, int *mbp_ssrecalc_interpolate, int *error);
+int mb_pr_get_metadata(int verbose, char *file, char *mbp_meta_vessel, char *mbp_meta_institution, char *mbp_meta_platform,
+                       char *mbp_meta_sonar, char *mbp_meta_sonarversion, char *mbp_meta_cruiseid, char *mbp_meta_cruisename,
+                       char *mbp_meta_pi, char *mbp_meta_piinstitution, char *mbp_meta_client, int *mbp_meta_svcorrected,
+                       int *mbp_meta_tidecorrected, int *mbp_meta_batheditmanual, int *mbp_meta_batheditauto,
+                       double *mbp_meta_rollbias, double *mbp_meta_pitchbias, double *mbp_meta_headingbias,
+                       double *mbp_meta_draft, int *error);
+int mb_pr_get_kluges(int verbose, char *file, int *mbp_kluge001, int *mbp_kluge002, int *mbp_kluge003, int *mbp_kluge004,
+                     int *mbp_kluge005, int *mbp_kluge006, int *mbp_kluge007, int *mbp_kluge008, int *mbp_kluge009,
+                     int *mbp_kluge010, int *error);
+int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int *ndepths,
+                         double *depths, double *depthacrosstrack, int *nslopes, double *slopes, double *slopeacrosstrack,
+                         double *depthsmooth, int *error);
+int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+                            int *ndepths, double *depths, double *depthacrosstrack, int *nslopes, double *slopes,
+                            double *slopeacrosstrack, double *depthsmooth, int *error);
+int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
+                         double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error);
+int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y, int *error);
+int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *error);
+int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int output, char *esffile, struct mb_esf_struct *esf,
+                int *error);
+int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int output, struct mb_esf_struct *esf, int *error);
+int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, double tolerance, int *error);
+int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int pingmultiplicity, int nbath, char *beamflag,
+                 int *error);
+int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error);
+int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error);
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
 
-int mb_pr_lockswathfile(int verbose, char *file, int purpose,
-			char *program, int *error);
-int mb_pr_unlockswathfile(int verbose, char *file, int purpose,
-			char *program, int *error);
-int mb_pr_lockinfo(int verbose, char *file, int *locked,
-			int *purpose, char *program, char *user, char *cpu,
-			char *date, int *error);
+int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int *error);
+int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, int *error);
+int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *program, char *user, char *cpu, char *date,
+                   int *error);
 
 /* end this include */
 #endif

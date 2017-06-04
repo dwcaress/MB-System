@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_em12darw.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1994-2016 by
+ *    Copyright (c) 1994-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -52,37 +52,37 @@
 #define MBF_EM12DARW_BEAMS 81
 
 struct mbf_em12darw_struct {
-	short	func;		/* record type; 100=comment, 150=data */
-	short	year;		/* TWO-digit year */
-	short 	jday;		/* Julian day  */
-	short 	minute;		/* minute of day */
-	short	secs;		/* seconds x 100 */
-	double	latitude;	/* latitude (for units see corflag) */
-	double	longitude;	/* longitude (for units see corflag) */
-	short	corflag;	/* Co-ordinate flag: 0=Lat/Long, 1=UTM North,
-					2=UTM South  */
-	float	utm_merd;	/* UTM Meridian if corflag=1,2  */
-	short	utm_zone;	/* UTM Zone if corflag=1,2  */
-	short	posq;		/* Quality factor of Position data */
-	int	pingno;		/* ping number */
-	short	mode;		/* resolution mode */
-	float	depthl;		/* depth of centrebeam */
-	float	speed;		/* Ship's speed */
-	float	gyro;		/* Ship's Heading */
-	float	roll;		/* Ship's Roll */
-	float	pitch;		/* Ship's Pitch */
-	float	heave;		/* Ship's Heave */
-	float	sndval;		/* Sound Velocity */
-	short	depth[MBF_EM12DARW_BEAMS];
-				/* Beam Depth scaled (0.1/0.2) */
-	short	distacr[MBF_EM12DARW_BEAMS];
-				/* Beam Across Distance, scaled (0.2/0.5) */
-	short	distalo[MBF_EM12DARW_BEAMS];
-				/* Beam Along Distance, scaled (0.2/0.5) */
-	short	range[MBF_EM12DARW_BEAMS];
-				/* Beam Range, scaled (0.2/0.8) */
-	short	refl[MBF_EM12DARW_BEAMS];
-				/* Beam Reflectivity, scaled 0.5 */
-	short	beamq[MBF_EM12DARW_BEAMS];
-				/* Beam Quality, unscaled */
+	short func;       /* record type; 100=comment, 150=data */
+	short year;       /* TWO-digit year */
+	short jday;       /* Julian day  */
+	short minute;     /* minute of day */
+	short secs;       /* seconds x 100 */
+	double latitude;  /* latitude (for units see corflag) */
+	double longitude; /* longitude (for units see corflag) */
+	short corflag;    /* Co-ordinate flag: 0=Lat/Long, 1=UTM North,
+	              2=UTM South  */
+	float utm_merd;   /* UTM Meridian if corflag=1,2  */
+	short utm_zone;   /* UTM Zone if corflag=1,2  */
+	short posq;       /* Quality factor of Position data */
+	int pingno;       /* ping number */
+	short mode;       /* resolution mode */
+	float depthl;     /* depth of centrebeam */
+	float speed;      /* Ship's speed */
+	float gyro;       /* Ship's Heading */
+	float roll;       /* Ship's Roll */
+	float pitch;      /* Ship's Pitch */
+	float heave;      /* Ship's Heave */
+	float sndval;     /* Sound Velocity */
+	short depth[MBF_EM12DARW_BEAMS];
+	/* Beam Depth scaled (0.1/0.2) */
+	short distacr[MBF_EM12DARW_BEAMS];
+	/* Beam Across Distance, scaled (0.2/0.5) */
+	short distalo[MBF_EM12DARW_BEAMS];
+	/* Beam Along Distance, scaled (0.2/0.5) */
+	short range[MBF_EM12DARW_BEAMS];
+	/* Beam Range, scaled (0.2/0.8) */
+	short refl[MBF_EM12DARW_BEAMS];
+	/* Beam Reflectivity, scaled 0.5 */
+	short beamq[MBF_EM12DARW_BEAMS];
+	/* Beam Quality, unscaled */
 };

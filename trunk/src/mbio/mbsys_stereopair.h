@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_stereopair.h	11/22/2014
  *	$Id$
  *
- *    Copyright (c) 2014-2016 by
+ *    Copyright (c) 2014-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -107,7 +107,7 @@
  *              Data record identifier              4U      (0x4444434D = "DDCM" = 1145324365)
  *              Number of characters in comment     4U      Includes at least one terminating
  *                                                          null character, multiple of 4.
- *              Comment                             NC      
+ *              Comment                             NC
  *              End identifier                      4U      (0x454E4421 = "END!" = 1162757153)
  *              Check sum of data record between    2U
  *              and including the data record and
@@ -130,54 +130,52 @@
 #define MBSYS_STEREOPAIR_MAX_BEAMS 400
 #define MBSYS_STEREOPAIR_MAX_PIXELS 400
 
-#define MBSYS_STEREOPAIR_SOUNDING_SIZE  28
-#define MBSYS_STEREOPAIR_INS_SIZE       52
-#define MBSYS_STEREOPAIR_HEADER_SIZE    56
+#define MBSYS_STEREOPAIR_SOUNDING_SIZE 28
+#define MBSYS_STEREOPAIR_INS_SIZE 52
+#define MBSYS_STEREOPAIR_HEADER_SIZE 56
 
 /*---------------------------------------------------------------*/
 
 /* Structure size definitions (if needed because there are dynamically allocated substructures) */
-struct mbsys_stereopair_sounding_struct
-        {
-        double          acrosstrack;
-        double          alongtrack;
-        double          depth;
-        mb_u_char       beamflag;
-        mb_u_char       red;
-        mb_u_char       green;
-        mb_u_char       blue;
-        };
+struct mbsys_stereopair_sounding_struct {
+	double acrosstrack;
+	double alongtrack;
+	double depth;
+	mb_u_char beamflag;
+	mb_u_char red;
+	mb_u_char green;
+	mb_u_char blue;
+};
 
 /* Internal data structure */
-struct mbsys_stereopair_struct
-	{
+struct mbsys_stereopair_struct {
 	/* Type of most recently read data record */
-	int		kind;			/* MB-System record ID */
+	int kind; /* MB-System record ID */
 
 	/* MB-System time stamp of most recently read record */
-	double		time_d;
-	int		time_i[7];
-        
-        /* Navigation */
-        double          longitude;      /* degrees */
-        double          latitude;       /* degrees */
-        double          sensordepth;    /* meters */
-        float           heading;        /* degrees */
-        float           roll;           /* degrees */
-        float           pitch;          /* degrees */
-        float           speed;          /* m/sec */
-        float           altitude;       /* meters */
-        
-        /* Photogrammetric soundings */
-        int             num_soundings;
-        int             num_soundings_alloc;
-        struct mbsys_stereopair_sounding_struct *soundings;
-        
-        /* Comment */
-        int             comment_len;
-        char            comment[MB_COMMENT_MAXLINE];
-	};
-        
+	double time_d;
+	int time_i[7];
+
+	/* Navigation */
+	double longitude;   /* degrees */
+	double latitude;    /* degrees */
+	double sensordepth; /* meters */
+	float heading;      /* degrees */
+	float roll;         /* degrees */
+	float pitch;        /* degrees */
+	float speed;        /* m/sec */
+	float altitude;     /* meters */
+
+	/* Photogrammetric soundings */
+	int num_soundings;
+	int num_soundings_alloc;
+	struct mbsys_stereopair_sounding_struct *soundings;
+
+	/* Comment */
+	int comment_len;
+	char comment[MB_COMMENT_MAXLINE];
+};
+
 /*---------------------------------------------------------------*/
 
 /* System specific function prototypes */
@@ -192,122 +190,89 @@ struct mbsys_stereopair_struct
  * are commented out below. When using this example as the basis for
  * for coding a new MB-System I/O module, uncomment any non-required
  * functions that will be useful. */
-int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr,
-			int *pingnumber, int *error);
-int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
-                        int *sonartype, int *error);
-int mbsys_stereopair_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
-                        int *ss_type, int *error);
-//int mbsys_stereopair_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
+                                int *error);
+int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
+int mbsys_stereopair_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
+// int mbsys_stereopair_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 //        void *platform_ptr, void *preprocess_pars_ptr, int *error);
-int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
-			int nmax, int *kind, int *n,
-			int *time_i, double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_stereopair_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-//int mbsys_stereopair_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
+                             double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
+                             char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
+                             double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                            double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag,
+                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
+                                 double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
+                                 double *pitch, double *heave, int *error);
+int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i,
+                                  double *time_d, double *navlon, double *navlat, double *speed, double *heading, double *draft,
+                                  double *roll, double *pitch, double *heave, int *error);
+int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
+                                double navlat, double speed, double heading, double draft, double roll, double pitch,
+                                double heave, int *error);
+int mbsys_stereopair_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                                      double *altitude, int *error);
+// int mbsys_stereopair_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 //                        double transducer_depth, double altitude,
 //                        int *error);
-//int mbsys_stereopair_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
+// int mbsys_stereopair_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 //			int *kind,
 //			int *nsvp,
 //			double *depth, double *velocity,
 //			int *error);
-//int mbsys_stereopair_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
+// int mbsys_stereopair_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 //			int nsvp,
 //			double *depth, double *velocity,
 //			int *error);
-int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *detects, int *error);
-//int mbsys_stereopair_pulses(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                            double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                            double *ssv, int *error);
+int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+// int mbsys_stereopair_pulses(int verbose, void *mbio_ptr, void *store_ptr,
 //                        int *kind, int *nbeams, int *pulses, int *error);
-int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transmit_gain, double *pulse_length,
-			double *receive_gain, int *error);
-//int mbsys_stereopair_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
+                           double *receive_gain, int *error);
+// int mbsys_stereopair_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 //			int *kind, int *nrawss,
 //			double *rawss,
 //			double *rawssacrosstrack,
 //			double *rawssalongtrack,
 //			int *error);
-//int mbsys_stereopair_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
+// int mbsys_stereopair_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 //			int nrawss,
 //			double *rawss,
 //			double *rawssacrosstrack,
 //			double *rawssalongtrack,
 //			int *error);
-//int mbsys_stereopair_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
+// int mbsys_stereopair_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 //			int *kind,
 //			void *segytraceheader_ptr,
 //			int *error);
-//int mbsys_stereopair_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
+// int mbsys_stereopair_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 //			int *sampleformat,
 //			int *kind,
 //			void *segytraceheader_ptr,
 //			float *segydata,
 //			int *error);
-//int mbsys_stereopair_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
+// int mbsys_stereopair_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 //			int kind,
 //			void *segytraceheader_ptr,
 //			float *segydata,
 //			int *error);
-//int mbsys_stereopair_ctd(int verbose, void *mbio_ptr, void *store_ptr,
+// int mbsys_stereopair_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 //			int *kind, int *nctd, double *time_d,
 //			double *conductivity, double *temperature,
 //			double *depth, double *salinity, double *soundspeed, int *error);
-//int mbsys_stereopair_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
+// int mbsys_stereopair_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 //			int *kind, int *nsensor, double *time_d,
 //			double *sensor1, double *sensor2, double *sensor3,
 //			double *sensor4, double *sensor5, double *sensor6,
 //			double *sensor7, double *sensor8, int *error);
-int mbsys_stereopair_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
+int mbsys_stereopair_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 /*---------------------------------------------------------------*/

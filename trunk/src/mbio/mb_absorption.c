@@ -2,7 +2,7 @@
  *    The MB-system:	mb_absorption.c		2/10/2008
  *    $Id$
  *
- *    Copyright (c) 2008-2016 by
+ *    Copyright (c) 2008-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -94,7 +94,6 @@
  *
  */
 
-
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
@@ -104,69 +103,59 @@
 #include "mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_absorption(int verbose,
-		double frequency, double temperature,double salinity,
-		double depth, double ph, double soundspeed,
-		double *absorption, int *error)
-{
-	char	*function_name = "mb_absorption";
-	int	status = MB_SUCCESS;
-	double	Alphab, Alpham, Alphaw;
-	double	tk;
-	double	Ab, Pb, Fb;
-	double	Am, Pm, Fm;
-	double	Aw, Pw;
+int mb_absorption(int verbose, double frequency, double temperature, double salinity, double depth, double ph, double soundspeed,
+                  double *absorption, int *error) {
+	char *function_name = "mb_absorption";
+	int status = MB_SUCCESS;
+	double Alphab, Alpham, Alphaw;
+	double tk;
+	double Ab, Pb, Fb;
+	double Am, Pm, Fm;
+	double Aw, Pw;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       frequency:  %f\n",frequency);
-		fprintf(stderr,"dbg2       temperature:%f\n",temperature);
-		fprintf(stderr,"dbg2       salinity:   %f\n",salinity);
-		fprintf(stderr,"dbg2       soundspeed: %f\n",soundspeed);
-		fprintf(stderr,"dbg2       depth:      %f\n",depth);
-		fprintf(stderr,"dbg2       ph:         %f\n",ph);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       frequency:  %f\n", frequency);
+		fprintf(stderr, "dbg2       temperature:%f\n", temperature);
+		fprintf(stderr, "dbg2       salinity:   %f\n", salinity);
+		fprintf(stderr, "dbg2       soundspeed: %f\n", soundspeed);
+		fprintf(stderr, "dbg2       depth:      %f\n", depth);
+		fprintf(stderr, "dbg2       ph:         %f\n", ph);
+	}
 
 	/* calculate sound speed if needed */
 	if (soundspeed <= 0.0)
-		soundspeed = 1412.0 + 3.21 * temperature
-				+ 1.19 * salinity + 0.0167 * depth;
+		soundspeed = 1412.0 + 3.21 * temperature + 1.19 * salinity + 0.0167 * depth;
 
 	/* get temperature in deg Kelvin
-		- I know the conversion is slightly wrong, but this
-			is what they published.... */
+	    - I know the conversion is slightly wrong, but this
+	        is what they published.... */
 	tk = temperature + 273.0;
 
 	/* calculate boric acid contribution */
 	Ab = 8.86 / soundspeed * pow(10.0, (0.78 * ph - 5.0));
 	Pb = 1.0;
 	Fb = 2.8 * sqrt(salinity / 35.0) * pow(10.0, (4.0 - (1245.0 / tk)));
-	Alphab = (Ab * Pb * Fb * frequency * frequency)
-			/ (Fb * Fb + frequency * frequency);
+	Alphab = (Ab * Pb * Fb * frequency * frequency) / (Fb * Fb + frequency * frequency);
 
 	/* calculate MgSO4 contribution */
 	Am = 21.44 * salinity * (1 + 0.025 * temperature) / soundspeed;
 	Pm = 1 - 0.000137 * depth + 0.0000000062 * depth * depth;
 	Fm = (8.17 * pow(10.0, (8.0 - 1990.0 / tk))) / (1 + 0.0018 * (salinity - 35));
-	Alpham = (Am * Pm * Fm * frequency * frequency)
-			/ (Fm * Fm + frequency * frequency);
+	Alpham = (Am * Pm * Fm * frequency * frequency) / (Fm * Fm + frequency * frequency);
 
 	/* calculate pure water contribution */
 	if (temperature <= 20.0)
-		Aw = 0.0004937 - 0.0000259 * temperature
-			+ 0.000000911 * temperature * temperature
-			- 0.000000015 * temperature * temperature * temperature;
+		Aw = 0.0004937 - 0.0000259 * temperature + 0.000000911 * temperature * temperature -
+		     0.000000015 * temperature * temperature * temperature;
 	else
-		Aw = 0.0003964 - 0.00001146 * temperature
-			+ 0.000000145 * temperature * temperature
-			- 0.00000000065 * temperature * temperature * temperature;
+		Aw = 0.0003964 - 0.00001146 * temperature + 0.000000145 * temperature * temperature -
+		     0.00000000065 * temperature * temperature * temperature;
 
-	Pw = 1 - 0.0000383 * depth + 0.00000000049 *  depth * depth;
+	Pw = 1 - 0.0000383 * depth + 0.00000000049 * depth * depth;
 	Alphaw = Aw * Pw * frequency * frequency;
 
 	/* add it all together */
@@ -177,19 +166,17 @@ int mb_absorption(int verbose,
 	status = MB_SUCCESS;
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       absorption:      %f\n",*absorption);
-		fprintf(stderr,"dbg2       error:           %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -204,62 +191,51 @@ int mb_absorption(int verbose,
  *     seawater. J. Atmos. Oceanic Technol., 23, 1709–1728.
  *     doi: http://dx.doi.org/10.1175/JTECH1946.1
  */
-int mb_potential_temperature(int verbose,
-		double temperature,double salinity, double pressure,
-		double *potential_temperature, int *error)
-{
-	char	*function_name = "mb_potential_temperature";
-	int	status = MB_SUCCESS;
-		
+int mb_potential_temperature(int verbose, double temperature, double salinity, double pressure, double *potential_temperature,
+                             int *error) {
+	char *function_name = "mb_potential_temperature";
+	int status = MB_SUCCESS;
+
 	/* Polynomial coefficients */
-	double	a1 = 8.65483913395442e-6;
-	double	a2 = -1.41636299744881e-6;
-	double	a3 = -7.38286467135737e-9;
-	double	a4 = -8.38241357039698e-6;
-	double	a5 = 2.83933368585534e-8;
-	double	a6 = 1.77803965218656e-8;
-	double	a7 = 1.71155619208233e-10;
+	double a1 = 8.65483913395442e-6;
+	double a2 = -1.41636299744881e-6;
+	double a3 = -7.38286467135737e-9;
+	double a4 = -8.38241357039698e-6;
+	double a5 = 2.83933368585534e-8;
+	double a6 = 1.77803965218656e-8;
+	double a7 = 1.71155619208233e-10;
 
 	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       temperature:%f deg C\n",temperature);
-		fprintf(stderr,"dbg2       salinity:   %f PSU\n",salinity);
-		fprintf(stderr,"dbg2       pressure:   %f dbar\n",pressure);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       temperature:%f deg C\n", temperature);
+		fprintf(stderr, "dbg2       salinity:   %f PSU\n", salinity);
+		fprintf(stderr, "dbg2       pressure:   %f dbar\n", pressure);
+	}
 
 	/* Calculate potential temperature */
-	*potential_temperature = temperature
-								+ pressure * (a1
-											  + (a2 * salinity)
-											  + (a3 * pressure)
-											  + (a4 * temperature)
-											  + (a5 * salinity * temperature)
-											  + (a6 * temperature * temperature)
-											  + (a7 * temperature * pressure));
+	*potential_temperature =
+	    temperature + pressure * (a1 + (a2 * salinity) + (a3 * pressure) + (a4 * temperature) + (a5 * salinity * temperature) +
+	                              (a6 * temperature * temperature) + (a7 * temperature * pressure));
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
 	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       potential_temperature: %f deg C\n",*potential_temperature);
-		fprintf(stderr,"dbg2       error:                 %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:                %d\n",status);
-		}
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       potential_temperature: %f deg C\n", *potential_temperature);
+		fprintf(stderr, "dbg2       error:                 %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:                %d\n", status);
+	}
 
 	/* return status */
-	return(status);
+	return (status);
 }
 
 /*--------------------------------------------------------------------*/

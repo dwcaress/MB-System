@@ -15,7 +15,6 @@
  *
  */
 
-
 /* Begin user code block <file_comments> */
 
 #ifndef SANS
@@ -81,7 +80,6 @@
 /**
  * Globally included information.
  */
-
 
 /**
  * Common constant and pixmap declarations.
@@ -197,4550 +195,5223 @@ extern void do_list_data_select(Widget, XtPointer, XtPointer);
 /**
  * Create the mainWindow hierarchy of widgets.
  */
-Widget
-CreatemainWindow(Widget parent)
-{
-    Cardinal ac = 0;
-    Arg      args[256];
-    Boolean  argok = False;
-    Widget   mainWindow;
-    Widget   dialogShell_modelplot;
-    Widget   pushButton_modelplot_fullsize;
-    Widget   pushButton_modelplot_dismiss;
-    Widget   dialogShell_controls;
-    Widget   form_controls;
-    Widget   separator14;
-    Widget   label_controls_zoffset;
-    Widget   label_controls_smoothing;
-    Widget   separator12;
-    Widget   label_controls_sectionlength;
-    Widget   label_controls_contourinterval;
-    Widget   label_controls_colorinterval;
-    Widget   label_controls_tickinterval;
-    Widget   pushButton_controls_apply;
-    Widget   separator4;
-    Widget   separator5;
-    Widget   label_controls_decimation;
-    Widget   label_controls_sectionsoundings;
-    Widget   pushButton_controls_dismiss;
-    Widget   dialogShell_about;
-    Widget   form_about;
-    Widget   label_about_create1;
-    Widget   separator1;
-    Widget   pushButton_about_dismiss;
-    Widget   label_about_create;
-    Widget   label_about_lamont;
-    Widget   label_about_columbia;
-    Widget   label_about_mbsystem;
-    Widget   label_about_mbpub;
-    Widget   label_about_component;
-    Widget   label_about_for;
-    Widget   separator;
-    Widget   label_about_function;
-    Widget   label_about_mbedit;
-    Widget   dialogShell_biases;
-    Widget   bulletinBoard_biases;
-    Widget   separator9;
-    Widget   separator8;
-    Widget   separator6;
-    Widget   radioBox_biases_together;
-    Widget   pushButton_biases_apply;
-    Widget   pushButton_biases_dismiss;
-    Widget   dialogShell_naverr;
-    Widget   menuBar_settings;
-    Widget   cascadeButton_settings;
-    Widget   pulldownMenu_settings;
-    Widget   pushButton_naverr_biases;
-    Widget   pushButton_naverr_controls;
-    Widget   radioBox_misfitcenter;
-    Widget   xmDialogShell_error;
-    Widget   pushButton_error;
-    Widget   xmDialogShell_message;
-    Widget   label_pleasewait;
-    Widget   menuBar_mbnavadjust;
-    Widget   cascadeButton_file;
-    Widget   pulldownMenu_file;
-    Widget   separator2;
-    Widget   separator3;
-    Widget   cascadeButton_option;
-    Widget   pulldownMenu_option;
-    Widget   pushButton_controls;
-    Widget   cascadeButton_view;
-    Widget   pulldownMenu_view;
-    Widget   separator13;
-    Widget   separator15;
-    Widget   cascadeButton_action;
-    Widget   pulldownMenu_action;
-    Widget   separator7;
-    Widget   separator10;
-    Widget   separator17;
-    Widget   separator11;
-    Widget   separator16;
-    Widget   cascadeButton_about;
-    Widget   pulldownMenu_about;
-    Widget   pushButton_about;
-
-    /**
-     * Register the converters for the widgets.
-     */
-    RegisterBxConverters(XtWidgetToApplicationContext(parent));
-    XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmFileSelectionBoxWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmPushButtonGadgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmScrolledWindowWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmTextWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmListWidgetClass);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 82); ac++;
-    XtSetArg(args[ac], XmNy, 396); ac++;
-    XtSetArg(args[ac], XmNwidth, 962); ac++;
-    XtSetArg(args[ac], XmNheight, 400); ac++;
-    mainWindow = XmCreateMainWindow(parent,
-        (char *)"mainWindow",
-        args,
-        ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNwidth, 962); ac++;
-    XtSetArg(args[ac], XmNheight, 32); ac++;
-    menuBar_mbnavadjust = XmCreateMenuBar(mainWindow,
-        (char *)"menuBar_mbnavadjust",
-        args,
-        ac);
-    XtManageChild(menuBar_mbnavadjust);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(menuBar_mbnavadjust, (char *)"File",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 5); ac++;
-        XtSetArg(args[ac], XmNy, 5); ac++;
-        XtSetArg(args[ac], XmNwidth, 36); ac++;
-        XtSetArg(args[ac], XmNheight, 22); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(menuBar_mbnavadjust, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        cascadeButton_file = XmCreateCascadeButton(menuBar_mbnavadjust,
-            (char *)"cascadeButton_file",
-            args,
-            ac);
-        XtManageChild(cascadeButton_file);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 126); ac++;
-    XtSetArg(args[ac], XmNheight, 118); ac++;
-    pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file),
-        (char *)"pulldownMenu_file",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, (char *)"New",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_new = XmCreatePushButton(pulldownMenu_file,
-            (char *)"pushButton_new",
-            args,
-            ac);
-        XtManageChild(pushButton_new);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_new, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_fileselection");
-    XtAddCallback(pushButton_new, XmNactivateCallback, BxSetValuesCB, (XtPointer)"xmDialogShell_fileselection.title=Specify New Project");
-    XtAddCallback(pushButton_new, XmNactivateCallback, BxUnmanageCB, (XtPointer)"label_format");
-    XtAddCallback(pushButton_new, XmNactivateCallback, BxUnmanageCB, (XtPointer)"textField_format");
-    XtAddCallback(pushButton_new, XmNactivateCallback, do_fileselection_mode, (XtPointer)MBNA_FILESELECTION_NEW);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, (char *)"Open",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_open = XmCreatePushButton(pulldownMenu_file,
-            (char *)"pushButton_open",
-            args,
-            ac);
-        XtManageChild(pushButton_open);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_open, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_fileselection");
-    XtAddCallback(pushButton_open, XmNactivateCallback, BxUnmanageCB, (XtPointer)"label_format");
-    XtAddCallback(pushButton_open, XmNactivateCallback, BxUnmanageCB, (XtPointer)"textField_format");
-    XtAddCallback(pushButton_open, XmNactivateCallback, BxSetValuesCB, (XtPointer)"xmDialogShell_fileselection.title=Open Project");
-    XtAddCallback(pushButton_open, XmNactivateCallback, do_fileselection_mode, (XtPointer)MBNA_FILESELECTION_OPEN);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, (char *)"Close",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_close = XmCreatePushButton(pulldownMenu_file,
-            (char *)"pushButton_close",
-            args,
-            ac);
-        XtManageChild(pushButton_close);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_close, XmNactivateCallback, do_file_close, (XtPointer)0);
-
-    ac = 0;
-    separator2 = XmCreateSeparator(pulldownMenu_file,
-        (char *)"separator2",
-        args,
-        ac);
-    XtManageChild(separator2);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, (char *)"Import Swath Data",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_importdata = XmCreatePushButton(pulldownMenu_file,
-            (char *)"pushButton_importdata",
-            args,
-            ac);
-        XtManageChild(pushButton_importdata);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_importdata, XmNactivateCallback, BxSetValuesCB, (XtPointer)"xmDialogShell_fileselection.title=Import Swath Data File or Datalist");
-    XtAddCallback(pushButton_importdata, XmNactivateCallback, BxSetValuesCB, (XtPointer)"label_format.labelString=MBIO Format ID:");
-    XtAddCallback(pushButton_importdata, XmNactivateCallback, BxManageCB, (XtPointer)"label_format");
-    XtAddCallback(pushButton_importdata, XmNactivateCallback, BxManageCB, (XtPointer)"textField_format");
-    XtAddCallback(pushButton_importdata, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_fileselection");
-    XtAddCallback(pushButton_importdata, XmNactivateCallback, do_fileselection_mode, (XtPointer)MBNA_FILESELECTION_IMPORT);
-
-    ac = 0;
-    separator3 = XmCreateSeparator(pulldownMenu_file,
-        (char *)"separator3",
-        args,
-        ac);
-    XtManageChild(separator3);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, (char *)"Quit",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_file, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_quit = XmCreatePushButton(pulldownMenu_file,
-            (char *)"pushButton_quit",
-            args,
-            ac);
-        XtManageChild(pushButton_quit);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_quit, XmNactivateCallback, do_quit, (XtPointer)0);
-    XtAddCallback(pushButton_quit, XmNactivateCallback, BxExitCB, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_file); ac++;
-    XtSetValues(cascadeButton_file, args, ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(menuBar_mbnavadjust, (char *)"Option",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 41); ac++;
-        XtSetArg(args[ac], XmNy, 5); ac++;
-        XtSetArg(args[ac], XmNwidth, 55); ac++;
-        XtSetArg(args[ac], XmNheight, 22); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(menuBar_mbnavadjust, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        cascadeButton_option = XmCreateCascadeButton(menuBar_mbnavadjust,
-            (char *)"cascadeButton_option",
-            args,
-            ac);
-        XtManageChild(cascadeButton_option);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 61); ac++;
-    XtSetArg(args[ac], XmNheight, 26); ac++;
-    pulldownMenu_option = XmCreatePulldownMenu(XtParent(cascadeButton_option),
-        (char *)"pulldownMenu_option",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_option, (char *)"Controls",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_option, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_controls = XmCreatePushButton(pulldownMenu_option,
-            (char *)"pushButton_controls",
-            args,
-            ac);
-        XtManageChild(pushButton_controls);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_controls, XmNactivateCallback, BxManageCB, (XtPointer)"form_controls");
-
-    ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_option); ac++;
-    XtSetValues(cascadeButton_option, args, ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(menuBar_mbnavadjust, (char *)"View",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 96); ac++;
-        XtSetArg(args[ac], XmNy, 5); ac++;
-        XtSetArg(args[ac], XmNwidth, 45); ac++;
-        XtSetArg(args[ac], XmNheight, 22); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(menuBar_mbnavadjust, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        cascadeButton_view = XmCreateCascadeButton(menuBar_mbnavadjust,
-            (char *)"cascadeButton_view",
-            args,
-            ac);
-        XtManageChild(cascadeButton_view);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 225); ac++;
-    XtSetArg(args[ac], XmNheight, 360); ac++;
-    pulldownMenu_view = XmCreatePulldownMenu(XtParent(cascadeButton_view),
-        (char *)"pulldownMenu_view",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Surveys",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_showsurveys = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_showsurveys",
-            args,
-            ac);
-        XtManageChild(pushButton_showsurveys);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_showsurveys, XmNactivateCallback, do_view_showsurveys, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Survey-vs-Survey Blocks",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_showblocks = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_showblocks",
-            args,
-            ac);
-        XtManageChild(pushButton_showblocks);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_showblocks, XmNactivateCallback, do_view_showblocks, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Data Files",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_showdata = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_showdata",
-            args,
-            ac);
-        XtManageChild(pushButton_showdata);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_showdata, XmNactivateCallback, do_view_showdata, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Data File Sections",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_showsections = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_showsections",
-            args,
-            ac);
-        XtManageChild(pushButton_showsections);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_showsections, XmNactivateCallback, do_view_showsections, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show All Crossings",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_showcrossings = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_showcrossings",
-            args,
-            ac);
-        XtManageChild(pushButton_showcrossings);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_showcrossings, XmNactivateCallback, do_view_showcrossings, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show >10% Overlap Crossings",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_showmediocrecrossings = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_showmediocrecrossings",
-            args,
-            ac);
-        XtManageChild(pushButton_showmediocrecrossings);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_showmediocrecrossings, XmNactivateCallback, do_view_showmediocrecrossings, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show >25% Overlap Crossings",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_showgoodcrossings = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_showgoodcrossings",
-            args,
-            ac);
-        XtManageChild(pushButton_showgoodcrossings);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_showgoodcrossings, XmNactivateCallback, do_view_showgoodcrossings, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show >50% Overlap Crossings",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_showbettercrossings = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_showbettercrossings",
-            args,
-            ac);
-        XtManageChild(pushButton_showbettercrossings);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_showbettercrossings, XmNactivateCallback, do_view_showbettercrossings, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show True Crossings",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_showtruecrossings = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_showtruecrossings",
-            args,
-            ac);
-        XtManageChild(pushButton_showtruecrossings);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_showtruecrossings, XmNactivateCallback, do_view_showtruecrossings, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Ties",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_showties = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_showties",
-            args,
-            ac);
-        XtManageChild(pushButton_showties);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_showties, XmNactivateCallback, do_view_showties, (XtPointer)0);
-
-    ac = 0;
-    separator13 = XmCreateSeparator(pulldownMenu_view,
-        (char *)"separator13",
-        args,
-        ac);
-    XtManageChild(separator13);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show All Surveys",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_showallsurveys = XmCreateToggleButton(pulldownMenu_view,
-            (char *)"toggleButton_showallsurveys",
-            args,
-            ac);
-        XtManageChild(toggleButton_showallsurveys);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_showallsurveys, XmNvalueChangedCallback, do_view_showallsurveys, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected Survey",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_showselectedsurvey = XmCreateToggleButton(pulldownMenu_view,
-            (char *)"toggleButton_showselectedsurvey",
-            args,
-            ac);
-        XtManageChild(toggleButton_showselectedsurvey);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_showselectedsurvey, XmNvalueChangedCallback, do_view_showselectedsurveys, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected Survey-vs-Survey Block",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_showselectedblock = XmCreateToggleButton(pulldownMenu_view,
-            (char *)"toggleButton_showselectedblock",
-            args,
-            ac);
-        XtManageChild(toggleButton_showselectedblock);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_showselectedblock, XmNvalueChangedCallback, do_view_showselectedblock, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected File",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_showselectedfile = XmCreateToggleButton(pulldownMenu_view,
-            (char *)"toggleButton_showselectedfile",
-            args,
-            ac);
-        XtManageChild(toggleButton_showselectedfile);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_showselectedfile, XmNvalueChangedCallback, do_view_showselectedfile, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only With Selected Survey",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_showwithselectedsurvey = XmCreateToggleButton(pulldownMenu_view,
-            (char *)"toggleButton_showwithselectedsurvey",
-            args,
-            ac);
-        XtManageChild(toggleButton_showwithselectedsurvey);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_showwithselectedsurvey, XmNvalueChangedCallback, do_view_showwithselectedsurveys, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only With Selected File",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_showwithselectedfile = XmCreateToggleButton(pulldownMenu_view,
-            (char *)"toggleButton_showwithselectedfile",
-            args,
-            ac);
-        XtManageChild(toggleButton_showwithselectedfile);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_showwithselectedfile, XmNvalueChangedCallback, do_view_showwithselectedfile, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only With Selected Section",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_showselectedsection = XmCreateToggleButton(pulldownMenu_view,
-            (char *)"toggleButton_showselectedsection",
-            args,
-            ac);
-        XtManageChild(toggleButton_showselectedsection);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_showselectedsection, XmNvalueChangedCallback, do_view_showselectedsection, (XtPointer)0);
-
-    ac = 0;
-    separator15 = XmCreateSeparator(pulldownMenu_view,
-        (char *)"separator15",
-        args,
-        ac);
-    XtManageChild(separator15);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Visualize Survey",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_visualize = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_visualize",
-            args,
-            ac);
-        XtManageChild(pushButton_visualize);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_visualize, XmNactivateCallback, do_visualize, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Modelplot",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_view, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_showmodelplot = XmCreatePushButton(pulldownMenu_view,
-            (char *)"pushButton_showmodelplot",
-            args,
-            ac);
-        XtManageChild(pushButton_showmodelplot);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_showmodelplot, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_modelplot");
-    XtAddCallback(pushButton_showmodelplot, XmNactivateCallback, do_modelplot_show, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_view); ac++;
-    XtSetValues(cascadeButton_view, args, ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(menuBar_mbnavadjust, (char *)"Action",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 141); ac++;
-        XtSetArg(args[ac], XmNy, 5); ac++;
-        XtSetArg(args[ac], XmNwidth, 53); ac++;
-        XtSetArg(args[ac], XmNheight, 22); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(menuBar_mbnavadjust, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        cascadeButton_action = XmCreateCascadeButton(menuBar_mbnavadjust,
-            (char *)"cascadeButton_action",
-            args,
-            ac);
-        XtManageChild(cascadeButton_action);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 182); ac++;
-    XtSetArg(args[ac], XmNheight, 344); ac++;
-    pulldownMenu_action = XmCreatePulldownMenu(XtParent(cascadeButton_action),
-        (char *)"pulldownMenu_action",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set File Poor Navigation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_poornav = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_poornav",
-            args,
-            ac);
-        XtManageChild(pushButton_poornav);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_poornav, XmNactivateCallback, do_action_poornav, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set File Good Navigation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_goodnav = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_goodnav",
-            args,
-            ac);
-        XtManageChild(pushButton_goodnav);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_goodnav, XmNactivateCallback, do_action_goodnav, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set File Fixed Navigation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_fixednav = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_fixednav",
-            args,
-            ac);
-        XtManageChild(pushButton_fixednav);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_fixednav, XmNactivateCallback, do_action_fixednav, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set File Fixed XY Navigation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_fixedxynav = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_fixedxynav",
-            args,
-            ac);
-        XtManageChild(pushButton_fixedxynav);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_fixedxynav, XmNactivateCallback, do_action_fixedxynav, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set File Fixed Z Navigation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_fixedznav = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_fixedznav",
-            args,
-            ac);
-        XtManageChild(pushButton_fixedznav);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_fixedznav, XmNactivateCallback, do_action_fixedznav, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set tie to XY only",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_tie_xy = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_tie_xy",
-            args,
-            ac);
-        XtManageChild(pushButton_tie_xy);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_tie_xy, XmNactivateCallback, do_action_tie_xy, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set tie to Z only",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_tie_z = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_tie_z",
-            args,
-            ac);
-        XtManageChild(pushButton_tie_z);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_tie_z, XmNactivateCallback, do_action_z, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set tie to full XYZ",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_tie_xyz = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_tie_xyz",
-            args,
-            ac);
-        XtManageChild(pushButton_tie_xyz);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_tie_xyz, XmNactivateCallback, do_action_tie_xyz, (XtPointer)0);
-
-    ac = 0;
-    separator7 = XmCreateSeparator(pulldownMenu_action,
-        (char *)"separator7",
-        args,
-        ac);
-    XtManageChild(separator7);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Auto-Pick Offsets",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_autopick = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_autopick",
-            args,
-            ac);
-        XtManageChild(pushButton_autopick);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_autopick, XmNactivateCallback, do_action_autopick, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Auto-Pick Horizontal Offsets",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_autopickhorizontal = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_autopickhorizontal",
-            args,
-            ac);
-        XtManageChild(pushButton_autopickhorizontal);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_autopickhorizontal, XmNactivateCallback, do_action_autopickhorizontal, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Auto-Set Survey-vs-Survey Vertical Offsets",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_autosetsvsvertical = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_autosetsvsvertical",
-            args,
-            ac);
-        XtManageChild(pushButton_autosetsvsvertical);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_autosetsvsvertical, XmNactivateCallback, do_action_autosetsvsvertical, (XtPointer)0);
-
-    ac = 0;
-    separator10 = XmCreateSeparator(pulldownMenu_action,
-        (char *)"separator10",
-        args,
-        ac);
-    XtManageChild(separator10);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Check For New Crossings",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_newcrossings = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_newcrossings",
-            args,
-            ac);
-        XtManageChild(pushButton_newcrossings);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_newcrossings, XmNactivateCallback, do_action_checknewcrossings, (XtPointer)0);
-
-    ac = 0;
-    separator17 = XmCreateSeparator(pulldownMenu_action,
-        (char *)"separator17",
-        args,
-        ac);
-    XtManageChild(separator17);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Analyze Crossings",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_analyzecrossings = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_analyzecrossings",
-            args,
-            ac);
-        XtManageChild(pushButton_analyzecrossings);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_analyzecrossings, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_naverr");
-    XtAddCallback(pushButton_analyzecrossings, XmNactivateCallback, do_naverr_init, (XtPointer)0);
-    XtAddCallback(pushButton_analyzecrossings, XmNactivateCallback, do_action_analyzecrossings, (XtPointer)0);
-
-    ac = 0;
-    separator11 = XmCreateSeparator(pulldownMenu_action,
-        (char *)"separator11",
-        args,
-        ac);
-    XtManageChild(separator11);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Zero All Z Offsets",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_zerozoffsets = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_zerozoffsets",
-            args,
-            ac);
-        XtManageChild(pushButton_zerozoffsets);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_zerozoffsets, XmNactivateCallback, do_zerozoffsets, (XtPointer)0);
-
-    ac = 0;
-    separator16 = XmCreateSeparator(pulldownMenu_action,
-        (char *)"separator16",
-        args,
-        ac);
-    XtManageChild(separator16);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Invert Navigation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_invertnav = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_invertnav",
-            args,
-            ac);
-        XtManageChild(pushButton_invertnav);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_invertnav, XmNactivateCallback, do_action_invertnav, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Update Grids",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_updategrids = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_updategrids",
-            args,
-            ac);
-        XtManageChild(pushButton_updategrids);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_updategrids, XmNactivateCallback, do_action_updategrids, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Apply Adjusted Navigation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_action, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_applynav = XmCreatePushButtonGadget(pulldownMenu_action,
-            (char *)"pushButton_applynav",
-            args,
-            ac);
-        XtManageChild(pushButton_applynav);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_applynav, XmNactivateCallback, do_apply_nav, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_action); ac++;
-    XtSetValues(cascadeButton_action, args, ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(menuBar_mbnavadjust, (char *)"About",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 907); ac++;
-        XtSetArg(args[ac], XmNy, 5); ac++;
-        XtSetArg(args[ac], XmNwidth, 50); ac++;
-        XtSetArg(args[ac], XmNheight, 22); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(menuBar_mbnavadjust, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        cascadeButton_about = XmCreateCascadeButton(menuBar_mbnavadjust,
-            (char *)"cascadeButton_about",
-            args,
-            ac);
-        XtManageChild(cascadeButton_about);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 46); ac++;
-    XtSetArg(args[ac], XmNheight, 26); ac++;
-    pulldownMenu_about = XmCreatePulldownMenu(XtParent(cascadeButton_about),
-        (char *)"pulldownMenu_about",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_about, (char *)"About",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_about, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_about = XmCreatePushButton(pulldownMenu_about,
-            (char *)"pushButton_about",
-            args,
-            ac);
-        XtManageChild(pushButton_about);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_about, XmNactivateCallback, BxManageCB, (XtPointer)"form_about");
-
-    ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_about); ac++;
-    XtSetValues(cascadeButton_about, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNwidth, 962); ac++;
-    XtSetArg(args[ac], XmNheight, 368); ac++;
-    form_mbnavadjust = XmCreateForm(mainWindow,
-        (char *)"form_mbnavadjust",
-        args,
-        ac);
-    XtManageChild(form_mbnavadjust);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNscrollingPolicy, XmAUTOMATIC); ac++;
-    XtSetArg(args[ac], XmNscrollBarDisplayPolicy, XmAS_NEEDED); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 150); ac++;
-    XtSetArg(args[ac], XmNwidth, 440); ac++;
-    XtSetArg(args[ac], XmNheight, 220); ac++;
-    scrolledWindow_messages = XmCreateScrolledWindow(form_mbnavadjust,
-        (char *)"scrolledWindow_messages",
-        args,
-        ac);
-    XtManageChild(scrolledWindow_messages);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNeditMode, XmMULTI_LINE_EDIT); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(scrolledWindow_messages, (char *)"-*-fixed-medium-r-*-*-*-120-*-*-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    XtSetArg(args[ac], XmNcolumns, 120); ac++;
-    XtSetArg(args[ac], XmNwordWrap, False); ac++;
-    XtSetArg(args[ac], XmNautoShowCursorPosition, False); ac++;
-    XtSetArg(args[ac], XmNrows, 1); ac++;
-    XtSetArg(args[ac], XmNeditable, False); ac++;
-    text_messages = XmCreateText(scrolledWindow_messages,
-        (char *)"text_messages",
-        args,
-        ac);
-    XtManageChild(text_messages);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_mbnavadjust, (char *)"No Data Imported",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 0); ac++;
-        XtSetArg(args[ac], XmNwidth, 440); ac++;
-        XtSetArg(args[ac], XmNheight, 140); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_mbnavadjust, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_status = XmCreateLabel(form_mbnavadjust,
-            (char *)"label_status",
-            args,
-            ac);
-        XtManageChild(label_status);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_mbnavadjust, (char *)"Data Files:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 450); ac++;
-        XtSetArg(args[ac], XmNy, 0); ac++;
-        XtSetArg(args[ac], XmNwidth, 120); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_mbnavadjust, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_listdata = XmCreateLabel(form_mbnavadjust,
-            (char *)"label_listdata",
-            args,
-            ac);
-        XtManageChild(label_listdata);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNscrollingPolicy, XmAPPLICATION_DEFINED); ac++;
-    XtSetArg(args[ac], XmNx, 450); ac++;
-    XtSetArg(args[ac], XmNy, 30); ac++;
-    XtSetArg(args[ac], XmNwidth, 490); ac++;
-    XtSetArg(args[ac], XmNheight, 330); ac++;
-    scrolledWindow_datalist = XmCreateScrolledWindow(form_mbnavadjust,
-        (char *)"scrolledWindow_datalist",
-        args,
-        ac);
-    XtManageChild(scrolledWindow_datalist);
-
-    ac = 0;
-    {
-        Cardinal    ndx;
-        XmStringTable    tmp0;
-
-        tmp0 = (XmStringTable) BX_CONVERT(scrolledWindow_datalist, (char *)" ",
-                XmRXmStringTable, 0, &argok);
-        XtSetArg(args[ac], XmNitems, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNitemCount, 1); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(scrolledWindow_datalist, (char *)"-*-fixed-medium-r-*-*-*-120-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNselectionPolicy, XmSINGLE_SELECT); ac++;
-        XtSetArg(args[ac], XmNlistSizePolicy, XmCONSTANT); ac++;
-        XtSetArg(args[ac], XmNwidth, 490); ac++;
-        XtSetArg(args[ac], XmNheight, 330); ac++;
-        list_data = XmCreateList(scrolledWindow_datalist,
-            (char *)"list_data",
-            args,
-            ac);
-        XtManageChild(list_data);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        for ( ndx = 0; ndx < 1; ndx++ )
-        {
-            XmStringFree(((XmStringTable)tmp0)[ndx]);
-        }
-    }
-
-    XtAddCallback(list_data, XmNsingleSelectionCallback, do_list_data_select, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "Please Wait..."); ac++;
-    XtSetArg(args[ac], XmNallowShellResize, True); ac++;
-    XtSetArg(args[ac], XmNmwmInputMode, MWM_INPUT_MODELESS); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmUNMAP); ac++;
-    XtSetArg(args[ac], XmNwidth, 542); ac++;
-    XtSetArg(args[ac], XmNheight, 86); ac++;
-    xmDialogShell_message = XmCreateDialogShell(mainWindow,
-        (char *)"xmDialogShell_message",
-        args,
-        ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_ANY); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1294); ac++;
-    XtSetArg(args[ac], XmNwidth, 542); ac++;
-    XtSetArg(args[ac], XmNheight, 86); ac++;
-    bulletinBoard_message = XtCreateWidget((char *)"bulletinBoard_message",
-        xmBulletinBoardWidgetClass,
-        xmDialogShell_message,
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_message, (char *)"Thank you for your patience.",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 510); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_message, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_pleasewait = XmCreateLabel(bulletinBoard_message,
-            (char *)"label_pleasewait",
-            args,
-            ac);
-        XtManageChild(label_pleasewait);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_message, (char *)"MBnavadjust is loading data...",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 510); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_message, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_message = XmCreateLabel(bulletinBoard_message,
-            (char *)"label_message",
-            args,
-            ac);
-        XtManageChild(label_message);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "Error"); ac++;
-    XtSetArg(args[ac], XmNwidth, 311); ac++;
-    XtSetArg(args[ac], XmNheight, 160); ac++;
-    xmDialogShell_error = XmCreateDialogShell(mainWindow,
-        (char *)"xmDialogShell_error",
-        args,
-        ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1257); ac++;
-    XtSetArg(args[ac], XmNwidth, 311); ac++;
-    XtSetArg(args[ac], XmNheight, 160); ac++;
-    bulletinBoard_error = XtCreateWidget((char *)"bulletinBoard_error",
-        xmBulletinBoardWidgetClass,
-        xmDialogShell_error,
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_error, (char *)"You probably do not have write",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 290); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_error, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_error_two = XmCreateLabel(bulletinBoard_error,
-            (char *)"label_error_two",
-            args,
-            ac);
-        XtManageChild(label_error_two);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_error, (char *)"Unable to open output file.",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 290); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_error, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_error_one = XmCreateLabel(bulletinBoard_error,
-            (char *)"label_error_one",
-            args,
-            ac);
-        XtManageChild(label_error_one);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_error, (char *)"permission in this directory!",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 70); ac++;
-        XtSetArg(args[ac], XmNwidth, 290); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_error, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_error_three = XmCreateLabel(bulletinBoard_error,
-            (char *)"label_error_three",
-            args,
-            ac);
-        XtManageChild(label_error_three);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_error, (char *)"OK",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 110); ac++;
-        XtSetArg(args[ac], XmNy, 110); ac++;
-        XtSetArg(args[ac], XmNwidth, 90); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_error, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_error = XmCreatePushButton(bulletinBoard_error,
-            (char *)"pushButton_error",
-            args,
-            ac);
-        XtManageChild(pushButton_error);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "Select Input Data File"); ac++;
-    XtSetArg(args[ac], XmNallowShellResize, False); ac++;
-    XtSetArg(args[ac], XmNwidth, 611); ac++;
-    XtSetArg(args[ac], XmNheight, 530); ac++;
-    xmDialogShell_fileselection = XmCreateDialogShell(mainWindow,
-        (char *)"xmDialogShell_fileselection",
-        args,
-        ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1072); ac++;
-    XtSetArg(args[ac], XmNwidth, 611); ac++;
-    XtSetArg(args[ac], XmNheight, 530); ac++;
-    bulletinBoard_fileselection = XtCreateWidget((char *)"bulletinBoard_fileselection",
-        xmBulletinBoardWidgetClass,
-        xmDialogShell_fileselection,
-        args,
-        ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(bulletinBoard_fileselection, (char *)"-*-"SANS"-bold-r-normal--14-140-75-75-p-82-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    XtSetArg(args[ac], XmNx, 160); ac++;
-    XtSetArg(args[ac], XmNy, 480); ac++;
-    XtSetArg(args[ac], XmNwidth, 100); ac++;
-    XtSetArg(args[ac], XmNheight, 35); ac++;
-    textField_format = XmCreateTextField(bulletinBoard_fileselection,
-        (char *)"textField_format",
-        args,
-        ac);
-    XtManageChild(textField_format);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_fileselection, (char *)"MBIO Format ID:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_fileselection, (char *)"-*-"SANS"-bold-r-normal--14-140-75-75-p-82-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 480); ac++;
-        XtSetArg(args[ac], XmNwidth, 150); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        label_format = XmCreateLabel(bulletinBoard_fileselection,
-            (char *)"label_format",
-            args,
-            ac);
-        XtManageChild(label_format);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_fileselection, (char *)"File Selection",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_MODELESS); ac++;
-        XtSetArg(args[ac], XmNlistVisibleItemCount, 13); ac++;
-        XtSetArg(args[ac], XmNtextFontList,
-            BX_CONVERT(bulletinBoard_fileselection, (char *)"-*-"SANS"-bold-r-normal--14-140-75-75-p-82-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNlabelFontList,
-            BX_CONVERT(bulletinBoard_fileselection, (char *)"-*-"SANS"-bold-r-normal--14-140-75-75-p-82-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNbuttonFontList,
-            BX_CONVERT(bulletinBoard_fileselection, (char *)"-*-"SANS"-bold-r-normal--14-140-75-75-p-82-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
-        XtSetArg(args[ac], XmNnoResize, True); ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 590); ac++;
-        XtSetArg(args[ac], XmNheight, 470); ac++;
-        fileSelectionBox = XmCreateFileSelectionBox(bulletinBoard_fileselection,
-            (char *)"fileSelectionBox",
-            args,
-            ac);
-        XtManageChild(fileSelectionBox);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    BxUnmanageCB(fileSelectionBox, (XtPointer)"fileSelectionBox.Help", (XtPointer)0);
-    do_fileselection_mode(fileSelectionBox, (XtPointer)MBNA_FILESELECTION_NONE, (XtPointer)0);
-    XtAddCallback(fileSelectionBox, XmNokCallback, do_fileselection_ok, (XtPointer)0);
-    XtAddCallback(fileSelectionBox, XmNokCallback, BxUnmanageCB, (XtPointer)"bulletinBoard_fileselection");
-    XtAddCallback(fileSelectionBox, XmNcancelCallback, BxUnmanageCB, (XtPointer)"bulletinBoard_fileselection");
-    XtAddCallback(fileSelectionBox, XmNcancelCallback, do_fileselection_mode, (XtPointer)MBNA_FILESELECTION_NONE);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNwidth, 935); ac++;
-    XtSetArg(args[ac], XmNheight, 685); ac++;
-    dialogShell_naverr = XmCreateDialogShell(mainWindow,
-        (char *)"dialogShell_naverr",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(dialogShell_naverr, (char *)"Navadjust: Nav Error at Crossings",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNdefaultPosition, True); ac++;
-        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
-        XtSetArg(args[ac], XmNnoResize, True); ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-        XtSetArg(args[ac], XmNx, 258); ac++;
-        XtSetArg(args[ac], XmNy, 456); ac++;
-        XtSetArg(args[ac], XmNwidth, 935); ac++;
-        XtSetArg(args[ac], XmNheight, 685); ac++;
-        bulletinBoard_naverr = XtCreateWidget((char *)"bulletinBoard_naverr",
-            xmBulletinBoardWidgetClass,
-            dialogShell_naverr,
-            args,
-            ac);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Unset Crossing",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 450); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_unset = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_unset",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_unset);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_unset, XmNactivateCallback, do_naverr_unset, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Minimum XY Misfit",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 650); ac++;
-        XtSetArg(args[ac], XmNwidth, 120); ac++;
-        XtSetArg(args[ac], XmNheight, 32); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_minxymisfit = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_minxymisfit",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_minxymisfit);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_minxymisfit, XmNactivateCallback, do_naverr_minxymisfit, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNborderWidth, 1); ac++;
-    XtSetArg(args[ac], XmNbackground,
-        BX_CONVERT(bulletinBoard_naverr, (char *)"white",
-        XmRPixel, 0, &argok)); if (argok) ac++;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 550); ac++;
-    XtSetArg(args[ac], XmNwidth, 300); ac++;
-    XtSetArg(args[ac], XmNheight, 60); ac++;
-    drawingArea_naverr_zcorr = XmCreateDrawingArea(bulletinBoard_naverr,
-        (char *)"drawingArea_naverr_zcorr",
-        args,
-        ac);
-    XtManageChild(drawingArea_naverr_zcorr);
-    XtAddCallback(drawingArea_naverr_zcorr, XmNinputCallback, do_naverr_zcorr_input, (XtPointer)0);
-    XtAddCallback(drawingArea_naverr_zcorr, XmNexposeCallback, do_naverr_corr_expose, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Zero Z Offset",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 550); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_zerozoffset = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_zerozoffset",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_zerozoffset);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_zerozoffset, XmNactivateCallback, do_naverr_zerozoffset, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 10); ac++;
-    XtSetArg(args[ac], XmNwidth, 76); ac++;
-    XtSetArg(args[ac], XmNheight, 32); ac++;
-    menuBar_settings = XmCreateMenuBar(bulletinBoard_naverr,
-        (char *)"menuBar_settings",
-        args,
-        ac);
-    XtManageChild(menuBar_settings);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(menuBar_settings, (char *)"Settings",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 5); ac++;
-        XtSetArg(args[ac], XmNy, 5); ac++;
-        XtSetArg(args[ac], XmNwidth, 66); ac++;
-        XtSetArg(args[ac], XmNheight, 22); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(menuBar_settings, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        cascadeButton_settings = XmCreateCascadeButton(menuBar_settings,
-            (char *)"cascadeButton_settings",
-            args,
-            ac);
-        XtManageChild(cascadeButton_settings);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 65); ac++;
-    XtSetArg(args[ac], XmNheight, 48); ac++;
-    pulldownMenu_settings = XmCreatePulldownMenu(XtParent(cascadeButton_settings),
-        (char *)"pulldownMenu_settings",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_settings, (char *)"Biases",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_settings, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_biases = XmCreatePushButton(pulldownMenu_settings,
-            (char *)"pushButton_naverr_biases",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_biases);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_biases, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_biases");
-    XtAddCallback(pushButton_naverr_biases, XmNactivateCallback, do_biases_init, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_settings, (char *)"Contours",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(pulldownMenu_settings, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_controls = XmCreatePushButton(pulldownMenu_settings,
-            (char *)"pushButton_naverr_controls",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_controls);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_controls, XmNactivateCallback, BxManageCB, (XtPointer)"form_controls");
-
-    ac = 0;
-    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_settings); ac++;
-    XtSetValues(cascadeButton_settings, args, ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Set Offset",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 550); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_settie = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_settie",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_settie);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_settie, XmNactivateCallback, do_naverr_setoffset, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 130); ac++;
-    XtSetArg(args[ac], XmNy, 620); ac++;
-    XtSetArg(args[ac], XmNwidth, 180); ac++;
-    XtSetArg(args[ac], XmNheight, 61); ac++;
-    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
-    radioBox_misfitcenter = XmCreateRadioBox(bulletinBoard_naverr,
-        (char *)"radioBox_misfitcenter",
-        args,
-        ac);
-    XtManageChild(radioBox_misfitcenter);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(radioBox_misfitcenter, (char *)"Center on Zero Offset",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNindicatorOn, XmINDICATOR_CHECK_BOX); ac++;
-        XtSetArg(args[ac], XmNwidth, 174); ac++;
-        XtSetArg(args[ac], XmNheight, 26); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(radioBox_misfitcenter, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_misfitcenter_zero = XmCreateToggleButton(radioBox_misfitcenter,
-            (char *)"toggleButton_misfitcenter_zero",
-            args,
-            ac);
-        XtManageChild(toggleButton_misfitcenter_zero);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_misfitcenter_zero, XmNvalueChangedCallback, do_naverr_misfitcenter, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(radioBox_misfitcenter, (char *)"Center on Current Offset",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNindicatorOn, XmINDICATOR_CHECK_BOX); ac++;
-        XtSetArg(args[ac], XmNwidth, 174); ac++;
-        XtSetArg(args[ac], XmNheight, 26); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(radioBox_misfitcenter, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_misfitcenter_auto = XmCreateToggleButton(radioBox_misfitcenter,
-            (char *)"toggleButton_misfitcenter_auto",
-            args,
-            ac);
-        XtManageChild(toggleButton_misfitcenter_auto);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_misfitcenter_auto, XmNvalueChangedCallback, do_naverr_misfitcenter, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Reset Offset",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 450); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_resettie = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_resettie",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_resettie);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_resettie, XmNactivateCallback, do_naverr_resettie, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Add Tie",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 650); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_addtie = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_addtie",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_addtie);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_addtie, XmNactivateCallback, do_naverr_addtie, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Delete Tie",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 750); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_deletetie = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_deletetie",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_deletetie);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_deletetie, XmNactivateCallback, do_naverr_deletetie, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Full Size",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 350); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_fullsize = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_fullsize",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_fullsize);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_fullsize, XmNactivateCallback, do_naverr_fullsize, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Zero Offset",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 650); ac++;
-        XtSetArg(args[ac], XmNy, 40); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_zerooffset = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_zerooffset",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_zerooffset);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_zerooffset, XmNactivateCallback, do_naverr_zerooffset, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"No Data Imported",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 200); ac++;
-        XtSetArg(args[ac], XmNwidth, 300); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_naverr_offsets = XmCreateLabel(bulletinBoard_naverr,
-            (char *)"label_naverr_offsets",
-            args,
-            ac);
-        XtManageChild(label_naverr_offsets);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Next Unset",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 250); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 90); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_nextunset = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_nextunset",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_nextunset);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_nextunset, XmNactivateCallback, do_naverr_nextunset, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"No Data Imported",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 50); ac++;
-        XtSetArg(args[ac], XmNwidth, 300); ac++;
-        XtSetArg(args[ac], XmNheight, 150); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_naverr_status = XmCreateLabel(bulletinBoard_naverr,
-            (char *)"label_naverr_status",
-            args,
-            ac);
-        XtManageChild(label_naverr_status);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNborderWidth, 1); ac++;
-    XtSetArg(args[ac], XmNbackground,
-        BX_CONVERT(bulletinBoard_naverr, (char *)"white",
-        XmRPixel, 0, &argok)); if (argok) ac++;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 320); ac++;
-    XtSetArg(args[ac], XmNy, 70); ac++;
-    XtSetArg(args[ac], XmNwidth, 600); ac++;
-    XtSetArg(args[ac], XmNheight, 600); ac++;
-    drawingArea_naverr_cont = XmCreateDrawingArea(bulletinBoard_naverr,
-        (char *)"drawingArea_naverr_cont",
-        args,
-        ac);
-    XtManageChild(drawingArea_naverr_cont);
-    XtAddCallback(drawingArea_naverr_cont, XmNinputCallback, do_naverr_cont_input, (XtPointer)0);
-    XtAddCallback(drawingArea_naverr_cont, XmNexposeCallback, do_naverr_cont_expose, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNborderWidth, 1); ac++;
-    XtSetArg(args[ac], XmNbackground,
-        BX_CONVERT(bulletinBoard_naverr, (char *)"white",
-        XmRPixel, 0, &argok)); if (argok) ac++;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 240); ac++;
-    XtSetArg(args[ac], XmNwidth, 301); ac++;
-    XtSetArg(args[ac], XmNheight, 301); ac++;
-    drawingArea_naverr_corr = XmCreateDrawingArea(bulletinBoard_naverr,
-        (char *)"drawingArea_naverr_corr",
-        args,
-        ac);
-    XtManageChild(drawingArea_naverr_corr);
-    XtAddCallback(drawingArea_naverr_corr, XmNinputCallback, do_naverr_corr_input, (XtPointer)0);
-    XtAddCallback(drawingArea_naverr_corr, XmNexposeCallback, do_naverr_corr_expose, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 850); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 70); ac++;
-        XtSetArg(args[ac], XmNheight, 60); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_dismiss = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_dismiss",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_dismiss, XmNactivateCallback, do_dismiss_naverr, (XtPointer)0);
-    XtAddCallback(pushButton_naverr_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"bulletinBoard_biases");
-    XtAddCallback(pushButton_naverr_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"bulletinBoard_naverr");
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Select Tie",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 750); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_selecttie = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_selecttie",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_selecttie);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_selecttie, XmNactivateCallback, do_naverr_selecttie, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Minimum Misfit",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 620); ac++;
-        XtSetArg(args[ac], XmNwidth, 120); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_minimum = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_minmisfit",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_minimum);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_minimum, XmNactivateCallback, do_naverr_minmisfit, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Next",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 170); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 80); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_next = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_next",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_next);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_next, XmNactivateCallback, do_naverr_next, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Previous",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 90); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 80); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_previous = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_previous",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_previous);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_previous, XmNactivateCallback, do_naverr_previous, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_naverr, (char *)"Skip Crossing",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 350); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_naverr, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_naverr_setnone = XmCreatePushButton(bulletinBoard_naverr,
-            (char *)"pushButton_naverr_setnone",
-            args,
-            ac);
-        XtManageChild(pushButton_naverr_setnone);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_naverr_setnone, XmNactivateCallback, do_naverr_setnone, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "Attitude Biases"); ac++;
-    XtSetArg(args[ac], XmNwidth, 284); ac++;
-    XtSetArg(args[ac], XmNheight, 446); ac++;
-    dialogShell_biases = XmCreateDialogShell(mainWindow,
-        (char *)"dialogShell_biases",
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(dialogShell_biases, (char *)"Heading & Roll Bias",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
-        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 1114); ac++;
-        XtSetArg(args[ac], XmNwidth, 284); ac++;
-        XtSetArg(args[ac], XmNheight, 446); ac++;
-        bulletinBoard_biases = XtCreateWidget((char *)"bulletinBoard_biases",
-            xmBulletinBoardWidgetClass,
-            dialogShell_biases,
-            args,
-            ac);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 340); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator9 = XmCreateSeparator(bulletinBoard_biases,
-        (char *)"separator9",
-        args,
-        ac);
-    XtManageChild(separator9);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, (char *)"Apply to All Files",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 70); ac++;
-        XtSetArg(args[ac], XmNy, 360); ac++;
-        XtSetArg(args[ac], XmNwidth, 140); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_biases, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_biases_applyall = XmCreatePushButton(bulletinBoard_biases,
-            (char *)"pushButton_biases_applyall",
-            args,
-            ac);
-        XtManageChild(pushButton_biases_applyall);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_biases_applyall, XmNactivateCallback, do_biases_applyall, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 60); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator8 = XmCreateSeparator(bulletinBoard_biases,
-        (char *)"separator8",
-        args,
-        ac);
-    XtManageChild(separator8);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 200); ac++;
-    XtSetArg(args[ac], XmNwidth, 260); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator6 = XmCreateSeparator(bulletinBoard_biases,
-        (char *)"separator6",
-        args,
-        ac);
-    XtManageChild(separator6);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, (char *)"Section 2 Heading (deg)",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNminimum, -99); ac++;
-        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
-        XtSetArg(args[ac], XmNvalue, 0); ac++;
-        XtSetArg(args[ac], XmNmaximum, 99); ac++;
-        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 220); ac++;
-        XtSetArg(args[ac], XmNwidth, 260); ac++;
-        XtSetArg(args[ac], XmNheight, 58); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_biases, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        scale_biases_heading2 = XmCreateScale(bulletinBoard_biases,
-            (char *)"scale_biases_heading2",
-            args,
-            ac);
-        XtManageChild(scale_biases_heading2);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, (char *)"Section 2 Roll (deg)",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNminimum, -99); ac++;
-        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
-        XtSetArg(args[ac], XmNvalue, 0); ac++;
-        XtSetArg(args[ac], XmNmaximum, 99); ac++;
-        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 280); ac++;
-        XtSetArg(args[ac], XmNwidth, 260); ac++;
-        XtSetArg(args[ac], XmNheight, 58); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_biases, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        scale_biases_roll2 = XmCreateScale(bulletinBoard_biases,
-            (char *)"scale_biases_roll2",
-            args,
-            ac);
-        XtManageChild(scale_biases_roll2);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, (char *)"Section 1 Roll (deg)",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNminimum, -99); ac++;
-        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
-        XtSetArg(args[ac], XmNvalue, 0); ac++;
-        XtSetArg(args[ac], XmNmaximum, 99); ac++;
-        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 140); ac++;
-        XtSetArg(args[ac], XmNwidth, 260); ac++;
-        XtSetArg(args[ac], XmNheight, 58); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_biases, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        scale_biases_roll1 = XmCreateScale(bulletinBoard_biases,
-            (char *)"scale_biases_roll1",
-            args,
-            ac);
-        XtManageChild(scale_biases_roll1);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(scale_biases_roll1, XmNvalueChangedCallback, do_biases_roll, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, (char *)"Section 1 Heading (deg)",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNminimum, -99); ac++;
-        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
-        XtSetArg(args[ac], XmNvalue, 0); ac++;
-        XtSetArg(args[ac], XmNsliderVisual, XmSHADOWED_BACKGROUND); ac++;
-        XtSetArg(args[ac], XmNmaximum, 99); ac++;
-        XtSetArg(args[ac], XmNslidingMode, XmSLIDER); ac++;
-        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 80); ac++;
-        XtSetArg(args[ac], XmNwidth, 260); ac++;
-        XtSetArg(args[ac], XmNheight, 58); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_biases, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        scale_biases_heading1 = XmCreateScale(bulletinBoard_biases,
-            (char *)"scale_biases_heading1",
-            args,
-            ac);
-        XtManageChild(scale_biases_heading1);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(scale_biases_heading1, XmNvalueChangedCallback, do_biases_heading, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, (char *)":::t\"Section ID\'s:\":t\"  Section 1: XXX:XXX\"\"  Section 2: XXX:XXX\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 140); ac++;
-        XtSetArg(args[ac], XmNheight, 50); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_biases, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_biases_files = XmCreateLabel(bulletinBoard_biases,
-            (char *)"label_biases_files",
-            args,
-            ac);
-        XtManageChild(label_biases_files);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 150); ac++;
-    XtSetArg(args[ac], XmNy, 10); ac++;
-    XtSetArg(args[ac], XmNwidth, 127); ac++;
-    XtSetArg(args[ac], XmNheight, 61); ac++;
-    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
-    radioBox_biases_together = XmCreateRadioBox(bulletinBoard_biases,
-        (char *)"radioBox_biases_together",
-        args,
-        ac);
-    XtManageChild(radioBox_biases_together);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(radioBox_biases_together, (char *)"Same biases",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 121); ac++;
-        XtSetArg(args[ac], XmNheight, 26); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(radioBox_biases_together, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_biases_together = XmCreateToggleButton(radioBox_biases_together,
-            (char *)"toggleButton_biases_together",
-            args,
-            ac);
-        XtManageChild(toggleButton_biases_together);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_biases_together, XmNvalueChangedCallback, do_biases_toggle, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(radioBox_biases_together, (char *)"Different biases",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 121); ac++;
-        XtSetArg(args[ac], XmNheight, 26); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(radioBox_biases_together, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_biases_separate = XmCreateToggleButton(radioBox_biases_together,
-            (char *)"toggleButton_biases_separate",
-            args,
-            ac);
-        XtManageChild(toggleButton_biases_separate);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, (char *)"Apply",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 70); ac++;
-        XtSetArg(args[ac], XmNy, 400); ac++;
-        XtSetArg(args[ac], XmNwidth, 70); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_biases, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_biases_apply = XmCreatePushButton(bulletinBoard_biases,
-            (char *)"pushButton_biases_apply",
-            args,
-            ac);
-        XtManageChild(pushButton_biases_apply);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_biases_apply, XmNactivateCallback, do_biases_apply, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_biases, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 140); ac++;
-        XtSetArg(args[ac], XmNy, 400); ac++;
-        XtSetArg(args[ac], XmNwidth, 70); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_biases, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_biases_dismiss = XmCreatePushButton(bulletinBoard_biases,
-            (char *)"pushButton_biases_dismiss",
-            args,
-            ac);
-        XtManageChild(pushButton_biases_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_biases_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"bulletinBoard_biases");
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "About MBnavadjust"); ac++;
-    XtSetArg(args[ac], XmNwidth, 488); ac++;
-    XtSetArg(args[ac], XmNheight, 484); ac++;
-    dialogShell_about = XmCreateDialogShell(mainWindow,
-        (char *)"dialogShell_about",
-        args,
-        ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1095); ac++;
-    XtSetArg(args[ac], XmNwidth, 488); ac++;
-    XtSetArg(args[ac], XmNheight, 484); ac++;
-    form_about = XtCreateWidget((char *)"form_about",
-        xmFormWidgetClass,
-        dialogShell_about,
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)"David W. Caress    and    Dale N. Chayes",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 250); ac++;
-        XtSetArg(args[ac], XmNwidth, 479); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        label_about_create1 = XmCreateLabel(form_about,
-            (char *)"label_about_create1",
-            args,
-            ac);
-        XtManageChild(label_about_create1);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 210); ac++;
-    XtSetArg(args[ac], XmNwidth, 470); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator1 = XmCreateSeparator(form_about,
-        (char *)"separator1",
-        args,
-        ac);
-    XtManageChild(separator1);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 170); ac++;
-        XtSetArg(args[ac], XmNy, 410); ac++;
-        XtSetArg(args[ac], XmNwidth, 140); ac++;
-        XtSetArg(args[ac], XmNheight, 35); ac++;
-        pushButton_about_dismiss = XmCreatePushButton(form_about,
-            (char *)"pushButton_about_dismiss",
-            args,
-            ac);
-        XtManageChild(pushButton_about_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_about_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"form_about");
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)"Created by:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 230); ac++;
-        XtSetArg(args[ac], XmNwidth, 479); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
-        label_about_create = XmCreateLabel(form_about,
-            (char *)"label_about_create",
-            args,
-            ac);
-        XtManageChild(label_about_create);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)":::t\"Lamont-Doherty \":t\"Earth Observatory\"\"of Columbia University\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 270); ac++;
-        XtSetArg(args[ac], XmNy, 280); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 70); ac++;
-        label_about_lamont = XmCreateLabel(form_about,
-            (char *)"label_about_lamont",
-            args,
-            ac);
-        XtManageChild(label_about_lamont);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)":::t\"Monterey Bay\":t\"Aquarium\"\"Research Institute\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-bold-r-*-*-*-120-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 110); ac++;
-        XtSetArg(args[ac], XmNy, 280); ac++;
-        XtSetArg(args[ac], XmNwidth, 110); ac++;
-        XtSetArg(args[ac], XmNheight, 70); ac++;
-        label_about_columbia = XmCreateLabel(form_about,
-            (char *)"label_about_columbia",
-            args,
-            ac);
-        XtManageChild(label_about_columbia);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)"MB-System",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 110); ac++;
-        XtSetArg(args[ac], XmNwidth, 479); ac++;
-        XtSetArg(args[ac], XmNheight, 38); ac++;
-        label_about_mbsystem = XmCreateLabel(form_about,
-            (char *)"label_about_mbsystem",
-            args,
-            ac);
-        XtManageChild(label_about_mbsystem);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)"An Open Source Software Package",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 150); ac++;
-        XtSetArg(args[ac], XmNwidth, 479); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        label_about_mbpub = XmCreateLabel(form_about,
-            (char *)"label_about_mbpub",
-            args,
-            ac);
-        XtManageChild(label_about_mbpub);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)"One Component of the",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 80); ac++;
-        XtSetArg(args[ac], XmNwidth, 479); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        label_about_component = XmCreateLabel(form_about,
-            (char *)"label_about_component",
-            args,
-            ac);
-        XtManageChild(label_about_component);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)"for Processing and Display of Swath Sonar Data",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-bold-r-*-*-*-140-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 180); ac++;
-        XtSetArg(args[ac], XmNwidth, 479); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        label_about_for = XmCreateLabel(form_about,
-            (char *)"label_about_for",
-            args,
-            ac);
-        XtManageChild(label_about_for);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 60); ac++;
-    XtSetArg(args[ac], XmNwidth, 470); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator = XmCreateSeparator(form_about,
-        (char *)"separator",
-        args,
-        ac);
-    XtManageChild(separator);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)":::t\"MB-System Release 4.6\"\"April 14, 1999\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-medium-r-*-*-*-140-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 350); ac++;
-        XtSetArg(args[ac], XmNwidth, 479); ac++;
-        XtSetArg(args[ac], XmNheight, 60); ac++;
-        label_about_version = XmCreateLabel(form_about,
-            (char *)"label_about_version",
-            args,
-            ac);
-        XtManageChild(label_about_version);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)"Interactive Navigation Adjustment of Swath Bathymetry",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-bold-r-*-*-*-180-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 30); ac++;
-        XtSetArg(args[ac], XmNwidth, 479); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
-        label_about_function = XmCreateLabel(form_about,
-            (char *)"label_about_function",
-            args,
-            ac);
-        XtManageChild(label_about_function);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_about, (char *)"MBnavadjust",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_about, (char *)"-*-"SERIF"-bold-r-*-*-*-240-*-*-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 0); ac++;
-        XtSetArg(args[ac], XmNwidth, 479); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        label_about_mbedit = XmCreateLabel(form_about,
-            (char *)"label_about_mbedit",
-            args,
-            ac);
-        XtManageChild(label_about_mbedit);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "Controls"); ac++;
-    XtSetArg(args[ac], XmNwidth, 635); ac++;
-    XtSetArg(args[ac], XmNheight, 438); ac++;
-    dialogShell_controls = XmCreateDialogShell(mainWindow,
-        (char *)"dialogShell_controls",
-        args,
-        ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1118); ac++;
-    XtSetArg(args[ac], XmNwidth, 635); ac++;
-    XtSetArg(args[ac], XmNheight, 438); ac++;
-    form_controls = XtCreateWidget((char *)"form_controls",
-        xmFormWidgetClass,
-        dialogShell_controls,
-        args,
-        ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 370); ac++;
-    XtSetArg(args[ac], XmNwidth, 613); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator14 = XmCreateSeparator(form_controls,
-        (char *)"separator14",
-        args,
-        ac);
-    XtManageChild(separator14);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNminimum, 1); ac++;
-    XtSetArg(args[ac], XmNdecimalPoints, 0); ac++;
-    XtSetArg(args[ac], XmNvalue, 10); ac++;
-    XtSetArg(args[ac], XmNmaximum, 20); ac++;
-    XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-    XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 140); ac++;
-    XtSetArg(args[ac], XmNy, 330); ac++;
-    XtSetArg(args[ac], XmNwidth, 480); ac++;
-    XtSetArg(args[ac], XmNheight, 36); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_controls_zoffset = XmCreateScale(form_controls,
-        (char *)"scale_controls_zoffset",
-        args,
-        ac);
-    XtManageChild(scale_controls_zoffset);
-    XtAddCallback(scale_controls_zoffset, XmNvalueChangedCallback, do_scale_controls_zoffset, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)"Z Offset Width (m):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 340); ac++;
-        XtSetArg(args[ac], XmNwidth, 120); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_controls_zoffset = XmCreateLabel(form_controls,
-            (char *)"label_controls_zoffset",
-            args,
-            ac);
-        XtManageChild(label_controls_zoffset);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)":::t\"Inversion\"\"Smoothing (m):\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 270); ac++;
-        XtSetArg(args[ac], XmNwidth, 120); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_controls_smoothing = XmCreateLabel(form_controls,
-            (char *)"label_controls_smoothing",
-            args,
-            ac);
-        XtManageChild(label_controls_smoothing);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNminimum, 1); ac++;
-    XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
-    XtSetArg(args[ac], XmNvalue, 10); ac++;
-    XtSetArg(args[ac], XmNmaximum, 5000); ac++;
-    XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-    XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 140); ac++;
-    XtSetArg(args[ac], XmNy, 270); ac++;
-    XtSetArg(args[ac], XmNwidth, 488); ac++;
-    XtSetArg(args[ac], XmNheight, 36); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_controls_smoothing = XmCreateScale(form_controls,
-        (char *)"scale_controls_smoothing",
-        args,
-        ac);
-    XtManageChild(scale_controls_smoothing);
-    XtAddCallback(scale_controls_smoothing, XmNvalueChangedCallback, do_scale_controls_smoothing, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 310); ac++;
-    XtSetArg(args[ac], XmNwidth, 613); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator12 = XmCreateSeparator(form_controls,
-        (char *)"separator12",
-        args,
-        ac);
-    XtManageChild(separator12);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)"Max Section Length (km):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 20); ac++;
-        XtSetArg(args[ac], XmNwidth, 160); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_controls_sectionlength = XmCreateLabel(form_controls,
-            (char *)"label_controls_sectionlength",
-            args,
-            ac);
-        XtManageChild(label_controls_sectionlength);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNminimum, 1); ac++;
-    XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
-    XtSetArg(args[ac], XmNvalue, 2000); ac++;
-    XtSetArg(args[ac], XmNmaximum, 5000); ac++;
-    XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-    XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 190); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 438); ac++;
-    XtSetArg(args[ac], XmNheight, 36); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_controls_sectionlength = XmCreateScale(form_controls,
-        (char *)"scale_controls_sectionlength",
-        args,
-        ac);
-    XtManageChild(scale_controls_sectionlength);
-    XtAddCallback(scale_controls_sectionlength, XmNvalueChangedCallback, do_scale_controls_sectionlength, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNminimum, 1); ac++;
-    XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
-    XtSetArg(args[ac], XmNvalue, 10000); ac++;
-    XtSetArg(args[ac], XmNmaximum, 40000); ac++;
-    XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-    XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 140); ac++;
-    XtSetArg(args[ac], XmNy, 224); ac++;
-    XtSetArg(args[ac], XmNwidth, 489); ac++;
-    XtSetArg(args[ac], XmNheight, 36); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_controls_tickinterval = XmCreateScale(form_controls,
-        (char *)"scale_controls_tickinterval",
-        args,
-        ac);
-    XtManageChild(scale_controls_tickinterval);
-    XtAddCallback(scale_controls_tickinterval, XmNvalueChangedCallback, do_scale_controls_tickinterval, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNminimum, 1); ac++;
-    XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
-    XtSetArg(args[ac], XmNvalue, 10000); ac++;
-    XtSetArg(args[ac], XmNmaximum, 40000); ac++;
-    XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-    XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 140); ac++;
-    XtSetArg(args[ac], XmNy, 184); ac++;
-    XtSetArg(args[ac], XmNwidth, 489); ac++;
-    XtSetArg(args[ac], XmNheight, 36); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_controls_colorinterval = XmCreateScale(form_controls,
-        (char *)"scale_controls_colorinterval",
-        args,
-        ac);
-    XtManageChild(scale_controls_colorinterval);
-    XtAddCallback(scale_controls_colorinterval, XmNvalueChangedCallback, do_controls_scale_colorinterval, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNminimum, 1); ac++;
-    XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
-    XtSetArg(args[ac], XmNvalue, 2500); ac++;
-    XtSetArg(args[ac], XmNmaximum, 40000); ac++;
-    XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-    XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 140); ac++;
-    XtSetArg(args[ac], XmNy, 144); ac++;
-    XtSetArg(args[ac], XmNwidth, 489); ac++;
-    XtSetArg(args[ac], XmNheight, 36); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_controls_contourinterval = XmCreateScale(form_controls,
-        (char *)"scale_controls_contourinterval",
-        args,
-        ac);
-    XtManageChild(scale_controls_contourinterval);
-    XtAddCallback(scale_controls_contourinterval, XmNvalueChangedCallback, do_scale_contourinterval, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)"Contour Interval (m):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 160); ac++;
-        XtSetArg(args[ac], XmNwidth, 140); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_controls_contourinterval = XmCreateLabel(form_controls,
-            (char *)"label_controls_contourinterval",
-            args,
-            ac);
-        XtManageChild(label_controls_contourinterval);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)"Color Interval (m):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 200); ac++;
-        XtSetArg(args[ac], XmNwidth, 130); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_controls_colorinterval = XmCreateLabel(form_controls,
-            (char *)"label_controls_colorinterval",
-            args,
-            ac);
-        XtManageChild(label_controls_colorinterval);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)"Tick Interval (m):",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 240); ac++;
-        XtSetArg(args[ac], XmNwidth, 120); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_controls_tickinterval = XmCreateLabel(form_controls,
-            (char *)"label_controls_tickinterval",
-            args,
-            ac);
-        XtManageChild(label_controls_tickinterval);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)"Apply",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 200); ac++;
-        XtSetArg(args[ac], XmNy, 389); ac++;
-        XtSetArg(args[ac], XmNwidth, 70); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_controls_apply = XmCreatePushButton(form_controls,
-            (char *)"pushButton_controls_apply",
-            args,
-            ac);
-        XtManageChild(pushButton_controls_apply);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_controls_apply, XmNactivateCallback, do_controls_apply, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 13); ac++;
-    XtSetArg(args[ac], XmNy, 88); ac++;
-    XtSetArg(args[ac], XmNwidth, 616); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator4 = XmCreateSeparator(form_controls,
-        (char *)"separator4",
-        args,
-        ac);
-    XtManageChild(separator4);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 264); ac++;
-    XtSetArg(args[ac], XmNwidth, 618); ac++;
-    XtSetArg(args[ac], XmNheight, 20); ac++;
-    separator5 = XmCreateSeparator(form_controls,
-        (char *)"separator5",
-        args,
-        ac);
-    XtManageChild(separator5);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNminimum, 1); ac++;
-    XtSetArg(args[ac], XmNvalue, 1); ac++;
-    XtSetArg(args[ac], XmNmaximum, 10); ac++;
-    XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-    XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 140); ac++;
-    XtSetArg(args[ac], XmNy, 104); ac++;
-    XtSetArg(args[ac], XmNwidth, 489); ac++;
-    XtSetArg(args[ac], XmNheight, 36); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_controls_decimation = XmCreateScale(form_controls,
-        (char *)"scale_controls_decimation",
-        args,
-        ac);
-    XtManageChild(scale_controls_decimation);
-    XtAddCallback(scale_controls_decimation, XmNvalueChangedCallback, do_scale_controls_decimation, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)"Decimation:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 120); ac++;
-        XtSetArg(args[ac], XmNwidth, 120); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_controls_decimation = XmCreateLabel(form_controls,
-            (char *)"label_controls_decimation",
-            args,
-            ac);
-        XtManageChild(label_controls_decimation);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)"Max # Soundings in Section:",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 60); ac++;
-        XtSetArg(args[ac], XmNwidth, 180); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_controls_sectionsoundings = XmCreateLabel(form_controls,
-            (char *)"label_controls_sectionsoundings",
-            args,
-            ac);
-        XtManageChild(label_controls_sectionsoundings);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNminimum, 1000); ac++;
-    XtSetArg(args[ac], XmNdecimalPoints, 0); ac++;
-    XtSetArg(args[ac], XmNvalue, 10000); ac++;
-    XtSetArg(args[ac], XmNmaximum, 100000); ac++;
-    XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
-    XtSetArg(args[ac], XmNscaleMultiple, 499); ac++;
-    XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 190); ac++;
-    XtSetArg(args[ac], XmNy, 40); ac++;
-    XtSetArg(args[ac], XmNwidth, 439); ac++;
-    XtSetArg(args[ac], XmNheight, 43); ac++;
-    XtSetArg(args[ac], XmNfontList,
-        BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_controls_sectionsoundings = XmCreateScale(form_controls,
-        (char *)"scale_controls_sectionsoundings",
-        args,
-        ac);
-    XtManageChild(scale_controls_sectionsoundings);
-    XtAddCallback(scale_controls_sectionsoundings, XmNvalueChangedCallback, do_scale_controls_sectionsoundings, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 300); ac++;
-        XtSetArg(args[ac], XmNy, 389); ac++;
-        XtSetArg(args[ac], XmNwidth, 108); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(form_controls, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_controls_dismiss = XmCreatePushButton(form_controls,
-            (char *)"pushButton_controls_dismiss",
-            args,
-            ac);
-        XtManageChild(pushButton_controls_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_controls_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"form_controls");
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "Navigation Adjustment Model Plot"); ac++;
-    XtSetArg(args[ac], XmNallowShellResize, True); ac++;
-    XtSetArg(args[ac], XmNwidth, 1021); ac++;
-    XtSetArg(args[ac], XmNheight, 483); ac++;
-    dialogShell_modelplot = XmCreateDialogShell(mainWindow,
-        (char *)"dialogShell_modelplot",
-        args,
-        ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
-    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 757); ac++;
-    XtSetArg(args[ac], XmNy, 995); ac++;
-    XtSetArg(args[ac], XmNwidth, 1021); ac++;
-    XtSetArg(args[ac], XmNheight, 483); ac++;
-    bulletinBoard_modelplot = XtCreateWidget((char *)"bulletinBoard_modelplot",
-        xmBulletinBoardWidgetClass,
-        dialogShell_modelplot,
-        args,
-        ac);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)"Clear Block",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 480); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 80); ac++;
-        XtSetArg(args[ac], XmNheight, 32); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_modelplot_clearblock = XmCreatePushButton(bulletinBoard_modelplot,
-            (char *)"pushButton_modelplot_clearblock",
-            args,
-            ac);
-        XtManageChild(pushButton_modelplot_clearblock);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_modelplot_clearblock, XmNactivateCallback, do_modelplot_clearblock, (XtPointer)0);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 80); ac++;
-    XtSetArg(args[ac], XmNy, 10); ac++;
-    XtSetArg(args[ac], XmNwidth, 270); ac++;
-    XtSetArg(args[ac], XmNheight, 32); ac++;
-    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
-    radioBox = XmCreateRadioBox(bulletinBoard_modelplot,
-        (char *)"radioBox",
-        args,
-        ac);
-    XtManageChild(radioBox);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(radioBox, (char *)"Time Series",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 88); ac++;
-        XtSetArg(args[ac], XmNheight, 26); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(radioBox, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_modelplot_timeseries = XmCreateToggleButton(radioBox,
-            (char *)"toggleButton_modelplot_timeseries",
-            args,
-            ac);
-        XtManageChild(toggleButton_modelplot_timeseries);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_modelplot_timeseries, XmNvalueChangedCallback, do_modelplot_timeseries, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(radioBox, (char *)"Perturbation",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 88); ac++;
-        XtSetArg(args[ac], XmNheight, 26); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(radioBox, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_modelplot_perturbation = XmCreateToggleButton(radioBox,
-            (char *)"toggleButton_modelplot_perturbation",
-            args,
-            ac);
-        XtManageChild(toggleButton_modelplot_perturbation);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_modelplot_perturbation, XmNvalueChangedCallback, do_modelplot_perturbation, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(radioBox, (char *)"Tie Offsets",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNwidth, 88); ac++;
-        XtSetArg(args[ac], XmNheight, 26); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(radioBox, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        toggleButton_modelplot_tieoffsets = XmCreateToggleButton(radioBox,
-            (char *)"toggleButton_modelplot_tieoffsets",
-            args,
-            ac);
-        XtManageChild(toggleButton_modelplot_tieoffsets);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(toggleButton_modelplot_tieoffsets, XmNvalueChangedCallback, do_modelplot_tieoffsets, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)"Full Size",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 390); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 80); ac++;
-        XtSetArg(args[ac], XmNheight, 32); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_modelplot_fullsize = XmCreatePushButton(bulletinBoard_modelplot,
-            (char *)"pushButton_modelplot_fullsize",
-            args,
-            ac);
-        XtManageChild(pushButton_modelplot_fullsize);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_modelplot_fullsize, XmNactivateCallback, do_modelplot_fullsize, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom extent\"\"Selection: No selection\"",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 570); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 550); ac++;
-        XtSetArg(args[ac], XmNheight, 40); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        label_modelplot_status = XmCreateLabel(bulletinBoard_modelplot,
-            (char *)"label_modelplot_status",
-            args,
-            ac);
-        XtManageChild(label_modelplot_status);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-
-    ac = 0;
-    XtSetArg(args[ac], XmNborderWidth, 1); ac++;
-    XtSetArg(args[ac], XmNbackground,
-        BX_CONVERT(bulletinBoard_modelplot, (char *)"white",
-        XmRPixel, 0, &argok)); if (argok) ac++;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 50); ac++;
-    XtSetArg(args[ac], XmNwidth, 990); ac++;
-    XtSetArg(args[ac], XmNheight, 420); ac++;
-    drawingArea_modelplot = XmCreateDrawingArea(bulletinBoard_modelplot,
-        (char *)"drawingArea_modelplot",
-        args,
-        ac);
-    XtManageChild(drawingArea_modelplot);
-    XtAddCallback(drawingArea_modelplot, XmNinputCallback, do_modelplot_input, (XtPointer)0);
-    XtAddCallback(drawingArea_modelplot, XmNexposeCallback, do_modelplot_expose, (XtPointer)0);
-
-    ac = 0;
-    {
-        XmString    tmp0;
-
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)"Dismiss",
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 60); ac++;
-        XtSetArg(args[ac], XmNheight, 32); ac++;
-        XtSetArg(args[ac], XmNfontList,
-            BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-"SANS"-bold-r-*-*-*-120-75-75-*-*-iso8859-1",
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_modelplot_dismiss = XmCreatePushButton(bulletinBoard_modelplot,
-            (char *)"pushButton_modelplot_dismiss",
-            args,
-            ac);
-        XtManageChild(pushButton_modelplot_dismiss);
-
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-
-    XtAddCallback(pushButton_modelplot_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"bulletinBoard_modelplot");
-    XtAddCallback(pushButton_modelplot_dismiss, XmNactivateCallback, do_modelplot_dismiss, (XtPointer)0);
-    ac = 0;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 370); ac++;
-    XtSetValues(separator14, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 140); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 330); ac++;
-    XtSetValues(scale_controls_zoffset, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 340); ac++;
-    XtSetValues(label_controls_zoffset, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 270); ac++;
-    XtSetValues(label_controls_smoothing, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 140); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 7); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 270); ac++;
-    XtSetValues(scale_controls_smoothing, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 12); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 310); ac++;
-    XtSetValues(separator12, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 20); ac++;
-    XtSetValues(label_controls_sectionlength, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 20); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 7); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
-    XtSetArg(args[ac], XmNleftWidget, label_controls_sectionlength); ac++;
-    XtSetValues(scale_controls_sectionlength, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 140); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 6); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 4); ac++;
-    XtSetArg(args[ac], XmNtopWidget, scale_controls_colorinterval); ac++;
-    XtSetValues(scale_controls_tickinterval, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 140); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 6); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 4); ac++;
-    XtSetArg(args[ac], XmNtopWidget, scale_controls_contourinterval); ac++;
-    XtSetValues(scale_controls_colorinterval, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 140); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 6); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 4); ac++;
-    XtSetArg(args[ac], XmNtopWidget, scale_controls_decimation); ac++;
-    XtSetValues(scale_controls_contourinterval, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 160); ac++;
-    XtSetValues(label_controls_contourinterval, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 200); ac++;
-    XtSetValues(label_controls_colorinterval, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 240); ac++;
-    XtSetValues(label_controls_tickinterval, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 19); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 200); ac++;
-    XtSetValues(pushButton_controls_apply, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_POSITION); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNleftPosition, 2); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 6); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 5); ac++;
-    XtSetArg(args[ac], XmNtopWidget, scale_controls_sectionsoundings); ac++;
-    XtSetValues(separator4, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 7); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 4); ac++;
-    XtSetArg(args[ac], XmNtopWidget, scale_controls_tickinterval); ac++;
-    XtSetValues(separator5, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 140); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 6); ac++;
-    XtSetArg(args[ac], XmNtopOffset, -4); ac++;
-    XtSetArg(args[ac], XmNtopWidget, separator4); ac++;
-    XtSetValues(scale_controls_decimation, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 120); ac++;
-    XtSetValues(label_controls_decimation, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 60); ac++;
-    XtSetValues(label_controls_sectionsoundings, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_POSITION); ac++;
-    XtSetArg(args[ac], XmNbottomPosition, 19); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 6); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 4); ac++;
-    XtSetArg(args[ac], XmNleftWidget, label_controls_sectionsoundings); ac++;
-    XtSetArg(args[ac], XmNtopWidget, scale_controls_sectionlength); ac++;
-    XtSetValues(scale_controls_sectionsoundings, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 19); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 30); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 227); ac++;
-    XtSetArg(args[ac], XmNleftWidget, pushButton_controls_apply); ac++;
-    XtSetValues(pushButton_controls_dismiss, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 9); ac++;
-    XtSetValues(label_about_create1, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_POSITION); ac++;
-    XtSetArg(args[ac], XmNleftPosition, 2); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 8); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 210); ac++;
-    XtSetValues(separator1, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 170); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 178); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 410); ac++;
-    XtSetValues(pushButton_about_dismiss, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 9); ac++;
-    XtSetValues(label_about_create, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 270); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 118); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 280); ac++;
-    XtSetValues(label_about_lamont, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 110); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 268); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 280); ac++;
-    XtSetValues(label_about_columbia, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 9); ac++;
-    XtSetValues(label_about_mbsystem, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 9); ac++;
-    XtSetValues(label_about_mbpub, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 9); ac++;
-    XtSetValues(label_about_component, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 9); ac++;
-    XtSetValues(label_about_for, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 8); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 60); ac++;
-    XtSetValues(separator, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 9); ac++;
-    XtSetValues(label_about_version, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 9); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 30); ac++;
-    XtSetValues(label_about_function, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 9); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
-    XtSetValues(label_about_mbedit, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNmenuHelpWidget, cascadeButton_about); ac++;
-    XtSetValues(menuBar_mbnavadjust, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, -2); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopWidget, label_status); ac++;
-    XtSetValues(scrolledWindow_messages, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomWidget, scrolledWindow_messages); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
-    XtSetValues(label_status, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 450); ac++;
-    XtSetValues(label_listdata, args, ac);
-
-    ac = 0;
-    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
-    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 8); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 22); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 30); ac++;
-    XtSetArg(args[ac], XmNleftWidget, scrolledWindow_messages); ac++;
-    XtSetArg(args[ac], XmNtopWidget, label_listdata); ac++;
-    XtSetValues(scrolledWindow_datalist, args, ac);
-
-
-
-    /* Begin user code block <end_CreatemainWindow> */
-    /* End user code block <end_CreatemainWindow> */
-    return( mainWindow );
+Widget CreatemainWindow(Widget parent) {
+	Cardinal ac = 0;
+	Arg args[256];
+	Boolean argok = False;
+	Widget mainWindow;
+	Widget dialogShell_modelplot;
+	Widget pushButton_modelplot_fullsize;
+	Widget pushButton_modelplot_dismiss;
+	Widget dialogShell_controls;
+	Widget form_controls;
+	Widget separator14;
+	Widget label_controls_zoffset;
+	Widget label_controls_smoothing;
+	Widget separator12;
+	Widget label_controls_sectionlength;
+	Widget label_controls_contourinterval;
+	Widget label_controls_colorinterval;
+	Widget label_controls_tickinterval;
+	Widget pushButton_controls_apply;
+	Widget separator4;
+	Widget separator5;
+	Widget label_controls_decimation;
+	Widget label_controls_sectionsoundings;
+	Widget pushButton_controls_dismiss;
+	Widget dialogShell_about;
+	Widget form_about;
+	Widget label_about_create1;
+	Widget separator1;
+	Widget pushButton_about_dismiss;
+	Widget label_about_create;
+	Widget label_about_lamont;
+	Widget label_about_columbia;
+	Widget label_about_mbsystem;
+	Widget label_about_mbpub;
+	Widget label_about_component;
+	Widget label_about_for;
+	Widget separator;
+	Widget label_about_function;
+	Widget label_about_mbedit;
+	Widget dialogShell_biases;
+	Widget bulletinBoard_biases;
+	Widget separator9;
+	Widget separator8;
+	Widget separator6;
+	Widget radioBox_biases_together;
+	Widget pushButton_biases_apply;
+	Widget pushButton_biases_dismiss;
+	Widget dialogShell_naverr;
+	Widget menuBar_settings;
+	Widget cascadeButton_settings;
+	Widget pulldownMenu_settings;
+	Widget pushButton_naverr_biases;
+	Widget pushButton_naverr_controls;
+	Widget radioBox_misfitcenter;
+	Widget xmDialogShell_error;
+	Widget pushButton_error;
+	Widget xmDialogShell_message;
+	Widget label_pleasewait;
+	Widget menuBar_mbnavadjust;
+	Widget cascadeButton_file;
+	Widget pulldownMenu_file;
+	Widget separator2;
+	Widget separator3;
+	Widget cascadeButton_option;
+	Widget pulldownMenu_option;
+	Widget pushButton_controls;
+	Widget cascadeButton_view;
+	Widget pulldownMenu_view;
+	Widget separator13;
+	Widget separator15;
+	Widget cascadeButton_action;
+	Widget pulldownMenu_action;
+	Widget separator7;
+	Widget separator10;
+	Widget separator17;
+	Widget separator11;
+	Widget separator16;
+	Widget cascadeButton_about;
+	Widget pulldownMenu_about;
+	Widget pushButton_about;
+
+	/**
+	 * Register the converters for the widgets.
+	 */
+	RegisterBxConverters(XtWidgetToApplicationContext(parent));
+	XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmFileSelectionBoxWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmPushButtonGadgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmScrolledWindowWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmTextWidgetClass);
+	XtInitializeWidgetClass((WidgetClass)xmListWidgetClass);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 82);
+	ac++;
+	XtSetArg(args[ac], XmNy, 396);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 962);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 400);
+	ac++;
+	mainWindow = XmCreateMainWindow(parent, (char *)"mainWindow", args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNwidth, 962);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 32);
+	ac++;
+	menuBar_mbnavadjust = XmCreateMenuBar(mainWindow, (char *)"menuBar_mbnavadjust", args, ac);
+	XtManageChild(menuBar_mbnavadjust);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(menuBar_mbnavadjust, (char *)"File", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 5);
+		ac++;
+		XtSetArg(args[ac], XmNy, 5);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 36);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 22);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(menuBar_mbnavadjust, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		cascadeButton_file = XmCreateCascadeButton(menuBar_mbnavadjust, (char *)"cascadeButton_file", args, ac);
+		XtManageChild(cascadeButton_file);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 126);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 118);
+	ac++;
+	pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file), (char *)"pulldownMenu_file", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_file, (char *)"New", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_file, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_new = XmCreatePushButton(pulldownMenu_file, (char *)"pushButton_new", args, ac);
+		XtManageChild(pushButton_new);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_new, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_fileselection");
+	XtAddCallback(pushButton_new, XmNactivateCallback, BxSetValuesCB,
+	              (XtPointer) "xmDialogShell_fileselection.title=Specify New Project");
+	XtAddCallback(pushButton_new, XmNactivateCallback, BxUnmanageCB, (XtPointer) "label_format");
+	XtAddCallback(pushButton_new, XmNactivateCallback, BxUnmanageCB, (XtPointer) "textField_format");
+	XtAddCallback(pushButton_new, XmNactivateCallback, do_fileselection_mode, (XtPointer)MBNA_FILESELECTION_NEW);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_file, (char *)"Open", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_file, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_open = XmCreatePushButton(pulldownMenu_file, (char *)"pushButton_open", args, ac);
+		XtManageChild(pushButton_open);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_open, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_fileselection");
+	XtAddCallback(pushButton_open, XmNactivateCallback, BxUnmanageCB, (XtPointer) "label_format");
+	XtAddCallback(pushButton_open, XmNactivateCallback, BxUnmanageCB, (XtPointer) "textField_format");
+	XtAddCallback(pushButton_open, XmNactivateCallback, BxSetValuesCB,
+	              (XtPointer) "xmDialogShell_fileselection.title=Open Project");
+	XtAddCallback(pushButton_open, XmNactivateCallback, do_fileselection_mode, (XtPointer)MBNA_FILESELECTION_OPEN);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_file, (char *)"Close", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_file, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_close = XmCreatePushButton(pulldownMenu_file, (char *)"pushButton_close", args, ac);
+		XtManageChild(pushButton_close);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_close, XmNactivateCallback, do_file_close, (XtPointer)0);
+
+	ac = 0;
+	separator2 = XmCreateSeparator(pulldownMenu_file, (char *)"separator2", args, ac);
+	XtManageChild(separator2);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_file, (char *)"Import Swath Data", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_file, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_importdata = XmCreatePushButton(pulldownMenu_file, (char *)"pushButton_importdata", args, ac);
+		XtManageChild(pushButton_importdata);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_importdata, XmNactivateCallback, BxSetValuesCB,
+	              (XtPointer) "xmDialogShell_fileselection.title=Import Swath Data File or Datalist");
+	XtAddCallback(pushButton_importdata, XmNactivateCallback, BxSetValuesCB,
+	              (XtPointer) "label_format.labelString=MBIO Format ID:");
+	XtAddCallback(pushButton_importdata, XmNactivateCallback, BxManageCB, (XtPointer) "label_format");
+	XtAddCallback(pushButton_importdata, XmNactivateCallback, BxManageCB, (XtPointer) "textField_format");
+	XtAddCallback(pushButton_importdata, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_fileselection");
+	XtAddCallback(pushButton_importdata, XmNactivateCallback, do_fileselection_mode, (XtPointer)MBNA_FILESELECTION_IMPORT);
+
+	ac = 0;
+	separator3 = XmCreateSeparator(pulldownMenu_file, (char *)"separator3", args, ac);
+	XtManageChild(separator3);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_file, (char *)"Quit", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_file, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_quit = XmCreatePushButton(pulldownMenu_file, (char *)"pushButton_quit", args, ac);
+		XtManageChild(pushButton_quit);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_quit, XmNactivateCallback, do_quit, (XtPointer)0);
+	XtAddCallback(pushButton_quit, XmNactivateCallback, BxExitCB, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_file);
+	ac++;
+	XtSetValues(cascadeButton_file, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(menuBar_mbnavadjust, (char *)"Option", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 41);
+		ac++;
+		XtSetArg(args[ac], XmNy, 5);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 55);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 22);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(menuBar_mbnavadjust, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		cascadeButton_option = XmCreateCascadeButton(menuBar_mbnavadjust, (char *)"cascadeButton_option", args, ac);
+		XtManageChild(cascadeButton_option);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 61);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 26);
+	ac++;
+	pulldownMenu_option = XmCreatePulldownMenu(XtParent(cascadeButton_option), (char *)"pulldownMenu_option", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_option, (char *)"Controls", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_option, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_controls = XmCreatePushButton(pulldownMenu_option, (char *)"pushButton_controls", args, ac);
+		XtManageChild(pushButton_controls);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_controls, XmNactivateCallback, BxManageCB, (XtPointer) "form_controls");
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_option);
+	ac++;
+	XtSetValues(cascadeButton_option, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(menuBar_mbnavadjust, (char *)"View", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 96);
+		ac++;
+		XtSetArg(args[ac], XmNy, 5);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 45);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 22);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(menuBar_mbnavadjust, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		cascadeButton_view = XmCreateCascadeButton(menuBar_mbnavadjust, (char *)"cascadeButton_view", args, ac);
+		XtManageChild(cascadeButton_view);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 225);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 360);
+	ac++;
+	pulldownMenu_view = XmCreatePulldownMenu(XtParent(cascadeButton_view), (char *)"pulldownMenu_view", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Surveys", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showsurveys = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showsurveys", args, ac);
+		XtManageChild(pushButton_showsurveys);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showsurveys, XmNactivateCallback, do_view_showsurveys, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Survey-vs-Survey Blocks", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showblocks = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showblocks", args, ac);
+		XtManageChild(pushButton_showblocks);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showblocks, XmNactivateCallback, do_view_showblocks, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Data Files", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showdata = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showdata", args, ac);
+		XtManageChild(pushButton_showdata);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showdata, XmNactivateCallback, do_view_showdata, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Data File Sections", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showsections = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showsections", args, ac);
+		XtManageChild(pushButton_showsections);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showsections, XmNactivateCallback, do_view_showsections, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show All Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showcrossings = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showcrossings", args, ac);
+		XtManageChild(pushButton_showcrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showcrossings, XmNactivateCallback, do_view_showcrossings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show >10% Overlap Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showmediocrecrossings =
+		    XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showmediocrecrossings", args, ac);
+		XtManageChild(pushButton_showmediocrecrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showmediocrecrossings, XmNactivateCallback, do_view_showmediocrecrossings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show >25% Overlap Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showgoodcrossings = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showgoodcrossings", args, ac);
+		XtManageChild(pushButton_showgoodcrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showgoodcrossings, XmNactivateCallback, do_view_showgoodcrossings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show >50% Overlap Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showbettercrossings =
+		    XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showbettercrossings", args, ac);
+		XtManageChild(pushButton_showbettercrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showbettercrossings, XmNactivateCallback, do_view_showbettercrossings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show True Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showtruecrossings = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showtruecrossings", args, ac);
+		XtManageChild(pushButton_showtruecrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showtruecrossings, XmNactivateCallback, do_view_showtruecrossings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Ties", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showties = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showties", args, ac);
+		XtManageChild(pushButton_showties);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showties, XmNactivateCallback, do_view_showties, (XtPointer)0);
+
+	ac = 0;
+	separator13 = XmCreateSeparator(pulldownMenu_view, (char *)"separator13", args, ac);
+	XtManageChild(separator13);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show All Surveys", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_showallsurveys = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_showallsurveys", args, ac);
+		XtManageChild(toggleButton_showallsurveys);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_showallsurveys, XmNvalueChangedCallback, do_view_showallsurveys, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected Survey", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_showselectedsurvey =
+		    XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_showselectedsurvey", args, ac);
+		XtManageChild(toggleButton_showselectedsurvey);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_showselectedsurvey, XmNvalueChangedCallback, do_view_showselectedsurveys, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected Survey-vs-Survey Block", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_showselectedblock =
+		    XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_showselectedblock", args, ac);
+		XtManageChild(toggleButton_showselectedblock);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_showselectedblock, XmNvalueChangedCallback, do_view_showselectedblock, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected File", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_showselectedfile =
+		    XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_showselectedfile", args, ac);
+		XtManageChild(toggleButton_showselectedfile);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_showselectedfile, XmNvalueChangedCallback, do_view_showselectedfile, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Only With Selected Survey", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_showwithselectedsurvey =
+		    XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_showwithselectedsurvey", args, ac);
+		XtManageChild(toggleButton_showwithselectedsurvey);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_showwithselectedsurvey, XmNvalueChangedCallback, do_view_showwithselectedsurveys, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Only With Selected File", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_showwithselectedfile =
+		    XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_showwithselectedfile", args, ac);
+		XtManageChild(toggleButton_showwithselectedfile);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_showwithselectedfile, XmNvalueChangedCallback, do_view_showwithselectedfile, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Only With Selected Section", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_showselectedsection =
+		    XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_showselectedsection", args, ac);
+		XtManageChild(toggleButton_showselectedsection);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_showselectedsection, XmNvalueChangedCallback, do_view_showselectedsection, (XtPointer)0);
+
+	ac = 0;
+	separator15 = XmCreateSeparator(pulldownMenu_view, (char *)"separator15", args, ac);
+	XtManageChild(separator15);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Visualize Survey", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_visualize = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_visualize", args, ac);
+		XtManageChild(pushButton_visualize);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_visualize, XmNactivateCallback, do_visualize, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Modelplot", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showmodelplot = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showmodelplot", args, ac);
+		XtManageChild(pushButton_showmodelplot);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showmodelplot, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_modelplot");
+	XtAddCallback(pushButton_showmodelplot, XmNactivateCallback, do_modelplot_show, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_view);
+	ac++;
+	XtSetValues(cascadeButton_view, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(menuBar_mbnavadjust, (char *)"Action", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 141);
+		ac++;
+		XtSetArg(args[ac], XmNy, 5);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 53);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 22);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(menuBar_mbnavadjust, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		cascadeButton_action = XmCreateCascadeButton(menuBar_mbnavadjust, (char *)"cascadeButton_action", args, ac);
+		XtManageChild(cascadeButton_action);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 182);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 344);
+	ac++;
+	pulldownMenu_action = XmCreatePulldownMenu(XtParent(cascadeButton_action), (char *)"pulldownMenu_action", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set File Poor Navigation", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_poornav = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_poornav", args, ac);
+		XtManageChild(pushButton_poornav);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_poornav, XmNactivateCallback, do_action_poornav, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set File Good Navigation", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_goodnav = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_goodnav", args, ac);
+		XtManageChild(pushButton_goodnav);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_goodnav, XmNactivateCallback, do_action_goodnav, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set File Fixed Navigation", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_fixednav = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_fixednav", args, ac);
+		XtManageChild(pushButton_fixednav);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_fixednav, XmNactivateCallback, do_action_fixednav, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set File Fixed XY Navigation", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_fixedxynav = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_fixedxynav", args, ac);
+		XtManageChild(pushButton_fixedxynav);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_fixedxynav, XmNactivateCallback, do_action_fixedxynav, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set File Fixed Z Navigation", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_fixedznav = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_fixedznav", args, ac);
+		XtManageChild(pushButton_fixedznav);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_fixedznav, XmNactivateCallback, do_action_fixedznav, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set tie to XY only", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_tie_xy = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_tie_xy", args, ac);
+		XtManageChild(pushButton_tie_xy);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_tie_xy, XmNactivateCallback, do_action_tie_xy, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set tie to Z only", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_tie_z = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_tie_z", args, ac);
+		XtManageChild(pushButton_tie_z);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_tie_z, XmNactivateCallback, do_action_z, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Set tie to full XYZ", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_tie_xyz = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_tie_xyz", args, ac);
+		XtManageChild(pushButton_tie_xyz);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_tie_xyz, XmNactivateCallback, do_action_tie_xyz, (XtPointer)0);
+
+	ac = 0;
+	separator7 = XmCreateSeparator(pulldownMenu_action, (char *)"separator7", args, ac);
+	XtManageChild(separator7);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Auto-Pick Offsets", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_autopick = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_autopick", args, ac);
+		XtManageChild(pushButton_autopick);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_autopick, XmNactivateCallback, do_action_autopick, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Auto-Pick Horizontal Offsets", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_autopickhorizontal =
+		    XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_autopickhorizontal", args, ac);
+		XtManageChild(pushButton_autopickhorizontal);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_autopickhorizontal, XmNactivateCallback, do_action_autopickhorizontal, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Auto-Set Survey-vs-Survey Vertical Offsets", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_autosetsvsvertical =
+		    XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_autosetsvsvertical", args, ac);
+		XtManageChild(pushButton_autosetsvsvertical);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_autosetsvsvertical, XmNactivateCallback, do_action_autosetsvsvertical, (XtPointer)0);
+
+	ac = 0;
+	separator10 = XmCreateSeparator(pulldownMenu_action, (char *)"separator10", args, ac);
+	XtManageChild(separator10);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Check For New Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_newcrossings = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_newcrossings", args, ac);
+		XtManageChild(pushButton_newcrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_newcrossings, XmNactivateCallback, do_action_checknewcrossings, (XtPointer)0);
+
+	ac = 0;
+	separator17 = XmCreateSeparator(pulldownMenu_action, (char *)"separator17", args, ac);
+	XtManageChild(separator17);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Analyze Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_analyzecrossings = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_analyzecrossings", args, ac);
+		XtManageChild(pushButton_analyzecrossings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_analyzecrossings, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_naverr");
+	XtAddCallback(pushButton_analyzecrossings, XmNactivateCallback, do_naverr_init, (XtPointer)0);
+	XtAddCallback(pushButton_analyzecrossings, XmNactivateCallback, do_action_analyzecrossings, (XtPointer)0);
+
+	ac = 0;
+	separator11 = XmCreateSeparator(pulldownMenu_action, (char *)"separator11", args, ac);
+	XtManageChild(separator11);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Zero All Z Offsets", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_zerozoffsets = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_zerozoffsets", args, ac);
+		XtManageChild(pushButton_zerozoffsets);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_zerozoffsets, XmNactivateCallback, do_zerozoffsets, (XtPointer)0);
+
+	ac = 0;
+	separator16 = XmCreateSeparator(pulldownMenu_action, (char *)"separator16", args, ac);
+	XtManageChild(separator16);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Invert Navigation", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_invertnav = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_invertnav", args, ac);
+		XtManageChild(pushButton_invertnav);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_invertnav, XmNactivateCallback, do_action_invertnav, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Update Grids", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_updategrids = XmCreatePushButton(pulldownMenu_action, (char *)"pushButton_updategrids", args, ac);
+		XtManageChild(pushButton_updategrids);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_updategrids, XmNactivateCallback, do_action_updategrids, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_action, (char *)"Apply Adjusted Navigation", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_applynav = XmCreatePushButtonGadget(pulldownMenu_action, (char *)"pushButton_applynav", args, ac);
+		XtManageChild(pushButton_applynav);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_applynav, XmNactivateCallback, do_apply_nav, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_action);
+	ac++;
+	XtSetValues(cascadeButton_action, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(menuBar_mbnavadjust, (char *)"About", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 907);
+		ac++;
+		XtSetArg(args[ac], XmNy, 5);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 50);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 22);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(menuBar_mbnavadjust, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		cascadeButton_about = XmCreateCascadeButton(menuBar_mbnavadjust, (char *)"cascadeButton_about", args, ac);
+		XtManageChild(cascadeButton_about);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 46);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 26);
+	ac++;
+	pulldownMenu_about = XmCreatePulldownMenu(XtParent(cascadeButton_about), (char *)"pulldownMenu_about", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_about, (char *)"About", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_about, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_about = XmCreatePushButton(pulldownMenu_about, (char *)"pushButton_about", args, ac);
+		XtManageChild(pushButton_about);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_about, XmNactivateCallback, BxManageCB, (XtPointer) "form_about");
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_about);
+	ac++;
+	XtSetValues(cascadeButton_about, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 962);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 368);
+	ac++;
+	form_mbnavadjust = XmCreateForm(mainWindow, (char *)"form_mbnavadjust", args, ac);
+	XtManageChild(form_mbnavadjust);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNscrollingPolicy, XmAUTOMATIC);
+	ac++;
+	XtSetArg(args[ac], XmNscrollBarDisplayPolicy, XmAS_NEEDED);
+	ac++;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 150);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 440);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 220);
+	ac++;
+	scrolledWindow_messages = XmCreateScrolledWindow(form_mbnavadjust, (char *)"scrolledWindow_messages", args, ac);
+	XtManageChild(scrolledWindow_messages);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNeditMode, XmMULTI_LINE_EDIT);
+	ac++;
+	XtSetArg(
+	    args[ac], XmNfontList,
+	    BX_CONVERT(scrolledWindow_messages, (char *)"-*-fixed-medium-r-*-*-*-120-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	XtSetArg(args[ac], XmNcolumns, 120);
+	ac++;
+	XtSetArg(args[ac], XmNwordWrap, False);
+	ac++;
+	XtSetArg(args[ac], XmNautoShowCursorPosition, False);
+	ac++;
+	XtSetArg(args[ac], XmNrows, 1);
+	ac++;
+	XtSetArg(args[ac], XmNeditable, False);
+	ac++;
+	text_messages = XmCreateText(scrolledWindow_messages, (char *)"text_messages", args, ac);
+	XtManageChild(text_messages);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_mbnavadjust, (char *)"No Data Imported", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 0);
+		ac++;
+		XtSetArg(args[ac], XmNy, 0);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 440);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 140);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(form_mbnavadjust, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_status = XmCreateLabel(form_mbnavadjust, (char *)"label_status", args, ac);
+		XtManageChild(label_status);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_mbnavadjust, (char *)"Data Files:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 450);
+		ac++;
+		XtSetArg(args[ac], XmNy, 0);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 120);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(form_mbnavadjust, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_listdata = XmCreateLabel(form_mbnavadjust, (char *)"label_listdata", args, ac);
+		XtManageChild(label_listdata);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNscrollingPolicy, XmAPPLICATION_DEFINED);
+	ac++;
+	XtSetArg(args[ac], XmNx, 450);
+	ac++;
+	XtSetArg(args[ac], XmNy, 30);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 490);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 330);
+	ac++;
+	scrolledWindow_datalist = XmCreateScrolledWindow(form_mbnavadjust, (char *)"scrolledWindow_datalist", args, ac);
+	XtManageChild(scrolledWindow_datalist);
+
+	ac = 0;
+	{
+		Cardinal ndx;
+		XmStringTable tmp0;
+
+		tmp0 = (XmStringTable)BX_CONVERT(scrolledWindow_datalist, (char *)" ", XmRXmStringTable, 0, &argok);
+		XtSetArg(args[ac], XmNitems, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNitemCount, 1);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(scrolledWindow_datalist, (char *)"-*-fixed-medium-r-*-*-*-120-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNselectionPolicy, XmSINGLE_SELECT);
+		ac++;
+		XtSetArg(args[ac], XmNlistSizePolicy, XmCONSTANT);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 490);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 330);
+		ac++;
+		list_data = XmCreateList(scrolledWindow_datalist, (char *)"list_data", args, ac);
+		XtManageChild(list_data);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		for (ndx = 0; ndx < 1; ndx++) {
+			XmStringFree(((XmStringTable)tmp0)[ndx]);
+		}
+	}
+
+	XtAddCallback(list_data, XmNsingleSelectionCallback, do_list_data_select, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Please Wait...");
+	ac++;
+	XtSetArg(args[ac], XmNallowShellResize, True);
+	ac++;
+	XtSetArg(args[ac], XmNmwmInputMode, MWM_INPUT_MODELESS);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmUNMAP);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 542);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 86);
+	ac++;
+	xmDialogShell_message = XmCreateDialogShell(mainWindow, (char *)"xmDialogShell_message", args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL);
+	ac++;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_ANY);
+	ac++;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1294);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 542);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 86);
+	ac++;
+	bulletinBoard_message =
+	    XtCreateWidget((char *)"bulletinBoard_message", xmBulletinBoardWidgetClass, xmDialogShell_message, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_message, (char *)"Thank you for your patience.", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 510);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(bulletinBoard_message, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		label_pleasewait = XmCreateLabel(bulletinBoard_message, (char *)"label_pleasewait", args, ac);
+		XtManageChild(label_pleasewait);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_message, (char *)"MBnavadjust is loading data...", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 510);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(bulletinBoard_message, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		label_message = XmCreateLabel(bulletinBoard_message, (char *)"label_message", args, ac);
+		XtManageChild(label_message);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Error");
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 311);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 160);
+	ac++;
+	xmDialogShell_error = XmCreateDialogShell(mainWindow, (char *)"xmDialogShell_error", args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL);
+	ac++;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+	ac++;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1257);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 311);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 160);
+	ac++;
+	bulletinBoard_error =
+	    XtCreateWidget((char *)"bulletinBoard_error", xmBulletinBoardWidgetClass, xmDialogShell_error, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_error, (char *)"You probably do not have write", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 290);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_error, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_error_two = XmCreateLabel(bulletinBoard_error, (char *)"label_error_two", args, ac);
+		XtManageChild(label_error_two);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_error, (char *)"Unable to open output file.", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 290);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_error, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_error_one = XmCreateLabel(bulletinBoard_error, (char *)"label_error_one", args, ac);
+		XtManageChild(label_error_one);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_error, (char *)"permission in this directory!", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 70);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 290);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_error, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_error_three = XmCreateLabel(bulletinBoard_error, (char *)"label_error_three", args, ac);
+		XtManageChild(label_error_three);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_error, (char *)"OK", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 110);
+		ac++;
+		XtSetArg(args[ac], XmNy, 110);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 90);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_error, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_error = XmCreatePushButton(bulletinBoard_error, (char *)"pushButton_error", args, ac);
+		XtManageChild(pushButton_error);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Select Input Data File");
+	ac++;
+	XtSetArg(args[ac], XmNallowShellResize, False);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 611);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 530);
+	ac++;
+	xmDialogShell_fileselection = XmCreateDialogShell(mainWindow, (char *)"xmDialogShell_fileselection", args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL);
+	ac++;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1072);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 611);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 530);
+	ac++;
+	bulletinBoard_fileselection =
+	    XtCreateWidget((char *)"bulletinBoard_fileselection", xmBulletinBoardWidgetClass, xmDialogShell_fileselection, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(bulletinBoard_fileselection, (char *)"-*-" SANS "-bold-r-normal--14-140-75-75-p-82-iso8859-1",
+	                    XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	XtSetArg(args[ac], XmNx, 160);
+	ac++;
+	XtSetArg(args[ac], XmNy, 480);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 100);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 35);
+	ac++;
+	textField_format = XmCreateTextField(bulletinBoard_fileselection, (char *)"textField_format", args, ac);
+	XtManageChild(textField_format);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_fileselection, (char *)"MBIO Format ID:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(bulletinBoard_fileselection, (char *)"-*-" SANS "-bold-r-normal--14-140-75-75-p-82-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 480);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		label_format = XmCreateLabel(bulletinBoard_fileselection, (char *)"label_format", args, ac);
+		XtManageChild(label_format);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_fileselection, (char *)"File Selection", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNdialogTitle, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_MODELESS);
+		ac++;
+		XtSetArg(args[ac], XmNlistVisibleItemCount, 13);
+		ac++;
+		XtSetArg(args[ac], XmNtextFontList,
+		         BX_CONVERT(bulletinBoard_fileselection, (char *)"-*-" SANS "-bold-r-normal--14-140-75-75-p-82-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNlabelFontList,
+		         BX_CONVERT(bulletinBoard_fileselection, (char *)"-*-" SANS "-bold-r-normal--14-140-75-75-p-82-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNbuttonFontList,
+		         BX_CONVERT(bulletinBoard_fileselection, (char *)"-*-" SANS "-bold-r-normal--14-140-75-75-p-82-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNautoUnmanage, False);
+		ac++;
+		XtSetArg(args[ac], XmNnoResize, True);
+		ac++;
+		XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 590);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 470);
+		ac++;
+		fileSelectionBox = XmCreateFileSelectionBox(bulletinBoard_fileselection, (char *)"fileSelectionBox", args, ac);
+		XtManageChild(fileSelectionBox);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	BxUnmanageCB(fileSelectionBox, (XtPointer) "fileSelectionBox.Help", (XtPointer)0);
+	do_fileselection_mode(fileSelectionBox, (XtPointer)MBNA_FILESELECTION_NONE, (XtPointer)0);
+	XtAddCallback(fileSelectionBox, XmNokCallback, do_fileselection_ok, (XtPointer)0);
+	XtAddCallback(fileSelectionBox, XmNokCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_fileselection");
+	XtAddCallback(fileSelectionBox, XmNcancelCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_fileselection");
+	XtAddCallback(fileSelectionBox, XmNcancelCallback, do_fileselection_mode, (XtPointer)MBNA_FILESELECTION_NONE);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNwidth, 935);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 685);
+	ac++;
+	dialogShell_naverr = XmCreateDialogShell(mainWindow, (char *)"dialogShell_naverr", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(dialogShell_naverr, (char *)"Navadjust: Nav Error at Crossings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNdialogTitle, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNdefaultPosition, True);
+		ac++;
+		XtSetArg(args[ac], XmNautoUnmanage, False);
+		ac++;
+		XtSetArg(args[ac], XmNnoResize, True);
+		ac++;
+		XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE);
+		ac++;
+		XtSetArg(args[ac], XmNx, 258);
+		ac++;
+		XtSetArg(args[ac], XmNy, 456);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 935);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 685);
+		ac++;
+		bulletinBoard_naverr =
+		    XtCreateWidget((char *)"bulletinBoard_naverr", xmBulletinBoardWidgetClass, dialogShell_naverr, args, ac);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Unset Crossing", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 450);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_unset = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_unset", args, ac);
+		XtManageChild(pushButton_naverr_unset);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_unset, XmNactivateCallback, do_naverr_unset, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Minimum XY Misfit", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 650);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 120);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 32);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_minxymisfit =
+		    XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_minxymisfit", args, ac);
+		XtManageChild(pushButton_naverr_minxymisfit);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_minxymisfit, XmNactivateCallback, do_naverr_minxymisfit, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNborderWidth, 1);
+	ac++;
+	XtSetArg(args[ac], XmNbackground, BX_CONVERT(bulletinBoard_naverr, (char *)"white", XmRPixel, 0, &argok));
+	if (argok)
+		ac++;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 550);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 300);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 60);
+	ac++;
+	drawingArea_naverr_zcorr = XmCreateDrawingArea(bulletinBoard_naverr, (char *)"drawingArea_naverr_zcorr", args, ac);
+	XtManageChild(drawingArea_naverr_zcorr);
+	XtAddCallback(drawingArea_naverr_zcorr, XmNinputCallback, do_naverr_zcorr_input, (XtPointer)0);
+	XtAddCallback(drawingArea_naverr_zcorr, XmNexposeCallback, do_naverr_corr_expose, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Zero Z Offset", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 550);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_zerozoffset =
+		    XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_zerozoffset", args, ac);
+		XtManageChild(pushButton_naverr_zerozoffset);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_zerozoffset, XmNactivateCallback, do_naverr_zerozoffset, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 10);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 76);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 32);
+	ac++;
+	menuBar_settings = XmCreateMenuBar(bulletinBoard_naverr, (char *)"menuBar_settings", args, ac);
+	XtManageChild(menuBar_settings);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(menuBar_settings, (char *)"Settings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 5);
+		ac++;
+		XtSetArg(args[ac], XmNy, 5);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 66);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 22);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(menuBar_settings, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		cascadeButton_settings = XmCreateCascadeButton(menuBar_settings, (char *)"cascadeButton_settings", args, ac);
+		XtManageChild(cascadeButton_settings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 65);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 48);
+	ac++;
+	pulldownMenu_settings = XmCreatePulldownMenu(XtParent(cascadeButton_settings), (char *)"pulldownMenu_settings", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_settings, (char *)"Biases", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(pulldownMenu_settings, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_biases = XmCreatePushButton(pulldownMenu_settings, (char *)"pushButton_naverr_biases", args, ac);
+		XtManageChild(pushButton_naverr_biases);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_biases, XmNactivateCallback, BxManageCB, (XtPointer) "bulletinBoard_biases");
+	XtAddCallback(pushButton_naverr_biases, XmNactivateCallback, do_biases_init, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_settings, (char *)"Contours", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(pulldownMenu_settings, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_controls = XmCreatePushButton(pulldownMenu_settings, (char *)"pushButton_naverr_controls", args, ac);
+		XtManageChild(pushButton_naverr_controls);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_controls, XmNactivateCallback, BxManageCB, (XtPointer) "form_controls");
+
+	ac = 0;
+	XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_settings);
+	ac++;
+	XtSetValues(cascadeButton_settings, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Set Offset", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 550);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_settie = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_settie", args, ac);
+		XtManageChild(pushButton_naverr_settie);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_settie, XmNactivateCallback, do_naverr_setoffset, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 130);
+	ac++;
+	XtSetArg(args[ac], XmNy, 620);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 180);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 61);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	radioBox_misfitcenter = XmCreateRadioBox(bulletinBoard_naverr, (char *)"radioBox_misfitcenter", args, ac);
+	XtManageChild(radioBox_misfitcenter);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox_misfitcenter, (char *)"Center on Zero Offset", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNindicatorOn, XmINDICATOR_CHECK_BOX);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 174);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 26);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(radioBox_misfitcenter, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		toggleButton_misfitcenter_zero =
+		    XmCreateToggleButton(radioBox_misfitcenter, (char *)"toggleButton_misfitcenter_zero", args, ac);
+		XtManageChild(toggleButton_misfitcenter_zero);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_misfitcenter_zero, XmNvalueChangedCallback, do_naverr_misfitcenter, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox_misfitcenter, (char *)"Center on Current Offset", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNindicatorOn, XmINDICATOR_CHECK_BOX);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 174);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 26);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(radioBox_misfitcenter, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		toggleButton_misfitcenter_auto =
+		    XmCreateToggleButton(radioBox_misfitcenter, (char *)"toggleButton_misfitcenter_auto", args, ac);
+		XtManageChild(toggleButton_misfitcenter_auto);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_misfitcenter_auto, XmNvalueChangedCallback, do_naverr_misfitcenter, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Reset Offset", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 450);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_resettie = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_resettie", args, ac);
+		XtManageChild(pushButton_naverr_resettie);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_resettie, XmNactivateCallback, do_naverr_resettie, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Add Tie", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 650);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_addtie = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_addtie", args, ac);
+		XtManageChild(pushButton_naverr_addtie);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_addtie, XmNactivateCallback, do_naverr_addtie, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Delete Tie", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 750);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_deletetie = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_deletetie", args, ac);
+		XtManageChild(pushButton_naverr_deletetie);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_deletetie, XmNactivateCallback, do_naverr_deletetie, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Full Size", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 350);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_fullsize = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_fullsize", args, ac);
+		XtManageChild(pushButton_naverr_fullsize);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_fullsize, XmNactivateCallback, do_naverr_fullsize, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Zero Offset", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 650);
+		ac++;
+		XtSetArg(args[ac], XmNy, 40);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_zerooffset = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_zerooffset", args, ac);
+		XtManageChild(pushButton_naverr_zerooffset);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_zerooffset, XmNactivateCallback, do_naverr_zerooffset, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"No Data Imported", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 200);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 300);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_naverr_offsets = XmCreateLabel(bulletinBoard_naverr, (char *)"label_naverr_offsets", args, ac);
+		XtManageChild(label_naverr_offsets);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Next Unset", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 250);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 90);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_nextunset = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_nextunset", args, ac);
+		XtManageChild(pushButton_naverr_nextunset);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_nextunset, XmNactivateCallback, do_naverr_nextunset, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"No Data Imported", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 50);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 300);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 150);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_naverr_status = XmCreateLabel(bulletinBoard_naverr, (char *)"label_naverr_status", args, ac);
+		XtManageChild(label_naverr_status);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNborderWidth, 1);
+	ac++;
+	XtSetArg(args[ac], XmNbackground, BX_CONVERT(bulletinBoard_naverr, (char *)"white", XmRPixel, 0, &argok));
+	if (argok)
+		ac++;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNx, 320);
+	ac++;
+	XtSetArg(args[ac], XmNy, 70);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 600);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 600);
+	ac++;
+	drawingArea_naverr_cont = XmCreateDrawingArea(bulletinBoard_naverr, (char *)"drawingArea_naverr_cont", args, ac);
+	XtManageChild(drawingArea_naverr_cont);
+	XtAddCallback(drawingArea_naverr_cont, XmNinputCallback, do_naverr_cont_input, (XtPointer)0);
+	XtAddCallback(drawingArea_naverr_cont, XmNexposeCallback, do_naverr_cont_expose, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNborderWidth, 1);
+	ac++;
+	XtSetArg(args[ac], XmNbackground, BX_CONVERT(bulletinBoard_naverr, (char *)"white", XmRPixel, 0, &argok));
+	if (argok)
+		ac++;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 240);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 301);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 301);
+	ac++;
+	drawingArea_naverr_corr = XmCreateDrawingArea(bulletinBoard_naverr, (char *)"drawingArea_naverr_corr", args, ac);
+	XtManageChild(drawingArea_naverr_corr);
+	XtAddCallback(drawingArea_naverr_corr, XmNinputCallback, do_naverr_corr_input, (XtPointer)0);
+	XtAddCallback(drawingArea_naverr_corr, XmNexposeCallback, do_naverr_corr_expose, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 850);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 70);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 60);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_dismiss = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_dismiss", args, ac);
+		XtManageChild(pushButton_naverr_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_dismiss, XmNactivateCallback, do_dismiss_naverr, (XtPointer)0);
+	XtAddCallback(pushButton_naverr_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_biases");
+	XtAddCallback(pushButton_naverr_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_naverr");
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Select Tie", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 750);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_selecttie = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_selecttie", args, ac);
+		XtManageChild(pushButton_naverr_selecttie);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_selecttie, XmNactivateCallback, do_naverr_selecttie, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Minimum Misfit", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 620);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 120);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_minimum = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_minmisfit", args, ac);
+		XtManageChild(pushButton_naverr_minimum);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_minimum, XmNactivateCallback, do_naverr_minmisfit, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Next", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 170);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 80);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_next = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_next", args, ac);
+		XtManageChild(pushButton_naverr_next);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_next, XmNactivateCallback, do_naverr_next, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Previous", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 90);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 80);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_previous = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_previous", args, ac);
+		XtManageChild(pushButton_naverr_previous);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_previous, XmNactivateCallback, do_naverr_previous, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_naverr, (char *)"Skip Crossing", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 350);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_naverr, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_naverr_setnone = XmCreatePushButton(bulletinBoard_naverr, (char *)"pushButton_naverr_setnone", args, ac);
+		XtManageChild(pushButton_naverr_setnone);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_naverr_setnone, XmNactivateCallback, do_naverr_setnone, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Attitude Biases");
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 284);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 446);
+	ac++;
+	dialogShell_biases = XmCreateDialogShell(mainWindow, (char *)"dialogShell_biases", args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(dialogShell_biases, (char *)"Heading & Roll Bias", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNdialogTitle, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNautoUnmanage, False);
+		ac++;
+		XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+		ac++;
+		XtSetArg(args[ac], XmNx, 0);
+		ac++;
+		XtSetArg(args[ac], XmNy, 1114);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 284);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 446);
+		ac++;
+		bulletinBoard_biases =
+		    XtCreateWidget((char *)"bulletinBoard_biases", xmBulletinBoardWidgetClass, dialogShell_biases, args, ac);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 340);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator9 = XmCreateSeparator(bulletinBoard_biases, (char *)"separator9", args, ac);
+	XtManageChild(separator9);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_biases, (char *)"Apply to All Files", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 70);
+		ac++;
+		XtSetArg(args[ac], XmNy, 360);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 140);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_biases, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_biases_applyall = XmCreatePushButton(bulletinBoard_biases, (char *)"pushButton_biases_applyall", args, ac);
+		XtManageChild(pushButton_biases_applyall);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_biases_applyall, XmNactivateCallback, do_biases_applyall, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 60);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator8 = XmCreateSeparator(bulletinBoard_biases, (char *)"separator8", args, ac);
+	XtManageChild(separator8);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 200);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 260);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator6 = XmCreateSeparator(bulletinBoard_biases, (char *)"separator6", args, ac);
+	XtManageChild(separator6);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_biases, (char *)"Section 2 Heading (deg)", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, -99);
+		ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 1);
+		ac++;
+		XtSetArg(args[ac], XmNvalue, 0);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, 99);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 220);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 260);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 58);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_biases, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		scale_biases_heading2 = XmCreateScale(bulletinBoard_biases, (char *)"scale_biases_heading2", args, ac);
+		XtManageChild(scale_biases_heading2);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_biases, (char *)"Section 2 Roll (deg)", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, -99);
+		ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 1);
+		ac++;
+		XtSetArg(args[ac], XmNvalue, 0);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, 99);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 280);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 260);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 58);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_biases, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		scale_biases_roll2 = XmCreateScale(bulletinBoard_biases, (char *)"scale_biases_roll2", args, ac);
+		XtManageChild(scale_biases_roll2);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_biases, (char *)"Section 1 Roll (deg)", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, -99);
+		ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 1);
+		ac++;
+		XtSetArg(args[ac], XmNvalue, 0);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, 99);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 140);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 260);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 58);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_biases, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		scale_biases_roll1 = XmCreateScale(bulletinBoard_biases, (char *)"scale_biases_roll1", args, ac);
+		XtManageChild(scale_biases_roll1);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(scale_biases_roll1, XmNvalueChangedCallback, do_biases_roll, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_biases, (char *)"Section 1 Heading (deg)", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, -99);
+		ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 1);
+		ac++;
+		XtSetArg(args[ac], XmNvalue, 0);
+		ac++;
+		XtSetArg(args[ac], XmNsliderVisual, XmSHADOWED_BACKGROUND);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, 99);
+		ac++;
+		XtSetArg(args[ac], XmNslidingMode, XmSLIDER);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 80);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 260);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 58);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_biases, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		scale_biases_heading1 = XmCreateScale(bulletinBoard_biases, (char *)"scale_biases_heading1", args, ac);
+		XtManageChild(scale_biases_heading1);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(scale_biases_heading1, XmNvalueChangedCallback, do_biases_heading, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_biases,
+		                            (char *)":::t\"Section ID\'s:\":t\"  Section 1: XXX:XXX\"\"  Section 2: XXX:XXX\"",
+		                            XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 140);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 50);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_biases, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_biases_files = XmCreateLabel(bulletinBoard_biases, (char *)"label_biases_files", args, ac);
+		XtManageChild(label_biases_files);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 150);
+	ac++;
+	XtSetArg(args[ac], XmNy, 10);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 127);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 61);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	radioBox_biases_together = XmCreateRadioBox(bulletinBoard_biases, (char *)"radioBox_biases_together", args, ac);
+	XtManageChild(radioBox_biases_together);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox_biases_together, (char *)"Same biases", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 121);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 26);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(radioBox_biases_together, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		toggleButton_biases_together =
+		    XmCreateToggleButton(radioBox_biases_together, (char *)"toggleButton_biases_together", args, ac);
+		XtManageChild(toggleButton_biases_together);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_biases_together, XmNvalueChangedCallback, do_biases_toggle, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox_biases_together, (char *)"Different biases", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 121);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 26);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(radioBox_biases_together, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		toggleButton_biases_separate =
+		    XmCreateToggleButton(radioBox_biases_together, (char *)"toggleButton_biases_separate", args, ac);
+		XtManageChild(toggleButton_biases_separate);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_biases, (char *)"Apply", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 70);
+		ac++;
+		XtSetArg(args[ac], XmNy, 400);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 70);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_biases, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_biases_apply = XmCreatePushButton(bulletinBoard_biases, (char *)"pushButton_biases_apply", args, ac);
+		XtManageChild(pushButton_biases_apply);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_biases_apply, XmNactivateCallback, do_biases_apply, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_biases, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 140);
+		ac++;
+		XtSetArg(args[ac], XmNy, 400);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 70);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(bulletinBoard_biases, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_biases_dismiss = XmCreatePushButton(bulletinBoard_biases, (char *)"pushButton_biases_dismiss", args, ac);
+		XtManageChild(pushButton_biases_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_biases_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_biases");
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "About MBnavadjust");
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 488);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 484);
+	ac++;
+	dialogShell_about = XmCreateDialogShell(mainWindow, (char *)"dialogShell_about", args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+	ac++;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1095);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 488);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 484);
+	ac++;
+	form_about = XtCreateWidget((char *)"form_about", xmFormWidgetClass, dialogShell_about, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_about, (char *)"David W. Caress    and    Dale N. Chayes", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-bold-r-*-*-*-140-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 0);
+		ac++;
+		XtSetArg(args[ac], XmNy, 250);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 479);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		label_about_create1 = XmCreateLabel(form_about, (char *)"label_about_create1", args, ac);
+		XtManageChild(label_about_create1);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 210);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 470);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator1 = XmCreateSeparator(form_about, (char *)"separator1", args, ac);
+	XtManageChild(separator1);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_about, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-bold-r-*-*-*-140-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 170);
+		ac++;
+		XtSetArg(args[ac], XmNy, 410);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 140);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 35);
+		ac++;
+		pushButton_about_dismiss = XmCreatePushButton(form_about, (char *)"pushButton_about_dismiss", args, ac);
+		XtManageChild(pushButton_about_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_about_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "form_about");
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_about, (char *)"Created by:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-bold-r-*-*-*-140-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 0);
+		ac++;
+		XtSetArg(args[ac], XmNy, 230);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 479);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		label_about_create = XmCreateLabel(form_about, (char *)"label_about_create", args, ac);
+		XtManageChild(label_about_create);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(form_about, (char *)":::t\"Lamont-Doherty \":t\"Earth Observatory\"\"of Columbia University\"",
+		                         XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-bold-r-*-*-*-120-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 270);
+		ac++;
+		XtSetArg(args[ac], XmNy, 280);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 100);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 70);
+		ac++;
+		label_about_lamont = XmCreateLabel(form_about, (char *)"label_about_lamont", args, ac);
+		XtManageChild(label_about_lamont);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_about, (char *)":::t\"Monterey Bay\":t\"Aquarium\"\"Research Institute\"", XmRXmString,
+		                            0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-bold-r-*-*-*-120-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 110);
+		ac++;
+		XtSetArg(args[ac], XmNy, 280);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 110);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 70);
+		ac++;
+		label_about_columbia = XmCreateLabel(form_about, (char *)"label_about_columbia", args, ac);
+		XtManageChild(label_about_columbia);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_about, (char *)"MB-System", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-bold-r-*-*-*-240-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 0);
+		ac++;
+		XtSetArg(args[ac], XmNy, 110);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 479);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 38);
+		ac++;
+		label_about_mbsystem = XmCreateLabel(form_about, (char *)"label_about_mbsystem", args, ac);
+		XtManageChild(label_about_mbsystem);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_about, (char *)"An Open Source Software Package", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-bold-r-*-*-*-140-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 0);
+		ac++;
+		XtSetArg(args[ac], XmNy, 150);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 479);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		label_about_mbpub = XmCreateLabel(form_about, (char *)"label_about_mbpub", args, ac);
+		XtManageChild(label_about_mbpub);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_about, (char *)"One Component of the", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-bold-r-*-*-*-140-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 0);
+		ac++;
+		XtSetArg(args[ac], XmNy, 80);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 479);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		label_about_component = XmCreateLabel(form_about, (char *)"label_about_component", args, ac);
+		XtManageChild(label_about_component);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_about, (char *)"for Processing and Display of Swath Sonar Data", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-bold-r-*-*-*-140-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 0);
+		ac++;
+		XtSetArg(args[ac], XmNy, 180);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 479);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		label_about_for = XmCreateLabel(form_about, (char *)"label_about_for", args, ac);
+		XtManageChild(label_about_for);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 60);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 470);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator = XmCreateSeparator(form_about, (char *)"separator", args, ac);
+	XtManageChild(separator);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 =
+		    (XmString)BX_CONVERT(form_about, (char *)":::t\"MB-System Release 4.6\"\"April 14, 1999\"", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-medium-r-*-*-*-140-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 0);
+		ac++;
+		XtSetArg(args[ac], XmNy, 350);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 479);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 60);
+		ac++;
+		label_about_version = XmCreateLabel(form_about, (char *)"label_about_version", args, ac);
+		XtManageChild(label_about_version);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_about, (char *)"Interactive Navigation Adjustment of Swath Bathymetry", XmRXmString, 0,
+		                            &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-bold-r-*-*-*-180-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 0);
+		ac++;
+		XtSetArg(args[ac], XmNy, 30);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 479);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		label_about_function = XmCreateLabel(form_about, (char *)"label_about_function", args, ac);
+		XtManageChild(label_about_function);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_about, (char *)"MBnavadjust", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_about, (char *)"-*-" SERIF "-bold-r-*-*-*-240-*-*-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 0);
+		ac++;
+		XtSetArg(args[ac], XmNy, 0);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 479);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		label_about_mbedit = XmCreateLabel(form_about, (char *)"label_about_mbedit", args, ac);
+		XtManageChild(label_about_mbedit);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Controls");
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 635);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 438);
+	ac++;
+	dialogShell_controls = XmCreateDialogShell(mainWindow, (char *)"dialogShell_controls", args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+	ac++;
+	XtSetArg(args[ac], XmNx, 0);
+	ac++;
+	XtSetArg(args[ac], XmNy, 1118);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 635);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 438);
+	ac++;
+	form_controls = XtCreateWidget((char *)"form_controls", xmFormWidgetClass, dialogShell_controls, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 370);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 613);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator14 = XmCreateSeparator(form_controls, (char *)"separator14", args, ac);
+	XtManageChild(separator14);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, 1);
+	ac++;
+	XtSetArg(args[ac], XmNdecimalPoints, 0);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, 10);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, 20);
+	ac++;
+	XtSetArg(args[ac], XmNshowArrows, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNshowValue, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 140);
+	ac++;
+	XtSetArg(args[ac], XmNy, 330);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 480);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 36);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	scale_controls_zoffset = XmCreateScale(form_controls, (char *)"scale_controls_zoffset", args, ac);
+	XtManageChild(scale_controls_zoffset);
+	XtAddCallback(scale_controls_zoffset, XmNvalueChangedCallback, do_scale_controls_zoffset, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Z Offset Width (m):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 340);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 120);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_controls_zoffset = XmCreateLabel(form_controls, (char *)"label_controls_zoffset", args, ac);
+		XtManageChild(label_controls_zoffset);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)":::t\"Inversion\"\"Smoothing (m):\"", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 270);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 120);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_controls_smoothing = XmCreateLabel(form_controls, (char *)"label_controls_smoothing", args, ac);
+		XtManageChild(label_controls_smoothing);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, 1);
+	ac++;
+	XtSetArg(args[ac], XmNdecimalPoints, 2);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, 10);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, 5000);
+	ac++;
+	XtSetArg(args[ac], XmNshowArrows, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNshowValue, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 140);
+	ac++;
+	XtSetArg(args[ac], XmNy, 270);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 488);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 36);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	scale_controls_smoothing = XmCreateScale(form_controls, (char *)"scale_controls_smoothing", args, ac);
+	XtManageChild(scale_controls_smoothing);
+	XtAddCallback(scale_controls_smoothing, XmNvalueChangedCallback, do_scale_controls_smoothing, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 310);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 613);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator12 = XmCreateSeparator(form_controls, (char *)"separator12", args, ac);
+	XtManageChild(separator12);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Max Section Length (km):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 20);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 160);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_controls_sectionlength = XmCreateLabel(form_controls, (char *)"label_controls_sectionlength", args, ac);
+		XtManageChild(label_controls_sectionlength);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, 1);
+	ac++;
+	XtSetArg(args[ac], XmNdecimalPoints, 2);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, 2000);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, 5000);
+	ac++;
+	XtSetArg(args[ac], XmNshowArrows, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNshowValue, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 190);
+	ac++;
+	XtSetArg(args[ac], XmNy, 0);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 438);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 36);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	scale_controls_sectionlength = XmCreateScale(form_controls, (char *)"scale_controls_sectionlength", args, ac);
+	XtManageChild(scale_controls_sectionlength);
+	XtAddCallback(scale_controls_sectionlength, XmNvalueChangedCallback, do_scale_controls_sectionlength, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, 1);
+	ac++;
+	XtSetArg(args[ac], XmNdecimalPoints, 2);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, 10000);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, 40000);
+	ac++;
+	XtSetArg(args[ac], XmNshowArrows, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNshowValue, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 140);
+	ac++;
+	XtSetArg(args[ac], XmNy, 224);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 489);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 36);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	scale_controls_tickinterval = XmCreateScale(form_controls, (char *)"scale_controls_tickinterval", args, ac);
+	XtManageChild(scale_controls_tickinterval);
+	XtAddCallback(scale_controls_tickinterval, XmNvalueChangedCallback, do_scale_controls_tickinterval, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, 1);
+	ac++;
+	XtSetArg(args[ac], XmNdecimalPoints, 2);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, 10000);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, 40000);
+	ac++;
+	XtSetArg(args[ac], XmNshowArrows, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNshowValue, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 140);
+	ac++;
+	XtSetArg(args[ac], XmNy, 184);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 489);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 36);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	scale_controls_colorinterval = XmCreateScale(form_controls, (char *)"scale_controls_colorinterval", args, ac);
+	XtManageChild(scale_controls_colorinterval);
+	XtAddCallback(scale_controls_colorinterval, XmNvalueChangedCallback, do_controls_scale_colorinterval, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, 1);
+	ac++;
+	XtSetArg(args[ac], XmNdecimalPoints, 2);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, 2500);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, 40000);
+	ac++;
+	XtSetArg(args[ac], XmNshowArrows, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNshowValue, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 140);
+	ac++;
+	XtSetArg(args[ac], XmNy, 144);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 489);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 36);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	scale_controls_contourinterval = XmCreateScale(form_controls, (char *)"scale_controls_contourinterval", args, ac);
+	XtManageChild(scale_controls_contourinterval);
+	XtAddCallback(scale_controls_contourinterval, XmNvalueChangedCallback, do_scale_contourinterval, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Contour Interval (m):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 160);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 140);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_controls_contourinterval = XmCreateLabel(form_controls, (char *)"label_controls_contourinterval", args, ac);
+		XtManageChild(label_controls_contourinterval);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Color Interval (m):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 200);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 130);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_controls_colorinterval = XmCreateLabel(form_controls, (char *)"label_controls_colorinterval", args, ac);
+		XtManageChild(label_controls_colorinterval);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Tick Interval (m):", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 240);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 120);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_controls_tickinterval = XmCreateLabel(form_controls, (char *)"label_controls_tickinterval", args, ac);
+		XtManageChild(label_controls_tickinterval);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Apply", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 200);
+		ac++;
+		XtSetArg(args[ac], XmNy, 389);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 70);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_controls_apply = XmCreatePushButton(form_controls, (char *)"pushButton_controls_apply", args, ac);
+		XtManageChild(pushButton_controls_apply);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_controls_apply, XmNactivateCallback, do_controls_apply, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 13);
+	ac++;
+	XtSetArg(args[ac], XmNy, 88);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 616);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator4 = XmCreateSeparator(form_controls, (char *)"separator4", args, ac);
+	XtManageChild(separator4);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 264);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 618);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 20);
+	ac++;
+	separator5 = XmCreateSeparator(form_controls, (char *)"separator5", args, ac);
+	XtManageChild(separator5);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, 1);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, 1);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, 10);
+	ac++;
+	XtSetArg(args[ac], XmNshowArrows, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNshowValue, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 140);
+	ac++;
+	XtSetArg(args[ac], XmNy, 104);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 489);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 36);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	scale_controls_decimation = XmCreateScale(form_controls, (char *)"scale_controls_decimation", args, ac);
+	XtManageChild(scale_controls_decimation);
+	XtAddCallback(scale_controls_decimation, XmNvalueChangedCallback, do_scale_controls_decimation, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Decimation:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 120);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 120);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_controls_decimation = XmCreateLabel(form_controls, (char *)"label_controls_decimation", args, ac);
+		XtManageChild(label_controls_decimation);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Max # Soundings in Section:", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 60);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 180);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 20);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		label_controls_sectionsoundings = XmCreateLabel(form_controls, (char *)"label_controls_sectionsoundings", args, ac);
+		XtManageChild(label_controls_sectionsoundings);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, 1000);
+	ac++;
+	XtSetArg(args[ac], XmNdecimalPoints, 0);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, 10000);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, 100000);
+	ac++;
+	XtSetArg(args[ac], XmNshowArrows, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNscaleMultiple, 499);
+	ac++;
+	XtSetArg(args[ac], XmNshowValue, TRUE);
+	ac++;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 190);
+	ac++;
+	XtSetArg(args[ac], XmNy, 40);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 439);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 43);
+	ac++;
+	XtSetArg(args[ac], XmNfontList,
+	         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+	if (argok)
+		ac++;
+	scale_controls_sectionsoundings = XmCreateScale(form_controls, (char *)"scale_controls_sectionsoundings", args, ac);
+	XtManageChild(scale_controls_sectionsoundings);
+	XtAddCallback(scale_controls_sectionsoundings, XmNvalueChangedCallback, do_scale_controls_sectionsoundings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(form_controls, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 300);
+		ac++;
+		XtSetArg(args[ac], XmNy, 389);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 108);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(form_controls, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_controls_dismiss = XmCreatePushButton(form_controls, (char *)"pushButton_controls_dismiss", args, ac);
+		XtManageChild(pushButton_controls_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_controls_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "form_controls");
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Navigation Adjustment Model Plot");
+	ac++;
+	XtSetArg(args[ac], XmNallowShellResize, True);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 1021);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 483);
+	ac++;
+	dialogShell_modelplot = XmCreateDialogShell(mainWindow, (char *)"dialogShell_modelplot", args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNautoUnmanage, False);
+	ac++;
+	XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW);
+	ac++;
+	XtSetArg(args[ac], XmNx, 757);
+	ac++;
+	XtSetArg(args[ac], XmNy, 995);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 1021);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 483);
+	ac++;
+	bulletinBoard_modelplot =
+	    XtCreateWidget((char *)"bulletinBoard_modelplot", xmBulletinBoardWidgetClass, dialogShell_modelplot, args, ac);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_modelplot, (char *)"Clear Block", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 480);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 80);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 32);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		pushButton_modelplot_clearblock =
+		    XmCreatePushButton(bulletinBoard_modelplot, (char *)"pushButton_modelplot_clearblock", args, ac);
+		XtManageChild(pushButton_modelplot_clearblock);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_modelplot_clearblock, XmNactivateCallback, do_modelplot_clearblock, (XtPointer)0);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+	ac++;
+	XtSetArg(args[ac], XmNx, 80);
+	ac++;
+	XtSetArg(args[ac], XmNy, 10);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 270);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 32);
+	ac++;
+	XtSetArg(args[ac], XmNisHomogeneous, False);
+	ac++;
+	radioBox = XmCreateRadioBox(bulletinBoard_modelplot, (char *)"radioBox", args, ac);
+	XtManageChild(radioBox);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox, (char *)"Time Series", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 88);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 26);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(radioBox, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_modelplot_timeseries = XmCreateToggleButton(radioBox, (char *)"toggleButton_modelplot_timeseries", args, ac);
+		XtManageChild(toggleButton_modelplot_timeseries);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_modelplot_timeseries, XmNvalueChangedCallback, do_modelplot_timeseries, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox, (char *)"Perturbation", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 88);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 26);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(radioBox, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_modelplot_perturbation =
+		    XmCreateToggleButton(radioBox, (char *)"toggleButton_modelplot_perturbation", args, ac);
+		XtManageChild(toggleButton_modelplot_perturbation);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_modelplot_perturbation, XmNvalueChangedCallback, do_modelplot_perturbation, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(radioBox, (char *)"Tie Offsets", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNwidth, 88);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 26);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(radioBox, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_modelplot_tieoffsets = XmCreateToggleButton(radioBox, (char *)"toggleButton_modelplot_tieoffsets", args, ac);
+		XtManageChild(toggleButton_modelplot_tieoffsets);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_modelplot_tieoffsets, XmNvalueChangedCallback, do_modelplot_tieoffsets, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_modelplot, (char *)"Full Size", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 390);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 80);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 32);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		pushButton_modelplot_fullsize =
+		    XmCreatePushButton(bulletinBoard_modelplot, (char *)"pushButton_modelplot_fullsize", args, ac);
+		XtManageChild(pushButton_modelplot_fullsize);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_modelplot_fullsize, XmNactivateCallback, do_modelplot_fullsize, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_modelplot,
+		                            (char *)":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
+		                                    "extent\"\"Selection: No selection\"",
+		                            XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(args[ac], XmNrecomputeSize, False);
+		ac++;
+		XtSetArg(args[ac], XmNx, 570);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 550);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 40);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		label_modelplot_status = XmCreateLabel(bulletinBoard_modelplot, (char *)"label_modelplot_status", args, ac);
+		XtManageChild(label_modelplot_status);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	ac = 0;
+	XtSetArg(args[ac], XmNborderWidth, 1);
+	ac++;
+	XtSetArg(args[ac], XmNbackground, BX_CONVERT(bulletinBoard_modelplot, (char *)"white", XmRPixel, 0, &argok));
+	if (argok)
+		ac++;
+	XtSetArg(args[ac], XmNx, 10);
+	ac++;
+	XtSetArg(args[ac], XmNy, 50);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 990);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 420);
+	ac++;
+	drawingArea_modelplot = XmCreateDrawingArea(bulletinBoard_modelplot, (char *)"drawingArea_modelplot", args, ac);
+	XtManageChild(drawingArea_modelplot);
+	XtAddCallback(drawingArea_modelplot, XmNinputCallback, do_modelplot_input, (XtPointer)0);
+	XtAddCallback(drawingArea_modelplot, XmNexposeCallback, do_modelplot_expose, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(bulletinBoard_modelplot, (char *)"Dismiss", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNx, 10);
+		ac++;
+		XtSetArg(args[ac], XmNy, 10);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 60);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 32);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		pushButton_modelplot_dismiss =
+		    XmCreatePushButton(bulletinBoard_modelplot, (char *)"pushButton_modelplot_dismiss", args, ac);
+		XtManageChild(pushButton_modelplot_dismiss);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_modelplot_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer) "bulletinBoard_modelplot");
+	XtAddCallback(pushButton_modelplot_dismiss, XmNactivateCallback, do_modelplot_dismiss, (XtPointer)0);
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 370);
+	ac++;
+	XtSetValues(separator14, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 140);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 330);
+	ac++;
+	XtSetValues(scale_controls_zoffset, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 340);
+	ac++;
+	XtSetValues(label_controls_zoffset, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 270);
+	ac++;
+	XtSetValues(label_controls_smoothing, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 140);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 7);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 270);
+	ac++;
+	XtSetValues(scale_controls_smoothing, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 12);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 310);
+	ac++;
+	XtSetValues(separator12, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 20);
+	ac++;
+	XtSetValues(label_controls_sectionlength, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 20);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 7);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftWidget, label_controls_sectionlength);
+	ac++;
+	XtSetValues(scale_controls_sectionlength, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 140);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 6);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, scale_controls_colorinterval);
+	ac++;
+	XtSetValues(scale_controls_tickinterval, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 140);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 6);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, scale_controls_contourinterval);
+	ac++;
+	XtSetValues(scale_controls_colorinterval, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 140);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 6);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, scale_controls_decimation);
+	ac++;
+	XtSetValues(scale_controls_contourinterval, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 160);
+	ac++;
+	XtSetValues(label_controls_contourinterval, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 200);
+	ac++;
+	XtSetValues(label_controls_colorinterval, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 240);
+	ac++;
+	XtSetValues(label_controls_tickinterval, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 19);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 200);
+	ac++;
+	XtSetValues(pushButton_controls_apply, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_POSITION);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftPosition, 2);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 6);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 5);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, scale_controls_sectionsoundings);
+	ac++;
+	XtSetValues(separator4, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 7);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, scale_controls_tickinterval);
+	ac++;
+	XtSetValues(separator5, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 140);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 6);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, -4);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, separator4);
+	ac++;
+	XtSetValues(scale_controls_decimation, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 120);
+	ac++;
+	XtSetValues(label_controls_decimation, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 60);
+	ac++;
+	XtSetValues(label_controls_sectionsoundings, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_POSITION);
+	ac++;
+	XtSetArg(args[ac], XmNbottomPosition, 19);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 6);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 4);
+	ac++;
+	XtSetArg(args[ac], XmNleftWidget, label_controls_sectionsoundings);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, scale_controls_sectionlength);
+	ac++;
+	XtSetValues(scale_controls_sectionsoundings, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 19);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 30);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 227);
+	ac++;
+	XtSetArg(args[ac], XmNleftWidget, pushButton_controls_apply);
+	ac++;
+	XtSetValues(pushButton_controls_dismiss, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 9);
+	ac++;
+	XtSetValues(label_about_create1, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_POSITION);
+	ac++;
+	XtSetArg(args[ac], XmNleftPosition, 2);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 8);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 210);
+	ac++;
+	XtSetValues(separator1, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 170);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 178);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 410);
+	ac++;
+	XtSetValues(pushButton_about_dismiss, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 9);
+	ac++;
+	XtSetValues(label_about_create, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 270);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 118);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 280);
+	ac++;
+	XtSetValues(label_about_lamont, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 110);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 268);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 280);
+	ac++;
+	XtSetValues(label_about_columbia, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 9);
+	ac++;
+	XtSetValues(label_about_mbsystem, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 9);
+	ac++;
+	XtSetValues(label_about_mbpub, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 9);
+	ac++;
+	XtSetValues(label_about_component, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 9);
+	ac++;
+	XtSetValues(label_about_for, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 8);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 60);
+	ac++;
+	XtSetValues(separator, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 9);
+	ac++;
+	XtSetValues(label_about_version, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 9);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 30);
+	ac++;
+	XtSetValues(label_about_function, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 9);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 0);
+	ac++;
+	XtSetValues(label_about_mbedit, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNmenuHelpWidget, cascadeButton_about);
+	ac++;
+	XtSetValues(menuBar_mbnavadjust, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, -2);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, label_status);
+	ac++;
+	XtSetValues(scrolledWindow_messages, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomWidget, scrolledWindow_messages);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 0);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 0);
+	ac++;
+	XtSetValues(label_status, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 450);
+	ac++;
+	XtSetValues(label_listdata, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 8);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetArg(args[ac], XmNrightOffset, 22);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 30);
+	ac++;
+	XtSetArg(args[ac], XmNleftWidget, scrolledWindow_messages);
+	ac++;
+	XtSetArg(args[ac], XmNtopWidget, label_listdata);
+	ac++;
+	XtSetValues(scrolledWindow_datalist, args, ac);
+
+	/* Begin user code block <end_CreatemainWindow> */
+	/* End user code block <end_CreatemainWindow> */
+	return (mainWindow);
 }

@@ -2,17 +2,16 @@
 #include "projects.h"
 #include <stdio.h>
 #include <string.h>
-#define NF 20 /* length of final format string */
+#define NF 20  /* length of final format string */
 #define CUT 60 /* check length of line */
-	void
-p_series(Tseries *T, FILE *file, char *fmt) {
+void p_series(Tseries *T, FILE *file, char *fmt) {
 	int i, j, n, L;
-	char format[NF+1];
+	char format[NF + 1];
 
 	*format = ' ';
 	strncpy(format + 1, fmt, NF - 3);
 	strcat(format, "%n");
-	fprintf(file, "u: %d\n", T->mu+1);
+	fprintf(file, "u: %d\n", T->mu + 1);
 	for (i = 0; i <= T->mu; ++i)
 		if (T->cu[i].m) {
 			fprintf(file, "%d %d%n", i, T->cu[i].m, &L);
@@ -24,7 +23,7 @@ p_series(Tseries *T, FILE *file, char *fmt) {
 			}
 			fputc('\n', file);
 		}
-	fprintf(file, "v: %d\n", T->mv+1);
+	fprintf(file, "v: %d\n", T->mv + 1);
 	for (i = 0; i <= T->mv; ++i)
 		if (T->cv[i].m) {
 			fprintf(file, "%d %d%n", i, T->cv[i].m, &L);

@@ -11,7 +11,7 @@ C_NAMESPACE_VAR int pj_errno = 0;
 int *pj_get_errno_ref()
 
 {
-    return &pj_errno;
+	return &pj_errno;
 }
 
 /* end */

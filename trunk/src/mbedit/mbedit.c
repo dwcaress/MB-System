@@ -15,7 +15,6 @@
  *
  */
 
-
 /* Begin user code block <file_comments> */
 /* End user code block <file_comments> */
 
@@ -31,7 +30,6 @@
 /**
  * Globally included information.
  */
-
 
 /*
  * Headers for classes used in this program
@@ -71,97 +69,92 @@ Widget Createwindow_mbedit(Widget parent);
  */
 #define BX_APP_CLASS "mbedit"
 
-int main( int argc, char **argv)
-{
-    Widget       parent;
-    XtAppContext app;
-    Arg          args[256];
-    Cardinal     ac;
-    Widget   topLevelShell;
+int main(int argc, char **argv) {
+	Widget parent;
+	XtAppContext app;
+	Arg args[256];
+	Cardinal ac;
+	Widget topLevelShell;
 
-    /* Begin user code block <declarations> */
+	/* Begin user code block <declarations> */
 
-    /* make sure that the argc that goes to XtVaAppInitialize
-       is 1 so that no options are removed by its option parsing */
-    int		 argc_save;
-    argc_save = argc;
-    argc = 1;
+	/* make sure that the argc that goes to XtVaAppInitialize
+	   is 1 so that no options are removed by its option parsing */
+	int argc_save;
+	argc_save = argc;
+	argc = 1;
 
-    /* End user code block <declarations> */
+	/* End user code block <declarations> */
 
-    /*
-     * Initialize Xt.
-     */
+	/*
+	 * Initialize Xt.
+	 */
 
-    // XtSetLanguageProc(NULL, (XtLanguageProc) NULL, NULL);
+	// XtSetLanguageProc(NULL, (XtLanguageProc) NULL, NULL);
 
-    /*
-     * The applicationShell is created as an unrealized
-     * parent for multiple topLevelShells.  The topLevelShells
-     * are created as popup children of the applicationShell.
-     * This is a recommendation of Paul Asente & Ralph Swick in
-     * _X_Window_System_Toolkit_ p. 677.
-     */
+	/*
+	 * The applicationShell is created as an unrealized
+	 * parent for multiple topLevelShells.  The topLevelShells
+	 * are created as popup children of the applicationShell.
+	 * This is a recommendation of Paul Asente & Ralph Swick in
+	 * _X_Window_System_Toolkit_ p. 677.
+	 */
 
-    parent = XtVaOpenApplication ( &app,
-                                   BX_APP_CLASS,
-                                   NULL,
-                                   0,
-                                   &argc,
-                                   argv,
-                                   NULL,
-                                   sessionShellWidgetClass,
-                                   NULL );
+	parent = XtVaOpenApplication(&app, BX_APP_CLASS, NULL, 0, &argc, argv, NULL, sessionShellWidgetClass, NULL);
 
-    RegisterBxConverters(app);
-    XmRepTypeInstallTearOffModelConverter();
+	RegisterBxConverters(app);
+	XmRepTypeInstallTearOffModelConverter();
 
-    /* Begin user code block <create_shells> */
-    /* End user code block <create_shells> */
+	/* Begin user code block <create_shells> */
+	/* End user code block <create_shells> */
 
-    /*
-     * Create classes and widgets used in this program.
-     */
+	/*
+	 * Create classes and widgets used in this program.
+	 */
 
-    /* Begin user code block <create_topLevelShell> */
-    /* End user code block <create_topLevelShell> */
+	/* Begin user code block <create_topLevelShell> */
+	/* End user code block <create_topLevelShell> */
 
-    ac = 0;
-    XtSetArg(args[ac], XmNtitle, "MBedit"); ac++;
-    XtSetArg(args[ac], XmNiconName, "MBedit"); ac++;
-    XtSetArg(args[ac], XmNallowShellResize, False); ac++;
-    XtSetArg(args[ac], XmNdeleteResponse, XmDESTROY); ac++;
-    XtSetArg(args[ac], XmNx, 114); ac++;
-    XtSetArg(args[ac], XmNy, 631); ac++;
-    XtSetArg(args[ac], XmNwidth, 1014); ac++;
-    XtSetArg(args[ac], XmNheight, 663); ac++;
-    topLevelShell = XtCreatePopupShell((char *)"topLevelShell",
-        topLevelShellWidgetClass,
-        parent,
-        args,
-        ac);
-    XtAddCallback(topLevelShell, XmNdestroyCallback, do_quit, (XtPointer)0);
-    window_mbedit = (Widget)Createwindow_mbedit(topLevelShell);
-    XtManageChild(window_mbedit);
-    XtPopup(XtParent(window_mbedit), XtGrabNone);
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "MBedit");
+	ac++;
+	XtSetArg(args[ac], XmNiconName, "MBedit");
+	ac++;
+	XtSetArg(args[ac], XmNallowShellResize, False);
+	ac++;
+	XtSetArg(args[ac], XmNdeleteResponse, XmDESTROY);
+	ac++;
+	XtSetArg(args[ac], XmNx, 114);
+	ac++;
+	XtSetArg(args[ac], XmNy, 631);
+	ac++;
+	XtSetArg(args[ac], XmNwidth, 1014);
+	ac++;
+	XtSetArg(args[ac], XmNheight, 663);
+	ac++;
+	topLevelShell = XtCreatePopupShell((char *)"topLevelShell", topLevelShellWidgetClass, parent, args, ac);
+	XtAddCallback(topLevelShell, XmNdestroyCallback, do_quit, (XtPointer)0);
+	window_mbedit = (Widget)Createwindow_mbedit(topLevelShell);
+	XtManageChild(window_mbedit);
+	XtPopup(XtParent(window_mbedit), XtGrabNone);
 
-    /* Begin user code block <app_procedures> */
+	/* Begin user code block <app_procedures> */
 
-    /* initialize app value and wait until view realized */
-    do_wait_until_viewed(app);
+	/* initialize app value and wait until view realized */
+	do_wait_until_viewed(app);
 
-    /* initialize everything */
-    do_mbedit_init(argc_save,argv);
+	/* initialize everything */
+	do_mbedit_init(argc_save, argv);
 
-    /* End user code block <app_procedures> */
+	/* End user code block <app_procedures> */
 
-    /* Begin user code block <main_loop> */
-    /* End user code block <main_loop> */
+	/* Begin user code block <main_loop> */
+	/* End user code block <main_loop> */
 
-    XtAppMainLoop(app);
+	XtAppMainLoop(app);
 
-    /*
-     * A return value regardless of whether or not the main loop ends.
-     */
-     return(0);
+	/*
+	 * A return value regardless of whether or not the main loop ends.
+	 */
+	return (0);
 }

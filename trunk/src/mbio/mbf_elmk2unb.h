@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_elmk2unb.h	6/6/97
  *	$Id$
  *
- *    Copyright (c) 1997-2016 by
+ *    Copyright (c) 1997-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -52,124 +52,122 @@
  */
 
 /* maximum number of beams and pixels */
-#define	MBF_ELMK2UNB_MAXBEAMS	126
-#define	MBF_ELMK2UNB_COMMENT_LENGTH	200
+#define MBF_ELMK2UNB_MAXBEAMS 126
+#define MBF_ELMK2UNB_COMMENT_LENGTH 200
 
-struct mbf_elmk2unb_beam_struct
-	{
-	unsigned int	bath;		/* 0.01 m */
-	int	bath_acrosstrack;	/* 0.01 m */
-	int	bath_alongtrack;	/* 0.01 m */
-	unsigned int	tt;		/* 0.05 ms */
-	int	quality;		/* 1 (best) to 8 (worst) */
-	int	amplitude;		/* dB + 128 */
-	unsigned short	time_offset;	/* 0.5 ms */
-	short	heave;			/* 0.001 meters */
-	short	roll;			/* 0.005 degrees */
-	short	pitch;			/* 0.005 degrees */
-	short	angle;			/* 0.005 degrees */
-	};
+struct mbf_elmk2unb_beam_struct {
+	unsigned int bath;          /* 0.01 m */
+	int bath_acrosstrack;       /* 0.01 m */
+	int bath_alongtrack;        /* 0.01 m */
+	unsigned int tt;            /* 0.05 ms */
+	int quality;                /* 1 (best) to 8 (worst) */
+	int amplitude;              /* dB + 128 */
+	unsigned short time_offset; /* 0.5 ms */
+	short heave;                /* 0.001 meters */
+	short roll;                 /* 0.005 degrees */
+	short pitch;                /* 0.005 degrees */
+	short angle;                /* 0.005 degrees */
+};
 
-struct mbf_elmk2unb_struct
-	{
+struct mbf_elmk2unb_struct {
 	/* type of data record */
-	int	kind;			/* Data vs Comment */
+	int kind; /* Data vs Comment */
 
 	/* type of sonar */
-	int	sonar;			/* Type of Elac sonar */
+	int sonar; /* Type of Elac sonar */
 
 	/* parameter info (parameter telegrams) */
-	int	par_year;
-	int	par_month;
-	int	par_day;
-	int	par_hour;
-	int	par_minute;
-	int	par_second;
-	int	par_hundredth_sec;
-	int	par_thousandth_sec;
-	short	roll_offset;	/* roll offset (degrees) */
-	short	pitch_offset;	/* pitch offset (degrees) */
-	short	heading_offset;	/* heading offset (degrees) */
-	short	time_delay;	/* positioning system delay (sec) */
-	short	transducer_port_height;
-	short	transducer_starboard_height;
-	short	transducer_port_depth;
-	short	transducer_starboard_depth;
-	short	transducer_port_x;
-	short	transducer_starboard_x;
-	short	transducer_port_y;
-	short	transducer_starboard_y;
-	short	transducer_port_error;
-	short	transducer_starboard_error;
-	short	antenna_height;
-	short	antenna_x;
-	short	antenna_y;
-	short	vru_height;
-	short	vru_x;
-	short	vru_y;
-	short	line_number;
-	short	start_or_stop;
-	short	transducer_serial_number;
+	int par_year;
+	int par_month;
+	int par_day;
+	int par_hour;
+	int par_minute;
+	int par_second;
+	int par_hundredth_sec;
+	int par_thousandth_sec;
+	short roll_offset;    /* roll offset (degrees) */
+	short pitch_offset;   /* pitch offset (degrees) */
+	short heading_offset; /* heading offset (degrees) */
+	short time_delay;     /* positioning system delay (sec) */
+	short transducer_port_height;
+	short transducer_starboard_height;
+	short transducer_port_depth;
+	short transducer_starboard_depth;
+	short transducer_port_x;
+	short transducer_starboard_x;
+	short transducer_port_y;
+	short transducer_starboard_y;
+	short transducer_port_error;
+	short transducer_starboard_error;
+	short antenna_height;
+	short antenna_x;
+	short antenna_y;
+	short vru_height;
+	short vru_x;
+	short vru_y;
+	short line_number;
+	short start_or_stop;
+	short transducer_serial_number;
 
 	/* comment */
-	char	comment[MBF_ELMK2UNB_COMMENT_LENGTH];
+	char comment[MBF_ELMK2UNB_COMMENT_LENGTH];
 
 	/* position (position telegrams) */
-	int	pos_year;
-	int	pos_month;
-	int	pos_day;
-	int	pos_hour;
-	int	pos_minute;
-	int	pos_second;
-	int	pos_hundredth_sec;
-	int	pos_thousandth_sec;
-	int	pos_latitude;		/* 180 deg = 2e9 */
-	int	pos_longitude;		/* 180 deg = 2e9 */
-	unsigned int	utm_northing;
-	unsigned int	utm_easting;
-	int	utm_zone_lon;		/* 180 deg = 2e9 */
-	char	utm_zone;
-	char	hemisphere;
-	char	ellipsoid;
-	char	pos_spare;
-	int	semi_major_axis;
-	int	other_quality;
+	int pos_year;
+	int pos_month;
+	int pos_day;
+	int pos_hour;
+	int pos_minute;
+	int pos_second;
+	int pos_hundredth_sec;
+	int pos_thousandth_sec;
+	int pos_latitude;  /* 180 deg = 2e9 */
+	int pos_longitude; /* 180 deg = 2e9 */
+	unsigned int utm_northing;
+	unsigned int utm_easting;
+	int utm_zone_lon; /* 180 deg = 2e9 */
+	char utm_zone;
+	char hemisphere;
+	char ellipsoid;
+	char pos_spare;
+	int semi_major_axis;
+	int other_quality;
 
 	/* sound velocity profile */
-	int	svp_year;
-	int	svp_month;
-	int	svp_day;
-	int	svp_hour;
-	int	svp_minute;
-	int	svp_second;
-	int	svp_hundredth_sec;
-	int	svp_thousandth_sec;
-	int	svp_latitude;		/* 180 deg = 2e9 */
-	int	svp_longitude;		/* 180 deg = 2e9 */
-	int	svp_num;
-	int	svp_depth[500]; /* 0.1 meters */
-	int	svp_vel[500];	/* 0.1 meters/sec */
+	int svp_year;
+	int svp_month;
+	int svp_day;
+	int svp_hour;
+	int svp_minute;
+	int svp_second;
+	int svp_hundredth_sec;
+	int svp_thousandth_sec;
+	int svp_latitude;  /* 180 deg = 2e9 */
+	int svp_longitude; /* 180 deg = 2e9 */
+	int svp_num;
+	int svp_depth[500]; /* 0.1 meters */
+	int svp_vel[500];   /* 0.1 meters/sec */
 
 	/* general bathymetry */
-	int	year;
-	int	month;
-	int	day;
-	int	hour;
-	int	minute;
-	int	second;
-	int	hundredth_sec;
-	int	thousandth_sec;
-	int	latitude;		/* 180 deg = 2e9 */
-	int	longitude;		/* 180 deg = 2e9 */
-	int	ping_num;
-	int	sound_vel;		/* 0.1 m/s */
-	int	heading;		/* 0.01 deg */
-	int	pulse_length;		/* 0.01 ms */
-	int	mode;			/* 0: omni, 1: RDT (def) */
-	int	source_power;		/* 0: low, 1: high */
-	int	receiver_gain_stbd;	/* db */
-	int	receiver_gain_port;	/* db */
-	int	reserved;
-	int	beams_bath;		/* number of beams stored */
+	int year;
+	int month;
+	int day;
+	int hour;
+	int minute;
+	int second;
+	int hundredth_sec;
+	int thousandth_sec;
+	int latitude;  /* 180 deg = 2e9 */
+	int longitude; /* 180 deg = 2e9 */
+	int ping_num;
+	int sound_vel;          /* 0.1 m/s */
+	int heading;            /* 0.01 deg */
+	int pulse_length;       /* 0.01 ms */
+	int mode;               /* 0: omni, 1: RDT (def) */
+	int source_power;       /* 0: low, 1: high */
+	int receiver_gain_stbd; /* db */
+	int receiver_gain_port; /* db */
+	int reserved;
+	int beams_bath; /* number of beams stored */
 	struct mbf_elmk2unb_beam_struct beams[MBF_ELMK2UNB_MAXBEAMS];
-	};
+};

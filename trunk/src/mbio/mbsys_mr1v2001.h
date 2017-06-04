@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_mr1v2001.h	3/6/2003
  *	$Id$
  *
- *    Copyright (c) 2003-2016 by
+ *    Copyright (c) 2003-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -57,88 +57,61 @@
 #define MBSYS_MR1V2001_PIXELS_SIDE 3500
 
 /* maximum number of bathymetry beams for MR1 */
-#define MBSYS_MR1V2001_BEAMS (2*MBSYS_MR1V2001_BEAMS_SIDE + 3)
+#define MBSYS_MR1V2001_BEAMS (2 * MBSYS_MR1V2001_BEAMS_SIDE + 3)
 
 /* maximum number of sidescan pixels output for MR1 */
-#define MBSYS_MR1V2001_PIXELS (2*MBSYS_MR1V2001_PIXELS_SIDE + 3)
+#define MBSYS_MR1V2001_PIXELS (2 * MBSYS_MR1V2001_PIXELS_SIDE + 3)
 
 /* maximum length of comment */
-#define	MBSYS_MR1V2001_MAXLINE 256
+#define MBSYS_MR1V2001_MAXLINE 256
 
 /* angle from vertical of MR1 transducers */
-#define	MBSYS_MR1V2001_XDUCER_ANGLE 50.0
+#define MBSYS_MR1V2001_XDUCER_ANGLE 50.0
 
-struct mbsys_mr1v2001_struct
-	{
+struct mbsys_mr1v2001_struct {
 	/* type of data record */
-	int	kind;
+	int kind;
 
 	/* file header info */
 	BSFile header;
 
 	/* ping */
-	Ping 	ping;
+	Ping ping;
 
 	/* data buffer */
-	unsigned int	bsbuffersize;
-	void 	*bsbuffer;
+	unsigned int bsbuffersize;
+	void *bsbuffer;
 
 	/* PingData including sensors */
-	PingData    pingdata;
+	PingData pingdata;
 
 	/* comment */
-	char	comment[MBSYS_MR1V2001_MAXLINE];
+	char comment[MBSYS_MR1V2001_MAXLINE];
 };
 
-
 /* system specific function prototypes */
-int mbsys_mr1v2001_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_mr1v2001_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_mr1v2001_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_mr1v2001_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_mr1v2001_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_mr1v2001_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *detects, int *error);
-int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-int mbsys_mr1v2001_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_mr1v2001_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_mr1v2001_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
+int mbsys_mr1v2001_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_mr1v2001_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_mr1v2001_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
+                              int *error);
+int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
+                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_mr1v2001_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                          double *ssalongtrack, char *comment, int *error);
+int mbsys_mr1v2001_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                          double *ssv, int *error);
+int mbsys_mr1v2001_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                                    double *altitude, int *error);
+int mbsys_mr1v2001_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
+                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
+                               double *pitch, double *heave, int *error);
+int mbsys_mr1v2001_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
+                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
+                              int *error);
+int mbsys_mr1v2001_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);

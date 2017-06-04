@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hs10jams.h	12/4/00
  *	$Id$
  *
- *    Copyright (c) 2000-2016 by
+ *    Copyright (c) 2000-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -134,7 +134,6 @@
  *      ----------------------------------------------------------
  *
  */
- *
- */
+** /
 
-#define	MBF_HS10JAMS_MAXLINE	716
+#define MBF_HS10JAMS_MAXLINE 716

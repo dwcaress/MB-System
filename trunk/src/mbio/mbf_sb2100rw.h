@@ -2,7 +2,7 @@
  *    The MB-system:	MBF_SB2100RW.h	3/3/94
  *	$Id$
  *
- *    Copyright (c) 1994-2016 by
+ *    Copyright (c) 1994-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -73,110 +73,107 @@
 #define MBF_SB2100RW_CENTER_PIXEL 1000
 
 /* define id's for the different types of raw Hydrosweep records */
-#define	MBF_SB2100RW_RECORDS	6
-#define	MBF_SB2100RW_NONE	0
-#define	MBF_SB2100RW_RAW_LINE	1
-#define	MBF_SB2100RW_PR		2
-#define	MBF_SB2100RW_TR		3
-#define	MBF_SB2100RW_DR		4
-#define	MBF_SB2100RW_SS		5
-char *mbf_sb2100rw_labels[] = {
-	"NONE    ", "RAW_LINE", "SB2100PR",
-	"SB2100TR", "SB2100DR", "SB2100SS"};
+#define MBF_SB2100RW_RECORDS 6
+#define MBF_SB2100RW_NONE 0
+#define MBF_SB2100RW_RAW_LINE 1
+#define MBF_SB2100RW_PR 2
+#define MBF_SB2100RW_TR 3
+#define MBF_SB2100RW_DR 4
+#define MBF_SB2100RW_SS 5
+char *mbf_sb2100rw_labels[] = {"NONE    ", "RAW_LINE", "SB2100PR", "SB2100TR", "SB2100DR", "SB2100SS"};
 
-struct mbf_sb2100rw_struct
-	{
+struct mbf_sb2100rw_struct {
 	/* type of data record */
-	int	kind;
+	int kind;
 
 	/* time stamp (all records ) */
-	int	year;
-	int	jday;
-	int	hour;
-	int	minute;
-	int	msec;			/* msec */
+	int year;
+	int jday;
+	int hour;
+	int minute;
+	int msec; /* msec */
 
 	/* sonar parameters (PR) */
-	int	roll_bias_port;			/* 0.01 deg */
-	int	roll_bias_starboard;		/* 0.01 deg */
-	int	pitch_bias;			/* 0.01 deg */
-	int	ship_draft;			/* 0.01 m */
-	int	num_svp;
-	int	vdepth[MBF_SB2100RW_MAXVEL];	/* 0.01 m */
-	int	velocity[MBF_SB2100RW_MAXVEL];	/* 0.01 m/sec */
+	int roll_bias_port;      /* 0.01 deg */
+	int roll_bias_starboard; /* 0.01 deg */
+	int pitch_bias;          /* 0.01 deg */
+	int ship_draft;          /* 0.01 m */
+	int num_svp;
+	int vdepth[MBF_SB2100RW_MAXVEL];   /* 0.01 m */
+	int velocity[MBF_SB2100RW_MAXVEL]; /* 0.01 m/sec */
 
 	/* DR and SS header info */
-	double	longitude;
-	double	latitude;
-	int	speed;			/* 0.001 m/sec */
-	int	heave; 			/* 0.001 m; + up */
-	char	range_scale; 		/* D = m; I = 0.1 m; S = 0.01 m */
-	int	surface_sound_velocity;	/* 0.01 m/sec */
-	char	ssv_source;		/* V=Velocimeter, M=Manual,
-						T=Temperature */
-	char	depth_gate_mode;	/* A=Auto, M=Manual */
+	double longitude;
+	double latitude;
+	int speed;                  /* 0.001 m/sec */
+	int heave;                  /* 0.001 m; + up */
+	char range_scale;           /* D = m; I = 0.1 m; S = 0.01 m */
+	int surface_sound_velocity; /* 0.01 m/sec */
+	char ssv_source;            /* V=Velocimeter, M=Manual,
+	                        T=Temperature */
+	char depth_gate_mode;       /* A=Auto, M=Manual */
 
 	/* DR header info */
-	int	num_beams;		/* number of formed beams recorded */
-	char	svp_corr_beams;		/* 0=None; A=True Xtrack
-						and Apparent Depth;
-						T=True Xtrack and True Depth */
-	char	spare_dr[2];
-	int	num_algorithms;		/* If 1 then only "best" algorithm
-						recorded, else multiple
-						algorithm results recorded */
-	char	algorithm_order[4];	/* blank if num_algorithms=1;
-						W=WMT and B=BDI */
+	int num_beams;       /* number of formed beams recorded */
+	char svp_corr_beams; /* 0=None; A=True Xtrack
+	             and Apparent Depth;
+	             T=True Xtrack and True Depth */
+	char spare_dr[2];
+	int num_algorithms; /* If 1 then only "best" algorithm
+	                recorded, else multiple
+	                algorithm results recorded */
+	char algorithm_order[4]; /* blank if num_algorithms=1;
+	                 W=WMT and B=BDI */
 
 	/* SS header info */
-	int	num_pixels;		/* number of sidescan pixels recorded */
-	char	svp_corr_ss;		/* 0=off; 1=on */
-	int	ss_data_length;		/* number of bytes of sidescan data */
-	char	pixel_algorithm;	/* pixel intensity algorithm
-						D = logarithm, L = linear */
-	int	num_pixels_12khz;
-	double	pixel_size_12khz;	/* meters */
-	int	num_pixels_36khz;
-	double	pixel_size_36khz;	/* meters */
-	char	spare_ss;
-	char	pixel_size_scale;
+	int num_pixels;       /* number of sidescan pixels recorded */
+	char svp_corr_ss;     /* 0=off; 1=on */
+	int ss_data_length;   /* number of bytes of sidescan data */
+	char pixel_algorithm; /* pixel intensity algorithm
+	              D = logarithm, L = linear */
+	int num_pixels_12khz;
+	double pixel_size_12khz; /* meters */
+	int num_pixels_36khz;
+	double pixel_size_36khz; /* meters */
+	char spare_ss;
+	char pixel_size_scale;
 
 	/* transmit parameters and navigation (DR and SS) */
-	char	frequency[2];		/* LL=12kHz; HH=36kHz; number=36kHz
-						until this angle
-						in degrees then 12kHz */
-	int	ping_gain_12khz;			/* dB */
-	int	ping_pulse_width_12khz;			/* msec */
-	int	transmitter_attenuation_12khz;		/* dB */
-	int	pitch_12khz;				/* 0.001 deg */
-	int	roll_12khz;				/* 0.001 deg */
-	int	heading_12khz;				/* 0.001 deg */
-	int	ping_gain_36khz;			/* dB */
-	int	ping_pulse_width_36khz;			/* msec */
-	int	transmitter_attenuation_36khz;		/* dB */
-	int	pitch_36khz;				/* 0.001 deg */
-	int	roll_36khz;				/* 0.001 deg */
-	int	heading_36khz;				/* 0.001 deg */
+	char frequency[2];   /* LL=12kHz; HH=36kHz; number=36kHz
+	             until this angle
+	             in degrees then 12kHz */
+	int ping_gain_12khz; /* dB */
+	int ping_pulse_width_12khz;        /* msec */
+	int transmitter_attenuation_12khz; /* dB */
+	int pitch_12khz;                   /* 0.001 deg */
+	int roll_12khz;                    /* 0.001 deg */
+	int heading_12khz;                 /* 0.001 deg */
+	int ping_gain_36khz;               /* dB */
+	int ping_pulse_width_36khz;        /* msec */
+	int transmitter_attenuation_36khz; /* dB */
+	int pitch_36khz;                   /* 0.001 deg */
+	int roll_36khz;                    /* 0.001 deg */
+	int heading_36khz;                 /* 0.001 deg */
 
 	/* formed beam data (DR) */
-	char	source[MBF_SB2100RW_BEAMS];		/* B=BDI, W=WMT */
-	int	travel_time[MBF_SB2100RW_BEAMS];	/*  msec */
-	int	angle_across[MBF_SB2100RW_BEAMS];	/* 0.001 deg */
-	int	angle_forward[MBF_SB2100RW_BEAMS];	/* 0.01 deg */
-	int	depth[MBF_SB2100RW_BEAMS];		/* m or cm */
-	int	acrosstrack_beam[MBF_SB2100RW_BEAMS];	/* m or cm */
-	int	alongtrack_beam[MBF_SB2100RW_BEAMS];	/* m or cm */
-	int	amplitude_beam[MBF_SB2100RW_BEAMS];	/* 0.25 dB */
-	int	signal_to_noise[MBF_SB2100RW_BEAMS];	/* dB */
-	int	echo_length[MBF_SB2100RW_BEAMS];	/* samples */
-	char	quality[MBF_SB2100RW_BEAMS];		/* 0=no data,
-							Q=poor quality,
-							blank otherwise */
+	char source[MBF_SB2100RW_BEAMS];          /* B=BDI, W=WMT */
+	int travel_time[MBF_SB2100RW_BEAMS];      /*  msec */
+	int angle_across[MBF_SB2100RW_BEAMS];     /* 0.001 deg */
+	int angle_forward[MBF_SB2100RW_BEAMS];    /* 0.01 deg */
+	int depth[MBF_SB2100RW_BEAMS];            /* m or cm */
+	int acrosstrack_beam[MBF_SB2100RW_BEAMS]; /* m or cm */
+	int alongtrack_beam[MBF_SB2100RW_BEAMS];  /* m or cm */
+	int amplitude_beam[MBF_SB2100RW_BEAMS];   /* 0.25 dB */
+	int signal_to_noise[MBF_SB2100RW_BEAMS];  /* dB */
+	int echo_length[MBF_SB2100RW_BEAMS];      /* samples */
+	char quality[MBF_SB2100RW_BEAMS];         /* 0=no data,
+	                      Q=poor quality,
+	                      blank otherwise */
 
 	/* sidescan data (SS) */
-	int	amplitude_ss[MBF_SB2100RW_PIXELS];	/* range 0-65535 */
-	int	alongtrack_ss[MBF_SB2100RW_PIXELS];	/* m or cm */
+	int amplitude_ss[MBF_SB2100RW_PIXELS];  /* range 0-65535 */
+	int alongtrack_ss[MBF_SB2100RW_PIXELS]; /* m or cm */
 
 	/* comment (TR) */
-	char	comment[MBF_SB2100RW_MAXLINE ];
+	char comment[MBF_SB2100RW_MAXLINE];
 };

@@ -19,8 +19,7 @@
 #define EPS 1e-11
 #define MAX_ITER 10
 #define EN_SIZE 5
-	double *
-pj_enfn(double es) {
+double *pj_enfn(double es) {
 	double t, *en;
 
 	if ((en = (double *)pj_malloc(EN_SIZE * sizeof(double))) != NULL) {
@@ -32,26 +31,23 @@ pj_enfn(double es) {
 	} /* else return NULL if unable to allocate memory */
 	return en;
 }
-	double
-pj_mlfn(double phi, double sphi, double cphi, double *en) {
+double pj_mlfn(double phi, double sphi, double cphi, double *en) {
 	cphi *= sphi;
 	sphi *= sphi;
-	return(en[0] * phi - cphi * (en[1] + sphi*(en[2]
-		+ sphi*(en[3] + sphi*en[4]))));
+	return (en[0] * phi - cphi * (en[1] + sphi * (en[2] + sphi * (en[3] + sphi * en[4]))));
 }
-	double
-pj_inv_mlfn(projCtx ctx, double arg, double es, double *en) {
-	double s, t, phi, k = 1./(1.-es);
+double pj_inv_mlfn(projCtx ctx, double arg, double es, double *en) {
+	double s, t, phi, k = 1. / (1. - es);
 	int i;
 
 	phi = arg;
-	for (i = MAX_ITER; i ; --i) { /* rarely goes over 2 iterations */
+	for (i = MAX_ITER; i; --i) { /* rarely goes over 2 iterations */
 		s = sin(phi);
 		t = 1. - es * s * s;
 		phi -= t = (pj_mlfn(phi, s, cos(phi), en) - arg) * (t * sqrt(t)) * k;
 		if (fabs(t) < EPS)
 			return phi;
 	}
-	pj_ctx_set_errno( ctx, -17 );
+	pj_ctx_set_errno(ctx, -17);
 	return phi;
 }

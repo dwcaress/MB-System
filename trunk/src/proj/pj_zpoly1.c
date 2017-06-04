@@ -4,7 +4,7 @@
 **	i.e. C_0 == (0., 0)
 **	n should always be >= 1 though no checks are made
 */
-	COMPLEX
+COMPLEX
 pj_zpoly1(COMPLEX z, COMPLEX *C, int n) {
 	COMPLEX a;
 	double t;
@@ -19,7 +19,7 @@ pj_zpoly1(COMPLEX z, COMPLEX *C, int n) {
 	return a;
 }
 /* evaluate complex polynomial and derivative */
-	COMPLEX
+COMPLEX
 pj_zpolyd1(COMPLEX z, COMPLEX *C, int n, COMPLEX *der) {
 	COMPLEX a, b;
 	double t;
@@ -30,7 +30,8 @@ pj_zpolyd1(COMPLEX z, COMPLEX *C, int n, COMPLEX *der) {
 		if (first) {
 			first = 0;
 			b = a;
-		} else {
+		}
+		else {
 			b.r = a.r + z.r * (t = b.r) - z.i * b.i;
 			b.i = a.i + z.r * b.i + z.i * t;
 		}

@@ -2,11 +2,11 @@
 #include <projects.h>
 #include <stdio.h>
 #include <string.h>
-	paralist * /* create parameter list entry */
+paralist * /* create parameter list entry */
 pj_mkparam(char *str) {
 	paralist *newitem;
 
-	if((newitem = (paralist *)pj_malloc(sizeof(paralist) + strlen(str))) != NULL) {
+	if ((newitem = (paralist *)pj_malloc(sizeof(paralist) + strlen(str))) != NULL) {
 		newitem->used = 0;
 		newitem->next = 0;
 		if (*str == '+')
@@ -33,21 +33,20 @@ pj_mkparam(char *str) {
 /*                                                                      */
 /************************************************************************/
 
-	PVALUE /* test for presence or get parameter value */
+PVALUE /* test for presence or get parameter value */
 pj_param(projCtx ctx, paralist *pl, const char *opt) {
 
 	int type;
 	unsigned l;
 	PVALUE value;
 
-	if( ctx == NULL )
+	if (ctx == NULL)
 		ctx = pj_get_default_ctx();
 
 	type = *opt++;
 	/* simple linear lookup */
 	l = strlen(opt);
-	while (pl && !(!strncmp(pl->param, opt, l) &&
-	  (!pl->param[l] || pl->param[l] == '=')))
+	while (pl && !(!strncmp(pl->param, opt, l) && (!pl->param[l] || pl->param[l] == '=')))
 		pl = pl->next;
 	if (type == 't')
 		value.i = pl != 0;
@@ -57,24 +56,27 @@ pj_param(projCtx ctx, paralist *pl, const char *opt) {
 		if (*opt == '=')
 			++opt;
 		switch (type) {
-		case 'i':	/* integer input */
+		case 'i': /* integer input */
 			value.i = atoi(opt);
 			break;
-		case 'd':	/* simple real input */
+		case 'd': /* simple real input */
 			value.f = atof(opt);
 			break;
-		case 'r':	/* degrees input */
+		case 'r': /* degrees input */
 			value.f = dmstor_ctx(ctx, opt, 0);
 			break;
-		case 's':	/* char string */
-                        value.s = (char *) opt;
+		case 's': /* char string */
+			value.s = (char *)opt;
 			break;
-		case 'b':	/* boolean */
+		case 'b': /* boolean */
 			switch (*opt) {
-			case 'F': case 'f':
+			case 'F':
+			case 'f':
 				value.i = 0;
 				break;
-			case '\0': case 'T': case 't':
+			case '\0':
+			case 'T':
+			case 't':
 				value.i = 1;
 				break;
 			default:
@@ -84,11 +86,12 @@ pj_param(projCtx ctx, paralist *pl, const char *opt) {
 			}
 			break;
 		default:
-bum_type:	/* note: this is an error in parameter, not a user error */
+		bum_type: /* note: this is an error in parameter, not a user error */
 			fprintf(stderr, "invalid request to pj_param, fatal\n");
 			exit(1);
 		}
-	} else /* not given */
+	}
+	else /* not given */
 		switch (type) {
 		case 'b':
 		case 'i':
