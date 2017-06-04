@@ -389,7 +389,7 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
     --with-motif-include=/usr/local/include \
     --with-motif-lib=/usr/local/lib \
     --with-otps-dir=/usr/local/opt/otps
-    
+
 make -j
 
 make -j install

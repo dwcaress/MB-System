@@ -15,7 +15,8 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
-* Version 5.5.2306       May 27, 2017
+* Version 5.5.2309       June 4, 2017
+  Version 5.5.2306       May 27, 2017
   Version 5.5.2305       May 13, 2017
   Version 5.5.2304       May 6, 2017
   Version 5.5.2303       April 28, 2017
@@ -255,6 +256,15 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2309 (June 4, 2017)
+
+Applied reformatting to all *.c and *.h files using the tool clang-format as
+suggested by Joaquim Luis.
+
+Updated copyright statements to 2017.
+
+Updated mbotps to use the current best OSU tidal model (atlas_tpxo8_1).
 
 -----> 5.5.2306 (May 27, 2017)
 
