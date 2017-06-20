@@ -41,6 +41,8 @@
 <p>MB-System is included in <a href="http://sites.google.com/site/poseidonlinux/">Poseidon Linux</a>, the "Scientific GNU/Linux". Poseidon is an Ubuntu Linux based distribution including a selection of open source software packages intended to support scientific research. In particular, it offers several specific tools in the areas of GIS, 3D Visualization, Mathematics, Statistics and several other fields of research.</p>
 <p><strong><u>UbuntuGIS for Ubuntu Linux</u></strong></p>
 <p>MB-System is one of the packages maintained in the <a href="https://wiki.ubuntu.com/UbuntuGIS">UbuntuGIS</a> repository.</p>
+<p><strong><u>OSGeo-Live Distribution</u></strong></p>
+	<p>The <a href="http://live.osgeo.org/">OSGeo-Live</a> distribution includes MB-System. OSGeo-Live is a self-contained bootable DVD, USB thumb drive or Virtual Machine based on <a href="http://lubuntu.net">Lubuntu</a> that includes a wide variety of open source geospatial software.</p>
 <p><strong><u>HomeBrew for MacOs</u></strong></p>
 <p>MB-System has been packaged for MacOs X using the <a href="http://brew.sh">Homebrew</a> package manager.
  If you have Homebrew installed, then MB-System and its prerequisites can be installed from the science "tap" using these two commands:</p>
@@ -48,10 +50,10 @@
 	<dd>brew tap homebrew/science</dd>
 	<dd>brew install mbsystem</dd>
 </dl>
-<p>However, the MB-System package in homebrew/science does not integrate with the OTPS tide modeling package. If tide correction is important to you, &nbsp;then install OTPS and MB-System using a special formula maintained by Simon Dreutter:</p>
+<p>However, the MB-System package in homebrew/science frequently lags the most recent release and does not integrate with the OTPS tide modeling package. In order to install the current release and/or include  the tide correction functionality,  then install OTPS and MB-System from a private tap at:</p>
 <dl>
-	<dd>brew install zimonkaizoku/mbsystem/otps --with-tpxo8</dd>
-	<dd>brew install zimonkaizoku/mbsystem/mbsystem</dd>
+	<dd>brew install dwcaress/mbsystem/otps --with-tpxo8</dd>
+	<dd>brew install dwcaress/mbsystem/mbsystem</dd>
 </dl>
 <p>Note that installing OTPS requires a Fortran compiler, and may cause Homebrew to install all of the gcc compiler suite.
 <p><strong><u>Fink for MacOs</u></strong></p>
@@ -64,9 +66,6 @@
 	<dd>fink install mbsystem</dd>
 </dl>
 <p>Unfortunately, as of May 2017 there are library namespace issues associated with the OpenMotif package that result in MB-System graphical utilities not working. For now, we recommend installing MB-System on MacOS computers using the Homebrew package manager.</p>
-<p><strong><u>OSGeo-Live Distribution</u></strong></p>
-<p>The <a href="http://live.osgeo.org/">OSGeo-Live</a>
-  distribution includes MB-System. OSGeo-Live is a self-contained bootable DVD, USB thumb drive or Virtual Machine based on <a href="http://lubuntu.net">Lubuntu</a> that includes a wide variety of open source geospatial software.
 <p><b>Acknowledgements</b></p>
 <p>Thanks to Christian Ferreira for creating and distributing Poseidon Linux, to Johan Van de Wauw for updating the MB-System package in UbuntuGIS, to Kurt Schwehr for maintaing the Fink MB-System package, to Anthony Lukach, Simon Dreutter, and Andrew Janke for maintaining the Homebrew MB-System package, and to Hamish Bowman for maintaining the OSGeo-Live MB-System package.</p>
 
@@ -98,7 +97,7 @@ that many modern ftp clients do not require the "binary" command).</p>
 	<dd>% ftp mbsystemftp@ftp.mbari.org</dd>
 	<dd>Password: literally_anything</dd>
 	<dd>&gt; binary</dd>
-	<dd>&gt; get mbsystem-5.5.2305.tar.gz</dd>
+	<dd>&gt; get mbsystem-5.5.2309.tar.gz</dd>
 	<dd>&gt; quit</dd>
 	</dl>
 <center>
@@ -195,20 +194,20 @@ Foundation</a>.</li></ul>
 </center>
 <p>The MB-System source code is extracted from the distribution using the tar utility:</p>
 <dl>
-  <dd>tar xvzf mbsystem-5.5.2305.tar.gz</dd>
+  <dd>tar xvzf mbsystem-5.5.2309.tar.gz</dd>
 </dl>
 <p>or for some older systems with feature-limited versions of tar, a combination of gunzip and tar:</p>
 <dl>
-	<dd>gunzip mbsystem-5.5.2305.tar.gz</dd>
-	<dd>tar xvf mbsystem-5.5.2305.tar</dd>
+	<dd>gunzip mbsystem-5.5.2309.tar.gz</dd>
+	<dd>tar xvf mbsystem-5.5.2309.tar</dd>
 </dl>
-<p>This will create a directory called (for the 5.5.2305 distribution): </p>
+<p>This will create a directory called (for the 5.5.2309 distribution): </p>
 <dl>
-  <dd>mbsystem-5.5.2305</dd>
+  <dd>mbsystem-5.5.2309</dd>
 </dl>
 <p>In order to build and install MB-System from an interactive shell, you need to change your current directory to the distribution:</p>
 <dl>
-  <dd>cd mbsystem-5.5.2305</dd>
+  <dd>cd mbsystem-5.5.2309</dd>
 </dl>
 <center>
 <hr width="67%">
@@ -217,11 +216,11 @@ Foundation</a>.</li></ul>
   <a name="MB-install"></a><strong><font size="+2">How to Build and Install MB-System From Source Using the Configure Script</font></strong>
 </center>
 <p><b><u>General Instructions</u></b></p>
-<p>The configure script has been generated using the autoconf package. The current configure script does not resolve all of the flags and locations needed to build MB-System on all platforms, but does allow for flexible installation and generation and use of shared libraries without requiring interactive editing. These improvements make MB-System distributions much more amenable to inclusion in package manager systems like Debian and Fink. We hope to improve the configure script so that less intervention is required.</p>
+<p>The configure script has been generated using the autoconf package. The current configure script does not resolve all of the flags and locations needed to build MB-System on all platforms, but does allow for flexible installation and generation and use of shared libraries without requiring interactive editing. These improvements make MB-System distributions much more amenable to inclusion in package manager systems like Debian and Homebrew. We hope to improve the configure script so that less intervention is required.</p>
 <p>The basic steps for building MB-System using the configure script are:</p>
 <p>1. Move to the top of the MB-System distribution directory:</p>
 <dl>
-	<dd>cd mbsystem-5.5.2305</dd>
+	<dd>cd mbsystem-5.5.2309</dd>
 </dl>
 <p>2. Run the configure script to generate the Makefile files throughout the
   distribution directory structure. The command line options for configure
@@ -330,12 +329,7 @@ executable <em>perl</em> must also be available in the user's path for most of t
 	<dt>gmt mbswath (...various arguments...)</dt>
 	<dt>gmt mbgrdtiff (...various arguments...)</dt>
 </dl></ul>
-<p>In order for GMT to successfully execute the MB-System modules, the
-location of the shared library named mbsystem.so containing these modules must be known to
-GMT. This can be accomplished by either setting the GMT_CUSTOM_LIBS parameter
-in the file gmt.conf that is part of the GMT installation, by setting
-this parameter in the file gmt.conf in the user's home directory, or by using
-the GMT module gmtset to modify this parameter in the current working directory. If, for instance, MB-System has been installed into "/usr/local", then the MB-System libraries will be located in "/usr/local/lib", and so &nbsp;the GMT_CUSTOM_LIBS parameter in a gmt.conf file should be set to:</p>
+<p>In order for GMT to successfully execute the MB-System modules, the location of the shared libraries containing the dynamically loaded modules must be known to GMT. This can be accomplished by either setting the GMT_CUSTOM_LIBS parameter in the file gmt.conf that is part of the GMT installation, by setting this parameter in the file gmt.conf in the user's home directory, or by using the GMT module gmtset to modify this parameter in the current working directory. The Mb-System GMT modules are included in a shared library file named mbsystem.so that is installed in the same location as the regular MB-System shared libraries (e.g. libmbio), which is typically a location such as /usr/local/lib. If mbsystem.so has been installed in  /usr/local/lib, then the GMT_CUSTOM_LIBS parameter in a gmt.conf file can be set to:</p>
 	<ul><dl><dt>GMT_CUSTOM_LIBS = /usr/local/lib/mbsystem.so</dt></dl></ul>
 <p>The parallel processing modules mbm_multiprocess, mbm_multidatalist, and mbm_multicopy require the perl module Parallel::ForkManager. This can be added to your local perl installation using the command line utility cpan:</p>
 <ul><dl><dt>cpan Parallel::ForkManager</dt></dl></ul>
