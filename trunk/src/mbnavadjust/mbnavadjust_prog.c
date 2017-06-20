@@ -1117,14 +1117,18 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 	/* allocate mbna_file array if needed */
 	if (project.num_files_alloc <= project.num_files) {
 		tptr = realloc(project.files, sizeof(struct mbna_file) * (project.num_files_alloc + ALLOC_NUM));
-		if (project.files != NULL) {
+		if (tptr != NULL) {
 			project.files = (struct mbna_file *)tptr;
 			project.num_files_alloc += ALLOC_NUM;
 		}
 		else {
-			free(project.files);
+			if (project.files != NULL)
+				free(project.files);
 			status = MB_FAILURE;
 			error = MB_ERROR_MEMORY_FAIL;
+			mb_error(mbna_verbose, error, &error_message);
+			fprintf(stderr, "\nError in function <%s>:\n%s\n", function_name, error_message);
+			fprintf(stderr, "\nImportation of <%s> not attempted\n", ipath);
 		}
 	}
 
