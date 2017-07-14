@@ -1,4 +1,4 @@
-.TH mbauvloglist 1 "2 February 2016" "MB-System 5.0" "MB-System 5.0"
+.TH mbauvloglist 1 "2 July 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbauvloglist\fP \- Lists table data from an MBARI AUV mission log file.
 
@@ -7,7 +7,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbauvloglist\fP \fB\-I\fP\fIfile\fP [\fB\-F\fP\fIprintformat\fP \fB\-L\fP\fIlonflip\fP
-\fB\-M\fP\fImode\fP \fB\-N\fP\fInavfile\fP \fB\-O\fP\fIlist\fP \fB\-P \-S\fP \fB\-V \-H\fP ]
+\fB\-M\fP\fImode\fP \fB\-N\fP\fInavfile\fP \fB\-O\fP\fIlist\fP \fB\-P\fP \fB\-R\fP\fIid\fP \-S\fP \fB\-V \-H\fP ]
 
 .SH DESCRIPTION
 MBauvloglist reads an MBARI AUV mission log file and lists specified
@@ -363,18 +363,40 @@ log file being parsed, plus the following:
      mergeRoll
      mergePitch
      mergeHeave
-     potentialTemperature
+     calcConductivity
+     calcTemperature
+     calcPressure
+     calcSalinity
+     calcSoundspeed
+     calcPotentialTemperature
+     calcDensity
 .br
 All of the special values are double values. Those beginning with "merge"
 derive from interpolation of data from an external navigation file
-specified using the \fB-N\fP option. The "potentialTemperature" value is defined
-only when the input file is fastcatlog.log, which contains temperature, pressure,
-and salinity values.
-
+specified using the \fB-N\fP option. Those beginning with "calc" are defined
+only when the input file is fastcatlog.log, which contains both raw conductivity,
+temperature, and pressure values from a SeaBird SBE49 Fastcat CTD and
+temperature, pressure, and salinity values derived from the raw values. If
+the \fB\-R\fP\fIid\fP option is used, then the temperature, conductivity, salinity,
+and pressure values will be recalculated using the calibration coefficients
+referenced by the \fIid\fP value.
 .TP
 .B \-P
 .br
 Prints out the log file header.
+.TP
+.B \-R
+\fIid\fP
+.br
+This option is meaningful only when the input file is fastcatlog.log, which
+contains both raw conductivity, temperature, and pressure values from a
+SeaBird SBE49 Fastcat CTD and temperature, pressure, and salinity values
+derived from the raw values. If the \fB\-R\fP\fIid\fP option is used, then the
+temperature, conductivity, salinity,
+and pressure values will be recalculated using the calibration coefficients
+referenced by the \fIid\fP value. As of July 2017, the only calibration
+coefficients defined are referenced by \fIid\fP=1, for the SeaBird SBE49 Fastcat
+CTD used on MBARI Mapping AUV 1 during 2016 and 2017.
 .TP
 .B \-S
 .br

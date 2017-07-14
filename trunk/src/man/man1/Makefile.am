@@ -85,8 +85,4 @@ mbsystem.1 \
 mbtime.1 \
 mbvelocitytool.1
 
-if BUILD_PROJ
-  man_PROJ = proj.1 geod.1 
-endif
-
-EXTRA_DIST = $(man_MANS) $(man_PROJ)
+EXTRA_DIST = $(man_MANS)

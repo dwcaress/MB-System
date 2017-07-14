@@ -133,7 +133,8 @@ extern void do_scale_y(Widget, XtPointer, XtPointer);
 extern void do_number_pings(Widget, XtPointer, XtPointer);
 extern void do_number_step(Widget, XtPointer, XtPointer);
 extern void do_view_mode(Widget, XtPointer, XtPointer);
-extern void do_show_flagged(Widget, XtPointer, XtPointer);
+extern void do_show_flaggedsoundings(Widget, XtPointer, XtPointer);
+extern void do_show_flaggedprofiles(Widget, XtPointer, XtPointer);
 extern void do_show_flags(Widget, XtPointer, XtPointer);
 extern void do_show_detects(Widget, XtPointer, XtPointer);
 extern void do_show_pulsetypes(Widget, XtPointer, XtPointer);
@@ -652,6 +653,32 @@ Widget Createwindow_mbedit(Widget parent) {
 	{
 		XmString tmp0;
 
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Flagged Soundings", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		toggleButton_show_flaggedsoundings_on = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_flaggedsoundings_on", args, ac);
+		XtManageChild(toggleButton_show_flaggedsoundings_on);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(toggleButton_show_flaggedsoundings_on, XmNvalueChangedCallback, do_show_flaggedsoundings, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
 		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Flagged Profile", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
@@ -663,8 +690,8 @@ Widget Createwindow_mbedit(Widget parent) {
 		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
 		if (argok)
 			ac++;
-		toggleButton_show_flagged_on = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_flagged_on", args, ac);
-		XtManageChild(toggleButton_show_flagged_on);
+		toggleButton_show_flaggedprofiles_on = XmCreateToggleButton(pulldownMenu_view, (char *)"toggleButton_show_flaggedprofiles_on", args, ac);
+		XtManageChild(toggleButton_show_flaggedprofiles_on);
 
 		/**
 		 * Free any memory allocated for resources.
@@ -672,7 +699,7 @@ Widget Createwindow_mbedit(Widget parent) {
 		XmStringFree((XmString)tmp0);
 	}
 
-	XtAddCallback(toggleButton_show_flagged_on, XmNvalueChangedCallback, do_show_flagged, (XtPointer)0);
+	XtAddCallback(toggleButton_show_flaggedprofiles_on, XmNvalueChangedCallback, do_show_flaggedprofiles, (XtPointer)0);
 
 	ac = 0;
 	separator8 = XmCreateSeparator(pulldownMenu_view, (char *)"separator8", args, ac);

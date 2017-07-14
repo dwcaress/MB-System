@@ -5197,6 +5197,8 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 	double heave = 0.0;
 	double beamheave;
 	double soundspeed;
+	double soundspeednew;
+	double soundspeedsnellfactor = 1.0;
 	double theta, phi;
 	double rr, xx, zz;
 	double mtodeglon, mtodeglat, headingx, headingy;
@@ -5206,6 +5208,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 	int jheading = 0;
 	int jaltitude = 0;
 	int jattitude = 0;
+	int jsoundspeed = 0;
 	int j1, j2;
 	int interp_status = MB_SUCCESS;
 	int interp_error = MB_ERROR_NO_ERROR;
@@ -5267,31 +5270,36 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
-		fprintf(stderr, "dbg2       timestamp_changed:          %d\n", pars->timestamp_changed);
-		fprintf(stderr, "dbg2       time_d:                     %f\n", pars->time_d);
-		fprintf(stderr, "dbg2       n_nav:                      %d\n", pars->n_nav);
-		fprintf(stderr, "dbg2       nav_time_d:                 %p\n", pars->nav_time_d);
-		fprintf(stderr, "dbg2       nav_lon:                    %p\n", pars->nav_lon);
-		fprintf(stderr, "dbg2       nav_lat:                    %p\n", pars->nav_lat);
-		fprintf(stderr, "dbg2       nav_speed:                  %p\n", pars->nav_speed);
-		fprintf(stderr, "dbg2       n_sensordepth:              %d\n", pars->n_sensordepth);
-		fprintf(stderr, "dbg2       sensordepth_time_d:         %p\n", pars->sensordepth_time_d);
-		fprintf(stderr, "dbg2       sensordepth_sensordepth:    %p\n", pars->sensordepth_sensordepth);
-		fprintf(stderr, "dbg2       n_heading:                  %d\n", pars->n_heading);
-		fprintf(stderr, "dbg2       heading_time_d:             %p\n", pars->heading_time_d);
-		fprintf(stderr, "dbg2       heading_heading:            %p\n", pars->heading_heading);
-		fprintf(stderr, "dbg2       n_altitude:                 %d\n", pars->n_altitude);
-		fprintf(stderr, "dbg2       altitude_time_d:            %p\n", pars->altitude_time_d);
-		fprintf(stderr, "dbg2       altitude_altitude:          %p\n", pars->altitude_altitude);
-		fprintf(stderr, "dbg2       n_attitude:                 %d\n", pars->n_attitude);
-		fprintf(stderr, "dbg2       attitude_time_d:            %p\n", pars->attitude_time_d);
-		fprintf(stderr, "dbg2       attitude_roll:              %p\n", pars->attitude_roll);
-		fprintf(stderr, "dbg2       attitude_pitch:             %p\n", pars->attitude_pitch);
-		fprintf(stderr, "dbg2       attitude_heave:             %p\n", pars->attitude_heave);
-		fprintf(stderr, "dbg2       no_change_survey:           %d\n", pars->no_change_survey);
-		fprintf(stderr, "dbg2       multibeam_sidescan_source:  %d\n", pars->multibeam_sidescan_source);
-		fprintf(stderr, "dbg2       n_kluge:                    %d\n", pars->n_kluge);
+		fprintf(stderr, "dbg2       target_sensor:                 %d\n", pars->target_sensor);
+		fprintf(stderr, "dbg2       timestamp_changed:             %d\n", pars->timestamp_changed);
+		fprintf(stderr, "dbg2       time_d:                        %f\n", pars->time_d);
+		fprintf(stderr, "dbg2       n_nav:                         %d\n", pars->n_nav);
+		fprintf(stderr, "dbg2       nav_time_d:                    %p\n", pars->nav_time_d);
+		fprintf(stderr, "dbg2       nav_lon:                       %p\n", pars->nav_lon);
+		fprintf(stderr, "dbg2       nav_lat:                       %p\n", pars->nav_lat);
+		fprintf(stderr, "dbg2       nav_speed:                     %p\n", pars->nav_speed);
+		fprintf(stderr, "dbg2       n_sensordepth:                 %d\n", pars->n_sensordepth);
+		fprintf(stderr, "dbg2       sensordepth_time_d:            %p\n", pars->sensordepth_time_d);
+		fprintf(stderr, "dbg2       sensordepth_sensordepth:       %p\n", pars->sensordepth_sensordepth);
+		fprintf(stderr, "dbg2       n_heading:                     %d\n", pars->n_heading);
+		fprintf(stderr, "dbg2       heading_time_d:                %p\n", pars->heading_time_d);
+		fprintf(stderr, "dbg2       heading_heading:               %p\n", pars->heading_heading);
+		fprintf(stderr, "dbg2       n_altitude:                    %d\n", pars->n_altitude);
+		fprintf(stderr, "dbg2       altitude_time_d:               %p\n", pars->altitude_time_d);
+		fprintf(stderr, "dbg2       altitude_altitude:             %p\n", pars->altitude_altitude);
+		fprintf(stderr, "dbg2       n_attitude:                    %d\n", pars->n_attitude);
+		fprintf(stderr, "dbg2       attitude_time_d:               %p\n", pars->attitude_time_d);
+		fprintf(stderr, "dbg2       attitude_roll:                 %p\n", pars->attitude_roll);
+		fprintf(stderr, "dbg2       attitude_pitch:                %p\n", pars->attitude_pitch);
+		fprintf(stderr, "dbg2       attitude_heave:                %p\n", pars->attitude_heave);
+		fprintf(stderr, "dbg2       no_change_survey:              %d\n", pars->no_change_survey);
+		fprintf(stderr, "dbg2       multibeam_sidescan_source:     %d\n", pars->multibeam_sidescan_source);
+		fprintf(stderr, "dbg2       modify_soundspeed:             %d\n", pars->modify_soundspeed);
+		fprintf(stderr, "dbg2       recalculate_bathymetry:        %d\n", pars->recalculate_bathymetry);
+		fprintf(stderr, "dbg2       sounding_amplitude_filter:     %d\n", pars->sounding_amplitude_filter);
+		fprintf(stderr, "dbg2       sounding_amplitude_threshold:  %f\n", pars->sounding_amplitude_threshold);
+		fprintf(stderr, "dbg2       ignore_water_column:           %d\n", pars->ignore_water_column);
+		fprintf(stderr, "dbg2       n_kluge:                       %d\n", pars->n_kluge);
 		for (i = 0; i < pars->n_kluge; i++) {
 			fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
 			if (pars->kluge_id[i] == MB_PR_KLUGE_BEAMTWEAK) {
@@ -5569,7 +5577,12 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					}
 
 					/* flagged by sonar */
-					if ((bathymetry->quality[i] & 3) == 3) {
+					if ((bathymetry->quality[i] & 3) == 3
+						&& pars->sounding_amplitude_filter == MB_YES
+						&& (double)bathymetry->intensity[i] < pars->sounding_amplitude_threshold) {
+						bathymetry->quality[i] += 64;
+					}
+					else if ((bathymetry->quality[i] & 3) == 3) {
 					}
 					else if ((bathymetry->quality[i] & 3) == 0 && bathymetry->quality[i] > 0) {
 						bathymetry->quality[i] += 64;
@@ -5580,6 +5593,12 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					// fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]);
 				}
 			}
+
+			/* if requested ignore water column data
+			 * (will not be included in any output file) */
+			if (pars->ignore_water_column == MB_YES
+				&& store->read_v2beamformed == MB_YES)
+				store->read_v2beamformed = MB_NO;
 
 			/*--------------------------------------------------------------*/
 			/* change timestamp if indicated */
@@ -5666,6 +5685,10 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 			                                 time_d, &pitch, &jattitude, &interp_error);
 			interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
 			                                 time_d, &heave, &jattitude, &interp_error);
+
+			/* interpolate soundspeed */
+			interp_status = mb_linear_interp(verbose, pars->soundspeed_time_d - 1, pars->soundspeed_soundspeed - 1, pars->n_soundspeed,
+			                                 time_d, &soundspeednew, &jsoundspeed, &interp_error);
 
 			/* do lever arm correction */
 			if (platform != NULL) {
@@ -5820,6 +5843,12 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					}
 				}
 
+				/* Change the sound speed used to calculate bathymetry */
+				if (pars->modify_soundspeed) {
+					soundspeedsnellfactor = soundspeednew / soundspeed;
+					soundspeed = soundspeednew;
+				}
+				
 				/* if requested apply kluge scaling of sound speed - which means
 				    changing beam angles by Snell's law and changing the sound
 				    speed used to calculate bathymetry */
@@ -5827,7 +5856,16 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					/*
 					 * sound speed
 					 */
+					soundspeedsnellfactor *= kluge_soundspeedsnellfactor;
 					soundspeed *= kluge_soundspeedsnellfactor;
+				}
+
+				if (pars->modify_soundspeed || kluge_soundspeedsnell == MB_YES) {
+					/* change the sound speed recorded for the current ping and
+					 * then use it to alter the beam angles and recalculated the
+					 * bathymetry
+					 */
+					volatilesettings->sound_velocity = soundspeed;
 
 					/*
 					 * v2rawdetection record
@@ -5835,7 +5873,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					if (store->read_v2rawdetection == MB_YES) {
 						for (i = 0; i < v2rawdetection->number_beams; i++) {
 							v2rawdetection->rx_angle[i] =
-							    asin(MIN(1.0, kluge_soundspeedsnellfactor * sin(v2rawdetection->rx_angle[i])));
+							    asin(MIN(1.0, soundspeedsnellfactor * sin(v2rawdetection->rx_angle[i])));
 						}
 					}
 
@@ -5844,7 +5882,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					 */
 					if (store->read_v2detection == MB_YES) {
 						for (i = 0; i < v2detection->number_beams; i++) {
-							v2detection->angle_x[i] = asin(MIN(1.0, kluge_soundspeedsnellfactor * sin(v2detection->angle_x[i])));
+							v2detection->angle_x[i] = asin(MIN(1.0, soundspeedsnellfactor * sin(v2detection->angle_x[i])));
 						}
 					}
 
@@ -5854,7 +5892,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					if (store->read_beamgeometry == MB_YES) {
 						for (i = 0; i < bathymetry->number_beams; i++) {
 							beamgeometry->angle_acrosstrack[i] =
-							    asin(MIN(1.0, kluge_soundspeedsnellfactor * sin(beamgeometry->angle_acrosstrack[i])));
+							    asin(MIN(1.0, soundspeedsnellfactor * sin(beamgeometry->angle_acrosstrack[i])));
 						}
 					}
 				}

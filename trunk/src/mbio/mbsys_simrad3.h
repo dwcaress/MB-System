@@ -489,7 +489,7 @@ the water column have been applied. */
 	    will contain a code telling why the beam is flagged out. */
 	int png_amp[MBSYS_SIMRAD3_MAXBEAMS];
 	/* 0.5 dB */
-	char png_beamflag[MBSYS_SIMRAD3_MAXBEAMS];
+	mb_u_char png_beamflag[MBSYS_SIMRAD3_MAXBEAMS];
 	/* uses standard MB-System beamflags */
 	float png_depression[MBSYS_SIMRAD3_MAXBEAMS];
 	/* beam depression angles (deg) */

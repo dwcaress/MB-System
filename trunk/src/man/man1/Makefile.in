@@ -393,8 +393,7 @@ mbsystem.1 \
 mbtime.1 \
 mbvelocitytool.1
 
-@BUILD_PROJ_TRUE@man_PROJ = proj.1 geod.1 
-EXTRA_DIST = $(man_MANS) $(man_PROJ)
+EXTRA_DIST = $(man_MANS)
 all: all-am
 
 .SUFFIXES:
