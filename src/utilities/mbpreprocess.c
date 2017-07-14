@@ -102,6 +102,10 @@ int main(int argc, char **argv) {
 	                       "\t--attitude-file-format=format_id\n"
 	                       "\t--attitude-async=record_kind\n"
 	                       "\t--attitude-sensor=sensor_id\n\n"
+	                       "\t--soundspeed-file=file\n"
+	                       "\t--soundspeed-file-format=format_id\n"
+	                       "\t--soundspeed-async=record_kind\n"
+	                       "\t--soundspeed-sensor=sensor_id\n\n"
 	                       "\t--time-latency-file=file\n"
 	                       "\t--time-latency-file-format=format_id\n"
 	                       "\t--time-latency-constant=value\n"
@@ -120,7 +124,8 @@ int main(int argc, char **argv) {
 	                       "\t--filter-apply-all-ancilliary\n\n"
 	                       "\t--recalculate-bathymetry\n"
 	                       "\t--no-change-survey\n"
-	                       "\t--multibeam-sidescan-source=recordid\n\n"
+	                       "\t--multibeam-sidescan-source=recordid\n"
+						   "\t--sounding-amplitude-filter=value\n\n"
 	                       "\t--kluge-time-jumps=threshold\n"
 	                       "\t--kluge-beam-tweak=factor\n"
 	                       "\t--kluge-soundspeed-tweak=factor\n"
@@ -170,10 +175,16 @@ int main(int argc, char **argv) {
 	 * 		--altitude-file-format=format_id
 	 * 		--altitude-async=record_kind
 	 * 		--altitude-sensor=sensor_id
+	 * 		
 	 * 		--attitude-file=file
 	 * 		--attitude-file-format=format_id
 	 * 		--attitude-async=record_kind
 	 * 		--attitude-sensor=sensor_id
+	 * 		
+	 * 		--soundspeed-file=file
+	 * 		--soundspeed-file-format=format_id
+	 * 		--soundspeed-async=record_kind
+	 * 		--soundspeed-sensor=sensor_id
 	 *
 	 * 		--time-latency-file=file
 	 * 		--time-latency-file-format=format_id
@@ -196,6 +207,8 @@ int main(int argc, char **argv) {
 	 * 		--recalculate-bathymetry
 	 * 		--no-change-survey
 	 * 		--multibeam-sidescan-source=recordid
+	 * 		--sounding-amplitude-filter=value
+	 * 		--ignore-water-column
 	 *
 	 * 		--kluge-time-jumps=threshold
 	 *      --kluge-beam-tweak=factor
@@ -230,6 +243,10 @@ int main(int argc, char **argv) {
 	                                  {"attitude-file-format", required_argument, NULL, 0},
 	                                  {"attitude-async", required_argument, NULL, 0},
 	                                  {"attitude-sensor", required_argument, NULL, 0},
+	                                  {"soundspeed-file", required_argument, NULL, 0},
+	                                  {"soundspeed-file-format", required_argument, NULL, 0},
+	                                  {"soundspeed-async", required_argument, NULL, 0},
+	                                  {"soundspeed-sensor", required_argument, NULL, 0},
 	                                  {"time-latency-file", required_argument, NULL, 0},
 	                                  {"time-latency-file-format", required_argument, NULL, 0},
 	                                  {"time-latency-constant", required_argument, NULL, 0},
@@ -249,6 +266,8 @@ int main(int argc, char **argv) {
 	                                  {"recalculate-bathymetry", no_argument, NULL, 0},
 	                                  {"no-change-survey", no_argument, NULL, 0},
 	                                  {"multibeam-sidescan-source", required_argument, NULL, 0},
+	                                  {"sounding-amplitude-filter", required_argument, NULL, 0},
+	                                  {"ignore-water-column", no_argument, NULL, 0},
 	                                  {"kluge-time-jumps", required_argument, NULL, 0},
 	                                  {"kluge-beam-tweak", required_argument, NULL, 0},
 	                                  {"kluge-soundspeed-tweak", required_argument, NULL, 0},
@@ -256,7 +275,7 @@ int main(int argc, char **argv) {
 	                                  {"kluge-zero-alongtrack-angles", no_argument, NULL, 0},
 	                                  {NULL, 0, NULL, 0}};
 
-	/* asynchronous navigation, heading, attitude data */
+	/* asynchronous navigation, heading, altitude, attitude, soundspeed data */
 	int nav_mode = MBPREPROCESS_MERGE_OFF;
 	mb_path nav_file = "";
 	int nav_file_format = 0;
@@ -311,6 +330,16 @@ int main(int argc, char **argv) {
 	double *attitude_pitch = NULL;
 	double *attitude_heave = NULL;
 
+	int soundspeed_mode = MBPREPROCESS_MERGE_OFF;
+	mb_path soundspeed_file = "";
+	int soundspeed_file_format = 0;
+	int soundspeed_async = MB_DATA_DATA;
+	int soundspeed_sensor = -1;
+	int n_soundspeed = 0;
+	int n_soundspeed_alloc = 0;
+	double *soundspeed_time_d = NULL;
+	double *soundspeed_soundspeed = NULL;
+
 	int time_latency_mode = MB_SENSOR_TIME_LATENCY_NONE;
 	mb_u_char time_latency_apply = MBPREPROCESS_TIME_LATENCY_APPLY_NONE;
 	mb_path time_latency_file = "";
@@ -359,6 +388,7 @@ int main(int argc, char **argv) {
 	int sensordepth_changed = MB_NO;
 	int altitude_changed = MB_NO;
 	int attitude_changed = MB_NO;
+	int soundspeed_changed = MB_NO;
 
 	/* preprocess structure */
 	struct mb_preprocess_struct preprocess_pars;
@@ -511,6 +541,7 @@ int main(int argc, char **argv) {
 	int jheading = 0;
 	int jaltitude = 0;
 	int jattitude = 0;
+	int jsoundspeed = 0;
 	double *dptr = NULL;
 	int index = 0;
 	char buffer[16] = "";
@@ -528,6 +559,7 @@ int main(int argc, char **argv) {
 	memset(heading_file, 0, sizeof(mb_path));
 	memset(altitude_file, 0, sizeof(mb_path));
 	memset(attitude_file, 0, sizeof(mb_path));
+	memset(soundspeed_file, 0, sizeof(mb_path));
 	memset(time_latency_file, 0, sizeof(mb_path));
 	memset(platform_file, 0, sizeof(mb_path));
 	memset(read_file, 0, sizeof(mb_path));
@@ -738,6 +770,39 @@ int main(int argc, char **argv) {
 			}
 
 			/*-------------------------------------------------------
+			 * Define source of soundspeed - could be an external file
+			 * or an internal asynchronous record */
+
+			/* soundspeed-file */
+			else if (strcmp("soundspeed-file", options[option_index].name) == 0) {
+				strcpy(soundspeed_file, optarg);
+				soundspeed_mode = MBPREPROCESS_MERGE_FILE;
+				preprocess_pars.modify_soundspeed = MB_YES;
+				preprocess_pars.recalculate_bathymetry = MB_YES;
+			}
+
+			/* soundspeed-file-format */
+			else if (strcmp("soundspeed-file-format", options[option_index].name) == 0) {
+				n = sscanf(optarg, "%d", &soundspeed_file_format);
+			}
+
+			/* soundspeed-async */
+			else if (strcmp("soundspeed-async", options[option_index].name) == 0) {
+				n = sscanf(optarg, "%d", &soundspeed_async);
+				if (n == 1)
+					soundspeed_mode = MBPREPROCESS_MERGE_ASYNC;
+				preprocess_pars.modify_soundspeed = MB_YES;
+				preprocess_pars.recalculate_bathymetry = MB_YES;
+			}
+
+			/* soundspeed-sensor */
+			else if (strcmp("soundspeed-sensor", options[option_index].name) == 0) {
+				n = sscanf(optarg, "%d", &soundspeed_sensor);
+				preprocess_pars.modify_soundspeed = MB_YES;
+				preprocess_pars.recalculate_bathymetry = MB_YES;
+			}
+
+			/*-------------------------------------------------------
 			 * Define source of time_latency - could be an external file
 			 * or single value. Also define which data the time_latency model
 			 * will be applied to - nav, sensordepth, heading, attitude,
@@ -875,6 +940,18 @@ int main(int argc, char **argv) {
 					preprocess_pars.multibeam_sidescan_source = MB_PR_SSSOURCE_CALIBRATEDSNIPPET;
 				else if (optarg[0] == 'B' || optarg[0] == 'b')
 					preprocess_pars.multibeam_sidescan_source = MB_PR_SSSOURCE_WIDEBEAMBACKSCATTER;
+			}
+
+			/* sounding-amplitude-filter=value */
+			else if (strcmp("sounding-amplitude-filter", options[option_index].name) == 0) {
+				n = sscanf(optarg, "%lf", &preprocess_pars.sounding_amplitude_threshold);
+				if (n == 1)
+					preprocess_pars.sounding_amplitude_filter = MB_YES;
+			}
+
+			/* ignore-water-column */
+			else if (strcmp("ignore-water-column", options[option_index].name) == 0) {
+				preprocess_pars.ignore_water_column = MB_YES;
 			}
 
 			/*-------------------------------------------------------
@@ -1025,6 +1102,12 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       attitude_file_format:         %d\n", attitude_file_format);
 		fprintf(stderr, "dbg2       attitude_async:               %d\n", attitude_async);
 		fprintf(stderr, "dbg2       attitude_sensor:              %d\n", attitude_sensor);
+		fprintf(stderr, "dbg2  Source of soundspeed data:\n");
+		fprintf(stderr, "dbg2       soundspeed_mode:              %d\n", soundspeed_mode);
+		fprintf(stderr, "dbg2       soundspeed_file:              %s\n", soundspeed_file);
+		fprintf(stderr, "dbg2       soundspeed_file_format:       %d\n", soundspeed_file_format);
+		fprintf(stderr, "dbg2       soundspeed_async:             %d\n", soundspeed_async);
+		fprintf(stderr, "dbg2       soundspeed_sensor:            %d\n", soundspeed_sensor);
 		fprintf(stderr, "dbg2  Time latency correction:\n");
 		fprintf(stderr, "dbg2       time_latency_mode:            %d\n", time_latency_mode);
 		fprintf(stderr, "dbg2       time_latency_constant:        %f\n", time_latency_constant);
@@ -1038,6 +1121,9 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       no_change_survey:             %d\n", preprocess_pars.no_change_survey);
 		fprintf(stderr, "dbg2       multibeam_sidescan_source:    %d\n", preprocess_pars.multibeam_sidescan_source);
 		fprintf(stderr, "dbg2       recalculate_bathymetry:       %d\n", preprocess_pars.recalculate_bathymetry);
+		fprintf(stderr, "dbg2       sounding_amplitude_filter:    %d\n", preprocess_pars.sounding_amplitude_filter);
+		fprintf(stderr, "dbg2       sounding_amplitude_threshold: %f\n", preprocess_pars.sounding_amplitude_threshold);
+		fprintf(stderr, "dbg2       ignore_water_column:          %d\n", preprocess_pars.ignore_water_column);
 		fprintf(stderr, "dbg2  Various data fixes (kluges):\n");
 		fprintf(stderr, "dbg2       kluge_timejumps:              %d\n", kluge_timejumps);
 		fprintf(stderr, "dbg2       kluge_timejumps_threshold:    %f\n", kluge_timejumps_threshold);
@@ -1093,6 +1179,12 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "     attitude_file_format:         %d\n", attitude_file_format);
 		fprintf(stderr, "     attitude_async:               %d\n", attitude_async);
 		fprintf(stderr, "     attitude_sensor:              %d\n", attitude_sensor);
+		fprintf(stderr, "Source of soundspeed data:\n");
+		fprintf(stderr, "     soundspeed_mode:              %d\n", soundspeed_mode);
+		fprintf(stderr, "     soundspeed_file:              %s\n", soundspeed_file);
+		fprintf(stderr, "     soundspeed_file_format:       %d\n", soundspeed_file_format);
+		fprintf(stderr, "     soundspeed_async:             %d\n", soundspeed_async);
+		fprintf(stderr, "     soundspeed_sensor:            %d\n", soundspeed_sensor);
 		fprintf(stderr, "Time latency correction:\n");
 		fprintf(stderr, "     time_latency_mode:            %d\n", time_latency_mode);
 		fprintf(stderr, "     time_latency_constant:        %f\n", time_latency_constant);
@@ -1106,6 +1198,9 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "     no_change_survey:             %d\n", preprocess_pars.no_change_survey);
 		fprintf(stderr, "     multibeam_sidescan_source:    %d\n", preprocess_pars.multibeam_sidescan_source);
 		fprintf(stderr, "     recalculate_bathymetry:       %d\n", preprocess_pars.recalculate_bathymetry);
+		fprintf(stderr, "     sounding_amplitude_filter:    %d\n", preprocess_pars.sounding_amplitude_filter);
+		fprintf(stderr, "     sounding_amplitude_threshold: %f\n", preprocess_pars.sounding_amplitude_threshold);
+		fprintf(stderr, "     ignore_water_column:          %d\n", preprocess_pars.ignore_water_column);
 		fprintf(stderr, "Various data fixes (kluges):\n");
 		fprintf(stderr, "     kluge_timejumps:              %d\n", kluge_timejumps);
 		fprintf(stderr, "     kluge_timejumps_threshold:    %f\n", kluge_timejumps_threshold);
@@ -1215,6 +1310,13 @@ int main(int argc, char **argv) {
 
 		if (verbose > 0)
 			fprintf(stderr, "%d attitude records loaded from file %s\n", n_attitude, attitude_file);
+	}
+	if (soundspeed_mode == MBPREPROCESS_MERGE_FILE) {
+		mb_loadsoundspeeddata(verbose, soundspeed_file, soundspeed_file_format, &n_soundspeed, &n_soundspeed_alloc, &soundspeed_time_d,
+		                    &soundspeed_soundspeed, &error);
+
+		if (verbose > 0)
+			fprintf(stderr, "%d soundspeed records loaded from file %s\n", n_soundspeed, soundspeed_file);
 	}
 
 	/*-------------------------------------------------------------------*/
@@ -2307,6 +2409,9 @@ int main(int argc, char **argv) {
 				preprocess_pars.attitude_roll = attitude_roll;
 				preprocess_pars.attitude_pitch = attitude_pitch;
 				preprocess_pars.attitude_heave = attitude_heave;
+				preprocess_pars.n_soundspeed = n_soundspeed;
+				preprocess_pars.soundspeed_time_d = soundspeed_time_d;
+				preprocess_pars.soundspeed_soundspeed = soundspeed_soundspeed;
 
 				/* attempt to execute a preprocess function for these data */
 				status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform, (void *)&preprocess_pars, &error);

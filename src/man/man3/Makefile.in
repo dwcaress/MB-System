@@ -307,8 +307,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 man_MANS = mbio.3  
-@BUILD_PROJ_TRUE@man_PROJ = pj_init.3 
-EXTRA_DIST = $(man_MANS) $(man_PROJ)
+EXTRA_DIST = $(man_MANS)
 all: all-am
 
 .SUFFIXES:

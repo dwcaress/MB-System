@@ -130,7 +130,9 @@ int main(int argc, char **argv) {
 	double salinity;    /* salinity (per mil) */
 	double soundspeed;  /* speed of sound (m/sec) */
 	double depth;       /* depth (m) */
+	double pressure;       /* depth (m) */
 	double ph;          /* pH */
+	double density;     /* kg/m3 */
 
 	/* set defaults */
 	frequency = 200.0;
@@ -230,6 +232,9 @@ int main(int argc, char **argv) {
 
 	/* call function to calculate absorption */
 	status = mb_absorption(verbose, frequency, temperature, salinity, depth, ph, soundspeed, &absorption, &error);
+	pressure = 1.006 * depth;
+	status = mb_seabird_density(verbose, salinity, temperature, pressure, &density, &error);
+
 
 	/* print it out */
 	if (verbose > 0) {
@@ -246,6 +251,7 @@ int main(int argc, char **argv) {
 		fprintf(outfp, "     pH:               %f\n", ph);
 		fprintf(outfp, "Result:\n");
 		fprintf(outfp, "     Sound absorption: %f dB/km\n", absorption);
+		fprintf(outfp, "     Density:          %f kg/m3\n", density);
 	}
 	else {
 		fprintf(outfp, "%f\n", absorption);

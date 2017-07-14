@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  18 March 2017 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  5 July 2017 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -35,6 +35,10 @@ Version 5.0
 <B>--help</B>
 <B>--input</B>=<I>FILE</I>
 <B>--format</B>=<I>FORMATID</I>
+<BR>
+
+<B>--platform-file</B>=<I>FILE</I>
+<B>--platform-target-sensor</B>=<I>RECORDID</I>
 <BR>
 
 <B>--output-sensor-fnv</B>
@@ -70,6 +74,12 @@ Version 5.0
 <B>--attitude-sensor</B>=<I>SENSORID</I>
 <BR>
 
+<B>--soundspeed-file</B>=<I>FILE</I>
+<B>--soundspeed-file-format</B>=<I>FORMATID</I>
+<B>--soundspeed-async</B>=<I>RECORDTYPE</I>
+<B>--soundspeed-sensor</B>=<I>SENSORID</I>
+<BR>
+
 <B>--time-latency-file</B>=<I>FILE</I>
 <B>--time-latency-file-format</B>=<I>FORMATID</I>
 <B>--time-latency-constant</B>=<I>SECONDS</I>
@@ -102,14 +112,10 @@ Version 5.0
 <B>--filter-apply-all-ancilliary</B>
 <BR>
 
-<B>--platform-file</B>=<I>FILE</I>
-<B>--platform-target-sensor</B>=<I>RECORDID</I>
-<BR>
-
+<B>--recalculate-bathymetry</B>
 <B>--no-change-survey</B>
-<BR>
-
-<B>--multibeam-sidescan-source</B>=<I>SECONDS</I>
+<B>--multibeam-sidescan-source</B>=<I>RECORDID</I>
+<B>--sounding-amplitude-filter</B>=<I>THRESHOLD</I>
 <BR>
 
 <B>--kluge-time-jumps</B>=<I>SECONDS</I>
@@ -129,6 +135,7 @@ MBpreprocess handles preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset. This program replaces
 the several format-specific preprocessing programs
 found in MB-System version 5 releases with a single program for version 6.
+In many cases the preprocessing 
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -265,6 +272,20 @@ positional and angular offsets defined in the platform file.
 <DD>
 <BR>
 
+<DT><B>--soundspeed-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--soundspeed-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--soundspeed-async=</B><I>RECORDTYPE</I>
+
+<DD>
+<DT><B>--soundspeed-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
 <DT><B>--time-latency-file=</B><I>FILE</I>
 
 <DD>
@@ -326,20 +347,36 @@ positional and angular offsets defined in the platform file.
 <DT><B>--platform-file=</B><I>FILE</I>
 
 <DD>
-<DT><B>--platform-target-sensor=</B><I>RECORDID</I>
+<DT><B>--platform-target-sensor=</B><I>SENSORID</I>
+
+<DD>
+<DT><B>--recalculate-bathymetry</B>
 
 <DD>
 <DT><B>--no-change-survey</B>
 
 <DD>
-<DT><B>multibeam-sidescan-source=</B><I>SECONDS</I><DD>
-<DT><B>kluge-time-jumps=</B><I>SECONDS</I><DD>
-<DT><B>kluge-beam-tweak=</B><I>FACTOR</I><DD>
-<DT><B>kluge-zero-attitude-correction<DD>
-<DT>kluge-zero-alongtrack-angles<DD>
+<DT><B>--multibeam-sidescan-source=</B><I>RECORDID</I>
+
+<DD>
+<DT><B>--sounding-amplitude-filter=</B><I>THRESHOLD</I>
+
+<DD>
+<DT><B>--kluge-time-jumps=</B><I>SECONDS</I>
+
+<DD>
+<DT><B>--kluge-beam-tweak=</B><I>FACTOR</I>
+
+<DD>
+<DT><B>--kluge-zero-attitude-correction</B>
+
+<DD>
+<DT><B>--kluge-zero-alongtrack-angles</B>
+
+<DD>
 <P>
 </DL>
-</B><A NAME="lbAH">&nbsp;</A>
+<A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
 To be written.....
@@ -372,7 +409,7 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 18 March 2017</P></CENTER>
+Last Updated: 5 July 2017</P></CENTER>
 
 <HR>
 <P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>

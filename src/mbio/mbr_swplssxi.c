@@ -44,8 +44,8 @@
 /* include for byte swapping */
 #include "mb_swap.h"
 
-/* turn on debug statements here
-   #define MBF_SWPLSSXI_DEBUG 1 */
+/* turn on debug statements here */
+// #define MBF_SWPLSSXI_DEBUG 1
 
 /* essential function prototypes */
 int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error);

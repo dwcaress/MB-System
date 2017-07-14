@@ -56,11 +56,52 @@
 #define INDEX_MERGE_ROLL -7
 #define INDEX_MERGE_PITCH -8
 #define INDEX_MERGE_HEAVE -9
-#define INDEX_CALCULATE_POTENTIALTEMPERATURE -10
+#define INDEX_CALC_CONDUCTIVITY -10
+#define INDEX_CALC_TEMPERATURE -11
+#define INDEX_CALC_PRESSURE -12
+#define INDEX_CALC_SALINITY -13
+#define INDEX_CALC_SOUNDSPEED -14
+#define INDEX_CALC_POTENTIALTEMP -15
+#define INDEX_CALC_DENSITY -16
 
 #define OUTPUT_MODE_TAB 0
 #define OUTPUT_MODE_CSV 1
 #define OUTPUT_MODE_BINARY 2
+
+struct ctd_calibration_struct {
+		double pa0;
+		double pa1;
+		double pa2;
+		double ptempa0;
+		double ptempa1;
+		double ptempa2;
+		double ptca0;
+		double ptca1;
+		double ptca2;
+		double ptcb0;
+		double ptcb1;
+		double ptcb2;
+		
+		double a0;
+		double a1;
+		double a2;
+		double a3;
+		
+		double g;
+		double h;
+		double i;
+		double j;
+		double cpcor;
+		double ctcor;
+		};
+
+void calibration_MAUV1_2017(struct ctd_calibration_struct *calibration_ptr);
+double calcPressure(struct ctd_calibration_struct *calibration_ptr,
+				double presCounts, double temperature);
+double calcTemp(struct ctd_calibration_struct *calibration_ptr,
+				double tempCounts);
+double calcCond(struct ctd_calibration_struct *calibration_ptr,
+				double cFreq, double temp, double pressure);
 
 static char rcs_id[] = "$Id$";
 
@@ -69,7 +110,7 @@ static char rcs_id[] = "$Id$";
 int main(int argc, char **argv) {
 	char program_name[] = "MBauvloglist";
 	char help_message[] = "MBauvloglist lists table data from an MBARI AUV mission log file.";
-	char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -H -V]";
+	char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -Rid -S -H -V]";
 	extern char *optarg;
 	int errflg = 0;
 	int c;
@@ -134,11 +175,35 @@ int main(int argc, char **argv) {
 	double *nav_roll = NULL;
 	double *nav_pitch = NULL;
 	double *nav_heave = NULL;
+    
+    /* recalculate ctd data from fundamental observations */
+    int recalculate_ctd = MB_NO;
+    int ctd_calibration_id = 0;
+    struct ctd_calibration_struct ctd_calibration;
+    int cond_frequency_available = MB_NO;
+    int temp_counts_available = MB_NO;
+    int pressure_counts_available = MB_NO;
+    int thermistor_available = MB_NO;
+    int conductivity_available = MB_NO;
+    int temperature_available = MB_NO;
+    int pressure_available = MB_NO;
+    int ctd_available = MB_NO;
 
-	/* values used to calculate potential temperature */
-	double temperature;
-	double salinity;
-	double pressure;
+	/* values used to calculate some water properties */
+    int calc_potentialtemp = MB_NO;
+    int calc_soundspeed = MB_NO;
+    int calc_density = MB_NO;
+	double cond_frequency = 0.0;
+	double temp_counts = 0.0;
+	double pressure_counts = 0.0;
+    double thermistor = 0.0;
+	double temperature_calc = 0.0;
+	double salinity_calc = 0.0;
+    double conductivity_calc = 0.0;
+	double pressure_calc = 0.0;
+    double soundspeed_calc = 0.0;
+    double potentialtemperature_calc = 0.0;
+    double density_calc = 0.0;
 
 	/* output control */
 	int output_mode = OUTPUT_MODE_TAB;
@@ -171,7 +236,7 @@ int main(int argc, char **argv) {
 	strcpy(printformat, "default");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "F:f:I:i:L:l:M:m:N:n:O:o:PpSsVvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "F:f:I:i:L:l:M:m:N:n:O:o:PpR:r:SsVvWwHh")) != -1)
 		switch (c) {
 		case 'H':
 		case 'h':
@@ -218,6 +283,12 @@ int main(int argc, char **argv) {
 				printfields[nprintfields].formatset = MB_NO;
 				strcpy(printfields[nprintfields].format, "");
 			}
+            if (strcmp(printfields[nprintfields].name, "calcPotentialTemperature") == 0)
+                calc_potentialtemp = MB_YES;
+            if (strcmp(printfields[nprintfields].name, "calcSoundspeed") == 0)
+                calc_soundspeed = MB_YES;
+            if (strcmp(printfields[nprintfields].name, "calcDensity") == 0)
+                calc_density = MB_YES;
 			printfields[nprintfields].index = -1;
 			nprintfields++;
 			flag++;
@@ -225,6 +296,12 @@ int main(int argc, char **argv) {
 		case 'P':
 		case 'p':
 			printheader = MB_YES;
+			flag++;
+			break;
+		case 'R':
+		case 'r':
+			recalculate_ctd = MB_YES;
+			sscanf(optarg, "%d", &ctd_calibration_id);
 			flag++;
 			break;
 		case 'S':
@@ -257,34 +334,37 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
-		fprintf(stderr, "dbg2       help:           %d\n", help);
-		fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
-		fprintf(stderr, "dbg2       file:           %s\n", file);
-		fprintf(stderr, "dbg2       nav_file:       %s\n", nav_file);
-		fprintf(stderr, "dbg2       output_mode:    %d\n", output_mode);
-		fprintf(stderr, "dbg2       printheader:    %d\n", printheader);
-		fprintf(stderr, "dbg2       angles_in_degrees:%d\n", angles_in_degrees);
+		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
+		fprintf(stderr, "dbg2       help:                 %d\n", help);
+		fprintf(stderr, "dbg2       lonflip:              %d\n", lonflip);
+		fprintf(stderr, "dbg2       bounds[0]:            %f\n", bounds[0]);
+		fprintf(stderr, "dbg2       bounds[1]:            %f\n", bounds[1]);
+		fprintf(stderr, "dbg2       bounds[2]:            %f\n", bounds[2]);
+		fprintf(stderr, "dbg2       bounds[3]:            %f\n", bounds[3]);
+		fprintf(stderr, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
+		fprintf(stderr, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
+		fprintf(stderr, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
+		fprintf(stderr, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
+		fprintf(stderr, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
+		fprintf(stderr, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
+		fprintf(stderr, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
+		fprintf(stderr, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
+		fprintf(stderr, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
+		fprintf(stderr, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
+		fprintf(stderr, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
+		fprintf(stderr, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
+		fprintf(stderr, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
+		fprintf(stderr, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
+		fprintf(stderr, "dbg2       speedmin:             %f\n", speedmin);
+		fprintf(stderr, "dbg2       timegap:              %f\n", timegap);
+		fprintf(stderr, "dbg2       file:                 %s\n", file);
+		fprintf(stderr, "dbg2       nav_file:             %s\n", nav_file);
+		fprintf(stderr, "dbg2       output_mode:          %d\n", output_mode);
+		fprintf(stderr, "dbg2       printheader:          %d\n", printheader);
+		fprintf(stderr, "dbg2       angles_in_degrees:    %d\n", angles_in_degrees);
+		fprintf(stderr, "dbg2       calc_potentialtemp:   %d\n", calc_potentialtemp);
+		fprintf(stderr, "dbg2       recalculate_ctd:      %d\n", recalculate_ctd);
+		fprintf(stderr, "dbg2       ctd_calibration_id:   %d\n", ctd_calibration_id);
 		fprintf(stderr, "dbg2       nprintfields:   %d\n", nprintfields);
 		for (i = 0; i < nprintfields; i++)
 			fprintf(stderr, "dbg2         printfields[%d]:      %s %d %s\n", i, printfields[i].name, printfields[i].formatset,
@@ -424,13 +504,31 @@ int main(int argc, char **argv) {
 				fields[nfields].size = 8;
 				if (angles_in_degrees == MB_YES &&
 				    (strcmp(fields[nfields].name, "mRollCB") == 0 || strcmp(fields[nfields].name, "mOmega_xCB") == 0 ||
-				     strcmp(fields[nfields].name, "mPitchCB") == 0 || strcmp(fields[nfields].name, "mOmega_yCB") == 0 ||
-				     strcmp(fields[nfields].name, "mYawCB") == 0 || strcmp(fields[nfields].name, "mOmega_zCB") == 0))
+                    strcmp(fields[nfields].name, "mPitchCB") == 0 || strcmp(fields[nfields].name, "mOmega_yCB") == 0 ||
+				    strcmp(fields[nfields].name, "mYawCB") == 0 || strcmp(fields[nfields].name, "mOmega_zCB") == 0))
 					fields[nfields].scale = RTD;
 				else
 					fields[nfields].scale = 1.0;
 				recordsize += 8;
 			}
+            
+            /* check if raw and processed ctd data are in this file */
+            if (strcmp(fields[nfields].name, "cond_frequency") == 0)
+                cond_frequency_available = MB_YES;
+            else if (strcmp(fields[nfields].name, "temp_counts") == 0)
+                temp_counts_available = MB_YES;
+            else if (strcmp(fields[nfields].name, "pressure_counts") == 0)
+                pressure_counts_available = MB_YES;
+            else if (strcmp(fields[nfields].name, "pressure_temp_comp_voltage_reading") == 0)
+                thermistor_available = MB_YES;
+            else if (strcmp(fields[nfields].name, "conductivity") == 0)
+                conductivity_available = MB_YES;
+            else if (strcmp(fields[nfields].name, "temperature") == 0)
+                temperature_available = MB_YES;
+            else if (strcmp(fields[nfields].name, "pressure") == 0)
+                pressure_available = MB_YES;
+            
+            /* increment counter */
 			nfields++;
 		}
 	}
@@ -449,6 +547,37 @@ int main(int argc, char **argv) {
 			strcpy(printfields[i].format, fields[i].format);
 		}
 	}
+    
+    /* if recalculating CTD data then check for available raw CTD data */
+    if (recalculate_ctd == MB_YES) {
+        if (cond_frequency_available == MB_NO
+            || temp_counts_available == MB_NO
+            || pressure_counts_available == MB_NO
+            || thermistor_available == MB_NO) {
+            error = MB_ERROR_BAD_FORMAT;
+		    status = MB_FAILURE;
+		    fprintf(stderr, "\nUnable to recalculate CTD data as requested, raw CTD data not in file <%s>\n", file);
+		    exit(status);
+        } else {
+            calibration_MAUV1_2017(&ctd_calibration);
+        }
+    }
+    if (conductivity_available == MB_YES
+        && temperature_available == MB_YES
+        && pressure_available == MB_YES) {
+        ctd_available = MB_YES;
+    }
+    if (calc_potentialtemp == MB_YES
+        || calc_soundspeed == MB_YES
+        || calc_density == MB_YES) {
+        if (recalculate_ctd == MB_NO
+            && ctd_available == MB_NO) {
+                error = MB_ERROR_BAD_FORMAT;
+                status = MB_FAILURE;
+                fprintf(stderr, "\nUnable to calculate CTD data products as requested, CTD data not in file <%s>\n", file);
+                exit(status);
+        }
+    }
 
 	/* check the fields to be printed */
 	for (i = 0; i < nprintfields; i++) {
@@ -518,8 +647,44 @@ int main(int argc, char **argv) {
 				strcpy(printfields[i].format, "%.3f");
 			}
 		}
-		else if (strcmp(printfields[i].name, "potentialTemperature") == 0) {
-			printfields[i].index = INDEX_CALCULATE_POTENTIALTEMPERATURE;
+		else if (strcmp(printfields[i].name, "calcConductivity") == 0) {
+			printfields[i].index = INDEX_CALC_CONDUCTIVITY;
+			if (printfields[i].formatset == MB_NO) {
+				strcpy(printfields[i].format, "%.8f");
+			}
+		}
+		else if (strcmp(printfields[i].name, "calcTemperature") == 0) {
+			printfields[i].index = INDEX_CALC_TEMPERATURE;
+			if (printfields[i].formatset == MB_NO) {
+				strcpy(printfields[i].format, "%.8f");
+			}
+		}
+		else if (strcmp(printfields[i].name, "calcPressure") == 0) {
+			printfields[i].index = INDEX_CALC_PRESSURE;
+			if (printfields[i].formatset == MB_NO) {
+				strcpy(printfields[i].format, "%.8f");
+			}
+		}
+		else if (strcmp(printfields[i].name, "calcSalinity") == 0) {
+			printfields[i].index = INDEX_CALC_SALINITY;
+			if (printfields[i].formatset == MB_NO) {
+				strcpy(printfields[i].format, "%.8f");
+			}
+		}
+		else if (strcmp(printfields[i].name, "calcSoundspeed") == 0) {
+			printfields[i].index = INDEX_CALC_SOUNDSPEED;
+			if (printfields[i].formatset == MB_NO) {
+				strcpy(printfields[i].format, "%.8f");
+			}
+		}
+		else if (strcmp(printfields[i].name, "CalcPotentialTemperature") == 0) {
+			printfields[i].index = INDEX_CALC_POTENTIALTEMP;
+			if (printfields[i].formatset == MB_NO) {
+				strcpy(printfields[i].format, "%.8f");
+			}
+		}
+		else if (strcmp(printfields[i].name, "calcDensity") == 0) {
+			printfields[i].index = INDEX_CALC_DENSITY;
 			if (printfields[i].formatset == MB_NO) {
 				strcpy(printfields[i].format, "%.8f");
 			}
@@ -551,6 +716,52 @@ int main(int argc, char **argv) {
 	/* read the data records in the auv log file */
 	nrecord = 0;
 	while (fread(buffer, recordsize, 1, fp) == 1) {
+        /* recalculate CTD data if requested */
+        if (recalculate_ctd == MB_YES) {
+            for (ii = 0; ii < nfields; ii++) {
+                if (strcmp(fields[ii].name, "cond_frequency") == 0)
+                    mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &cond_frequency);
+                else if (strcmp(fields[ii].name, "temp_counts") == 0)
+                    mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &temp_counts);
+                else if (strcmp(fields[ii].name, "pressure_counts") == 0)
+                    mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &pressure_counts);
+                else if (strcmp(fields[ii].name, "pressure_temp_comp_voltage_reading") == 0)
+                    mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &thermistor);
+            }
+            temperature_calc = calcTemp(&ctd_calibration, temp_counts);
+            pressure_calc = calcPressure(&ctd_calibration, pressure_counts,
+                                thermistor);
+            conductivity_calc = calcCond(&ctd_calibration, cond_frequency,
+                                temperature_calc, pressure_calc);
+            interp_status = mb_seabird_salinity(verbose, conductivity_calc, temperature_calc,
+                                pressure_calc, &salinity_calc, &error);
+            interp_status = mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
+                                        salinity_calc, temperature_calc, pressure_calc,
+                                        &soundspeed_calc, &error);
+            interp_status = mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
+                                        &potentialtemperature_calc, &error);
+            interp_status = mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
+        } else if (ctd_available == MB_YES) {
+            /* else deal with existing values if available */
+            for (ii = 0; ii < nprintfields; ii++) {
+				if (strcmp(fields[ii].name, "temperature") == 0)
+						mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &temperature_calc);
+				else if (strcmp(fields[ii].name, "calculated_salinity") == 0)
+						mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &salinity_calc);
+				else if (strcmp(fields[ii].name, "conductivity") == 0)
+						mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &conductivity_calc);
+				else if (strcmp(fields[ii].name, "pressure") == 0)
+						mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &pressure_calc);
+				}
+            interp_status = mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
+                                        salinity_calc, temperature_calc, pressure_calc,
+                                        &soundspeed_calc, &error);
+            interp_status = mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
+                                        &potentialtemperature_calc, &error);
+            interp_status = mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
+        }
+        
+        /* loop over the printfields */
 		for (i = 0; i < nprintfields; i++) {
 			index = printfields[i].index;
 			if (index == INDEX_ZERO) {
@@ -640,26 +851,48 @@ int main(int argc, char **argv) {
 				else
 					fprintf(stdout, printfields[i].format, dvalue);
 			}
-			else if (index == INDEX_CALCULATE_POTENTIALTEMPERATURE) {
-				/* get temperature value */
-				temperature = 0.0;
-				salinity = 0.0;
-				pressure = 0.0;
-				for (ii = 0; ii < nprintfields; ii++) {
-					if (strcmp(fields[printfields[ii].index].name, "temperature") == 0)
-						mb_get_binary_double(MB_YES, &buffer[fields[printfields[ii].index].index], &temperature);
-					else if (strcmp(fields[printfields[ii].index].name, "calculated_salinity") == 0)
-						mb_get_binary_double(MB_YES, &buffer[fields[printfields[ii].index].index], &salinity);
-					else if (strcmp(fields[printfields[ii].index].name, "pressure") == 0)
-						mb_get_binary_double(MB_YES, &buffer[fields[printfields[ii].index].index], &pressure);
-				}
-				interp_status = mb_potential_temperature(verbose, temperature, salinity, pressure, &dvalue, &error);
+			else if (index == INDEX_CALC_CONDUCTIVITY) {
 				if (output_mode == OUTPUT_MODE_BINARY)
-					fwrite(&dvalue, sizeof(double), 1, stdout);
+					fwrite(&conductivity_calc, sizeof(double), 1, stdout);
 				else
-					fprintf(stdout, printfields[i].format, dvalue);
+					fprintf(stdout, printfields[i].format, conductivity_calc);
 			}
-
+			else if (index == INDEX_CALC_TEMPERATURE) {
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&temperature_calc, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, temperature_calc);
+			}
+			else if (index == INDEX_CALC_PRESSURE) {
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&pressure_calc, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, pressure_calc);
+			}
+			else if (index == INDEX_CALC_SALINITY) {
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&salinity_calc, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, salinity_calc);
+			}
+			else if (index == INDEX_CALC_SOUNDSPEED) {
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&soundspeed_calc, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, soundspeed_calc);
+			}
+			else if (index == INDEX_CALC_POTENTIALTEMP) {
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&potentialtemperature_calc, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, potentialtemperature_calc);
+			}
+			else if (index == INDEX_CALC_DENSITY) {
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&density_calc, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, density_calc);
+			}
 			else if (fields[index].type == TYPE_DOUBLE) {
 				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
 				dvalue *= fields[index].scale;
@@ -765,3 +998,88 @@ int main(int argc, char **argv) {
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
+
+void calibration_MAUV1_2017(struct ctd_calibration_struct *calibration_ptr)
+{
+	calibration_ptr->pa0 = 8.580044e-001;
+	calibration_ptr->pa1 = 1.108702e-001;
+	calibration_ptr->pa2 = -2.247276e-009;
+	calibration_ptr->ptempa0 = 5.929376e+001;
+	calibration_ptr->ptempa1 = -3.132766e+001;
+	calibration_ptr->ptempa2 = 3.934270e+000;
+	calibration_ptr->ptca0 = 5.247614e+005;
+	calibration_ptr->ptca1 = 1.857443e+000;
+	calibration_ptr->ptca2 = 2.311606e-003;
+	calibration_ptr->ptcb0 = 2.769200e+001;
+	calibration_ptr->ptcb1 = 4.400000e-003;
+	calibration_ptr->ptcb2 = 0.;
+
+	calibration_ptr->a0 = 8.391167e-004;
+	calibration_ptr->a1 = 2.789202e-004;
+	calibration_ptr->a2 = -1.769508e-006;
+	calibration_ptr->a3 = 1.831480e-007;
+
+	calibration_ptr->g = -1.000098e+000;
+	calibration_ptr->h = 1.542017e-001;
+	calibration_ptr->i = -4.018137e-004;
+	calibration_ptr->j = 5.724026e-005;
+	calibration_ptr->cpcor = -9.5700e-008;
+	calibration_ptr->ctcor = 3.2500e-006;
+
+	return;
+}
+
+//returns pressure in dbar. Returned pressure is zero at surface, assuming
+//atmospheric pressure fixed at 14.7PSI
+double calcPressure(struct ctd_calibration_struct *calibration_ptr,
+				double presCounts, double temperature)
+{
+  double t = calibration_ptr->ptempa0
+								+ calibration_ptr->ptempa1*temperature
+								+ calibration_ptr->ptempa2*temperature*temperature;
+  double x = (double)presCounts - calibration_ptr->ptca0
+								- calibration_ptr->ptca1*t
+								- calibration_ptr->ptca2*t*t;
+  double n = x*calibration_ptr->ptcb0 / (calibration_ptr->ptcb0
+								+ calibration_ptr->ptcb1*t
+								+ calibration_ptr->ptcb2*t*t);
+  double pres = calibration_ptr->pa0
+								+ calibration_ptr->pa1*n
+								+ calibration_ptr->pa2*n*n;
+
+  pres = (pres-14.7)*.6894757; //per note on page 34 of the SBE49 Manual
+  return pres;
+}
+
+//return ITS90 temperature
+double calcTemp(struct ctd_calibration_struct *calibration_ptr,
+				double tempCounts)
+{
+  double mv = (double)((double)tempCounts - 524288.0) / (double)1.6e7;
+  double r  = (mv * (double)2.295e10 + (double)9.216e8)
+                      / ((double)6.144e4 - mv*(double)5.3e5);
+  double ln_r = log(r);
+
+  double temp = 1. / ( calibration_ptr->a0 + calibration_ptr->a1*ln_r
+					  + calibration_ptr->a2*ln_r*ln_r
+					  + calibration_ptr->a3*ln_r*ln_r*ln_r)
+                      - (double)273.15;
+  return temp;
+}
+
+double calcCond(struct ctd_calibration_struct *calibration_ptr,
+				double cFreq, double temp, double pressure)
+{
+
+  // pressure *= 1.45; // Convert to psia for this formula
+
+  cFreq /= 1000.0; 
+  double cond = (calibration_ptr->g + calibration_ptr->h*cFreq*cFreq
+				 + calibration_ptr->i*cFreq*cFreq*cFreq
+				 + calibration_ptr->j*cFreq*cFreq*cFreq*cFreq)
+                        / (1 + calibration_ptr->ctcor*temp
+							+ calibration_ptr->cpcor*pressure);
+
+  return cond;
+}
+

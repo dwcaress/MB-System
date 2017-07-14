@@ -78,6 +78,9 @@ static Arg args[256];
 
 static char rcs_id[] = "$Id$";
 
+// #define MBV_DEBUG_GLX 1
+// #define MBV_GET_GLX_ERRORS 1
+
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(size_t instance) {
 	/* local variables */
@@ -102,12 +105,12 @@ int mbview_reset_glx(size_t instance) {
 	/* delete old glx_context if it exists */
 	if (view->glx_init == MB_YES) {
 #ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, function_name, instance,
+		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, function_name, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 		glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
 #ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p,%p)\n", __FILE__, __LINE__, function_name, instance,
+		fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%lu,%p)\n", __FILE__, __LINE__, function_name, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 		glXDestroyContext(view->dpy, view->glx_context);
@@ -129,7 +132,7 @@ int mbview_reset_glx(size_t instance) {
 #endif
 	view->glx_context = glXCreateContext(view->dpy, view->vi, NULL, GL_TRUE);
 #ifdef MBV_DEBUG_GLX
-	fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, function_name, instance, view->dpy,
+	fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, function_name, instance, view->dpy,
 	        XtWindow(view->glwmda), view->glx_context);
 #endif
 	glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
@@ -896,7 +899,7 @@ int mbview_plot(size_t instance, int rez) {
 
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, function_name, instance,
+		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, function_name, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 		glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
@@ -1010,7 +1013,7 @@ int mbview_plot(size_t instance, int rez) {
 
 /* make correct window current for OpenGL (may have changed due to recursion) */
 #ifdef MBV_DEBUG_GLX
-			fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, function_name, instance,
+			fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, function_name, instance,
 			        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 			glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
@@ -1021,7 +1024,7 @@ int mbview_plot(size_t instance, int rez) {
 
 /* swap opengl buffers */
 #ifdef MBV_DEBUG_GLX
-			fprintf(stderr, "%s:%d:%s instance:%zu glXSwapBuffers(%p,%p)\n", __FILE__, __LINE__, function_name, instance,
+			fprintf(stderr, "%s:%d:%s instance:%zu glXSwapBuffers(%p,%lu)\n", __FILE__, __LINE__, function_name, instance,
 			        view->dpy, XtWindow(view->glwmda));
 #endif
 			glXSwapBuffers(view->dpy, XtWindow(view->glwmda));
@@ -1227,7 +1230,7 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ij
 
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, function_name, instance,
+		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, function_name, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 		glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
@@ -1485,7 +1488,7 @@ int mbview_viewbounds(size_t instance) {
 
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, function_name, instance,
+		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, function_name, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
 		glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);

@@ -1,4 +1,4 @@
-.TH mbpreprocess 1 "18 March 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbpreprocess 1 "5 July 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbpreprocess\fP \- performs preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset.
@@ -13,6 +13,9 @@ Version 5.0
 \fB--help\fP
 \fB--input\fP=\fIFILE\fP
 \fB--format\fP=\fIFORMATID\fP
+.br
+\fB--platform-file\fP=\fIFILE\fP
+\fB--platform-target-sensor\fP=\fIRECORDID\fP
 .br
 \fB--output-sensor-fnv\fP
 .br
@@ -41,6 +44,11 @@ Version 5.0
 \fB--attitude-async\fP=\fIRECORDTYPE\fP
 \fB--attitude-sensor\fP=\fISENSORID\fP
 .br
+\fB--soundspeed-file\fP=\fIFILE\fP
+\fB--soundspeed-file-format\fP=\fIFORMATID\fP
+\fB--soundspeed-async\fP=\fIRECORDTYPE\fP
+\fB--soundspeed-sensor\fP=\fISENSORID\fP
+.br
 \fB--time-latency-file\fP=\fIFILE\fP
 \fB--time-latency-file-format\fP=\fIFORMATID\fP
 \fB--time-latency-constant\fP=\fISECONDS\fP
@@ -66,12 +74,10 @@ Version 5.0
 \fB--filter-apply-altitude\fP
 \fB--filter-apply-all-ancilliary\fP
 .br
-\fB--platform-file\fP=\fIFILE\fP
-\fB--platform-target-sensor\fP=\fIRECORDID\fP
-.br
+\fB--recalculate-bathymetry\fP
 \fB--no-change-survey\fP
-.br
-\fB--multibeam-sidescan-source\fP=\fISECONDS\fP
+\fB--multibeam-sidescan-source\fP=\fIRECORDID\fP
+\fB--sounding-amplitude-filter\fP=\fITHRESHOLD\fP
 .br
 \fB--kluge-time-jumps\fP=\fISECONDS\fP
 \fB--kluge-beam-tweak\fP=\fIFACTOR\fP
@@ -86,6 +92,7 @@ MBpreprocess handles preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset. This program replaces
 the several format-specific preprocessing programs
 found in MB-System version 5 releases with a single program for version 6.
+In many cases the preprocessing 
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -180,6 +187,15 @@ positional and angular offsets defined in the platform file.
 .B --attitude-sensor=\fISENSORID\fP
 .br
 .TP
+.B --soundspeed-file=\fIFILE\fP
+.TP
+.B --soundspeed-file-format=\fIFORMATID\fP
+.TP
+.B --soundspeed-async=\fIRECORDTYPE\fP
+.TP
+.B --soundspeed-sensor=\fISENSORID\fP
+.br
+.TP
 .B --time-latency-file=\fIFILE\fP
 .TP
 .B --time-latency-file-format=\fIFORMATID\fP
@@ -220,19 +236,23 @@ positional and angular offsets defined in the platform file.
 .TP
 .B --platform-file=\fIFILE\fP
 .TP
-.B --platform-target-sensor=\fIRECORDID\fP
+.B --platform-target-sensor=\fISENSORID\fP
+.TP
+.B --recalculate-bathymetry
 .TP
 .B --no-change-survey
 .TP
-\fBmultibeam-sidescan-source=\fISECONDS\fP
+.B --multibeam-sidescan-source=\fIRECORDID\fP
 .TP
-\fBkluge-time-jumps=\fISECONDS\fP
+.B --sounding-amplitude-filter=\fITHRESHOLD\fP
 .TP
-\fBkluge-beam-tweak=\fIFACTOR\fP
+.B --kluge-time-jumps=\fISECONDS\fP
 .TP
-\fBkluge-zero-attitude-correction
+.B --kluge-beam-tweak=\fIFACTOR\fP
 .TP
-\fBkluge-zero-alongtrack-angles
+.B --kluge-zero-attitude-correction
+.TP
+.B --kluge-zero-alongtrack-angles
 
 .SH EXAMPLES
 To be written.....

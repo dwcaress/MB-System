@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2311       June 20, 2017
 * Version 5.5.2309       June 4, 2017
   Version 5.5.2306       May 27, 2017
   Version 5.5.2305       May 13, 2017
@@ -256,6 +257,24 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2312 (July ??, 2017)
+
+MBedit: Added togglebutton to the View menu that allows to control whether
+flagged soundings are displayed (previously flagged but valid soundings were
+always displayed).
+
+MBauvloglist: Added ability to recalculate MBARI Mapping AUV CTD data using
+corrected calibration coefficients. This allows one to output a corrected time
+series of sound speed.
+
+Proj: Removed the embedded Proj library from MB-System. One must now have Proj
+installed separately in order to build MB-System (which is always the case
+anyway).
+
+-----> 5.5.2311 (June 20, 2017)
+
+MBnavadjust: Fixed bug that preventing importing data into a new project.
 
 -----> 5.5.2309 (June 4, 2017)
 

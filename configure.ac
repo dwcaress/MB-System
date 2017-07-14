@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2310],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2312],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "20 June 2017", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "14 July 2017", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -91,7 +91,6 @@ AS_ECHO(["        --with-gdal-config    - location of GDAL config script gdal-co
 AS_ECHO(["        --with-gmt-config     - location of GMT config script gmt-config"])
 AS_ECHO(["        --with-proj-lib       - location of PROJ libs"])
 AS_ECHO(["        --with-proj-include   - location of PROJ headers"])
-AS_ECHO(["        --enable-bundledproj  - build using bundled proj package - default is to link with libproj"])
 AS_ECHO(["        --with-fftw-lib       - location of FFTW3 libs (optional)"])
 AS_ECHO(["        --with-fftw-include   - location of FFTW3 headers (optional)"])
 AS_ECHO(["        --with-motif-lib      - location of Motif libs (optional)"])
@@ -221,90 +220,79 @@ dnl--------------------------------------------------------------------
 dnl PROJ Section
 dnl--------------------------------------------------------------------
 
-dnl Check whether to use bundled proj package or link with external libproj
-AS_ECHO(["Check whether to use bundled proj package or link with external libproj"])
-AC_ARG_ENABLE(bundledproj, [AS_HELP_STRING([--enable-bundledproj], [build and use the bundled proj package])],
-        [bundledproj=yes], [bundledproj=no])
-AM_CONDITIONAL([BUILD_PROJ], [test x"$bundledproj" = xyes])
-if test "$bundledproj" = "yes" ; then
-    dnl Using bundled PROJ library
-    AS_ECHO(["Using bundled PROJ library"])
-    libproj_LIBS="-lproj"
-    libproj_LDFLAGS=
+dnl Check for Proj.4 library libproj
+AS_ECHO(["Check for Proj.4 library libproj"])
+GOT_PROJ=no
+PROJ_SETTING=no
+AC_ARG_WITH(proj-lib, [  --with-proj-lib=DIR	Location of PROJ library],
+    [proj_libdir="${withval}"] [GOT_PROJ=yes], [GOT_PROJ=no])
+if test "$GOT_PROJ" = "yes" ; then
+    dnl PROJ library location specified: $proj_libdir - check if libproj is there...
+    AS_ECHO(["PROJ library location specified: $proj_libdir - check if libproj is there..."])
+    save_LDFLAGS=$LDFLAGS
+    LDFLAGS="$LDFLAGS -L$proj_libdir"
+    AC_CHECK_LIB([proj], [pj_init_plus], [PROJ_SETTING=yes], [PROJ_SETTING=no], )
+    LDFLAGS="$save_LDFLAGS"
+    if test "$PROJ_SETTING" = "no"; then
+        AC_MSG_ERROR([Did not find libproj according to --with-proj-lib - check the installation!])
+    fi
+    libproj_LIBS="-L$proj_libdir -R $proj_libdir -lproj"
+    libproj_LDFLAGS="-L$proj_libdir"
 else
-    dnl Check if proj library location specified on the command line
-    AS_ECHO(["Check if proj library location specified on the command line"])
-    GOT_PROJ=no
-    PROJ_SETTING=no
-    AC_ARG_WITH(proj-lib, [  --with-proj-lib=DIR	Location of PROJ library],
-        [proj_libdir="${withval}"] [GOT_PROJ=yes], [GOT_PROJ=no])
-    if test "$GOT_PROJ" = "yes" ; then
-        dnl PROJ library location specified: $proj_libdir - check if libproj is there...
-        AS_ECHO(["PROJ library location specified: $proj_libdir - check if libproj is there..."])
-        save_LDFLAGS=$LDFLAGS
-        LDFLAGS="$LDFLAGS -L$proj_libdir"
-        AC_CHECK_LIB([proj], [pj_init_plus], [PROJ_SETTING=yes], [PROJ_SETTING=no], )
-        LDFLAGS="$save_LDFLAGS"
-        if test "$PROJ_SETTING" = "no"; then
-            AC_MSG_ERROR([Did not find libproj according to --with-proj-lib - check the installation!])
-        fi
-        libproj_LIBS="-L$proj_libdir -R $proj_libdir -lproj"
-        libproj_LDFLAGS="-L$proj_libdir"
-    else
-        dnl Look for pkg-config PROJ package...
-        AS_ECHO(["Look for pkg-config PROJ package..."])
-        PKG_CHECK_MODULES([libproj], [proj], [GOT_PROJ=yes], [GOT_PROJ=no])
+    dnl Look for pkg-config PROJ package...
+    AS_ECHO(["Look for pkg-config PROJ package..."])
+    PKG_CHECK_MODULES([libproj], [proj], [GOT_PROJ=yes], [GOT_PROJ=no])
+    libproj_LIBS="-lproj"
+    libproj_LDFLAGS=""
+fi
+if test "$GOT_PROJ" = "no" ; then
+    dnl Did not find PROJ library pkg-config package, looking in the usual places...
+    AS_ECHO(["Did not find PROJ library pkg-config package, looking in the usual places..."])
+    AC_CHECK_LIB([proj], [pj_init_plus], [PROJ_SETTING=yes], [PROJ_SETTING=no],)
+    if test "$PROJ_SETTING" = "yes" ; then
+        GOT_PROJ=yes
+        AS_ECHO(["Using pre-installed libproj..."])
         libproj_LIBS="-lproj"
         libproj_LDFLAGS=""
-    fi
-    if test "$GOT_PROJ" = "no" ; then
-        dnl Did not find PROJ library pkg-config package, looking in the usual places...
-        AS_ECHO(["Did not find PROJ library pkg-config package, looking in the usual places..."])
-        AC_CHECK_LIB([proj], [pj_init_plus], [PROJ_SETTING=yes], [PROJ_SETTING=no],)
-        if test "$PROJ_SETTING" = "yes" ; then
-            GOT_PROJ=yes
-            AS_ECHO(["Using pre-installed libproj..."])
-            libproj_LIBS="-lproj"
-            libproj_LDFLAGS=""
-        else
-            AS_ECHO(["Did not find PROJ library anywhere, use --with-proj-lib to set the location"])
-            AC_MSG_ERROR([Did not find PROJ library anywhere, use --with-proj-lib to set the location])
-        fi
-    fi
-    
-    dnl Check if proj header location specified on the command line
-    AS_ECHO(["Check if proj header location specified on the command line"])
-    GOT_PROJ=no
-    PROJ_SETTING=no
-    AC_ARG_WITH(proj-include, [  --with-proj-include=DIR	Location of PROJ headers],
-            [libproj_CPPFLAGS="-I${withval}"] [GOT_PROJ=yes], [GOT_PROJ=no])
-    if test "$GOT_PROJ" = "yes" ; then
-        dnl PROJ header location specified: $libproj_CPPFLAGS - check if proj_api.h is there...
-        AS_ECHO(["PROJ header location specified: $libproj_CPPFLAGS - check if proj_api.h is there..."])
-        save_CPPFLAGS=$CPPFLAGS
-        save_CFLAGS=$CFLAGS
-        CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
-        CFLAGS="$CFLAGS $libproj_CPPFLAGS"
-        AC_CHECK_HEADER(proj_api.h, [PROJ_SETTING=yes], [PROJ_SETTING=no],)
-        CPPFLAGS=$save_CPPFLAGS
-        CFLAGS=$save_CFLAGS
-        if test "$PROJ_SETTING" = "no"; then
-           AC_MSG_ERROR([Did not find PROJ headers according to --with-proj-include - check the installation!])
-        fi
     else
-        dnl Looking for PROJ headers in the usual places...
-        AS_ECHO(["Looking for PROJ headers in the usual places..."])
-        AC_CHECK_HEADER(proj_api.h, [PROJ_SETTING=yes], [PROJ_SETTING=no])
-        if test "$PROJ_SETTING" = "yes" ; then
-            GOT_PROJ=yes
-            AS_ECHO(["Using pre-installed PROJ headers..."])
-        else
-            AS_ECHO(["Did not find PROJ headers anywhere, use --with-proj-include to set the location"])
-            AC_MSG_ERROR([Did not find PROJ headers anywhere, use --with-proj-include to set the location])
-        fi
+        AS_ECHO(["Did not find PROJ library anywhere, use --with-proj-lib to set the location"])
+        AC_MSG_ERROR([Did not find PROJ library anywhere, use --with-proj-lib to set the location])
     fi
-     dnl Done checking for PROJ headers
 fi
+dnl Done checking for Proj.4 library libproj
+
+dnl Check if proj header location specified on the command line
+AS_ECHO(["Check if proj header location specified on the command line"])
+GOT_PROJ=no
+PROJ_SETTING=no
+AC_ARG_WITH(proj-include, [  --with-proj-include=DIR	Location of PROJ headers],
+        [libproj_CPPFLAGS="-I${withval}"] [GOT_PROJ=yes], [GOT_PROJ=no])
+if test "$GOT_PROJ" = "yes" ; then
+    dnl PROJ header location specified: $libproj_CPPFLAGS - check if proj_api.h is there...
+    AS_ECHO(["PROJ header location specified: $libproj_CPPFLAGS - check if proj_api.h is there..."])
+    save_CPPFLAGS=$CPPFLAGS
+    save_CFLAGS=$CFLAGS
+    CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
+    CFLAGS="$CFLAGS $libproj_CPPFLAGS"
+    AC_CHECK_HEADER(proj_api.h, [PROJ_SETTING=yes], [PROJ_SETTING=no],)
+    CPPFLAGS=$save_CPPFLAGS
+    CFLAGS=$save_CFLAGS
+    if test "$PROJ_SETTING" = "no"; then
+       AC_MSG_ERROR([Did not find PROJ headers according to --with-proj-include - check the installation!])
+    fi
+else
+    dnl Looking for PROJ headers in the usual places...
+    AS_ECHO(["Looking for PROJ headers in the usual places..."])
+    AC_CHECK_HEADER(proj_api.h, [PROJ_SETTING=yes], [PROJ_SETTING=no])
+    if test "$PROJ_SETTING" = "yes" ; then
+        GOT_PROJ=yes
+        AS_ECHO(["Using pre-installed PROJ headers..."])
+    else
+        AS_ECHO(["Did not find PROJ headers anywhere, use --with-proj-include to set the location"])
+        AC_MSG_ERROR([Did not find PROJ headers anywhere, use --with-proj-include to set the location])
+    fi
+fi
+dnl Done checking for PROJ headers
 dnl Done checking for PROJ library libproj and PROJ headers
 
 dnl Substitute PROJ library and header arguments
@@ -471,7 +459,7 @@ if test "$GOT_FFTW" = "yes" ; then
     AC_CHECK_LIB([fftw3], [fftw_plan_dft_1d], [FFTW_SETTING=yes], [FFTW_SETTING=no], )
     LDFLAGS="$save_LDFLAGS"
     if test "$FFTW_SETTING" = "no"; then
-	AC_MSG_ERROR([Did not find libfftw3 according to --with-fftw-lib - check the installation!])
+        AC_MSG_ERROR([Did not find libfftw3 according to --with-fftw-lib - check the installation!])
     fi
     libfftw_LIBS="-L$fftw_libdir -R $fftw_libdir -lfftw3"
     libfftw_LDFLAGS="-L$fftw_libdir"
@@ -758,9 +746,6 @@ dnl--------------------------------------------------------------------
 
 AC_DEFINE_UNQUOTED(MBSYSTEM_INSTALL_PREFIX, "$prefix", [Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h])
 AC_DEFINE_UNQUOTED(MBSYSTEM_OTPS_LOCATION, "$OTPS_DIR", [Set MBSYSTEM_OTPS_LOCATION define in mb_config.h])
-if test "$bundledproj" = "yes" ; then
-AC_DEFINE_UNQUOTED(MBSYSTEM_BUNDLED_PROJ, 1, [Set MBSYSTEM_OTPS_LOCATION define in mb_config.h])
-fi
 
 dnl--------------------------------------------------------------------
 dnl Generate Makefiles
@@ -780,9 +765,6 @@ AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
 	  src/mbview/Makefile  src/mbgrdviz/Makefile  src/mbeditviz/Makefile  \
 	  src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile \
 	  src/html/Makefile src/ps/Makefile src/share/Makefile])
-if test "$bundledproj" = "yes" ; then
-AC_CONFIG_FILES([src/proj/Makefile])
-fi
 AC_OUTPUT
 
 dnl--------------------------------------------------------------------
@@ -813,6 +795,13 @@ AS_ECHO(["libgmt_CPPFLAGS:  $libgmt_CPPFLAGS"])
 AS_ECHO(["libgmt_LIBS:      $libgmt_LIBS"])
 AS_ECHO(["libgmt_LDFLAGS:   $libgmt_LDFLAGS"])
 AS_ECHO(["GMT PLUGIN DIR:   $GMT_PLUGINDIR"])
+AS_ECHO(["libnetcdf_CPPFLAGS:  $libnetcdf_CPPFLAGS"])
+AS_ECHO(["libnetcdf_LIBS:      $libnetcdf_LIBS"])
+AS_ECHO(["libnetcdf_LDFLAGS:   $libnetcdf_LDFLAGS"])
+AS_ECHO(["libproj_CPPFLAGS:    $libproj_CPPFLAGS"])
+AS_ECHO(["libproj_LIBS:        $libproj_LIBS"])
+AS_ECHO(["libproj_LDFLAGS:     $libproj_LDFLAGS"])
+
 if test "$GOT_FFTW" = "yes" ; then
 	AS_ECHO(["FFTW Support: Enabled"])
 else
@@ -829,12 +818,6 @@ else
 	AS_ECHO(["OpenGL Support: Disabled"])
 fi
 AS_ECHO(["Using $OTPS_DIR for OSU Tidal Prediction Software"])
-
-if test "$bundledproj" = "yes" ; then
-	AS_ECHO(["Building using bundled proj package"])
-else
-	AS_ECHO(["Building using system libproj library, not bundled proj package"])
-fi
 
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["Key Variables:"])

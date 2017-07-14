@@ -733,9 +733,17 @@ struct mb_preprocess_struct {
 	double *attitude_pitch;
 	double *attitude_heave;
 
+	int n_soundspeed;
+	double *soundspeed_time_d;
+	double *soundspeed_soundspeed;
+
 	int no_change_survey;
 	int multibeam_sidescan_source;
+    int modify_soundspeed;
 	int recalculate_bathymetry;
+    int sounding_amplitude_filter;
+    double sounding_amplitude_threshold;
+    int ignore_water_column;
 
 	int n_kluge;
 	int kluge_id[MB_PR_KLUGE_NUM_MAX];

@@ -272,7 +272,8 @@ static double yscale;
 static int x_interval = 1000;
 static int y_interval = 250;
 static int show_mode = MBEDIT_SHOW_FLAG;
-static int show_flagged = MB_NO;
+static int show_flaggedsoundings = MB_YES;
+static int show_flaggedprofiles = MB_NO;
 static int show_time = MBEDIT_PLOT_TIME;
 static int beam_save = MB_NO;
 static int iping_save = 0;
@@ -695,7 +696,7 @@ int mbedit_get_filters(int *b_m, double *d_m, int *f_m, int *f_m_t, int *f_m_x, 
 }
 
 /*--------------------------------------------------------------------*/
-int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_flggd, int *sh_time, int *buffer_size_max,
+int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_flggdsdg, int *sh_flggdprf, int *sh_time, int *buffer_size_max,
                         int *buffer_size, int *hold_size, int *form, int *plwd, int *exgr, int *xntrvl, int *yntrvl, int *ttime_i,
                         int *outmode) {
 	/* local variables */
@@ -715,8 +716,11 @@ int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_
 	/* get show mode flag */
 	*sh_mode = show_mode;
 
-	/* get show flagged flag */
-	*sh_flggd = show_flagged;
+	/* get show flagged soundings flag */
+	*sh_flggdsdg = show_flaggedsoundings;
+
+	/* get show flagged profiles flag */
+	*sh_flggdprf = show_flaggedprofiles;
 
 	/* get show time flag */
 	*sh_time = show_time;
@@ -755,25 +759,26 @@ int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       plot max:    %d\n", *plt_size_max);
-		fprintf(stderr, "dbg2       plot_size:   %d\n", *plt_size);
-		fprintf(stderr, "dbg2       show_mode:   %d\n", *sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", *sh_flggd);
-		fprintf(stderr, "dbg2       show_time:   %d\n", *sh_time);
-		fprintf(stderr, "dbg2       buffer max:  %d\n", *buffer_size_max);
-		fprintf(stderr, "dbg2       buffer_size: %d\n", *buffer_size);
-		fprintf(stderr, "dbg2       hold_size:   %d\n", *hold_size);
-		fprintf(stderr, "dbg2       format:      %d\n", *form);
-		fprintf(stderr, "dbg2       plot_width:  %d\n", *plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", *exgr);
-		fprintf(stderr, "dbg2       x_interval:  %d\n", *xntrvl);
-		fprintf(stderr, "dbg2       y_interval:  %d\n", *yntrvl);
+		fprintf(stderr, "dbg2       plot max:               %d\n", *plt_size_max);
+		fprintf(stderr, "dbg2       plot_size:              %d\n", *plt_size);
+		fprintf(stderr, "dbg2       show_mode:              %d\n", *sh_mode);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:  %d\n", *sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:   %d\n", *sh_flggdprf);
+		fprintf(stderr, "dbg2       show_time:              %d\n", *sh_time);
+		fprintf(stderr, "dbg2       buffer max:             %d\n", *buffer_size_max);
+		fprintf(stderr, "dbg2       buffer_size:            %d\n", *buffer_size);
+		fprintf(stderr, "dbg2       hold_size:              %d\n", *hold_size);
+		fprintf(stderr, "dbg2       format:                 %d\n", *form);
+		fprintf(stderr, "dbg2       plot_width:             %d\n", *plwd);
+		fprintf(stderr, "dbg2       exager:                 %d\n", *exgr);
+		fprintf(stderr, "dbg2       x_interval:             %d\n", *xntrvl);
+		fprintf(stderr, "dbg2       y_interval:             %d\n", *yntrvl);
 		for (i = 0; i < 7; i++)
-			fprintf(stderr, "dbg2       ttime[%d]:    %d\n", i, ttime_i[i]);
-		fprintf(stderr, "dbg2       outmode:     %d\n", *outmode);
-		fprintf(stderr, "dbg2       error:       %d\n", error);
+			fprintf(stderr, "dbg2       ttime[%d]:               %d\n", i, ttime_i[i]);
+		fprintf(stderr, "dbg2       outmode:                %d\n", *outmode);
+		fprintf(stderr, "dbg2       error:                  %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:      %d\n", status);
+		fprintf(stderr, "dbg2       status:                 %d\n", status);
 	}
 
 	return (status);
@@ -833,7 +838,7 @@ int mbedit_set_viewmode(int vw_mode) {
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_open(char *file, int form, int fileid, int numfiles, int savemode, int outmode, int plwd, int exgr, int xntrvl,
-                       int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time, int *buffer_size, int *buffer_size_max,
+                       int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *buffer_size, int *buffer_size_max,
                        int *hold_size, int *ndumped, int *nloaded, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_open";
@@ -855,7 +860,8 @@ int mbedit_action_open(char *file, int form, int fileid, int numfiles, int savem
 		fprintf(stderr, "dbg2       y_interval:      %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:       %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:       %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:    %d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:       %d\n", sh_time);
 		fprintf(stderr, "dbg2       buffer_size:     %d\n", *buffer_size);
 		fprintf(stderr, "dbg2       buffer_size_max: %d\n", *buffer_size_max);
@@ -899,7 +905,7 @@ int mbedit_action_open(char *file, int form, int fileid, int numfiles, int savem
 		do_filebutton_off();
 
 		/* now plot it */
-		status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time, nplt, MB_YES);
+		status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, MB_YES);
 
 		/* set fileid and numfiles */
 		file_id = fileid;
@@ -932,7 +938,7 @@ int mbedit_action_open(char *file, int form, int fileid, int numfiles, int savem
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_next_buffer(int hold_size, int buffer_size, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
-                              int sh_mode, int sh_flggd, int sh_time, int *ndumped, int *nloaded, int *nbuffer, int *ngood,
+                              int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *ndumped, int *nloaded, int *nbuffer, int *ngood,
                               int *icurrent, int *nplt, int *quit) {
 	/* local variables */
 	char *function_name = "mbedit_action_next_buffer";
@@ -951,7 +957,8 @@ int mbedit_action_next_buffer(int hold_size, int buffer_size, int plwd, int exgr
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -1003,7 +1010,7 @@ int mbedit_action_next_buffer(int hold_size, int buffer_size, int plwd, int exgr
 
 		/* else set up plotting */
 		else {
-			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time, nplt, MB_YES);
+			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, MB_YES);
 		}
 	}
 
@@ -1229,7 +1236,7 @@ int mbedit_action_quit(int buffer_size, int *ndumped, int *nloaded, int *nbuffer
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time,
+int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                        int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_step";
@@ -1247,7 +1254,8 @@ int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -1273,7 +1281,7 @@ int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int
 
 		/* set the plotting list */
 		if (*ngood > 0) {
-			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time, nplt, MB_NO);
+			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, MB_NO);
 		}
 
 		/* set failure flag if no step was made */
@@ -1310,7 +1318,7 @@ int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time,
+int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                        int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_plot";
@@ -1326,7 +1334,8 @@ int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -1343,7 +1352,7 @@ int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 
 		/* set the plotting list */
 		if (*ngood > 0) {
-			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time, nplt, MB_NO);
+			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, MB_NO);
 		}
 	}
 
@@ -1375,7 +1384,7 @@ int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
-                               int sh_flggd, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+                               int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_mouse_toggle";
 	int status = MB_SUCCESS;
@@ -1397,7 +1406,8 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -1427,7 +1437,7 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 
 		/* if a zap box has been picked call zap routine */
 		if (zap_box == MB_YES)
-			status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time,
+			status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time,
 			                                     nbuffer, ngood, icurrent, nplt);
 	}
 
@@ -1548,7 +1558,7 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
-                             int sh_flggd, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+                             int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_mouse_pick";
 	int status = MB_SUCCESS;
@@ -1570,7 +1580,8 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -1600,7 +1611,7 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 
 		/* if a zap box has been picked call zap routine */
 		if (zap_box == MB_YES)
-			status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time,
+			status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time,
 			                                     nbuffer, ngood, icurrent, nplt);
 	}
 
@@ -1707,7 +1718,7 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
-                              int sh_flggd, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+                              int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_mouse_erase";
 	int status = MB_SUCCESS;
@@ -1729,7 +1740,8 @@ int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntr
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -1755,7 +1767,7 @@ int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntr
 					zap_ping = i;
 
 					/* if a zap box has been picked call zap routine */
-					status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd,
+					status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf,
 					                                     sh_time, nbuffer, ngood, icurrent, nplt);
 				}
 			}
@@ -1855,7 +1867,7 @@ int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntr
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
-                                int sh_flggd, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+                                int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_mouse_restore";
 	int status = MB_SUCCESS;
@@ -1877,7 +1889,8 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -1903,7 +1916,7 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 					zap_ping = i;
 
 					/* if a zap box has been picked call zap routine */
-					status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd,
+					status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf,
 					                                     sh_time, nbuffer, ngood, icurrent, nplt);
 				}
 			}
@@ -2001,7 +2014,7 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
-                             int sh_mode, int sh_flggd, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+                             int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_mouse_grab";
 	int status = MB_SUCCESS;
@@ -2024,7 +2037,8 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -2183,7 +2197,7 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
 						zap_ping = i;
 
 						/* if a zap box has been picked call zap routine */
-						status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd,
+						status = mbedit_action_zap_outbounds(zap_ping, plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf,
 						                                     sh_time, nbuffer, ngood, icurrent, nplt);
 					}
 				}
@@ -2230,7 +2244,7 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
 			}
 
 			/* replot everything */
-			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time, nplt, MB_NO);
+			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, MB_NO);
 		}
 
 		/* set some return values */
@@ -2267,7 +2281,7 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
-                             int sh_flggd, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
+                             int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_mouse_info";
 	int status = MB_SUCCESS;
@@ -2287,7 +2301,8 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -2392,7 +2407,7 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd,
+int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf,
                                 int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_zap_outbounds";
@@ -2411,7 +2426,8 @@ int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int y
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -2505,7 +2521,7 @@ int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int y
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time,
+int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                            int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_bad_ping";
@@ -2522,7 +2538,8 @@ int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_s
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -2608,7 +2625,7 @@ int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_s
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time,
+int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_good_ping";
@@ -2625,7 +2642,8 @@ int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -2700,7 +2718,7 @@ int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time,
+int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_left_ping";
@@ -2717,7 +2735,8 @@ int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -2803,7 +2822,7 @@ int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time,
+int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                              int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_right_ping";
@@ -2820,7 +2839,8 @@ int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -2906,7 +2926,7 @@ int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time,
+int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_zero_ping";
@@ -2923,7 +2943,8 @@ int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -2999,7 +3020,7 @@ int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time,
+int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_flag_view";
@@ -3016,7 +3037,8 @@ int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -3069,7 +3091,7 @@ int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 
 		/* set up plotting */
 		if (*ngood > 0) {
-			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time, nplt, MB_NO);
+			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, MB_NO);
 		}
 	}
 
@@ -3100,7 +3122,7 @@ int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time,
+int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                               int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_unflag_view";
@@ -3117,7 +3139,8 @@ int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int pl
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -3166,7 +3189,7 @@ int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int pl
 
 		/* set up plotting */
 		if (*ngood > 0) {
-			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time, nplt, MB_NO);
+			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, MB_NO);
 		}
 	}
 
@@ -3197,7 +3220,7 @@ int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int pl
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time,
+int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                              int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_unflag_all";
@@ -3214,7 +3237,8 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -3261,7 +3285,7 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 
 		/* set up plotting */
 		if (*ngood > 0) {
-			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time, nplt, MB_NO);
+			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, MB_NO);
 		}
 	}
 
@@ -3292,7 +3316,7 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time,
+int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                              int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_filter_all";
@@ -3311,7 +3335,8 @@ int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -3352,7 +3377,7 @@ int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 		/* set up plotting */
 		do_message_off();
 		if (*ngood > 0) {
-			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time, nplt, MB_NO);
+			status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, MB_NO);
 		}
 	}
 
@@ -4417,7 +4442,7 @@ int mbedit_clear_screen() {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggd, int sh_time, int *nplt,
+int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nplt,
                     int autoscale) {
 	/* local variables */
 	char *function_name = "mbedit_plot_all";
@@ -4452,7 +4477,8 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, in
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 		fprintf(stderr, "dbg2       nplt:        %p\n", nplt);
 		fprintf(stderr, "dbg2       autoscale:   %d\n", autoscale);
@@ -4462,7 +4488,8 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, in
 	plot_width = plwd;
 	exager = exgr;
 	show_mode = sh_mode;
-	show_flagged = sh_flggd;
+	show_flaggedsoundings = sh_flggdsdg;
+	show_flaggedprofiles = sh_flggdprf;
 	show_time = sh_time,
 
 	/* figure out which pings to plot */
@@ -4818,17 +4845,17 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, in
 			if (!mb_beam_check_flag_unusable(ping[i].beamflag[j])) {
 				if (view_mode == MBEDIT_VIEW_WATERFALL) {
 					ping[i].bath_x[j] = xcen + dxscale * ping[i].bathacrosstrack[j];
-					ping[i].bath_y[j] = y + dyscale * (fabs((double)ping[i].bath[j]) - bathmedian);
+					ping[i].bath_y[j] = y + dyscale * ((double)ping[i].bath[j] - bathmedian);
 				}
 				else if (view_mode == MBEDIT_VIEW_ALONGTRACK) {
 					ping[i].bath_x[j] = xcen + dxscale * ping[i].bathacrosstrack[j];
-					ping[i].bath_y[j] = ycen + dyscale * (fabs((double)ping[i].bath[j]) - bathmedian);
+					ping[i].bath_y[j] = ycen + dyscale * ((double)ping[i].bath[j] - bathmedian);
 				}
 				else {
 					/* ping[i].bath_x[j] = x;*/
 					ping[i].bath_x[j] =
 					    xcen + dxscale * (ping[i].bathalongtrack[j] + ping[i].distance - ping[current_id + nplot / 2].distance);
-					ping[i].bath_y[j] = ycen + dyscale * (fabs((double)ping[i].bath[j]) - bathmedian);
+					ping[i].bath_y[j] = ycen + dyscale * ((double)ping[i].bath[j] - bathmedian);
 				}
 			}
 			else {
@@ -4925,7 +4952,7 @@ int mbedit_plot_beam(int iping, int jbeam) {
 		if (mb_beam_ok(ping[iping].beamflag[jbeam]))
 			xg_fillrectangle(mbedit_xgid, ping[iping].bath_x[jbeam] - 2, ping[iping].bath_y[jbeam] - 2, 4, 4,
 			                 pixel_values[beam_color], XG_SOLIDLINE);
-		else
+		else if (show_flaggedsoundings == MB_YES)
 			xg_drawrectangle(mbedit_xgid, ping[iping].bath_x[jbeam] - 2, ping[iping].bath_y[jbeam] - 2, 4, 4,
 			                 pixel_values[beam_color], XG_SOLIDLINE);
 	}
@@ -4962,7 +4989,7 @@ int mbedit_plot_ping(int iping) {
 	first = MB_YES;
 	last_flagged = MB_NO;
 	for (j = 0; j < ping[iping].beams_bath; j++) {
-		if (show_flagged == MB_YES && !mb_beam_ok(ping[iping].beamflag[j]) &&
+		if (show_flaggedprofiles == MB_YES && !mb_beam_ok(ping[iping].beamflag[j]) &&
 		    !mb_beam_check_flag_unusable(ping[iping].beamflag[j]) && first == MB_YES) {
 			first = MB_NO;
 			last_flagged = MB_YES;
@@ -4987,7 +5014,7 @@ int mbedit_plot_ping(int iping) {
 			xold = ping[iping].bath_x[j];
 			yold = ping[iping].bath_y[j];
 		}
-		else if (show_flagged == MB_YES && !mb_beam_ok(ping[iping].beamflag[j]) &&
+		else if (show_flaggedprofiles == MB_YES && !mb_beam_ok(ping[iping].beamflag[j]) &&
 		         !mb_beam_check_flag_unusable(ping[iping].beamflag[j])) {
 			if (j > 0)
 				xg_drawline(mbedit_xgid, xold, yold, ping[iping].bath_x[j], ping[iping].bath_y[j], pixel_values[RED],
@@ -5295,7 +5322,7 @@ int mbedit_unplot_info() {
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
-                       int sh_mode, int sh_flggd, int sh_time, int *ndumped, int *nloaded, int *nbuffer, int *ngood,
+                       int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *ndumped, int *nloaded, int *nbuffer, int *ngood,
                        int *icurrent, int *nplt) {
 	/* local variables */
 	char *function_name = "mbedit_action_goto";
@@ -5323,7 +5350,8 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
 		fprintf(stderr, "dbg2       show_mode:   %d\n", sh_mode);
-		fprintf(stderr, "dbg2       show_flagged:%d\n", sh_flggd);
+		fprintf(stderr, "dbg2       show_flaggedsoundings:    %d\n", sh_flggdsdg);
+		fprintf(stderr, "dbg2       show_flaggedprofiles:     %d\n", sh_flggdprf);
 		fprintf(stderr, "dbg2       show_time:   %d\n", sh_time);
 	}
 
@@ -5440,7 +5468,7 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
 
 	/* set up plotting */
 	if (*ngood > 0) {
-		status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggd, sh_time, nplt, MB_NO);
+		status = mbedit_plot_all(plwd, exgr, xntrvl, yntrvl, plt_size, sh_mode, sh_flggdsdg, sh_flggdprf, sh_time, nplt, MB_NO);
 	}
 
 	/* let the world know... */

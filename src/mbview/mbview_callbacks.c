@@ -103,6 +103,9 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 
+// #define MBV_DEBUG_GLX 1
+// #define MBV_GET_GLX_ERRORS 1
+
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
@@ -2246,10 +2249,14 @@ int mbview_open(int verbose, size_t instance, int *error) {
 
 	/* set widget sensitivity */
 	mbview_update_sensitivity(verbose, instance, error);
+	fprintf(stderr,"Calling mbview_action_sensitivityall()\n");
 	mbview_action_sensitivityall();
+	fprintf(stderr,"Done with mbview_action_sensitivityall()\n");
 
 	/* create glx context */
+	fprintf(stderr,"Calling mbview_reset_glx(%zu)\n",instance);
 	mbview_reset_glx(instance);
+	fprintf(stderr,"Done with mbview_reset_glx()\n");
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -4693,7 +4700,7 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 			if (view->prglx_init == MB_YES) {
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-				fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, function_name, instance,
+				fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, function_name, instance,
 				        view->dpy, XtWindow(view->prglwmda), view->prglx_context);
 #endif
 				glXMakeCurrent(view->dpy, XtWindow(view->prglwmda), view->prglx_context);
@@ -4718,7 +4725,7 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 			if (view->glx_init == MB_YES) {
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-				fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, function_name, instance,
+				fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, function_name, instance,
 				        XtDisplay(view->glwmda), XtWindow(view->glwmda), view->glx_context);
 #endif
 				glXMakeCurrent(XtDisplay(view->glwmda), XtWindow(view->glwmda), view->glx_context);

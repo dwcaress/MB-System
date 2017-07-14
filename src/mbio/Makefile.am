@@ -53,12 +53,8 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbaux \
 	-I@top_srcdir@/src/surf \
 	-I@top_srcdir@/src/gsf \
 	${libgmt_CPPFLAGS} \
-	${libnetcdf_CPPFLAGS}
-if BUILD_PROJ
-  AM_CPPFLAGS += -I@top_srcdir@/src/proj
-else
-  AM_CPPFLAGS += ${libproj_CPPFLAGS}
-endif
+	${libnetcdf_CPPFLAGS} \
+	${libproj_CPPFLAGS}
 
 libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
 

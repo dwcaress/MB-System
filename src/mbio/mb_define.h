@@ -182,6 +182,12 @@ typedef char mb_longname[MB_LONGNAME_LENGTH];
 #define MB_ISECINMINUTE 60
 #define MB_IMININHOUR 60
 
+/* water sound speed calculation algorithms */
+#define MB_SOUNDSPEEDALGORITHM_NONE 		0
+#define MB_SOUNDSPEEDALGORITHM_CHENMILLERO 	1
+#define MB_SOUNDSPEEDALGORITHM_WILSON 		2
+#define MB_SOUNDSPEEDALGORITHM_DELGROSSO 	3
+
 /* min max round define */
 #ifndef MIN
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
@@ -524,6 +530,14 @@ int mb_absorption(int verbose, double frequency, double temperature, double sali
                   double *absorption, int *error);
 int mb_potential_temperature(int verbose, double temperature, double salinity, double pressure, double *potential_temperature,
                              int *error);
+int mb_seabird_density(int verbose, double salinity, double temperature,
+					   double pressure, double *density, int *error);
+int mb_seabird_depth(int verbose, double pressure, double latitude, double *depth, int *error);
+int mb_seabird_salinity(int verbose, double conductivity, double temperature,
+						double pressure, double *salinity, int *error);
+int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
+						  double temperature, double pressure,
+						  double *soundspeed, int *error);
 
 int mb_mem_debug_on(int verbose, int *error);
 int mb_mem_debug_off(int verbose, int *error);

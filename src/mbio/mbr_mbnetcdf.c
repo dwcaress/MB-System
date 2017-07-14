@@ -60,7 +60,7 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-#define MBNETCDF_DEBUG 1
+// #define MBNETCDF_DEBUG 1
 
 static char rcs_id[] = "$Id$";
 

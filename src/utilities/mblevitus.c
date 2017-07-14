@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
 	extern char *optarg;
 	int errflg = 0;
 	int c;
-	int status;
+	int status = MB_SUCCESS;
 	int verbose = 0;
 	int help = 0;
 	int flag = 0;
