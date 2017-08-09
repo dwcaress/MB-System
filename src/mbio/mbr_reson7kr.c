@@ -2184,8 +2184,9 @@ Have a nice day...\n");
 
 			/* check for MB-System format error in bathymetry records by checking comments
 			 * for MB-System distributions earlier than 4.3.2004 */
-			if (status == MB_SUCCESS && *recordid == R7KRECID_7kSystemEventMessage &&
-			    store->systemeventmessage.message_length > 0) {
+			if (status == MB_SUCCESS && *recordid == R7KRECID_7kSystemEventMessage
+                && store->systemeventmessage.message_length > 0
+                && store->bathymetry.acrossalongerror == MB_MAYBE) {
 				nscan = sscanf(store->systemeventmessage.message, "MB-System Version %d.%d.%d", &version_major, &version_minor,
 				               &version_svn);
 				if (nscan == 0)
@@ -2197,7 +2198,13 @@ Have a nice day...\n");
 				}
 				else if (nscan == 2 && (version_major < 5 || (version_major == 5 && version_minor < 3))) {
 					store->bathymetry.acrossalongerror = MB_YES;
+                }
+				else if (nscan >= 2) {
+					store->bathymetry.acrossalongerror = MB_NO;
 				}
+//if (nscan > 0)
+//fprintf(stderr,"READ OLD MB-System Version %s   nscan:%d %d %d %d acrossalongerror:%d\n",
+//store->systemeventmessage.message,nscan,version_major,version_minor,version_svn,store->bathymetry.acrossalongerror);
 			}
 		}
 
@@ -6942,6 +6949,8 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 			index += 4;
 			mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->azimuth_angle[i]));
 			index += 4;
+//fprintf(stderr,"READ BEAM:%d d:%f l:%f x:%f ax:%f az:%f\n",
+//i,bathymetry->depth[i],bathymetry->alongtrack[i],bathymetry->acrosstrack[i],bathymetry->pointing_angle[i],bathymetry->azimuth_angle[i]);
 		}
 
 		/* now check to see if these data were written incorrectly with acrosstrack before alongtrack
@@ -14956,6 +14965,8 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 				index += 4;
 				mb_put_binary_float(MB_YES, bathymetry->azimuth_angle[i], &buffer[index]);
 				index += 4;
+//fprintf(stderr,"WRITE BEAM:%d d:%f l:%f x:%f ax:%f az:%f\n",
+//i,bathymetry->depth[i],bathymetry->alongtrack[i],bathymetry->acrosstrack[i],bathymetry->pointing_angle[i],bathymetry->azimuth_angle[i]);
 			}
 		}
 
