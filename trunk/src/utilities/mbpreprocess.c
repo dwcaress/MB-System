@@ -1268,54 +1268,138 @@ int main(int argc, char **argv) {
 
 	/* start by loading time latency model if required */
 	if (time_latency_mode == MB_SENSOR_TIME_LATENCY_MODEL) {
-		mb_loadtimeshiftdata(verbose, time_latency_file, time_latency_format, &time_latency_num, &time_latency_alloc,
+		status = mb_loadtimeshiftdata(verbose, time_latency_file, time_latency_format, &time_latency_num, &time_latency_alloc,
 		                     &time_latency_time_d, &time_latency_time_latency, &error);
 
-		if (verbose > 0)
+		if (status == MB_FAILURE) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nUnable to open and parse time latency file: %s\n", time_latency_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (time_latency_num < 1) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nNo time latency values read from: %s\n", time_latency_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (verbose > 0)
 			fprintf(stderr, "%d time_latency records loaded from file %s\n", time_latency_num, time_latency_file);
 	}
 
 	/* import specified ancilliary data */
 	if (nav_mode == MBPREPROCESS_MERGE_FILE) {
-		mb_loadnavdata(verbose, nav_file, nav_file_format, lonflip, &n_nav, &n_nav_alloc, &nav_time_d, &nav_navlon, &nav_navlat,
+		status = mb_loadnavdata(verbose, nav_file, nav_file_format, lonflip, &n_nav, &n_nav_alloc, &nav_time_d, &nav_navlon, &nav_navlat,
 		               &nav_speed, &error);
 
-		if (verbose > 0)
+		if (status == MB_FAILURE) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nUnable to open and parse nav file: %s\n", nav_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (n_nav < 1) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nNo nav values read from: %s\n", nav_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (verbose > 0)
 			fprintf(stderr, "%d navigation records loaded from file %s\n", n_nav, nav_file);
 	}
 	if (sensordepth_mode == MBPREPROCESS_MERGE_FILE) {
-		mb_loadsensordepthdata(verbose, sensordepth_file, sensordepth_file_format, &n_sensordepth, &n_sensordepth_alloc,
+		status = mb_loadsensordepthdata(verbose, sensordepth_file, sensordepth_file_format, &n_sensordepth, &n_sensordepth_alloc,
 		                       &sensordepth_time_d, &sensordepth_sensordepth, &error);
 
-		if (verbose > 0)
+		if (status == MB_FAILURE) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nUnable to open and parse sensoredepth file: %s\n", sensordepth_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (n_sensordepth < 1) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nNo soundspeed values read from: %s\n", sensordepth_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (verbose > 0)
 			fprintf(stderr, "%d sensordepth records loaded from file %s\n", n_sensordepth, sensordepth_file);
 	}
 	if (heading_mode == MBPREPROCESS_MERGE_FILE) {
-		mb_loadheadingdata(verbose, heading_file, heading_file_format, &n_heading, &n_heading_alloc, &heading_time_d,
+		status = mb_loadheadingdata(verbose, heading_file, heading_file_format, &n_heading, &n_heading_alloc, &heading_time_d,
 		                   &heading_heading, &error);
 
-		if (verbose > 0)
+		if (status == MB_FAILURE) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nUnable to open and parse heading file: %s\n", heading_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (n_heading < 1) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nNo heading values read from: %s\n", heading_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (verbose > 0)
 			fprintf(stderr, "%d heading records loaded from file %s\n", n_heading, heading_file);
 	}
 	if (altitude_mode == MBPREPROCESS_MERGE_FILE) {
-		mb_loadaltitudedata(verbose, altitude_file, altitude_file_format, &n_altitude, &n_altitude_alloc, &altitude_time_d,
+		status = mb_loadaltitudedata(verbose, altitude_file, altitude_file_format, &n_altitude, &n_altitude_alloc, &altitude_time_d,
 		                    &altitude_altitude, &error);
 
-		if (verbose > 0)
+		if (status == MB_FAILURE) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nUnable to open and parse altitude file: %s\n", altitude_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (n_altitude < 1) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nNo altitude values read from: %s\n", altitude_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (verbose > 0)
 			fprintf(stderr, "%d altitude records loaded from file %s\n", n_altitude, altitude_file);
 	}
 	if (attitude_mode == MBPREPROCESS_MERGE_FILE) {
-		mb_loadattitudedata(verbose, attitude_file, attitude_file_format, &n_attitude, &n_attitude_alloc, &attitude_time_d,
+		status = mb_loadattitudedata(verbose, attitude_file, attitude_file_format, &n_attitude, &n_attitude_alloc, &attitude_time_d,
 		                    &attitude_roll, &attitude_pitch, &attitude_heave, &error);
 
-		if (verbose > 0)
+		if (status == MB_FAILURE) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nUnable to open and parse attitude file: %s\n", attitude_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (n_attitude < 1) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nNo attitude values read from: %s\n", attitude_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (verbose > 0)
 			fprintf(stderr, "%d attitude records loaded from file %s\n", n_attitude, attitude_file);
 	}
 	if (soundspeed_mode == MBPREPROCESS_MERGE_FILE) {
-		mb_loadsoundspeeddata(verbose, soundspeed_file, soundspeed_file_format, &n_soundspeed, &n_soundspeed_alloc, &soundspeed_time_d,
+		status = mb_loadsoundspeeddata(verbose, soundspeed_file, soundspeed_file_format, &n_soundspeed, &n_soundspeed_alloc, &soundspeed_time_d,
 		                    &soundspeed_soundspeed, &error);
 
-		if (verbose > 0)
+		if (status == MB_FAILURE) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nUnable to open and parse soundspeed file: %s\n", soundspeed_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (n_soundspeed < 1) {
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nNo soundspeed values read from: %s\n", soundspeed_file);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
+		else if (verbose > 0)
 			fprintf(stderr, "%d soundspeed records loaded from file %s\n", n_soundspeed, soundspeed_file);
 	}
 

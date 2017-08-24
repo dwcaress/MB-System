@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+* Version 5.5.2314       August 24, 2017
 * Version 5.5.2313       August 9, 2017
   Version 5.5.2312       July 14, 2017
   Version 5.5.2311       June 20, 2017
@@ -259,6 +260,27 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2314 (August 24, 2017)
+
+Mbprocess: Fixed bug in which mbprocess sometimes crashed for files that have not
+had bathymetry edited or filtered.
+
+Mbprocess: Code used to read GMT grid files modified so that if the GMT API call
+to read a grid fails, that call will be repeated every 0.1 seconds for 10 seconds
+until it succeeds. This should allow multiple instances of mbprocess to read the
+same grid files used for processing without interfering (the current GMT libraries
+have problems with multiple simultaneous reading of a grid file over some network
+mounted filesystems).
+
+Format 88 (MBF_RESON7KR): Augmented the preprocess function to properly implement
+a correction to the sound speed value used for beamforming, with consequential
+changes to the recalculated bathymetry.
+
+Mbpreprocess: Changed so that it ancilliary data is specified to be read from
+external file(s) but one of those files does not exist, the program terminates
+with an error message.
+
 
 -----> 5.5.2313 (August 9, 2017)
 

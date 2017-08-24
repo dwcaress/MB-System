@@ -259,9 +259,7 @@ int main(int argc, char **argv) {
 
 		printf("\n<CENTER><P><BR>\n");
 		printf("Last Updated: %s</P></CENTER>\n", MB_FORMAT_UPDATEDATE);
-		printf("\n<P>\n<HR WIDTH=\"100%%\"></P>\n\n");
-		printf("<P><IMG SRC=\"mbsystem_logo_small.gif\" HEIGHT=55 WIDTH=158><A HREF=\"mbsystem_home.html\">Back\n");
-		printf("to MB-System Home Page...</A></P>\n");
+		printf("\n<P>\n<HR WIDTH=\"67%%\"></P>\n\n");
 		printf("\n</BODY>\n</HTML>\n");
 
 		status = MB_SUCCESS;

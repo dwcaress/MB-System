@@ -5846,7 +5846,9 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 				/* Change the sound speed used to calculate bathymetry */
 				if (pars->modify_soundspeed) {
 					soundspeedsnellfactor = soundspeednew / soundspeed;
+//fprintf(stderr,"MODIFY SOUND SPEED:  old: %.3f  new: *%.3f    ratio: %.6f\n", soundspeed, soundspeednew, soundspeedsnellfactor);
 					soundspeed = soundspeednew;
+					bathymetry->sound_velocity = soundspeed;
 				}
 				
 				/* if requested apply kluge scaling of sound speed - which means
