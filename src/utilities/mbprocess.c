@@ -451,8 +451,9 @@ and mbedit edit save files.\n";
 	mbp_format_specified = MB_NO;
 	strip_comments = MB_NO;
 
-	/* initialize grid */
+	/* initialize grid and esf */
 	memset(&grid, 0, sizeof(struct mbprocess_grid_struct));
+	memset(&esf, 0, sizeof(struct mb_esf_struct));
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
@@ -5572,30 +5573,32 @@ and mbedit edit save files.\n";
 			neditduplicate = 0;
 			neditnotused = 0;
 			neditused = 0;
-			for (i = 0; i < esf.nedit; i++) {
-				if (esf.edit[i].use == 1000) {
-					neditnull++;
-					if (verbose >= 2)
-						fprintf(stderr, "BEAM FLAG TIED TO NULL BEAM: i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
-						        esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
-				}
-				else if (esf.edit[i].use == 100) {
-					neditduplicate++;
-					if (verbose >= 2)
-						fprintf(stderr, "DUPLICATE BEAM FLAG:         i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
-						        esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
-				}
-				else if (esf.edit[i].use != 1) {
-					neditnotused++;
-					if (verbose >= 2)
-						fprintf(stderr, "BEAM FLAG NOT USED:          i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
-						        esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
-				}
-				else if (esf.edit[i].use == 1) {
-					neditused++;
-					if (verbose >= 2)
-						fprintf(stderr, "BEAM FLAG USED:              i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
-						        esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
+			if (process.mbp_edit_mode == MBP_EDIT_ON) {
+				for (i = 0; i < esf.nedit; i++) {
+					if (esf.edit[i].use == 1000) {
+						neditnull++;
+						if (verbose >= 2)
+							fprintf(stderr, "BEAM FLAG TIED TO NULL BEAM: i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
+									esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
+					}
+					else if (esf.edit[i].use == 100) {
+						neditduplicate++;
+						if (verbose >= 2)
+							fprintf(stderr, "DUPLICATE BEAM FLAG:         i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
+									esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
+					}
+					else if (esf.edit[i].use != 1) {
+						neditnotused++;
+						if (verbose >= 2)
+							fprintf(stderr, "BEAM FLAG NOT USED:          i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
+									esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
+					}
+					else if (esf.edit[i].use == 1) {
+						neditused++;
+						if (verbose >= 2)
+							fprintf(stderr, "BEAM FLAG USED:              i:%d edit: %f %d %d   %d\n", i, esf.edit[i].time_d,
+									esf.edit[i].beam, esf.edit[i].action, esf.edit[i].use);
+					}
 				}
 			}
 			if (verbose >= 1) {
