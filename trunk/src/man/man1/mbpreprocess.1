@@ -92,7 +92,10 @@ MBpreprocess handles preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset. This program replaces
 the several format-specific preprocessing programs
 found in MB-System version 5 releases with a single program for version 6.
-In many cases the preprocessing 
+In many cases the preprocessing consists only of creating the ancilliary files
+parallel to the raw files, but in others the data must be translated to
+different formats. The proprocessing step can also be used to merge navigation,
+attitude, sound speed, or other ancilliary data with the survey data.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -135,11 +138,17 @@ for the input file \fIFILE\fP specified with the
 infers the format from the "*.mbXX" \fBMB\-System\fP suffix
 convention.
 .TP
+.B --platform-file=\fIFILE\fP
+.TP
+.B --platform-target-sensor=\fISENSORID\fP
+.TP
 .B --output-sensor-fnv
 Causes \fBmbpreprocess\fP to output "fast navigation" or *.fnv files for each
 of the sensors described in the platform file specified with the \fB--platform-file\fP
 option. These *.fnv files will be corrected for the lever arms specified by the
 positional and angular offsets defined in the platform file.
+.TP
+.B --skip-existing
 .br
 .TP
 .B --nav-file=\fIFILE\fP
@@ -233,10 +242,6 @@ positional and angular offsets defined in the platform file.
 .TP
 .B --filter-apply-all-ancilliary
 .br
-.TP
-.B --platform-file=\fIFILE\fP
-.TP
-.B --platform-target-sensor=\fISENSORID\fP
 .TP
 .B --recalculate-bathymetry
 .TP

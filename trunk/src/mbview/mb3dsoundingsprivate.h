@@ -81,12 +81,12 @@ struct mb3dsoundings_world_struct {
 	void (*mb3dsoundings_dismiss_notify)(void);
 	void (*mb3dsoundings_edit_notify)(int ifile, int iping, int ibeam, char beamflag, int flush);
 	void (*mb3dsoundings_info_notify)(int ifile, int iping, int ibeam, char *infostring);
-	void (*mb3dsoundings_bias_notify)(double rollbias, double pitchbias, double headingbias, double timelag);
-	void (*mb3dsoundings_biasapply_notify)(double rollbias, double pitchbias, double headingbias, double timelag);
+	void (*mb3dsoundings_bias_notify)(double rollbias, double pitchbias, double headingbias, double timelag, double snell);
+	void (*mb3dsoundings_biasapply_notify)(double rollbias, double pitchbias, double headingbias, double timelag, double snell);
 	void (*mb3dsoundings_flagsparsevoxels_notify)(int sizemultiplier, int nsoundingthreshold);
 	void (*mb3dsoundings_colorsoundings_notify)(int color);
 	void (*mb3dsoundings_optimizebiasvalues_notify)(int mode, double *rollbias, double *pitchbias, double *headingbias,
-	                                                double *timelag);
+	                                                double *timelag, double *snell);
 
 	/* pointer to structure holding data to be rendered */
 	struct mb3dsoundings_struct *soundingdata;
@@ -177,6 +177,7 @@ struct mb3dsoundings_world_struct {
 	int ipitchbias;
 	int iheadingbias;
 	int itimelag;
+	int isnell;
 
 	/* view parameters */
 	int view_boundingbox;
@@ -260,6 +261,7 @@ void do_mb3dsdg_rollbias(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_pitchbias(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_headingbias(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_timelag(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_snell(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_flagged(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_noprofile(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_goodprofile(Widget w, XtPointer client_data, XtPointer call_data);
@@ -285,6 +287,7 @@ void do_mb3dsdg_action_optimizebiasvalues_h(Widget w, XtPointer client_data, XtP
 void do_mb3dsdg_action_optimizebiasvalues_rp(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_optimizebiasvalues_rph(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_optimizebiasvalues_t(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_optimizebiasvalues_s(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_boundingbox(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_scalewithflagged(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_reset(Widget w, XtPointer client_data, XtPointer call_data);

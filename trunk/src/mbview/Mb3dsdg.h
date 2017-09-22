@@ -42,6 +42,7 @@ typedef struct _Mb3dsdgData {
 	Widget Mb3dsdg;
 	Widget pushButton_reset;
 	Widget scale_timelag;
+	Widget scale_snell;
 	Widget toggleButton_mouse_panzoom1;
 	Widget toggleButton_mouse_rotate1;
 	Widget label_mousemode;
@@ -94,6 +95,7 @@ typedef struct _Mb3dsdgData {
 	Widget pushButton_action_optimizebiasvalues_rp;
 	Widget pushButton_action_optimizebiasvalues_rph;
 	Widget pushButton_action_optimizebiasvalues_t;
+	Widget pushButton_action_optimizebiasvalues_s;
 	Widget cascadeButton_dismiss;
 	Widget pulldownMenu_dismiss;
 	Widget pushButton_dismiss;

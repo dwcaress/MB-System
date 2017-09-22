@@ -100,13 +100,14 @@ bin_PROGRAMS = mbconfig$(EXEEXT) mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
 	mbhysweeppreprocess$(EXEEXT) mbinfo$(EXEEXT) \
 	mbinsreprocess$(EXEEXT) mbkongsbergpreprocess$(EXEEXT) \
 	mblevitus$(EXEEXT) mblist$(EXEEXT) mbmakeplatform$(EXEEXT) \
-	mbmosaic$(EXEEXT) mbnavlist$(EXEEXT) mbneptune2esf$(EXEEXT) \
-	mbpreprocess$(EXEEXT) mbprocess$(EXEEXT) mbrollbias$(EXEEXT) \
-	mbrolltimelag$(EXEEXT) mbroutetime$(EXEEXT) \
-	mbrphsbias$(EXEEXT) mbsegygrid$(EXEEXT) mbsegyinfo$(EXEEXT) \
-	mbsegylist$(EXEEXT) mbset$(EXEEXT) mbsslayout$(EXEEXT) \
-	mbstripnan$(EXEEXT) mbsvplist$(EXEEXT) mbsvpselect$(EXEEXT) \
-	mbswplspreprocess$(EXEEXT) mbtime$(EXEEXT) $(am__EXEEXT_1)
+	mbminirovnav$(EXEEXT) mbmosaic$(EXEEXT) mbnavlist$(EXEEXT) \
+	mbneptune2esf$(EXEEXT) mbpreprocess$(EXEEXT) \
+	mbprocess$(EXEEXT) mbrollbias$(EXEEXT) mbrolltimelag$(EXEEXT) \
+	mbroutetime$(EXEEXT) mbrphsbias$(EXEEXT) mbsegygrid$(EXEEXT) \
+	mbsegyinfo$(EXEEXT) mbsegylist$(EXEEXT) mbset$(EXEEXT) \
+	mbsslayout$(EXEEXT) mbstripnan$(EXEEXT) mbsvplist$(EXEEXT) \
+	mbsvpselect$(EXEEXT) mbswplspreprocess$(EXEEXT) \
+	mbtime$(EXEEXT) $(am__EXEEXT_1)
 subdir = src/utilities
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -216,6 +217,9 @@ mblist_LDADD = $(LDADD)
 am_mbmakeplatform_OBJECTS = mbmakeplatform.$(OBJEXT)
 mbmakeplatform_OBJECTS = $(am_mbmakeplatform_OBJECTS)
 mbmakeplatform_LDADD = $(LDADD)
+mbminirovnav_SOURCES = mbminirovnav.c
+mbminirovnav_OBJECTS = mbminirovnav.$(OBJEXT)
+mbminirovnav_LDADD = $(LDADD)
 am_mbmosaic_OBJECTS = mbmosaic.$(OBJEXT)
 mbmosaic_OBJECTS = $(am_mbmosaic_OBJECTS)
 mbmosaic_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
@@ -332,7 +336,7 @@ SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbhysweeppreprocess_SOURCES) $(mbinfo_SOURCES) \
 	$(mbinsreprocess_SOURCES) $(mbkongsbergpreprocess_SOURCES) \
 	$(mblevitus_SOURCES) $(mblist_SOURCES) \
-	$(mbmakeplatform_SOURCES) $(mbmosaic_SOURCES) \
+	$(mbmakeplatform_SOURCES) mbminirovnav.c $(mbmosaic_SOURCES) \
 	$(mbnavlist_SOURCES) $(mbneptune2esf_SOURCES) \
 	$(mbpreprocess_SOURCES) $(mbprocess_SOURCES) \
 	$(mbrollbias_SOURCES) $(mbrolltimelag_SOURCES) \
@@ -836,6 +840,10 @@ mbmakeplatform$(EXEEXT): $(mbmakeplatform_OBJECTS) $(mbmakeplatform_DEPENDENCIES
 	@rm -f mbmakeplatform$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mbmakeplatform_OBJECTS) $(mbmakeplatform_LDADD) $(LIBS)
 
+mbminirovnav$(EXEEXT): $(mbminirovnav_OBJECTS) $(mbminirovnav_DEPENDENCIES) $(EXTRA_mbminirovnav_DEPENDENCIES) 
+	@rm -f mbminirovnav$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mbminirovnav_OBJECTS) $(mbminirovnav_LDADD) $(LIBS)
+
 mbmosaic$(EXEEXT): $(mbmosaic_OBJECTS) $(mbmosaic_DEPENDENCIES) $(EXTRA_mbmosaic_DEPENDENCIES) 
 	@rm -f mbmosaic$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mbmosaic_OBJECTS) $(mbmosaic_LDADD) $(LIBS)
@@ -952,6 +960,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mblevitus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mblist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbmakeplatform.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbminirovnav.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbmosaic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavlist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbneptune2esf.Po@am__quote@

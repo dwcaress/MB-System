@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
 	    "MBotps predicts tides using methods and data derived from the OSU Tidal Prediction Software (OTPS) distributions.";
 	static char usage_message[] =
 	    "mbotps [-Atideformat -Byear/month/day/hour/minute/second -Dinterval\n\t-Eyear/month/day/hour/minute/second -Fformat\n"
-	    "\t-Idatalist.mb-1 -Lopts_path -Ooutput -Potps_location -Rlon/lat -Tmodel -V]";
+	    "\t-Idatalist.mb-1 -Lopts_path -Ooutput -Potps_location -Rlon/lat -S -Tmodel -V]";
 	extern char *optarg;
 	int errflg = 0;
 	int c;
@@ -153,6 +153,7 @@ int main(int argc, char **argv) {
 	double interval = 300.0;
 	mb_path tidefile;
 	int mbprocess_update = MB_NO;
+	int skip_existing = MB_NO;
 	int tideformat = 2;
 	int ngood;
 
@@ -160,10 +161,15 @@ int main(int argc, char **argv) {
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	int pid;
-
+	
 	FILE *tfp, *mfp, *ofp;
 	struct stat file_status;
 	int fstat;
+	double start_time_d;
+	double end_time_d;
+	int istart, iend;
+	int proceed = MB_YES;
+	int input_size, input_modtime, output_size, output_modtime;
 	mb_path lltfile = "";
 	mb_path otpsfile = "";
 	mb_path line = "";
@@ -222,7 +228,7 @@ int main(int argc, char **argv) {
 	etime_i[6] = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:I:i:MmO:o:P:p:R:r:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:I:i:MmO:o:P:p:R:r:SST:t:VvHh")) != -1)
 		switch (c) {
 		case 'H':
 		case 'h':
@@ -280,6 +286,10 @@ int main(int argc, char **argv) {
 		case 'R':
 		case 'r':
 			sscanf(optarg, "%lf/%lf", &tidelon, &tidelat);
+			break;
+		case 'S':
+		case 's':
+			skip_existing = MB_YES;
 			break;
 		case 'T':
 		case 't':
@@ -394,6 +404,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       interval:         %f\n", interval);
 		fprintf(stderr, "dbg2       tidefile:         %s\n", tidefile);
 		fprintf(stderr, "dbg2       mbprocess_update: %d\n", mbprocess_update);
+		fprintf(stderr, "dbg2       skip_existing:    %d\n", skip_existing);
 		fprintf(stderr, "dbg2       tideformat:       %d\n", tideformat);
 		fprintf(stderr, "dbg2       format:           %d\n", format);
 		fprintf(stderr, "dbg2       read_file:        %s\n", read_file);
@@ -572,207 +583,244 @@ int main(int argc, char **argv) {
 
 		/* loop over all files to be read */
 		while (read_data == MB_YES) {
-			/* some helpful output */
-			fprintf(stderr, "\n---------------------------------------\n\nProcessing tides for %s\n\n", file);
-
-			/* first open temporary file of lat lon time */
-			pid = getpid();
-			strcpy(swath_file, file);
-			sprintf(lltfile, "tmp_mbotps_llt_%d.txt", pid);
-			sprintf(otpsfile, "tmp_mbotps_llttd_%d.txt", pid);
+			
+			/* Figure out if the file needs a tide model - don't generate a new tide
+				model if one was made previously and is up to date AND the
+				appropriate request has been made */
+			proceed = MB_YES;
 			sprintf(tidefile, "%s.tde", file);
-			if ((tfp = fopen(lltfile, "w")) == NULL) {
-				error = MB_ERROR_OPEN_FAIL;
-				fprintf(stderr, "\nUnable to open temporary lat-lon-time file <%s> for writing\n", lltfile);
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(MB_FAILURE);
-			}
-
-			/* read fnv file if possible */
-			mb_get_fnv(verbose, file, &format, &error);
-
-			/* initialize reading the swath file */
-			if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
-			    MB_SUCCESS) {
-				mb_error(verbose, error, &message);
-				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
-				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(error);
-			}
-
-			/* allocate memory for data arrays */
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
-				                           &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
-				                           &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status =
-				    mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status =
-				    mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
-
-			/* if error initializing memory then quit */
-			if (error != MB_ERROR_NO_ERROR) {
-				mb_error(verbose, error, &message);
-				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(error);
-			}
-
-			/* read and use data */
-			nread = 0;
-			while (error <= MB_ERROR_NO_ERROR) {
-				/* reset error */
-				error = MB_ERROR_NO_ERROR;
-				output = MB_NO;
-
-				/* read next data record */
-				status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-				                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
-				                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
-
-				/* print debug statements */
-				if (verbose >= 2) {
-					fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
-					fprintf(stderr, "dbg2       kind:           %d\n", kind);
-					fprintf(stderr, "dbg2       error:          %d\n", error);
-					fprintf(stderr, "dbg2       status:         %d\n", status);
+			if (skip_existing == MB_YES) {
+				if ((fstat = stat(file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+					input_modtime = file_status.st_mtime;
+					input_size = file_status.st_size;
 				}
+				else {
+					input_modtime = 0;
+					input_size = 0;
+				}
+				if ((fstat = stat(tidefile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+					output_modtime = file_status.st_mtime;
+					output_size = file_status.st_size;
+				}
+				else {
+					output_modtime = 0;
+					output_size = 0;
+				}
+				if (output_modtime > input_modtime && input_size > 0 && output_size > 0) {
+					proceed = MB_NO;
+				}
+			}
 
-				/* deal with nav and time from survey data only - not nav, sidescan, or subbottom */
-				if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
-					/* flag positions and times for output at specified interval */
-					if (nread == 0 || time_d - savetime_d >= interval) {
-						savetime_d = time_d;
-						output = MB_YES;
+			/* skip the file */
+			if (proceed == MB_NO) {
+				/* some helpful output */
+				fprintf(stderr, "\n---------------------------------------\n\nProcessing tides for %s\n\n", file);
+			}
+			
+			/* generate the tide model */
+			else {
+				/* some helpful output */
+				fprintf(stderr, "\n---------------------------------------\n\nProcessing tides for %s\n\n", file);
+	
+				/* first open temporary file of lat lon time */
+				pid = getpid();
+				strcpy(swath_file, file);
+				sprintf(lltfile, "tmp_mbotps_llt_%d.txt", pid);
+				sprintf(otpsfile, "tmp_mbotps_llttd_%d.txt", pid);
+				if ((tfp = fopen(lltfile, "w")) == NULL) {
+					error = MB_ERROR_OPEN_FAIL;
+					fprintf(stderr, "\nUnable to open temporary lat-lon-time file <%s> for writing\n", lltfile);
+					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+					exit(MB_FAILURE);
+				}
+	
+				/* read fnv file if possible */
+				mb_get_fnv(verbose, file, &format, &error);
+	
+				/* initialize reading the swath file */
+				if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+										   &mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
+					MB_SUCCESS) {
+					mb_error(verbose, error, &message);
+					fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+					fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
+					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+					exit(error);
+				}
+	
+				/* allocate memory for data arrays */
+				if (error == MB_ERROR_NO_ERROR)
+					status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+				if (error == MB_ERROR_NO_ERROR)
+					status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+				if (error == MB_ERROR_NO_ERROR)
+					status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+				if (error == MB_ERROR_NO_ERROR)
+					status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack,
+											   &error);
+				if (error == MB_ERROR_NO_ERROR)
+					status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack,
+											   &error);
+				if (error == MB_ERROR_NO_ERROR)
+					status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+				if (error == MB_ERROR_NO_ERROR)
+					status =
+						mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
+				if (error == MB_ERROR_NO_ERROR)
+					status =
+						mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
+	
+				/* if error initializing memory then quit */
+				if (error != MB_ERROR_NO_ERROR) {
+					mb_error(verbose, error, &message);
+					fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+					exit(error);
+				}
+	
+				/* read and use data */
+				nread = 0;
+				while (error <= MB_ERROR_NO_ERROR) {
+					/* reset error */
+					error = MB_ERROR_NO_ERROR;
+					output = MB_NO;
+	
+					/* read next data record */
+					status = mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+										&distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+										bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
+	
+					/* print debug statements */
+					if (verbose >= 2) {
+						fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
+						fprintf(stderr, "dbg2       kind:           %d\n", kind);
+						fprintf(stderr, "dbg2       error:          %d\n", error);
+						fprintf(stderr, "dbg2       status:         %d\n", status);
 					}
-					lasttime_d = time_d;
-					lastlon = navlon;
-					lastlat = navlat;
-
-					/* increment counter */
-					nread++;
-				}
-
-				/* output position and time if flagged or end of file */
-				if (output == MB_YES || error == MB_ERROR_EOF) {
-					if (lastlon < 0.0)
-						lastlon += 360.0;
-					mb_get_date(verbose, lasttime_d, time_i);
-					fprintf(tfp, "%.6f %.6f %4.4d %2.2d %2.2d %2.2d %2.2d %2.2d\n", lastlat, lastlon, time_i[0], time_i[1],
-					        time_i[2], time_i[3], time_i[4], time_i[5]);
-				}
-			}
-
-			/* close the swath file */
-			status = mb_close(verbose, &mbio_ptr, &error);
-
-			/* output read statistics */
-			fprintf(stderr, "%d records read from %s\n", nread, file);
-
-			/* close the llt file */
-			fclose(tfp);
-
-			/* call predict_tide with popen */
-			sprintf(predict_tide, "%s/predict_tide", otps_location_use);
-			if ((tfp = popen(predict_tide, "w")) == NULL) {
-				error = MB_ERROR_OPEN_FAIL;
-				fprintf(stderr, "\nUnable to open predict_time program using popen()\n");
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(MB_FAILURE);
-			}
-
-			/* send relevant input to predict_tide through its stdin stream */
-			fprintf(tfp, "%s/DATA/Model_%s\n", otps_location_use, otps_model);
-			fprintf(tfp, "%s\n", lltfile);
-			fprintf(tfp, "z\n\nAP\noce\n1\n");
-			/*fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");*/
-			fprintf(tfp, "%s\n", otpsfile);
-
-			/* close the process */
-			pclose(tfp);
-
-			/* now read results from predict_tide and rewrite them in a useful form */
-			if ((tfp = fopen(otpsfile, "r")) == NULL) {
-				error = MB_ERROR_OPEN_FAIL;
-				fprintf(stderr, "\nUnable to open predict_time results temporary file <%s>\n", otpsfile);
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(MB_FAILURE);
-			}
-			if ((ofp = fopen(tidefile, "w")) == NULL) {
-				error = MB_ERROR_OPEN_FAIL;
-				fprintf(stderr, "\nUnable to open tide output file <%s>\n", tidefile);
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(MB_FAILURE);
-			}
-			fprintf(ofp, "# Tide model generated by program %s\n", program_name);
-			fprintf(ofp, "# Version: %s\n", rcs_id);
-			fprintf(ofp, "# MB-System Version: %s\n", MB_VERSION);
-			fprintf(ofp, "# Tide model generated by program %s\n", program_name);
-			fprintf(ofp, "# which in turn calls OTPS program predict_tide obtained from:\n");
-			fprintf(ofp, "#     http://www.coas.oregonstate.edu/research/po/research/tide/\n");
-			right_now = time((time_t *)0);
-			strcpy(date, ctime(&right_now));
-			date[strlen(date) - 1] = '\0';
-			if ((user_ptr = getenv("USER")) == NULL)
-				user_ptr = getenv("LOGNAME");
-			if (user_ptr != NULL)
-				strcpy(user, user_ptr);
-			else
-				strcpy(user, "unknown");
-			gethostname(host, MBP_FILENAMESIZE);
-			fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
-
-			nline = 0;
-			ngood = 0;
-			while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line) {
-				nline++;
-				if (nline == 2 || nline == 3) {
-					fprintf(ofp, "#%s", line);
-				}
-				else if (nline > 6) {
-					nget = sscanf(line, "%lf %lf %d.%d.%d %d:%d:%d %lf %lf", &lat, &lon, &time_i[1], &time_i[2], &time_i[0],
-					              &time_i[3], &time_i[4], &time_i[5], &tide, &depth);
-					if (nget == 10) {
-						ngood++;
-						if (tideformat == 2) {
-							fprintf(ofp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d %9.4f\n", time_i[0], time_i[1], time_i[2],
-							        time_i[3], time_i[4], time_i[5], tide);
+	
+					/* deal with nav and time from survey data only - not nav, sidescan, or subbottom */
+					if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
+						/* flag positions and times for output at specified interval */
+						if (nread == 0 || time_d - savetime_d >= interval) {
+							savetime_d = time_d;
+							output = MB_YES;
 						}
-						else {
-							mb_get_time(verbose, time_i, &time_d);
-							fprintf(ofp, "%.3f %9.4f\n", time_d, tide);
-						}
+						lasttime_d = time_d;
+						lastlon = navlon;
+						lastlat = navlat;
+	
+						/* increment counter */
+						nread++;
+					}
+	
+					/* output position and time if flagged or end of file */
+					if (output == MB_YES || error == MB_ERROR_EOF) {
+						if (lastlon < 0.0)
+							lastlon += 360.0;
+						mb_get_date(verbose, lasttime_d, time_i);
+						fprintf(tfp, "%.6f %.6f %4.4d %2.2d %2.2d %2.2d %2.2d %2.2d\n", lastlat, lastlon, time_i[0], time_i[1],
+								time_i[2], time_i[3], time_i[4], time_i[5]);
 					}
 				}
-			}
-			fclose(tfp);
-			fclose(ofp);
-
-			/* remove the temporary files */
-			unlink(lltfile);
-			unlink(otpsfile);
-
-			/* some helpful output */
-			fprintf(stderr, "\nResults are really in %s\n", tidefile);
-
-			/* set mbprocess usage of tide file */
-			if (mbprocess_update == MB_YES && ngood > 0) {
-				status = mb_pr_update_tide(verbose, swath_file, MBP_TIDE_ON, tidefile, tideformat, &error);
-				fprintf(stderr, "MBprocess set to apply tide correction to %s\n", swath_file);
+	
+				/* close the swath file */
+				status = mb_close(verbose, &mbio_ptr, &error);
+	
+				/* output read statistics */
+				fprintf(stderr, "%d records read from %s\n", nread, file);
+	
+				/* close the llt file */
+				fclose(tfp);
+	
+				/* call predict_tide with popen */
+				sprintf(predict_tide, "%s/predict_tide", otps_location_use);
+				if ((tfp = popen(predict_tide, "w")) == NULL) {
+					error = MB_ERROR_OPEN_FAIL;
+					fprintf(stderr, "\nUnable to open predict_time program using popen()\n");
+					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+					exit(MB_FAILURE);
+				}
+	
+				/* send relevant input to predict_tide through its stdin stream */
+				fprintf(tfp, "%s/DATA/Model_%s\n", otps_location_use, otps_model);
+				fprintf(tfp, "%s\n", lltfile);
+				fprintf(tfp, "z\n\nAP\noce\n1\n");
+				/*fprintf(tfp, "z\nm2,s2,n2,k2,k1,o1,p1,q1\nAP\noce\n1\n");*/
+				fprintf(tfp, "%s\n", otpsfile);
+	
+				/* close the process */
+				pclose(tfp);
+	
+				/* now read results from predict_tide and rewrite them in a useful form */
+				if ((tfp = fopen(otpsfile, "r")) == NULL) {
+					error = MB_ERROR_OPEN_FAIL;
+					fprintf(stderr, "\nUnable to open predict_time results temporary file <%s>\n", otpsfile);
+					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+					exit(MB_FAILURE);
+				}
+				if ((ofp = fopen(tidefile, "w")) == NULL) {
+					error = MB_ERROR_OPEN_FAIL;
+					fprintf(stderr, "\nUnable to open tide output file <%s>\n", tidefile);
+					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+					exit(MB_FAILURE);
+				}
+				fprintf(ofp, "# Tide model generated by program %s\n", program_name);
+				fprintf(ofp, "# Version: %s\n", rcs_id);
+				fprintf(ofp, "# MB-System Version: %s\n", MB_VERSION);
+				fprintf(ofp, "# Tide model generated by program %s\n", program_name);
+				fprintf(ofp, "# which in turn calls OTPS program predict_tide obtained from:\n");
+				fprintf(ofp, "#     http://www.coas.oregonstate.edu/research/po/research/tide/\n");
+				right_now = time((time_t *)0);
+				strcpy(date, ctime(&right_now));
+				date[strlen(date) - 1] = '\0';
+				if ((user_ptr = getenv("USER")) == NULL)
+					user_ptr = getenv("LOGNAME");
+				if (user_ptr != NULL)
+					strcpy(user, user_ptr);
+				else
+					strcpy(user, "unknown");
+				gethostname(host, MBP_FILENAMESIZE);
+				fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
+	
+				nline = 0;
+				ngood = 0;
+				while ((result = fgets(line, MB_PATH_MAXLINE, tfp)) == line) {
+					nline++;
+					if (nline == 2 || nline == 3) {
+						fprintf(ofp, "#%s", line);
+					}
+					else if (nline > 6) {
+						nget = sscanf(line, "%lf %lf %d.%d.%d %d:%d:%d %lf %lf", &lat, &lon, &time_i[1], &time_i[2], &time_i[0],
+									  &time_i[3], &time_i[4], &time_i[5], &tide, &depth);
+						if (nget == 10) {
+							ngood++;
+							if (tideformat == 2) {
+								fprintf(ofp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d %9.4f\n", time_i[0], time_i[1], time_i[2],
+										time_i[3], time_i[4], time_i[5], tide);
+							}
+							else {
+								mb_get_time(verbose, time_i, &time_d);
+								fprintf(ofp, "%.3f %9.4f\n", time_d, tide);
+							}
+						}
+					}
+				}
+				fclose(tfp);
+				fclose(ofp);
+	
+				/* remove the temporary files */
+				unlink(lltfile);
+				unlink(otpsfile);
+	
+				/* some helpful output */
+				fprintf(stderr, "\nResults are really in %s\n", tidefile);
+	
+				/* set mbprocess usage of tide file */
+				if (mbprocess_update == MB_YES && ngood > 0) {
+					status = mb_pr_update_tide(verbose, swath_file, MBP_TIDE_ON, tidefile, tideformat, &error);
+					fprintf(stderr, "MBprocess set to apply tide correction to %s\n", swath_file);
+				}
+					
 			}
 
 			/* figure out whether and what to read next */

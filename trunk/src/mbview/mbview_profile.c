@@ -67,6 +67,9 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 
+//#define MBV_DEBUG_GLX 1
+//#define MBV_GET_GLX_ERRORS 1
+
 /*------------------------------------------------------------------------------*/
 
 /* library variables */
@@ -416,7 +419,13 @@ int mbview_reset_prglx(size_t instance) {
 	if (data->profile_view_mode == MBV_VIEW_ON) {
 		/* delete old glx_context if it exists */
 		if (view->prglx_init == MB_YES) {
+#ifdef MBV_DEBUG_GLX
+			fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, function_name, instance, view->dpy, view->prglx_context);
+#endif
 			glXDestroyContext(view->dpy, view->prglx_context);
+#ifdef MBV_GET_GLX_ERRORS
+			mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 			view->prglx_init = MB_NO;
 		}
 

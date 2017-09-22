@@ -760,7 +760,7 @@ int main(int argc, char **argv) {
                                         &potentialtemperature_calc, &error);
             interp_status = mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
         }
-        
+
         /* loop over the printfields */
 		for (i = 0; i < nprintfields; i++) {
 			index = printfields[i].index;

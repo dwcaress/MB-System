@@ -288,6 +288,7 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 	double heave = 0.0;
 	double altitude = 0.0;
 	int interp_status = MB_SUCCESS;
+	int interp_error = MB_ERROR_NO_ERROR;
 	int jnav = 0;
 	int jsensordepth = 0;
 	int jheading = 0;
@@ -428,32 +429,42 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 
 	if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2) {
 		/* get nav sensordepth heading attitude values for record timestamp */
-		interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
-		                                           &jnav, error);
-		interp_status = mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
-		                                          &jnav, error);
-		interp_status =
-		    mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed, &jnav, error);
+		if (pars->n_nav > 1) {
+			interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon,
+		                                    &jnav, &interp_error);
+			interp_status = mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat,
+		                                    &jnav, &interp_error);
+			interp_status = mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed,
+											&jnav, &interp_error);
+		}
 
 		/* interpolate sensordepth */
-		interp_status = mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
-		                                 pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, error);
+		if (pars->n_sensordepth > 1) {
+			interp_status = mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+		                                 pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
+		}
 
 		/* interpolate heading */
-		interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
-		                                         time_d, &heading, &jheading, error);
+		if (pars->n_heading > 1) {
+			interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading,
+		                                         time_d, &heading, &jheading, &interp_error);
+		}
 
 		/* interpolate altitude */
-		interp_status = mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
-		                                 time_d, &altitude, &jaltitude, error);
+		if (pars->n_altitude > 1) {
+			interp_status = mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
+		                                 time_d, &altitude, &jaltitude, &interp_error);
+		}
 
 		/* interpolate attitude */
-		interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
-		                                 &roll, &jattitude, error);
-		interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
-		                                 &pitch, &jattitude, error);
-		interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
-		                                 &heave, &jattitude, error);
+		if (pars->n_attitude > 1) {
+			interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d,
+											 &roll, &jattitude, &interp_error);
+			interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
+											 &pitch, &jattitude, &interp_error);
+			interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
+											 &heave, &jattitude, &interp_error);
+		}
 	}
 
 	/* preprocess subbottom data */
@@ -462,30 +473,43 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
 
 		/* set navigation */
-		if (navlon < 180.0)
-			navlon = navlon + 360.0;
-		if (navlon > 180.0)
-			navlon = navlon - 360.0;
-		sbp->sourceCoordX = (int)(600000.0 * navlon);
-		sbp->sourceCoordY = (int)(600000.0 * navlat);
-		sbp->groupCoordX = (int)(600000.0 * navlon);
-		sbp->groupCoordY = (int)(600000.0 * navlat);
+		if (pars->n_nav > 1) {
+			if (navlon < 180.0)
+				navlon = navlon + 360.0;
+			if (navlon > 180.0)
+				navlon = navlon - 360.0;
+			sbp->sourceCoordX = (int)(600000.0 * navlon);
+			sbp->sourceCoordY = (int)(600000.0 * navlat);
+			sbp->groupCoordX = (int)(600000.0 * navlon);
+			sbp->groupCoordY = (int)(600000.0 * navlat);
+		}
 
 		/* set heading */
-		if (heading > 180.0)
-			heading -= 360.0;
-		if (heading < -180.0)
-			heading += 360.0;
-		sbp->heading = (short)(100.0 * heading);
+		if (pars->n_heading > 1) {
+			if (heading > 180.0)
+				heading -= 360.0;
+			if (heading < -180.0)
+				heading += 360.0;
+			sbp->heading = (short)(100.0 * heading);
+		}
 
 		/* set sonardepth */
-		sbp->startDepth = sensordepth / sbp->sampleInterval / 0.00000075;
-		sbp->sonardepth = 1000 * sensordepth;
+		if (pars->n_sensordepth > 1) {
+			sbp->startDepth = sensordepth / sbp->sampleInterval / 0.00000075;
+			sbp->sonardepth = 1000 * sensordepth;
+		}
+		
+		/* set altitude */
+		if (pars->n_altitude > 1) {
+			sbp->sonaraltitude = (int)(1000 * altitude);
+		}
 
 		/* set attitude */
-		sbp->roll = 32768 * roll / 180.0;
-		sbp->pitch = 32768 * pitch / 180.0;
-		sbp->heaveCompensation = heave / sbp->sampleInterval / 0.00000075;
+		if (pars->n_attitude > 1) {
+			sbp->roll = 32768 * roll / 180.0;
+			sbp->pitch = 32768 * pitch / 180.0;
+			sbp->heaveCompensation = heave / sbp->sampleInterval / 0.00000075;
+		}
 	}
 
 	/* preprocess sidescan data */
@@ -495,40 +519,54 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		ssstbd = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
 
 		/* set navigation */
-		if (navlon < 180.0)
-			navlon = navlon + 360.0;
-		if (navlon > 180.0)
-			navlon = navlon - 360.0;
-		ssport->sourceCoordX = 600000.0 * navlon;
-		ssport->sourceCoordY = 600000.0 * navlat;
-		ssstbd->sourceCoordX = 600000.0 * navlon;
-		ssstbd->sourceCoordY = 600000.0 * navlat;
-		ssport->groupCoordX = 600000.0 * navlon;
-		ssport->groupCoordY = 600000.0 * navlat;
-		ssstbd->groupCoordX = 600000.0 * navlon;
-		ssstbd->groupCoordY = 600000.0 * navlat;
+		if (pars->n_nav > 1) {
+			if (navlon < 180.0)
+				navlon = navlon + 360.0;
+			if (navlon > 180.0)
+				navlon = navlon - 360.0;
+			ssport->sourceCoordX = 600000.0 * navlon;
+			ssport->sourceCoordY = 600000.0 * navlat;
+			ssstbd->sourceCoordX = 600000.0 * navlon;
+			ssstbd->sourceCoordY = 600000.0 * navlat;
+			ssport->groupCoordX = 600000.0 * navlon;
+			ssport->groupCoordY = 600000.0 * navlat;
+			ssstbd->groupCoordX = 600000.0 * navlon;
+			ssstbd->groupCoordY = 600000.0 * navlat;
+		}
 
 		/* set heading and speed */
-		if (heading > 180.0)
-			heading -= 360.0;
-		if (heading < -180.0)
-			heading += 360.0;
-		ssport->heading = (short)(100.0 * heading);
-		ssstbd->heading = (short)(100.0 * heading);
+		if (pars->n_heading > 1) {
+			if (heading > 180.0)
+				heading -= 360.0;
+			if (heading < -180.0)
+				heading += 360.0;
+			ssport->heading = (short)(100.0 * heading);
+			ssstbd->heading = (short)(100.0 * heading);
+		}
 
 		/* set sonardepth */
-		ssport->startDepth = sensordepth / ssport->sampleInterval / 0.00000075;
-		ssstbd->startDepth = sensordepth / ssstbd->sampleInterval / 0.00000075;
-		ssport->sonardepth = 1000 * sensordepth;
-		ssstbd->sonardepth = 1000 * sensordepth;
+		if (pars->n_sensordepth > 1) {
+			ssport->startDepth = sensordepth / ssport->sampleInterval / 0.00000075;
+			ssstbd->startDepth = sensordepth / ssstbd->sampleInterval / 0.00000075;
+			ssport->sonardepth = 1000 * sensordepth;
+			ssstbd->sonardepth = 1000 * sensordepth;
+		}
+		
+		/* set altitude */
+		if (pars->n_altitude > 1) {
+			ssport->sonaraltitude = (int)(1000 * altitude);
+			ssstbd->sonaraltitude = (int)(1000 * altitude);
+		}
 
 		/* set attitude */
-		ssport->roll = 32768 * roll / 180.0;
-		ssport->pitch = 32768 * pitch / 180.0;
-		ssport->heaveCompensation = heave / ssport->sampleInterval / 0.00000075;
-		ssstbd->roll = 32768 * roll / 180.0;
-		ssstbd->pitch = 32768 * pitch / 180.0;
-		ssstbd->heaveCompensation = heave / ssstbd->sampleInterval / 0.00000075;
+		if (pars->n_attitude > 1) {
+			ssport->roll = 32768 * roll / 180.0;
+			ssport->pitch = 32768 * pitch / 180.0;
+			ssport->heaveCompensation = heave / ssport->sampleInterval / 0.00000075;
+			ssstbd->roll = 32768 * roll / 180.0;
+			ssstbd->pitch = 32768 * pitch / 180.0;
+			ssstbd->heaveCompensation = heave / ssstbd->sampleInterval / 0.00000075;
+		}
 	}
 
 	/* preprocess comment */
@@ -735,7 +773,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		else
 			pixelsize = rawpixelsize;
 		altitude = 0.001 * ssport->sonaraltitude;
-		/*fprintf(stderr,"rawpixelsize:%f pixelsize:%f altitude:%f\n", rawpixelsize,pixelsize,altitude);*/
+		// fprintf(stderr,"rawpixelsize:%f pixelsize:%f altitude:%f\n", rawpixelsize,pixelsize,altitude);
 
 		/* zero the array */
 		for (i = 0; i < *nss; i++) {

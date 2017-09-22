@@ -541,7 +541,7 @@ void do_parse_datalist(char *file, int form) {
 	int verbose = 0;
 	int i;
 
-	fprintf(stderr, "Called do_parse_datalist:%s %d\n", file, form);
+	//fprintf(stderr, "Called do_parse_datalist:%s %d\n", file, form);
 	/* try to resolve format if necessary */
 	format = form;
 	mb_get_format(verbose, file, NULL, &format, &error);
@@ -682,7 +682,7 @@ void do_load_specific_file(int i_file) {
 	;
 	char save_file[MB_PATH_MAXLINE];
 
-	fprintf(stderr, "Called do_load_specific_file:%d\n", i_file);
+	//fprintf(stderr, "Called do_load_specific_file:%d\n", i_file);
 	/* check the specified file is in the list */
 	if (numfiles > 0 && i_file >= 0 && i_file < numfiles) {
 		/* set current_file */
@@ -2273,7 +2273,7 @@ void do_useprevious_no(Widget w, XtPointer client_data, XtPointer call_data) {
 void do_load(int useprevious) {
 	int status;
 
-	fprintf(stderr, "Called do_load:%d\n", useprevious);
+	//fprintf(stderr, "Called do_load:%d\n", useprevious);
 	/* turn off expose plots */
 	expose_plot_ok = False;
 

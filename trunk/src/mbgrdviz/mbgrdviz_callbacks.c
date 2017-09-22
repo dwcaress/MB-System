@@ -71,8 +71,9 @@
 #define MBGRDVIZ_SAVEDEGDECMIN 11
 #define MBGRDVIZ_SAVELNW 12
 #define MBGRDVIZ_SAVESITE 13
-#define MBGRDVIZ_SAVEPROFILE 14
-#define MBGRDVIZ_REALTIME 15
+#define MBGRDVIZ_SAVESITEWPT 14
+#define MBGRDVIZ_SAVEPROFILE 15
+#define MBGRDVIZ_REALTIME 16
 
 /* Projection defines */
 #define ModelTypeProjected 1
@@ -152,6 +153,7 @@ void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPoi
 void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_close(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_quit(Widget w, XtPointer client_data, XtPointer call_data);
@@ -159,6 +161,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr);
 int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr);
+int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr);
@@ -1012,6 +1015,48 @@ void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPo
 	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
+void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, XtPointer call_data) {
+	char function_name[] = "do_mbgrdviz_fileSelectionBox_savesitewpt";
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
+
+	/* get instance */
+	instance = (size_t)client_data;
+
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Save Sites as Winfrog WPT File");
+	ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
+	actionid = MBGRDVIZ_SAVESITEWPT * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+	XmStringFree((XmString)tmp0);
+}
+/*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_saveroute";
 	Cardinal ac = 0;
@@ -1537,6 +1582,13 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
 		status = do_mbgrdviz_savesite(instance, file_ptr);
 	}
 
+	/* else write site data */
+	else if (mode == MBGRDVIZ_SAVESITEWPT) {
+		/* write site file */
+		do_mbview_message_on("Saving site data...", instance);
+		status = do_mbgrdviz_savesitewpt(instance, file_ptr);
+	}
+
 	/* else write route data */
 	else if (mode == MBGRDVIZ_SAVEROUTE) {
 		/* write route file */
@@ -1902,6 +1954,8 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
 				                 MBV_PICKMASK_NONE, &error);
 				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savesite, "Save Site File", MBV_EXISTMASK_SITE,
 				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savesitewpt, "Save Sites as Winfrog WPT File", MBV_EXISTMASK_SITE,
+				                 &error);
 				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveroute, "Save Route File",
 				                 MBV_EXISTMASK_ROUTE, &error);
 				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saverisiscript, "Save Risi Script File",
@@ -2257,6 +2311,118 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
 				for (i = 0; i < nsite; i++) {
 					fprintf(sfp, "%12.7f %12.7f %10.3f %2d %2d %s\n", sitelon[i], sitelat[i], sitetopo[i], sitecolor[i],
 					        sitesize[i], sitename[i]);
+				}
+
+				/* close the output file */
+				fclose(sfp);
+			}
+
+			/* output error message */
+			else {
+				error = MB_ERROR_OPEN_FAIL;
+				fprintf(stderr, "\nUnable to Open Site File <%s> for writing\n", output_file_ptr);
+				XBell((Display *)XtDisplay(mainWindow), 100);
+				status = MB_FAILURE;
+			}
+		}
+
+		/* deallocate arrays for sites */
+		if (nsite > 0) {
+			status = mbview_freesitearrays(verbose, &sitelon, &sitelat, &sitetopo, &sitecolor, &sitesize, &sitename, &error);
+		}
+	}
+
+	/* all done */
+	return (status);
+}
+/*---------------------------------------------------------------------------------------*/
+
+int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr) {
+	char function_name[] = "do_mbgrdviz_savesitewpt";
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	int nsite;
+	double *sitelon;
+	double *sitelat;
+	double *sitetopo;
+	int *sitecolor;
+	int *sitesize;
+	mb_path *sitename;
+	int i;
+
+	/* time, user, host variables */
+	time_t right_now;
+	char date[32], *user_ptr, host[MB_PATH_MAXLINE];
+	char *unknown = "Unknown";
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
+	}
+
+	/* read data for valid instance */
+	if (instance != MBV_NO_WINDOW) {
+
+		/* get the number of sites to be written to the outpuf file */
+		status = mbview_getsitecount(verbose, instance, &nsite, &error);
+		if (status == MB_SUCCESS && nsite <= 0) {
+			fprintf(stderr, "Unable to write site file...\nCurrently %d sites defined for instance %zu!\n", nsite, instance);
+			XBell((Display *)XtDisplay(mainWindow), 100);
+			status = MB_FAILURE;
+		}
+
+		/* allocate arrays for sites */
+		if (status == MB_SUCCESS && nsite > 0) {
+			/* allocate the arrays */
+			sitelon = NULL;
+			sitelat = NULL;
+			sitetopo = NULL;
+			sitecolor = NULL;
+			sitesize = NULL;
+			sitename = NULL;
+			status =
+			    mbview_allocsitearrays(verbose, nsite, &sitelon, &sitelat, &sitetopo, &sitecolor, &sitesize, &sitename, &error);
+
+			/* if error initializing memory then cancel dealing with sites */
+			if (status == MB_FAILURE) {
+				nsite = 0;
+				fprintf(stderr, "Unable to write site file...\nArray allocation for %d sites failed for instance %zu!\n", nsite,
+				        instance);
+				XBell((Display *)XtDisplay(mainWindow), 100);
+			}
+		}
+
+		/* get the sites */
+		if (status == MB_SUCCESS) {
+			status =
+			    mbview_getsites(verbose, instance, &nsite, sitelon, sitelat, sitetopo, sitecolor, sitesize, sitename, &error);
+		}
+
+		/* write the sites to the output file */
+		if (status == MB_SUCCESS) {
+			/* open the output file */
+			if ((sfp = fopen(output_file_ptr, "w")) != NULL) {
+				/* write the site file header */
+				fprintf(sfp, "## Site File Version %s\n", MBGRDVIZ_SITE_VERSION);
+				fprintf(sfp, "## Output by Program %s\n", program_name);
+				fprintf(sfp, "## Program Version %s\n", rcs_id);
+				fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
+				right_now = time((time_t *)0);
+				strcpy(date, ctime(&right_now));
+				date[strlen(date) - 1] = '\0';
+				if ((user_ptr = getenv("USER")) == NULL)
+					if ((user_ptr = getenv("LOGNAME")) == NULL)
+						user_ptr = unknown;
+				gethostname(host, MB_PATH_MAXLINE);
+				fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n", user_ptr, host, date);
+				fprintf(sfp, "## Number of sites: %d\n", nsite);
+
+				/* loop over the sites */
+				for (i = 0; i < nsite; i++) {
+					fprintf(sfp, "%s %d,%.10f,%.10f,17,100.0,0.00,0.00,255,0.00\r\n", sitename[i], i, sitelat[i], sitelon[i]);
 				}
 
 				/* close the output file */
@@ -4350,6 +4516,8 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 				                 &error);
 				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savesite, "Save Site File", MBV_EXISTMASK_SITE,
 				                 &error);
+				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savesitewpt, "Save Sites as Winfrog WPT File", MBV_EXISTMASK_SITE,
+				                 &error);
 				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveroute, "Save Route File",
 				                 MBV_EXISTMASK_ROUTE, &error);
 				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saverisiscript, "Save Risi Script File",
@@ -5270,7 +5438,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
 				}
 
 				/* get second point */
-				waypoint = MBV_ROUTE_WAYPOINT_ENDLINE;
+				waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
 				xdisplay = data->area.cornerpoints[j].xdisplay + dxuse + dxextra;
 				ydisplay = data->area.cornerpoints[j].ydisplay + dyuse + dyextra;
 				zdisplay = data->area.cornerpoints[j].zdisplay;
@@ -5357,7 +5525,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
 						}
 
 						/* get second point */
-						waypoint = MBV_ROUTE_WAYPOINT_ENDLINE;
+						waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
 						xdisplay = data->area.endpoints[jendpoint].xdisplay + dxuse + dxextra;
 						ydisplay = data->area.endpoints[jendpoint].ydisplay + dyuse + dyextra;
 						zdisplay = data->area.endpoints[jendpoint].zdisplay;
@@ -5465,7 +5633,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
 				}
 
 				/* get second point */
-				waypoint = MBV_ROUTE_WAYPOINT_ENDLINE;
+				waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
 				xdisplay = data->area.cornerpoints[j].xdisplay + dxuse + dxextra;
 				ydisplay = data->area.cornerpoints[j].ydisplay + dyuse + dyextra;
 				zdisplay = data->area.cornerpoints[j].zdisplay;

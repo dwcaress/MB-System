@@ -2081,6 +2081,24 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 			found = MB_YES;
 		}
 	}
+	if (found == MB_NO) {
+		if (strlen(filename) >= 5)
+			i = strlen(filename) - 4;
+		else
+			i = 0;
+		if ((suffix = strstr(&filename[i], ".seg")) != NULL || (suffix = strstr(&filename[i], ".SEG")) != NULL)
+			suffix_len = 4;
+		else
+			suffix_len = 0;
+		if (suffix_len == 4) {
+			if (fileroot != NULL) {
+				strncpy(fileroot, filename, strlen(filename) - suffix_len);
+				fileroot[strlen(filename) - suffix_len] = '\0';
+			}
+			*format = MBF_SEGYSEGY;
+			found = MB_YES;
+		}
+	}
 
 	/* look for IFREMER Trismus format convention */
 	if (found == MB_NO) {

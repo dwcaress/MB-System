@@ -27,7 +27,7 @@
  */
 
 /* Debug flag */
-/* #define MBF_EDGJSTAR_DEBUG 1 */
+//#define MBF_EDGJSTAR_DEBUG 1
 
 /* standard include files */
 #include <stdio.h>
@@ -1109,6 +1109,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 						store->kind = MB_DATA_DATA;
 					else if (message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
 						store->kind = MB_DATA_SIDESCAN2;
+//fprintf(stderr, "READ SIDESCAN format:%d subsystem:%d kind:%d\n", mb_io_ptr->format, message.subsystem, store->kind);
 				}
 				else {
 					if (message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
@@ -1638,133 +1639,38 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 		}
 
-		/* if pitchroll data read it */
-		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_PITCHROLL && message.size < MB_COMMENT_MAXLINE) {
-			/* nmea channel */
-			pitchroll = (struct mbsys_jstar_pitchroll_struct *)&(store->pitchroll);
-			pitchroll->message = message;
+		/* system info record */
+		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_SYSINFO) {
+			/* get message */
+			sysinfo = (struct mbsys_jstar_sysinfo_struct *)&(store->sysinfo);
+			sysinfo->message = message;
 
-			/* read the pitchroll record */
+			/* read the pressure record */
 			if ((read_status = fread(buffer, message.size, 1, mb_io_ptr->mbfp)) == 1) {
 				index = 0;
-				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->seconds));
+				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->system_type));
 				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->msec));
+				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->reserved1));
 				index += 4;
-				pitchroll->reserve1[0] = buffer[index];
-				index++;
-				pitchroll->reserve1[1] = buffer[index];
-				index++;
-				pitchroll->reserve1[2] = buffer[index];
-				index++;
-				pitchroll->reserve1[3] = buffer[index];
-				index++;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->accelerationx));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->accelerationy));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->accelerationz));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->gyroratex));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->gyroratey));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->gyroratez));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->pitch));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->roll));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->temperature));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->deviceinfo));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->heave));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->heading));
-				index += 2;
-				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->datavalidflags));
+				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->version));
 				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->reserve2));
+				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->reserved2));
 				index += 4;
-
-				done = MB_YES;
-				store->kind = MB_DATA_ATTITUDE;
-			}
-		}
-
-		/* if dvl data read it */
-		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_DVL && message.size < MB_COMMENT_MAXLINE) {
-			/* nmea channel */
-			dvl = (struct mbsys_jstar_dvl_struct *)&(store->dvl);
-			dvl->message = message;
-
-			/* read the dvl record */
-			if ((read_status = fread(buffer, message.size, 1, mb_io_ptr->mbfp)) == 1) {
-				index = 0;
-				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->seconds));
+				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->platformserialnumber));
 				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->msec));
-				index += 4;
-				dvl->reserve1[0] = buffer[index];
-				index++;
-				dvl->reserve1[1] = buffer[index];
-				index++;
-				dvl->reserve1[2] = buffer[index];
-				index++;
-				dvl->reserve1[3] = buffer[index];
-				index++;
-				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->datavalidflags));
-				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->beam1range));
-				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->beam2range));
-				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->beam3range));
-				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->beam4range));
-				index += 4;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitybottomx));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitybottomy));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitybottomz));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitywaterx));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitywatery));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitywaterz));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->depth));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->pitch));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->roll));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->heading));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->salinity));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->temperature));
-				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->soundspeed));
-				index += 2;
-				for (i = 0; i < 7; i++) {
-					mb_get_binary_short(MB_YES, &buffer[index], &(dvl->reserve2[i]));
-					index += 2;
+				sysinfo->sysinfosize = MIN((message.size - index), MBSYS_JSTAR_SYSINFO_MAX - 1);
+				for (i = 0; i < sysinfo->sysinfosize; i++) {
+					sysinfo->sysinfo[i] = buffer[index];
+					index++;
 				}
+				sysinfo->sysinfo[sysinfo->sysinfosize] = '\0';
+#ifdef MBF_EDGJSTAR_DEBUG
+				fprintf(stderr, "SYSINFO: system_type:%d version:%d platformserialnumber:%d sysinfosize:%d\n",
+				        sysinfo->system_type, sysinfo->version, sysinfo->platformserialnumber, sysinfo->sysinfosize);
+#endif
 
 				done = MB_YES;
-				store->kind = MB_DATA_DVL;
-#ifdef MBF_EDGJSTAR_DEBUG
-				fprintf(stderr,
-				        "DVL: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  beams:%d %d %d %d   velocity:%d %d %d  depth:%d "
-				        "pitch:%d roll:%d heading:%d soundspeed:%d\n",
-				        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], dvl->beam1range,
-				        dvl->beam2range, dvl->beam3range, dvl->beam4range, dvl->velocitybottomx, dvl->velocitybottomy,
-				        dvl->velocitybottomz, dvl->depth, dvl->pitch, dvl->roll, dvl->heading, dvl->soundspeed);
-#endif
+				store->kind = MB_DATA_HEADER;
 			}
 		}
 
@@ -1864,6 +1770,61 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 		}
 
+		/* if pitchroll data read it */
+		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_PITCHROLL && message.size < MB_COMMENT_MAXLINE) {
+			/* nmea channel */
+			pitchroll = (struct mbsys_jstar_pitchroll_struct *)&(store->pitchroll);
+			pitchroll->message = message;
+
+			/* read the pitchroll record */
+			if ((read_status = fread(buffer, message.size, 1, mb_io_ptr->mbfp)) == 1) {
+				index = 0;
+				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->seconds));
+				index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->msec));
+				index += 4;
+				pitchroll->reserve1[0] = buffer[index];
+				index++;
+				pitchroll->reserve1[1] = buffer[index];
+				index++;
+				pitchroll->reserve1[2] = buffer[index];
+				index++;
+				pitchroll->reserve1[3] = buffer[index];
+				index++;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->accelerationx));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->accelerationy));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->accelerationz));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->gyroratex));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->gyroratey));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->gyroratez));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->pitch));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->roll));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->temperature));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->deviceinfo));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->heave));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(pitchroll->heading));
+				index += 2;
+				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->datavalidflags));
+				index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->reserve2));
+				index += 4;
+
+				done = MB_YES;
+				store->kind = MB_DATA_ATTITUDE;
+			}
+		}
+
 		/* if pressure data read it */
 		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_PRESSURE && message.size < MB_COMMENT_MAXLINE) {
 			/* nmea channel */
@@ -1918,38 +1879,78 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 		}
 
-		/* system info record */
-		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_SYSINFO) {
-			/* get message */
-			sysinfo = (struct mbsys_jstar_sysinfo_struct *)&(store->sysinfo);
-			sysinfo->message = message;
+		/* if dvl data read it */
+		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_DVL && message.size < MB_COMMENT_MAXLINE) {
+			/* nmea channel */
+			dvl = (struct mbsys_jstar_dvl_struct *)&(store->dvl);
+			dvl->message = message;
 
-			/* read the pressure record */
+			/* read the dvl record */
 			if ((read_status = fread(buffer, message.size, 1, mb_io_ptr->mbfp)) == 1) {
 				index = 0;
-				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->system_type));
+				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->seconds));
 				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->reserved1));
+				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->msec));
 				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->version));
+				dvl->reserve1[0] = buffer[index];
+				index++;
+				dvl->reserve1[1] = buffer[index];
+				index++;
+				dvl->reserve1[2] = buffer[index];
+				index++;
+				dvl->reserve1[3] = buffer[index];
+				index++;
+				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->datavalidflags));
 				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->reserved2));
+				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->beam1range));
 				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->platformserialnumber));
+				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->beam2range));
 				index += 4;
-				sysinfo->sysinfosize = MIN((message.size - index), MBSYS_JSTAR_SYSINFO_MAX - 1);
-				for (i = 0; i < sysinfo->sysinfosize; i++) {
-					sysinfo->sysinfo[i] = buffer[index];
-					index++;
+				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->beam3range));
+				index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->beam4range));
+				index += 4;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitybottomx));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitybottomy));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitybottomz));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitywaterx));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitywatery));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->velocitywaterz));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->depth));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->pitch));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->roll));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->heading));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->salinity));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->temperature));
+				index += 2;
+				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->soundspeed));
+				index += 2;
+				for (i = 0; i < 7; i++) {
+					mb_get_binary_short(MB_YES, &buffer[index], &(dvl->reserve2[i]));
+					index += 2;
 				}
-				sysinfo->sysinfo[sysinfo->sysinfosize] = '\0';
-#ifdef MBF_EDGJSTAR_DEBUG
-				fprintf(stderr, "SYSINFO: system_type:%d version:%d platformserialnumber:%d sysinfosize:%d\n",
-				        sysinfo->system_type, sysinfo->version, sysinfo->platformserialnumber, sysinfo->sysinfosize);
-#endif
 
 				done = MB_YES;
-				store->kind = MB_DATA_HEADER;
+				store->kind = MB_DATA_DVL;
+#ifdef MBF_EDGJSTAR_DEBUG
+				fprintf(stderr,
+				        "DVL: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  beams:%d %d %d %d   velocity:%d %d %d  depth:%d "
+				        "pitch:%d roll:%d heading:%d soundspeed:%d\n",
+				        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], dvl->beam1range,
+				        dvl->beam2range, dvl->beam3range, dvl->beam4range, dvl->velocitybottomx, dvl->velocitybottomy,
+				        dvl->velocitybottomz, dvl->depth, dvl->pitch, dvl->roll, dvl->heading, dvl->soundspeed);
+#endif
 			}
 		}
 
@@ -2413,7 +2414,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     conductivity:                %d\n", pressure->conductivity);
 		fprintf(stderr, "dbg5     soundspeed:                  %d\n", pressure->soundspeed);
 		for (i = 0; i < 10; i++)
-			fprintf(stderr, "dbg5     reserve2[%2d]:                 %d\n", i, pitchroll->reserve2);
+			fprintf(stderr, "dbg5     reserve2[%2d]:                 %d\n", i, pressure->reserve2[i]);
 	}
 	else if (status == MB_SUCCESS && verbose >= 5 &&
 	         (store->kind == MB_DATA_NMEA_RMC || store->kind == MB_DATA_NMEA_DBT || store->kind == MB_DATA_NMEA_DPT)) {
