@@ -43,17 +43,28 @@
 #define MBSYS_JSTAR_PIXELS_MAX 2000
 #define MBSYS_JSTAR_SYSINFO_MAX 16384
 
-#define MBSYS_JSTAR_DATA_SONAR 80
-#define MBSYS_JSTAR_DATA_SONAR2 82
-#define MBSYS_JSTAR_DATA_4400SAS 86
-#define MBSYS_JSTAR_DATA_PITCHROLL 2020
-#define MBSYS_JSTAR_DATA_NMEA 2002
-#define MBSYS_JSTAR_DATA_MISCANALOG 2040
-#define MBSYS_JSTAR_DATA_PRESSURE 2060
-#define MBSYS_JSTAR_DATA_DVL 2080
-#define MBSYS_JSTAR_DATA_MESSAGE 2090
-#define MBSYS_JSTAR_DATA_SYSINFO 182
-#define MBSYS_JSTAR_DATA_COMMENT 17229
+#define MBSYS_JSTAR_DATA_SONAR                  80
+#define MBSYS_JSTAR_DATA_SONAR2                 82
+#define MBSYS_JSTAR_DATA_4400SAS                86
+#define MBSYS_JSTAR_DATA_SYSINFO                182
+#define MBSYS_JSTAR_DATA_NMEA                   2002
+#define MBSYS_JSTAR_DATA_PITCHROLL              2020
+#define MBSYS_JSTAR_DATA_MISCANALOG             2040
+#define MBSYS_JSTAR_DATA_PRESSURE               2060
+#define MBSYS_JSTAR_DATA_DVL                    2080
+#define MBSYS_JSTAR_DATA_SITUATION              2090
+#define MBSYS_JSTAR_DATA_SITUATIONV2            2091
+#define MBSYS_JSTAR_DATA_CABLECOUNTER           2100
+#define MBSYS_JSTAR_DATA_KMPIPEDATA             2101
+#define MBSYS_JSTAR_DATA_TIMESTAMP              2111
+
+#define MBSYS_JSTAR_DATA_BATHYMETRICDATA        3000
+#define MBSYS_JSTAR_DATA_BATHYMETRICATTITUDE    3001
+#define MBSYS_JSTAR_DATA_BATHYMETRICPRESSURE    3002
+#define MBSYS_JSTAR_DATA_BATHYMETRICALTITUDE    3003
+#define MBSYS_JSTAR_DATA_BATHYMETRICPOSITION    3004
+
+#define MBSYS_JSTAR_DATA_COMMENT                17229
 
 #define MBSYS_JSTAR_SUBSYSTEM_SBP 0
 #define MBSYS_JSTAR_SUBSYSTEM_SSLOW 20
@@ -139,35 +150,16 @@ struct mbsys_jstar_nmea_struct {
 	char nmea[MB_COMMENT_MAXLINE];
 };
 
-struct mbsys_jstar_pressure_struct {
-	/* Message Header */
-	struct mbsys_jstar_message_struct message;
-
-	/* Time and source */
-	int seconds; /* seconds since start of time */
-	int msec;    /* milliseconds since start of time */
-	char reserve1[4];
-	int pressure;       /* 0.001 PSI */
-	int salinity;       /* ppm */
-	int datavalidflags; /* data valid flags:
-	                0 - pressure
-	                1 - temp
-	                2 - salt PPM
-	                3 - conductivity
-	                4 - sound velocity */
-	int conductivity;   /* uSiemens/cm */
-	int soundspeed;     /* 0.001 m/sec */
-	int reserve2[10];
-};
-
 struct mbsys_jstar_pitchroll_struct {
 	/* Message Header */
 	struct mbsys_jstar_message_struct message;
 
-	/* Time and source */
+	/* Time */
 	int seconds; /* seconds since start of time */
 	int msec;    /* milliseconds since start of time */
 	char reserve1[4];
+    
+    /* attitude data */
 	short accelerationx;       /* x acceleration: multiply by (20 * 1.5) / (32768) to get G's */
 	short accelerationy;       /* y acceleration: multiply by (20 * 1.5) / (32768) to get G's */
 	short accelerationz;       /* z acceleration: multiply by (20 * 1.5) / (32768) to get G's */
@@ -196,14 +188,39 @@ struct mbsys_jstar_pitchroll_struct {
 	int reserve2;
 };
 
+struct mbsys_jstar_pressure_struct {
+	/* Message Header */
+	struct mbsys_jstar_message_struct message;
+
+	/* Time */
+	int seconds; /* seconds since start of time */
+	int msec;    /* milliseconds since start of time */
+	char reserve1[4];
+    
+    /* CTD data */
+	int pressure;       /* 0.001 PSI */
+	int salinity;       /* ppm */
+	int datavalidflags; /* data valid flags:
+	                0 - pressure
+	                1 - temp
+	                2 - salt PPM
+	                3 - conductivity
+	                4 - sound velocity */
+	int conductivity;   /* uSiemens/cm */
+	int soundspeed;     /* 0.001 m/sec */
+	int reserve2[10];
+};
+
 struct mbsys_jstar_dvl_struct {
 	/* Message Header */
 	struct mbsys_jstar_message_struct message;
 
-	/* Time and source */
+	/* Time */
 	int seconds; /* seconds since start of time */
 	int msec;    /* milliseconds since start of time */
 	char reserve1[4];
+    
+    /* dvl data */
 	unsigned int datavalidflags; /* Bit values indicate which values are present:
 	             0: X,Y velocity present
 	             1: 1 = velocity in ship coordinates
@@ -239,6 +256,79 @@ struct mbsys_jstar_dvl_struct {
 	short temperature;           /* temperature (0.01 degree celcius) */
 	short soundspeed;            /* sound speed (m/sec) */
 	short reserve2[7];
+};
+
+struct mbsys_jstar_situation_struct {
+	/* Message Header */
+	struct mbsys_jstar_message_struct message;
+
+	/* Time */
+	int seconds; /* seconds since start of time */
+	int msec;    /* milliseconds since start of time */
+	char reserve1[4];
+    
+    /* navigation and attitude data */
+	unsigned int datavalidflags; /* Validity Flags:
+                Validity Flags indicate which of the following fields are valid.
+                If the corresponding bit is set the field is valid.
+                        Bit 0 : microsecondTimestamp
+                        Bit 1 : latitude
+                        Bit 2 : longitude
+                        Bit 3 : depth
+                        Bit 4 : heading
+                        Bit 5 : pitch
+                        Bit 6:roll
+                        Bit 7 : XRelativePosition
+                        Bit 8 : YRelativePosition
+                        Bit 9 : ZRelativePosition
+                        Bit 10 : XVelocity
+                        Bit 11 : YVelocity
+                        Bit 12 : ZVelocity
+                        Bit 13 : NorthVelocity
+                        Bit 14 : EastVelocity
+                        Bit 15 : downVelocity
+                        Bit 16 : XAngularRate
+                        Bit 17 : YAngularRate
+                        Bit 18 : ZAngularRate
+                        Bit 19 : XAcceleration
+                        Bit 20 : YAcceleration
+                        Bit 21 : ZAcceleration
+                        Bit 22 : latitudeStandardDeviation
+                        Bit 23 : longitudeStandardDeviation Bit
+                        24 : depthStandardDeviation
+                        Bit 25 : headingStandardDeviation
+                        Bit 26 : pitchStandardDeviation
+                        Bit 27 : rollStandardDeviation */
+	char reserve2[4];
+    unsigned long int time_usec; /* Microsecond timestamp, us since 12:00:00 am GMT, January 1, 1970 */
+    double latitude; /* Latitude in degrees, north is positive */
+    double longitude; /* Longitude in degrees, east is positive */
+    double depth; /* Depth in meters */
+    double heading; /* Heading in degrees */
+    double pitch; /* Pitch in degrees, bow up is positive */
+    double roll; /* Roll in degrees, port up is positive */
+    double x_forward; /* X, forward, relative position in meters, surge */
+    double y_starboard; /* Y, starboard, relative position in meters, sway */
+    double z_downward; /* Z downward, relative position in meters, heave */
+    double velocity_x_forward; /* X, forward, velocity in meters per second */
+    double velocity_y_starboard; /* Y, starboard, velocity in meters per second */
+    double velocity_z_downward; /* Z, downward, velocity in meters per second */
+    double velocity_north; /* North velocity in meters per second */
+    double velocity_east; /* East velocity in meters per second */
+    double velocity_down; /* Down velocity in meters per second */
+    double angular_rate_x; /* X angular rate in degrees per second, port up is positive */
+    double angular_rate_y; /* Y angular rate in degrees per second, bow up is positive */
+    double angular_rate_z; /* Z angular rate in degrees per second, starboard is positive */
+    double acceleration_x; /* X, forward, acceleration in meters per second per second */
+    double acceleration_y; /* Y, starboard, acceleration in meters per second per second */
+    double acceleration_z; /* Z, downward, acceleration in meters per second per second */
+    double latitude_sigma; /* Latitude standard deviation in meters */
+    double longitude_sigma; /* Longitude standard deviation in meters */
+    double depth_sigma; /* Depth standard deviation in meters */
+    double heading_sigma; /* Heading standard deviation in degrees */
+    double pitch_sigma; /* Pitch standard deviation in degrees */
+    double roll_sigma; /* Roll standard deviation in degrees */
+    unsigned short reserved3[16]; /* Reserved – Do not use */
 };
 
 struct mbsys_jstar_channel_struct {
@@ -413,6 +503,9 @@ struct mbsys_jstar_struct {
 	struct mbsys_jstar_channel_struct ssport;
 	struct mbsys_jstar_channel_struct ssstbd;
 
+	/* System Information data */
+	struct mbsys_jstar_sysinfo_struct sysinfo;
+
 	/* Pitch Roll data */
 	struct mbsys_jstar_pitchroll_struct pitchroll;
 
@@ -425,8 +518,8 @@ struct mbsys_jstar_struct {
 	/* Pressure data */
 	struct mbsys_jstar_pressure_struct pressure;
 
-	/* System Information data */
-	struct mbsys_jstar_sysinfo_struct sysinfo;
+	/* Situation data */
+	struct mbsys_jstar_situation_struct situation;
 
 	/* Comment */
 	struct mbsys_jstar_comment_struct comment;

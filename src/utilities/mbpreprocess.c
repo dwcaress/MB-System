@@ -81,6 +81,8 @@ int main(int argc, char **argv) {
 	                       "\t--format=format_id\n\n"
 	                       "\t--platform-file=platform_file\n"
 	                       "\t--platform-target-sensor=sensor_id\n\n"
+	                       "\t--output-sensor-fnv\n"
+	                       "\t--skip-existing\n\n"
 	                       "\t--nav-file=file\n"
 	                       "\t--nav-file-format=format_id\n"
 	                       "\t--output-sensor-fnv\n"
@@ -154,7 +156,10 @@ int main(int argc, char **argv) {
 	 *
 	 * 		--platform-file=platform_file
 	 * 		--platform-target-sensor=sensor_id
-
+	 * 		
+	 * 		--output-sensor-fnv
+	 * 		--skip-existing
+     *
 	 * 		--nav-file=file
 	 * 		--nav-file-format=format_id
 	 * 		--output-sensor-fnv
@@ -223,6 +228,7 @@ int main(int argc, char **argv) {
 	                                  {"platform-file", required_argument, NULL, 0},
 	                                  {"platform-target-sensor", required_argument, NULL, 0},
 	                                  {"output-sensor-fnv", no_argument, NULL, 0},
+	                                  {"skip-existing", no_argument, NULL, 0},
 	                                  {"nav-file", required_argument, NULL, 0},
 	                                  {"nav-file-format", required_argument, NULL, 0},
 	                                  {"nav-async", required_argument, NULL, 0},
@@ -370,6 +376,9 @@ int main(int argc, char **argv) {
 
 	/* output fnv files for each sensor */
 	int output_sensor_fnv = MB_NO;
+
+	/* skip existing output files */
+	int skip_existing = MB_NO;
 
 	/* kluge various data fixes */
 	int kluge_timejumps = MB_NO;
@@ -529,6 +538,8 @@ int main(int argc, char **argv) {
 	double start_time_d;
 	double end_time_d;
 	int istart, iend;
+	int proceed = MB_YES;
+	int input_size, input_modtime, output_size, output_modtime;
 
 	mb_path fnvfile = "";
 	int isensor, ioffset;
@@ -620,6 +631,14 @@ int main(int argc, char **argv) {
 			/* output-sensor-fnv */
 			else if (strcmp("output-sensor-fnv", options[option_index].name) == 0) {
 				output_sensor_fnv = MB_YES;
+			}
+
+			/*-------------------------------------------------------
+			 * Skip existing output files */
+
+			/* output-sensor-fnv */
+			else if (strcmp("skip-existing", options[option_index].name) == 0) {
+				skip_existing = MB_YES;
 			}
 
 			/*-------------------------------------------------------
@@ -1133,6 +1152,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       kluge_soundspeedtweak_factor: %f\n", kluge_soundspeedtweak_factor);
 		fprintf(stderr, "dbg2  Additional output:\n");
 		fprintf(stderr, "dbg2       output_sensor_fnv:            %d\n", output_sensor_fnv);
+		fprintf(stderr, "dbg2  Skip existing output files:\n");
+		fprintf(stderr, "dbg2       skip_existing:                %d\n", skip_existing);
 	}
 
 	/* print starting verbose */
@@ -1210,6 +1231,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "     kluge_soundspeedtweak_factor: %f\n", kluge_soundspeedtweak_factor);
 		fprintf(stderr, "Additional output:\n");
 		fprintf(stderr, "     output_sensor_fnv:            %d\n", output_sensor_fnv);
+		fprintf(stderr, "Skip existing output files:\n");
+		fprintf(stderr, "     skip_existing:                %d\n", skip_existing);
 	}
 
 	/* if help desired then print it and exit */
@@ -2166,692 +2189,729 @@ int main(int argc, char **argv) {
 		sprintf(ofile, "%s.mb%d", fileroot, oformat);
 		if (strcmp(ifile, ofile) == 0)
 			sprintf(ofile, "%sr.mb%d", fileroot, oformat);
-
-		if (verbose > 0)
-			fprintf(stderr, "\nPass 2: Opening input file:  %s %d\n", ifile, iformat);
-
-		/* initialize reading the input file */
-		if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-		                           &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
-			mb_error(verbose, error, &message);
-			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
-			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			
+		/* Figure out if the file should be preprocessed - don't if it looks like
+			the file was previously preprocessed and looks up to date  AND the
+			appropriate request has been made */
+		proceed = MB_YES;
+		if (skip_existing == MB_YES) {
+			if ((fstat = stat(ifile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				input_modtime = file_status.st_mtime;
+				input_size = file_status.st_size;
+			}
+			else {
+				input_modtime = 0;
+				input_size = 0;
+			}
+			if ((fstat = stat(ofile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				output_modtime = file_status.st_mtime;
+				output_size = file_status.st_size;
+			}
+			else {
+				output_modtime = 0;
+				output_size = 0;
+			}
+			if (output_modtime > input_modtime && output_size > input_size) {
+				proceed = MB_NO;
+			}
 		}
-
-		if (verbose > 0)
-			fprintf(stderr, "Pass 2: Opening output file: %s %d\n", ofile, oformat);
-
-		/* initialize writing the output swath file */
-		if ((status = mb_write_init(verbose, ofile, oformat, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) !=
-		    MB_SUCCESS) {
-			mb_error(verbose, error, &message);
-			fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
-			fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+		
+		/* skip redo if requested and relevant */
+		if (proceed == MB_NO) {
+			if (verbose > 0)
+				fprintf(stderr, "\nPass 2: Skipping input file:  %s %d\n", ifile, iformat);
 		}
-
-		beamflag = NULL;
-		bath = NULL;
-		amp = NULL;
-		bathacrosstrack = NULL;
-		bathalongtrack = NULL;
-		ss = NULL;
-		ssacrosstrack = NULL;
-		ssalongtrack = NULL;
-		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
-		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
-		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
-		if (error == MB_ERROR_NO_ERROR)
-			status =
-			    mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
-		if (error == MB_ERROR_NO_ERROR)
-			status =
-			    mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
-		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
-		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
-		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
-
-		/* if error initializing memory then quit */
-		if (error != MB_ERROR_NO_ERROR) {
-			mb_error(verbose, error, &message);
-			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
-		}
-
-		/* delete old synchronous and synchronous files */
-		sprintf(afile, "%s.ata", ofile);
-		if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
-			remove(afile);
-		}
-		sprintf(afile, "%s.ath", ofile);
-		if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
-			remove(afile);
-		}
-		sprintf(afile, "%s.ats", ofile);
-		if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
-			remove(afile);
-		}
-		sprintf(afile, "%s.sta", ofile);
-		if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
-			remove(afile);
-		}
-		sprintf(afile, "%s.baa", ofile);
-		if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
-			remove(afile);
-		}
-		sprintf(afile, "%s.bah", ofile);
-		if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
-			remove(afile);
-		}
-		sprintf(afile, "%s.bas", ofile);
-		if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
-			remove(afile);
-		}
-		sprintf(afile, "%s.bsa", ofile);
-		if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
-			remove(afile);
-		}
-
-		/* open synchronous attitude file */
-		sprintf(afile, "%s.bsa", ofile);
-		if ((afp = fopen(afile, "w")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", afile);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
-		}
-
-		/* zero file count records */
-		n_rf_data = 0;
-		n_rf_comment = 0;
-		n_rf_nav = 0;
-		n_rf_nav1 = 0;
-		n_rf_nav2 = 0;
-		n_rf_nav3 = 0;
-		n_rf_att = 0;
-		n_rf_att1 = 0;
-		n_rf_att2 = 0;
-		n_rf_att3 = 0;
-		n_wf_data = 0;
-		n_wf_comment = 0;
-		n_wf_nav = 0;
-		n_wf_nav1 = 0;
-		n_wf_nav2 = 0;
-		n_wf_nav3 = 0;
-		n_wf_att = 0;
-		n_wf_att1 = 0;
-		n_wf_att2 = 0;
-		n_wf_att3 = 0;
-		start_time_d = -1.0;
-		end_time_d = -1.0;
-
-		/* ------------------------------- */
-		/* write comments to output file   */
-
-		/* ------------------------------- */
-		/* start read+process,+output loop */
-		while (error <= MB_ERROR_NO_ERROR) {
-			/* reset error */
-			status = MB_SUCCESS;
-			error = MB_ERROR_NO_ERROR;
-
-			/* read next data record */
-			status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon_org, &navlat_org, &speed_org,
-			                    &heading_org, &distance, &altitude_org, &sensordepth_org, &beams_bath, &beams_amp, &pixels_ss,
-			                    beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment,
-			                    &error);
-
-			/* some nonfatal errors do not matter */
-			if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE) {
-				error = MB_ERROR_NO_ERROR;
+		
+		/* preprocess the input file */
+		else {
+			if (verbose > 0)
+				fprintf(stderr, "\nPass 2: Opening input file:  %s %d\n", ifile, iformat);
+	
+			/* initialize reading the input file */
+			if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
+									   &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+				mb_error(verbose, error, &message);
+				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(error);
+			}
+	
+			if (verbose > 0)
+				fprintf(stderr, "Pass 2: Opening output file: %s %d\n", ofile, oformat);
+	
+			/* initialize writing the output swath file */
+			if ((status = mb_write_init(verbose, ofile, oformat, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) !=
+				MB_SUCCESS) {
+				mb_error(verbose, error, &message);
+				fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
+				fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(error);
+			}
+	
+			beamflag = NULL;
+			bath = NULL;
+			amp = NULL;
+			bathacrosstrack = NULL;
+			bathalongtrack = NULL;
+			ss = NULL;
+			ssacrosstrack = NULL;
+			ssalongtrack = NULL;
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status =
+					mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status =
+					mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
+	
+			/* if error initializing memory then quit */
+			if (error != MB_ERROR_NO_ERROR) {
+				mb_error(verbose, error, &message);
+				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(error);
+			}
+	
+			/* delete old synchronous and synchronous files */
+			sprintf(afile, "%s.ata", ofile);
+			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+			}
+			sprintf(afile, "%s.ath", ofile);
+			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+			}
+			sprintf(afile, "%s.ats", ofile);
+			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+			}
+			sprintf(afile, "%s.sta", ofile);
+			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+			}
+			sprintf(afile, "%s.baa", ofile);
+			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+			}
+			sprintf(afile, "%s.bah", ofile);
+			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+			}
+			sprintf(afile, "%s.bas", ofile);
+			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+			}
+			sprintf(afile, "%s.bsa", ofile);
+			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				remove(afile);
+			}
+	
+			/* open synchronous attitude file */
+			sprintf(afile, "%s.bsa", ofile);
+			if ((afp = fopen(afile, "w")) == NULL) {
+				error = MB_ERROR_OPEN_FAIL;
+				fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", afile);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(error);
+			}
+	
+			/* zero file count records */
+			n_rf_data = 0;
+			n_rf_comment = 0;
+			n_rf_nav = 0;
+			n_rf_nav1 = 0;
+			n_rf_nav2 = 0;
+			n_rf_nav3 = 0;
+			n_rf_att = 0;
+			n_rf_att1 = 0;
+			n_rf_att2 = 0;
+			n_rf_att3 = 0;
+			n_wf_data = 0;
+			n_wf_comment = 0;
+			n_wf_nav = 0;
+			n_wf_nav1 = 0;
+			n_wf_nav2 = 0;
+			n_wf_nav3 = 0;
+			n_wf_att = 0;
+			n_wf_att1 = 0;
+			n_wf_att2 = 0;
+			n_wf_att3 = 0;
+			start_time_d = -1.0;
+			end_time_d = -1.0;
+	
+			/* ------------------------------- */
+			/* write comments to output file   */
+	
+			/* ------------------------------- */
+			/* start read+process,+output loop */
+			while (error <= MB_ERROR_NO_ERROR) {
+				/* reset error */
 				status = MB_SUCCESS;
-			}
-
-			/* count records */
-			if (kind == MB_DATA_DATA) {
-				if (n_rf_data == 0)
-					start_time_d = time_d;
-				end_time_d = time_d;
-				n_rf_data++;
-				n_rt_data++;
-			}
-			else if (kind == MB_DATA_COMMENT) {
-				n_rf_comment++;
-				n_rt_comment++;
-			}
-			else if (kind == MB_DATA_NAV) {
-				n_rf_nav++;
-				n_rt_nav++;
-			}
-			else if (kind == MB_DATA_NAV1) {
-				n_rf_nav1++;
-				n_rt_nav1++;
-			}
-			else if (kind == MB_DATA_NAV2) {
-				n_rf_nav2++;
-				n_rt_nav2++;
-			}
-			else if (kind == MB_DATA_NAV3) {
-				n_rf_nav3++;
-				n_rt_nav3++;
-			}
-			else if (kind == MB_DATA_ATTITUDE) {
-				n_rf_att++;
-				n_rt_att++;
-			}
-			else if (kind == MB_DATA_ATTITUDE1) {
-				n_rf_att1++;
-				n_rt_att1++;
-			}
-			else if (kind == MB_DATA_ATTITUDE2) {
-				n_rf_att2++;
-				n_rt_att2++;
-			}
-			else if (kind == MB_DATA_ATTITUDE3) {
-				n_rf_att3++;
-				n_rt_att3++;
-			}
-
-			timestamp_changed = MB_NO;
-			nav_changed = MB_NO;
-			heading_changed = MB_NO;
-			sensordepth_changed = MB_NO;
-			attitude_changed = MB_NO;
-
-			/* apply preprocessing to survey data records */
-			if (status == MB_SUCCESS &&
-			    (kind == MB_DATA_DATA || kind == MB_DATA_SUBBOTTOM_MCS || kind == MB_DATA_SUBBOTTOM_CNTRBEAM ||
-			     kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_SIDESCAN3 ||
-			     kind == MB_DATA_WATER_COLUMN)) {
-				/* call mb_extract_nav to get attitude */
-				status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon_org, &navlat_org,
-				                        &speed_org, &heading_org, &draft_org, &roll_org, &pitch_org, &heave_org, &error);
-
-				/* call mb_extract_altitude to get altitude */
-				status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth_org, &altitude_org, &error);
-
-				/* apply time jump fix */
-				if (kluge_timejumps == MB_YES) {
-					if (n_rf_data == 1)
-						kluge_first_time_d = time_d;
-					if (n_rf_data > 2) {
-						dtime_d_expect = (kluge_last_time_d - kluge_first_time_d) / (n_rf_data - 1);
-						dtime_d = time_d - kluge_last_time_d;
-						if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_threshold) {
-							time_d = kluge_last_time_d + dtime_d_expect;
-							timestamp_changed = MB_YES;
-						}
-					}
-					kluge_last_time_d = time_d;
-				}
-
-				/* apply time latency correction called for in the platform file */
-				if (sensor_target != NULL && sensor_target->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
-					mb_apply_time_latency(verbose, 1, &time_d, sensor_target->time_latency_mode,
-					                      sensor_target->time_latency_static, sensor_target->num_time_latency,
-					                      sensor_target->time_latency_time_d, sensor_target->time_latency_value, &error);
-					timestamp_changed = MB_YES;
-				}
-
-				/* apply time latency correction called for on the command line */
-				if ((time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) &&
-				    (time_latency_apply & MBPREPROCESS_TIME_LATENCY_APPLY_SURVEY)) {
-					mb_apply_time_latency(verbose, 1, &time_d, time_latency_mode, time_latency_constant, time_latency_num,
-					                      time_latency_time_d, time_latency_time_latency, &error);
-					timestamp_changed = MB_YES;
-				}
-
-				/* use available asynchronous ancilliary data to replace
-				    nav sensordepth heading attitude values for record timestamp  */
-				if (n_nav > 0) {
-					interp_status = mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, n_nav, time_d,
-					                                           &navlon_org, &jnav, &interp_error);
-					interp_status = mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, n_nav, time_d, &navlat_org,
-					                                          &jnav, &interp_error);
-					interp_status =
-					    mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, n_nav, time_d, &speed_org, &jnav, &interp_error);
-					nav_changed = MB_YES;
-				}
-				if (n_sensordepth > 0) {
-					interp_status = mb_linear_interp(verbose, sensordepth_time_d - 1, sensordepth_sensordepth - 1, n_sensordepth,
-					                                 time_d, &sensordepth_org, &jsensordepth, &interp_error);
-					sensordepth_changed = MB_YES;
-				}
-				if (n_heading > 0) {
-					interp_status = mb_linear_interp_heading(verbose, heading_time_d - 1, heading_heading - 1, n_heading, time_d,
-					                                         &heading_org, &jheading, &interp_error);
-					heading_changed = MB_YES;
-				}
-				if (n_altitude > 0) {
-					interp_status = mb_linear_interp(verbose, altitude_time_d - 1, altitude_altitude - 1, n_altitude, time_d,
-					                                 &altitude_org, &jaltitude, &interp_error);
-					altitude_changed = MB_YES;
-				}
-				if (n_attitude > 0) {
-					interp_status = mb_linear_interp(verbose, attitude_time_d - 1, attitude_roll - 1, n_attitude, time_d,
-					                                 &roll_org, &jattitude, &interp_error);
-					interp_status = mb_linear_interp(verbose, attitude_time_d - 1, attitude_pitch - 1, n_attitude, time_d,
-					                                 &pitch_org, &jattitude, &interp_error);
-					interp_status = mb_linear_interp(verbose, attitude_time_d - 1, attitude_heave - 1, n_attitude, time_d,
-					                                 &heave_org, &jattitude, &interp_error);
-					attitude_changed = MB_YES;
-				}
-				if (n_sensordepth > 0 || n_attitude > 0) {
-					draft_org = sensordepth_org - heave_org;
-				}
-
-				/* save the original values prior to lever arm correction */
-				navlon = navlon_org;
-				navlat = navlat_org;
-				speed = speed_org;
-				heading = heading_org;
-				altitude = altitude_org;
-				sensordepth = sensordepth_org;
-				draft = draft_org;
-				roll = roll_org;
-				pitch = pitch_org;
-				heave = heave_org;
-
-				/* set up preprocess structure */
-				preprocess_pars.target_sensor = target_sensor;
-				preprocess_pars.timestamp_changed = timestamp_changed;
-				preprocess_pars.time_d = time_d;
-				preprocess_pars.n_nav = n_nav;
-				preprocess_pars.nav_time_d = nav_time_d;
-				preprocess_pars.nav_lon = nav_navlon;
-				preprocess_pars.nav_lat = nav_navlat;
-				preprocess_pars.nav_speed = nav_speed;
-				preprocess_pars.n_sensordepth = n_sensordepth;
-				preprocess_pars.sensordepth_time_d = sensordepth_time_d;
-				preprocess_pars.sensordepth_sensordepth = sensordepth_sensordepth;
-				preprocess_pars.n_heading = n_heading;
-				preprocess_pars.heading_time_d = heading_time_d;
-				preprocess_pars.heading_heading = heading_heading;
-				preprocess_pars.n_altitude = n_altitude;
-				preprocess_pars.altitude_time_d = altitude_time_d;
-				preprocess_pars.altitude_altitude = altitude_altitude;
-				preprocess_pars.n_attitude = n_attitude;
-				preprocess_pars.attitude_time_d = attitude_time_d;
-				preprocess_pars.attitude_roll = attitude_roll;
-				preprocess_pars.attitude_pitch = attitude_pitch;
-				preprocess_pars.attitude_heave = attitude_heave;
-				preprocess_pars.n_soundspeed = n_soundspeed;
-				preprocess_pars.soundspeed_time_d = soundspeed_time_d;
-				preprocess_pars.soundspeed_soundspeed = soundspeed_soundspeed;
-
-				/* attempt to execute a preprocess function for these data */
-				status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform, (void *)&preprocess_pars, &error);
-
-				/* If a predefined preprocess function does not exist for
-				 * this format then standard preprocessing will be done
-				 *      1) Replace time tag, nav, attitude
-				 * 	2) if attitude values changed rotate bathymetry accordingly
-				 * 	3) if any values changed reinsert the data */
-				if (status == MB_FAILURE) {
-					/* reset status and error */
-					status = MB_SUCCESS;
+				error = MB_ERROR_NO_ERROR;
+	
+				/* read next data record */
+				status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon_org, &navlat_org, &speed_org,
+									&heading_org, &distance, &altitude_org, &sensordepth_org, &beams_bath, &beams_amp, &pixels_ss,
+									beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment,
+									&error);
+//fprintf(stderr,"mbpreprocess: A:  kind:%d status:%d error:%d",kind,status,error);
+	
+				/* some nonfatal errors do not matter */
+				if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE) {
 					error = MB_ERROR_NO_ERROR;
-
-					/* if platform defined, do lever arm correction */
-					if (platform != NULL) {
-						/* calculate target sensor position */
-						status = mb_platform_position(verbose, (void *)platform, target_sensor, 0, navlon, navlat, sensordepth,
-						                              heading, roll, pitch, &navlon, &navlat, &sensordepth, &error);
-						draft = sensordepth - heave;
-						nav_changed = MB_YES;
-						sensordepth_changed = MB_YES;
-
-						/* calculate target sensor attitude */
-						status = mb_platform_orientation_target(verbose, (void *)platform, target_sensor, 0, heading, roll, pitch,
-						                                        &heading, &roll, &pitch, &error);
-						roll_delta = roll - roll_org;
-						pitch_delta = pitch - pitch_org;
-						if (roll_delta != 0.0 || pitch_delta != 0.0)
-							attitude_changed = MB_YES;
-					}
-
-					/* if attitude changed apply rigid rotations to any bathymetry */
-					if (attitude_changed == MB_YES) {
-						/* loop over the beams */
-						for (i = 0; i < beams_bath; i++) {
-							if (beamflag[i] != MB_FLAG_NULL) {
-								/* strip off original heave + draft */
-								bath[i] -= sensordepth_org;
-								/* rotate beam by
-								   rolldelta:  Roll relative to previous correction and bias included
-								   pitchdelta: Pitch relative to previous correction and bias included
-								   heading:    Heading absolute (bias included) */
-								mb_platform_math_attitude_rotate_beam(verbose, bathacrosstrack[i], bathalongtrack[i], bath[i],
-								                                      roll_delta, pitch_delta, 0.0, &(bathacrosstrack[i]),
-								                                      &(bathalongtrack[i]), &(bath[i]), &error);
-
-								/* add heave and draft back in */
-								bath[i] += sensordepth_org;
-							}
-						}
-					}
-
-					/* recalculate bathymetry by changes to sensor depth  */
-					if (sensordepth_changed == MB_YES) {
-						/* get draft change */
-						depth_offset_change = draft - draft_org;
-
-						/* loop over the beams */
-						for (i = 0; i < beams_bath; i++) {
-							if (beamflag[i] != MB_FLAG_NULL) {
-								/* apply transducer depth change to depths */
-								bath[i] += depth_offset_change;
-							}
-						}
-					}
-
-					/* insert navigation */
-					if (timestamp_changed == MB_YES || nav_changed == MB_YES || heading_changed == MB_YES ||
-					    sensordepth_changed == MB_YES || attitude_changed == MB_YES) {
-						status = mb_insert_nav(verbose, imbio_ptr, istore_ptr, time_i, time_d, navlon, navlat, speed, heading,
-						                       draft, roll, pitch, heave, &error);
-					}
-
-					/* insert altitude */
-					if (altitude_changed == MB_YES) {
-						status = mb_insert_altitude(verbose, imbio_ptr, istore_ptr, sensordepth, altitude, &error);
-						if (status == MB_FAILURE) {
-							status = MB_SUCCESS;
-							error = MB_ERROR_NO_ERROR;
-						}
-					}
-
-					/* if attitude changed apply rigid rotations to the bathymetry */
-					if (preprocess_pars.no_change_survey == MB_NO &&
-					    (attitude_changed == MB_YES || sensordepth_changed == MB_YES)) {
-						status = mb_insert(verbose, imbio_ptr, istore_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
-						                   beams_bath, beams_amp, pixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack,
-						                   ss, ssacrosstrack, ssalongtrack, comment, &error);
-					}
+					status = MB_SUCCESS;
 				}
-			}
-
-			/* write some data */
-			if (error == MB_ERROR_NO_ERROR) {
-				status = mb_put_all(verbose, ombio_ptr, istore_ptr, MB_NO, kind, time_i, time_d, navlon, navlat, speed, heading,
-				                    obeams_bath, obeams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
-				                    ssacrosstrack, ssalongtrack, comment, &error);
-				if (status != MB_SUCCESS) {
-					mb_error(verbose, error, &message);
-					fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
-					fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);
-					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
-				}
-
-				/* output synchronous attitude */
-				if (kind == MB_DATA_DATA) {
-					index = 0;
-					mb_put_binary_double(MB_YES, time_d, &buffer[index]);
-					index += 8;
-					mb_put_binary_float(MB_YES, (float)roll, &buffer[index]);
-					index += 4;
-					mb_put_binary_float(MB_YES, (float)pitch, &buffer[index]);
-					index += 4;
-					fwrite(buffer, (size_t)index, 1, afp);
-					// fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", time_d, roll, pitch);
-				}
-
+	
 				/* count records */
 				if (kind == MB_DATA_DATA) {
-					n_wf_data++;
-					n_wt_data++;
+					if (n_rf_data == 0)
+						start_time_d = time_d;
+					end_time_d = time_d;
+					n_rf_data++;
+					n_rt_data++;
 				}
 				else if (kind == MB_DATA_COMMENT) {
-					n_wf_comment++;
-					n_wt_comment++;
+					n_rf_comment++;
+					n_rt_comment++;
 				}
 				else if (kind == MB_DATA_NAV) {
-					n_wf_nav++;
-					n_wt_nav++;
+					n_rf_nav++;
+					n_rt_nav++;
 				}
 				else if (kind == MB_DATA_NAV1) {
-					n_wf_nav1++;
-					n_wt_nav1++;
+					n_rf_nav1++;
+					n_rt_nav1++;
 				}
 				else if (kind == MB_DATA_NAV2) {
-					n_wf_nav2++;
-					n_wt_nav2++;
+					n_rf_nav2++;
+					n_rt_nav2++;
 				}
 				else if (kind == MB_DATA_NAV3) {
-					n_wf_nav3++;
-					n_wt_nav3++;
+					n_rf_nav3++;
+					n_rt_nav3++;
 				}
 				else if (kind == MB_DATA_ATTITUDE) {
-					n_wf_att++;
-					n_wt_att++;
+					n_rf_att++;
+					n_rt_att++;
 				}
 				else if (kind == MB_DATA_ATTITUDE1) {
-					n_wf_att1++;
-					n_wt_att1++;
+					n_rf_att1++;
+					n_rt_att1++;
 				}
 				else if (kind == MB_DATA_ATTITUDE2) {
-					n_wf_att2++;
-					n_wt_att2++;
+					n_rf_att2++;
+					n_rt_att2++;
 				}
 				else if (kind == MB_DATA_ATTITUDE3) {
-					n_wf_att3++;
-					n_wt_att3++;
+					n_rf_att3++;
+					n_rt_att3++;
 				}
-			}
-
-			/* if requested output integrated nav */
-			if (output_sensor_fnv == MB_YES && status == MB_SUCCESS && kind == MB_DATA_DATA) {
-				/* loop over all sensors and output integrated nav for all
-				    sensors producing mapping data */
-				for (isensor = 0; isensor < platform->num_sensors; isensor++) {
-					if (platform->sensors[isensor].capability2 != 0) {
-						for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {
-							if (platform->sensors[isensor].offsets[ioffset].ofp != NULL) {
-								/* calculate position and attitude of target sensor */
-								status = mb_platform_position(verbose, (void *)platform, isensor, ioffset, navlon_org, navlat_org,
-								                              sensordepth_org, heading_org, roll_org, pitch_org, &navlon, &navlat,
-								                              &sensordepth, &error);
-								draft = sensordepth - heave;
-								status = mb_platform_orientation_target(verbose, (void *)platform, isensor, ioffset, heading_org,
-								                                        roll_org, pitch_org, &heading, &roll, &pitch, &error);
-
-								/* output integrated navigation */
-								fprintf(platform->sensors[isensor].offsets[ioffset].ofp,
-								        "%4.4d %2.2d %2.2d %2.2d %2.2d "
-								        "%2.2d.%6.6d\t%.6f\t%.10f\t%.10f\t%.3f\t%.3f\t%.4f\t%.3f\t%.3f\t%.3f\n",
-								        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d,
-								        navlon, navlat, heading, speed, draft, roll, pitch, heave);
+	
+				timestamp_changed = MB_NO;
+				nav_changed = MB_NO;
+				heading_changed = MB_NO;
+				sensordepth_changed = MB_NO;
+				attitude_changed = MB_NO;
+	
+				/* apply preprocessing to survey data records */
+				if (status == MB_SUCCESS &&
+					(kind == MB_DATA_DATA || kind == MB_DATA_SUBBOTTOM_MCS || kind == MB_DATA_SUBBOTTOM_CNTRBEAM ||
+					 kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_SIDESCAN3 ||
+					 kind == MB_DATA_WATER_COLUMN)) {
+					/* call mb_extract_nav to get attitude */
+					status = mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon_org, &navlat_org,
+											&speed_org, &heading_org, &draft_org, &roll_org, &pitch_org, &heave_org, &error);
+	
+					/* call mb_extract_altitude to get altitude */
+					status = mb_extract_altitude(verbose, imbio_ptr, istore_ptr, &kind, &sensordepth_org, &altitude_org, &error);
+	
+					/* apply time jump fix */
+					if (kluge_timejumps == MB_YES) {
+						if (n_rf_data == 1)
+							kluge_first_time_d = time_d;
+						if (n_rf_data > 2) {
+							dtime_d_expect = (kluge_last_time_d - kluge_first_time_d) / (n_rf_data - 1);
+							dtime_d = time_d - kluge_last_time_d;
+							if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_threshold) {
+								time_d = kluge_last_time_d + dtime_d_expect;
+								timestamp_changed = MB_YES;
+							}
+						}
+						kluge_last_time_d = time_d;
+					}
+	
+					/* apply time latency correction called for in the platform file */
+					if (sensor_target != NULL && sensor_target->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
+						mb_apply_time_latency(verbose, 1, &time_d, sensor_target->time_latency_mode,
+											  sensor_target->time_latency_static, sensor_target->num_time_latency,
+											  sensor_target->time_latency_time_d, sensor_target->time_latency_value, &error);
+						timestamp_changed = MB_YES;
+					}
+	
+					/* apply time latency correction called for on the command line */
+					if ((time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) &&
+						(time_latency_apply & MBPREPROCESS_TIME_LATENCY_APPLY_SURVEY)) {
+						mb_apply_time_latency(verbose, 1, &time_d, time_latency_mode, time_latency_constant, time_latency_num,
+											  time_latency_time_d, time_latency_time_latency, &error);
+						timestamp_changed = MB_YES;
+					}
+	
+					/* use available asynchronous ancilliary data to replace
+						nav sensordepth heading attitude values for record timestamp  */
+					if (n_nav > 0) {
+						interp_status = mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, n_nav, time_d,
+																   &navlon_org, &jnav, &interp_error);
+						interp_status = mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, n_nav, time_d, &navlat_org,
+																  &jnav, &interp_error);
+						interp_status =
+							mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, n_nav, time_d, &speed_org, &jnav, &interp_error);
+						nav_changed = MB_YES;
+					}
+					if (n_sensordepth > 0) {
+						interp_status = mb_linear_interp(verbose, sensordepth_time_d - 1, sensordepth_sensordepth - 1, n_sensordepth,
+														 time_d, &sensordepth_org, &jsensordepth, &interp_error);
+						sensordepth_changed = MB_YES;
+					}
+					if (n_heading > 0) {
+						interp_status = mb_linear_interp_heading(verbose, heading_time_d - 1, heading_heading - 1, n_heading, time_d,
+																 &heading_org, &jheading, &interp_error);
+						heading_changed = MB_YES;
+					}
+					if (n_altitude > 0) {
+						interp_status = mb_linear_interp(verbose, altitude_time_d - 1, altitude_altitude - 1, n_altitude, time_d,
+														 &altitude_org, &jaltitude, &interp_error);
+						altitude_changed = MB_YES;
+					}
+					if (n_attitude > 0) {
+						interp_status = mb_linear_interp(verbose, attitude_time_d - 1, attitude_roll - 1, n_attitude, time_d,
+														 &roll_org, &jattitude, &interp_error);
+						interp_status = mb_linear_interp(verbose, attitude_time_d - 1, attitude_pitch - 1, n_attitude, time_d,
+														 &pitch_org, &jattitude, &interp_error);
+						interp_status = mb_linear_interp(verbose, attitude_time_d - 1, attitude_heave - 1, n_attitude, time_d,
+														 &heave_org, &jattitude, &interp_error);
+						attitude_changed = MB_YES;
+					}
+					if (n_sensordepth > 0 || n_attitude > 0) {
+						draft_org = sensordepth_org - heave_org;
+					}
+	
+					/* save the original values prior to lever arm correction */
+					navlon = navlon_org;
+					navlat = navlat_org;
+					speed = speed_org;
+					heading = heading_org;
+					altitude = altitude_org;
+					sensordepth = sensordepth_org;
+					draft = draft_org;
+					roll = roll_org;
+					pitch = pitch_org;
+					heave = heave_org;
+	
+					/* set up preprocess structure */
+					preprocess_pars.target_sensor = target_sensor;
+					preprocess_pars.timestamp_changed = timestamp_changed;
+					preprocess_pars.time_d = time_d;
+					preprocess_pars.n_nav = n_nav;
+					preprocess_pars.nav_time_d = nav_time_d;
+					preprocess_pars.nav_lon = nav_navlon;
+					preprocess_pars.nav_lat = nav_navlat;
+					preprocess_pars.nav_speed = nav_speed;
+					preprocess_pars.n_sensordepth = n_sensordepth;
+					preprocess_pars.sensordepth_time_d = sensordepth_time_d;
+					preprocess_pars.sensordepth_sensordepth = sensordepth_sensordepth;
+					preprocess_pars.n_heading = n_heading;
+					preprocess_pars.heading_time_d = heading_time_d;
+					preprocess_pars.heading_heading = heading_heading;
+					preprocess_pars.n_altitude = n_altitude;
+					preprocess_pars.altitude_time_d = altitude_time_d;
+					preprocess_pars.altitude_altitude = altitude_altitude;
+					preprocess_pars.n_attitude = n_attitude;
+					preprocess_pars.attitude_time_d = attitude_time_d;
+					preprocess_pars.attitude_roll = attitude_roll;
+					preprocess_pars.attitude_pitch = attitude_pitch;
+					preprocess_pars.attitude_heave = attitude_heave;
+					preprocess_pars.n_soundspeed = n_soundspeed;
+					preprocess_pars.soundspeed_time_d = soundspeed_time_d;
+					preprocess_pars.soundspeed_soundspeed = soundspeed_soundspeed;
+	
+					/* attempt to execute a preprocess function for these data */
+					status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform, (void *)&preprocess_pars, &error);
+	
+					/* If a predefined preprocess function does not exist for
+					 * this format then standard preprocessing will be done
+					 *      1) Replace time tag, nav, attitude
+					 * 	2) if attitude values changed rotate bathymetry accordingly
+					 * 	3) if any values changed reinsert the data */
+					if (status == MB_FAILURE) {
+						/* reset status and error */
+						status = MB_SUCCESS;
+						error = MB_ERROR_NO_ERROR;
+	
+						/* if platform defined, do lever arm correction */
+						if (platform != NULL) {
+							/* calculate target sensor position */
+							status = mb_platform_position(verbose, (void *)platform, target_sensor, 0, navlon, navlat, sensordepth,
+														  heading, roll, pitch, &navlon, &navlat, &sensordepth, &error);
+							draft = sensordepth - heave;
+							nav_changed = MB_YES;
+							sensordepth_changed = MB_YES;
+	
+							/* calculate target sensor attitude */
+							status = mb_platform_orientation_target(verbose, (void *)platform, target_sensor, 0, heading, roll, pitch,
+																	&heading, &roll, &pitch, &error);
+							roll_delta = roll - roll_org;
+							pitch_delta = pitch - pitch_org;
+							if (roll_delta != 0.0 || pitch_delta != 0.0)
+								attitude_changed = MB_YES;
+						}
+	
+						/* if attitude changed apply rigid rotations to any bathymetry */
+						if (attitude_changed == MB_YES) {
+							/* loop over the beams */
+							for (i = 0; i < beams_bath; i++) {
+								if (beamflag[i] != MB_FLAG_NULL) {
+									/* strip off original heave + draft */
+									bath[i] -= sensordepth_org;
+									/* rotate beam by
+									   rolldelta:  Roll relative to previous correction and bias included
+									   pitchdelta: Pitch relative to previous correction and bias included
+									   heading:    Heading absolute (bias included) */
+									mb_platform_math_attitude_rotate_beam(verbose, bathacrosstrack[i], bathalongtrack[i], bath[i],
+																		  roll_delta, pitch_delta, 0.0, &(bathacrosstrack[i]),
+																		  &(bathalongtrack[i]), &(bath[i]), &error);
+	
+									/* add heave and draft back in */
+									bath[i] += sensordepth_org;
+								}
+							}
+						}
+	
+						/* recalculate bathymetry by changes to sensor depth  */
+						if (sensordepth_changed == MB_YES) {
+							/* get draft change */
+							depth_offset_change = draft - draft_org;
+	
+							/* loop over the beams */
+							for (i = 0; i < beams_bath; i++) {
+								if (beamflag[i] != MB_FLAG_NULL) {
+									/* apply transducer depth change to depths */
+									bath[i] += depth_offset_change;
+								}
+							}
+						}
+	
+						/* insert navigation */
+						if (timestamp_changed == MB_YES || nav_changed == MB_YES || heading_changed == MB_YES ||
+							sensordepth_changed == MB_YES || attitude_changed == MB_YES) {
+							status = mb_insert_nav(verbose, imbio_ptr, istore_ptr, time_i, time_d, navlon, navlat, speed, heading,
+												   draft, roll, pitch, heave, &error);
+						}
+	
+						/* insert altitude */
+						if (altitude_changed == MB_YES) {
+							status = mb_insert_altitude(verbose, imbio_ptr, istore_ptr, sensordepth, altitude, &error);
+							if (status == MB_FAILURE) {
+								status = MB_SUCCESS;
+								error = MB_ERROR_NO_ERROR;
+							}
+						}
+	
+						/* if attitude changed apply rigid rotations to the bathymetry */
+						if (preprocess_pars.no_change_survey == MB_NO &&
+							(attitude_changed == MB_YES || sensordepth_changed == MB_YES)) {
+							status = mb_insert(verbose, imbio_ptr, istore_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
+											   beams_bath, beams_amp, pixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack,
+											   ss, ssacrosstrack, ssalongtrack, comment, &error);
+						}
+					}
+				}
+	
+				/* write some data */
+//fprintf(stderr," B  kind:%d status:%d error:%d\n",kind,status,error);
+				if (error == MB_ERROR_NO_ERROR) {
+					status = mb_put_all(verbose, ombio_ptr, istore_ptr, MB_NO, kind, time_i, time_d, navlon, navlat, speed, heading,
+										obeams_bath, obeams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
+										ssacrosstrack, ssalongtrack, comment, &error);
+					if (status != MB_SUCCESS) {
+						mb_error(verbose, error, &message);
+						fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
+						fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);
+						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+						exit(error);
+					}
+	
+					/* output synchronous attitude */
+					if (kind == MB_DATA_DATA) {
+						index = 0;
+						mb_put_binary_double(MB_YES, time_d, &buffer[index]);
+						index += 8;
+						mb_put_binary_float(MB_YES, (float)roll, &buffer[index]);
+						index += 4;
+						mb_put_binary_float(MB_YES, (float)pitch, &buffer[index]);
+						index += 4;
+						fwrite(buffer, (size_t)index, 1, afp);
+						// fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", time_d, roll, pitch);
+					}
+	
+					/* count records */
+					if (kind == MB_DATA_DATA) {
+						n_wf_data++;
+						n_wt_data++;
+					}
+					else if (kind == MB_DATA_COMMENT) {
+						n_wf_comment++;
+						n_wt_comment++;
+					}
+					else if (kind == MB_DATA_NAV) {
+						n_wf_nav++;
+						n_wt_nav++;
+					}
+					else if (kind == MB_DATA_NAV1) {
+						n_wf_nav1++;
+						n_wt_nav1++;
+					}
+					else if (kind == MB_DATA_NAV2) {
+						n_wf_nav2++;
+						n_wt_nav2++;
+					}
+					else if (kind == MB_DATA_NAV3) {
+						n_wf_nav3++;
+						n_wt_nav3++;
+					}
+					else if (kind == MB_DATA_ATTITUDE) {
+						n_wf_att++;
+						n_wt_att++;
+					}
+					else if (kind == MB_DATA_ATTITUDE1) {
+						n_wf_att1++;
+						n_wt_att1++;
+					}
+					else if (kind == MB_DATA_ATTITUDE2) {
+						n_wf_att2++;
+						n_wt_att2++;
+					}
+					else if (kind == MB_DATA_ATTITUDE3) {
+						n_wf_att3++;
+						n_wt_att3++;
+					}
+				}
+	
+				/* if requested output integrated nav */
+				if (output_sensor_fnv == MB_YES && status == MB_SUCCESS && kind == MB_DATA_DATA) {
+					/* loop over all sensors and output integrated nav for all
+						sensors producing mapping data */
+					for (isensor = 0; isensor < platform->num_sensors; isensor++) {
+						if (platform->sensors[isensor].capability2 != 0) {
+							for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {
+								if (platform->sensors[isensor].offsets[ioffset].ofp != NULL) {
+									/* calculate position and attitude of target sensor */
+									status = mb_platform_position(verbose, (void *)platform, isensor, ioffset, navlon_org, navlat_org,
+																  sensordepth_org, heading_org, roll_org, pitch_org, &navlon, &navlat,
+																  &sensordepth, &error);
+									draft = sensordepth - heave;
+									status = mb_platform_orientation_target(verbose, (void *)platform, isensor, ioffset, heading_org,
+																			roll_org, pitch_org, &heading, &roll, &pitch, &error);
+	
+									/* output integrated navigation */
+									fprintf(platform->sensors[isensor].offsets[ioffset].ofp,
+											"%4.4d %2.2d %2.2d %2.2d %2.2d "
+											"%2.2d.%6.6d\t%.6f\t%.10f\t%.10f\t%.3f\t%.3f\t%.4f\t%.3f\t%.3f\t%.3f\n",
+											time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], time_d,
+											navlon, navlat, heading, speed, draft, roll, pitch, heave);
+								}
 							}
 						}
 					}
 				}
 			}
-		}
-
-		/* end read+process+output data loop */
-		/* --------------------------------- */
-
-		/* output data counts */
-		if (verbose > 0) {
-			fprintf(stderr, "Pass 2: Records read from input file %s\n", ifile);
-			fprintf(stderr, "     %d survey records\n", n_rf_data);
-			fprintf(stderr, "     %d comment records\n", n_rf_comment);
-			fprintf(stderr, "     %d nav records\n", n_rf_nav);
-			fprintf(stderr, "     %d nav1 records\n", n_rf_nav1);
-			fprintf(stderr, "     %d nav2 records\n", n_rf_nav2);
-			fprintf(stderr, "     %d nav3 records\n", n_rf_nav3);
-			fprintf(stderr, "     %d att records\n", n_rf_att);
-			fprintf(stderr, "     %d att1 records\n", n_rf_att1);
-			fprintf(stderr, "     %d att2 records\n", n_rf_att2);
-			fprintf(stderr, "     %d att3 records\n", n_rf_att3);
-			fprintf(stderr, "Pass 2: Records written to output file %s\n", ofile);
-			fprintf(stderr, "     %d survey records\n", n_wf_data);
-			fprintf(stderr, "     %d comment records\n", n_wf_comment);
-			fprintf(stderr, "     %d nav records\n", n_wf_nav);
-			fprintf(stderr, "     %d nav1 records\n", n_wf_nav1);
-			fprintf(stderr, "     %d nav2 records\n", n_wf_nav2);
-			fprintf(stderr, "     %d nav3 records\n", n_wf_nav3);
-			fprintf(stderr, "     %d att records\n", n_wf_att);
-			fprintf(stderr, "     %d att1 records\n", n_wf_att1);
-			fprintf(stderr, "     %d att2 records\n", n_wf_att2);
-			fprintf(stderr, "     %d att3 records\n", n_wf_att3);
-		}
-
-		/* close the input swath file */
-		status = mb_close(verbose, &imbio_ptr, &error);
-
-		/* close the output swath file */
-		status = mb_close(verbose, &ombio_ptr, &error);
-
-		/* close the synchronous attitude file */
-		fclose(afp);
-
-		/* if success then generate ancilliary files */
-		if (status == MB_SUCCESS) {
-
-			/* generate inf fnv and fbt files */
-			status = mb_make_info(verbose, MB_YES, ofile, oformat, &error);
-
-			/* generate gef files */
-			sprintf(command, "mbgetesf -I %s -M2 -O %s.gef", ofile, ofile);
-			fprintf(stderr, "Generating gef file for %s\n", ofile);
-			shellstatus = system(command);
-
-			/* generate asynchronous heading file */
-			if (n_heading > 0) {
-				/* use only the samples relevant to survey data for this file, but
-				 * allow 10 seconds before and after to insure time latency corrections
-				 * do not overshoot the data */
-				istart = 0;
-				iend = 0;
-				for (i = 0; i < n_heading; i++) {
-					if (heading_time_d[i] < start_time_d - 10.0)
-						istart = i;
-					if (heading_time_d[i] < end_time_d + 10.0)
-						iend = i;
+	
+			/* end read+process+output data loop */
+			/* --------------------------------- */
+	
+			/* output data counts */
+			if (verbose > 0) {
+				fprintf(stderr, "Pass 2: Records read from input file %s\n", ifile);
+				fprintf(stderr, "     %d survey records\n", n_rf_data);
+				fprintf(stderr, "     %d comment records\n", n_rf_comment);
+				fprintf(stderr, "     %d nav records\n", n_rf_nav);
+				fprintf(stderr, "     %d nav1 records\n", n_rf_nav1);
+				fprintf(stderr, "     %d nav2 records\n", n_rf_nav2);
+				fprintf(stderr, "     %d nav3 records\n", n_rf_nav3);
+				fprintf(stderr, "     %d att records\n", n_rf_att);
+				fprintf(stderr, "     %d att1 records\n", n_rf_att1);
+				fprintf(stderr, "     %d att2 records\n", n_rf_att2);
+				fprintf(stderr, "     %d att3 records\n", n_rf_att3);
+				fprintf(stderr, "Pass 2: Records written to output file %s\n", ofile);
+				fprintf(stderr, "     %d survey records\n", n_wf_data);
+				fprintf(stderr, "     %d comment records\n", n_wf_comment);
+				fprintf(stderr, "     %d nav records\n", n_wf_nav);
+				fprintf(stderr, "     %d nav1 records\n", n_wf_nav1);
+				fprintf(stderr, "     %d nav2 records\n", n_wf_nav2);
+				fprintf(stderr, "     %d nav3 records\n", n_wf_nav3);
+				fprintf(stderr, "     %d att records\n", n_wf_att);
+				fprintf(stderr, "     %d att1 records\n", n_wf_att1);
+				fprintf(stderr, "     %d att2 records\n", n_wf_att2);
+				fprintf(stderr, "     %d att3 records\n", n_wf_att3);
+			}
+	
+			/* close the input swath file */
+			status = mb_close(verbose, &imbio_ptr, &error);
+	
+			/* close the output swath file */
+			status = mb_close(verbose, &ombio_ptr, &error);
+	
+			/* close the synchronous attitude file */
+			fclose(afp);
+	
+			/* if success then generate ancilliary files */
+			if (status == MB_SUCCESS) {
+	
+				/* generate inf fnv and fbt files */
+				status = mb_make_info(verbose, MB_YES, ofile, oformat, &error);
+	
+				/* generate gef files */
+				sprintf(command, "mbgetesf -I %s -M2 -O %s.gef", ofile, ofile);
+				fprintf(stderr, "Generating gef file for %s\n", ofile);
+				shellstatus = system(command);
+	
+				/* generate asynchronous heading file */
+				if (n_heading > 0) {
+					/* use only the samples relevant to survey data for this file, but
+					 * allow 10 seconds before and after to insure time latency corrections
+					 * do not overshoot the data */
+					istart = 0;
+					iend = 0;
+					for (i = 0; i < n_heading; i++) {
+						if (heading_time_d[i] < start_time_d - 10.0)
+							istart = i;
+						if (heading_time_d[i] < end_time_d + 10.0)
+							iend = i;
+					}
+					if (iend < n_heading - 1)
+						iend++;
+					if (iend > istart) {
+						sprintf(afile, "%s.bah", ofile);
+						if ((afp = fopen(afile, "w")) == NULL) {
+							error = MB_ERROR_OPEN_FAIL;
+							fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", afile);
+							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+							exit(error);
+						}
+						fprintf(stderr, "Generating bah file for %s using samples %d:%d out of %d\n", ofile, istart, iend, n_heading);
+						for (i = istart; i < iend; i++) {
+							index = 0;
+							mb_put_binary_double(MB_YES, heading_time_d[i], &buffer[index]);
+							index += 8;
+							mb_put_binary_float(MB_YES, (float)heading_heading[i], &buffer[index]);
+							index += 4;
+							fwrite(buffer, (size_t)index, 1, afp);
+							// fprintf(afp, "%0.6f\t%7.3f\n", heading_time_d[i], heading_heading[i]);
+						}
+						fclose(afp);
+					}
 				}
-				if (iend < n_heading - 1)
-					iend++;
-				if (iend > istart) {
-					sprintf(afile, "%s.bah", ofile);
-					if ((afp = fopen(afile, "w")) == NULL) {
-						error = MB_ERROR_OPEN_FAIL;
-						fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", afile);
-						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-						exit(error);
+	
+				/* generate asynchronous sensordepth file */
+				if (n_sensordepth > 0) {
+					/* use only the samples relevant to survey data for this file, but
+					 * allow 10 seconds before and after to insure time latency corrections
+					 * do not overshoot the data */
+					istart = 0;
+					iend = 0;
+					for (i = 0; i < n_sensordepth; i++) {
+						if (sensordepth_time_d[i] < start_time_d - 10.0)
+							istart = i;
+						if (sensordepth_time_d[i] < end_time_d + 10.0)
+							iend = i;
 					}
-					fprintf(stderr, "Generating bah file for %s using samples %d:%d out of %d\n", ofile, istart, iend, n_heading);
-					for (i = istart; i < iend; i++) {
-						index = 0;
-						mb_put_binary_double(MB_YES, heading_time_d[i], &buffer[index]);
-						index += 8;
-						mb_put_binary_float(MB_YES, (float)heading_heading[i], &buffer[index]);
-						index += 4;
-						fwrite(buffer, (size_t)index, 1, afp);
-						// fprintf(afp, "%0.6f\t%7.3f\n", heading_time_d[i], heading_heading[i]);
+					if (iend < n_sensordepth - 1)
+						iend++;
+					if (iend > istart) {
+						sprintf(afile, "%s.bas", ofile);
+						if ((afp = fopen(afile, "w")) == NULL) {
+							error = MB_ERROR_OPEN_FAIL;
+							fprintf(stderr, "\nUnable to open asynchronous sensordepth data file <%s> for writing\n", afile);
+							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+							exit(error);
+						}
+						fprintf(stderr, "Generating bas file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
+								n_sensordepth);
+						for (i = istart; i < iend; i++) {
+							index = 0;
+							mb_put_binary_double(MB_YES, sensordepth_time_d[i], &buffer[index]);
+							index += 8;
+							mb_put_binary_float(MB_YES, (float)sensordepth_sensordepth[i], &buffer[index]);
+							index += 4;
+							fwrite(buffer, (size_t)index, 1, afp);
+							// fprintf(afp, "%0.6f\t%7.3f\n", sensordepth_time_d[i], sensordepth_sensordepth[i]);
+						}
+						fclose(afp);
 					}
-					fclose(afp);
+				}
+	
+				/* generate asynchronous attitude file */
+				if (n_attitude > 0) {
+					/* use only the samples relevant to survey data for this file, but
+					 * allow 10 seconds before and after to insure time latency corrections
+					 * do not overshoot the data */
+					istart = 0;
+					iend = 0;
+					for (i = 0; i < n_attitude; i++) {
+						if (attitude_time_d[i] < start_time_d - 10.0)
+							istart = i;
+						if (attitude_time_d[i] < end_time_d + 10.0)
+							iend = i;
+					}
+					if (iend < n_attitude - 1)
+						iend++;
+					if (iend > istart) {
+						sprintf(afile, "%s.baa", ofile);
+						if ((afp = fopen(afile, "w")) == NULL) {
+							error = MB_ERROR_OPEN_FAIL;
+							fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", afile);
+							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+							exit(error);
+						}
+						fprintf(stderr, "Generating baa file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
+								n_attitude);
+						for (i = istart; i < iend; i++) {
+							index = 0;
+							mb_put_binary_double(MB_YES, attitude_time_d[i], &buffer[index]);
+							index += 8;
+							mb_put_binary_float(MB_YES, (float)attitude_roll[i], &buffer[index]);
+							index += 4;
+							mb_put_binary_float(MB_YES, (float)attitude_pitch[i], &buffer[index]);
+							index += 4;
+							fwrite(buffer, (size_t)index, 1, afp);
+							// fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", attitude_time_d[i], attitude_roll[i], attitude_pitch[i]);
+						}
+						fclose(afp);
+					}
 				}
 			}
-
-			/* generate asynchronous sensordepth file */
-			if (n_sensordepth > 0) {
-				/* use only the samples relevant to survey data for this file, but
-				 * allow 10 seconds before and after to insure time latency corrections
-				 * do not overshoot the data */
-				istart = 0;
-				iend = 0;
-				for (i = 0; i < n_sensordepth; i++) {
-					if (sensordepth_time_d[i] < start_time_d - 10.0)
-						istart = i;
-					if (sensordepth_time_d[i] < end_time_d + 10.0)
-						iend = i;
-				}
-				if (iend < n_sensordepth - 1)
-					iend++;
-				if (iend > istart) {
-					sprintf(afile, "%s.bas", ofile);
-					if ((afp = fopen(afile, "w")) == NULL) {
-						error = MB_ERROR_OPEN_FAIL;
-						fprintf(stderr, "\nUnable to open asynchronous sensordepth data file <%s> for writing\n", afile);
-						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-						exit(error);
-					}
-					fprintf(stderr, "Generating bas file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
-					        n_sensordepth);
-					for (i = istart; i < iend; i++) {
-						index = 0;
-						mb_put_binary_double(MB_YES, sensordepth_time_d[i], &buffer[index]);
-						index += 8;
-						mb_put_binary_float(MB_YES, (float)sensordepth_sensordepth[i], &buffer[index]);
-						index += 4;
-						fwrite(buffer, (size_t)index, 1, afp);
-						// fprintf(afp, "%0.6f\t%7.3f\n", sensordepth_time_d[i], sensordepth_sensordepth[i]);
-					}
-					fclose(afp);
-				}
-			}
-
-			/* generate asynchronous attitude file */
-			if (n_attitude > 0) {
-				/* use only the samples relevant to survey data for this file, but
-				 * allow 10 seconds before and after to insure time latency corrections
-				 * do not overshoot the data */
-				istart = 0;
-				iend = 0;
-				for (i = 0; i < n_attitude; i++) {
-					if (attitude_time_d[i] < start_time_d - 10.0)
-						istart = i;
-					if (attitude_time_d[i] < end_time_d + 10.0)
-						iend = i;
-				}
-				if (iend < n_attitude - 1)
-					iend++;
-				if (iend > istart) {
-					sprintf(afile, "%s.baa", ofile);
-					if ((afp = fopen(afile, "w")) == NULL) {
-						error = MB_ERROR_OPEN_FAIL;
-						fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", afile);
-						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-						exit(error);
-					}
-					fprintf(stderr, "Generating baa file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
-					        n_attitude);
-					for (i = istart; i < iend; i++) {
-						index = 0;
-						mb_put_binary_double(MB_YES, attitude_time_d[i], &buffer[index]);
-						index += 8;
-						mb_put_binary_float(MB_YES, (float)attitude_roll[i], &buffer[index]);
-						index += 4;
-						mb_put_binary_float(MB_YES, (float)attitude_pitch[i], &buffer[index]);
-						index += 4;
-						fwrite(buffer, (size_t)index, 1, afp);
-						// fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", attitude_time_d[i], attitude_roll[i], attitude_pitch[i]);
-					}
-					fclose(afp);
-				}
-			}
 		}
-
+		
 		/* figure out whether and what to read next */
 		if (read_datalist == MB_YES) {
 			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)

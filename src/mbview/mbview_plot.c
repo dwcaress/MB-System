@@ -78,8 +78,8 @@ static Arg args[256];
 
 static char rcs_id[] = "$Id$";
 
-// #define MBV_DEBUG_GLX 1
-// #define MBV_GET_GLX_ERRORS 1
+//#define MBV_DEBUG_GLX 1
+//#define MBV_GET_GLX_ERRORS 1
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(size_t instance) {
@@ -101,6 +101,10 @@ int mbview_reset_glx(size_t instance) {
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
+#ifdef MBV_DEBUG_GLX
+		fprintf(stderr, "%s:%d:%s instance:%zu view->glx_init:%d\n", __FILE__, __LINE__, function_name, instance,
+		        view->glx_init);
+#endif
 
 	/* delete old glx_context if it exists */
 	if (view->glx_init == MB_YES) {
@@ -108,7 +112,7 @@ int mbview_reset_glx(size_t instance) {
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, function_name, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
-		glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
+		//glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
 #ifdef MBV_DEBUG_GLX
 		fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%lu,%p)\n", __FILE__, __LINE__, function_name, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);

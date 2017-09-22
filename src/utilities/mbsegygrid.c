@@ -42,6 +42,7 @@
 /* local options */
 #define MBSEGYGRID_USESHOT 0
 #define MBSEGYGRID_USECMP 1
+#define MBSEGYGRID_USESHOTONLY 2
 #define MBSEGYGRID_PLOTBYTRACENUMBER 0
 #define MBSEGYGRID_PLOTBYDISTANCE 1
 #define MBSEGYGRID_WINDOW_OFF 0
@@ -127,6 +128,7 @@ int main(int argc, char **argv) {
 	double endlon = 0.0;
 	double endlat = 0.0;
 	int tracemode = MBSEGYGRID_USESHOT;
+    int tracemode_set = MB_NO;
 	int tracestart = 0;
 	int traceend = 0;
 	int chanstart = 0;
@@ -307,6 +309,9 @@ int main(int argc, char **argv) {
 			if (n < 1) {
 				tracemode = MBSEGYGRID_USESHOT;
 			}
+            else {
+                tracemode_set = MB_YES;
+            }
 			flag++;
 			break;
 		case 'T':
@@ -404,7 +409,8 @@ int main(int argc, char **argv) {
 		get_segy_limits(verbose, segyfile, &sinftracemode, &sinftracestart, &sinftraceend, &sinfchanstart, &sinfchanend,
 		                &sinftimesweep, &sinftimedelay, &sinfstartlon, &sinfstartlat, &sinfendlon, &sinfendlat, &error);
 		if (traceend < 1 || traceend < tracestart) {
-			tracemode = sinftracemode;
+			if (tracemode_set == MB_NO)
+                tracemode = sinftracemode;
 			tracestart = sinftracestart;
 			traceend = sinftraceend;
 		}
@@ -435,6 +441,10 @@ int main(int argc, char **argv) {
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 		exit(error);
 	}
+    if (tracemode == MBSEGYGRID_USESHOTONLY) {
+     	chanstart = 0;
+        chanend = -1;
+    }
 
 	/* initialize reading the segy file */
 	if (mb_segy_read_init(verbose, segyfile, &mbsegyioptr, &asciiheader, &fileheader, &error) != MB_SUCCESS) {
@@ -582,7 +592,11 @@ int main(int argc, char **argv) {
 						tracenum = traceheader.rp_num;
 						channum = traceheader.rp_tr;
 					}
-					if (chanend >= chanstart) {
+					else if (tracemode == MBSEGYGRID_USESHOTONLY) {
+						tracenum = traceheader.shot_num;
+						channum = 0;
+					}
+					if (tracemode != MBSEGYGRID_USESHOTONLY && chanend >= chanstart) {
 						tracecount = (tracenum - tracestart) * (chanend - chanstart + 1) + (channum - chanstart);
 					}
 					else {

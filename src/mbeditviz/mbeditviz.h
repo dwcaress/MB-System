@@ -218,10 +218,7 @@ MBVIEW_EXTERNAL double mbev_rollbias;
 MBVIEW_EXTERNAL double mbev_pitchbias;
 MBVIEW_EXTERNAL double mbev_headingbias;
 MBVIEW_EXTERNAL double mbev_timelag;
-MBVIEW_EXTERNAL double mbev_rollbias_3dsdg;
-MBVIEW_EXTERNAL double mbev_pitchbias_3dsdg;
-MBVIEW_EXTERNAL double mbev_headingbias_3dsdg;
-MBVIEW_EXTERNAL double mbev_timelag_3dsdg;
+MBVIEW_EXTERNAL double mbev_snell;
 
 /* sparse voxel filter parameters */
 MBVIEW_EXTERNAL int mbev_sizemultiplier;
@@ -275,9 +272,11 @@ int mbeditviz_get_format(char *file, int *form);
 int mbeditviz_open_data(char *path, int format);
 int mbeditviz_import_file(char *path, int format);
 int mbeditviz_load_file(int ifile);
-int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, double rollbias, double pitchbias,
+int mbeditviz_apply_biasesandtimelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, double rollbias, double pitchbias,
                             double headingbias, double timelag, double *headingdelta, double *sonardepth, double *rolldelta,
                             double *pitchdelta);
+int mbeditviz_snell_correction(double snell, double roll, double *beam_xtrack,
+							   double *beam_ltrack, double *beam_z);
 int mbeditviz_beam_position(double navlon, double navlat, double mtodeglon, double mtodeglat, double rawbath, double acrosstrack,
                             double alongtrack, double sonardepth, double rolldelta, double pitchdelta, double heading,
                             double *bathcorr, double *lon, double *lat);
@@ -299,17 +298,17 @@ int mbeditviz_selectnav(size_t instance);
 void mbeditviz_mb3dsoundings_dismiss(void);
 void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag, int flush);
 void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostring);
-void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias, double timelag);
-void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias, double timelag);
+void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias, double timelag, double snell);
+void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias, double timelag, double snell);
 void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingthreshold);
 void mbeditviz_mb3dsoundings_colorsoundings(int color);
 void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias, double *pitchbias, double *headingbias,
-                                                double *timelag);
+                                                double *timelag, double *snell);
 void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double local_grid_xmax, double local_grid_ymin,
                                              double local_grid_ymax, int local_grid_nx, int local_grid_ny, double local_grid_dx,
                                              double local_grid_dy, double *local_grid_first, double *local_grid_sum,
                                              double *local_grid_sum2, double *local_grid_variance, int *local_grid_num,
-                                             double rollbias, double pitchbias, double headingbias, double timelag,
+                                             double rollbias, double pitchbias, double headingbias, double timelag, double snell, 
                                              int *variance_total_num, double *variance_total);
 
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);

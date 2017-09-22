@@ -5819,7 +5819,9 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					 */
 					if (store->read_v2rawdetection == MB_YES) {
 						for (i = 0; i < v2rawdetection->number_beams; i++) {
-							v2rawdetection->rx_angle[i] = asin(kluge_beampatternsnellfactor * sin(v2rawdetection->rx_angle[i]));
+							v2rawdetection->rx_angle[i]
+								= asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor
+													 * sin(v2rawdetection->rx_angle[i]))));
 						}
 					}
 
@@ -5828,7 +5830,9 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					 */
 					if (store->read_v2detection == MB_YES) {
 						for (i = 0; i < v2detection->number_beams; i++) {
-							v2detection->angle_x[i] = asin(kluge_beampatternsnellfactor * sin(v2detection->angle_x[i]));
+							v2detection->angle_x[i]
+								= asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor
+													 * sin(v2detection->angle_x[i]))));
 						}
 					}
 
@@ -5838,7 +5842,8 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					if (store->read_beamgeometry == MB_YES) {
 						for (i = 0; i < bathymetry->number_beams; i++) {
 							beamgeometry->angle_acrosstrack[i] =
-							    asin(kluge_beampatternsnellfactor * sin(beamgeometry->angle_acrosstrack[i]));
+							    asin(MAX(-1.0, MIN(1.0, kluge_beampatternsnellfactor
+												   * sin(beamgeometry->angle_acrosstrack[i]))));
 						}
 					}
 				}
@@ -5875,7 +5880,8 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					if (store->read_v2rawdetection == MB_YES) {
 						for (i = 0; i < v2rawdetection->number_beams; i++) {
 							v2rawdetection->rx_angle[i] =
-							    asin(MIN(1.0, soundspeedsnellfactor * sin(v2rawdetection->rx_angle[i])));
+							    asin(MAX(-1.0, MIN(1.0, soundspeedsnellfactor
+												   * sin(v2rawdetection->rx_angle[i]))));
 						}
 					}
 
@@ -5884,7 +5890,9 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					 */
 					if (store->read_v2detection == MB_YES) {
 						for (i = 0; i < v2detection->number_beams; i++) {
-							v2detection->angle_x[i] = asin(MIN(1.0, soundspeedsnellfactor * sin(v2detection->angle_x[i])));
+							v2detection->angle_x[i]
+								= asin(MAX(-1.0, MIN(1.0, soundspeedsnellfactor
+													 * sin(v2detection->angle_x[i]))));
 						}
 					}
 
@@ -5894,7 +5902,8 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					if (store->read_beamgeometry == MB_YES) {
 						for (i = 0; i < bathymetry->number_beams; i++) {
 							beamgeometry->angle_acrosstrack[i] =
-							    asin(MIN(1.0, soundspeedsnellfactor * sin(beamgeometry->angle_acrosstrack[i])));
+							    asin(MAX(-1.0, MIN(1.0, soundspeedsnellfactor
+												   * sin(beamgeometry->angle_acrosstrack[i]))));
 						}
 					}
 				}

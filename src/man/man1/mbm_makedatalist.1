@@ -1,4 +1,4 @@
-.TH mbm_makedatalist 1 "3 April 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_makedatalist 1 "21 September 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_makedatalist\fP \- Macro to generate a datalist of the swath
 files in a specified directory.
@@ -88,6 +88,13 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
+.B \-F
+\fIformat\fP
+.br
+By default, \fBmbm_makedatalist\fP  infers the format id
+of included files using the naming conventions. This option specifies the
+format id that is assigned.
+.TP
 .B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
@@ -114,14 +121,20 @@ Sets the filename suffix of swath files considered for inclusion in the output
 datalist. Under most circumstances using this option explicitly is the best
 approach as it prevents \fBmbm_makedatalist\fP from including files that
 are not intended for inclusion by the user yet satisfy one of the many recognized
-naming conventions. 
+naming conventions.
+If the file suffix declared with this option corresponds to one of the formats
+associated with Kongsberg multibeam sonar data, then \fBmbm_makedatalist\fP will
+attempt to sort the swath files into time order before generating the final datalist.
+This behavior applies to files with the ".all" or ".ALL" suffix used for raw logged
+Kongsberg files, and also to files with suffixes following the \fBMB-System\fP
+convention (e.g. ".mb56", ".mb57", ".mb58", ".mb59" suffixes). This behavior is
+disabled by the \fB-T\fP option.
 .TP
-.B \-F
-\fIformat\fP
+.B \-T
 .br
-By default, \fBmbm_makedatalist\fP  infers the format id
-of included files using the naming conventions. This option specifies the
-format id that is assigned.
+By default, when the \fB-S\fP option is used to specify a file suffix corresponding
+to Kongsberg multibeam data, \fBmbm_makedatalist\fP  attempts to sort the data files
+into time order before outputting the datalist. This option disables that behavior.
 .TP
 .B \-V
 The \fB\-V\fP option causes \fBmbm_makedatalist\fP to print out status messages.

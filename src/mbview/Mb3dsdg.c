@@ -39,15 +39,6 @@
 #include <Xm/CascadeB.h>
 #include <Xm/Separator.h>
 #include <Xm/DrawingA.h>
-#include <Xm/Form.h>
-#include <Xm/PushB.h>
-#include <Xm/Scale.h>
-#include <Xm/ToggleB.h>
-#include <Xm/Label.h>
-#include <Xm/RowColumn.h>
-#include <Xm/CascadeB.h>
-#include <Xm/Separator.h>
-#include <Xm/DrawingA.h>
 #include "Mb3dsdg.h"
 
 /**
@@ -70,12 +61,13 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
  * Declarations for callbacks and handlers.
  */
 extern void do_mb3dsdg_resetview(Widget, XtPointer, XtPointer);
-extern void do_mb3dsdg_timelag(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_panzoom(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_rotate(Widget, XtPointer, XtPointer);
-extern void do_mb3dsdg_headingbias(Widget, XtPointer, XtPointer);
-extern void do_mb3dsdg_pitchbias(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_rollbias(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_pitchbias(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_headingbias(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_timelag(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_snell(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_input(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_boundingbox(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_flagged(Widget, XtPointer, XtPointer);
@@ -103,6 +95,7 @@ extern void do_mb3dsdg_action_optimizebiasvalues_h(Widget, XtPointer, XtPointer)
 extern void do_mb3dsdg_action_optimizebiasvalues_rp(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_optimizebiasvalues_rph(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_optimizebiasvalues_t(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_optimizebiasvalues_s(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_dismiss(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_toggle(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_pick(Widget, XtPointer, XtPointer);
@@ -150,10 +143,8 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
-	XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
 	XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
-	XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
 	/**
 	 * Setup app-defaults fallback table if not already done.
 	 */
@@ -202,11 +193,11 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
-		XtSetArg(args[ac], XmNx, 810);
+		XtSetArg(args[ac], XmNx, 910);
 		ac++;
 		XtSetArg(args[ac], XmNy, 10);
 		ac++;
-		XtSetArg(args[ac], XmNwidth, 170);
+		XtSetArg(args[ac], XmNwidth, 160);
 		ac++;
 		XtSetArg(args[ac], XmNheight, 30);
 		ac++;
@@ -225,50 +216,6 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	}
 
 	XtAddCallback(class_in->pushButton_reset, XmNactivateCallback, do_mb3dsdg_resetview, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Time Lag (seconds)", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNtitleString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(args[ac], XmNminimum, -100);
-		ac++;
-		XtSetArg(args[ac], XmNdecimalPoints, 2);
-		ac++;
-		XtSetArg(args[ac], XmNshowArrows, TRUE);
-		ac++;
-		XtSetArg(args[ac], XmNscaleMultiple, 1);
-		ac++;
-		XtSetArg(args[ac], XmNshowValue, TRUE);
-		ac++;
-		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
-		ac++;
-		XtSetArg(args[ac], XmNx, 630);
-		ac++;
-		XtSetArg(args[ac], XmNy, 70);
-		ac++;
-		XtSetArg(args[ac], XmNwidth, 170);
-		ac++;
-		XtSetArg(args[ac], XmNheight, 63);
-		ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		class_in->scale_timelag = XmCreateScale(class_in->Mb3dsdg, (char *)"scale_timelag", args, ac);
-		XtManageChild(class_in->scale_timelag);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(class_in->scale_timelag, XmNvalueChangedCallback, do_mb3dsdg_timelag, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -349,11 +296,11 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 			ac++;
 		XtSetArg(args[ac], XmNrecomputeSize, False);
 		ac++;
-		XtSetArg(args[ac], XmNx, 810);
+		XtSetArg(args[ac], XmNx, 1050);
 		ac++;
 		XtSetArg(args[ac], XmNy, 50);
 		ac++;
-		XtSetArg(args[ac], XmNwidth, 170);
+		XtSetArg(args[ac], XmNwidth, 160);
 		ac++;
 		XtSetArg(args[ac], XmNheight, 80);
 		ac++;
@@ -370,94 +317,6 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 		 */
 		XmStringFree((XmString)tmp0);
 	}
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Heading Bias (degrees)", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNtitleString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(args[ac], XmNminimum, -100);
-		ac++;
-		XtSetArg(args[ac], XmNdecimalPoints, 2);
-		ac++;
-		XtSetArg(args[ac], XmNshowArrows, TRUE);
-		ac++;
-		XtSetArg(args[ac], XmNscaleMultiple, 1);
-		ac++;
-		XtSetArg(args[ac], XmNshowValue, TRUE);
-		ac++;
-		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
-		ac++;
-		XtSetArg(args[ac], XmNx, 460);
-		ac++;
-		XtSetArg(args[ac], XmNy, 70);
-		ac++;
-		XtSetArg(args[ac], XmNwidth, 165);
-		ac++;
-		XtSetArg(args[ac], XmNheight, 63);
-		ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		class_in->scale_headingbias = XmCreateScale(class_in->Mb3dsdg, (char *)"scale_headingbias", args, ac);
-		XtManageChild(class_in->scale_headingbias);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(class_in->scale_headingbias, XmNvalueChangedCallback, do_mb3dsdg_headingbias, (XtPointer)0);
-
-	ac = 0;
-	{
-		XmString tmp0;
-
-		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Pitch Bias (degrees)", XmRXmString, 0, &argok);
-		XtSetArg(args[ac], XmNtitleString, tmp0);
-		if (argok)
-			ac++;
-		XtSetArg(args[ac], XmNminimum, -100);
-		ac++;
-		XtSetArg(args[ac], XmNdecimalPoints, 2);
-		ac++;
-		XtSetArg(args[ac], XmNshowArrows, TRUE);
-		ac++;
-		XtSetArg(args[ac], XmNscaleMultiple, 1);
-		ac++;
-		XtSetArg(args[ac], XmNshowValue, TRUE);
-		ac++;
-		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
-		ac++;
-		XtSetArg(args[ac], XmNx, 270);
-		ac++;
-		XtSetArg(args[ac], XmNy, 70);
-		ac++;
-		XtSetArg(args[ac], XmNwidth, 190);
-		ac++;
-		XtSetArg(args[ac], XmNheight, 63);
-		ac++;
-		XtSetArg(
-		    args[ac], XmNfontList,
-		    BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
-		if (argok)
-			ac++;
-		class_in->scale_pitchbias = XmCreateScale(class_in->Mb3dsdg, (char *)"scale_pitchbias", args, ac);
-		XtManageChild(class_in->scale_pitchbias);
-
-		/**
-		 * Free any memory allocated for resources.
-		 */
-		XmStringFree((XmString)tmp0);
-	}
-
-	XtAddCallback(class_in->scale_pitchbias, XmNvalueChangedCallback, do_mb3dsdg_pitchbias, (XtPointer)0);
 
 	ac = 0;
 	{
@@ -483,7 +342,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 		ac++;
 		XtSetArg(args[ac], XmNy, 70);
 		ac++;
-		XtSetArg(args[ac], XmNwidth, 170);
+		XtSetArg(args[ac], XmNwidth, 150);
 		ac++;
 		XtSetArg(args[ac], XmNheight, 63);
 		ac++;
@@ -507,6 +366,184 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	{
 		XmString tmp0;
 
+		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Pitch Bias (degrees)", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, -100);
+		ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 2);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNscaleMultiple, 1);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 250);
+		ac++;
+		XtSetArg(args[ac], XmNy, 70);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 63);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->scale_pitchbias = XmCreateScale(class_in->Mb3dsdg, (char *)"scale_pitchbias", args, ac);
+		XtManageChild(class_in->scale_pitchbias);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->scale_pitchbias, XmNvalueChangedCallback, do_mb3dsdg_pitchbias, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Heading Bias (degrees)", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, -100);
+		ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 2);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNscaleMultiple, 1);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 400);
+		ac++;
+		XtSetArg(args[ac], XmNy, 70);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 63);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->scale_headingbias = XmCreateScale(class_in->Mb3dsdg, (char *)"scale_headingbias", args, ac);
+		XtManageChild(class_in->scale_headingbias);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->scale_headingbias, XmNvalueChangedCallback, do_mb3dsdg_headingbias, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Time Lag (seconds)", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, -100);
+		ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 2);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNscaleMultiple, 1);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 550);
+		ac++;
+		XtSetArg(args[ac], XmNy, 70);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 63);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->scale_timelag = XmCreateScale(class_in->Mb3dsdg, (char *)"scale_timelag", args, ac);
+		XtManageChild(class_in->scale_timelag);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->scale_timelag, XmNvalueChangedCallback, do_mb3dsdg_timelag, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Snell Correction", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNtitleString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNminimum, 9900);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, 10100);
+		ac++;
+		XtSetArg(args[ac], XmNdecimalPoints, 4);
+		ac++;
+		XtSetArg(args[ac], XmNshowArrows, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNscaleMultiple, 1);
+		ac++;
+		XtSetArg(args[ac], XmNshowValue, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNorientation, XmHORIZONTAL);
+		ac++;
+		XtSetArg(args[ac], XmNx, 700);
+		ac++;
+		XtSetArg(args[ac], XmNy, 70);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, 150);
+		ac++;
+		XtSetArg(args[ac], XmNheight, 63);
+		ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->scale_snell = XmCreateScale(class_in->Mb3dsdg, (char *)"scale_snell", args, ac);
+		XtManageChild(class_in->scale_snell);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->scale_snell, XmNvalueChangedCallback, do_mb3dsdg_snell, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
 		tmp0 = (XmString)BX_CONVERT(class_in->Mb3dsdg, (char *)"Azimuth: 0.00 | Elevation: 0.00 | Vert. Exager.: 1.00",
 		                            XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
@@ -521,7 +558,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 			ac++;
 		XtSetArg(args[ac], XmNx, 100);
 		ac++;
-		XtSetArg(args[ac], XmNy, 10);
+		XtSetArg(args[ac], XmNy, 40);
 		ac++;
 		XtSetArg(args[ac], XmNwidth, 540);
 		ac++;
@@ -1453,6 +1490,32 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	              (XtPointer)0);
 
 	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->pulldownMenu_action, (char *)"Optimize Snell Correction Values", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->pushButton_action_optimizebiasvalues_s =
+		    XmCreatePushButton(class_in->pulldownMenu_action, (char *)"pushButton_action_optimizebiasvalues_s", args, ac);
+		XtManageChild(class_in->pushButton_action_optimizebiasvalues_s);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->pushButton_action_optimizebiasvalues_s, XmNactivateCallback, do_mb3dsdg_action_optimizebiasvalues_s,
+	              (XtPointer)0);
+
+	ac = 0;
 	XtSetArg(args[ac], XmNsubMenuId, class_in->pulldownMenu_action);
 	ac++;
 	XtSetValues(class_in->cascadeButton_action, args, ac);
@@ -1554,7 +1617,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	ac++;
 	XtSetArg(args[ac], XmNx, 100);
 	ac++;
-	XtSetArg(args[ac], XmNy, 40);
+	XtSetArg(args[ac], XmNy, 10);
 	ac++;
 	XtSetArg(args[ac], XmNwidth, 519);
 	ac++;
@@ -1741,7 +1804,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	ac = 0;
 	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
 	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 810);
+	XtSetArg(args[ac], XmNleftOffset, 860);
 	ac++;
 	XtSetArg(args[ac], XmNtopOffset, 10);
 	ac++;
@@ -1751,15 +1814,6 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
 	ac++;
 	XtSetArg(args[ac], XmNleftOffset, 630);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 70);
-	ac++;
-	XtSetValues(class_in->scale_timelag, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 650);
 	ac++;
 	XtSetArg(args[ac], XmNtopOffset, 40);
 	ac++;
@@ -1772,7 +1826,7 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	ac++;
 	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE);
 	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 650);
+	XtSetArg(args[ac], XmNleftOffset, 630);
 	ac++;
 	XtSetArg(args[ac], XmNtopOffset, 10);
 	ac++;
@@ -1783,35 +1837,13 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	ac++;
 	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
 	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 810);
+	XtSetArg(args[ac], XmNleftOffset, 860);
 	ac++;
 	XtSetArg(args[ac], XmNrightOffset, 0);
 	ac++;
 	XtSetArg(args[ac], XmNtopOffset, 50);
 	ac++;
 	XtSetValues(class_in->label_mousemode, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
-	ac++;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 460);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 70);
-	ac++;
-	XtSetValues(class_in->scale_headingbias, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
-	ac++;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 270);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 70);
-	ac++;
-	XtSetValues(class_in->scale_pitchbias, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
@@ -1829,11 +1861,44 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	ac++;
 	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
 	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 100);
+	XtSetArg(args[ac], XmNleftOffset, 250);
 	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 10);
+	XtSetArg(args[ac], XmNtopOffset, 70);
 	ac++;
-	XtSetValues(class_in->label_status, args, ac);
+	XtSetValues(class_in->scale_pitchbias, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 400);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 70);
+	ac++;
+	XtSetValues(class_in->scale_headingbias, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 550);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 70);
+	ac++;
+	XtSetValues(class_in->scale_timelag, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 700);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 70);
+	ac++;
+	XtSetValues(class_in->scale_snell, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
@@ -1843,6 +1908,28 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	XtSetArg(args[ac], XmNtopOffset, 10);
 	ac++;
 	XtSetValues(class_in->menuBar, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 100);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 10);
+	ac++;
+	XtSetValues(class_in->label_status, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 100);
+	ac++;
+	XtSetArg(args[ac], XmNtopOffset, 40);
+	ac++;
+	XtSetValues(class_in->radioBox_soundingsmode, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM);
@@ -1862,17 +1949,6 @@ Mb3dsdgDataPtr Mb3dsdgCreate(Mb3dsdgDataPtr class_in, Widget parent, String name
 	XtSetArg(args[ac], XmNtopOffset, 140);
 	ac++;
 	XtSetValues(class_in->drawingArea, args, ac);
-
-	ac = 0;
-	XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE);
-	ac++;
-	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM);
-	ac++;
-	XtSetArg(args[ac], XmNleftOffset, 100);
-	ac++;
-	XtSetArg(args[ac], XmNtopOffset, 40);
-	ac++;
-	XtSetValues(class_in->radioBox_soundingsmode, args, ac);
 
 	/*
 	 * Assign functions to class record

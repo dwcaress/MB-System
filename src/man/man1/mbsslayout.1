@@ -1,4 +1,4 @@
-.TH mbsslayout 1 "12 April 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbsslayout 1 "17 September 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsslayout\fP \- translates time-based sidescan sonar data into backscatter
 layed out onto a topographic model of the seafloor.
@@ -10,69 +10,120 @@ Version 5.0
 \fBmbsslayout\fP [ 
 .br
 \fB--verbose\fP
+.br
 \fB--help\fP
 .br
+ .br
 \fB--input\fP=\fIdatalist\fP
+.br
 \fB--format\fP=\fIformat\fP
 .br
+ .br
 \fB--platform-file\fP=\fIFILE\fP
+.br
 \fB--platform-target-sensor\fP=\fISENSORID\fP
 .br
-\fB--output_source\fP=\fIrecord_kind\fP
-\fB--output_name1\fP=\fIname\fP
-\fB--output_name2\fP=\fIname\fP
 .br
-\fB--line_nameroot\fP=\fIname\fP
-\fB--line_time_list\fP=\fIfilename\fP
-\fB--line_route\fP=\fIfilename\fP
-\fB--line_check_bearing\fP
-\fB--line_range_threshold\fP=\fIvalue\fP
+\fB--output-source\fP=\fIrecord_kind\fP
 .br
-\fB--topo_grid_file\fP=\fIfilename\fP
-\fB--altitude_altitude\fP
-\fB--altitude_bottomppick\fP
-\fB--altitude_bottompick_threshold\fP=\fIvalue\fP
-\fB--altitude_topo_grid\fP
-\fB--channel_swap\fP
-\fB--swath_width\fP=\fIvalue\fP
+\fB--output-name1\fP=\fIname\fP
+.br
+\fB--output-name2\fP=\fIname\fP
+.br
+ .br
+\fB--line-nameroot\fP=\fIname\fP
+.br
+\fB--line-time-list\fP=\fIfilename\fP
+.br
+\fB--line-route\fP=\fIfilename\fP
+.br
+\fB--line-check-bearing\fP
+.br
+\fB--line-range-threshold\fP=\fIvalue\fP
+.br
+ .br
+\fB--topo-grid-file\fP=\fIfilename\fP
+.br
+\fB--altitude-altitude\fP
+.br
+\fB--altitude-bottomppick\fP
+.br
+\fB--altitude-bottompick-threshold\fP=\fIvalue\fP
+.br
+\fB--altitude-topo-grid\fP
+.br
+\fB--channel-swap\fP
+.br
+\fB--swath-width\fP=\fIvalue\fP
+.br
 \fB--gain\fP=\fIvalue\fP
+.br
 \fB--interpolation\fP=\fIvalue\fP
 .br
-\fB--nav_file\fP=\fIfilename\fP
-\fB--nav_file_format\fP=\fIformat_id\fP
-\fB--nav_async\fP=\fIrecord_kind\fP
-\fB--sensordepth_file\fP=\fIfilename\fP
-\fB--sensordepth_file_format\fP=\fIformat_id\fP
-\fB--sensordepth_async\fP=\fIrecord_kind\fP
-\fB--altitude_file\fP=\fIfilename\fP
-\fB--altitude_file_format\fP=\fIformat_id\fP
-\fB--altitude_async\fP=\fIrecord_kind\fP
-\fB--heading_file\fP=\fIfilename\fP
-\fB--heading_file_format\fP=\fIformat_id\fP
-\fB--heading_async\fP=\fIrecord_kind\fP
-\fB--attitude_file\fP=\fIfilename\fP
-\fB--attitude_file_format\fP=\fIformat_id\fP
-\fB--attitude_async\fP=\fIrecord_kind\fP
-\fB--soundspeed_constant\fP=\fIvalue\fP
-\fB--soundspeed_file\fP=\fIfilename\fP
-\fB--soundspeed_file_format\fP=\fIformat_id\fP
-\fB--soundspeed_async\fP=\fIrecord_kind\fP
-\fB--timeshift_file\fP=\fIfilename\fP
-\fB--timeshift_constant\fP=\fIvalue\fP
-\fB--timeshift_apply_nav\fP
-\fB--timeshift_apply_sensordepth\fP
-\fB--timeshift_apply_altitude\fP
-\fB--timeshift_apply_heading\fP
-\fB--timeshift_apply_attitude\fP
-\fB--timeshift_apply_all_ancilliary\fP
-\fB--timeshift_apply_survey\fP
-\fB--timeshift_apply_all\fP
+.br
+\fB--nav-file\fP=\fIfilename\fP
+.br
+\fB--nav-file-format\fP=\fIformat_id\fP
+.br
+\fB--nav-async\fP=\fIrecord_kind\fP
+.br
+\fB--sensordepth-file\fP=\fIfilename\fP
+.br
+\fB--sensordepth-file-format\fP=\fIformat_id\fP
+.br
+\fB--sensordepth-async\fP=\fIrecord_kind\fP
+.br
+\fB--altitude-file\fP=\fIfilename\fP
+.br
+\fB--altitude_file-format\fP=\fIformat_id\fP
+.br
+\fB--altitude-async\fP=\fIrecord_kind\fP
+.br
+\fB--heading-file\fP=\fIfilename\fP
+.br
+\fB--heading-file-format\fP=\fIformat_id\fP
+.br
+\fB--heading-async\fP=\fIrecord_kind\fP
+.br
+\fB--attitude-file\fP=\fIfilename\fP
+.br
+\fB--attitude-file-format\fP=\fIformat_id\fP
+.br
+\fB--attitude-async\fP=\fIrecord_kind\fP
+.br
+\fB--soundspeed-constant\fP=\fIvalue\fP
+.br
+\fB--soundspeed-file\fP=\fIfilename\fP
+.br
+\fB--soundspeed-file-format\fP=\fIformat_id\fP
+.br
+\fB--soundspeed-async\fP=\fIrecord_kind\fP
+.br
+\fB--timeshift-file\fP=\fIfilename\fP
+.br
+\fB--timeshift-constant\fP=\fIvalue\fP
+.br
+\fB--timeshift-apply-nav\fP
+.br
+\fB--timeshift-apply-sensordepth\fP
+.br
+\fB--timeshift-apply-altitude\fP
+.br
+\fB--timeshift-apply-heading\fP
+.br
+\fB--timeshift-apply-attitude\fP
+.br
+\fB--timeshift-apply-all-ancilliary\fP
+.br
+\fB--timeshift-apply-survey\fP
+.br
+\fB--timeshift-apply-all\fP
 .br
 ]
 
 .SH DESCRIPTION
 MBsslayout translates time-based sidescan sonar data into backscatter
-layed out onto a topographic model of the seafloor. The input should be a datalist
+laid out onto a topographic model of the seafloor. The input should be a datalist
 referencing data files in a format containing time based sidescan sonar data
 (typically both port and starboard time series) without swath
 bathymetry data. The output will be sidescan data in the MBF_MBLDEOIH format

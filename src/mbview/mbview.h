@@ -227,6 +227,7 @@
 #define MB3DSDG_OPTIMIZEBIASVALUES_P 0x02
 #define MB3DSDG_OPTIMIZEBIASVALUES_H 0x04
 #define MB3DSDG_OPTIMIZEBIASVALUES_T 0x08
+#define MB3DSDG_OPTIMIZEBIASVALUES_S 0x10
 #define MB3DSDG_OPTIMIZEBIASVALUES_RP 0x03
 #define MB3DSDG_OPTIMIZEBIASVALUES_RPH 0x07
 #define MB3DSDG_OPTIMIZEBIASVALUES_RPHT 0x0F
@@ -870,14 +871,14 @@ int mb3dsoundings_end(int verbose, int *error);
 int mb3dsoundings_set_dismiss_notify(int verbose, void(dismiss_notify)(), int *error);
 int mb3dsoundings_set_edit_notify(int verbose, void(edit_notify)(int, int, int, char, int), int *error);
 int mb3dsoundings_set_info_notify(int verbose, void(edit_notify)(int, int, int, char *), int *error);
-int mb3dsoundings_set_bias_notify(int verbose, void(bias_notify)(double, double, double, double), int *error);
-int mb3dsoundings_set_biasapply_notify(int verbose, void(biasapply_notify)(double, double, double, double), int *error);
+int mb3dsoundings_set_bias_notify(int verbose, void(bias_notify)(double, double, double, double, double), int *error);
+int mb3dsoundings_set_biasapply_notify(int verbose, void(biasapply_notify)(double, double, double, double, double), int *error);
 int mb3dsoundings_set_flagsparsevoxels_notify(int verbose, void(flagsparsevoxels_notify)(int, int), int *error);
 int mb3dsoundings_set_colorsoundings_notify(int verbose, void(colorsoundings_notify)(int), int *error);
 int mb3dsoundings_set_optimizebiasvalues_notify(int verbose,
-                                                void(optimizebiasvalues_notify)(int, double *, double *, double *, double *),
+                                                void(optimizebiasvalues_notify)(int, double *, double *, double *, double *, double *),
                                                 int *error);
 int mb3dsoundings_plot(int verbose, int *error);
 int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, double *timelag,
-                                  int *error);
+                                  double *snell, int *error);
 /*--------------------------------------------------------------------*/

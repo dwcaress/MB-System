@@ -1839,6 +1839,7 @@ void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_
 	double pitchbias;
 	double headingbias;
 	double timelag;
+	double snell;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
@@ -1854,10 +1855,10 @@ void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_
 #endif
 
 	/* get current bias parameters */
-	mb3dsoundings_get_bias_values(mbev_verbose, &rollbias, &pitchbias, &headingbias, &timelag, &mbev_error);
+	mb3dsoundings_get_bias_values(mbev_verbose, &rollbias, &pitchbias, &headingbias, &timelag, &snell, &mbev_error);
 
 	/* regrid the bathymetry */
-	mbeditviz_mb3dsoundings_biasapply(rollbias, pitchbias, headingbias, timelag);
+	mbeditviz_mb3dsoundings_biasapply(rollbias, pitchbias, headingbias, timelag, snell);
 
 	/* reset the gui */
 	do_mbeditviz_update_gui();

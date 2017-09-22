@@ -379,7 +379,7 @@ autoconf
 autoupdate
 autoreconf --force --install --warnings=all
 
-sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
+sudo CFLAGS="-g -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/usr/local \
     --with-proj-include=/usr/local/include \

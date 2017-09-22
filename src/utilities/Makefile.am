@@ -31,6 +31,7 @@ bin_PROGRAMS = mbconfig \
         mblevitus \
         mblist \
 		mbmakeplatform \
+		mbminirovnav \
         mbmosaic \
         mbnavlist \
         mbneptune2esf \

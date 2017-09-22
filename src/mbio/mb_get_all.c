@@ -316,7 +316,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 	/* check for time gap */
 	if (status == MB_SUCCESS && mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN &&
 	    (*kind == MB_DATA_DATA || *kind == MB_DATA_NAV || *kind == MB_DATA_CALIBRATE) && mb_io_ptr->ping_count > 1) {
-		if ((*time_d - mb_io_ptr->old_ntime_d) > 60 * mb_io_ptr->timegap) {
+		if ((*time_d - mb_io_ptr->old_time_d) > 60 * mb_io_ptr->timegap) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_TIME_GAP;
 		}

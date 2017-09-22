@@ -614,7 +614,7 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 		beamVectRel.z = 0.0;
 	}
 
-	// if (verbose >= 4)
+	if (verbose >= 4)
 	if (radial > 1.0)
 		fprintf(stderr, "dbg4     Got y1, y2, radial: %lf %lf %lf     beamVectRel:%f %f %f\n", y1, y2, radial, beamVectRel.x,
 		        beamVectRel.y, beamVectRel.z);

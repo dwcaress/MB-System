@@ -10,7 +10,7 @@ Version 5.0
 \fB\-D\fP\fIinterval\fP \fB\-E\fP\fIyear/month/day/hour/minute/second
 \fB\-F\fP\fIformat\fP \fB\-I\fP\fIdatalist.mb-1\fP
 \fB\-M\fP \fB\-O\fP\fIoutput\fP \fB\-P\fP\fIotps_location\fP
-\fB\-R\fP\fIlon/lat\fP \fB\-T\fP\fImodel\fP \fB\-V\fP]
+\fB\-R\fP\fIlon/lat\fP \fB-S\fP \fB\-T\fP\fImodel\fP \fB\-V\fP]
 
 .SH DESCRIPTION
 \fBMBotps\fP is a utility that predicts tides using the OTPS (OSU Tidal Prediction
@@ -187,6 +187,10 @@ the tide model to be used by \fBpredict_tide\fP.
 .br
 Sets the longitude and latitude position at which the tidal model will be
 calculated.
+.TP
+.B \-S
+If tide models are being generated for swath files specified using the \fB-I\fP option,
+then skip files that already have an existing tide model.
 .TP
 .B \-T
 \fImodel\fP

@@ -80,6 +80,9 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 
+//#define MBV_DEBUG_GLX 1
+//#define MBV_GET_GLX_ERRORS 1
+
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
@@ -278,6 +281,17 @@ int mb3dsoundings_updategui() {
 	ac++;
 	XtSetValues(mb3dsoundings.mb3dsdg.scale_timelag, args, ac);
 
+	ibiasmin = 100 * (mb3dsoundings.isnell / 100) - 100;
+	ibiasmax = 100 * (mb3dsoundings.isnell / 100) + 100;
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, ibiasmin);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, ibiasmax);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, mb3dsoundings.isnell);
+	ac++;
+	XtSetValues(mb3dsoundings.mb3dsdg.scale_snell, args, ac);
+
 	if (mb3dsoundings.view_boundingbox == MB_YES) {
 		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_boundingbox, True, False);
 	}
@@ -342,6 +356,7 @@ int mb3dsoundings_updategui() {
 }
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_updatemodetoggles() {
+	
 	/* set the mode toggles */
 	if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
 		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_toggle, TRUE, FALSE);
@@ -391,6 +406,25 @@ int mb3dsoundings_updatemodetoggles() {
 		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_grab, FALSE, FALSE);
 		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_info, TRUE, FALSE);
 	}
+	if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
+		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Pan\"\"R: Zoom\"");
+	}
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK) {
+		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Pan\"\"R: Zoom\"");
+	}
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE) {
+		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Pan\"\"R: Zoom\"");
+	}
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE) {
+		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Pan\"\"R: Zoom\"");
+	}
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB) {
+		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Pan\"\"R: Zoom\"");
+	}
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO) {
+		sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Pan\"\"R: Zoom\"");
+	}
+	set_mbview_label_multiline_string(mb3dsoundings.mb3dsdg.label_mousemode, value_text);
 
 	/* return */
 	return (mbs_status);
@@ -414,6 +448,11 @@ int mb3dsoundings_updatestatus() {
 		        soundingdata->zscale);
 		fprintf(stderr, "SOUNDING: xyz: %f %f %f   glxyz: %f %f %f  winxy: %d %d\n", sounding->x, sounding->y, sounding->z,
 		        sounding->glx, sounding->gly, sounding->glz, sounding->winx, sounding->winy);
+		XtUnmanageChild(mb3dsoundings.mb3dsdg.scale_rollbias);
+		XtUnmanageChild(mb3dsoundings.mb3dsdg.scale_pitchbias);
+		XtUnmanageChild(mb3dsoundings.mb3dsdg.scale_headingbias);
+		XtUnmanageChild(mb3dsoundings.mb3dsdg.scale_timelag);
+		XtUnmanageChild(mb3dsoundings.mb3dsdg.scale_snell);
 	}
 
 	/* else set standard status label */
@@ -421,10 +460,64 @@ int mb3dsoundings_updatestatus() {
 		sprintf(value_text, "Azi:%.2f | Elev: %.2f | Exager:%.2f | Tot:%d Good:%d Flagged:%d", mb3dsoundings.azimuth,
 		        mb3dsoundings.elevation, mb3dsoundings.exageration, soundingdata->num_soundings,
 		        soundingdata->num_soundings_unflagged, soundingdata->num_soundings_flagged);
+		XtManageChild(mb3dsoundings.mb3dsdg.scale_rollbias);
+		XtManageChild(mb3dsoundings.mb3dsdg.scale_pitchbias);
+		XtManageChild(mb3dsoundings.mb3dsdg.scale_headingbias);
+		XtManageChild(mb3dsoundings.mb3dsdg.scale_timelag);
+		XtManageChild(mb3dsoundings.mb3dsdg.scale_snell);
 	}
 
 	/* put up the new status string */
 	set_mbview_label_string(mb3dsoundings.mb3dsdg.label_status, value_text);
+
+	/* return */
+	return (mbs_status);
+}
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_updatelabelmousemode() {
+
+	/* set mouse mode label */
+	if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM) {
+		if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Pan\"\"R: Zoom\"");
+		}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Pan\"\"R: Zoom\"");
+		}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Pan\"\"R: Zoom\"");
+		}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Pan\"\"R: Zoom\"");
+		}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Pan\"\"R: Zoom\"");
+		}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Pan\"\"R: Zoom\"");
+		}
+	}
+	else /* if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) */ {
+		if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+		}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+		}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+		}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+		}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+		}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO) {
+			sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+		}
+	}
+	set_mbview_label_multiline_string(mb3dsoundings.mb3dsdg.label_mousemode, value_text);
 
 	/* return */
 	return (mbs_status);
@@ -591,7 +684,7 @@ int mb3dsoundings_set_info_notify(int verbose, void(info_notify)(int, int, int, 
 }
 
 /*------------------------------------------------------------------------------*/
-int mb3dsoundings_set_bias_notify(int verbose, void(bias_notify)(double, double, double, double), int *error) {
+int mb3dsoundings_set_bias_notify(int verbose, void(bias_notify)(double, double, double, double, double), int *error) {
 	/* local variables */
 	char *function_name = "mb3dsoundings_set_bias_notify";
 
@@ -627,7 +720,7 @@ int mb3dsoundings_set_bias_notify(int verbose, void(bias_notify)(double, double,
 }
 
 /*------------------------------------------------------------------------------*/
-int mb3dsoundings_set_biasapply_notify(int verbose, void(biasapply_notify)(double, double, double, double), int *error) {
+int mb3dsoundings_set_biasapply_notify(int verbose, void(biasapply_notify)(double, double, double, double, double), int *error) {
 	/* local variables */
 	char *function_name = "mb3dsoundings_set_biasapply_notify";
 
@@ -727,7 +820,7 @@ int mb3dsoundings_set_colorsoundings_notify(int verbose, void(colorsoundings_not
 
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_set_optimizebiasvalues_notify(int verbose,
-                                                void(optimizebiasvalues_notify)(int, double *, double *, double *, double *),
+                                                void(optimizebiasvalues_notify)(int, double *, double *, double *, double *, double *),
                                                 int *error) {
 	/* local variables */
 	char *function_name = "mb3dsoundings_set_optimizebiasvalues_notify";
@@ -839,6 +932,7 @@ int mb3dsoundings_reset() {
 	mb3dsoundings.ipitchbias = 0;
 	mb3dsoundings.iheadingbias = 0;
 	mb3dsoundings.itimelag = 0;
+	mb3dsoundings.isnell = 10000;
 
 	/* view parameters */
 	mb3dsoundings.view_boundingbox = MB_YES;
@@ -895,7 +989,7 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
 		ac = 0;
 		XtSetArg(args[ac], XmNtitle, "3D Soundings");
 		ac++;
-		XtSetArg(args[ac], XmNwidth, 800);
+		XtSetArg(args[ac], XmNwidth, 1040);
 		ac++;
 		XtSetArg(args[ac], XmNheight, 600);
 		ac++;
@@ -1034,8 +1128,17 @@ int mb3dsoundings_reset_glx() {
 
 	/* delete old glx_context if it exists */
 	if (mb3dsoundings.glx_init == MB_YES) {
+#ifdef MBV_DEBUG_GLX
+	fprintf(stderr, "%s:%d:%s glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, function_name, mb3dsoundings.dpy, mb3dsoundings.glx_context);
+#endif
 		glXDestroyContext(mb3dsoundings.dpy, mb3dsoundings.glx_context);
+#ifdef MBV_DEBUG_GLX
+	fprintf(stderr, "%s:%d:%s XtDestroyWidget(%p)\n", __FILE__, __LINE__, function_name, mb3dsoundings.glwmda);
+#endif
 		XtDestroyWidget(mb3dsoundings.glwmda);
+#ifdef MBV_GET_GLX_ERRORS
+	mbview_glerrorcheck(0, __FILE__, __LINE__, function_name);
+#endif
 		mb3dsoundings.glx_init = MB_NO;
 	}
 
@@ -1141,6 +1244,9 @@ void do_mb3dsdg_mouse_toggle(Widget w, XtPointer client_data, XtPointer call_dat
 
 	mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
 
+	/* set mouse mode label */
+	mb3dsoundings_updatelabelmousemode();
+
 	/* set edit cursor */
 	mb3dsoundings_updatecursor();
 
@@ -1156,6 +1262,9 @@ void do_mb3dsdg_mouse_pick(Widget w, XtPointer client_data, XtPointer call_data)
 	/* fprintf(stderr,"Called do_mb3dsdg_mouse_pick\n"); */
 
 	mb3dsoundings.edit_mode = MBS_EDIT_PICK;
+
+	/* set mouse mode label */
+	mb3dsoundings_updatelabelmousemode();
 
 	/* set edit cursor */
 	mb3dsoundings_updatecursor();
@@ -1173,6 +1282,9 @@ void do_mb3dsdg_mouse_erase(Widget w, XtPointer client_data, XtPointer call_data
 
 	mb3dsoundings.edit_mode = MBS_EDIT_ERASE;
 
+	/* set mouse mode label */
+	mb3dsoundings_updatelabelmousemode();
+
 	/* set edit cursor */
 	mb3dsoundings_updatecursor();
 
@@ -1188,6 +1300,9 @@ void do_mb3dsdg_mouse_restore(Widget w, XtPointer client_data, XtPointer call_da
 	/* fprintf(stderr,"Called do_mb3dsdg_mouse_restore\n"); */
 
 	mb3dsoundings.edit_mode = MBS_EDIT_RESTORE;
+
+	/* set mouse mode label */
+	mb3dsoundings_updatelabelmousemode();
 
 	/* set edit cursor */
 	mb3dsoundings_updatecursor();
@@ -1205,6 +1320,9 @@ void do_mb3dsdg_mouse_grab(Widget w, XtPointer client_data, XtPointer call_data)
 
 	mb3dsoundings.edit_mode = MBS_EDIT_GRAB;
 
+	/* set mouse mode label */
+	mb3dsoundings_updatelabelmousemode();
+
 	/* set edit cursor */
 	mb3dsoundings_updatecursor();
 
@@ -1220,6 +1338,9 @@ void do_mb3dsdg_mouse_info(Widget w, XtPointer client_data, XtPointer call_data)
 	/* fprintf(stderr,"Called do_mb3dsdg_mouse_info\n"); */
 
 	mb3dsoundings.edit_mode = MBS_EDIT_INFO;
+
+	/* set mouse mode label */
+	mb3dsoundings_updatelabelmousemode();
 
 	/* set edit cursor */
 	mb3dsoundings_updatecursor();
@@ -2766,7 +2887,8 @@ soundingdata->num_soundings); */
 }
 
 /*---------------------------------------------------------------------------------------*/
-int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, double *timelag,
+int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias,
+								  double *headingbias, double *timelag, double *snell, 
                                   int *error) {
 	/* fprintf(stderr,"Called mb3dsoundings_get_bias_values\n"); */
 
@@ -2775,6 +2897,7 @@ int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbi
 	*pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
 	*headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
 	*timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+	*snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
 	/* return */
 	return (mbs_status);
@@ -2805,7 +2928,8 @@ void do_mb3dsdg_rollbias(Widget w, XtPointer client_data, XtPointer call_data) {
 	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
 		(mb3dsoundings.mb3dsoundings_bias_notify)(
 		    0.01 * ((double)mb3dsoundings.irollbias), 0.01 * ((double)mb3dsoundings.ipitchbias),
-		    0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag));
+		    0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag),
+			0.0001 * ((double)mb3dsoundings.isnell));
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
@@ -2853,7 +2977,8 @@ void do_mb3dsdg_pitchbias(Widget w, XtPointer client_data, XtPointer call_data) 
 	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
 		(mb3dsoundings.mb3dsoundings_bias_notify)(
 		    0.01 * ((double)mb3dsoundings.irollbias), 0.01 * ((double)mb3dsoundings.ipitchbias),
-		    0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag));
+		    0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag),
+			0.0001 * ((double)mb3dsoundings.isnell));
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
@@ -2901,7 +3026,8 @@ void do_mb3dsdg_headingbias(Widget w, XtPointer client_data, XtPointer call_data
 	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
 		(mb3dsoundings.mb3dsoundings_bias_notify)(
 		    0.01 * ((double)mb3dsoundings.irollbias), 0.01 * ((double)mb3dsoundings.ipitchbias),
-		    0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag));
+		    0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag),
+			0.0001 * ((double)mb3dsoundings.isnell));
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
@@ -2948,7 +3074,8 @@ void do_mb3dsdg_timelag(Widget w, XtPointer client_data, XtPointer call_data) {
 	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
 		(mb3dsoundings.mb3dsoundings_bias_notify)(
 		    0.01 * ((double)mb3dsoundings.irollbias), 0.01 * ((double)mb3dsoundings.ipitchbias),
-		    0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag));
+		    0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag),
+			0.0001 * ((double)mb3dsoundings.isnell));
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
@@ -2967,6 +3094,54 @@ void do_mb3dsdg_timelag(Widget w, XtPointer client_data, XtPointer call_data) {
 		XtSetArg(args[ac], XmNmaximum, itimelagmax);
 		ac++;
 		XtSetValues(mb3dsoundings.mb3dsdg.scale_timelag, args, ac);
+	}
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void do_mb3dsdg_snell(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmScaleCallbackStruct *acs;
+	int isnellmin, isnellmax;
+
+	acs = (XmScaleCallbackStruct *)call_data;
+
+	//fprintf(stderr,"Called do_mb3dsdg_snell: %d\n", acs->value);
+
+	mb3dsoundings.isnell = acs->value;
+
+	ac = 0;
+	XtSetArg(args[ac], XmNminimum, &isnellmin);
+	ac++;
+	XtSetArg(args[ac], XmNmaximum, &isnellmax);
+	ac++;
+	XtSetArg(args[ac], XmNvalue, &(mb3dsoundings.isnell));
+	ac++;
+	XtGetValues(mb3dsoundings.mb3dsdg.scale_snell, args, ac);
+
+	/* send bias parameters to calling program */
+	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
+		(mb3dsoundings.mb3dsoundings_bias_notify)(
+		    0.01 * ((double)mb3dsoundings.irollbias), 0.01 * ((double)mb3dsoundings.ipitchbias),
+		    0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag),
+			0.0001 * ((double)mb3dsoundings.isnell));
+
+	/* rescale data to the gl coordinates */
+	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+	mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+
+	/* reset scale min max */
+	if (mb3dsoundings.isnell == isnellmin || mb3dsoundings.isnell == isnellmax) {
+		isnellmin = mb3dsoundings.isnell - 100;
+		isnellmax = mb3dsoundings.isnell + 100;
+		ac = 0;
+		XtSetArg(args[ac], XmNminimum, isnellmin);
+		ac++;
+		XtSetArg(args[ac], XmNmaximum, isnellmax);
+		ac++;
+		XtSetValues(mb3dsoundings.mb3dsdg.scale_snell, args, ac);
 	}
 }
 
@@ -3100,7 +3275,8 @@ void do_mb3dsdg_action_applybias(Widget w, XtPointer client_data, XtPointer call
 	if (mb3dsoundings.mb3dsoundings_biasapply_notify != NULL)
 		(mb3dsoundings.mb3dsoundings_biasapply_notify)(
 		    0.01 * ((double)mb3dsoundings.irollbias), 0.01 * ((double)mb3dsoundings.ipitchbias),
-		    0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag));
+		    0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag),
+			0.0001 * ((double)mb3dsoundings.isnell));
 }
 /*---------------------------------------------------------------------------------------*/
 
@@ -3313,6 +3489,7 @@ void do_mb3dsdg_action_optimizebiasvalues_r(Widget w, XtPointer client_data, XtP
 	double pitchbias;
 	double headingbias;
 	double timelag;
+	double snell;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_r\n"); */
 
@@ -3323,15 +3500,17 @@ void do_mb3dsdg_action_optimizebiasvalues_r(Widget w, XtPointer client_data, XtP
 		pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
 		headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
 		timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+		snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
 		(mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_R, &rollbias, &pitchbias, &headingbias,
-		                                                        &timelag);
+		                                                        &timelag, &snell);
 
 		/* set the bias parameters stored for the gui */
 		mb3dsoundings.irollbias = (int)(100 * rollbias);
 		mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
 		mb3dsoundings.iheadingbias = (int)(100 * headingbias);
 		mb3dsoundings.itimelag = (int)(100 * timelag);
+		mb3dsoundings.isnell = (int)(10000 * snell);
 
 		/* update the gui */
 		mb3dsoundings_updategui();
@@ -3354,6 +3533,7 @@ void do_mb3dsdg_action_optimizebiasvalues_p(Widget w, XtPointer client_data, XtP
 	double pitchbias;
 	double headingbias;
 	double timelag;
+	double snell;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_p\n"); */
 
@@ -3364,15 +3544,17 @@ void do_mb3dsdg_action_optimizebiasvalues_p(Widget w, XtPointer client_data, XtP
 		pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
 		headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
 		timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+		snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
 		(mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_P, &rollbias, &pitchbias, &headingbias,
-		                                                        &timelag);
+		                                                        &timelag, &snell);
 
 		/* set the bias parameters stored for the gui */
 		mb3dsoundings.irollbias = (int)(100 * rollbias);
 		mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
 		mb3dsoundings.iheadingbias = (int)(100 * headingbias);
 		mb3dsoundings.itimelag = (int)(100 * timelag);
+		mb3dsoundings.isnell = (int)(10000 * snell);
 
 		/* update the gui */
 		mb3dsoundings_updategui();
@@ -3395,6 +3577,7 @@ void do_mb3dsdg_action_optimizebiasvalues_h(Widget w, XtPointer client_data, XtP
 	double pitchbias;
 	double headingbias;
 	double timelag;
+	double snell;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_h\n"); */
 
@@ -3405,15 +3588,17 @@ void do_mb3dsdg_action_optimizebiasvalues_h(Widget w, XtPointer client_data, XtP
 		pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
 		headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
 		timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+		snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
 		(mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_H, &rollbias, &pitchbias, &headingbias,
-		                                                        &timelag);
+		                                                        &timelag, &snell);
 
 		/* set the bias parameters stored for the gui */
 		mb3dsoundings.irollbias = (int)(100 * rollbias);
 		mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
 		mb3dsoundings.iheadingbias = (int)(100 * headingbias);
 		mb3dsoundings.itimelag = (int)(100 * timelag);
+		mb3dsoundings.isnell = (int)(10000 * snell);
 
 		/* update the gui */
 		mb3dsoundings_updategui();
@@ -3436,6 +3621,7 @@ void do_mb3dsdg_action_optimizebiasvalues_rp(Widget w, XtPointer client_data, Xt
 	double pitchbias;
 	double headingbias;
 	double timelag;
+	double snell;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rp\n"); */
 
@@ -3446,15 +3632,17 @@ void do_mb3dsdg_action_optimizebiasvalues_rp(Widget w, XtPointer client_data, Xt
 		pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
 		headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
 		timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+		snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
 		(mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_RP, &rollbias, &pitchbias,
-		                                                        &headingbias, &timelag);
+		                                                        &headingbias, &timelag, &snell);
 
 		/* set the bias parameters stored for the gui */
 		mb3dsoundings.irollbias = (int)(100 * rollbias);
 		mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
 		mb3dsoundings.iheadingbias = (int)(100 * headingbias);
 		mb3dsoundings.itimelag = (int)(100 * timelag);
+		mb3dsoundings.isnell = (int)(10000 * snell);
 
 		/* update the gui */
 		mb3dsoundings_updategui();
@@ -3477,6 +3665,7 @@ void do_mb3dsdg_action_optimizebiasvalues_rph(Widget w, XtPointer client_data, X
 	double pitchbias;
 	double headingbias;
 	double timelag;
+	double snell;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rph\n"); */
 
@@ -3487,15 +3676,17 @@ void do_mb3dsdg_action_optimizebiasvalues_rph(Widget w, XtPointer client_data, X
 		pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
 		headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
 		timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+		snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
 		(mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_RPH, &rollbias, &pitchbias,
-		                                                        &headingbias, &timelag);
+		                                                        &headingbias, &timelag, &snell);
 
 		/* set the bias parameters stored for the gui */
 		mb3dsoundings.irollbias = (int)(100 * rollbias);
 		mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
 		mb3dsoundings.iheadingbias = (int)(100 * headingbias);
 		mb3dsoundings.itimelag = (int)(100 * timelag);
+		mb3dsoundings.isnell = (int)(10000 * snell);
 
 		/* update the gui */
 		mb3dsoundings_updategui();
@@ -3517,6 +3708,7 @@ void do_mb3dsdg_action_optimizebiasvalues_t(Widget w, XtPointer client_data, XtP
 	double pitchbias;
 	double headingbias;
 	double timelag;
+	double snell;
 
 	/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rph\n"); */
 
@@ -3527,15 +3719,61 @@ void do_mb3dsdg_action_optimizebiasvalues_t(Widget w, XtPointer client_data, XtP
 		pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
 		headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
 		timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+		snell = 0.0001 * ((double)mb3dsoundings.isnell);
 
 		(mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_T, &rollbias, &pitchbias, &headingbias,
-		                                                        &timelag);
+		                                                        &timelag, &snell);
 
 		/* set the bias parameters stored for the gui */
 		mb3dsoundings.irollbias = (int)(100 * rollbias);
 		mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
 		mb3dsoundings.iheadingbias = (int)(100 * headingbias);
 		mb3dsoundings.itimelag = (int)(100 * timelag);
+		mb3dsoundings.isnell = (int)(10000 * snell);
+
+		/* update the gui */
+		mb3dsoundings_updategui();
+
+		/* rescale data to the gl coordinates */
+		mb3dsoundings_scale(mbs_verbose, &mbs_error);
+		mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+
+		/* replot the data */
+		mb3dsoundings_plot(mbs_verbose, &mbs_error);
+	}
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void do_mb3dsdg_action_optimizebiasvalues_s(Widget w, XtPointer client_data, XtPointer call_data) {
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
+	double rollbias;
+	double pitchbias;
+	double headingbias;
+	double timelag;
+	double snell;
+
+	/* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rph\n"); */
+
+	/* notify calling program to color current selected unflagged soundings */
+	if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
+		/* get bias parameters */
+		rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+		pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+		headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+		timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+		snell = 0.0001 * ((double)mb3dsoundings.isnell);
+
+		(mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_S, &rollbias, &pitchbias, &headingbias,
+		                                                        &timelag, &snell);
+
+		/* set the bias parameters stored for the gui */
+		mb3dsoundings.irollbias = (int)(100 * rollbias);
+		mb3dsoundings.ipitchbias = (int)(100 * pitchbias);
+		mb3dsoundings.iheadingbias = (int)(100 * headingbias);
+		mb3dsoundings.itimelag = (int)(100 * timelag);
+		mb3dsoundings.isnell = (int)(10000 * snell);
 
 		/* update the gui */
 		mb3dsoundings_updategui();
@@ -3564,8 +3802,8 @@ void do_mb3dsdg_mouse_panzoom(Widget w, XtPointer client_data, XtPointer call_da
 	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_panzoom1, True, False);
 
 	/* set mouse mode label */
-	sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Pan\"\"R: Zoom\"");
-	set_mbview_label_multiline_string(mb3dsoundings.mb3dsdg.label_mousemode, value_text);
+	mb3dsoundings_updatelabelmousemode();
+	
 }
 
 /*---------------------------------------------------------------------------------------*/
@@ -3584,8 +3822,8 @@ void do_mb3dsdg_mouse_rotate(Widget w, XtPointer client_data, XtPointer call_dat
 	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_panzoom1, False, False);
 
 	/* set mouse mode label */
-	sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
-	set_mbview_label_multiline_string(mb3dsoundings.mb3dsdg.label_mousemode, value_text);
+	mb3dsoundings_updatelabelmousemode();
+
 }
 
 /*---------------------------------------------------------------------------------------*/
