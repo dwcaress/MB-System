@@ -207,6 +207,9 @@ seismic reflection or seismic refraction in either shot or CMP gathers, the
 start and end of the channels selected for gridding is set using the optional <I>schan</I>
 and <I>echan</I>, respectively. The x-dimension of the output grid is determined by
 (<I>end</I> - <I>start</I> + 1) * (<I>echan</I> - <I>schan</I> + 1) / <I>decimatex</I>.
+If <I>mode</I>=2, then  <I>start</I> and <I>end</I> refer to shot numbers and
+all traces within that range of shot numbers are plotted. Effectively  the channel
+numbers are ignored by setting all trace channels to 0 and plotting channel 0.
 <DT><B>-T</B>
 
 <DD>

@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbsslayout</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  12 April 2017 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  17 September 2017 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -32,69 +32,160 @@ Version 5.0
 <BR>
 
 <B>--verbose</B>
+<BR>
+
 <B>--help</B>
 <BR>
 
 <B>--input</B>=<I>datalist</I>
+<BR>
+
 <B>--format</B>=<I>format</I>
 <BR>
 
 <B>--platform-file</B>=<I>FILE</I>
+<BR>
+
 <B>--platform-target-sensor</B>=<I>SENSORID</I>
 <BR>
 
-<B>--output_source</B>=<I>record_kind</I>
-<B>--output_name1</B>=<I>name</I>
-<B>--output_name2</B>=<I>name</I>
 <BR>
 
-<B>--line_nameroot</B>=<I>name</I>
-<B>--line_time_list</B>=<I>filename</I>
-<B>--line_route</B>=<I>filename</I>
-<B>--line_check_bearing</B>
-<B>--line_range_threshold</B>=<I>value</I>
+<B>--output-source</B>=<I>record_kind</I>
 <BR>
 
-<B>--topo_grid_file</B>=<I>filename</I>
-<B>--altitude_altitude</B>
-<B>--altitude_bottomppick</B>
-<B>--altitude_bottompick_threshold</B>=<I>value</I>
-<B>--altitude_topo_grid</B>
-<B>--channel_swap</B>
-<B>--swath_width</B>=<I>value</I>
-<B>--gain</B>=<I>value</I>
+<B>--line-nameroot</B>=<I>name</I>
+<BR>
+
+<B>--line-time-list</B>=<I>filename</I>
+<BR>
+
+<B>--line-route</B>=<I>filename</I>
+<BR>
+
+<B>--line-check-bearing</B>
+<BR>
+
+<B>--line-name1</B>=<I>name</I>
+<BR>
+
+<B>--line-name2</B>=<I>name</I>
+<BR>
+
+<B>--line-range-threshold</B>=<I>value</I>
+<BR>
+
+<B>--topo-grid-file</B>=<I>filename</I>
+<BR>
+
+<B>--altitude-altitude</B>
+<BR>
+
+<B>--altitude-bottomppick</B>
+<BR>
+
+<B>--altitude-bottompick-threshold</B>=<I>value</I>
+<BR>
+
+<B>--altitude-topo-grid</B>
+<BR>
+
+<B>--channel-swap</B>
+<BR>
+
+<B>--swath-width</B>=<I>value</I>
+<BR>
+
 <B>--interpolation</B>=<I>value</I>
 <BR>
 
-<B>--nav_file</B>=<I>filename</I>
-<B>--nav_file_format</B>=<I>format_id</I>
-<B>--nav_async</B>=<I>record_kind</I>
-<B>--sensordepth_file</B>=<I>filename</I>
-<B>--sensordepth_file_format</B>=<I>format_id</I>
-<B>--sensordepth_async</B>=<I>record_kind</I>
-<B>--altitude_file</B>=<I>filename</I>
-<B>--altitude_file_format</B>=<I>format_id</I>
-<B>--altitude_async</B>=<I>record_kind</I>
-<B>--heading_file</B>=<I>filename</I>
-<B>--heading_file_format</B>=<I>format_id</I>
-<B>--heading_async</B>=<I>record_kind</I>
-<B>--attitude_file</B>=<I>filename</I>
-<B>--attitude_file_format</B>=<I>format_id</I>
-<B>--attitude_async</B>=<I>record_kind</I>
-<B>--soundspeed_constant</B>=<I>value</I>
-<B>--soundspeed_file</B>=<I>filename</I>
-<B>--soundspeed_file_format</B>=<I>format_id</I>
-<B>--soundspeed_async</B>=<I>record_kind</I>
-<B>--timeshift_file</B>=<I>filename</I>
-<B>--timeshift_constant</B>=<I>value</I>
-<B>--timeshift_apply_nav</B>
-<B>--timeshift_apply_sensordepth</B>
-<B>--timeshift_apply_altitude</B>
-<B>--timeshift_apply_heading</B>
-<B>--timeshift_apply_attitude</B>
-<B>--timeshift_apply_all_ancilliary</B>
-<B>--timeshift_apply_survey</B>
-<B>--timeshift_apply_all</B>
+<BR>
+
+<B>--nav-file</B>=<I>filename</I>
+<BR>
+
+<B>--nav-file-format</B>=<I>format_id</I>
+<BR>
+
+<B>--nav-async</B>=<I>record_kind</I>
+<BR>
+
+<B>--sensordepth-file</B>=<I>filename</I>
+<BR>
+
+<B>--sensordepth-file-format</B>=<I>format_id</I>
+<BR>
+
+<B>--sensordepth-async</B>=<I>record_kind</I>
+<BR>
+
+<B>--altitude-file</B>=<I>filename</I>
+<BR>
+
+<B>--altitude_file-format</B>=<I>format_id</I>
+<BR>
+
+<B>--altitude-async</B>=<I>record_kind</I>
+<BR>
+
+<B>--heading-file</B>=<I>filename</I>
+<BR>
+
+<B>--heading-file-format</B>=<I>format_id</I>
+<BR>
+
+<B>--heading-async</B>=<I>record_kind</I>
+<BR>
+
+<B>--attitude-file</B>=<I>filename</I>
+<BR>
+
+<B>--attitude-file-format</B>=<I>format_id</I>
+<BR>
+
+<B>--attitude-async</B>=<I>record_kind</I>
+<BR>
+
+<B>--soundspeed-constant</B>=<I>value</I>
+<BR>
+
+<B>--soundspeed-file</B>=<I>filename</I>
+<BR>
+
+<B>--soundspeed-file-format</B>=<I>format_id</I>
+<BR>
+
+<B>--soundspeed-async</B>=<I>record_kind</I>
+<BR>
+
+<B>--timeshift-file</B>=<I>filename</I>
+<BR>
+
+<B>--timeshift-constant</B>=<I>value</I>
+<BR>
+
+<B>--timeshift-apply-nav</B>
+<BR>
+
+<B>--timeshift-apply-sensordepth</B>
+<BR>
+
+<B>--timeshift-apply-altitude</B>
+<BR>
+
+<B>--timeshift-apply-heading</B>
+<BR>
+
+<B>--timeshift-apply-attitude</B>
+<BR>
+
+<B>--timeshift-apply-all-ancilliary</B>
+<BR>
+
+<B>--timeshift-apply-survey</B>
+<BR>
+
+<B>--timeshift-apply-all</B>
 <BR>
 
 ]
@@ -103,22 +194,64 @@ Version 5.0
 <H2>DESCRIPTION</H2>
 
 MBsslayout translates time-based sidescan sonar data into backscatter
-layed out onto a topographic model of the seafloor. The input should be a datalist
+laid out onto a topographic model of the seafloor. The input should be a datalist
 referencing data files in a format containing time based sidescan sonar data
-(typically both port and starboard time series) without swath
-bathymetry data. The output will be sidescan data in the MBF_MBLDEOIH format
-(MBIO format id 71). The sidescan can be laid out using a flat bottom assumption,
+(typically both port and starboard time series). Often the logged file will not
+include any form of swath bathymetry data.
+The output will be sidescan data for which each ping return is represented by a single array
+of pixels with acrosstrack and alongtrack locations, where in the acrosstrack
+direction the pixels are uniformly sized (and therefore uniformly spaced).
+The output will be written to files in the MBF_MBLDEOIH format (MBIO format id 71). 
+<P>
+The time series sidescan is
+&quot;laid out&quot; onto the seafloor using the two-travel time of each sample, it's
+orientation (port or starboard), the speed of sound, the location and orientation
+of the sonar, and some knowledge or assumption about the seafloor topography.
+The &quot;laying out&quot; process involves defining a regularly spaced array of acrosstrack
+pixels for which the pixel size (in meters) and the number of pixels determines
+the width of the array; this array is centered under the sonar location in an
+assumption that the swath center is approximately beneath the sonar. The location
+of each original sidescan sample on the seafloor, and the corresponding pixel in
+the destination sidescan array, is calculated according to the parameters listed
+above. The sidescan samples are binned in the destination array, with averaging
+applied for destination pixels holding more than one sample. After the averaging is
+calculated, empty pixels surrounded by valid data can be filled by interpolation.
+<P>
+The maximum number of pixels in the output swath sidescan is 4001. By default,
+<B>mbsslayout</B> varies the pixel size between pings in order to accomodate the
+full sidescan swath width within 4001 pixels. The calculation of the swath width W is:
+<BR>&nbsp;&nbsp;&nbsp;W&nbsp;=&nbsp;2.2&nbsp;*&nbsp;sqrt(R&nbsp;*&nbsp;R&nbsp;-&nbsp;A&nbsp;*&nbsp;A)
+<BR>
+
+where A is the sonar altitude and R is the maximum range:
+<BR>&nbsp;&nbsp;&nbsp;R&nbsp;=&nbsp;0.5&nbsp;*&nbsp;V&nbsp;*&nbsp;dt&nbsp;*&nbsp;N
+<BR>
+
+Here dt is the sample interval in the time series sidescan, N is the maximum
+number of samples in a time series sidescan channel, and V is the speed of sound.
+Alternatively, the swath width can be specified to be a constant distance.
+Given the swath width W, whether it varies or is constant, <B>mbsslayout</B>
+uses an acrosstrack pixel size of:
+<BR>&nbsp;&nbsp;&nbsp;dx&nbsp;=&nbsp;W&nbsp;/&nbsp;4000
+<P>
+The sidescan can be laid out using a flat bottom assumption,
 but is generally laid out onto a gridded topographic model derived from bathymetric
 mapping with other sensors. The gridded bathymetry data may be collected
 simultaneously with the sidescan from the same platform, or it may derive from
-other surveys.
+other surveys. If no topographic model is specified, then the location of each
+sample is calculated assuming a flat bottom according to an altitude value. By
+default this altitude derives from the navigation available in the time series
+sidescan files, but it can also derive from picking the first bottom arrival in
+the time series sidescan data. In this case the altitude used is the average of
+the bottom picks from the port and starboard time series sidescan channels.
 <P>
-Navigation, attitude, and water sound speed values will by default, if available,
+Navigation, attitude, altitude, and water sound speed values will by default, if available,
 derive from values contained in the time-based sidescan files. If necessary or
 desired, the ancilliary values can be merged from separate files. Time latency
 corrections can be made to the ancilliary data time series if needed.
 <P>
-Once the sidescan data have been laid out onto the seafloor, they can be further
+Once the sidescan data have been laid out onto the seafloor and output to format
+71 swath files, they can be further
 processed using <B>MB-System</B> tools such as <B>mbbackangle</B> followed by
 <B>mbprocess</B>.
 <P>
@@ -155,8 +288,502 @@ Christian do Santos Ferreira
 <DT><B>--verbose</B>
 
 <DD>
+<BR>
+
 By default <B>mbsslayout</B> outputs minimal information to the shell. This option
-causes the program to indicate it's progress as it runs. Goody.
+causes the program to output the control parameters at the start and various
+status messages as it runs.
+<DT><B>--help</B>
+
+<DD>
+<BR>
+
+The <B>--help</B> option causes <B>mbsslayout</B> to print out a summary of its
+purpose and a listing of its control options, and then exit immediately.
+<DT><B>--input</B>=<I>datalist</I>
+
+<DD>
+<BR>
+
+This option defines the input files containing the time series sidescan data.
+The <I>datalist</I> value typically denotes a  datalist  file
+containing  a list of input swath data files and/or other datalist files. 
+Alternatively, a single swath data file can also be specified.
+<DT><B>--format</B>=<I>format</I>
+
+<DD>
+<BR>
+
+This option sets the <B>MBIO</B> format identifier for the input file specified with
+the <B>--input</B> option. By default, <B>mbsslayout</B> infers the format id from
+from the input filename via use of the <B>MB-System</B> suffix convention
+(&quot;*.mbXXX&quot;) or of other recognized file suffixes.
+<DT><B>--platform-file</B>=<I>FILE</I>
+
+<DD>
+<BR>
+
+This option specifies an <B>MB-System</B> platform file to be read and used to
+define the positional and angular offsets between sensors on the source survey
+platform. Often the embedded navigation and attitude (and other ancilliary) data
+are already referenced to the relevant sidescan sonar; in this case no platform
+model is required during sidescan layout. However, if the available navigation
+and attitude data are referenced to another sensor or location on the survey
+platform, a platform model allows calculation of the actual location and orientation
+of the sidescan sonar during the layout process.
+<DT><B>--platform-target-sensor</B>=<I>SENSORID</I>
+
+<DD>
+<BR>
+
+This option specifies which sensor in the platform model specified with the
+<B>--platform-file</B> option is the source of the time series sidescan data
+being processed by <B>mbsslayout</B>.
+<BR>
+
+<DT><B>--output-source</B>=<I>record_kind</I>
+
+<DD>
+<BR>
+
+This option specifies the <B>MB-System</B> data record type in the input source
+data that contains the time series sidescan data being processed by <B>mbsslayout</B>.
+The source data record type will not always be considered survey data (MB_DATA_DATA, ID=1)
+and may instead by secondary sidescan (MB_DATA_SIDESCAN2, ID=38) or tertiary sidescan
+(MB_DATA_SIDESCAN2, ID=39). For instance, Edgetech sidescan data are recorded in the
+Jstar format in files with a *.jsf suffix, and these files typically contain two
+frequencies of sidescan data. The records containing the lower frequency time series
+sidescan data will be reported as MB_DATA_DATA, and those containing the higher frequency
+time series sidescan data will be reported as MB_DATA_SIDESCAN2.
+The <B>MB-System</B> program <B>mbinfo</B> will, with the
+<B>-N</B> option, output a complete list of the data record types in a swath file,
+revealing the number of MB_DATA_DATA, MB_DATA_SIDESCAN2, and MB_DATA_SIDESCAN3 records
+present.
+<DT><B>--line-time-list</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+Specifies an ASCII text file containing a list of times used to define the start and ends of
+survey lines, allowing <B>mbsslayout</B> to structure the output files according
+to those survey lines. The output filenames will be constructed using the sequential
+line numbers (starting from 000) The times are defined in decimal epoch seconds (seconds since
+1970) with one time value on each line. Such a time list file can be constructed
+from an <B>MB-System</B> route file using the program <B>mbroutetime</B>.
+<DT><B>--line-route</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+Specifies an <B>MB-System</B> route file (typically generated using <B>mbgrdviz</B>)
+that defines the waypoints of a planned survey. The waypoints of this route are
+used in conjunction with the survey navigation to define the start and ends of
+survey lines, allowing <B>mbsslayout</B> to structure the output files according
+to those survey lines. Since the navigation of real surveys rarely passes through the
+planned waypoints exactly, the times at which waypoints are reached is calculated
+using a range threshold specified using the <B>--line-range-threshold</B> option.
+
+<B>--line-range-threshold</B>=<I>value</I>
+
+<BR>
+
+Specifies the range theshold used to define when survey navigation reaches a
+survey line waypoint. The range (distance) of the survey navigation to the waypoint
+should decrease as the waypoint is approached. The waypoint is considered to be
+reached when the range stops decreasing and starts to increase, provided the range
+is less than the range threshold when that occurs. The default value is 50 meters.
+<DT><B>--line-name1</B>=<I>name</I>
+
+<DD>
+<BR>
+
+If <B>mbsslayout</B> is requested to output sidescan in files corresponding to survey
+lines, as defined either by a route file (option <B>--line-route</B>) or a list
+of time stamps (option <B>--line-time-list</B>), then the output files will have
+names of the form &quot;N1&quot;_&quot;N2&quot;_XXXX.mb71, where &quot;N1&quot; is specified with <B>--output-name1</B>,
+&quot;N2&quot; is specified with <B>--output-name2</B>, and XXXX are the sequential line
+numbers (starting with &quot;0000&quot;).
+<DT><B>--line-name2</B>=<I>name</I>
+
+<DD>
+<BR>
+
+By default, <B>mbsslayout</B> outputs &quot;laid-out&quot; sidescan in format 71 files
+corresponding to the input files containing the time series sidescan data, where
+the output filenames consist of the original filename stripped of it's identifying
+suffix (e.g. &quot;.jsf&quot;) and appended with _&quot;N2&quot;.mb71.
+Here &quot;N2&quot; is specified with <B>--output-name2</B>.
+If <B>mbsslayout</B> is requested to output sidescan in files corresponding to survey
+lines, as defined either by a route file (option <B>--line-route</B>) or a list
+of time stamps (option <B>--line-time-list</B>), then the output files will have
+names of the form &quot;N1&quot;_&quot;N2&quot;_XXXX.mb71, where &quot;N1&quot; is specified with <B>--output-name1</B>,
+&quot;N2&quot; is specified with <B>--output-name2</B>, and XXXX are the sequential line
+numbers (starting with &quot;0000&quot;).
+<DT><B>--topo-grid-file</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+This option specifies a topographic model in the form of a GMT topography grid
+file to be used for laying out the sidescan. Each time series sidescan sample
+is projected into the topographic model using the sonar navigation and attitude
+so that the location of the sample on the seafloor is correct with respect to
+the full three dimensional survey geometry. If a topography model is not specified
+with this option, then the sidescan will be laid out using a flat bottom assumption
+and an altitude value derived either from the survey navigation or by picking the
+initial bottom return in the time series sidescan data.
+<DT><B>--altitude-bottomppick</B>
+
+<DD>
+<BR>
+
+Specifies obtaining the altitude value by picking the initial bottom return in
+the time series sidescan data. If no topographic model is specified with the
+<B>--topo-grid-file</B> option, then the
+sidescan will be laid out using using a flat bottom assumption and the altitude.
+The default altitude bottompick threshold is 0.5, meaning the bottom return is
+picked for each channel (port and starboard) at the first time the time series
+sidescan value reaches 0.5 times the maximum value. The altitude value used for
+the overall layout is the average of the values found for the port and starboard
+channels.
+<DT><B>--altitude-bottompick-threshold</B>=<I>value</I>
+
+<DD>
+<BR>
+
+Specifies the threshold used to pick the initial bottom return in the time series
+sidescan data. The default threshold is 0.5. This option turns the bottompick
+altitude mode on, so it is unnecessary to also specify the <B>--altitude-bottomppick</B>
+option.
+<DT><B>--channel-swap</B>
+
+<DD>
+<BR>
+
+This option causes <B>mbsslayout</B> to swap the port and starboard time series
+sidescan channels before laying out the sidescan data on the seafloor.
+<DT><B>--swath-width</B>=<I>value</I>
+
+<DD>
+<BR>
+
+Specifies a constant output swath width in meters. By default, <B>mbsslayout</B>
+varies the swath width according to the maximum range and altitude of the
+sidescan data. See the description section for details of the default swath width
+calculation and the sidescan layout process.
+<BR>
+
+<DT><B>--interpolation</B>=<I>value</I>
+
+<DD>
+<BR>
+
+Specifies the degree to which gaps in the output swath sidescan are filled by
+interpolation. The interpolation value corresponds to the maximum number of
+adjacent empty pixels that is filled by interpolation; larger gaps are not
+filled by interpolation and remain empty in the output swath sidescan. The default
+is to do no interpolation.
+<BR>
+
+<DT><B>--nav-file</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+Specifies an external file from which to merge sonar position (navigation),
+replacing any navigation data included in the input time series sidescan files.
+By default <B>mbsslayout</B> attempts to use navigation values included in the
+input data.
+<DT><B>--nav-file-format</B>=<I>format_id</I>
+
+<DD>
+<BR>
+
+Specifies the format of an external navigation file from which position values
+are derived (as defined with <B>--nav-file</B>). Options for the <I>format_id</I>
+value are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;1:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;longitude&nbsp;latitude&nbsp;speed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;longitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;and&nbsp;speed&nbsp;is&nbsp;in&nbsp;km/hour&nbsp;(and&nbsp;is&nbsp;optional).
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;2:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;longitude&nbsp;latitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;month,&nbsp;day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;3:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;longitude&nbsp;latitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;4:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;day_minute&nbsp;second&nbsp;longitude&nbsp;latitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;and&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;5:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;in&nbsp;the&nbsp;1990's&nbsp;era&nbsp;L-DEO&nbsp;processed&nbsp;nav&nbsp;format&nbsp;with&nbsp;lines
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yy+jjjhhmmssNddmmmmmmEdddmmmmmm
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;yy&nbsp;is&nbsp;the&nbsp;two&nbsp;digit&nbsp;year&nbsp;(after&nbsp;1999&nbsp;the&nbsp;&quot;yy+&quot;&nbsp;was&nbsp;replaced&nbsp;by&nbsp;a&nbsp;four
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;digit&nbsp;year&nbsp;&quot;yyyy&quot;),&nbsp;jjj&nbsp;is&nbsp;the&nbsp;julian_day,&nbsp;hh&nbsp;is&nbsp;the&nbsp;hour,&nbsp;mm
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;minutes,&nbsp;and&nbsp;ss&nbsp;is&nbsp;seconds.&nbsp;The&nbsp;latitude&nbsp;is&nbsp;given&nbsp;as
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Nddmmmmmmand&nbsp;where&nbsp;N&nbsp;is&nbsp;'N'&nbsp;for&nbsp;north&nbsp;and&nbsp;'S'&nbsp;for&nbsp;south,&nbsp;dd&nbsp;are&nbsp;integer
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;degrees,&nbsp;and&nbsp;mmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;10000.&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Edddmmmmmmand&nbsp;where&nbsp;E&nbsp;is&nbsp;'E'&nbsp;for&nbsp;east&nbsp;and&nbsp;'W'&nbsp;for&nbsp;west,&nbsp;ddd&nbsp;are&nbsp;integer
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;degrees,&nbsp;and&nbsp;mmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;10000.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;6&nbsp;or&nbsp;7:&nbsp;NMEA&nbsp;0183&nbsp;position&nbsp;strings
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Several&nbsp;NMEA&nbsp;and&nbsp;NMEA-like&nbsp;strings&nbsp;containing&nbsp;position&nbsp;are&nbsp;recognized,
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;can&nbsp;be&nbsp;parsed&nbsp;with&nbsp;and&nbsp;without&nbsp;line&nbsp;break&nbsp;characters.&nbsp;These&nbsp;strings
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;include&nbsp;ZDA,&nbsp;GLL,&nbsp;GGA,&nbsp;DAT,&nbsp;and&nbsp;UNX.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;8:&nbsp;Simrad&nbsp;90&nbsp;format&nbsp;navigation&nbsp;files&nbsp;with&nbsp;lines
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ddmmyy&nbsp;hhmmssss&nbsp;ddmmmmmmmN&nbsp;dddmmmmmmmE
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;dd&nbsp;is&nbsp;day&nbsp;of&nbsp;the&nbsp;month,&nbsp;mm&nbsp;is&nbsp;the&nbsp;month,&nbsp;yy&nbsp;is&nbsp;the&nbsp;two&nbsp;digit&nbsp;year,
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hh&nbsp;is&nbsp;the&nbsp;hour,&nbsp;mm&nbsp;is&nbsp;the&nbsp;minute,&nbsp;and&nbsp;ssss&nbsp;is&nbsp;seconds&nbsp;*&nbsp;100.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;latitude&nbsp;is&nbsp;given&nbsp;as&nbsp;ddmmmmmmmN&nbsp;where&nbsp;dd&nbsp;are&nbsp;integer&nbsp;degrees,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mmmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;100000,&nbsp;and&nbsp;N&nbsp;is&nbsp;'N'&nbsp;for&nbsp;north&nbsp;and&nbsp;'S'&nbsp;for&nbsp;south&nbsp;latitude.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as&nbsp;dddmmmmmmmE&nbsp;where&nbsp;ddd&nbsp;are&nbsp;integer&nbsp;degrees,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mmmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;100000,&nbsp;and&nbsp;E&nbsp;is&nbsp;'E'&nbsp;for&nbsp;east&nbsp;and&nbsp;'W'&nbsp;for&nbsp;west&nbsp;longitude.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;second&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;degrees.&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Edddmmmmmmand&nbsp;where&nbsp;E&nbsp;is&nbsp;'E'&nbsp;for&nbsp;east&nbsp;and&nbsp;'W'&nbsp;for&nbsp;west,&nbsp;ddd&nbsp;are&nbsp;integer
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;degrees,&nbsp;and&nbsp;mmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;10000.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;9:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;white-space&nbsp;delimited&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;time_d&nbsp;lon&nbsp;lat&nbsp;heading&nbsp;speed&nbsp;sensordepth*
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;yr&nbsp;is&nbsp;the&nbsp;four&nbsp;digit&nbsp;year,&nbsp;mon&nbsp;is&nbsp;the&nbsp;month,&nbsp;day&nbsp;is&nbsp;the&nbsp;day&nbsp;of&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;month,&nbsp;min&nbsp;is&nbsp;the&nbsp;minute,&nbsp;second&nbsp;is&nbsp;the&nbsp;decimal&nbsp;seconds,&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;lon&nbsp;is&nbsp;the&nbsp;longitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;lat&nbsp;is&nbsp;the&nbsp;latitude&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;heading&nbsp;is&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;degrees,&nbsp;speed&nbsp;is&nbsp;in&nbsp;km/hour,&nbsp;and&nbsp;sensordepth&nbsp;is&nbsp;in&nbsp;meters.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;10:&nbsp;R2R&nbsp;(Rolling&nbsp;deck&nbsp;to&nbsp;Repository)&nbsp;navigation&nbsp;format&nbsp;with&nbsp;ASCCI&nbsp;text&nbsp;lines
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yyyy-mm-ddThh:mm:ss.sssZ&nbsp;lon&nbsp;lat&nbsp;quality&nbsp;nsat&nbsp;dilution&nbsp;height
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;the&nbsp;lon&nbsp;and&nbsp;lat&nbsp;fields&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees&nbsp;with&nbsp;south&nbsp;latitudes
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;west&nbsp;longitudes&nbsp;negative,&nbsp;and&nbsp;the&nbsp;last&nbsp;four&nbsp;quantities&nbsp;relating&nbsp;to
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GPS&nbsp;fix&nbsp;quality.
+<DT><B>--nav-async</B>=<I>record_kind</I>
+
+<DD>
+<BR>
+
+Specifies the type of data records from which position values
+are derived (as defined with <B>--nav-file-format</B>). Options for the
+<I>record_kind</I> include:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATA:&nbsp;&nbsp;1&nbsp;(survey&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV:&nbsp;&nbsp;12&nbsp;(navigation&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1:&nbsp;29&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;1)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2:&nbsp;30&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;2)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3:&nbsp;31&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;3)
+<BR>
+
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the navigation source by default. The
+program <B>mbinfo</B> can be used with the <B>-N</B> option to determine the numbers
+of different record types present in a data file.
+<DT><B>--sensordepth-file</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+Specifies an external file from which to merge sensor depth,
+replacing any sensor depth data included in the input time series sidescan files.
+By default <B>mbsslayout</B> attempts to use sensor depth values included in the
+input data.
+<DT><B>--sensordepth-file-format</B>=<I>format_id</I>
+
+<DD>
+<BR>
+
+Specifies the format of an external sensor depth file from which sensor depth values
+are derived (as defined with <B>--sensordepth-file</B>). Options for the <I>format_id</I>
+value are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;1:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;longitude&nbsp;latitude&nbsp;speed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;longitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;and&nbsp;speed&nbsp;is&nbsp;in&nbsp;km/hour&nbsp;(and&nbsp;is&nbsp;optional).
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;2:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;longitude&nbsp;latitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;month,&nbsp;day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<DT><B>--sensordepth-async</B>=<I>record_kind</I>
+
+<DD>
+<BR>
+
+<DT><B>--altitude-file</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+Specifies an external file from which to merge altitude,
+replacing any altitude data included in the input time series sidescan files.
+By default <B>mbsslayout</B> attempts to use altitude values included in the
+input data.
+<DT><B>--altitude_file-format</B>=<I>format_id</I>
+
+<DD>
+<BR>
+
+<DT><B>--altitude-async</B>=<I>record_kind</I>
+
+<DD>
+<BR>
+
+<DT><B>--heading-file</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+Specifies an external file from which to merge heading,
+replacing any heading data included in the input time series sidescan files.
+By default <B>mbsslayout</B> attempts to use heading values included in the
+input data.
+<DT><B>--heading-file-format</B>=<I>format_id</I>
+
+<DD>
+<BR>
+
+<DT><B>--heading-async</B>=<I>record_kind</I>
+
+<DD>
+<BR>
+
+<DT><B>--attitude-file</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+Specifies an external file from which to merge attitude (roll and pitch),
+replacing any attitude data included in the input time series sidescan files.
+By default <B>mbsslayout</B> attempts to use attitude values included in the
+input data.
+<DT><B>--attitude-file-format</B>=<I>format_id</I>
+
+<DD>
+<BR>
+
+<DT><B>--attitude-async</B>=<I>record_kind</I>
+
+<DD>
+<BR>
+
+<DT><B>--soundspeed-constant</B>=<I>value</I>
+
+<DD>
+<BR>
+
+<DT><B>--soundspeed-file</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+Specifies an external file from which to merge water sound speed,
+replacing any sound speed data included in the input time series sidescan files.
+By default <B>mbsslayout</B> attempts to use sound speed values included in the
+input data.
+<DT><B>--soundspeed-file-format</B>=<I>format_id</I>
+
+<DD>
+<BR>
+
+<DT><B>--soundspeed-async</B>=<I>record_kind</I>
+
+<DD>
+<BR>
+
+<DT><B>--timeshift-file</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+<DT><B>--timeshift-constant</B>=<I>value</I>
+
+<DD>
+<BR>
+
+<DT><B>--timeshift-apply-nav</B>
+
+<DD>
+<BR>
+
+<DT><B>--timeshift-apply-sensordepth</B>
+
+<DD>
+<BR>
+
+<DT><B>--timeshift-apply-altitude</B>
+
+<DD>
+<BR>
+
+<DT><B>--timeshift-apply-heading</B>
+
+<DD>
+<BR>
+
+<DT><B>--timeshift-apply-attitude</B>
+
+<DD>
+<BR>
+
+<DT><B>--timeshift-apply-all-ancilliary</B>
+
+<DD>
+<BR>
+
+<DT><B>--timeshift-apply-survey</B>
+
+<DD>
+<BR>
+
+<DT><B>--timeshift-apply-all</B>
+
+<DD>
+<BR>
+
+<P>
+<P>
+<P>
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -192,7 +819,7 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 12 April 2017</P></CENTER>
+Last Updated: 17 September 2017</P></CENTER>
 
 <HR>
 

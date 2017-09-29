@@ -126,16 +126,13 @@ int main(int argc, char **argv) {
 	 *
 	 * 		--platform-file
 	 * 		--platform-target-sensor
-	 *
 	 * 		--output-source=record_kind
-	 * 		--output-name1=name
-	 * 		--output-name2=name
 	 *
-	 * 		--line-nameroot=name
 	 * 		--line-time-list=filename
 	 * 		--line-route=filename
-	 * 		--line-check-bearing
 	 * 		--line-range-threshold=value
+	 * 		--line-name1=name
+	 * 		--line-name2=name
 	 *
 	 * 		--topo-grid-file=filename
 	 * 		--altitude-altitude
@@ -185,22 +182,17 @@ int main(int argc, char **argv) {
 	                                  {"platform-file", required_argument, NULL, 0},
 	                                  {"platform-target-sensor", required_argument, NULL, 0},
 	                                  {"output-source", required_argument, NULL, 0},
-	                                  {"output_source", required_argument, NULL, 0},
-	                                  {"output-name1", required_argument, NULL, 0},
-	                                  {"output_name1", required_argument, NULL, 0},
-	                                  {"output-name2", required_argument, NULL, 0},
-	                                  {"output_name2", required_argument, NULL, 0},
 	                                  {"line-time-list", required_argument, NULL, 0},
-	                                  {"line_time_list", required_argument, NULL, 0},
 	                                  {"line-position-list", required_argument, NULL, 0},
-	                                  {"line-check-bearing", no_argument, NULL, 0},
 	                                  {"line-range-threshold", required_argument, NULL, 0},
+	                                  {"line-name1", required_argument, NULL, 0},
+	                                  {"line-name2", required_argument, NULL, 0},
+	                                  {"output-name1", required_argument, NULL, 0},
+	                                  {"output-name2", required_argument, NULL, 0},
 	                                  {"topo-grid-file", required_argument, NULL, 0},
-	                                  {"topo_grid_file", required_argument, NULL, 0},
 	                                  {"altitude-altitude", no_argument, NULL, 0},
 	                                  {"altitude-bottompick", no_argument, NULL, 0},
 	                                  {"altitude-topo-grid", no_argument, NULL, 0},
-	                                  {"altitude_topo_grid", no_argument, NULL, 0},
 	                                  {"altitude-bottompick-threshold", required_argument, NULL, 0},
 	                                  {"channel-swap", required_argument, NULL, 0},
 	                                  {"swath-width", required_argument, NULL, 0},
@@ -239,15 +231,14 @@ int main(int argc, char **argv) {
 
 	/* output variables */
 	int output_source = MB_DATA_DATA;
-	mb_path output_name1 = "Survey";
-	mb_path output_name2 = "sidescan";
 
 	/* survey line variables */
 	int line_mode = MBSSLAYOUT_LINE_OFF;
 	mb_path line_time_list;
 	mb_path line_route;
-	int line_check_bearing = MB_NO;
 	double line_range_threshold = 50.0;
+	mb_path line_name1 = "Survey";
+	mb_path line_name2 = "sidescan";
 
 	/* sidescan layout variables */
 	int layout_mode = MBSSLAYOUT_LAYOUT_FLATBOTTOM;
@@ -573,8 +564,8 @@ int main(int argc, char **argv) {
 	strcpy(read_file, "datalist.mb-1");
 
 	/* initialize some other things */
-	memset(output_name1, 0, sizeof(mb_path));
-	memset(output_name2, 0, sizeof(mb_path));
+	memset(line_name1, 0, sizeof(mb_path));
+	memset(line_name2, 0, sizeof(mb_path));
 	memset(line_time_list, 0, sizeof(mb_path));
 	memset(line_route, 0, sizeof(mb_path));
 	memset(topo_grid_file, 0, sizeof(mb_path));
@@ -585,7 +576,7 @@ int main(int argc, char **argv) {
 	memset(attitude_file, 0, sizeof(mb_path));
 	memset(soundspeed_file, 0, sizeof(mb_path));
 	memset(time_latency_file, 0, sizeof(mb_path));
-	memset(read_file, 0, sizeof(mb_path));
+	//memset(read_file, 0, sizeof(mb_path));
 	memset(output_file, 0, sizeof(mb_path));
 	memset(ifile, 0, sizeof(mb_path));
 	memset(dfile, 0, sizeof(mb_path));
@@ -593,8 +584,8 @@ int main(int argc, char **argv) {
 	memset(platform_file, 0, sizeof(mb_path));
 	memset(command, 0, sizeof(mb_path));
 	memset(scriptfile, 0, sizeof(mb_path));
-	strcpy(output_name1, "Survey");
-	strcpy(output_name2, "sidescan");
+	strcpy(line_name1, "Survey");
+	strcpy(line_name2, "sidescan");
 
 	/* process argument list */
 	while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
@@ -655,16 +646,20 @@ int main(int argc, char **argv) {
                     n = sscanf(optarg, "%d", &output_source);
 			}
 
-			/* output_name1 */
-			else if ((strcmp("output-name1", options[option_index].name) == 0)
+			/* line_name1 */
+			else if ((strcmp("line-name1", options[option_index].name) == 0)
+                     || (strcmp("line_name1", options[option_index].name) == 0)
+			         || (strcmp("output-name1", options[option_index].name) == 0)
                      || (strcmp("output_name1", options[option_index].name) == 0)) {
-				strcpy(output_name1, optarg);
+				strcpy(line_name1, optarg);
 			}
 
-			/* output_name2 */
-			else if ((strcmp("output-name2", options[option_index].name) == 0) 
+			/* line_name2 */
+			else if ((strcmp("line-name2", options[option_index].name) == 0) 
+                    || (strcmp("line_name2", options[option_index].name) == 0)
+			        || (strcmp("output-name2", options[option_index].name) == 0) 
                     || (strcmp("output_name2", options[option_index].name) == 0)) {
-				strcpy(output_name2, optarg);
+				strcpy(line_name2, optarg);
 			}
 
 			/*-------------------------------------------------------
@@ -683,11 +678,6 @@ int main(int argc, char **argv) {
 				line_mode = MBSSLAYOUT_LINE_ROUTE;
 			}
 
-			/* line-check-bearing */
-			else if (strcmp("line-check-bearing", options[option_index].name) == 0) {
-				line_check_bearing = MB_YES;
-			}
-
 			/*-------------------------------------------------------
 			 * Define sidescan layout algorithm parameters */
 
@@ -696,6 +686,7 @@ int main(int argc, char **argv) {
                     || (strcmp("topo_grid_file", options[option_index].name) == 0)) {
 				strcpy(topo_grid_file, optarg);
 				layout_mode = MBSSLAYOUT_LAYOUT_3DTOPO;
+				ss_altitude_mode = MBSSLAYOUT_ALTITUDE_TOPO_GRID;
 			}
 
 			/* altitude-altitude */
@@ -1066,13 +1057,12 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", target_sensor);
 		fprintf(stderr, "dbg2  Source Data Parameters:\n");
 		fprintf(stderr, "dbg2       output_source:              %d\n", output_source);
-		fprintf(stderr, "dbg2       output_name1:               %s\n", output_name1);
-		fprintf(stderr, "dbg2       output_name2:               %s\n", output_name2);
+		fprintf(stderr, "dbg2       line_name1:                 %s\n", line_name1);
+		fprintf(stderr, "dbg2       line_name2:                 %s\n", line_name2);
 		fprintf(stderr, "dbg2  Survey Line Parameters:\n");
 		fprintf(stderr, "dbg2       line_mode:                  %d\n", line_mode);
 		fprintf(stderr, "dbg2       line_time_list:             %s\n", line_time_list);
 		fprintf(stderr, "dbg2       line_route:                 %s\n", line_route);
-		fprintf(stderr, "dbg2       line_check_bearing:         %d\n", line_check_bearing);
 		fprintf(stderr, "dbg2       line_range_threshold:       %f\n", line_range_threshold);
 		fprintf(stderr, "dbg2  Sidescan Layout Algorithm Parameters:\n");
 		fprintf(stderr, "dbg2       layout_mode:                %d\n", layout_mode);
@@ -1148,8 +1138,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Output Channel Parameters:\n");
 		if (output_source != MB_DATA_NONE) {
 			fprintf(stderr, "     output_source:            %d\n", output_source);
-			fprintf(stderr, "     output_name1:             %s\n", output_name1);
-			fprintf(stderr, "     output_name2:             %s\n", output_name2);
+			fprintf(stderr, "     line_name1:               %s\n", line_name1);
+			fprintf(stderr, "     line_name2:               %s\n", line_name2);
 		}
 		fprintf(stderr, "Survey Line Parameters:\n");
 		if (line_mode == MBSSLAYOUT_LINE_OFF) {
@@ -1158,12 +1148,10 @@ int main(int argc, char **argv) {
 		else if (line_mode == MBSSLAYOUT_LINE_TIME) {
 			fprintf(stderr, "     line_mode:                Lines defined by waypoint time list.\n");
 			fprintf(stderr, "     line_time_list:           %s\n", line_time_list);
-			fprintf(stderr, "     line_check_bearing:       %d\n", line_check_bearing);
 		}
 		else if (line_mode == MBSSLAYOUT_LINE_ROUTE) {
 			fprintf(stderr, "     line_mode:                Lines defined by route waypoint position list.\n");
 			fprintf(stderr, "     line_route:               %s\n", line_route);
-			fprintf(stderr, "     line_check_bearing:       %d\n", line_check_bearing);
 		}
 		fprintf(stderr, "Sidescan Layout Algorithm Parameters:\n");
 		if (layout_mode == MBSSLAYOUT_LAYOUT_FLATBOTTOM) {
@@ -1560,7 +1548,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* set up plotting script file */
-	sprintf(scriptfile, "%s_%s_ssswathplot.cmd", output_name1, output_name2);
+	sprintf(scriptfile, "%s_%s_ssswathplot.cmd", line_name1, line_name2);
 	if ((sfp = fopen(scriptfile, "w")) == NULL) {
 		error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
@@ -2359,9 +2347,9 @@ int main(int argc, char **argv) {
 
 					/* define the filename */
 					if (line_mode == MBSSLAYOUT_LINE_OFF)
-						sprintf(output_file, "%s_%s.mb%2.2d", ifileroot, output_name2, MBF_MBLDEOIH);
+						sprintf(output_file, "%s_%s.mb%2.2d", ifileroot, line_name2, MBF_MBLDEOIH);
 					else
-						sprintf(output_file, "%s_%s_%4.4d.mb%2.2d", output_name1, output_name2, line_number, MBF_MBLDEOIH);
+						sprintf(output_file, "%s_%s_%4.4d.mb%2.2d", line_name1, line_name2, line_number, MBF_MBLDEOIH);
 
 					/* open the new file */
 					if (verbose > 0)

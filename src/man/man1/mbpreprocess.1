@@ -151,11 +151,113 @@ positional and angular offsets defined in the platform file.
 .B --skip-existing
 .br
 .TP
-.B --nav-file=\fIFILE\fP
+.B \-\-nav-file\fP=\fIfilename\fP
+.br
+Specifies an external file from which to merge sonar position (navigation),
+replacing any navigation data included in the input time series sidescan files.
+By default \fBmbsslayout\fP attempts to use navigation values included in the
+input data.
 .TP
-.B --nav-file-format=\fIFORMATID\fP
+.B \-\-nav-file-format\fP=\fIformat_id\fP
+.br
+Specifies the format of an external navigation file from which position values
+are derived (as defined with \fB\-\-nav-file\fP). Options for the \fIformat_id\fP
+value are:
+.br
+   1: ASCCI text file with lines of the form:
+        time_d longitude latitude speed
+      where time_d is time in decimal epoch seconds (seconds since 1970), longitude
+      and latitude are in decimal degrees, and speed is in km/hour (and is optional).
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+   2: ASCCI text file with lines of the form:
+        year month day hour minute second longitude latitude
+      where year, month, day, hour, and minute values are integers, the second
+      value is decimal, and longitude and latitude are in decimal degrees.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+   3: ASCCI text file with lines of the form:
+        year julian_day hour minute second longitude latitude
+      where year, julian_day, hour, and minute values are integers, the second
+      value is decimal, and longitude and latitude are in decimal degrees.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+   4: ASCCI text file with lines of the form:
+        year julian_day day_minute second longitude latitude
+      where year, julian_day, and day_minute values are integers, the second
+      value is decimal, and longitude and latitude are in decimal degrees.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+   5: ASCCI text file in the 1990's era L-DEO processed nav format with lines
+      of the form:
+        yy+jjjhhmmssNddmmmmmmEdddmmmmmm
+      where yy is the two digit year (after 1999 the "yy+" was replaced by a four
+      digit year "yyyy"), jjj is the julian_day, hh is the hour, mm
+      is minutes, and ss is seconds. The latitude is given as
+      Nddmmmmmmand where N is 'N' for north and 'S' for south, dd are integer
+      degrees, and mmmmmm is minutes * 10000. The longitude is given as
+      Edddmmmmmmand where E is 'E' for east and 'W' for west, ddd are integer
+      degrees, and mmmmmm is minutes * 10000.
+.br
+   6 or 7: NMEA 0183 position strings
+      Several NMEA and NMEA-like strings containing position are recognized,
+      and can be parsed with and without line break characters. These strings
+      include ZDA, GLL, GGA, DAT, and UNX.
+.br
+   8: Simrad 90 format navigation files with lines
+      of the form:
+        ddmmyy hhmmssss ddmmmmmmmN dddmmmmmmmE
+      where dd is day of the month, mm is the month, yy is the two digit year,
+      hh is the hour, mm is the minute, and ssss is seconds * 100.
+      The latitude is given as ddmmmmmmmN where dd are integer degrees, 
+      mmmmmmm is minutes * 100000, and N is 'N' for north and 'S' for south latitude.
+      The longitude is given as dddmmmmmmmE where ddd are integer degrees, 
+      mmmmmmm is minutes * 100000, and E is 'E' for east and 'W' for west longitude.
+      
+      
+      day_minute values are integers,
+      the second value is decimal, and longitude and latitude are in decimal
+      degrees. The longitude is given as
+      Edddmmmmmmand where E is 'E' for east and 'W' for west, ddd are integer
+      degrees, and mmmmm is minutes * 10000.
+.br
+   9: ASCCI text file with white-space delimited lines of the form:
+        yr mon day hour min sec time_d lon lat heading speed sensordepth*
+      where yr is the four digit year, mon is the month, day is the day of the
+      month, min is the minute, second is the decimal seconds, time_d is time in
+      decimal epoch seconds (seconds since 1970), lon is the longitude
+      in decimal degrees, lat is the latitude in decimal degrees, heading is in
+      decimal degrees, speed is in km/hour, and sensordepth is in meters.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+   10: R2R (Rolling deck to Repository) navigation format with ASCCI text lines
+      of the form:
+         yyyy-mm-ddThh:mm:ss.sssZ lon lat quality nsat dilution height
+      where the lon and lat fields are in decimal degrees with south latitudes
+      and west longitudes negative, and the last four quantities relating to
+      GPS fix quality.
 .TP
-.B --nav-async=\fIRECORDTYPE\fP
+.B \-\-nav-async\fP=\fIrecord_kind\fP
+.br
+Specifies the type of data records from which position values
+are derived (as defined with \fB\-\-nav-file-format\fP). Options for the
+\fIrecord_kind\fP include:
+.br
+    MB_DATA_DATA:  1 (survey data)
+    MB_DATA_NAV:  12 (navigation data)
+    MB_DATA_NAV1: 29 (navigation data from navigation system 1)
+    MB_DATA_NAV2: 30 (navigation data from navigation system 2)
+    MB_DATA_NAV3: 31 (navigation data from navigation system 3)
+.br
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the navigation source by default. The
+program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
+of different record types present in a data file.
 .TP
 .B --nav-sensor=\fISENSORID\fP
 .br
