@@ -31,7 +31,7 @@ Version 5.0
 <B>-D</B><I>interval</I> <B>-E</B><I>year/month/day/hour/minute/second
 </I><B>-F</B><I>format</I> <B>-I</B><I>datalist.mb-1</I>
 <B>-M</B> <B>-O</B><I>output</I> <B>-P</B><I>otps_location</I>
-<B>-R</B><I>lon/lat</I> <B>-T</B><I>model</I> <B>-V</B>]
+<B>-R</B><I>lon/lat</I> <B>-S</B> <B>-T</B><I>model</I> <B>-V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -250,6 +250,11 @@ the tide model to be used by <B>predict_tide</B>.
 
 Sets the longitude and latitude position at which the tidal model will be
 calculated.
+<DT><B>-S</B>
+
+<DD>
+If tide models are being generated for swath files specified using the <B>-I</B> option,
+then skip files that already have an existing tide model.
 <DT><B>-T</B>
 
 <DD>
@@ -278,7 +283,7 @@ at 60 second intervals over the day February 21, 2009. The following will suffic
 The shell output looks like:
 <P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.1&nbsp;2300&nbsp;2017-04-15&nbsp;08:28:27Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.1&nbsp;2315&nbsp;2017-09-22&nbsp;06:17:14Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.4.2137<BR>
 <P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Checking&nbsp;for&nbsp;available&nbsp;OTPS&nbsp;tide&nbsp;models<BR>
@@ -309,7 +314,7 @@ The shell output looks like:
 The output tidal model is in the file tide_model.txt, which includes
 data that look like:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.1&nbsp;2300&nbsp;2017-04-15&nbsp;08:28:27Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.1&nbsp;2315&nbsp;2017-09-22&nbsp;06:17:14Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;MB-System&nbsp;Version:&nbsp;5.4.2137<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;which&nbsp;in&nbsp;turn&nbsp;calls&nbsp;OTPS&nbsp;program&nbsp;predict_tide&nbsp;obtained&nbsp;from:<BR>
@@ -358,7 +363,7 @@ The resulting shell output looks like:
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.1&nbsp;2300&nbsp;2017-04-15&nbsp;08:28:27Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.1&nbsp;2315&nbsp;2017-09-22&nbsp;06:17:14Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.4.2137<BR>
 <P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Checking&nbsp;for&nbsp;available&nbsp;OTPS&nbsp;tide&nbsp;models<BR>
@@ -397,7 +402,7 @@ The resulting shell output looks like:
 
 The output tide files have the same structure shown above:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.1&nbsp;2300&nbsp;2017-04-15&nbsp;08:28:27Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.1&nbsp;2315&nbsp;2017-09-22&nbsp;06:17:14Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;MB-System&nbsp;Version:&nbsp;5.4.2137<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;which&nbsp;in&nbsp;turn&nbsp;calls&nbsp;OTPS&nbsp;program&nbsp;predict_tide&nbsp;obtained&nbsp;from:<BR>

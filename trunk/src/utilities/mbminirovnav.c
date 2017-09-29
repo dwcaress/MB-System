@@ -62,18 +62,19 @@ int main(int argc, char **argv) {
                             "\tformats handles preprocessing of swath sonar data as part of setting up\n"
                             "\tan MB-System processing structure for a dataset.\n";
 	char usage_message[] = "mbminirovnav\n"
-	                       "\t--verbose\n"
 	                       "\t--help\n\n"
 	                       "\t--input=fileroot\n"
-	                       "\t--input-nav-file=file\n"
 	                       "\t--input-ctd-file=file\n"
 	                       "\t--input-dvl-file=file\n"
+	                       "\t--input-nav-file=file\n"
 	                       "\t--input-rov-file=file\n"
+						   "\t--interpolate-position\n"
+						   "\t--interval=seconds\n"
 	                       "\t--output=file\n"
 						   "\t--rov-dive-start=yyyymmddhhmmss\n"
 						   "\t--rov-dive-end=yyyymmddhhmmss\n"
 						   "\t--utm-zone=zone_id/NorS\n"
-						   "\t--interpolate-position\n\n";
+	                       "\t--verbose\n\n";
 
 	extern char *optarg;
 	int option_index;
@@ -143,6 +144,7 @@ int main(int argc, char **argv) {
 
 	double start_time_d = 0.0;
 	double end_time_d = 0.0;
+	double interval = 1.0;
 	int onav_time_i[7], onav_time_j[5];
 	int onav_year, onav_jday, onav_timetag;
 	double num_output;
@@ -186,18 +188,19 @@ int main(int argc, char **argv) {
 	 * 		--input-ctd=file
 	 * 		--output=file
 	 */
-	static struct option options[] = {{"verbose", no_argument, NULL, 0},
-	                                  {"help", no_argument, NULL, 0},
+	static struct option options[] = {{"help", no_argument, NULL, 0},
 	                                  {"input", required_argument, NULL, 0},
 	                                  {"input-nav-file", required_argument, NULL, 0},
 	                                  {"input-ctd-file", required_argument, NULL, 0},
 	                                  {"input-dvl-file", required_argument, NULL, 0},
 	                                  {"input-rov-file", required_argument, NULL, 0},
+	                                  {"interpolate-position", no_argument, NULL, 0},
+	                                  {"interval", required_argument, NULL, 0},
 	                                  {"output", required_argument, NULL, 0},
 	                                  {"rov-dive-start", required_argument, NULL, 0},
 	                                  {"rov-dive-end", required_argument, NULL, 0},
 	                                  {"utm-zone", required_argument, NULL, 0},
-	                                  {"interpolate-position", no_argument, NULL, 0},
+									  {"verbose", no_argument, NULL, 0},
 	                                  {NULL, 0, NULL, 0}};
 
     /* files */
@@ -236,22 +239,22 @@ int main(int argc, char **argv) {
 				sprintf(output_file, "MiniROV_nav_%s.mb165", input_root);
 			}
 
-			/* input-nav=file */
-			else if (strcmp("input-nav-file", options[option_index].name) == 0) {
-				strcpy(input_nav_file, optarg);
-			}
-
 			/* input-ctd=file */
 			else if (strcmp("input-ctd-file", options[option_index].name) == 0) {
 				strcpy(input_ctd_file, optarg);
 			}
 
-			/* input-ctd=file */
+			/* input-dvl=file */
 			else if (strcmp("input-dvl-file", options[option_index].name) == 0) {
 				strcpy(input_dvl_file, optarg);
 			}
 
-			/* input-ctd=file */
+			/* input-nav=file */
+			else if (strcmp("input-nav-file", options[option_index].name) == 0) {
+				strcpy(input_nav_file, optarg);
+			}
+
+			/* input-rov=file */
 			else if (strcmp("input-rov-file", options[option_index].name) == 0) {
 				strcpy(input_rov_file, optarg);
 			}
@@ -259,6 +262,16 @@ int main(int argc, char **argv) {
 			/* output=file */
 			else if (strcmp("output", options[option_index].name) == 0) {
 				strcpy(output_file, optarg);
+			}
+
+			/* interval */
+			else if (strcmp("interval", options[option_index].name) == 0) {
+				nscan = sscanf(optarg, "%lf", &interval);
+				if (interval <= 0.0) {
+					fprintf(stderr,"Program %s command error: %s %s\n\toutput interval reset to 1.0 seconds\n",
+							program_name, options[option_index].name, optarg);
+					
+				}
 			}
 
 			/* start rov dive time */
@@ -348,7 +361,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  Version %s\n", version_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Default MB-System Parameters:\n");
+		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
 		fprintf(stderr, "dbg2       help:                         %d\n", help);
 		fprintf(stderr, "dbg2       input_root:                   %s\n", input_root);
@@ -357,18 +370,25 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       input_dvl_file:               %s\n", input_dvl_file);
 		fprintf(stderr, "dbg2       input_rov_file:               %s\n", input_rov_file);
 		fprintf(stderr, "dbg2       output_file:                  %s\n", output_file);
-		fprintf(stderr, "dbg2       utm_zone_set:                 %d\n", utm_zone_set);
-		fprintf(stderr, "dbg2       projection_id:                %s\n", projection_id);
-		fprintf(stderr, "dbg2       interpolate_position:         %d\n", interpolate_position);
+		fprintf(stderr, "dbg2       output time interval:         %f\n", interval);
 		fprintf(stderr, "dbg2       rov_dive_start_time_set:      %d\n", rov_dive_start_time_set);
-		fprintf(stderr, "dbg2       rov_dive_start_time_i:        %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-				rov_dive_start_time_i[0], rov_dive_start_time_i[1], rov_dive_start_time_i[2],
-				rov_dive_start_time_i[3], rov_dive_start_time_i[4], rov_dive_start_time_i[5],
-				rov_dive_start_time_i[6]);
-		fprintf(stderr, "dbg2       rov_dive_end_time_i:          %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-				rov_dive_end_time_i[0], rov_dive_end_time_i[1], rov_dive_end_time_i[2],
-				rov_dive_end_time_i[3], rov_dive_end_time_i[4], rov_dive_end_time_i[5],
-				rov_dive_end_time_i[6]);
+		if (rov_dive_start_time_set == MB_YES)
+			fprintf(stderr, "dbg2       rov_dive_start_time_i:        %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					rov_dive_start_time_i[0], rov_dive_start_time_i[1], rov_dive_start_time_i[2],
+					rov_dive_start_time_i[3], rov_dive_start_time_i[4], rov_dive_start_time_i[5],
+					rov_dive_start_time_i[6]);
+		fprintf(stderr, "dbg2       rov_dive_end_time_set:        %d\n", rov_dive_end_time_set);
+		if (rov_dive_end_time_set == MB_YES)
+			fprintf(stderr, "dbg2       rov_dive_end_time_i:          %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					rov_dive_end_time_i[0], rov_dive_end_time_i[1], rov_dive_end_time_i[2],
+					rov_dive_end_time_i[3], rov_dive_end_time_i[4], rov_dive_end_time_i[5],
+					rov_dive_end_time_i[6]);
+		fprintf(stderr, "dbg2       utm_zone_set:                 %d\n", utm_zone_set);
+		if (utm_zone_set == MB_YES) {
+			fprintf(stderr, "dbg2       utm_zone:                     %d\n", utm_zone);
+			fprintf(stderr, "dbg2       projection_id:                %s\n", projection_id);
+		}
+		fprintf(stderr, "dbg2       interpolate_position:         %d\n", interpolate_position);
 	}
 
 	/* print starting verbose */
@@ -376,7 +396,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nProgram <%s>\n", program_name);
 		fprintf(stderr, "Version %s\n", version_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "Default MB-System Parameters:\n");
+		fprintf(stderr, "Control Parameters:\n");
 		fprintf(stderr, "     verbose:                      %d\n", verbose);
 		fprintf(stderr, "     help:                         %d\n", help);
 		fprintf(stderr, "     input_root:                   %s\n", input_root);
@@ -385,18 +405,25 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "     input_dvl_file:               %s\n", input_dvl_file);
 		fprintf(stderr, "     input_rov_file:               %s\n", input_rov_file);
 		fprintf(stderr, "     output_file:                  %s\n", output_file);
-		fprintf(stderr, "     utm_zone_set:                 %d\n", utm_zone_set);
-		fprintf(stderr, "     projection_id:                %s\n", projection_id);
-		fprintf(stderr, "     interpolate_position:         %d\n", interpolate_position);
+		fprintf(stderr, "     output time interval:         %f\n", interval);
 		fprintf(stderr, "     rov_dive_start_time_set:      %d\n", rov_dive_start_time_set);
-		fprintf(stderr, "     rov_dive_start_time_i:        %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-				rov_dive_start_time_i[0], rov_dive_start_time_i[1], rov_dive_start_time_i[2],
-				rov_dive_start_time_i[3], rov_dive_start_time_i[4], rov_dive_start_time_i[5],
-				rov_dive_start_time_i[6]);
-		fprintf(stderr, "     rov_dive_end_time_i:          %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-				rov_dive_end_time_i[0], rov_dive_end_time_i[1], rov_dive_end_time_i[2],
-				rov_dive_end_time_i[3], rov_dive_end_time_i[4], rov_dive_end_time_i[5],
-				rov_dive_end_time_i[6]);
+		if (rov_dive_start_time_set == MB_YES)
+			fprintf(stderr, "     rov_dive_start_time_i:        %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					rov_dive_start_time_i[0], rov_dive_start_time_i[1], rov_dive_start_time_i[2],
+					rov_dive_start_time_i[3], rov_dive_start_time_i[4], rov_dive_start_time_i[5],
+					rov_dive_start_time_i[6]);
+		fprintf(stderr, "     rov_dive_end_time_set:        %d\n", rov_dive_end_time_set);
+		if (rov_dive_end_time_set == MB_YES)
+			fprintf(stderr, "     rov_dive_end_time_i:          %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					rov_dive_end_time_i[0], rov_dive_end_time_i[1], rov_dive_end_time_i[2],
+					rov_dive_end_time_i[3], rov_dive_end_time_i[4], rov_dive_end_time_i[5],
+					rov_dive_end_time_i[6]);
+		fprintf(stderr, "     utm_zone_set:                 %d\n", utm_zone_set);
+		if (utm_zone_set == MB_YES) {
+			fprintf(stderr, "     utm_zone:                     %d\n", utm_zone);
+			fprintf(stderr, "     projection_id:                %s\n", projection_id);
+		}
+		fprintf(stderr, "     interpolate_position:         %d\n", interpolate_position);
 	}
 
 	/* if help desired then print it and exit */
@@ -731,14 +758,22 @@ int main(int argc, char **argv) {
 		end_time_d = rov_dive_end_time_d;
 	}
 	start_time_d = floor(start_time_d);
-	num_output = (int)(ceil(end_time_d - start_time_d));
+	num_output = (int)(ceil((end_time_d - start_time_d) / interval));
 	
 	/* get UTM projection for easting and northing fields */
-	utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
-	if (reference_lat >= 0.0)
-		sprintf(projection_id, "UTM%2.2dN", utm_zone);
-	else
-		sprintf(projection_id, "UTM%2.2dS", utm_zone);
+	if (utm_zone_set == MB_YES) {
+		if (utm_zone < 0)
+			sprintf(projection_id, "UTM%2.2dS", abs(utm_zone));
+		else
+			sprintf(projection_id, "UTM%2.2dN", utm_zone);
+	}
+	else {
+		utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+		if (reference_lat >= 0.0)
+			sprintf(projection_id, "UTM%2.2dN", utm_zone);
+		else
+			sprintf(projection_id, "UTM%2.2dS", utm_zone);
+	}
 	proj_status = mb_proj_init(verbose, projection_id, &(pjptr), &error);
 
 	/* write the MiniROV navigation data */
@@ -752,7 +787,7 @@ int main(int argc, char **argv) {
 			for (ioutput=0;ioutput<num_output;ioutput++) {
 				
 				/* set the output time */
-				onav_time_d = start_time_d + (double)ioutput;
+				onav_time_d = start_time_d + ioutput * interval;
 				mb_get_date(verbose, onav_time_d, onav_time_i);
 				onav_year = onav_time_i[0];
 				onav_timetag = 10000 * onav_time_i[3] + 100 * onav_time_i[4] + onav_time_i[5];

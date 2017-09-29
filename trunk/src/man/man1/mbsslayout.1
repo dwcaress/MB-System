@@ -9,115 +9,109 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbsslayout\fP [ 
 .br
-\fB--verbose\fP
+\fB\-\-verbose\fP
 .br
-\fB--help\fP
+\fB\-\-help\fP
 .br
- .br
-\fB--input\fP=\fIdatalist\fP
+\fB\-\-input\fP=\fIdatalist\fP
 .br
-\fB--format\fP=\fIformat\fP
+\fB\-\-format\fP=\fIformat\fP
 .br
- .br
-\fB--platform-file\fP=\fIFILE\fP
+\fB\-\-platform-file\fP=\fIFILE\fP
 .br
-\fB--platform-target-sensor\fP=\fISENSORID\fP
+\fB\-\-platform-target-sensor\fP=\fISENSORID\fP
 .br
 .br
-\fB--output-source\fP=\fIrecord_kind\fP
+\fB\-\-output-source\fP=\fIrecord_kind\fP
 .br
-\fB--output-name1\fP=\fIname\fP
+\fB\-\-line-nameroot\fP=\fIname\fP
 .br
-\fB--output-name2\fP=\fIname\fP
+\fB\-\-line-time-list\fP=\fIfilename\fP
 .br
- .br
-\fB--line-nameroot\fP=\fIname\fP
+\fB\-\-line-route\fP=\fIfilename\fP
 .br
-\fB--line-time-list\fP=\fIfilename\fP
+\fB\-\-line-check-bearing\fP
 .br
-\fB--line-route\fP=\fIfilename\fP
+\fB\-\-line-name1\fP=\fIname\fP
 .br
-\fB--line-check-bearing\fP
+\fB\-\-line-name2\fP=\fIname\fP
 .br
-\fB--line-range-threshold\fP=\fIvalue\fP
+\fB\-\-line-range-threshold\fP=\fIvalue\fP
 .br
- .br
-\fB--topo-grid-file\fP=\fIfilename\fP
+\fB\-\-topo-grid-file\fP=\fIfilename\fP
 .br
-\fB--altitude-altitude\fP
+\fB\-\-altitude-altitude\fP
 .br
-\fB--altitude-bottomppick\fP
+\fB\-\-altitude-bottomppick\fP
 .br
-\fB--altitude-bottompick-threshold\fP=\fIvalue\fP
+\fB\-\-altitude-bottompick-threshold\fP=\fIvalue\fP
 .br
-\fB--altitude-topo-grid\fP
+\fB\-\-altitude-topo-grid\fP
 .br
-\fB--channel-swap\fP
+\fB\-\-channel-swap\fP
 .br
-\fB--swath-width\fP=\fIvalue\fP
+\fB\-\-swath-width\fP=\fIvalue\fP
 .br
-\fB--gain\fP=\fIvalue\fP
-.br
-\fB--interpolation\fP=\fIvalue\fP
+\fB\-\-interpolation\fP=\fIvalue\fP
 .br
 .br
-\fB--nav-file\fP=\fIfilename\fP
+\fB\-\-nav-file\fP=\fIfilename\fP
 .br
-\fB--nav-file-format\fP=\fIformat_id\fP
+\fB\-\-nav-file-format\fP=\fIformat_id\fP
 .br
-\fB--nav-async\fP=\fIrecord_kind\fP
+\fB\-\-nav-async\fP=\fIrecord_kind\fP
 .br
-\fB--sensordepth-file\fP=\fIfilename\fP
+\fB\-\-sensordepth-file\fP=\fIfilename\fP
 .br
-\fB--sensordepth-file-format\fP=\fIformat_id\fP
+\fB\-\-sensordepth-file-format\fP=\fIformat_id\fP
 .br
-\fB--sensordepth-async\fP=\fIrecord_kind\fP
+\fB\-\-sensordepth-async\fP=\fIrecord_kind\fP
 .br
-\fB--altitude-file\fP=\fIfilename\fP
+\fB\-\-altitude-file\fP=\fIfilename\fP
 .br
-\fB--altitude_file-format\fP=\fIformat_id\fP
+\fB\-\-altitude_file-format\fP=\fIformat_id\fP
 .br
-\fB--altitude-async\fP=\fIrecord_kind\fP
+\fB\-\-altitude-async\fP=\fIrecord_kind\fP
 .br
-\fB--heading-file\fP=\fIfilename\fP
+\fB\-\-heading-file\fP=\fIfilename\fP
 .br
-\fB--heading-file-format\fP=\fIformat_id\fP
+\fB\-\-heading-file-format\fP=\fIformat_id\fP
 .br
-\fB--heading-async\fP=\fIrecord_kind\fP
+\fB\-\-heading-async\fP=\fIrecord_kind\fP
 .br
-\fB--attitude-file\fP=\fIfilename\fP
+\fB\-\-attitude-file\fP=\fIfilename\fP
 .br
-\fB--attitude-file-format\fP=\fIformat_id\fP
+\fB\-\-attitude-file-format\fP=\fIformat_id\fP
 .br
-\fB--attitude-async\fP=\fIrecord_kind\fP
+\fB\-\-attitude-async\fP=\fIrecord_kind\fP
 .br
-\fB--soundspeed-constant\fP=\fIvalue\fP
+\fB\-\-soundspeed-constant\fP=\fIvalue\fP
 .br
-\fB--soundspeed-file\fP=\fIfilename\fP
+\fB\-\-soundspeed-file\fP=\fIfilename\fP
 .br
-\fB--soundspeed-file-format\fP=\fIformat_id\fP
+\fB\-\-soundspeed-file-format\fP=\fIformat_id\fP
 .br
-\fB--soundspeed-async\fP=\fIrecord_kind\fP
+\fB\-\-soundspeed-async\fP=\fIrecord_kind\fP
 .br
-\fB--timeshift-file\fP=\fIfilename\fP
+\fB\-\-timeshift-file\fP=\fIfilename\fP
 .br
-\fB--timeshift-constant\fP=\fIvalue\fP
+\fB\-\-timeshift-constant\fP=\fIvalue\fP
 .br
-\fB--timeshift-apply-nav\fP
+\fB\-\-timeshift-apply-nav\fP
 .br
-\fB--timeshift-apply-sensordepth\fP
+\fB\-\-timeshift-apply-sensordepth\fP
 .br
-\fB--timeshift-apply-altitude\fP
+\fB\-\-timeshift-apply-altitude\fP
 .br
-\fB--timeshift-apply-heading\fP
+\fB\-\-timeshift-apply-heading\fP
 .br
-\fB--timeshift-apply-attitude\fP
+\fB\-\-timeshift-apply-attitude\fP
 .br
-\fB--timeshift-apply-all-ancilliary\fP
+\fB\-\-timeshift-apply-all-ancilliary\fP
 .br
-\fB--timeshift-apply-survey\fP
+\fB\-\-timeshift-apply-survey\fP
 .br
-\fB--timeshift-apply-all\fP
+\fB\-\-timeshift-apply-all\fP
 .br
 ]
 
@@ -125,20 +119,60 @@ Version 5.0
 MBsslayout translates time-based sidescan sonar data into backscatter
 laid out onto a topographic model of the seafloor. The input should be a datalist
 referencing data files in a format containing time based sidescan sonar data
-(typically both port and starboard time series) without swath
-bathymetry data. The output will be sidescan data in the MBF_MBLDEOIH format
-(MBIO format id 71). The sidescan can be laid out using a flat bottom assumption,
+(typically both port and starboard time series). Often the logged file will not
+include any form of swath bathymetry data.
+The output will be sidescan data for which each ping return is represented by a single array
+of pixels with acrosstrack and alongtrack locations, where in the acrosstrack
+direction the pixels are uniformly sized (and therefore uniformly spaced).
+The output will be written to files in the MBF_MBLDEOIH format (MBIO format id 71). 
+
+The time series sidescan is
+"laid out" onto the seafloor using the two-travel time of each sample, it's
+orientation (port or starboard), the speed of sound, the location and orientation
+of the sonar, and some knowledge or assumption about the seafloor topography.
+The "laying out" process involves defining a regularly spaced array of acrosstrack
+pixels for which the pixel size (in meters) and the number of pixels determines
+the width of the array; this array is centered under the sonar location in an
+assumption that the swath center is approximately beneath the sonar. The location
+of each original sidescan sample on the seafloor, and the corresponding pixel in
+the destination sidescan array, is calculated according to the parameters listed
+above. The sidescan samples are binned in the destination array, with averaging
+applied for destination pixels holding more than one sample. After the averaging is
+calculated, empty pixels surrounded by valid data can be filled by interpolation.
+
+The maximum number of pixels in the output swath sidescan is 4001. By default,
+\fBmbsslayout\fP varies the pixel size between pings in order to accomodate the
+full sidescan swath width within 4001 pixels. The calculation of the swath width W is:
+   W = 2.2 * sqrt(R * R - A * A)
+.br
+where A is the sonar altitude and R is the maximum range:
+   R = 0.5 * V * dt * N
+.br
+Here dt is the sample interval in the time series sidescan, N is the maximum
+number of samples in a time series sidescan channel, and V is the speed of sound.
+Alternatively, the swath width can be specified to be a constant distance.
+Given the swath width W, whether it varies or is constant, \fBmbsslayout\fP
+uses an acrosstrack pixel size of:
+   dx = W / 4000
+
+The sidescan can be laid out using a flat bottom assumption,
 but is generally laid out onto a gridded topographic model derived from bathymetric
 mapping with other sensors. The gridded bathymetry data may be collected
 simultaneously with the sidescan from the same platform, or it may derive from
-other surveys.
+other surveys. If no topographic model is specified, then the location of each
+sample is calculated assuming a flat bottom according to an altitude value. By
+default this altitude derives from the navigation available in the time series
+sidescan files, but it can also derive from picking the first bottom arrival in
+the time series sidescan data. In this case the altitude used is the average of
+the bottom picks from the port and starboard time series sidescan channels.
 
-Navigation, attitude, and water sound speed values will by default, if available,
+Navigation, attitude, altitude, and water sound speed values will by default, if available,
 derive from values contained in the time-based sidescan files. If necessary or
 desired, the ancilliary values can be merged from separate files. Time latency
 corrections can be made to the ancilliary data time series if needed.
 
-Once the sidescan data have been laid out onto the seafloor, they can be further
+Once the sidescan data have been laid out onto the seafloor and output to format
+71 swath files, they can be further
 processed using \fBMB-System\fP tools such as \fBmbbackangle\fP followed by
 \fBmbprocess\fP.
 
@@ -161,9 +195,393 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B --verbose
+.B \-\-verbose
+.br
 By default \fBmbsslayout\fP outputs minimal information to the shell. This option
-causes the program to indicate it's progress as it runs. Goody.
+causes the program to output the control parameters at the start and various
+status messages as it runs.
+.TP
+.B \-\-help\fP
+.br
+The \fB\-\-help\fP option causes \fBmbsslayout\fP to print out a summary of its
+purpose and a listing of its control options, and then exit immediately.
+.TP
+.B \-\-input\fP=\fIdatalist\fP
+.br
+This option defines the input files containing the time series sidescan data.
+The \fIdatalist\fP value typically denotes a  datalist  file
+containing  a list of input swath data files and/or other datalist files. 
+Alternatively, a single swath data file can also be specified.
+.TP
+.B \-\-format\fP=\fIformat\fP
+.br
+This option sets the \fBMBIO\fP format identifier for the input file specified with
+the \fB\-\-input\fP option. By default, \fBmbsslayout\fP infers the format id from
+from the input filename via use of the \fBMB-System\fP suffix convention
+("*.mbXXX") or of other recognized file suffixes.
+.TP
+.B \-\-platform-file\fP=\fIFILE\fP
+.br
+This option specifies an \fBMB-System\fP platform file to be read and used to
+define the positional and angular offsets between sensors on the source survey
+platform. Often the embedded navigation and attitude (and other ancilliary) data
+are already referenced to the relevant sidescan sonar; in this case no platform
+model is required during sidescan layout. However, if the available navigation
+and attitude data are referenced to another sensor or location on the survey
+platform, a platform model allows calculation of the actual location and orientation
+of the sidescan sonar during the layout process.
+.TP
+.B \-\-platform-target-sensor\fP=\fISENSORID\fP
+.br
+This option specifies which sensor in the platform model specified with the
+\fB\-\-platform\-file\fP option is the source of the time series sidescan data
+being processed by \fBmbsslayout\fP.
+.br
+.TP
+.B \-\-output-source\fP=\fIrecord_kind\fP
+.br
+This option specifies the \fBMB-System\fP data record type in the input source
+data that contains the time series sidescan data being processed by \fBmbsslayout\fP.
+The source data record type will not always be considered survey data (MB_DATA_DATA, ID=1)
+and may instead by secondary sidescan (MB_DATA_SIDESCAN2, ID=38) or tertiary sidescan
+(MB_DATA_SIDESCAN2, ID=39). For instance, Edgetech sidescan data are recorded in the
+Jstar format in files with a *.jsf suffix, and these files typically contain two
+frequencies of sidescan data. The records containing the lower frequency time series
+sidescan data will be reported as MB_DATA_DATA, and those containing the higher frequency
+time series sidescan data will be reported as MB_DATA_SIDESCAN2.
+The \fBMB-System\fP program \fBmbinfo\fP will, with the
+\fB-N\fP option, output a complete list of the data record types in a swath file,
+revealing the number of MB_DATA_DATA, MB_DATA_SIDESCAN2, and MB_DATA_SIDESCAN3 records
+present.
+.TP
+.B \-\-line-time-list\fP=\fIfilename\fP
+.br
+Specifies an ASCII text file containing a list of times used to define the start and ends of
+survey lines, allowing \fBmbsslayout\fP to structure the output files according
+to those survey lines. The output filenames will be constructed using the sequential
+line numbers (starting from 000) The times are defined in decimal epoch seconds (seconds since
+1970) with one time value on each line. Such a time list file can be constructed
+from an \fBMB-System\fP route file using the program \fBmbroutetime\fP.
+.TP
+.B \-\-line-route\fP=\fIfilename\fP
+.br
+Specifies an \fBMB-System\fP route file (typically generated using \fBmbgrdviz\fP)
+that defines the waypoints of a planned survey. The waypoints of this route are
+used in conjunction with the survey navigation to define the start and ends of
+survey lines, allowing \fBmbsslayout\fP to structure the output files according
+to those survey lines. Since the navigation of real surveys rarely passes through the
+planned waypoints exactly, the times at which waypoints are reached is calculated
+using a range threshold specified using the \fB\-\-line-range-threshold\fP option.
+..TP
+.B \-\-line-range-threshold\fP=\fIvalue\fP
+.br
+Specifies the range theshold used to define when survey navigation reaches a
+survey line waypoint. The range (distance) of the survey navigation to the waypoint
+should decrease as the waypoint is approached. The waypoint is considered to be
+reached when the range stops decreasing and starts to increase, provided the range
+is less than the range threshold when that occurs. The default value is 50 meters.
+.TP
+.B \-\-line-name1\fP=\fIname\fP
+.br
+If \fBmbsslayout\fP is requested to output sidescan in files corresponding to survey
+lines, as defined either by a route file (option \fB\-\-line\-route\fP) or a list
+of time stamps (option \fB\-\-line\-time\-list\fP), then the output files will have
+names of the form "N1"_"N2"_XXXX.mb71, where "N1" is specified with \fB\-\-output-name1\fP,
+"N2" is specified with \fB\-\-output-name2\fP, and XXXX are the sequential line
+numbers (starting with "0000").
+.TP
+.B \-\-line-name2\fP=\fIname\fP
+.br
+By default, \fBmbsslayout\fP outputs "laid-out" sidescan in format 71 files
+corresponding to the input files containing the time series sidescan data, where
+the output filenames consist of the original filename stripped of it's identifying
+suffix (e.g. ".jsf") and appended with _"N2".mb71.
+Here "N2" is specified with \fB\-\-output-name2\fP.
+If \fBmbsslayout\fP is requested to output sidescan in files corresponding to survey
+lines, as defined either by a route file (option \fB\-\-line\-route\fP) or a list
+of time stamps (option \fB\-\-line\-time\-list\fP), then the output files will have
+names of the form "N1"_"N2"_XXXX.mb71, where "N1" is specified with \fB\-\-output-name1\fP,
+"N2" is specified with \fB\-\-output-name2\fP, and XXXX are the sequential line
+numbers (starting with "0000").
+.TP
+.B \-\-topo-grid-file\fP=\fIfilename\fP
+.br
+This option specifies a topographic model in the form of a GMT topography grid
+file to be used for laying out the sidescan. Each time series sidescan sample
+is projected into the topographic model using the sonar navigation and attitude
+so that the location of the sample on the seafloor is correct with respect to
+the full three dimensional survey geometry. If a topography model is not specified
+with this option, then the sidescan will be laid out using a flat bottom assumption
+and an altitude value derived either from the survey navigation or by picking the
+initial bottom return in the time series sidescan data.
+.TP
+.B \-\-altitude-bottomppick\fP
+.br
+Specifies obtaining the altitude value by picking the initial bottom return in
+the time series sidescan data. If no topographic model is specified with the
+\fB\-\-topo-grid-file\fP option, then the
+sidescan will be laid out using using a flat bottom assumption and the altitude.
+The default altitude bottompick threshold is 0.5, meaning the bottom return is
+picked for each channel (port and starboard) at the first time the time series
+sidescan value reaches 0.5 times the maximum value. The altitude value used for
+the overall layout is the average of the values found for the port and starboard
+channels.
+.TP
+.B \-\-altitude-bottompick-threshold\fP=\fIvalue\fP
+.br
+Specifies the threshold used to pick the initial bottom return in the time series
+sidescan data. The default threshold is 0.5. This option turns the bottompick
+altitude mode on, so it is unnecessary to also specify the \fB\-\-altitude-bottomppick\fP
+option.
+.TP
+.B \-\-channel-swap\fP
+.br
+This option causes \fBmbsslayout\fP to swap the port and starboard time series
+sidescan channels before laying out the sidescan data on the seafloor.
+.TP
+.B \-\-swath-width\fP=\fIvalue\fP
+.br
+Specifies a constant output swath width in meters. By default, \fBmbsslayout\fP
+varies the swath width according to the maximum range and altitude of the
+sidescan data. See the description section for details of the default swath width
+calculation and the sidescan layout process.
+.br
+.TP
+.B \-\-interpolation\fP=\fIvalue\fP
+.br
+Specifies the degree to which gaps in the output swath sidescan are filled by
+interpolation. The interpolation value corresponds to the maximum number of
+adjacent empty pixels that is filled by interpolation; larger gaps are not
+filled by interpolation and remain empty in the output swath sidescan. The default
+is to do no interpolation.
+.br
+.TP
+.B \-\-nav-file\fP=\fIfilename\fP
+.br
+Specifies an external file from which to merge sonar position (navigation),
+replacing any navigation data included in the input time series sidescan files.
+By default \fBmbsslayout\fP attempts to use navigation values included in the
+input data.
+.TP
+.B \-\-nav-file-format\fP=\fIformat_id\fP
+.br
+Specifies the format of an external navigation file from which position values
+are derived (as defined with \fB\-\-nav-file\fP). Options for the \fIformat_id\fP
+value are:
+.br
+   1: ASCCI text file with lines of the form:
+        time_d longitude latitude speed
+      where time_d is time in decimal epoch seconds (seconds since 1970), longitude
+      and latitude are in decimal degrees, and speed is in km/hour (and is optional).
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+   2: ASCCI text file with lines of the form:
+        year month day hour minute second longitude latitude
+      where year, month, day, hour, and minute values are integers, the second
+      value is decimal, and longitude and latitude are in decimal degrees.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+   3: ASCCI text file with lines of the form:
+        year julian_day hour minute second longitude latitude
+      where year, julian_day, hour, and minute values are integers, the second
+      value is decimal, and longitude and latitude are in decimal degrees.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+   4: ASCCI text file with lines of the form:
+        year julian_day day_minute second longitude latitude
+      where year, julian_day, and day_minute values are integers, the second
+      value is decimal, and longitude and latitude are in decimal degrees.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+   5: ASCCI text file in the 1990's era L-DEO processed nav format with lines
+      of the form:
+        yy+jjjhhmmssNddmmmmmmEdddmmmmmm
+      where yy is the two digit year (after 1999 the "yy+" was replaced by a four
+      digit year "yyyy"), jjj is the julian_day, hh is the hour, mm
+      is minutes, and ss is seconds. The latitude is given as
+      Nddmmmmmmand where N is 'N' for north and 'S' for south, dd are integer
+      degrees, and mmmmmm is minutes * 10000. The longitude is given as
+      Edddmmmmmmand where E is 'E' for east and 'W' for west, ddd are integer
+      degrees, and mmmmmm is minutes * 10000.
+.br
+   6 or 7: NMEA 0183 position strings
+      Several NMEA and NMEA-like strings containing position are recognized,
+      and can be parsed with and without line break characters. These strings
+      include ZDA, GLL, GGA, DAT, and UNX.
+.br
+   8: Simrad 90 format navigation files with lines
+      of the form:
+        ddmmyy hhmmssss ddmmmmmmmN dddmmmmmmmE
+      where dd is day of the month, mm is the month, yy is the two digit year,
+      hh is the hour, mm is the minute, and ssss is seconds * 100.
+      The latitude is given as ddmmmmmmmN where dd are integer degrees, 
+      mmmmmmm is minutes * 100000, and N is 'N' for north and 'S' for south latitude.
+      The longitude is given as dddmmmmmmmE where ddd are integer degrees, 
+      mmmmmmm is minutes * 100000, and E is 'E' for east and 'W' for west longitude.
+      
+      
+      day_minute values are integers,
+      the second value is decimal, and longitude and latitude are in decimal
+      degrees. The longitude is given as
+      Edddmmmmmmand where E is 'E' for east and 'W' for west, ddd are integer
+      degrees, and mmmmm is minutes * 10000.
+.br
+   9: ASCCI text file with white-space delimited lines of the form:
+        yr mon day hour min sec time_d lon lat heading speed sensordepth*
+      where yr is the four digit year, mon is the month, day is the day of the
+      month, min is the minute, second is the decimal seconds, time_d is time in
+      decimal epoch seconds (seconds since 1970), lon is the longitude
+      in decimal degrees, lat is the latitude in decimal degrees, heading is in
+      decimal degrees, speed is in km/hour, and sensordepth is in meters.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+   10: R2R (Rolling deck to Repository) navigation format with ASCCI text lines
+      of the form:
+         yyyy-mm-ddThh:mm:ss.sssZ lon lat quality nsat dilution height
+      where the lon and lat fields are in decimal degrees with south latitudes
+      and west longitudes negative, and the last four quantities relating to
+      GPS fix quality.
+.TP
+.B \-\-nav-async\fP=\fIrecord_kind\fP
+.br
+Specifies the type of data records from which position values
+are derived (as defined with \fB\-\-nav-file-format\fP). Options for the
+\fIrecord_kind\fP include:
+.br
+    MB_DATA_DATA:  1 (survey data)
+    MB_DATA_NAV:  12 (navigation data)
+    MB_DATA_NAV1: 29 (navigation data from navigation system 1)
+    MB_DATA_NAV2: 30 (navigation data from navigation system 2)
+    MB_DATA_NAV3: 31 (navigation data from navigation system 3)
+.br
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the navigation source by default. The
+program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
+of different record types present in a data file.
+.TP
+.B \-\-sensordepth-file\fP=\fIfilename\fP
+.br
+Specifies an external file from which to merge sensor depth,
+replacing any sensor depth data included in the input time series sidescan files.
+By default \fBmbsslayout\fP attempts to use sensor depth values included in the
+input data.
+.TP
+.B \-\-sensordepth-file-format\fP=\fIformat_id\fP
+.br
+Specifies the format of an external sensor depth file from which sensor depth values
+are derived (as defined with \fB\-\-sensordepth-file\fP). Options for the \fIformat_id\fP
+value are:
+.br
+   1: ASCCI text file with lines of the form:
+        time_d longitude latitude speed
+      where time_d is time in decimal epoch seconds (seconds since 1970), longitude
+      and latitude are in decimal degrees, and speed is in km/hour (and is optional).
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+   2: ASCCI text file with lines of the form:
+        year month day hour minute second longitude latitude
+      where year, month, day, hour, and minute values are integers, the second
+      value is decimal, and longitude and latitude are in decimal degrees.
+      South latitudes are negative. Longitude may be defined on either the
+      -180.0 to +180.0 or 0.0 to 360.0 domains.
+.br
+.TP
+.B \-\-sensordepth-async\fP=\fIrecord_kind\fP
+.br
+.TP
+.B \-\-altitude-file\fP=\fIfilename\fP
+.br
+Specifies an external file from which to merge altitude,
+replacing any altitude data included in the input time series sidescan files.
+By default \fBmbsslayout\fP attempts to use altitude values included in the
+input data.
+.TP
+.B \-\-altitude_file-format\fP=\fIformat_id\fP
+.br
+.TP
+.B \-\-altitude-async\fP=\fIrecord_kind\fP
+.br
+.TP
+.B \-\-heading-file\fP=\fIfilename\fP
+.br
+Specifies an external file from which to merge heading,
+replacing any heading data included in the input time series sidescan files.
+By default \fBmbsslayout\fP attempts to use heading values included in the
+input data.
+.TP
+.B \-\-heading-file-format\fP=\fIformat_id\fP
+.br
+.TP
+.B \-\-heading-async\fP=\fIrecord_kind\fP
+.br
+.TP
+.B \-\-attitude-file\fP=\fIfilename\fP
+.br
+Specifies an external file from which to merge attitude (roll and pitch),
+replacing any attitude data included in the input time series sidescan files.
+By default \fBmbsslayout\fP attempts to use attitude values included in the
+input data.
+.TP
+.B \-\-attitude-file-format\fP=\fIformat_id\fP
+.br
+.TP
+.B \-\-attitude-async\fP=\fIrecord_kind\fP
+.br
+.TP
+.B \-\-soundspeed-constant\fP=\fIvalue\fP
+.br
+.TP
+.B \-\-soundspeed-file\fP=\fIfilename\fP
+.br
+Specifies an external file from which to merge water sound speed,
+replacing any sound speed data included in the input time series sidescan files.
+By default \fBmbsslayout\fP attempts to use sound speed values included in the
+input data.
+.TP
+.B \-\-soundspeed-file-format\fP=\fIformat_id\fP
+.br
+.TP
+.B \-\-soundspeed-async\fP=\fIrecord_kind\fP
+.br
+.TP
+.B \-\-timeshift-file\fP=\fIfilename\fP
+.br
+.TP
+.B \-\-timeshift-constant\fP=\fIvalue\fP
+.br
+.TP
+.B \-\-timeshift-apply-nav\fP
+.br
+.TP
+.B \-\-timeshift-apply-sensordepth\fP
+.br
+.TP
+.B \-\-timeshift-apply-altitude\fP
+.br
+.TP
+.B \-\-timeshift-apply-heading\fP
+.br
+.TP
+.B \-\-timeshift-apply-attitude\fP
+.br
+.TP
+.B \-\-timeshift-apply-all-ancilliary\fP
+.br
+.TP
+.B \-\-timeshift-apply-survey\fP
+.br
+.TP
+.B \-\-timeshift-apply-all\fP
+.br
+
+
+
 
 .SH EXAMPLES
 To be written.....
