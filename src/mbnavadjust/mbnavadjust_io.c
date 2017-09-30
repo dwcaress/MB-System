@@ -618,6 +618,9 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 							strcat(file->path, file->file);
 						}
 					}
+					
+					/* reset output_id to 0 - this should no longer have any value but 0 */
+					file->output_id = 0;
 
 					/* read section info */
 					if (file->num_sections > 0) {
