@@ -1086,18 +1086,19 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 	/* now look for existing mbnavadjust output files
 	 * - increment output id so this mbnavadjust project outputs
 	 *   a unique nav file for this input file */
+	/* Now only use a value of 0 for output_id  - all output navigation should be *.na0 files */
 	output_id = 0;
-	found = MB_NO;
-	while (found == MB_NO) {
-		sprintf(opath, "%s.na%d", path, output_id);
-		fstat = stat(opath, &file_status);
-		if (fstat != 0) {
-			found = MB_YES;
-		}
-		else {
-			output_id++;
-		}
-	}
+	//found = MB_NO;
+	//while (found == MB_NO) {
+	//	sprintf(opath, "%s.na%d", path, output_id);
+	//	fstat = stat(opath, &file_status);
+	//	if (fstat != 0) {
+	//		found = MB_YES;
+	//	}
+	//	else {
+	//		output_id++;
+	//	}
+	//}
 
 	/* turn on message */
 	root = (char *)strrchr(ipath, '/');
@@ -7882,7 +7883,7 @@ int mbnavadjust_invertnav() {
 					matrix.ia[index_m] = index_n;
 					matrix.a[index_m] = 1.0;
 
-					b[irow] = bxfix[jbvb];
+					b[irow] = bxfix[iblock];
 					matrix.nia[irow] = 1;
 					irow++;
 				}
@@ -7892,7 +7893,7 @@ int mbnavadjust_invertnav() {
 					matrix.ia[index_m] = index_n;
 					matrix.a[index_m] = 1.0;
 
-					b[irow] = byfix[jbvb];
+					b[irow] = byfix[iblock];
 					matrix.nia[irow] = 1;
 					irow++;
 				}
@@ -7902,7 +7903,7 @@ int mbnavadjust_invertnav() {
 					matrix.ia[index_m] = index_n;
 					matrix.a[index_m] = 1.0;
 
-					b[irow] = bzfix[jbvb];
+					b[irow] = bzfix[iblock];
 					matrix.nia[irow] = 1;
 					irow++;
 				}
@@ -7966,9 +7967,9 @@ int mbnavadjust_invertnav() {
 			relpr = 1.0e-16; // relative precision of double precision arithmetic
 			conlim = 1 / (10 * sqrt(relpr));
 			itnlim = 4 * matrix.n;
-
 			// fprintf(stderr,"damp:%f\natol:%f\nbtol:%f\nconlim:%f\nitnlim:%d\n",
 			//		damp,atol,btol,conlim,itnlim);
+			
 			// for (i=0;i<matrix.m;i++)
 			//	{
 			//	fprintf(stderr,"A row:%6d nia:%d ",i,matrix.nia[i]);
@@ -8420,8 +8421,9 @@ int mbnavadjust_invertnav() {
 		relpr = 1.0e-16; // relative precision of double precision arithmetic
 		conlim = 1 / (10 * sqrt(relpr));
 		itnlim = 4 * matrix.n;
-
-		fprintf(stderr, "damp:%f\natol:%f\nbtol:%f\nconlim:%f\nitnlim:%d\n", damp, atol, btol, conlim, itnlim);
+		// fprintf(stderr, "damp:%f\natol:%f\nbtol:%f\nconlim:%f\nitnlim:%d\n",
+		// damp, atol, btol, conlim, itnlim);
+		
 		// for (i=0;i<matrix.m;i++)
 		//	{
 		//	fprintf(stderr,"A row:%6d nia:%d ",i,matrix.nia[i]);
