@@ -4459,7 +4459,8 @@ and mbedit edit save files.\n";
 				  --------------------------------------------*/
 
 				/* apply tide corrections */
-				if (process.mbp_tide_mode == MBP_TIDE_ON && ntide > 0) {
+				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA
+					&& process.mbp_tide_mode == MBP_TIDE_ON && ntide > 0) {
 					/* interpolate tide */
 					intstat = mb_linear_interp(verbose, tidetime - 1, tide - 1, ntide, time_d, &tideval, &itime, &error);
 
