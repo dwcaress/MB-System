@@ -105,11 +105,16 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 			if ((G = GMT_Read_Data(API, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE, GMT_GRID_ALL, NULL, grdfile, NULL)) == NULL) {
 				num_tries++;
 				usleep(1000);
-				fprintf(stderr,"Failed to read grid with GMT_Read_Data(), attempt %d\n", num_tries);
+				//fprintf(stderr,"Failed to read grid with GMT_Read_Data(), attempt %d\n", num_tries);
+			} else {
+				if (num_tries > 0) {
+					fprintf(stderr, "Read grid on try %d\n", num_tries);
+				}
 			}
 		}
 		if (G == NULL) {
-			fprintf(stderr, "\nUnable to read GMT grid file %s with GMT_Read_Data() in function %s\n", grdfile, function_name);
+			fprintf(stderr, "\nUnable to read GMT grid file %s with GMT_Read_Data() after %d tries in function %s\n",
+					grdfile, num_tries, function_name);
 			fprintf(stderr, "Program terminated\n");
 			exit(EXIT_FAILURE);
 		}

@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+* Version 5.5.2320       October 18, 2017
 * Version 5.5.2319       October 16, 2017
 * Version 5.5.2318       September 29, 2017
 * Version 5.5.2314       August 24, 2017
@@ -262,6 +263,11 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2320 (October 18, 2017)
+
+Mbgrdviz: Now, when overlays are displayed in mbgrdviz, the only areas rendered
+are those where both the primary and overlay grids are defined.
 
 -----> 5.5.2319 (October 16, 2017)
 

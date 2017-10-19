@@ -182,6 +182,7 @@ int mbview_drawdata(size_t instance, int rez) {
 	int on, flip;
 	int nxrange, nyrange;
 	int stride;
+	double secondary_value;
 	int use_histogram;
 	int make_histogram;
 	float *histogram;
@@ -381,105 +382,220 @@ int mbview_drawdata(size_t instance, int rez) {
 	glEnd();*/
 
 	/* draw the data as triangle strips */
-	for (i = data->viewbounds[0]; i < data->viewbounds[1] - stride; i += stride) {
-		on = MB_NO;
-		flip = MB_NO;
-		for (j = data->viewbounds[2]; j < data->viewbounds[3]; j += stride) {
-			k = i * data->primary_ny + j;
-			l = (i + stride) * data->primary_ny + j;
-			if (flip == MB_NO) {
-				ikk = i;
-				kk = k;
-				ill = i + stride;
-				ll = l;
-			}
-			else {
-				ikk = i + stride;
-				kk = l;
-				ill = i;
-				ll = k;
-			}
-			if (data->primary_data[kk] != data->primary_nodatavalue) {
-				if (on == MB_NO) {
-					glBegin(GL_TRIANGLE_STRIP);
-					on = MB_YES;
-					if (kk == k)
-						flip = MB_NO;
-					else
-						flip = MB_YES;
-				}
-				if (!(data->primary_stat_z[kk / 8] & statmask[kk % 8]))
-					mbview_zscalegridpoint(instance, kk);
-				if (!(data->primary_stat_color[kk / 8] & statmask[kk % 8])) {
-					if (use_histogram == MB_NO)
-						mbview_colorpoint(view, data, ikk, j, kk);
-					else
-						mbview_colorpoint_histogram(view, data, histogram, ikk, j, kk);
-				}
-				glColor3f(data->primary_r[kk], data->primary_g[kk], data->primary_b[kk]);
-				glVertex3f(data->primary_x[kk], data->primary_y[kk], data->primary_z[kk]);
-				/*fprintf(stderr,"Drawing triangles: origin: %f %f %f  pt:%f %f %f\n",
-				view->xorigin,view->yorigin,view->zorigin,
-				data->primary_x[kk],data->primary_y[kk],data->primary_z[kk]);*/
-			}
-			else {
-				if (on == MB_YES) {
-					glEnd();
-#ifdef MBV_GET_GLX_ERRORS
-					mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
-#endif
-					on = MB_NO;
-				}
-				flip = MB_NO;
-			}
-			if (data->primary_data[ll] != data->primary_nodatavalue) {
-				if (on == MB_NO) {
-					glBegin(GL_TRIANGLE_STRIP);
-					on = MB_YES;
-					if (ll == l)
-						flip = MB_NO;
-					else
-						flip = MB_YES;
-				}
-				if (!(data->primary_stat_z[ll / 8] & statmask[ll % 8]))
-					mbview_zscalegridpoint(instance, ll);
-				if (!(data->primary_stat_color[ll / 8] & statmask[ll % 8])) {
-					if (use_histogram == MB_NO)
-						mbview_colorpoint(view, data, ill, j, ll);
-					else
-						mbview_colorpoint_histogram(view, data, histogram, ill, j, ll);
-				}
-				glColor3f(data->primary_r[ll], data->primary_g[ll], data->primary_b[ll]);
-				glVertex3f(data->primary_x[ll], data->primary_y[ll], data->primary_z[ll]);
-			}
-			else {
-				if (on == MB_YES) {
-					glEnd();
-#ifdef MBV_GET_GLX_ERRORS
-					mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
-#endif
-					on = MB_NO;
-				}
-				flip = MB_NO;
-			}
-		}
-		if (on == MB_YES) {
-			glEnd();
-#ifdef MBV_GET_GLX_ERRORS
-			mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
-#endif
+	if (data->grid_mode != MBV_GRID_VIEW_SECONDARY) {
+		for (i = data->viewbounds[0]; i < data->viewbounds[1] - stride; i += stride) {
 			on = MB_NO;
 			flip = MB_NO;
+			for (j = data->viewbounds[2]; j < data->viewbounds[3]; j += stride) {
+				k = i * data->primary_ny + j;
+				l = (i + stride) * data->primary_ny + j;
+				if (flip == MB_NO) {
+					ikk = i;
+					kk = k;
+					ill = i + stride;
+					ll = l;
+				}
+				else {
+					ikk = i + stride;
+					kk = l;
+					ill = i;
+					ll = k;
+				}
+				if (data->primary_data[kk] != data->primary_nodatavalue) {
+					if (on == MB_NO) {
+						glBegin(GL_TRIANGLE_STRIP);
+						on = MB_YES;
+						if (kk == k)
+							flip = MB_NO;
+						else
+							flip = MB_YES;
+					}
+					if (!(data->primary_stat_z[kk / 8] & statmask[kk % 8]))
+						mbview_zscalegridpoint(instance, kk);
+					if (!(data->primary_stat_color[kk / 8] & statmask[kk % 8])) {
+						if (use_histogram == MB_NO)
+							mbview_colorpoint(view, data, ikk, j, kk);
+						else
+							mbview_colorpoint_histogram(view, data, histogram, ikk, j, kk);
+					}
+					glColor3f(data->primary_r[kk], data->primary_g[kk], data->primary_b[kk]);
+					glVertex3f(data->primary_x[kk], data->primary_y[kk], data->primary_z[kk]);
+					/*fprintf(stderr,"Drawing triangles: origin: %f %f %f  pt:%f %f %f\n",
+					view->xorigin,view->yorigin,view->zorigin,
+					data->primary_x[kk],data->primary_y[kk],data->primary_z[kk]);*/
+				}
+				else {
+					if (on == MB_YES) {
+						glEnd();
+#ifdef MBV_GET_GLX_ERRORS
+						mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
+						on = MB_NO;
+					}
+					flip = MB_NO;
+				}
+				if (data->primary_data[ll] != data->primary_nodatavalue) {
+					if (on == MB_NO) {
+						glBegin(GL_TRIANGLE_STRIP);
+						on = MB_YES;
+						if (ll == l)
+							flip = MB_NO;
+						else
+							flip = MB_YES;
+					}
+					if (!(data->primary_stat_z[ll / 8] & statmask[ll % 8]))
+						mbview_zscalegridpoint(instance, ll);
+					if (!(data->primary_stat_color[ll / 8] & statmask[ll % 8])) {
+						if (use_histogram == MB_NO)
+							mbview_colorpoint(view, data, ill, j, ll);
+						else
+							mbview_colorpoint_histogram(view, data, histogram, ill, j, ll);
+					}
+					glColor3f(data->primary_r[ll], data->primary_g[ll], data->primary_b[ll]);
+					glVertex3f(data->primary_x[ll], data->primary_y[ll], data->primary_z[ll]);
+				}
+				else {
+					if (on == MB_YES) {
+						glEnd();
+#ifdef MBV_GET_GLX_ERRORS
+						mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
+						on = MB_NO;
+					}
+					flip = MB_NO;
+				}
+			}
+			if (on == MB_YES) {
+				glEnd();
+#ifdef MBV_GET_GLX_ERRORS
+				mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
+				on = MB_NO;
+				flip = MB_NO;
+			}
+	
+			/* check for pending event */
+			if (view->plot_done == MB_NO && view->plot_interrupt_allowed == MB_YES && i % MBV_EVENTCHECKCOARSENESS == 0) {
+				do_mbview_xevents();
+			}
+	
+			/* dump out of loop if plotting already done at a higher recursion */
+			if (view->plot_done == MB_YES)
+				i = data->primary_nx;
 		}
-
-		/* check for pending event */
-		if (view->plot_done == MB_NO && view->plot_interrupt_allowed == MB_YES && i % MBV_EVENTCHECKCOARSENESS == 0) {
-			do_mbview_xevents();
+	}
+	
+	else /* if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) */ {
+		for (i = data->viewbounds[0]; i < data->viewbounds[1] - stride; i += stride) {
+			on = MB_NO;
+			flip = MB_NO;
+			for (j = data->viewbounds[2]; j < data->viewbounds[3]; j += stride) {
+				k = i * data->primary_ny + j;
+				l = (i + stride) * data->primary_ny + j;
+				if (flip == MB_NO) {
+					ikk = i;
+					kk = k;
+					ill = i + stride;
+					ll = l;
+				}
+				else {
+					ikk = i + stride;
+					kk = l;
+					ill = i;
+					ll = k;
+				}
+				if (data->secondary_sameas_primary == MB_YES)
+					secondary_value = data->secondary_data[kk];
+				else
+					mbview_getsecondaryvalue(view, data, ikk, j, &secondary_value);
+				if (data->primary_data[kk] != data->primary_nodatavalue
+					&& secondary_value != data->secondary_nodatavalue) {
+					if (on == MB_NO) {
+						glBegin(GL_TRIANGLE_STRIP);
+						on = MB_YES;
+						if (kk == k)
+							flip = MB_NO;
+						else
+							flip = MB_YES;
+					}
+					if (!(data->primary_stat_z[kk / 8] & statmask[kk % 8]))
+						mbview_zscalegridpoint(instance, kk);
+					if (!(data->primary_stat_color[kk / 8] & statmask[kk % 8])) {
+						if (use_histogram == MB_NO)
+							mbview_colorpoint(view, data, ikk, j, kk);
+						else
+							mbview_colorpoint_histogram(view, data, histogram, ikk, j, kk);
+					}
+					glColor3f(data->primary_r[kk], data->primary_g[kk], data->primary_b[kk]);
+					glVertex3f(data->primary_x[kk], data->primary_y[kk], data->primary_z[kk]);
+					/*fprintf(stderr,"Drawing triangles: origin: %f %f %f  pt:%f %f %f\n",
+					view->xorigin,view->yorigin,view->zorigin,
+					data->primary_x[kk],data->primary_y[kk],data->primary_z[kk]);*/
+				}
+				else {
+					if (on == MB_YES) {
+						glEnd();
+#ifdef MBV_GET_GLX_ERRORS
+						mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
+						on = MB_NO;
+					}
+					flip = MB_NO;
+				}
+				if (data->secondary_sameas_primary == MB_YES)
+					secondary_value = data->secondary_data[ll];
+				else
+					mbview_getsecondaryvalue(view, data, ill, j, &secondary_value);
+				if (data->primary_data[ll] != data->primary_nodatavalue
+					&& secondary_value != data->secondary_nodatavalue) {
+					if (on == MB_NO) {
+						glBegin(GL_TRIANGLE_STRIP);
+						on = MB_YES;
+						if (ll == l)
+							flip = MB_NO;
+						else
+							flip = MB_YES;
+					}
+					if (!(data->primary_stat_z[ll / 8] & statmask[ll % 8]))
+						mbview_zscalegridpoint(instance, ll);
+					if (!(data->primary_stat_color[ll / 8] & statmask[ll % 8])) {
+						if (use_histogram == MB_NO)
+							mbview_colorpoint(view, data, ill, j, ll);
+						else
+							mbview_colorpoint_histogram(view, data, histogram, ill, j, ll);
+					}
+					glColor3f(data->primary_r[ll], data->primary_g[ll], data->primary_b[ll]);
+					glVertex3f(data->primary_x[ll], data->primary_y[ll], data->primary_z[ll]);
+				}
+				else {
+					if (on == MB_YES) {
+						glEnd();
+#ifdef MBV_GET_GLX_ERRORS
+						mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
+						on = MB_NO;
+					}
+					flip = MB_NO;
+				}
+			}
+			if (on == MB_YES) {
+				glEnd();
+#ifdef MBV_GET_GLX_ERRORS
+				mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
+				on = MB_NO;
+				flip = MB_NO;
+			}
+	
+			/* check for pending event */
+			if (view->plot_done == MB_NO && view->plot_interrupt_allowed == MB_YES && i % MBV_EVENTCHECKCOARSENESS == 0) {
+				do_mbview_xevents();
+			}
+	
+			/* dump out of loop if plotting already done at a higher recursion */
+			if (view->plot_done == MB_YES)
+				i = data->primary_nx;
 		}
-
-		/* dump out of loop if plotting already done at a higher recursion */
-		if (view->plot_done == MB_YES)
-			i = data->primary_nx;
 	}
 #ifdef MBV_GET_GLX_ERRORS
 	mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
