@@ -15,7 +15,8 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
-* Version 5.5.2320       October 18, 2017
+* Version 5.5.2321       October 26, 2017
+  Version 5.5.2320       October 18, 2017
 * Version 5.5.2319       October 16, 2017
 * Version 5.5.2318       September 29, 2017
 * Version 5.5.2314       August 24, 2017
@@ -263,6 +264,17 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2321 (October 26, 2017)
+
+Mbgrdviz: fixed bug in displaying overlays.
+
+Mbpreprocess: Added some kluge fixes to time jumps in ancilliary data. New commands
+are --kluge-ancilliary-time-jumps and --kluge-mbaripressure-time-jumps.
+
+Mbextractsegy: fixed bug in the output plotting script.
+
+Format 88 (MBF_RESON7KR): Fixed confusion between Depth and Height s7k data records.
 
 -----> 5.5.2320 (October 18, 2017)
 

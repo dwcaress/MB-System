@@ -68,6 +68,8 @@ static char version_id[] = "$Id$";
 #define MBPREPROCESS_TIME_LATENCY_APPLY_SURVEY 0x80
 #define MBPREPROCESS_TIME_LATENCY_APPLY_ALL 0xFF
 
+//#define DEBUG_MBPREPROCESS 1
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
@@ -129,6 +131,8 @@ int main(int argc, char **argv) {
 	                       "\t--multibeam-sidescan-source=recordid\n"
 						   "\t--sounding-amplitude-filter=value\n\n"
 	                       "\t--kluge-time-jumps=threshold\n"
+                           "\t--kluge-ancilliary-time-jumps=threshold\n"
+                           "\t--kluge-mbaripressure-time-jumps=threshold\n"
 	                       "\t--kluge-beam-tweak=factor\n"
 	                       "\t--kluge-soundspeed-tweak=factor\n"
 	                       "\t--kluge-zero-attitude-correction\n"
@@ -216,6 +220,8 @@ int main(int argc, char **argv) {
 	 * 		--ignore-water-column
 	 *
 	 * 		--kluge-time-jumps=threshold
+	 * 		--kluge-ancilliary-time-jumps=threshold
+	 * 		--kluge-mbaripressure-time-jumps=threshold
 	 *      --kluge-beam-tweak=factor
 	 *      --kluge-soundspeed-tweak=factor
 	 *      --kluge-zero-attitude-correction
@@ -275,6 +281,8 @@ int main(int argc, char **argv) {
 	                                  {"sounding-amplitude-filter", required_argument, NULL, 0},
 	                                  {"ignore-water-column", no_argument, NULL, 0},
 	                                  {"kluge-time-jumps", required_argument, NULL, 0},
+	                                  {"kluge-ancilliary-time-jumps", required_argument, NULL, 0},
+	                                  {"kluge-mbaripressure-time-jumps", required_argument, NULL, 0},
 	                                  {"kluge-beam-tweak", required_argument, NULL, 0},
 	                                  {"kluge-soundspeed-tweak", required_argument, NULL, 0},
 	                                  {"kluge-zero-attitude-correction", no_argument, NULL, 0},
@@ -383,10 +391,18 @@ int main(int argc, char **argv) {
 	/* kluge various data fixes */
 	int kluge_timejumps = MB_NO;
 	double kluge_timejumps_threshold = 0.0;
+	int kluge_timejumps_ancilliary = MB_NO;
+	double kluge_timejumps_anc_threshold = 0.0;
+	int kluge_timejumps_mbaripressure = MB_NO;
+	double kluge_timejumps_mba_threshold = 0.0;
 	double kluge_first_time_d;
 	double kluge_last_time_d;
 	double dtime_d_expect;
 	double dtime_d;
+	int correction_on = MB_NO;
+	double correction_start_time_d = 0.0;
+	int correction_start_index = 0;
+	int correction_end_index = -1;
 	int kluge_beamtweak = MB_NO;
 	double kluge_beamtweak_factor = 1.0;
 	int kluge_soundspeedtweak = MB_NO;
@@ -556,7 +572,7 @@ int main(int argc, char **argv) {
 	double *dptr = NULL;
 	int index = 0;
 	char buffer[16] = "";
-	int i, n;
+	int i, ii, n, nn;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -983,6 +999,20 @@ int main(int argc, char **argv) {
 					kluge_timejumps = MB_YES;
 			}
 
+			/* kluge-ancilliary-time-jumps */
+			else if (strcmp("kluge-ancilliary-time-jumps", options[option_index].name) == 0) {
+				n = sscanf(optarg, "%lf", &kluge_timejumps_anc_threshold);
+				if (n == 1)
+					kluge_timejumps_ancilliary = MB_YES;
+			}
+
+			/* kluge-mbaripressure-time-jumps */
+			else if (strcmp("kluge-mbaripressure-time-jumps", options[option_index].name) == 0) {
+				n = sscanf(optarg, "%lf", &kluge_timejumps_mba_threshold);
+				if (n == 1)
+					kluge_timejumps_mbaripressure = MB_YES;
+			}
+
 			/* kluge-beam-tweak */
 			else if (strcmp("kluge-beam-tweak", options[option_index].name) == 0) {
 				n = sscanf(optarg, "%lf", &kluge_beamtweak_factor);
@@ -1146,6 +1176,10 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2  Various data fixes (kluges):\n");
 		fprintf(stderr, "dbg2       kluge_timejumps:              %d\n", kluge_timejumps);
 		fprintf(stderr, "dbg2       kluge_timejumps_threshold:    %f\n", kluge_timejumps_threshold);
+		fprintf(stderr, "dbg2       kluge_timejumps_ancilliary:   %d\n", kluge_timejumps_ancilliary);
+		fprintf(stderr, "dbg2       kluge_timejumps_anc_threshold:%f\n", kluge_timejumps_anc_threshold);
+		fprintf(stderr, "dbg2       kluge_timejumps_mbaripressure:%d\n", kluge_timejumps_mbaripressure);
+		fprintf(stderr, "dbg2       kluge_timejumps_mba_threshold:%f\n", kluge_timejumps_mba_threshold);
 		fprintf(stderr, "dbg2       kluge_beamtweak:              %d\n", kluge_beamtweak);
 		fprintf(stderr, "dbg2       kluge_beamtweak_factor:       %f\n", kluge_beamtweak_factor);
 		fprintf(stderr, "dbg2       kluge_soundspeedtweak:        %d\n", kluge_soundspeedtweak);
@@ -1225,6 +1259,10 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Various data fixes (kluges):\n");
 		fprintf(stderr, "     kluge_timejumps:              %d\n", kluge_timejumps);
 		fprintf(stderr, "     kluge_timejumps_threshold:    %f\n", kluge_timejumps_threshold);
+		fprintf(stderr, "     kluge_timejumps_ancilliary:   %d\n", kluge_timejumps_ancilliary);
+		fprintf(stderr, "     kluge_timejumps_anc_threshold:%f\n", kluge_timejumps_anc_threshold);
+		fprintf(stderr, "     kluge_timejumps_mbaripressure:%d\n", kluge_timejumps_mbaripressure);
+		fprintf(stderr, "     kluge_timejumps_mba_threshold:%f\n", kluge_timejumps_mba_threshold);
 		fprintf(stderr, "     kluge_beamtweak:              %d\n", kluge_beamtweak);
 		fprintf(stderr, "     kluge_beamtweak_factor:       %f\n", kluge_beamtweak_factor);
 		fprintf(stderr, "     kluge_soundspeedtweak:        %d\n", kluge_soundspeedtweak);
@@ -1473,9 +1511,13 @@ int main(int argc, char **argv) {
 			}
 		}
 		if (sensordepth_mode == MBPREPROCESS_MERGE_OFF) {
-			if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW || iformat == MBF_RESON7KR) {
+			if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
 				sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
 				sensordepth_async = MB_DATA_HEIGHT;
+			}
+			else if (iformat == MBF_RESON7KR) {
+				sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
+				sensordepth_async = MB_DATA_SONARDEPTH;
 			}
 		}
 		if (heading_mode == MBPREPROCESS_MERGE_OFF) {
@@ -1845,6 +1887,233 @@ int main(int argc, char **argv) {
 	/* end first pass through data */
 
 	/*-------------------------------------------------------------------*/
+
+#ifdef DEBUG_MBPREPROCESS
+	for (i=0;i<n_nav;i++) {
+		mb_get_date(verbose,nav_time_d[i],time_i);
+		fprintf(stderr,"NAV: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.6f %.6f\n",
+			time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+			nav_navlon[i], nav_navlat[i]);
+	}
+	
+	for (i=0;i<n_sensordepth;i++) {
+		mb_get_date(verbose,sensordepth_time_d[i],time_i);
+		fprintf(stderr,"DEP: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
+			time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+			sensordepth_sensordepth[i]);
+	}
+	
+	for (i=0;i<n_heading;i++) {
+		mb_get_date(verbose,heading_time_d[i],time_i);
+		fprintf(stderr,"HDG: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
+			time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+			heading_heading[i]);
+	}
+	
+	for (i=0;i<n_altitude;i++) {
+		mb_get_date(verbose,altitude_time_d[i],time_i);
+		fprintf(stderr,"HDG: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
+			time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+			altitude_altitude[i]);
+	}
+	
+	for (i=0;i<n_attitude;i++) {
+		mb_get_date(verbose,attitude_time_d[i],time_i);
+		fprintf(stderr,"RPH: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f %.3f\n",
+			time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+			attitude_roll[i], attitude_pitch[i]);
+	}
+#endif
+
+	/* deal with correcting MBARI Mapping AUV pressure depth time jumps */
+	if  (kluge_timejumps_mbaripressure == MB_YES) {
+		if (verbose > 0) {
+			fprintf(stderr, "\n-----------------------------------------------\n");
+			fprintf(stderr, "Applying time jump corrections to MBARI pressure depth data:\n");
+		}
+		
+		/* sensordepth */
+		if (n_sensordepth > 2 && n_sensordepth_alloc >= n_sensordepth) {
+			correction_on = MB_NO;
+			dtime_d_expect = (sensordepth_time_d[n_sensordepth-1] - sensordepth_time_d[0]) / (n_sensordepth - 1);
+			if (fabs((sensordepth_time_d[1] - sensordepth_time_d[0]) -  dtime_d_expect) < kluge_timejumps_mba_threshold)
+					dtime_d_expect = (sensordepth_time_d[1] - sensordepth_time_d[0]);
+			for (i=2;i<n_sensordepth;i++) {
+				dtime_d = sensordepth_time_d[i] - sensordepth_time_d[i-1];
+				if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_mba_threshold) {
+					if (correction_on == MB_NO) {
+						correction_on = MB_YES;
+						correction_start_time_d = sensordepth_time_d[i-1];
+						correction_start_index = i;
+						correction_end_index = i - 1;
+					}
+					fprintf(stderr, "DEP MBARI FIX: i:%d t: %f %f dt: %f %f ",
+							i, sensordepth_time_d[i-1], sensordepth_time_d[i], dtime_d, dtime_d_expect);
+					if (sensordepth_time_d[i] < correction_start_time_d) {
+						correction_end_index = i;
+					}
+					sensordepth_time_d[i] = sensordepth_time_d[i-1] + dtime_d_expect;
+					fprintf(stderr, "newt[%d]: %f\n", i, sensordepth_time_d[i]);
+				} else {
+					/* if correction has been on and there was a negative jump that needs deleting */
+					if (correction_on == MB_YES && correction_end_index > correction_start_index) {
+						for (ii=correction_start_index;ii<=correction_end_index;ii++) {
+							fprintf(stderr,"DEP MBARI DELETE: i:%d t:%f\n", ii, sensordepth_time_d[ii]);
+							sensordepth_time_d[ii] = 0.0;
+						}
+					}
+					
+					/* correction is off */
+					correction_on = MB_NO;
+				}
+			}
+			
+			/* remove any samples that have had the timestamps zeroed */
+			nn = n_sensordepth;
+			for (i=n_sensordepth-1;i>=0;i--) {
+				if (sensordepth_time_d[i] == 0.0) {
+					for (ii=i;ii<nn-1;ii++) {
+						sensordepth_time_d[ii] = sensordepth_time_d[ii+1];
+						sensordepth_sensordepth[ii] = sensordepth_sensordepth[ii+1];
+					}
+					nn--;
+				}
+			}
+			n_sensordepth = nn;
+		}
+	}
+
+	/* deal with ancilliary data time jump corrections */
+	if  (kluge_timejumps_ancilliary == MB_YES) {
+		if (verbose > 0) {
+			fprintf(stderr, "\n-----------------------------------------------\n");
+			fprintf(stderr, "Applying time jump corrections to ancilliary data:\n");
+		}
+		
+		/* position */
+		if (n_nav > 2 && n_nav_alloc >= n_nav) {
+			dtime_d_expect = (nav_time_d[n_nav-1] - nav_time_d[0]) / (n_nav - 1);
+			if (fabs((nav_time_d[1] - nav_time_d[0]) -  dtime_d_expect) < kluge_timejumps_anc_threshold)
+					dtime_d_expect = (nav_time_d[1] - nav_time_d[0]);
+			for (i=2;i<n_nav;i++) {
+				dtime_d = nav_time_d[i] - nav_time_d[i-1];
+				if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_anc_threshold) {
+					fprintf(stderr, "NAV TIME JUMP FIX: i:%d t: %f %f dt: %f %f ",
+							i, nav_time_d[i-1], nav_time_d[i], dtime_d, dtime_d_expect);
+					nav_time_d[i] = nav_time_d[i-1] + dtime_d_expect;
+					fprintf(stderr, "newt[%d]: %f\n", i, nav_time_d[i]);
+				}
+			}
+		}
+		
+		/* sensordepth */
+		if (n_sensordepth > 2 && n_sensordepth_alloc >= n_sensordepth) {
+			dtime_d_expect = (sensordepth_time_d[n_sensordepth-1] - sensordepth_time_d[0]) / (n_sensordepth - 1);
+			if (fabs((sensordepth_time_d[1] - sensordepth_time_d[0]) -  dtime_d_expect) < kluge_timejumps_anc_threshold)
+					dtime_d_expect = (sensordepth_time_d[1] - sensordepth_time_d[0]);
+			for (i=2;i<n_sensordepth;i++) {
+				dtime_d = sensordepth_time_d[i] - sensordepth_time_d[i-1];
+				if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_anc_threshold) {
+					fprintf(stderr, "DEP TIME JUMP FIX: i:%d t: %f %f dt: %f %f ",
+							i, sensordepth_time_d[i-1], sensordepth_time_d[i], dtime_d, dtime_d_expect);
+					sensordepth_time_d[i] = sensordepth_time_d[i-1] + dtime_d_expect;
+					fprintf(stderr, "newt[%d]: %f\n", i, sensordepth_time_d[i]);
+				}
+			}
+		}
+		
+		/* heading */
+		if (n_heading > 2 && n_heading_alloc >= n_heading) {
+			dtime_d_expect = (heading_time_d[n_heading-1] - heading_time_d[0]) / (n_heading - 1);
+			if (fabs((heading_time_d[1] - heading_time_d[0]) -  dtime_d_expect) < kluge_timejumps_anc_threshold)
+					dtime_d_expect = (heading_time_d[1] - heading_time_d[0]);
+			for (i=2;i<n_heading;i++) {
+				dtime_d = heading_time_d[i] - heading_time_d[i-1];
+				if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_anc_threshold) {
+					fprintf(stderr, "HDG TIME JUMP FIX: i:%d t: %f %f dt: %f %f ",
+							i, heading_time_d[i-1], heading_time_d[i], dtime_d, dtime_d_expect);
+					heading_time_d[i] = heading_time_d[i-1] + dtime_d_expect;
+					fprintf(stderr, "newt[%d]: %f\n", i, heading_time_d[i]);
+				}
+			}
+		}
+		
+		/* altitude */
+		if (n_altitude > 2 && n_altitude_alloc >= n_altitude) {
+			dtime_d_expect = (altitude_time_d[n_altitude-1] - altitude_time_d[0]) / (n_altitude - 1);
+			if (fabs((altitude_time_d[1] - altitude_time_d[0]) -  dtime_d_expect) < kluge_timejumps_anc_threshold)
+					dtime_d_expect = (altitude_time_d[1] - altitude_time_d[0]);
+			for (i=2;i<n_altitude;i++) {
+				dtime_d = altitude_time_d[i] - altitude_time_d[i-1];
+				if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_anc_threshold) {
+					fprintf(stderr, "ALT TIME JUMP FIX: i:%d t: %f %f dt: %f %f ",
+							i, altitude_time_d[i-1], altitude_time_d[i], dtime_d, dtime_d_expect);
+					altitude_time_d[i] = altitude_time_d[i-1] + dtime_d_expect;
+					fprintf(stderr, "newt[%d]: %f\n", i, altitude_time_d[i]);
+				}
+			}
+		}
+		
+		/* attitude */
+		if (n_attitude > 2 && n_attitude_alloc >= n_attitude) {
+			dtime_d_expect = (attitude_time_d[n_attitude-1] - attitude_time_d[0]) / (n_attitude - 1);
+			if (fabs((attitude_time_d[1] - attitude_time_d[0]) -  dtime_d_expect) < kluge_timejumps_anc_threshold)
+					dtime_d_expect = (attitude_time_d[1] - attitude_time_d[0]);
+			for (i=2;i<n_attitude;i++) {
+				dtime_d = attitude_time_d[i] - attitude_time_d[i-1];
+				if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_anc_threshold) {
+					fprintf(stderr, "ATT TIME JUMP FIX: i:%d t: %f %f dt: %f %f ",
+							i, attitude_time_d[i-1], attitude_time_d[i], dtime_d, dtime_d_expect);
+					attitude_time_d[i] = attitude_time_d[i-1] + dtime_d_expect;
+					fprintf(stderr, "newt[%d]: %f\n", i, attitude_time_d[i]);
+				}
+			}
+		}
+
+#ifdef DEBUG_MBPREPROCESS
+		for (i=0;i<n_nav;i++) {
+			mb_get_date(verbose,nav_time_d[i],time_i);
+			fprintf(stderr,"NAV: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.6f %.6f\n",
+				time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+				nav_navlon[i], nav_navlat[i]);
+		}
+		
+		for (i=0;i<n_sensordepth;i++) {
+			mb_get_date(verbose,sensordepth_time_d[i],time_i);
+			fprintf(stderr,"DEP: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
+				time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+				sensordepth_sensordepth[i]);
+		}
+		
+		for (i=0;i<n_heading;i++) {
+			mb_get_date(verbose,heading_time_d[i],time_i);
+			fprintf(stderr,"HDG: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
+				time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+				heading_heading[i]);
+		}
+		
+		for (i=0;i<n_altitude;i++) {
+			mb_get_date(verbose,altitude_time_d[i],time_i);
+			fprintf(stderr,"HDG: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
+				time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+				altitude_altitude[i]);
+		}
+		
+		for (i=0;i<n_attitude;i++) {
+			mb_get_date(verbose,attitude_time_d[i],time_i);
+			fprintf(stderr,"RPH: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f %.3f\n",
+				time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+				attitude_roll[i], attitude_pitch[i]);
+		}
+#endif
+		
+		for (i=0;i<n_sensordepth;i++) {
+			mb_get_date(verbose,sensordepth_time_d[i],time_i);
+			fprintf(stderr,"DEP: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
+				time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+				sensordepth_sensordepth[i]);
+		}
+	}
 
 	/* deal with time latency corrections */
 	if (verbose > 0) {
@@ -2288,42 +2557,50 @@ int main(int argc, char **argv) {
 			/* delete old synchronous and synchronous files */
 			sprintf(afile, "%s.ata", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				if (verbose > 0)
+					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.ath", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				if (verbose > 0)
+					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.ats", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				if (verbose > 0)
+					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.sta", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				if (verbose > 0)
+					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.baa", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				if (verbose > 0)
+					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.bah", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				if (verbose > 0)
+					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.bas", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				if (verbose > 0)
+					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.bsa", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+				if (verbose > 0)
+					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
 				remove(afile);
 			}
 	
@@ -2448,17 +2725,22 @@ int main(int argc, char **argv) {
 	
 					/* apply time jump fix */
 					if (kluge_timejumps == MB_YES) {
-						if (n_rf_data == 1)
-							kluge_first_time_d = time_d;
-						if (n_rf_data > 2) {
-							dtime_d_expect = (kluge_last_time_d - kluge_first_time_d) / (n_rf_data - 1);
+						if (kind == MB_DATA_DATA) {
+							if (n_rf_data == 1)
+								kluge_first_time_d = time_d;
+						}
+						if (n_rf_data >= 2) {
 							dtime_d = time_d - kluge_last_time_d;
 							if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_threshold) {
 								time_d = kluge_last_time_d + dtime_d_expect;
 								timestamp_changed = MB_YES;
 							}
 						}
-						kluge_last_time_d = time_d;
+						if (kind == MB_DATA_DATA) {
+							kluge_last_time_d = time_d;
+							if (n_rf_data >= 2)
+								dtime_d_expect = (kluge_last_time_d - kluge_first_time_d) / (n_rf_data - 1);
+						}
 					}
 	
 					/* apply time latency correction called for in the platform file */
@@ -2792,7 +3074,8 @@ int main(int argc, char **argv) {
 	
 				/* generate gef files */
 				sprintf(command, "mbgetesf -I %s -M2 -O %s.gef", ofile, ofile);
-				fprintf(stderr, "Generating gef file for %s\n", ofile);
+				if (verbose > 0)
+					fprintf(stderr, "Generating gef file for %s\n", ofile);
 				shellstatus = system(command);
 	
 				/* generate asynchronous heading file */
@@ -2818,7 +3101,8 @@ int main(int argc, char **argv) {
 							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 							exit(error);
 						}
-						fprintf(stderr, "Generating bah file for %s using samples %d:%d out of %d\n", ofile, istart, iend, n_heading);
+						if (verbose > 0)
+							fprintf(stderr, "Generating bah file for %s using samples %d:%d out of %d\n", ofile, istart, iend, n_heading);
 						for (i = istart; i < iend; i++) {
 							index = 0;
 							mb_put_binary_double(MB_YES, heading_time_d[i], &buffer[index]);
@@ -2855,7 +3139,8 @@ int main(int argc, char **argv) {
 							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 							exit(error);
 						}
-						fprintf(stderr, "Generating bas file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
+						if (verbose > 0)
+							fprintf(stderr, "Generating bas file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
 								n_sensordepth);
 						for (i = istart; i < iend; i++) {
 							index = 0;
@@ -2893,7 +3178,8 @@ int main(int argc, char **argv) {
 							fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 							exit(error);
 						}
-						fprintf(stderr, "Generating baa file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
+						if (verbose > 0)
+							fprintf(stderr, "Generating baa file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
 								n_attitude);
 						for (i = istart; i < iend; i++) {
 							index = 0;

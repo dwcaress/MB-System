@@ -697,7 +697,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* save altitude if altitude record */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_HEIGHT && store->type == R7KRECID_Altitude) {
+	if (status == MB_SUCCESS && store->kind == MB_DATA_ALTITUDE && store->type == R7KRECID_Altitude) {
 		/* get attitude structure */
 		altitude = &(store->altitude);
 
@@ -706,7 +706,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* save sonardepth if depth record */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_HEIGHT && store->type == R7KRECID_Depth) {
+	if (status == MB_SUCCESS && store->kind == MB_DATA_SONARDEPTH && store->type == R7KRECID_Depth) {
 		/* get attitude structure */
 		depth = &(store->depth);
 
@@ -3362,7 +3362,7 @@ int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *er
 	/* set kind */
 	if (status == MB_SUCCESS) {
 		/* set kind */
-		store->kind = MB_DATA_HEIGHT;
+		store->kind = MB_DATA_ALTITUDE;
 		store->type = R7KRECID_Altitude;
 
 		/* get the time */
@@ -3588,7 +3588,7 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
 	/* set kind */
 	if (status == MB_SUCCESS) {
 		/* set kind */
-		store->kind = MB_DATA_HEIGHT;
+		store->kind = MB_DATA_SONARDEPTH;
 		store->type = R7KRECID_Depth;
 
 		/* get the time */

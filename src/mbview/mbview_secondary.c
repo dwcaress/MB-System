@@ -146,7 +146,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 
 	/* copy grid */
 	memcpy(data->secondary_data, secondary_data, data->secondary_nxy * sizeof(float));
-
+ 
 	/* check if secondary grid has same bounds and dimensions as primary grid so
 	    that overlay calculations are trivial */
 	if (data->secondary_nx == data->primary_nx && data->secondary_ny == data->primary_ny &&
