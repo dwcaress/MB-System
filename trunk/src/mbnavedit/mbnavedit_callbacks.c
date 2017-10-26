@@ -578,9 +578,6 @@ void do_parse_datalist(char *file, int form) {
 			}
 		}
 	}
-	fprintf(stderr, "numfiles:%d\n", numfiles);
-	for (i = 0; i < numfiles; i++)
-		fprintf(stderr, "\t%s\t%d\t%d\t%d\n", filepaths[i], fileformats[i], filelocks[i], filenves[i]);
 }
 
 /*--------------------------------------------------------------------*/

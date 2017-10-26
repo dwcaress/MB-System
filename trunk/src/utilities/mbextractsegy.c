@@ -1463,10 +1463,8 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
 
-					sprintf(
-					    command,
-					    "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -trim -quality 75 %s_%4.4d_%2.2d_sectionplot.jpg\n\n",
-					    lineroot, linenumber, i + 1, lineroot, linenumber, i + 1);
+					sprintf(command, "gmt psconvert %s_%4.4d_%2.2d_sectionplot.ps -Tj -A -E300 -P\n\n",
+					    lineroot, linenumber, i + 1);
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
 					fflush(sfp);
