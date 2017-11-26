@@ -662,7 +662,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (quality == 0)
 				store->beamflag[i] = MB_FLAG_NULL;
 			else if (quality < 3)
-				store->beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+				store->beamflag[i] = (char)(MB_FLAG_FLAG | MB_FLAG_SONAR);
 			else
 				store->beamflag[i] = MB_FLAG_NONE;
 

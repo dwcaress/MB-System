@@ -642,13 +642,13 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 				if (store->beams[i].quality == 1)
 					beamflag[j] = MB_FLAG_NONE;
 				else if (store->beams[i].quality < 8)
-					beamflag[j] = MB_FLAG_SONAR + MB_FLAG_FLAG;
+					beamflag[j] = (char)(MB_FLAG_SONAR | MB_FLAG_FLAG);
 				else if (store->beams[i].quality == 8)
 					beamflag[j] = MB_FLAG_NULL;
 				else if (store->beams[i].quality == 10)
-					beamflag[j] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
+					beamflag[j] = (char)(MB_FLAG_MANUAL | MB_FLAG_FLAG);
 				else if (store->beams[i].quality == 20)
-					beamflag[j] = MB_FLAG_FILTER + MB_FLAG_FLAG;
+					beamflag[j] = (char)(MB_FLAG_FILTER | MB_FLAG_FLAG);
 				else
 					beamflag[j] = MB_FLAG_NULL;
 

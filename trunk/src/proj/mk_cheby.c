@@ -96,20 +96,27 @@ Tseries *mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(
 				T->mu = nru - 1;
 				T->mv = nrv - 1;
 				T->power = 1;
-				for (i = 0; i < nru; ++i) /* store coefficient rows for u */
-					if ((T->cu[i].m = ncu[i]) != 0)
-						if ((p = T->cu[i].c = (double *)pj_malloc(sizeof(double) * ncu[i])))
+				for (i = 0; i < nru; ++i) { /* store coefficient rows for u */
+					if ((T->cu[i].m = ncu[i]) != 0) {
+						if ((p = T->cu[i].c = (double *)pj_malloc(sizeof(double) * ncu[i]))) {
 							for (j = 0; j < ncu[i]; ++j)
 								*p++ = (w[i] + j)->u;
+						}
 						else
 							goto error;
-				for (i = 0; i < nrv; ++i) /* same for v */
-					if ((T->cv[i].m = ncv[i]) != 0)
-						if ((p = T->cv[i].c = (double *)pj_malloc(sizeof(double) * ncv[i])))
+					}
+				}
+				for (i = 0; i < nrv; ++i)  {/* same for v */
+					if ((T->cv[i].m = ncv[i]) != 0) {
+						if ((p = T->cv[i].c = (double *)pj_malloc(sizeof(double) * ncv[i]))) {
 							for (j = 0; j < ncv[i]; ++j)
 								*p++ = (w[i] + j)->v;
-						else
+						}
+						else {
 							goto error;
+						}
+					}
+				}
 			}
 		}
 		else if ((T = makeT(nru, nrv)) != NULL) {
@@ -128,16 +135,22 @@ Tseries *mk_cheby(projUV a, projUV b, double res, projUV *resid, projUV (*func)(
 							*p++ = (w[i] + j)->u;
 					else
 						goto error;
-			for (i = 0; i < nrv; ++i) /* same for v */
-				if ((T->cv[i].m = ncv[i]) != 0)
-					if ((p = T->cv[i].c = (double *)pj_malloc(sizeof(double) * ncv[i])))
-						for (j = 0; j < ncv[i]; ++j)
+			for (i = 0; i < nrv; ++i) { /* same for v */
+				if ((T->cv[i].m = ncv[i]) != 0) {
+					if ((p = T->cv[i].c = (double *)pj_malloc(sizeof(double) * ncv[i]))) {
+						for (j = 0; j < ncv[i]; ++j) {
 							*p++ = (w[i] + j)->v;
-					else
+						}
+					}
+					else {
 						goto error;
+					}
+				}
+			}
 		}
-		else
+		else {
 			goto error;
+		}
 	}
 	goto gohome;
 error:
