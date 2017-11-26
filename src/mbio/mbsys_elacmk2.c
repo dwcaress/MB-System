@@ -348,13 +348,13 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			if (store->beams[j].quality == 1)
 				beamflag[i] = MB_FLAG_NONE;
 			else if (store->beams[j].quality < 8)
-				beamflag[i] = MB_FLAG_SONAR + MB_FLAG_FLAG;
+				beamflag[i] = (char)(MB_FLAG_SONAR | MB_FLAG_FLAG);
 			else if (store->beams[j].quality == 8)
 				beamflag[i] = MB_FLAG_NULL;
 			else if (store->beams[j].quality == 10)
-				beamflag[i] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
+				beamflag[i] = (char)(MB_FLAG_MANUAL | MB_FLAG_FLAG);
 			else if (store->beams[j].quality == 20)
-				beamflag[i] = MB_FLAG_FILTER + MB_FLAG_FLAG;
+				beamflag[i] = (char)(MB_FLAG_FILTER | MB_FLAG_FLAG);
 			else
 				beamflag[i] = MB_FLAG_NULL;
 			bath[i] = depthscale * store->beams[j].bath;

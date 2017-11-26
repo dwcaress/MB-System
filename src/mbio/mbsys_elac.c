@@ -346,13 +346,13 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 				if (store->profile[i].quality[j] == 1)
 					beamflag[ibeam] = MB_FLAG_NONE;
 				else if (store->profile[i].quality[j] < 8)
-					beamflag[ibeam] = MB_FLAG_SONAR + MB_FLAG_FLAG;
+					beamflag[ibeam] = (char)(MB_FLAG_SONAR | MB_FLAG_FLAG);
 				else if (store->profile[i].quality[j] == 8)
 					beamflag[ibeam] = MB_FLAG_NULL;
 				else if (store->profile[i].quality[j] == 10)
-					beamflag[ibeam] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
+					beamflag[ibeam] = (char)(MB_FLAG_MANUAL | MB_FLAG_FLAG);
 				else if (store->profile[i].quality[j] == 20)
-					beamflag[ibeam] = MB_FLAG_FILTER + MB_FLAG_FLAG;
+					beamflag[ibeam] = (char)(MB_FLAG_FILTER | MB_FLAG_FLAG);
 				else
 					beamflag[ibeam] = MB_FLAG_NULL;
 				bath[ibeam] = depthscale * store->profile[i].bath[j];

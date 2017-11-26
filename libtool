@@ -1,6 +1,6 @@
 #! /bin/sh
-# Generated automatically by config.status (mbsystem) 5.5.2321
-# Libtool was configured on host heezen.shore.mbari.org:
+# Generated automatically by config.status (mbsystem) 5.5.2322
+# Libtool was configured on host heezen.local:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
 # Provide generalized library-building support services.
@@ -67,13 +67,13 @@ PATH_SEPARATOR=":"
 
 # The host system.
 host_alias=
-host=x86_64-apple-darwin16.6.0
-host_os=darwin16.6.0
+host=x86_64-apple-darwin16.7.0
+host_os=darwin16.7.0
 
 # The build system.
 build_alias=
-build=x86_64-apple-darwin16.6.0
-build_os=darwin16.6.0
+build=x86_64-apple-darwin16.7.0
+build_os=darwin16.7.0
 
 # A sed program that does not truncate output.
 SED="/usr/bin/sed"

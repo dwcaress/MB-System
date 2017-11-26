@@ -1127,7 +1127,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       nav_file_format:              %d\n", nav_file_format);
 		fprintf(stderr, "dbg2       nav_async:                    %d\n", nav_async);
 		fprintf(stderr, "dbg2       nav_sensor:                   %d\n", nav_sensor);
-		fprintf(stderr, "dbg2  Source of navigation data:\n");
+		fprintf(stderr, "dbg2  Source of sensor depth data:\n");
 		fprintf(stderr, "dbg2       sensordepth_mode:             %d\n", sensordepth_mode);
 		fprintf(stderr, "dbg2       sensordepth_file:             %s\n", sensordepth_file);
 		fprintf(stderr, "dbg2       sensordepth_file_format:      %d\n", sensordepth_file_format);
@@ -1210,7 +1210,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "     nav_file_format:              %d\n", nav_file_format);
 		fprintf(stderr, "     nav_async:                    %d\n", nav_async);
 		fprintf(stderr, "     nav_sensor:                   %d\n", nav_sensor);
-		fprintf(stderr, "Source of navigation data:\n");
+		fprintf(stderr, "Source of sensor depth data:\n");
 		fprintf(stderr, "     sensordepth_mode:             %d\n", sensordepth_mode);
 		fprintf(stderr, "     sensordepth_file:             %s\n", sensordepth_file);
 		fprintf(stderr, "     sensordepth_file_format:      %d\n", sensordepth_file_format);
@@ -2450,6 +2450,8 @@ int main(int argc, char **argv) {
 			oformat = MBF_EM300MBA;
 		else if (iformat == MBF_EM710RAW || iformat == MBF_EM710MBA)
 			oformat = MBF_EM710MBA;
+		else if (iformat == MBF_IMAGE83P)
+			oformat = MBF_IMAGEMBA;
 		else
 			oformat = iformat;
 

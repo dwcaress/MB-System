@@ -336,6 +336,297 @@ struct mbsys_jstar_channel_struct {
 	struct mbsys_jstar_message_struct message;
 
 	/* Trace Header */
+	int pingTime;            /* 0-3 : Ping Time in epoch seconds [since (1/1/1970)] (Protocol Version 8 onwards) */
+	unsigned int startDepth; /* 4-7 : Starting depth (window offset) in samples. */
+	unsigned int pingNum;    /* 8-11: Ping number (increments with ping) ** */
+	short reserved1[2];      /* 12-15: Reserved */
+	short msb;               /* 16-17: MSBs – Most Significant Bits
+                              *   High order bits to extend 16 bits unsigned short
+                              *   values to 20 bits. The 4MSB bits become the most
+                              *   significant portion of the new 20 bit value.
+                              *       Bits 0 – 3: Start Frequency
+                              *       Bits 4 – 7: End Frequency
+                              *       Bits 8 – 11: Samples in this Packet
+                              *       Bits 12 – 15: Mark Number (added in protocol version 0xA)
+                              *   The Most Significant Bits fields are used to extend
+                              *   16 bit integers to 20 bits. These are added as needed
+                              *   when the range of possible values exceeds what can be
+                              *   stored in a 16 bit integer. The simplest way to use
+                              *   these additional bits is to treat the value as a 32 bit
+                              *   integer, the existing value becomes the least
+                              *   significant 16 bits, and the MSB field becomes the
+                              *   next most significant 4 bits with the most significant
+                              *   12 bits set to zeros. */
+	short lsb1;              /* 18-19 : LSB – Extended precision
+                              *   Low order bits for fields requiring greater precision.
+                              *       Bits 0-7: Sample Interval-- Sample interval fractional component
+                              *       Bits 8-15: Course- - fractional portion of course
+                              *   (Added in protocol version 0xB) */
+	short lsb2;              /* 20-21 : Reserved – LBS2 – Extended precision
+                              *   Low order bits for fields requiring greater precision.
+                              *       Bits 0 – 3: Speed - sub fractional speed component (added in protocol version 0xC).
+                              *       Bits 4 – 13: Sweep Length in Microsecond, from 0 - 999 (added in protocol version 0xD).
+                              *       Bits 14 – 15: Reserved*/
+	short reserved2[3];      /* 22-27 : Reserved – Do not use */
+
+	short traceIDCode;       /* 28-29 : ID Code (always 1 => seismic data) ** */
+
+	unsigned short validityFlag;  /* 30-31 : Validity flags bitmap
+                                   *   Bit 0: Lat Lon or XY valid
+                                   *   Bit 1: Course valid
+                                   *   Bit 2: Speed valid
+                                   *   Bit 3: Heading valid
+                                   *   Bit 4: Pressure valid
+                                   *   Bit 5: Pitch roll valid
+                                   *   Bit 6: Altitude valid
+                                   *   Bit 7: Reserved
+                                   *   Bit 8: Water temperature valid Bit 9: Depth valid
+                                   *   Bit 10: Annotation valid
+                                   *   Bit 11: Cable counter valid
+                                   *   Bit 12: KP valid
+                                   *   Bit 13: Position interpolated
+                                   *   Bit 14: Water sound speed valid */
+    short reserved3;              /* 32-33 : Reserved – Do not use */
+	short dataFormat;             /* 34-35 : DataFormatType
+                                   *         0 = one short per sample - envelope data. The total number
+                                   *             of bytes of data to follow is 2 * samples.
+                                   *         1 = two shorts per sample - stored as real (one short),
+                                   *             imaginary (one short). The total number of bytes
+                                   *             of data to follow is 4 * samples.
+                                   *         2 = one short per sample - before matched filter.
+                                   *             The total number of bytes of data to follow is 2 * samples.
+                                   *         9 = two shorts per sample - stored as real (one short),
+                                   *             imaginary (one short), - prior to matched filtering.
+                                   *             This is the code for unmatched filtered analytic data,
+                                   *             whereas value 1 is intended for match filtered analytic
+                                   *             data. The total number of bytes of data to follow is 4 * samples.
+                                   *         NOTE: Values greater than 255 indicate that the data to
+                                   *         follow is compressed and must be decompressed prior to use.
+                                   *         For more detail refer to the JSF Data File Decompression
+                                   *         Application Note for more information.
+                                   *
+                                   *     Old definitions:
+                                   *         0 = 1 short  per sample  - envelope data 
+                                   *         1 = 2 shorts per sample, - stored as real(1), imag(1),
+                                   *         2 = 1 short  per sample  - before matched filter
+                                   *         3 = 1 short  per sample  - real part analytic signal
+                                   *         4 = 1 short  per sample  - pixel data / ceros data */
+	short NMEAantennaeR; /* 36-37 : Distance from Antenna to Tow point in Centimeters - Sonar Aft is Positive */
+	short NMEAantennaeO; /* 38-39 : Distance from Antenna to Tow Point in Centimeters - Sonar to Starboard is Positive. */
+	short reserved4[2];  /* 40-43 : Reserved – Do not use */
+	float kmOfPipe;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
+	short reserved5[16]; /* 48-79 : Reserved – Do not use */
+
+	/* -------------------------------------------------------------------- */
+	/* Navigation data :                                                    */
+	/* If the coorUnits are seconds(2), the x values represent longitude    */
+	/* and the y values represent latitude.  A positive value designates    */
+	/* the number of seconds east of Greenwich Meridian or north of the     */
+	/* equator.                                                             */
+	/* -------------------------------------------------------------------- */
+	int coordX;                  /* 80-83 : longitude or easting  */
+	int coordY;                  /* 84-87 : latitude or northing */
+	short coordUnits;            /* 88-89 : Units of coordinates -
+                                  *         1 = X,Y in millimeters
+                                  *         2 = X,Y in iminutes of arc times 10000
+                                  *         3 = X,Y in decimeters */
+	char annotation[24];         /* 90-113 : Annotation string */
+	unsigned short samples;      /* 114-115 : Samples in this packet  
+	                              *           Large sample sizes require multiple packets.
+	                              *           For protocol versions 0xA and above, the
+	                              *           MSB1 field should include the MSBs
+	                              *           (Most Significant Bits) needed to
+	                              *           determine the number of samples.
+	                              *           See bits 8-11 in bytes 16-17. Field MSB1
+	                              *           for MSBs for large sample sizes. */
+	unsigned int sampleInterval; /* 116-119 : Sampling Interval in Nanoseconds
+                                  *           NOTE: For protocol versions 0xB and
+                                  *           above, see the LSBs field should
+                                  *           include the fractional component
+                                  *           needed to determine the sample interval.
+                                  *           See bits 0-7 in bytes 18-19. Field LSB1
+                                  *           for LSBs for increased precision. */
+	unsigned short ADCGain;      /* 120-121 : Gain factor of ADC */
+	short pulsePower;            /* 122-123 : User Transmit Level Setting (0 – 100%). */
+	short reserved6;             /* 124-125 : Reserved */
+	unsigned short startFreq;    /* 126-127 : Transmit Pulse Starting Frequency in
+                                  *           daHz (decaHertz, units of 10Hz).
+                                  *           NOTE: For protocol versions 0xA and above,
+                                  *           the MSB1 field should include the MSBs
+                                  *           (Most Significant Bits) needed to
+                                  *           determine the starting frequency
+                                  *           of transmit pulse.
+                                  *           See Bits 0-3 in byte 16-17. Field MSB1
+                                  *           for MSBs for large transmit pulse. */
+	unsigned short endFreq;      /* 128-129 : Transmit Pulse Ending Frequency in
+                                  *           daHz (decaHertz, units of 10Hz).
+                                  *           NOTE: For protocol versions 0xA and above,
+                                  *           the MSB1 field should include the MSBs
+                                  *           (Most Significant Bits) needed to
+                                  *           determine the starting frequency of
+                                  *           transmit pulse.
+                                  *           See bits 4-7 in byte 16-17. Field MSB1
+                                  *           for MSBs for large transmit pulse. */
+	unsigned short sweepLength;  /* 130-131 : Sweep Length in Milliseconds.
+                                  *           See bytes 18-19 for LSBs (Least Significant Bits),
+                                  *           LSB2 bits 4 - 13 contain the microsecond
+                                  *           portion (0 - 999). LSB2 part was added
+                                  *           in protocol version 0xD, and was previously 0.
+                                  *           */
+	int pressure;                /* 132-135 : Pressure in Milli PSI (1 unit = 1/1000 PSI)
+                                  *           See Validity Flag (bytes 30-31) */
+	int sonarDepth;              /* 136-139 : Depth in Millimeters (if not = 0)
+                                  *           See Validity Flag (bytes 30-31). */
+	unsigned short sampleFreq;   /* 140-141 : Sample Frequency of the Data in hertz
+                                  *           NOTE: For all data types EXCEPT RAW
+                                  *           (Data Format = 2) this is the sampling
+                                  *           frequency of the data. For RAW data,
+                                  *           this is one- half the sample frequency
+                                  *           of the data (FS/2). All values are
+                                  *           modulo 65536. Use this in conjunction
+                                  *           with the Sample Interval (bytes 114-115)
+                                  *           to calculate correct sample rate. */
+	unsigned short pulseID;      /* 142-143 : Outgoing Pulse Identifier */
+	int sonarAltitude;           /* 144-147 : Altitude in Millimeters
+                                  *           A zero implies not filled. See Validity Flag (bytes 30-31) */
+	float soundspeed;            /* 148-151 : Sound Speed in Meters per Second.
+                                  *           See Validity Flag (bytes 30-31). */
+	float mixerFrequency;        /* 152-155 : Mixer Frequency in Hertz
+                                  *           For single pulses systems this should
+                                  *           be close to the center frequency.
+                                  *           For multi pulse systems this should
+                                  *           be the approximate center frequency
+                                  *           of the span of all the pulses. */
+	short year;                  /* 156-157 : Year Data Recorded (CPU time) e.g. 2009.
+                                  *           The Ping Time can also be determined
+                                  *           from the Year, Day, Hour, Minute and
+                                  *           Seconds as per bytes 156 to 165.
+                                  *           Provides 1 second level accuracy and
+                                  *           resolution.
+                                  *           See Bytes 0-3 these 2 time stamps
+                                  *           are equivalent and identical. For
+                                  *           most purposes this should not be used.
+                                  *           For higher resolution (milliseconds)
+                                  *           use the Year, and Day values of bytes
+                                  *           156 to 159, and then use the milliSecondsToday
+                                  *           value of bytes 200-203 to complete the
+                                  *           timestamp. System time is set to UTC,
+                                  *           regardless of time zone. This time
+                                  *           format is backwards compatible with
+                                  *           all older Protocol Revisions */
+	short day;                   /* 158-159 : Day (1 – 366) (should not be used) */
+	short hour;                  /* 160-161 : Hour (see Bytes 200-203) (should not be used) */
+	short minute;                /* 162-163 : Minute (should not be used) */
+	short second;                /* 164-165 : Second (should not be used) */
+	short timeBasis;             /* 166-167 : Time Basis (always 3) */
+	short weightingFactor;       /* 168-169 :  Weighting Factor for Block Floating
+                                  *            Point Expansion
+                                  *            -- defined as 2 to N Volts for LSB.
+                                  *            All data MUST be scaled by 2-N,
+                                  *            where N is the Weighting Factor.
+                                  *            (See Equation 2-1, on page 2-8) */
+	short numberPulses;          /* 170-171 : Number of Pulses in the Water */
+	/* -------------------------------------------------------------------- */
+	/* From pitch/roll/temp/heading sensor */
+	/* -------------------------------------------------------------------- */
+	short heading;               /* 172-173 : Compass Heading (0 to 359.99) in units of 1/100 Degree.
+                                  *           See Validity Flag (bytes 30-31).
+                                  *           The Compass heading is the magnetic heading
+                                  *           of the towfish. If a Gyro sensor is properly
+                                  *           interfaced to the DISCOVER Topside Acquisition Unit
+                                  *           with a valid NMEA HDT message, this field will
+                                  *           contain the Gyro heading, relative to True North. */
+	short pitch;                 /* 174-175 : Pitch [(degrees / 180.0) * 32768.0] maximum resolution.
+                                  *           Positive values indicate bow up.
+                                  *           See Validity Flag (bytes 30-31).*/
+	short roll;                  /* 176-177 : Roll [(degrees / 180.0) * 32768.0] maximum resolution.
+                                  *           Positive values indicate port up.
+                                  *           See Validity Flag (bytes 30-31).*/
+	short reserved8;             /* 178-179 : Reserved */
+	/* -------------------------------------------------------------------- */
+	/* Trigger source from 180-185                                          */
+	/* -------------------------------------------------------------------- */
+	short reserved9;             /* 180-181 : Reserved */
+	short triggerSource;         /* 182-183 : Trigger Source
+                                  *               0 = Internal
+                                  *               1 = External
+                                  *               2 = Coupled */
+	unsigned short markNumber;   /* 184-185 : Mark Number
+                                  *               0 = No Mark
+                                  *           See bytes 16 –17 fields MSB1 for MSBs
+                                  *           (Most Significant Bits) for large
+                                  *           values (> 655350). */
+	/* -------------------------------------------------------------------- */
+	/* Position fix time                                                    */
+	/* -------------------------------------------------------------------- */
+	short NMEAHour;                 /* 186-187 : Position Fix Hour (0 – 23)
+                                     *           NOTE: the NAV time is the time
+                                     *           of the latitude and longitude fix.*/
+	short NMEAMinutes;              /* 188-189 : Position Fix Minutes (0 – 59)
+                                     *           NOTE: the NAV time is the time
+                                     *           of the latitude and longitude fix.*/
+	short NMEASeconds;              /* 190-191 : Position Fix Seconds (0 – 59)
+                                     *           NOTE: the NAV time is the time
+                                     *           of the latitude and longitude fix.*/
+	short NMEACourse;               /* 192-193 : Course in Degrees (0 to 359.9)
+                                     *           Starting with protocol version 0x0C
+                                     *           two digits of fractional degrees
+                                     *           are stored in LSB1. Fractional
+                                     *           portion in LSBs (Least Significant Bits).
+                                     *           See bytes 18 – 19.*/
+	short NMEASpeed;                /* 194-195 : Speed – in Tenths of a Knot
+                                     *           Starting with protocol version 0x0C
+                                     *           one additional digit of fractional
+                                     *           knot (1/100) is stored in LSB2.
+                                     *           For an additional fractional digit,
+                                     *           see LSB2 (bytes 20 -21).*/
+	short NMEADay;                  /* 196-197 : Position Fix Day (1 – 366) */
+	short NMEAYear;                 /* 198-199 : Position Fix Year */
+    
+	/* -------------------------------------------------------------------- */
+	/* Miscellaneous data                                                   */
+	/* -------------------------------------------------------------------- */
+	unsigned int millisecondsToday; /* 200-203 : Milliseconds Today (Since Midnight)
+                                     *           Use with seconds since 1970 to
+                                     *           get time to the milliseconds (time of Ping).*/
+	unsigned short ADCMax;          /* 204-205 : Maximum Absolute Value of ADC Samples
+                                     *           in this Packet */
+	short reserved10;               /* 206-207 : Reserved */
+	short reserved11;               /* 208-209 : Reserved */
+	char softwareVersion[6];        /* 210-215 : Sonar Software Version Number - ASCII */
+	int sphericalCorrection;  /* 216-219 : Initial Spherical Correction Factor in
+                               *           Samples times 100.
+                               *            A value of -1 indicates that the spherical
+                               *            spreading is disabled. /*/
+	unsigned short packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */
+	short ADCDecimation;      /* 222-223 : ADC Decimation * 100 times */
+	short reserved12;         /* 224-225 : Reserved */
+	short temperature;        /* 226-227 : Water Temperature in Units of 1/10 Degree C.
+                               *           See Validity Flag (bytes 30-31).*/
+	float layback;            /* 227-231 : Layback
+                               *           Distance to the sonar in meters. */
+	int reserved13;           /* 232-235 : Reserved */
+	short cableOut;           /* 236-239 : Cable Out in Decimeters
+                               *           See Validity Flag (bytes 30-31). */
+	short reserved14;         /* 236-239 : Reserved */
+
+	/* -------------------------------------------------------------------- */
+	/* MB-System-only parameters from 236-239                               */
+	/* -------------------------------------------------------------------- */
+	//int depth;         /* 227-231 : Seafloor depth in 0.001 m */
+	//int sonardepth;    /* 232-235 : Sonar depth in 0.001 m */
+	//int sonaraltitude; /* 236-239 : Sonar altitude in 0.001 m */
+
+	/* trace data stored as shorts */
+	unsigned int trace_alloc;
+	unsigned short *trace;
+};
+
+struct mbsys_jstar_channel_old_struct {
+	/* Message Header */
+	struct mbsys_jstar_message_struct message;
+
+	/* Trace Header */
 	int sequenceNumber;      /* 0-3 : Trace Sequence Number (always 0) ** */
 	unsigned int startDepth; /* 4-7 : Starting depth (window offset) in samples. */
 	unsigned int pingNum;    /* 8-11: Ping number (increments with ping) ** */

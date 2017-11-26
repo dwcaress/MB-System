@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2322       November 25, 2017
 * Version 5.5.2321       October 26, 2017
   Version 5.5.2320       October 18, 2017
 * Version 5.5.2319       October 16, 2017
@@ -264,6 +265,25 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2322 (November 25, 2017)
+
+Mbpreprocess: Now set so that input Imagenex DeltaT data in the vendor format
+MBF_IMAGE83P (191) will be output in the processing format MBF_IMAGEMBA (192)
+after pre-processing.
+
+Mb7k2jstar: Now outputs in the current jstar format rather than a >10 year old
+variant.
+
+Formats MBF_EDGJSTAR (132) and MBF_EDGJSTR2 (133) supporting Edgetech Jstar (*.jsf)
+files: Changed code to support recent and current versions of Jstar format files.
+The code should recognize and convert older variants, particularly those written
+by past versions of MB-System.
+
+Various source files (mk_cheby.c, geod_for.c, mbsys_xse.c, mbsys_sb2100.c,
+mbsys_elacmk2.c, mbsys_elac.c, mbr_xtfr8101.c, mbbs_defines.h):
+Added curly brackets, changed beamflag setting calculations, and reformatted
+some lines in order to silence compiler warnings.
 
 -----> 5.5.2321 (October 26, 2017)
 

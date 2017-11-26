@@ -478,10 +478,9 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 				navlon = navlon + 360.0;
 			if (navlon > 180.0)
 				navlon = navlon - 360.0;
-			sbp->sourceCoordX = (int)(600000.0 * navlon);
-			sbp->sourceCoordY = (int)(600000.0 * navlat);
-			sbp->groupCoordX = (int)(600000.0 * navlon);
-			sbp->groupCoordY = (int)(600000.0 * navlat);
+			sbp->coordX = (int)(600000.0 * navlon);
+			sbp->coordX = (int)(600000.0 * navlat);
+			sbp->coordUnits = 2;
 		}
 
 		/* set heading */
@@ -496,19 +495,18 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		/* set sonardepth */
 		if (pars->n_sensordepth > 1) {
 			sbp->startDepth = sensordepth / sbp->sampleInterval / 0.00000075;
-			sbp->sonardepth = 1000 * sensordepth;
+			sbp->sonarDepth = 1000 * sensordepth;
 		}
 		
 		/* set altitude */
 		if (pars->n_altitude > 1) {
-			sbp->sonaraltitude = (int)(1000 * altitude);
+			sbp->sonarAltitude = (int)(1000 * altitude);
 		}
 
 		/* set attitude */
 		if (pars->n_attitude > 1) {
 			sbp->roll = 32768 * roll / 180.0;
 			sbp->pitch = 32768 * pitch / 180.0;
-			sbp->heaveCompensation = heave / sbp->sampleInterval / 0.00000075;
 		}
 	}
 
@@ -524,14 +522,12 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 				navlon = navlon + 360.0;
 			if (navlon > 180.0)
 				navlon = navlon - 360.0;
-			ssport->sourceCoordX = 600000.0 * navlon;
-			ssport->sourceCoordY = 600000.0 * navlat;
-			ssstbd->sourceCoordX = 600000.0 * navlon;
-			ssstbd->sourceCoordY = 600000.0 * navlat;
-			ssport->groupCoordX = 600000.0 * navlon;
-			ssport->groupCoordY = 600000.0 * navlat;
-			ssstbd->groupCoordX = 600000.0 * navlon;
-			ssstbd->groupCoordY = 600000.0 * navlat;
+			ssport->coordX = 600000.0 * navlon;
+			ssport->coordY = 600000.0 * navlat;
+			ssport->coordUnits = 2;
+			ssstbd->coordX = 600000.0 * navlon;
+			ssstbd->coordY = 600000.0 * navlat;
+			ssstbd->coordUnits = 2;
 		}
 
 		/* set heading and speed */
@@ -548,24 +544,22 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		if (pars->n_sensordepth > 1) {
 			ssport->startDepth = sensordepth / ssport->sampleInterval / 0.00000075;
 			ssstbd->startDepth = sensordepth / ssstbd->sampleInterval / 0.00000075;
-			ssport->sonardepth = 1000 * sensordepth;
-			ssstbd->sonardepth = 1000 * sensordepth;
+			ssport->sonarDepth = 1000 * sensordepth;
+			ssstbd->sonarDepth = 1000 * sensordepth;
 		}
 		
 		/* set altitude */
 		if (pars->n_altitude > 1) {
-			ssport->sonaraltitude = (int)(1000 * altitude);
-			ssstbd->sonaraltitude = (int)(1000 * altitude);
+			ssport->sonarAltitude = (int)(1000 * altitude);
+			ssstbd->sonarAltitude = (int)(1000 * altitude);
 		}
 
 		/* set attitude */
 		if (pars->n_attitude > 1) {
 			ssport->roll = 32768 * roll / 180.0;
 			ssport->pitch = 32768 * pitch / 180.0;
-			ssport->heaveCompensation = heave / ssport->sampleInterval / 0.00000075;
 			ssstbd->roll = 32768 * roll / 180.0;
 			ssstbd->pitch = 32768 * pitch / 180.0;
-			ssstbd->heaveCompensation = heave / ssstbd->sampleInterval / 0.00000075;
 		}
 	}
 
@@ -643,8 +637,8 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		mb_get_time(verbose, time_i, time_d);
 
 		/* get navigation */
-		*navlon = sbp->groupCoordX / 600000.0;
-		*navlat = sbp->groupCoordY / 600000.0;
+		*navlon = sbp->coordX / 600000.0;
+		*navlat = sbp->coordY / 600000.0;
 
 		/* get heading */
 		*heading = sbp->heading / 100.0;
@@ -666,12 +660,12 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		*nss = 0;
 
 		/* get nadir depth */
-		if (sbp->depth > 0) {
-			bath[0] = 0.001 * sbp->depth;
+		if (sbp->sonarDepth > 0) {
+			bath[0] = 0.001 * sbp->sonarDepth;
 			beamflag[0] = MB_FLAG_NONE;
 		}
-		else if (sbp->depth < 0) {
-			bath[0] = -0.001 * sbp->depth;
+		else if (sbp->sonarDepth < 0) {
+			bath[0] = -0.001 * sbp->sonarDepth;
 			beamflag[0] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
 		}
 		else {
@@ -726,8 +720,8 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		mb_get_time(verbose, time_i, time_d);
 
 		/* get navigation */
-		*navlon = ssport->groupCoordX / 600000.0;
-		*navlat = ssport->groupCoordY / 600000.0;
+		*navlon = ssport->coordX / 600000.0;
+		*navlat = ssport->coordY / 600000.0;
 
 		/* get heading */
 		*heading = ssport->heading / 100.0;
@@ -753,12 +747,12 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			*nss = ssport->samples + ssstbd->samples;
 
 		/* get nadir depth */
-		if (ssport->depth > 0) {
-			bath[0] = 0.001 * ssport->depth;
+		if (ssport->sonarDepth > 0) {
+			bath[0] = 0.001 * ssport->sonarDepth;
 			beamflag[0] = MB_FLAG_NONE;
 		}
-		else if (ssport->depth < 0) {
-			bath[0] = -0.001 * ssport->depth;
+		else if (ssport->sonarDepth < 0) {
+			bath[0] = -0.001 * ssport->sonarDepth;
 			beamflag[0] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
 		}
 		else {
@@ -772,7 +766,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			pixelsize = rawpixelsize * ((double)(ssport->samples + ssstbd->samples)) / ((double)(*nss));
 		else
 			pixelsize = rawpixelsize;
-		altitude = 0.001 * ssport->sonaraltitude;
+		altitude = 0.001 * ssport->sonarAltitude;
 		// fprintf(stderr,"rawpixelsize:%f pixelsize:%f altitude:%f\n", rawpixelsize,pixelsize,altitude);
 
 		/* zero the array */
@@ -1003,10 +997,10 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 			navlon = navlon + 360.0;
 		if (navlon > 180.0)
 			navlon = navlon - 360.0;
-		sbp->sourceCoordX = (int)(600000.0 * navlon);
-		sbp->sourceCoordY = (int)(600000.0 * navlat);
-		sbp->groupCoordX = (int)(600000.0 * navlon);
-		sbp->groupCoordY = (int)(600000.0 * navlat);
+		sbp->coordX = (int)(600000.0 * navlon);
+		sbp->coordY = (int)(600000.0 * navlat);
+		sbp->coordX = (int)(600000.0 * navlon);
+		sbp->coordY = (int)(600000.0 * navlat);
 
 		/* get heading */
 		if (heading > 180.0)
@@ -1082,14 +1076,14 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 			navlon = navlon + 360.0;
 		if (navlon > 180.0)
 			navlon = navlon - 360.0;
-		ssport->sourceCoordX = 600000.0 * navlon;
-		ssport->sourceCoordY = 600000.0 * navlat;
-		ssstbd->sourceCoordX = 600000.0 * navlon;
-		ssstbd->sourceCoordY = 600000.0 * navlat;
-		ssport->groupCoordX = 600000.0 * navlon;
-		ssport->groupCoordY = 600000.0 * navlat;
-		ssstbd->groupCoordX = 600000.0 * navlon;
-		ssstbd->groupCoordY = 600000.0 * navlat;
+		ssport->coordX = 600000.0 * navlon;
+		ssport->coordY = 600000.0 * navlat;
+		ssstbd->coordX = 600000.0 * navlon;
+		ssstbd->coordY = 600000.0 * navlat;
+		ssport->coordX = 600000.0 * navlon;
+		ssport->coordY = 600000.0 * navlat;
+		ssstbd->coordX = 600000.0 * navlon;
+		ssstbd->coordY = 600000.0 * navlat;
 
 		/* get heading and speed */
 		if (heading > 180.0)
@@ -1104,15 +1098,15 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
 		/* get nadir depth */
 		if (nbath > 0) {
-			ssport->depth = 1000 * bath[nbath / 2];
+			ssport->sonarDepth = 1000 * bath[nbath / 2];
 			if (beamflag[nbath / 2] == MB_FLAG_NULL)
-				ssport->depth = 0;
+				ssport->sonarDepth = 0;
 			else if (mb_beam_check_flag(beamflag[nbath / 2]))
-				ssport->depth = -ssport->depth;
+				ssport->sonarDepth = -ssport->sonarDepth;
 		}
 
 		/* get lateral pixel size */
-		altitude = 0.001 * ssport->sonaraltitude;
+		altitude = 0.001 * ssport->sonarAltitude;
 		xtrackmax = 0.0;
 		jxtrackmax = nss / 2;
 		pixelsize = 2.0 * altitude / nss;
@@ -1159,10 +1153,10 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		if (status == MB_SUCCESS) {
 			/* reset sample interval */
 			ssport->sampleInterval = (int)(1000000000.0 * pixelsize / 750.0);
-			ssport->startDepth = (int)((0.001 * ssport->sonardepth) / pixelsize);
+			ssport->startDepth = (int)((0.001 * ssport->sonarDepth) / pixelsize);
 			ssport->samples = nsamples;
 			ssstbd->sampleInterval = (int)(1000000000.0 * pixelsize / 750.0);
-			ssstbd->startDepth = (int)((0.001 * ssstbd->sonardepth) / pixelsize);
+			ssstbd->startDepth = (int)((0.001 * ssstbd->sonarDepth) / pixelsize);
 			ssstbd->samples = nsamples;
 
 			/* zero trace before bottom arrival */
@@ -1402,12 +1396,12 @@ int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
 
 		/* get transducer_depth */
-		if (sbp->sonardepth > 0)
-			*transducer_depth = 0.001 * sbp->sonardepth + sbp->heaveCompensation * sbp->sampleInterval * 0.00000075;
+		if (sbp->sonarDepth > 0)
+			*transducer_depth = 0.001 * sbp->sonarDepth;
 		else
 			*transducer_depth =
-			    sbp->startDepth * sbp->sampleInterval * 0.00000075 + sbp->heaveCompensation * sbp->sampleInterval * 0.00000075;
-		*altitude = 0.001 * sbp->sonaraltitude;
+			    sbp->startDepth * sbp->sampleInterval * 0.00000075;
+		*altitude = 0.001 * sbp->sonarAltitude;
 	}
 
 	else if (*kind == MB_DATA_DATA || *kind == MB_DATA_SIDESCAN2) {
@@ -1415,12 +1409,11 @@ int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 		ssport = (struct mbsys_jstar_channel_struct *)&(store->ssport);
 
 		/* get transducer_depth */
-		if (ssport->sonardepth > 0)
-			*transducer_depth = 0.001 * ssport->sonardepth + ssport->heaveCompensation * ssport->sampleInterval * 0.00000075;
+		if (ssport->sonarDepth > 0)
+			*transducer_depth = 0.001 * ssport->sonarDepth;
 		else
-			*transducer_depth = ssport->startDepth * ssport->sampleInterval * 0.00000075 +
-			                    ssport->heaveCompensation * ssport->sampleInterval * 0.00000075;
-		*altitude = 0.001 * ssport->sonaraltitude;
+			*transducer_depth = ssport->startDepth * ssport->sampleInterval * 0.00000075;
+		*altitude = 0.001 * ssport->sonarAltitude;
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -1497,8 +1490,8 @@ int mbsys_jstar_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, do
 		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
 
 		/* get transducer_depth and altitude */
-		sbp->sonardepth = 1000 * (transducer_depth - sbp->heaveCompensation * sbp->sampleInterval * 0.00000075);
-		sbp->sonaraltitude = 1000 * altitude;
+		sbp->sonarDepth = 1000 * transducer_depth;
+		sbp->sonarAltitude = 1000 * altitude;
 	}
 
 	else if (kind == MB_DATA_DATA || kind == MB_DATA_SIDESCAN2) {
@@ -1507,10 +1500,10 @@ int mbsys_jstar_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, do
 		ssstbd = (struct mbsys_jstar_channel_struct *)&(store->ssstbd);
 
 		/* get transducer_depth and altitude */
-		ssport->sonardepth = 1000 * (transducer_depth - ssport->heaveCompensation * ssport->sampleInterval * 0.00000075);
-		ssport->sonaraltitude = 1000 * altitude;
-		ssstbd->sonardepth = 1000 * (transducer_depth - ssstbd->heaveCompensation * ssstbd->sampleInterval * 0.00000075);
-		ssstbd->sonaraltitude = 1000 * altitude;
+		ssport->sonarDepth = 1000 * transducer_depth;
+		ssport->sonarAltitude = 1000 * altitude;
+		ssstbd->sonarDepth = 1000 * transducer_depth;
+		ssstbd->sonarAltitude = 1000 * altitude;
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -1591,8 +1584,8 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		mb_get_time(verbose, time_i, time_d);
 
 		/* get navigation */
-		*navlon = sbp->groupCoordX / 600000.0;
-		*navlat = sbp->groupCoordY / 600000.0;
+		*navlon = sbp->coordX / 600000.0;
+		*navlat = sbp->coordY / 600000.0;
 
 		/* get heading */
 		*heading = sbp->heading / 100.0;
@@ -1605,15 +1598,15 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		*speed = 0.0;
 
 		/* get draft */
-		if (sbp->sonardepth > 0)
-			*draft = 0.001 * sbp->sonardepth;
+		if (sbp->sonarDepth > 0)
+			*draft = 0.001 * sbp->sonarDepth;
 		else
 			*draft = sbp->startDepth * sbp->sampleInterval * 0.00000075;
 
 		/* get attitude */
 		*roll = 180.0 / 32768.0 * (double)sbp->roll;
 		*pitch = 180.0 / 32768.0 * (double)sbp->pitch;
-		*heave = sbp->heaveCompensation * sbp->sampleInterval * 0.00000075;
+		*heave = 0.0;
 
 		/* print debug statements */
 		if (verbose >= 5) {
@@ -1657,8 +1650,8 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		mb_get_time(verbose, time_i, time_d);
 
 		/* get navigation */
-		*navlon = ssport->groupCoordX / 600000.0;
-		*navlat = ssport->groupCoordY / 600000.0;
+		*navlon = ssport->coordX / 600000.0;
+		*navlat = ssport->coordY / 600000.0;
 
 		/* get heading */
 		*heading = ssport->heading / 100.0;
@@ -1671,15 +1664,15 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		*speed = 0.0;
 
 		/* get draft */
-		if (ssport->sonardepth > 0)
-			*draft = 0.001 * ssport->sonardepth;
+		if (ssport->sonarDepth > 0)
+			*draft = 0.001 * ssport->sonarDepth;
 		else
 			*draft = ssport->startDepth * ssport->sampleInterval * 0.00000075;
 
 		/* get attitude */
 		*roll = 180.0 / 32768.0 * (double)ssport->roll;
 		*pitch = 180.0 / 32768.0 * (double)ssport->pitch;
-		*heave = ssport->heaveCompensation * ssport->sampleInterval * 0.00000075;
+		*heave = 0.0;
 
 		/* print debug statements */
 		if (verbose >= 5) {
@@ -1823,10 +1816,10 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 			navlon = navlon + 360.0;
 		if (navlon > 180.0)
 			navlon = navlon - 360.0;
-		sbp->sourceCoordX = (int)(600000.0 * navlon);
-		sbp->sourceCoordY = (int)(600000.0 * navlat);
-		sbp->groupCoordX = (int)(600000.0 * navlon);
-		sbp->groupCoordY = (int)(600000.0 * navlat);
+		sbp->coordX = (int)(600000.0 * navlon);
+		sbp->coordY = (int)(600000.0 * navlat);
+		sbp->coordX = (int)(600000.0 * navlon);
+		sbp->coordY = (int)(600000.0 * navlat);
 
 		/* get heading */
 		if (heading > 180.0)
@@ -1837,12 +1830,11 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 
 		/* get draft */
 		sbp->startDepth = draft / sbp->sampleInterval / 0.00000075;
-		sbp->sonardepth = 1000 * draft;
+		sbp->sonarDepth = 1000 * draft;
 
 		/* get attitude */
 		sbp->roll = 32768 * roll / 180.0;
 		sbp->pitch = 32768 * pitch / 180.0;
-		sbp->heaveCompensation = heave / sbp->sampleInterval / 0.00000075;
 	}
 
 	/* insert data in structure */
@@ -1891,14 +1883,14 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 			navlon = navlon + 360.0;
 		if (navlon > 180.0)
 			navlon = navlon - 360.0;
-		ssport->sourceCoordX = 600000.0 * navlon;
-		ssport->sourceCoordY = 600000.0 * navlat;
-		ssstbd->sourceCoordX = 600000.0 * navlon;
-		ssstbd->sourceCoordY = 600000.0 * navlat;
-		ssport->groupCoordX = 600000.0 * navlon;
-		ssport->groupCoordY = 600000.0 * navlat;
-		ssstbd->groupCoordX = 600000.0 * navlon;
-		ssstbd->groupCoordY = 600000.0 * navlat;
+		ssport->coordX = 600000.0 * navlon;
+		ssport->coordY = 600000.0 * navlat;
+		ssstbd->coordX = 600000.0 * navlon;
+		ssstbd->coordY = 600000.0 * navlat;
+		ssport->coordX = 600000.0 * navlon;
+		ssport->coordY = 600000.0 * navlat;
+		ssstbd->coordX = 600000.0 * navlon;
+		ssstbd->coordY = 600000.0 * navlat;
 
 		/* get heading and speed */
 		if (heading > 180.0)
@@ -1911,16 +1903,14 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 		/* get draft */
 		ssport->startDepth = draft / ssport->sampleInterval / 0.00000075;
 		ssstbd->startDepth = draft / ssstbd->sampleInterval / 0.00000075;
-		ssport->sonardepth = 1000 * draft;
-		ssstbd->sonardepth = 1000 * draft;
+		ssport->sonarDepth = 1000 * draft;
+		ssstbd->sonarDepth = 1000 * draft;
 
 		/* get attitude */
 		ssport->roll = 32768 * roll / 180.0;
 		ssport->pitch = 32768 * pitch / 180.0;
-		ssport->heaveCompensation = heave / ssport->sampleInterval / 0.00000075;
 		ssstbd->roll = 32768 * roll / 180.0;
 		ssstbd->pitch = 32768 * pitch / 180.0;
-		ssstbd->heaveCompensation = heave / ssstbd->sampleInterval / 0.00000075;
 	}
 
 	/* print output debug statements */
@@ -2312,14 +2302,13 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 
 		/* get needed values */
 		/* get transducer_depth */
-		if (sbp->sonardepth > 0)
-			dsonardepth = 0.001 * sbp->sonardepth + sbp->heaveCompensation * sbp->sampleInterval * 0.00000075;
+		if (sbp->sonarDepth > 0)
+			dsonardepth = 0.001 * sbp->sonarDepth;
 		else
-			dsonardepth =
-			    sbp->startDepth * sbp->sampleInterval * 0.00000075 + sbp->heaveCompensation * sbp->sampleInterval * 0.00000075;
-		dsonaraltitude = 0.001 * sbp->sonaraltitude;
-		if (sbp->depth > 0)
-			dwaterdepth = 0.001 * sbp->depth;
+			dsonardepth = sbp->startDepth * sbp->sampleInterval * 0.00000075;
+		dsonaraltitude = 0.001 * sbp->sonarAltitude;
+		if (sbp->sonarDepth > 0)
+			dwaterdepth = 0.001 * sbp->sonarDepth;
 		else
 			dwaterdepth = dsonardepth + dsonaraltitude;
 		sonardepth = (int)(100 * dsonardepth);
@@ -2328,8 +2317,8 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		fwatertime = 2.0 * dwaterdepth / ((double)watersoundspeed);
 
 		/* get navigation */
-		longitude = sbp->groupCoordX / 600000.0;
-		latitude = sbp->groupCoordY / 600000.0;
+		longitude = sbp->coordX / 600000.0;
+		latitude = sbp->coordY / 600000.0;
 
 		/* extract the data */
 		mb_segytraceheader_ptr->seq_num = sbp->pingNum;
@@ -2799,11 +2788,11 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		sbp->minute = time_i[4];
 		sbp->millisecondsToday = 0.001 * time_i[6] + 1000 * (time_i[5] + 60.0 * (time_i[4] + 60.0 * time_i[3]));
 
-		sbp->depth = 1000 * waterdepth;
-		sbp->sonardepth = 1000 * sonardepth;
-		sbp->sonaraltitude = 1000 * (waterdepth - sonardepth);
-		if (sbp->sonaraltitude < 0)
-			sbp->sonaraltitude = 0;
+		sbp->sonarDepth = 1000 * waterdepth;
+		sbp->sonarDepth = 1000 * sonardepth;
+		sbp->sonarAltitude = 1000 * (waterdepth - sonardepth);
+		if (sbp->sonarAltitude < 0)
+			sbp->sonarAltitude = 0;
 
 		/* get max data value */
 		datamax = 0.0;

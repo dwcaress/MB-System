@@ -942,7 +942,7 @@ int main(int argc, char **argv) {
 
 					/* message header values */
 					channel->message.start_marker = 0x1601;
-					channel->message.version = 0;
+					channel->message.version = 10;
 					channel->message.session = 0;
 					channel->message.type = 80;
 					channel->message.command = 0;
@@ -953,28 +953,39 @@ int main(int argc, char **argv) {
 					channel->message.size = 0;
 
 					/* Trace Header */
-					channel->sequenceNumber = s7ksegyheader->sequenceNumber; /* 0-3 : Trace Sequence Number (always 0) ** */
+					channel->pingTime = s7ksegyheader->sequenceNumber; /* 0-3 : Ping Time in epoch seconds [since (1/1/1970)] (Protocol Version 8 onwards) */
 					channel->startDepth = s7ksegyheader->startDepth; /* 4-7 : Starting depth (window offset) in samples. */
 					channel->pingNum = s7ksegyheader->pingNum;       /* 8-11: Ping number (increments with ping) ** */
-					channel->channelNum = s7ksegyheader->channelNum; /* 12-15 : Channel Number (0 .. n) ** */
-					for (i = 0; i < 6; i++)
-						channel->unused1[i] = s7ksegyheader->unused1[i]; /* 16-27 */
+					for (i = 0; i < 2; i++) /* 12-15 */
+						channel->reserved1[i] = 0; /* 16-27 */
+					channel->msb = 0; /* 16-17 */
+					channel->lsb1 = 0; /* 18-19 */
+					channel->lsb2 = 0; /* 20-21 */
+					for (i = 0; i < 3; i++) /* 22-27 */
+						channel->reserved2[i] = s7ksegyheader->unused1[i+3];
 
 					channel->traceIDCode = s7ksegyheader->traceIDCode; /* 28-29 : ID Code (always 1 => seismic data) ** */
 
-					for (i = 0; i < 2; i++)
-						channel->unused2[i] = s7ksegyheader->unused2[i]; /* 30-33 */
-					channel->dataFormat = s7ksegyheader->dataFormat;     /* 34-35 : DataFormatType */
-					                                                     /*   0 = 1 short  per sample  - envelope data */
-					/*   1 = 2 shorts per sample, - stored as real(1), imag(1), */
-					/*   2 = 1 short  per sample  - before matched filter */
-					/*   3 = 1 short  per sample  - real part analytic signal */
-					/*   4 = 1 short  per sample  - pixel data / ceros data */
+					channel->validityFlag = 0;
+					channel->reserved3 = s7ksegyheader->unused2[1]; /* 32-33 */
+					channel->dataFormat = s7ksegyheader->dataFormat;
+									/* 34-35 : DataFormatType */
+					                /*   0 = 1 short  per sample  - envelope data */
+									/*   1 = 2 shorts per sample, - stored as real(1), imag(1), */
+									/*   2 = 1 short  per sample  - before matched filter */
+									/*   3 = 1 short  per sample  - real part analytic signal */
+									/*   4 = 1 short  per sample  - pixel data / ceros data */
 					channel->NMEAantennaeR = s7ksegyheader->NMEAantennaeR; /* 36-37 : Distance from towfish to antennae in cm */
 					channel->NMEAantennaeO =
 					    s7ksegyheader->NMEAantennaeO; /* 38-39 : Distance to antennae starboard direction in cm */
-					for (i = 0; i < 32; i++)
-						channel->RS232[i] = s7ksegyheader->RS232[i]; /* 40-71 : Reserved for RS232 data - TBD */
+					for (i = 0; i < 2; i++) {
+						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
+					}
+					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
+					for (i = 0; i < 16; i++) {
+						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
+					}
+
 					/* -------------------------------------------------------------------- */
 					/* Navigation data :                                                    */
 					/* If the coorUnits are seconds(2), the x values represent longitude    */
@@ -982,30 +993,56 @@ int main(int argc, char **argv) {
 					/* the number of seconds east of Greenwich Meridian or north of the     */
 					/* equator.                                                             */
 					/* -------------------------------------------------------------------- */
-					channel->sourceCoordX = s7ksegyheader->sourceCoordX; /* 72-75 : Meters or Seconds of Arc */
-					channel->sourceCoordY = s7ksegyheader->sourceCoordY; /* 76-79 : Meters or Seconds of Arc */
-					channel->groupCoordX = s7ksegyheader->groupCoordX;   /* 80-83 : mm or 10000 * (Minutes of Arc) */
-					channel->groupCoordY = s7ksegyheader->groupCoordY;   /* 84-87 : mm or 10000 * (Minutes of Arc) */
-					channel->coordUnits =
-					    s7ksegyheader->coordUnits; /* 88-89 : Units of coordinates - 1->length (x /y), 2->seconds of arc */
+					channel->coordX = s7ksegyheader->groupCoordX;   /* 80-83 : longitude or easting  */
+					channel->coordY = s7ksegyheader->groupCoordY;   /* 84-87 : latitude or northing */
+					channel->coordUnits = s7ksegyheader->coordUnits;
+								 /* 88-89 : Units of coordinates -
+                                  *         1 = X,Y in millimeters
+                                  *         2 = X,Y in iminutes of arc times 10000
+                                  *         3 = X,Y in decimeters */
 					for (i = 0; i < 24; i++)
 						channel->annotation[i] = s7ksegyheader->annotation[i]; /* 90-113 : Annotation string */
-					channel->samples = s7ksegyheader->samples;                 /* 114-115 : Samples in this packet ** */
-					/* Note:  Large sample sizes require multiple packets. */
+					channel->samples = s7ksegyheader->samples;
+								 /* 114-115 : Samples in this packet  
+	                              *           Large sample sizes require multiple packets.
+	                              *           For protocol versions 0xA and above, the
+	                              *           MSB1 field should include the MSBs
+	                              *           (Most Significant Bits) needed to
+	                              *           determine the number of samples.
+	                              *           See bits 8-11 in bytes 16-17. Field MSB1
+	                              *           for MSBs for large sample sizes. */
 					channel->sampleInterval =
-					    s7ksegyheader->sampleInterval;                 /* 116-119 : Sample interval in ns of stored data ** */
+					    s7ksegyheader->sampleInterval;
+								 /* 116-119 : Sampling Interval in Nanoseconds
+                                  *           NOTE: For protocol versions 0xB and
+                                  *           above, see the LSBs field should
+                                  *           include the fractional component
+                                  *           needed to determine the sample interval.
+                                  *           See bits 0-7 in bytes 18-19. Field LSB1
+                                  *           for LSBs for increased precision. */
 					channel->ADCGain = s7ksegyheader->ADCGain;         /* 120-121 : Gain factor of ADC */
 					channel->pulsePower = s7ksegyheader->pulsePower;   /* 122-123 : user pulse power setting (0 - 100) percent */
-					channel->correlated = s7ksegyheader->correlated;   /* 124-125 : correlated data 1 - No, 2 - Yes */
+					channel->reserved6 = s7ksegyheader->correlated;   /* 124-125 : correlated data 1 - No, 2 - Yes */
 					channel->startFreq = s7ksegyheader->startFreq;     /* 126-127 : Starting frequency in 10 * Hz */
 					channel->endFreq = s7ksegyheader->endFreq;         /* 128-129 : Ending frequency in 10 * Hz */
 					channel->sweepLength = s7ksegyheader->sweepLength; /* 130-131 : Sweep length in ms */
-					for (i = 0; i < 4; i++)
-						channel->unused7[i] = s7ksegyheader->unused7[i]; /* 132-139 */
-					channel->aliasFreq = s7ksegyheader->aliasFreq;       /* 140-141 : alias Frequency (sample frequency / 2) */
+					channel->pressure = 0; /* 132-135 : Pressure in Milli PSI (1 unit = 1/1000 PSI)
+                                  *           See Validity Flag (bytes 30-31) */
+					channel->sonarDepth = 0; /* 136-139 : Depth in Millimeters (if not = 0)
+                                  *           See Validity Flag (bytes 30-31). */
+					channel->sampleFreq = s7ksegyheader->aliasFreq;       /* 140-141 : alias Frequency (sample frequency / 2) */
 					channel->pulseID = s7ksegyheader->pulseID;           /* 142-143 : Unique pulse identifier */
-					for (i = 0; i < 6; i++)
-						channel->unused8[i] = s7ksegyheader->unused8[i]; /* 144-155 */
+					channel->sonarAltitude = 0;           /* 144-147 : Altitude in Millimeters
+                                  *           A zero implies not filled. See Validity Flag (bytes 30-31) */
+					channel->soundspeed = 0.0;            /* 148-151 : Sound Speed in Meters per Second.
+                                  *           See Validity Flag (bytes 30-31). */
+					channel->mixerFrequency = 0.0;        /* 152-155 : Mixer Frequency in Hertz
+                                  *           For single pulses systems this should
+                                  *           be close to the center frequency.
+                                  *           For multi pulse systems this should
+                                  *           be the approximate center frequency
+                                  *           of the span of all the pulses. */
+
 					channel->year = istore->time_i[0];                   /* 156-157 : Year data recorded (CPU time) */
 					channel->day = time_j[1];                            /* 158-159 : day */
 					channel->hour = istore->time_i[3];                   /* 160-161 : hour */
@@ -1015,7 +1052,7 @@ int main(int argc, char **argv) {
 					channel->weightingFactor =
 					    s7ksegyheader->weightingFactor; /* 168-169 :  weighting factor for block floating point expansion */
 					                                    /*            -- defined as 2 -N volts for lsb */
-					channel->unused9 = s7ksegyheader->unused9; /* 170-171 : */
+					channel->numberPulses =  0; /* 170-171 : Number of Pulses in the Water */
 					/* -------------------------------------------------------------------- */
 					/* From pitch/roll/temp/heading sensor */
 					/* -------------------------------------------------------------------- */
@@ -1023,13 +1060,12 @@ int main(int argc, char **argv) {
 					    s7ksegyheader->heading; /* 172-173 : Compass heading (100 * degrees) -180.00 to 180.00 degrees */
 					channel->pitch = s7ksegyheader->pitch;             /* 174-175 : Pitch */
 					channel->roll = s7ksegyheader->roll;               /* 176-177 : Roll */
-					channel->temperature = s7ksegyheader->temperature; /* 178-179 : Temperature (10 * degrees C) */
+					channel->temperature = 0;   /* 178-179 : Reserved */
 					/* -------------------------------------------------------------------- */
 					/* User defined area from 180-239                                       */
 					/* -------------------------------------------------------------------- */
-					channel->heaveCompensation =
-					    s7ksegyheader->heaveCompensation;              /* 180-181 : Heave compensation offset (samples) */
-					channel->trigSource = s7ksegyheader->trigSource;   /* 182-183 : TriggerSource (0 = internal, 1 = external) */
+					channel->reserved9 = 0; /* 180-181 : Reserved */
+					channel->triggerSource = s7ksegyheader->trigSource;   /* 182-183 : TriggerSource (0 = internal, 1 = external) */
 					channel->markNumber = s7ksegyheader->markNumber;   /* 184-185 : Mark Number (0 = no mark) */
 					channel->NMEAHour = s7ksegyheader->NMEAHour;       /* 186-187 : Hour */
 					channel->NMEAMinutes = s7ksegyheader->NMEAMinutes; /* 188-189 : Minutes */
@@ -1043,8 +1079,8 @@ int main(int argc, char **argv) {
 					    + 1000 * (istore->time_i[5] + 60.0 * (istore->time_i[4] + 60.0 * istore->time_i[3]));
 					channel->ADCMax =
 					    s7ksegyheader->ADCMax; /* 204-205 : Maximum absolute value for ADC samples for this packet */
-					channel->calConst = s7ksegyheader->calConst;   /* 206-207 : System constant in tenths of a dB */
-					channel->vehicleID = s7ksegyheader->vehicleID; /* 208-209 : Vehicle ID */
+					channel->reserved10 = 0;   /* 206-207 : Reserved */
+					channel->reserved11 = 0; /* 208-209 : Reserved */
 					for (i = 0; i < 6; i++)
 						channel->softwareVersion[i] = s7ksegyheader->softwareVersion[i]; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
@@ -1055,15 +1091,15 @@ int main(int argc, char **argv) {
 					channel->packetNum =
 					    s7ksegyheader->packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */
 					channel->ADCDecimation = s7ksegyheader->ADCDecimation; /* 222-223 : A/D decimation before FFT */
-					channel->decimation = s7ksegyheader->decimation;       /* 224-225 : Decimation factor after FFT */
-					channel->unuseda = s7ksegyheader->unuseda[0];
-
-					/* -------------------------------------------------------------------- */
-					/* MB-System-only parameters from 236-239                               */
-					/* -------------------------------------------------------------------- */
-					channel->depth = 0;         /* 227-231 : Seafloor depth in 0.001 m */
-					channel->sonardepth = 0;    /* 236-235 : Sonar depth in 0.001 m */
-					channel->sonaraltitude = 0; /* 236-239 : Sonar altitude in 0.001 m */
+					channel->reserved12 = 0;       /* 224-225 : Reserved */
+					channel->temperature = 0;        /* 226-227 : Water Temperature in Units of 1/10 Degree C.
+                               *           See Validity Flag (bytes 30-31).*/
+					channel->layback = 0;            /* 227-231 : Layback
+                               *           Distance to the sonar in meters. */
+					channel->reserved13 = 0;           /* 232-235 : Reserved */
+					channel->cableOut = 0;           /* 236-239 : Cable Out in Decimeters
+                               *           See Validity Flag (bytes 30-31). */
+					channel->reserved14 = 0;         /* 236-239 : Reserved */
 
 					/* allocate memory for the trace */
 					if (channel->dataFormat == 1)
@@ -1121,15 +1157,15 @@ int main(int argc, char **argv) {
 						}
 
 						/* set sonar altitude */
-						channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+						channel->sonarAltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
 					else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY) {
-						channel->sonaraltitude = (int)(750000.0 * ttime_min_use);
-						if (channel->sonaraltitude == 0)
-							channel->sonaraltitude = 1000 * altitude;
+						channel->sonarAltitude = (int)(750000.0 * ttime_min_use);
+						if (channel->sonarAltitude == 0)
+							channel->sonarAltitude = 1000 * altitude;
 					}
 					else {
-						channel->sonaraltitude = 1000 * altitude;
+						channel->sonarAltitude = 1000 * altitude;
 					}
 
 					/* reset navigation and other values */
@@ -1137,18 +1173,14 @@ int main(int argc, char **argv) {
 						navlon = navlon + 360.0;
 					if (navlon > 180.0)
 						navlon = navlon - 360.0;
-					channel->sourceCoordX = (int)(360000.0 * navlon);
-					channel->sourceCoordY = (int)(360000.0 * navlat);
-					channel->groupCoordX = (int)(360000.0 * navlon);
-					channel->groupCoordY = (int)(360000.0 * navlat);
+					channel->coordX = (int)(360000.0 * navlon);
+					channel->coordY = (int)(360000.0 * navlat);
 					channel->coordUnits = 2;
 					channel->heading = (short)(100.0 * heading);
 					channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075;
-					channel->sonardepth = 1000 * sonardepth;
-					channel->depth = channel->sonardepth + channel->sonaraltitude;
+					channel->sonarDepth = 1000 * sonardepth;
 					channel->roll = (short)(32768 * roll / 180.0);
 					channel->pitch = (short)(32768 * pitch / 180.0);
-					channel->heaveCompensation = heave / channel->sampleInterval / 0.00000075;
 
 					/* write the record */
 					mb_write_ping(verbose, ombio_ptr, ostore_ptr, &error);
@@ -1192,27 +1224,35 @@ int main(int argc, char **argv) {
 					channel->message.size = 0;
 
 					/* Trace Header */
-					channel->sequenceNumber = 0;                   /* 0-3 : Trace Sequence Number (always 0) ** */
+					channel->pingTime = 0;                   /* 0-3 : Ping Time in epoch seconds [since (1/1/1970)] (Protocol Version 8 onwards) */
 					channel->startDepth = s7kssheader->startDepth; /* 4-7 : Starting depth (window offset) in samples. */
 					channel->pingNum = s7kssheader->pingNum;       /* 8-11: Ping number (increments with ping) ** */
-					channel->channelNum = s7kssheader->channelNum; /* 12-15 : Channel Number (0 .. n) ** */
-					for (i = 0; i < 6; i++)
-						channel->unused1[i] = 0; /* 16-27 */
+					for (i = 0; i < 2; i++) /* 12-15 */
+						channel->reserved1[i] = 0; /* 16-27 */
+					channel->msb = 0; /* 16-17 */
+					channel->lsb1 = 0; /* 18-19 */
+					channel->lsb2 = 0; /* 20-21 */
+					for (i = 0; i < 3; i++) /* 22-27 */
+						channel->reserved2[i] = 0;
 
 					channel->traceIDCode = 1; /* 28-29 : ID Code (always 1 => seismic data) ** */
 
-					for (i = 0; i < 2; i++)
-						channel->unused2[i] = 0;                   /* 30-33 */
+					channel->validityFlag = 0;
+					channel->reserved3 = 0; /* 32-33 */
 					channel->dataFormat = s7kssheader->dataFormat; /* 34-35 : DataFormatType */
 					                                               /*   0 = 1 short  per sample  - envelope data */
 					                                               /*   1 = 2 shorts per sample, - stored as real(1), imag(1), */
 					                                               /*   2 = 1 short  per sample  - before matched filter */
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
-					channel->NMEAantennaeR = 0;                    /* 36-37 : Distance from towfish to antennae in cm */
-					channel->NMEAantennaeO = 0;                    /* 38-39 : Distance to antennae starboard direction in cm */
-					for (i = 0; i < 32; i++)
-						channel->RS232[i] = 0; /* 40-71 : Reserved for RS232 data - TBD */
+					for (i = 0; i < 2; i++) {
+						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
+					}
+					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
+					for (i = 0; i < 16; i++) {
+						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
+					}
+
 					/* -------------------------------------------------------------------- */
 					/* Navigation data :                                                    */
 					/* If the coorUnits are seconds(2), the x values represent longitude    */
@@ -1220,10 +1260,8 @@ int main(int argc, char **argv) {
 					/* the number of seconds east of Greenwich Meridian or north of the     */
 					/* equator.                                                             */
 					/* -------------------------------------------------------------------- */
-					channel->sourceCoordX = 0; /* 72-75 : Meters or Seconds of Arc */
-					channel->sourceCoordY = 0; /* 76-79 : Meters or Seconds of Arc */
-					channel->groupCoordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
-					channel->groupCoordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
+					channel->coordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
+					channel->coordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
 					channel->coordUnits = 0;   /* 88-89 : Units of coordinates - 1->length (x /y), 2->seconds of arc */
 					for (i = 0; i < 24; i++)
 						channel->annotation[i] = 0;          /* 90-113 : Annotation string */
@@ -1232,16 +1270,27 @@ int main(int argc, char **argv) {
 					channel->sampleInterval = s7kssheader->sampleInterval; /* 116-119 : Sample interval in ns of stored data ** */
 					channel->ADCGain = s7kssheader->ADCGain;               /* 120-121 : Gain factor of ADC */
 					channel->pulsePower = 0;  /* 122-123 : user pulse power setting (0 - 100) percent */
-					channel->correlated = 0;  /* 124-125 : correlated data 1 - No, 2 - Yes */
+					channel->reserved6 = 0;  /* 124-125 : correlated data 1 - No, 2 - Yes */
 					channel->startFreq = 0;   /* 126-127 : Starting frequency in 10 * Hz */
 					channel->endFreq = 0;     /* 128-129 : Ending frequency in 10 * Hz */
 					channel->sweepLength = 0; /* 130-131 : Sweep length in ms */
-					for (i = 0; i < 4; i++)
-						channel->unused7[i] = 0;             /* 132-139 */
-					channel->aliasFreq = 0;                  /* 140-141 : alias Frequency (sample frequency / 2) */
-					channel->pulseID = s7kssheader->pulseID; /* 142-143 : Unique pulse identifier */
-					for (i = 0; i < 6; i++)
-						channel->unused8[i] = 0;         /* 144-155 */
+					channel->pressure = 0; /* 132-135 : Pressure in Milli PSI (1 unit = 1/1000 PSI)
+                                  *           See Validity Flag (bytes 30-31) */
+					channel->sonarDepth = 0; /* 136-139 : Depth in Millimeters (if not = 0)
+                                  *           See Validity Flag (bytes 30-31). */
+					channel->sampleFreq = 0;       /* 140-141 : alias Frequency (sample frequency / 2) */
+					channel->pulseID = s7ksegyheader->pulseID;           /* 142-143 : Unique pulse identifier */
+					channel->sonarAltitude = 0;           /* 144-147 : Altitude in Millimeters
+                                  *           A zero implies not filled. See Validity Flag (bytes 30-31) */
+					channel->soundspeed = 0.0;            /* 148-151 : Sound Speed in Meters per Second.
+                                  *           See Validity Flag (bytes 30-31). */
+					channel->mixerFrequency = 0.0;        /* 152-155 : Mixer Frequency in Hertz
+                                  *           For single pulses systems this should
+                                  *           be close to the center frequency.
+                                  *           For multi pulse systems this should
+                                  *           be the approximate center frequency
+                                  *           of the span of all the pulses. */
+
 					channel->year = istore->time_i[0];   /* 156-157 : Year data recorded (CPU time) */
 					channel->day = time_j[1];            /* 158-159 : day */
 					channel->hour = istore->time_i[3];   /* 160-161 : hour */
@@ -1251,7 +1300,7 @@ int main(int argc, char **argv) {
 					channel->weightingFactor =
 					    s7kssheader->weightingFactor; /* 168-169 :  weighting factor for block floating point expansion */
 					                                  /*            -- defined as 2 -N volts for lsb */
-					channel->unused9 = 0;             /* 170-171 : */
+					channel->numberPulses =  0; /* 170-171 : Number of Pulses in the Water */
 					/* -------------------------------------------------------------------- */
 					/* From pitch/roll/temp/heading sensor */
 					/* -------------------------------------------------------------------- */
@@ -1263,8 +1312,8 @@ int main(int argc, char **argv) {
 					/* -------------------------------------------------------------------- */
 					/* User defined area from 180-239                                       */
 					/* -------------------------------------------------------------------- */
-					channel->heaveCompensation = 0;                /* 180-181 : Heave compensation offset (samples) */
-					channel->trigSource = s7kssheader->trigSource; /* 182-183 : TriggerSource (0 = internal, 1 = external) */
+					channel->reserved9 = 0;                /* 180-181 : Reserved */
+					channel->triggerSource = s7kssheader->trigSource; /* 182-183 : TriggerSource (0 = internal, 1 = external) */
 					channel->markNumber = s7kssheader->markNumber; /* 184-185 : Mark Number (0 = no mark) */
 					channel->NMEAHour = 0;                         /* 186-187 : Hour */
 					channel->NMEAMinutes = 0;                      /* 188-189 : Minutes */
@@ -1277,25 +1326,25 @@ int main(int argc, char **argv) {
 					    0.001 * istore->time_i[6] /* 200-203 : Millieconds today */
 					    + 1000 * (istore->time_i[5] + 60.0 * (istore->time_i[4] + 60.0 * istore->time_i[3]));
 					channel->ADCMax = s7kssheader->ADCMax; /* 204-205 : Maximum absolute value for ADC samples for this packet */
-					channel->calConst = 0;                 /* 206-207 : System constant in tenths of a dB */
-					channel->vehicleID = 0;                /* 208-209 : Vehicle ID */
+					channel->reserved10 = 0;   /* 206-207 : Reserved */
+					channel->reserved11 = 0; /* 208-209 : Reserved */
 					for (i = 0; i < 6; i++)
 						channel->softwareVersion[i] = 0; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
-					channel->sphericalCorrection = 0; /* 216-219 : Initial spherical correction factor (useful for multiping /*/
-					                                  /* deep application) * 100 */
-					channel->packetNum =
-					    s7kssheader->packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */
+					channel->sphericalCorrection = s7ksegyheader->sphericalCorrection;
+												/* 216-219 : Initial spherical correction factor (useful for multiping /*/
+					                            /* deep application) * 100 */
+					channel->packetNum = s7kssheader->packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */
 					channel->ADCDecimation = 0; /* 222-223 : A/D decimation before FFT */
-					channel->decimation = 0;    /* 224-225 : Decimation factor after FFT */
-					channel->unuseda = 0;
-
-					/* -------------------------------------------------------------------- */
-					/* MB-System-only parameters from 236-239                               */
-					/* -------------------------------------------------------------------- */
-					channel->depth = 0;         /* 227-231 : Seafloor depth in 0.001 m */
-					channel->sonardepth = 0;    /* 236-235 : Sonar depth in 0.001 m */
-					channel->sonaraltitude = 0; /* 236-239 : Sonar altitude in 0.001 m */
+					channel->reserved12 = 0;       /* 224-225 : Reserved */
+					channel->temperature = 0;        /* 226-227 : Water Temperature in Units of 1/10 Degree C.
+                               *           See Validity Flag (bytes 30-31).*/
+					channel->layback = 0;            /* 227-231 : Layback
+                               *           Distance to the sonar in meters. */
+					channel->reserved13 = 0;           /* 232-235 : Reserved */
+					channel->cableOut = 0;           /* 236-239 : Cable Out in Decimeters
+                               *           See Validity Flag (bytes 30-31). */
+					channel->reserved14 = 0;         /* 236-239 : Reserved */
 
 					/* allocate memory for the trace */
 					if (channel->dataFormat == 1)
@@ -1384,23 +1433,23 @@ int main(int argc, char **argv) {
 						}
 
 						/* set sonar altitude */
-						channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+						channel->sonarAltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
 					else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY) {
-						channel->sonaraltitude = (int)(750000.0 * ttime_min_use);
-						if (channel->sonaraltitude == 0)
-							channel->sonaraltitude = 1000 * altitude;
+						channel->sonarAltitude = (int)(750000.0 * ttime_min_use);
+						if (channel->sonarAltitude == 0)
+							channel->sonarAltitude = 1000 * altitude;
 					}
 					else {
-						channel->sonaraltitude = 1000 * altitude;
+						channel->sonarAltitude = 1000 * altitude;
 					}
 
 					/* apply gain if specified */
 					if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR) {
-						channelpick = (int)(((double)channel->sonaraltitude) / 0.00075 / ((double)channel->sampleInterval));
+						channelpick = (int)(((double)channel->sonarAltitude) / 0.00075 / ((double)channel->sampleInterval));
 						channelpick = MAX(channelpick, 1);
 						/*fprintf(stderr,"altitude:%d sampleInterval:%d
-						 * channelpick:%d\n",channel->sonaraltitude,channel->sampleInterval,channelpick);*/
+						 * channelpick:%d\n",channel->sonarAltitude,channel->sampleInterval,channelpick);*/
 						for (i = 0; i < channelpick; i++) {
 							channel->trace[i] = (unsigned short)(gainfactor * channel->trace[i]);
 						}
@@ -1417,18 +1466,14 @@ int main(int argc, char **argv) {
 						navlon = navlon + 360.0;
 					if (navlon > 180.0)
 						navlon = navlon - 360.0;
-					channel->sourceCoordX = (int)(360000.0 * navlon);
-					channel->sourceCoordY = (int)(360000.0 * navlat);
-					channel->groupCoordX = (int)(360000.0 * navlon);
-					channel->groupCoordY = (int)(360000.0 * navlat);
+					channel->coordX = (int)(360000.0 * navlon);
+					channel->coordY = (int)(360000.0 * navlat);
 					channel->coordUnits = 2;
 					channel->heading = (short)(100.0 * heading);
 					channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075;
-					channel->depth = channel->sonardepth + channel->sonaraltitude;
-					channel->sonardepth = 1000 * sonardepth;
+					channel->sonarDepth = 1000 * sonardepth;
 					channel->roll = (short)(32768 * roll / 180.0);
 					channel->pitch = (short)(32768 * pitch / 180.0);
-					channel->heaveCompensation = heave / channel->sampleInterval / 0.00000075;
 
 					/*----------------------------------------------------------------*/
 					/* copy low frequency starboard sidescan to jstar storage */
@@ -1455,27 +1500,35 @@ int main(int argc, char **argv) {
 					channel->message.size = 0;
 
 					/* Trace Header */
-					channel->sequenceNumber = 0;                   /* 0-3 : Trace Sequence Number (always 0) ** */
+					channel->pingTime = 0;                   /* 0-3 : Ping Time in epoch seconds [since (1/1/1970)] (Protocol Version 8 onwards) */
 					channel->startDepth = s7kssheader->startDepth; /* 4-7 : Starting depth (window offset) in samples. */
 					channel->pingNum = s7kssheader->pingNum;       /* 8-11: Ping number (increments with ping) ** */
-					channel->channelNum = s7kssheader->channelNum; /* 12-15 : Channel Number (0 .. n) ** */
-					for (i = 0; i < 6; i++)
-						channel->unused1[i] = 0; /* 16-27 */
+					for (i = 0; i < 2; i++) /* 12-15 */
+						channel->reserved1[i] = 0; /* 16-27 */
+					channel->msb = 0; /* 16-17 */
+					channel->lsb1 = 0; /* 18-19 */
+					channel->lsb2 = 0; /* 20-21 */
+					for (i = 0; i < 3; i++) /* 22-27 */
+						channel->reserved2[i] = 0;
 
 					channel->traceIDCode = 1; /* 28-29 : ID Code (always 1 => seismic data) ** */
 
-					for (i = 0; i < 2; i++)
-						channel->unused2[i] = 0;                   /* 30-33 */
+					channel->validityFlag = 0;
+					channel->reserved3 = 0; /* 32-33 */
 					channel->dataFormat = s7kssheader->dataFormat; /* 34-35 : DataFormatType */
 					                                               /*   0 = 1 short  per sample  - envelope data */
 					                                               /*   1 = 2 shorts per sample, - stored as real(1), imag(1), */
 					                                               /*   2 = 1 short  per sample  - before matched filter */
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
-					channel->NMEAantennaeR = 0;                    /* 36-37 : Distance from towfish to antennae in cm */
-					channel->NMEAantennaeO = 0;                    /* 38-39 : Distance to antennae starboard direction in cm */
-					for (i = 0; i < 32; i++)
-						channel->RS232[i] = 0; /* 40-71 : Reserved for RS232 data - TBD */
+					for (i = 0; i < 2; i++) {
+						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
+					}
+					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
+					for (i = 0; i < 16; i++) {
+						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
+					}
+
 					/* -------------------------------------------------------------------- */
 					/* Navigation data :                                                    */
 					/* If the coorUnits are seconds(2), the x values represent longitude    */
@@ -1483,10 +1536,8 @@ int main(int argc, char **argv) {
 					/* the number of seconds east of Greenwich Meridian or north of the     */
 					/* equator.                                                             */
 					/* -------------------------------------------------------------------- */
-					channel->sourceCoordX = 0; /* 72-75 : Meters or Seconds of Arc */
-					channel->sourceCoordY = 0; /* 76-79 : Meters or Seconds of Arc */
-					channel->groupCoordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
-					channel->groupCoordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
+					channel->coordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
+					channel->coordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
 					channel->coordUnits = 0;   /* 88-89 : Units of coordinates - 1->length (x /y), 2->seconds of arc */
 					for (i = 0; i < 24; i++)
 						channel->annotation[i] = 0;          /* 90-113 : Annotation string */
@@ -1495,16 +1546,27 @@ int main(int argc, char **argv) {
 					channel->sampleInterval = s7kssheader->sampleInterval; /* 116-119 : Sample interval in ns of stored data ** */
 					channel->ADCGain = s7kssheader->ADCGain;               /* 120-121 : Gain factor of ADC */
 					channel->pulsePower = 0;  /* 122-123 : user pulse power setting (0 - 100) percent */
-					channel->correlated = 0;  /* 124-125 : correlated data 1 - No, 2 - Yes */
+					channel->reserved6 = 0;  /* 124-125 : correlated data 1 - No, 2 - Yes */
 					channel->startFreq = 0;   /* 126-127 : Starting frequency in 10 * Hz */
 					channel->endFreq = 0;     /* 128-129 : Ending frequency in 10 * Hz */
 					channel->sweepLength = 0; /* 130-131 : Sweep length in ms */
-					for (i = 0; i < 4; i++)
-						channel->unused7[i] = 0;             /* 132-139 */
-					channel->aliasFreq = 0;                  /* 140-141 : alias Frequency (sample frequency / 2) */
-					channel->pulseID = s7kssheader->pulseID; /* 142-143 : Unique pulse identifier */
-					for (i = 0; i < 6; i++)
-						channel->unused8[i] = 0;         /* 144-155 */
+					channel->pressure = 0; /* 132-135 : Pressure in Milli PSI (1 unit = 1/1000 PSI)
+                                  *           See Validity Flag (bytes 30-31) */
+					channel->sonarDepth = 0; /* 136-139 : Depth in Millimeters (if not = 0)
+                                  *           See Validity Flag (bytes 30-31). */
+					channel->sampleFreq = 0;       /* 140-141 : alias Frequency (sample frequency / 2) */
+					channel->pulseID = s7ksegyheader->pulseID;           /* 142-143 : Unique pulse identifier */
+					channel->sonarAltitude = 0;           /* 144-147 : Altitude in Millimeters
+                                  *           A zero implies not filled. See Validity Flag (bytes 30-31) */
+					channel->soundspeed = 0.0;            /* 148-151 : Sound Speed in Meters per Second.
+                                  *           See Validity Flag (bytes 30-31). */
+					channel->mixerFrequency = 0.0;        /* 152-155 : Mixer Frequency in Hertz
+                                  *           For single pulses systems this should
+                                  *           be close to the center frequency.
+                                  *           For multi pulse systems this should
+                                  *           be the approximate center frequency
+                                  *           of the span of all the pulses. */
+
 					channel->year = istore->time_i[0];   /* 156-157 : Year data recorded (CPU time) */
 					channel->day = time_j[1];            /* 158-159 : day */
 					channel->hour = istore->time_i[3];   /* 160-161 : hour */
@@ -1514,7 +1576,7 @@ int main(int argc, char **argv) {
 					channel->weightingFactor =
 					    s7kssheader->weightingFactor; /* 168-169 :  weighting factor for block floating point expansion */
 					                                  /*            -- defined as 2 -N volts for lsb */
-					channel->unused9 = 0;             /* 170-171 : */
+					channel->numberPulses =  0; /* 170-171 : Number of Pulses in the Water */
 					/* -------------------------------------------------------------------- */
 					/* From pitch/roll/temp/heading sensor */
 					/* -------------------------------------------------------------------- */
@@ -1526,8 +1588,8 @@ int main(int argc, char **argv) {
 					/* -------------------------------------------------------------------- */
 					/* User defined area from 180-239                                       */
 					/* -------------------------------------------------------------------- */
-					channel->heaveCompensation = 0;                /* 180-181 : Heave compensation offset (samples) */
-					channel->trigSource = s7kssheader->trigSource; /* 182-183 : TriggerSource (0 = internal, 1 = external) */
+					channel->reserved9 = 0;                /* 180-181 : Reserved */
+					channel->triggerSource = s7kssheader->trigSource; /* 182-183 : TriggerSource (0 = internal, 1 = external) */
 					channel->markNumber = s7kssheader->markNumber; /* 184-185 : Mark Number (0 = no mark) */
 					channel->NMEAHour = 0;                         /* 186-187 : Hour */
 					channel->NMEAMinutes = 0;                      /* 188-189 : Minutes */
@@ -1540,25 +1602,25 @@ int main(int argc, char **argv) {
 					    0.001 * istore->time_i[6] /* 200-203 : Millieconds today */
 					    + 1000 * (istore->time_i[5] + 60.0 * (istore->time_i[4] + 60.0 * istore->time_i[3]));
 					channel->ADCMax = s7kssheader->ADCMax; /* 204-205 : Maximum absolute value for ADC samples for this packet */
-					channel->calConst = 0;                 /* 206-207 : System constant in tenths of a dB */
-					channel->vehicleID = 0;                /* 208-209 : Vehicle ID */
+					channel->reserved10 = 0;   /* 206-207 : Reserved */
+					channel->reserved11 = 0; /* 208-209 : Reserved */
 					for (i = 0; i < 6; i++)
 						channel->softwareVersion[i] = 0; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
-					channel->sphericalCorrection = 0; /* 216-219 : Initial spherical correction factor (useful for multiping /*/
-					                                  /* deep application) * 100 */
-					channel->packetNum =
-					    s7kssheader->packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */
+					channel->sphericalCorrection = s7ksegyheader->sphericalCorrection;
+												/* 216-219 : Initial spherical correction factor (useful for multiping /*/
+					                            /* deep application) * 100 */
+					channel->packetNum = s7kssheader->packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */
 					channel->ADCDecimation = 0; /* 222-223 : A/D decimation before FFT */
-					channel->decimation = 0;    /* 224-225 : Decimation factor after FFT */
-					channel->unuseda = 0;
-
-					/* -------------------------------------------------------------------- */
-					/* MB-System-only parameters from 236-239                               */
-					/* -------------------------------------------------------------------- */
-					channel->depth = 0;         /* 227-231 : Seafloor depth in 0.001 m */
-					channel->sonardepth = 0;    /* 236-235 : Sonar depth in 0.001 m */
-					channel->sonaraltitude = 0; /* 236-239 : Sonar altitude in 0.001 m */
+					channel->reserved12 = 0;       /* 224-225 : Reserved */
+					channel->temperature = 0;        /* 226-227 : Water Temperature in Units of 1/10 Degree C.
+                               *           See Validity Flag (bytes 30-31).*/
+					channel->layback = 0;            /* 227-231 : Layback
+                               *           Distance to the sonar in meters. */
+					channel->reserved13 = 0;           /* 232-235 : Reserved */
+					channel->cableOut = 0;           /* 236-239 : Cable Out in Decimeters
+                               *           See Validity Flag (bytes 30-31). */
+					channel->reserved14 = 0;         /* 236-239 : Reserved */
 
 					/* allocate memory for the trace */
 					if (channel->dataFormat == 1)
@@ -1647,22 +1709,22 @@ int main(int argc, char **argv) {
 						}
 
 						/* set sonar altitude */
-						channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+						channel->sonarAltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
 					else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY) {
-						channel->sonaraltitude = (int)(750000.0 * ttime_min_use);
-						if (channel->sonaraltitude == 0)
-							channel->sonaraltitude = 1000 * altitude;
+						channel->sonarAltitude = (int)(750000.0 * ttime_min_use);
+						if (channel->sonarAltitude == 0)
+							channel->sonarAltitude = 1000 * altitude;
 					}
 					else {
-						channel->sonaraltitude = 1000 * altitude;
+						channel->sonarAltitude = 1000 * altitude;
 					}
 
 					/* apply gain if specified */
 					if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR) {
-						channelpick = (int)(((double)channel->sonaraltitude) / 0.00075 / ((double)channel->sampleInterval));
+						channelpick = (int)(((double)channel->sonarAltitude) / 0.00075 / ((double)channel->sampleInterval));
 						/*fprintf(stderr,"altitude:%d sampleInterval:%d
-						 * channelpick:%d\n",channel->sonaraltitude,channel->sampleInterval,channelpick);*/
+						 * channelpick:%d\n",channel->sonarAltitude,channel->sampleInterval,channelpick);*/
 						channelpick = MAX(channelpick, 1);
 						for (i = channelpick; i < channel->samples; i++) {
 							factor = gainfactor * (((double)(i * i)) / ((double)(channelpick * channelpick)));
@@ -1677,18 +1739,14 @@ int main(int argc, char **argv) {
 						navlon = navlon + 360.0;
 					if (navlon > 180.0)
 						navlon = navlon - 360.0;
-					channel->sourceCoordX = (int)(360000.0 * navlon);
-					channel->sourceCoordY = (int)(360000.0 * navlat);
-					channel->groupCoordX = (int)(360000.0 * navlon);
-					channel->groupCoordY = (int)(360000.0 * navlat);
+					channel->coordX = (int)(360000.0 * navlon);
+					channel->coordY = (int)(360000.0 * navlat);
 					channel->coordUnits = 2;
 					channel->heading = (short)(100.0 * heading);
 					channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075;
-					channel->sonardepth = 1000 * sonardepth;
-					channel->depth = channel->sonardepth + channel->sonaraltitude;
+					channel->sonarDepth = 1000 * sonardepth;
 					channel->roll = (short)(32768 * roll / 180.0);
 					channel->pitch = (short)(32768 * pitch / 180.0);
-					channel->heaveCompensation = heave / channel->sampleInterval / 0.00000075;
 
 					/* write the record */
 					nwritesslo++;
@@ -1729,27 +1787,35 @@ int main(int argc, char **argv) {
 					channel->message.size = 0;
 
 					/* Trace Header */
-					channel->sequenceNumber = 0;                   /* 0-3 : Trace Sequence Number (always 0) ** */
+					channel->pingTime = 0;                   /* 0-3 : Ping Time in epoch seconds [since (1/1/1970)] (Protocol Version 8 onwards) */
 					channel->startDepth = s7kssheader->startDepth; /* 4-7 : Starting depth (window offset) in samples. */
 					channel->pingNum = s7kssheader->pingNum;       /* 8-11: Ping number (increments with ping) ** */
-					channel->channelNum = s7kssheader->channelNum; /* 12-15 : Channel Number (0 .. n) ** */
-					for (i = 0; i < 6; i++)
-						channel->unused1[i] = 0; /* 16-27 */
+					for (i = 0; i < 2; i++) /* 12-15 */
+						channel->reserved1[i] = 0; /* 16-27 */
+					channel->msb = 0; /* 16-17 */
+					channel->lsb1 = 0; /* 18-19 */
+					channel->lsb2 = 0; /* 20-21 */
+					for (i = 0; i < 3; i++) /* 22-27 */
+						channel->reserved2[i] = 0;
 
 					channel->traceIDCode = 1; /* 28-29 : ID Code (always 1 => seismic data) ** */
 
-					for (i = 0; i < 2; i++)
-						channel->unused2[i] = 0;                   /* 30-33 */
+					channel->validityFlag = 0;
+					channel->reserved3 = 0; /* 32-33 */
 					channel->dataFormat = s7kssheader->dataFormat; /* 34-35 : DataFormatType */
 					                                               /*   0 = 1 short  per sample  - envelope data */
 					                                               /*   1 = 2 shorts per sample, - stored as real(1), imag(1), */
 					                                               /*   2 = 1 short  per sample  - before matched filter */
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
-					channel->NMEAantennaeR = 0;                    /* 36-37 : Distance from towfish to antennae in cm */
-					channel->NMEAantennaeO = 0;                    /* 38-39 : Distance to antennae starboard direction in cm */
-					for (i = 0; i < 32; i++)
-						channel->RS232[i] = 0; /* 40-71 : Reserved for RS232 data - TBD */
+					for (i = 0; i < 2; i++) {
+						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
+					}
+					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
+					for (i = 0; i < 16; i++) {
+						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
+					}
+
 					/* -------------------------------------------------------------------- */
 					/* Navigation data :                                                    */
 					/* If the coorUnits are seconds(2), the x values represent longitude    */
@@ -1757,10 +1823,8 @@ int main(int argc, char **argv) {
 					/* the number of seconds east of Greenwich Meridian or north of the     */
 					/* equator.                                                             */
 					/* -------------------------------------------------------------------- */
-					channel->sourceCoordX = 0; /* 72-75 : Meters or Seconds of Arc */
-					channel->sourceCoordY = 0; /* 76-79 : Meters or Seconds of Arc */
-					channel->groupCoordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
-					channel->groupCoordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
+					channel->coordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
+					channel->coordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
 					channel->coordUnits = 0;   /* 88-89 : Units of coordinates - 1->length (x /y), 2->seconds of arc */
 					for (i = 0; i < 24; i++)
 						channel->annotation[i] = 0;          /* 90-113 : Annotation string */
@@ -1769,16 +1833,27 @@ int main(int argc, char **argv) {
 					channel->sampleInterval = s7kssheader->sampleInterval; /* 116-119 : Sample interval in ns of stored data ** */
 					channel->ADCGain = s7kssheader->ADCGain;               /* 120-121 : Gain factor of ADC */
 					channel->pulsePower = 0;  /* 122-123 : user pulse power setting (0 - 100) percent */
-					channel->correlated = 0;  /* 124-125 : correlated data 1 - No, 2 - Yes */
+					channel->reserved6 = 0;  /* 124-125 : correlated data 1 - No, 2 - Yes */
 					channel->startFreq = 0;   /* 126-127 : Starting frequency in 10 * Hz */
 					channel->endFreq = 0;     /* 128-129 : Ending frequency in 10 * Hz */
 					channel->sweepLength = 0; /* 130-131 : Sweep length in ms */
-					for (i = 0; i < 4; i++)
-						channel->unused7[i] = 0;             /* 132-139 */
-					channel->aliasFreq = 0;                  /* 140-141 : alias Frequency (sample frequency / 2) */
-					channel->pulseID = s7kssheader->pulseID; /* 142-143 : Unique pulse identifier */
-					for (i = 0; i < 6; i++)
-						channel->unused8[i] = 0;         /* 144-155 */
+					channel->pressure = 0; /* 132-135 : Pressure in Milli PSI (1 unit = 1/1000 PSI)
+                                  *           See Validity Flag (bytes 30-31) */
+					channel->sonarDepth = 0; /* 136-139 : Depth in Millimeters (if not = 0)
+                                  *           See Validity Flag (bytes 30-31). */
+					channel->sampleFreq = 0;       /* 140-141 : alias Frequency (sample frequency / 2) */
+					channel->pulseID = s7ksegyheader->pulseID;           /* 142-143 : Unique pulse identifier */
+					channel->sonarAltitude = 0;           /* 144-147 : Altitude in Millimeters
+                                  *           A zero implies not filled. See Validity Flag (bytes 30-31) */
+					channel->soundspeed = 0.0;            /* 148-151 : Sound Speed in Meters per Second.
+                                  *           See Validity Flag (bytes 30-31). */
+					channel->mixerFrequency = 0.0;        /* 152-155 : Mixer Frequency in Hertz
+                                  *           For single pulses systems this should
+                                  *           be close to the center frequency.
+                                  *           For multi pulse systems this should
+                                  *           be the approximate center frequency
+                                  *           of the span of all the pulses. */
+
 					channel->year = istore->time_i[0];   /* 156-157 : Year data recorded (CPU time) */
 					channel->day = time_j[1];            /* 158-159 : day */
 					channel->hour = istore->time_i[3];   /* 160-161 : hour */
@@ -1788,7 +1863,7 @@ int main(int argc, char **argv) {
 					channel->weightingFactor =
 					    s7kssheader->weightingFactor; /* 168-169 :  weighting factor for block floating point expansion */
 					                                  /*            -- defined as 2 -N volts for lsb */
-					channel->unused9 = 0;             /* 170-171 : */
+					channel->numberPulses =  0; /* 170-171 : Number of Pulses in the Water */
 					/* -------------------------------------------------------------------- */
 					/* From pitch/roll/temp/heading sensor */
 					/* -------------------------------------------------------------------- */
@@ -1800,8 +1875,8 @@ int main(int argc, char **argv) {
 					/* -------------------------------------------------------------------- */
 					/* User defined area from 180-239                                       */
 					/* -------------------------------------------------------------------- */
-					channel->heaveCompensation = 0;                /* 180-181 : Heave compensation offset (samples) */
-					channel->trigSource = s7kssheader->trigSource; /* 182-183 : TriggerSource (0 = internal, 1 = external) */
+					channel->reserved9 = 0;                /* 180-181 : Reserved */
+					channel->triggerSource = s7kssheader->trigSource; /* 182-183 : TriggerSource (0 = internal, 1 = external) */
 					channel->markNumber = s7kssheader->markNumber; /* 184-185 : Mark Number (0 = no mark) */
 					channel->NMEAHour = 0;                         /* 186-187 : Hour */
 					channel->NMEAMinutes = 0;                      /* 188-189 : Minutes */
@@ -1814,25 +1889,25 @@ int main(int argc, char **argv) {
 					    0.001 * istore->time_i[6] /* 200-203 : Millieconds today */
 					    + 1000 * (istore->time_i[5] + 60.0 * (istore->time_i[4] + 60.0 * istore->time_i[3]));
 					channel->ADCMax = s7kssheader->ADCMax; /* 204-205 : Maximum absolute value for ADC samples for this packet */
-					channel->calConst = 0;                 /* 206-207 : System constant in tenths of a dB */
-					channel->vehicleID = 0;                /* 208-209 : Vehicle ID */
+					channel->reserved10 = 0;   /* 206-207 : Reserved */
+					channel->reserved11 = 0; /* 208-209 : Reserved */
 					for (i = 0; i < 6; i++)
 						channel->softwareVersion[i] = 0; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
-					channel->sphericalCorrection = 0; /* 216-219 : Initial spherical correction factor (useful for multiping /*/
-					                                  /* deep application) * 100 */
-					channel->packetNum =
-					    s7kssheader->packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */
+					channel->sphericalCorrection = s7ksegyheader->sphericalCorrection;
+												/* 216-219 : Initial spherical correction factor (useful for multiping /*/
+					                            /* deep application) * 100 */
+					channel->packetNum = s7kssheader->packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */
 					channel->ADCDecimation = 0; /* 222-223 : A/D decimation before FFT */
-					channel->decimation = 0;    /* 224-225 : Decimation factor after FFT */
-					channel->unuseda = 0;
-
-					/* -------------------------------------------------------------------- */
-					/* MB-System-only parameters from 236-239                               */
-					/* -------------------------------------------------------------------- */
-					channel->depth = 0;         /* 227-231 : Seafloor depth in 0.001 m */
-					channel->sonardepth = 0;    /* 236-235 : Sonar depth in 0.001 m */
-					channel->sonaraltitude = 0; /* 236-239 : Sonar altitude in 0.001 m */
+					channel->reserved12 = 0;       /* 224-225 : Reserved */
+					channel->temperature = 0;        /* 226-227 : Water Temperature in Units of 1/10 Degree C.
+                               *           See Validity Flag (bytes 30-31).*/
+					channel->layback = 0;            /* 227-231 : Layback
+                               *           Distance to the sonar in meters. */
+					channel->reserved13 = 0;           /* 232-235 : Reserved */
+					channel->cableOut = 0;           /* 236-239 : Cable Out in Decimeters
+                               *           See Validity Flag (bytes 30-31). */
+					channel->reserved14 = 0;         /* 236-239 : Reserved */
 
 					/* allocate memory for the trace */
 					if (channel->dataFormat == 1)
@@ -1921,15 +1996,15 @@ int main(int argc, char **argv) {
 						}
 
 						/* set sonar altitude */
-						channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+						channel->sonarAltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
 					else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY) {
-						channel->sonaraltitude = (int)(750000.0 * ttime_min_use);
-						if (channel->sonaraltitude == 0)
-							channel->sonaraltitude = 1000 * altitude;
+						channel->sonarAltitude = (int)(750000.0 * ttime_min_use);
+						if (channel->sonarAltitude == 0)
+							channel->sonarAltitude = 1000 * altitude;
 					}
 					else {
-						channel->sonaraltitude = 1000 * altitude;
+						channel->sonarAltitude = 1000 * altitude;
 					}
 
 					/* reset navigation and other values */
@@ -1937,18 +2012,14 @@ int main(int argc, char **argv) {
 						navlon = navlon + 360.0;
 					if (navlon > 180.0)
 						navlon = navlon - 360.0;
-					channel->sourceCoordX = (int)(360000.0 * navlon);
-					channel->sourceCoordY = (int)(360000.0 * navlat);
-					channel->groupCoordX = (int)(360000.0 * navlon);
-					channel->groupCoordY = (int)(360000.0 * navlat);
+					channel->coordX = (int)(360000.0 * navlon);
+					channel->coordY = (int)(360000.0 * navlat);
 					channel->coordUnits = 2;
 					channel->heading = (short)(100.0 * heading);
 					channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075;
-					channel->sonardepth = 1000 * sonardepth;
-					channel->depth = channel->sonardepth + channel->sonaraltitude;
+					channel->sonarDepth = 1000 * sonardepth;
 					channel->roll = (short)(32768 * roll / 180.0);
 					channel->pitch = (short)(32768 * pitch / 180.0);
-					channel->heaveCompensation = heave / channel->sampleInterval / 0.00000075;
 
 					/*----------------------------------------------------------------*/
 					/* copy high frequency starboard sidescan to jstar storage */
@@ -1972,27 +2043,35 @@ int main(int argc, char **argv) {
 					channel->message.size = 0;
 
 					/* Trace Header */
-					channel->sequenceNumber = 0;                   /* 0-3 : Trace Sequence Number (always 0) ** */
+					channel->pingTime = 0;                   /* 0-3 : Ping Time in epoch seconds [since (1/1/1970)] (Protocol Version 8 onwards) */
 					channel->startDepth = s7kssheader->startDepth; /* 4-7 : Starting depth (window offset) in samples. */
 					channel->pingNum = s7kssheader->pingNum;       /* 8-11: Ping number (increments with ping) ** */
-					channel->channelNum = s7kssheader->channelNum; /* 12-15 : Channel Number (0 .. n) ** */
-					for (i = 0; i < 6; i++)
-						channel->unused1[i] = 0; /* 16-27 */
+					for (i = 0; i < 2; i++) /* 12-15 */
+						channel->reserved1[i] = 0; /* 16-27 */
+					channel->msb = 0; /* 16-17 */
+					channel->lsb1 = 0; /* 18-19 */
+					channel->lsb2 = 0; /* 20-21 */
+					for (i = 0; i < 3; i++) /* 22-27 */
+						channel->reserved2[i] = 0;
 
 					channel->traceIDCode = 1; /* 28-29 : ID Code (always 1 => seismic data) ** */
 
-					for (i = 0; i < 2; i++)
-						channel->unused2[i] = 0;                   /* 30-33 */
+					channel->validityFlag = 0;
+					channel->reserved3 = 0; /* 32-33 */
 					channel->dataFormat = s7kssheader->dataFormat; /* 34-35 : DataFormatType */
 					                                               /*   0 = 1 short  per sample  - envelope data */
 					                                               /*   1 = 2 shorts per sample, - stored as real(1), imag(1), */
 					                                               /*   2 = 1 short  per sample  - before matched filter */
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
-					channel->NMEAantennaeR = 0;                    /* 36-37 : Distance from towfish to antennae in cm */
-					channel->NMEAantennaeO = 0;                    /* 38-39 : Distance to antennae starboard direction in cm */
-					for (i = 0; i < 32; i++)
-						channel->RS232[i] = 0; /* 40-71 : Reserved for RS232 data - TBD */
+					for (i = 0; i < 2; i++) {
+						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
+					}
+					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
+					for (i = 0; i < 16; i++) {
+						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
+					}
+
 					/* -------------------------------------------------------------------- */
 					/* Navigation data :                                                    */
 					/* If the coorUnits are seconds(2), the x values represent longitude    */
@@ -2000,10 +2079,8 @@ int main(int argc, char **argv) {
 					/* the number of seconds east of Greenwich Meridian or north of the     */
 					/* equator.                                                             */
 					/* -------------------------------------------------------------------- */
-					channel->sourceCoordX = 0; /* 72-75 : Meters or Seconds of Arc */
-					channel->sourceCoordY = 0; /* 76-79 : Meters or Seconds of Arc */
-					channel->groupCoordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
-					channel->groupCoordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
+					channel->coordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
+					channel->coordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
 					channel->coordUnits = 0;   /* 88-89 : Units of coordinates - 1->length (x /y), 2->seconds of arc */
 					for (i = 0; i < 24; i++)
 						channel->annotation[i] = 0;          /* 90-113 : Annotation string */
@@ -2012,16 +2089,27 @@ int main(int argc, char **argv) {
 					channel->sampleInterval = s7kssheader->sampleInterval; /* 116-119 : Sample interval in ns of stored data ** */
 					channel->ADCGain = s7kssheader->ADCGain;               /* 120-121 : Gain factor of ADC */
 					channel->pulsePower = 0;  /* 122-123 : user pulse power setting (0 - 100) percent */
-					channel->correlated = 0;  /* 124-125 : correlated data 1 - No, 2 - Yes */
+					channel->reserved6 = 0;  /* 124-125 : correlated data 1 - No, 2 - Yes */
 					channel->startFreq = 0;   /* 126-127 : Starting frequency in 10 * Hz */
 					channel->endFreq = 0;     /* 128-129 : Ending frequency in 10 * Hz */
 					channel->sweepLength = 0; /* 130-131 : Sweep length in ms */
-					for (i = 0; i < 4; i++)
-						channel->unused7[i] = 0;             /* 132-139 */
-					channel->aliasFreq = 0;                  /* 140-141 : alias Frequency (sample frequency / 2) */
-					channel->pulseID = s7kssheader->pulseID; /* 142-143 : Unique pulse identifier */
-					for (i = 0; i < 6; i++)
-						channel->unused8[i] = 0;         /* 144-155 */
+					channel->pressure = 0; /* 132-135 : Pressure in Milli PSI (1 unit = 1/1000 PSI)
+                                  *           See Validity Flag (bytes 30-31) */
+					channel->sonarDepth = 0; /* 136-139 : Depth in Millimeters (if not = 0)
+                                  *           See Validity Flag (bytes 30-31). */
+					channel->sampleFreq = 0;       /* 140-141 : alias Frequency (sample frequency / 2) */
+					channel->pulseID = s7ksegyheader->pulseID;           /* 142-143 : Unique pulse identifier */
+					channel->sonarAltitude = 0;           /* 144-147 : Altitude in Millimeters
+                                  *           A zero implies not filled. See Validity Flag (bytes 30-31) */
+					channel->soundspeed = 0.0;            /* 148-151 : Sound Speed in Meters per Second.
+                                  *           See Validity Flag (bytes 30-31). */
+					channel->mixerFrequency = 0.0;        /* 152-155 : Mixer Frequency in Hertz
+                                  *           For single pulses systems this should
+                                  *           be close to the center frequency.
+                                  *           For multi pulse systems this should
+                                  *           be the approximate center frequency
+                                  *           of the span of all the pulses. */
+
 					channel->year = istore->time_i[0];   /* 156-157 : Year data recorded (CPU time) */
 					channel->day = time_j[1];            /* 158-159 : day */
 					channel->hour = istore->time_i[3];   /* 160-161 : hour */
@@ -2031,7 +2119,7 @@ int main(int argc, char **argv) {
 					channel->weightingFactor =
 					    s7kssheader->weightingFactor; /* 168-169 :  weighting factor for block floating point expansion */
 					                                  /*            -- defined as 2 -N volts for lsb */
-					channel->unused9 = 0;             /* 170-171 : */
+					channel->numberPulses =  0; /* 170-171 : Number of Pulses in the Water */
 					/* -------------------------------------------------------------------- */
 					/* From pitch/roll/temp/heading sensor */
 					/* -------------------------------------------------------------------- */
@@ -2043,8 +2131,8 @@ int main(int argc, char **argv) {
 					/* -------------------------------------------------------------------- */
 					/* User defined area from 180-239                                       */
 					/* -------------------------------------------------------------------- */
-					channel->heaveCompensation = 0;                /* 180-181 : Heave compensation offset (samples) */
-					channel->trigSource = s7kssheader->trigSource; /* 182-183 : TriggerSource (0 = internal, 1 = external) */
+					channel->reserved9 = 0;                /* 180-181 : Reserved */
+					channel->triggerSource = s7kssheader->trigSource; /* 182-183 : TriggerSource (0 = internal, 1 = external) */
 					channel->markNumber = s7kssheader->markNumber; /* 184-185 : Mark Number (0 = no mark) */
 					channel->NMEAHour = 0;                         /* 186-187 : Hour */
 					channel->NMEAMinutes = 0;                      /* 188-189 : Minutes */
@@ -2057,25 +2145,25 @@ int main(int argc, char **argv) {
 					    0.001 * istore->time_i[6] /* 200-203 : Millieconds today */
 					    + 1000 * (istore->time_i[5] + 60.0 * (istore->time_i[4] + 60.0 * istore->time_i[3]));
 					channel->ADCMax = s7kssheader->ADCMax; /* 204-205 : Maximum absolute value for ADC samples for this packet */
-					channel->calConst = 0;                 /* 206-207 : System constant in tenths of a dB */
-					channel->vehicleID = 0;                /* 208-209 : Vehicle ID */
+					channel->reserved10 = 0;   /* 206-207 : Reserved */
+					channel->reserved11 = 0; /* 208-209 : Reserved */
 					for (i = 0; i < 6; i++)
 						channel->softwareVersion[i] = 0; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
-					channel->sphericalCorrection = 0; /* 216-219 : Initial spherical correction factor (useful for multiping /*/
-					                                  /* deep application) * 100 */
-					channel->packetNum =
-					    s7kssheader->packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */
+					channel->sphericalCorrection = s7ksegyheader->sphericalCorrection;
+												/* 216-219 : Initial spherical correction factor (useful for multiping /*/
+					                            /* deep application) * 100 */
+					channel->packetNum = s7kssheader->packetNum; /* 220-221 : Packet number (1 - N) (Each ping starts with packet 1) */
 					channel->ADCDecimation = 0; /* 222-223 : A/D decimation before FFT */
-					channel->decimation = 0;    /* 224-225 : Decimation factor after FFT */
-					channel->unuseda = 0;
-
-					/* -------------------------------------------------------------------- */
-					/* MB-System-only parameters from 236-239                               */
-					/* -------------------------------------------------------------------- */
-					channel->depth = 0;         /* 227-231 : Seafloor depth in 0.001 m */
-					channel->sonardepth = 0;    /* 236-235 : Sonar depth in 0.001 m */
-					channel->sonaraltitude = 0; /* 236-239 : Sonar altitude in 0.001 m */
+					channel->reserved12 = 0;       /* 224-225 : Reserved */
+					channel->temperature = 0;        /* 226-227 : Water Temperature in Units of 1/10 Degree C.
+                               *           See Validity Flag (bytes 30-31).*/
+					channel->layback = 0;            /* 227-231 : Layback
+                               *           Distance to the sonar in meters. */
+					channel->reserved13 = 0;           /* 232-235 : Reserved */
+					channel->cableOut = 0;           /* 236-239 : Cable Out in Decimeters
+                               *           See Validity Flag (bytes 30-31). */
+					channel->reserved14 = 0;         /* 236-239 : Reserved */
 
 					/* allocate memory for the trace */
 					if (channel->dataFormat == 1)
@@ -2164,15 +2252,15 @@ int main(int argc, char **argv) {
 						}
 
 						/* set sonar altitude */
-						channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+						channel->sonarAltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
 					else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY) {
-						channel->sonaraltitude = (int)(750000.0 * ttime_min_use);
-						if (channel->sonaraltitude == 0)
-							channel->sonaraltitude = 1000 * altitude;
+						channel->sonarAltitude = (int)(750000.0 * ttime_min_use);
+						if (channel->sonarAltitude == 0)
+							channel->sonarAltitude = 1000 * altitude;
 					}
 					else {
-						channel->sonaraltitude = 1000 * altitude;
+						channel->sonarAltitude = 1000 * altitude;
 					}
 
 					/* reset navigation and other values */
@@ -2180,18 +2268,14 @@ int main(int argc, char **argv) {
 						navlon = navlon + 360.0;
 					if (navlon > 180.0)
 						navlon = navlon - 360.0;
-					channel->sourceCoordX = (int)(360000.0 * navlon);
-					channel->sourceCoordY = (int)(360000.0 * navlat);
-					channel->groupCoordX = (int)(360000.0 * navlon);
-					channel->groupCoordY = (int)(360000.0 * navlat);
+					channel->coordX = (int)(360000.0 * navlon);
+					channel->coordY = (int)(360000.0 * navlat);
 					channel->coordUnits = 2;
 					channel->heading = (short)(100.0 * heading);
 					channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075;
-					channel->sonardepth = 1000 * sonardepth;
-					channel->depth = channel->sonardepth + channel->sonaraltitude;
+					channel->sonarDepth = 1000 * sonardepth;
 					channel->roll = (short)(32768 * roll / 180.0);
 					channel->pitch = (short)(32768 * pitch / 180.0);
-					channel->heaveCompensation = heave / channel->sampleInterval / 0.00000075;
 
 					/* write the record */
 					nwritesshi++;

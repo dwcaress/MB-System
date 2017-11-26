@@ -81,7 +81,7 @@
 #ifdef HPUX
 #include <rpc/rpc.h>
 #endif
-#ifdef DARWIN
+#if defined(DARWIN) || defined(__APPLE__)
 #include <rpc/types.h>
 #include <rpc/xdr.h>
 #endif

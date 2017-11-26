@@ -246,11 +246,11 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			else if (store->beams[i].quality == '0')
 				beamflag[i] = MB_FLAG_NULL;
 			else if (store->beams[i].quality == 'Q')
-				beamflag[i] = MB_FLAG_SONAR + MB_FLAG_FLAG;
+				beamflag[i] = (char)(MB_FLAG_SONAR | MB_FLAG_FLAG);
 			else if (store->beams[i].quality == 'E')
-				beamflag[i] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
+				beamflag[i] = (char)(MB_FLAG_MANUAL | MB_FLAG_FLAG);
 			else if (store->beams[i].quality == 'F')
-				beamflag[i] = MB_FLAG_FILTER + MB_FLAG_FLAG;
+				beamflag[i] = (char)(MB_FLAG_FILTER | MB_FLAG_FLAG);
 			bath[i] = store->beams[i].depth;
 			bathacrosstrack[i] = store->beams[i].acrosstrack;
 			bathalongtrack[i] = store->beams[i].alongtrack;
