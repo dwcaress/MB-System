@@ -1,7 +1,11 @@
 .TH mbdatalist 1 "18 April 2017" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbdatalist\fP \- parses recursive datalist files and outputs the
-complete list of data files, formats, and file weights.
+\fBmbdatalist\fP \- parses recursive datalist structures, performing one or more
+tasks on the swath files referenced in the datalist(s). The default action is to
+print out out the complete list of data files, formats, and file weights; other
+possible tasks include creating ancilliary (fbt, fnv, and inf) files as part of setting up an
+MB-System processing environment, removing orphaned lock files, and creating
+convenience datalists that referenced processed swath files.
 
 .SH VERSION
 Version 5.0

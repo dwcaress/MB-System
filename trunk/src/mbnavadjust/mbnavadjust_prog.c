@@ -7586,11 +7586,11 @@ int mbnavadjust_invertnav() {
 
 				/* count fixed sections for full inversion */
 				if (file->status == MBNA_FILE_FIXEDNAV)
-					nfixed += 3;
+					nfixed += 3 * section->num_snav;
 				else if (file->status == MBNA_FILE_FIXEDXYNAV)
-					nfixed += 2;
+					nfixed += 2 * section->num_snav;
 				else if (file->status == MBNA_FILE_FIXEDZNAV)
-					nfixed += 1;
+					nfixed += 1 * section->num_snav;
 			}
 		}
 
