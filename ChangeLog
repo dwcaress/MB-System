@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2324       January 18, 2017
   Version 5.5.2323       December 7, 2017
   Version 5.5.2322       November 25, 2017
 * Version 5.5.2321       October 26, 2017
@@ -266,6 +267,19 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2324 (January 18, 2018)
+
+MBpreprocess: Added support for the 3D at Depth
+wide swath lidar (WiSSL) system delivered to MBARI in December 2017.
+
+Formats MBF_3DWISSLR (232) and MBF_3DWISSLP (233): Added support for the 3D at Depth
+wide swath lidar (WiSSL) system delivered to MBARI in December 2017.
+
+MBm_route2mission: Fixed implementation of inserting surfacing events into missions
+at line start and end waypoints.
+
+Many source files: Changes to variable names in GMT grid header and CPT structures for GMT 6.
 
 -----> 5.5.2323 (December 7, 2017)
 

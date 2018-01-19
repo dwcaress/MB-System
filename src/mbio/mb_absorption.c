@@ -417,7 +417,10 @@ int mb_seabird_depth(int verbose, double pressure, double latitude, double *dept
 int mb_seabird_salinity(int verbose, double conductivity, double temperature, double pressure, double *salinity, int *error) {
 	char *function_name = "mb_seabird_salinity";
 	int status = MB_SUCCESS;
-	double R, RT, RP, temp, sum1, sum2, result, val;
+	double R;
+	double RT = 0.0;
+	double RP = 0.0;
+	double temp, sum1, sum2, result, val;
 	int i;
 	
 	/* constants for salinity calculation */
@@ -454,8 +457,8 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
         for (i = 0; i < 6; i++) {
             temp = pow(RT, (double)i / 2.0);
 			sum1 += a[i] * temp;
+			sum2 += b[i] * temp;
 		}
-		sum2 += b[i] * temp;
         val = 1.0 + 0.0162 * (temperature - 15.0);
 		if (val)
 			*salinity = sum1 + sum2 * (temperature - 15.0) / val;

@@ -57,6 +57,8 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
 		fprintf(stderr, "dbg2       minute:  %d\n", time_i[4]);
 		fprintf(stderr, "dbg2       second:  %d\n", time_i[5]);
 		fprintf(stderr, "dbg2       microsec:%d\n", time_i[6]);
+		fprintf(stderr, "dbg2       time_d:  %p\n", time_d);
+		fprintf(stderr, "dbg2       *time_d: %f\n", *time_d);
 	}
 
 	/* get time */

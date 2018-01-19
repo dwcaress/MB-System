@@ -2,7 +2,7 @@
  *    The MB-system:	mb_format.c	2/18/94
  *    $Id$
  *
- *    Copyright (c) 1993-2017 by
+ *    Copyright (c) 1993-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -341,6 +341,12 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 	}
 	else if (*format == MBF_3DDEPTHP) {
 		status = mbr_register_3ddepthp(verbose, mbio_ptr, error);
+	}
+	else if (*format == MBF_3DWISSLR) {
+		status = mbr_register_3dwisslr(verbose, mbio_ptr, error);
+    }
+    else if (*format == MBF_3DWISSLP) {
+		status = mbr_register_3dwisslp(verbose, mbio_ptr, error);
 	}
 	else if (*format == MBF_WASSPENL) {
 		status = mbr_register_wasspenl(verbose, mbio_ptr, error);
@@ -907,6 +913,18 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 	}
 	else if (*format == MBF_3DDEPTHP) {
 		status = mbr_info_3ddepthp(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
+		                           format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
+		                           platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
+		                           beamwidth_xtrack, beamwidth_ltrack, error);
+	}
+	else if (*format == MBF_3DWISSLR) {
+		status = mbr_info_3dwisslr(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
+		                           format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
+		                           platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
+		                           beamwidth_xtrack, beamwidth_ltrack, error);
+	}
+	else if (*format == MBF_3DWISSLP) {
+		status = mbr_info_3dwisslp(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
 		                           format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
 		                           platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
 		                           beamwidth_xtrack, beamwidth_ltrack, error);
@@ -2691,14 +2709,33 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 			suffix_len = 4;
 		else
 			suffix_len = 0;
-		if (suffix_len == 4) {
-			if (fileroot != NULL) {
-				strncpy(fileroot, filename, strlen(filename) - suffix_len);
-				fileroot[strlen(filename) - suffix_len] = '\0';
-			}
-			*format = MBF_3DDEPTHP;
-			found = MB_YES;
-		}
+        if (suffix_len == 4) {
+            /* examine the first datagram to determine
+            whether data is old or new 3D at Depth RAA format */
+            if ((checkfp = fopen(filename, "r")) != NULL) {
+                if (fread(buffer, 1, 4, checkfp) == 4) {
+                    if (buffer[2] == 0x07 && buffer[3] == 0x3D) {
+                        *format = MBF_3DDEPTHP;
+                    }
+                    else if (buffer[2] == 0x08 && buffer[3] == 0x3D) {
+                        *format = MBF_3DWISSLR;
+                    }
+                    else if (buffer[2] == 0x09 && buffer[3] == 0x3D) {
+                        *format = MBF_3DWISSLP;
+                    }
+                    else
+                        *format = MBF_3DDEPTHP;
+                }
+                fclose(checkfp);
+            }
+            else
+                *format = MBF_3DWISSLR;
+            if (fileroot != NULL) {
+                strncpy(fileroot, filename, strlen(filename) - suffix_len);
+                fileroot[strlen(filename) - suffix_len] = '\0';
+            }
+            found = MB_YES;
+        }
 	}
 
 	/* look for a WASSP *.000 file format convention*/

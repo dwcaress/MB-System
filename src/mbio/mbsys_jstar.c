@@ -2958,7 +2958,7 @@ int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 	/* get the ctd data from the Edgetech pressure record */
 	if (*kind == MB_DATA_CTD) {
 		*nctd = 1;
-		*time_d = pressure->seconds + 0.001 * pressure->msec;
+		*time_d = pressure->seconds + 0.001 * pressure->milliseconds;
 		*conductivity = 1000000.0 * pressure->conductivity;
 		*temperature = 0.0;
 

@@ -57,8 +57,8 @@ struct mbba_grid_struct {
 	mb_path projection_id;
 	float nodatavalue;
 	int nxy;
-	int nx;
-	int ny;
+	int n_columns;
+	int n_rows;
 	double min;
 	double max;
 	double xmin;
@@ -91,7 +91,7 @@ average function for a user defined number of pings. The tables \n\t\
 are output to a \".aga\" and \".sga\" files that can be applied \n\t\
 by MBprocess.";
 	char usage_message[] = "mbbackangle -Ifile \
-[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/min/max/nx/ny \
+[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/min/max/n_columns/n_rows \
 -Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Zaltitude -V -H]";
 	extern char *optarg;
 	int errflg = 0;
@@ -218,8 +218,8 @@ by MBprocess.";
 	double gridampangle = 0.0;
 	double gridampmin = 0.0;
 	double gridampmax = 0.0;
-	int gridampnx = 0;
-	int gridampny = 0;
+	int gridampn_columns = 0;
+	int gridampn_rows = 0;
 	double gridampdx = 0.0;
 	double gridampdy = 0.0;
 	float *gridamphist = NULL;
@@ -227,8 +227,8 @@ by MBprocess.";
 	double gridssangle = 0.0;
 	double gridssmin = 0.0;
 	double gridssmax = 0.0;
-	int gridssnx = 0;
-	int gridssny = 0;
+	int gridssn_columns = 0;
+	int gridssn_rows = 0;
 	double gridssdx = 0.0;
 	double gridssdy = 0.0;
 	float *gridsshist = NULL;
@@ -338,20 +338,20 @@ by MBprocess.";
 				gridampangle = angle;
 				gridampmin = ampmin;
 				gridampmax = ampmax;
-				gridampnx = i;
-				gridampny = j;
-				gridampdx = 2.0 * gridampangle / (gridampnx - 1);
-				gridampdy = (gridampmax - gridampmin) / (gridampny - 1);
+				gridampn_columns = i;
+				gridampn_rows = j;
+				gridampdx = 2.0 * gridampangle / (gridampn_columns - 1);
+				gridampdy = (gridampmax - gridampmin) / (gridampn_rows - 1);
 			}
 			else if (mode == MBBACKANGLE_SS && n == 6) {
 				gridss = MB_YES;
 				gridssangle = angle;
 				gridssmin = ampmin;
 				gridssmax = ampmax;
-				gridssnx = i;
-				gridssny = j;
-				gridssdx = 2.0 * gridssangle / (gridssnx - 1);
-				gridssdy = (gridssmax - gridssmin) / (gridssny - 1);
+				gridssn_columns = i;
+				gridssn_rows = j;
+				gridssdx = 2.0 * gridssangle / (gridssn_columns - 1);
+				gridssdy = (gridssmax - gridssmin) / (gridssn_rows - 1);
 			}
 			flag++;
 			break;
@@ -493,16 +493,16 @@ by MBprocess.";
 		fprintf(stderr, "dbg2       gridampangle: %f\n", gridampangle);
 		fprintf(stderr, "dbg2       gridampmin:   %f\n", gridampmin);
 		fprintf(stderr, "dbg2       gridampmax:   %f\n", gridampmax);
-		fprintf(stderr, "dbg2       gridampnx:    %d\n", gridampnx);
-		fprintf(stderr, "dbg2       gridampny:    %d\n", gridampny);
+		fprintf(stderr, "dbg2       gridampn_columns:    %d\n", gridampn_columns);
+		fprintf(stderr, "dbg2       gridampn_rows:    %d\n", gridampn_rows);
 		fprintf(stderr, "dbg2       gridampdx:    %f\n", gridampdx);
 		fprintf(stderr, "dbg2       gridampdy:    %f\n", gridampdy);
 		fprintf(stderr, "dbg2       gridss:       %d\n", gridss);
 		fprintf(stderr, "dbg2       gridssangle:  %f\n", gridssangle);
 		fprintf(stderr, "dbg2       gridssmin:    %f\n", gridssmin);
 		fprintf(stderr, "dbg2       gridssmax:    %f\n", gridssmax);
-		fprintf(stderr, "dbg2       gridssnx:     %d\n", gridssnx);
-		fprintf(stderr, "dbg2       gridssny:     %d\n", gridssny);
+		fprintf(stderr, "dbg2       gridssn_columns:     %d\n", gridssn_columns);
+		fprintf(stderr, "dbg2       gridssn_rows:     %d\n", gridssn_rows);
 		fprintf(stderr, "dbg2       gridssdx:     %f\n", gridssdx);
 		fprintf(stderr, "dbg2       gridssdy:     %f\n", gridssdy);
 	}
@@ -610,7 +610,7 @@ by MBprocess.";
 	if (corr_topogrid == MB_YES) {
 		grid.data = NULL;
 		status = mb_read_gmt_grd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue, &grid.nxy,
-		                         &grid.nx, &grid.ny, &grid.min, &grid.max, &grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
+		                         &grid.n_columns, &grid.n_rows, &grid.min, &grid.max, &grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
 		                         &grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
 		if (status == MB_FAILURE) {
 			error = MB_ERROR_OPEN_FAIL;
@@ -661,7 +661,7 @@ by MBprocess.";
 	/* initialize grids */
 	if (gridamp == MB_YES) {
 		/* allocate memory for output grids */
-		status = mb_mallocd(verbose, __FILE__, __LINE__, gridampnx * gridampny * sizeof(float), (void **)&gridamphist, &error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, gridampn_columns * gridampn_rows * sizeof(float), (void **)&gridamphist, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
@@ -674,7 +674,7 @@ by MBprocess.";
 	}
 	if (gridss == MB_YES) {
 		/* allocate memory for output grids */
-		status = mb_mallocd(verbose, __FILE__, __LINE__, gridssnx * gridssny * sizeof(float), (void **)&gridsshist, &error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, gridssn_columns * gridssn_rows * sizeof(float), (void **)&gridsshist, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
@@ -825,13 +825,13 @@ by MBprocess.";
 		if (error == MB_ERROR_NO_ERROR) {
 			if (gridamp == MB_YES) {
 				/* initialize the memory */
-				for (i = 0; i < gridampnx * gridampny; i++) {
+				for (i = 0; i < gridampn_columns * gridampn_rows; i++) {
 					gridamphist[i] = 0.0;
 				}
 			}
 			if (gridss == MB_YES) {
 				/* initialize the memory */
-				for (i = 0; i < gridssnx * gridssny; i++) {
+				for (i = 0; i < gridssn_columns * gridssn_rows; i++) {
 					gridsshist[i] = 0.0;
 				}
 			}
@@ -1036,12 +1036,12 @@ by MBprocess.";
 								r[1] = -headingx * bathacrosstrack[i] + headingy * bathalongtrack[i];
 								ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
 								jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
-								kgrid = ix * grid.ny + jy;
-								kgrid00 = (ix - 1) * grid.ny + jy - 1;
-								kgrid01 = (ix - 1) * grid.ny + jy + 1;
-								kgrid10 = (ix + 1) * grid.ny + jy - 1;
-								kgrid11 = (ix + 1) * grid.ny + jy + 1;
-								if (ix > 0 && ix < grid.nx - 1 && jy > 0 && jy < grid.ny - 1 &&
+								kgrid = ix * grid.n_rows + jy;
+								kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
+								kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
+								kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
+								kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
+								if (ix > 0 && ix < grid.n_columns - 1 && jy > 0 && jy < grid.n_rows - 1 &&
 								    grid.data[kgrid] > grid.nodatavalue && grid.data[kgrid00] > grid.nodatavalue &&
 								    grid.data[kgrid01] > grid.nodatavalue && grid.data[kgrid10] > grid.nodatavalue &&
 								    grid.data[kgrid11] > grid.nodatavalue) {
@@ -1084,12 +1084,12 @@ by MBprocess.";
 									/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
 									i,bathacrosstrack[i],bathalongtrack[i],bath[i],sonardepth,RTD * atan(bathacrosstrack[i] /
 									(sonardepth + grid.data[kgrid]))); fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
-									ix,grid.nx,jy,grid.ny,grid.data[kgrid]);
+									ix,grid.n_columns,jy,grid.n_rows,grid.data[kgrid]);
 									fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
 									r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 								}
 								else {
-									if (ix >= 0 && ix < grid.nx && jy >= 0 && jy < grid.ny && grid.data[kgrid] > grid.nodatavalue)
+									if (ix >= 0 && ix < grid.n_columns && jy >= 0 && jy < grid.n_rows && grid.data[kgrid] > grid.nodatavalue)
 										bathy = -grid.data[kgrid];
 									else if (altitude > 0.0)
 										bathy = altitude + sonardepth;
@@ -1141,8 +1141,8 @@ by MBprocess.";
 								if (gridamp == MB_YES) {
 									ix = (angle + gridampangle) / gridampdx;
 									jy = (amp[i] - gridampmin) / gridampdy;
-									if (ix >= 0 && ix < gridampnx && jy >= 0 && jy < gridampny) {
-										k = ix * gridampny + jy;
+									if (ix >= 0 && ix < gridampn_columns && jy >= 0 && jy < gridampn_rows) {
+										k = ix * gridampn_rows + jy;
 										gridamphist[k] += 1.0;
 									}
 								}
@@ -1167,12 +1167,12 @@ by MBprocess.";
 								r[1] = -headingx * ssacrosstrack[i] + headingy * ssalongtrack[i];
 								ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
 								jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
-								kgrid = ix * grid.ny + jy;
-								kgrid00 = (ix - 1) * grid.ny + jy - 1;
-								kgrid01 = (ix - 1) * grid.ny + jy + 1;
-								kgrid10 = (ix + 1) * grid.ny + jy - 1;
-								kgrid11 = (ix + 1) * grid.ny + jy + 1;
-								if (ix > 0 && ix < grid.nx - 1 && jy > 0 && jy < grid.ny - 1 &&
+								kgrid = ix * grid.n_rows + jy;
+								kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
+								kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
+								kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
+								kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
+								if (ix > 0 && ix < grid.n_columns - 1 && jy > 0 && jy < grid.n_rows - 1 &&
 								    grid.data[kgrid] > grid.nodatavalue && grid.data[kgrid00] > grid.nodatavalue &&
 								    grid.data[kgrid01] > grid.nodatavalue && grid.data[kgrid10] > grid.nodatavalue &&
 								    grid.data[kgrid11] > grid.nodatavalue) {
@@ -1215,12 +1215,12 @@ by MBprocess.";
 									/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
 									i,ssacrosstrack[i],ssalongtrack[i],ss[i],sonardepth,RTD * atan(ssacrosstrack[i] / (sonardepth
 									+ grid.data[kgrid]))); fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
-									ix,grid.nx,jy,grid.ny,grid.data[kgrid]);
+									ix,grid.n_columns,jy,grid.n_rows,grid.data[kgrid]);
 									fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
 									r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 								}
 								else {
-									if (ix >= 0 && ix < grid.nx && jy >= 0 && jy < grid.ny && grid.data[kgrid] > grid.nodatavalue)
+									if (ix >= 0 && ix < grid.n_columns && jy >= 0 && jy < grid.n_rows && grid.data[kgrid] > grid.nodatavalue)
 										bathy = -grid.data[kgrid];
 									else if (altitude > 0.0)
 										bathy = altitude + sonardepth;
@@ -1272,8 +1272,8 @@ by MBprocess.";
 								if (gridss == MB_YES) {
 									ix = (angle + gridssangle) / gridssdx;
 									jy = (ss[i] - gridssmin) / gridssdy;
-									if (ix >= 0 && ix < gridssnx && jy >= 0 && jy < gridssny) {
-										k = ix * gridssny + jy;
+									if (ix >= 0 && ix < gridssn_columns && jy >= 0 && jy < gridssn_rows) {
+										k = ix * gridssn_rows + jy;
 										gridsshist[k] += 1.0;
 									}
 								}
@@ -1308,16 +1308,16 @@ by MBprocess.";
 		if (gridamp == MB_YES) {
 			/* normalize the grid */
 			ampmax = 0.0;
-			for (ix = 0; ix < gridampnx; ix++) {
+			for (ix = 0; ix < gridampn_columns; ix++) {
 				norm = 0.0;
-				for (jy = 0; jy < gridampny; jy++) {
-					k = ix * gridampny + jy;
+				for (jy = 0; jy < gridampn_rows; jy++) {
+					k = ix * gridampn_rows + jy;
 					norm += gridamphist[k];
 				}
 				if (norm > 0.0) {
 					norm *= 0.001;
-					for (jy = 0; jy < gridampny; jy++) {
-						k = ix * gridampny + jy;
+					for (jy = 0; jy < gridampn_rows; jy++) {
+						k = ix * gridampn_rows + jy;
 						gridamphist[k] /= norm;
 						ampmax = MAX(ampmax, gridamphist[k]);
 					}
@@ -1331,7 +1331,7 @@ by MBprocess.";
 			strcpy(title, "Beam Amplitude vs. Grazing Angle PDF");
 
 			/* output the grid */
-			mb_write_gmt_grd(verbose, gridfile, gridamphist, MB_DEFAULT_GRID_NODATA, gridampnx, gridampny,
+			mb_write_gmt_grd(verbose, gridfile, gridamphist, MB_DEFAULT_GRID_NODATA, gridampn_columns, gridampn_rows,
 			                 (double)(-gridampangle), gridampangle, gridampmin, gridampmax, (double)0.0, ampmax, gridampdx,
 			                 gridampdy, xlabel, ylabel, zlabel, title, projection, argc, argv, &error);
 
@@ -1349,16 +1349,16 @@ by MBprocess.";
 		if (gridss == MB_YES) {
 			/* normalize the grid */
 			ampmax = 0.0;
-			for (ix = 0; ix < gridssnx; ix++) {
+			for (ix = 0; ix < gridssn_columns; ix++) {
 				norm = 0.0;
-				for (jy = 0; jy < gridssny; jy++) {
-					k = ix * gridssny + jy;
+				for (jy = 0; jy < gridssn_rows; jy++) {
+					k = ix * gridssn_rows + jy;
 					norm += gridsshist[k];
 				}
 				if (norm > 0.0) {
 					norm *= 0.001;
-					for (jy = 0; jy < gridssny; jy++) {
-						k = ix * gridssny + jy;
+					for (jy = 0; jy < gridssn_rows; jy++) {
+						k = ix * gridssn_rows + jy;
 						gridsshist[k] /= norm;
 						ampmax = MAX(ampmax, gridsshist[k]);
 					}
@@ -1372,7 +1372,7 @@ by MBprocess.";
 			strcpy(title, "Sidescan Amplitude vs. Grazing Angle PDF");
 
 			/* output the grid */
-			mb_write_gmt_grd(verbose, gridfile, gridsshist, MB_DEFAULT_GRID_NODATA, gridssnx, gridssny, (double)(-gridssangle),
+			mb_write_gmt_grd(verbose, gridfile, gridsshist, MB_DEFAULT_GRID_NODATA, gridssn_columns, gridssn_rows, (double)(-gridssangle),
 			                 gridssangle, gridssmin, gridssmax, (double)0.0, ampmax, gridssdx, gridssdy, xlabel, ylabel, zlabel,
 			                 title, projection, argc, argv, &error);
 

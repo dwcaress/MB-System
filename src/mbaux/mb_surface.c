@@ -92,18 +92,18 @@ struct MB_SURFACE_BRIGGS {
 };
 
 static int npoints = 0; /* Number of data points */
-static int nx = 0;      /* Number of nodes in x-dir. */
-static int ny = 0;      /* Number of nodes in y-dir. (Final grid) */
-static int mx = 0;
-static int my = 0;
+static int n_columns = 0;      /* Number of nodes in x-dir. */
+static int n_rows = 0;      /* Number of nodes in y-dir. (Final grid) */
+static int m_columns = 0;
+static int m_rows = 0;
 static int ij_sw_corner, ij_se_corner, ij_nw_corner, ij_ne_corner;
-static int block_nx;             /* Number of nodes in x-dir for a given grid factor */
-static int block_ny;             /* Number of nodes in y-dir for a given grid factor */
+static int block_n_columns;             /* Number of nodes in x-dir for a given grid factor */
+static int block_n_rows;             /* Number of nodes in y-dir for a given grid factor */
 static int max_iterations = 250; /* Max iter per call to iterate */
 static int total_iterations = 0;
 static int grid, old_grid; /* Node spacings  */
 static int grid_east;
-static int n_fact = 0;  /* Number of factors in common (ny-1, nx-1) */
+static int n_fact = 0;  /* Number of factors in common (n_rows-1, n_columns-1) */
 static int factors[32]; /* Array of common factors */
 static int local_verbose = FALSE;
 static int local_error = MB_ERROR_NO_ERROR;
@@ -169,7 +169,7 @@ int replace_planar_trend(void);
 int throw_away_unusables(void);
 int rescale_z_values(void);
 void load_constraints(char *low, char *high);
-double guess_surface_time(int nx, int ny);
+double guess_surface_time(int n_columns, int n_rows);
 int get_prime_factors(int n, int f[]);
 int gcd_euclid(int a, int b);
 
@@ -230,21 +230,21 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 	}
 	relax_old = 1.0 - relax_new;
 
-	nx = rint((xmax - xmin) / xinc) + 1;
-	ny = rint((ymax - ymin) / yinc) + 1;
-	mx = nx + 4;
-	my = ny + 4;
+	n_columns = rint((xmax - xmin) / xinc) + 1;
+	n_rows = rint((ymax - ymin) / yinc) + 1;
+	m_columns = n_columns + 4;
+	m_rows = n_rows + 4;
 	r_xinc = 1.0 / xinc;
 	r_yinc = 1.0 / yinc;
 
 	/* New stuff here for v4.3:  Check out the grid dimensions:  */
-	grid = gcd_euclid(nx - 1, ny - 1);
+	grid = gcd_euclid(n_columns - 1, n_rows - 1);
 
 	/*
-	if (local_verbose || size_query || grid == 1) fprintf (stderr, "W: %.3lf E: %.3lf S: %.3lf N: %.3lf nx: %d ny: %d\n",
-	    xmin, xmax, ymin, ymax, nx, ny);
+	if (local_verbose || size_query || grid == 1) fprintf (stderr, "W: %.3lf E: %.3lf S: %.3lf N: %.3lf n_columns: %d n_rows: %d\n",
+	    xmin, xmax, ymin, ymax, n_columns, n_rows);
 	if (grid == 1) fprintf(stderr,"surface:  WARNING:  Your grid dimensions are mutually prime.\n");
-	if (grid == 1 || size_query) suggest_sizes_for_surface(nx-1, ny-1);
+	if (grid == 1 || size_query) suggest_sizes_for_surface(n_columns-1, n_rows-1);
 	if (size_query) exit(0);
 	*/
 
@@ -262,10 +262,10 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 
 	/* Set up factors and reset grid to first value  */
 
-	grid = gcd_euclid(nx - 1, ny - 1);
+	grid = gcd_euclid(n_columns - 1, n_rows - 1);
 	n_fact = get_prime_factors(grid, factors);
 	set_grid_parameters();
-	while (block_nx < 4 || block_ny < 4) {
+	while (block_n_columns < 4 || block_n_rows < 4) {
 		smart_divide();
 		set_grid_parameters();
 	}
@@ -277,8 +277,8 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 
 	status =
 	    mb_mallocd(local_verbose, __FILE__, __LINE__, npoints * sizeof(struct MB_SURFACE_BRIGGS), (void **)&briggs, &local_error);
-	status = mb_mallocd(local_verbose, __FILE__, __LINE__, mx * my * sizeof(char), (void **)&iu, &local_error);
-	status = mb_mallocd(local_verbose, __FILE__, __LINE__, mx * my * sizeof(float), (void **)&u, &local_error);
+	status = mb_mallocd(local_verbose, __FILE__, __LINE__, m_columns * m_rows * sizeof(char), (void **)&iu, &local_error);
+	status = mb_mallocd(local_verbose, __FILE__, __LINE__, m_columns * m_rows * sizeof(float), (void **)&u, &local_error);
 
 	if (radius > 0)
 		initialize_grid(); /* Fill in nodes with a weighted avg in a search radius  */
@@ -326,7 +326,7 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", local_error);
-		for (i = 0; i < mx * my; i++)
+		for (i = 0; i < m_columns * m_rows; i++)
 			fprintf(stderr, "dbg2       grid:       %d %f\n", i, sgrid[i]);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
@@ -370,25 +370,25 @@ void set_coefficients() {
 	e_2 *= 2; /* We will need these in boundary conditions  */
 	e_m2 *= 2;
 
-	ij_sw_corner = 2 * my + 2; /*  Corners of array of actual data  */
-	ij_se_corner = ij_sw_corner + (nx - 1) * my;
-	ij_nw_corner = ij_sw_corner + (ny - 1);
-	ij_ne_corner = ij_se_corner + (ny - 1);
+	ij_sw_corner = 2 * m_rows + 2; /*  Corners of array of actual data  */
+	ij_se_corner = ij_sw_corner + (n_columns - 1) * m_rows;
+	ij_nw_corner = ij_sw_corner + (n_rows - 1);
+	ij_ne_corner = ij_se_corner + (n_rows - 1);
 }
 
 void set_offset() {
 	int add_w[5], add_e[5], add_s[5], add_n[5], add_w2[5], add_e2[5], add_s2[5], add_n2[5];
 	int i, j, kase;
 
-	add_w[0] = -my;
+	add_w[0] = -m_rows;
 	add_w[1] = add_w[2] = add_w[3] = add_w[4] = -grid_east;
-	add_w2[0] = -2 * my;
-	add_w2[1] = -my - grid_east;
+	add_w2[0] = -2 * m_rows;
+	add_w2[1] = -m_rows - grid_east;
 	add_w2[2] = add_w2[3] = add_w2[4] = -2 * grid_east;
-	add_e[4] = my;
+	add_e[4] = m_rows;
 	add_e[0] = add_e[1] = add_e[2] = add_e[3] = grid_east;
-	add_e2[4] = 2 * my;
-	add_e2[3] = my + grid_east;
+	add_e2[4] = 2 * m_rows;
+	add_e2[3] = m_rows + grid_east;
 	add_e2[2] = add_e2[1] = add_e2[0] = 2 * grid_east;
 
 	add_n[4] = 1;
@@ -435,13 +435,13 @@ void fill_in_forecast() {
 
 	/* first do from southwest corner */
 
-	for (i = 0; i < nx - 1; i += old_grid) {
+	for (i = 0; i < n_columns - 1; i += old_grid) {
 
-		for (j = 0; j < ny - 1; j += old_grid) {
+		for (j = 0; j < n_rows - 1; j += old_grid) {
 
 			/* get indices of bilinear square */
-			index_0 = ij_sw_corner + i * my + j;
-			index_1 = index_0 + old_grid * my;
+			index_0 = ij_sw_corner + i * m_rows + j;
+			index_1 = index_0 + old_grid * m_rows;
 			index_2 = index_1 + old_grid;
 			index_3 = index_0 + old_grid;
 
@@ -456,7 +456,7 @@ void fill_in_forecast() {
 			for (ii = i; ii < i + old_grid; ii += grid) {
 				delta_x = (ii - i) * old_size;
 				for (jj = j; jj < j + old_grid; jj += grid) {
-					index_new = ij_sw_corner + ii * my + jj;
+					index_new = ij_sw_corner + ii * m_rows + jj;
 					if (index_new == index_0)
 						continue;
 					delta_y = (jj - j) * old_size;
@@ -470,7 +470,7 @@ void fill_in_forecast() {
 
 	/* now do linear guess along east edge */
 
-	for (j = 0; j < (ny - 1); j += old_grid) {
+	for (j = 0; j < (n_rows - 1); j += old_grid) {
 		index_0 = ij_se_corner + j;
 		index_3 = index_0 + old_grid;
 		for (jj = j; jj < j + old_grid; jj += grid) {
@@ -482,11 +482,11 @@ void fill_in_forecast() {
 		iu[index_0] = 5;
 	}
 	/* now do linear guess along north edge */
-	for (i = 0; i < (nx - 1); i += old_grid) {
-		index_0 = ij_nw_corner + i * my;
-		index_1 = index_0 + old_grid * my;
+	for (i = 0; i < (n_columns - 1); i += old_grid) {
+		index_0 = ij_nw_corner + i * m_rows;
+		index_1 = index_0 + old_grid * m_rows;
 		for (ii = i; ii < i + old_grid; ii += grid) {
-			index_new = ij_nw_corner + ii * my;
+			index_new = ij_nw_corner + ii * m_rows;
 			delta_x = (ii - i) * old_size;
 			u[index_new] = u[index_0] + delta_x * (u[index_1] - u[index_0]);
 			iu[index_new] = 0;
@@ -514,8 +514,8 @@ int compare_points(struct MB_SURFACE_DATA *point_1, struct MB_SURFACE_DATA *poin
 	else if (index_1 == OUTSIDE)
 		return (0);
 	else { /* Points are in same grid cell, find the one who is nearest to grid point */
-		block_i = point_1->index / block_ny;
-		block_j = point_1->index % block_ny;
+		block_i = point_1->index / block_n_rows;
+		block_j = point_1->index % block_n_rows;
 		x0 = xmin + block_i * grid_xinc;
 		y0 = ymin + block_j * grid_yinc;
 		dist_1 = (point_1->x - x0) * (point_1->x - x0) + (point_1->y - y0) * (point_1->y - y0);
@@ -544,12 +544,12 @@ void set_index() {
 	for (k = 0; k < npoints; k++) {
 		i = floor(((data[k].x - xmin) * r_grid_xinc) + 0.5);
 		j = floor(((data[k].y - ymin) * r_grid_yinc) + 0.5);
-		if (i < 0 || i >= block_nx || j < 0 || j >= block_ny) {
+		if (i < 0 || i >= block_n_columns || j < 0 || j >= block_n_rows) {
 			data[k].index = OUTSIDE;
 			k_skipped++;
 		}
 		else
-			data[k].index = i * block_ny + j;
+			data[k].index = i * block_n_rows + j;
 	}
 
 	qsort((char *)data, npoints, sizeof(struct MB_SURFACE_DATA), (void *)compare_points);
@@ -565,17 +565,17 @@ void find_nearest_point() {
 	last_index = -1;
 	smalldistance = 0.05 * ((grid_xinc < grid_yinc) ? grid_xinc : grid_yinc);
 
-	for (i = 0; i < nx; i += grid) /* Reset grid info */
-		for (j = 0; j < ny; j += grid)
-			iu[ij_sw_corner + i * my + j] = 0;
+	for (i = 0; i < n_columns; i += grid) /* Reset grid info */
+		for (j = 0; j < n_rows; j += grid)
+			iu[ij_sw_corner + i * m_rows + j] = 0;
 
 	briggs_index = 0;
 	for (k = 0; k < npoints; k++) { /* Find constraining value  */
 		if (data[k].index != last_index) {
-			block_i = data[k].index / block_ny;
-			block_j = data[k].index % block_ny;
+			block_i = data[k].index / block_n_rows;
+			block_j = data[k].index % block_n_rows;
 			last_index = data[k].index;
-			iu_index = ij_sw_corner + (block_i * my + block_j) * grid;
+			iu_index = ij_sw_corner + (block_i * m_rows + block_j) * grid;
 			x0 = xmin + block_i * grid_xinc;
 			y0 = ymin + block_j * grid_yinc;
 			dx = (data[k].x - x0) * r_grid_xinc;
@@ -621,11 +621,11 @@ void find_nearest_point() {
 }
 
 void set_grid_parameters() {
-	block_ny = (ny - 1) / grid + 1;
-	block_nx = (nx - 1) / grid + 1;
+	block_n_rows = (n_rows - 1) / grid + 1;
+	block_n_columns = (n_columns - 1) / grid + 1;
 	grid_xinc = grid * xinc;
 	grid_yinc = grid * yinc;
-	grid_east = grid * my;
+	grid_east = grid * m_rows;
 	r_grid_xinc = 1.0 / grid_xinc;
 	r_grid_yinc = 1.0 / grid_yinc;
 }
@@ -641,31 +641,31 @@ void initialize_grid() { /*
 	jrad = ceil(radius / grid_yinc);
 	rfact = -4.5 / (radius * radius);
 
-	for (i = 0; i < block_nx; i++) {
+	for (i = 0; i < block_n_columns; i++) {
 		x0 = xmin + i * grid_xinc;
-		for (j = 0; j < block_ny; j++) {
+		for (j = 0; j < block_n_rows; j++) {
 			y0 = ymin + j * grid_yinc;
 			imin = i - irad;
 			if (imin < 0)
 				imin = 0;
 			imax = i + irad;
-			if (imax >= block_nx)
-				imax = block_nx - 1;
+			if (imax >= block_n_columns)
+				imax = block_n_columns - 1;
 			jmin = j - jrad;
 			if (jmin < 0)
 				jmin = 0;
 			jmax = j + jrad;
-			if (jmax >= block_ny)
-				jmax = block_ny - 1;
-			index_1 = imin * block_ny + jmin;
-			index_2 = imax * block_ny + jmax + 1;
+			if (jmax >= block_n_rows)
+				jmax = block_n_rows - 1;
+			index_1 = imin * block_n_rows + jmin;
+			index_2 = imax * block_n_rows + jmax + 1;
 			sum_w = sum_zw = 0.0;
 			k = 0;
 			while (k < npoints && data[k].index < index_1)
 				k++;
 			for (ki = imin; k < npoints && ki <= imax && data[k].index < index_2; ki++) {
 				for (kj = jmin; k < npoints && kj <= jmax && data[k].index < index_2; kj++) {
-					k_index = ki * block_ny + kj;
+					k_index = ki * block_n_rows + kj;
 					while (k < npoints && data[k].index < k_index)
 						k++;
 					while (k < npoints && data[k].index == k_index) {
@@ -681,10 +681,10 @@ void initialize_grid() { /*
 				/*
 				fprintf (stderr, "surface: Warning: no data inside search radius at: %.8lg %.8lg\n", x0, y0);
 				*/
-				u[ij_sw_corner + (i * my + j) * grid] = z_mean;
+				u[ij_sw_corner + (i * m_rows + j) * grid] = z_mean;
 			}
 			else {
-				u[ij_sw_corner + (i * my + j) * grid] = sum_zw / sum_w;
+				u[ij_sw_corner + (i * m_rows + j) * grid] = sum_zw / sum_w;
 			}
 		}
 	}
@@ -699,14 +699,14 @@ void new_initialize_grid() { /*
 
 	dx_scale = 4.0 / grid_xinc;
 	dy_scale = 4.0 / grid_yinc;
-	n_empty = block_ny * block_nx;
+	n_empty = block_n_rows * block_n_columns;
 	k = 0;
 	while (k < npoints) {
-		block_i = data[k].index / block_ny;
-		block_j = data[k].index % block_ny;
+		block_i = data[k].index / block_n_rows;
+		block_j = data[k].index % block_n_rows;
 		x0 = xmin + block_i * grid_xinc;
 		y0 = ymin + block_j * grid_yinc;
-		u_index = ij_sw_corner + (block_i * my + block_j) * grid;
+		u_index = ij_sw_corner + (block_i * m_rows + block_j) * grid;
 		k_index = data[k].index;
 
 		dy = (data[k].y - y0) * dy_scale;
@@ -744,8 +744,8 @@ void read_data(int ndat, float *xdat, float *ydat, float *zdat) {
 	for (idat = 0; idat < ndat; idat++) {
 		i = floor(((xdat[idat] - xmin) * r_grid_xinc) + 0.5);
 		j = floor(((ydat[idat] - ymin) * r_grid_yinc) + 0.5);
-		if (i >= 0 && i < block_nx && j >= 0 && j < block_ny) {
-			data[k].index = i * block_ny + j;
+		if (i >= 0 && i < block_n_columns && j >= 0 && j < block_n_rows) {
+			data[k].index = i * block_n_rows + j;
 			data[k].x = xdat[idat];
 			data[k].y = ydat[idat];
 			data[k].z = zdat[idat];
@@ -799,9 +799,9 @@ void get_output(float *sgrid) {
 	int index, i, j;
 
 	index = ij_sw_corner;
-	for (i = 0; i < nx; i++, index += my)
-		for (j = 0; j < ny; j++) {
-			sgrid[j * nx + i] = u[index + ny - j - 1];
+	for (i = 0; i < n_columns; i++, index += m_rows)
+		for (j = 0; j < n_rows; j++) {
+			sgrid[j * n_columns + i] = u[index + n_rows - j - 1];
 		}
 }
 
@@ -831,48 +831,48 @@ int iterate(int mode) {
 		/* First set d2[]/dn2 = 0 along edges:  */
 		/* New experiment : (1-T)d2[]/dn2 + Td[]/dn = 0  */
 
-		for (i = 0; i < nx; i += grid) {
+		for (i = 0; i < n_columns; i += grid) {
 			/* set d2[]/dy2 = 0 on south side:  */
-			ij = ij_sw_corner + i * my;
+			ij = ij_sw_corner + i * m_rows;
 			/* u[ij - 1] = 2 * u[ij] - u[ij + grid];  */
 			u[ij - 1] = y_0_const * u[ij] + y_1_const * u[ij + grid];
 			/* set d2[]/dy2 = 0 on north side:  */
-			ij = ij_nw_corner + i * my;
+			ij = ij_nw_corner + i * m_rows;
 			/* u[ij + 1] = 2 * u[ij] - u[ij - grid];  */
 			u[ij + 1] = y_0_const * u[ij] + y_1_const * u[ij - grid];
 		}
 
-		for (j = 0; j < ny; j += grid) {
+		for (j = 0; j < n_rows; j += grid) {
 			/* set d2[]/dx2 = 0 on west side:  */
 			ij = ij_sw_corner + j;
-			/* u[ij - my] = 2 * u[ij] - u[ij + grid_east];  */
-			u[ij - my] = x_1_const * u[ij + grid_east] + x_0_const * u[ij];
+			/* u[ij - m_rows] = 2 * u[ij] - u[ij + grid_east];  */
+			u[ij - m_rows] = x_1_const * u[ij + grid_east] + x_0_const * u[ij];
 			/* set d2[]/dx2 = 0 on east side:  */
 			ij = ij_se_corner + j;
-			/* u[ij + my] = 2 * u[ij] - u[ij - grid_east];  */
-			u[ij + my] = x_1_const * u[ij - grid_east] + x_0_const * u[ij];
+			/* u[ij + m_rows] = 2 * u[ij] - u[ij - grid_east];  */
+			u[ij + m_rows] = x_1_const * u[ij - grid_east] + x_0_const * u[ij];
 		}
 
 		/* Now set d2[]/dxdy = 0 at each corner:  */
 
 		ij = ij_sw_corner;
-		u[ij - my - 1] = u[ij + grid_east - 1] + u[ij - my + grid] - u[ij + grid_east + grid];
+		u[ij - m_rows - 1] = u[ij + grid_east - 1] + u[ij - m_rows + grid] - u[ij + grid_east + grid];
 
 		ij = ij_nw_corner;
-		u[ij - my + 1] = u[ij + grid_east + 1] + u[ij - my - grid] - u[ij + grid_east - grid];
+		u[ij - m_rows + 1] = u[ij + grid_east + 1] + u[ij - m_rows - grid] - u[ij + grid_east - grid];
 
 		ij = ij_se_corner;
-		u[ij + my - 1] = u[ij - grid_east - 1] + u[ij + my + grid] - u[ij - grid_east + grid];
+		u[ij + m_rows - 1] = u[ij - grid_east - 1] + u[ij + m_rows + grid] - u[ij - grid_east + grid];
 
 		ij = ij_ne_corner;
-		u[ij + my + 1] = u[ij - grid_east + 1] + u[ij + my - grid] - u[ij - grid_east - grid];
+		u[ij + m_rows + 1] = u[ij - grid_east + 1] + u[ij + m_rows - grid] - u[ij - grid_east - grid];
 
 		/* Now set (1-T)dC/dn + Tdu/dn = 0 at each edge :  */
 		/* New experiment:  only dC/dn = 0  */
 
 		x_w_case = 0;
-		x_e_case = block_nx - 1;
-		for (i = 0; i < nx; i += grid, x_w_case++, x_e_case--) {
+		x_e_case = block_n_columns - 1;
+		for (i = 0; i < n_columns; i += grid, x_w_case++, x_e_case--) {
 
 			if (x_w_case < 2)
 				x_case = x_w_case;
@@ -883,7 +883,7 @@ int iterate(int mode) {
 
 			/* South side :  */
 			kase = x_case * 5;
-			ij = ij_sw_corner + i * my;
+			ij = ij_sw_corner + i * m_rows;
 			u[ij + offset[kase][11]] = (u[ij + offset[kase][0]] +
 			                            eps_m2 * (u[ij + offset[kase][1]] + u[ij + offset[kase][3]] - u[ij + offset[kase][8]] -
 			                                      u[ij + offset[kase][10]]) +
@@ -891,7 +891,7 @@ int iterate(int mode) {
 			/*  + tense * eps_m2 * (u[ij + offset[kase][2]] - u[ij + offset[kase][9]]) / (1.0 - tense);  */
 			/* North side :  */
 			kase = x_case * 5 + 4;
-			ij = ij_nw_corner + i * my;
+			ij = ij_nw_corner + i * m_rows;
 			u[ij + offset[kase][0]] = -(-u[ij + offset[kase][11]] +
 			                            eps_m2 * (u[ij + offset[kase][1]] + u[ij + offset[kase][3]] - u[ij + offset[kase][8]] -
 			                                      u[ij + offset[kase][10]]) +
@@ -900,8 +900,8 @@ int iterate(int mode) {
 		}
 
 		y_s_case = 0;
-		y_n_case = block_ny - 1;
-		for (j = 0; j < ny; j += grid, y_s_case++, y_n_case--) {
+		y_n_case = block_n_rows - 1;
+		for (j = 0; j < n_rows; j += grid, y_s_case++, y_n_case--) {
 
 			if (y_s_case < 2)
 				y_case = y_s_case;
@@ -931,8 +931,8 @@ int iterate(int mode) {
 		/* That's it for the boundary points.  Now loop over all data  */
 
 		x_w_case = 0;
-		x_e_case = block_nx - 1;
-		for (i = 0; i < nx; i += grid, x_w_case++, x_e_case--) {
+		x_e_case = block_n_columns - 1;
+		for (i = 0; i < n_columns; i += grid, x_w_case++, x_e_case--) {
 
 			if (x_w_case < 2)
 				x_case = x_w_case;
@@ -942,11 +942,11 @@ int iterate(int mode) {
 				x_case = 2;
 
 			y_s_case = 0;
-			y_n_case = block_ny - 1;
+			y_n_case = block_n_rows - 1;
 
-			ij = ij_sw_corner + i * my;
+			ij = ij_sw_corner + i * m_rows;
 
-			for (j = 0; j < ny; j += grid, ij += grid, y_s_case++, y_n_case--) {
+			for (j = 0; j < n_rows; j += grid, ij += grid, y_s_case++, y_n_case--) {
 
 				if (iu[ij] == 5)
 					continue; /* Point is fixed  */
@@ -1005,7 +1005,7 @@ int iterate(int mode) {
 				sum_ij = u[ij] * relax_old + sum_ij * relax_new;
 
 				if (constrained) { /* Must check limits.  Note lower/upper is v2 format and need ij_v2! */
-					ij_v2 = (ny - j - 1) * nx + i;
+					ij_v2 = (n_rows - j - 1) * n_columns + i;
 					if (set_low /*&& !GMT_is_fnan((double)lower[ij_v2])*/ && sum_ij < lower[ij_v2])
 						sum_ij = lower[ij_v2];
 					else if (set_high /*&& !GMT_is_fnan((double)upper[ij_v2])*/ && sum_ij > upper[ij_v2])
@@ -1048,16 +1048,16 @@ void check_errors() {
 	double y_1_const = (boundary_tension - 2 * epsilon * (1.0 - boundary_tension)) / y_denom;
 
 	move_over[0] = 2;
-	move_over[1] = 1 - my;
+	move_over[1] = 1 - m_rows;
 	move_over[2] = 1;
-	move_over[3] = 1 + my;
-	move_over[4] = -2 * my;
-	move_over[5] = -my;
-	move_over[6] = my;
-	move_over[7] = 2 * my;
-	move_over[8] = -1 - my;
+	move_over[3] = 1 + m_rows;
+	move_over[4] = -2 * m_rows;
+	move_over[5] = -m_rows;
+	move_over[6] = m_rows;
+	move_over[7] = 2 * m_rows;
+	move_over[8] = -1 - m_rows;
 	move_over[9] = -1;
-	move_over[10] = -1 + my;
+	move_over[10] = -1 + m_rows;
 	move_over[11] = -2;
 
 	mean_error = 0;
@@ -1065,45 +1065,45 @@ void check_errors() {
 
 	/* First update the boundary values  */
 
-	for (i = 0; i < nx; i++) {
-		ij = ij_sw_corner + i * my;
+	for (i = 0; i < n_columns; i++) {
+		ij = ij_sw_corner + i * m_rows;
 		u[ij - 1] = y_0_const * u[ij] + y_1_const * u[ij + 1];
-		ij = ij_nw_corner + i * my;
+		ij = ij_nw_corner + i * m_rows;
 		u[ij + 1] = y_0_const * u[ij] + y_1_const * u[ij - 1];
 	}
 
-	for (j = 0; j < ny; j++) {
+	for (j = 0; j < n_rows; j++) {
 		ij = ij_sw_corner + j;
-		u[ij - my] = x_1_const * u[ij + my] + x_0_const * u[ij];
+		u[ij - m_rows] = x_1_const * u[ij + m_rows] + x_0_const * u[ij];
 		ij = ij_se_corner + j;
-		u[ij + my] = x_1_const * u[ij - my] + x_0_const * u[ij];
+		u[ij + m_rows] = x_1_const * u[ij - m_rows] + x_0_const * u[ij];
 	}
 
 	ij = ij_sw_corner;
-	u[ij - my - 1] = u[ij + my - 1] + u[ij - my + 1] - u[ij + my + 1];
+	u[ij - m_rows - 1] = u[ij + m_rows - 1] + u[ij - m_rows + 1] - u[ij + m_rows + 1];
 	ij = ij_nw_corner;
-	u[ij - my + 1] = u[ij + my + 1] + u[ij - my - 1] - u[ij + my - 1];
+	u[ij - m_rows + 1] = u[ij + m_rows + 1] + u[ij - m_rows - 1] - u[ij + m_rows - 1];
 	ij = ij_se_corner;
-	u[ij + my - 1] = u[ij - my - 1] + u[ij + my + 1] - u[ij - my + 1];
+	u[ij + m_rows - 1] = u[ij - m_rows - 1] + u[ij + m_rows + 1] - u[ij - m_rows + 1];
 	ij = ij_ne_corner;
-	u[ij + my + 1] = u[ij - my + 1] + u[ij + my - 1] - u[ij - my - 1];
+	u[ij + m_rows + 1] = u[ij - m_rows + 1] + u[ij + m_rows - 1] - u[ij - m_rows - 1];
 
-	for (i = 0; i < nx; i++) {
+	for (i = 0; i < n_columns; i++) {
 
-		ij = ij_sw_corner + i * my;
+		ij = ij_sw_corner + i * m_rows;
 		u[ij + move_over[11]] =
 		    (u[ij + move_over[0]] +
 		     eps_m2 * (u[ij + move_over[1]] + u[ij + move_over[3]] - u[ij + move_over[8]] - u[ij + move_over[10]]) +
 		     two_plus_em2 * (u[ij + move_over[9]] - u[ij + move_over[2]]));
 
-		ij = ij_nw_corner + i * my;
+		ij = ij_nw_corner + i * m_rows;
 		u[ij + move_over[0]] =
 		    -(-u[ij + move_over[11]] +
 		      eps_m2 * (u[ij + move_over[1]] + u[ij + move_over[3]] - u[ij + move_over[8]] - u[ij + move_over[10]]) +
 		      two_plus_em2 * (u[ij + move_over[9]] - u[ij + move_over[2]]));
 	}
 
-	for (j = 0; j < ny; j++) {
+	for (j = 0; j < n_rows; j++) {
 
 		ij = ij_sw_corner + j;
 		u[ij + move_over[4]] =
@@ -1122,9 +1122,9 @@ void check_errors() {
 	    Note that this loop checks all values, even though only nearest were used.  */
 
 	for (k = 0; k < npoints; k++) {
-		i = data[k].index / ny;
-		j = data[k].index % ny;
-		ij = ij_sw_corner + i * my + j;
+		i = data[k].index / n_rows;
+		j = data[k].index % n_rows;
+		ij = ij_sw_corner + i * m_rows + j;
 		if (iu[ij] == 5)
 			continue;
 		x0 = xmin + i * xinc;
@@ -1158,11 +1158,11 @@ void check_errors() {
 	mean_squared_error = sqrt(mean_squared_error / npoints);
 
 	curvature = 0.0;
-	n_nodes = nx * ny;
+	n_nodes = n_columns * n_rows;
 
-	for (i = 0; i < nx; i++) {
-		for (j = 0; j < ny; j++) {
-			ij = ij_sw_corner + i * my + j;
+	for (i = 0; i < n_columns; i++) {
+		for (j = 0; j < n_rows; j++) {
+			ij = ij_sw_corner + i * m_rows + j;
 			c = u[ij + move_over[6]] + u[ij + move_over[5]] + u[ij + move_over[2]] + u[ij + move_over[9]] -
 			    4.0 * u[ij + move_over[6]];
 			curvature += (c * c);
@@ -1234,9 +1234,9 @@ int remove_planar_trend() {
 int replace_planar_trend() {
 	int i, j, ij;
 
-	for (i = 0; i < nx; i++) {
-		for (j = 0; j < ny; j++) {
-			ij = ij_sw_corner + i * my + j;
+	for (i = 0; i < n_columns; i++) {
+		for (j = 0; j < n_rows; j++) {
+			ij = ij_sw_corner + i * m_rows + j;
 			u[ij] = (u[ij] * z_scale) + (plane_c0 + plane_c1 * i + plane_c2 * j);
 		}
 	}
@@ -1316,9 +1316,9 @@ void load_constraints(char *low, char *high) {
 	/* Load lower/upper limits, verify range, deplane, and rescale */
 
 	if (set_low > 0) {
-		status = mb_mallocd(local_verbose, __FILE__, __LINE__, nx * ny * sizeof(float), (void **)&lower, &local_error);
+		status = mb_mallocd(local_verbose, __FILE__, __LINE__, n_columns * n_rows * sizeof(float), (void **)&lower, &local_error);
 		if (set_low < 3)
-			for (i = 0; i < nx * ny; i++)
+			for (i = 0; i < n_columns * n_rows; i++)
 				lower[i] = low_limit;
 		/* Comment this out:
 		        else {
@@ -1326,7 +1326,7 @@ void load_constraints(char *low, char *high) {
 		                fprintf (stderr, "surface: Error opening file %s\n", low);
 		                exit (-1);
 		            }
-		            if (hdr.nx != nx || hdr.ny != ny) {
+		            if (hdr.n_columns != n_columns || hdr.n_rows != n_rows) {
 		                fprintf (stderr, "surface: lower limit file not of proper dimension!\n");
 		                exit (-1);
 		            }
@@ -1335,7 +1335,7 @@ void load_constraints(char *low, char *high) {
 		                exit (-1);
 		            }
 		            n_trimmed = 0;
-		            for (i = 0; i < nx * ny; i++) if (lower[i] > low_limit) {
+		            for (i = 0; i < n_columns * n_rows; i++) if (lower[i] > low_limit) {
 		                lower[i] = low_limit;
 		                n_trimmed++;
 		            }
@@ -1343,9 +1343,9 @@ void load_constraints(char *low, char *high) {
 		        }
 		*/
 
-		for (j = ij = 0; j < ny; j++) {
-			yy = ny - j - 1;
-			for (i = 0; i < nx; i++, ij++) {
+		for (j = ij = 0; j < n_rows; j++) {
+			yy = n_rows - j - 1;
+			for (i = 0; i < n_columns; i++, ij++) {
 				/*if (GMT_is_fnan ((double)lower[ij])) continue;*/
 				lower[ij] -= (plane_c0 + plane_c1 * i + plane_c2 * yy);
 				lower[ij] *= r_z_scale;
@@ -1354,9 +1354,9 @@ void load_constraints(char *low, char *high) {
 		constrained = TRUE;
 	}
 	if (set_high > 0) {
-		status = mb_mallocd(local_verbose, __FILE__, __LINE__, nx * ny * sizeof(float), (void **)&upper, &local_error);
+		status = mb_mallocd(local_verbose, __FILE__, __LINE__, n_columns * n_rows * sizeof(float), (void **)&upper, &local_error);
 		if (set_high < 3)
-			for (i = 0; i < nx * ny; i++)
+			for (i = 0; i < n_columns * n_rows; i++)
 				upper[i] = high_limit;
 		/* Comment this out:
 		        else {
@@ -1364,7 +1364,7 @@ void load_constraints(char *low, char *high) {
 		                fprintf (stderr, "surface: Error opening file %s\n", high);
 		                exit (-1);
 		            }
-		            if (hdr.nx != nx || hdr.ny != ny) {
+		            if (hdr.n_columns != n_columns || hdr.n_rows != n_rows) {
 		                fprintf (stderr, "surface: upper limit file not of proper dimension!\n");
 		                exit (-1);
 		            }
@@ -1373,16 +1373,16 @@ void load_constraints(char *low, char *high) {
 		                exit (-1);
 		            }
 		            n_trimmed = 0;
-		            for (i = 0; i < nx * ny; i++) if (upper[i] < high_limit) {
+		            for (i = 0; i < n_columns * n_rows; i++) if (upper[i] < high_limit) {
 		                upper[i] = high_limit;
 		                n_trimmed++;
 		            }
 		            if (n_trimmed) fprintf (stderr, "surface: %d upper limit values < max data, reset to max data!\n");
 		        }
 		*/
-		for (j = ij = 0; j < ny; j++) {
-			yy = ny - j - 1;
-			for (i = 0; i < nx; i++, ij++) {
+		for (j = ij = 0; j < n_rows; j++) {
+			yy = n_rows - j - 1;
+			for (i = 0; i < n_columns; i++, ij++) {
 				/*if (GMT_is_fnan ((double)upper[ij])) continue;*/
 				upper[ij] -= (plane_c0 + plane_c1 * i + plane_c2 * yy);
 				upper[ij] *= r_z_scale;
@@ -1392,24 +1392,24 @@ void load_constraints(char *low, char *high) {
 	}
 }
 
-double guess_surface_time(int nx, int ny) {
+double guess_surface_time(int n_columns, int n_rows) {
 	/* Routine to guess a number proportional to the operations
 	 * required by surface working on a user-desired grid of
-	 * size nx by ny, where nx = (xmax - xmin)/dx, and same for
-	 * ny.  (That is, one less than actually used in routine.)
+	 * size n_columns by n_rows, where n_columns = (xmax - xmin)/dx, and same for
+	 * n_rows.  (That is, one less than actually used in routine.)
 	 *
 	 * This is based on the following untested conjecture:
-	 * 	The operations are proportional to T = nxg*nyg*L,
+	 * 	The operations are proportional to T = n_columnsg*n_rowsg*L,
 	 *	where L is a measure of the distance that data
-	 *	constraints must propagate, and nxg, nyg are the
+	 *	constraints must propagate, and n_columnsg, n_rowsg are the
 	 * 	current size of the grid.
-	 *	For nx,ny relatively prime, we will go through only
-	 * 	one grid cycle, L = max(nx,ny), and T = nx*ny*L.
-	 *	But for nx,ny whose greatest common divisor is a highly
+	 *	For n_columns,n_rows relatively prime, we will go through only
+	 * 	one grid cycle, L = max(n_columns,n_rows), and T = n_columns*n_rows*L.
+	 *	But for n_columns,n_rows whose greatest common divisor is a highly
 	 * 	composite number, we will have L equal to the division
-	 * 	step made at each new grid cycle, and nxg,nyg will
-	 * 	also be smaller than nx,ny.  Thus we can hope to find
-	 *	some nx,ny for which the total value of T is small.
+	 * 	step made at each new grid cycle, and n_columnsg,n_rowsg will
+	 * 	also be smaller than n_columns,n_rows.  Thus we can hope to find
+	 *	some n_columns,n_rows for which the total value of T is small.
 	 *
 	 * The above is pure speculation and has not been derived
 	 * empirically.  In actual practice, the distribution of the
@@ -1421,7 +1421,7 @@ double guess_surface_time(int nx, int ny) {
 	int gcd_euclid(); /* Finds the greatest common divisor  */
 	int get_prime_factors();
 	int gcd;      /* Current value of the gcd  */
-	int nxg, nyg; /* Current value of the grid dimensions  */
+	int n_columnsg, n_rowsg; /* Current value of the grid dimensions  */
 	int nfactors; /* Number of prime factors of current gcd  */
 	int factor;   /* Currently used factor  */
 	/* Doubles are used below, even though the values will be integers,
@@ -1429,35 +1429,35 @@ double guess_surface_time(int nx, int ny) {
 	double t_sum;  /* Sum of values of T at each grid cycle  */
 	double length; /* Current propagation distance.  */
 
-	gcd = gcd_euclid(nx, ny);
+	gcd = gcd_euclid(n_columns, n_rows);
 	if (gcd > 1) {
 		nfactors = get_prime_factors(gcd, factors);
-		nxg = nx / gcd;
-		nyg = ny / gcd;
-		if (nxg < 3 || nyg < 3) {
+		n_columnsg = n_columns / gcd;
+		n_rowsg = n_rows / gcd;
+		if (n_columnsg < 3 || n_rowsg < 3) {
 			factor = factors[nfactors - 1];
 			nfactors--;
 			gcd /= factor;
-			nxg *= factor;
-			nyg *= factor;
+			n_columnsg *= factor;
+			n_rowsg *= factor;
 		}
 	}
 	else {
-		nxg = nx;
-		nyg = ny;
+		n_columnsg = n_columns;
+		n_rowsg = n_rows;
 	}
-	length = MAX(nxg, nyg);
-	t_sum = nxg * (nyg * length); /* Make it double at each multiply  */
+	length = MAX(n_columnsg, n_rowsg);
+	t_sum = n_columnsg * (n_rowsg * length); /* Make it double at each multiply  */
 
 	/* Are there more grid cycles ?  */
 	while (gcd > 1) {
 		factor = factors[nfactors - 1];
 		nfactors--;
 		gcd /= factor;
-		nxg *= factor;
-		nyg *= factor;
+		n_columnsg *= factor;
+		n_rowsg *= factor;
 		length = factor;
-		t_sum += nxg * (nyg * length);
+		t_sum += n_columnsg * (n_rowsg * length);
 	}
 	return (t_sum);
 }
@@ -1489,7 +1489,7 @@ int get_prime_factors(int n, int f[]) {
 	 * W. H. F. Smith, 26 Feb 1992, after D.E. Knuth, vol. II  */
 
 	int current_factor;        /* The factor currently being tried  */
-	int max_factor;            /* Don't try any factors bigger than this  */
+	int max_factor;            /* Don't try an_rows factors bigger than this  */
 	int n_factors = 0;         /* Returned; one if n is prime  */
 	int two_four_toggle = 0;   /* Used to add 2 or 4 to get next trial factor  */
 	int ten_twenty_toggle = 0; /* Used to add 10 or 20 to skip_five  */

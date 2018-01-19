@@ -2419,7 +2419,7 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
-
+	
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
@@ -2452,6 +2452,8 @@ int main(int argc, char **argv) {
 			oformat = MBF_EM710MBA;
 		else if (iformat == MBF_IMAGE83P)
 			oformat = MBF_IMAGEMBA;
+		else if (iformat == MBF_3DWISSLR)
+			oformat = MBF_3DWISSLP;
 		else
 			oformat = iformat;
 
@@ -2654,7 +2656,6 @@ int main(int argc, char **argv) {
 									&heading_org, &distance, &altitude_org, &sensordepth_org, &beams_bath, &beams_amp, &pixels_ss,
 									beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment,
 									&error);
-//fprintf(stderr,"mbpreprocess: A:  kind:%d status:%d error:%d",kind,status,error);
 	
 				/* some nonfatal errors do not matter */
 				if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE) {
