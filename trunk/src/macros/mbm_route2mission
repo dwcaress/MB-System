@@ -530,6 +530,14 @@ foreach $lon (@lons)
 	if (($cnt == 0 || $cnt == $npoints - 1)
 		|| ($waypoints[$cnt] == 3 && $gpsmode == 1)
 		|| ($waypoints[$cnt] == 4 && $gpsmode == 2)
+		|| ($waypoints[$cnt] == 5 && $gpsmode == 1)
+		|| ($waypoints[$cnt] == 6 && $gpsmode == 2)
+		|| ($waypoints[$cnt] == 7 && $gpsmode == 1)
+		|| ($waypoints[$cnt] == 8 && $gpsmode == 2)
+		|| ($waypoints[$cnt] == 9 && $gpsmode == 1)
+		|| ($waypoints[$cnt] == 10 && $gpsmode == 2)
+		|| ($waypoints[$cnt] == 11 && $gpsmode == 1)
+		|| ($waypoints[$cnt] == 12 && $gpsmode == 2)
 		|| ($waypoints[$cnt] >= 3 && $gpsmode == 3))
 		{
 		$ngpsevents++;
@@ -833,17 +841,17 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 	elsif ($mmodes[$i] == 3)
 		{
 		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired3;
-#printf "DEPTHS 2 %f\n", $mmissiondepths[$i];
+#printf "DEPTHS 3 %f\n", $mmissiondepths[$i];
 		}
 	elsif ($mmodes[$i] == 4)
 		{
 		$mmissiondepths[$i] = $depthconstant;
-#printf "DEPTHS 3 %f\n", $mmissiondepths[$i];
+#printf "DEPTHS 4 %f\n", $mmissiondepths[$i];
 		}
 	elsif ($mmodes[$i] == 5)
 		{
 		$mmissiondepths[$i] = $depthconstant2;
-#printf "DEPTHS 4 %f\n", $mmissiondepths[$i];
+#printf "DEPTHS 5 %f\n", $mmissiondepths[$i];
 		}
 	else
 		{
@@ -913,9 +921,17 @@ $missiontime += $startdistance / $ascentdescent_speed;
 # add time for each ascent, gps, descent event
 for ($i = 1; $i < $nmissionpoints - 1; $i++)
 	{
-	if (($gpsmode == 1 && ($mstartstops[$i] == 1))
-			|| ($gpsmode == 2 && ($mstartstops[$i] == 2))
-			|| ($gpsmode == 3 && $mstartstops[$i] > 0))
+	if (   ($gpsmode == 1 && ($mstartstops[$i] == 3))
+        || ($gpsmode == 2 && ($mstartstops[$i] == 4))
+        || ($gpsmode == 1 && ($mstartstops[$i] == 5))
+        || ($gpsmode == 2 && ($mstartstops[$i] == 6))
+        || ($gpsmode == 1 && ($mstartstops[$i] == 7))
+        || ($gpsmode == 2 && ($mstartstops[$i] == 8))
+        || ($gpsmode == 1 && ($mstartstops[$i] == 9))
+        || ($gpsmode == 2 && ($mstartstops[$i] == 10))
+        || ($gpsmode == 1 && ($mstartstops[$i] == 11))
+        || ($gpsmode == 2 && ($mstartstops[$i] == 12))
+        || ($gpsmode == 3 && ($mstartstops[$i] >= 3)))
 		{
 		$missiontime += (-$mmissiondepths[$i] / $ascendrate)
 				+ (-$mmissiondepths[$i] / $descendrate)
@@ -1444,11 +1460,14 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 			}
 
 		# do ascend, gps, descend at line starts and ends if specified
+print "TEST for GPS ascent: $gpsmode $i $mstartstops[$i] \n";
 		if (($iwaypoint != $nwaypoints - 1)
-			&& (($gpsmode == 1 && ($mstartstops[$i] == 1))
-				|| ($gpsmode == 2 && ($mstartstops[$i] == 2))
-				|| ($gpsmode == 3 && ($mstartstops[$i] > 0))))
+            && ($iwaypoint != 0)
+			&& (   ($gpsmode == 1 && $mstartstops[$i] == 1)
+				|| ($gpsmode == 2 && $mstartstops[$i] == 2)
+				|| ($gpsmode == 3 && $mstartstops[$i] >  0)))
 			{
+print "GPS ASCENT!!\n";
 			print MFILE "# \r\n";
 			printf MFILE "# Ascend, gps, descend after reaching waypoint %d at end of line %d\r\n", $iwaypoint, $iwaypoint;
 			if ($mappingsonar)
@@ -2706,7 +2725,7 @@ print "Behavior: delta_t (start, reset, logMode = 0)\r\n";
                 $latmax = $lats[$i];
                 }
             }
-printf "Lon: %f %f %f    Lat: %f %f %f\n", $lons[$i], $lonmin, $lonmax, $lats[$i], $latmin, $latmax;
+#printf "Lon: %f %f %f    Lat: %f %f %f\n", $lons[$i], $lonmin, $lonmax, $lats[$i], $latmin, $latmax;
 		}
 	$topodatafile = "$root" . "_bounds.txt";
 	open(TFILE,">$topodatafile") || die "Cannot open output bounds file: $topodatafile\r\n$program_name aborted.\r\n";

@@ -523,6 +523,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_jstar_dvl_struct *dvl;
 	struct mbsys_jstar_pressure_struct *pressure;
 	struct mbsys_jstar_sysinfo_struct *sysinfo;
+    struct mbsys_jstar_filetimestamp_struct *filetimestamp;
 	struct mbsys_jstar_comment_struct *comment;
 	struct mbsys_jstar_ssold_struct ssold_tmp;
 	char buffer[MBSYS_JSTAR_SYSINFO_MAX];
@@ -1376,7 +1377,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #ifndef BYTESWAPPED
 					for (i = 0; i < shortspersample * sbp->samples; i++) {
 						sbp->trace[i] = mb_swap_short(sbp->trace[i]);
-						;
 					}
 #endif
 				}
@@ -1704,7 +1704,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			sysinfo = (struct mbsys_jstar_sysinfo_struct *)&(store->sysinfo);
 			sysinfo->message = message;
 
-			/* read the pressure record */
+			/* read the system info record */
 			if ((read_status = fread(buffer, message.size, 1, mb_io_ptr->mbfp)) == 1) {
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->system_type));
@@ -1733,6 +1733,25 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 		}
 
+		/* file timestamp record */
+		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_FILETIMESTAMP) {
+			/* get message */
+			filetimestamp = (struct mbsys_jstar_filetimestamp_struct *)&(store->filetimestamp);
+			filetimestamp->message = message;
+
+			/* read the file timestamp record */
+			if ((read_status = fread(buffer, message.size, 1, mb_io_ptr->mbfp)) == 1) {
+				index = 0;
+				mb_get_binary_int(MB_YES, &buffer[index], &(filetimestamp->seconds));
+				index += 4;
+				mb_get_binary_int(MB_YES, &buffer[index], &(filetimestamp->milliseconds));
+				index += 4;
+
+				done = MB_YES;
+				store->kind = MB_DATA_TIMESTAMP;
+			}
+		}
+
 		/* if nmea data read it, parse it, and and store values for interpolation */
 		else if (status == MB_SUCCESS && message.type == MBSYS_JSTAR_DATA_NMEA && message.size < MB_COMMENT_MAXLINE) {
 			/* nmea channel */
@@ -1744,7 +1763,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(nmea->seconds));
 				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(nmea->msec));
+				mb_get_binary_int(MB_YES, &buffer[index], &(nmea->milliseconds));
 				index += 4;
 				nmea->source = buffer[index];
 				index++;
@@ -1761,7 +1780,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				nmea->nmea[message.size - 12] = 0;
 				strcpy(nmeastring, nmea->nmea);
 
-				time_d = ((double)nmea->seconds) + 0.001 * ((double)nmea->msec);
+				time_d = ((double)nmea->seconds) + 0.001 * ((double)nmea->milliseconds);
 				mb_get_date(verbose, time_d, time_i);
 
 				/* break up NMEA string into arguments */
@@ -1840,7 +1859,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->seconds));
 				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->msec));
+				mb_get_binary_int(MB_YES, &buffer[index], &(pitchroll->milliseconds));
 				index += 4;
 				pitchroll->reserve1[0] = buffer[index];
 				index++;
@@ -1895,7 +1914,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(pressure->seconds));
 				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(pressure->msec));
+				mb_get_binary_int(MB_YES, &buffer[index], &(pressure->milliseconds));
 				index += 4;
 				pressure->reserve1[0] = buffer[index];
 				index++;
@@ -1949,7 +1968,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->seconds));
 				index += 4;
-				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->msec));
+				mb_get_binary_int(MB_YES, &buffer[index], &(dvl->milliseconds));
 				index += 4;
 				dvl->reserve1[0] = buffer[index];
 				index++;
@@ -2396,7 +2415,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     size:                        %d\n", pitchroll->message.size);
 
 		fprintf(stderr, "dbg5     seconds:                     %d\n", pitchroll->seconds);
-		fprintf(stderr, "dbg5     msec:                        %d\n", pitchroll->msec);
+		fprintf(stderr, "dbg5     milliseconds:                %d\n", pitchroll->milliseconds);
 		fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", pitchroll->reserve1[0]);
 		fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", pitchroll->reserve1[1]);
 		fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", pitchroll->reserve1[2]);
@@ -2439,7 +2458,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     size:                        %d\n", dvl->message.size);
 
 		fprintf(stderr, "dbg5     seconds:                     %d\n", dvl->seconds);
-		fprintf(stderr, "dbg5     msec:                        %d\n", dvl->msec);
+		fprintf(stderr, "dbg5     milliseconds:                %d\n", dvl->milliseconds);
 		fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", dvl->reserve1[0]);
 		fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", dvl->reserve1[1]);
 		fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", dvl->reserve1[2]);
@@ -2480,7 +2499,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     size:                        %d\n", pressure->message.size);
 
 		fprintf(stderr, "dbg5     seconds:                     %d\n", pressure->seconds);
-		fprintf(stderr, "dbg5     msec:                        %d\n", pressure->msec);
+		fprintf(stderr, "dbg5     milliseconds:                %d\n", pressure->milliseconds);
 		fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", pressure->reserve1[0]);
 		fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", pressure->reserve1[1]);
 		fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", pressure->reserve1[2]);
@@ -2509,7 +2528,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     size:                        %d\n", nmea->message.size);
 
 		fprintf(stderr, "dbg5     seconds:                     %d\n", nmea->seconds);
-		fprintf(stderr, "dbg5     msec:                        %d\n", nmea->msec);
+		fprintf(stderr, "dbg5     milliseconds:                %d\n", nmea->milliseconds);
 		fprintf(stderr, "dbg5     source:                      %d\n", nmea->source);
 		fprintf(stderr, "dbg5     reserve[0]:                  %d\n", nmea->reserve[0]);
 		fprintf(stderr, "dbg5     reserve[1]:                  %d\n", nmea->reserve[1]);
@@ -2942,7 +2961,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     size:                        %d\n", pitchroll->message.size);
 
 		fprintf(stderr, "dbg5     seconds:                     %d\n", pitchroll->seconds);
-		fprintf(stderr, "dbg5     msec:                        %d\n", pitchroll->msec);
+		fprintf(stderr, "dbg5     milliseconds:                %d\n", pitchroll->milliseconds);
 		fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", pitchroll->reserve1[0]);
 		fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", pitchroll->reserve1[1]);
 		fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", pitchroll->reserve1[2]);
@@ -2985,7 +3004,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     size:                        %d\n", dvl->message.size);
 
 		fprintf(stderr, "dbg5     seconds:                     %d\n", dvl->seconds);
-		fprintf(stderr, "dbg5     msec:                        %d\n", dvl->msec);
+		fprintf(stderr, "dbg5     milliseconds:                %d\n", dvl->milliseconds);
 		fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", dvl->reserve1[0]);
 		fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", dvl->reserve1[1]);
 		fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", dvl->reserve1[2]);
@@ -3026,7 +3045,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     size:                        %d\n", pressure->message.size);
 
 		fprintf(stderr, "dbg5     seconds:                     %d\n", pressure->seconds);
-		fprintf(stderr, "dbg5     msec:                        %d\n", pressure->msec);
+		fprintf(stderr, "dbg5     milliseconds:                %d\n", pressure->milliseconds);
 		fprintf(stderr, "dbg5     reserve1[0]:                 %d\n", pressure->reserve1[0]);
 		fprintf(stderr, "dbg5     reserve1[1]:                 %d\n", pressure->reserve1[1]);
 		fprintf(stderr, "dbg5     reserve1[2]:                 %d\n", pressure->reserve1[2]);
@@ -3055,7 +3074,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     size:                        %d\n", nmea->message.size);
 
 		fprintf(stderr, "dbg5     seconds:                     %d\n", nmea->seconds);
-		fprintf(stderr, "dbg5     msec:                        %d\n", nmea->msec);
+		fprintf(stderr, "dbg5     milliseconds:                %d\n", nmea->milliseconds);
 		fprintf(stderr, "dbg5     source:                      %d\n", nmea->source);
 		fprintf(stderr, "dbg5     reserve[0]:                  %d\n", nmea->reserve[0]);
 		fprintf(stderr, "dbg5     reserve[1]:                  %d\n", nmea->reserve[1]);
@@ -3837,7 +3856,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index = 0;
 		mb_put_binary_int(MB_YES, pitchroll->seconds, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_YES, pitchroll->msec, &buffer[index]);
+		mb_put_binary_int(MB_YES, pitchroll->milliseconds, &buffer[index]);
 		index += 4;
 		buffer[index] = pitchroll->reserve1[0];
 		index++;
@@ -3918,7 +3937,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index = 0;
 		mb_put_binary_int(MB_YES, dvl->seconds, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_YES, dvl->msec, &buffer[index]);
+		mb_put_binary_int(MB_YES, dvl->milliseconds, &buffer[index]);
 		index += 4;
 		buffer[index] = dvl->reserve1[0];
 		index++;
@@ -4011,7 +4030,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index = 0;
 		mb_put_binary_int(MB_YES, nmea->seconds, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_YES, nmea->msec, &buffer[index]);
+		mb_put_binary_int(MB_YES, nmea->milliseconds, &buffer[index]);
 		index += 4;
 		buffer[index] = nmea->source;
 		index++;
@@ -4068,7 +4087,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index = 0;
 		mb_put_binary_int(MB_YES, pressure->seconds, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_YES, pressure->msec, &buffer[index]);
+		mb_put_binary_int(MB_YES, pressure->milliseconds, &buffer[index]);
 		index += 4;
 		buffer[index] = pressure->reserve1[0];
 		index++;

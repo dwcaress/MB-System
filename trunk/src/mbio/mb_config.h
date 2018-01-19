@@ -74,7 +74,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.5.2323"
+#define PACKAGE_STRING "mbsystem 5.5.2324"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -83,16 +83,16 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.5.2323"
+#define PACKAGE_VERSION "5.5.2324"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "5.5.2323"
+#define VERSION "5.5.2324"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "7 December 2017"
+#define VERSION_DATE "18 January 2018"
 
 /* Turned on WIN32 define in config */
 /* #undef WIN32 */

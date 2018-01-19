@@ -78,8 +78,8 @@ struct mbprocess_grid_struct {
 	mb_path projection_id;
 	float nodatavalue;
 	int nxy;
-	int nx;
-	int ny;
+	int n_columns;
+	int n_rows;
 	double min;
 	double max;
 	double xmin;
@@ -1305,7 +1305,7 @@ and mbedit edit save files.\n";
 				grid.data = NULL;
 				strcpy(grid.file, process.mbp_ampsscorr_topofile);
 				status = mb_read_gmt_grd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue,
-				                         &grid.nxy, &grid.nx, &grid.ny, &grid.min, &grid.max, &grid.xmin, &grid.xmax, &grid.ymin,
+				                         &grid.nxy, &grid.n_columns, &grid.n_rows, &grid.min, &grid.max, &grid.xmin, &grid.xmax, &grid.ymin,
 				                         &grid.ymax, &grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
 				if (status == MB_FAILURE) {
 					error = MB_ERROR_OPEN_FAIL;
@@ -5346,12 +5346,12 @@ and mbedit edit save files.\n";
 								r[1] = -headingx * bathacrosstrack[i] + headingy * bathalongtrack[i];
 								ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
 								jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
-								kgrid = ix * grid.ny + jy;
-								kgrid00 = (ix - 1) * grid.ny + jy - 1;
-								kgrid01 = (ix - 1) * grid.ny + jy + 1;
-								kgrid10 = (ix + 1) * grid.ny + jy - 1;
-								kgrid11 = (ix + 1) * grid.ny + jy + 1;
-								if (ix > 0 && ix < grid.nx - 1 && jy > 0 && jy < grid.ny - 1 &&
+								kgrid = ix * grid.n_rows + jy;
+								kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
+								kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
+								kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
+								kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
+								if (ix > 0 && ix < grid.n_columns - 1 && jy > 0 && jy < grid.n_rows - 1 &&
 								    grid.data[kgrid] > grid.nodatavalue && grid.data[kgrid00] > grid.nodatavalue &&
 								    grid.data[kgrid01] > grid.nodatavalue && grid.data[kgrid10] > grid.nodatavalue &&
 								    grid.data[kgrid11] > grid.nodatavalue) {
@@ -5394,12 +5394,12 @@ and mbedit edit save files.\n";
 									/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
 									i,bathacrosstrack[i],bathalongtrack[i],bath[i],sonardepth,RTD * atan(bathacrosstrack[i] /
 									(sonardepth + grid.data[kgrid]))); fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
-									ix,grid.nx,jy,grid.ny,grid.data[kgrid]);
+									ix,grid.n_columns,jy,grid.n_rows,grid.data[kgrid]);
 									fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
 									r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 								}
 								else {
-									if (ix >= 0 && ix < grid.nx && jy >= 0 && jy < grid.ny && grid.data[kgrid] > grid.nodatavalue)
+									if (ix >= 0 && ix < grid.n_columns && jy >= 0 && jy < grid.n_rows && grid.data[kgrid] > grid.nodatavalue)
 										bathy = -grid.data[kgrid];
 									else
 										bathy = bath[i];
@@ -5449,12 +5449,12 @@ and mbedit edit save files.\n";
 								r[1] = -headingx * ssacrosstrack[i] + headingy * ssalongtrack[i];
 								ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
 								jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
-								kgrid = ix * grid.ny + jy;
-								kgrid00 = (ix - 1) * grid.ny + jy - 1;
-								kgrid01 = (ix - 1) * grid.ny + jy + 1;
-								kgrid10 = (ix + 1) * grid.ny + jy - 1;
-								kgrid11 = (ix + 1) * grid.ny + jy + 1;
-								if (ix > 0 && ix < grid.nx - 1 && jy > 0 && jy < grid.ny - 1 &&
+								kgrid = ix * grid.n_rows + jy;
+								kgrid00 = (ix - 1) * grid.n_rows + jy - 1;
+								kgrid01 = (ix - 1) * grid.n_rows + jy + 1;
+								kgrid10 = (ix + 1) * grid.n_rows + jy - 1;
+								kgrid11 = (ix + 1) * grid.n_rows + jy + 1;
+								if (ix > 0 && ix < grid.n_columns - 1 && jy > 0 && jy < grid.n_rows - 1 &&
 								    grid.data[kgrid] > grid.nodatavalue && grid.data[kgrid00] > grid.nodatavalue &&
 								    grid.data[kgrid01] > grid.nodatavalue && grid.data[kgrid10] > grid.nodatavalue &&
 								    grid.data[kgrid11] > grid.nodatavalue) {
@@ -5497,12 +5497,12 @@ and mbedit edit save files.\n";
 									/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
 									i,ssacrosstrack[i],ssalongtrack[i],ss[i],sonardepth,RTD * atan(ssacrosstrack[i] / (sonardepth
 									+ grid.data[kgrid]))); fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
-									ix,grid.nx,jy,grid.ny,grid.data[kgrid]);
+									ix,grid.n_columns,jy,grid.n_rows,grid.data[kgrid]);
 									fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
 									r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 								}
 								else {
-									if (ix >= 0 && ix < grid.nx && jy >= 0 && jy < grid.ny && grid.data[kgrid] > grid.nodatavalue)
+									if (ix >= 0 && ix < grid.n_columns && jy >= 0 && jy < grid.n_rows && grid.data[kgrid] > grid.nodatavalue)
 										bathy = -grid.data[kgrid];
 									else if (altitude > 0.0)
 										bathy = altitude + sonardepth;

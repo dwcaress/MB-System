@@ -382,6 +382,17 @@ struct mb_platform_struct {
 /* ---------------------------------------------------------------------------*/
 /* MBIO data storage and control structures */
 
+/* MBIO file index storage structure */
+struct mb_io_indextable_struct {
+    double time_d;
+    long offset;
+    int count;
+    size_t size;
+    mb_u_char kind;
+    mb_u_char read;
+};
+
+/* MBIO ping storage structure */
 struct mb_io_ping_struct {
 	double time_d;
 	double navlon;
@@ -474,6 +485,11 @@ struct mb_io_struct {
 	void *xdrs;                  /* XDR stream handle */
 	void *xdrs2;                 /* XDR stream handle #2 */
 	void *xdrs3;                 /* XDR stream handle #2 */
+    
+    /* file indexing (used by some formats) */
+    int num_indextable;
+    int num_indextable_alloc;
+    struct mb_io_indextable_struct *indextable;
 
 	/* read or write history */
 	int fileheader;       /* indicates whether file header has

@@ -5706,7 +5706,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 			headingx = sin(DTR * heading);
 			headingy = cos(DTR * heading);
 
-			/* if a valide speed is not available calculate it */
+			/* if a valid speed is not available calculate it */
 			if (interp_status == MB_SUCCESS && speed <= 0.0) {
 				if (jnav > 1) {
 					j1 = jnav - 2;

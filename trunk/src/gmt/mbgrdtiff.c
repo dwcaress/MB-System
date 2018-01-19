@@ -645,8 +645,8 @@ void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER 
 	bool all_lats = false, all_lons = false;
 	double x, y;
 
-	r->nx = g->nx;
-	r->ny = g->ny;
+	r->n_columns = g->n_columns;
+	r->n_rows = g->n_rows;
 	r->registration = g->registration;
 	r->n_bands = g->n_bands;
 
@@ -670,7 +670,7 @@ void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER 
 	r->wesn[XHI] = r->wesn[YHI] = -DBL_MAX;
 	k = (g->registration == GMT_GRID_NODE_REG) ? 1 : 0;
 
-	for (i = 0; i < g->nx - k; i++) { /* South and north sides */
+	for (i = 0; i < g->n_columns - k; i++) { /* South and north sides */
 		gmt_geo_to_xy(GMT, g->wesn[XLO] + i * g->inc[GMT_X], g->wesn[YLO], &x, &y);
 		r->wesn[XLO] = MIN(r->wesn[XLO], x), r->wesn[XHI] = MAX(r->wesn[XHI], x);
 		r->wesn[YLO] = MIN(r->wesn[YLO], y), r->wesn[YHI] = MAX(r->wesn[YHI], y);
@@ -678,7 +678,7 @@ void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER 
 		r->wesn[XLO] = MIN(r->wesn[XLO], x), r->wesn[XHI] = MAX(r->wesn[XHI], x);
 		r->wesn[YLO] = MIN(r->wesn[YLO], y), r->wesn[YHI] = MAX(r->wesn[YHI], y);
 	}
-	for (i = 0; i < g->ny - k; i++) { /* East and west sides */
+	for (i = 0; i < g->n_rows - k; i++) { /* East and west sides */
 		gmt_geo_to_xy(GMT, g->wesn[XLO], g->wesn[YHI] - i * g->inc[GMT_Y], &x, &y);
 		r->wesn[XLO] = MIN(r->wesn[XLO], x), r->wesn[XHI] = MAX(r->wesn[XHI], x);
 		r->wesn[YLO] = MIN(r->wesn[YLO], y), r->wesn[YHI] = MAX(r->wesn[YHI], y);
@@ -729,7 +729,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	int utmzone;
 	int keyindex;
 
-	short value_short;
+	unsigned short value_short;
 	int value_int;
 	double value_double;
 	size_t write_size;
@@ -824,9 +824,9 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		if (!(Grid_orig[0]->header->inc[GMT_X] == Grid_orig[1]->header->inc[GMT_X] &&
 		      Grid_orig[0]->header->inc[GMT_X] == Grid_orig[2]->header->inc[GMT_X]))
 			error++;
-		if (!(Grid_orig[0]->header->nx == Grid_orig[1]->header->nx && Grid_orig[0]->header->nx == Grid_orig[2]->header->nx))
+		if (!(Grid_orig[0]->header->n_columns == Grid_orig[1]->header->n_columns && Grid_orig[0]->header->n_columns == Grid_orig[2]->header->n_columns))
 			error++;
-		if (!(Grid_orig[0]->header->ny == Grid_orig[1]->header->ny && Grid_orig[0]->header->ny == Grid_orig[2]->header->ny))
+		if (!(Grid_orig[0]->header->n_rows == Grid_orig[1]->header->n_rows && Grid_orig[0]->header->n_rows == Grid_orig[2]->header->n_rows))
 			error++;
 		if (!(Grid_orig[0]->header->registration == Grid_orig[1]->header->registration &&
 		      Grid_orig[0]->header->registration == Grid_orig[2]->header->registration))
@@ -839,7 +839,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 
 	/* Determine what wesn to pass to map_setup */
 
-	if (!GMT->common.R.active && n_grids)
+	if (!GMT->common.R.active[RSET] && n_grids)
 		gmt_M_memcpy(GMT->common.R.wesn, Grid_orig[0]->header->wesn, 4, double);
 
 	gmt_M_err_fail(GMT, gmt_map_setup(GMT, GMT->common.R.wesn), "");
@@ -902,7 +902,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			Return(API->error); /* Get grid data */
 		}
 		if (n_grids &&
-		    (Intens_orig->header->nx != Grid_orig[0]->header->nx || Intens_orig->header->ny != Grid_orig[0]->header->ny)) {
+		    (Intens_orig->header->n_columns != Grid_orig[0]->header->n_columns || Intens_orig->header->n_rows != Grid_orig[0]->header->n_rows)) {
 			GMT_Report(API, GMT_MSG_NORMAL, "Intensity file has improper dimensions!\n");
 			Return(EXIT_FAILURE);
 		}
@@ -942,8 +942,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			if (n_grids)
 				gmt_M_memcpy(Intens_proj->header->wesn, Grid_proj[0]->header->wesn, 4, double);
 			if (Ctrl->E.dpi == 0) { /* Use input # of nodes as # of projected nodes */
-				nx_proj = Intens_orig->header->nx;
-				ny_proj = Intens_orig->header->ny;
+				nx_proj = Intens_orig->header->n_columns;
+				ny_proj = Intens_orig->header->n_rows;
 			}
 			gmt_M_err_fail(GMT, gmt_project_init(GMT, Intens_proj->header, inc, nx_proj, ny_proj, Ctrl->E.dpi, grid_registration),
 			               Ctrl->Intensity.file);
@@ -977,8 +977,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	}
 
 	nm = header_work->nm;
-	nx = header_work->nx;
-	ny = header_work->ny;
+	nx = header_work->n_columns;
+	ny = header_work->n_rows;
 
 	/* Get/calculate a color palette file */
 	if (!Ctrl->I.do_rgb) {
@@ -1125,8 +1125,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	}
 
 	/* Get actual size of each pixel */
-	dx = gmt_M_get_inc(GMT, header_work->wesn[XLO], header_work->wesn[XHI], header_work->nx, header_work->registration);
-	dy = gmt_M_get_inc(GMT, header_work->wesn[YLO], header_work->wesn[YHI], header_work->ny, header_work->registration);
+	dx = gmt_M_get_inc(GMT, header_work->wesn[XLO], header_work->wesn[XHI], header_work->n_columns, header_work->registration);
+	dy = gmt_M_get_inc(GMT, header_work->wesn[YLO], header_work->wesn[YHI], header_work->n_rows, header_work->registration);
 
 	/* Set lower left position of image on map */
 
@@ -1137,8 +1137,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		y0 -= 0.5 * dy;
 	}
 
-	x_side = dx * header_work->nx;
-	y_side = dy * header_work->ny;
+	x_side = dx * header_work->n_columns;
+	y_side = dy * header_work->n_rows;
 
 	if (P && gray_only)
 		for (kk = 0, P->is_bw = true; P->is_bw && kk < nm; kk++)
@@ -1605,11 +1605,11 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	/* close the world file */
 	fclose(tfp);
 	fprintf(stderr, "3 Grid header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n",
-	        Grid_orig[0]->header->nx, Grid_orig[0]->header->ny, Grid_orig[0]->header->registration,
+	        Grid_orig[0]->header->n_columns, Grid_orig[0]->header->n_rows, Grid_orig[0]->header->registration,
 	        Grid_orig[0]->header->wesn[XLO], Grid_orig[0]->header->wesn[XHI], Grid_orig[0]->header->wesn[YLO],
 	        Grid_orig[0]->header->wesn[YHI], Grid_orig[0]->header->inc[0], Grid_orig[0]->header->inc[1]);
-	fprintf(stderr, "3 Work header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n", header_work->nx,
-	        header_work->ny, header_work->registration, header_work->wesn[XLO], header_work->wesn[XHI], header_work->wesn[YLO],
+	fprintf(stderr, "3 Work header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n", header_work->n_columns,
+	        header_work->n_rows, header_work->registration, header_work->wesn[XLO], header_work->wesn[XHI], header_work->wesn[YLO],
 	        header_work->wesn[YHI], header_work->inc[0], header_work->inc[1]);
 
 	//	if (!Ctrl->A.active) {

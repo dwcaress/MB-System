@@ -166,8 +166,8 @@ struct mbev_grid_struct {
 	double boundsutm[4];
 	double dx;
 	double dy;
-	int nx;
-	int ny;
+	int n_columns;
+	int n_rows;
 	double min;
 	double max;
 	double smin;
@@ -210,8 +210,8 @@ MBVIEW_EXTERNAL size_t mbev_instance;
 MBVIEW_EXTERNAL double mbev_grid_bounds[4];
 MBVIEW_EXTERNAL double mbev_grid_boundsutm[4];
 MBVIEW_EXTERNAL double mbev_grid_cellsize;
-MBVIEW_EXTERNAL int mbev_grid_nx;
-MBVIEW_EXTERNAL int mbev_grid_ny;
+MBVIEW_EXTERNAL int mbev_grid_n_columns;
+MBVIEW_EXTERNAL int mbev_grid_n_rows;
 
 /* global patch test parameters */
 MBVIEW_EXTERNAL double mbev_rollbias;

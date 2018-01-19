@@ -20,7 +20,6 @@
  * Author:	David W. Caress
  * Date:	November 29, 2013
  *
- *
  */
 /*
  * Notes on the MBSYS_3DATDEPTHLIDAR data structure:

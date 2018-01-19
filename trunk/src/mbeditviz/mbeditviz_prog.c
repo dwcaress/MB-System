@@ -119,8 +119,8 @@ int mbeditviz_init(int argc, char **argv) {
 	}
 	mbev_grid.dx = 0.0;
 	mbev_grid.dy = 0.0;
-	mbev_grid.nx = 0;
-	mbev_grid.ny = 0;
+	mbev_grid.n_columns = 0;
+	mbev_grid.n_rows = 0;
 	mbev_grid.min = 0.0;
 	mbev_grid.max = 0.0;
 	mbev_grid.smin = 0.0;
@@ -135,8 +135,8 @@ int mbeditviz_init(int argc, char **argv) {
 		mbev_grid_boundsutm[i] = 0.0;
 	}
 	mbev_grid_cellsize = 0.0;
-	mbev_grid_nx = 0;
-	mbev_grid_ny = 0;
+	mbev_grid_n_columns = 0;
+	mbev_grid_n_rows = 0;
 	mbev_selected.xorigin = 0.0;
 	mbev_selected.yorigin = 0.0;
 	mbev_selected.zorigin = 0.0;
@@ -2366,16 +2366,16 @@ int mbeditviz_get_grid_bounds() {
 			mbev_grid_cellsize = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / 250;
 
 		/* get grid dimensions */
-		mbev_grid_nx = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
-		mbev_grid_ny = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
-		mbev_grid_boundsutm[1] = mbev_grid_boundsutm[0] + (mbev_grid_nx - 1) * mbev_grid_cellsize;
-		mbev_grid_boundsutm[3] = mbev_grid_boundsutm[2] + (mbev_grid_ny - 1) * mbev_grid_cellsize;
+		mbev_grid_n_columns = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
+		mbev_grid_n_rows = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
+		mbev_grid_boundsutm[1] = mbev_grid_boundsutm[0] + (mbev_grid_n_columns - 1) * mbev_grid_cellsize;
+		mbev_grid_boundsutm[3] = mbev_grid_boundsutm[2] + (mbev_grid_n_rows - 1) * mbev_grid_cellsize;
 		fprintf(stderr, "\nGrid bounds (longitude latitude): %.7f %.7f %.7f %.7f\n", mbev_grid_bounds[0], mbev_grid_bounds[1],
 		        mbev_grid_bounds[2], mbev_grid_bounds[3]);
 		fprintf(stderr, "Grid bounds (eastings northings): %.3f %.3f %.3f %.3f\n", mbev_grid_boundsutm[0], mbev_grid_boundsutm[1],
 		        mbev_grid_boundsutm[2], mbev_grid_boundsutm[3]);
 		fprintf(stderr, "Altitude range: %.3f %.3f\n", altitude_min, altitude_max);
-		fprintf(stderr, "Cell size:%.3f\nGrid Dimensions: %d %d\n\n", mbev_grid_cellsize, mbev_grid_nx, mbev_grid_ny);
+		fprintf(stderr, "Cell size:%.3f\nGrid Dimensions: %d %d\n\n", mbev_grid_cellsize, mbev_grid_n_columns, mbev_grid_n_rows);
 
 		/* release projection */
 		mb_proj_free(mbev_verbose, &(pjptr), &mbev_error);
@@ -2484,32 +2484,32 @@ int mbeditviz_setup_grid() {
 		mbev_grid.boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
 
 		/* get grid dimensions */
-		mbev_grid.nx = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / mbev_grid.dx + 1;
-		mbev_grid.ny = (mbev_grid.boundsutm[3] - mbev_grid.boundsutm[2]) / mbev_grid.dy + 1;
-		mbev_grid.boundsutm[1] = mbev_grid.boundsutm[0] + (mbev_grid.nx - 1) * mbev_grid.dx;
-		mbev_grid.boundsutm[3] = mbev_grid.boundsutm[2] + (mbev_grid.ny - 1) * mbev_grid.dy;
+		mbev_grid.n_columns = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / mbev_grid.dx + 1;
+		mbev_grid.n_rows = (mbev_grid.boundsutm[3] - mbev_grid.boundsutm[2]) / mbev_grid.dy + 1;
+		mbev_grid.boundsutm[1] = mbev_grid.boundsutm[0] + (mbev_grid.n_columns - 1) * mbev_grid.dx;
+		mbev_grid.boundsutm[3] = mbev_grid.boundsutm[2] + (mbev_grid.n_rows - 1) * mbev_grid.dy;
 		/*fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
 		mbev_grid.bounds[0],mbev_grid.bounds[1],mbev_grid.bounds[2],mbev_grid.bounds[3],
 		mbev_grid.boundsutm[0],mbev_grid.boundsutm[1],mbev_grid.boundsutm[2],mbev_grid.boundsutm[3]);
 		fprintf(stderr,"cell size:%f %f dimensions: %d %d\n",
-		mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);*/
+		mbev_grid.dx,mbev_grid.dy,mbev_grid.n_columns,mbev_grid.n_rows);*/
 	}
 
 	/* allocate memory for grid */
 	if (mbev_status == MB_SUCCESS) {
-		if ((mbev_grid.sum = (float *)malloc(mbev_grid.nx * mbev_grid.ny * sizeof(float))) == NULL)
+		if ((mbev_grid.sum = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
 			mbev_error = MB_ERROR_MEMORY_FAIL;
-		if ((mbev_grid.wgt = (float *)malloc(mbev_grid.nx * mbev_grid.ny * sizeof(float))) == NULL)
+		if ((mbev_grid.wgt = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
 			mbev_error = MB_ERROR_MEMORY_FAIL;
-		if ((mbev_grid.val = (float *)malloc(mbev_grid.nx * mbev_grid.ny * sizeof(float))) == NULL)
+		if ((mbev_grid.val = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
 			mbev_error = MB_ERROR_MEMORY_FAIL;
-		if ((mbev_grid.sgm = (float *)malloc(mbev_grid.nx * mbev_grid.ny * sizeof(float))) == NULL)
+		if ((mbev_grid.sgm = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
 			mbev_error = MB_ERROR_MEMORY_FAIL;
 		if (mbev_error == MB_ERROR_NO_ERROR) {
-			memset(mbev_grid.sum, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));
-			memset(mbev_grid.wgt, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));
-			memset(mbev_grid.val, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));
-			memset(mbev_grid.sgm, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));
+			memset(mbev_grid.sum, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+			memset(mbev_grid.wgt, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+			memset(mbev_grid.val, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+			memset(mbev_grid.sgm, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
 		}
 		else
 			mbev_status = MB_FAILURE;
@@ -2599,10 +2599,10 @@ int mbeditviz_make_grid() {
 	}
 
 	/* zero the grid arrays */
-	memset(mbev_grid.sum, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));
-	memset(mbev_grid.wgt, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));
-	/* memset(mbev_grid.val, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));*/
-	memset(mbev_grid.sgm, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));
+	memset(mbev_grid.sum, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+	memset(mbev_grid.wgt, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+	/* memset(mbev_grid.val, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));*/
+	memset(mbev_grid.sgm, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
 
 	/* loop over loaded files */
 	filecount = 0;
@@ -2624,9 +2624,9 @@ int mbeditviz_make_grid() {
 	}
 	mbev_grid.nodatavalue = MBEV_NODATA;
 	first = MB_YES;
-	for (i = 0; i < mbev_grid.nx; i++)
-		for (j = 0; j < mbev_grid.ny; j++) {
-			k = i * mbev_grid.ny + j;
+	for (i = 0; i < mbev_grid.n_columns; i++)
+		for (j = 0; j < mbev_grid.n_rows; j++) {
+			k = i * mbev_grid.n_rows + j;
 			if (mbev_grid.wgt[k] > 0.0) {
 				mbev_grid.val[k] = mbev_grid.sum[k] / mbev_grid.wgt[k];
 				mbev_grid.sgm[k] = sqrt(fabs(mbev_grid.sgm[k] / mbev_grid.wgt[k] - mbev_grid.val[k] * mbev_grid.val[k]));
@@ -2699,11 +2699,11 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 	j = (ping->bathy[ibeam] - mbev_grid.boundsutm[2] + 0.5 * mbev_grid.dy) / mbev_grid.dy;
 
 	/* proceed if beam in grid */
-	if (i >= 0 && i < mbev_grid.nx && j >= 0 && j < mbev_grid.ny) {
+	if (i >= 0 && i < mbev_grid.n_columns && j >= 0 && j < mbev_grid.n_rows) {
 		/* simple gridding mode */
 		if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM || mbev_grid_algorithm == MBEV_GRID_ALGORITH_SIMPLE) {
 			/* get location in grid arrays */
-			kk = i * mbev_grid.ny + j;
+			kk = i * mbev_grid.n_rows + j;
 
 			if (isnan(ping->bathcorr[ibeam])) {
 				fprintf(stderr, "\nFunction mbeditviz_grid_beam(): Encountered NaN value in swath data from file: %s\n",
@@ -2783,9 +2783,9 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 			foot_dix = 2 * MAX(foot_wix, foot_lix);
 			foot_diy = 2 * MAX(foot_wiy, foot_liy);
 			ix1 = MAX(i - foot_dix, 0);
-			ix2 = MIN(i + foot_dix, mbev_grid.nx - 1);
+			ix2 = MIN(i + foot_dix, mbev_grid.n_columns - 1);
 			iy1 = MAX(j - foot_diy, 0);
-			iy2 = MIN(j + foot_diy, mbev_grid.ny - 1);
+			iy2 = MIN(j + foot_diy, mbev_grid.n_rows - 1);
 
 			/* loop over neighborhood of bins */
 			for (ii = ix1; ii <= ix2; ii++)
@@ -2823,7 +2823,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 					/* if beam affects cell apply using weight */
 					if (use_weight == MBEV_USE_YES) {
 						/* get location in grid arrays */
-						kk = ii * mbev_grid.ny + jj;
+						kk = ii * mbev_grid.n_rows + jj;
 
 						/* add to weights and sums */
 						if (beam_ok == MB_YES) {
@@ -3024,33 +3024,33 @@ int mbeditviz_make_grid_simple() {
 		}
 
 		/* get grid dimensions */
-		mbev_grid.nx = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / mbev_grid.dx + 1;
-		mbev_grid.ny = (mbev_grid.boundsutm[3] - mbev_grid.boundsutm[2]) / mbev_grid.dy + 1;
-		mbev_grid.boundsutm[1] = mbev_grid.boundsutm[0] + (mbev_grid.nx - 1) * mbev_grid.dx;
-		mbev_grid.boundsutm[3] = mbev_grid.boundsutm[2] + (mbev_grid.ny - 1) * mbev_grid.dy;
+		mbev_grid.n_columns = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / mbev_grid.dx + 1;
+		mbev_grid.n_rows = (mbev_grid.boundsutm[3] - mbev_grid.boundsutm[2]) / mbev_grid.dy + 1;
+		mbev_grid.boundsutm[1] = mbev_grid.boundsutm[0] + (mbev_grid.n_columns - 1) * mbev_grid.dx;
+		mbev_grid.boundsutm[3] = mbev_grid.boundsutm[2] + (mbev_grid.n_rows - 1) * mbev_grid.dy;
 		if (mbev_verbose > 0)
 			fprintf(stderr, "Grid bounds: %f %f %f %f    %f %f %f %f\n", mbev_grid.bounds[0], mbev_grid.bounds[1],
 			        mbev_grid.bounds[2], mbev_grid.bounds[3], mbev_grid.boundsutm[0], mbev_grid.boundsutm[1],
 			        mbev_grid.boundsutm[2], mbev_grid.boundsutm[3]);
 		if (mbev_verbose > 0)
-			fprintf(stderr, "cell size:%f %f dimensions: %d %d\n", mbev_grid.dx, mbev_grid.dy, mbev_grid.nx, mbev_grid.ny);
+			fprintf(stderr, "cell size:%f %f dimensions: %d %d\n", mbev_grid.dx, mbev_grid.dy, mbev_grid.n_columns, mbev_grid.n_rows);
 	}
 
 	/* allocate memory for grid */
 	if (mbev_status == MB_SUCCESS) {
-		if ((mbev_grid.sum = (float *)malloc(mbev_grid.nx * mbev_grid.ny * sizeof(float))) == NULL)
+		if ((mbev_grid.sum = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
 			mbev_error = MB_ERROR_MEMORY_FAIL;
-		if ((mbev_grid.wgt = (float *)malloc(mbev_grid.nx * mbev_grid.ny * sizeof(float))) == NULL)
+		if ((mbev_grid.wgt = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
 			mbev_error = MB_ERROR_MEMORY_FAIL;
-		if ((mbev_grid.val = (float *)malloc(mbev_grid.nx * mbev_grid.ny * sizeof(float))) == NULL)
+		if ((mbev_grid.val = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
 			mbev_error = MB_ERROR_MEMORY_FAIL;
-		if ((mbev_grid.sgm = (float *)malloc(mbev_grid.nx * mbev_grid.ny * sizeof(float))) == NULL)
+		if ((mbev_grid.sgm = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
 			mbev_error = MB_ERROR_MEMORY_FAIL;
 		if (mbev_error == MB_ERROR_NO_ERROR) {
-			memset(mbev_grid.sum, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));
-			memset(mbev_grid.wgt, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));
-			memset(mbev_grid.val, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));
-			memset(mbev_grid.sgm, 0, mbev_grid.nx * mbev_grid.ny * sizeof(float));
+			memset(mbev_grid.sum, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+			memset(mbev_grid.wgt, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+			memset(mbev_grid.val, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+			memset(mbev_grid.sgm, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
 		}
 		else
 			mbev_status = MB_FAILURE;
@@ -3076,7 +3076,7 @@ int mbeditviz_make_grid_simple() {
 						if (mb_beam_ok(ping->beamflag[ibeam])) {
 							i = (ping->bathx[ibeam] - mbev_grid.boundsutm[0] + 0.5 * mbev_grid.dx) / mbev_grid.dx;
 							j = (ping->bathy[ibeam] - mbev_grid.boundsutm[2] + 0.5 * mbev_grid.dy) / mbev_grid.dy;
-							k = i * mbev_grid.ny + j;
+							k = i * mbev_grid.n_rows + j;
 							mbev_grid.sum[k] += (-ping->bathcorr[ibeam]);
 							mbev_grid.wgt[k] += 1.0;
 							mbev_grid.sgm[k] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
@@ -3087,9 +3087,9 @@ int mbeditviz_make_grid_simple() {
 		}
 		mbev_grid.nodatavalue = MBEV_NODATA;
 		first = MB_YES;
-		for (i = 0; i < mbev_grid.nx; i++)
-			for (j = 0; j < mbev_grid.ny; j++) {
-				k = i * mbev_grid.ny + j;
+		for (i = 0; i < mbev_grid.n_columns; i++)
+			for (j = 0; j < mbev_grid.n_rows; j++) {
+				k = i * mbev_grid.n_rows + j;
 				if (mbev_grid.wgt[k] > 0.0) {
 					mbev_grid.val[k] = mbev_grid.sum[k] / mbev_grid.wgt[k];
 					mbev_grid.sgm[k] = sqrt(fabs(mbev_grid.sgm[k] / mbev_grid.wgt[k] - mbev_grid.val[k] * mbev_grid.val[k]));
@@ -3216,8 +3216,8 @@ int mbeditviz_destroy_grid() {
 		}
 		mbev_grid.dx = 0.0;
 		mbev_grid.dy = 0.0;
-		mbev_grid.nx = 0;
-		mbev_grid.ny = 0;
+		mbev_grid.n_columns = 0;
+		mbev_grid.n_rows = 0;
 
 		/* reset status */
 		mbev_grid.status = MBEV_GRID_NONE;
@@ -4112,8 +4112,8 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 	mbeditviz_make_grid();
 
 	/* update the grid to mbview */
-	mbview_updateprimarygrid(mbev_verbose, 0, mbev_grid.nx, mbev_grid.ny, mbev_grid.val, &mbev_error);
-	mbview_updatesecondarygrid(mbev_verbose, 0, mbev_grid.nx, mbev_grid.ny, mbev_grid.sgm, &mbev_error);
+	mbview_updateprimarygrid(mbev_verbose, 0, mbev_grid.n_columns, mbev_grid.n_rows, mbev_grid.val, &mbev_error);
+	mbview_updatesecondarygrid(mbev_verbose, 0, mbev_grid.n_columns, mbev_grid.n_rows, mbev_grid.sgm, &mbev_error);
 
 	/* turn message of */
 	do_mbeditviz_message_off();
@@ -4137,7 +4137,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 	char *function_name = "mbeditviz_mb3dsoundings_flagsparsevoxels";
 	struct mb3dsoundings_sounding_struct *sounding;
 	int isounding;
-	int nx, ny, nz, cnx, cny, cnz;
+	int n_columns, n_rows, nz, cn_columns, cn_rows, cnz;
 	double dx, dy, dz;
 	int **coarsevoxels = NULL;
 	int *ncoarsevoxels = NULL;
@@ -4183,23 +4183,23 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 	dx = sizemultiplier * mbev_grid_cellsize;
 	dy = sizemultiplier * mbev_grid_cellsize;
 	dz = sizemultiplier * mbev_grid_cellsize;
-	nx = (mbev_selected.xmax - mbev_selected.xmin) / dx;
-	ny = (mbev_selected.ymax - mbev_selected.ymin) / dy;
+	n_columns = (mbev_selected.xmax - mbev_selected.xmin) / dx;
+	n_rows = (mbev_selected.ymax - mbev_selected.ymin) / dy;
 	nz = (mbev_selected.zmax - mbev_selected.zmin) / dz;
-	cnx = nx / 10 + 1;
-	cny = ny / 10 + 1;
+	cn_columns = n_columns / 10 + 1;
+	cn_rows = n_rows / 10 + 1;
 	cnz = nz / 10 + 1;
-	nx = 10 * cnx;
-	ny = 10 * cny;
+	n_columns = 10 * cn_columns;
+	n_rows = 10 * cn_rows;
 	nz = 10 * cnz;
 	nvoxels_occupied = 0;
 	// fprintf(stderr,"Volume Bounds: %f %f  %f %f  %f %f  dxyz:%f  Dims: %d %d %d\n",
 	// mbev_selected.xmin,mbev_selected.xmax,mbev_selected.ymin,mbev_selected.ymax,mbev_selected.zmin,mbev_selected.zmax,
-	// dx,nx,ny,nz);
+	// dx,n_columns,n_rows,nz);
 
 	/* allocate arrays for lists of occupied voxels */
 	// fprintf(stderr,"\nArray pointers before: %p %p %p\n",ncoarsevoxels,ncoarsevoxels_alloc,coarsevoxels);
-	alloc_size = cnx * cny * cnz * sizeof(int);
+	alloc_size = cn_columns * cn_rows * cnz * sizeof(int);
 	// fprintf(stderr,"Alloc sizes: %zu ", alloc_size);
 	if ((mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, alloc_size, (void **)&ncoarsevoxels, &mbev_error)) ==
 	    MB_SUCCESS)
@@ -4207,13 +4207,13 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 	if ((mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, alloc_size, (void **)&ncoarsevoxels_alloc, &mbev_error)) ==
 	    MB_SUCCESS)
 		memset(ncoarsevoxels_alloc, 0, alloc_size);
-	alloc_size = cnx * cny * cnz * sizeof(int *);
+	alloc_size = cn_columns * cn_rows * cnz * sizeof(int *);
 	// fprintf(stderr," %zu\n", alloc_size);
 	if ((mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, alloc_size, (void **)&coarsevoxels, &mbev_error)) ==
 	    MB_SUCCESS)
 		memset(coarsevoxels, 0, alloc_size);
 	voxel_size = (mbev_nsoundingthreshold + 5);
-	nvoxels_alloc_chunk = nx * ny * 2 / 10; /* figure occupied voxels likely to number about twice a horizontal slice */
+	nvoxels_alloc_chunk = n_columns * n_rows * 2 / 10; /* figure occupied voxels likely to number about twice a horizontal slice */
 	// fprintf(stderr,"Array pointers after: %p %p %p\n",ncoarsevoxels,ncoarsevoxels_alloc,coarsevoxels);
 
 	/* loop over all soundings setting occupied voxels as needed */
@@ -4229,9 +4229,9 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 				 * this sounding, setting occupancy for the containing voxel and
 				 * neighbor occupancy for the surrounding voxels */
 				i0 = MAX(i - 1, 0);
-				i1 = MIN(i + 1, nx - 1);
+				i1 = MIN(i + 1, n_columns - 1);
 				j0 = MAX(j - 1, 0);
-				j1 = MIN(j + 1, ny - 1);
+				j1 = MIN(j + 1, n_rows - 1);
 				k0 = MAX(k - 1, 0);
 				k1 = MIN(k + 1, nz - 1);
 				for (iii = i0; iii <= i1; iii++) {
@@ -4247,7 +4247,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 							ii = i / 10;
 							jj = j / 10;
 							kk = k / 10;
-							ll = ii + jj * cnx + kk * cnx * cny;
+							ll = ii + jj * cn_columns + kk * cn_columns * cn_rows;
 
 							/* look for voxel already set in the appropriate coarse voxel */
 							nvoxels = ncoarsevoxels[ll];
@@ -4338,7 +4338,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 		/* count occupied voxels */
 		ncoarsevoxelstot = 0;
 		nvoxelstot = 0;
-		for (ll = 0; ll < cnx * cny * cnz; ll++) {
+		for (ll = 0; ll < cn_columns * cn_rows * cnz; ll++) {
 			if (ncoarsevoxels[ll] > 0) {
 				ncoarsevoxelstot++;
 				voxels = coarsevoxels[ll];
@@ -4349,13 +4349,13 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 				}
 			}
 		}
-		fprintf(stderr, "Number of occupied coarse voxels: %10d of %10d\n", ncoarsevoxelstot, cnx * cny * cnz);
-		fprintf(stderr, "Number of occupied voxels:        %10d of %10d\n", nvoxelstot, nx * ny * nz);
+		fprintf(stderr, "Number of occupied coarse voxels: %10d of %10d\n", ncoarsevoxelstot, cn_columns * cn_rows * cnz);
+		fprintf(stderr, "Number of occupied voxels:        %10d of %10d\n", nvoxelstot, n_columns * n_rows * nz);
 
 		/* loop over all occupied voxels */
 		nflagged = 0;
 		nvoxels = 0;
-		for (ll = 0; ll < cnx * cny * cnz; ll++) {
+		for (ll = 0; ll < cn_columns * cn_rows * cnz; ll++) {
 			voxels = coarsevoxels[ll];
 			for (ivoxel = 0; ivoxel < ncoarsevoxels[ll]; ivoxel++) {
 				voxel = &voxels[ivoxel * voxel_size];
@@ -4392,7 +4392,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 	}
 
 	/* deallocate arrays */
-	for (ll = 0; ll < cnx * cny * cnz; ll++)
+	for (ll = 0; ll < cn_columns * cn_rows * cnz; ll++)
 		mbev_status = mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&coarsevoxels[ll], &mbev_error);
 	mbev_status = mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&ncoarsevoxels, &mbev_error);
 	mbev_status = mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&ncoarsevoxels_alloc, &mbev_error);
@@ -4463,7 +4463,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	int variance_total_num = 0;
 	double local_grid_dx, local_grid_dy;
 	double local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax;
-	int local_grid_nx, local_grid_ny;
+	int local_grid_n_columns, local_grid_n_rows;
 	double rollbias, rollbias_org;
 	double pitchbias, pitchbias_org;
 	double headingbias, headingbias_org;
@@ -4511,14 +4511,14 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 	local_grid_xmax = mbev_selected.xmax + 0.25 * (mbev_selected.xmax - mbev_selected.xmin);
 	local_grid_ymin = mbev_selected.ymin - 0.25 * (mbev_selected.ymax - mbev_selected.ymin);
 	local_grid_ymax = mbev_selected.ymax + 0.25 * (mbev_selected.ymax - mbev_selected.ymin);
-	local_grid_nx = (local_grid_xmax - local_grid_xmin) / local_grid_dx + 1;
-	local_grid_ny = (local_grid_ymax - local_grid_ymin) / local_grid_dy + 1;
-	local_grid_xmax = local_grid_xmin + local_grid_nx * local_grid_dx;
-	local_grid_ymax = local_grid_ymin + local_grid_ny * local_grid_dy;
+	local_grid_n_columns = (local_grid_xmax - local_grid_xmin) / local_grid_dx + 1;
+	local_grid_n_rows = (local_grid_ymax - local_grid_ymin) / local_grid_dy + 1;
+	local_grid_xmax = local_grid_xmin + local_grid_n_columns * local_grid_dx;
+	local_grid_ymax = local_grid_ymin + local_grid_n_rows * local_grid_dy;
 
 	/* allocate arrays for calculating variance */
-	size_double = local_grid_nx * local_grid_ny * sizeof(double);
-	size_int = local_grid_nx * local_grid_ny * sizeof(int);
+	size_double = local_grid_n_columns * local_grid_n_rows * sizeof(double);
+	size_int = local_grid_n_columns * local_grid_n_rows * sizeof(int);
 	mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_first, &mbev_error);
 	mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_sum, &mbev_error);
 	mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_sum2, &mbev_error);
@@ -4563,7 +4563,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			rollbias = rollbias_start + i * drollbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4594,7 +4594,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			rollbias = rollbias_start + i * drollbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4628,7 +4628,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			pitchbias = pitchbias_start + i * dpitchbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4659,7 +4659,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			pitchbias = pitchbias_start + i * dpitchbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4693,7 +4693,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			headingbias = headingbias_start + i * dheadingbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4724,7 +4724,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			headingbias = headingbias_start + i * dheadingbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4758,7 +4758,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			rollbias = rollbias_start + i * drollbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4792,7 +4792,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			pitchbias = pitchbias_start + i * dpitchbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4826,7 +4826,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			headingbias = headingbias_start + i * dheadingbias;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4861,7 +4861,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			timelag = timelag_start + i * dtimelag;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4893,7 +4893,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			timelag = timelag_start + i * dtimelag;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4928,7 +4928,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			snell = snell_start + i * dsnell;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -4960,7 +4960,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 		for (i = 0; i < niterate; i++) {
 			snell = snell_start + i * dsnell;
 			mbeditviz_mb3dsoundings_getbiasvariance(
-			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_nx, local_grid_ny, local_grid_dx,
+			    local_grid_xmin, local_grid_xmax, local_grid_ymin, local_grid_ymax, local_grid_n_columns, local_grid_n_rows, local_grid_dx,
 			    local_grid_dy, local_grid_first, local_grid_sum, local_grid_sum2, local_grid_variance, local_grid_num, rollbias,
 			    pitchbias, headingbias, timelag, snell, &variance_total_num, &variance_total);
 			if (variance_total_num > 0 && (variance_total < variance_total_best || first == MB_YES)) {
@@ -5008,7 +5008,7 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
 }
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double local_grid_xmax, double local_grid_ymin,
-                                             double local_grid_ymax, int local_grid_nx, int local_grid_ny, double local_grid_dx,
+                                             double local_grid_ymax, int local_grid_n_columns, int local_grid_n_rows, double local_grid_dx,
                                              double local_grid_dy, double *local_grid_first, double *local_grid_sum,
                                              double *local_grid_sum2, double *local_grid_variance, int *local_grid_num,
                                              double rollbias, double pitchbias, double headingbias, double timelag, double snell, 
@@ -5028,8 +5028,8 @@ void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double loca
 		fprintf(stderr, "dbg2       local_grid_xmax:     %f\n", local_grid_xmax);
 		fprintf(stderr, "dbg2       local_grid_ymin:     %f\n", local_grid_ymin);
 		fprintf(stderr, "dbg2       local_grid_ymax:     %f\n", local_grid_ymax);
-		fprintf(stderr, "dbg2       local_grid_nx:       %d\n", local_grid_nx);
-		fprintf(stderr, "dbg2       local_grid_ny:       %d\n", local_grid_ny);
+		fprintf(stderr, "dbg2       local_grid_n_columns:       %d\n", local_grid_n_columns);
+		fprintf(stderr, "dbg2       local_grid_n_rows:       %d\n", local_grid_n_rows);
 		fprintf(stderr, "dbg2       local_grid_dx:       %f\n", local_grid_dx);
 		fprintf(stderr, "dbg2       local_grid_dy:       %f\n", local_grid_dy);
 		fprintf(stderr, "dbg2       local_grid_first:    %p\n", local_grid_first);
@@ -5050,8 +5050,8 @@ void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double loca
 	/* initialize variance */
 	*variance_total = 0.0;
 	*variance_total_num = 0;
-	size_double = local_grid_nx * local_grid_ny * sizeof(double);
-	size_int = local_grid_nx * local_grid_ny * sizeof(int);
+	size_double = local_grid_n_columns * local_grid_n_rows * sizeof(double);
+	size_int = local_grid_n_columns * local_grid_n_rows * sizeof(int);
 	memset(local_grid_first, 0, size_double);
 	memset(local_grid_sum, 0, size_double);
 	memset(local_grid_sum2, 0, size_double);
@@ -5064,8 +5064,8 @@ void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double loca
 		if (mb_beam_ok(sounding->beamflag)) {
 			i = (sounding->x - local_grid_xmin) / local_grid_dx;
 			j = (sounding->y - local_grid_ymin) / local_grid_dy;
-			if (i >= 0 && i < local_grid_nx && j >= 0 && j < local_grid_ny) {
-				k = i * local_grid_ny + j;
+			if (i >= 0 && i < local_grid_n_columns && j >= 0 && j < local_grid_n_rows) {
+				k = i * local_grid_n_rows + j;
 				if (local_grid_num[k] == 0)
 					local_grid_first[k] = sounding->z;
 				z = sounding->z - local_grid_first[k];
@@ -5075,9 +5075,9 @@ void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double loca
 			}
 		}
 	}
-	for (i = 0; i < local_grid_nx; i++) {
-		for (j = 0; j < local_grid_ny; j++) {
-			k = i * local_grid_ny + j;
+	for (i = 0; i < local_grid_n_columns; i++) {
+		for (j = 0; j < local_grid_n_rows; j++) {
+			k = i * local_grid_n_rows + j;
 			if (local_grid_num[k] > 0) {
 				local_grid_variance[k] =
 				    (local_grid_sum2[k] - (local_grid_sum[k] * local_grid_sum[k] / local_grid_num[k])) / local_grid_num[k];

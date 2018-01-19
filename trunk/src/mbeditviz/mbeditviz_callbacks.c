@@ -866,18 +866,18 @@ void do_mbeditviz_changecellsize(Widget w, XtPointer client_data, XtPointer call
 	mbev_grid_cellsize = 0.01 * icellsize;
 
 	/* get updated grid dimensions */
-	mbev_grid_nx = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
-	mbev_grid_ny = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
+	mbev_grid_n_columns = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
+	mbev_grid_n_rows = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
 	if (mbev_verbose > 0) {
 		fprintf(stderr, "Grid bounds: %f %f %f %f    %f %f %f %f\n", mbev_grid_bounds[0], mbev_grid_bounds[1],
 		        mbev_grid_bounds[2], mbev_grid_bounds[3], mbev_grid_boundsutm[0], mbev_grid_boundsutm[1], mbev_grid_boundsutm[2],
 		        mbev_grid_boundsutm[3]);
-		fprintf(stderr, "cell size:%f dimensions: %d %d\n", mbev_grid_cellsize, mbev_grid_nx, mbev_grid_ny);
+		fprintf(stderr, "cell size:%f dimensions: %d %d\n", mbev_grid_cellsize, mbev_grid_n_columns, mbev_grid_n_rows);
 	}
 
 	/* reset the widgets */
 	sprintf(string, ":::t\"Selected Grid Parameters:\":t\"    Cell Size: %.1f m\":t\"    Dimensions: %d %d\"", mbev_grid_cellsize,
-	        mbev_grid_nx, mbev_grid_ny);
+	        mbev_grid_n_columns, mbev_grid_n_rows);
 	set_label_multiline_string(label_implied, (String)string);
 }
 
@@ -916,10 +916,10 @@ void do_mbeditviz_gridparameters(Widget w, XtPointer client_data, XtPointer call
 	        "km\":t\"Suggested Grid Parameters:\":t\"    Cell Size: %.2f m\":t\"    Dimensions: %d %d\"",
 	        mbev_grid_bounds[0], mbev_grid_bounds[1], 0.001 * (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]),
 	        mbev_grid_bounds[2], mbev_grid_bounds[3], 0.001 * (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]),
-	        mbev_grid_cellsize, mbev_grid_nx, mbev_grid_ny);
+	        mbev_grid_cellsize, mbev_grid_n_columns, mbev_grid_n_rows);
 	set_label_multiline_string(label_current, (String)string);
 	sprintf(string, ":::t\"Selected Grid Parameters:\":t\"    Cell Size: %.2f m\":t\"    Dimensions: %d %d\"", mbev_grid_cellsize,
-	        mbev_grid_nx, mbev_grid_ny);
+	        mbev_grid_n_columns, mbev_grid_n_rows);
 	set_label_multiline_string(label_implied, (String)string);
 }
 
@@ -1076,7 +1076,7 @@ void do_mbeditviz_viewgrid() {
 		/* set primary grid data */
 		if (mbev_status == MB_SUCCESS)
 			mbev_status = mbview_setprimarygrid(mbev_verbose, mbev_instance, MBV_PROJECTION_PROJECTED, mbev_grid.projection_id,
-			                                    mbev_grid.nodatavalue, mbev_grid.nx, mbev_grid.ny, mbev_grid.min, mbev_grid.max,
+			                                    mbev_grid.nodatavalue, mbev_grid.n_columns, mbev_grid.n_rows, mbev_grid.min, mbev_grid.max,
 			                                    mbev_grid.boundsutm[0], mbev_grid.boundsutm[1], mbev_grid.boundsutm[2],
 			                                    mbev_grid.boundsutm[3], mbev_grid.dx, mbev_grid.dy, mbev_grid.val, &mbev_error);
 
@@ -1100,7 +1100,7 @@ void do_mbeditviz_viewgrid() {
 		if (mbev_status == MB_SUCCESS)
 			mbev_status = mbview_setsecondarygrid(
 			    mbev_verbose, mbev_instance, MBV_PROJECTION_PROJECTED, mbev_grid.projection_id, mbev_grid.nodatavalue,
-			    mbev_grid.nx, mbev_grid.ny, mbev_grid.smin, mbev_grid.smax, mbev_grid.boundsutm[0], mbev_grid.boundsutm[1],
+			    mbev_grid.n_columns, mbev_grid.n_rows, mbev_grid.smin, mbev_grid.smax, mbev_grid.boundsutm[0], mbev_grid.boundsutm[1],
 			    mbev_grid.boundsutm[2], mbev_grid.boundsutm[3], mbev_grid.dx, mbev_grid.dy, mbev_grid.sgm, &mbev_error);
 		if (mbev_status == MB_SUCCESS)
 			mbev_status = mbview_setsecondarycolortable(mbev_verbose, mbev_instance, mbv_secondary_colortable,
@@ -1448,7 +1448,7 @@ void do_mbeditviz_update_gui() {
 		        ":::t\"Available Files: %d\":t\"Loaded Files: %d\":t\"Grid:\":t\"  Lon: %f %f\":t\"  Lat: %f %f\":t\"  Cell "
 		        "Size: %f m\":t\"  Dimensions: %d %d\"",
 		        mbev_num_files, mbev_num_files_loaded, mbev_grid.bounds[0], mbev_grid.bounds[1], mbev_grid.bounds[2],
-		        mbev_grid.bounds[3], mbev_grid.dx, mbev_grid.nx, mbev_grid.ny);
+		        mbev_grid.bounds[3], mbev_grid.dx, mbev_grid.n_columns, mbev_grid.n_rows);
 	set_label_multiline_string(label_mbeditviz_status, (String)string);
 
 	/* build available file list */

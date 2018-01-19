@@ -37,8 +37,8 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
-#ifdef WIN32
-#include <stdint.h> /* To get INT32_MIN, INT32_MAX, etc ... */
+#if HAVE_STDINT_H
+#include <stdint.h>
 #endif
 
 #include "mbbs_defines.h"
