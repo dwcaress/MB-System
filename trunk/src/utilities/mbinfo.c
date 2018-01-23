@@ -759,12 +759,13 @@ int main(int argc, char **argv) {
 					fprintf(output, "%s", format_description);
 					break;
 				case JSON:
-					fprintf(output, "\"file_info\":{\n");
-					fprintf(output, "\"swath_data_file\":\"%s\",\n", fileprint);
-					fprintf(output, "\"mbio_data_format_id\":\"%d\",\n", format);
+					fprintf(output, "\"file_info\": {\n");
+					fprintf(output, "\"swath_data_file\": \"%s\",\n", fileprint);
+					fprintf(output, "\"mbio_data_format_id\": \"%d\",\n", format);
 					len1 = strspn(format_description, "Formatname: ");
 					len2 = strcspn(&format_description[len1], "\n");
 					strncpy(string, &format_description[len1], len2);
+					string[len2] = '\0';
 					fprintf(output, "\"format_name\": \"%s\",\n", string);
 					len1 += len2 + 1;
 					len1 += strspn(&format_description[len1], "InformalDescription: ");
@@ -789,11 +790,13 @@ int main(int argc, char **argv) {
 					len1 = strspn(format_description, "Formatname: ");
 					len2 = strcspn(&format_description[len1], "\n");
 					strncpy(string, &format_description[len1], len2);
+					string[len2] = '\0';
 					fprintf(output, "\t\t<format_name>%s</format_name>\n", string);
 					len1 += len2 + 1;
 					len1 += strspn(&format_description[len1], "InformalDescription: ");
 					len2 = strcspn(&format_description[len1], "\n");
 					strncpy(string, &format_description[len1], len2);
+					string[len2] = '\0';
 					fprintf(output, "\t\t<informal_description>%s</informal_description>\n", string);
 					len1 += len2 + 1;
 					len1 += strspn(&format_description[len1], "Attributes: ");
@@ -860,7 +863,7 @@ int main(int argc, char **argv) {
 								fprintf(output, "  %s\n", comment);
 								break;
 							case JSON:
-								fprintf(output, "\"comment\":\"%s\",\n", comment);
+								fprintf(output, "\"comment\": \"%s\",\n", comment);
 								break;
 							case XML:
 								fprintf(output, "\t<comment>%s</comment>\n", comment);
@@ -1959,7 +1962,7 @@ int main(int argc, char **argv) {
 		break;
 	case JSON:
 		fprintf(output, "\"data_totals\": {\n");
-		fprintf(output, "\"number_of_records\":\"%d\"", irec);
+		fprintf(output, "\"number_of_records\": \"%d\"", irec);
 		isbtmrec = notice_list_tot[MB_DATA_SUBBOTTOM_MCS] + notice_list_tot[MB_DATA_SUBBOTTOM_CNTRBEAM] +
 		           notice_list_tot[MB_DATA_SUBBOTTOM_SUBBOTTOM];
 		if (isbtmrec > 0)
@@ -2345,7 +2348,7 @@ int main(int argc, char **argv) {
 					mb_notice_message(verbose, i, &notice_msg);
 					if (notice_total > 0)
 						fprintf(output, ",\n");
-					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\":\"%s\"\n}}",
+					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\": \"%s\"\n}}",
 					        notice_list_tot[i], notice_msg);
 					notice_total++;
 				}
@@ -2360,7 +2363,7 @@ int main(int argc, char **argv) {
 					mb_notice_message(verbose, i, &notice_msg);
 					if (notice_total > 0)
 						fprintf(output, ",\n");
-					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\":\"%s\"\n}}",
+					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\": \"%s\"\n}}",
 					        notice_list_tot[i], notice_msg);
 					notice_total++;
 				}
@@ -2375,7 +2378,7 @@ int main(int argc, char **argv) {
 					mb_notice_message(verbose, i, &notice_msg);
 					if (notice_total > 0)
 						fprintf(output, ",\n");
-					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\":\"%s\"\n}}",
+					fprintf(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\": \"%s\"\n}}",
 					        notice_list_tot[i], notice_msg);
 					notice_total++;
 				}
