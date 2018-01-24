@@ -40,9 +40,7 @@
  *       INCLUDE FILES
  *****************************************************************************/
 #ifdef HAVE_CONFIG_H
-#ifndef MBSYSTEM_CONFIG_DEFINED
 #include <mb_config.h>
-#endif
 #endif
 
 #if defined(__hpux)
