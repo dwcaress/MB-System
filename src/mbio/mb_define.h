@@ -27,7 +27,11 @@
 #ifndef MB_DEFINE_DEF
 #define MB_DEFINE_DEF
 
-#include "mb_config.h"
+#ifdef HAVE_CONFIG_H
+#ifndef MBSYSTEM_CONFIG_DEFINED
+#include <mb_config.h>
+#endif
+#endif
 
 /* include for mb_s_char types */
 #if HAVE_STDINT_H

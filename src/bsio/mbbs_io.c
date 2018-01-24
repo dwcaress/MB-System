@@ -37,7 +37,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
-#if HAVE_STDINT_H
+#ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
 

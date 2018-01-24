@@ -35,9 +35,10 @@
 /*****************************************************************************
  *       INCLUDE FILES
  *****************************************************************************/
-/* Added HAVE_CONFIG_H for autogen files */
 #ifdef HAVE_CONFIG_H
+#ifndef MBSYSTEM_CONFIG_DEFINED
 #include <mb_config.h>
+#endif
 #endif
 
 #include <Xm/Xm.h>
