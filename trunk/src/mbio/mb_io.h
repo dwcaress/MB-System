@@ -26,7 +26,6 @@
 #ifndef MB_IO_DEF
 #define MB_IO_DEF
 
-#include "mb_config.h"
 #include "mb_define.h"
 #include "mb_status.h"
 

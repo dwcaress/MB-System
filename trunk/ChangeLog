@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+* Version 5.5.2326       January 23, 2017
   Version 5.5.2324       January 18, 2017
   Version 5.5.2323       December 7, 2017
   Version 5.5.2322       November 25, 2017
@@ -267,6 +268,15 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2326 (January 23, 2018)
+
+Build system: Restructure the use of the mb_config.h file so that compiling on
+Ubuntu 17 succeeds (issue related to stdint.h includes)
+
+-----> 5.5.2325 (January 23, 2018)
+
+MBinfo: Fixed bug in JSON output (Christian Ferreira)
 
 -----> 5.5.2324 (January 18, 2018)
 

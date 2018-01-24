@@ -57,6 +57,9 @@
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
+/* Set MBSYSTEM_CONFIG_DEFINED define in mb_config.h */
+#undef MBSYSTEM_CONFIG_DEFINED
+
 /* Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h */
 #undef MBSYSTEM_INSTALL_PREFIX
 

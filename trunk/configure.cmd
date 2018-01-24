@@ -229,7 +229,7 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
         sudo apt-get install gmt libgmt5 libgmt-dev gmt-gshhg gmt-doc \
             libx11-dev xorg-dev libmotif-dev libmotif4 \
             libxp-dev mesa-common-dev libsdl1.2-dev libsdl-image1.2-dev \
-            sudo apt-get install  build-essential gfortran nautilus-open-terminal \
+            build-essential gfortran nautilus-open-terminal \
             libfftw3-3 libfftw3-dev libnetcdf-dev netcdf-bin \
             libgdal-bin gdal-dev gv csh libgmt-dev libproj-dev
 # 

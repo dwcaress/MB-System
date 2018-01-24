@@ -27,7 +27,7 @@
  */
 
 /* Debug flag */
-#define MBF_EDGJSTAR_DEBUG 1
+//#define MBF_EDGJSTAR_DEBUG 1
 
 /* standard include files */
 #include <stdio.h>

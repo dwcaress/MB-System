@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2324],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2326],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "18 January 2018", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "23 January 2018", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -744,6 +744,7 @@ dnl--------------------------------------------------------------------
 dnl Add some variables to be exported to the src/mbio/mb_config.h file
 dnl--------------------------------------------------------------------
 
+AC_DEFINE_UNQUOTED(MBSYSTEM_CONFIG_DEFINED, 1, [Set MBSYSTEM_CONFIG_DEFINED define in mb_config.h])
 AC_DEFINE_UNQUOTED(MBSYSTEM_INSTALL_PREFIX, "$prefix", [Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h])
 AC_DEFINE_UNQUOTED(MBSYSTEM_OTPS_LOCATION, "$OTPS_DIR", [Set MBSYSTEM_OTPS_LOCATION define in mb_config.h])
 
