@@ -3076,7 +3076,7 @@ int main(int argc, char **argv) {
 				status = mb_make_info(verbose, MB_YES, ofile, oformat, &error);
 	
 				/* generate gef files */
-				sprintf(command, "mbgetesf -I %s -M2 -O %s.gef", ofile, ofile);
+				sprintf(command, "mbgetesf -I %s -M4 -O %s.gef", ofile, ofile);
 				if (verbose > 0)
 					fprintf(stderr, "Generating gef file for %s\n", ofile);
 				shellstatus = system(command);

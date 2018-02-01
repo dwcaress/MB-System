@@ -33,11 +33,13 @@ name), the edits can automatically be loaded into \fBmbedit\fP or
 \fBmbclean\fP.
 
 The user can extract edit events from only the flagged beams (\fB\-M\fP\fI1\fP),
-or can extract edit events specifying null and flagged beams (\fB\-M\fP\fI2\fP)
-and all (good, flagged, and null) beams (\fB\-M\fP\fI3\fP). The latter cases are necessary only if
+or can extract edit events specifying null and flagged beams (\fB\-M\fP\fI2\fP),
+or all (good, flagged, and null) beams (\fB\-M\fP\fI3\fP).
+The \fB\-M\fP\fI2\fP and \fB\-M\fP\fI3\fP cases are useful if
 previous editing has involved nulling beams that were
 originally classified as good or unflagging beams that were
 originally flagged.
+
 
 The default input is from stdin, and the default output is
 to standard out.
@@ -90,7 +92,17 @@ If \fImode\fP = 1, then only flagged beams are output. If
 \fImode\fP = 2, then flagged and null beams are output. If
 \fImode\fP = 3, then an edit event will be output for every
 beam, including those that are "good" (neither flagged nor
-null). Default: \fImode\fP = 1.
+null).
+The \fImode\fP values of 4 to 6 cause the output "edit save file" to have an
+embedded special mode that implicitly sets all beam flags not specified with
+an edit event to a default value. If \fImode\fP=5 then the default value is
+null, if \fImode\fP=6 then the default value is good, and if \fImode\fP=4 then
+the default value is good for most formats and null for the few formats that
+have more null than valid beams. The default modes are used by programs
+\fBmbpreprocess\fP and \fBmbeditviz\fP when generating and using "global edit
+files" ("*.gef" suffix) that are used to completely specify the beam flag state
+of a raw swath bathymetry file.
+Default: \fImode\fP = 1.
 .TP
 .B \-O
 \fIesffile\fP

@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2328       January 31, 2017
 * Version 5.5.2327       January 23, 2017
   Version 5.5.2324       January 18, 2017
   Version 5.5.2323       December 7, 2017
@@ -268,6 +269,29 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2328 (January 31, 2018)
+
+Edit Save Files (*.esf): The edit save file format has been augmented to include
+a mode value that can include implicitly setting all soundings not set by a beamflag
+in the file to a null value (mode == 1) or a valid value (mode = 2). The default
+remains to change sounding beamflag values only for beams explicitly set by an
+edit event. The only means to create ESF files with implicit beamflag modes is
+using mbgetesf with -M4 or -M5, and the only use of implicit beamflag modes is in
+the MBedtiviz *.gef files. The new ESF files have a version 3 tag; old ESF files
+will continue to work fine.
+
+MBgetesf: Augmented to output edit save files in two new modes. If -M4 is specified,
+the beamflags of null beams will not be output, but the ESF mode is set so that
+the beamflags of any soundings not specified will be set null. If -M5 is specified,
+the beamflags of valid beams will not be output, but the ESF mode is set so that
+the beamflags of any soundings not specified will be set valid.
+
+MBpreprocess: Generates *.gef files using mbgetesf with the -M4 rather than -M2
+option.
+
+MBinfo: Fixed memory allocation problem that led to crashes reading data in formats
+MBF_3DWISSLR (232) and MBF_3DWISSLP (233).
 
 -----> 5.5.2327 (January 23, 2018)
 

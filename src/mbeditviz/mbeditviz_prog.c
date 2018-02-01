@@ -997,7 +997,7 @@ int mbeditviz_load_file(int ifile) {
 				else
 					gefmodtime = 0;
 				if (rawmodtime >= gefmodtime) {
-					sprintf(command, "mbgetesf -I %s -M2 -O %s.gef", file->path, file->path);
+					sprintf(command, "mbgetesf -I %s -M4 -O %s.gef", file->path, file->path);
 					fprintf(stderr, "Generating global edit file:\n\t%s\n", command);
 					shellstatus = system(command);
 				}

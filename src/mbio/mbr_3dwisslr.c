@@ -519,7 +519,7 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
                                 (void **)(&mb_io_ptr->indextable), error);
     }
     
-    /* read file header and check the first two bytes */
+    /* read file header and check the first few bytes */
     count = 0;
     if (status == MB_SUCCESS)
         status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
@@ -558,6 +558,14 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
                     mb_io_ptr->data_structure_size = store->size_pulse_record_raw;
                     buffer = mb_io_ptr->raw_data;
                 }
+            }
+    
+            /* allocate indexing array */
+            if (mb_io_ptr->num_indextable_alloc <= store->scan_count) {
+                mb_io_ptr->num_indextable_alloc = store->scan_count;
+                status = mb_reallocd(verbose, __FILE__, __LINE__,
+                                        mb_io_ptr->num_indextable_alloc * sizeof(struct mb_io_indextable_struct),
+                                        (void **)(&mb_io_ptr->indextable), error);
             }
             
             /* augment the index table */
@@ -866,11 +874,13 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
             store->heada_offset_x_m = MBSYS_3DDWISSL_HEADA_OFFSET_X_M;
             store->heada_offset_y_m = MBSYS_3DDWISSL_HEADA_OFFSET_Y_M;
             store->heada_offset_z_m = MBSYS_3DDWISSL_HEADA_OFFSET_Z_M;
+            store->heada_offset_heading_deg = MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG;
             store->heada_offset_roll_deg = MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG;
             store->heada_offset_pitch_deg = MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG;
             store->headb_offset_x_m = MBSYS_3DDWISSL_HEADB_OFFSET_X_M;
             store->headb_offset_y_m = MBSYS_3DDWISSL_HEADB_OFFSET_Y_M;
             store->headb_offset_z_m = MBSYS_3DDWISSL_HEADB_OFFSET_Z_M;
+            store->headb_offset_heading_deg = MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG;
             store->headb_offset_roll_deg = MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG;
             store->headb_offset_pitch_deg = MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG;
             

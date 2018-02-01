@@ -15,6 +15,13 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+* Version 5.5.2327       January 23, 2017
+  Version 5.5.2324       January 18, 2017
+  Version 5.5.2323       December 7, 2017
+  Version 5.5.2322       November 25, 2017
+* Version 5.5.2321       October 26, 2017
+  Version 5.5.2320       October 18, 2017
+* Version 5.5.2319       October 16, 2017
 * Version 5.5.2318       September 29, 2017
 * Version 5.5.2314       August 24, 2017
 * Version 5.5.2313       August 9, 2017
@@ -262,7 +269,76 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2316 (September 29, 2017)
+-----> 5.5.2327 (January 23, 2018)
+
+Build system: Restructure the use of the mb_config.h file so that compiling on
+Ubuntu 17 succeeds (issue related to stdint.h includes)
+
+-----> 5.5.2325 (January 23, 2018)
+
+MBinfo: Fixed bug in JSON output (Christian Ferreira)
+
+-----> 5.5.2324 (January 18, 2018)
+
+MBpreprocess: Added support for the 3D at Depth
+wide swath lidar (WiSSL) system delivered to MBARI in December 2017.
+
+Formats MBF_3DWISSLR (232) and MBF_3DWISSLP (233): Added support for the 3D at Depth
+wide swath lidar (WiSSL) system delivered to MBARI in December 2017.
+
+MBm_route2mission: Fixed implementation of inserting surfacing events into missions
+at line start and end waypoints.
+
+Many source files: Changes to variable names in GMT grid header and CPT structures for GMT 6.
+
+-----> 5.5.2323 (December 7, 2017)
+
+MBnavadjust: fixed crashes that happened when files or surveys are held fixed.
+
+-----> 5.5.2322 (November 25, 2017)
+
+Mbpreprocess: Now set so that input Imagenex DeltaT data in the vendor format
+MBF_IMAGE83P (191) will be output in the processing format MBF_IMAGEMBA (192)
+after pre-processing.
+
+Mb7k2jstar: Now outputs in the current jstar format rather than a >10 year old
+variant.
+
+Formats MBF_EDGJSTAR (132) and MBF_EDGJSTR2 (133) supporting Edgetech Jstar (*.jsf)
+files: Changed code to support recent and current versions of Jstar format files.
+The code should recognize and convert older variants, particularly those written
+by past versions of MB-System.
+
+Various source files (mk_cheby.c, geod_for.c, mbsys_xse.c, mbsys_sb2100.c,
+mbsys_elacmk2.c, mbsys_elac.c, mbr_xtfr8101.c, mbbs_defines.h):
+Added curly brackets, changed beamflag setting calculations, and reformatted
+some lines in order to silence compiler warnings.
+
+-----> 5.5.2321 (October 26, 2017)
+
+Mbgrdviz: fixed bug in displaying overlays.
+
+Mbpreprocess: Added some kluge fixes to time jumps in ancilliary data. New commands
+are --kluge-ancilliary-time-jumps and --kluge-mbaripressure-time-jumps.
+
+Mbextractsegy: fixed bug in the output plotting script.
+
+Format 88 (MBF_RESON7KR): Fixed confusion between Depth and Height s7k data records.
+
+-----> 5.5.2320 (October 18, 2017)
+
+Mbgrdviz: Now, when overlays are displayed in mbgrdviz, the only areas rendered
+are those where both the primary and overlay grids are defined.
+
+-----> 5.5.2319 (October 16, 2017)
+
+Mbprocess: Fixed bug that caused mbprocess to (sometimes) never finish while
+continuing to write to the output file.
+
+-----> 5.5.2318 (September 29, 2017)
+
+Mbnavadjust: Fixed bug that often, but not always, caused the inversion to blow
+up and crash the program.
 
 General: Fixed problem with data record type informational messages
 
