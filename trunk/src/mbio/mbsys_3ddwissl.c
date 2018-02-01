@@ -2193,7 +2193,8 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 	double angle_az_sign, angle_el_sign;
 	double mtodeglon, mtodeglat;
 	double xx;
-	int ipulse, isounding;
+	int ipulse, isounding, isounding_largest;
+	short amplitude_largest, amplitude_max, amplitude_threshold;
     double head_offset_x_m;
     double head_offset_y_m;
     double head_offset_z_m;
@@ -2239,7 +2240,7 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 		if (store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADA || store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADA) {
 			/* optical head A */
 			angle_az_sign = -1.0;
-			angle_el_sign = 1.0;
+			angle_el_sign = -1.0;
 			head_offset_x_m = store->heada_offset_x_m;
 			head_offset_y_m = store->heada_offset_y_m;
 			head_offset_z_m = store->heada_offset_z_m;
@@ -2258,17 +2259,38 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 			head_offset_roll_deg = store->headb_offset_roll_deg;
 			head_offset_pitch_deg = store->headb_offset_pitch_deg;
 		}
+		
+		/* figure out valid amplitude threshold */
+		for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++) {
+			pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
+			amplitude_max = 0;
+			for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
+				sounding = &pulse->soundings[isounding];
+				/* valid pulses have nonzero ranges */
+				if (sounding->range > 0.001 && sounding->amplitude > amplitude_max) {
+					amplitude_max = sounding->amplitude;
+				}
+			}
+		}
+		amplitude_threshold = MAX(amplitude_max / 25, 1000);
+//fprintf(stderr,"amplitude_max:%d amplitude_threshold:%d\n", amplitude_max, amplitude_threshold);
 
 		/* loop over all pulses and soundings */
 		for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++) {
 			pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
+			isounding_largest = -1;
+			amplitude_largest = 0;
 			for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
 				sounding = &pulse->soundings[isounding];
+				
 				/* valid pulses have nonzero ranges */
 				if (sounding->range > 0.001) {
 	
 					/* set beamflag */
-					sounding->beamflag = MB_FLAG_NONE;
+					if (sounding->amplitude >= amplitude_threshold)
+						sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
+					else
+						sounding->beamflag = MB_FLAG_NULL;
 	
 					/* apply pitch and roll */
 					alpha = angle_el_sign * pulse->angle_el
@@ -2295,6 +2317,13 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 					sounding->alongtrack = xx * sin(DTR * phi)
 										+ head_offset_y_m
 										+ pulse->alongtrack_offset;
+		
+										
+					/* check for largest amplitude */
+					if (sounding->amplitude > amplitude_largest) {
+						amplitude_largest = sounding->amplitude;
+						isounding_largest = isounding;
+					}
 				}
 				else {
 					/* null everything */
@@ -2302,6 +2331,16 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 					sounding->depth = 0.0;
 					sounding->acrosstrack = 0.0;
 					sounding->alongtrack = 0.0;
+				}
+			}
+				
+			/* reset beam flags */
+			if (isounding_largest >= 0) {
+				sounding = &pulse->soundings[isounding_largest];
+				if (sounding->beamflag != MB_FLAG_NULL) {
+					sounding->beamflag = MB_FLAG_NONE;
+//fprintf(stderr," ipulse:%d isounding:%d angle_az_sign:%f xyz: %f %f %f\n",
+//ipulse,isounding,angle_az_sign,sounding->acrosstrack,sounding->alongtrack,sounding->depth);
 				}
 			}
 		}

@@ -551,11 +551,13 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
                 store->heada_offset_x_m = MBSYS_3DDWISSL_HEADA_OFFSET_X_M;
                 store->heada_offset_y_m = MBSYS_3DDWISSL_HEADA_OFFSET_Y_M;
                 store->heada_offset_z_m = MBSYS_3DDWISSL_HEADA_OFFSET_Z_M;
+                store->heada_offset_heading_deg = MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG;
                 store->heada_offset_roll_deg = MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG;
                 store->heada_offset_pitch_deg = MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG;
                 store->headb_offset_x_m = MBSYS_3DDWISSL_HEADB_OFFSET_X_M;
                 store->headb_offset_y_m = MBSYS_3DDWISSL_HEADB_OFFSET_Y_M;
                 store->headb_offset_z_m = MBSYS_3DDWISSL_HEADB_OFFSET_Z_M;
+                store->headb_offset_heading_deg = MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG;
                 store->headb_offset_roll_deg = MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG;
                 store->headb_offset_pitch_deg = MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG;
                 

@@ -44,16 +44,19 @@
 #define MBGETESF_FLAGONLY 1
 #define MBGETESF_FLAGNULL 2
 #define MBGETESF_ALL 3
+#define MBGETESF_IMPLICITBEST 4
+#define MBGETESF_IMPLICITNULL 5
+#define MBGETESF_IMPLICITGOOD 6
 
 int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error);
 
-static char rcs_id[] = "$Id$";
+static char svn_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
 	/* id variables */
-	char program_name[] = "mbgetest";
+	char program_name[] = "mbgetesf";
 	char help_message[] = "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other "
 	                      "data files\ncontaining the same data (but presumably in a different\nstate of processing).  This "
 	                      "allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit "
@@ -125,6 +128,12 @@ int main(int argc, char **argv) {
 	char comment[MB_COMMENT_MAXLINE];
 	int mode;
 	int kluge = 0;
+
+	/* time, user, host variables */
+	time_t right_now;
+	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	mb_path esf_header;
+	int esf_mode = MB_ESF_MODE_EXPLICIT;
 
 	/* save file control variables */
 	int sofile_set = MB_NO;
@@ -226,14 +235,14 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
+		fprintf(stderr, "Version %s\n", svn_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Version %s\n", svn_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
@@ -319,14 +328,48 @@ int main(int argc, char **argv) {
 		if (sofile_set == MB_NO) {
 			sofp = stdout;
 		}
-
-		/* open the edit save file */
 		else if ((sofp = fopen(sofile, "w")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nEdit Save File <%s> not initialized for writing\n", sofile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(error);
+		}
+	}
+
+	/* put version header at beginning */
+	if (status == MB_SUCCESS) {
+		memset(esf_header, 0, MB_PATH_MAXLINE);
+		right_now = time((time_t *)0);
+		strcpy(date, ctime(&right_now));
+		date[strlen(date) - 1] = '\0';
+		if ((user_ptr = getenv("USER")) == NULL)
+			user_ptr = getenv("LOGNAME");
+		if (user_ptr != NULL)
+			strcpy(user, user_ptr);
+		else
+			strcpy(user, "unknown");
+		gethostname(host, MBP_FILENAMESIZE);
+		if (mode == MBGETESF_IMPLICITBEST) {
+			if (format == MBF_3DWISSLR || format == MBF_3DWISSLP) {
+				esf_mode = MB_ESF_MODE_IMPLICIT_NULL;
+			}
+			else {
+				esf_mode = MB_ESF_MODE_IMPLICIT_GOOD;
+			}
+		}
+		else if (mode == MBGETESF_IMPLICITNULL)
+			esf_mode = MB_ESF_MODE_IMPLICIT_NULL;
+		else if (mode == MBGETESF_IMPLICITGOOD)
+			esf_mode = MB_ESF_MODE_IMPLICIT_GOOD;
+		else
+			esf_mode = MB_ESF_MODE_EXPLICIT;
+		sprintf(esf_header,
+				"ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nSource Version: %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
+				esf_mode, MB_VERSION, svn_id, program_name, user, host, date);
+		if (fwrite(esf_header, MB_PATH_MAXLINE, 1, sofp) != 1) {
+			status = MB_FAILURE;
+			error = MB_ERROR_WRITE_FAIL;
 		}
 	}
 
@@ -403,14 +446,16 @@ int main(int argc, char **argv) {
 				// i,beamflag[i],bath[i]);
 				if (mb_beam_ok(beamflag[i])) {
 					beam_ok++;
-					if (mode == MBGETESF_ALL) {
+					if (mode == MBGETESF_ALL
+						|| esf_mode == MB_ESF_MODE_IMPLICIT_NULL) {
 						mbgetesf_save_edit(verbose, sofp, time_d, i, MBP_EDIT_UNFLAG, &error);
 						beam_ok_write++;
 					}
 				}
 				else if (mb_beam_check_flag_unusable(beamflag[i])) {
 					beam_null++;
-					if (mode == MBGETESF_FLAGNULL || mode == MBGETESF_ALL) {
+					if (mode == MBGETESF_ALL || mode == MBGETESF_FLAGNULL
+						|| esf_mode == MB_ESF_MODE_IMPLICIT_GOOD) {
 						mbgetesf_save_edit(verbose, sofp, time_d, i, MBP_EDIT_ZERO, &error);
 						beam_null_write++;
 					}
@@ -446,22 +491,40 @@ int main(int argc, char **argv) {
 
 	/* give the statistics */
 	if (verbose >= 1) {
+		if (mode == MBGETESF_FLAGONLY)
+			fprintf(stderr, "\nMBgetesf mode: Output beam flags of flagged beams\n");
+		else if (mode == MBGETESF_FLAGNULL)
+			fprintf(stderr, "\nMBgetesf mode: Output beam flags of flagged and null beams\n");
+		else if (mode == MBGETESF_ALL)
+			fprintf(stderr, "\nMBgetesf mode: Output beam flags of all beams\n");
+		else if (mode == MBGETESF_IMPLICITBEST)
+			fprintf(stderr, "\nMBgetesf mode: Output beam flags of flagged and good or null beams with null or good beams implicit (according to format)\n");
+		else if (mode == MBGETESF_IMPLICITNULL)
+			fprintf(stderr, "\nMBgetesf mode: Output beam flags of flagged and good beams with null beams implicit\n");
+		else if (mode == MBGETESF_IMPLICITGOOD)
+			fprintf(stderr, "\nMBgetesf mode: Output beam flags of flagged and null beams with good beams implicitbeams\n");
 		fprintf(stderr, "\nData records:\n");
 		fprintf(stderr, "\t%d input data records\n", idata);
 		fprintf(stderr, "\nBeam flag read totals:\n");
 		fprintf(stderr, "\t%d beams ok\n", beam_ok);
 		fprintf(stderr, "\t%d beams null\n", beam_null);
 		fprintf(stderr, "\t%d beams flagged\n", beam_flag);
-		fprintf(stderr, "\t%d beams flagged manually\n", beam_flag_manual);
-		fprintf(stderr, "\t%d beams flagged by filter\n", beam_flag_filter);
-		fprintf(stderr, "\t%d beams flagged by sonar\n", beam_flag_sonar);
-		fprintf(stderr, "\nBeam flag write totals:\n");
+		fprintf(stderr, "\t\t%d beams flagged manually\n", beam_flag_manual);
+		fprintf(stderr, "\t\t%d beams flagged by filter\n", beam_flag_filter);
+		fprintf(stderr, "\t\t%d beams flagged by sonar\n", beam_flag_sonar);
+		if (esf_mode == MB_ESF_MODE_IMPLICIT_NULL)
+			fprintf(stderr, "\nESF mode: implicit NULL beams\n");
+		else if (esf_mode == MB_ESF_MODE_IMPLICIT_GOOD)
+			fprintf(stderr, "\nESF mode: implicit GOOD beams\n");
+		else
+			fprintf(stderr, "\nESF mode: no implicit beams\n");
+		fprintf(stderr, "Beam flag write totals:\n");
 		fprintf(stderr, "\t%d beams ok\n", beam_ok_write);
 		fprintf(stderr, "\t%d beams null\n", beam_null_write);
 		fprintf(stderr, "\t%d beams flagged\n", beam_flag);
-		fprintf(stderr, "\t%d beams flagged manually\n", beam_flag_manual);
-		fprintf(stderr, "\t%d beams flagged by filter\n", beam_flag_filter);
-		fprintf(stderr, "\t%d beams flagged by sonar\n", beam_flag_sonar);
+		fprintf(stderr, "\t\t%d beams flagged manually\n", beam_flag_manual);
+		fprintf(stderr, "\t\t%d beams flagged by filter\n", beam_flag_filter);
+		fprintf(stderr, "\t\t%d beams flagged by sonar\n", beam_flag_sonar);
 	}
 
 	/* end it all */

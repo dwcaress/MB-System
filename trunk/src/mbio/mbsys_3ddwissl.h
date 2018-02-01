@@ -185,16 +185,18 @@
      *     droll (in xz plane, + to starboard): -22.08 degrees
      *     dpitch (in yz plane, + forward): -5.01
      */
-#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           -0.012224004
+#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           +0.012224004
 #define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954
-#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           -0.062005210
-#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -22.08
-#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -4.68
-#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           +0.012224004
+#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.062005210
+#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -1.40         // ICD value 0.0
+#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -21.60        // ICD value -22.08
+#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -5.54         // ICD value -4.68
+#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           -0.012224004
 #define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.120281954
-#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           -0.062005210
-#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.08
-#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -5.01
+#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.062005210
+#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.40         // ICD value 0.0
+#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +21.60        // ICD value +22.08
+#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.15         // ICD value -5.01
 
 struct mbsys_3ddwissl_calibration_struct {
     char cfg_path[ 64 ];

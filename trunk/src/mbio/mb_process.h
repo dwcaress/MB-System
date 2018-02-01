@@ -916,6 +916,9 @@ struct mb_process_struct {
 };
 
 /* edit save file definitions */
+#define MB_ESF_MODE_EXPLICIT 0
+#define MB_ESF_MODE_IMPLICIT_NULL 1
+#define MB_ESF_MODE_IMPLICIT_GOOD 2
 #define MB_ESF_MAXTIMEDIFF 0.00011
 #define MB_ESF_MAXTIMEDIFF_X10 0.0011
 #define MB_ESF_MULTIPLICITY_FACTOR 1000000
@@ -930,6 +933,7 @@ struct mb_esf_struct {
 	char esstream[MB_PATH_MAXLINE];
 	int byteswapped;
 	int version;
+    int mode;
 	int nedit;
 	struct mb_edit_struct *edit;
 	FILE *esffp;
