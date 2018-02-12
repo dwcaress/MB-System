@@ -677,6 +677,7 @@ struct mb_io_struct {
 	int (*mb_io_sidescantype)(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
 	int (*mb_io_preprocess)(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars, int *error);
 	int (*mb_io_extract_platform)(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error);
+	int (*mb_io_sensorhead)(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead, int *error);
 	int (*mb_io_extract)(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
 	                     double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
 	                     double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,

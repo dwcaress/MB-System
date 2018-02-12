@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_3dwisslr.c	2/11/93
  *	$Id$
  *
- *    Copyright (c) 1993-2017 by
+ *    Copyright (c) 1993-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -103,6 +103,7 @@ int mbr_register_3dwisslr(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_3dwisslr;
 	mb_io_ptr->mb_io_dimensions = &mbsys_3ddwissl_dimensions;
 	mb_io_ptr->mb_io_preprocess = &mbsys_3ddwissl_preprocess;
+	mb_io_ptr->mb_io_sensorhead = &mbsys_3ddwissl_sensorhead;
 	mb_io_ptr->mb_io_extract = &mbsys_3ddwissl_extract;
 	mb_io_ptr->mb_io_insert = &mbsys_3ddwissl_insert;
 	mb_io_ptr->mb_io_extract_nav = &mbsys_3ddwissl_extract_nav;
@@ -387,7 +388,9 @@ int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* if needed calculate bathymetry */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == MB_NO) {
-		mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr, error);
+		mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
+                MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD,
+                MBSYS_3DDWISSL_DEFAULT_TARGET_RANGE, error);
 	}
 
 	/* print out status info */
@@ -1047,6 +1050,9 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
             mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->range_start)); index += 4;
             mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->range_end)); index += 4;
             mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->pulse_count)); index += 4;
+//fprintf(stderr,"read %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%9.9d pulse_count:%d\n",
+//store->year,store->month,store->day,store->hour,store->minutes,store->seconds,
+//store->nanoseconds,store->pulse_count);
             
             /* read the pulses */
             for (ipulse=0; ipulse<store->pulses_per_scan; ipulse++) {

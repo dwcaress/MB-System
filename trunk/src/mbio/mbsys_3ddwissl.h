@@ -32,6 +32,7 @@
  *
  *--------------------------------------------------------------------------------
  * Range Angle Angle data format (binary)
+ * 3D at Depth raw WiSSL data format
  *              Item	                                Value	            Bytes
  * ---------------------------------------------------------------------------------------
  * File Header
@@ -101,7 +102,7 @@
  *      Calibration Information Head A
  *      Calibration Information Head B
  *          (1) Record ID (A or B)
- *              Pulse Timestamp
+ *              Scan Timestamp and characteristics
  *              Pulse count this scan line
  *                  (1) Laser Pulse Data:
  *                      AZ angle
@@ -139,6 +140,127 @@
  *
  *--------------------------------------------------------------------------------
  *
+ * Processing WiSSL Data Format
+ * ----------------------------
+ * The file header, scan information, and calibration information sections are
+ * the same as for the raw format. The survey data records differ from those of
+ * the raw format in three respects:
+ *   1) The size in bytes of the scan record, minus 4, is stored as an unsigned
+ *      short int immediately following the record id.
+ *   2) Only non-null soundings as defined by preprocessing are stored - many
+ *      low amplitude picks may be discarded.
+ *   3) The soundings are stored sequentially.
+ *   4) The soundings include calculated bathymetry values and the pulse and LOS
+ *      pick numbers.
+ *
+ * ---------------------------------------------------------------------------------------
+ * File Header
+ *           Record ID – WiSSL                             0x3D47   2 (1 UINT16)
+ *           File Magic Number                             0x3D08   2 (1 UINT16)
+ *           File version                                  1        2 (1 UINT16)
+ *           File sub version                              1        2 (1 UINT16)
+ *           
+ * Scan Information
+ *           AZ, Cross track angle start, typical (deg)             4 (1 float32)
+ *           AZ, Cross track angle end, typical (deg)               4 (1 float32)
+ *           Pulses per cross track, scan line                      2 (1 UINT16)
+ *           Number pulses per LOS                                  1 (1 UINT8)
+ *           Scan lines per this File, Head A                       2 (1 UINT16)
+ *           Scan lines per this File, Head B                       2 (1 UINT16)
+ *           
+ * Calibration Information
+ *           Calibration Structure, Head A                          450 bytes
+ *           Calibration Structure, Head B                          450 bytes
+ * 
+ * Pulse ID and Timestamp ( 1 to n Scans )
+ *           Record ID – Head A or B              0x3D53, 0x3D54    2 (1 UINT16)
+ *           Timestamp year (true year)                             2 (1 UINT16)
+ *           Timestamp month (1-12)                                 1 (1 UINT8)
+ *           Timestamp day                                          1 (1 UINT8)
+ *           Timestamp days since Jan 1                             2 (1 UINT16)
+ *           Timestamp hour                                         2 (1 UINT16)
+ *           Timestamp minutes                                      1 (1 UINT8)
+ *           Timestamp seconds                                      1 (1 UINT8)
+ *           Timestamp nano seconds                                 4 (1 UINT32)
+ *           Gain (laser power)                                     1 (UINT8)
+ *           Digitizer temperature C                                4 (float)
+ *           CTD temperature C                                      4 (float)
+ *           CTD salinity psu                                       4 (float)
+ *           CTD pressure dbar                                      4 (float)
+ *           Index                                                  4 (float)
+ *           Start processing m                                     4 (float)
+ *           End processing m                                       4 (float)
+ *           Pulse Count this scan line                             4 (1 UINT32)
+ *
+ * Laser Pulse Data ( 1 to m pulses per scan )
+ *           AZ, Cross track angle (deg)                            4 (1 float32)
+ *           EL, Forward track angle (deg)                          4 (1 float32)
+ *           AZ, Cross track offset (m)                             4 (1 float32)
+ *           EL, Forward track offset (m)                           4 (1 float32)
+ *           Pulse time offset (sec)                                4 (1 float32)
+ *           LOS Range 1 ( from glass front ) meters                4 (1 float32)
+ *           ...
+ *           LOS Range n ( from glass front ) meters                4 (1 float32) 
+ *           Amplitude LOS 1 / peak of signal                       2 (1 UINT16)
+ *           ...
+ *           Amplitude LOS n / peak of signal                       2 (1 UINT16)
+ *
+ *
+ * Each RAA file begins with a File Header, followed by a “Scan Information”
+ * block and a “Calibration Information” block of data. Then, the file contains
+ * scan line data. The data for each scan line contains: a Record ID (head
+ * designator), a full timestamp, and a” Laser Pulse Data” collection of data.
+ * Note, Head A and B scanlines are interleaved in the RAA file per their
+ * specific time stamps.
+ *
+ * For example, if the sensor was configured for 250 pulses per scan line and
+ * 3 LOS range measurements per pulse, the following data would be present in
+ * the RAA file:
+ *      File Header
+ *      Scan Information
+ *      Calibration Information Head A
+ *      Calibration Information Head B
+ *          (1) Record ID (A or B)
+ *              Scan Timestamp and characteristics
+ *              Pulse count this scan line
+ *                  (1) Laser Pulse Data:
+ *                      AZ angle
+ *                      EL angle
+ *                      AZ offset
+ *                      EL offset
+ *                      Pulse time offset
+ *                      Range Data:
+ *                          LOS Range 1
+ *                          LOS Range 2
+ *                          LOS Range 3
+ *                      Intensity Data:
+ *                          Intensity 1
+ *                          Intensity 2
+ *                          Intensity 3
+ *                      ...
+ *                  (250) Laser Pulse Data:
+ *                      AZ angle
+ *                      EL angle
+ *                      AZ offset
+ *                      EL offset
+ *                      Pulse time offset
+ *                      Range Data:
+ *                          LOS Range 1
+ *                          LOS Range 2
+ *                          LOS Range 3
+ *                      Intensity Data:
+ *                          Intensity 1
+ *                          Intensity 2
+ *                          Intensity 3
+ *                      ...
+ *
+ * Note: based on laser head performance, differing counts of data sets may
+ * exist for Head A and B. The “.raa” file extension is used for the binary file.
+ *
+ *--------------------------------------------------------------------------------
+ *--------------------------------------------------------------------------------
+ *
+ *
  */
 
 /* include mb_define.h */
@@ -161,9 +283,9 @@
 #define MBSYS_3DDWISSL_V1S1_RAW_SCAN_HEADER_SIZE      49
 #define MBSYS_3DDWISSL_V1S1_RAW_PULSE_HEADER_SIZE     20
 #define MBSYS_3DDWISSL_V1S1_RAW_SOUNDING_SIZE         6
-#define MBSYS_3DDWISSL_V1S1_PRO_SCAN_HEADER_SIZE      97
-#define MBSYS_3DDWISSL_V1S1_PRO_PULSE_HEADER_SIZE     64
-#define MBSYS_3DDWISSL_V1S1_PRO_SOUNDING_SIZE         19
+#define MBSYS_3DDWISSL_V1S1_PRO_SCAN_HEADER_SIZE      100
+#define MBSYS_3DDWISSL_V1S1_PRO_PULSE_HEADER_SIZE     66
+#define MBSYS_3DDWISSL_V1S1_PRO_SOUNDING_SIZE         22
     
     /* Instrument geometry for dual optical heads - the sensor reference point
      * is the midpoint on bottom of the mounting bracketry  as per the WiSSL
@@ -185,6 +307,19 @@
      *     droll (in xz plane, + to starboard): -22.08 degrees
      *     dpitch (in yz plane, + forward): -5.01
      */
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           +0.012224004
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.062005210
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -0.0         // ICD value 0.0
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -22.08        // ICD value -22.08
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -4.68         // ICD value -4.68
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           -0.012224004
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.120281954
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.062005210
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +0.00         // ICD value 0.0
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.08        // ICD value +22.08
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -5.01         // ICD value -5.01
+
 #define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           +0.012224004
 #define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954
 #define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.062005210
@@ -197,6 +332,9 @@
 #define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.40         // ICD value 0.0
 #define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +21.60        // ICD value +22.08
 #define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.15         // ICD value -5.01
+
+#define MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD 2000.0
+#define MBSYS_3DDWISSL_DEFAULT_TARGET_RANGE        4.5
 
 struct mbsys_3ddwissl_calibration_struct {
     char cfg_path[ 64 ];
@@ -290,6 +428,7 @@ struct mbsys_3ddwissl_pulse_struct {
                                  * and heading at start of scan */
 
     /* soundings */
+    int validsounding_count;    /* number of the soundings valid (non-null) for this pulse */
     struct mbsys_3ddwissl_sounding_struct soundings[MBSYS_3DDWISSL_V1S1_MAX_SOUNDINGS_PER_PULSE];
 };
 
@@ -335,6 +474,7 @@ struct mbsys_3ddwissl_struct {
     
 	/* Scan information from raw records */
     unsigned short record_id;       /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or 0x3D74) */
+    unsigned int scan_size;         /* bytes of scan record minus 4 (record_id + scan_size) */
     unsigned short year;
     mb_u_char month;
     mb_u_char day;
@@ -344,6 +484,7 @@ struct mbsys_3ddwissl_struct {
     mb_u_char seconds;
     unsigned int nanoseconds;
     mb_u_char gain;                 /* laser power setting */
+    mb_u_char unused;               /* unused */
     float digitizer_temperature;    /* digitizer temperature degrees C */
     float ctd_temperature;          /* ctd temperature degrees C */
     float ctd_salinity;             /* ctd salinity psu */
@@ -352,8 +493,7 @@ struct mbsys_3ddwissl_struct {
     float range_start;              /* range start processing meters */
     float range_end;                /* range end processing meters */
     unsigned int pulse_count;       /* pulse count for this scan */
-    char junk[1024];
-   
+
     /* merged navigation and attitude per each scan */
     double time_d;      /* epoch time - not in data file, calculated following reading */
 	double navlon;      /* absolute position longitude (degrees) */
@@ -363,8 +503,10 @@ struct mbsys_3ddwissl_struct {
 	float heading;      /* lidar heading (degrees) */
 	float roll;         /* lidar roll (degrees) */
 	float pitch;        /* lidar pitch (degrees) */
-    
-	unsigned int scan_count; /* global scan count */
+    unsigned short validpulse_count;              /* number of valid (non-null) pulses stored in this record */
+    unsigned short validsounding_count;           /* number of valid (non-null) soundings stored in this record */
+
+	unsigned int scan_count;                    /* global scan count */
     unsigned int size_pulse_record_raw;         /* for original logged records
                                                  * - calculated from file header values */
     unsigned int size_pulse_record_processed;   /* for extended processed records
@@ -386,6 +528,7 @@ int mbsys_3ddwissl_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_3ddwissl_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
 int mbsys_3ddwissl_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr,
                                     int *error);
+int mbsys_3ddwissl_sensorhead(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead, int *error);
 int mbsys_3ddwissl_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                                  double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                                  char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
@@ -418,7 +561,8 @@ int mbsys_3ddwissl_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
                                     int *error);
 int mbsys_3ddwissl_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_3ddwissl_print_store(int verbose, void *store_ptr, int *error);
-int mbsys_3ddwissl_calculatebathymetry(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbsys_3ddwissl_calculatebathymetry(int verbose, void *mbio_ptr, void *store_ptr,
+                                       double amplitude_threshold, double target_range, int *error);
 
 
 

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_process.h	9/11/00
  *    $Id$
  *
- *    Copyright (c) 2000-2017 by
+ *    Copyright (c) 2000-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -602,6 +602,7 @@
 #define MBP_EDIT_UNFLAG 2
 #define MBP_EDIT_ZERO 3
 #define MBP_EDIT_FILTER 4
+#define MBP_EDIT_SONAR 5
 #define MBP_ESF_NOWRITE 0
 #define MBP_ESF_WRITE 1
 #define MBP_ESF_APPEND 2
@@ -743,6 +744,8 @@ struct mb_preprocess_struct {
 	int recalculate_bathymetry;
     int sounding_amplitude_filter;
     double sounding_amplitude_threshold;
+    int sounding_range_filter;
+    double sounding_target_range;
     int ignore_water_column;
 
 	int n_kluge;

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_esf.c	4/10/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2017 by
+ *    Copyright (c) 2003-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -543,8 +543,14 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 		maxtimediff = MB_ESF_MAXTIMEDIFF;
 
 	/* find first and last edits for this ping - take ping multiplicity into account */
-	if (esf->nedit > 0 && time_d < (esf->edit[esf->startnextsearch].time_d - maxtimediff) &&
-	    (esf->startnextsearch > 0 && time_d < (esf->edit[esf->startnextsearch - 1].time_d - maxtimediff)))
+	if (esf->nedit > 0 && esf->startnextsearch > 0 
+		&& time_d < (esf->edit[esf->startnextsearch].time_d - maxtimediff)
+			&& time_d < (esf->edit[esf->startnextsearch - 1].time_d - maxtimediff))
+		firstedit = 0;
+	else if (esf->nedit > 0 && esf->startnextsearch > 0 
+		&& fabs(time_d - esf->edit[esf->startnextsearch - 1].time_d) <= maxtimediff
+		&& (esf->edit[esf->startnextsearch - 1].beam < beamoffset
+				|| esf->edit[esf->startnextsearch-1].beam > beamoffsetmax))
 		firstedit = 0;
 	else
 		firstedit = esf->startnextsearch;
@@ -559,7 +565,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 			lastedit = j;
 		}
 	}
-//fprintf(stderr,"time_d:%.6f pingmultiplicity:%d beamoffset:%d beamoffsetmax:%d   startnextsearch:%d firstedit:%d lastedit:%d\n",
+//fprintf(stderr,"time_d:%.9f pingmultiplicity:%d beamoffset:%d beamoffsetmax:%d   startnextsearch:%d firstedit:%d lastedit:%d\n",
 //time_d,pingmultiplicity,beamoffset,beamoffsetmax,esf->startnextsearch,firstedit,lastedit);
 
 	/* apply edits */
@@ -602,6 +608,15 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 							//	fprintf(stderr,"beam:%4.4d edit:%d time_d:%.6f MBP_EDIT_FILTER  flag:%d
 							//",i,j,esf->edit[j].time_d,beamflag[i]);
 							beamflag[i] = mb_beam_set_flag_filter(beamflag[i]);
+							esf->edit[j].use++;
+							apply = MB_YES;
+							action = esf->edit[j].action;
+							//	fprintf(stderr," %d\n",beamflag[i]);
+						}
+						else if (esf->edit[j].action == MBP_EDIT_SONAR) {
+							//	fprintf(stderr,"beam:%4.4d edit:%d time_d:%.6f MBP_EDIT_SONAR  flag:%d
+							//",i,j,esf->edit[j].time_d,beamflag[i]);
+							beamflag[i] = mb_beam_set_flag_sonar(beamflag[i]);
 							esf->edit[j].use++;
 							apply = MB_YES;
 							action = esf->edit[j].action;

@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
  *	$Id$
  *
- *    Copyright (c) 1993-2017 by
+ *    Copyright (c) 1993-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <assert.h>
 
 /* mbio include files */
 #include "mb_status.h"
@@ -80,7 +81,7 @@ int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	store->beams_bath = 0;
 	store->beams_amp = 0;
 	store->pixels_ss = 0;
-	store->spare1 = 0;
+	store->sensorhead = 0;
 	store->beams_bath_alloc = 0;
 	store->beams_amp_alloc = 0;
 	store->pixels_ss_alloc = 0;
@@ -284,6 +285,54 @@ int mbsys_ldeoih_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ss_type:    %d\n", *ss_type);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	/* return status */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_ldeoih_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
+							  int *sensorhead, int *error) {
+	char *function_name = "mbsys_ldeoih_sensorhead";
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_ldeoih_struct *store;
+
+	/* check for non-null data */
+	assert(mbio_ptr != NULL);
+	assert(store_ptr != NULL);
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", store_ptr);
+	}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_ldeoih_struct *)store_ptr;
+
+	/* if survey data extract which lidar head used for this scan */
+	if (store->kind == MB_DATA_DATA) {
+		*sensorhead = store->sensorhead;
+	} else {
+		*sensorhead = 0;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       sensorhead: %d\n", *sensorhead);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
@@ -1356,7 +1405,7 @@ int mbsys_ldeoih_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 		copy->beams_bath = store->beams_bath;
 		copy->beams_amp = store->beams_amp;
 		copy->pixels_ss = store->pixels_ss;
-		copy->spare1 = store->spare1;
+		copy->sensorhead = store->sensorhead;
 		copy->depth_scale = store->depth_scale;
 		copy->distance_scale = store->distance_scale;
 		copy->ss_type = store->ss_type;

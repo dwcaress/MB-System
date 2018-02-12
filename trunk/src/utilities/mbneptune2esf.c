@@ -177,6 +177,7 @@ int main(int argc, char **argv) {
 
 	/* mbio read and write values */
 	void *mbio_ptr = NULL;
+	void *store_ptr = NULL;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *sim_ping;
@@ -239,6 +240,9 @@ int main(int argc, char **argv) {
 	struct mb_esf_struct esf;
 
 	/* processing variables */
+	int sensorhead_status = MB_SUCCESS;
+	int sensorhead_error = MB_ERROR_NO_ERROR;
+	int sensorhead = 0;
 	int pingmultiplicity;
 	double time_d_lastping;
 	int read_data;
@@ -724,7 +728,12 @@ int main(int argc, char **argv) {
 					}
 
 					/* detect multiple pings with the same time stamps */
-					if (cur_ping.time_d == time_d_lastping) {
+					status = mb_get_store(verbose, mbio_ptr, &store_ptr, &error);
+					sensorhead_status = mb_sensorhead(verbose, mbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
+					if (sensorhead_status == MB_SUCCESS) {
+						pingmultiplicity = sensorhead;
+					}
+					else if (cur_ping.time_d == time_d_lastping) {
 						pingmultiplicity++;
 					}
 					else {

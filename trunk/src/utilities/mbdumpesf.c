@@ -2,7 +2,7 @@
  *    The MB-system:	mbdumpesf.c	3/20/2008
  *    $Id$
  *
- *    Copyright (c) 2008-2017 by
+ *    Copyright (c) 2008-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -40,7 +40,7 @@
 #include "mb_process.h"
 #include "mb_swap.h"
 
-static char rcs_id[] = "$Id$";
+static char svn_id[] = "$Id$";
 
 #define OUTPUT_TEXT 0
 #define OUTPUT_ESF 1
@@ -94,6 +94,7 @@ int main(int argc, char **argv) {
 	int time_i[7];
 	int beam;
 	int action;
+	int esf_mode;
 
 	/* time, user, host variables */
 	time_t right_now;
@@ -209,14 +210,14 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
+		fprintf(stderr, "Version %s\n", svn_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Version %s\n", svn_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -251,11 +252,12 @@ int main(int argc, char **argv) {
 		}
 
 		/* read file header to discern the format */
-		if (fread(esf_header, MB_PATH_MAXLINE, 1, iesffp) == 1 && strncmp(esf_header, "ESFVERSION02", 12) == 0) {
+		if (fread(esf_header, MB_PATH_MAXLINE, 1, iesffp) == 1 && strncmp(esf_header, "ESFVERSION", 10) == 0) {
 			nedit = (file_status.st_size - MB_PATH_MAXLINE) / (sizeof(double) + 2 * sizeof(int));
 
 			if (omode == OUTPUT_ESF && oesffp != NULL) {
 				memset(esf_header, 0, MB_PATH_MAXLINE);
+				esf_mode = MB_ESF_MODE_EXPLICIT;
 				right_now = time((time_t *)0);
 				strcpy(date, ctime(&right_now));
 				date[strlen(date) - 1] = '\0';
@@ -266,8 +268,9 @@ int main(int argc, char **argv) {
 				else
 					strcpy(user, "unknown");
 				gethostname(host, MBP_FILENAMESIZE);
-				sprintf(esf_header, "ESFVERSION02\nMB-System Version %s\nUser:%s\nCPU:%s\nDate:%s\n", MB_VERSION, user, host,
-				        date);
+				sprintf(esf_header,
+			        "ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nSource Version: %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
+			        esf_mode, MB_VERSION, svn_id, program_name, user, host, date);
 				if (fwrite(esf_header, MB_PATH_MAXLINE, 1, oesffp) != 1) {
 					status = MB_FAILURE;
 					error = MB_ERROR_WRITE_FAIL;
@@ -281,43 +284,54 @@ int main(int argc, char **argv) {
 
 		/* loop over reading edit events and printing them out */
 		for (i = 0; i < nedit && error == MB_ERROR_NO_ERROR; i++) {
+			ignore = MB_NO;
 			if (fread(&(time_d), sizeof(double), 1, iesffp) != 1 || fread(&(beam), sizeof(int), 1, iesffp) != 1 ||
 			    fread(&(action), sizeof(int), 1, iesffp) != 1) {
+				ignore = MB_YES;
 				status = MB_FAILURE;
 				error = MB_ERROR_EOF;
+			}
+			else if (strncmp(((char *)&time_d), "ESFVERSI", 8) == 0) {
+				ignore = MB_YES;
+				if (fread(esf_header, MB_PATH_MAXLINE-16, 1, iesffp) != 1) {
+					status = MB_FAILURE;
+					error = MB_ERROR_EOF;
+				}
 			}
 			else if (byteswapped == MB_YES) {
 				mb_swap_double(&(time_d));
 				beam = mb_swap_int(beam);
 				action = mb_swap_int(action);
 			}
-			ignore = MB_NO;
-			if (action == MBP_EDIT_FLAG) {
-				beam_flag++;
-				if (ignore_flag == MB_YES) {
-					ignore = MB_YES;
-					beam_flag_ignore++;
+			
+			if (ignore == MB_NO) {
+				if (action == MBP_EDIT_FLAG) {
+					beam_flag++;
+					if (ignore_flag == MB_YES) {
+						ignore = MB_YES;
+						beam_flag_ignore++;
+					}
 				}
-			}
-			else if (action == MBP_EDIT_UNFLAG) {
-				beam_unflag++;
-				if (ignore_flag == MB_YES) {
-					ignore = MB_YES;
-					beam_unflag_ignore++;
+				else if (action == MBP_EDIT_UNFLAG) {
+					beam_unflag++;
+					if (ignore_flag == MB_YES) {
+						ignore = MB_YES;
+						beam_unflag_ignore++;
+					}
 				}
-			}
-			else if (action == MBP_EDIT_ZERO) {
-				beam_zero++;
-				if (ignore_flag == MB_YES) {
-					ignore = MB_YES;
-					beam_zero_ignore++;
+				else if (action == MBP_EDIT_ZERO) {
+					beam_zero++;
+					if (ignore_flag == MB_YES) {
+						ignore = MB_YES;
+						beam_zero_ignore++;
+					}
 				}
-			}
-			else if (action == MBP_EDIT_FILTER) {
-				beam_filter++;
-				if (ignore_flag == MB_YES) {
-					ignore = MB_YES;
-					beam_filter_ignore++;
+				else if (action == MBP_EDIT_FILTER) {
+					beam_filter++;
+					if (ignore_flag == MB_YES) {
+						ignore = MB_YES;
+						beam_filter_ignore++;
+					}
 				}
 			}
 

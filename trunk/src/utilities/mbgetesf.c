@@ -2,7 +2,7 @@
  *    The MB-system:	mbgetesf.c	6/15/93
  *    $Id$
  *
- *    Copyright (c) 2001-2017 by
+ *    Copyright (c) 2001-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -472,7 +472,7 @@ int main(int argc, char **argv) {
 					}
 					if (mb_beam_check_flag_sonar(beamflag[i])) {
 						beam_flag_sonar++;
-						mbgetesf_save_edit(verbose, sofp, time_d, i, MBP_EDIT_FLAG, &error);
+						mbgetesf_save_edit(verbose, sofp, time_d, i, MBP_EDIT_SONAR, &error);
 					}
 				}
 			}

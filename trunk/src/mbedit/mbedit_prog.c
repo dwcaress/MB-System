@@ -4191,6 +4191,9 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 	char string[MB_PATH_MAXLINE];
 	int detect_status, detect_error, nbeams;
 	double speed_nav;
+	int sensorhead = 0;
+	int sensorhead_status = MB_SUCCESS;
+	int sensorhead_error = MB_ERROR_NO_ERROR;
 	int i, j;
 
 	/* print input debug statements */
@@ -4218,7 +4221,11 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 			status = mb_extract_nav(verbose, imbio_ptr, store_ptr, &kind, ping[nbuff].time_i, &ping[nbuff].time_d,
 			                        &ping[nbuff].navlon, &ping[nbuff].navlat, &speed_nav, &ping[nbuff].heading, &draft,
 			                        &ping[nbuff].roll, &ping[nbuff].pitch, &ping[nbuff].heave, &error);
-			if (nbuff > 0 && ping[nbuff].time_d == ping[nbuff - 1].time_d) {
+			sensorhead_status = mb_sensorhead(verbose, imbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
+			if (sensorhead_status == MB_SUCCESS) {
+				ping[nbuff].multiplicity = sensorhead;
+			}
+			else if (nbuff > 0 && ping[nbuff].time_d == ping[nbuff - 1].time_d) {
 				ping[nbuff].multiplicity = ping[nbuff - 1].multiplicity + 1;
 			}
 			else {
