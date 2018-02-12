@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_ldeoih.h	3/2/93
  *	$Id$
  *
- *    Copyright (c) 1993-2017 by
+ *    Copyright (c) 1993-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -76,7 +76,9 @@ struct mbsys_ldeoih_struct {
 	int beams_bath; /* number of depth values */
 	int beams_amp;  /* number of amplitude values */
 	int pixels_ss;  /* number of sidescan pixels */
-	int spare1;
+	int sensorhead; /* sensor head id for multi-head sensors
+					 *   0 for single head sensors,
+					 *   0 or 1 for dual head sensors, etc */
 	int beams_bath_alloc; /* number of depth values allocated */
 	int beams_amp_alloc;  /* number of amplitude values allocated */
 	int pixels_ss_alloc;  /* number of sidescan pixels allocated */
@@ -207,6 +209,7 @@ int mbsys_ldeoih_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 int mbsys_ldeoih_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_ldeoih_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 int mbsys_ldeoih_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
+int mbsys_ldeoih_sensorhead(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead, int *error);
 int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                          double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                          double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,

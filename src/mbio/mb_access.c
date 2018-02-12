@@ -2,7 +2,7 @@
  *    The MB-system:	mb_access.c	11/1/00
  *    $Id$
  *
- *    Copyright (c) 2000-2017 by
+ *    Copyright (c) 2000-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -618,6 +618,57 @@ int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       status:			     %d\n", status);
 	}
 	if (verbose >= 2) {
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	/* return status */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mb_sensorhead(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead, int *error) {
+	char *function_name = "mb_sensorhead";
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* call the appropriate mbsys_ sensorhead routine
+	        defined for:
+	          mb_io_ptr->system == MB_SYS_WISSL */
+	if (mb_io_ptr->mb_io_sensorhead != NULL) {
+		if (store_ptr == NULL)
+			store_ptr = (void *)mb_io_ptr->store_data;
+		if (store_ptr != NULL)
+			status = (*mb_io_ptr->mb_io_sensorhead)(verbose, mbio_ptr, store_ptr, sensorhead, error);
+	}
+
+	/* else set error so calling function knows to use timestamp comparison
+	   - calling function should immediately reset the error */
+	else {
+		*sensorhead = 0;
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_FORMAT;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       sensorhead: %d\n", *sensorhead);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);

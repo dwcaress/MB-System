@@ -217,8 +217,12 @@ int main(int argc, char **argv) {
 	double mtodeglat;
 	double mean;
 	double std_dev;
+	int pingmultiplicity;
 	int detect_status;
 	int detect_error;
+	int sensorhead;
+	int sensorhead_status = MB_SUCCESS;
+	int sensorhead_error = MB_ERROR_NO_ERROR;
 
 	/* median filter parameters */
 	int binnum;
@@ -779,22 +783,53 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "dbg2    status:     %d\n", status);
 			}
 			if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
+				/* save the beamflags */
 				for (i = 0; i < beams_bath; i++)
 					beamflagorg[i] = beamflag[i];
-				status = mb_esf_apply(verbose, &esf, time_d, 1, beams_bath, beamflagorg, &error);
 
-				/* get detection */
-				if (use_detect == MB_YES) {
-					status = mb_get_store(verbose, mbio_ptr, &store_ptr, &error);
-					detect_status = mb_detects(verbose, mbio_ptr, store_ptr, &kind, &beams_bath, detect, &detect_error);
-
-					if (detect_status != MB_SUCCESS) {
-						status = MB_SUCCESS;
-						for (i = 0; i < beams_bath; i++) {
-							detect[i] = MB_DETECT_UNKNOWN;
-						}
+				/* get detections and ping multiplicity */
+				status = mb_get_store(verbose, mbio_ptr, &store_ptr, &error);
+				detect_status = mb_detects(verbose, mbio_ptr, store_ptr, &kind, &beams_bath, detect, &detect_error);
+				if (detect_status != MB_SUCCESS) {
+					status = MB_SUCCESS;
+					for (i = 0; i < beams_bath; i++) {
+						detect[i] = MB_DETECT_UNKNOWN;
 					}
 				}
+				sensorhead_status = mb_sensorhead(verbose, mbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
+
+				/* allocate memory if necessary */
+				if (files[nfile - 1].nping >= files[nfile - 1].nping_alloc) {
+					files[nfile - 1].nping_alloc += PINGALLOCNUM;
+					status = mb_reallocd(verbose, __FILE__, __LINE__, files[nfile - 1].nping_alloc * sizeof(double),
+					                     (void **)&(files[nfile - 1].ping_time_d), &error);
+					if (status == MB_SUCCESS)
+						status = mb_reallocd(verbose, __FILE__, __LINE__, files[nfile - 1].nping_alloc * sizeof(int),
+						                     (void **)&(files[nfile - 1].pingmultiplicity), &error);
+					if (status == MB_SUCCESS)
+						status = mb_reallocd(verbose, __FILE__, __LINE__, files[nfile - 1].nping_alloc * sizeof(double),
+						                     (void **)&(files[nfile - 1].ping_altitude), &error);
+					if (error != MB_ERROR_NO_ERROR) {
+						mb_error(verbose, error, &message);
+						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+						exit(error);
+					}
+				}
+
+				/* store the ping data */
+				if (sensorhead_status == MB_SUCCESS) {
+					pingmultiplicity = sensorhead;
+				}
+				else if (files[nfile - 1].nping > 0
+						 && time_d == files[nfile - 1].ping_time_d[files[nfile - 1].nping - 1]) {
+					pingmultiplicity 
+					    = files[nfile - 1].pingmultiplicity[files[nfile - 1].nping - 1] + 1;
+				}
+				else {
+					pingmultiplicity = 0;
+				}
+				status = mb_esf_apply(verbose, &esf, time_d, pingmultiplicity, beams_bath, beamflagorg, &error);
 
 				/* update counters */
 				pings_tot++;
@@ -820,39 +855,12 @@ int main(int argc, char **argv) {
 						files[nfile - 1].nflag++;
 					}
 				}
-
-				/* allocate memory if necessary */
-				if (files[nfile - 1].nping >= files[nfile - 1].nping_alloc) {
-					files[nfile - 1].nping_alloc += PINGALLOCNUM;
-					status = mb_reallocd(verbose, __FILE__, __LINE__, files[nfile - 1].nping_alloc * sizeof(double),
-					                     (void **)&(files[nfile - 1].ping_time_d), &error);
-					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, files[nfile - 1].nping_alloc * sizeof(int),
-						                     (void **)&(files[nfile - 1].pingmultiplicity), &error);
-					if (status == MB_SUCCESS)
-						status = mb_reallocd(verbose, __FILE__, __LINE__, files[nfile - 1].nping_alloc * sizeof(double),
-						                     (void **)&(files[nfile - 1].ping_altitude), &error);
-					if (error != MB_ERROR_NO_ERROR) {
-						mb_error(verbose, error, &message);
-						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-						exit(error);
-					}
-				}
-
-				/* store the ping data */
+				
 				files[nfile - 1].ping_time_d[files[nfile - 1].nping] = time_d;
-				if (files[nfile - 1].nping > 0 && files[nfile - 1].ping_time_d[files[nfile - 1].nping] ==
-				                                      files[nfile - 1].ping_time_d[files[nfile - 1].nping - 1]) {
-					files[nfile - 1].pingmultiplicity[files[nfile - 1].nping] =
-					    files[nfile - 1].pingmultiplicity[files[nfile - 1].nping - 1] + 1;
-				}
-				else {
-					files[nfile - 1].pingmultiplicity[files[nfile - 1].nping] = 0;
-				}
+				files[nfile - 1].pingmultiplicity[files[nfile - 1].nping] = pingmultiplicity;
 				files[nfile - 1].ping_altitude[files[nfile - 1].nping] = altitude;
 				files[nfile - 1].nping++;
-
+				
 				/* check beam range */
 				if (limit_beams == MB_YES && max_beam_no == 0)
 					max_beam = beams_bath - min_beam;

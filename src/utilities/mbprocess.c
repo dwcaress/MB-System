@@ -2,7 +2,7 @@
  *    The MB-system:	mbprocess.c	3/31/93
  *    $Id$
  *
- *    Copyright (c) 2000-2017 by
+ *    Copyright (c) 2000-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -97,8 +97,9 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, struct mbprocess_sscorr_struct *corrtable,
                   struct mbprocess_sscorr_struct *corrtableuse, int *error);
 int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double angle, double *corr, int *error);
+int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int action, int *error);
 
-static char rcs_id[] = "$Id$";
+static char svn_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
@@ -181,6 +182,7 @@ and mbedit edit save files.\n";
 	int namp;
 	int nss;
 	char *beamflag = NULL;
+	char *beamflagorg = NULL;
 	double *bath = NULL;
 	double *bathacrosstrack = NULL;
 	double *bathalongtrack = NULL;
@@ -329,6 +331,9 @@ and mbedit edit save files.\n";
 	double *velocity_sum = NULL;
 	void *rt_svp = NULL;
 	double ssv;
+	int sensorhead = 0;
+	int sensorhead_status = MB_SUCCESS;
+	int sensorhead_error = MB_ERROR_NO_ERROR;
 
 	/* swath file locking variables */
 	int uselockfiles;
@@ -347,6 +352,13 @@ and mbedit edit save files.\n";
 	int neditduplicate;
 	int neditnotused;
 	int neditused;
+	
+	/* output reverse edit save file control variables */
+	mb_path resf_file;
+	FILE *resf_fp = NULL;
+	mb_path resf_header;
+	int resf_mode = MB_ESF_MODE_EXPLICIT;
+	int action;
 
 	double draft_org, depth_offset_use, depth_offset_change, depth_offset_org, static_shift;
 	double roll_org, pitch_org, heave_org, heading_org;
@@ -399,6 +411,10 @@ and mbedit edit save files.\n";
 
 	/* topography parameters */
 	struct mbprocess_grid_struct grid;
+	
+	/* output fbt and fnv files */
+	FILE *fnv_fp, *fbt_fp;
+	mb_path fnv_file, fbt_file;
 
 	char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	char *string1, *string2, *string3;
@@ -520,7 +536,7 @@ and mbedit edit save files.\n";
 	/* if help desired then print it and exit */
 	if (help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
+		fprintf(stderr, "Version %s\n", svn_id);
 		fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
 		fprintf(stderr, "\n%s\n", help_message);
 		fprintf(stderr, "\nusage: %s\n", usage_message);
@@ -576,7 +592,7 @@ and mbedit edit save files.\n";
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Version %s\n", svn_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "\ndbg2  MB-System Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
@@ -615,7 +631,7 @@ and mbedit edit save files.\n";
 	/* print starting info statements */
 	else if (verbose > 0) {
 		fprintf(stderr, "\nProgram <%s>\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
+		fprintf(stderr, "Version %s\n", svn_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "\nProgram Operation:\n");
 		fprintf(stderr, "  Input file:      %s\n", read_file);
@@ -2961,6 +2977,8 @@ and mbedit edit save files.\n";
 			if (error == MB_ERROR_NO_ERROR)
 				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflagorg, &error);
+			if (error == MB_ERROR_NO_ERROR)
 				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
 			if (error == MB_ERROR_NO_ERROR)
 				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
@@ -3073,6 +3091,9 @@ and mbedit edit save files.\n";
 					    mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 				if (error == MB_ERROR_NO_ERROR)
 					status =
+					    mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflagorg, &error);
+				if (error == MB_ERROR_NO_ERROR)
+					status =
 					    mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
 				if (error == MB_ERROR_NO_ERROR)
 					status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
@@ -3123,6 +3144,37 @@ and mbedit edit save files.\n";
 			/* reset error */
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
+			
+			/* open reverse edit save file (*.resf) */
+			sprintf(resf_file, "%s.resf", process.mbp_ifile);
+			if ((resf_fp = fopen(resf_file, "w")) == NULL) {
+				error = MB_ERROR_OPEN_FAIL;
+				mb_error(verbose, error, &message);
+				fprintf(stderr, "\nReverse edit save file <%s> not initialized for writing\n", resf_file);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(error);
+			} else {
+				/* put version header at beginning */
+				memset(resf_header, 0, MB_PATH_MAXLINE);
+				right_now = time((time_t *)0);
+				strcpy(date, ctime(&right_now));
+				date[strlen(date) - 1] = '\0';
+				if ((user_ptr = getenv("USER")) == NULL)
+					user_ptr = getenv("LOGNAME");
+				if (user_ptr != NULL)
+					strcpy(user, user_ptr);
+				else
+					strcpy(user, "unknown");
+				gethostname(host, MBP_FILENAMESIZE);
+				resf_mode = MB_ESF_MODE_EXPLICIT;
+				sprintf(resf_header,
+						"ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nSource Version: %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
+						resf_mode, MB_VERSION, svn_id, program_name, user, host, date);
+				if (fwrite(resf_header, MB_PATH_MAXLINE, 1, resf_fp) != 1) {
+					status = MB_FAILURE;
+					error = MB_ERROR_WRITE_FAIL;
+				}
+			}
 
 			/* allocate memory for amplitude and sidescan correction arrays */
 			/*  */
@@ -3268,7 +3320,7 @@ and mbedit edit save files.\n";
 				if (error == MB_ERROR_NO_ERROR)
 					ocomment++;
 				strncpy(comment, "\0", MBP_FILENAMESIZE);
-				sprintf(comment, "Version %s", rcs_id);
+				sprintf(comment, "Version %s", svn_id);
 				status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 				if (error == MB_ERROR_NO_ERROR)
 					ocomment++;
@@ -4203,10 +4255,21 @@ and mbedit edit save files.\n";
 						status = MB_FAILURE;
 					}
 				}
+				
+				/* save the orginal beamflag states */
+				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
+					for (i = 0; i < nbath; i++) {
+						beamflagorg[i] = beamflag[i];
+					}
+				}
 
 				/* detect multiple pings with the same time stamps */
 				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
-					if (time_d == time_d_lastping) {
+					sensorhead_status = mb_sensorhead(verbose, imbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
+					if (sensorhead_status == MB_SUCCESS) {
+						pingmultiplicity = sensorhead;
+					}
+					else if (time_d == time_d_lastping) {
 						pingmultiplicity++;
 					}
 					else {
@@ -5536,6 +5599,35 @@ and mbedit edit save files.\n";
 					                   namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack,
 					                   ssalongtrack, comment, &error);
 				}
+				
+				/*--------------------------------------------
+				  output any changed beamflags to the reverse
+				  edit save file (saving the change required
+				  to get back to the original flag state from
+				  the processed flag state)
+				  --------------------------------------------*/
+				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
+					for (i = 0; i < nbath; i++) {
+						if (beamflag[i] != beamflagorg[i]) {
+							if (mb_beam_ok(beamflagorg[i])) {
+								action = MBP_EDIT_UNFLAG;
+							}
+							else if (mb_beam_check_flag_unusable(beamflagorg[i])) {
+								action = MBP_EDIT_ZERO;
+							}
+							else if (mb_beam_check_flag_manual(beamflagorg[i])) {
+								action = MBP_EDIT_FLAG;
+							}
+							else if (mb_beam_check_flag_filter(beamflagorg[i])) {
+								action = MBP_EDIT_FILTER;
+							}
+							else if (mb_beam_check_flag_sonar(beamflagorg[i])) {
+								action = MBP_EDIT_SONAR;
+							}
+						status = mbprocess_save_edit(verbose, resf_fp, time_d, i, action, &error);
+						}
+					}
+				}
 
 				/*--------------------------------------------
 				  write the processed data
@@ -5620,6 +5712,11 @@ and mbedit edit save files.\n";
 			/* unlock the raw swath file */
 			if (uselockfiles == MB_YES)
 				lock_status = mb_pr_unlockswathfile(verbose, process.mbp_ifile, MBP_LOCK_PROCESS, program_name, &lock_error);
+				
+			/* close the *.resf file */
+			if (resf_fp != NULL) {
+				fclose(resf_fp);
+			}
 
 			/* deallocate arrays for amplitude correction tables */
 			if (nampcorrtable > 0) {
@@ -6037,6 +6134,62 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 	}
 
 	/* return status */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int action, int *error) {
+	/* local variables */
+	char *function_name = "mbgetesf_save_edit";
+	int status = MB_SUCCESS;
+	//	int time_i[7];
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+
+		fprintf(stderr, "dbg2       esffp:           %p\n", (void *)esffp);
+		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr, "dbg2       beam:            %d\n", beam);
+		fprintf(stderr, "dbg2       action:          %d\n", action);
+	}
+	// mb_get_date(verbose,time_d,time_i);
+	// fprintf(stderr,"MBGETESF: time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d action:%d\n",
+	// time_d,time_i[0],time_i[1],time_i[2],
+	// time_i[3],time_i[4],time_i[5],time_i[6],
+	// beam,action);
+
+	/* write out the edit */
+	if (esffp != NULL) {
+#ifdef BYTESWAPPED
+		mb_swap_double(&time_d);
+		beam = mb_swap_int(beam);
+		action = mb_swap_int(action);
+#endif
+		if (fwrite(&time_d, sizeof(double), 1, esffp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&beam, sizeof(int), 1, esffp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&action, sizeof(int), 1, esffp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:       %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:      %d\n", status);
+	}
+
+	/* return */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

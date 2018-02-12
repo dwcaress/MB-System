@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
  *	$Id$
  *
- *    Copyright (c) 1993-2017 by
+ *    Copyright (c) 1993-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -156,6 +156,7 @@ int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_dimensions = &mbsys_ldeoih_dimensions;
 	mb_io_ptr->mb_io_sonartype = &mbsys_ldeoih_sonartype;
 	mb_io_ptr->mb_io_sidescantype = &mbsys_ldeoih_sidescantype;
+	mb_io_ptr->mb_io_sensorhead = &mbsys_ldeoih_sensorhead;
 	mb_io_ptr->mb_io_extract = &mbsys_ldeoih_extract;
 	mb_io_ptr->mb_io_insert = &mbsys_ldeoih_insert;
 	mb_io_ptr->mb_io_extract_nav = &mbsys_ldeoih_extract_nav;
@@ -381,7 +382,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	short *flag;
 	short short_transducer_depth;
 	short short_altitude;
-	short short_beams_bath, short_beams_amp, short_pixels_ss, short_spare1;
+	short short_beams_bath, short_beams_amp, short_pixels_ss, short_sensorhead;
 	int header_length;
 	char buffer[MBF_MBLDEOIH_V5HEADERSIZE];
 	int index;
@@ -515,7 +516,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 4;
 			mb_get_binary_int(MB_NO, (void *)&buffer[index], &store->pixels_ss);
 			index += 4;
-			mb_get_binary_int(MB_NO, (void *)&buffer[index], &store->spare1);
+			mb_get_binary_int(MB_NO, (void *)&buffer[index], &store->sensorhead);
 			index += 4;
 			mb_get_binary_float(MB_NO, (void *)&buffer[index], &store->depth_scale);
 			index += 4;
@@ -562,7 +563,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 2;
 			mb_get_binary_short(MB_NO, (void *)&buffer[index], &short_pixels_ss);
 			index += 2;
-			mb_get_binary_short(MB_NO, (void *)&buffer[index], &short_spare1);
+			mb_get_binary_short(MB_NO, (void *)&buffer[index], &short_sensorhead);
 			index += 2;
 			mb_get_binary_float(MB_NO, (void *)&buffer[index], &store->depth_scale);
 			index += 4;
@@ -579,7 +580,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->beams_bath = short_beams_bath;
 			store->beams_amp = short_beams_amp;
 			store->pixels_ss = short_pixels_ss;
-			store->spare1 = short_spare1;
+			store->sensorhead = short_sensorhead;
 		}
 		else {
 			index = 2;
@@ -699,7 +700,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->beams_bath = oldstore.beams_bath;
 			store->beams_amp = oldstore.beams_amp;
 			store->pixels_ss = oldstore.pixels_ss;
-			store->spare1 = 0;
+			store->sensorhead = 0;
 
 			/* get scaling */
 			store->depth_scale = 0.001 * oldstore.depth_scale;
@@ -766,7 +767,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", store->beams_bath);
 		fprintf(stderr, "dbg5       beams_amp:        %d\n", store->beams_amp);
 		fprintf(stderr, "dbg5       pixels_ss:        %d\n", store->pixels_ss);
-		fprintf(stderr, "dbg5       spare1:           %d\n", store->spare1);
+		fprintf(stderr, "dbg5       sensorhead:       %d\n", store->sensorhead);
 		fprintf(stderr, "dbg5       depth_scale:      %f\n", store->depth_scale);
 		fprintf(stderr, "dbg5       distance_scale:   %f\n", store->distance_scale);
 		fprintf(stderr, "dbg5       ss_scalepower:    %d\n", store->ss_scalepower);
@@ -1134,7 +1135,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", store->beams_bath);
 		fprintf(stderr, "dbg5       beams_amp:        %d\n", store->beams_amp);
 		fprintf(stderr, "dbg5       pixels_ss:        %d\n", store->pixels_ss);
-		fprintf(stderr, "dbg5       spare1:           %d\n", store->spare1);
+		fprintf(stderr, "dbg5       sensorhead:       %d\n", store->sensorhead);
 		fprintf(stderr, "dbg5       depth_scale:      %f\n", store->depth_scale);
 		fprintf(stderr, "dbg5       distance_scale:   %f\n", store->distance_scale);
 		fprintf(stderr, "dbg5       ss_scalepower:    %d\n", store->ss_scalepower);
@@ -1275,7 +1276,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 2;
 			mb_put_binary_short(MB_NO, (short)store->pixels_ss, (void *)&buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_NO, (short)store->spare1, (void *)&buffer[index]);
+			mb_put_binary_short(MB_NO, (short)store->sensorhead, (void *)&buffer[index]);
 			index += 2;
 			mb_put_binary_float(MB_NO, store->depth_scale, (void *)&buffer[index]);
 			index += 4;
@@ -1325,7 +1326,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 4;
 			mb_put_binary_int(MB_NO, store->pixels_ss, (void *)&buffer[index]);
 			index += 4;
-			mb_put_binary_int(MB_NO, store->spare1, (void *)&buffer[index]);
+			mb_put_binary_int(MB_NO, store->sensorhead, (void *)&buffer[index]);
 			index += 4;
 			mb_put_binary_float(MB_NO, store->depth_scale, (void *)&buffer[index]);
 			index += 4;

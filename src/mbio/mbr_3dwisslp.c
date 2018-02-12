@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_3dwisslp.c	2/11/93
  *	$Id$
  *
- *    Copyright (c) 1993-2017 by
+ *    Copyright (c) 1993-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -99,6 +99,7 @@ int mbr_register_3dwisslp(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_3dwisslp;
 	mb_io_ptr->mb_io_dimensions = &mbsys_3ddwissl_dimensions;
 	mb_io_ptr->mb_io_preprocess = &mbsys_3ddwissl_preprocess;
+	mb_io_ptr->mb_io_sensorhead = &mbsys_3ddwissl_sensorhead;
 	mb_io_ptr->mb_io_extract = &mbsys_3ddwissl_extract;
 	mb_io_ptr->mb_io_insert = &mbsys_3ddwissl_insert;
 	mb_io_ptr->mb_io_extract_nav = &mbsys_3ddwissl_extract_nav;
@@ -366,7 +367,9 @@ int mbr_rt_3dwisslp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* if needed calculate bathymetry */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == MB_NO) {
-		mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr, error);
+		mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
+                MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD,
+                MBSYS_3DDWISSL_DEFAULT_TARGET_RANGE, error);
 	}
 
 	/* print out status info */
@@ -445,9 +448,10 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	unsigned int *newscancheck, newscancheckvalue;
 	int time_i[7];
 	int done;
-	int i, ipulse, isounding;
+	int i, ipulse, isounding, ivalidpulse, ivalidsounding;
 	int skip;
 	int valid_id;
+    unsigned short ushort_val;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -487,11 +491,11 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
             status = mb_reallocd(verbose, __FILE__, __LINE__, read_len, (void **)(&mb_io_ptr->raw_data), error);
             if (status == MB_SUCCESS) {
                 mb_io_ptr->data_structure_size = read_len;
-                buffer = mb_io_ptr->raw_data;
             }
         }
         
 		/* read file header and check the first two bytes */
+        buffer = mb_io_ptr->raw_data;
 		if (status == MB_SUCCESS)
             status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
 		if (status == MB_SUCCESS) {
@@ -694,8 +698,8 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     /* else read subsequent data records */
     else {
 		/* read and check two bytes until a valid record_id is found */
-		read_len = (size_t)sizeof(short);
         buffer = mb_io_ptr->raw_data;
+		read_len = (size_t)sizeof(short);
 		valid_id = MB_NO;
 		skip = 0;
 		status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -708,8 +712,8 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					valid_id = MB_YES;
 				}
 				else {
-//fprintf(stderr,"%s:%s():%d SKIP BAD RECORD ID: %x %x %x %d skip:%d valid_id:%d status:%d error:%d\n",
-//__FILE__, __FUNCTION__, __LINE__, (mb_u_char)buffer[0], (mb_u_char)buffer[1], store->record_id,store->record_id,skip,valid_id,status,*error);
+fprintf(stderr,"%s:%s():%d SKIP BAD RECORD ID: %x %x %x %d skip:%d valid_id:%d status:%d error:%d\n",
+__FILE__, __FUNCTION__, __LINE__, (mb_u_char)buffer[0], (mb_u_char)buffer[1], store->record_id,store->record_id,skip,valid_id,status,*error);
 					skip++;
                     buffer[0] = buffer[1];
                     read_len = (size_t)sizeof(char);
@@ -733,9 +737,14 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 //else
 //fprintf(stderr,"%s:%s():%d Reading MBSYS_3DDWISSL_RECORD_PROHEADB\n",
 //__FILE__, __FUNCTION__, __LINE__);
-            read_len = (size_t)(store->size_pulse_record_processed - 2);
-            buffer = mb_io_ptr->raw_data;
+            read_len = (size_t)sizeof(unsigned int);
             status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
+            mb_get_binary_int(MB_YES, (void *)&buffer[0], &(store->scan_size)); 
+            read_len = (size_t)(store->scan_size);
+            status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
+//fprintf(stderr,"read_len:%zu last 8 bytes: %x %x %x %x %x %x %x %x\n",
+//read_len,buffer[read_len-8],buffer[read_len-7],buffer[read_len-6],buffer[read_len-5],
+//buffer[read_len-4],buffer[read_len-3],buffer[read_len-2],buffer[read_len-1]);
             if (status == MB_SUCCESS) {
                 index = 0;
                 mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->year)); index += 2;
@@ -751,6 +760,7 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 //__FILE__, __FUNCTION__, __LINE__, store->year, store->month, store->day, store->jday,
 //store->hour, store->minutes, store->seconds, store->nanoseconds);
                 store->gain = buffer[index]; index += 1;
+                store->unused = buffer[index]; index += 1;
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->digitizer_temperature)); index += 4;
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->ctd_temperature)); index += 4;
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->ctd_salinity)); index += 4;
@@ -758,7 +768,10 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->index)); index += 4;
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->range_start)); index += 4;
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->range_end)); index += 4;
-                mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->pulse_count)); index += 4;
+                mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->pulse_count)); index += 4;
+//fprintf(stderr,"read %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%9.9d pulse_count:%d\n",
+//store->year,store->month,store->day,store->hour,store->minutes,store->seconds,
+//store->nanoseconds,store->pulse_count);
                 mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->time_d)); index += 8;
                 mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->navlon)); index += 8;
                 mb_get_binary_double(MB_YES, (void *)&buffer[index], &(store->navlat)); index += 8;
@@ -767,9 +780,22 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->heading)); index += 4;
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->roll)); index += 4;
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->pitch)); index += 4;
+                mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->validpulse_count)); index += 2;
+                mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->validsounding_count)); index += 2;
                 
-                /* read the pulses */
+                /* initialize all of the pulses with zero values excepting for null beamflags */
+                memset(store->pulses, 0, (size_t)(store->pulses_per_scan * sizeof(struct mbsys_3ddwissl_pulse_struct)));
                 for (ipulse=0; ipulse<store->pulses_per_scan; ipulse++) {
+                    pulse = &store->pulses[ipulse];
+                    for (isounding = 0; isounding < store->soundings_per_pulse; isounding++) {
+                        pulse->soundings[isounding].beamflag = MB_FLAG_NULL;
+                    }
+                }
+                
+                /* parse the list of pulses - note that for this format the list of valid soundings follows separately */
+                for (ivalidpulse=0; ivalidpulse<store->validpulse_count; ivalidpulse++) {
+                    mb_get_binary_short(MB_YES, (void *)&buffer[index], &ushort_val); index += 2;
+                    ipulse = ushort_val;
                     pulse = &store->pulses[ipulse];
                     mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->angle_az)); index += 4;
                     mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->angle_el)); index += 4;
@@ -783,18 +809,25 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
                     mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->heading_offset)); index += 4;
                     mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->roll_offset)); index += 4;
                     mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->pitch_offset)); index += 4;
-                    for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
-                        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].range)); index += 4;
-                        mb_get_binary_short(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].amplitude)); index += 2;
-                        pulse->soundings[isounding].beamflag = buffer[index]; index += 1;
-                        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].acrosstrack)); index += 4;
-                        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].alongtrack)); index += 4;
-                        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].depth)); index += 4;
+                }
+                 
+                /* parse the list of valid soundings */
+                for (ivalidsounding = 0; ivalidsounding < store->validsounding_count; ivalidsounding++) {
+                    mb_get_binary_short(MB_YES, (void *)&buffer[index], &ushort_val); index += 2;
+                    ipulse = (int) ushort_val;
+                    isounding = (int) buffer[index]; index += 1;
+                    pulse = &store->pulses[ipulse];
+                    pulse->validsounding_count += 1;
+                    mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].range)); index += 4;
+                    mb_get_binary_short(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].amplitude)); index += 2;
+                    pulse->soundings[isounding].beamflag = buffer[index]; index += 1;
+                    mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].acrosstrack)); index += 4;
+                    mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].alongtrack)); index += 4;
+                    mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].depth)); index += 4;
 //fprintf(stderr,"%s:%s():%d Reading sounding ipulse:%d isounding:%d beamflag:%d\n",
 //__FILE__, __FUNCTION__, __LINE__, ipulse, isounding, pulse->soundings[isounding].beamflag);
-                    }
                 }
-                
+            
                 store->bathymetry_calculated = MB_YES;
                 done = MB_YES;
                 store->kind = MB_DATA_DATA;
@@ -903,8 +936,8 @@ int mbr_3dwisslp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         if (mb_io_ptr->file_pos > 0) {
             fseek(mb_io_ptr->mbfp, 0, SEEK_SET);
         }
-        
-		/* calculate size of output lidar record and allocate write buffer to handle that */
+         
+		/* calculate maximum size of output lidar record and allocate write buffer to handle that */
         write_len = (size_t)MAX((MBSYS_3DDWISSL_V1S1_PRO_SCAN_HEADER_SIZE
                                 + store->pulses_per_scan
                                     * (MBSYS_3DDWISSL_V1S1_PRO_PULSE_HEADER_SIZE
@@ -1142,6 +1175,34 @@ int mbr_3dwisslp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
     /* write LIDAR scan record */
     else if (store->kind == MB_DATA_DATA) {
+        
+        /* count valid (non-null) pulses and soundings */
+        store->validpulse_count = 0;
+        store->validsounding_count = 0;
+        for (ipulse = 0; ipulse < store->pulse_count; ipulse++) {
+            pulse = &store->pulses[ipulse];
+            pulse->validsounding_count = 0;
+            for (isounding = 0; isounding < store->soundings_per_pulse; isounding++) {
+                if (pulse->soundings[isounding].beamflag != MB_FLAG_NULL) {
+                    pulse->validsounding_count++;
+                    store->validsounding_count++;
+                }
+            }
+            if (pulse->validsounding_count > 0) {
+                store->validpulse_count++;
+            }
+        }
+        
+		/* calculate size of output lidar record and allocate write buffer to handle that */
+        write_len = (size_t)(MBSYS_3DDWISSL_V1S1_PRO_SCAN_HEADER_SIZE
+                                + store->validpulse_count
+                                    * MBSYS_3DDWISSL_V1S1_PRO_PULSE_HEADER_SIZE
+                                + store->validsounding_count
+                                    * MBSYS_3DDWISSL_V1S1_PRO_SOUNDING_SIZE);
+        store->scan_size = write_len;
+//fprintf(stderr,"%s:%s():%d write_len %zu bytes from validpulse_count:%d validsoundingcount:%d\n",
+//__FILE__, __FUNCTION__, __LINE__, write_len, store->validpulse_count, store->validsounding_count);
+
         /* encode the data */
         index = 0;
         buffer = mb_io_ptr->raw_data;
@@ -1153,6 +1214,7 @@ int mbr_3dwisslp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
             store->record_id = MBSYS_3DDWISSL_RECORD_PROHEADB;
         }
         mb_put_binary_short(MB_YES, store->record_id, &buffer[index]); index += 2;
+        mb_put_binary_int(MB_YES, store->scan_size, &buffer[index]); index += 4;
         mb_put_binary_short(MB_YES, store->year, &buffer[index]); index += 2;
         buffer[index] = (mb_u_char)store->month; index += 1;
         buffer[index] = (mb_u_char)store->day; index += 1;
@@ -1163,6 +1225,7 @@ int mbr_3dwisslp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         mb_put_binary_int(MB_YES, store->nanoseconds, &buffer[index]); index += 4;
         
         buffer[index] = store->gain; index += 1;
+        buffer[index] = store->unused; index += 1;
         mb_put_binary_float(MB_YES, store->digitizer_temperature, (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES, store->ctd_temperature, (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES, store->ctd_salinity, (void **)&buffer[index]); index += 4;
@@ -1170,7 +1233,8 @@ int mbr_3dwisslp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         mb_put_binary_float(MB_YES, store->index, (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES, store->range_start, (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES, store->range_end, (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, store->pulse_count, (void **)&buffer[index]); index += 4;
+        mb_put_binary_int(MB_YES, store->pulse_count, (void **)&buffer[index]); index += 4;
+
         mb_put_binary_double(MB_YES, store->time_d, (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES, store->navlon, (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES, store->navlat, (void **)&buffer[index]); index += 8;
@@ -1179,39 +1243,55 @@ int mbr_3dwisslp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         mb_put_binary_float(MB_YES, store->heading, (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES, store->roll, (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES, store->pitch, (void **)&buffer[index]); index += 4;
+        mb_put_binary_short(MB_YES, store->validpulse_count, &buffer[index]); index += 2;
+        mb_put_binary_short(MB_YES, store->validsounding_count, &buffer[index]); index += 2;
 
-        /* write scan pulses */
+        /* write only the valid (non-null) scan pulses */
         for (ipulse=0; ipulse<store->pulses_per_scan; ipulse++) {
             pulse = &store->pulses[ipulse];
-            mb_put_binary_float(MB_YES, pulse->angle_az, (void **)&buffer[index]); index += 4;
-            mb_put_binary_float(MB_YES, pulse->angle_el, (void **)&buffer[index]); index += 4;
-            mb_put_binary_float(MB_YES, pulse->offset_az, (void **)&buffer[index]); index += 4;
-            mb_put_binary_float(MB_YES, pulse->offset_el, (void **)&buffer[index]); index += 4;
-            mb_put_binary_float(MB_YES, pulse->time_offset, (void **)&buffer[index]); index += 4;
-            mb_put_binary_double(MB_YES, pulse->time_d, (void **)&buffer[index]); index += 8;
-            mb_put_binary_double(MB_YES, pulse->acrosstrack_offset, (void **)&buffer[index]); index += 8;
-            mb_put_binary_double(MB_YES, pulse->alongtrack_offset, (void **)&buffer[index]); index += 8;
-            mb_put_binary_double(MB_YES, pulse->sensordepth_offset, (void **)&buffer[index]); index += 8;
-            mb_put_binary_float(MB_YES, pulse->heading_offset, (void **)&buffer[index]); index += 4;
-            mb_put_binary_float(MB_YES, pulse->roll_offset, (void **)&buffer[index]); index += 4;
-            mb_put_binary_float(MB_YES, pulse->pitch_offset, (void **)&buffer[index]); index += 4;
-            for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
-                mb_put_binary_float(MB_YES, pulse->soundings[isounding].range, (void **)&buffer[index]); index += 4;
-                mb_put_binary_short(MB_YES, pulse->soundings[isounding].amplitude, (void **)&buffer[index]); index += 2;
-                buffer[index] = pulse->soundings[isounding].beamflag; index += 1;
-                mb_put_binary_float(MB_YES, pulse->soundings[isounding].acrosstrack, (void **)&buffer[index]); index += 4;
-                mb_put_binary_float(MB_YES, pulse->soundings[isounding].alongtrack, (void **)&buffer[index]); index += 4;
-                mb_put_binary_float(MB_YES, pulse->soundings[isounding].depth, (void **)&buffer[index]); index += 4;
+            if (pulse->validsounding_count > 0) {
+                mb_put_binary_short(MB_YES, (unsigned short)ipulse, &buffer[index]); index += 2;
+                mb_put_binary_float(MB_YES, pulse->angle_az, (void **)&buffer[index]); index += 4;
+                mb_put_binary_float(MB_YES, pulse->angle_el, (void **)&buffer[index]); index += 4;
+                mb_put_binary_float(MB_YES, pulse->offset_az, (void **)&buffer[index]); index += 4;
+                mb_put_binary_float(MB_YES, pulse->offset_el, (void **)&buffer[index]); index += 4;
+                mb_put_binary_float(MB_YES, pulse->time_offset, (void **)&buffer[index]); index += 4;
+                mb_put_binary_double(MB_YES, pulse->time_d, (void **)&buffer[index]); index += 8;
+                mb_put_binary_double(MB_YES, pulse->acrosstrack_offset, (void **)&buffer[index]); index += 8;
+                mb_put_binary_double(MB_YES, pulse->alongtrack_offset, (void **)&buffer[index]); index += 8;
+                mb_put_binary_double(MB_YES, pulse->sensordepth_offset, (void **)&buffer[index]); index += 8;
+                mb_put_binary_float(MB_YES, pulse->heading_offset, (void **)&buffer[index]); index += 4;
+                mb_put_binary_float(MB_YES, pulse->roll_offset, (void **)&buffer[index]); index += 4;
+                mb_put_binary_float(MB_YES, pulse->pitch_offset, (void **)&buffer[index]); index += 4;
+            }
+        }
+            
+        /* write only the valid (non-null) soundings */
+        for (ipulse=0; ipulse<store->pulses_per_scan; ipulse++) {
+            pulse = &store->pulses[ipulse];
+            if (pulse->validsounding_count > 0) {
+                for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
+                    if (pulse->soundings[isounding].beamflag != MB_FLAG_NULL) {
+                        mb_put_binary_short(MB_YES, (unsigned short)ipulse, (void **)&buffer[index]); index += 2;
+                        buffer[index] = (mb_u_char)isounding; index += 1;
+                        mb_put_binary_float(MB_YES, pulse->soundings[isounding].range, (void **)&buffer[index]); index += 4;
+                        mb_put_binary_short(MB_YES, pulse->soundings[isounding].amplitude, (void **)&buffer[index]); index += 2;
+                        buffer[index] = pulse->soundings[isounding].beamflag; index += 1;
+                        mb_put_binary_float(MB_YES, pulse->soundings[isounding].acrosstrack, (void **)&buffer[index]); index += 4;
+                        mb_put_binary_float(MB_YES, pulse->soundings[isounding].alongtrack, (void **)&buffer[index]); index += 4;
+                        mb_put_binary_float(MB_YES, pulse->soundings[isounding].depth, (void **)&buffer[index]); index += 4;
 //fprintf(stderr,"%s:%s():%d Writing sounding ipulse:%d isounding:%d beamflag:%d\n",
 //__FILE__, __FUNCTION__, __LINE__, ipulse, isounding, pulse->soundings[isounding].beamflag);
-            }
+                    }
+                }
+             }
         }
 
         /* write LIDAR scan record */
+//fprintf(stderr,"%s:%s():%d Writing MBF_3DWISSLP scan record %zu %zu bytes from buffer:%p  pulse_count:%d time_d:%f\n",
+//__FILE__, __FUNCTION__, __LINE__, write_len, index, buffer, store->pulse_count, store->time_d);
         write_len = (size_t)index;
         status = mb_fileio_put(verbose, mbio_ptr, (void *)buffer, &write_len, error);
-//fprintf(stderr,"%s:%s():%d Wrote lidar record %zu bytes from buffer:%p  pulse_count:%d time_d:%f\n",
-//__FILE__, __FUNCTION__, __LINE__, write_len, buffer, store->pulse_count, store->time_d);
 	}
 
 	/* print output debug statements */

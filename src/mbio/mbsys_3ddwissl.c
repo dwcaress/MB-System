@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_3ddwissl.c	3.00	12/26/2017
  *	$Id$
  *
- *    Copyright (c) 2017-2017 by
+ *    Copyright (c) 2017-2018 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -461,6 +461,8 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	int jheading = 0;
 	// int	jaltitude = 0;
 	int jattitude = 0;
+	double amplitude_threshold;
+	double target_range;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -679,7 +681,18 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	}
 
 	/* calculate the bathymetry using the newly inserted values */
-	status = mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr, error);
+	if (pars->sounding_amplitude_filter == MB_YES) {
+		amplitude_threshold = pars->sounding_amplitude_threshold;
+	} else {
+		amplitude_threshold = MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD;
+	}
+	if (pars->sounding_range_filter == MB_YES) {
+		target_range = pars->sounding_target_range;
+	} else {
+		target_range = MBSYS_3DDWISSL_DEFAULT_TARGET_RANGE;
+	}
+	status = mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
+					amplitude_threshold, target_range, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -689,6 +702,59 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:        %d\n", status);
+	}
+
+	/* return status */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_3ddwissl_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
+							  int *sensorhead, int *error) {
+	char *function_name = "mbsys_3ddwissl_sensorhead";
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_3ddwissl_struct *store;
+
+	/* check for non-null data */
+	assert(mbio_ptr != NULL);
+	assert(store_ptr != NULL);
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", store_ptr);
+	}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_3ddwissl_struct *)store_ptr;
+
+	/* if survey data extract which lidar head used for this scan */
+	if (store->kind == MB_DATA_DATA) {
+		if (store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADA
+			|| store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADA) {
+			*sensorhead = 1;
+		}
+		else if (store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADB
+			|| store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADB) {
+			*sensorhead = 0;
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       sensorhead: %d\n", *sensorhead);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
 	/* return status */
@@ -2122,6 +2188,8 @@ int mbsys_3ddwissl_print_store(int verbose,     /* in: verbosity level set on co
 		fprintf(stderr, "%s     heading:                       %f\n", first, store->heading);
 		fprintf(stderr, "%s     roll:                          %f\n", first, store->roll);
 		fprintf(stderr, "%s     pitch:                         %f\n", first, store->pitch);
+		fprintf(stderr, "%s     validpulse_count:              %d\n", first, store->validpulse_count);
+		fprintf(stderr, "%s     validsounding_count:           %d\n", first, store->validsounding_count);
 		fprintf(stderr, "%s     scan_count:                    %u\n", first, store->scan_count);
 		fprintf(stderr, "%s     size_pulse_record_raw:         %u\n", first, store->size_pulse_record_raw);
 		fprintf(stderr, "%s     size_pulse_record_processed:   %u\n", first, store->size_pulse_record_processed);
@@ -2181,6 +2249,8 @@ int mbsys_3ddwissl_print_store(int verbose,     /* in: verbosity level set on co
 int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level set on command line 0..N */
                                              void *mbio_ptr,  /* in: see mb_io.h:mb_io_struct */
                                              void *store_ptr, /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
+											 double amplitude_threshold, /* used to determine valid soundings */
+ 											 double target_range, /* used to calculate an exponential amplitude correction */
                                              int *error       /* out: see mb_status.h:MB_ERROR */
                                              ) {
 	char *function_name = "mbsys_3ddwissl_calculatebathymetry";
@@ -2194,21 +2264,24 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 	double mtodeglon, mtodeglat;
 	double xx;
 	int ipulse, isounding, isounding_largest;
-	short amplitude_largest, amplitude_max, amplitude_threshold;
+	short amplitude_largest, amplitude_max;
     double head_offset_x_m;
     double head_offset_y_m;
     double head_offset_z_m;
     double head_offset_heading_deg;
     double head_offset_roll_deg;
     double head_offset_pitch_deg;
+	double amplitude_factor;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2         store:    %p\n", store_ptr);
+		fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
+		fprintf(stderr, "dbg2         store:               %p\n", store_ptr);
+		fprintf(stderr, "dbg2         amplitude_threshold: %f\n", amplitude_threshold);
+		fprintf(stderr, "dbg2         target_range:        %f\n", target_range);
 	}
 
 	/* check for non-null data */
@@ -2272,8 +2345,8 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 				}
 			}
 		}
-		amplitude_threshold = MAX(amplitude_max / 25, 1000);
-//fprintf(stderr,"amplitude_max:%d amplitude_threshold:%d\n", amplitude_max, amplitude_threshold);
+		amplitude_threshold = MAX((double)amplitude_max / 20, amplitude_threshold);
+//fprintf(stderr,"\namplitude_max:%d amplitude_threshold:%f\n", amplitude_max, amplitude_threshold);
 
 		/* loop over all pulses and soundings */
 		for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++) {
@@ -2285,9 +2358,14 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 				
 				/* valid pulses have nonzero ranges */
 				if (sounding->range > 0.001) {
+					
+					/* calculate amplitude range factor */
+					amplitude_factor = exp(-(sounding->range - target_range) / target_range);
+//fprintf(stderr,"amplitude_max:%d amplitude_threshold:%f amplitude_factor:%f\n",
+//amplitude_max, amplitude_threshold, amplitude_factor);
 	
 					/* set beamflag */
-					if (sounding->amplitude >= amplitude_threshold)
+					if (sounding->amplitude / amplitude_factor >= amplitude_threshold)
 						sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
 					else
 						sounding->beamflag = MB_FLAG_NULL;

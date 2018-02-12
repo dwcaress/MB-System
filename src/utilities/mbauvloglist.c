@@ -63,6 +63,7 @@
 #define INDEX_CALC_SOUNDSPEED -14
 #define INDEX_CALC_POTENTIALTEMP -15
 #define INDEX_CALC_DENSITY -16
+#define INDEX_CALC_KTIME -17
 
 #define OUTPUT_MODE_TAB 0
 #define OUTPUT_MODE_CSV 1
@@ -175,6 +176,12 @@ int main(int argc, char **argv) {
 	double *nav_roll = NULL;
 	double *nav_pitch = NULL;
 	double *nav_heave = NULL;
+    
+    /* calculate time by adding time of date  to Kearfott time of day value */
+    int calc_ktime = MB_NO;
+    int ktime_available = MB_NO;
+    double startofday_time_d = 0.0;
+    double ktime_calc = 0.0;
     
     /* recalculate ctd data from fundamental observations */
     int recalculate_ctd = MB_NO;
@@ -289,6 +296,8 @@ int main(int argc, char **argv) {
                 calc_soundspeed = MB_YES;
             if (strcmp(printfields[nprintfields].name, "calcDensity") == 0)
                 calc_density = MB_YES;
+            if (strcmp(printfields[nprintfields].name, "calcKTime") == 0)
+                calc_ktime = MB_YES;
 			printfields[nprintfields].index = -1;
 			nprintfields++;
 			flag++;
@@ -365,7 +374,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       calc_potentialtemp:   %d\n", calc_potentialtemp);
 		fprintf(stderr, "dbg2       recalculate_ctd:      %d\n", recalculate_ctd);
 		fprintf(stderr, "dbg2       ctd_calibration_id:   %d\n", ctd_calibration_id);
-		fprintf(stderr, "dbg2       nprintfields:   %d\n", nprintfields);
+		fprintf(stderr, "dbg2       calc_ktime:           %d\n", calc_ktime);
+		fprintf(stderr, "dbg2       nprintfields:         %d\n", nprintfields);
 		for (i = 0; i < nprintfields; i++)
 			fprintf(stderr, "dbg2         printfields[%d]:      %s %d %s\n", i, printfields[i].name, printfields[i].formatset,
 			        printfields[i].format);
@@ -511,6 +521,10 @@ int main(int argc, char **argv) {
 					fields[nfields].scale = 1.0;
 				recordsize += 8;
 			}
+            
+            /* check if kearfott time is in this file */
+            if (strcmp(fields[nfields].name, "utcTime") == 0)
+                ktime_available = MB_YES;
             
             /* check if raw and processed ctd data are in this file */
             if (strcmp(fields[nfields].name, "cond_frequency") == 0)
@@ -689,6 +703,12 @@ int main(int argc, char **argv) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
+		else if (strcmp(printfields[i].name, "calcKTime") == 0) {
+			printfields[i].index = INDEX_CALC_KTIME;
+			if (printfields[i].formatset == MB_NO) {
+				strcpy(printfields[i].format, "%.8f");
+			}
+		}
 		else {
 			for (j = 0; j < nfields; j++) {
 				if (strcmp(printfields[i].name, fields[j].name) == 0)
@@ -759,6 +779,24 @@ int main(int argc, char **argv) {
             interp_status = mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
                                         &potentialtemperature_calc, &error);
             interp_status = mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
+        }
+    
+        /* calculate timestamp by adding Kearfott second-of-day value (utcTime) to seconds to the start of day
+         * from the overall timestamp (time) */
+        if (ktime_available == MB_YES && calc_ktime == MB_YES) {
+            /* else deal with existing values if available */
+            startofday_time_d = 0.0;
+            ktime_calc = 0.0;
+            for (ii = 0; ii < nfields; ii++) {
+				if (strcmp(fields[ii].name, "time") == 0) {
+                        mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &time_d);
+                        startofday_time_d = MB_SECINDAY * floor(time_d / MB_SECINDAY);
+				}
+				else if (strcmp(fields[ii].name, "utcTime") == 0) {
+                        mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &ktime_calc);
+				}
+            }
+            ktime_calc += startofday_time_d;
         }
 
         /* loop over the printfields */
@@ -892,6 +930,12 @@ int main(int argc, char **argv) {
 					fwrite(&density_calc, sizeof(double), 1, stdout);
 				else
 					fprintf(stdout, printfields[i].format, density_calc);
+			}
+			else if (index == INDEX_CALC_KTIME) {
+				if (output_mode == OUTPUT_MODE_BINARY)
+					fwrite(&ktime_calc, sizeof(double), 1, stdout);
+				else
+					fprintf(stdout, printfields[i].format, ktime_calc);
 			}
 			else if (fields[index].type == TYPE_DOUBLE) {
 				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
