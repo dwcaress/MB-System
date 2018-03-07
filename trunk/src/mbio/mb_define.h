@@ -149,6 +149,7 @@ typedef char mb_longname[MB_LONGNAME_LENGTH];
 #define MB_FILETYPE_NETCDF 5
 #define MB_FILETYPE_SURF 6
 #define MB_FILETYPE_SEGY 7
+#define MB_FILETYPE_INPUT 8
 
 /* settings for recursive datalist reading functions */
 #define MB_DATALIST_LOOK_UNSET 0
@@ -276,8 +277,15 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
                    double *ssalongtrack, int *ibeamport, int *ibeamcntr, int *ibeamstbd, int *ipixelport, int *ipixelcntr,
                    int *ipixelstbd, int *error);
 int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
-                 double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
-                 int *beams_amp, int *pixels_ss, int *error);
+                double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
+                int *beams_amp, int *pixels_ss, int *error);
+int mb_input_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
+                double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
+                int *beams_amp, int *pixels_ss, 
+                int (*input_open)(int verbose, void *mbio_ptr, char *path, int *error),
+                int (*input_read)(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error),
+                int (*input_close)(int verbose, void *mbio_ptr, int *error),
+                int *error);
 int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *beams_bath, int *beams_amp, int *pixels_ss,
                   int *error);
 int mb_close(int verbose, void **mbio_ptr, int *error);

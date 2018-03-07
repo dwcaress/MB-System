@@ -465,19 +465,16 @@ struct mb_io_struct {
 	/* file descriptor, file name, and usage flag */
 	FILE *mbfp;                  /* file descriptor */
 	mb_path file;                /* file name */
-	long file_pos;               /* file position at start of
-	                         last record read */
+	long file_pos;               /* file position at start of last record read */
 	long file_bytes;             /* number of bytes read from file */
 	char *file_iobuffer;         /* file i/o buffer for fread() and fwrite() calls */
 	FILE *mbfp2;                 /* file descriptor #2 */
 	char file2[MB_PATH_MAXLINE]; /* file name #2 */
-	long file2_pos;              /* file position #2 at start of
-	                         last record read */
+	long file2_pos;              /* file position #2 at start of last record read */
 	long file2_bytes;            /* number of bytes read from file */
 	FILE *mbfp3;                 /* file descriptor #3 */
 	char file3[MB_PATH_MAXLINE]; /* file name #3 */
-	long file3_pos;              /* file position #3 at start of
-	                         last record read */
+	long file3_pos;              /* file position #3 at start of last record read */
 	long file3_bytes;            /* number of bytes read from file */
 	int ncid;                    /* netCDF datastream ID */
 	int gsfid;                   /* GSF datastream ID */
@@ -729,6 +726,12 @@ struct mb_io_struct {
 	                              double *sensor1, double *sensor2, double *sensor3, double *sensor4, double *sensor5,
 	                              double *sensor6, double *sensor7, double *sensor8, int *error);
 	int (*mb_io_copyrecord)(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+    
+	/* function pointers for reading from application defined input */
+	int (*mb_io_input_open)(int verbose, void *mbio_ptr, char *path, int *error);
+	int (*mb_io_input_read)(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error);
+	int (*mb_io_input_close)(int verbose, void *mbio_ptr, int *error);
+
 };
 
 /* MBIO buffer control structure */

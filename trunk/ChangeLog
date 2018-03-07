@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2330       March 7, 2018
   Version 5.5.2329       February 12, 2018
   Version 5.5.2328       January 31, 2018
 * Version 5.5.2327       January 23, 2018
@@ -270,6 +271,21 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2330 (March 7, 2018)
+
+Proj: Removed the embedded Proj source package from the MB-System archive and
+distribution. From now on Proj is strictly a prerequisite for building MB-System.
+
+Mbtrnpreprocess: Added initial version of new tool for real-time multibeam data
+filtering as part of the implementation of terrain aided navigation on MBARI
+AUVs. Specifically, mbtrnpreprocess accesses realtime s7k data from a Reson 7125
+multibeam sonar, decimates and filters the bathymetry, and than passes the
+decimated and filtered soundings on to an application that attempts to locate
+the AUV in real time relative to a pre-existing multibeam bathymetry survey. This
+allows repeat AUV surveys to execute exactly the desired survey tracks.
+
+Format MBF_3DWISSLP (233): Many fixes to the code supporting WiSSL lidar data.
 
 -----> 5.5.2329 (February 12, 2018)
 
