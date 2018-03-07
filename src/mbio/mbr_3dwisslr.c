@@ -390,7 +390,7 @@ int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == MB_NO) {
 		mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
                 MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD,
-                MBSYS_3DDWISSL_DEFAULT_TARGET_RANGE, error);
+                MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE, error);
 	}
 
 	/* print out status info */

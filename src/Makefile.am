@@ -6,6 +6,6 @@ if BUILD_GL
 endif
 
 SUBDIRS = gsf surf bsio mbio mbaux \
-	utilities gmt otps macros share man html ps \
+	utilities gmt otps trn macros share man html ps \
 	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL)
 

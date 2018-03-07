@@ -334,7 +334,7 @@
 #define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.15         // ICD value -5.01
 
 #define MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD 2000.0
-#define MBSYS_3DDWISSL_DEFAULT_TARGET_RANGE        4.5
+#define MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE        0.0
 
 struct mbsys_3ddwissl_calibration_struct {
     char cfg_path[ 64 ];
@@ -562,7 +562,7 @@ int mbsys_3ddwissl_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_3ddwissl_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_3ddwissl_print_store(int verbose, void *store_ptr, int *error);
 int mbsys_3ddwissl_calculatebathymetry(int verbose, void *mbio_ptr, void *store_ptr,
-                                       double amplitude_threshold, double target_range, int *error);
+                                       double amplitude_threshold, double target_altitude, int *error);
 
 
 

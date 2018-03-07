@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
 	                       "\t--no-change-survey\n"
 	                       "\t--multibeam-sidescan-source=recordid\n"
 						   "\t--sounding-amplitude-filter=value\n\n"
-						   "\t--sounding-range-filter=value\n\n"
+						   "\t--sounding-altitude-filter=value\n\n"
 	                       "\t--kluge-time-jumps=threshold\n"
                            "\t--kluge-ancilliary-time-jumps=threshold\n"
                            "\t--kluge-mbaripressure-time-jumps=threshold\n"
@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
 	 * 		--no-change-survey
 	 * 		--multibeam-sidescan-source=recordid
 	 * 		--sounding-amplitude-filter=value
-	 * 		--sounding-range-filter=value
+	 * 		--sounding-altitude-filter=value
 	 * 		--ignore-water-column
 	 *
 	 * 		--kluge-time-jumps=threshold
@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
 	                                  {"no-change-survey", no_argument, NULL, 0},
 	                                  {"multibeam-sidescan-source", required_argument, NULL, 0},
 	                                  {"sounding-amplitude-filter", required_argument, NULL, 0},
-	                                  {"sounding-range-filter", required_argument, NULL, 0},
+	                                  {"sounding-altitude-filter", required_argument, NULL, 0},
 	                                  {"ignore-water-column", no_argument, NULL, 0},
 	                                  {"kluge-time-jumps", required_argument, NULL, 0},
 	                                  {"kluge-ancilliary-time-jumps", required_argument, NULL, 0},
@@ -987,11 +987,11 @@ int main(int argc, char **argv) {
 					preprocess_pars.sounding_amplitude_filter = MB_YES;
 			}
 
-			/* sounding-target-range=value */
-			else if (strcmp("sounding-range-filter", options[option_index].name) == 0) {
-				n = sscanf(optarg, "%lf", &preprocess_pars.sounding_target_range);
+			/* sounding-altitude-filter=value */
+			else if (strcmp("sounding-altitude-filter", options[option_index].name) == 0) {
+				n = sscanf(optarg, "%lf", &preprocess_pars.sounding_target_altitude);
 				if (n == 1)
-					preprocess_pars.sounding_range_filter = MB_YES;
+					preprocess_pars.sounding_altitude_filter = MB_YES;
 			}
 
 			/* ignore-water-column */
@@ -1182,8 +1182,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       recalculate_bathymetry:       %d\n", preprocess_pars.recalculate_bathymetry);
 		fprintf(stderr, "dbg2       sounding_amplitude_filter:    %d\n", preprocess_pars.sounding_amplitude_filter);
 		fprintf(stderr, "dbg2       sounding_amplitude_threshold: %f\n", preprocess_pars.sounding_amplitude_threshold);
-		fprintf(stderr, "dbg2       sounding_range_filter:        %d\n", preprocess_pars.sounding_range_filter);
-		fprintf(stderr, "dbg2       sounding_target_range:        %f\n", preprocess_pars.sounding_target_range);
+		fprintf(stderr, "dbg2       sounding_altitude_filter:     %d\n", preprocess_pars.sounding_altitude_filter);
+		fprintf(stderr, "dbg2       sounding_target_altitude:     %f\n", preprocess_pars.sounding_target_altitude);
 		fprintf(stderr, "dbg2       ignore_water_column:          %d\n", preprocess_pars.ignore_water_column);
 		fprintf(stderr, "dbg2  Various data fixes (kluges):\n");
 		fprintf(stderr, "dbg2       kluge_timejumps:              %d\n", kluge_timejumps);
@@ -1267,8 +1267,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "     recalculate_bathymetry:       %d\n", preprocess_pars.recalculate_bathymetry);
 		fprintf(stderr, "     sounding_amplitude_filter:    %d\n", preprocess_pars.sounding_amplitude_filter);
 		fprintf(stderr, "     sounding_amplitude_threshold: %f\n", preprocess_pars.sounding_amplitude_threshold);
-		fprintf(stderr, "     sounding_range_filter:        %d\n", preprocess_pars.sounding_range_filter);
-		fprintf(stderr, "     sounding_target_range:        %f\n", preprocess_pars.sounding_target_range);
+		fprintf(stderr, "     sounding_altitude_filter:     %d\n", preprocess_pars.sounding_altitude_filter);
+		fprintf(stderr, "     sounding_target_altitude:     %f\n", preprocess_pars.sounding_target_altitude);
 		fprintf(stderr, "     ignore_water_column:          %d\n", preprocess_pars.ignore_water_column);
 		fprintf(stderr, "Various data fixes (kluges):\n");
 		fprintf(stderr, "     kluge_timejumps:              %d\n", kluge_timejumps);

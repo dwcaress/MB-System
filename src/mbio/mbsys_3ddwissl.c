@@ -462,7 +462,7 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	// int	jaltitude = 0;
 	int jattitude = 0;
 	double amplitude_threshold;
-	double target_range;
+	double target_altitude;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -686,13 +686,13 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	} else {
 		amplitude_threshold = MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD;
 	}
-	if (pars->sounding_range_filter == MB_YES) {
-		target_range = pars->sounding_target_range;
+	if (pars->sounding_altitude_filter == MB_YES) {
+		target_altitude = pars->sounding_target_altitude;
 	} else {
-		target_range = MBSYS_3DDWISSL_DEFAULT_TARGET_RANGE;
+		target_altitude = MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE;
 	}
 	status = mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
-					amplitude_threshold, target_range, error);
+					amplitude_threshold, target_altitude, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2250,7 +2250,7 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
                                              void *mbio_ptr,  /* in: see mb_io.h:mb_io_struct */
                                              void *store_ptr, /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
 											 double amplitude_threshold, /* used to determine valid soundings */
- 											 double target_range, /* used to calculate an exponential amplitude correction */
+ 											 double target_altitude, /* used to prioritize picks close to a desired standoff */
                                              int *error       /* out: see mb_status.h:MB_ERROR */
                                              ) {
 	char *function_name = "mbsys_3ddwissl_calculatebathymetry";
@@ -2272,6 +2272,8 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
     double head_offset_roll_deg;
     double head_offset_pitch_deg;
 	double amplitude_factor;
+	double target_range;
+	double scaled_range_diff;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2281,7 +2283,7 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 		fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
 		fprintf(stderr, "dbg2         store:               %p\n", store_ptr);
 		fprintf(stderr, "dbg2         amplitude_threshold: %f\n", amplitude_threshold);
-		fprintf(stderr, "dbg2         target_range:        %f\n", target_range);
+		fprintf(stderr, "dbg2         target_altitude:     %f\n", target_altitude);
 	}
 
 	/* check for non-null data */
@@ -2345,7 +2347,6 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 				}
 			}
 		}
-		amplitude_threshold = MAX((double)amplitude_max / 20, amplitude_threshold);
 //fprintf(stderr,"\namplitude_max:%d amplitude_threshold:%f\n", amplitude_max, amplitude_threshold);
 
 		/* loop over all pulses and soundings */
@@ -2358,17 +2359,6 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 				
 				/* valid pulses have nonzero ranges */
 				if (sounding->range > 0.001) {
-					
-					/* calculate amplitude range factor */
-					amplitude_factor = exp(-(sounding->range - target_range) / target_range);
-//fprintf(stderr,"amplitude_max:%d amplitude_threshold:%f amplitude_factor:%f\n",
-//amplitude_max, amplitude_threshold, amplitude_factor);
-	
-					/* set beamflag */
-					if (sounding->amplitude / amplitude_factor >= amplitude_threshold)
-						sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
-					else
-						sounding->beamflag = MB_FLAG_NULL;
 	
 					/* apply pitch and roll */
 					alpha = angle_el_sign * pulse->angle_el
@@ -2379,6 +2369,26 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 										+ store->roll
 										+ head_offset_roll_deg
 										+ pulse->roll_offset;
+					
+					/* calculate amplitude range factor */
+					if (target_altitude > 0.0) {
+						target_range = target_altitude
+											/ cos(DTR * (angle_az_sign * pulse->angle_az
+													- head_offset_roll_deg
+													- pulse->roll_offset));
+						scaled_range_diff = (sounding->range - target_range) / target_range;
+						amplitude_factor = exp(-4.0 * scaled_range_diff * scaled_range_diff);
+					} else {
+						amplitude_factor = 1.0;
+					}
+//fprintf(stderr,"amplitude_max:%d amplitude_threshold:%f amplitude_factor:%f\n",
+//amplitude_max, amplitude_threshold, amplitude_factor);
+	
+					/* set beamflag */
+					if (sounding->amplitude * amplitude_factor >= amplitude_threshold)
+						sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
+					else
+						sounding->beamflag = MB_FLAG_NULL;
 	
 					/* translate to takeoff coordinates */
 					mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);

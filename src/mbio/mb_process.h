@@ -744,8 +744,8 @@ struct mb_preprocess_struct {
 	int recalculate_bathymetry;
     int sounding_amplitude_filter;
     double sounding_amplitude_threshold;
-    int sounding_range_filter;
-    double sounding_target_range;
+    int sounding_altitude_filter;
+    double sounding_target_altitude;
     int ignore_water_column;
 
 	int n_kluge;
