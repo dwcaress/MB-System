@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2331       April 10, 2018
   Version 5.5.2330       March 7, 2018
   Version 5.5.2329       February 12, 2018
   Version 5.5.2328       January 31, 2018
@@ -271,6 +272,28 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2331 (April 10, 2018)
+
+Mbm_makedatalist: Fixed problem with use of perl sort function when handling
+Kongsberg multibeam data. Also fixed problem with specifying a directory using
+the -I option.
+
+Mbotps: Added new options -Ctidestationformat, -Ntidestationfile, and
+-Utidestationlon/tidestationlat. Together these commands allow users to input
+observations from a tide station; these observations can be used to calculate
+corrections to tidal model values in the vicinity of the tide station. If tide
+station data are specified, then MBotps calculates the difference between the
+observed and modeled tide at that station for each data point in the input tide
+station data. This difference time series is then used as a correction to the
+output tide models, whether at a location specified with the -Rlon/lat option or
+for swath data specified with the -Idatalist option.
+
+Mbmakeplatform: Fixed initialization of the organization and documentation_url
+fields.
+
+Mbtrnpreprocess: Continued development of this new tool, particularly adding
+interprocess communication via TCP-IP sockets.
 
 -----> 5.5.2330 (March 7, 2018)
 

@@ -31,6 +31,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
 
 /* mbio include files */
 #include "mb_status.h"
@@ -80,6 +81,8 @@ struct mbtrnpreprocess_ping_struct {
 
 #define MBTRNPREPROCESS_LOGFILE_TIMELENGTH 900.0
 
+#define MBTRNPREPROCESS_DEFAULT_PORT 27000
+
 int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error);
 int mbtrnpreprocess_closelog(int verbose, FILE **logfp, int *error);
 int mbtrnpreprocess_postlog(int verbose, FILE *logfp, char *message, int *error);
@@ -111,6 +114,7 @@ int mbtrnpreprocess_logstatistics(int verbose,
 int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int *error);
 int mbtrnpreprocess_input_read(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error);
 int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error);
+int mbtrnpreprocess_output_socket_init(int verbose, int trn_port, int *trn_socket, int *error);
 
 static char version_id[] = "$Id: mbtrnpreprocess.c 2308 2017-06-04 19:55:48Z caress $";
 static char program_name[] = "mbtrnpreprocess";
@@ -274,6 +278,8 @@ int main(int argc, char **argv) {
     int n_output_buffer_alloc = 0;
     size_t mb1_size, index;
     unsigned int checksum;
+    int trn_port = MBTRNPREPROCESS_DEFAULT_PORT;
+    int trn_socket = 0;
     
     /* log file parameters */
     int make_logs = MB_NO;
@@ -376,7 +382,8 @@ int main(int argc, char **argv) {
 			/* output */
 			else if ((strcmp("output", options[option_index].name) == 0)) {
 				strcpy(output, optarg);
-                if (strstr(output, "SOCKET") != NULL) {
+                if (strstr(output, "port:") != NULL) {
+                    sscanf(output, "port:%d", &trn_port);
                     output_mode = MBTRNPREPROCESS_OUTPUT_TRN;
                 } else {
                     output_mode = MBTRNPREPROCESS_OUTPUT_FILE;
@@ -524,18 +531,29 @@ int main(int argc, char **argv) {
     
     /* initialize output */
     if (output_mode == MBTRNPREPROCESS_OUTPUT_STDOUT) {
-
+        /* no need to initialize stdout */
     }
-    /* insert option to recognize and initialize ipc with TRN */
     /* else open ipc to TRN */
     else if (output_mode == MBTRNPREPROCESS_OUTPUT_TRN) {
-        
+        status = mbtrnpreprocess_output_socket_init(verbose, trn_port, &trn_socket, &error);
+        if (error != MB_ERROR_NO_ERROR) {
+            fprintf(stderr, "\nError initializing TRN socket on port %d\n", trn_port);
+            fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+            exit(error);
+        }
     }
     /* else open output file in which the binary data otherwise communicated
      * to TRN will be saved */
     else {
         ofp = fopen(output, "w");
-    }
+        if (ofp == NULL) {
+            status = MB_FAILURE;
+            error = MB_ERROR_OPEN_FAIL;
+            fprintf(stderr, "\nError opening output file %s", output);
+            fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+            exit(error);
+        }
+     }
 
     /* get number of ping records to hold */
     if (median_filter == MB_YES) {
@@ -1604,6 +1622,90 @@ int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:              %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:             %d\n", status);
+	}
+
+	/* return */
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
+
+int mbtrnpreprocess_output_socket_init(int verbose, int trn_port, int *trn_socket, int *error)
+{
+    
+	/* local variables */
+	char *function_name = "mbtrnpreprocess_output_socket_init";
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+    /* int trn_port; */     /* listening socket providing service */
+    int sockoptval = 1;
+    struct sockaddr_in my_addr;    /* address of this service */
+    struct sockaddr_in client_addr;  /* client's address */
+    char hostname[128];
+ 
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       trn_port:   %d\n", trn_port);
+		fprintf(stderr, "dbg2       trn_socket: %p\n", trn_socket);
+	}
+
+	/* set initial status */
+	status = MB_SUCCESS;
+
+    gethostname(hostname, 128);
+ 
+    /* get a tcp/ip socket */
+    /*   AF_INET is the Internet address (protocol) family  */
+    /*   with SOCK_STREAM we ask for a sequenced, reliable, two-way */
+    /*   conenction based on byte streams.  With IP, this means that */
+    /*   TCP will be used */
+    
+    if ((*trn_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+      perror("mbtrn_sim: cannot create socket");
+      return -1;
+    }
+    
+    /* we use setsockopt to set SO_REUSEADDR. This allows us */
+    /* to reuse the port immediately as soon as the service exits. */
+    /* Some operating systems will not allow immediate reuse */
+    /* on the chance that some packets may still be en route */
+    /* to the port. */
+    
+    setsockopt(*trn_socket, SOL_SOCKET, SO_REUSEADDR, &sockoptval, sizeof(int));
+    
+    
+    /* set up our address */
+    /* htons converts a short integer into the network representation */
+    /* htonl converts a int integer into the network representation */
+    /* INADDR_ANY is the special IP address 0.0.0.0 which binds the */
+    /* transport endpoint to all IP addresses on the machine. */
+    
+    memset((char*)&my_addr, 0, sizeof(my_addr));  /* 0 out the structure */
+    my_addr.sin_family = AF_INET;   /* address family */
+    my_addr.sin_port = htons(trn_port);
+    my_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+   
+    /* bind to the address to which the service will be offered */
+    if (bind(*trn_socket, (struct sockaddr *)&my_addr, sizeof(my_addr)) < 0) {
+      perror("mbtrn_sim: bind failed");
+      return -1;
+    }
+
+    if (verbose > 0) {
+        fprintf(stderr, "program %s: server started on %s, listening on port %d ...\n", program_name, hostname, trn_port);
+    }
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       trn_socket:         %d\n", *trn_socket);
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:             %d\n", status);
