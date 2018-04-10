@@ -778,6 +778,7 @@ int mb_input_init(int verbose, char *file, int format,
 	mb_io_ptr->xdrs = NULL;
 	mb_io_ptr->xdrs2 = NULL;
 	mb_io_ptr->xdrs3 = NULL;
+    mb_io_ptr->mbsp = NULL;
 
 	/* load control parameters into the mbio descriptor */
 	mb_io_ptr->format = format;

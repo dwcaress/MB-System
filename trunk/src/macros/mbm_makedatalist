@@ -91,14 +91,16 @@ if ($verbose) {
 		print " - Checking all files for those that meet swath data naming conventions\n";
 	}
 	if ($disablesorting) {
-		if ($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".mb56" || $suffix eq ".mb57" || $suffix eq ".mb58" || $suffix eq ".mb59") {
+		if ($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".KMALL"
+            || $suffix eq ".kmall" || $suffix eq ".mb56" || $suffix eq ".mb57"
+            || $suffix eq ".mb58" || $suffix eq ".mb59") {
 			print " - Sorting Kongsberg multibeam files into time order is disabled.\n"
         }
 		else {
 			print " - Request to disable time sorting of Kongsberg multibeam files ignored because a Kongsberg multibeam file\n   suffix (.all or .ALL) has not been specified with the -S option\n"
         }
     } else {
-		if ($suffix eq ".all" || $suffix eq ".ALL"
+		if ($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".KMALL" || $suffix eq ".kmall"
 			|| $suffix eq ".mb56" || $suffix eq ".mb57" || $suffix eq ".mb58" || $suffix eq ".mb59") {
 			print " - Attempting to sort Kongsberg multibeam files into time order based on filenames.\n"
         }
@@ -111,16 +113,22 @@ if ($verbose) {
 }
 
 # get list of files in specified directory, with desired suffix if specified
-if ($suffix && $directory) {
-    @filelist = `/bin/ls -1 $directory/*$suffix`;
-} elsif ($suffix && $ignoreprocessed) {
-    @filelist = `/bin/ls -1 *$suffix | grep -v p$suffix`;
+if ($directory) {
+    if ($suffix) {
+        $lsarg = "$directory/*$suffix";
+    } else {
+        $lsarg = "$directory/*";        
+    }
 } elsif ($suffix) {
-    @filelist = `/bin/ls -1 *$suffix`;
-} elsif ($directory) {
-	@filelist = `/bin/ls -1 $directory`;
+    $lsarg = "*$suffix";    
 } else {
-	@filelist = `/bin/ls -1`;
+    $lsarg = "";    
+}
+
+if ($ignoreprocessed && $suffix) {
+    @filelist = `/bin/ls -1 $lsarg | grep -v p$suffix`;
+} else {
+    @filelist = `/bin/ls -1 $lsarg`;    
 }
 
 # loop over the list of files counting identifiable swath files
@@ -136,18 +144,15 @@ foreach $file (@filelist) {
     
 	if ($format != 0 && ($file ne $datalist || $directory ne ".")) {
 		$count++;
-		if ($directory) {
-			$path = "$directory/$file";
-		} else {
-			$path = $file;
-		}
-		push(@outfilelist, $path);
+		push(@outfilelist, $file);
 		push(@outformatlist, $format);
 	}
 }
 
 # If the suffix is *.all and -T is specified, attempt to time order the filenames
-if (($suffix eq ".all" || $suffix eq ".ALL") && !$disablesorting) {
+if (($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".mb56"
+     || $suffix eq ".mb57" || $suffix eq ".mb58" || $suffix eq ".mb59")
+        && !$disablesorting) {
     # loop over the list of files
 	for ($i = 0; $i < scalar(@outfilelist); $i++) {
 		$file = $outfilelist[$i];
@@ -157,12 +162,18 @@ if (($suffix eq ".all" || $suffix eq ".ALL") && !$disablesorting) {
 		push(@sortfilelist, $tmpname);
 		$count++;
 	}
-	sort sortfilelist;
-	foreach $tmpname (@sortfilelist) {
+	@sortedfilelist = sort @sortfilelist;
+    $ii = 0;
+	foreach $tmpname (@sortedfilelist) {
 		($yyyymmdd, $hhmmss, $start, $end, $i, $format) = $tmpname =~ /(\d{8})\^(\d{6})\^(\d{4})\^(\S+)\^(\S+)\^(\S+)/;
 		$file = $start . "_" . $yyyymmdd . "_" . $hhmmss . "_" . $end;
-		$outfilelist[$i] = $file;
-		$outformatlist[$i] = $format;
+        if ($directory) {
+            $outfilelist[$ii] = "$directory/$file";
+        } else {
+            $outfilelist[$ii] = $file;
+        }
+		$outformatlist[$ii] = $format;
+        $ii++;
 	}
 }
 

@@ -482,6 +482,9 @@ struct mb_io_struct {
 	void *xdrs2;                 /* XDR stream handle #2 */
 	void *xdrs3;                 /* XDR stream handle #2 */
     
+    /* application defined i/o */
+    void *mbsp;                  /* mbtrn socket i/o */
+    
     /* file indexing (used by some formats) */
     int num_indextable;
     int num_indextable_alloc;

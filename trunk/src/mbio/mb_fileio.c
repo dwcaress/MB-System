@@ -174,14 +174,24 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* read expected number of bytes into buffer */
-	if ((read_len = fread(buffer, 1, *size, mb_io_ptr->mbfp)) != *size) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-		*size = read_len;
-	}
-	else {
-		*error = MB_ERROR_NO_ERROR;
-	}
+    if (mb_io_ptr->mbfp != NULL) {
+        if ((read_len = fread(buffer, 1, *size, mb_io_ptr->mbfp)) != *size) {
+            status = MB_FAILURE;
+            *error = MB_ERROR_EOF;
+            *size = read_len;
+        }
+        else {
+            *error = MB_ERROR_NO_ERROR;
+        }
+    }
+    else if (mb_io_ptr->mb_io_input_read != NULL && mb_io_ptr->mbsp != NULL) {
+        status = (*mb_io_ptr->mb_io_input_read)(verbose, mbio_ptr, *size, buffer, error);
+    }
+    else {
+        status = MB_FAILURE;
+        *error = MB_ERROR_EOF;
+        *size = read_len;
+    }
 
 	/* print output debug statements */
 	if (verbose >= 2) {
