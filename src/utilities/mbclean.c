@@ -892,7 +892,7 @@ int main(int argc, char **argv) {
 					if (sensorhead_status == MB_SUCCESS) {
 						ping[nrec].multiplicity = sensorhead;
 					}
-					else if (nrec > 0 && ping[nrec].time_d == ping[nrec - 1].time_d) {
+					else if (nrec > 0 && fabs(ping[nrec].time_d - ping[nrec - 1].time_d) < MB_ESF_MAXTIMEDIFF) {
 						ping[nrec].multiplicity = ping[nrec - 1].multiplicity + 1;
 					}
 					else {

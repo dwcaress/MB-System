@@ -822,7 +822,7 @@ int main(int argc, char **argv) {
 					pingmultiplicity = sensorhead;
 				}
 				else if (files[nfile - 1].nping > 0
-						 && fabs(time_d == files[nfile - 1].ping_time_d[files[nfile - 1].nping - 1]) < MB_ESF_MAXTIMEDIFF) {
+						 && fabs(time_d - files[nfile - 1].ping_time_d[files[nfile - 1].nping - 1]) < MB_ESF_MAXTIMEDIFF) {
 					pingmultiplicity 
 					    = files[nfile - 1].pingmultiplicity[files[nfile - 1].nping - 1] + 1;
 				}
