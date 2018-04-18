@@ -923,7 +923,7 @@ struct mb_process_struct {
 #define MB_ESF_MODE_IMPLICIT_NULL 1
 #define MB_ESF_MODE_IMPLICIT_GOOD 2
 #define MB_ESF_MAXTIMEDIFF 0.0000011
-#define MB_ESF_MAXTIMEDIFF_X10 0.000011
+#define MB_ESF_MAXTIMEDIFF_X10 0.0011
 #define MB_ESF_MULTIPLICITY_FACTOR 100000000
 struct mb_edit_struct {
 	double time_d;

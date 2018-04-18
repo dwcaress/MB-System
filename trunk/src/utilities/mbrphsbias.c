@@ -647,7 +647,7 @@ int main(int argc, char **argv) {
 				for (i = 0; i < 7; i++)
 					ping->time_i[i] = time_i[i];
 				ping->time_d = time_d;
-				if (file->num_pings > 0 && fabs(ping->time_d == file->pings[file->num_pings - 1].time_d) < MB_ESF_MAXTIMEDIFF) {
+				if (file->num_pings > 0 && fabs(ping->time_d - file->pings[file->num_pings - 1].time_d) < MB_ESF_MAXTIMEDIFF) {
 					ping->multiplicity = file->pings[file->num_pings - 1].multiplicity + 1;
 				}
 				else {
