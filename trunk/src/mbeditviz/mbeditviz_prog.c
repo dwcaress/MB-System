@@ -739,7 +739,7 @@ int mbeditviz_load_file(int ifile) {
 					if (sensorhead_status == MB_SUCCESS) {
 						ping->multiplicity = sensorhead;
 					}
-					else if (file->num_pings > 0 && ping->time_d == file->pings[file->num_pings - 1].time_d) {
+					else if (file->num_pings > 0 && fabs(ping->time_d - file->pings[file->num_pings - 1].time_d) < MB_ESF_MAXTIMEDIFF) {
 						ping->multiplicity = file->pings[file->num_pings - 1].multiplicity + 1;
 					}
 					else {

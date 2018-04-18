@@ -733,7 +733,7 @@ int main(int argc, char **argv) {
 					if (sensorhead_status == MB_SUCCESS) {
 						pingmultiplicity = sensorhead;
 					}
-					else if (cur_ping.time_d == time_d_lastping) {
+					else if (fabs(cur_ping.time_d - time_d_lastping) < MB_ESF_MAXTIMEDIFF) {
 						pingmultiplicity++;
 					}
 					else {

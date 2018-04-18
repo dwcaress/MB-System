@@ -4225,7 +4225,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 			if (sensorhead_status == MB_SUCCESS) {
 				ping[nbuff].multiplicity = sensorhead;
 			}
-			else if (nbuff > 0 && ping[nbuff].time_d == ping[nbuff - 1].time_d) {
+			else if (nbuff > 0 && fabs(ping[nbuff].time_d - ping[nbuff - 1].time_d) < MB_ESF_MAXTIMEDIFF) {
 				ping[nbuff].multiplicity = ping[nbuff - 1].multiplicity + 1;
 			}
 			else {

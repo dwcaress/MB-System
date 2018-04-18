@@ -1,6 +1,6 @@
 #! /bin/sh
-# Generated automatically by config.status (mbsystem) 5.5.2331
-# Libtool was configured on host Haxby.local:
+# Generated automatically by config.status (mbsystem) 5.5.2332
+# Libtool was configured on host haxby.shore.mbari.org:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
 # Provide generalized library-building support services.
@@ -67,13 +67,13 @@ PATH_SEPARATOR=":"
 
 # The host system.
 host_alias=
-host=x86_64-apple-darwin17.4.0
-host_os=darwin17.4.0
+host=x86_64-apple-darwin17.5.0
+host_os=darwin17.5.0
 
 # The build system.
 build_alias=
-build=x86_64-apple-darwin17.4.0
-build_os=darwin17.4.0
+build=x86_64-apple-darwin17.5.0
+build_os=darwin17.5.0
 
 # A sed program that does not truncate output.
 SED="/usr/bin/sed"
@@ -282,7 +282,7 @@ finish_eval=""
 hardcode_into_libs=no
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0  /usr/local/lib"
+sys_lib_search_path_spec="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.1.0  /usr/local/lib"
 
 # Detected run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/usr/local/lib /lib /usr/lib"

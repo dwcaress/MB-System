@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2332       April 17, 2018
   Version 5.5.2331       April 10, 2018
   Version 5.5.2330       March 7, 2018
   Version 5.5.2329       February 12, 2018
@@ -272,6 +273,14 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2332 (April 17, 2018)
+
+Mbprocess, mbareaclean, mbclean, mbedit, mbeditviz, mbrphsbias, mbneptune2esf:
+Fixed problem recocognizing multiplicity of pings when ping times are close to
+but not exactly the same. This problem was recognized in XSE data from a
+SeaBeam 3020 multibeam, but could potentially have impacted data from other
+sensors.
 
 -----> 5.5.2331 (April 10, 2018)
 
