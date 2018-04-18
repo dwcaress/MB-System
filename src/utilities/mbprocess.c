@@ -4269,7 +4269,7 @@ and mbedit edit save files.\n";
 					if (sensorhead_status == MB_SUCCESS) {
 						pingmultiplicity = sensorhead;
 					}
-					else if (time_d == time_d_lastping) {
+					else if (fabs(time_d - time_d_lastping) < MB_ESF_MAXTIMEDIFF) {
 						pingmultiplicity++;
 					}
 					else {
