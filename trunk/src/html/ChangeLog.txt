@@ -15,8 +15,16 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
-* Version 5.5.2327       January 23, 2017
-  Version 5.5.2324       January 18, 2017
+  Version 5.5.2335       May 6, 2018
+  Version 5.5.2334       April 18, 2018
+  Version 5.5.2333       April 18, 2018
+  Version 5.5.2332       April 17, 2018
+  Version 5.5.2331       April 10, 2018
+  Version 5.5.2330       March 7, 2018
+  Version 5.5.2329       February 12, 2018
+  Version 5.5.2328       January 31, 2018
+* Version 5.5.2327       January 23, 2018
+  Version 5.5.2324       January 18, 2018
   Version 5.5.2323       December 7, 2017
   Version 5.5.2322       November 25, 2017
 * Version 5.5.2321       October 26, 2017
@@ -268,6 +276,122 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2335 (May 6, 2018)
+
+Mbm_bpr: Added ability to parse pressure data from Sonardyne AMT beacons. Also
+added optional smoothing of the BPR depth data used to calculate tides.
+
+Mbotps: Made the options -Ctidestationformat, -Ntidestationfile, and
+-Utidestationlon/tidestationlat introduced last month actually work. One can now
+use nearby tide station data to correct tide models calculated for the location
+and time of survey data.
+
+Mbm_route2mission: Altered to reflect the increased mission duration possible
+for MBARI Mapping AUVs.
+
+Format 88 (MBF_RESON7KR): Fixed handling of beams when using the version 2
+raw detection data records.
+
+-----> 5.5.2334 (April 18, 2018)
+
+Mbprocess, mbareaclean, mbclean, mbedit, mbeditviz, mbrphsbias, mbneptune2esf:
+Reset MB_ESF_MAXTIMEDIFF_X10 value in mb_process.h to 0.0011 to handle old
+beamflags with millisecond truncated timetags.
+
+Mbareaclean, mbclean, mbrphsbias: Fixed the previous fixes .
+
+-----> 5.5.2333 (April 18, 2018)
+
+Mbprocess, mbareaclean, mbclean, mbedit, mbeditviz, mbrphsbias, mbneptune2esf:
+Decreased time range where multiplicity of pings will consider close records
+as the same from 100 to 1 microsecond.
+
+-----> 5.5.2332 (April 17, 2018)
+
+Mbprocess, mbareaclean, mbclean, mbedit, mbeditviz, mbrphsbias, mbneptune2esf:
+Fixed problem recocognizing multiplicity of pings when ping times are close to
+but not exactly the same. This problem was recognized in XSE data from a
+SeaBeam 3020 multibeam, but could potentially have impacted data from other
+sensors.
+
+-----> 5.5.2331 (April 10, 2018)
+
+Mbm_makedatalist: Fixed problem with use of perl sort function when handling
+Kongsberg multibeam data. Also fixed problem with specifying a directory using
+the -I option.
+
+Mbotps: Added new options -Ctidestationformat, -Ntidestationfile, and
+-Utidestationlon/tidestationlat. Together these commands allow users to input
+observations from a tide station; these observations can be used to calculate
+corrections to tidal model values in the vicinity of the tide station. If tide
+station data are specified, then MBotps calculates the difference between the
+observed and modeled tide at that station for each data point in the input tide
+station data. This difference time series is then used as a correction to the
+output tide models, whether at a location specified with the -Rlon/lat option or
+for swath data specified with the -Idatalist option.
+
+Mbmakeplatform: Fixed initialization of the organization and documentation_url
+fields.
+
+Mbtrnpreprocess: Continued development of this new tool, particularly adding
+interprocess communication via TCP-IP sockets.
+
+-----> 5.5.2330 (March 7, 2018)
+
+Proj: Removed the embedded Proj source package from the MB-System archive and
+distribution. From now on Proj is strictly a prerequisite for building MB-System.
+
+Mbtrnpreprocess: Added initial version of new tool for real-time multibeam data
+filtering as part of the implementation of terrain aided navigation on MBARI
+AUVs. Specifically, mbtrnpreprocess accesses realtime s7k data from a Reson 7125
+multibeam sonar, decimates and filters the bathymetry, and than passes the
+decimated and filtered soundings on to an application that attempts to locate
+the AUV in real time relative to a pre-existing multibeam bathymetry survey. This
+allows repeat AUV surveys to execute exactly the desired survey tracks.
+
+Format MBF_3DWISSLP (233): Many fixes to the code supporting WiSSL lidar data.
+
+-----> 5.5.2329 (February 12, 2018)
+
+Format MBF_3DWISSLP (233): Rewrote the processing format for the 3D at Depth
+wide swath lidar (WiSSL) system delivered to MBARI in December 2017. The new
+version of the format is more compact and is read and written much faster.
+
+Edit Save Files (*.esf) and mbedit, mbclean, mbareaclean, mbeditviz: Fixed
+problem in which flags were sometimes not applied
+to all soundings in pings that are less than 0.1 milliseconds earlier or later than
+another ping or scan.
+
+MBeditviz: Replaced use of the global edit files (*.gef) by mbeditviz with use of
+new edit files called reverse edit save files (*.resf). The *.gef files were generated
+by mbpreprocess using mbgetesf. The *.resf files are generated by mbprocess.
+
+Mbm_route2mission: Fixed generation of Dorado AUV missions with waypoint_bottom
+behaviours.
+
+-----> 5.5.2328 (January 31, 2018)
+
+Edit Save Files (*.esf): The edit save file format has been augmented to include
+a mode value that can include implicitly setting all soundings not set by a beamflag
+in the file to a null value (mode == 1) or a valid value (mode = 2). The default
+remains to change sounding beamflag values only for beams explicitly set by an
+edit event. The only means to create ESF files with implicit beamflag modes is
+using mbgetesf with -M4 or -M5, and the only use of implicit beamflag modes is in
+the MBedtiviz *.gef files. The new ESF files have a version 3 tag; old ESF files
+will continue to work fine.
+
+MBgetesf: Augmented to output edit save files in two new modes. If -M4 is specified,
+the beamflags of null beams will not be output, but the ESF mode is set so that
+the beamflags of any soundings not specified will be set null. If -M5 is specified,
+the beamflags of valid beams will not be output, but the ESF mode is set so that
+the beamflags of any soundings not specified will be set valid.
+
+MBpreprocess: Generates *.gef files using mbgetesf with the -M4 rather than -M2
+option.
+
+MBinfo: Fixed memory allocation problem that led to crashes reading data in formats
+MBF_3DWISSLR (232) and MBF_3DWISSLP (233).
 
 -----> 5.5.2327 (January 23, 2018)
 

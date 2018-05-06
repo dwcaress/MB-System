@@ -261,7 +261,7 @@ int main(int argc, char **argv) {
 	etime_i[6] = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:I:i:MmO:o:P:p:R:r:SST:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:I:i:MmN:n:O:o:P:p:R:r:SST:t:U:u:VvHh")) != -1)
 		switch (c) {
 		case 'H':
 		case 'h':
@@ -688,7 +688,7 @@ int main(int argc, char **argv) {
 	/* -------------------------------------------------------------------------
 	 * calculate tide model  for a single position and time range
 	 * -----------------------------------------------------------------------*/
-	if (mbotps_mode == MBOTPS_MODE_POSITION) {
+	if (!(mbotps_mode & MBOTPS_MODE_NAVIGATION)) {
 		/* first open temporary file of lat lon time */
 		pid = getpid();
 		sprintf(lltfile, "tmp_mbotps_llt_%d.txt", pid);
@@ -808,8 +808,8 @@ int main(int argc, char **argv) {
                                                    &correction, &itime, &error);
                         if (intstat == MB_SUCCESS) {
                             tide += correction;
-fprintf(stderr,"TIDE STATION CORRECTION: intstat:%d itime:%dof%d time_d:%f correction:%f tide:%f\n",
-        intstat, itime, ntidestation, time_d, correction, tide);
+//fprintf(stderr,"TIDE STATION CORRECTION: intstat:%d itime:%dof%d time_d:%f correction:%f tide:%f\n",
+//        intstat, itime, ntidestation, time_d, correction, tide);
                         }
                     }
                     
@@ -839,7 +839,8 @@ fprintf(stderr,"TIDE STATION CORRECTION: intstat:%d itime:%dof%d time_d:%f corre
 	/* -------------------------------------------------------------------------
 	 * else get tides along the navigation contained in a set of swath files
 	 * -----------------------------------------------------------------------*/
-	else if (mbotps_mode == MBOTPS_MODE_NAVIGATION) {
+	else if (mbotps_mode & MBOTPS_MODE_NAVIGATION) {
+//fprintf(stderr,"Doing tide correction for swath navigation\n");
 		/* get format if required */
 		if (format == 0)
 			mb_get_format(verbose, read_file, NULL, &format, &error);
@@ -1093,8 +1094,8 @@ fprintf(stderr,"TIDE STATION CORRECTION: intstat:%d itime:%dof%d time_d:%f corre
                                                            &correction, &itime, &error);
                                 if (intstat == MB_SUCCESS) {
                                     tide += correction;
-fprintf(stderr,"TIDE STATION CORRECTION: intstat:%d itime:%dof%d time_d:%f correction:%f tide:%f\n",
-        intstat, itime, ntidestation, time_d, correction, tide);
+//fprintf(stderr,"TIDE STATION CORRECTION: intstat:%d itime:%dof%d time_d:%f correction:%f tide:%f\n",
+//        intstat, itime, ntidestation, time_d, correction, tide);
                                 }
                             }
 

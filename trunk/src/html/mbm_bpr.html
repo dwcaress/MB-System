@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_bpr</H1>
-Section:  MB\-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB\-System 5.0  (1)<BR>Updated:  6 May 2018 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,16 +28,21 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbm_bpr</B> <B>-I</B><I>bprfile</I> <B>-O</B><I>tidefile</I> [<B>-D</B><I>offset </I><B>R</B><I>lon/lat</I> <B>-T -H -V</B>]
+<B>mbm_bpr</B> <B>-I</B><I>bprfile</I> <B>-O</B><I>tidefile</I> [<B>-D</B><I>offset </I><B>-F</B><I>format </I><B>R</B><I>lon/lat</I> <B>S</B><I>window</I> <B>-T -H -V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbm_bpr</B> is a perl shellscript used to translate pressure data from a Seabird SBE53 pressure
-sensor used as a Bottom Pressure Recorder (BPR) into tidal data that can be used to correct
-swath bathymetry data. The user specifies an input BPR data file in the *.tid format produced
-by Seabird software and the output path for the resulting tidefile.
+<B>mbm_bpr</B> is a perl shellscript used to translate pressure data from a Bottom Pressure Recorder (BPR) into tidal data that can be used to correct
+swath bathymetry data. The user specifies an input BPR data file and the output path for the resulting tidefile.
 <P>
+The input data must be in either the *.tid format
+produced by Seabird sensors such as the Seabird SBE53 (specified using <B>-F</B><I>0</I>),
+or the CSV files output by Sonardyne AMT units (specified using <B>-F</B><I>1</I>). In the
+latter case it is the lines tagged with &quot;PR2&quot; that are parsed for the AMT pressure data.
+<P>
+<BR>
+
 By default, the output
 tidefile will be in the form of a text file with two columns:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;tide.
@@ -84,6 +89,9 @@ a location on the equator is assumed for the depth calculation and the vertical 
 the mean depth of the middle half of the depth time series (i.e. depths from 1/4 to 3/4 of the total time span).
 The user can specify an additional offset to apply to the tide data using the <B>-D</B><I>offset</I> option.
 <P>
+If the <B>-S</B><I>window</I> option is used, then the calculated depth data will be
+smoothed using a boxcar window of <I>window</I> seconds.
+<P>
 If the <B>-T</B> option is not used, then <B>mbm_bpr</B> will also output a shellscript that will, if
 executed, generate a GMT postscript plot of the tide data output. If a location has been specified so that
 a tidal model was also generated, the model will be plotted with the tide data.
@@ -125,6 +133,18 @@ Christian do Santos Ferreira
 <BR>
 
 An offset to be added to the calculated tidal data, in meters. Default: <I>offset</I>=0.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+This option specifies the format of the input BPR data. If <I>format</I>=0 then
+input data are in the *.tid format
+produced by Seabird software from sensors such as the Seabird SBE53.
+If <I>format</I>=1 then input data are in a CSV file output by Sonardyne AMT units.
+The pressure values used are those in lines with the &quot;PR2&quot; tag.
+Default: <I>format</I>=0.
 <DT><B>-H</B>
 
 <DD>
@@ -152,6 +172,16 @@ Output tide data file path. The format of the tide data controlled by the use (o
 
 Sets the location of the BPR deployment. Here <I>longitude</I> and <I>latitude</I> are in decimal
 degrees.
+<DT><B>-S</B>
+
+<DD>
+<I>window</I>
+<BR>
+
+This option enables smoothing of the depth values calculated from BPR pressure using
+a boxcar window of <I>window</I> seconds. The number of samples that are averaged to
+generate each smoothed value depends on both the size of the window and the
+sampling interval.
 <DT><B>-T</B>
 
 <DD>
@@ -307,7 +337,7 @@ Lobsters, really.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 6 May 2018</P></CENTER>
 
 <HR>
 

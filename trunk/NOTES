@@ -116,23 +116,19 @@ become:
 	% sudo make install
 
 The available configure options are:
-    --prefix=install      - location for mbsystem (/usr/local/mbsystem)"])
-    --with-netcdf-lib     - location of NetCDF libs"])
-    --with-netcdf-include - location of NetCDF headers"])
-    --with-proj-lib       - location of PROJ libs"])
-    --with-proj-include   - location of PROJ headers"])
-    --with-gmt-lib        - location of GMT libs"])
-    --with-gmt-include    - location of GMT headers"])
-    --with-fftw-lib       - location of FFTW3 libs (optional)"])
-    --with-fftw-include   - location of FFTW3 headers (optional)"])
-    --with-motif-lib      - location of Motif libs (optional)"])
-    --with-motif-include  - location of Motif headers (optional)"])
-    --with-opengl-lib     - location of OpenGL libs (optional)"])
-    --with-opengl-include - location of OpenGL headers (optional)"])
-    --with-otps-dir       - location of OTPS installation (optional)"])
-    --without-gsf         - build without including or supporting GSF"])
-    --enable-bundledproj  - build using bundled proj package - the
-				default is to link with libproj"])
+    --prefix=install      - location for mbsystem (/usr/local/mbsystem)
+    --with-netcdf-config  - location of NetCDF config script nc-config
+    --with-gdal-config    - location of GDAL config script gdal-configx
+    --with-gmt-config     - location of GMT config script gmt-config
+    --with-proj-lib       - location of PROJ libs
+    --with-proj-include   - location of PROJ headers
+    --with-fftw-lib       - location of FFTW3 libs (optional)
+    --with-fftw-include   - location of FFTW3 headers (optional)
+    --with-motif-lib      - location of Motif libs (optional)
+    --with-motif-include  - location of Motif headers (optional)
+    --with-opengl-lib     - location of OpenGL libs (optional)
+    --with-opengl-include - location of OpenGL headers (optional)
+    --with-otps-dir       - location of OTPS installation (optional)
 
 Users can also define custom compiler flags on the command line to be used by
 configure. For example, the command:
@@ -149,134 +145,22 @@ the package in /usr/local/mbsystem. The destination directories will be:
         /usr/local/mbsystem/share/doc/mbsystem/ps    postscript documentation
         /usr/local/mbsystem/man                      man page documentation
 
-If one is installing on a Mac in which some or all of the prerequisite packages
-have been installed with Fink or MacPorts, then the locations of those
-prerequisite packages must be explicitly defined. Fink installs packages in
-/sw, and MacPorts installs into /opt. An example for installing in a Fink-centric
-system is:
-	% CFLAGS="-g -I/opt/X11/include" \
-	    LDFLAGS="-L/opt/X11/lib" \
+As an example, if one is installing on a Mac in which all of the prerequisite
+packages have been installed with Homebrew, then the locations of those
+prerequisite packages must be explicitly defined. Homebrew installs packages in
+/usr/local. For this, the configure command is:
+	% CFLAGS=-g -I/opt/X11/include -L/opt/X11/lib \
 	    ./configure \
-	    --prefix=/Users/caress/sandbox/mbsystem \
-	    --with-netcdf-include=/sw/include \
-	    --with-netcdf-lib=/sw/lib \
-	    --with-proj-include=/sw/include \
-	    --with-proj-lib=/sw/lib \
-	    --with-gmt-include=/sw/include \
-	    --with-gmt-lib=/sw/lib \
-	    --with-fftw-include=/sw/include \
-	    --with-fftw-lib=/sw/lib \
-	    --with-motif-include=/sw/include \
-	    --with-motif-lib=/sw/lib \
-	    --with-otps-dir=/usr/local/OTPS
-This is for MacOSX 10.9 (Mavericks), in which X11 must be obtained from X.org
-and is installed in /opt. Previous versions of MacOsX installed X11 in /usr/X11R6.
-The only non-Fink package specified is OTPS (which is not available through
-package managers) in /usr/local.
+	    −−with-proj-include=/usr/local/include \
+	    −−with-proj-lib=/usr/local/lib \
+	    −−with-fftw-include=/usr/local/include \
+	    −−with-fftw-lib=/usr/local/lib \
+	    −−with-motif-include=/usr/local/include \
+	    −−with-motif-lib=/usr/local/lib \
+	    −−with-otps-dir=/usr/local/opt/otps
 
--------------------------------------------------------------------------------
-BUILDING AND INSTALLING MB-SYSTEM WITH INSTALL_MAKEFILES:
--------------------------------------------------------------------------------
-
-The original, and now alternate, method for generating the makefiles is to use
-a script named install_makefiles that is also present at the top of the
-MB-System distribution. In contrast to configure, which can be controlled by
-command line options, install_makefiles must be customized to the local
-environment by manual editing before this perl script is executed.
-In order to configure your installation. In particular, the user must explicitly
-set the library locations, header file locations, compile flags, and link flags.
-
-The important parameters to be set in install_makefiles are:
-
-     Required parameters:
-     $MBSYSTEM_HOME - absolute path to the MB-System installation location
-     $OS - Operating system (e.g. DARWIN, LINUX).
-     $CFLAGS - Compile flags for C source files.
-     $LFLAGS - Load flags for all object files.
-     $NETCDFLIBDIR - Location of NetCDF library.
-     $NETCDFINCDIR - Location of NetCDF header files.
-     $GMTLIBDIR - Location of GMT libraries.
-     $GMTINCDIR - Location of GMT header files.
-
-     Required parameters for spectrogram program mbsegypsd
-	- mbsegypsd will not be built if these are commented out
-     $FFTWLIBDIR - Location of the FFTW3 library.
-     $FFTWINCDIR - Location of FFTW3 header files.
-
-     Required parameters for graphical tools
-	- graphical tools will not be built if these
-	  are commented out
-     $MOTIFINCDIR - Location of the Motif header files.
-     $MOTIFLIBS - Location of the Motif libraries.
-
-     Required parameter for visualization tools
-	- visualization tools will not be built if this
-	  is commented out
-     $OPENGLLIBS - Link flags for the OpenGL libraries: "-lGLU -lGL";
-
-     Required parameter for mblevitus program
-     $LEVITUS - Location of the Levitus library (usually "$MBSYSTEM_HOME/share/LevitusAnnual82.dat").
-
-     Required parameter for mbotps program
-     $OTPSDIR - Location of the OTPSnc installation (usually "/usr/local/OTPSnc").
-
-     Optional name of C compiler (if other than "cc").
-     $CC - Usually "cc", but could be "gcc".
-
-     Optional parameters for use of independent GSF library installation
-	- GSF library included with MB-System will be used
-	  if these are commented out
-     $GSFLIB - Location of GSF library.
-     $GSFINCDIR - Location of GSF header files.
-
-     Optional parameters for use of independent PROJ4 library installation
-	- PROJ4 library included with MB-System will be used
-	  if these are commented out
-     $PROJLIB - Location of PROJ4 library.
-     $PROJINCDIR - Location of PROJ4 header files.
-
-An example of the parameters for installing a distribution in /usr/local on a
-current (MacOs X 10.8) Fink-centric Mac is:
-     $MBSYSTEM_HOME = "/usr/local/mbsystem-5.4.2081";
-     $OS = "DARWIN";
-     $CFLAGS = "-I/usr/X11R6/include ";
-     $LFLAGS = "-lm -L/sw/lib -lgdal";
-     $NETCDFLIBDIR = "/sw/lib";
-     $NETCDFINCDIR = "/sw/include";
-     $GMTLIBDIR = "/sw/lib";
-     $GMTINCDIR = "/usr/include";
-     $PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
-     $FFTWLIBDIR = "/sw/lib";
-     $FFTWINCDIR = "/sw/include";
-     $MOTIFINCDIR = "/sw/include";
-     $MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
-     $OPENGLLIBS = "-lGLU -lGL";
-     $LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
-     $OTPSDIR = "/usr/local/OTPSnc";
-
-To execute install_makefiles, do the following:
-
-     % cd mbsystem-5.4.2081
-     % ./install_makefiles
-
-Because install_makefiles is a perl script, the executable perl must be
-available in the installer's path. Once install_makefiles has been correctly
-configured and run, give the command "make all" to generate the executable
-programs:
-
-     % make all
-
-The make command will descend recursively down through the directory structure,
-compiling source files, linking object files, and copying executables and manual
-pages to the appropriate directories.
-The destination directories will be:
-        /usr/local/mbsystem-5.4.2081/bin                      executable binaries and scripts
-        /usr/local/mbsystem-5.4.2081/lib                      libraries
-        /usr/local/mbsystem-5.4.2081/include                  header files
-        /usr/local/mbsystem-5.4.2081/share/mbsystem           projection and levitus data
-        /usr/local/mbsystem-5.4.2081/share/doc/mbsystem/html  web page documentation
-        /usr/local/mbsystem-5.4.2081/share/doc/mbsystem/ps    postscript documentation
-        /usr/local/mbsystem-5.4.2081/man                      man page documentation
+This is for MacOSX 10.13 (High Sierra), in which X11 must be obtained from X.org
+and is installed in /opt. 
 
 -------------------------------------------------------------------------------
 SETTING THE USER ENVIRONMENT:

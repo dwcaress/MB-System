@@ -69,9 +69,9 @@ $program_name = "mbm_route2mission";
 $durationfactorwaypoint = 6.0;
 $durationfactormission = 1.5;
 $durationmax = 28800;
-$batterylife = 75600; # 21 hours
+$batterylife = 79200; # 22 hours
 #$batterylife = 68400; # 19 hours
-$safetymargin = 1800;
+$safetymargin = 900;
 
 # set defaults
 
@@ -953,9 +953,9 @@ if (!$aborttime)
 
 # shorten abort time if unsafe
 $ascendtime = $ascendtimes[$nmissionpoints - 1];
-if ($aborttime > $batterylife - $safetymargin - $ascendtime)
+if ($aborttime > $batterylife - $safetymargin - 0.66667 * $ascendtime)
 	{
-	$aborttime = $batterylife - $safetymargin - $ascendtime;
+	$aborttime = $batterylife - $safetymargin - 0.66667 * $ascendtime;
 	}
 
 # Print out program info
