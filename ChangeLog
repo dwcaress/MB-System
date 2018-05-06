@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2335       May 6, 2018
   Version 5.5.2334       April 18, 2018
   Version 5.5.2333       April 18, 2018
   Version 5.5.2332       April 17, 2018
@@ -276,15 +277,33 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.5.2335 (May 6, 2018)
+
+Mbm_bpr: Added ability to parse pressure data from Sonardyne AMT beacons. Also
+added optional smoothing of the BPR depth data used to calculate tides.
+
+Mbotps: Made the options -Ctidestationformat, -Ntidestationfile, and
+-Utidestationlon/tidestationlat introduced last month actually work. One can now
+use nearby tide station data to correct tide models calculated for the location
+and time of survey data.
+
+Mbm_route2mission: Altered to reflect the increased mission duration possible
+for MBARI Mapping AUVs.
+
+Format 88 (MBF_RESON7KR): Fixed handling of beams when using the version 2
+raw detection data records.
+
 -----> 5.5.2334 (April 18, 2018)
 
+Mbprocess, mbareaclean, mbclean, mbedit, mbeditviz, mbrphsbias, mbneptune2esf:
 Reset MB_ESF_MAXTIMEDIFF_X10 value in mb_process.h to 0.0011 to handle old
 beamflags with millisecond truncated timetags.
 
-Fixed the fixes to mbclean, mbareaclean, and mbrphbias.
+Mbareaclean, mbclean, mbrphsbias: Fixed the previous fixes .
 
 -----> 5.5.2333 (April 18, 2018)
 
+Mbprocess, mbareaclean, mbclean, mbedit, mbeditviz, mbrphsbias, mbneptune2esf:
 Decreased time range where multiplicity of pings will consider close records
 as the same from 100 to 1 microsecond.
 
