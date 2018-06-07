@@ -117,6 +117,8 @@ int mbr_register_3dwisslr(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_copyrecord = &mbsys_3ddwissl_copy;
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
+	mb_io_ptr->mb_io_indextablefix = mbsys_3ddwissl_indextablefix;
+	mb_io_ptr->mb_io_indextableapply = mbsys_3ddwissl_indextableapply;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -162,6 +164,8 @@ int mbr_register_3dwisslr(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       extract_rawss:      %p\n", (void *)mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr, "dbg2       insert_rawss:       %p\n", (void *)mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr, "dbg2       copyrecord:         %p\n", (void *)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr, "dbg2       indextablefix:      %p\n", (void *)mb_io_ptr->mb_io_indextablefix);
+		fprintf(stderr, "dbg2       indextableapply:    %p\n", (void *)mb_io_ptr->mb_io_indextableapply);
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:         %d\n", status);
@@ -254,6 +258,7 @@ int mbr_alm_3dwisslr(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	int *file_header_readwritten;
+    int *file_indexed;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -284,7 +289,8 @@ int mbr_alm_3dwisslr(int verbose, void *mbio_ptr, int *error) {
 	*file_header_readwritten = MB_NO;
 
 	/* set saved bytes flag */
-	mb_io_ptr->save2 = MB_NO;
+	file_indexed = (int *)&mb_io_ptr->save2;
+    *file_indexed = MB_NO;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -455,7 +461,7 @@ int mbr_wt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_3dwisslr_rd_data";
+	char *function_name = "mbr_3dwisslr_index_data";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
@@ -469,9 +475,12 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
     double time_d;
 	int done;
 	int i;
-    int count = 0;
+    int record_num_heada = 0;
+    int record_num_headb = 0;
+    int record_num_comment = 0;
 	int skip;
 	int valid_id;
+    double A_dt, B_dt, last_A_time_d, last_B_time_d;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -515,6 +524,7 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
     }
     
     /* allocate indexing array */
+    mb_io_ptr->num_indextable = 0;
     if (mb_io_ptr->num_indextable_alloc <= mb_io_ptr->num_indextable) {
         mb_io_ptr->num_indextable_alloc += MB_BUFFER_MAX;
         status = mb_reallocd(verbose, __FILE__, __LINE__,
@@ -523,7 +533,6 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
     }
     
     /* read file header and check the first few bytes */
-    count = 0;
     if (status == MB_SUCCESS)
         status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
     if (status == MB_SUCCESS) {
@@ -564,22 +573,26 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
             }
     
             /* allocate indexing array */
-            if (mb_io_ptr->num_indextable_alloc <= store->scan_count) {
-                mb_io_ptr->num_indextable_alloc = store->scan_count;
+            if (mb_io_ptr->num_indextable_alloc <= store->scan_count + 1) {
+                mb_io_ptr->num_indextable_alloc = store->scan_count + 1;
                 status = mb_reallocd(verbose, __FILE__, __LINE__,
                                         mb_io_ptr->num_indextable_alloc * sizeof(struct mb_io_indextable_struct),
                                         (void **)(&mb_io_ptr->indextable), error);
             }
             
             /* augment the index table */
-            mb_io_ptr->indextable[mb_io_ptr->num_indextable].count = count;
-            mb_io_ptr->indextable[mb_io_ptr->num_indextable].time_d = (double)(mb_io_ptr->num_indextable);
+            mb_io_ptr->indextable[mb_io_ptr->num_indextable].file_index = 0;
+            mb_io_ptr->indextable[mb_io_ptr->num_indextable].total_index_org = mb_io_ptr->num_indextable;
+            mb_io_ptr->indextable[mb_io_ptr->num_indextable].total_index_sorted = -1;
+            mb_io_ptr->indextable[mb_io_ptr->num_indextable].subsensor = MBSYS_3DDWISSL_FILEHEADER;
+            mb_io_ptr->indextable[mb_io_ptr->num_indextable].subsensor_index = 0;
+            mb_io_ptr->indextable[mb_io_ptr->num_indextable].time_d_org = 0.0;
+            mb_io_ptr->indextable[mb_io_ptr->num_indextable].time_d_corrected = 0.0;
             mb_io_ptr->indextable[mb_io_ptr->num_indextable].offset = 0;
             mb_io_ptr->indextable[mb_io_ptr->num_indextable].size = read_len;
             mb_io_ptr->indextable[mb_io_ptr->num_indextable].kind = (mb_u_char) MB_DATA_PARAMETER;
             mb_io_ptr->indextable[mb_io_ptr->num_indextable].read = (mb_u_char) 0;
             mb_io_ptr->num_indextable++;
-            count++;
         }
         
         /* else this is not a first generation WISSL file, set error */
@@ -658,14 +671,56 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
                 mb_get_time(verbose, time_i, &time_d);
             
                 /* augment the index table */
-                mb_io_ptr->indextable[mb_io_ptr->num_indextable].count = count;
-                mb_io_ptr->indextable[mb_io_ptr->num_indextable].time_d = time_d;
+                mb_io_ptr->indextable[mb_io_ptr->num_indextable].total_index_org = mb_io_ptr->num_indextable;
+                mb_io_ptr->indextable[mb_io_ptr->num_indextable].total_index_sorted = -1;
+                if (store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADA) {
+                    mb_io_ptr->indextable[mb_io_ptr->num_indextable].subsensor = MBSYS_3DDWISSL_HEADA;
+                    mb_io_ptr->indextable[mb_io_ptr->num_indextable].subsensor_index = record_num_heada;
+                    record_num_heada++;
+                }
+                else if (store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADB) {
+                    mb_io_ptr->indextable[mb_io_ptr->num_indextable].subsensor = MBSYS_3DDWISSL_HEADB;
+                    mb_io_ptr->indextable[mb_io_ptr->num_indextable].subsensor_index = record_num_headb;
+                    record_num_headb++;
+                }
+                mb_io_ptr->indextable[mb_io_ptr->num_indextable].time_d_org = time_d;
+                mb_io_ptr->indextable[mb_io_ptr->num_indextable].time_d_corrected = time_d;
                 mb_io_ptr->indextable[mb_io_ptr->num_indextable].offset = ftell(mb_io_ptr->mbfp) - store->size_pulse_record_raw;
                 mb_io_ptr->indextable[mb_io_ptr->num_indextable].size = store->size_pulse_record_raw;
                 mb_io_ptr->indextable[mb_io_ptr->num_indextable].kind = (mb_u_char) MB_DATA_DATA;
                 mb_io_ptr->indextable[mb_io_ptr->num_indextable].read = (mb_u_char) 0;
                 mb_io_ptr->num_indextable++;
-                count++;
+
+/*
+if (store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADA) {
+A_dt = time_d - last_A_time_d;
+last_A_time_d = time_d;
+fprintf(stderr,"%5.5d A: %2.2d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.6f %7ld  Raw: %2.2d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%9.9d   dt:%10.6f",
+mb_io_ptr->indextable[mb_io_ptr->num_indextable].total_index_org, time_i[0],
+time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+time_d, mb_io_ptr->indextable[mb_io_ptr->num_indextable-1].offset,
+store->year, store->month, store->day, store->hour, store->minutes, store->seconds, store->nanoseconds, 
+A_dt);
+if ((A_dt < 0.015 || A_dt > 0.030) && A_dt < 1500000000.0)
+fprintf(stderr," *****\n");
+else
+fprintf(stderr,"\n");
+}
+else {
+B_dt = time_d - last_B_time_d;
+last_B_time_d = time_d;
+fprintf(stderr,"%5.5d B: %2.2d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.6f %7ld  Raw: %2.2d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%9.9d   dt:%10.6f",
+mb_io_ptr->indextable[mb_io_ptr->num_indextable].total_index_org, time_i[0],
+time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+time_d, mb_io_ptr->indextable[mb_io_ptr->num_indextable-1].offset,
+store->year, store->month, store->day, store->hour, store->minutes, store->seconds, store->nanoseconds, 
+B_dt);
+if ((B_dt < 0.015 || B_dt > 0.035) && B_dt < 1500000000.0)
+fprintf(stderr," *****\n");
+else
+fprintf(stderr,"\n");
+}
+*/
             }
             else {
                 done = MB_YES;
@@ -688,14 +743,18 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
                 status = mb_fileio_get(verbose, mbio_ptr, store->comment, &read_len, error);
           
                 /* augment the index table */
-                mb_io_ptr->indextable[mb_io_ptr->num_indextable].count = count;
-                mb_io_ptr->indextable[mb_io_ptr->num_indextable].time_d = (double) mb_io_ptr->num_indextable;
+                mb_io_ptr->indextable[mb_io_ptr->num_indextable].total_index_org = mb_io_ptr->num_indextable;
+                mb_io_ptr->indextable[mb_io_ptr->num_indextable].total_index_sorted = -1;
+                mb_io_ptr->indextable[mb_io_ptr->num_indextable].subsensor = MBSYS_3DDWISSL_COMMENT;
+                mb_io_ptr->indextable[mb_io_ptr->num_indextable].subsensor_index = record_num_comment;
+                record_num_comment++;
+                mb_io_ptr->indextable[mb_io_ptr->num_indextable].time_d_org = (double) (mb_io_ptr->num_indextable);
+                mb_io_ptr->indextable[mb_io_ptr->num_indextable].time_d_corrected = 0.0;
                 mb_io_ptr->indextable[mb_io_ptr->num_indextable].offset = ftell(mb_io_ptr->mbfp) - (long)(read_len + 4);
                 mb_io_ptr->indextable[mb_io_ptr->num_indextable].size = read_len + 4;
                 mb_io_ptr->indextable[mb_io_ptr->num_indextable].kind = (mb_u_char) MB_DATA_COMMENT;
                 mb_io_ptr->indextable[mb_io_ptr->num_indextable].read = (mb_u_char) 0;
                 mb_io_ptr->num_indextable++;
-                count++;
             }
             done = MB_YES;
             if (status == MB_SUCCESS)
@@ -722,12 +781,22 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
 	/* sort the index table */
 	if (status == MB_SUCCESS) {
+//fprintf(stderr,"\nOriginal Index Table:\n");
+//for (i=0;i<mb_io_ptr->num_indextable;i++) {
+//fprintf(stderr,"%4.4d %4.4d %15.4f %3d %5ld %lu\n",
+//i, mb_io_ptr->indextable[i].count_org, mb_io_ptr->indextable[i].time_d_org, mb_io_ptr->indextable[i].kind,
+//mb_io_ptr->indextable[i].offset, mb_io_ptr->indextable[i].size);
+//}
         qsort((void *)mb_io_ptr->indextable, mb_io_ptr->num_indextable,
               sizeof(struct mb_io_indextable_struct),
               (void *)mbr_3dwisslr_indextable_compare);
+        for (i=0;i<mb_io_ptr->num_indextable;i++) {
+            mb_io_ptr->indextable[i].total_index_sorted = i;
+        }
+//fprintf(stderr,"\nSorted Index Table:\n");
 //for (i=0;i<mb_io_ptr->num_indextable;i++) {
 //fprintf(stderr,"%4.4d %4.4d %15.4f %3d %5ld %lu\n",
-//i, mb_io_ptr->indextable[i].count, mb_io_ptr->indextable[i].time_d, mb_io_ptr->indextable[i].kind,
+//i, mb_io_ptr->indextable[i].count_org, mb_io_ptr->indextable[i].time_d_org, mb_io_ptr->indextable[i].kind,
 //mb_io_ptr->indextable[i].offset, mb_io_ptr->indextable[i].size);
 //}
     }
@@ -753,9 +822,9 @@ int mbr_3dwisslr_indextable_compare(const void *a, const void *b) {
     
     aa = (struct mb_io_indextable_struct*) a;
     bb = (struct mb_io_indextable_struct*) b;
-    if (aa->time_d < bb->time_d)
+    if (aa->time_d_org < bb->time_d_org)
         result = -1;
-    else if (aa->time_d > bb->time_d)
+    else if (aa->time_d_org > bb->time_d_org)
         result = 1;
     return(result);
 }
@@ -773,6 +842,7 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	size_t read_len;
 	size_t index;
 	int time_i[7];
+    int time_j[5];
 	int found;
 	int i, ipulse, isounding;
 	int irecord;
@@ -1081,6 +1151,20 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
                     pulse->soundings[isounding].alongtrack = 0.0;
                     pulse->soundings[isounding].depth = 0.0;
                 }
+            }
+            
+            /* if the index table indicates the time stamp needs to be corrected, do it */
+            if (mb_io_ptr->indextable[irecord].time_d_corrected > MB_SECONDS_01JAN2000) {
+                mb_get_date(verbose, mb_io_ptr->indextable[irecord].time_d_corrected, time_i);
+                mb_get_jtime(verbose, time_i, time_j);
+                store->year = time_i[0];
+                store->month = time_i[1];
+                store->day = time_i[2];
+                store->jday = time_j[1];
+                store->hour = time_i[3];
+                store->minutes = time_i[4];
+                store->seconds = time_i[5];
+                store->nanoseconds = 1000 * ((unsigned int)time_i[6]);
             }
             
             store->bathymetry_calculated = MB_NO;
@@ -1491,4 +1575,58 @@ int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* return status */
 	return (status);
 }
+/*--------------------------------------------------------------------*/
+int mbr_3dwisslr_fixtimestamps(int verbose, void *mbio_ptr,
+                                int num_indextable, struct mb_io_indextable_struct *indextable, int n_file, int *error) {
+	char *function_name = "mbr_3dwisslr_fixtimestamps";
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_3ddwissl_struct *store;
+    double time_d;
+	int time_i[7], time_j[5];
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:              %p\n", mbio_ptr);
+		fprintf(stderr, "dbg2       num_indextable:        %d\n", num_indextable);
+		fprintf(stderr, "dbg2       indextable:            %p\n", indextable);
+		fprintf(stderr, "dbg2       n_file:                %d\n", n_file);
+	}
+
+	/* check for non-null data */
+	assert(mbio_ptr != NULL);
+
+	/* always successful */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_3ddwissl_struct *)mb_io_ptr->store_data;
+
+    /* correct timestamps in the file's internal index table using information
+     * supplied in the external index table */
+    
+
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	/* return status */
+	return status;
+
+} /* mbsys_3ddwissl_fixtimestamps */
+
 /*--------------------------------------------------------------------*/

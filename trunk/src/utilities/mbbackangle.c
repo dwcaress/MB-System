@@ -743,7 +743,10 @@ by MBprocess.";
 			ss_corr_type = MBP_SSCORR_UNKNOWN;
 		else
 			ss_corr_type = MBP_SSCORR_SUBTRACTION;
-		amp_corr_type = MBP_AMPCORR_SUBTRACTION;
+        if (format == MBF_3DWISSLR || format == MBF_3DWISSLP)
+            amp_corr_type = MBP_AMPCORR_DIVISION;
+        else
+            amp_corr_type = MBP_AMPCORR_SUBTRACTION;
 		ref_angle = ref_angle_default;
 
 		/* allocate memory for data arrays */

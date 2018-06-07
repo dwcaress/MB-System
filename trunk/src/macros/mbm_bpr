@@ -366,7 +366,7 @@ else {
 $ocount = 0;
 for ($i = 0; $i < $count; $i++) {
   $tide = $sdepths[$i] - $mean + $offset;
-  if (abs($tide) < 20.0 && ($i == 0 || $time_ds[$i] != $time_ds[$i-1])) {
+  if (abs($tide) < 2.5 && ($i == 0 || $time_ds[$i] != $time_ds[$i-1])) {
     if ($tmode == 0) {
       printf FO "$time_ds[$i] $tide\n";
     }

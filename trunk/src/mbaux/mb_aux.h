@@ -221,6 +221,7 @@ void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int
 /* mb_topogrid function prototypes */
 int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **topogrid_ptr, int *error);
 int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error);
+int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *error);
 int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navlat, double *topo, int *error);
 int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double navlat, double altitude, double sonardepth,
                           double mtodeglon, double mtodeglat, double vx, double vy, double vz, double *lon, double *lat,
