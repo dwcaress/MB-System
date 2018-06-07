@@ -320,6 +320,10 @@
 //#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.08        // ICD value +22.08
 //#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -5.01         // ICD value -5.01
 
+#define MBSYS_3DDWISSL_FILEHEADER                 0
+#define MBSYS_3DDWISSL_HEADA                      1
+#define MBSYS_3DDWISSL_HEADB                      2
+#define MBSYS_3DDWISSL_COMMENT                    3
 #define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           +0.012224004
 #define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954
 #define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.062005210
@@ -335,6 +339,7 @@
 
 #define MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD 2000.0
 #define MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE        0.0
+#define MBSYS_3DDWISSL_LASERPULSERATE               40000.0
 
 struct mbsys_3ddwissl_calibration_struct {
     char cfg_path[ 64 ];
@@ -558,11 +563,18 @@ int mbsys_3ddwissl_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_3ddwissl_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth,
                                      double *velocity, int *error);
 int mbsys_3ddwissl_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
-                                    int *error);
+                                int *error);
 int mbsys_3ddwissl_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_3ddwissl_print_store(int verbose, void *store_ptr, int *error);
 int mbsys_3ddwissl_calculatebathymetry(int verbose, void *mbio_ptr, void *store_ptr,
-                                       double amplitude_threshold, double target_altitude, int *error);
+                                double amplitude_threshold, double target_altitude, int *error);
+
+/* functions called by mbpreprocess to fix first generation WiSSL timestamp errors */
+int mbsys_3ddwissl_indextablefix(int verbose, void *mbio_ptr, int num_indextable,
+                                 void *indextable_ptr, int *error);
+int mbsys_3ddwissl_indextableapply(int verbose, void *mbio_ptr, int num_indextable,
+                                   void *indextable_ptr, int n_file, int *error);
+
 
 
 

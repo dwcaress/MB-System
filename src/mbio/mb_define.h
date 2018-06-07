@@ -186,6 +186,7 @@ typedef char mb_longname[MB_LONGNAME_LENGTH];
 #define MB_ISECINHOUR 3600
 #define MB_ISECINMINUTE 60
 #define MB_IMININHOUR 60
+#define MB_SECONDS_01JAN2000 946684800.0
 
 /* water sound speed calculation algorithms */
 #define MB_SOUNDSPEEDALGORITHM_NONE 		0
@@ -371,6 +372,9 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *sensor2, double *sensor3, double *sensor4, double *sensor5, double *sensor6, double *sensor7,
                         double *sensor8, int *error);
 int mb_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+int mb_indextable(int verbose, void *mbio_ptr, int *num_indextable, void **indextable_ptr, int *error);
+int mb_indextablefix(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int *error);
+int mb_indextableapply(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int n_file, int *error);
 
 int mb_platform_init(int verbose, void **platform_ptr, int *error);
 int mb_platform_setinfo(int verbose, void *platform_ptr, int type, char *name, char *organization, char *documentation_url,

@@ -383,9 +383,14 @@ struct mb_platform_struct {
 
 /* MBIO file index storage structure */
 struct mb_io_indextable_struct {
-    double time_d;
+    int file_index;
+    int total_index_org;
+    int total_index_sorted;
+    int subsensor;
+    int subsensor_index;
+    double time_d_org;
+    double time_d_corrected;
     long offset;
-    int count;
     size_t size;
     mb_u_char kind;
     mb_u_char read;
@@ -729,7 +734,11 @@ struct mb_io_struct {
 	                              double *sensor1, double *sensor2, double *sensor3, double *sensor4, double *sensor5,
 	                              double *sensor6, double *sensor7, double *sensor8, int *error);
 	int (*mb_io_copyrecord)(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
-    
+
+    /* function pointers used by mbpreprocess to fix timestamps */
+    int (*mb_io_indextablefix)(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int *error);
+    int (*mb_io_indextableapply)(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int n_file, int *error);
+
 	/* function pointers for reading from application defined input */
 	int (*mb_io_input_open)(int verbose, void *mbio_ptr, char *path, int *error);
 	int (*mb_io_input_read)(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error);

@@ -161,7 +161,7 @@
 
 #define MBF_3DDEPTHP_DEBUG 1
 
-static char rcs_id[] = "$Id$";
+static char version_id[] = "$Id$";
 
 /*-------------------------------------------------------------------- */
 int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command line 0..N */
@@ -181,7 +181,7 @@ int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -292,7 +292,7 @@ int mbsys_3ddwissl_deall(int verbose,      /* in: verbosity level set on command
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -467,7 +467,7 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
@@ -697,7 +697,7 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -722,7 +722,7 @@ int mbsys_3ddwissl_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -800,7 +800,7 @@ int mbsys_3ddwissl_extract(int verbose,     /* in: verbosity level set on comman
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -927,7 +927,7 @@ int mbsys_3ddwissl_insert(int verbose,     /* in: verbosity level set on command
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -1066,7 +1066,7 @@ int mbsys_3ddwissl_ttimes(int verbose,            /* in: verbosity level set on 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1153,7 +1153,7 @@ int mbsys_3ddwissl_detects(int verbose,     /* in: verbosity level set on comman
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1238,7 +1238,7 @@ int mbsys_3ddwissl_pulses(int verbose,     /* in: verbosity level set on command
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1413,7 +1413,7 @@ int mbsys_3ddwissl_extract_altitude(
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1515,7 +1515,7 @@ int mbsys_3ddwissl_extract_nnav(int verbose,     /* in: verbosity level set on c
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1626,7 +1626,7 @@ int mbsys_3ddwissl_extract_nav(int verbose, void *mbio_ptr, /* in: verbosity lev
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1730,7 +1730,7 @@ int mbsys_3ddwissl_insert_nav(int verbose, void *mbio_ptr, /* in: verbosity leve
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -1816,7 +1816,7 @@ int mbsys_3ddwissl_extract_svp(int verbose,      /* in: verbosity level set on c
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1885,7 +1885,7 @@ int mbsys_3ddwissl_insert_svp(int verbose,      /* in: verbosity level set on co
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -1949,7 +1949,7 @@ int mbsys_3ddwissl_copy(int verbose,     /* in: verbosity level set on command l
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -2018,7 +2018,7 @@ int mbsys_3ddwissl_print_store(int verbose,     /* in: verbosity level set on co
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2         store:    %p\n", store_ptr);
@@ -2278,7 +2278,7 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
 		fprintf(stderr, "dbg2         store:               %p\n", store_ptr);
@@ -2448,5 +2448,500 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 
 	/* return status */
 	return status;
-} /* mbsys_3ddwissl_print_store */
+
+} /* mbsys_3ddwissl_calculatebathymetry */
+
+/*--------------------------------------------------------------------*/
+int mbsys_3ddwissl_wissl_indextable_compare1(const void *a, const void *b) {
+    struct mb_io_indextable_struct *aa;
+    struct mb_io_indextable_struct *bb;
+    int result = 0;
+    
+    aa = (struct mb_io_indextable_struct*) a;
+    bb = (struct mb_io_indextable_struct*) b;
+    
+    if (aa->subsensor < bb->subsensor) {
+        result = -1;
+    }
+    else if (aa->subsensor > bb->subsensor) {
+        result = 1;
+    }
+    else if (aa->file_index < bb->file_index) {
+        result = -1;
+    }
+    else if (aa->file_index > bb->file_index) {
+        result = 1;
+    }
+    else if (aa->subsensor_index < bb->subsensor_index) {
+        result = -1;
+    }
+    else if (aa->subsensor_index > bb->subsensor_index) {
+        result = 1;
+    }
+    
+    return(result);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_3ddwissl_wissl_indextable_compare2(const void *a, const void *b) {
+    struct mb_io_indextable_struct *aa;
+    struct mb_io_indextable_struct *bb;
+    int result = 0;
+    
+    aa = (struct mb_io_indextable_struct*) a;
+    bb = (struct mb_io_indextable_struct*) b;
+    if (aa->time_d_corrected < bb->time_d_corrected)
+        result = -1;
+    else if (aa->time_d_corrected > bb->time_d_corrected)
+        result = 1;
+    return(result);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_3ddwissl_indextablefix(int verbose, void *mbio_ptr, int num_indextable,
+                                 void *indextable_ptr, int *error) {
+	char *function_name = "mbsys_3ddwissl_fixwissltimestamps";
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+    struct mb_io_indextable_struct *indextable;
+	struct mbsys_3ddwissl_struct *store;
+    double dt, dt_threshold, nearest_minute_time_d;
+    int head_a_start, head_a_end, head_b_start, head_b_end;
+    int first_good_timestamp, next_good_timestamp, last_good_timestamp;
+    int num_good_timestamps;
+    int done;
+    int i;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:              %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       num_indextable:        %d\n", num_indextable);
+		fprintf(stderr, "dbg2       indextable_ptr:        %p\n", indextable_ptr);
+	}
+
+	/* always successful */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_3ddwissl_struct *)mb_io_ptr->store_data;
+
+	/* get index table structure pointer */
+	indextable = (struct mb_io_indextable_struct *)indextable_ptr;
+
+    /* resort the total index table so that the data records are sorted by
+     * left/right head, then file, then original order */
+/*fprintf(stderr,"\nOriginal Index Table:\n");
+for (i=0;i<num_indextable;i++) {
+double nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
+fprintf(stderr,"%4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
+i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
+indextable[i].subsensor, indextable[i].subsensor_index,
+indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
+indextable[i].offset, indextable[i].size, indextable[i].kind,
+indextable[i].read);
+}*/
+    qsort((void *)indextable, num_indextable,
+              sizeof(struct mb_io_indextable_struct),
+              (void *)mbsys_3ddwissl_wissl_indextable_compare1);
+    for (i=0;i<num_indextable;i++) {
+        indextable[i].total_index_sorted = i;
+    }
+/*
+fprintf(stderr,"\nSorted Index Table:\n");
+dt = 0.0;
+for (i=0;i<num_indextable;i++) {
+if (i > 0 && indextable[i].kind == MB_DATA_DATA && indextable[i].subsensor == indextable[i-1].subsensor) {
+dt = indextable[i].time_d_org - indextable[i-1].time_d_org;
+}
+else {
+dt = 0.0;
+}
+double nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
+fprintf(stderr,"%4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d   %10.6f",
+i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
+indextable[i].subsensor, indextable[i].subsensor_index,
+indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
+indextable[i].offset, indextable[i].size, indextable[i].kind,
+indextable[i].read, dt);
+if (fabs(dt) > 0.05) fprintf(stderr, " *****");
+if (indextable[i].time_d_org - nearest_minute_time_d >= 0.0
+     && indextable[i].time_d_org - nearest_minute_time_d < 0.01)
+    fprintf(stderr, " $$$$$");
+fprintf(stderr, "\n");
+}
+*/
+
+    /* Correct the WiSSL timestamps produced by the first version of the sensor.
+     * The timestamps need correcting because the clock drifts between being reset t
+     * to a correct value at each even minute. Therefore look for large time offsets
+     * immediately after the minute mark, and treat the post shift timestamp as correct.
+     * Interpolate between the post-minute timestamps to correct all the other timestamps.
+     * Note that large postive clock drifts lead to two timestamps at the minute mark,
+     * one incorrect and the second correct, while negative clock drifts lead to a
+     * gap in time prior to the minute mark. Also, some datasets have little, if any,
+     * clock drift even though the problem exists.
+     */
+    
+    /* calculate the approximate expected time between scan timestamps */
+    dt_threshold = 2.30 * store->pulses_per_scan / MBSYS_3DDWISSL_LASERPULSERATE;
+    
+    /* find the index bounds of sorted data from the two WiSSL optical heads */
+    head_a_start = num_indextable;
+    head_a_end = -1;
+    head_b_start = num_indextable;
+    head_b_end = -1;
+    for (i = 0; i < num_indextable; i++) {
+        if (indextable[i].subsensor == MBSYS_3DDWISSL_HEADA) {
+            if (i < head_a_start)
+                head_a_start = i;
+            if (i > head_a_end)
+                head_a_end = i;
+        }
+        else if (indextable[i].subsensor == MBSYS_3DDWISSL_HEADB) {
+            if (i < head_b_start)
+                head_b_start = i;
+            if (i > head_b_end)
+                head_b_end = i;
+        }
+    }
+//fprintf(stderr,"head_a_start:%d head_a_end:%d\n", head_a_start, head_a_end);
+//fprintf(stderr,"head_b_start:%d head_b_end:%d\n\n", head_b_start, head_b_end);
+     
+    /* deal with head A data - start by identifying all good timestamps */
+    dt = 0.0;
+    num_good_timestamps = 0;
+    first_good_timestamp = head_a_end;
+    last_good_timestamp = head_a_start;
+    for (i = head_a_start; i <= head_a_end; i++) {
+        if (i > head_a_start)
+            dt = indextable[i].time_d_org - indextable[i-1].time_d_org;
+        nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
+        if (indextable[i].time_d_org - nearest_minute_time_d >= 0.0
+            && indextable[i].time_d_org - nearest_minute_time_d < dt_threshold
+            && fabs(dt) > dt_threshold) {
+//fprintf(stderr,"Good timestamp A: %d %.6f\n",i,indextable[i].time_d_org);
+            indextable[i].time_d_corrected = indextable[i].time_d_org;
+            num_good_timestamps++;
+            if (first_good_timestamp > i)
+                first_good_timestamp = i;
+            last_good_timestamp = i;
+        }
+        else
+            indextable[i].time_d_corrected = 0.0;
+    }
+//fprintf(stderr,"\nHead A: dt_threshold:%f num_good_timestamps:%d first_good_timestamp:%d last_good_timestamp:%d\n\n",
+//dt_threshold, num_good_timestamps,first_good_timestamp,last_good_timestamp);
+    
+    /* if good timestamps found then extrapolate and interpolate the other timestamps */
+    if (last_good_timestamp > first_good_timestamp) {
+        dt = (indextable[last_good_timestamp].time_d_corrected - indextable[first_good_timestamp].time_d_corrected)
+            / ((double)(last_good_timestamp - first_good_timestamp));
+//fprintf(stderr,"dt:%.6f\n",dt);
+        for (i = head_a_start; i < first_good_timestamp; i++) {
+            indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected
+                                                + dt * (i - first_good_timestamp);
+//fprintf(stderr,"New time_d A-0: %5d %.6f\n", i, indextable[i].time_d_corrected);
+        }
+        for (i = last_good_timestamp + 1; i <= head_a_end; i++) {
+            indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected
+                                                + dt * (i - last_good_timestamp);
+//fprintf(stderr,"New time_d A-2: %5d %.6f\n", i, indextable[i].time_d_corrected);
+        }
+        done = MB_NO;
+        next_good_timestamp = first_good_timestamp;
+        while (done == MB_NO) {
+            for (i = first_good_timestamp + 1;
+                 i <= last_good_timestamp && next_good_timestamp == first_good_timestamp;
+                 i++) {
+                if (indextable[i].time_d_corrected > 0.0) {
+                    next_good_timestamp = i;
+                }
+            }
+            dt = (indextable[next_good_timestamp].time_d_corrected - indextable[first_good_timestamp].time_d_corrected)
+            / ((double)(next_good_timestamp - first_good_timestamp));
+            for (i = first_good_timestamp + 1; i < next_good_timestamp; i++) {
+                indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected
+                                                + dt * (i - first_good_timestamp);
+//fprintf(stderr,"New time_d A-1: %5d %.6f\n", i, indextable[i].time_d_corrected);
+            }
+            first_good_timestamp = next_good_timestamp;
+            if (next_good_timestamp == last_good_timestamp)
+                done = MB_YES;
+        }
+    }
+    
+    /* if no good timestamps identified assume all are good and reset all
+        timestamps to the original values */
+    else {
+        for (i = head_a_start; i <= head_a_end; i++) {
+            indextable[i].time_d_corrected = indextable[i].time_d_org;
+        }
+    }
+    
+    /* deal with head B data - start by identifying all good timestamps */
+    dt = 0.0;
+    num_good_timestamps = 0;
+    first_good_timestamp = head_b_end;
+    last_good_timestamp = head_b_start;
+    for (i = head_b_start; i <= head_b_end; i++) {
+        if (i > head_b_start)
+            dt = indextable[i].time_d_org - indextable[i-1].time_d_org;
+        nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
+        if (indextable[i].time_d_org - nearest_minute_time_d >= 0.0
+            && indextable[i].time_d_org - nearest_minute_time_d < dt_threshold
+            && fabs(dt) > dt_threshold) {
+//fprintf(stderr,"Good timestamp B: %d %.6f\n",i,indextable[i].time_d_org);
+            indextable[i].time_d_corrected = indextable[i].time_d_org;
+            num_good_timestamps++;
+            if (first_good_timestamp > i)
+                first_good_timestamp = i;
+            last_good_timestamp = i;
+        }
+        else
+            indextable[i].time_d_corrected = 0.0;
+    }
+//fprintf(stderr,"\nHead B: dt_threshold:%f num_good_timestamps:%d first_good_timestamp:%d last_good_timestamp:%d\n",
+//dt_threshold, num_good_timestamps,first_good_timestamp,last_good_timestamp);
+    
+    /* if good timestamps found then extrapolate and interpolate the other timestamps */
+    if (last_good_timestamp > first_good_timestamp) {
+        dt = (indextable[last_good_timestamp].time_d_corrected - indextable[first_good_timestamp].time_d_corrected)
+            / ((double)(last_good_timestamp - first_good_timestamp));
+        for (i = head_b_start; i < first_good_timestamp; i++) {
+            indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected
+                                                + dt * (i - first_good_timestamp);
+//fprintf(stderr,"New time_d B-0: %5d %.6f\n", i, indextable[i].time_d_corrected);
+        }
+        for (i = last_good_timestamp + 1; i <= head_b_end; i++) {
+            indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected
+                                                + dt * (i - last_good_timestamp);
+//fprintf(stderr,"New time_d B-2: %5d %.6f\n", i, indextable[i].time_d_corrected);
+        }
+        done = MB_NO;
+        next_good_timestamp = first_good_timestamp;
+        while (done == MB_NO) {
+            for (i = first_good_timestamp + 1;
+                 i <= last_good_timestamp && next_good_timestamp == first_good_timestamp;
+                 i++) {
+                if (indextable[i].time_d_corrected > 0.0) {
+                    next_good_timestamp = i;
+                }
+            }
+            dt = (indextable[next_good_timestamp].time_d_corrected - indextable[first_good_timestamp].time_d_corrected)
+            / ((double)(next_good_timestamp - first_good_timestamp));
+            for (i = first_good_timestamp + 1; i < next_good_timestamp; i++) {
+                indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected
+                                                + dt * (i - first_good_timestamp);
+//fprintf(stderr,"New time_d B-1: %5d %.6f\n", i, indextable[i].time_d_corrected);
+            }
+            first_good_timestamp = next_good_timestamp;
+            if (next_good_timestamp == last_good_timestamp)
+                done = MB_YES;
+        }
+    }
+    
+    /* if no good timestamps identified assume all are good and reset all
+        timestamps to the original values */
+    else {
+        for (i = head_b_start; i <= head_b_end; i++) {
+            indextable[i].time_d_corrected = indextable[i].time_d_org;
+        }
+    }
+    
+/*fprintf(stderr,"\nCorrected Timestamp Index Table:\n");
+dt = 0.0;
+for (i=0;i<num_indextable;i++) {
+if (i > 0 && indextable[i].kind == MB_DATA_DATA && indextable[i].subsensor == indextable[i-1].subsensor) {
+dt = indextable[i].time_d_corrected - indextable[i-1].time_d_corrected;
+}
+else {
+dt = 0.0;
+}
+double nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
+fprintf(stderr,"FIX: %4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d   %10.6f",
+i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
+indextable[i].subsensor, indextable[i].subsensor_index,
+indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
+indextable[i].offset, indextable[i].size, indextable[i].kind,
+indextable[i].read, dt);
+if (fabs(dt) > 0.05) fprintf(stderr, " *****");
+if (indextable[i].time_d_corrected - nearest_minute_time_d >= 0.0
+     && indextable[i].time_d_corrected - nearest_minute_time_d < dt_threshold)
+    fprintf(stderr, " $$$$$");
+fprintf(stderr, "\n");
+}*/
+    
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	/* return status */
+	return status;
+
+} /* mbsys_3ddwissl_fixwissltimestamps */
+
+/*--------------------------------------------------------------------*/
+int mbsys_3ddwissl_indextableapply(int verbose, void *mbio_ptr, int num_indextable,
+                                   void *indextable_ptr, int n_file, int *error) {
+	char *function_name = "mbsys_3ddwissl_indextableapply";
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+    struct mb_io_indextable_struct *indextable;
+    double time_d;
+    double nearest_minute_time_d;
+	int time_i[7], time_j[5];
+    int giindex, iindex;
+    int giindex_a_begin, giindex_a_end;
+    int giindex_b_begin, giindex_b_end;
+    int i;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:              %p\n", mbio_ptr);
+		fprintf(stderr, "dbg2       num_indextable:        %d\n", num_indextable);
+		fprintf(stderr, "dbg2       indextable_ptr:        %p\n", indextable_ptr);
+		fprintf(stderr, "dbg2       n_file:                %d\n", n_file);
+	}
+
+	/* check for non-null data */
+	assert(mbio_ptr != NULL);
+
+	/* always successful */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get index table structure pointer */
+	indextable = (struct mb_io_indextable_struct *)indextable_ptr;
+
+/*fprintf(stderr,"\nExternal Index Table:\n");
+for (i=0;i<num_indextable;i++) {
+nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
+fprintf(stderr,"EXT %4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
+i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
+indextable[i].subsensor, indextable[i].subsensor_index,
+indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
+indextable[i].offset, indextable[i].size, indextable[i].kind,
+mb_io_ptr->indextable[i].read);
+}*//*
+
+fprintf(stderr,"\nOriginal internal Index Table:\n");
+for (i=0;i<mb_io_ptr->num_indextable;i++) {
+nearest_minute_time_d = 60.0 * round(mb_io_ptr->indextable[i].time_d_org / 60.0);
+fprintf(stderr,"INT %4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
+i, mb_io_ptr->indextable[i].file_index, mb_io_ptr->indextable[i].total_index_org, mb_io_ptr->indextable[i].total_index_sorted,
+mb_io_ptr->indextable[i].subsensor, mb_io_ptr->indextable[i].subsensor_index,
+mb_io_ptr->indextable[i].time_d_org, mb_io_ptr->indextable[i].time_d_corrected, nearest_minute_time_d,
+mb_io_ptr->indextable[i].offset, mb_io_ptr->indextable[i].size, mb_io_ptr->indextable[i].kind,
+mb_io_ptr->indextable[i].read);
+}*/
+
+    /* correct timestamps in the file's internal index table using information
+     * supplied in the external index table */
+    
+    /* find the start and end of relevant entries in the global index table */
+    giindex_a_begin = -1;
+    giindex_a_end = -1;
+    giindex_b_begin = -1;
+    giindex_b_end = -1;
+    for (giindex = 0; giindex < num_indextable; giindex++) {
+        if (indextable[giindex].file_index == n_file) {
+            if (indextable[giindex].subsensor == MBSYS_3DDWISSL_HEADA) {
+                if (giindex_a_begin < 0)
+                    giindex_a_begin = giindex;
+                giindex_a_end = giindex;
+            }
+            else if (indextable[giindex].subsensor == MBSYS_3DDWISSL_HEADB) {
+                if (giindex_b_begin < 0)
+                    giindex_b_begin = giindex;
+                giindex_b_end = giindex;
+            }
+        }
+    }
+    
+    /* replace timestamps with corrected values from the global index table */
+    for (iindex = 0; iindex < mb_io_ptr->num_indextable; iindex++) {
+        if (mb_io_ptr->indextable[iindex].subsensor == MBSYS_3DDWISSL_HEADA) {
+            for (giindex = giindex_a_begin; giindex <= giindex_a_end; giindex++) {
+                if (mb_io_ptr->indextable[iindex].subsensor_index == indextable[giindex].subsensor_index) {
+/*fprintf(stderr,"A Replacing iindex:%d giindex:%d  file: %d %d subsensor: %d:%d %d:%d  time_d: %.6f %.6f %.6f\n",
+iindex, giindex, n_file, indextable[giindex].file_index,
+mb_io_ptr->indextable[iindex].subsensor, mb_io_ptr->indextable[iindex].subsensor_index,
+indextable[giindex].subsensor, indextable[giindex].subsensor_index,
+mb_io_ptr->indextable[iindex].time_d_org,
+indextable[giindex].time_d_org,
+indextable[giindex].time_d_corrected);*/
+                    mb_io_ptr->indextable[iindex].time_d_corrected = indextable[giindex].time_d_corrected; 
+                }
+            
+            }
+        }
+        else if (mb_io_ptr->indextable[iindex].subsensor == MBSYS_3DDWISSL_HEADB) {
+            for (giindex = giindex_b_begin; giindex <= giindex_b_end; giindex++) {
+                if (mb_io_ptr->indextable[iindex].subsensor_index == indextable[giindex].subsensor_index) {
+/*fprintf(stderr,"B Replacing iindex:%d giindex:%d  file: %d %d subsensor: %d:%d %d:%d  time_d: %.6f %.6f %.6f\n",
+iindex, giindex, n_file, indextable[giindex].file_index,
+mb_io_ptr->indextable[iindex].subsensor, mb_io_ptr->indextable[iindex].subsensor_index,
+indextable[giindex].subsensor, indextable[giindex].subsensor_index,
+mb_io_ptr->indextable[iindex].time_d_org,
+indextable[giindex].time_d_org,
+indextable[giindex].time_d_corrected);*/
+                    mb_io_ptr->indextable[iindex].time_d_corrected = indextable[giindex].time_d_corrected; 
+                }
+            
+            }
+        }
+    }
+    
+    /* resort the file's index table using the new timestamps */
+    qsort((void *)mb_io_ptr->indextable, mb_io_ptr->num_indextable,
+              sizeof(struct mb_io_indextable_struct),
+              (void *)mbsys_3ddwissl_wissl_indextable_compare2);
+    for (i=0;i<mb_io_ptr->num_indextable;i++) {
+        mb_io_ptr->indextable[i].total_index_sorted = i;
+    }
+/*fprintf(stderr,"\nCorrected and resorted Index Table:\n");
+for (i=0;i<mb_io_ptr->num_indextable;i++) {
+nearest_minute_time_d = 60.0 * round(mb_io_ptr->indextable[i].time_d_org / 60.0);
+fprintf(stderr,"%4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
+i, mb_io_ptr->indextable[i].file_index, mb_io_ptr->indextable[i].total_index_org, mb_io_ptr->indextable[i].total_index_sorted,
+mb_io_ptr->indextable[i].subsensor, mb_io_ptr->indextable[i].subsensor_index,
+mb_io_ptr->indextable[i].time_d_org, mb_io_ptr->indextable[i].time_d_corrected, nearest_minute_time_d,
+mb_io_ptr->indextable[i].offset, mb_io_ptr->indextable[i].size, mb_io_ptr->indextable[i].kind,
+mb_io_ptr->indextable[i].read);
+}*/
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	/* return status */
+	return status;
+
+} /* mbsys_3ddwissl_applywissltimestamps */
+
 /*--------------------------------------------------------------------*/

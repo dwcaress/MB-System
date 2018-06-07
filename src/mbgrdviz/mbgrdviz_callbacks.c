@@ -2810,6 +2810,8 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 	double xx, yy, zz;
 	double vvspeed = 0.2;
 	double settlingtime = 3.0;
+    double altitude = 3.0;
+    double heading = 3.0;
 
 	/* time, user, host variables */
 	time_t right_now;
@@ -2921,6 +2923,31 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 
 					/* write the route points */
 					iscript = 0;
+					vvspeed = 0.15;
+					settlingtime = 3.0;
+                    altitude = 3.0;
+                    heading = 0.0;
+                    /* for now set heading and altitude at start only */
+                    fprintf(sfp, "ALT, %.3f, 0.1, 3\r\n", altitude);
+                    fprintf(sfp, "HDG, %.3f, 1, 6, 3\r\n", heading);
+					for (j = 0; j < npointtotal; j++) {
+						if (projection_initialized == MB_NO) {
+							mb_coor_scale(verbose, routelat[j], &mtodeglon, &mtodeglat);
+							lon_origin = routelon[j];
+							lat_origin = routelat[j];
+							projection_initialized = MB_YES;
+						}
+						if (routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE) {
+							iscript++;
+							xx = (routelon[j] - lon_origin) / mtodeglon;
+							yy = (routelat[j] - lat_origin) / mtodeglat;
+							zz = -altitude;
+							fprintf(sfp, "POS, %.3f, %.3f, %.3f, %.3f, %.3f\r\n", yy, xx, zz, vvspeed, settlingtime);
+						}
+					}
+
+					/* write the route points */
+/*					iscript = 0;
 					vvspeed = 0.2;
 					settlingtime = 3.0;
 					for (j = 0; j < npointtotal; j++) {
@@ -2937,7 +2964,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 							zz = 0.0;
 							fprintf(sfp, "%d, %.3f, %.3f, %.3f, %.3f, %.3f\r\n", iscript, xx, yy, zz, vvspeed, settlingtime);
 						}
-					}
+					}*/
 
 					/* write the route end */
 					fprintf(sfp, "## ENDROUTE\r\n");

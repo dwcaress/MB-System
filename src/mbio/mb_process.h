@@ -701,6 +701,7 @@
 #define MB_PR_KLUGE_SOUNDSPEEDTWEAK 2
 #define MB_PR_KLUGE_ZEROATTITUDECORRECTION 3
 #define MB_PR_KLUGE_ZEROALONGTRACKANGLES 4
+#define MB_PR_KLUGE_FIXWISSLTIMESTAMPS 5
 
 /* structure holding mbpreprocess parameters to be passed to preprocess
  * functions of i/o modules */

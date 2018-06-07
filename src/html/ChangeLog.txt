@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+* Version 5.5.2336       June 6, 2018
   Version 5.5.2335       May 6, 2018
   Version 5.5.2334       April 18, 2018
   Version 5.5.2333       April 18, 2018
@@ -276,6 +277,19 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2336 (June 6, 2018)
+
+Mbpreprocess and format MBF_3DWISSLR (232): Add option --kluge-fix-wissl-timestamps
+to fix a timestamp problem with the initial version of the 3D at Depth WiSSL (wide
+swath lidar).
+
+Mbbackangle and mbprocess: Lidar intensity correction calculations now appropriate
+for linear data instead of log-scaled data.
+
+src/mbaux/mb_intersectgrid.c: Added function mb_topogrid_bounds() that returns the
+lon-lat bounds of a topography grid previously loaded using the mb_topogrid_init()
+function.
 
 -----> 5.5.2335 (May 6, 2018)
 

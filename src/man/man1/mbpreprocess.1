@@ -1,4 +1,4 @@
-.TH mbpreprocess 1 "5 July 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbpreprocess 1 "6 June 2018" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbpreprocess\fP \- performs preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset.
@@ -81,10 +81,12 @@ Version 5.0
 .br
 \fB--kluge-time-jumps\fP=\fISECONDS\fP
 \fB--kluge-ancilliary-time-jumps\fP=\fISECONDS\fP
+\fB--kluge-mbaripressure-time-jumps\fP=\fIthreshold
 \fB--kluge-beam-tweak\fP=\fIFACTOR\fP
-.br
+\fB--kluge-soundspeed-tweak\fP=\fIfactor\fP
 \fB--kluge-zero-attitude-correction\fP
 \fB--kluge-zero-alongtrack-angles\fP
+\fB--kluge-fix-wissl-timestamps\fP
 .br
 ]
 
@@ -354,15 +356,24 @@ of different record types present in a data file.
 .TP
 .B --sounding-amplitude-filter=\fITHRESHOLD\fP
 .TP
-.B --kluge-ancilliary-time-jumps=\fISECONDS\fP
+.B --sounding-amplitude-filter=\fITHRESHOLD\fP
 .TP
 .B --kluge-time-jumps=\fISECONDS\fP
 .TP
+.B --kluge-ancilliary-time-jumps=\fISECONDS\fP
+.TP
+.B --kluge-mbaripressure-time-jumps=\fISECONDS\fP
+.TP
 .B --kluge-beam-tweak=\fIFACTOR\fP
+.TP
+.B --kluge-soundspeed-tweak=\fIFACTOR\fP
 .TP
 .B --kluge-zero-attitude-correction
 .TP
 .B --kluge-zero-alongtrack-angles
+.TP
+.B --kluge-fix-wissl-timestamps
+.br
 
 .SH EXAMPLES
 To be written.....

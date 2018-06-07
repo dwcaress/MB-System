@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0
 %%Creator: groff version 1.19.2
-%%CreationDate: Sun May  6 16:05:49 2018
+%%CreationDate: Wed Jun  6 18:19:14 2018
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
@@ -279,19 +279,22 @@ y-apply-all-ancilliary)108 393.6 Q(--time-latency-apply-sur)108 405.6 Q
 (-multibeam-sidescan-sour)-5.527 E(ce)-.18 E F0(=)A F3(RECORDID)A F2
 (--sounding-)5.526 E(amplitude-\214lter)108 465.6 Q F0(=)A F3(THRESHOLD)
 A F2(--kluge-time-jumps)108 477.6 Q F0(=)A F3(SECONDS)A F2
-(--kluge-ancilliary-time-jumps)32.32 E F0(=)A F3(SECONDS)A F2
-(--kluge-beam-)32.32 E(tweak)108 489.6 Q F0(=)A F3 -.5 -1.15(FA C)D -.18
-(TO)1.15 G(R).18 E F2(--kluge-zer)108 501.6 Q(o-attitude-corr)-.18 E
-(ection --kluge-zer)-.18 E(o-alongtrack-angles)-.18 E F0(])108 513.6 Q
-F1(DESCRIPTION)72 542.4 Q F0 .949
-(MBpreprocess handles preprocessing of sw)108 554.4 R .948
+(--kluge-ancilliary-time-jumps)12.78 E F0(=)A F3(SECONDS)A F2
+(--kluge-mbaripr)12.78 E(essur)-.18 E(e-)-.18 E(time-jumps)108 489.6 Q
+F0(=)A F3(thr)A(eshold)-.37 E F2(--kluge-beam-tweak)4.84 E F3(=F)A -.3
+(AC)-1.15 G -.18(TO).3 G(R).18 E F2(--kluge-soundspeed-tweak)4.84 E F3
+(=factor)A F2(--kluge-zer)4.84 E(o-)-.18 E(attitude-corr)108 501.6 Q
+(ection --kluge-zer)-.18 E
+(o-alongtrack-angles --kluge-\214x-wissl-timestamps)-.18 E F3(])108
+513.6 Q F1(DESCRIPTION)72 542.4 Q F0 .948
+(MBpreprocess handles preprocessing of sw)108 554.4 R .949
 (ath sonar data as part of setting up an MB-System processing)-.1 F .663
 (structure for a dataset. This program replaces the se)108 566.4 R -.15
 (ve)-.25 G .663(ral format-speci\214c preprocessing programs found in)
-.15 F .61(MB-System v)108 578.4 R .61
+.15 F .609(MB-System v)108 578.4 R .609
 (ersion 5 releases with a single program for v)-.15 F .609(ersion 6.)
--.15 F .609(In man)5.609 F 3.109(yc)-.15 G .609
-(ases the preprocessing con-)-3.109 F .328
+-.15 F .61(In man)5.61 F 3.11(yc)-.15 G .61(ases the preprocessing con-)
+-3.11 F .328
 (sists only of creating the ancilliary \214les parallel to the ra)108
 590.4 R 2.828<778c>-.15 G .328(les, b)-2.828 F .328
 (ut in others the data must be translated to)-.2 F(dif)108 602.4 Q .98
@@ -305,7 +308,7 @@ G(ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108 679.2 Q
 (ve)-.25 G(rsity of Ne).15 E 2.5(wH)-.25 G(ampshire)-2.5 E
 (Christian do Santos Ferreira)108 715.2 Q(MAR)113 727.2 Q
 (UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E
-(MB-System 5.0)72 768 Q 2.5(5J)147.325 G(uly 2017)-2.5 E(1)205.665 E 0
+(MB-System 5.0)72 768 Q 2.5(6J)146.495 G(une 2018)-2.5 E(1)204.835 E 0
 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
@@ -316,10 +319,10 @@ BP
 (rsity of Bremen).15 E/F1 10.95/Times-Bold@0 SF(OPTIONS)72 112.8 Q/F2 10
 /Times-Bold@0 SF(--help)108 124.8 Q F0(This option causes)11 E F2
 (mbcon\214g)2.5 E F0(to print out its usage options and e)2.5 E(xit.)
--.15 E F2(--v)108 141.6 Q(erbose)-.1 E F0 1.139(By def)144 153.6 R(ault)
--.1 E F2(mbpr)3.639 E(epr)-.18 E(ocess)-.18 E F0 1.139
+-.15 E F2(--v)108 141.6 Q(erbose)-.1 E F0 1.14(By def)144 153.6 R(ault)
+-.1 E F2(mbpr)3.64 E(epr)-.18 E(ocess)-.18 E F0 1.139
 (outputs minimal information to the shell. This option causes the pro-)
-3.639 F(gram to indicate it')144 165.6 Q 2.5(sp)-.55 G
+3.64 F(gram to indicate it')144 165.6 Q 2.5(sp)-.55 G
 (rogress as it runs.)-2.5 E F2(--input=)108 194.4 Q/F3 10/Times-Italic@0
 SF(FILE)A F0(Sw)144 206.4 Q .732(ath data \214le from which the input d\
 ata will be read, or a datalist \214le containing a list of input)-.1 F
@@ -340,16 +343,16 @@ E F0(suf)2.5 E(\214x con)-.25 E -.15(ve)-.4 G(ntion.).15 E F2(--platf)
 (-fn)-.37 E(v)-.4 E F0(Causes)144 345.6 Q F2(mbpr)2.582 E(epr)-.18 E
 (ocess)-.18 E F0 .082(to output "f)2.582 F .082(ast na)-.1 F(vig)-.2 E
 .082(ation" or *.fn)-.05 F 2.582<768c>-.4 G .082
-(les for each of the sensors described in)-2.582 F .915
+(les for each of the sensors described in)-2.582 F .916
 (the platform \214le speci\214ed with the)144 357.6 R F2(--platf)3.416 E
 (orm-\214le)-.25 E F0 .916(option. These *.fn)3.416 F 3.416<768c>-.4 G
-.916(les will be corrected for)-3.416 F(the le)144 369.6 Q -.15(ve)-.25
+.915(les will be corrected for)-3.416 F(the le)144 369.6 Q -.15(ve)-.25
 G 2.5(ra).15 G(rms speci\214ed by the positional and angular of)-2.5 E
 (fsets de\214ned in the platform \214le.)-.25 E F2(--skip-existing)108
 386.4 Q<adad6e61>108 403.2 Q(v-\214le)-.25 E F0(=)A F3(\214lename)A F0
-.799(Speci\214es an e)144 415.2 R .799(xternal \214le from which to mer)
--.15 F .798(ge sonar position \(na)-.18 F(vig)-.2 E .798
-(ation\), replacing an)-.05 F 3.298(yn)-.15 G -.2(av)-3.298 G(ig).2 E
+.798(Speci\214es an e)144 415.2 R .798(xternal \214le from which to mer)
+-.15 F .799(ge sonar position \(na)-.18 F(vig)-.2 E .799
+(ation\), replacing an)-.05 F 3.299(yn)-.15 G -.2(av)-3.299 G(ig).2 E
 (a-)-.05 E .85
 (tion data included in the input time series sidescan \214les.)144 427.2
 R .85(By def)5.85 F(ault)-.1 E F2(mbsslay)3.35 E(out)-.25 E F0 .85
@@ -358,7 +361,7 @@ R .85(By def)5.85 F(ault)-.1 E F2(mbsslay)3.35 E(out)-.25 E F0 .85
 (v-\214le-f)-.25 E(ormat)-.25 E F0(=)A F3(format_id)A F0 1.897
 (Speci\214es the format of an e)144 468 R 1.897(xternal na)-.15 F(vig)
 -.2 E 1.897(ation \214le from which position v)-.05 F 1.897
-(alues are deri)-.25 F -.15(ve)-.25 G 4.397(d\().15 G(as)-4.397 E
+(alues are deri)-.25 F -.15(ve)-.25 G 4.398(d\().15 G(as)-4.398 E
 (de\214ned with)144 480 Q F2<adad6e61>2.5 E(v-\214le)-.25 E F0
 (\). Options for the)A F3(format_id)2.5 E F0 -.25(va)2.5 G(lue are:).25
 E(1: ASCCI te)151.5 492 Q(xt \214le with lines of the form:)-.15 E
@@ -389,7 +392,7 @@ E(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 624 Q(3: ASCCI te)151.5
 E(-180.0 to +180.0 or 0.0 to 360.0 domains.)159 696 Q(4: ASCCI te)151.5
 708 Q(xt \214le with lines of the form:)-.15 E
 (year julian_day day_minute second longitude latitude)164 720 Q
-(MB-System 5.0)72 768 Q 2.5(5J)147.325 G(uly 2017)-2.5 E(2)205.665 E 0
+(MB-System 5.0)72 768 Q 2.5(6J)146.495 G(une 2018)-2.5 E(2)204.835 E 0
 Cg EP
 %%Page: 3 3
 %%BeginPageSetup
@@ -464,16 +467,16 @@ Q(yyyy-mm-ddThh:mm:ss.sssZ lon lat quality nsat dilution height)166.5
 (ga)-.15 G(ti).05 E -.15(ve)-.25 G 2.5(,a).15 G
 (nd the last four quantities relating to)-2.5 E(GPS \214x quality)159
 660 Q(.)-.65 E/F1 10/Times-Bold@0 SF<adad6e61>108 676.8 Q(v-async)-.25 E
-F0(=)A/F2 10/Times-Italic@0 SF -.37(re)C(cor).37 E(d_kind)-.37 E F0 .426
+F0(=)A/F2 10/Times-Italic@0 SF -.37(re)C(cor).37 E(d_kind)-.37 E F0 .427
 (Speci\214es the type of data records from which position v)144 688.8 R
-.427(alues are deri)-.25 F -.15(ve)-.25 G 2.927(d\().15 G .427
-(as de\214ned with)-2.927 F F1<adad6e61>2.927 E(v-)-.25 E(\214le-f)144
+.427(alues are deri)-.25 F -.15(ve)-.25 G 2.926(d\().15 G .426
+(as de\214ned with)-2.926 F F1<adad6e61>2.926 E(v-)-.25 E(\214le-f)144
 700.8 Q(ormat)-.25 E F0(\). Options for the)A F2 -.37(re)2.5 G(cor).37 E
 (d_kind)-.37 E F0(include:)2.5 E(MB_D)154 712.8 Q -1.21 -1.11(AT A)-.4 H
 (_D)1.11 E -1.21 -1.11(AT A)-.4 H 5(:1)1.11 G(\(surv)-2.5 E .3 -.15
 (ey d)-.15 H(ata\)).15 E(MB_D)154 724.8 Q -1.21 -1.11(AT A)-.4 H(_N)1.11
 E -.54 -1.35(AV :)-.35 H(12 \(na)6.35 E(vig)-.2 E(ation data\))-.05 E
-(MB-System 5.0)72 768 Q 2.5(5J)147.325 G(uly 2017)-2.5 E(3)205.665 E 0
+(MB-System 5.0)72 768 Q 2.5(6J)146.495 G(une 2018)-2.5 E(3)204.835 E 0
 Cg EP
 %%Page: 4 4
 %%BeginPageSetup
@@ -488,7 +491,7 @@ Q -1.21 -1.11(AT A)-.4 H(_N)1.11 E -1.35(AV)-.35 G(2: 30 \(na)1.35 E
 (MB_D)154 108 Q -1.21 -1.11(AT A)-.4 H(_N)1.11 E -1.35(AV)-.35 G
 (3: 31 \(na)1.35 E(vig)-.2 E(ation data from na)-.05 E(vig)-.2 E
 (ation system 3\))-.05 E 1.747(What types of data records are present i\
-s format-dependent, as is the def)144 120 R 1.746(ault choice of which)
+s format-dependent, as is the def)144 120 R 1.747(ault choice of which)
 -.1 F .327(record type is used as the na)144 132 R(vig)-.2 E .327
 (ation source by def)-.05 F .327(ault. The program)-.1 F/F1 10
 /Times-Bold@0 SF(mbinf)2.827 E(o)-.25 E F0 .327(can be used with the)
@@ -520,8 +523,8 @@ F1(--time-latency-constant=)108 547.2 Q F2(SECONDS)A F1
 108 614.4 Q(--time-latency-apply-altitude)108 631.2 Q
 (--time-latency-apply-all-ancilliary)108 648 Q(--time-latency-apply-sur)
 108 664.8 Q -.1(ve)-.1 G(y).1 E(--time-latency-apply-all)108 681.6 Q
-(--\214lter=)108 698.4 Q F2(SECONDS)A F0(MB-System 5.0)72 768 Q 2.5(5J)
-147.325 G(uly 2017)-2.5 E(4)205.665 E 0 Cg EP
+(--\214lter=)108 698.4 Q F2(SECONDS)A F0(MB-System 5.0)72 768 Q 2.5(6J)
+146.495 G(une 2018)-2.5 E(4)204.835 E 0 Cg EP
 %%Page: 5 5
 %%BeginPageSetup
 BP
@@ -536,16 +539,21 @@ E(--r)108 184.8 Q(ecalculate-bath)-.18 E(ymetry)-.15 E(--no-change-sur)
 108 201.6 Q -.1(ve)-.1 G(y).1 E(--multibeam-sidescan-sour)108 218.4 Q
 (ce=)-.18 E/F2 10/Times-Italic@0 SF(RECORDID)A F1
 (--sounding-amplitude-\214lter=)108 235.2 Q F2(THRESHOLD)A F1
-(--kluge-ancilliary-time-jumps=)108 252 Q F2(SECONDS)A F1
-(--kluge-time-jumps=)108 268.8 Q F2(SECONDS)A F1(--kluge-beam-tweak=)108
-285.6 Q F2 -.5 -1.15(FA C)D -.18(TO)1.15 G(R).18 E F1(--kluge-zer)108
-302.4 Q(o-attitude-corr)-.18 E(ection)-.18 E(--kluge-zer)108 319.2 Q
-(o-alongtrack-angles)-.18 E/F3 10.95/Times-Bold@0 SF(EXAMPLES)72 348 Q
-F0 1.6 -.8(To b)108 360 T 2.5(ew).8 G(ritten.....)-2.5 E F3(SEE ALSO)72
-388.8 Q F1(mbsystem)108 400.8 Q F0(\(1\),)A F1(mbdatalist)2.5 E F0
-(\(1\),)A F1(mbpr)2.5 E(ocess)-.18 E F0(\(1\))A F3 -.11(BU)72 429.6 S
-(GS).11 E F0(Oh yeah.)108 441.6 Q(MB-System 5.0)72 768 Q 2.5(5J)147.325
-G(uly 2017)-2.5 E(5)205.665 E 0 Cg EP
+(--sounding-amplitude-\214lter=)108 252 Q F2(THRESHOLD)A F1
+(--kluge-time-jumps=)108 268.8 Q F2(SECONDS)A F1
+(--kluge-ancilliary-time-jumps=)108 285.6 Q F2(SECONDS)A F1
+(--kluge-mbaripr)108 302.4 Q(essur)-.18 E(e-time-jumps=)-.18 E F2
+(SECONDS)A F1(--kluge-beam-tweak=)108 319.2 Q F2 -.5 -1.15(FA C)D -.18
+(TO)1.15 G(R).18 E F1(--kluge-soundspeed-tweak=)108 336 Q F2 -.5 -1.15
+(FA C)D -.18(TO)1.15 G(R).18 E F1(--kluge-zer)108 352.8 Q
+(o-attitude-corr)-.18 E(ection)-.18 E(--kluge-zer)108 369.6 Q
+(o-alongtrack-angles)-.18 E(--kluge-\214x-wissl-timestamps)108 386.4 Q
+/F3 10.95/Times-Bold@0 SF(EXAMPLES)72 415.2 Q F0 1.6 -.8(To b)108 427.2
+T 2.5(ew).8 G(ritten.....)-2.5 E F3(SEE ALSO)72 456 Q F1(mbsystem)108
+468 Q F0(\(1\),)A F1(mbdatalist)2.5 E F0(\(1\),)A F1(mbpr)2.5 E(ocess)
+-.18 E F0(\(1\))A F3 -.11(BU)72 496.8 S(GS).11 E F0(Oh yeah.)108 508.8 Q
+(MB-System 5.0)72 768 Q 2.5(6J)146.495 G(une 2018)-2.5 E(5)204.835 E 0
+Cg EP
 %%Trailer
 end
 %%EOF
