@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2336],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2337],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "6 June 2018", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "25 June 2018", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -98,6 +98,7 @@ AS_ECHO(["        --with-motif-include  - location of Motif headers (optional)"]
 AS_ECHO(["        --with-opengl-lib     - location of OpenGL libs (optional)"])
 AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"])
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
+AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
 AS_ECHO(["        make"])
@@ -164,34 +165,42 @@ esac
 dnl check for win32 flag
 case "${host_os}" in
     *mingw32*|cygwin*)
-    AC_DEFINE(WIN32, 1, [Turned on WIN32 define in config])
-    AS_ECHO(["Added WIN32 define to mb_config.h"])
+#    AC_DEFINE(WIN32, 1, [Turned on WIN32 define in config])
+    AS_ECHO(["Identified WIN32 but with Cygwin - no WIN32 define added to mb_config.h"])
     ;;
     *)
     AS_ECHO(["Not WIN32 system"])
     ;;
 esac
 
-dnl check for RPC XDR headers needed by mbio lib
-AC_CHECK_HEADERS(rpc/rpc.h)
+dnl Check for RPC and XDR headers needed by MBIO library
+AC_CHECK_HEADERS(rpc/rpc.h, , [AC_CHECK_HEADERS(tirpc/rpc/rpc.h)], )
 AC_CHECK_HEADERS(rpc/types.h, ,
-                 [AC_MSG_ERROR([Required header <rpc/types.h> not found, check include path and intsalled devel packages])],)
+    [AC_CHECK_HEADERS(tirpc/rpc/types.h, , [AC_MSG_ERROR([Required header <rpc/types.h> not found, check include path and installed development packages])],)],)
 
-dnl for win32
-dnl AC_CHECK_LIB(uuid, main)
-dnl AC_CHECK_LIB(ole32, main)
-dnl AC_CHECK_LIB(gw32c, main)
-dnl AC_CHECK_LIB(wsock32, main)
-AC_CHECK_LIB(ws2_32, main)
+dnl Check for WIN32 libraries
+# AC_CHECK_LIB(uuid, main)
+# AC_CHECK_LIB(ole32, main)
+# AC_CHECK_LIB(gw32c, main)
+# AC_CHECK_LIB(wsock32, main)
+# AC_CHECK_LIB(ws2_32, main)
 
+dnl Look for library containing the XDR functions
 AC_CHECK_FUNC(xdrmem_create, XDR_LIB=, [
- AC_CHECK_LIB(sun, xdrmem_create, XDR_LIB=-lsun, [
-  AC_CHECK_LIB(nsl, xdrmem_create, XDR_LIB=-lnsl, [
-   AC_CHECK_LIB(rpclib, xdrmem_create, XDR_LIB=-lrpclib, [
-    AC_CHECK_LIB(xdr, xdrmem_create, XDR_LIB=-lxdr, [
-     AC_CHECK_LIB(portablexdr, xdrmem_create, XDR_LIB=-lportablexdr,
-   [ AC_MSG_ERROR([*** Unable to locate XDR functions.]) ], -lws2_32 )
-], -lws2_32 )])])])])
+  AC_CHECK_LIB(sun, xdrmem_create, XDR_LIB=-lsun, [
+    AC_CHECK_LIB(nsl, xdrmem_create, XDR_LIB=-lnsl, [
+      AC_CHECK_LIB(rpclib, xdrmem_create, XDR_LIB=-lrpclib, [
+        AC_CHECK_LIB(xdr, xdrmem_create, XDR_LIB=-lxdr, [
+          AC_CHECK_LIB(tirpc, xdrmem_create, XDR_LIB=-ltirpc, [
+            AC_CHECK_LIB(portablexdr, xdrmem_create, XDR_LIB=-lportablexdr, [
+              AC_MSG_ERROR([*** Unable to locate XDR functions.])
+            ], -lws2_32 )
+          ], -lws2_32 )
+        ])
+      ])
+    ])
+  ])
+])
 AC_SUBST(XDR_LIB)
 
 dnl--------------------------------------------------------------------
@@ -212,7 +221,7 @@ dnl--------------------------------------------------------------------
 
 dnl Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps-dir, use default otherwise
 AS_ECHO(["Use OTPS (OSU Tidal Prediction Software) location if specified with --with-otps-dir, use default otherwise"])
-OTPS_DIR="/usr/local/OTPSnc"
+OTPS_DIR="/usr/local/OTPS2"
 AC_ARG_WITH(otps_dir, [ --with-otps-dir=DIR    Location of OSU Tidal Prediction Software], [OTPS_DIR=${withval}])
 AC_SUBST(OTPS_DIR)
 
@@ -286,7 +295,7 @@ else
     AC_CHECK_HEADER(proj_api.h, [PROJ_SETTING=yes], [PROJ_SETTING=no])
     if test "$PROJ_SETTING" = "yes" ; then
         GOT_PROJ=yes
-        AS_ECHO(["Using pre-installed PROJ headers..."])
+        AS_ECHO(["Found PROJ headers..."])
     else
         AS_ECHO(["Did not find PROJ headers anywhere, use --with-proj-include to set the location"])
         AC_MSG_ERROR([Did not find PROJ headers anywhere, use --with-proj-include to set the location])
@@ -748,6 +757,24 @@ AC_DEFINE_UNQUOTED(MBSYSTEM_CONFIG_DEFINED, 1, [Set MBSYSTEM_CONFIG_DEFINED defi
 AC_DEFINE_UNQUOTED(MBSYSTEM_INSTALL_PREFIX, "$prefix", [Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h])
 AC_DEFINE_UNQUOTED(MBSYSTEM_OTPS_LOCATION, "$OTPS_DIR", [Set MBSYSTEM_OTPS_LOCATION define in mb_config.h])
 
+
+dnl--------------------------------------------------------------------
+dnl MBTRN Section - optionally build terrain relative navigation (TRN) tools
+dnl--------------------------------------------------------------------
+
+dnl Check if the mbtrn tools should be built
+AS_ECHO(["Check if the mbtrn tools should be built"])
+AC_ARG_ENABLE(mbtrn, [AS_HELP_STRING([--enable-mbtrn], [build mbtrn tools])],
+        [build_mbtrn=yes], [build_mbtrn=no])
+AM_CONDITIONAL([BUILD_MBTRN], [test x$build_mbtrn = xyes])
+if test "$build_mbtrn" = "yes" ; then
+    dnl Building mbtrn tools
+    AS_ECHO(["Building mbtrn tools"])
+else
+    dnl Not building mbtrn tools
+    AS_ECHO(["Not building mbtrn tools"])
+fi
+
 dnl--------------------------------------------------------------------
 dnl Generate Makefiles
 dnl--------------------------------------------------------------------
@@ -767,7 +794,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
       src/mbvelocitytool/Makefile \
       src/mbnavadjust/Makefile \
       src/otps/Makefile \
-      src/trn/Makefile \
+      src/mbtrn/Makefile \
       src/mbview/Makefile \
       src/mbgrdviz/Makefile \
       src/mbeditviz/Makefile  \
@@ -830,6 +857,11 @@ else
     AS_ECHO(["OpenGL Support: Disabled"])
 fi
 AS_ECHO(["Using $OTPS_DIR for OSU Tidal Prediction Software"])
+if test "$build_mbtrn" = "yes" ; then
+    AS_ECHO(["Build mbtrn tools: Enabled"])
+else
+    AS_ECHO(["Build mbtrn tools: Disabled"])
+fi
 
 AS_ECHO(["------------------------------------------------------------------------------"])
 AS_ECHO(["Key Variables:"])

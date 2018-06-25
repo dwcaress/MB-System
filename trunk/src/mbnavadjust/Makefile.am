@@ -1,4 +1,4 @@
-bin_PROGRAMS = mbnavadjust mbnavadjustmerge
+bin_PROGRAMS = mbnavadjust mbnavadjustmerge mbnavadjusttest
 
 AM_CFLAGS =  ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
@@ -24,3 +24,5 @@ mbnavadjust_SOURCES = mbnavadjust.c mbnavadjust_callbacks.c mbnavadjust_creation
 	mbnavadjust_extrawidgets.h mbnavadjust_io.h mbnavadjust.h
 
 mbnavadjustmerge_SOURCES = mbnavadjustmerge.c mbnavadjust_io.c mbnavadjust_io.h
+
+mbnavadjusttest_SOURCES = mbnavadjusttest.c mbnavadjust_io.c mbnavadjust_io.h

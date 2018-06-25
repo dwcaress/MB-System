@@ -258,9 +258,6 @@ int mbnavadjust_init_globals() {
 	project.col_int = 5.;
 	project.tick_int = 5.;
 	project.label_int = 100000.;
-	mbna_contour_algorithm = MB_CONTOUR_OLD;
-	/*mbna_contour_algorithm = MB_CONTOUR_TRIANGLES;*/
-	mbna_ncolor = 10;
 	mbna_contour = NULL;
 	mbna_contour1.nvector = 0;
 	mbna_contour1.nvector_alloc = 0;
@@ -812,6 +809,14 @@ int mbnavadjust_file_open(char *projectname) {
 						}
 					}
 				}
+                
+            /* set plotting functions */
+            mbnavadjust_set_plot_functions(mbna_verbose, &project,
+                                           &mbnavadjust_plot,
+                                           &mbnavadjust_newpen,
+                                           &mbnavadjust_setline,
+                                           &mbnavadjust_justify_string,
+                                           &mbnavadjust_plot_string, &error);
 			}
 		}
 		else {
@@ -3965,29 +3970,31 @@ int mbnavadjust_crossing_load() {
 		/* load sections */
 		sprintf(message, "Loading section 1 of crossing %d...", mbna_current_crossing);
 		do_message_update(message);
-		status =
-		    mbnavadjust_section_load(mbna_file_id_1, mbna_section_1, (void **)&swathraw1, (void **)&swath1, section1->num_pings);
+		status = mbnavadjust_section_load(mbna_verbose, &project, mbna_file_id_1, mbna_section_1,
+                                          (void **)&swathraw1, (void **)&swath1, section1->num_pings, &error);
 		sprintf(message, "Loading section 2 of crossing %d...", mbna_current_crossing);
 		do_message_update(message);
-		status =
-		    mbnavadjust_section_load(mbna_file_id_2, mbna_section_2, (void **)&swathraw2, (void **)&swath2, section2->num_pings);
+		status = mbnavadjust_section_load(mbna_verbose, &project, mbna_file_id_2, mbna_section_2,
+                                          (void **)&swathraw2, (void **)&swath2, section2->num_pings, &error);
 
 		/* get lon lat positions for soundings */
 		sprintf(message, "Transforming section 1 of crossing %d...", mbna_current_crossing);
 		do_message_update(message);
-		status = mbnavadjust_section_translate(mbna_file_id_1, swathraw1, swath1, 0.0);
+		status = mbnavadjust_section_translate(mbna_verbose, &project, mbna_file_id_1, swathraw1, swath1, 0.0, &error);
 		sprintf(message, "Transforming section 2 of crossing %d...", mbna_current_crossing);
 		do_message_update(message);
-		status = mbnavadjust_section_translate(mbna_file_id_2, swathraw2, swath2, mbna_offset_z);
+		status = mbnavadjust_section_translate(mbna_verbose, &project, mbna_file_id_2, swathraw2, swath2, mbna_offset_z, &error);
 
 		/* generate contour data */
 		if (mbna_status != MBNA_STATUS_AUTOPICK) {
 			sprintf(message, "Contouring section 1 of crossing %d...", mbna_current_crossing);
 			do_message_update(message);
-			status = mbnavadjust_section_contour(mbna_file_id_1, mbna_section_1, swath1, &mbna_contour1);
+            mbna_contour = &mbna_contour1;
+			status = mbnavadjust_section_contour(mbna_verbose, &project, mbna_file_id_1, mbna_section_1, swath1, &mbna_contour1, &error);
 			sprintf(message, "Contouring section 2 of crossing %d...", mbna_current_crossing);
 			do_message_update(message);
-			status = mbnavadjust_section_contour(mbna_file_id_2, mbna_section_2, swath2, &mbna_contour2);
+            mbna_contour = &mbna_contour2;
+			status = mbnavadjust_section_contour(mbna_verbose, &project, mbna_file_id_2, mbna_section_2, swath2, &mbna_contour2, &error);
 		}
 
 		/* set loaded flag */
@@ -4151,430 +4158,14 @@ int mbnavadjust_crossing_replot() {
 	/* replot loaded crossing */
 	if ((mbna_status == MBNA_STATUS_NAVERR || mbna_status == MBNA_STATUS_AUTOPICK) && mbna_naverr_load == MB_YES) {
 		/* get lon lat positions for soundings */
-		status = mbnavadjust_section_translate(mbna_file_id_1, swathraw1, swath1, 0.0);
-		status = mbnavadjust_section_translate(mbna_file_id_2, swathraw2, swath2, mbna_offset_z);
+		status = mbnavadjust_section_translate(mbna_verbose, &project, mbna_file_id_1, swathraw1, swath1, 0.0, &error);
+		status = mbnavadjust_section_translate(mbna_verbose, &project, mbna_file_id_2, swathraw2, swath2, mbna_offset_z, &error);
 
 		/* generate contour data */
-		status = mbnavadjust_section_contour(mbna_file_id_1, mbna_section_1, swath1, &mbna_contour1);
-		status = mbnavadjust_section_contour(mbna_file_id_2, mbna_section_2, swath2, &mbna_contour2);
-	}
-
-	/* print output debug statements */
-	if (mbna_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:       %d\n", error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:      %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, void **swath_ptr, int num_pings) {
-	/* local variables */
-	char *function_name = "mbnavadjust_section_load";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *imb_io_ptr;
-	struct swathraw *swathraw;
-	struct pingraw *pingraw;
-	struct swath *swath;
-	struct mbna_file *file;
-	struct mbna_section *section;
-
-	/* mbio read and write values */
-	void *imbio_ptr = NULL;
-	void *istore_ptr = NULL;
-	int kind;
-	int time_i[7];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	double roll;
-	double pitch;
-	double heave;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
-
-	char path[STRING_MAX];
-	int iformat;
-	double tick_len_map, label_hgt_map;
-	int done;
-	int i;
-
-	/* print input debug statements */
-	if (mbna_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       file_id:      %d\n", file_id);
-		fprintf(stderr, "dbg2       section_id:   %d\n", section_id);
-		fprintf(stderr, "dbg2       swath_ptr:    %p  %p\n", swath_ptr, *swath_ptr);
-		fprintf(stderr, "dbg2       num_pings:    %d\n", num_pings);
-	}
-
-	/* load specified section */
-	if (project.open == MB_YES && project.num_crossings > 0) {
-		/* set section format and path */
-		sprintf(path, "%s/nvs_%4.4d_%4.4d.mb71", project.datadir, file_id, section_id);
-		iformat = 71;
-		file = &(project.files[file_id]);
-		section = &(file->sections[section_id]);
-
-		/* initialize section for reading */
-		if ((status = mb_read_init(mbna_verbose, path, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
-		                           &imbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
-			mb_error(mbna_verbose, error, &error_message);
-			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", error_message);
-			fprintf(stderr, "\nSwath sonar File <%s> not initialized for reading\n", path);
-			exit(0);
-		}
-
-		/* allocate memory for data arrays */
-		if (status == MB_SUCCESS) {
-			if (error == MB_ERROR_NO_ERROR)
-				status =
-				    mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status =
-				    mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-				                           (void **)&bathacrosstrack, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-				                           (void **)&bathalongtrack, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack,
-				                           &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack,
-				                           &error);
-
-			/* if error initializing memory then don't read the file */
-			if (error != MB_ERROR_NO_ERROR) {
-				mb_error(mbna_verbose, error, &error_message);
-				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
-			}
-		}
-
-		/* allocate memory for data arrays */
-		if (status == MB_SUCCESS) {
-			/* get mb_io_ptr */
-			imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-
-			/* initialize data storage */
-			status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, sizeof(struct swathraw), (void **)swathraw_ptr, &error);
-			swathraw = (struct swathraw *)*swathraw_ptr;
-			swathraw->beams_bath = beams_bath;
-			swathraw->npings_max = num_pings;
-			swathraw->npings = 0;
-			status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, num_pings * sizeof(struct pingraw),
-			                    (void **)&swathraw->pingraws, &error);
-			for (i = 0; i < swathraw->npings_max; i++) {
-				pingraw = &swathraw->pingraws[i];
-				pingraw->beams_bath = 0;
-				pingraw->beamflag = NULL;
-				pingraw->bath = NULL;
-				pingraw->bathacrosstrack = NULL;
-				pingraw->bathalongtrack = NULL;
-			}
-
-			/* initialize contour controls */
-			tick_len_map = MAX(section->lonmax - section->lonmin, section->latmax - section->latmin) / 500;
-			label_hgt_map = MAX(section->lonmax - section->lonmin, section->latmax - section->latmin) / 100;
-			status = mb_contour_init(mbna_verbose, (struct swath **)swath_ptr, num_pings, beams_bath, mbna_contour_algorithm,
-			                         MB_YES, MB_NO, MB_NO, MB_NO, MB_NO, project.cont_int, project.col_int, project.tick_int,
-			                         project.label_int, tick_len_map, label_hgt_map, 0.0, mbna_ncolor, 0, NULL, NULL, NULL, 0.0,
-			                         0.0, 0.0, 0.0, 0, 0, 0.0, 0.0, &mbnavadjust_plot, &mbnavadjust_newpen, &mbnavadjust_setline,
-			                         &mbnavadjust_justify_string, &mbnavadjust_plot_string, &error);
-			swath = (struct swath *)*swath_ptr;
-			swath->beams_bath = beams_bath;
-			swath->npings = 0;
-
-			/* if error initializing memory then quit */
-			if (error != MB_ERROR_NO_ERROR) {
-				mb_error(mbna_verbose, error, &error_message);
-				fprintf(stderr, "\nMBIO Error allocating contour control structure:\n%s\n", error_message);
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(error);
-			}
-		}
-
-		/* now read the data */
-		if (status == MB_SUCCESS) {
-			done = MB_NO;
-			while (done == MB_NO) {
-				/* read the next ping */
-				status = mb_get_all(mbna_verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed,
-				                    &heading, &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag,
-				                    bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
-
-				/* handle successful read */
-				if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
-					/* allocate memory for the raw arrays */
-					pingraw = &swathraw->pingraws[swathraw->npings];
-					status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&pingraw->beamflag,
-					                    &error);
-					status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&pingraw->bath,
-					                    &error);
-					status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-					                    (void **)&pingraw->bathacrosstrack, &error);
-					status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-					                    (void **)&pingraw->bathalongtrack, &error);
-
-					/* make sure enough memory is allocated for contouring arrays */
-					ping = &swath->pings[swathraw->npings];
-					if (ping->beams_bath_alloc < beams_bath) {
-						status = mb_reallocd(mbna_verbose, __FILE__, __LINE__, beams_bath * sizeof(char),
-						                     (void **)&(ping->beamflag), &error);
-						status = mb_reallocd(mbna_verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-						                     (void **)&(ping->bath), &error);
-						status = mb_reallocd(mbna_verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-						                     (void **)&(ping->bathlon), &error);
-						status = mb_reallocd(mbna_verbose, __FILE__, __LINE__, beams_bath * sizeof(double),
-						                     (void **)&(ping->bathlat), &error);
-						if (mbna_contour_algorithm == MB_CONTOUR_OLD) {
-							status = mb_reallocd(mbna_verbose, __FILE__, __LINE__, beams_bath * sizeof(int),
-							                     (void **)&(ping->bflag[0]), &error);
-							status = mb_reallocd(mbna_verbose, __FILE__, __LINE__, beams_bath * sizeof(int),
-							                     (void **)&(ping->bflag[1]), &error);
-						}
-						ping->beams_bath_alloc = beams_bath;
-					}
-
-					/* copy arrays and update bookkeeping */
-					if (error == MB_ERROR_NO_ERROR) {
-						swathraw->npings++;
-						if (swathraw->npings >= swathraw->npings_max)
-							done = MB_YES;
-
-						for (i = 0; i < 7; i++)
-							pingraw->time_i[i] = time_i[i];
-						pingraw->time_d = time_d;
-						pingraw->navlon = navlon;
-						pingraw->navlat = navlat;
-						pingraw->heading = heading;
-						pingraw->draft = sonardepth;
-						pingraw->beams_bath = beams_bath;
-						/* fprintf(stderr,"\nPING %d : %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-						swathraw->npings,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]); */
-						for (i = 0; i < beams_bath; i++) {
-							pingraw->beamflag[i] = beamflag[i];
-							if (mb_beam_ok(beamflag[i])) {
-								pingraw->beamflag[i] = beamflag[i];
-								pingraw->bath[i] = bath[i];
-								pingraw->bathacrosstrack[i] = bathacrosstrack[i];
-								pingraw->bathalongtrack[i] = bathalongtrack[i];
-							}
-							else {
-								pingraw->beamflag[i] = MB_FLAG_NULL;
-								pingraw->bath[i] = 0.0;
-								pingraw->bathacrosstrack[i] = 0.0;
-								pingraw->bathalongtrack[i] = 0.0;
-							}
-							/* fprintf(stderr,"BEAM: %d:%d  Flag:%d    %f %f %f\n",
-							swathraw->npings,i,pingraw->beamflag[i],pingraw->bath[i],pingraw->bathacrosstrack[i],pingraw->bathalongtrack[i]);
-						  */
-						}
-					}
-
-					/* extract all nav values */
-					status = mb_extract_nav(mbna_verbose, imbio_ptr, istore_ptr, &kind, pingraw->time_i, &pingraw->time_d,
-					                        &pingraw->navlon, &pingraw->navlat, &speed, &pingraw->heading, &pingraw->draft, &roll,
-					                        &pitch, &heave, &error);
-
-					/*fprintf(stderr, "%d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %15.10f %15.10f %d:%d\n",
-					status,
-					ping->time_i[0],ping->time_i[1],ping->time_i[2],
-					ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6],
-					ping->navlon, ping->navlat, beams_bath, swath->beams_bath);*/
-
-					/* print debug statements */
-					if (mbna_verbose >= 2) {
-						fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
-						fprintf(stderr, "dbg2       kind:           %d\n", kind);
-						fprintf(stderr, "dbg2       npings:         %d\n", swathraw->npings);
-						fprintf(stderr, "dbg2       time:           %4d %2d %2d %2d %2d %2d %6.6d\n", pingraw->time_i[0],
-						        pingraw->time_i[1], pingraw->time_i[2], pingraw->time_i[3], pingraw->time_i[4],
-						        pingraw->time_i[5], pingraw->time_i[6]);
-						fprintf(stderr, "dbg2       navigation:     %f  %f\n", pingraw->navlon, pingraw->navlat);
-						fprintf(stderr, "dbg2       beams_bath:     %d\n", beams_bath);
-						fprintf(stderr, "dbg2       beams_amp:      %d\n", beams_amp);
-						fprintf(stderr, "dbg2       pixels_ss:      %d\n", pixels_ss);
-						fprintf(stderr, "dbg2       done:           %d\n", done);
-						fprintf(stderr, "dbg2       error:          %d\n", error);
-						fprintf(stderr, "dbg2       status:         %d\n", status);
-					}
-				}
-				else if (error > MB_ERROR_NO_ERROR) {
-					status = MB_SUCCESS;
-					error = MB_ERROR_NO_ERROR;
-					done = MB_YES;
-				}
-			}
-
-			/* close the input data file */
-			status = mb_close(mbna_verbose, &imbio_ptr, &error);
-		}
-	}
-
-	/* print output debug statements */
-	if (mbna_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:       %d\n", error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:      %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_ptr, double zoffset) {
-	/* local variables */
-	char *function_name = "mbnavadjust_section_translate";
-	int status = MB_SUCCESS;
-	struct swathraw *swathraw;
-	struct pingraw *pingraw;
-	struct swath *swath;
-	double mtodeglon, mtodeglat, headingx, headingy;
-	double depth, depthacrosstrack, depthalongtrack;
-	double alpha, beta, range;
-	int i, iping;
-
-	/* print input debug statements */
-	if (mbna_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       file_id:      %d\n", file_id);
-		fprintf(stderr, "dbg2       swathraw_ptr: %p\n", swathraw_ptr);
-		fprintf(stderr, "dbg2       swath_ptr:    %p\n", swath_ptr);
-		fprintf(stderr, "dbg2       zoffset:      %f\n", zoffset);
-	}
-
-	/* translate sounding positions for loaded section */
-	if (project.open == MB_YES && project.num_crossings > 0 && mbna_current_crossing >= 0) {
-		swathraw = (struct swathraw *)swathraw_ptr;
-		swath = (struct swath *)swath_ptr;
-
-		/* relocate soundings based on heading bias */
-		swath->npings = 0;
-		for (iping = 0; iping < swathraw->npings; iping++) {
-			swath->npings++;
-			pingraw = &swathraw->pingraws[iping];
-			ping = &swath->pings[swath->npings - 1];
-			for (i = 0; i < 7; i++)
-				ping->time_i[i] = pingraw->time_i[i];
-			ping->time_d = pingraw->time_d;
-			ping->navlon = pingraw->navlon;
-			ping->navlat = pingraw->navlat;
-			ping->heading = pingraw->heading + project.files[file_id].heading_bias;
-			mb_coor_scale(mbna_verbose, pingraw->navlat, &mtodeglon, &mtodeglat);
-			headingx = sin(ping->heading * DTR);
-			headingy = cos(ping->heading * DTR);
-			ping->beams_bath = pingraw->beams_bath;
-			for (i = 0; i < ping->beams_bath; i++) {
-				ping->beamflag[i] = pingraw->beamflag[i];
-				if (mb_beam_ok(pingraw->beamflag[i])) {
-					/* strip off transducer depth */
-					depth = pingraw->bath[i] - pingraw->draft;
-
-					/* get range and angles in
-					roll-pitch frame */
-					range = sqrt(depth * depth + pingraw->bathacrosstrack[i] * pingraw->bathacrosstrack[i] +
-					             pingraw->bathalongtrack[i] * pingraw->bathalongtrack[i]);
-					alpha = asin(pingraw->bathalongtrack[i] / range);
-					beta = acos(pingraw->bathacrosstrack[i] / range / cos(alpha));
-
-					/* apply roll correction */
-					beta += DTR * project.files[file_id].roll_bias;
-
-					/* recalculate bathymetry */
-					depth = range * cos(alpha) * sin(beta);
-					depthalongtrack = range * sin(alpha);
-					depthacrosstrack = range * cos(alpha) * cos(beta);
-
-					/* add heave and draft back in */
-					depth += pingraw->draft;
-
-					/* add zoffset */
-					depth += zoffset;
-
-					/* get bathymetry in lon lat */
-					ping->beamflag[i] = pingraw->beamflag[i];
-					ping->bath[i] = depth;
-					ping->bathlon[i] =
-					    pingraw->navlon + headingy * mtodeglon * depthacrosstrack + headingx * mtodeglon * depthalongtrack;
-					ping->bathlat[i] =
-					    pingraw->navlat - headingx * mtodeglat * depthacrosstrack + headingy * mtodeglat * depthalongtrack;
-				}
-			}
-		}
-	}
-
-	/* print output debug statements */
-	if (mbna_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:       %d\n", error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:      %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbnavadjust_section_contour(int fileid, int sectionid, struct swath *swath, struct mbna_contour_vector *contour) {
-	/* local variables */
-	char *function_name = "mbnavadjust_section_contour";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (mbna_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       fileid:       %d\n", fileid);
-		fprintf(stderr, "dbg2       sectionid:    %d\n", sectionid);
-		fprintf(stderr, "dbg2       swath:        %p\n", swath);
-		fprintf(stderr, "dbg2       contour:      %p\n", contour);
-		fprintf(stderr, "dbg2       nvector:      %d\n", contour->nvector);
-		fprintf(stderr, "dbg2       nvector_alloc:%d\n", contour->nvector_alloc);
-	}
-
-	if (swath != NULL) {
-		/* set vectors */
-		mbna_contour = contour;
-		contour->nvector = 0;
-
-		/* reset contouring parameters */
-		swath->contour_int = project.cont_int;
-		swath->color_int = project.col_int;
-		swath->tick_int = project.tick_int;
-
-		/* generate contours */
-		status = mb_contour(mbna_verbose, swath, &error);
-
-		/* set contours up to date flag */
-		project.files[fileid].sections[sectionid].contoursuptodate = MB_YES;
+        mbna_contour = &mbna_contour1;
+		status = mbnavadjust_section_contour(mbna_verbose, &project, mbna_file_id_1, mbna_section_1, swath1, &mbna_contour1, &error);
+        mbna_contour = &mbna_contour2;
+		status = mbnavadjust_section_contour(mbna_verbose, &project, mbna_file_id_2, mbna_section_2, swath2, &mbna_contour2, &error);
 	}
 
 	/* print output debug statements */

@@ -388,7 +388,8 @@ sudo CFLAGS="-g -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
     --with-fftw-lib=/usr/local/lib \
     --with-motif-include=/usr/local/include \
     --with-motif-lib=/usr/local/lib \
-    --with-otps-dir=/usr/local/opt/otps
+    --with-otps-dir=/usr/local/opt/otps \
+    --enable-mbtrn
 
 make -j
 

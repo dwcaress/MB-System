@@ -88,7 +88,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = mbnavadjust$(EXEEXT) mbnavadjustmerge$(EXEEXT)
+bin_PROGRAMS = mbnavadjust$(EXEEXT) mbnavadjustmerge$(EXEEXT) \
+	mbnavadjusttest$(EXEEXT)
 subdir = src/mbnavadjust
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -118,6 +119,10 @@ am_mbnavadjustmerge_OBJECTS = mbnavadjustmerge.$(OBJEXT) \
 	mbnavadjust_io.$(OBJEXT)
 mbnavadjustmerge_OBJECTS = $(am_mbnavadjustmerge_OBJECTS)
 mbnavadjustmerge_LDADD = $(LDADD)
+am_mbnavadjusttest_OBJECTS = mbnavadjusttest.$(OBJEXT) \
+	mbnavadjust_io.$(OBJEXT)
+mbnavadjusttest_OBJECTS = $(am_mbnavadjusttest_OBJECTS)
+mbnavadjusttest_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -152,7 +157,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(mbnavadjust_SOURCES) $(mbnavadjustmerge_SOURCES)
+SOURCES = $(mbnavadjust_SOURCES) $(mbnavadjustmerge_SOURCES) \
+	$(mbnavadjusttest_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -354,6 +360,7 @@ mbnavadjust_SOURCES = mbnavadjust.c mbnavadjust_callbacks.c mbnavadjust_creation
 	mbnavadjust_extrawidgets.h mbnavadjust_io.h mbnavadjust.h
 
 mbnavadjustmerge_SOURCES = mbnavadjustmerge.c mbnavadjust_io.c mbnavadjust_io.h
+mbnavadjusttest_SOURCES = mbnavadjusttest.c mbnavadjust_io.c mbnavadjust_io.h
 all: all-am
 
 .SUFFIXES:
@@ -445,6 +452,10 @@ mbnavadjustmerge$(EXEEXT): $(mbnavadjustmerge_OBJECTS) $(mbnavadjustmerge_DEPEND
 	@rm -f mbnavadjustmerge$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mbnavadjustmerge_OBJECTS) $(mbnavadjustmerge_LDADD) $(LIBS)
 
+mbnavadjusttest$(EXEEXT): $(mbnavadjusttest_OBJECTS) $(mbnavadjusttest_DEPENDENCIES) $(EXTRA_mbnavadjusttest_DEPENDENCIES) 
+	@rm -f mbnavadjusttest$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mbnavadjusttest_OBJECTS) $(mbnavadjusttest_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -458,6 +469,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavadjust_prog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavadjust_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavadjustmerge.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbnavadjusttest.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

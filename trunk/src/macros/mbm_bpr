@@ -153,7 +153,7 @@ if ($format == 0) {
 
 # Loop over the input records for Sonardyne format
 # Here the raw pressure values are in kPa == 10 dBar
-else {
+elsif ($format == 1) {
     $count = 0;
     $depthcount = 0;
     $depthsum = 0.0;
@@ -245,6 +245,64 @@ else {
     }
 }
 
+
+# Loop over the input records for generic format
+# Here the raw pressure values are in dBar
+elsif ($format == 2) {
+    $count = 0;
+    while ($line=<FI>) {		# reading from the input
+        ($time_d, $pressure) = $line =~ /(\S+)\s+(\S+)/;
+        $time_str = `mbtime -M$time_d`;
+        ($year, $month, $day, $hour, $minute, $second) = $time_str =~ /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+        
+        if ($year > 1970 && $year < 2100) {
+
+            # Calculate the depth from pressure
+            #
+            # The following derives from Sea-Bird Electronics
+            # Application Note number 69: Conversion of Pressure to Depth
+            #	http://www.seabird.com/application_notes/AN69.htm
+            #
+            # Sea-Bird uses the formula in UNESCO Technical Papers in Marine Science No. 44.
+            # This is an empirical formula that takes compressibility (that is, density) into account.
+            # An ocean water column at 0 degree C (t = 0) and 35 PSU (s = 35) is assumed.
+            #
+            # The gravity variation with latitude and pressure is computed as:
+            #
+            # g (m/sec2) = 9.780318 * [ 1.0 + ( 5.2788x10 -3  + 2.36x10 -5  * x) * x ] + 1.092x10 -6  * p
+            #
+            # where
+            # x = [sin (latitude / 57.29578) ] 2
+            # p = pressure (decibars)
+            #
+            # Then, depth is calculated from pressure:
+            #
+            # depth (meters) = [(((-1.82x10 -15  * p + 2.279x10 -10 ) * p - 2.2512x10 -5 ) * p + 9.72659) * p] / g
+            #
+            # where
+            # p = pressure (decibars)
+            # g = gravity (m/sec2)
+            #
+            # N. P. Fofonoff and R. C. Millard, Jr., Algorithms for computation of fundamental properties of seawater, Unesco Tech. Papers in Mar. Sci., No. 44 1983.
+            #
+            $pressuredbar = 0.689475729 * $pressure;
+            $x = (sin($latitude * $PI / 180.0))**2;
+            $g = 9.780318 * ( 1.0 + ( 5.2788e-3  + 2.36e-5  * $x) * $x ) + 1.092e-6  * $pressuredbar;
+            $depth = ((((-1.82e-15  * $pressuredbar + 2.279e-10 ) * $pressuredbar - 2.2512e-5 ) * $pressuredbar + 9.72659) * $pressuredbar) / $g;
+    
+            push (@time_ds, $time_d);
+            push (@years, $year);
+            push (@months, $month);
+            push (@days, $day);
+            push (@hours, $hour);
+            push (@minutes, $minute);
+            push (@seconds, $second);
+            push (@depths, $depth);
+            $count++;
+        }
+    }
+}
+
 close(FI);
 
 # if requested smooth the tide data
@@ -308,7 +366,7 @@ if ($verbose) {
 # subtracting the mean difference between the tidal model and
 # the middle half of the data
 if ($location && $count > 10) {
-    # Execut mbotps to get tidal model for the specified location
+    # Execute mbotps to get tidal model for the specified location
     $i = $count / 4;
     $j = 3 * $count / 4;
     $interval = int(($time_ds[$j] - $time_ds[$i]) / ($j - $i));

@@ -772,8 +772,8 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       distance_scale:   %f\n", store->distance_scale);
 		fprintf(stderr, "dbg5       ss_scalepower:    %d\n", store->ss_scalepower);
 		fprintf(stderr, "dbg5       ss_type:          %d\n", store->ss_type);
-		fprintf(stderr, "dbg5       spare3:           %d\n", store->imagery_type);
-		fprintf(stderr, "dbg5       sonartype:        %d\n", store->topo_type);
+		fprintf(stderr, "dbg5       imagery_type:     %d\n", store->imagery_type);
+		fprintf(stderr, "dbg5       topo_type:        %d\n", store->topo_type);
 		fprintf(stderr, "dbg5       status:           %d\n", status);
 		fprintf(stderr, "dbg5       error:            %d\n", *error);
 	}
