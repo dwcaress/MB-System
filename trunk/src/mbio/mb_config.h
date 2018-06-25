@@ -80,7 +80,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.5.2337"
+#define PACKAGE_STRING "mbsystem 5.5.2339"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -89,16 +89,16 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.5.2337"
+#define PACKAGE_VERSION "5.5.2339"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "5.5.2337"
+#define VERSION "5.5.2339"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "23 June 2018"
+#define VERSION_DATE "25 June 2018"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
