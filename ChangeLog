@@ -279,7 +279,7 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.5.2337 (June 25, 2018)
+-----> 5.5.2339 (June 25, 2018)
 
 Mbgrid: Modified to use correct gridding algorithm when reading fbt files
 lacking the sonar type value.
