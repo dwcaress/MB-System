@@ -768,5 +768,17 @@ struct mb_datalist_struct {
 	struct mb_datalist_struct *datalist;
 };
 
+/* MBIO imagelist control structure */
+#define MB_IMAGELIST_RECURSION_MAX 25
+struct mb_imagelist_struct {
+	int open;
+	int recursion;
+    int leftrightstereo;
+    int printed;
+ 	char path[MB_PATH_MAXLINE];
+	FILE *fp;
+	struct mb_imagelist_struct *imagelist;
+};
+
 /* end conditional include */
 #endif

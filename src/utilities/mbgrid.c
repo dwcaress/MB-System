@@ -1983,6 +1983,15 @@ int main(int argc, char **argv) {
 
 						if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
 						    error == MB_ERROR_NO_ERROR) {
+                        
+                            /* if needed try again to get topography type */
+                            if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
+                                status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
+                                if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN
+                                    && mb_io_ptr->beamwidth_xtrack > 0.0 && mb_io_ptr->beamwidth_ltrack > 0.0) {
+                                    topo_type = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
+                                }
+                            }
 
 							/* reproject beam positions if necessary */
 							if (use_projection == MB_YES) {
@@ -2019,7 +2028,6 @@ int main(int argc, char **argv) {
 
 									/* else deal with multibeam data that have beam footprints */
 									else {
-
 										/* get slope from low resolution grid */
 										isx = (bathlon[ib] - wbnd[0] + 0.5 * sdx) / sdx;
 										isy = (bathlat[ib] - wbnd[2] + 0.5 * sdy) / sdy;
@@ -2423,6 +2431,15 @@ int main(int argc, char **argv) {
 
 						if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
 						    error == MB_ERROR_NO_ERROR) {
+                        
+                            /* if needed try again to get topography type */
+                            if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
+                                status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
+                                if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN
+                                    && mb_io_ptr->beamwidth_xtrack > 0.0 && mb_io_ptr->beamwidth_ltrack > 0.0) {
+                                    topo_type = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
+                                }
+                            }
 
 							/* reproject beam positions if necessary */
 							if (use_projection == MB_YES) {

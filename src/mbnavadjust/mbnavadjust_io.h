@@ -334,6 +334,15 @@ struct mbna_project {
 
 	int modelplot;
 	int modelplot_style;
+    
+    
+	/* function pointers for contour plotting */
+    void (*mbnavadjust_plot)(double xx, double yy, int ipen);
+    void (*mbnavadjust_newpen)(int icolor);
+    void (*mbnavadjust_setline)(int linewidth);
+    void (*mbnavadjust_justify_string)(double height, char *string, double *s);
+    void (*mbnavadjust_plot_string)(double x, double y, double hgt, double angle, char *label);
+
 };
 struct mbna_plot_vector {
 	int command;
@@ -354,6 +363,27 @@ struct mbna_matrix {
 	int *ia;
 	double *a;
 };
+struct mbna_pingraw {
+	int time_i[7];
+	double time_d;
+	double navlon;
+	double navlat;
+	double heading;
+	double draft;
+	double beams_bath;
+	char *beamflag;
+	double *bath;
+	double *bathacrosstrack;
+	double *bathalongtrack;
+};
+struct mbna_swathraw {
+	/* raw swath data */
+	int file_id;
+	int npings;
+	int npings_max;
+	int beams_bath;
+	struct mbna_pingraw *pingraws;
+};
 
 int mbnavadjust_new_project(int verbose, char *projectpath, double section_length, int section_soundings, double cont_int,
                             double col_int, double tick_int, double label_int, int decimation, double smoothing,
@@ -365,5 +395,17 @@ int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int 
 int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project, int crossing_id, double offset_x,
                                        double offset_y, double *lonmin, double *lonmax, double *latmin, double *latmax,
                                        int *error);
+int mbnavadjust_set_plot_functions(int verbose, struct mbna_project *project,
+                             void *plot, void *newpen, void *setline,
+                             void *justify_string, void *plot_string, int *error);
+int mbnavadjust_section_load(int verbose, struct mbna_project *project,
+                             int file_id, int section_id,
+                             void **swathraw_ptr, void **swath_ptr, int num_pings, int *error);
+int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
+                                  int file_id, void *swathraw_ptr, void *swath_ptr,
+                                  double zoffset, int *error);
+int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
+                                int fileid, int sectionid, struct swath *swath,
+                                struct mbna_contour_vector *contour, int *error);
 
 /*--------------------------------------------------------------------*/

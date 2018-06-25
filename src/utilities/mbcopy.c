@@ -64,7 +64,7 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
 int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, struct mbsys_simrad2_struct *ostore, int *error);
 int mbcopy_simrad_time_convert(int verbose, int year, int month, int day, int hour, int minute, int second, int centisecond,
                                int *date, int *msec, int *error);
-int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead,
+int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype, 
                            int *time_i, double time_d, double navlon, double navlat, double speed,
                            double heading, double draft, double altitude, double roll, double pitch, double heave,
                            double beamwidth_xtrack, double beamwidth_ltrack, int nbath, int namp, int nss, char *beamflag,
@@ -189,6 +189,7 @@ int main(int argc, char **argv) {
     int sensorhead_status = MB_SUCCESS;
     int sensorhead_error = MB_ERROR_NO_ERROR;
     int sensorhead = 0;
+    int sensortype = 0;
 
 	char mcomment[MB_COMMENT_MAXLINE];
 	int mnbath, mnamp, mnss;
@@ -954,6 +955,7 @@ int main(int argc, char **argv) {
 				mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &draft,
 				               &roll, &pitch, &heave, &error);
 				sensorhead_status = mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &sensorhead_error);
+                sensorhead_status = mb_sonartype(verbose, imbio_ptr, istore_ptr, &sensortype, &sensorhead_error);
             }
 			ostore_ptr = omb_io_ptr->store_data;
 			if (kind == MB_DATA_DATA || kind == MB_DATA_COMMENT) {
@@ -966,14 +968,16 @@ int main(int argc, char **argv) {
 				/* copy the data to mbldeoih */
 				if (merge == MB_YES) {
 					status =
-					    mbcopy_any_to_mbldeoih(verbose, kind, sensorhead, time_i, time_d, navlon, navlat, speed, heading, draft, altitude,
+					    mbcopy_any_to_mbldeoih(verbose, kind, sensorhead, sensortype,
+                                               time_i, time_d, navlon, navlat, speed, heading, draft, altitude,
 					                           roll, pitch, heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack,
 					                           nbath, namp, nss, mbeamflag, mbath, iamp, mbathacrosstrack, mbathalongtrack, iss,
 					                           issacrosstrack, issalongtrack, comment, ombio_ptr, ostore_ptr, &error);
 				}
 				else {
 					status =
-					    mbcopy_any_to_mbldeoih(verbose, kind, sensorhead, time_i, time_d, navlon, navlat, speed, heading, draft, altitude,
+					    mbcopy_any_to_mbldeoih(verbose, kind, sensorhead, sensortype,
+                                               time_i, time_d, navlon, navlat, speed, heading, draft, altitude,
 					                           roll, pitch, heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack,
 					                           nbath, namp, nss, ibeamflag, ibath, iamp, ibathacrosstrack, ibathalongtrack, iss,
 					                           issacrosstrack, issalongtrack, comment, ombio_ptr, ostore_ptr, &error);
@@ -2349,7 +2353,7 @@ int mbcopy_simrad_time_convert(int verbose, int year, int month, int day, int ho
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead,
+int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype, 
                            int *time_i, double time_d, double navlon, double navlat, double speed,
                            double heading, double draft, double altitude, double roll, double pitch, double heave,
                            double beamwidth_xtrack, double beamwidth_ltrack, int nbath, int namp, int nss, char *beamflag,
@@ -2375,6 +2379,7 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead,
 	}
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       sensorhead: %d\n", sensorhead);
+		fprintf(stderr, "dbg2       sensortype: %d\n", sensortype);
 	}
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV)) {
 		fprintf(stderr, "dbg2       time_i[0]:  %d\n", time_i[0]);
@@ -2422,6 +2427,7 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead,
 	if (ostore != NULL) {
 		/* set sensorhead and beam widths */
         ostore->sensorhead = sensorhead;
+        ostore->topo_type = sensortype;
 		ostore->beam_xwidth = beamwidth_xtrack;
 		ostore->beam_lwidth = beamwidth_ltrack;
 		ostore->kind = kind;

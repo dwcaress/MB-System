@@ -240,6 +240,10 @@ int mbsys_ldeoih_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *so
 
 	/* get sidescan type */
 	*sonartype = store->topo_type;
+    if (*sonartype == MB_TOPOGRAPHY_TYPE_UNKNOWN
+        && store->beam_xwidth > 0.0 && store->beam_lwidth > 0.0) {
+        *sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
+    }
 
 	/* print output debug statements */
 	if (verbose >= 2) {

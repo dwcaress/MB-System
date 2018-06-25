@@ -19,9 +19,6 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #define HAVE_LIBM 1
 
-/* Define to 1 if you have the `ws2_32' library (-lws2_32). */
-/* #undef HAVE_LIBWS2_32 */
-
 /* Have malloc.h */
 /* #undef HAVE_MALLOC_H */
 
@@ -52,6 +49,12 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 
+/* Define to 1 if you have the <tirpc/rpc/rpc.h> header file. */
+/* #undef HAVE_TIRPC_RPC_RPC_H */
+
+/* Define to 1 if you have the <tirpc/rpc/types.h> header file. */
+/* #undef HAVE_TIRPC_RPC_TYPES_H */
+
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
@@ -77,7 +80,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.5.2336"
+#define PACKAGE_STRING "mbsystem 5.5.2337"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -86,19 +89,16 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.5.2336"
+#define PACKAGE_VERSION "5.5.2337"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "5.5.2336"
+#define VERSION "5.5.2337"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "6 June 2018"
-
-/* Turned on WIN32 define in config */
-/* #undef WIN32 */
+#define VERSION_DATE "23 June 2018"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
