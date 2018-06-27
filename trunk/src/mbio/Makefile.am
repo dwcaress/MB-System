@@ -1,5 +1,11 @@
 lib_LTLIBRARIES = libmbio.la
 
+if BUILD_MBTRN
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+  MBTRNLIB = $(top_builddir)/src/mbtrn/libmbtrn.la
+endif
+
+
 include_HEADERS = mb_config.h \
         mb_format.h mb_status.h \
         mb_io.h mb_swap.h \
@@ -48,6 +54,7 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbaux \
 	-I@top_srcdir@/src/bsio \
 	-I@top_srcdir@/src/surf \
 	-I@top_srcdir@/src/gsf \
+	$(MBTRNINCDIR) \
 	${libgmt_CPPFLAGS} \
 	${libnetcdf_CPPFLAGS} \
 	${libproj_CPPFLAGS}
@@ -129,6 +136,7 @@ libmbio_la_SOURCES = \
 libmbio_la_LIBADD = $(top_builddir)/src/bsio/libmbbsio.la \
                    $(top_builddir)/src/surf/libmbsapi.la \
 		   $(top_builddir)/src/gsf/libmbgsf.la \
+           $(MBTRNLIB) \
 		   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${XDR_LIB}
 
 nodist_libmbio_la_SOURCES = projections.h

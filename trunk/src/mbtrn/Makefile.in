@@ -90,9 +90,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = mbtrnpreprocess$(EXEEXT) tmbtrn$(EXEEXT) \
-	stream7k$(EXEEXT) frames7k$(EXEEXT) trnc$(EXEEXT) \
-	emu7k$(EXEEXT)
+bin_PROGRAMS = tmbtrn$(EXEEXT) stream7k$(EXEEXT) frames7k$(EXEEXT) \
+	trnc$(EXEEXT) emu7k$(EXEEXT)
 subdir = src/mbtrn
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -155,15 +154,6 @@ emu7k_DEPENDENCIES = libmbtrn.la
 am_frames7k_OBJECTS = frames7k.$(OBJEXT)
 frames7k_OBJECTS = $(am_frames7k_OBJECTS)
 frames7k_DEPENDENCIES = libmbtrn.la
-am_mbtrnpreprocess_OBJECTS = mbtrnpreprocess.$(OBJEXT)
-mbtrnpreprocess_OBJECTS = $(am_mbtrnpreprocess_OBJECTS)
-am__DEPENDENCIES_1 =
-mbtrnpreprocess_DEPENDENCIES = libmbtrn.la \
-	$(top_builddir)/src/mbio/libmbio.la \
-	$(top_builddir)/src/mbaux/libmbaux.la \
-	$(top_builddir)/src/mbaux/libmbxgr.la $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 am_stream7k_OBJECTS = stream7k.$(OBJEXT)
 stream7k_OBJECTS = $(am_stream7k_OBJECTS)
 stream7k_DEPENDENCIES = libmbtrn.la
@@ -208,8 +198,7 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libmbtrn_la_SOURCES) $(emu7k_SOURCES) $(frames7k_SOURCES) \
-	$(mbtrnpreprocess_SOURCES) $(stream7k_SOURCES) \
-	$(tmbtrn_SOURCES) $(trnc_SOURCES)
+	$(stream7k_SOURCES) $(tmbtrn_SOURCES) $(trnc_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -408,6 +397,7 @@ include_HEADERS = cbuffer.h \
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/trn -DHAVE_CONFIG_H  -DWITH_TEST -DMD_OLEVEL=MD_DEBUG
+AM_LDFLAGS = -L$(top_builddir)/src/mbtrn
 libmbtrn_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbtrn_la_SOURCES = \
 				cbuffer.c \
@@ -423,14 +413,6 @@ libmbtrn_la_SOURCES = \
 				r7kc.c
 
 libmbtrn_la_LIBADD = -lpthread
-mbtrnpreprocess_SOURCES = mbtrnpreprocess.c
-mbtrnpreprocess_LDADD = libmbtrn.la \
-       $(top_builddir)/src/mbio/libmbio.la \
-       $(top_builddir)/src/mbaux/libmbaux.la \
-       $(top_builddir)/src/mbaux/libmbxgr.la \
-       ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-      $(LIBM)
-
 tmbtrn_SOURCES = mbtrn-test.c
 tmbtrn_LDADD = libmbtrn.la
 stream7k_SOURCES = stream7k.c
@@ -572,10 +554,6 @@ frames7k$(EXEEXT): $(frames7k_OBJECTS) $(frames7k_DEPENDENCIES) $(EXTRA_frames7k
 	@rm -f frames7k$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(frames7k_OBJECTS) $(frames7k_LDADD) $(LIBS)
 
-mbtrnpreprocess$(EXEEXT): $(mbtrnpreprocess_OBJECTS) $(mbtrnpreprocess_DEPENDENCIES) $(EXTRA_mbtrnpreprocess_DEPENDENCIES) 
-	@rm -f mbtrnpreprocess$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(mbtrnpreprocess_OBJECTS) $(mbtrnpreprocess_LDADD) $(LIBS)
-
 stream7k$(EXEEXT): $(stream7k_OBJECTS) $(stream7k_DEPENDENCIES) $(EXTRA_stream7k_DEPENDENCIES) 
 	@rm -f stream7k$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(stream7k_OBJECTS) $(stream7k_LDADD) $(LIBS)
@@ -602,7 +580,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrn-server.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrn-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrn.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrnpreprocess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mconfig.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mdebug.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merror.Plo@am__quote@

@@ -152,9 +152,9 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = gsf surf bsio mbio mbaux utilities gmt otps macros \
-	share man html ps mbedit mbnavedit mbvelocitytool mbview \
-	mbgrdviz mbeditviz mbnavadjust mbtrn
+DIST_SUBDIRS = gsf surf bsio mbtrn mbio mbaux utilities gmt otps \
+	macros share man html ps mbedit mbnavedit mbvelocitytool \
+	mbview mbgrdviz mbeditviz mbnavadjust
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -311,15 +311,12 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-@BUILD_MOTIF_FALSE@XBUILD_SUB_MOTIF = 
 @BUILD_MOTIF_TRUE@XBUILD_SUB_MOTIF = mbedit mbnavedit mbvelocitytool
-@BUILD_GL_FALSE@XBUILD_SUB_GL = 
 @BUILD_GL_TRUE@XBUILD_SUB_GL = mbview mbgrdviz mbeditviz mbnavadjust
-@BUILD_MBTRN_FALSE@XBUILD_SUB_MBTRN = 
 @BUILD_MBTRN_TRUE@XBUILD_SUB_MBTRN = mbtrn
-SUBDIRS = gsf surf bsio mbio mbaux \
+SUBDIRS = gsf surf bsio $(XBUILD_SUB_MBTRN) mbio mbaux \
 	utilities gmt otps macros share man html ps \
-	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL) $(XBUILD_SUB_MBTRN)
+	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL)
 
 CLEANFILES = 
 DISTCLEANFILES = 

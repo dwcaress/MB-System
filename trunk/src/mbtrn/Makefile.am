@@ -18,6 +18,8 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 AM_CPPFLAGS = -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/trn -DHAVE_CONFIG_H  -DWITH_TEST -DMD_OLEVEL=MD_DEBUG
 
+AM_LDFLAGS = -L$(top_builddir)/src/mbtrn
+
 libmbtrn_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
 libmbtrn_la_SOURCES = \
@@ -35,15 +37,7 @@ libmbtrn_la_SOURCES = \
 
 libmbtrn_la_LIBADD = -lpthread
 
-bin_PROGRAMS = mbtrnpreprocess tmbtrn stream7k frames7k trnc emu7k
-
-mbtrnpreprocess_SOURCES = mbtrnpreprocess.c
-mbtrnpreprocess_LDADD = libmbtrn.la \
-       $(top_builddir)/src/mbio/libmbio.la \
-       $(top_builddir)/src/mbaux/libmbaux.la \
-       $(top_builddir)/src/mbaux/libmbxgr.la \
-       ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-      $(LIBM)
+bin_PROGRAMS = tmbtrn stream7k frames7k trnc emu7k
 
 tmbtrn_SOURCES = mbtrn-test.c
 tmbtrn_LDADD = libmbtrn.la

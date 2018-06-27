@@ -2236,11 +2236,23 @@ store->read_beam,store->read_verticaldepth,store->read_tvg,store->read_image);
 		fprintf(stderr, "RESON7KR DATA READ: type:%d status:%d error:%d\n\n", store->kind, status, *error);
 #endif
 
-	/* get file position */
-	if (*save_flag == MB_YES)
-		mb_io_ptr->file_bytes = ftell(mbfp) - *size;
-	else
-		mb_io_ptr->file_bytes = ftell(mbfp);
+	/* get file position - check file and socket, use appropriate ftelln */
+    if (mb_io_ptr->mbfp != NULL) {
+         if (*save_flag == MB_YES)
+            mb_io_ptr->file_bytes = ftell(mbfp) - *size;
+        else
+            mb_io_ptr->file_bytes = ftell(mbfp);
+    }
+#ifdef MBTRN_ENABLED
+    else if (mb_io_ptr->mbsp != NULL) {
+        if (*save_flag == MB_YES)
+            mb_io_ptr->file_bytes = mbtrn_reader_tell(mb_io_ptr->mbsp) - *size;
+        else
+            mb_io_ptr->file_bytes = mbtrn_reader_tell(mb_io_ptr->mbsp);
+    }else{
+        fprintf(stderr,"ERROR - both file and socket input pointers are NULL\n");
+    }
+#endif
 
 	/* print output debug statements */
 	if (verbose >= 2) {

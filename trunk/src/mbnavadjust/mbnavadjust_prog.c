@@ -1004,9 +1004,9 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 	double roll;
 	double pitch;
 	double heave;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
+	int beams_bath = 0;
+	int beams_amp = 0;
+	int pixels_ss = 0;
 	char *beamflag = NULL;
 	double *bath = NULL;
 	double *bathacrosstrack = NULL;
@@ -1016,8 +1016,14 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 	double *ssacrosstrack = NULL;
 	double *ssalongtrack = NULL;
 	char comment[MB_COMMENT_MAXLINE];
+    int beams_bath_culled = 0;
+	char *beamflag_culled = NULL;
+	double *bath_culled = NULL;
+	double *bathacrosstrack_culled = NULL;
+	double *bathalongtrack_culled = NULL;
 
 	int sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
+    int sensorhead = 0;
 	int *bin_nbath = NULL;
 	double *bin_bath = NULL;
 	double *bin_bathacrosstrack = NULL;
@@ -1055,6 +1061,8 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 	double mbp_rollbias_port;
 	double mbp_rollbias_stbd;
 	double depthmax, distmax, depthscale, distscale;
+    int status_sensorhead = MB_SUCCESS;
+    int error_sensorhead = MB_ERROR_NO_ERROR;
 	void *tptr;
 	int i, j, k;
 	int ii1, jj1;
@@ -1158,6 +1166,10 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 		ss = NULL;
 		ssacrosstrack = NULL;
 		ssalongtrack = NULL;
+        beamflag_culled = NULL;
+	    bath_culled = NULL;
+	    bathacrosstrack_culled = NULL;
+	    bathalongtrack_culled = NULL;
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -1178,6 +1190,16 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 		if (error == MB_ERROR_NO_ERROR)
 			status =
 			    mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag_culled, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath_culled, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack_culled,
+			                           &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack_culled,
+			                           &error);
 
 		/* if error initializing memory then don't read the file */
 		if (error != MB_ERROR_NO_ERROR) {
@@ -1219,11 +1241,14 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 				error = MB_ERROR_NO_ERROR;
 			}
 
-			/* if sonar is interferometric, bin the bathymetry */
+            /* deal with survey data */
 			if (kind == MB_DATA_DATA) {
-				if (sonartype == MB_TOPOGRAPHY_TYPE_UNKNOWN)
+				status_sensorhead = mb_sensorhead(mbna_verbose, imbio_ptr, istore_ptr, &sensorhead, &error_sensorhead);
+				if (sonartype == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
 					status = mb_sonartype(mbna_verbose, imbio_ptr, istore_ptr, &sonartype, &error);
+                }
 
+                /* if sonar is interferometric, bin the bathymetry */
 				if (sonartype == MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC) {
 					/* allocate bin arrays if needed */
 					if (bin_nbath == NULL) {
@@ -1511,7 +1536,8 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 					ostore->beams_bath = obeams_bath;
 					ostore->beams_amp = 0;
 					ostore->pixels_ss = 0;
-					ostore->kind = MB_DATA_DATA;
+                    ostore->sensorhead = sensorhead;
+                    ostore->topo_type = sonartype;
 					output_open = MB_YES;
 					status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, obeams_bath * sizeof(char), (void **)&ostore->beamflag,
 					                    &error);
@@ -1567,6 +1593,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 					file->num_snavs++;
 					project.num_snavs++;
 				}
+                beams_bath_culled = 0;
 				for (i = 0; i < beams_bath; i++) {
 					if (mb_beam_ok(beamflag[i]) && bath[i] != 0.0) {
 						good_beams++;
@@ -1591,6 +1618,12 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 							section->depthmax = bath[i];
 						else
 							section->depthmax = MAX(section->depthmax, bath[i]);
+                            
+                        beamflag_culled[beams_bath_culled] = beamflag[i];
+                        bath_culled[beams_bath_culled] = bath[i];
+                        bathacrosstrack_culled[beams_bath_culled] = bathacrosstrack[i];
+                        bathalongtrack_culled[beams_bath_culled] = bathalongtrack[i];
+                        beams_bath_culled++;
 					}
 					else {
 						beamflag[i] = MB_FLAG_NULL;
@@ -1607,15 +1640,15 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 					file->num_sections,
 					time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
 					navlon,navlat,speed,heading,distance,section->distance,
-					beams_bath,beams_amp,pixels_ss);*/
+					beams_bath_culled,beams_amp,pixels_ss);*/
 
 					/* get depth and distance scaling */
 					depthmax = 0.0;
 					distmax = 0.0;
-					for (i = 0; i < beams_bath; i++) {
-						depthmax = MAX(depthmax, fabs(bath[i]));
-						distmax = MAX(distmax, fabs(bathacrosstrack[i]));
-						distmax = MAX(distmax, fabs(bathalongtrack[i]));
+					for (i = 0; i < beams_bath_culled; i++) {
+						depthmax = MAX(depthmax, fabs(bath_culled[i]));
+						distmax = MAX(distmax, fabs(bathacrosstrack_culled[i]));
+						distmax = MAX(distmax, fabs(bathalongtrack_culled[i]));
 					}
 					depthscale = MAX(0.001, depthmax / 32000);
 					distscale = MAX(0.001, distmax / 32000);
@@ -1627,8 +1660,11 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 					ostore->heave = heave;
 
 					/* write out data */
-					status = mb_put_all(mbna_verbose, ombio_ptr, ostore_ptr, MB_YES, MB_DATA_DATA, time_i, time_d, navlon, navlat,
-					                    speed, heading, beams_bath, 0, 0, beamflag, bath, amp, bathacrosstrack, bathalongtrack,
+					status = mb_put_all(mbna_verbose, ombio_ptr, ostore_ptr,
+                                        MB_YES, MB_DATA_DATA, time_i, time_d, navlon, navlat,
+					                    speed, heading, beams_bath_culled, 0, 0,
+                                        beamflag_culled, bath_culled, amp,
+                                        bathacrosstrack_culled, bathalongtrack_culled,
 					                    ss, ssacrosstrack, ssalongtrack, comment, &error);
 				}
 			}
@@ -1677,7 +1713,7 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 				fprintf(stderr, "dbg2       beams_bath:     %d\n", beams_bath);
 				fprintf(stderr, "dbg2       beams_amp:      %d\n", beams_amp);
 				fprintf(stderr, "dbg2       pixels_ss:      %d\n", pixels_ss);
-			}
+            }
 		}
 
 		/* close the swath file */

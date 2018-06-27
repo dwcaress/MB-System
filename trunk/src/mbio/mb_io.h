@@ -29,6 +29,14 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
+#ifdef MBTRN_ENABLED
+#include "mbtrn.h"
+#include "r7kc.h"
+#include "iowrap.h"
+#include "cbuffer.h"
+#include "mdebug.h"
+#endif
+
 /* ---------------------------------------------------------------------------*/
 /* Survey Platform definitions and structures for the
  * mb_platform_*() functions */
@@ -466,6 +474,12 @@ struct mb_io_struct {
 	              in km/hr */
 	double timegap;   /* maximum time between pings without
 	              a data gap */
+#ifdef MBTRN_ENABLED
+    /* application defined i/o */
+    mbtrn_reader_t *mbsp;         /* mbtrn socket i/o */
+#else
+    void *mbsp;                   /* blank spaceholder */
+#endif
 
 	/* file descriptor, file name, and usage flag */
 	FILE *mbfp;                  /* file descriptor */
@@ -487,8 +501,6 @@ struct mb_io_struct {
 	void *xdrs2;                 /* XDR stream handle #2 */
 	void *xdrs3;                 /* XDR stream handle #2 */
     
-    /* application defined i/o */
-    void *mbsp;                  /* mbtrn socket i/o */
     
     /* file indexing (used by some formats) */
     int num_indextable;

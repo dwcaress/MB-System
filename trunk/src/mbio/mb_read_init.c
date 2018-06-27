@@ -759,6 +759,8 @@ int mb_input_init(int verbose, char *file, int format,
 		return (status);
 	}
 
+    mb_io_ptr->mbsp = NULL;
+
 	/* initialize file access for the mbio descriptor */
 	mb_io_ptr->filemode = MB_FILEMODE_READ;
 	mb_io_ptr->mbfp = NULL;
@@ -778,7 +780,6 @@ int mb_input_init(int verbose, char *file, int format,
 	mb_io_ptr->xdrs = NULL;
 	mb_io_ptr->xdrs2 = NULL;
 	mb_io_ptr->xdrs3 = NULL;
-    mb_io_ptr->mbsp = NULL;
 
 	/* load control parameters into the mbio descriptor */
 	mb_io_ptr->format = format;
@@ -957,7 +958,7 @@ int mb_input_init(int verbose, char *file, int format,
     mb_io_ptr->mb_io_input_read = input_read;
     mb_io_ptr->mb_io_input_close = input_close;
 	mb_io_ptr->filetype = MB_FILETYPE_INPUT;
-    status = (mb_io_ptr->mb_io_input_open)(verbose, mbio_ptr, path, error);
+    status = (mb_io_ptr->mb_io_input_open)(verbose, *mbio_ptr, path, error);
 
 	/* if error terminate */
 	if (status == MB_FAILURE) {
