@@ -1,6 +1,10 @@
 if BUILD_FFTW
  FFTW_PROG = mbsegypsd
 endif
+if BUILD_MBTRN
+  MBTRN_PROG = mbtrnpreprocess
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+endif
 
 bin_PROGRAMS = mbconfig \
 		mb7k2jstar \
@@ -51,7 +55,8 @@ bin_PROGRAMS = mbconfig \
         mbsvpselect \
         mbswplspreprocess \
         mbtime \
-        $(FFTW_PROG)
+        $(FFTW_PROG) \
+        $(MBTRN_PROG)
 
 
 include_HEADERS = levitus.h
@@ -59,11 +64,12 @@ include_HEADERS = levitus.h
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-	      -I${top_srcdir}/src/mbaux \
-	      -I${top_srcdir}/src/gsf \
-	      ${libgmt_CPPFLAGS} \
-	      ${libnetcdf_CPPFLAGS} \
-	      ${libfftw_CPPFLAGS}
+	    -I${top_srcdir}/src/mbaux \
+	    -I${top_srcdir}/src/gsf \
+        $(MBTRNINCDIR) \
+	    ${libgmt_CPPFLAGS} \
+	    ${libnetcdf_CPPFLAGS} \
+	    ${libfftw_CPPFLAGS}
 
 AM_LDFLAGS =
 
@@ -140,6 +146,15 @@ mbsegypsd_LDADD = ${top_builddir}/src/mbaux/libmbaux.la \
                   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${libfftw_LIBS}
 mbsegypsd_SOURCES = mbsegypsd.c
 mbsegypsd_LDFLAGS =
+endif
+if BUILD_MBTRN
+mbtrnpreprocess_SOURCES = mbtrnpreprocess.c
+mbtrnpreprocess_LDADD = $(top_builddir)/src/mbtrn/libmbtrn.la \
+       $(top_builddir)/src/mbio/libmbio.la \
+       $(top_builddir)/src/mbaux/libmbaux.la \
+       $(top_builddir)/src/mbaux/libmbxgr.la \
+       ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
+      $(LIBM)
 endif
 
 BUILT_SOURCES = levitus.h

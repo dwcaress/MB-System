@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.5.2339],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.5.2340],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "25 June 2018", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "26 June 2018", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -192,10 +192,9 @@ AC_CHECK_FUNC(xdrmem_create, XDR_LIB=, [
       AC_CHECK_LIB(rpclib, xdrmem_create, XDR_LIB=-lrpclib, [
         AC_CHECK_LIB(xdr, xdrmem_create, XDR_LIB=-lxdr, [
           AC_CHECK_LIB(tirpc, xdrmem_create, XDR_LIB=-ltirpc, [
-            AC_CHECK_LIB(portablexdr, xdrmem_create, XDR_LIB=-lportablexdr, [
-              AC_MSG_ERROR([*** Unable to locate XDR functions.])
-            ], -lws2_32 )
-          ], -lws2_32 )
+            AC_CHECK_LIB(portablexdr, xdrmem_create, XDR_LIB=-lportablexdr,
+                [AC_MSG_ERROR([*** Unable to locate XDR functions.])], -lws2_32 )
+          ])
         ])
       ])
     ])
@@ -770,6 +769,7 @@ AM_CONDITIONAL([BUILD_MBTRN], [test x$build_mbtrn = xyes])
 if test "$build_mbtrn" = "yes" ; then
     dnl Building mbtrn tools
     AS_ECHO(["Building mbtrn tools"])
+    AC_DEFINE(MBTRN_ENABLED, 1, [Build libmbtrn and mbtrnpreprocess])
 else
     dnl Not building mbtrn tools
     AS_ECHO(["Not building mbtrn tools"])

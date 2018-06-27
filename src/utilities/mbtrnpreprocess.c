@@ -1880,6 +1880,7 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
     if (verbose>=1) {
         mbtrn_reader_show(mb_io_ptr->mbsp,true,5);
     }
+    fprintf(stderr,"CREATED READER mbsp[%p]\n",mb_io_ptr->mbsp);
     
     /* print output debug statements */
 	if (verbose >= 2) {

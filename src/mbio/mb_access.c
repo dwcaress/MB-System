@@ -343,6 +343,9 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, i
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+    
+    /* reset error value */
+    *error = MB_ERROR_NO_ERROR;
 
 	/* start off with sonartype unknown */
 	*sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
@@ -434,6 +437,9 @@ int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, 
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+    
+    /* reset error value */
+    *error = MB_ERROR_NO_ERROR;
 
 	/* call the appropriate mbsys_ extraction routine */
 	if (mb_io_ptr->mb_io_sidescantype != NULL) {
@@ -644,6 +650,9 @@ int mb_sensorhead(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead,
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+    
+    /* reset error value */
+    *error = MB_ERROR_NO_ERROR;
 
 	/* call the appropriate mbsys_ sensorhead routine
 	        defined for:

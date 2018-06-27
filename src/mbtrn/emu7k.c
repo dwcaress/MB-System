@@ -147,7 +147,7 @@ emu7k_client_t *emu7k_client_new(int fd, uint32_t nsubs, int32_t *subs)
     emu7k_client_t *self = (emu7k_client_t *)malloc(sizeof(emu7k_client_t));
     if (self) {
         self->fd=fd;
-        // self->sub_count=(nsubs<0?0:nsubs); //nsubs always >= 0
+        self->sub_count=nsubs;
         self->sub_list=NULL;
         if (self->sub_count > 0) {
             self->sub_list = (int32_t *)malloc(self->sub_count * sizeof(int32_t));
@@ -366,7 +366,7 @@ static int64_t read_s7k_rec(emu7k_record_t *dest, iow_file_t *src, int64_t ofs)
                     }
                     
                 }else{
-                    MERROR("invalid header frame_head[0x%0X] nf_sz[%lu] drf_sz[%lu]\n",(unsigned int)frame_head,R7K_NF_BYTES,R7K_DRF_BYTES);
+                    MERROR("invalid header frame_head[0x%0X] nf_sz[%"PRId32"] drf_sz[%"PRId32"]\n",(unsigned int)frame_head,(uint32_t)R7K_NF_BYTES,(uint32_t)R7K_DRF_BYTES);
                     if(g_verbose>=1){
 	                    r7k_drf_show(drf,false,5);
                     }
@@ -499,7 +499,7 @@ static void *s_server_publish(void *arg)
                         stats->rec_cycle=0;
                         stats->pub_cycle=0;
                         
-                        MMDEBUG(APP2,"reached end of file fs[%lld] ofs[%"PRId64"]\n",file_end,cur.tail);
+                        MMDEBUG(APP2,"reached end of file fs[%"PRId64"] ofs[%"PRId64"]\n",(int64_t)file_end,cur.tail);
                         if (svr->cfg->restart) {
                             MMDEBUG(APP2,"restarting\n");
                             cur.tail=0;

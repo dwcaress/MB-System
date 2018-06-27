@@ -173,8 +173,8 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* read expected number of bytes into buffer */
     if (mb_io_ptr->mbfp != NULL) {
+        /* read expected number of bytes into buffer */
         if ((read_len = fread(buffer, 1, *size, mb_io_ptr->mbfp)) != *size) {
             status = MB_FAILURE;
             *error = MB_ERROR_EOF;
@@ -184,14 +184,35 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
             *error = MB_ERROR_NO_ERROR;
         }
     }
-    else if (mb_io_ptr->mb_io_input_read != NULL && mb_io_ptr->mbsp != NULL) {
-        status = (*mb_io_ptr->mb_io_input_read)(verbose, mbio_ptr, *size, buffer, error);
+#ifdef MBTRN_ENABLED
+    else {
+        if (mb_io_ptr->mbsp != NULL) {
+            // use the socket reader
+            if( (read_len = mbtrn_reader_xread(mb_io_ptr->mbsp,(byte *)buffer,*size,350,MBR_ALLOW_PARTIAL)) != *size){
+                status = MB_FAILURE;
+                *error = MB_ERROR_EOF;
+                *size = read_len;
+                if (me_errno==ME_ESOCK) {
+                    fprintf(stderr,"mbtrn_reader server connection closed.\n");
+                }
+            }
+            else {
+                *error = MB_ERROR_NO_ERROR;
+            }
+        } else {
+            fprintf(stderr,"mb_io file and socket pointers both NULL\n");
+            status = MB_FAILURE;
+            *error = MB_ERROR_EOF;
+            *size = read_len;
+        }
     }
+#else
     else {
         status = MB_FAILURE;
         *error = MB_ERROR_EOF;
         *size = read_len;
     }
+#endif
 
 	/* print output debug statements */
 	if (verbose >= 2) {

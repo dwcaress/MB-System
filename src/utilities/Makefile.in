@@ -107,7 +107,7 @@ bin_PROGRAMS = mbconfig$(EXEEXT) mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
 	mbsegyinfo$(EXEEXT) mbsegylist$(EXEEXT) mbset$(EXEEXT) \
 	mbsslayout$(EXEEXT) mbstripnan$(EXEEXT) mbsvplist$(EXEEXT) \
 	mbsvpselect$(EXEEXT) mbswplspreprocess$(EXEEXT) \
-	mbtime$(EXEEXT) $(am__EXEEXT_1)
+	mbtime$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
 subdir = src/utilities
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -122,6 +122,7 @@ CONFIG_HEADER = $(top_builddir)/src/mbio/mb_config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @BUILD_FFTW_TRUE@am__EXEEXT_1 = mbsegypsd$(EXEEXT)
+@BUILD_MBTRN_TRUE@am__EXEEXT_2 = mbtrnpreprocess$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_mb7k2jstar_OBJECTS = mb7k2jstar.$(OBJEXT)
@@ -289,6 +290,16 @@ mbswplspreprocess_DEPENDENCIES =  \
 am_mbtime_OBJECTS = mbtime.$(OBJEXT)
 mbtime_OBJECTS = $(am_mbtime_OBJECTS)
 mbtime_LDADD = $(LDADD)
+@BUILD_MBTRN_TRUE@am_mbtrnpreprocess_OBJECTS =  \
+@BUILD_MBTRN_TRUE@	mbtrnpreprocess.$(OBJEXT)
+mbtrnpreprocess_OBJECTS = $(am_mbtrnpreprocess_OBJECTS)
+@BUILD_MBTRN_TRUE@mbtrnpreprocess_DEPENDENCIES =  \
+@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbtrn/libmbtrn.la \
+@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbio/libmbio.la \
+@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbaux/libmbaux.la \
+@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbaux/libmbxgr.la \
+@BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -345,7 +356,8 @@ SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbsegylist_SOURCES) $(mbsegypsd_SOURCES) $(mbset_SOURCES) \
 	$(mbsslayout_SOURCES) $(mbstripnan_SOURCES) \
 	$(mbsvplist_SOURCES) $(mbsvpselect_SOURCES) \
-	$(mbswplspreprocess_SOURCES) $(mbtime_SOURCES)
+	$(mbswplspreprocess_SOURCES) $(mbtime_SOURCES) \
+	$(mbtrnpreprocess_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -558,14 +570,17 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_FFTW_TRUE@FFTW_PROG = mbsegypsd
+@BUILD_MBTRN_TRUE@MBTRN_PROG = mbtrnpreprocess
+@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
 include_HEADERS = levitus.h
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-	      -I${top_srcdir}/src/mbaux \
-	      -I${top_srcdir}/src/gsf \
-	      ${libgmt_CPPFLAGS} \
-	      ${libnetcdf_CPPFLAGS} \
-	      ${libfftw_CPPFLAGS}
+	    -I${top_srcdir}/src/mbaux \
+	    -I${top_srcdir}/src/gsf \
+        $(MBTRNINCDIR) \
+	    ${libgmt_CPPFLAGS} \
+	    ${libnetcdf_CPPFLAGS} \
+	    ${libfftw_CPPFLAGS}
 
 AM_LDFLAGS = 
 mbconfig_SOURCES = mbconfig.c
@@ -637,6 +652,14 @@ mbtime_SOURCES = mbtime.c
 
 @BUILD_FFTW_TRUE@mbsegypsd_SOURCES = mbsegypsd.c
 @BUILD_FFTW_TRUE@mbsegypsd_LDFLAGS = 
+@BUILD_MBTRN_TRUE@mbtrnpreprocess_SOURCES = mbtrnpreprocess.c
+@BUILD_MBTRN_TRUE@mbtrnpreprocess_LDADD = $(top_builddir)/src/mbtrn/libmbtrn.la \
+@BUILD_MBTRN_TRUE@       $(top_builddir)/src/mbio/libmbio.la \
+@BUILD_MBTRN_TRUE@       $(top_builddir)/src/mbaux/libmbaux.la \
+@BUILD_MBTRN_TRUE@       $(top_builddir)/src/mbaux/libmbxgr.la \
+@BUILD_MBTRN_TRUE@       ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
+@BUILD_MBTRN_TRUE@      $(LIBM)
+
 BUILT_SOURCES = levitus.h
 CLEANFILES = levitus.h
 DISTCLEANFILES = levitus.h
@@ -924,6 +947,10 @@ mbtime$(EXEEXT): $(mbtime_OBJECTS) $(mbtime_DEPENDENCIES) $(EXTRA_mbtime_DEPENDE
 	@rm -f mbtime$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mbtime_OBJECTS) $(mbtime_LDADD) $(LIBS)
 
+mbtrnpreprocess$(EXEEXT): $(mbtrnpreprocess_OBJECTS) $(mbtrnpreprocess_DEPENDENCIES) $(EXTRA_mbtrnpreprocess_DEPENDENCIES) 
+	@rm -f mbtrnpreprocess$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mbtrnpreprocess_OBJECTS) $(mbtrnpreprocess_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -981,6 +1008,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsvpselect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbswplspreprocess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtime.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrnpreprocess.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

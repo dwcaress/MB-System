@@ -15,7 +15,8 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
-  Version 5.5.2337       June 25, 2018
+  Version 5.5.2340       June 26, 2018
+  Version 5.5.2339       June 25, 2018
 * Version 5.5.2336       June 6, 2018
   Version 5.5.2335       May 6, 2018
   Version 5.5.2334       April 18, 2018
@@ -278,6 +279,24 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2340 (June 26, 2018)
+
+Autoconf build system: Restructured to build successfully with the mbtrn capability
+enabled using the --enable-mbtrn option of the configure script.
+
+Mb_input_init() in src/mbio/mb_read_init.c: Allows calling program to initialize
+arbitrary input method by supplying functions to open, read bytes, and close the
+input. This capability is used by mbtrnpreprocess to read multibeam data over a
+socket directly from a sonar.
+
+Binary file i/o functions in src/mbio/mb_fileio.c: Can now read from an arbitrary
+input method defined by the mb_input_init() function.
+
+Mbtrnpreprocess: moved from src/mbtrn to src/utilities.
+
+Mbnavadjust: now stores only valid, unflagged soundings in the section files, which
+are format 71. Previously all soundings, including null and flagged, were stored.
 
 -----> 5.5.2339 (June 25, 2018)
 
