@@ -25,6 +25,7 @@ bin_PROGRAMS = mbconfig \
         mbfilter \
         mbformat \
         mbgetesf \
+        mbgpstide \
         mbgrid \
         mbhistogram \
         mbhsdump \
@@ -103,6 +104,7 @@ mbextractsegy_SOURCES = mbextractsegy.c
 mbfilter_SOURCES = mbfilter.c
 mbformat_SOURCES = mbformat.c
 mbgetesf_SOURCES = mbgetesf.c
+mbgpstide_SOURCES = mbgpstide.c
 mbgrid_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbgrid_SOURCES = mbgrid.c
 mbhistogram_SOURCES = mbhistogram.c

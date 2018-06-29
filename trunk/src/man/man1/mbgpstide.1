@@ -1,0 +1,190 @@
+.TH mbgpstide 1 "5 June 2018" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbgpstide\fP \- Generates tide model from GPS altitude data.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbgpstide\fP 
+.br
+[
+.br
+\fB--verbose\fP   {\fB-V\fP}
+.br
+\fB--help\fP   {\fB-H\fP}
+.br
+\fB\--tideformat\fP=\fITIDEFORMAT\fP   {\fB-A\fP \fITIDEFORMAT\fP}
+.br
+\fB\--interval\fP=\fIINTERVAL\fP   {\fB-D\fP \fIINTERVAL\fP}
+.br
+\fB\--format\fP=\fIFORMATID\fP   {\fB-F\fP \fIFORMATID\fP}
+.br
+\fB\--input\fP=\fIFILENAME\fP   {\fB-I\fP \fIFILENAME\fP}
+.br
+\fB\--setparameters\fP   {\fB-M\fP}
+.br
+\fB\--output\fP=\fIOUTPUT\fP   {\fB-O\fP \fIOUTPUT\fP}
+.br
+\fB\--offset\fP=\fIOFFSET\fP   {\fB-R\fP \fIOFFSET\fP}
+.br
+\fB\--skipexisting\fP   {\fB-S\fP}
+.br
+\fB\--geoid\fP=\fIGEOID_MODEL\fP   {\fB-T\fP \fIGEOID_MODEL\fP}
+.br
+\fB\--use\fP=\fISOURCE\fP   {\fB-U\fP \fISOURCE\fP}
+.br
+]
+
+.SH DESCRIPTION
+\fBMBgpstide\fP is a utility that generates tide files from the altitude 
+(height above elipsoid) information derived from GPS stored in the swath files. 
+The height may be adjusted by a fixed offset (\fB\-R\fP) or for a geoid (\fB\-T\fP).
+
+This allows bathymetry to be referenced to a specific ellipsoid or geoid rather
+than water level.
+
+The source of the GPS information is format specific.
+For Simrad format data files (formats 56-59) this data is the Height telegram.
+For GSF files the height is taken from the ping header.
+
+Geoid differences are calculated from a grid file containing the offset between the
+ellipsoid used by the GPS and desired geoid. 
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-A  \fITIDEFORMAT\fP\fR,\fP \-\^\-tideformat=\fITIDEFORMAT\fP
+.br
+This option sets the tide format of the output text tide model files.
+If \fITIDEFORMAT\fP = 2 (the default), the tide is output in this format:
+.br
+ 	year month day hour minute second tide
+.br
+where the tide value is in meters.
+If \fITIDEFORMAT\fP = 1, then the output format is:
+.br
+ 	time_d tide
+.br
+where time_d is in seconds since January 1, 1970 and tide is in meters.
+If \fITIDEFORMAT\fP = 5 (CARIS compatible), the tide is output in this format:
+.br
+ 	year/month/day hour:minute:decimal_second tide
+.br
+where the tide value is in meters. 
+\fITIDEFORMAT\fP = 5 should not be used with \fB-M\fP as this format is not recognised by mbprocess.
+
+.TP
+.B \-D \fIINTERVAL\fP\fR,\fP \-\^\-interval=\fIINTERVAL\fP
+.br
+This option sets the time interval between tidal model values in seconds.
+Default: 300 seconds (5 minutes).
+An \fIINTERVAL\fP of \fB0\fP will cause a value to be output for each height encountered.
+In this case tide format is \fB-A1\fP is required to prevent duplicate timestamps.
+.TP
+.B \-F \fIFORMAT\fP\fR,\fP \-\^\-format=\fIFORMAT\fP
+.br
+Sets the data format of the input swath data file specified with the
+\fB\-I\fP option. If \fIFORMAT\fP < 0, then the input file specified
+with the \fB\-I\fP option will actually contain a list of input swath sonar
+data files. This program uses the \fBMBIO\fP library and will read any
+swath sonar format with timestamps supported by \fBMBIO\fP.
+A list of the swath sonar data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page. The default format is
+set using \fBmbdefaults\fP.
+.TP
+.B \-H\fR,\fP \-\^\-help
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-I \fIINFILE\fP\fR,\fP \-\^\-input=\fIINFILE\fP
+.br
+Sets the input filename. If \fIFORMAT\fP > 0 (set with the
+\fB\-f\fP option) then the swath sonar data contained in \fIINFILE\fP
+is read and processed. If \fIFORMAT\fP < 0, then \fIINFILE\fP
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the \fIINFILE\fP file, each
+data file should be followed by a data format identifier, e.g.:
+ 	datafile1 11
+ 	datafile2 24
+.br
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page. Default: \fIINFILE\fP = "datalist.mb-1".
+.TP
+.B \-M\fR,\fP \-\^\-setparameters
+This option causes each swath file's parameter file to be modified so that
+\fBmbprocess\fP will read and apply the ancilliary tidal model file created by
+\fBmbgpstide\fP.
+.TP
+.B \-O \fIOUTFILE\fP\fR,\fP \-\^\-output=\fIOUTFILE\fP
+.br
+Sets the filename of the tidal model output. If \fB-O\fP is not specified then 
+for each input file a file \fIfilename\fP.gps.tde will be created. 
+Intervals which include file breaks (cover the end of one file and the start of another)
+may have different values for tide files generated for each input, 
+but will only have one averaged value if a single output file is specified.
+A value of "-" (\fB\-O-\fP) will output to standard out (not compatible with \fB-M\fP).
+.TP
+.B \-R \fIOFFSET\fP\fR,\fP \-\^\-offset=\fIOFFSET\fP
+\fIoffset\fP
+.br
+Adds the constant \fIOFFSET\fP to the tide model.
+.TP
+.B \-S\fR,\fP \-\^\-skipexisting
+If tide models are being generated for swath files specified using the \fB-I\fP option
+(the \fB-O\fP option is not used),
+then skip files that already have an existing tide model (.gps.tde file).
+.TP
+.B \-T \fIMODEL\fP\fR,\fP \-\^\-geoid=\fIMODEL\fP
+.br
+Specifies the geoid difference model to use to offset the tide. 
+The difference model should be a GMT grid with the height difference between the 
+ellipsoid and the geoid as the cell value for each cell.
+The GMT \fBgrdtrack\fP program will be used to extract values from the grid along 
+the vessel track.
+
+For example, 
+http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_gis.html
+provides access to download of ESRI grids of difference between WGS84 and EMG2008.
+The ESRI grids can be converted to GMT grids using the GMT command \fBgrdconvert\fP:
+  wget  http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/GIS/world_geoid/s45e135.zip
+  unzip s45e135.zip
+  grdconvert s45e135/s45e135/ s45e135.grd
+  mbgpstide -Ts45e135.grd
+.TP
+.B \-U \fISOURCE\fP\fR,\fP \-\^\-use=\fISOURCE\fP
+.br
+Specifies the source to use for altitude data.
+Supported values for \fISOURCE\fP are \fB0\fP for Simrad Height telegrams or 
+GSF height above elipsoid and \fB1\fP for GSF height above vertical datum.
+.TP
+.B \-V\fR,\fP \-\^\-verbose
+Increases the verbosity of \fBmbgpstide\fP.
+
+.SH EXAMPLES
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbprocess\fP, \fBmbset\fP
+
+.SH BUGS

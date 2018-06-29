@@ -96,8 +96,8 @@ bin_PROGRAMS = mbconfig$(EXEEXT) mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
 	mbcopy$(EXEEXT) mbctdlist$(EXEEXT) mbdatalist$(EXEEXT) \
 	mbdefaults$(EXEEXT) mbdumpesf$(EXEEXT) mbextractsegy$(EXEEXT) \
 	mbfilter$(EXEEXT) mbformat$(EXEEXT) mbgetesf$(EXEEXT) \
-	mbgrid$(EXEEXT) mbhistogram$(EXEEXT) mbhsdump$(EXEEXT) \
-	mbhysweeppreprocess$(EXEEXT) mbinfo$(EXEEXT) \
+	mbgpstide$(EXEEXT) mbgrid$(EXEEXT) mbhistogram$(EXEEXT) \
+	mbhsdump$(EXEEXT) mbhysweeppreprocess$(EXEEXT) mbinfo$(EXEEXT) \
 	mbinsreprocess$(EXEEXT) mbkongsbergpreprocess$(EXEEXT) \
 	mblevitus$(EXEEXT) mblist$(EXEEXT) mbmakeplatform$(EXEEXT) \
 	mbminirovnav$(EXEEXT) mbmosaic$(EXEEXT) mbnavlist$(EXEEXT) \
@@ -186,6 +186,9 @@ mbformat_LDADD = $(LDADD)
 am_mbgetesf_OBJECTS = mbgetesf.$(OBJEXT)
 mbgetesf_OBJECTS = $(am_mbgetesf_OBJECTS)
 mbgetesf_LDADD = $(LDADD)
+am_mbgpstide_OBJECTS = mbgpstide.$(OBJEXT)
+mbgpstide_OBJECTS = $(am_mbgpstide_OBJECTS)
+mbgpstide_LDADD = $(LDADD)
 am_mbgrid_OBJECTS = mbgrid.$(OBJEXT)
 mbgrid_OBJECTS = $(am_mbgrid_OBJECTS)
 mbgrid_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
@@ -342,8 +345,8 @@ SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbctdlist_SOURCES) $(mbdatalist_SOURCES) \
 	$(mbdefaults_SOURCES) $(mbdumpesf_SOURCES) \
 	$(mbextractsegy_SOURCES) $(mbfilter_SOURCES) \
-	$(mbformat_SOURCES) $(mbgetesf_SOURCES) $(mbgrid_SOURCES) \
-	$(mbhistogram_SOURCES) $(mbhsdump_SOURCES) \
+	$(mbformat_SOURCES) $(mbgetesf_SOURCES) $(mbgpstide_SOURCES) \
+	$(mbgrid_SOURCES) $(mbhistogram_SOURCES) $(mbhsdump_SOURCES) \
 	$(mbhysweeppreprocess_SOURCES) $(mbinfo_SOURCES) \
 	$(mbinsreprocess_SOURCES) $(mbkongsbergpreprocess_SOURCES) \
 	$(mblevitus_SOURCES) $(mblist_SOURCES) \
@@ -609,6 +612,7 @@ mbextractsegy_SOURCES = mbextractsegy.c
 mbfilter_SOURCES = mbfilter.c
 mbformat_SOURCES = mbformat.c
 mbgetesf_SOURCES = mbgetesf.c
+mbgpstide_SOURCES = mbgpstide.c
 mbgrid_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbgrid_SOURCES = mbgrid.c
 mbhistogram_SOURCES = mbhistogram.c
@@ -823,6 +827,10 @@ mbgetesf$(EXEEXT): $(mbgetesf_OBJECTS) $(mbgetesf_DEPENDENCIES) $(EXTRA_mbgetesf
 	@rm -f mbgetesf$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mbgetesf_OBJECTS) $(mbgetesf_LDADD) $(LIBS)
 
+mbgpstide$(EXEEXT): $(mbgpstide_OBJECTS) $(mbgpstide_DEPENDENCIES) $(EXTRA_mbgpstide_DEPENDENCIES) 
+	@rm -f mbgpstide$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mbgpstide_OBJECTS) $(mbgpstide_LDADD) $(LIBS)
+
 mbgrid$(EXEEXT): $(mbgrid_OBJECTS) $(mbgrid_DEPENDENCIES) $(EXTRA_mbgrid_DEPENDENCIES) 
 	@rm -f mbgrid$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mbgrid_OBJECTS) $(mbgrid_LDADD) $(LIBS)
@@ -977,6 +985,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbfilter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbformat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgetesf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgpstide.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbgrid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbhistogram.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbhsdump.Po@am__quote@
