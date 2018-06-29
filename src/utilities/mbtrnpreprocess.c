@@ -981,7 +981,8 @@ int main(int argc, char **argv) {
                         if (ping[i].count == n_ping_process)
                             i_ping_process = i;
                     }
-//fprintf(stdout, "\nProcess some data: ndata:%d counts: ", ndata);
+fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
+        ndata,ping[idataread].time_d,ping[idataread].navlon,ping[idataread].navlat,ping[idataread].heading);
 //for (i = 0; i < n_buffer_max; i++) {
 //    fprintf(stdout,"%d ", ping[i].count);
 //}
@@ -1080,9 +1081,7 @@ int main(int argc, char **argv) {
                         }
                     }
                     /* pack the data into a TRN MB1 packet and either send it to TRN or write it to a file */
-                    else {
-                        n_soundings_written++;
-                        
+                    else {                        
                         /* make sure buffer is large enough to hold the packet */
                         mb1_size = MBTRNPREPROCESS_MB1_HEADER_SIZE
                                     + n_output * MBTRNPREPROCESS_MB1_SOUNDING_SIZE
@@ -1141,6 +1140,7 @@ int main(int argc, char **argv) {
                                             ping[i_ping_process].bathacrosstrack[j],
                                            ping[i_ping_process].bath[j]);
 
+                                n_soundings_written++;
                             }
                         }
                         
@@ -1152,7 +1152,6 @@ int main(int argc, char **argv) {
                             checksum += (unsigned int) (*cp++);
                         }
                         mb_put_binary_int(MB_YES, checksum, &output_buffer[index]); index += 4;
-                        
                         
                         /* send the packet to TRN */
                         if (output_mode == MBTRNPREPROCESS_OUTPUT_TRN) {

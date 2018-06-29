@@ -22,6 +22,7 @@ mbextractsegy.1 \
 mbfilter.1 \
 mbformat.1 \
 mbgetesf.1 \
+mbgpstide.1 \
 mbgrdtiff.1 \
 mbgrdviz.1 \
 mbgrid.1 \
