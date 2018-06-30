@@ -2,6 +2,7 @@ bin_PROGRAMS = mbotps
 
 if BUILD_MBTRN
   MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 endif
 
 AM_CFLAGS = ${libnetcdf_CFLAGS}
@@ -15,7 +16,7 @@ AM_LDFLAGS =
 
 LIBS = ${top_builddir}/src/mbio/libmbio.la \
 	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-	$(LIBM)
+	$(MBTRNLIB) $(LIBM)
 
 mbotps_SOURCES = mbotps.c
 

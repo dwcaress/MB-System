@@ -136,7 +136,7 @@ libmbview_la_DEPENDENCIES = ${top_builddir}/src/bsio/libmbbsio.la \
 	${top_builddir}/src/surf/libmbsapi.la \
 	${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbaux.la $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) $(MBTRNLIB) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 am_libmbview_la_OBJECTS = libmbview_la-MB3DView.lo \
@@ -377,6 +377,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libmbview.la
 @BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+@BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 include_HEADERS = mbview.h
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
@@ -402,7 +403,7 @@ libmbview_la_LIBADD = \
         ${top_builddir}/src/mbio/libmbio.la \
         ${top_builddir}/src/mbaux/libmbaux.la \
         ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        ${libmotif_LIBS} ${libopengl_LIBS} \
+        $(MBTRNLIB) ${libmotif_LIBS} ${libopengl_LIBS} \
         ${XDR_LIB}
 
 all: all-am

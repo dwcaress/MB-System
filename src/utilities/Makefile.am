@@ -4,6 +4,7 @@ endif
 if BUILD_MBTRN
   MBTRN_PROG = mbtrnpreprocess
   MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 endif
 
 bin_PROGRAMS = mbconfig \
@@ -156,7 +157,7 @@ mbtrnpreprocess_LDADD = $(top_builddir)/src/mbtrn/libmbtrn.la \
        $(top_builddir)/src/mbaux/libmbaux.la \
        $(top_builddir)/src/mbaux/libmbxgr.la \
        ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-      $(LIBM)
+       $(MBTRNLIB) $(LIBM)
 endif
 
 BUILT_SOURCES = levitus.h

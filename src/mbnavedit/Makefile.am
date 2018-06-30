@@ -2,6 +2,7 @@ bin_PROGRAMS = mbnavedit
 
 if BUILD_MBTRN
   MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 endif
 
 AM_CFLAGS = ${libnetcdf_CFLAGS}
@@ -18,7 +19,7 @@ LIBS = ${top_builddir}/src/mbio/libmbio.la \
         ${top_builddir}/src/mbaux/libmbaux.la \
         ${top_builddir}/src/mbaux/libmbxgr.la \
         ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        ${libmotif_LIBS} \
+        ${libmotif_LIBS} $(MBTRNLIB) \
         $(LIBM)
 
 mbnavedit_SOURCES = mbnavedit.c mbnavedit_creation.c mbnavedit_util.c mbnavedit_callbacks.c \
