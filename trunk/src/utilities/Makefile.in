@@ -302,7 +302,8 @@ mbtrnpreprocess_OBJECTS = $(am_mbtrnpreprocess_OBJECTS)
 @BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbaux/libmbaux.la \
 @BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbaux/libmbxgr.la \
 @BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1) $(MBTRNLIB) \
+@BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -575,6 +576,7 @@ top_srcdir = @top_srcdir@
 @BUILD_FFTW_TRUE@FFTW_PROG = mbsegypsd
 @BUILD_MBTRN_TRUE@MBTRN_PROG = mbtrnpreprocess
 @BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+@BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 include_HEADERS = levitus.h
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
@@ -662,7 +664,7 @@ mbtime_SOURCES = mbtime.c
 @BUILD_MBTRN_TRUE@       $(top_builddir)/src/mbaux/libmbaux.la \
 @BUILD_MBTRN_TRUE@       $(top_builddir)/src/mbaux/libmbxgr.la \
 @BUILD_MBTRN_TRUE@       ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-@BUILD_MBTRN_TRUE@      $(LIBM)
+@BUILD_MBTRN_TRUE@       $(MBTRNLIB) $(LIBM)
 
 BUILT_SOURCES = levitus.h
 CLEANFILES = levitus.h

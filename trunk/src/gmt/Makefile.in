@@ -134,7 +134,7 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 mbsystem_la_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbaux.la $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) $(MBTRNLIB)
 am_mbsystem_la_OBJECTS = mbswath.lo mbcontour.lo mbgrdtiff.lo
 mbsystem_la_OBJECTS = $(am_mbsystem_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -362,6 +362,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = mbsystem.la
 @BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+@BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 include_HEADERS = 
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
         -I${top_srcdir}/src/mbaux \
@@ -375,7 +376,8 @@ mbsystem_la_LDFLAGS = -module -avoid-version -shared
 mbsystem_la_SOURCES = mbswath.c mbcontour.c mbgrdtiff.c
 mbsystem_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
         ${top_builddir}/src/mbaux/libmbaux.la \
-        ${libgmt_LIBS} ${libgdal_LIBS} ${libnetcdf_LIBS}
+        ${libgmt_LIBS} ${libgdal_LIBS} ${libnetcdf_LIBS} \
+        $(MBTRNLIB) 
 
 all: all-am
 

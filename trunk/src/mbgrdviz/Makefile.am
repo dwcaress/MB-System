@@ -2,6 +2,7 @@ bin_PROGRAMS = mbgrdviz
 
 if BUILD_MBTRN
   MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 endif
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}

@@ -217,7 +217,7 @@ LIBS = ${top_builddir}/src/mbio/libmbio.la \
         ${top_builddir}/src/mbaux/libmbaux.la \
         ${top_builddir}/src/mbaux/libmbxgr.la \
         ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        ${libmotif_LIBS} \
+        ${libmotif_LIBS} $(MBTRNLIB) \
         $(LIBM)
 
 LIBTOOL = @LIBTOOL@
@@ -335,6 +335,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+@BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 AM_CFLAGS = ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
         -I${top_srcdir}/src/mbaux \
