@@ -1,4 +1,4 @@
-.TH mbnavadjustmerge 1 "28 May 2014" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjustmerge 1 "21 April 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjustmerge\fP \- Tool to merge two MBnavadjust projects,
 either adding one to the first or outputting a new project combining
@@ -8,24 +8,38 @@ both existing projects.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavadjustmerge\fP --input=project-base [--input=project-add --output=project-output
+\fBmbnavadjustmerge\fP --input=project-base
+[--input=project-add --output=project-output
+--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
+--set-global-tie-xyz=file:section[:snav]
+--set-global-tie-xyonly=file:section[:snav]
+--set-global-tie-zonly=file:section[:snav]
+--unset-global-tie=file:section
 --add-crossing=file1:section1/file2:section2
 --set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset
 --set-tie-xyz=file1:section1/file2:section2
 --set-tie-xyonly=file1:section1/file2:section2
 --set-tie-zonly=file1:section1/file2:section2
+--unset-tie=file1:section1/file2:section2
+--set-ties-xyz-all
+--set-ties-xyonly-all
+--set-ties-zonly-all
 --set-ties-xyz-with-file=file
 --set-ties-xyonly-with-file=file
 --set-ties-zonly-with-file=file
 --set-ties-xyz-by-survey=survey
 --set-ties-xyonly-by-survey=survey
 --set-ties-zonly-by-survey=survey
---set-ties-xyz-by-block=survey1/survey2\n
+--set-ties-xyz-by-block=survey1/survey2
 --set-ties-xyonly-by-block=survey1/survey2
 --set-ties-zonly-by-block=survey1/survey2
 --set-ties-zoffset-by-block=survey1/survey2/zoffset
+--set-ties-xyonly-by-time=dt
 --skip-unset-crossings
- --verbose --help ]
+--insert-discontinuity=file:section
+--import-tie-list=filename
+--export-tie-list=filename
+--verbose --help ]
 
 .SH DESCRIPTION
 \fBMBnavadjustmerge\fP is a command line program that merges two
@@ -50,14 +64,22 @@ setting tie z-offset values, setting tie offsets (even if no
 corresponding crossing already exists), setting tie modes
 (xy only, z only, xyz),  and deleting ties.
 
-.SH AUTHORSHIP
-David W. Caress (caress@mbari.org)
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
 .br
   Monterey Bay Aquarium Research Institute
 .br
-Dale N. Chayes (dale@ldeo.columbia.edu)
+Dale N. Chayes
 .br
-  Lamont-Doherty Earth Observatory
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
 
 .SH OPTIONS
 .TP
@@ -87,6 +109,37 @@ not specified, then the \fIproject-base\fP project is used as the
 output, and the \fIproject-add\fP project is added on to the
 \fIproject-base\fP project.
 .TP
+.B \--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
+This options sets a global tie for a navigation point in the project. Global ties are
+ties to the global reference frame, which generally means GPS positions (e.g. WGS84).
+The file and section id's must be specified, along with the x (east-west), y (north-south),
+and z (vertical postive up) offset values in meters. If the snav id (navigation point id)
+is not specified, it is assumed to be 0, the first navigation point in the
+specified section. If the uncertainties in the global tie (xsigma, ysigma, zsigma)
+are not specified, then xsigma = ysigma = 10 m and zsigma = 0.5 m are assumed.
+.TP
+.B \--set-global-tie-xyz=file:section[:snav]
+This option sets the mode of the existing specified global tie in the
+\fBMBnavadjust\fP project to be "XYZ". This means all three
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-global-tie-xyonly=file:section[:snav]
+This option sets the mode of the existing specified global tie in the
+\fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-global-tie-zonly=file:section[:snav]
+This option sets the mode of the existing specified global tie in the
+\fBMBnavadjust\fP project to be "Z". This means only the vertical
+coordinate of the tie will be used as a constraint in the inversion
+for an optimal navigation model.
+.TP
+.B \--unset-global-tie=file:section
+This option unsets (deletes) the specified global tie in the
+\fBMBnavadjust\fP project. 
+.TP
 .B \--add-crossing=file1:section1/file2:section2
 This option adds the specified crossing to the \fBMBnavadjust\fP project.
 .TP
@@ -111,6 +164,25 @@ for an optimal navigation model.
 This option sets the mode of the existing specified tie in the
 \fBMBnavadjust\fP project to be "Z". This means only the vertical
 coordinate of the tie will be used as a constraint in the inversion
+for an optimal navigation model.
+.TP
+.B \--unset-tie=file1:section1/file2:section2
+This option unsets (deletes) the specified tie in the
+\fBMBnavadjust\fP project. 
+.TP
+.B \--set-ties-xyz-all
+This option sets the mode of all ties in the \fBMBnavadjust\fP project to be "XYZ". This means all three
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-xyonly-all
+This option sets the mode of all ties in the \fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
+.B \--set-ties-zonly-all
+This option sets the mode of all ties in the \fBMBnavadjust\fP project to be "Z". This means only the vertical
+coordinate of these ties will be used as constraints in the inversion
 for an optimal navigation model.
 .TP
 .B \--set-ties-xyz-with-file=file
@@ -189,10 +261,40 @@ for an optimal navigation model.
 This option resets the zoffset value of all ties between sections in the specified
 two surveys.
 .TP
+.B \--set-ties-xyonly-by-time=dt
+This option sets the mode of all ties with nav points separated in time by dt or
+larger in the \fBMBnavadjust\fP project to be "XY". This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+.TP
 .B \--skip-unset-crossings
 This option sets all unset crossings in the input projects to be
 skipped. This does not apply to any new crossings between the two
 merged projects.
+.TP
+.B \--unset-skipped-crossings-by-block=survey1/survey2
+This option sets all skipped crossings  in the specified
+two surveys to be unset. 
+.TP
+.B \--unset-skipped-crossings-between-surveys
+This option sets all skipped crossings between different surveys in the input
+projects to be unset. This does not apply to any new crossings between the two
+merged projects.
+.TP
+.B \--insert-discontinuity=file:section
+This option inserts a navigation discontinuity immediately after the specified
+file and section.
+.TP
+.B \--import-tie-list=filename
+Import a listing of navigation ties that has been exported from a different
+\fBmbnavadjust\fP project using the \fB--export-tie-list\fP
+command. 
+.TP
+.B \--export-tie-list=filename
+Output the current navigation ties as a text file that can be imported into
+a different \fBmbnavadjust\fP project using the \fB--import-tie-list\fP
+command. The ties that are output reflect all modifications specified by other
+commands.
 .TP
 .B \--verbose
 This option increases the verbosity of \fBMBnavadjustmerge\fP, which
@@ -233,5 +335,5 @@ the output project.
 \fBmbnavadjust\fP(1), \fBmbset\fP(1)
 
 .SH BUGS
-It started out simple and bulletproof, but now it's too complicated to be bulletproof.
+It started out simple and bulletproof, but now it's too complicated to be bulletproof. It's probably nerfgunproof, though.
 Good luck.

@@ -1,18 +1,16 @@
 if BUILD_MOTIF
-  XBUILD_SUB_MOTIF = mbedit mbnavedit mbvelocitytool mbnavadjust
+  XBUILD_SUB_MOTIF = mbedit mbnavedit mbvelocitytool
 endif
 if BUILD_GL
-  XBUILD_SUB_GL = mbview mbgrdviz mbeditviz
+  XBUILD_SUB_GL = mbview mbgrdviz mbeditviz mbnavadjust
 endif
-if BUILD_GSF
-  XBUILD_SUB_GSF = gsf
-endif
-if BUILD_PROJ
-  XBUILD_SUB_PROJ = proj
+if BUILD_MBTRN
+  XBUILD_SUB_MBTRN = mbtrn
 endif
 
-SUBDIRS = $(XBUILD_SUB_GSF) $(XBUILD_SUB_PROJ) surf bsio mbio mbaux \
-	utilities gmt otps macros \
-	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL) \
-	man html ps share
+SUBDIRS = gsf surf bsio $(XBUILD_SUB_MBTRN) mbio mbaux \
+	utilities gmt otps macros share man html ps \
+	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL)
 
+CLEANFILES =
+DISTCLEANFILES = 

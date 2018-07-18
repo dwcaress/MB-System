@@ -9,29 +9,14 @@
 /* Turned on OpenGL define in config */
 #undef GOT_GL
 
-/* Turned on Motif define in config */
-#undef GOT_MOTIF
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
-
-/* Define to 1 if you have the <GL/glu.h> header file. */
-#undef HAVE_GL_GLU_H
-
-/* Define to 1 if you have the <GL/glx.h> header file. */
-#undef HAVE_GL_GLX_H
-
-/* Define to 1 if you have the <GL/gl.h> header file. */
-#undef HAVE_GL_GL_H
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
-
-/* Define to 1 if you have the `ws2_32' library (-lws2_32). */
-#undef HAVE_LIBWS2_32
 
 /* Have malloc.h */
 #undef HAVE_MALLOC_H
@@ -63,12 +48,29 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
+/* Define to 1 if you have the <tirpc/rpc/rpc.h> header file. */
+#undef HAVE_TIRPC_RPC_RPC_H
+
+/* Define to 1 if you have the <tirpc/rpc/types.h> header file. */
+#undef HAVE_TIRPC_RPC_TYPES_H
+
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
+
+/* Set MBSYSTEM_CONFIG_DEFINED define in mb_config.h */
+#undef MBSYSTEM_CONFIG_DEFINED
+
+/* Set MBSYSTEM_INSTALL_PREFIX define in mb_config.h */
+#undef MBSYSTEM_INSTALL_PREFIX
+
+/* Set MBSYSTEM_OTPS_LOCATION define in mb_config.h */
+#undef MBSYSTEM_OTPS_LOCATION
+
+/* Build libmbtrn and mbtrnpreprocess */
+#undef MBTRN_ENABLED
 
 /* Name of package */
 #undef PACKAGE
@@ -99,12 +101,6 @@
 
 /* Set VERSION_DATE define in mb_config.h */
 #undef VERSION_DATE
-
-/* Turned on WIN32 define in config */
-#undef WIN32
-
-/* Build with GSF */
-#undef WITH_GSF
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

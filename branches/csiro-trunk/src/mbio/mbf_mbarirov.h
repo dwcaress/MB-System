@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_mbarirov.h	5/20/99
  *	$Id$
  *
- *    Copyright (c) 1999-2014 by
+ *    Copyright (c) 1999-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,31 +19,6 @@
  * Author:	D. W. Caress
  * Date:	May 20, 1999
  *
- * $Log: mbf_mbarirov.h,v $
- * Revision 5.3  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.1  2001/03/22 20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.3  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.2  1999/09/24  23:10:12  caress
- * Made this module work with older variant of format.
- *
- * Revision 4.1  1999/07/16  19:29:09  caress
- * First revision.
- *
- * Revision 1.1  1999/07/16  19:24:15  caress
- * Initial revision
- *
  *
  */
 /*
@@ -56,36 +31,35 @@
  *
  */
 
-#define	MBF_MBARIROV_MAXLINE	256
+#define MBF_MBARIROV_MAXLINE 256
 
-struct mbf_mbarirov_struct
-	{
+struct mbf_mbarirov_struct {
 	/* type of data record */
-	int	kind;
+	int kind;
 
 	/* time stamp */
-	double	time_d;
-	int	time_i[7];
+	double time_d;
+	int time_i[7];
 
 	/* navigation */
-	double	longitude;
-	double	latitude;
-	double	easting;
-	double	northing;
-	double	rov_depth;	/* m */
-	double	rov_pressure;	/* decibars */
-	double	rov_heading;	/* degrees */
-	double	rov_altitude;	/* m */
-	double	rov_pitch;	/* degrees */
-	double	rov_roll;	/* degrees */
+	double longitude;
+	double latitude;
+	double easting;
+	double northing;
+	double rov_depth;    /* m */
+	double rov_pressure; /* decibars */
+	double rov_heading;  /* degrees */
+	double rov_altitude; /* m */
+	double rov_pitch;    /* degrees */
+	double rov_roll;     /* degrees */
 
 	/* flags */
-	int	position_flag;
-	int	pressure_flag;
-	int	heading_flag;
-	int	altitude_flag;
-	int	attitude_flag;
+	int position_flag;
+	int pressure_flag;
+	int heading_flag;
+	int altitude_flag;
+	int attitude_flag;
 
 	/* comment */
-	char	comment[MBF_MBARIROV_MAXLINE];
-	};
+	char comment[MBF_MBARIROV_MAXLINE];
+};

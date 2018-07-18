@@ -1,0 +1,212 @@
+.TH mbconfig 1 "12 May 2017" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbconfig\fP \- provides command line access to the MB-System version and to
+the locations of the levitus database and the OTPS tidal correction software.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbconfig\fP [ 
+.br
+\fB--verbose\fP
+\fB--help\fP
+.br
+\fB--prefix\fP
+\fB--cflags\fP
+\fB--libs\fP
+.br
+\fB--version\fP
+\fB--version-id\fP
+\fB--version-major\fP
+\fB--version-minor\fP
+\fB--version-archive\fP
+.br
+\fB--levitus\fP
+\fB--otps\fP
+.br
+]
+
+.SH DESCRIPTION
+\fBMBconfig\fP provides command line access to the MB-System installation location 
+the compile and libs flags needed to compile and link programs using MB-System 
+libraries, and the locations of the levitus database and the OTPS tidal 
+correction software.
+When commands such as \fB--version\fP are given, the desired output will be
+written to stdout. Each desired value is printed on a separate line. If \fB--verbose\fP
+is specified, each value is output in two lines, the first consisting of a
+descriptive identifier and the second the value itself. The options include
+various forms of the installed \fBMB-System\fP version, the location of the
+Levitus water sound speed model database accessed by the program \fBmblevitus\fP,
+and the location of the installed OTPS tidal prediction software.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B --help
+This option causes \fBmbconfig\fP to print out its usage options and exit.
+.TP
+.B --verbose
+By default \fBmbconfig\fP outputs the desired values with no description or
+explanation. When \fB--verbose\fP is specified the values are preceded on a separate
+line by a descriptive identifier.
+.TP
+.B --prefix
+This option causes \fBmbconfig\fP to output the \fBMB-System\fP install location.
+The locations of the executable programs, the linkable libraries, and the
+header files are in directories named bin, lib, and include in the install
+locations. For instance, if the install location is "/usr/local", then executable
+programs will be in "/usr/local/bin", libraries in "/usr/local/lib", and
+header files in "/usr/local/include".
+.TP
+.B --cflags
+This option causes \fBmbconfig\fP to output the compiler flags needed to compile
+C programs or libraries that make use of functions available in \fBMB-System\fP
+linkable libraries. These flags consist of specifying the location of the
+\fBMB-System\fP header files.
+.TP
+.B --libs
+This option causes \fBmbconfig\fP to output the linker flags needed to link a
+C program with \fBMB-System\fP libraries. These flags consist of specifying the
+location of the \fBMB-System\fP dynamic libraries and the list of libraries
+available for linking.
+.TP
+.B --version
+This option causes \fBmbconfig\fP to output the version string of the installed
+\fBMB-System\fP.
+.TP
+.B --version-id
+This option causes \fBmbconfig\fP to output an integer version of the installed
+\fBMB-System\fP version. This value is constructed as follows:
+.br
+     version_id = 10000000 * version_major + 100000 * version_minor + version_archive
+.br
+so that:
+.br
+     5.5.2304 => 050502304
+.br
+These version id numbers are guarenteed to increase with newer versions.
+.TP
+.B --version-major
+This option causes \fBmbconfig\fP to output the major version number of the installed
+\fBMB-System\fP. This is the first of three values in an \fBMB-System\fP version
+string, and is incremented only rarely in conjunction with major changes to
+\fBMB-System\fP function and interfaces.
+.TP
+.B --version-minor
+This option causes \fBmbconfig\fP to output the minor version number of the installed
+\fBMB-System\fP. This is the second of three values in an \fBMB-System\fP version
+string, and is incremented infrequently in conjunction with significant changes to
+\fBMB-System\fP function.
+.TP
+.B --version-archive
+This option causes \fBmbconfig\fP to output the archive version number of the installed
+\fBMB-System\fP. This is the third of three values in an \fBMB-System\fP version
+string, and corresponds to the revision number in the \fBMB-System\fP source code
+archive. This number is incremented with every commitment of one or more changes
+to the source code archive. Typically the revision number increments several
+times between \fBMB-System\fP releases.
+.TP
+.B --levitus
+This option causes \fBmbconfig\fP to output the path to the Levitus water sound
+speed model database accessed by the program \fBmblevitus\fP.
+.TP
+.B --otps
+This option causes \fBmbconfig\fP to output the location of the OTPS tidal
+prediction software accessed by program \fBmbotps\fP.
+
+.SH EXAMPLES
+Consider an \fBMB-System\fP installation of release 5.5.2304 on an Apple MacBook Pro
+in /usr/local with the OTPS software installed under /usr/local/src/OTPS2. In this
+case, use of \fBmbconfig\fP with various arguments has the following results:
+.br
+
+     % mbconfig --prefix
+     /usr/local/mbsystem
+
+     % mbconfig --cflags
+     -I/usr/local/include
+
+     % mbconfig --libs
+     -L/usr/local/libs -lmbaux.la -lmbsapi.la -lmbbsio.la -lmbview.la -lmbgsf.la -lmbxgr.la -lmbio.la
+
+     % mbconfig --version
+     5.5.2304
+
+     % mbconfig --version-id
+     50502304
+
+     % mbconfig --version-major
+     5
+
+     % mbconfig --version-minor
+     5
+
+     % mbconfig --version-archive
+     2304
+
+     % mbconfig --levitus
+     /usr/local/share/mbsystem/LevitusAnnual82.dat
+
+     % mbconfig --otps
+     /usr/local/src/OTPS2
+
+     % mbconfig --version --version-id \\
+                --prefix --cflags --libs \\
+                --version-major --version-minor --version-archive \\
+                --levitus --otps --verbose
+
+     # Program mbconfig
+     # MB-system Version 5.5.2304
+
+     # MB-System install prefix:
+     /usr/local
+
+     # MB-System compile flags:
+     -I/usr/local/include
+
+     # MB-System link flags:
+     -L/usr/local/libs -lmbaux.la -lmbsapi.la -lmbbsio.la -lmbview.la -lmbgsf.la -lmbxgr.la -lmbio.la
+     
+     # MB-System version:
+     5.5.2304
+     
+     # MB-System version id:
+     50502304
+     
+     # MB-System major version:
+     5
+     
+     # MB-System minor version:
+     5
+     
+     # MB-System archive version:
+     2304
+     
+     # MB-System Levitus database location:
+     /usr/local/share/mbsystem/LevitusAnnual82.dat
+    
+     # OTPS tide modeling package location:
+     /usr/local/src/OTPS2
+
+.SH SEE ALSO
+\fBmbsystem\fP(1)
+
+.SH BUGS
+This program is not significant enough to deserve bugs.

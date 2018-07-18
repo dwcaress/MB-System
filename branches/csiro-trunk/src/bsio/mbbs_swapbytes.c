@@ -2,7 +2,7 @@
  *    The MB-system:	mbbs_swapbytes.c	3/3/2014
  *	$Id$
  *
- *    Copyright (c) 2014-2014 by
+ *    Copyright (c) 2014-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -31,35 +31,31 @@
 #include "mbbs_defines.h"
 #include "mbbs_mem.h"
 
-void
-swapbytes(MemType *buf, unsigned int bufsz)
-{
+void swapbytes(MemType *buf, unsigned int bufsz) {
 	unsigned char *a, *b, tmp;
 	unsigned int nswap;
 
-	a= (unsigned char *) buf;
-	b= a+1;
-	for (nswap= bufsz/2; nswap > 0; nswap--, a+= 2, b+= 2) {
-		tmp= *a;
-		*a= *b;
-		*b= tmp;
+	a = (unsigned char *)buf;
+	b = a + 1;
+	for (nswap = bufsz / 2; nswap > 0; nswap--, a += 2, b += 2) {
+		tmp = *a;
+		*a = *b;
+		*b = tmp;
 	}
 
 	return;
 }
 
-void
-revbytes(MemType *buf, unsigned int bufsz)
-{
+void revbytes(MemType *buf, unsigned int bufsz) {
 	unsigned char *a, *b, tmp;
 	unsigned int nrev;
 
-	a= (unsigned char *) buf;
-	b= a+bufsz-1;
-	for (nrev= bufsz/2; nrev > 0; nrev--, a++, b--) {
-		tmp= *a;
-		*a= *b;
-		*b= tmp;
+	a = (unsigned char *)buf;
+	b = a + bufsz - 1;
+	for (nrev = bufsz / 2; nrev > 0; nrev--, a++, b--) {
+		tmp = *a;
+		*a = *b;
+		*b = tmp;
 	}
 
 	return;

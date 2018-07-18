@@ -3,7 +3,7 @@
 #    The MB-system:	mbm_plot.perl	1/17/2003
 #    $Id$
 #
-#    Copyright (c) 2003-2014 by
+#    Copyright (c) 2003-2017 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -33,18 +33,6 @@
 #
 # Version:
 #   $Id$
-#
-# Revisions:
-#   $Log: mbm_copy.perl,v $
-#   Revision 5.2  2006/09/11 18:55:52  caress
-#   Changes during Western Flyer and Thomas Thompson cruises, August-September
-#   2006.
-#
-#   Revision 5.1  2005/11/05 01:34:20  caress
-#   Much work over the past two months.
-#
-#   Revision 5.0  2003/03/10 19:54:43  caress
-#   Initial version.
 #
 #
 #

@@ -56,28 +56,42 @@ name), the edits can automatically be loaded into <B>mbedit</B> or
 <B>mbclean</B>.
 <P>
 The user can extract edit events from only the flagged beams (<B>-M</B><I>1</I>),
-or can extract edit events specifying null and flagged beams (<B>-M</B><I>2</I>)
-and all (good, flagged, and null) beams (<B>-M</B><I>3</I>). The latter cases are necessary only if
+or can extract edit events specifying null and flagged beams (<B>-M</B><I>2</I>),
+or all (good, flagged, and null) beams (<B>-M</B><I>3</I>).
+The <B>-M</B><I>2</I> and <B>-M</B><I>3</I> cases are useful if
 previous editing has involved nulling beams that were
 originally classified as good or unflagging beams that were
 originally flagged.
+<P>
 <P>
 The default input is from stdin, and the default output is
 to standard out.
 <P>
 <A NAME="lbAF">&nbsp;</A>
-<H2>AUTHORSHIP</H2>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
 
-David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+David W. Caress
 <BR>
 
 <BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
-Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+Dale N. Chayes
 <BR>
 
-<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
 <A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
@@ -120,7 +134,17 @@ If <I>mode</I> = 1, then only flagged beams are output. If
 <I>mode</I> = 2, then flagged and null beams are output. If
 <I>mode</I> = 3, then an edit event will be output for every
 beam, including those that are &quot;good&quot; (neither flagged nor
-null). Default: <I>mode</I> = 1.
+null).
+The <I>mode</I> values of 4 to 6 cause the output &quot;edit save file&quot; to have an
+embedded special mode that implicitly sets all beam flags not specified with
+an edit event to a default value. If <I>mode</I>=5 then the default value is
+null, if <I>mode</I>=6 then the default value is good, and if <I>mode</I>=4 then
+the default value is good for most formats and null for the few formats that
+have more null than valid beams. The default modes are used by programs
+<B>mbpreprocess</B> and <B>mbeditviz</B> when generating and using &quot;global edit
+files&quot; (&quot;*.gef&quot; suffix) that are used to completely specify the beam flag state
+of a raw swath bathymetry file.
+Default: <I>mode</I> = 1.
 <DT><B>-O</B>
 
 <DD>
@@ -192,7 +216,7 @@ Let us know.
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
 <DT><A HREF="#lbAG">OPTIONS</A><DD>
 <DT><A HREF="#lbAH">EXAMPLES</A><DD>
 <DT><A HREF="#lbAI">SEE ALSO</A><DD>
@@ -205,9 +229,6 @@ Let us know.
 Last Updated: 3 June 2013</P></CENTER>
 
 <HR>
-<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
-<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
-to MB-System Home Page...</A></P>
 
 </BODY>
 </HTML>

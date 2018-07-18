@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_route2mission</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  22 February 2015 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -37,7 +37,7 @@ Version 5.0
 <B>-M</B><I>[sensorlist]</I> <B>-N</B>[<I>spiraldescentaltitude</I>] <B>-O</B><I>missionfile</I>
 <B>-P</B><I>[startlon/startlat | startdistance]</I>
 <B>-R</B><I>transmitpower/receivegain[/rangeminfraction[/pulsewidth]]</I>
-<B>-S</B><I>speed</I> <B>-T</B><I>starttime</I>
+<B>-S</B><I>speed</I> <B>-T</B><I>starttime</I> <B>-U</B><I>maxclimbrate</I>
 <B>-W</B><I>waypointspacing</I> <B>-V</B> <B>-H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -128,18 +128,30 @@ turned on and off at these points. The waypoint type value can be set interactiv
 <B>mbgrdviz</B>.
 <P>
 <A NAME="lbAF">&nbsp;</A>
-<H2>AUTHORSHIP</H2>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
 
-David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+David W. Caress
 <BR>
 
 <BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
-Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+Dale N. Chayes
 <BR>
 
-<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
 <A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
@@ -333,6 +345,16 @@ This sets the expected time required for the AUV to reach the first waypoint
 in the survey mission. If neither
 the <B>-P</B> or <B>-T</B> options are specified, a distance of 500 meters
 to the first waypoint is assumed.
+<DT><B>-U</B>
+
+<DD>
+<I>maxclimbrate</I>
+<BR>
+
+This sets the maximum climb rate in degrees allowed to be planned for the
+AUV mission. If the topography has a greater slope, the AUV will be brought
+up earlier so the planned climb angle never exceed <I>maxclimbrate</I>.
+Default: <I>maxclimbrate</I> = 25 degrees.
 <DT><B>-W</B>
 
 <DD>
@@ -496,7 +518,7 @@ Perhaps.
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
 <DT><A HREF="#lbAG">OPTIONS</A><DD>
 <DT><A HREF="#lbAH">EXAMPLES</A><DD>
 <DT><A HREF="#lbAI">SEE ALSO</A><DD>
@@ -506,12 +528,9 @@ Perhaps.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 22 February 2015</P></CENTER>
 
 <HR>
-<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
-<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
-to MB-System Home Page...</A></P>
 
 </BODY>
 </HTML>

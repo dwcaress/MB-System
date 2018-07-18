@@ -3,7 +3,7 @@
 #    The MB-system:	mbm_utm.perl	5/13/2002
 #    $Id$
 #
-#    Copyright (c) 2002-2014 by
+#    Copyright (c) 2002-2017 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -35,23 +35,6 @@
 #
 # Version:
 #   $Id$
-#
-# Revisions:
-#   $Log: mbm_utm.perl,v $
-#   Revision 5.4  2007/10/08 04:27:20  caress
-#   Now handles comma delimited xyz data along with white space delimited data.
-#
-#   Revision 5.3  2003/04/17 20:42:48  caress
-#   Release 5.0.beta30
-#
-#   Revision 5.2  2003/03/27 07:58:11  caress
-#   This macro now sets MEASURE_UNIT to inches and then resets it to the original value.
-#
-#   Revision 5.1  2002/05/29 23:35:57  caress
-#   Release 5.0.beta18
-#
-#   Revision 5.0  2002/05/14 18:53:03  caress
-#   Initial revision.
 #
 #
 #
@@ -122,16 +105,16 @@ $bounds = "$org_lon" . "/" . "$org_lat"
 		. "/" . "$org_lat_plus1" . "r";
 
 # set gmt defaults
-($d_format) = `gmtdefaults -L | grep D_FORMAT` =~ /\S+\s+\S+\s+(\S+)/;
-($ellipsoid) = `gmtdefaults -L | grep ELLIPSOID` =~ /\S+\s+\S+\s+(\S+)/;
-($measure_unit) = `gmtdefaults -L | grep MEASURE_UNIT` =~ /\S+\s+\S+\s+(\S+)/;
+($d_format) = `gmt gmtdefaults | grep FORMAT_FLOAT_OUT` =~ /\S+\s+\S+\s+(\S+)/;
+($ellipsoid) = `gmt gmtdefaults | grep ELLIPSOID` =~ /\S+\s+\S+\s+(\S+)/;
+($measure_unit) = `gmt gmtdefaults | grep MEASURE_UNIT` =~ /\S+\s+\S+\s+(\S+)/;
 if ($ellipsoid eq "Clarke-1866")
 	{
-	`gmtset D_FORMAT %.10lg ELLIPSOID Clarke-1866 MEASURE_UNIT inch`;
+	`gmt gmtset FORMAT_FLOAT_OUT %.10lg ELLIPSOID Clarke-1866 MEASURE_UNIT inch`;
 	}
 else
 	{
-	`gmtset D_FORMAT %.10lg ELLIPSOID WGS-84 MEASURE_UNIT inch`;
+	`gmt gmtset FORMAT_FLOAT_OUT %.10lg ELLIPSOID WGS-84 MEASURE_UNIT inch`;
 	}
 
 # set temporary file name
@@ -200,9 +183,9 @@ if (!$inverse)
 	# run mapproject
 	if ($verbose)
 		{
-		print "Doing forward projection using mapproject...\n";
+		print "Doing forward projection using gmt mapproject...\n";
 		}
-	`mapproject $filetmpa -J$projection -R$bounds > $filetmpb`;
+	`gmt mapproject $filetmpa -J$projection -R$bounds > $filetmpb`;
 
 	# open temporary file
 	if (!open(INP2,"<$filetmpb"))
@@ -219,7 +202,7 @@ if (!$inverse)
 	# read temporary file, looping over input lines
 	if ($verbose)
 		{
-		print "Processing output from mapproject...\n";
+		print "Processing output from gmt mapproject...\n";
 		}
 	$ndata = 0;
 	while ($line = <INP2>)
@@ -334,12 +317,12 @@ else
 	# close temporary file
 	close OUT1;
 
-	# run mapproject
+	# run gmt mapproject
 	if ($verbose)
 		{
-		print "Doing inverse projection using mapproject...\n";
+		print "Doing inverse projection using gmt mapproject...\n";
 		}
-	`mapproject $filetmpa -J$projection -I -R$bounds > $filetmpb`;
+	`gmt mapproject $filetmpa -J$projection -I -R$bounds > $filetmpb`;
 
 	# open temporary file
 	if (!open(INP2,"<$filetmpb"))
@@ -356,7 +339,7 @@ else
 	# read temporary file, looping over input lines
 	if ($verbose)
 		{
-		print "Processing output from mapproject...\n";
+		print "Processing output from gmt mapproject...\n";
 		}
 	$ndata = 0;
 	while ($line = <INP2>)
@@ -428,7 +411,7 @@ unlink($filetmpa);
 unlink($filetmpb);
 
 # reset the gmt defaults
-`gmtset D_FORMAT $d_format ELLIPSOID $ellipsoid MEASURE_UNIT $measure_unit`;
+`gmt gmtset FORMAT_FLOAT_OUT $d_format ELLIPSOID $ellipsoid MEASURE_UNIT $measure_unit`;
 
 exit 0;
 

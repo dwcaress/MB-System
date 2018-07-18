@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_netcdf.h	4/8/2002
  *	$Id$
  *
- *    Copyright (c) 2002-2014 by
+ *    Copyright (c) 2002-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,28 +22,6 @@
  * Author:	D. W. Caress
  * Date:	April 8, 2002
  *
- * $Log: mbsys_netcdf.h,v $
- * Revision 5.6  2008/12/05 17:32:52  caress
- * Check-in mods 5 December 2008 including contributions from Gordon Keith.
- *
- * Revision 5.5  2008/05/16 22:56:24  caress
- * Release 5.1.1beta18.
- *
- * Revision 5.4  2008/03/01 09:14:03  caress
- * Some housekeeping changes.
- *
- * Revision 5.3  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/05/29 23:41:49  caress
- * Release 5.0.beta18
- *
- * Revision 5.0  2002/05/02 03:56:34  caress
- * Release 5.0.beta17
- *
  *
  */
 /*
@@ -54,52 +32,51 @@
  */
 
 /* dimension lengths */
-#define MBSYS_NETCDF_COMMENTLEN	    256
-#define MBSYS_NETCDF_ATTRIBUTELEN   64
-#define MBSYS_NETCDF_NAMELEN	    20
-#define MBSYS_NETCDF_VELPROFNBR	    2
+#define MBSYS_NETCDF_COMMENTLEN 256
+#define MBSYS_NETCDF_ATTRIBUTELEN 64
+#define MBSYS_NETCDF_NAMELEN 20
+#define MBSYS_NETCDF_VELPROFNBR 2
 
 /* sonar id numbers */
-#define MBSYS_NETCDF_SONAR_UNKNOWN	    0
-#define MBSYS_NETCDF_SONAR_SEABEAM	    10
-#define MBSYS_NETCDF_SONAR_ECHOSXD15	    20
-#define MBSYS_NETCDF_SONAR_ECHOSXD60	    21
-#define MBSYS_NETCDF_SONAR_HSDS		    30
-#define MBSYS_NETCDF_SONAR_LENNEMOR	    40
-#define MBSYS_NETCDF_SONAR_TMS5265B	    41
-#define MBSYS_NETCDF_SONAR_EM100	    50
-#define MBSYS_NETCDF_SONAR_EM1000	    51
-#define MBSYS_NETCDF_SONAR_EM12S	    52
-#define MBSYS_NETCDF_SONAR_EM12D	    53
-#define MBSYS_NETCDF_SONAR_EM3000S	    54
-#define MBSYS_NETCDF_SONAR_EM3000D	    55
-#define MBSYS_NETCDF_SONAR_EM300	    56
-#define MBSYS_NETCDF_SONAR_FURUNO	    70
+#define MBSYS_NETCDF_SONAR_UNKNOWN 0
+#define MBSYS_NETCDF_SONAR_SEABEAM 10
+#define MBSYS_NETCDF_SONAR_ECHOSXD15 20
+#define MBSYS_NETCDF_SONAR_ECHOSXD60 21
+#define MBSYS_NETCDF_SONAR_HSDS 30
+#define MBSYS_NETCDF_SONAR_LENNEMOR 40
+#define MBSYS_NETCDF_SONAR_TMS5265B 41
+#define MBSYS_NETCDF_SONAR_EM100 50
+#define MBSYS_NETCDF_SONAR_EM1000 51
+#define MBSYS_NETCDF_SONAR_EM12S 52
+#define MBSYS_NETCDF_SONAR_EM12D 53
+#define MBSYS_NETCDF_SONAR_EM3000S 54
+#define MBSYS_NETCDF_SONAR_EM3000D 55
+#define MBSYS_NETCDF_SONAR_EM300 56
+#define MBSYS_NETCDF_SONAR_FURUNO 70
 
 /* sonar beam numbers */
-#define MBSYS_NETCDF_SONAR_BEAMS_UNKNOWN    0
-#define MBSYS_NETCDF_SONAR_BEAMS_SEABEAM    19
-#define MBSYS_NETCDF_SONAR_BEAMS_ECHOSXD15  15
-#define MBSYS_NETCDF_SONAR_BEAMS_ECHOSXD60  60
-#define MBSYS_NETCDF_SONAR_BEAMS_HSDS	    59
-#define MBSYS_NETCDF_SONAR_BEAMS_LENNEMOR   20
-#define MBSYS_NETCDF_SONAR_BEAMS_TMS5265B   500
-#define MBSYS_NETCDF_SONAR_BEAMS_EM100	    32
-#define MBSYS_NETCDF_SONAR_BEAMS_EM1000	    60
-#define MBSYS_NETCDF_SONAR_BEAMS_EM12S	    81
-#define MBSYS_NETCDF_SONAR_BEAMS_EM12D	    162
-#define MBSYS_NETCDF_SONAR_BEAMS_EM3000S    127
-#define MBSYS_NETCDF_SONAR_BEAMS_EM3000D    254
-#define MBSYS_NETCDF_SONAR_BEAMS_EM300	    127
-#define MBSYS_NETCDF_SONAR_BEAMS_FURUNO	    45
+#define MBSYS_NETCDF_SONAR_BEAMS_UNKNOWN 0
+#define MBSYS_NETCDF_SONAR_BEAMS_SEABEAM 19
+#define MBSYS_NETCDF_SONAR_BEAMS_ECHOSXD15 15
+#define MBSYS_NETCDF_SONAR_BEAMS_ECHOSXD60 60
+#define MBSYS_NETCDF_SONAR_BEAMS_HSDS 59
+#define MBSYS_NETCDF_SONAR_BEAMS_LENNEMOR 20
+#define MBSYS_NETCDF_SONAR_BEAMS_TMS5265B 500
+#define MBSYS_NETCDF_SONAR_BEAMS_EM100 32
+#define MBSYS_NETCDF_SONAR_BEAMS_EM1000 60
+#define MBSYS_NETCDF_SONAR_BEAMS_EM12S 81
+#define MBSYS_NETCDF_SONAR_BEAMS_EM12D 162
+#define MBSYS_NETCDF_SONAR_BEAMS_EM3000S 127
+#define MBSYS_NETCDF_SONAR_BEAMS_EM3000D 254
+#define MBSYS_NETCDF_SONAR_BEAMS_EM300 127
+#define MBSYS_NETCDF_SONAR_BEAMS_FURUNO 45
 
 /* seconds in day */
-#define SECINDAY     86400.0
+#define SECINDAY 86400.0
 
 /* internal data structure */
-struct mbsys_netcdf_struct
-	{
-	int	 kind;
+struct mbsys_netcdf_struct {
+	int kind;
 
 	/* global attributes */
 	short mbVersion;
@@ -220,68 +197,68 @@ struct mbsys_netcdf_struct
 	int mbVelProfilTime_id;
 
 	/* variable pointers */
-        int *mbHistDate;
-        int *mbHistTime;
-        char *mbHistCode;
-        char *mbHistAutor;
-        char *mbHistModule;
-        char *mbHistComment;
+	int *mbHistDate;
+	int *mbHistTime;
+	char *mbHistCode;
+	char *mbHistAutor;
+	char *mbHistModule;
+	char *mbHistComment;
 
-        int *mbCycle;
-        int *mbDate;
-        int *mbTime;
-        int *mbOrdinate;
-        int *mbAbscissa;
-        char *mbFrequency;
-        int *mbSonarFrequency;	/* extended mode */
-        char *mbSounderMode;
-        int *mbReferenceDepth;
-        short *mbDynamicDraught;
-        short *mbTide;
-        short *mbSoundVelocity;
-        unsigned short *mbHeading;
-        short *mbRoll;
-        short *mbPitch;
-        short *mbTransmissionHeave;
-        char *mbDistanceScale;
-        short *mbRangeScale;	/* extended mode */
-        char *mbDepthScale;
-        int *mbVerticalDepth;
-        char *mbCQuality;
-        char *mbCFlag;
-        char *mbInterlacing;
-        short *mbSamplingRate;
-        char *mbCompensationLayerMode;	/* extended mode */
-        short *mbTransmitBeamwidth;	/* extended mode */
-        char *mbReceiveBeamwidth;	/* extended mode */
-        short *mbTransmitPulseLength;	/* extended mode */
+	int *mbCycle;
+	int *mbDate;
+	int *mbTime;
+	int *mbOrdinate;
+	int *mbAbscissa;
+	char *mbFrequency;
+	int *mbSonarFrequency; /* extended mode */
+	char *mbSounderMode;
+	int *mbReferenceDepth;
+	short *mbDynamicDraught;
+	short *mbTide;
+	short *mbSoundVelocity;
+	unsigned short *mbHeading;
+	short *mbRoll;
+	short *mbPitch;
+	short *mbTransmissionHeave;
+	char *mbDistanceScale;
+	short *mbRangeScale; /* extended mode */
+	char *mbDepthScale;
+	int *mbVerticalDepth;
+	char *mbCQuality;
+	char *mbCFlag;
+	char *mbInterlacing;
+	short *mbSamplingRate;
+	char *mbCompensationLayerMode; /* extended mode */
+	short *mbTransmitBeamwidth;    /* extended mode */
+	char *mbReceiveBeamwidth;      /* extended mode */
+	short *mbTransmitPulseLength;  /* extended mode */
 
-        short *mbAlongDistance;
-        short *mbAcrossDistance;
-        int *mbDepth;
-        short *mbAcrossBeamAngle;	/* extended mode */
-        short *mbAzimutBeamAngle;	/* extended mode */
-        short *mbRange;		/* extended mode */
-        short *mbSoundingBias;	/* extended mode */
-        char *mbSQuality;
-        char *mbReflectivity ;	/* extended mode */
-        char *mbReceptionHeave;	/* extended mode */
-        short *mbAlongSlope;	/* extended mode */
-        short *mbAcrossSlope;	/* extended mode */
-        char *mbSFlag;
-        char *mbSLengthOfDetection;	/* extended mode */
+	short *mbAlongDistance;
+	short *mbAcrossDistance;
+	int *mbDepth;
+	short *mbAcrossBeamAngle; /* extended mode */
+	short *mbAzimutBeamAngle; /* extended mode */
+	short *mbRange;           /* extended mode */
+	short *mbSoundingBias;    /* extended mode */
+	char *mbSQuality;
+	char *mbReflectivity;   /* extended mode */
+	char *mbReceptionHeave; /* extended mode */
+	short *mbAlongSlope;    /* extended mode */
+	short *mbAcrossSlope;   /* extended mode */
+	char *mbSFlag;
+	char *mbSLengthOfDetection; /* extended mode */
 
-        char *mbAntenna;
-        short *mbBeamBias;	/* not in extended mode */
-        char *mbBFlag;
+	char *mbAntenna;
+	short *mbBeamBias; /* not in extended mode */
+	char *mbBFlag;
 
-        short *mbBeam;
-        char *mbAFlag;
+	short *mbBeam;
+	char *mbAFlag;
 
-        char *mbVelProfilRef;
-        short *mbVelProfilIdx;
-        int *mbVelProfilDate;
-        int *mbVelProfilTime;
+	char *mbVelProfilRef;
+	short *mbVelProfilIdx;
+	int *mbVelProfilDate;
+	int *mbVelProfilTime;
 
 	/* variable attributes */
 	char mbHistDate_type[MBSYS_NETCDF_ATTRIBUTELEN];
@@ -1040,69 +1017,36 @@ struct mbsys_netcdf_struct
 	int mbVelProfilTime_missing_value;
 
 	/* storage comment string */
-	char	comment[MBSYS_NETCDF_COMMENTLEN];
-	};
+	char comment[MBSYS_NETCDF_COMMENTLEN];
+};
 
 /* system specific function prototypes */
-int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_netcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_netcdf_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *detects, int *error);
-int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			double transducer_depth, double altitude,
-			int *error);
-int mbsys_netcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_netcdf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind,
-			int *nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_netcdf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
+int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                         double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
+                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                        double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                        double *ssalongtrack, char *comment, int *error);
+int mbsys_netcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                        double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                        double *ssv, int *error);
+int mbsys_netcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                                  double *altitude, int *error);
+int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude,
+                                 int *error);
+int mbsys_netcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
+                             double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
+                             double *pitch, double *heave, int *error);
+int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
+                            double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
+                            int *error);
+int mbsys_netcdf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
+                             int *error);
+int mbsys_netcdf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
+int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);

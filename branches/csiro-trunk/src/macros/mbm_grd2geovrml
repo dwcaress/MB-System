@@ -3,7 +3,7 @@
 #    The MB-system:     mbm_grd2geovrml.perl              11/7/2001
 $ver = '$Id$';
 #
-#    Copyright (c) 2003-2014 by
+#    Copyright (c) 2003-2017 by
 #    Mike McCann (mccann@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -56,51 +56,6 @@ $ver = '$Id$';
 #
 # Version:
 #   $Id$
-#
-# Revisions:
-#
-# $Log: mbm_grd2geovrml.perl,v $
-# Revision 5.1  2003/03/19 22:29:29  caress
-# New version from Mike McCann.
-#
-# Revision 1.12  2003/03/18 20:31:57  mccann
-# Added -newimage <type> and -basename options.  Can now drape other images
-# over the bathymetry.
-#
-# Revision 1.11  2002/08/08 21:09:36  mccann
-# Change to using the make_geovrml in the search path, not mccann's.
-#
-# Revision 1.10  2002/08/08 21:05:37  mccann
-# Changed name from mbm_grd2geovrml to mbm_grd2geovrml.perl
-# Use mbstripNaN instead of removeNaN; mbstripNaN is now a part of MB-System.
-#
-# Revision 1.9  2002/04/04 18:36:50  mccann
-# Added '-interlace none' to mogrify because make_oi wants chunky (RGBRGB...)
-#
-# Revision 1.8  2002/01/10 20:07:29  mccann
-# Fixed bugs in grid clipping command setup.
-#
-# Revision 1.7  2002/01/09 21:14:18  mccann
-# Removed customizations for MBARI data coverages (hawaii, cencal, etc.)
-#
-# Revision 1.6  2002/01/03 19:33:59  mccann
-# *** empty log message ***
-#
-# Revision 1.5  2001/12/05 18:15:42  mccann
-# Added comment for ImageMagick requirement.  Version sent to Dave for
-# testing and initial inclusion in MB-System.
-#
-# Revision 1.4  2001/11/28 23:22:14  mccann
-# Added options for color pallette and grid clipping.
-#
-# Revision 1.3  2001/11/14 17:42:40  mccann
-# Full command line written to out file.  -wrz option added to make_geovrml.
-#
-# Revision 1.2  2001/11/07 20:01:16  mccann
-# Added check in execute() for existence of commands in search path.
-#
-# Revision 1.1  2001/11/07 19:34:10  mccann
-# Initial revision
 #
 #
 
@@ -369,16 +324,16 @@ else {
 #
 if ( defined $clipmax || defined $clipmin ) {
 	$cmd = "mv $grdFile tmp_${grdFile}";
-	execute($cmd, "Clipping grid file, rename original in prep for grdclip");
+	execute($cmd, "Clipping grid file, rename original in prep for gmt grdclip");
 }
 if ( defined $clipmax && ! defined $clipmin ) {
-	$cmd = "grdclip tmp_${grdFile} -G$grdFile -Sa$clipmax/NaN";
+	$cmd = "gmt grdclip tmp_${grdFile} -G$grdFile -Sa$clipmax/NaN";
 }
 elsif ( defined $clipmin && ! defined $clipmax ) {
-	$cmd = "grdclip tmp_${grdFile} -G$grdFile -Sb$clipmin/NaN";
+	$cmd = "gmt grdclip tmp_${grdFile} -G$grdFile -Sb$clipmin/NaN";
 }
 elsif ( defined $clipmax && defined $clipmin ) {
-	$cmd = "grdclip tmp_${grdFile} -G$grdFile -Sa$clipmax/NaN -Sb$clipmin/NaN";
+	$cmd = "gmt grdclip tmp_${grdFile} -G$grdFile -Sa$clipmax/NaN -Sb$clipmin/NaN";
 }
 if ( defined $clipmax || defined $clipmin ) {
 	execute($cmd, "Clip grid at min = $clipmin, max = $clipmax");
@@ -388,7 +343,7 @@ if ( defined $clipmax || defined $clipmin ) {
 # Parse out grid information for use by make_dem & make_oi
 #
 execute("/bin/ls -l $grdFile", "Size of original grid file");
-$grdInfo = `grdinfo $grdFile`;
+$grdInfo = `gmt grdinfo $grdFile`;
 foreach ( split('\n', $grdInfo) ) {
 	if ( /x_min: (\S+)/ ) {
 		$x_min = $1;
@@ -420,7 +375,7 @@ print "y_min= $y_min, y_max= $y_max, y_inc= $y_inc\n";
 print "nx= $nx, ny= $ny\n";
 die "*** Can't continue without grid dimensions." unless
 	($x_min && $x_max && $x_inc && $y_min && $y_max && $y_inc && $nx && $ny);
-execute("grdinfo $grdFile", "Get grid dimensions & resolution");	# For the log output file
+execute("gmt grdinfo $grdFile", "Get grid dimensions & resolution");	# For the log output file
 
 #
 # Compute dimensions of grid for the course resampling
@@ -441,7 +396,7 @@ $surfYinc = ($y_max - $y_min) / (100 - 1);
 # Subsample grid
 #
 $xSampInc = $grdResampFac * $myXinc;
-$cmd = "grdsample $grdFile -I${xSampInc} -Q -G${sampGrdFile}";
+$cmd = "gmt grdsample $grdFile -I${xSampInc} -Q -G${sampGrdFile}";
 execute($cmd, "Subsample grid");
 
 #
@@ -449,10 +404,10 @@ execute($cmd, "Subsample grid");
 # 2. preprocess w/blockmean
 # 3. use surface to extrapolate to no data areas
 #
-$cmd = "grd2xyz -bo $sampGrdFile | ";
-$cmd .= "blockmean -bi -bo -V -I${surfXinc}/${surfYinc} -R$x_min/$x_max/$y_min/$y_max | ";
+$cmd = "gmt grd2xyz -bo $sampGrdFile | ";
+$cmd .= "gmt blockmean -bi -bo -V -I${surfXinc}/${surfYinc} -R$x_min/$x_max/$y_min/$y_max | ";
 $cmd .= "mbstripNaN | ";
-$cmd .= "surface -bi -I${surfXinc}/${surfYinc} -S${rad} -T0.35 -G${tmpGrdFile} ";
+$cmd .= "gmt surface -bi -I${surfXinc}/${surfYinc} -S${rad} -T0.35 -G${tmpGrdFile} ";
 $cmd .= "-V -R$x_min/$x_max/$y_min/$y_max ";
 execute($cmd, "Convert grid to xyz format for filling in blank areas, preprocess w/blockmean, use surface to extrapolate to no data areas");
 
@@ -460,21 +415,21 @@ execute($cmd, "Convert grid to xyz format for filling in blank areas, preprocess
 #
 # Resample to original grid dimenensions
 #
-$cmd = "grdsample $tmpGrdFile -I${myXinc}/${myYinc} -Q -G${fillGrdFile}";
+$cmd = "gmt grdsample $tmpGrdFile -I${myXinc}/${myYinc} -Q -G${fillGrdFile}";
 execute($cmd, "Resample to original grid dimenensions");
 
 
 #
 # Give proper units to Filled Grid file
 #
-$cmd = "grdedit ${fillGrdFile} -DLongitude/Latitude/\"Topography (m)\"";
+$cmd = "gmt grdedit ${fillGrdFile} -DLongitude/Latitude/\"Topography (m)\"";
 $cmd .= "/1/0/\"Topography Grid\"";
 execute($cmd, "Give proper units to Filled Grid file");
 
 #
 # Repair the dx/dy for the original grid
 #
-$cmd = "grdedit -A -R$x_min/$x_max/$y_min/$y_max ${grdFile} ";
+$cmd = "gmt grdedit -A -R$x_min/$x_max/$y_min/$y_max ${grdFile} ";
 execute($cmd, "Repair the dx/dy for the original grid");
 
 #
@@ -483,14 +438,14 @@ execute($cmd, "Repair the dx/dy for the original grid");
 #  2. Scale and offset the grid in preparation for make_geoVRML (preserves
 #     accuracy to 1 mm in Z, also make_geovrml can't handle elevations < 0)
 #
-$cmd = "grdmath $grdFile $fillGrdFile AND $offset ADD $scale MUL = $fixGrdFile";
+$cmd = "gmt grdmath $grdFile $fillGrdFile AND $offset ADD $scale MUL = $fixGrdFile";
 execute($cmd, "Paste (ADD) original grid on top of this large-search-radius grid, Scale and offset the grid in preparation for make_geoVRML");
 
 
 #
 # Extract bitmap from fixed grid for use by tsmApi,
 #
-$cmd = "grd2xyz -Zl $fixGrdFile > $baseFile.raw && ls -l $baseFile.raw";
+$cmd = "gmt grd2xyz -Zl $fixGrdFile > $baseFile.raw && ls -l $baseFile.raw";
 execute($cmd, "Extract bitmap from fixed grid for use by tsmApi");
 
 

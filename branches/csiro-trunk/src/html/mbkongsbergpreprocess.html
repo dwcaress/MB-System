@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbkongsbergpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  12 November 2014 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  17 May 2016 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -31,7 +31,7 @@ Version 5.0
 <B>mbkongsbergpreprocess</B> [<B>-C</B> <B>-D</B><I>outputdirectory</I>
 <B>-E</B><I>offx/offy[/offdepth]</I>
 <B>-F</B><I>format</I>
-<B>-I</B><I>file </I><B>-O</B><I>outfile</I> <B>-P</B><I>filterlength/filterdepth</I>
+<B>-I</B><I>file </I><B>-O</B><I>outfile</I> <B>-P</B><I>sonardepthfile</I> <B>-PF</B><I>filterlength/filterdepth</I>
 <B>-S</B><I>datatype/source</I>
 <B>-T</B><I>timelag</I> <B>-W -H -V</B>]
 <P>
@@ -81,18 +81,30 @@ not pass these large records into the output format 59 files. The <B>-W</B><I>1<
 option causes the water column records to be written in the output files.
 <P>
 <A NAME="lbAF">&nbsp;</A>
-<H2>AUTHORSHIP</H2>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
 
-David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+David W. Caress
 <BR>
 
 <BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
-Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+Dale N. Chayes
 <BR>
 
-<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
 <A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
@@ -175,6 +187,21 @@ the output file <I>outfile</I> will be in <I>outputdirectory</I>.
 <DT><B>-P</B>
 
 <DD>
+<I>sonardepthfile</I>
+<BR>
+
+The program will read sonar depth data from <I>sonardepthfile</I> and merge
+those data with the multibeam, sidescan, and subbtottom data in the 7k file.
+The <I>sonardepthfile</I> is a text data file containing two space delimited columns:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>time_d&nbsp;sonardepth<BR>
+<BR>
+
+where:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>time_d&nbsp;-&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(since&nbsp;start&nbsp;of&nbsp;1970)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sonardepth&nbsp;-&nbsp;sonar&nbsp;depth&nbsp;in&nbsp;meters,&nbsp;positive&nbsp;down<BR>
+<DT><B>-PF</B>
+
+<DD>
 <I>filterlength/filterdepth</I>
 This option specifies Gaussian tapered time domain filtering of the
 sonar depth data to be merged with the survey data, regardless of source.
@@ -216,11 +243,15 @@ a data record type. The possibilities for Kongsberg data include:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>57<BR>
 <BR>
 
-The default values are:
+The default sources for position, heading and sensor depth are:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nav_source&nbsp;=&nbsp;MB_DATA_NAV
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attitude_source&nbsp;=&nbsp;MB_DATA_ATTITUDE
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heading_source&nbsp;=&nbsp;MB_DATA_NAV
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sonardepth_source&nbsp;=&nbsp;MB_DATA_DATA
+<BR>
+
+The default source for attitude is set according to the sensor that was active
+during data collection, most often:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;attitude_source&nbsp;=&nbsp;MB_DATA_ATTITUDE&nbsp;
 <BR>
 
 <DT><B>-T</B>
@@ -381,7 +412,7 @@ Not true bugs. More like arachnids.
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
 <DT><A HREF="#lbAG">OPTIONS</A><DD>
 <DT><A HREF="#lbAH">EXAMPLES</A><DD>
 <DT><A HREF="#lbAI">SEE ALSO</A><DD>
@@ -391,12 +422,9 @@ Not true bugs. More like arachnids.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 12 November 2014</P></CENTER>
+Last Updated: 17 May 2016</P></CENTER>
 
 <HR>
-<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
-<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
-to MB-System Home Page...</A></P>
 
 </BODY>
 </HTML>

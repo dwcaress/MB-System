@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  14 March 2014 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  6 June 2018 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -29,31 +29,105 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbpreprocess</B> [ 
+<BR>
+
 <B>--verbose</B>
 <B>--help</B>
 <B>--input</B>=<I>FILE</I>
-<B>--format</B>=<I>FORMAT</I>
-<B>--nav_file</B>=<I>FILE</I>
-<B>--nav_file_format</B>=<I>FORMAT</I>
-<B>--nav_async</B>=<I>RECORDTYPE</I>
-<B>--sensordepth_file</B>=<I>FILE</I>
-<B>--sensordepth_file_format</B>=<I>FILE</I>
-<B>--sensordepth_async</B>=<I>RECORDTYPE</I>
-<B>--heading_file</B>=<I>FILE</I>
-<B>--heading_file_format</B>=<I>FORMAT</I>
-<B>--heading_async</B>=<I>RECORDTYPE</I>
-<B>--attitude_file</B>=<I>FILE</I>
-<B>--attitude_file_format</B>=<I>FORMAT</I>
-<B>--attitude_async</B>=<I>RECORDTYPE</I>
-<B>--timeshift_file</B>=<I>FILE</I>
-<B>--timeshift_constant</B>=<I>TIME</I>
-<B>--timeshift_apply_nav</B>
-<B>--timeshift_apply_sensordepth</B>
-<B>--timeshift_apply_heading</B>
-<B>--timeshift_apply_attitude</B>
-<B>--timeshift_apply_all_ancilliary</B>
-<B>--timeshift_apply_survey</B>
-<B>--timeshift_apply_all</B>
+<B>--format</B>=<I>FORMATID</I>
+<BR>
+
+<B>--platform-file</B>=<I>FILE</I>
+<B>--platform-target-sensor</B>=<I>RECORDID</I>
+<BR>
+
+<B>--output-sensor-fnv</B>
+<BR>
+
+<B>--nav-file</B>=<I>FILE</I>
+<B>--nav-file-format</B>=<I>FORMATID</I>
+<B>--nav-async</B>=<I>RECORDTYPE</I>
+<B>--nav-sensor</B>=<I>SENSORID</I>
+<BR>
+
+<B>--sensordepth-file</B>=<I>FILE</I>
+<B>--sensordepth-file-format</B>=<I>FORMATID</I>
+<B>--sensordepth-async</B>=<I>RECORDTYPE</I>
+<B>--sensordepth-sensor</B>=<I>SENSORID</I>
+<BR>
+
+<B>--heading-file</B>=<I>FILE</I>
+<B>--heading-file-format</B>=<I>FORMATID</I>
+<B>--heading-async</B>=<I>RECORDTYPE</I>
+<B>--heading-sensor</B>=<I>SENSORID</I>
+<BR>
+
+<B>--altitude-file</B>=<I>FILE</I>
+<B>--altitude-file-format</B>=<I>FORMATID</I>
+<B>--altitude-async</B>=<I>RECORDTYPE</I>
+<B>--altitude-sensor</B>=<I>SENSORID</I>
+<BR>
+
+<B>--attitude-file</B>=<I>FILE</I>
+<B>--attitude-file-format</B>=<I>FORMATID</I>
+<B>--attitude-async</B>=<I>RECORDTYPE</I>
+<B>--attitude-sensor</B>=<I>SENSORID</I>
+<BR>
+
+<B>--soundspeed-file</B>=<I>FILE</I>
+<B>--soundspeed-file-format</B>=<I>FORMATID</I>
+<B>--soundspeed-async</B>=<I>RECORDTYPE</I>
+<B>--soundspeed-sensor</B>=<I>SENSORID</I>
+<BR>
+
+<B>--time-latency-file</B>=<I>FILE</I>
+<B>--time-latency-file-format</B>=<I>FORMATID</I>
+<B>--time-latency-constant</B>=<I>SECONDS</I>
+<BR>
+
+<B>--time-latency-apply-nav</B>
+<B>--time-latency-apply-sensordepth</B>
+<B>--time-latency-apply-heading</B>
+<BR>
+
+<B>--time-latency-apply-attitude</B>
+<B>--time-latency-apply-altitude</B>
+<B>--time-latency-apply-all-ancilliary</B>
+<BR>
+
+<B>--time-latency-apply-survey</B>
+<B>--time-latency-apply-all</B>
+<BR>
+
+<B>--filter</B>=<I>SECONDS</I>
+<BR>
+
+<B>--filter-apply-nav</B>
+<B>--filter-apply-sensordepth</B>
+<B>--filter-apply-heading</B>
+<BR>
+
+<B>--filter-apply-attitude</B>
+<B>--filter-apply-altitude</B>
+<B>--filter-apply-all-ancilliary</B>
+<BR>
+
+<B>--recalculate-bathymetry</B>
+<B>--no-change-survey</B>
+<B>--multibeam-sidescan-source</B>=<I>RECORDID</I>
+<B>--sounding-amplitude-filter</B>=<I>THRESHOLD</I>
+<BR>
+
+<B>--kluge-time-jumps</B>=<I>SECONDS</I>
+<B>--kluge-ancilliary-time-jumps</B>=<I>SECONDS</I>
+<B>--kluge-mbaripressure-time-jumps</B>=<I>threshold
+</I><B>--kluge-beam-tweak</B>=<I>FACTOR</I>
+<B>--kluge-soundspeed-tweak</B>=<I>factor</I>
+<B>--kluge-zero-attitude-correction</B>
+<B>--kluge-zero-alongtrack-angles</B>
+<B>--kluge-fix-wissl-timestamps</B>
+<BR>
+
 ]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -63,32 +137,384 @@ MBpreprocess handles preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset. This program replaces
 the several format-specific preprocessing programs
 found in MB-System version 5 releases with a single program for version 6.
-This program is under development, and is not ready for general use at
-this time.
+In many cases the preprocessing consists only of creating the ancilliary files
+parallel to the raw files, but in others the data must be translated to
+different formats. The proprocessing step can also be used to merge navigation,
+attitude, sound speed, or other ancilliary data with the survey data.
 <P>
 <A NAME="lbAF">&nbsp;</A>
-<H2>AUTHORSHIP</H2>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
 
-David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+David W. Caress
 <BR>
 
 <BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
-Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+Dale N. Chayes
 <BR>
 
-<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
 <A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
+<DT><B>--help</B>
+
+<DD>
+This option causes <B>mbconfig</B> to print out its usage options and exit.
 <DT><B>--verbose</B>
 
 <DD>
 By default <B>mbpreprocess</B> outputs minimal information to the shell. This option
-causes the program to indicate it's progress as it runs. Goody.
+causes the program to indicate it's progress as it runs.
+<P>
+<DT><B>--input=</B><I>FILE</I>
+
+<DD>
+Swath data file from which the input data will be read, or a datalist file
+containing a list of input swath data files and/or other datalist files.
+If <I>FILE</I> is a datalist file, then mbpreprocess will attempt to preprocess
+all data files identified by recursively reading the datalist structure
+referenced in <I>FILE</I>.
+<DT><B>--format=</B><I>FORMATID</I>
+
+<DD>
+Sets the <B>MBIO</B> integer format identifier
+for the input file <I>FILE</I> specified with the
+<B>--input</B> option. By default, <B>mbpreprocess</B>
+infers the format from the &quot;*.mbXX&quot; <B>MB-System</B> suffix
+convention.
+<DT><B>--platform-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--platform-target-sensor=</B><I>SENSORID</I>
+
+<DD>
+<DT><B>--output-sensor-fnv</B>
+
+<DD>
+Causes <B>mbpreprocess</B> to output &quot;fast navigation&quot; or *.fnv files for each
+of the sensors described in the platform file specified with the <B>--platform-file</B>
+option. These *.fnv files will be corrected for the lever arms specified by the
+positional and angular offsets defined in the platform file.
+<DT><B>--skip-existing</B>
+
+<DD>
+<BR>
+
+<DT><B>--nav-file</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+Specifies an external file from which to merge sonar position (navigation),
+replacing any navigation data included in the input time series sidescan files.
+By default <B>mbsslayout</B> attempts to use navigation values included in the
+input data.
+<DT><B>--nav-file-format</B>=<I>format_id</I>
+
+<DD>
+<BR>
+
+Specifies the format of an external navigation file from which position values
+are derived (as defined with <B>--nav-file</B>). Options for the <I>format_id</I>
+value are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;1:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_d&nbsp;longitude&nbsp;latitude&nbsp;speed
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;longitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;and&nbsp;speed&nbsp;is&nbsp;in&nbsp;km/hour&nbsp;(and&nbsp;is&nbsp;optional).
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;2:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;longitude&nbsp;latitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;month,&nbsp;day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;3:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;longitude&nbsp;latitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;hour,&nbsp;and&nbsp;minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;4:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;year&nbsp;julian_day&nbsp;day_minute&nbsp;second&nbsp;longitude&nbsp;latitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;year,&nbsp;julian_day,&nbsp;and&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,&nbsp;the&nbsp;second
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;5:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;in&nbsp;the&nbsp;1990's&nbsp;era&nbsp;L-DEO&nbsp;processed&nbsp;nav&nbsp;format&nbsp;with&nbsp;lines
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yy+jjjhhmmssNddmmmmmmEdddmmmmmm
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;yy&nbsp;is&nbsp;the&nbsp;two&nbsp;digit&nbsp;year&nbsp;(after&nbsp;1999&nbsp;the&nbsp;&quot;yy+&quot;&nbsp;was&nbsp;replaced&nbsp;by&nbsp;a&nbsp;four
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;digit&nbsp;year&nbsp;&quot;yyyy&quot;),&nbsp;jjj&nbsp;is&nbsp;the&nbsp;julian_day,&nbsp;hh&nbsp;is&nbsp;the&nbsp;hour,&nbsp;mm
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;minutes,&nbsp;and&nbsp;ss&nbsp;is&nbsp;seconds.&nbsp;The&nbsp;latitude&nbsp;is&nbsp;given&nbsp;as
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Nddmmmmmmand&nbsp;where&nbsp;N&nbsp;is&nbsp;'N'&nbsp;for&nbsp;north&nbsp;and&nbsp;'S'&nbsp;for&nbsp;south,&nbsp;dd&nbsp;are&nbsp;integer
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;degrees,&nbsp;and&nbsp;mmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;10000.&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Edddmmmmmmand&nbsp;where&nbsp;E&nbsp;is&nbsp;'E'&nbsp;for&nbsp;east&nbsp;and&nbsp;'W'&nbsp;for&nbsp;west,&nbsp;ddd&nbsp;are&nbsp;integer
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;degrees,&nbsp;and&nbsp;mmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;10000.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;6&nbsp;or&nbsp;7:&nbsp;NMEA&nbsp;0183&nbsp;position&nbsp;strings
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Several&nbsp;NMEA&nbsp;and&nbsp;NMEA-like&nbsp;strings&nbsp;containing&nbsp;position&nbsp;are&nbsp;recognized,
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;can&nbsp;be&nbsp;parsed&nbsp;with&nbsp;and&nbsp;without&nbsp;line&nbsp;break&nbsp;characters.&nbsp;These&nbsp;strings
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;include&nbsp;ZDA,&nbsp;GLL,&nbsp;GGA,&nbsp;DAT,&nbsp;and&nbsp;UNX.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;8:&nbsp;Simrad&nbsp;90&nbsp;format&nbsp;navigation&nbsp;files&nbsp;with&nbsp;lines
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ddmmyy&nbsp;hhmmssss&nbsp;ddmmmmmmmN&nbsp;dddmmmmmmmE
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;dd&nbsp;is&nbsp;day&nbsp;of&nbsp;the&nbsp;month,&nbsp;mm&nbsp;is&nbsp;the&nbsp;month,&nbsp;yy&nbsp;is&nbsp;the&nbsp;two&nbsp;digit&nbsp;year,
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hh&nbsp;is&nbsp;the&nbsp;hour,&nbsp;mm&nbsp;is&nbsp;the&nbsp;minute,&nbsp;and&nbsp;ssss&nbsp;is&nbsp;seconds&nbsp;*&nbsp;100.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;latitude&nbsp;is&nbsp;given&nbsp;as&nbsp;ddmmmmmmmN&nbsp;where&nbsp;dd&nbsp;are&nbsp;integer&nbsp;degrees,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mmmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;100000,&nbsp;and&nbsp;N&nbsp;is&nbsp;'N'&nbsp;for&nbsp;north&nbsp;and&nbsp;'S'&nbsp;for&nbsp;south&nbsp;latitude.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as&nbsp;dddmmmmmmmE&nbsp;where&nbsp;ddd&nbsp;are&nbsp;integer&nbsp;degrees,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mmmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;100000,&nbsp;and&nbsp;E&nbsp;is&nbsp;'E'&nbsp;for&nbsp;east&nbsp;and&nbsp;'W'&nbsp;for&nbsp;west&nbsp;longitude.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;second&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;degrees.&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Edddmmmmmmand&nbsp;where&nbsp;E&nbsp;is&nbsp;'E'&nbsp;for&nbsp;east&nbsp;and&nbsp;'W'&nbsp;for&nbsp;west,&nbsp;ddd&nbsp;are&nbsp;integer
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;degrees,&nbsp;and&nbsp;mmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;10000.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;9:&nbsp;ASCCI&nbsp;text&nbsp;file&nbsp;with&nbsp;white-space&nbsp;delimited&nbsp;lines&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;time_d&nbsp;lon&nbsp;lat&nbsp;heading&nbsp;speed&nbsp;sensordepth*
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;yr&nbsp;is&nbsp;the&nbsp;four&nbsp;digit&nbsp;year,&nbsp;mon&nbsp;is&nbsp;the&nbsp;month,&nbsp;day&nbsp;is&nbsp;the&nbsp;day&nbsp;of&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;month,&nbsp;min&nbsp;is&nbsp;the&nbsp;minute,&nbsp;second&nbsp;is&nbsp;the&nbsp;decimal&nbsp;seconds,&nbsp;time_d&nbsp;is&nbsp;time&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;epoch&nbsp;seconds&nbsp;(seconds&nbsp;since&nbsp;1970),&nbsp;lon&nbsp;is&nbsp;the&nbsp;longitude
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;lat&nbsp;is&nbsp;the&nbsp;latitude&nbsp;in&nbsp;decimal&nbsp;degrees,&nbsp;heading&nbsp;is&nbsp;in
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decimal&nbsp;degrees,&nbsp;speed&nbsp;is&nbsp;in&nbsp;km/hour,&nbsp;and&nbsp;sensordepth&nbsp;is&nbsp;in&nbsp;meters.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;South&nbsp;latitudes&nbsp;are&nbsp;negative.&nbsp;Longitude&nbsp;may&nbsp;be&nbsp;defined&nbsp;on&nbsp;either&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-180.0&nbsp;to&nbsp;+180.0&nbsp;or&nbsp;0.0&nbsp;to&nbsp;360.0&nbsp;domains.
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;10:&nbsp;R2R&nbsp;(Rolling&nbsp;deck&nbsp;to&nbsp;Repository)&nbsp;navigation&nbsp;format&nbsp;with&nbsp;ASCCI&nbsp;text&nbsp;lines
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;of&nbsp;the&nbsp;form:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yyyy-mm-ddThh:mm:ss.sssZ&nbsp;lon&nbsp;lat&nbsp;quality&nbsp;nsat&nbsp;dilution&nbsp;height
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;the&nbsp;lon&nbsp;and&nbsp;lat&nbsp;fields&nbsp;are&nbsp;in&nbsp;decimal&nbsp;degrees&nbsp;with&nbsp;south&nbsp;latitudes
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;west&nbsp;longitudes&nbsp;negative,&nbsp;and&nbsp;the&nbsp;last&nbsp;four&nbsp;quantities&nbsp;relating&nbsp;to
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GPS&nbsp;fix&nbsp;quality.
+<DT><B>--nav-async</B>=<I>record_kind</I>
+
+<DD>
+<BR>
+
+Specifies the type of data records from which position values
+are derived (as defined with <B>--nav-file-format</B>). Options for the
+<I>record_kind</I> include:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATA:&nbsp;&nbsp;1&nbsp;(survey&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV:&nbsp;&nbsp;12&nbsp;(navigation&nbsp;data)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1:&nbsp;29&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;1)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2:&nbsp;30&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;2)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3:&nbsp;31&nbsp;(navigation&nbsp;data&nbsp;from&nbsp;navigation&nbsp;system&nbsp;3)
+<BR>
+
+What types of data records are present is format-dependent, as is the default
+choice of which record type is used as the navigation source by default. The
+program <B>mbinfo</B> can be used with the <B>-N</B> option to determine the numbers
+of different record types present in a data file.
+<DT><B>--nav-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
+<DT><B>--sensordepth-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--sensordepth-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--sensordepth-async=</B><I>RECORDTYPE</I>
+
+<DD>
+<DT><B>--sensordepth-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
+<DT><B>--heading-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--heading-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--heading-async=</B><I>RECORDTYPE</I>
+
+<DD>
+<DT><B>--heading-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
+<DT><B>--altitude-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--altitude-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--altitude-async=</B><I>RECORDTYPE</I>
+
+<DD>
+<DT><B>--altitude-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
+<DT><B>--attitude-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--attitude-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--attitude-async=</B><I>RECORDTYPE</I>
+
+<DD>
+<DT><B>--attitude-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
+<DT><B>--soundspeed-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--soundspeed-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--soundspeed-async=</B><I>RECORDTYPE</I>
+
+<DD>
+<DT><B>--soundspeed-sensor=</B><I>SENSORID</I>
+
+<DD>
+<BR>
+
+<DT><B>--time-latency-file=</B><I>FILE</I>
+
+<DD>
+<DT><B>--time-latency-file-format=</B><I>FORMATID</I>
+
+<DD>
+<DT><B>--time-latency-constant=</B><I>SECONDS</I>
+
+<DD>
+<DT><B>--time-latency-apply-nav</B>
+
+<DD>
+<DT><B>--time-latency-apply-sensordepth</B>
+
+<DD>
+<DT><B>--time-latency-apply-heading</B>
+
+<DD>
+<DT><B>--time-latency-apply-attitude</B>
+
+<DD>
+<DT><B>--time-latency-apply-altitude</B>
+
+<DD>
+<DT><B>--time-latency-apply-all-ancilliary</B>
+
+<DD>
+<DT><B>--time-latency-apply-survey</B>
+
+<DD>
+<DT><B>--time-latency-apply-all</B>
+
+<DD>
+<BR>
+
+<DT><B>--filter=</B><I>SECONDS</I>
+
+<DD>
+<DT><B>--filter-apply-nav</B>
+
+<DD>
+<DT><B>--filter-apply-sensordepth</B>
+
+<DD>
+<DT><B>--filter-apply-heading</B>
+
+<DD>
+<DT><B>--filter-apply-attitude</B>
+
+<DD>
+<DT><B>--filter-apply-altitude</B>
+
+<DD>
+<DT><B>--filter-apply-all-ancilliary</B>
+
+<DD>
+<BR>
+
+<DT><B>--recalculate-bathymetry</B>
+
+<DD>
+<DT><B>--no-change-survey</B>
+
+<DD>
+<DT><B>--multibeam-sidescan-source=</B><I>RECORDID</I>
+
+<DD>
+<DT><B>--sounding-amplitude-filter=</B><I>THRESHOLD</I>
+
+<DD>
+<DT><B>--sounding-amplitude-filter=</B><I>THRESHOLD</I>
+
+<DD>
+<DT><B>--kluge-time-jumps=</B><I>SECONDS</I>
+
+<DD>
+<DT><B>--kluge-ancilliary-time-jumps=</B><I>SECONDS</I>
+
+<DD>
+<DT><B>--kluge-mbaripressure-time-jumps=</B><I>SECONDS</I>
+
+<DD>
+<DT><B>--kluge-beam-tweak=</B><I>FACTOR</I>
+
+<DD>
+<DT><B>--kluge-soundspeed-tweak=</B><I>FACTOR</I>
+
+<DD>
+<DT><B>--kluge-zero-attitude-correction</B>
+
+<DD>
+<DT><B>--kluge-zero-alongtrack-angles</B>
+
+<DD>
+<DT><B>--kluge-fix-wissl-timestamps</B>
+
+<DD>
+<BR>
+
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
@@ -114,7 +540,7 @@ Oh yeah.
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
 <DT><A HREF="#lbAG">OPTIONS</A><DD>
 <DT><A HREF="#lbAH">EXAMPLES</A><DD>
 <DT><A HREF="#lbAI">SEE ALSO</A><DD>
@@ -124,12 +550,9 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 14 March 2014</P></CENTER>
+Last Updated: 6 June 2018</P></CENTER>
 
 <HR>
-<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
-<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
-to MB-System Home Page...</A></P>
 
 </BODY>
 </HTML>

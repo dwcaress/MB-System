@@ -3,7 +3,7 @@
 #    The MB-system:	mbm_multidatalist.perl	7/18/2011
 #   $Id: mbm_multidatalisz.pl 19XX 2011-07-18 15:40:00Z ferreira $
 #
-#    Copyright (c) 2011-2014 by
+#    Copyright (c) 2011-2017 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -34,10 +34,6 @@
 # Version:
 #   $Id: mbm_multidatalist.pl 19XX 2011-07-18 15:40:00Z ferreira $
 #
-# Revisions:
-#
-#  Revision 1.0		2011-07-18 15:40:00	cferreira
-#  Initial version with partial implementation of mbdatalist flags
 #
 
 $program_name = "mbm_multidatalist";
@@ -49,7 +45,7 @@ $help =    		($opt_H || $opt_h);
 $datalist =    		($opt_I || $opt_i || "datalist.mb-1");
 $regenerate =    	($opt_N || $opt_n);
 $verbose = 		($opt_V || $opt_v);
-$cpu =        		($opt_X || $opt_x || 1);
+$cpu =        		($opt_X || $opt_x || 4);
 
 # print out help message if required
 if ($help)
@@ -73,6 +69,13 @@ if ($verbose)
 if ($cpu < 1)
 	{
 	print "\nExiting $program_name, CPU(s) number(s) should be\n equal or bigger than one...\n\n";
+	exit 0;
+	}
+	
+# make sure that the input file exists
+if (! -f $datalist)
+	{
+	print "\nExiting $program_name, Input file $datalist does not exist...\n\n";
 	exit 0;
 	}
 

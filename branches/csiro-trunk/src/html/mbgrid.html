@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbgrid</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  2 January 2017 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -43,7 +43,7 @@ Version 5.0
 
 <B>mbgrid</B> is a utility used to grid bathymetry, amplitude, or sidescan
 data contained in a set of swath sonar data files. This program uses
-one of four algorithms to grid regions covered by swath sonar
+one of six algorithms to grid regions covered by swath sonar
 swaths and then can fill in gaps between the swaths (to the degree
 specified by the user) using a thin plate spline interpolation.
 The gridding algorithms include gaussian weighted average,
@@ -113,11 +113,24 @@ page), <B>mbgrid</B> can also read data from ASCII text files in
 longitude, latitude, value triples. This allows one to incorporate
 conventional echosounder bathymetry data into the gridding.
 <P>
-If the default weighted average gridding scheme is being used,
-each data point's contribution to a Gaussian weighted
+The available gridding algorithms specified with the <B>-F</B> option are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;Gaussian&nbsp;weighted&nbsp;mean&nbsp;filter
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.&nbsp;Median&nbsp;filter
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.&nbsp;Minimum&nbsp;filter
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.&nbsp;Maximum&nbsp;filter
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.&nbsp;Beam&nbsp;footprint&nbsp;with&nbsp;slope
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.&nbsp;Beam&nbsp;footprint
+<BR>
+
+Algorithms 5 and 6 can only be used to grid bathymetry data, and are
+not available for gridding amplitude or sidescan data.
+<P>
+If the default weighted average gridding scheme (<B>-F</B><I>1</I>) 
+is being used, each data point's contribution to a Gaussian weighted
 average for each nearby grid cell is calculated as the point is read
-and added to
-the grid cell sums.  The weighting function is given by:
+and added to the grid cell sums.  The weighting function is given by:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>W(r)&nbsp;=&nbsp;Aexp(-r**2/a**2)<BR>
 <BR>
 
@@ -127,23 +140,6 @@ maximum value, and A is a normalizing factor set so that the sum of all
 the weights adds to a value of 1.  Normally, the distance a is set to be
 half the average grid point spacing, but this can be varied using the <B>-W</B>
 option.
-<P>
-If the <B>-F</B><I>5</I> option is used, the gridding is performed using
-beam footprints rather than a weighting function tied to the grid
-cell spacing. In this algorithm, the beam footprints are calculated
-using the angular beamwidths and the sonar altitude above the seafloor.
-A weighting value is calculated for each grid cell which fully or
-parially lies within the beam footprint; these weighting values
-represent the fraction of the beam contained within the cell. Each
-footprint is tilted according to the local slope; the slope is estimated
-from a low resolution, first pass grid created by simple mean filtering
-the soundings. The slope grid is generated using a cell size twice that
-of the final grid. This approach allows one to sensibly grid data using
-a resolution greater than that of the raw data. Thus, if one has data
-with a large depth variation, one can generate a grid with a cell spacing
-appropriate for the high resolution, shallow data and still get
-sensible results in deep regions where the grid cells may be
-much smaller than the beam footprints.
 <P>
 If the <B>-F</B><I>2</I> option is used, the gridding is performed with a
 median filter scheme instead of a Gaussian weighted average. In this
@@ -170,6 +166,30 @@ producing grids which strongly reflect outliers in the
 data. Hydrographers often prefer to grid bathymetry using a minimum
 depth scheme because they are most interested in the
 shallowest (most dangerous) soundings in their data.
+<P>
+If the <B>-F</B><I>5</I> option is used, gridding of multibeam bathymetry
+is performed using beam footprints rather than a weighting function tied to
+the grid cell spacing. In this algorithm, the beam footprints are calculated
+using the angular beamwidths and the sonar altitude above the seafloor.
+A weighting value is calculated for each grid cell which fully or
+parially lies within the beam footprint; these weighting values
+represent the fraction of the beam contained within the cell. Each
+footprint is tilted according to the local slope; the slope is estimated
+from a low resolution, first pass grid created by simple mean filtering
+the soundings. The slope grid is generated using a cell size twice that
+of the final grid. This approach allows one to sensibly grid data using
+a resolution greater than that of the raw data. Thus, if one has data
+with a large depth variation, one can generate a grid with a cell spacing
+appropriate for the high resolution, shallow data and still get
+sensible results in deep regions where the grid cells may be
+much smaller than the beam footprints. Bathymetry data derived from
+sources other than multibeam data (e.g. xyz, lidar, photogrammetry)
+are treated as points rather than soundings with footprints; the
+full weight of each sounding is applied to the grid cell in which it
+is located.
+<P>
+The <B>-F</B><I>6</I> option results in beam footprint gridding of multibeam
+data without application of a local slope estimate.
 <P>
 Normally, all of the data which falls into the region of interest
 is used to construct the gridded data set. This means that the
@@ -263,18 +283,30 @@ option is ignored when the minimum or maximum filter gridding
 algorithms are used.
 <P>
 <A NAME="lbAF">&nbsp;</A>
-<H2>AUTHORSHIP</H2>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
 
-David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+David W. Caress
 <BR>
 
 <BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
-Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+Dale N. Chayes
 <BR>
 
-<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
 <A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
@@ -336,13 +368,13 @@ Default:  <I>xdim</I> = <I>ydim</I> = 101.
 Sets the grid cell spacing to <I>dx</I> in longitude and <I>dy</I>
 in latitude. If <I>units</I> is not specified, the <I>dx</I>
 and <I>dy</I> values are assumed to be in meters. Valid values
-for <I>units</I> include &quot;km&quot;, &quot;meters&quot;, and &quot;degrees&quot;.
+for <I>units</I> include &quot;km&quot;, &quot;meters&quot;, &quot;feet&quot;, &quot;degrees&quot;, &quot;arcmin&quot;, and &quot;arcsec&quot;.
 If not in degrees, the grid cell spacing values are converted to
-degrees using the central latitude of the grid. If
-<I>dy</I> = 0.0, then the latitude cell spacing will be set
-equal to the longitude cell spacing (after conversion to
-degrees, if necessary).
-By default, the grid spacing is calculated from
+degrees. For &quot;km&quot; and &quot;meters&quot;, the conversion to degrees is made using the
+distance per degree latitude calculated for the Earth's surface at the central
+latitude of the grid. If <I>dy</I> = 0.0, then the latitude cell spacing will
+be set equal to the longitude cell spacing (after conversion to degrees, if
+necessary). By default, the grid spacing is calculated from
 the grid bounds and the grid dimensions. When the user
 uses the <B>-E</B> option to set the cell spacings, the
 grid dimensions are calculated using the grid bounds and
@@ -352,10 +384,10 @@ the grid bounds as specified. Appending an ! to the end of
 the <B>-E</B> arguments forces <B>mbgrid</B> to use the
 exact grid cell spacing values specified by adjusting the
 grid bounds.
-Default: If neither the <B>-E</B> or <B>-DP options are specified,
+Default: If neither the <B>-E</B> or <B>-D</B> options are specified,
 the program sets the grid cell spacing to be 0.02 times the maximum
 sonar altitude in the input files.
-<DT>-F</B>
+<DT><B>-F</B>
 
 <DD>
 <I>mode</I>
@@ -366,7 +398,8 @@ Sets the gridding algorithm to be used.
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Median&nbsp;Filter<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Filter<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;4:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum&nbsp;Filter<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted&nbsp;Sonar&nbsp;Footprint<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted&nbsp;Sonar&nbsp;Footprint&nbsp;with&nbsp;slope<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;6:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted&nbsp;Sonar&nbsp;Footprint<BR>
 The default is <I>mode</I> = 1 (Gaussian Weighted Mean).
 <DT><B>-G</B>
 
@@ -750,7 +783,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
 <P>
 <BR>&nbsp;Program&nbsp;MBGRID
-<BR>&nbsp;Version&nbsp;$Id:&nbsp;mbgrid.1&nbsp;2096&nbsp;2013-06-04&nbsp;08:17:22Z&nbsp;caress&nbsp;$
+<BR>&nbsp;Version&nbsp;$Id:&nbsp;mbgrid.1&nbsp;2300&nbsp;2017-04-15&nbsp;08:28:27Z&nbsp;caress&nbsp;$
 <BR>&nbsp;MB-system&nbsp;Version&nbsp;4.5
 <P>
 <BR>&nbsp;MBGRID&nbsp;Parameters:
@@ -8382,7 +8415,7 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
 <DT><A HREF="#lbAG">OPTIONS</A><DD>
 <DT><A HREF="#lbAH">EXAMPLES</A><DD>
 <DT><A HREF="#lbAI">SEE ALSO</A><DD>
@@ -8393,12 +8426,9 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 2 January 2017</P></CENTER>
 
 <HR>
-<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
-<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
-to MB-System Home Page...</A></P>
 
 </BODY>
 </HTML>

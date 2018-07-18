@@ -324,8 +324,8 @@ XdrSurf surf_insertNewSdaBlockAtActualPosition(SurfDataInfo* toSurfDataInfo,
  {
   return(SURF_CANT_GET_MEMORY);
  }
- toNewThread = (SurfSdaThread*)
-                   calloc((u_int)newLengthOfThread,sizeof(SurfSdaThreadElement));
+ toNewThread = (SurfSdaThread *)
+                   calloc((u_int)newLengthOfThread,sizeof(SurfSdaThread));
  if(toNewThread == NULL)
  {
   free(toNewSdaBlock);
