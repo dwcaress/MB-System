@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	make_mbhtml	8/19/97
 #    $Id$
 #
-#    Copyright (c) 1997-2014 by
+#    Copyright (c) 1997-2016 by
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -32,60 +32,6 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Version:
 #   $Id$
 #
-# Revisions:
-#   $Log: make_mbhtml,v $
-#   Revision 5.12  2003/12/04 23:10:21  caress
-#   Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
-#
-#   Revision 5.11  2003/08/07 21:21:50  caress
-#   Changed to reflect use of CVS instead of raw RCS and the placement of source manual pages in mbystem/man/manl instead of src/* directories.
-#
-#   Revision 5.10  2003/04/17 21:43:48  caress
-#   Release 5.0.beta30
-#
-#   Revision 5.9  2002/08/30 19:55:38  caress
-#   Release 5.0.beta22.
-#   Fixed script for SGI.
-#
-#   Revision 5.8  2002/08/28 01:36:56  caress
-#   Updated documentation for 5.0.beta22.
-#
-#   Revision 5.7  2002/07/22 01:11:43  caress
-#   Added generation of postscript files.
-#
-#   Revision 5.6  2002/01/02 20:20:08  caress
-#   Fixed handling of operating system differences.
-#
-# Revision 5.5  2001/12/30  21:03:54  caress
-# Fixed handling of operating system parameter.
-#
-#   Revision 5.4  2001/11/19 23:52:41  dcaress
-#   Made it work on both SGI's and Linux.
-#
-#   Revision 5.3  2001-07-20 11:00:05-07  caress
-#   Don't know what I did...
-#
-# Revision 5.2  2001/06/08  21:54:03  caress
-# Version 5.0.beta01
-#
-# Revision 5.1  2001/04/25  05:10:56  caress
-# Changed from using awf to groff.
-#
-#   Revision 5.0  2001/03/23 01:48:38  caress
-#   Trying to get out release 5.0.beta00.
-#
-# Revision 4.3  1997/09/17  21:48:31  caress
-# Fixed typo.
-#
-# Revision 4.2  1997/09/17  21:46:07  caress
-# Put last update into man page html files.
-#
-# Revision 4.1  1997/09/17  20:07:29  caress
-# Fixed details.
-#
-# Revision 4.0  1997/09/15  19:13:10  caress
-# Real Version 4.5
-#
 #
 #--------------------------------------------------------------------
 #
@@ -110,7 +56,7 @@ print "mbformat -W > mbsystem_formats.html\n";
 
 # Copy necessary files
 `cp mbsystem_home.html index.html`;
-@preformatted_files = `/bin/ls -1 index.html mbsystem*.html gpl.html mbsystem_version.txt MBTeamJul2003.jpg caress_chayes_ferreira_Feb2014.jpg caress2001.gif ChayesJul2003.gif Christina_d_S_Ferreira_crop.jpg KrystleAnderson2013.gif ValJul2003.gif mbsystem*.gif`;
+@preformatted_files = `/bin/ls -1 index.html mbsystem*.html gpl.html mbsystem_version.txt MBTeamJul2003.jpg caress_chayes_ferreira_Feb2014.jpg Christina_d_S_Ferreira_2012_crop.jpg caress2001.gif ChayesJul2003.gif Christina_d_S_Ferreira_crop.jpg KrystleAnderson2013.gif ValJul2003.gif mbsystem*.gif`;
 foreach $file (@preformatted_files) {
     chop($file);
     print "cp $file ../html\n";

@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hypc8101.h	8/21/94
  *	$Id$
  *
- *    Copyright (c) 1994-2014 by
+ *    Copyright (c) 1994-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,43 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	August 21, 1994
- * $Log: mbf_hypc8101.h,v $
- * Revision 5.3  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2003/01/15 20:51:48  caress
- * Release 5.0.beta28
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.1  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.0  1999/01/01  23:38:01  caress
- * MB-System version 4.6beta6
- *
- * Revision 4.2  1998/10/05 17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.0  1994/10/21  12:35:04  caress
- * Release V4.0
- *
- * Revision 4.0  1994/10/21  12:35:04  caress
- * Release V4.0
- *
- * Revision 1.1  1994/10/21  12:20:01  caress
- * Initial revision
- *
- * Revision 1.1  1994/10/21  12:13:33  caress
- * Initial revision
- *
  *
  *
  */
@@ -450,127 +413,126 @@
  */
 
 /* maximum number of beams and pixels */
-#define	MBF_HYPC8101_MAXBEAMS	101
-#define	MBF_HYPC8101_COMMENT_LENGTH	200
-#define	MBF_HYPC8101_NHCP_MAX		20
-#define	MBF_HYPC8101_NGYR_MAX		20
-#define	MBF_HYPC8101_NPOS_MAX		20
-#define	MBF_HYPC8101_NRAW_MAX		20
-#define	MBF_HYPC8101_MAXLINE		1024
-struct mbf_hypc8101_struct
-	{
+#define MBF_HYPC8101_MAXBEAMS 101
+#define MBF_HYPC8101_COMMENT_LENGTH 200
+#define MBF_HYPC8101_NHCP_MAX 20
+#define MBF_HYPC8101_NGYR_MAX 20
+#define MBF_HYPC8101_NPOS_MAX 20
+#define MBF_HYPC8101_NRAW_MAX 20
+#define MBF_HYPC8101_MAXLINE 1024
+struct mbf_hypc8101_struct {
 	/* type of data record */
-	int	kind;			/* Data vs Comment */
+	int kind; /* Data vs Comment */
 
 	/* type of sonar */
-	int	sonar;			/* Type of Reson sonar */
+	int sonar; /* Type of Reson sonar */
 
 	/* parameter info (parameter telegrams) */
-	int	par_year;
-	int	par_month;
-	int	par_day;
-	int	par_hour;
-	int	par_minute;
-	int	par_second;
-	int	par_hundredth_sec;
-	int	par_thousandth_sec;
-	short	roll_offset;	/* roll offset (0.01 degrees) */
-	short	pitch_offset;	/* pitch offset (0.01 degrees) */
-	short	heading_offset;	/* heading offset (0.01 degrees) */
-	short	time_delay;	/* positioning system delay (0.001 sec) */
-	short	transducer_depth;	/* tranducer depth (0.01 meters) */
-	short	transducer_height;	/* reference height (0.01 meters) */
-	short	transducer_x;	/* reference athwartships offset (0.01 meters) */
-	short	transducer_y;	/* reference fore-aft offset (0.01 meters) */
-	short	antenna_x;	/* antenna athwartships offset (0.01 meters) */
-	short	antenna_y;	/* antenna fore-aft offset (0.01 meters) */
-	short	antenna_z;	/* antenna height (0.01 meters) */
-	short	motion_sensor_x;/* motion sensor athwartships offset (0.01 meters) */
-	short	motion_sensor_y;/* motion sensor fore-aft offset (0.01 meters) */
-	short	motion_sensor_z;/* motion sensor height offset (0.01 meters) */
-	short	spare;
-	short	line_number;
-	short	start_or_stop;
-	short	transducer_serial_number;
+	int par_year;
+	int par_month;
+	int par_day;
+	int par_hour;
+	int par_minute;
+	int par_second;
+	int par_hundredth_sec;
+	int par_thousandth_sec;
+	short roll_offset;       /* roll offset (0.01 degrees) */
+	short pitch_offset;      /* pitch offset (0.01 degrees) */
+	short heading_offset;    /* heading offset (0.01 degrees) */
+	short time_delay;        /* positioning system delay (0.001 sec) */
+	short transducer_depth;  /* tranducer depth (0.01 meters) */
+	short transducer_height; /* reference height (0.01 meters) */
+	short transducer_x;      /* reference athwartships offset (0.01 meters) */
+	short transducer_y;      /* reference fore-aft offset (0.01 meters) */
+	short antenna_x;         /* antenna athwartships offset (0.01 meters) */
+	short antenna_y;         /* antenna fore-aft offset (0.01 meters) */
+	short antenna_z;         /* antenna height (0.01 meters) */
+	short motion_sensor_x;   /* motion sensor athwartships offset (0.01 meters) */
+	short motion_sensor_y;   /* motion sensor fore-aft offset (0.01 meters) */
+	short motion_sensor_z;   /* motion sensor height offset (0.01 meters) */
+	short spare;
+	short line_number;
+	short start_or_stop;
+	short transducer_serial_number;
 
 	/* comment */
-	char	comment[MBSYS_RESON_COMMENT_LENGTH];
+	char comment[MBSYS_RESON_COMMENT_LENGTH];
 
 	/* position (position telegrams) */
-	int	pos_year;
-	int	pos_month;
-	int	pos_day;
-	int	pos_hour;
-	int	pos_minute;
-	int	pos_second;
-	int	pos_hundredth_sec;
-	int	pos_thousandth_sec;
-	int	pos_latitude;		/* 180 deg = 2e9 */
-	int	pos_longitude;		/* 180 deg = 2e9 */
-	int	utm_northing;		/* 0.01 m */
-	int	utm_easting;		/* 0.01 m */
-	int	utm_zone_lon;		/* 180 deg = 2e9 */
-	char	utm_zone;
-	char	hemisphere;
-	char	ellipsoid;
-	char	pos_spare;
-	int	semi_major_axis;
-	int	other_quality;
+	int pos_year;
+	int pos_month;
+	int pos_day;
+	int pos_hour;
+	int pos_minute;
+	int pos_second;
+	int pos_hundredth_sec;
+	int pos_thousandth_sec;
+	int pos_latitude;  /* 180 deg = 2e9 */
+	int pos_longitude; /* 180 deg = 2e9 */
+	int utm_northing;  /* 0.01 m */
+	int utm_easting;   /* 0.01 m */
+	int utm_zone_lon;  /* 180 deg = 2e9 */
+	char utm_zone;
+	char hemisphere;
+	char ellipsoid;
+	char pos_spare;
+	int semi_major_axis;
+	int other_quality;
 
 	/* sound velocity profile */
-	int	svp_year;
-	int	svp_month;
-	int	svp_day;
-	int	svp_hour;
-	int	svp_minute;
-	int	svp_second;
-	int	svp_hundredth_sec;
-	int	svp_thousandth_sec;
-	int	svp_latitude;		/* 180 deg = 2e9 */
-	int	svp_longitude;		/* 180 deg = 2e9 */
-	int	svp_num;
-	int	svp_depth[500]; /* 0.1 meters */
-	int	svp_vel[500];	/* 0.1 meters/sec */
+	int svp_year;
+	int svp_month;
+	int svp_day;
+	int svp_hour;
+	int svp_minute;
+	int svp_second;
+	int svp_hundredth_sec;
+	int svp_thousandth_sec;
+	int svp_latitude;  /* 180 deg = 2e9 */
+	int svp_longitude; /* 180 deg = 2e9 */
+	int svp_num;
+	int svp_depth[500]; /* 0.1 meters */
+	int svp_vel[500];   /* 0.1 meters/sec */
 
 	/* bathymetry */
-	int	year;
-	int	month;
-	int	day;
-	int	hour;
-	int	minute;
-	int	second;
-	int	hundredth_sec;
-	int	thousandth_sec;
-	int	latitude;		/* 180 deg = 2e9 */
-	int	longitude;		/* 180 deg = 2e9 */
-	int	roll;			/* 0.005 degrees */
-	int	pitch;			/* 0.005 degrees */
-	int	heading;		/* 0.01 degrees */
-	int	heave;			/* 0.001 meters */
-	int	ping_number;
-	int	sound_vel;	/* 0.1 meters/sec */
-	int	mode;		/* unused */
-	int	gain1;		/* unused */
-	int	gain2;		/* unused */
-	int	gain3;		/* unused */
-	int	beams_bath;
+	int year;
+	int month;
+	int day;
+	int hour;
+	int minute;
+	int second;
+	int hundredth_sec;
+	int thousandth_sec;
+	int latitude;  /* 180 deg = 2e9 */
+	int longitude; /* 180 deg = 2e9 */
+	int roll;      /* 0.005 degrees */
+	int pitch;     /* 0.005 degrees */
+	int heading;   /* 0.01 degrees */
+	int heave;     /* 0.001 meters */
+	int ping_number;
+	int sound_vel; /* 0.1 meters/sec */
+	int mode;      /* unused */
+	int gain1;     /* unused */
+	int gain2;     /* unused */
+	int gain3;     /* unused */
+	int beams_bath;
 	short bath[MBF_HYPC8101_MAXBEAMS];
-				/* depths:  0.01 meters */
+	/* depths:  0.01 meters */
 	short int bath_acrosstrack[MBF_HYPC8101_MAXBEAMS];
-				/* acrosstrack distances: 0.01 meters */
+	/* acrosstrack distances: 0.01 meters */
 	short int bath_alongtrack[MBF_HYPC8101_MAXBEAMS];
-				/* alongtrack distances: 0.01 meters */
+	/* alongtrack distances: 0.01 meters */
 	short int tt[MBF_HYPC8101_MAXBEAMS];
-				/* travel times:         0.01 msec */
+	/* travel times:         0.01 msec */
 	short int angle[MBF_HYPC8101_MAXBEAMS];
-				/* 0.005 degrees */
+	/* 0.005 degrees */
 	short int quality[MBF_HYPC8101_MAXBEAMS];
-				/* 0 (bad) to 3 (good) */
+	/* 0 (bad) to 3 (good) */
 	short int amp[MBF_HYPC8101_MAXBEAMS];
-				/* ??? */
+	/* ??? */
 
 	/* record keeping variables */
-	double	start_time_d;
-	double	angle0;
-	double	angle_inc;
-	};
+	double start_time_d;
+	double angle0;
+	double angle_inc;
+};

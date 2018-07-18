@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbotps</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  12 July 2014 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  6 May 2018 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,9 +28,13 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbotps</B> [<B>-A</B><I>tideformat</I> <B>-B</B><I>year/month/day/hour/minute/second</I>
+<B>-C</B><I>tidestationformat</I>
 <B>-D</B><I>interval</I> <B>-E</B><I>year/month/day/hour/minute/second
-</I><B>-F</B><I>format</I> <B>-I</B><I>datalist.mb-1</I>
-<B>-M</B> <B>-O</B><I>output</I> <B>-P</B><I>otps_location</I> <B>-R</B><I>lon/lat</I> <B>-V</B>]
+</I><B>-F</B><I>format</I> <B>-I</B><I>datalist</I>
+<B>-M</B> <B>-N</B><I>tidestationfile</I> <B>-O</B><I>output</I>
+<B>-P</B><I>otps_location</I>
+<B>-R</B><I>lon/lat</I> <B>-S</B> <B>-T</B><I>model</I>
+<B>-U</B><I>tidestationlon/tidestationlat</I> <B>-V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -91,6 +95,20 @@ edited to have the following contents:
 <BR>
 
 <P>
+The OTPS2 models are structured similarly, so that the tpxo8atlas model consists of
+four files:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Model_atlas
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;hf.tpxo8_atlas_30_v1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;uv.tpxo8_atlas_30_v1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;grid_tpxo8atlas_30_v1
+<BR>
+
+where, if these are located in the directory /usr/local/Cellar/otps/2/DATA/,
+the contents of the file Model_atlas is:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;/usr/local/Cellar/otps/2/DATA/hf.tpxo8_atlas_30_v1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;/usr/local/Cellar/otps/2/DATA/uv.tpxo8_atlas_30_v1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;/usr/local/Cellar/otps/2/DATA/grid_tpxo8atlas_30_v1
+<P>
 <B>MBotps</B> can be operated in two modes. First, users may use the <B>-R</B>,
 <B>-B</B>, and <B>-E</B> options to specify a location and the beginning and end times of
 a tidal model for that location. The <B>-D</B> option sets the time interval of values in
@@ -103,19 +121,42 @@ locations at intervals specified with the <B>-D</B> option, and if the <B>-M</B>
 is specified, the swath file's processing parameter file is modified so that <B>mbprocess</B>
 applies the tidal model during processing.
 <P>
+The <B>-C</B><I>tidestationformat</I>, <B>-N</B><I>tidestationfile</I>, and 
+<B>-U</B><I>tidestationlon/tidestationlat</I> commands together allow users to input
+observations from a tide station; these observations can be used to calculate
+corrections to tidal model values in the vicinity of the tide station.
+If tide station data are specified, then <B>MBotps</B> calculates
+the difference between the observed and modeled tide at that station for each data
+point in the input tide station data. This difference time series is then used as
+a correction to the output tide models, whether at a location specified with the
+<B>-R</B><I>lon/lat</I> option or for swath data specified with the
+<B>-I</B><I>datalist</I> option.
+<P>
 <A NAME="lbAF">&nbsp;</A>
-<H2>AUTHORSHIP</H2>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
 
-David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+David W. Caress
 <BR>
 
 <BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
-Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+Dale N. Chayes
 <BR>
 
-<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
 <A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
@@ -142,6 +183,23 @@ If <I>tideformat</I> = 1, then the output format is:
 <BR>
 
 where time_d is in seconds since January 1, 1970 and tide is in meters.
+<DT><B>-C</B>
+
+<DD>
+<I>tidestationformat
+<BR>
+
+This option sets the format of the tide station data in the file specified using
+the </I><B>-N</B><I>tidestationfile</I> option. The tide station data may be in one of
+four ASCII, space delimited, table formats:
+<BR>&nbsp;&nbsp;<I>tidestationformat</I>=1:&nbsp;format&nbsp;is&nbsp;&lt;time_d&nbsp;tide&gt;
+<BR>&nbsp;&nbsp;<I>tidestationformat</I>=2:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;tide&gt;
+<BR>&nbsp;&nbsp;<I>tidestationformat</I>=3:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;jday&nbsp;hour&nbsp;min&nbsp;sec&nbsp;tide&gt;
+<BR>&nbsp;&nbsp;<I>tidestationformat</I>=4:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;jday&nbsp;daymin&nbsp;sec&nbsp;tide&gt;
+<BR>
+
+Note that in format 1 the value time_d = decimal seconds since 1/1/1970 and that
+format 4 the value daymin = decimal minutes since the start of day.
 <DT><B>-B</B>
 
 <DD>
@@ -213,6 +271,14 @@ If the <B>-I</B> option has been used so that tidal models are created for swath
 then this option causes each swath file's parameter file to be modified so that
 <B>mbprocess</B> will read and apply the ancilliary tidal model file created by
 <B>mbotps</B>.
+<DT><B>-N</B>
+
+<DD>
+<I>tidestationfile</I>
+<BR>
+
+Sets the filename of the tide station data file used to correct the output tide
+model.
 <DT><B>-O</B>
 
 <DD>
@@ -237,14 +303,28 @@ the tide model to be used by <B>predict_tide</B>.
 
 Sets the longitude and latitude position at which the tidal model will be
 calculated.
+<DT><B>-S</B>
+
+<DD>
+If tide models are being generated for swath files specified using the <B>-I</B> option,
+then skip files that already have an existing tide model.
 <DT><B>-T</B>
 
 <DD>
-<I>filename</I>
+<I>model</I>
 <BR>
 
 Sets the name of the OTPSnc tidal model to be used. This model must be part of
-the local OTPSnc installation.
+the local OTPSnc installation. Examples include &quot;tpxo7.2&quot; and &quot;altas&quot;.
+Default: &quot;tpxo7.2&quot;
+<DT><B>-U</B>
+
+<DD>
+<I>longitude/latitude</I>
+<BR>
+
+Sets the longitude and latitude position of the tide station from which the data
+specified with the <B>-N</B><I>tidestationfile</I>.
 <DT><B>-V</B>
 
 <DD>
@@ -264,7 +344,7 @@ at 60 second intervals over the day February 21, 2009. The following will suffic
 The shell output looks like:
 <P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.1&nbsp;2196&nbsp;2014-07-14&nbsp;05:52:06Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.1&nbsp;2336&nbsp;2018-06-07&nbsp;01:27:18Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.4.2137<BR>
 <P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Checking&nbsp;for&nbsp;available&nbsp;OTPS&nbsp;tide&nbsp;models<BR>
@@ -295,7 +375,7 @@ The shell output looks like:
 The output tidal model is in the file tide_model.txt, which includes
 data that look like:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.1&nbsp;2196&nbsp;2014-07-14&nbsp;05:52:06Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.1&nbsp;2336&nbsp;2018-06-07&nbsp;01:27:18Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;MB-System&nbsp;Version:&nbsp;5.4.2137<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;which&nbsp;in&nbsp;turn&nbsp;calls&nbsp;OTPS&nbsp;program&nbsp;predict_tide&nbsp;obtained&nbsp;from:<BR>
@@ -344,7 +424,7 @@ The resulting shell output looks like:
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.1&nbsp;2196&nbsp;2014-07-14&nbsp;05:52:06Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Version&nbsp;$Id:&nbsp;mbotps.1&nbsp;2336&nbsp;2018-06-07&nbsp;01:27:18Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.4.2137<BR>
 <P>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Checking&nbsp;for&nbsp;available&nbsp;OTPS&nbsp;tide&nbsp;models<BR>
@@ -383,7 +463,7 @@ The resulting shell output looks like:
 
 The output tide files have the same structure shown above:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.1&nbsp;2196&nbsp;2014-07-14&nbsp;05:52:06Z&nbsp;caress&nbsp;$<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Version:&nbsp;$Id:&nbsp;mbotps.1&nbsp;2336&nbsp;2018-06-07&nbsp;01:27:18Z&nbsp;caress&nbsp;$<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;MB-System&nbsp;Version:&nbsp;5.4.2137<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;which&nbsp;in&nbsp;turn&nbsp;calls&nbsp;OTPS&nbsp;program&nbsp;predict_tide&nbsp;obtained&nbsp;from:<BR>
@@ -434,7 +514,7 @@ easy.
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
 <DT><A HREF="#lbAG">OPTIONS</A><DD>
 <DT><A HREF="#lbAH">EXAMPLES</A><DD>
 <DT><A HREF="#lbAI">SEE ALSO</A><DD>
@@ -444,12 +524,9 @@ easy.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 12 July 2014</P></CENTER>
+Last Updated: 6 May 2018</P></CENTER>
 
 <HR>
-<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
-<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
-to MB-System Home Page...</A></P>
 
 </BODY>
 </HTML>

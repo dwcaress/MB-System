@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavadjustmerge</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  28 May 2014 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  21 April 2016 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -29,23 +29,38 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbnavadjustmerge</B> --input=project-base [--input=project-add --output=project-output
+<B>mbnavadjustmerge</B> --input=project-base
+[--input=project-add --output=project-output
+--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
+--set-global-tie-xyz=file:section[:snav]
+--set-global-tie-xyonly=file:section[:snav]
+--set-global-tie-zonly=file:section[:snav]
+--unset-global-tie=file:section
 --add-crossing=file1:section1/file2:section2
 --set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset
 --set-tie-xyz=file1:section1/file2:section2
 --set-tie-xyonly=file1:section1/file2:section2
 --set-tie-zonly=file1:section1/file2:section2
+--unset-tie=file1:section1/file2:section2
+--set-ties-xyz-all
+--set-ties-xyonly-all
+--set-ties-zonly-all
 --set-ties-xyz-with-file=file
 --set-ties-xyonly-with-file=file
 --set-ties-zonly-with-file=file
 --set-ties-xyz-by-survey=survey
 --set-ties-xyonly-by-survey=survey
 --set-ties-zonly-by-survey=survey
---set-ties-xyz-by-block=survey1/survey2--set-ties-xyonly-by-block=survey1/survey2
+--set-ties-xyz-by-block=survey1/survey2
+--set-ties-xyonly-by-block=survey1/survey2
 --set-ties-zonly-by-block=survey1/survey2
 --set-ties-zoffset-by-block=survey1/survey2/zoffset
+--set-ties-xyonly-by-time=dt
 --skip-unset-crossings
-<BR>&nbsp;--verbose&nbsp;--help&nbsp;]
+--insert-discontinuity=file:section
+--import-tie-list=filename
+--export-tie-list=filename
+--verbose --help ]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -73,18 +88,30 @@ corresponding crossing already exists), setting tie modes
 (xy only, z only, xyz),  and deleting ties.
 <P>
 <A NAME="lbAF">&nbsp;</A>
-<H2>AUTHORSHIP</H2>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
 
-David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+David W. Caress
 <BR>
 
 <BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
-Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+Dale N. Chayes
 <BR>
 
-<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
 <A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
@@ -119,6 +146,42 @@ If the <B>output</B> option is
 not specified, then the <I>project-base</I> project is used as the
 output, and the <I>project-add</I> project is added on to the
 <I>project-base</I> project.
+<DT><B>--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]</B>
+
+<DD>
+This options sets a global tie for a navigation point in the project. Global ties are
+ties to the global reference frame, which generally means GPS positions (e.g. WGS84).
+The file and section id's must be specified, along with the x (east-west), y (north-south),
+and z (vertical postive up) offset values in meters. If the snav id (navigation point id)
+is not specified, it is assumed to be 0, the first navigation point in the
+specified section. If the uncertainties in the global tie (xsigma, ysigma, zsigma)
+are not specified, then xsigma = ysigma = 10 m and zsigma = 0.5 m are assumed.
+<DT><B>--set-global-tie-xyz=file:section[:snav]</B>
+
+<DD>
+This option sets the mode of the existing specified global tie in the
+<B>MBnavadjust</B> project to be &quot;XYZ&quot;. This means all three
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-global-tie-xyonly=file:section[:snav]</B>
+
+<DD>
+This option sets the mode of the existing specified global tie in the
+<B>MBnavadjust</B> project to be &quot;XY&quot;. This means only the horizontal
+coordinates of the tie will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-global-tie-zonly=file:section[:snav]</B>
+
+<DD>
+This option sets the mode of the existing specified global tie in the
+<B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
+coordinate of the tie will be used as a constraint in the inversion
+for an optimal navigation model.
+<DT><B>--unset-global-tie=file:section</B>
+
+<DD>
+This option unsets (deletes) the specified global tie in the
+<B>MBnavadjust</B> project. 
 <DT><B>--add-crossing=file1:section1/file2:section2</B>
 
 <DD>
@@ -149,6 +212,29 @@ for an optimal navigation model.
 This option sets the mode of the existing specified tie in the
 <B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
 coordinate of the tie will be used as a constraint in the inversion
+for an optimal navigation model.
+<DT><B>--unset-tie=file1:section1/file2:section2</B>
+
+<DD>
+This option unsets (deletes) the specified tie in the
+<B>MBnavadjust</B> project. 
+<DT><B>--set-ties-xyz-all</B>
+
+<DD>
+This option sets the mode of all ties in the <B>MBnavadjust</B> project to be &quot;XYZ&quot;. This means all three
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-xyonly-all</B>
+
+<DD>
+This option sets the mode of all ties in the <B>MBnavadjust</B> project to be &quot;XY&quot;. This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
+<DT><B>--set-ties-zonly-all</B>
+
+<DD>
+This option sets the mode of all ties in the <B>MBnavadjust</B> project to be &quot;Z&quot;. This means only the vertical
+coordinate of these ties will be used as constraints in the inversion
 for an optimal navigation model.
 <DT><B>--set-ties-xyz-with-file=file</B>
 
@@ -239,12 +325,48 @@ for an optimal navigation model.
 <DD>
 This option resets the zoffset value of all ties between sections in the specified
 two surveys.
+<DT><B>--set-ties-xyonly-by-time=dt</B>
+
+<DD>
+This option sets the mode of all ties with nav points separated in time by dt or
+larger in the <B>MBnavadjust</B> project to be &quot;XY&quot;. This means only the horizontal
+coordinates of these ties will be used as constraints in the inversion
+for an optimal navigation model.
 <DT><B>--skip-unset-crossings</B>
 
 <DD>
 This option sets all unset crossings in the input projects to be
 skipped. This does not apply to any new crossings between the two
 merged projects.
+<DT><B>--unset-skipped-crossings-by-block=survey1/survey2</B>
+
+<DD>
+This option sets all skipped crossings  in the specified
+two surveys to be unset. 
+<DT><B>--unset-skipped-crossings-between-surveys</B>
+
+<DD>
+This option sets all skipped crossings between different surveys in the input
+projects to be unset. This does not apply to any new crossings between the two
+merged projects.
+<DT><B>--insert-discontinuity=file:section</B>
+
+<DD>
+This option inserts a navigation discontinuity immediately after the specified
+file and section.
+<DT><B>--import-tie-list=filename</B>
+
+<DD>
+Import a listing of navigation ties that has been exported from a different
+<B>mbnavadjust</B> project using the <B>--export-tie-list</B>
+command. 
+<DT><B>--export-tie-list=filename</B>
+
+<DD>
+Output the current navigation ties as a text file that can be imported into
+a different <B>mbnavadjust</B> project using the <B>--import-tie-list</B>
+command. The ties that are output reflect all modifications specified by other
+commands.
 <DT><B>--verbose</B>
 
 <DD>
@@ -293,7 +415,7 @@ the output project.
 <A NAME="lbAJ">&nbsp;</A>
 <H2>BUGS</H2>
 
-It started out simple and bulletproof, but now it's too complicated to be bulletproof.
+It started out simple and bulletproof, but now it's too complicated to be bulletproof. It's probably nerfgunproof, though.
 Good luck.
 <P>
 
@@ -304,7 +426,7 @@ Good luck.
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
 <DT><A HREF="#lbAG">OPTIONS</A><DD>
 <DT><A HREF="#lbAH">EXAMPLES</A><DD>
 <DT><A HREF="#lbAI">SEE ALSO</A><DD>
@@ -314,12 +436,9 @@ Good luck.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 28 May 2014</P></CENTER>
+Last Updated: 21 April 2016</P></CENTER>
 
 <HR>
-<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
-<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
-to MB-System Home Page...</A></P>
 
 </BODY>
 </HTML>

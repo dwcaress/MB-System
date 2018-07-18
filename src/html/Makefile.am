@@ -3,6 +3,7 @@ caress2001.gif \
 caress_chayes_ferreira_Feb2014.jpg \
 ChayesJul2003.gif \
 Christina_d_S_Ferreira_crop.jpg \
+Christina_d_S_Ferreira_2012_crop.jpg \
 ChangeLog.txt \
 gpl.html \
 index.html \

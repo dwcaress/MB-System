@@ -1,0 +1,301 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbconfig</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbconfig</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  12 May 2017 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbconfig</B> - provides command line access to the MB-System version and to
+the locations of the levitus database and the OTPS tidal correction software.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbconfig</B> [ 
+<BR>
+
+<B>--verbose</B>
+<B>--help</B>
+<BR>
+
+<B>--prefix</B>
+<B>--cflags</B>
+<B>--libs</B>
+<BR>
+
+<B>--version</B>
+<B>--version-id</B>
+<B>--version-major</B>
+<B>--version-minor</B>
+<B>--version-archive</B>
+<BR>
+
+<B>--levitus</B>
+<B>--otps</B>
+<BR>
+
+]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>MBconfig</B> provides command line access to the MB-System installation location 
+the compile and libs flags needed to compile and link programs using MB-System 
+libraries, and the locations of the levitus database and the OTPS tidal 
+correction software.
+When commands such as <B>--version</B> are given, the desired output will be
+written to stdout. Each desired value is printed on a separate line. If <B>--verbose</B>
+is specified, each value is output in two lines, the first consisting of a
+descriptive identifier and the second the value itself. The options include
+various forms of the installed <B>MB-System</B> version, the location of the
+Levitus water sound speed model database accessed by the program <B>mblevitus</B>,
+and the location of the installed OTPS tidal prediction software.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--help</B>
+
+<DD>
+This option causes <B>mbconfig</B> to print out its usage options and exit.
+<DT><B>--verbose</B>
+
+<DD>
+By default <B>mbconfig</B> outputs the desired values with no description or
+explanation. When <B>--verbose</B> is specified the values are preceded on a separate
+line by a descriptive identifier.
+<DT><B>--prefix</B>
+
+<DD>
+This option causes <B>mbconfig</B> to output the <B>MB-System</B> install location.
+The locations of the executable programs, the linkable libraries, and the
+header files are in directories named bin, lib, and include in the install
+locations. For instance, if the install location is &quot;/usr/local&quot;, then executable
+programs will be in &quot;/usr/local/bin&quot;, libraries in &quot;/usr/local/lib&quot;, and
+header files in &quot;/usr/local/include&quot;.
+<DT><B>--cflags</B>
+
+<DD>
+This option causes <B>mbconfig</B> to output the compiler flags needed to compile
+C programs or libraries that make use of functions available in <B>MB-System</B>
+linkable libraries. These flags consist of specifying the location of the
+<B>MB-System</B> header files.
+<DT><B>--libs</B>
+
+<DD>
+This option causes <B>mbconfig</B> to output the linker flags needed to link a
+C program with <B>MB-System</B> libraries. These flags consist of specifying the
+location of the <B>MB-System</B> dynamic libraries and the list of libraries
+available for linking.
+<DT><B>--version</B>
+
+<DD>
+This option causes <B>mbconfig</B> to output the version string of the installed
+<B>MB-System</B>.
+<DT><B>--version-id</B>
+
+<DD>
+This option causes <B>mbconfig</B> to output an integer version of the installed
+<B>MB-System</B> version. This value is constructed as follows:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;version_id&nbsp;=&nbsp;10000000&nbsp;*&nbsp;version_major&nbsp;+&nbsp;100000&nbsp;*&nbsp;version_minor&nbsp;+&nbsp;version_archive
+<BR>
+
+so that:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.5.2304&nbsp;=&gt;&nbsp;050502304
+<BR>
+
+These version id numbers are guarenteed to increase with newer versions.
+<DT><B>--version-major</B>
+
+<DD>
+This option causes <B>mbconfig</B> to output the major version number of the installed
+<B>MB-System</B>. This is the first of three values in an <B>MB-System</B> version
+string, and is incremented only rarely in conjunction with major changes to
+<B>MB-System</B> function and interfaces.
+<DT><B>--version-minor</B>
+
+<DD>
+This option causes <B>mbconfig</B> to output the minor version number of the installed
+<B>MB-System</B>. This is the second of three values in an <B>MB-System</B> version
+string, and is incremented infrequently in conjunction with significant changes to
+<B>MB-System</B> function.
+<DT><B>--version-archive</B>
+
+<DD>
+This option causes <B>mbconfig</B> to output the archive version number of the installed
+<B>MB-System</B>. This is the third of three values in an <B>MB-System</B> version
+string, and corresponds to the revision number in the <B>MB-System</B> source code
+archive. This number is incremented with every commitment of one or more changes
+to the source code archive. Typically the revision number increments several
+times between <B>MB-System</B> releases.
+<DT><B>--levitus</B>
+
+<DD>
+This option causes <B>mbconfig</B> to output the path to the Levitus water sound
+speed model database accessed by the program <B>mblevitus</B>.
+<DT><B>--otps</B>
+
+<DD>
+This option causes <B>mbconfig</B> to output the location of the OTPS tidal
+prediction software accessed by program <B>mbotps</B>.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Consider an <B>MB-System</B> installation of release 5.5.2304 on an Apple MacBook Pro
+in /usr/local with the OTPS software installed under /usr/local/src/OTPS2. In this
+case, use of <B>mbconfig</B> with various arguments has the following results:
+<BR>
+
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;mbconfig&nbsp;--prefix
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/usr/local/mbsystem
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;mbconfig&nbsp;--cflags
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-I/usr/local/include
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;mbconfig&nbsp;--libs
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-L/usr/local/libs&nbsp;-lmbaux.la&nbsp;-lmbsapi.la&nbsp;-lmbbsio.la&nbsp;-lmbview.la&nbsp;-lmbgsf.la&nbsp;-lmbxgr.la&nbsp;-lmbio.la
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;mbconfig&nbsp;--version
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.5.2304
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;mbconfig&nbsp;--version-id
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50502304
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;mbconfig&nbsp;--version-major
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;mbconfig&nbsp;--version-minor
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;mbconfig&nbsp;--version-archive
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2304
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;mbconfig&nbsp;--levitus
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/usr/local/share/mbsystem/LevitusAnnual82.dat
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;mbconfig&nbsp;--otps
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/usr/local/src/OTPS2
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;mbconfig&nbsp;--version&nbsp;--version-id&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--prefix&nbsp;--cflags&nbsp;--libs&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--version-major&nbsp;--version-minor&nbsp;--version-archive&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--levitus&nbsp;--otps&nbsp;--verbose
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Program&nbsp;mbconfig
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;MB-system&nbsp;Version&nbsp;5.5.2304
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;MB-System&nbsp;install&nbsp;prefix:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/usr/local
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;MB-System&nbsp;compile&nbsp;flags:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-I/usr/local/include
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;MB-System&nbsp;link&nbsp;flags:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-L/usr/local/libs&nbsp;-lmbaux.la&nbsp;-lmbsapi.la&nbsp;-lmbbsio.la&nbsp;-lmbview.la&nbsp;-lmbgsf.la&nbsp;-lmbxgr.la&nbsp;-lmbio.la
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;MB-System&nbsp;version:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.5.2304
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;MB-System&nbsp;version&nbsp;id:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;50502304
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;MB-System&nbsp;major&nbsp;version:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;MB-System&nbsp;minor&nbsp;version:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;MB-System&nbsp;archive&nbsp;version:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2304
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;MB-System&nbsp;Levitus&nbsp;database&nbsp;location:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/usr/local/share/mbsystem/LevitusAnnual82.dat
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;OTPS&nbsp;tide&nbsp;modeling&nbsp;package&nbsp;location:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/usr/local/src/OTPS2
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+This program is not significant enough to deserve bugs.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 12 May 2017</P></CENTER>
+
+<HR>
+
+</BODY>
+</HTML>

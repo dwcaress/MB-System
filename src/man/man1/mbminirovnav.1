@@ -1,0 +1,451 @@
+.TH mbminirovnav 1 "29 September 2017" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbminirovnav\fP \- Merges MBARI MiniROV data logs and outputs the ROV navigation
+in the format used for other ROV navigation at MBARI (format 165, MBF_MBARIROV). 
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbminirovnav\fP [
+.br
+\fB\-\-help\fP
+.br
+\fB\-\-input\fP=\fIfileroot\fP
+.br
+\fB\-\-input-nav-file\fP=\fIfile\fP
+.br
+\fB\-\-input-ctd-file\fP=\fIfile\fP
+.br
+\fB\-\-input-dvl-file\fP=\fIfile\fP
+.br
+\fB\-\-input-rov-file\fP=\fIfile\fP
+.br
+\fB\-\-interpolate-position\fP
+.br
+\fB\-\-interval\fP=\fIseconds\fP
+.br
+\fB\-\-output\fP=\fIfile\fP
+.br
+\fB\-\-rov-dive-start\fP=\fIyyyymmddhhmmss\fP
+.br
+\fB\-\-rov-dive-end\fP=\fIyyyymmddhhmmss\fP
+.br
+\fB\-\-utm-zone\fP=\fIzone_id/NorS\fP
+.br
+\fB\-\-verbose\fP ]
+
+.SH DESCRIPTION
+The MBARI MiniROV logs navigation and related data in four
+files during each dive. These include USBL tracking in the form of position fixes
+derived from the Winfrog software package, CTD data including pressure depth,
+ROV platform data including heading, roll, and pitch, and DVL data including
+altitude and velocity over bottom whenever the Doppler Velocity Log (DVL) has
+bottom lock. This data logging structure began with MiniROV dive 100 on September 5,
+2017. This program \fmbminirovnav\fP reads the four MiniROV log files and outputs
+a single ROV navigation file in the format typically used by MBARI for
+ROV Doc Ricketts and ROV Ventana navigation. \fBMB-System\fP supports MBARI ROV
+navigation as format 165 (MBF_MBARIROV). The combined MiniROV navigation can then
+be interactively edited using the tool \fBmbnavedit\fP.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-help
+.br
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-\-input\fP=\fIfileroot\fP
+.br
+The MBARI MiniROV logs files with a consistent naming scheme. For instance, the
+first set of files associated with expedition ARA08C are:
+.br
+    CTD_090517000000.txt
+    DVL_090517000000.txt
+    NAV_090517000000.txt
+    ROV_090517000000.txt
+.br
+ This option allows one to specify the date value (e.g. "090517") that then
+ determines the filenames of the four log files. Alternatively, the four logfile
+ names can be specified individually with the \-\-input-ctd-file\fP,
+ \-\-input-dvl-file\fP, \-\-input-nav-file\fP, and \-\-input-rov-file\fP options.
+.TP
+.B \-\-input-ctd-file\fP=\fIfile\fP
+.br
+Specifies the MiniROV CTD data logfile to be read. This file includes the MiniROV's
+pressure depth values.
+.TP
+.B \-\-input-dvl-file\fP=\fIfile\fP
+.br
+Specifies the MiniROV DVL data logfile to be read. This file includes the MiniROV's
+altitude and velocity over bottom values (when the ROV is close enough to the
+seafloor for the DVL to have bottom lock).
+.TP
+.B \-\-input-nav-file\fP=\fIfile\fP
+.br
+Specifies the MiniROV NAV data logfile to be read. This file includes the MiniROV's
+lateral position values as estimated by an Ultra Short Baseline tracking sonar
+and passed through the Winfrog software package.
+.TP
+.B \-\-input-rov-file\fP=\fIfile\fP
+.br
+Specifies the MiniROV ROV data logfile to be read. This file includes the MiniROV's
+heading, roll, and pitch values.
+.TP
+.B \-\-interpolate-position\fP
+.br
+This option causes repeated position values to be replaced with
+values linearly interpolated between the occasional changed (new) values. 
+See the discussion in the example section section below for why this option
+is not recommended.
+TP
+.B \-\-interval\fP=\fIseconds\fP
+.br
+This option sets the time interval in seconds of the output format 165 ROV
+navigation data. The default is 1.0 seconds.
+.TP
+.B \-\-output\fP=\fIfile\fP
+.br
+Specifies the filename for the output format 165 ROV navigation data.
+.TP
+.B \-\-rov-dive-start\fP=\fIyyyymmddhhmmss\fP
+.br
+Specifies the start time of the output format 165 ROV navigation data.
+.TP
+.B \-\-rov-dive-end\fP=\fIyyyymmddhhmmss\fP
+.br
+Specifies the end time of the output format 165 ROV navigation data.
+.TP
+.B \-\-utm-zone\fP=\fIzone_id/NorS\fP
+.br
+Specifies the UTM zone used to calculate UTM eastings and northings from the
+longitude and latitude values derived from the NAV log file. By default,
+\fBmbminirovnav\fP calculates the UTM zone based on the average longitude and
+latitude contained in the input NAV log file.
+.TP
+.B \-\-verbose\fP ]
+The \-\-verbose\fP option causes the program to be verbose.
+
+.SH EXAMPLE
+During the 2017 Beaufort Sea cruise ARA08C on the South Korean icebreaker Araon,
+the MBARI MiniROV was used for ten ROV dives during six operational days
+(September 5, 6, 8, 9, 10, 12). The MiniROV data are logged in four ASCII text
+day files defined by UTC time, with names of the form XXX_mmddyyyy000000.txt
+where XXX is CTD, DVL, NAV, or ROV. For instance, the first set of files
+associated with expedition ARA08C are listed here:
+.br
+    CTD_090517000000.txt
+    DVL_090517000000.txt
+    NAV_090517000000.txt
+    ROV_090517000000.txt
+.br
+
+The CTD files contain the serial output of the CTD sensor in CSV form, with a
+beginning that includes calibration coefficients as comments:
+.br
+    #SN: 0361
+    #CAL DATE: 161116
+    #INST DATE: 200117
+    #Soc: .5617073
+    #Voffset: -.4905716
+    #Tau20: 1.15
+    #A: -.002684434
+    #B: .0001176004
+    #C: -.000001882225
+    #E: .036
+    #FIELDS=TIME,C,T,D,S,O2uM,O2raw,DGH_T,C2_T,C2_C
+    1504629902.228,2.474,7.233,5.071,31.741,-87.877,0.000,7.332,5.514,0.076
+    1504629904.528,2.474,7.233,5.707,31.741,-87.873,0.000,7.332,5.514,0.076
+    1504629906.728,2.474,7.236,6.267,31.741,-87.884,0.000,7.332,5.514,0.076
+    1504629908.935,2.475,7.235,6.839,31.741,-87.892,0.000,7.332,5.514,0.076
+.br
+The fields of interest for the ROV navigation data are the timestamp (which is
+in epoch seconds, or seconds since 1970, in UTC) and the depth value, which
+derives from the CTD's pressure sensor.
+
+The DVL files are also CSV, with the following form:
+.br
+    #FIELDS,time,Depth,S_Time,bx,by,bz,Satus
+    1504649788.514,0.000,758463.000,-99999.000,-99999.000,-99999.000,58.000
+    1504649790.719,0.000,758712.000,-99999.000,-99999.000,-99999.000,58.000
+    1504649792.920,0.000,758961.000,-99999.000,-99999.000,-99999.000,2.000
+    1504649795.120,7.976,759109.000,-407.000,12.000,-159.000,2.000
+    1504649797.321,0.000,759304.000,-99999.000,-99999.000,-99999.000,2.000
+    1504649799.521,0.000,759497.000,-99999.000,-99999.000,-99999.000,2.000
+    1504649801.721,0.000,759735.000,-99999.000,-99999.000,-99999.000,2.000
+    1504649803.921,0.000,759928.000,-99999.000,-99999.000,-99999.000,2.000
+    1504649806.122,7.355,760142.000,-8.000,38.000,-189.000,2.000
+    1504649808.323,0.000,760365.000,-99999.000,-99999.000,-99999.000,2.000
+.br
+Here the "Depth" field is actually altitude in meters, which is nonzero only when
+the DVL has bottom lock (which is also when the bx, by, and bz velocity components
+are not -99999.000). The altitude value is currently used in the output ROV
+navigation. The DVL velocity components are not currently used, but should be used
+in the calculation of an optimal navigation model.
+
+The NAV files are simply $GPGLL strings output by the Winfrog software program
+when it is interfaced with an Ultra Short Baseline (USBL) tracking sonar appended
+after a CSV timestamp in UTC epoch seconds:
+.br
+    #FIELDS,time,$GPGLL
+    1504649757.995,$GPGLL,6952.70206,N,13903.45914,W,221550.15,V,N*68
+    
+    1504649760.205,$GPGLL,6952.70237,N,13903.46025,W,221555.21,V,N*60
+    
+    1504649762.405,$GPGLL,6952.70237,N,13903.46025,W,221555.21,V,N*60
+    
+    1504649764.607,$GPGLL,6952.70237,N,13903.46025,W,221555.21,V,N*60
+    
+    1504649766.906,$GPGLL,6952.70237,N,13903.46025,W,221555.21,V,N*60
+    
+    1504649769.106,$GPGLL,6952.70272,N,13903.46148,W,221600.16,V,N*6C
+    
+    1504649771.312,$GPGLL,6952.70272,N,13903.46148,W,221600.16,V,N*6C
+    
+    1504649773.513,$GPGLL,6952.70305,N,13903.46286,W,221605.23,V,N*6F
+    
+    1504649775.713,$GPGLL,6952.70305,N,13903.46286,W,221605.23,V,N*6F
+    
+.br
+Because the datalogger currently appends an EOL character on top of the EOL that
+is already in the $GPGLL string, these files appear to have empty alternate lines
+in a text editor. This feature is likely to be fixed in the future. The values of
+interest to ROV navigation are the ROV position in latitude and longitude, which
+are presented in the form of
+    $GPGLL,ddmm.mmmmm,H,dddmm.mmmmm,H 
+.br
+where "dd" or "ddd" are degrees, "mm.mmmmm" are decimal minutes, and H is the
+hemisphere (N or S for north or south for latitude; E or W for east or west for
+longitude). Note that the datalogger saves the most recent position fix about
+every two seconds, which means that when the USBL fails to provide a new position
+fix the logged position does not change. Thus, repeated positions correspond to
+a lack of new data.
+
+Finally, the ROV files are CSV ASCII text files in the following form:
+.br
+    #FIELDS,time,x,y,z,yaw,magna_amps,F1,F2,F3,F4,F5-6,Heading,Pitch,Roll
+    1504649787.899,-0.000,-0.000,-11.126,-0.000,3.530,1.508,-1.056,1.508,-1.056,-10.000,77.389,1.242,-4.974
+    1504649790.099,-0.000,-0.000,-11.099,-0.000,3.520,1.192,-1.143,1.192,-1.143,-10.000,77.832,-0.353,-6.566
+    1504649792.301,-0.000,-0.000,-11.153,-0.000,3.510,0.410,-0.383,0.410,-0.383,-10.000,77.580,-2.960,-5.878
+    1504649794.503,-0.000,-0.000,-10.989,-0.000,3.510,-0.048,-1.232,-0.048,-1.232,-10.000,79.641,-1.444,-5.637
+    1504649796.717,-0.000,-0.000,-11.099,-0.000,3.490,0.801,-0.104,0.801,-0.104,-10.000,80.332,-2.918,-6.626
+    1504649798.917,-0.000,-0.000,-11.044,-0.000,3.520,0.176,-1.530,0.176,-1.530,-10.000,80.748,-1.917,-5.723
+    1504649801.216,-0.000,-0.000,-11.153,-0.000,3.520,1.752,-0.497,1.752,-0.497,-10.000,83.300,-2.980,-6.701
+    1504649803.416,5.097,-0.000,-11.126,-0.000,3.650,0.639,2.402,0.639,2.402,-10.000,82.556,-2.840,-4.664
+    1504649805.618,6.581,0.483,-11.153,-0.000,4.980,9.577,7.055,9.253,8.021,-10.000,82.143,-2.174,-6.512
+    1504649807.818,6.718,0.873,-11.126,-0.000,4.890,6.255,6.351,5.111,8.097,-10.000,76.531,-0.979,-3.645
+.br
+Here the values of interest to ROV navigation are the heading, pitch and roll.
+
+This program, \fBmbminirovnav\fP requires all four log files (CTD, DVL, NAV and ROV)
+to produce the output ROV navigation in format 165 files that can be further processed
+or plotted with \fBMB-System\fP. In practice, ROV dives often cross over the UTC
+day boundaries, and so it is frequently sensible to concatenate the data from an
+entire expedition and extract only the data of interest for individual ROV dives.
+
+For the case of the ARA08C MiniROV dives, only the time spent with ROV on bottom
+is of interest, and so we break up the navigation into files associated with the
+on-bottom components of each of the ten dives. What follows is a workflow that
+produces a format 165 file for each of the dives according to the known
+on and off bottom times in UTC. Because ROV dives cross the UTC day boundaries,
+we start by concatenating all of the log files for the expedition into single
+long files, and then use those long files as the inputs to \fBmbminirovnav\fP.
+
+The start and end times are defined by the \fB\-\-rov\-dive\-start\fP and
+\fB\-\-rov\-dive\-end\fP commands.
+
+The format 165 ROV navigation files include UTM
+easting and northing fields but no place to define which UTM zone is used.
+By default, \fBmbminirovnav\fP will use the average input longitude and latitude
+values to determine the UTM zone to use, but the zone can also be specified using
+using the \fB\-\-utm\-zone\fP command. In the case of the ARA08C MiniROV dives,
+some were in UTM zone 7 and others in UTM zone 8, and we specify which to use
+for each dive.
+
+This example also invokes the \fB\-\-interpolate\-position\fP command, which causes
+\fBmbminirovnav\fP to interpolate longitude and latitude values onto the output
+times. All of the other values are interpolated onto the output times regardless.
+USBL tracking of an ROV is intermittent in that interrogration usually occurs
+at intervals of a few seconds and that many, if not most, interrogations
+are unsuccessful. New positions are passed from Winfrog into the MiniROV only
+when they become available. The MiniROV navigation logging records the most recent
+position (in the form of the $GPGLL string sent from Winfrog) every two seconds
+or so; these values thus repeat until a new value is available. By default,
+\fBmbminirovnav\fP replicates this data flow in the output format 165 ROV navigation
+file, repeating position values until now positions are available.
+If the \fB\-\-interpolate-position\fP option
+is specified, \fBmbminirovnav\fP instead replaces repeated position values with
+values linearly interpolated between the occasional changed (new) values. This
+may actually be undesirable if some of the USBL fixes are badly wrong (outliers).
+The interactive program \fBmbnavedit\fP recognizes repeated positions as potentially
+null, and allows one to flag bad fixes and apply interpolation that only
+uses the unrepeated and unflagged fixes. Therefore, the recommended approach is
+to not use the \fB\-\-interpolate-position\fP option in \fBmbminirovnav\fP, and to
+instead apply the interpolation using \fBmbnavadjust\fP.
+
+
+
+    # Processing MiniROV log files into MB-System compatible ROV navigation
+    #
+    # Wrote new tool mbminirovnav to be included in MB-System that outputs
+    # format 165 ROV navigation files.
+    # Dive_#	on_bottom_(Z)	off_bottom_(Z)     UTM_Zone
+    # 100	    5-Sep	16:54	5-Sep	17:56       8
+    # 101	    5-Sep	20:07	5-Sep	22:05       8
+    # 102	    6-Sep	1:55	6-Sep	02:39       8
+    # 103	    6-Sep	20:56	6-Sep	22:46       8
+    # 104	    8-Sep	16:30	8-Sep	19:12       7
+    # 105	    8-Sep	23:43	9-Sep	02:15       7
+    # 106	    9-Sep	18:00	9-Sep	21:19       7
+    # 107	    9-Sep	23:38	10-Sep	02:18       7
+    # 108	    10-Sep	19:27	10-Sep	23:15       7
+    # 109	    12-Sep	16:41	12-Sep	19:16       8
+    #
+    # First concatenate all the MiniROV log files locally
+    cat ../MiniROVArctic2017logfiles/CTD*txt > MiniROV_CTD_2017Araon_ARA8C.txt
+    cat ../MiniROVArctic2017logfiles/DVL*txt > MiniROV_DVL_2017Araon_ARA8C.txt
+    cat ../MiniROVArctic2017logfiles/NAV*txt > MiniROV_NAV_2017Araon_ARA8C.txt
+    cat ../MiniROVArctic2017logfiles/ROV*txt > MiniROV_ROV_2017Araon_ARA8C.txt
+    #
+    # Generate ROV navigation for MiniROV dive 100
+    mbminirovnav --input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt \ 
+                    --input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt \ 
+                    --input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt \ 
+                    --input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt \ 
+                    --output=MiniROVnav_100_20170905_ARA8C.mb165 \ 
+                    --utm-zone=8N \ 
+                    --rov-dive-start=2017/09/05/16/54/00 \ 
+                    --rov-dive-end=2017/09/05/17/56/00 \ 
+                    --interpolate-position \ 
+                    --verbose
+    #
+    # Generate ROV navigation for MiniROV dive 101
+    mbminirovnav --input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt \ 
+                    --input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt \ 
+                    --input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt \ 
+                    --input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt \ 
+                    --output=MiniROVnav_101_20170905_ARA8C.mb165 \ 
+                    --utm-zone=8N \ 
+                    --rov-dive-start=2017/09/05/20/07/00 \ 
+                    --rov-dive-end=2017/09/05/22/05/00 \ 
+                    --interpolate-position \ 
+                    --verbose
+    #
+    # Generate ROV navigation for MiniROV dive 102
+    mbminirovnav --input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt \ 
+                    --input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt \ 
+                    --input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt \ 
+                    --input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt \ 
+                    --output=MiniROVnav_102_20170905_ARA8C.mb165 \ 
+                    --utm-zone=8N \ 
+                    --rov-dive-start=2017/09/06/01/58/30 \ 
+                    --rov-dive-end=2017/09/06/02/30/00 \ 
+                    --interpolate-position \ 
+                    --verbose
+    #
+    # Generate ROV navigation for MiniROV dive 103
+    mbminirovnav --input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt \ 
+                    --input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt \ 
+                    --input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt \ 
+                    --input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt \ 
+                    --output=MiniROVnav_103_20170906_ARA8C.mb165 \ 
+                    --utm-zone=7N \ 
+                    --rov-dive-start=2017/09/06/20/56/00 \ 
+                    --rov-dive-end=2017/09/06/22/46/00 \ 
+                    --interpolate-position \ 
+                    --verbose
+    #
+    # Generate ROV navigation for MiniROV dive 104
+    mbminirovnav --input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt \ 
+                    --input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt \ 
+                    --input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt \ 
+                    --input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt \ 
+                    --output=MiniROVnav_104_20170908_ARA8C.mb165 \ 
+                    --utm-zone=7N \ 
+                    --rov-dive-start=2017/09/08/16/30/00 \ 
+                    --rov-dive-end=2017/09/08/19/12/00 \ 
+                    --interpolate-position \ 
+                    --verbose
+    #
+    # Generate ROV navigation for MiniROV dive 105
+    mbminirovnav --input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt \ 
+                    --input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt \ 
+                    --input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt \ 
+                    --input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt \ 
+                    --output=MiniROVnav_105_20170908_ARA8C.mb165 \ 
+                    --utm-zone=7N \ 
+                    --rov-dive-start=2017/09/08/23/43/00 \ 
+                    --rov-dive-end=2017/09/09/02/14/00 \ 
+                    --interpolate-position \ 
+                    --verbose
+    #
+    # Generate ROV navigation for MiniROV dive 106
+    mbminirovnav --input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt \ 
+                    --input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt \ 
+                    --input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt \ 
+                    --input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt \ 
+                    --output=MiniROVnav_106_20170909_ARA8C.mb165 \ 
+                    --utm-zone=7N \ 
+                    --rov-dive-start=2017/09/09/18/00/00 \ 
+                    --rov-dive-end=2017/09/10/21/19/00 \ 
+                    --interpolate-position \ 
+                    --verbose
+    #
+    # Generate ROV navigation for MiniROV dive 107
+    mbminirovnav --input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt \ 
+                    --input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt \ 
+                    --input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt \ 
+                    --input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt \ 
+                    --output=MiniROVnav_107_20170909_ARA8C.mb165 \ 
+                    --utm-zone=7N \ 
+                    --rov-dive-start=2017/09/09/23/38/00 \ 
+                    --rov-dive-end=2017/09/10/02/18/00 \ 
+                    --interpolate-position \ 
+                    --verbose
+    #
+    # Generate ROV navigation for MiniROV dive 108
+    mbminirovnav --input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt \ 
+                    --input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt \ 
+                    --input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt \ 
+                    --input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt \ 
+                    --output=MiniROVnav_108_20170910_ARA8C.mb165 \ 
+                    --utm-zone=7N \ 
+                    --rov-dive-start=2017/09/10/19/27/00 \ 
+                    --rov-dive-end=2017/09/10/23/15/00 \ 
+                    --interpolate-position \ 
+                    --verbose
+    #
+    # Generate ROV navigation for MiniROV dive 109
+    mbminirovnav --input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt \ 
+                    --input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt \ 
+                    --input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt \ 
+                    --input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt \ 
+                    --output=MiniROVnav_109_20170912_ARA8C.mb165 \ 
+                    --utm-zone=8N \ 
+                    --rov-dive-start=2017/09/12/16/41/00 \ 
+                    --rov-dive-end=2017/09/12/19/16/00 \ 
+                    --interpolate-position \ 
+                    --verbose
+
+.SH SEE ALSO
+\fBmbsystem\fP(1)
+
+.SH BUGS
+Da.

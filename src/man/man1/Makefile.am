@@ -9,6 +9,7 @@ mbauvloglist.1 \
 mbauvnavusbl.1 \
 mbbackangle.1 \
 mbclean.1 \
+mbconfig.1 \
 mbcontour.1 \
 mbcopy.1 \
 mbctdlist.1 \
@@ -21,6 +22,7 @@ mbextractsegy.1 \
 mbfilter.1 \
 mbformat.1 \
 mbgetesf.1 \
+mbgpstide.1 \
 mbgrdtiff.1 \
 mbgrdviz.1 \
 mbgrid.1 \
@@ -57,6 +59,8 @@ mbm_utm.1 \
 mbm_vrefcheck.1 \
 mbm_xbt.1 \
 mbm_xyplot.1 \
+mbmakeplatform.1 \
+mbminirovnav.1 \
 mbnavadjust.1 \
 mbnavadjustmerge.1 \
 mbnavedit.1 \
@@ -74,6 +78,7 @@ mbsegyinfo.1 \
 mbsegylist.1 \
 mbsegypsd.1 \
 mbset.1 \
+mbsslayout.1 \
 mbstripnan.1 \
 mbsvplist.1 \
 mbsvpselect.1 \
@@ -83,11 +88,4 @@ mbsystem.1 \
 mbtime.1 \
 mbvelocitytool.1
 
-if BUILD_PROJ
-  man_PROJ = proj.1 geod.1 
-endif
-
-
-
-
-EXTRA_DIST = $(man_MANS) $(man_PROJ)
+EXTRA_DIST = $(man_MANS)

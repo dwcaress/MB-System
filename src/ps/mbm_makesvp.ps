@@ -1,6 +1,6 @@
 %!PS-Adobe-3.0
 %%Creator: groff version 1.19.2
-%%CreationDate: Thu Nov 13 10:24:24 2014
+%%CreationDate: Thu Jun 28 23:26:59 2018
 %%DocumentNeededResources: font Times-Roman
 %%+ font Times-Bold
 %%+ font Times-Italic
@@ -240,111 +240,134 @@ F0 2.867<ad4d>2.867 G .367(acro to e)-2.867 F .366
 (gular depth ranges.)-.15 E F1(VERSION)72 136.8 Q F0 -1.11(Ve)108 148.8
 S(rsion 5.0)1.11 E F1(SYNOPSIS)72 177.6 Q F2(mbm_mak)108 189.6 Q
 (esvp \255I)-.1 E/F3 10/Times-Italic@0 SF(input\214le)A F0([)2.5 E F2
-<ad4820ad5620ad44>A F3(depthinterval)A F2<ad4f>2.5 E F3(output\214le)A
-F0(])A F1(DESCRIPTION)72 218.4 Q F2(mbm_mak)108 230.4 Q(esvp)-.1 E F0
-.439(is a macro to e)2.938 F .439
+<ad4120ad44>A F3(depthinterval)A F2<ad4820ad4d>2.5 E F3(mode)A F2<ad4f>
+2.5 E F3(output\214le)A F2<ad56>2.5 E F0(])A F1(DESCRIPTION)72 218.4 Q
+F2(mbm_mak)108 230.4 Q(esvp)-.1 E F0 .439(is a macro to e)2.938 F .439
 (xtract sound speed and depth data from a datalist of sw)-.15 F .439
-(ath \214les, and gener)-.1 F(-)-.2 E(ate a sound v)108 242.4 Q
-(elocity pro\214le model from a)-.15 E -.15(ve)-.2 G
-(rages of the sound speed v).15 E(alues in re)-.25 E
-(gular depth ranges.)-.15 E .625(This macro uses)108 266.4 R F2
-(mbctdlist)3.124 E F0 .624(to e)3.124 F .624(xtract the sound speed v)
--.15 F .624(alues embedded in sw)-.25 F .624(ath data \214les.)-.1 F
-.624(This macro is)5.624 F 1.191
-(intended for use with mapping data from submer)108 278.4 R 1.191
-(ged platforms \(e.g. R)-.18 F -.5(OV)-.4 G 3.692(sa).5 G 1.192(nd A)
--3.692 F 1.192(UVs\) carrying CTD or)-.55 F .741
-(sound speed sensors. Since the sound speed v)108 290.4 R .74
-(alues are generally recorded during the entire R)-.25 F 1.74 -.5(OV o)
--.4 H 3.24(rA).5 G(UV)-3.79 E(surv)108 302.4 Q -.15(ey)-.15 G 3.082(,t)
--.5 G .582(hese v)-3.082 F .582(alues can be used to construct a model \
-for sound speed as a function of depth at the surv)-.25 F -.15(ey)-.15 G
-2.679(location. The)108 314.4 R .179(sound speed and sonar depth v)2.679
-F .179(alue pairs are binned according to the)-.25 F F3(depthinterval)
-2.678 E F0 -.25(va)2.678 G .178(lue, and).25 F -2.25 -.2(av e)108 326.4
-T .494(rage sound speed v).2 F .494
-(alues are reported for bins with at least one v)-.25 F 2.995(alue. The)
--.25 F F2<ad4f>2.995 E F0 .495(option speci\214es the out-)2.995 F
-(put \214lename; by def)108 338.4 Q
-(ault the model is output to the stdout stream.)-.1 E F1 -.548(AU)72
-367.2 S(THORSHIP).548 E F0(Da)108 379.2 Q(vid W)-.2 E 2.5(.C)-.92 G
-(aress \(caress@mbari.or)-2.5 E(g\))-.18 E(Montere)113 391.2 Q 2.5(yB)
--.15 G(ay Aquarium Research Institute)-2.5 E
-(Dale N. Chayes \(dale@ldeo.columbia.edu\))108 403.2 Q
-(Lamont-Doherty Earth Observ)113 415.2 Q(atory)-.25 E F1(OPTIONS)72 444
-Q F2<ad44>108 456 Q F3(depthinterval)23.08 E F0 1.122
+(ath \214les, and gener)-.1 F(-)-.2 E .895(ate a sound v)108 242.4 R
+.894(elocity pro\214le model from a)-.15 F -.15(ve)-.2 G .894
+(rages of the sound speed v).15 F .894(alues in re)-.25 F .894
+(gular depth ranges. This)-.15 F .969
+(macro is intended for use with mapping data from submer)108 254.4 R .97
+(ged platforms \(e.g. R)-.18 F -.5(OV)-.4 G 3.47(sa).5 G .97(nd A)-3.47
+F .97(UVs\) carrying)-.55 F .293
+(CTD or SSV sensors. If -M0 is used, then sound speed v)108 266.4 R .293
+(alues are e)-.25 F .292(xtracted directly from data records con-)-.15 F
+.738(taining CTD or SSV v)108 278.4 R 3.239(alues. If)-.25 F .739
+(-M1 is used, then sound speed v)3.239 F .739(alues are e)-.25 F .739
+(xtracted from the sonar surv)-.15 F -.15(ey)-.15 G .614
+(data records \(e.g. the sound speed v)108 290.4 R .614
+(alues used for beamforming\).)-.25 F .613
+(The sound speed and sonar depth v)5.614 F(alue)-.25 E .341
+(pairs are binned according to the)108 302.4 R F3(depthinterval)2.841 E
+F0 -.25(va)2.841 G .341(lue, and a).25 F -.15(ve)-.2 G .341
+(rage sound speed v).15 F .342(alues are reported for bins)-.25 F 1.159
+(with at least one v)108 314.4 R 3.659(alue. If)-.25 F 1.159(-A is spec\
+i\214ed, the sound speed pro\214le is prepended with a zero depth v)
+3.659 F(alue)-.25 E .507(equal to the shallo)108 326.4 R .507
+(west calculated v)-.25 F .508
+(alue, and appended with a full ocean depth \(11000 meters\) v)-.25 F
+.508(alue equal)-.25 F .843(to the deepest calculated corrected for pre\
+ssure using a correction of 0.0167 * delta_depth in m/sec.)108 338.4 R
+(The)5.843 E F2<ad4f>108 350.4 Q F0
+(option speci\214es the output \214lename; by def)2.5 E
+(ault the model is output to the stdout stream.)-.1 E F1(MB-SYSTEM A)72
+379.2 Q(UTHORSHIP)-.548 E F0(Da)108 391.2 Q(vid W)-.2 E 2.5(.C)-.92 G
+(aress)-2.5 E(Montere)113 403.2 Q 2.5(yB)-.15 G
+(ay Aquarium Research Institute)-2.5 E(Dale N. Chayes)108 415.2 Q
+(Center for Coastal and Ocean Mapping)113 427.2 Q(Uni)113 439.2 Q -.15
+(ve)-.25 G(rsity of Ne).15 E 2.5(wH)-.25 G(ampshire)-2.5 E
+(Christian do Santos Ferreira)108 451.2 Q(MAR)113 463.2 Q
+(UM - Center for Marine En)-.4 E(vironmental Sciences)-.4 E(Uni)113
+475.2 Q -.15(ve)-.25 G(rsity of Bremen).15 E F1(OPTIONS)72 504 Q F2
+<ad41>108 516 Q F0 .644(If -A is speci\214ed, the sound speed pro\214le\
+ is prepended with a zero depth v)23.08 F .645(alue equal to the shal-)
+-.25 F(lo)144 528 Q .826(west calculated v)-.25 F .826
+(alue, and appended with a full ocean depth \(11000 meters\) v)-.25 F
+.826(alue equal to the)-.25 F(deepest calculated corrected for pressure\
+ using a correction of 0.0167 * delta_depth in m/sec.)144 540 Q F2<ad44>
+108 556.8 Q F3(depthinterval)23.08 E F0 1.122
 (Sets the size in meters of the depth bins used to calculate an a)144
-468 R -.15(ve)-.2 G 1.121(rage sound speed v).15 F 1.121(ersus depth)
--.15 F(model. The def)144 480 Q(ault v)-.1 E(alue is 25 meters.)-.25 E
-F2<ad46>108 496.8 Q F3(format)24.19 E F0 1.358
-(Sets the data format for the input data.)144 508.8 R(If)6.358 E F3
+568.8 R -.15(ve)-.2 G 1.122(rage sound speed v).15 F 1.122(ersus depth)
+-.15 F(model. The def)144 580.8 Q(ault v)-.1 E(alue is 25 meters.)-.25 E
+F2<ad46>108 597.6 Q F3(format)24.19 E F0 1.358
+(Sets the data format for the input data.)144 609.6 R(If)6.358 E F3
 (format)3.858 E F0 3.858(<0)3.858 G 3.858(,t)-3.858 G 1.358
-(hen the input \214le speci\214ed with the)-3.858 F F2<ad49>3.858 E F0
-1.164(option will actually contain a list of input sw)144 520.8 R 1.164
-(ath sonar data \214les. This program uses the)-.1 F F2(MBIO)3.663 E F0
-1.291(library and will read or write an)144 532.8 R 3.792(ys)-.15 G -.1
+(hen the input \214le speci\214ed with the)-3.858 F F2<ad49>3.857 E F0
+1.163(option will actually contain a list of input sw)144 621.6 R 1.164
+(ath sonar data \214les. This program uses the)-.1 F F2(MBIO)3.664 E F0
+1.292(library and will read or write an)144 633.6 R 3.792(ys)-.15 G -.1
 (wa)-3.792 G 1.292(th sonar format supported by).1 F F2(MBIO)3.792 E F0
-3.792(.Al)C 1.292(ist of the sw)-3.792 F(ath)-.1 E .391
-(sonar data formats currently supported by)144 544.8 R F2(MBIO)2.891 E
-F0 .391(and their identi\214er v)2.891 F .39(alues is gi)-.25 F -.15(ve)
--.25 G 2.89(ni).15 G 2.89(nt)-2.89 G(he)-2.89 E F2(MBIO)2.89 E F0
-(manual page. Def)144 556.8 Q(ault:)-.1 E F3(format)2.5 E F0 2.5<3dad>
-2.5 G(1.)-2.5 E F2<ad48>108 573.6 Q F0 .162(This "help" \215ag cause th\
+3.792(.A)C 1.291(list of the sw)-.001 F(ath)-.1 E .39
+(sonar data formats currently supported by)144 645.6 R F2(MBIO)2.891 E
+F0 .391(and their identi\214er v)2.891 F .391(alues is gi)-.25 F -.15
+(ve)-.25 G 2.891(ni).15 G 2.891(nt)-2.891 G(he)-2.891 E F2(MBIO)2.891 E
+F0(manual page. Def)144 657.6 Q(ault:)-.1 E F3(format)2.5 E F0 2.5<3dad>
+2.5 G(1.)-2.5 E F2<ad48>108 674.4 Q F0 .162(This "help" \215ag cause th\
 e program to print out a description of its operation and then e)22.52 F
-.162(xit immedi-)-.15 F(ately)144 585.6 Q(.)-.65 E F2<ad49>108 602.4 Q
-F3(input\214le)26.41 E F0 .468(Sets the input \214lename. If)144 614.4 R
+.161(xit immedi-)-.15 F(ately)144 686.4 Q(.)-.65 E F2<ad49>108 703.2 Q
+F3(input\214le)26.41 E F0 .467(Sets the input \214lename. If)144 715.2 R
 F3(format)2.967 E F0 2.967(>0\()2.967 G .467(set with the)-2.967 F F2
-<ad66>2.967 E F0 .467(option\) then the sw)2.967 F .467
-(ath sonar data contained)-.1 F(in)144 626.4 Q F3(in\214le)2.942 E F0
-.442(is read and processed. If)2.942 F F3(format)2.942 E F0 2.942(<0\()
-2.942 G .443(the def)-2.942 F .443(ault\), then)-.1 F F3(in\214le)2.943
-E F0 .443(is assumed to be an ascii \214le)2.943 F .052
-(containing a list of the input sw)144 638.4 R .052
-(ath sonar data \214les to be processed and their formats.)-.1 F .051
-(The program)5.051 F .42
-(will read the data in each one of these \214les.)144 650.4 R .42
-(In the)5.42 F F3(input\214le)2.92 E F0 .42
-(\214le, each data \214le should be follo)2.92 F(wed)-.25 E
-(by a data format identi\214er)144 662.4 Q 2.5(,e)-.4 G(.g.:)-2.5 E
-(data\214le1 11)180 674.4 Q(data\214le2 24)180 686.4 Q .68
-(This program uses the)144 698.4 R F2(MBIO)3.18 E F0 .679
-(library and will read an)3.18 F 3.179(ys)-.15 G -.1(wa)-3.179 G .679
-(th sonar format supported by).1 F F2(MBIO)3.179 E F0(.)A(Ho)144 710.4 Q
-(we)-.25 E -.15(ve)-.25 G 1.255 -.4(r, n).15 H .455(ot all formats cont\
-ain sound speed or CTD information, and useful results can only be).4 F
--.15(ex)144 722.4 S .75(pected from data actually including the rele).15
-F -.25(va)-.25 G .749(nt v).25 F 3.249(alues. A)-.25 F .749
-(list of the sw)3.249 F .749(ath sonar data formats)-.1 F(MB-System 5.0)
-72 768 Q(13 October 2013)137.055 E(1)195.395 E 0 Cg EP
+<ad66>2.967 E F0 .467(option\) then the sw)2.967 F .468
+(ath sonar data contained)-.1 F(in)144 727.2 Q F3(in\214le)2.943 E F0
+.443(is read and processed. If)2.943 F F3(format)2.943 E F0 2.943(<0\()
+2.943 G .442(the def)-2.943 F .442(ault\), then)-.1 F F3(in\214le)2.942
+E F0 .442(is assumed to be an ascii \214le)2.942 F(MB-System 5.0)72 768
+Q(29 No)132.205 E -.15(ve)-.15 G(mber 2016).15 E(1)190.545 E 0 Cg EP
 %%Page: 2 2
 %%BeginPageSetup
 BP
 %%EndPageSetup
 /F0 10/Times-Roman@0 SF(mbm_mak)72 48 Q 127.16(esvp\(1\) MB-System)-.1 F
-127.16(5.0 mbm_mak)2.5 F(esvp\(1\))-.1 E .557(currently supported by)144
-84 R/F1 10/Times-Bold@0 SF(MBIO)3.057 E F0 .557
-(and their identi\214er v)3.057 F .557(alues is gi)-.25 F -.15(ve)-.25 G
-3.057(ni).15 G 3.058(nt)-3.057 G(he)-3.058 E F1(MBIO)3.058 E F0 .558
-(manual page. The)3.058 F(def)144 96 Q
-(ault input \214lename is "datalist.mb-1".)-.1 E F1<ad4f>108 112.8 Q/F2
-10/Times-Italic@0 SF(output)22.52 E F0 .565
-(Sets the name of the output \214le for the sound speed v)144 124.8 R
+127.16(5.0 mbm_mak)2.5 F(esvp\(1\))-.1 E .051
+(containing a list of the input sw)144 84 R .052
+(ath sonar data \214les to be processed and their formats.)-.1 F .052
+(The program)5.052 F .42
+(will read the data in each one of these \214les.)144 96 R .42(In the)
+5.42 F/F1 10/Times-Italic@0 SF(input\214le)2.92 E F0 .42
+(\214le, each data \214le should be follo)2.92 F(wed)-.25 E
+(by a data format identi\214er)144 108 Q 2.5(,e)-.4 G(.g.:)-2.5 E
+(data\214le1 11)180 120 Q(data\214le2 24)180 132 Q .679
+(This program uses the)144 144 R/F2 10/Times-Bold@0 SF(MBIO)3.179 E F0
+.679(library and will read an)3.179 F 3.179(ys)-.15 G -.1(wa)-3.179 G
+.68(th sonar format supported by).1 F F2(MBIO)3.18 E F0(.)A(Ho)144 156 Q
+(we)-.25 E -.15(ve)-.25 G 1.256 -.4(r, n).15 H .455(ot all formats cont\
+ain sound speed or CTD information, and useful results can only be).4 F
+-.15(ex)144 168 S .749(pected from data actually including the rele).15
+F -.25(va)-.25 G .749(nt v).25 F 3.249(alues. A)-.25 F .75
+(list of the sw)3.249 F .75(ath sonar data formats)-.1 F .558
+(currently supported by)144 180 R F2(MBIO)3.058 E F0 .557
+(and their identi\214er v)3.058 F .557(alues is gi)-.25 F -.15(ve)-.25 G
+3.057(ni).15 G 3.057(nt)-3.057 G(he)-3.057 E F2(MBIO)3.057 E F0 .557
+(manual page. The)3.057 F(def)144 192 Q
+(ault input \214lename is "datalist.mb-1".)-.1 E F2<ad4d>108 208.8 Q F1
+(mode)20.86 E F0(If)144 220.8 Q F2<ad4d>3.034 E F1(0)A F0 .534
+(is used, then sound speed v)3.034 F .534(alues are e)-.25 F .534
+(xtracted directly from data records containing CTD)-.15 F .471
+(or SSV v)144 232.8 R 2.971(alues. If)-.25 F F2<ad4d>2.971 E F1(1)A F0
+.471(is used, then sound speed v)2.971 F .47(alues are e)-.25 F .47
+(xtracted from the sonar surv)-.15 F .77 -.15(ey d)-.15 H(ata).15 E
+(records \(e.g. the sound speed v)144 244.8 Q
+(alues used for beamforming\).)-.25 E(Def)5 E(ault:)-.1 E F1(mode)2.5 E
+F0(=0.)A F2<ad4f>108 261.6 Q F1(output)22.52 E F0 .565
+(Sets the name of the output \214le for the sound speed v)144 273.6 R
 .565(ersus depth model. By def)-.15 F .565(ault, the model is)-.1 F
-(output to the stdout stream.)144 136.8 Q F1<ad56>108 153.6 Q F0(The)
-23.08 E F1<ad56>2.5 E F0(option causes)2.5 E F1(mbm_mak)2.5 E(esvp)-.1 E
+(output to the stdout stream.)144 285.6 Q F2<ad56>108 302.4 Q F0(The)
+23.08 E F2<ad56>2.5 E F0(option causes)2.5 E F2(mbm_mak)2.5 E(esvp)-.1 E
 F0(to print out status messages.)2.5 E/F3 10.95/Times-Bold@0 SF
-(EXAMPLES)72 182.4 Q F0 .252(Suppose we ha)108 194.4 R .552 -.15(ve a s)
--.2 H .252(et of sw).15 F .252(ath \214les from an A)-.1 F(UV)-.55 E
-.253(-based surv)-1 F .553 -.15(ey i)-.15 H 2.753(nad).15 G .253
-(irectory and we w)-2.753 F .253(ant to construct an)-.1 F -2.25 -.2
-(av e)108 206.4 T(rage sound speed v).2 E
+(EXAMPLES)72 331.2 Q F0 .253(Suppose we ha)108 343.2 R .553 -.15(ve a s)
+-.2 H .253(et of sw).15 F .253(ath \214les from an A)-.1 F(UV)-.55 E
+.252(-based surv)-1 F .552 -.15(ey i)-.15 H 2.752(nad).15 G .252
+(irectory and we w)-2.752 F .252(ant to construct an)-.1 F -2.25 -.2
+(av e)108 355.2 T(rage sound speed v).2 E
 (ersus depth model from these data. The command:)-.15 E(mbm_mak)144
-218.4 Q 1.498(esvp -Idatalist.mb-1 -D25 -Osvp.txt -V will generate a mo\
-del of sound speed v)-.1 F(ersus)-.15 E
-(depth in the output \214le "svp.txt".)108 230.4 Q F3(SEE ALSO)72 259.2
-Q F1(mbsystem)108 271.2 Q F0(\(1\),)A F1(mbctdlist)2.5 E F0(\(1\))A F3
--.11(BU)72 300 S(GS).11 E F0(Lik)108 312 Q(ely yes.)-.1 E(MB-System 5.0)
-72 768 Q(13 October 2013)137.055 E(2)195.395 E 0 Cg EP
+367.2 Q(esvp -Idatalist.mb-1 -D25 -Osvp.txt -V)-.1 E
+(will generate a model of sound speed v)108 379.2 Q
+(ersus depth in the output \214le "svp.txt".)-.15 E F3(SEE ALSO)72 408 Q
+F2(mbsystem)108 420 Q F0(\(1\),)A F2(mbctdlist)2.5 E F0(\(1\))A F3 -.11
+(BU)72 448.8 S(GS).11 E F0(Lik)108 460.8 Q(ely yes.)-.1 E(MB-System 5.0)
+72 768 Q(29 No)132.205 E -.15(ve)-.15 G(mber 2016).15 E(2)190.545 E 0 Cg
+EP
 %%Trailer
 end
 %%EOF

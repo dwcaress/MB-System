@@ -3,7 +3,7 @@
 #    The MB-system:	mbm_xyplot.perl	8/6/95
 #    $Id$
 #
-#    Copyright (c) 1993-2014 by
+#    Copyright (c) 1993-2017 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -43,7 +43,7 @@
 #            -Ltitle[:scale_label] -Mmisc -Q -Rw/e/s/n -X]
 #
 # Miscellaneous Options:
-#            [-MGDgmtdef/value -MGL[f][x]lon0/lat0/slat/length[m]
+#            [-MGDgmtdef/value -MGL[f][x]lon0/lat0/slat/length[units][+llabel]
 #            -MGTx/y/size/angle/font/just/text
 #            -MGU[/dx/dy/][label] ]
 #
@@ -55,95 +55,6 @@
 #
 # Version:
 #   $Id$
-#
-# Revisions:
-#   $Log: mbm_xyplot.perl,v $
-#   Revision 5.15  2008/09/11 20:06:46  caress
-#   Checking in updates made during cruise AT15-36.
-#
-#   Revision 5.14  2007/10/08 04:29:06  caress
-#   Added some large page definitions.
-#
-#   Revision 5.13  2006/07/05 19:50:21  caress
-#   Working towards 5.1.0beta
-#
-#   Revision 5.12  2006/06/16 19:30:58  caress
-#   Check in after the Santa Monica Basin Mapping AUV Expedition.
-#
-#   Revision 5.11  2006/01/06 18:26:26  caress
-#   Working towards 5.0.8
-#
-#   Revision 5.10  2005/11/05 01:34:20  caress
-#   Much work over the past two months.
-#
-#   Revision 5.9  2005/03/25 04:05:40  caress
-#   Fixed handling of tickinfo string.
-#   For mbm_plot only, added control on filename annotation direction.
-#
-#   Revision 5.8  2004/09/16 19:12:55  caress
-#   Supports postscript viewer ggv.
-#
-#   Revision 5.7  2003/11/25 21:25:43  caress
-#   Implemented Val Schmidt's changes.
-#
-#   Revision 5.6  2003/04/17 20:42:48  caress
-#   Release 5.0.beta30
-#
-#   Revision 5.5  2002/04/06 02:51:54  caress
-#   Release 5.0.beta16
-#
-#   Revision 5.4  2001/12/18 04:26:12  caress
-#   Version 5.0.beta11.
-#
-# Revision 5.3  2001/11/02  21:07:40  caress
-# Adjusted handling of segmented xy files.
-#
-# Revision 5.2  2001/10/10  23:56:01  dcaress
-# Regrettably, I don't remember what I changed...
-#
-#   Revision 5.1  2001-06-30 10:36:53-07  caress
-#   Release 5.0.beta02
-#
-# Revision 5.0  2000/12/01  22:58:01  caress
-# First cut at Version 5.0.
-#
-# Revision 4.10  2000/10/03  21:42:17  caress
-# Snapshot for Dale.
-#
-# Revision 4.9  1999/06/25  17:55:47  caress
-# I must have changed something!
-#
-# Revision 4.8  1999/05/06  23:46:32  caress
-# Release 4.6a
-#
-# Revision 4.7  1999/04/16  01:25:51  caress
-# Version 4.6 final release?
-#
-# Revision 4.6  1999/04/15  19:28:52  caress
-# Fixed sprintf statements.
-#
-# Revision 4.5  1999/02/04  23:39:54  caress
-# MB-System version 4.6beta7
-#
-# Revision 4.4  1998/10/05  17:00:15  caress
-# MB-System version 4.6beta
-#
-# Revision 4.3  1997/04/21  16:54:41  caress
-# MB-System 4.5 Beta Release.
-#
-# Revision 4.3  1997/04/17  15:06:49  caress
-# MB-System 4.5 Beta Release
-#
-# Revision 4.2  1996/03/12  17:28:19  caress
-# Check-in after flail with format 63.
-#
-# Revision 4.1  1995/09/28  18:05:43  caress
-# Various bug fixes working toward release 4.3.
-#
-# Revision 4.0  1995/08/17  14:53:25  caress
-# Revision for release 4.3.
-#
-#
 #
 #
 $program_name = "mbm_xyplot";
@@ -230,17 +141,7 @@ $program_name = "mbm_xyplot";
 	"m4",   "16m",   "m5",   "16m",   "m6",   "16m");
 
 # Determine the GMT version
-@grdinfo = `grdinfo 2>&1`;
-while (@grdinfo)
-	{
-	$line = shift @grdinfo;
-	if ($line =~
-		/^grdinfo\s+(\S+)\s+\S+/)
-		{
-		($gmt_version) = $line =~
-			/^grdinfo\s+(\S+)\s+\S+/;
-		}
-	}
+$gmt_version = `gmt --version`;
 
 # Get the current working directory.
 $current_working_dir = `pwd`;
@@ -475,7 +376,7 @@ else
 # either of two mechanisms. The first method is to specify multiple
 # input file flags and associated arguments ( e.g. mbm_xyplot
 # -i[fileargs]:file -i[fileargs]:file ...). The second method is to
-# use the utilize the multi-segemnt feature psxy. The -M flag allows
+# use the utilize the multi-segemnt feature psxy. The program allows
 # multiple "segments" of x,y pairs to be listed in a single file each
 # separated by a single line having a special character. The default
 # character is ">", and indeed that is the ONLY character supported
@@ -737,7 +638,7 @@ if ($map_scale)
 	&GetProjection;
 	}
 
-# set up for mapproject
+# set up for gmt mapproject
 if (($use_scale && $plot_scale) || ($use_width && $plot_width))
 	{
 	($projection) = $map_scale =~ /^(\w)/;
@@ -756,36 +657,60 @@ else
 	$use_scale = 1;
 	}
 
-# now find out the apparent size of the plot
-`echo $xmin $ymin > tmp$$.dat`;
-`echo $xmax $ymin >> tmp$$.dat`;
-`echo $xmax $ymax >> tmp$$.dat`;
-`echo $xmin $ymax >> tmp$$.dat`;
-@projected = `mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
-`/bin/rm -f tmp$$.dat`;
-print "mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot\n";
-
-while (@projected)
-{
-    $line = shift @projected;
-print $line;
-    if(!$xxmin){
-	($xxmin,$yymin) = $line =~ /(\S+)\s+(\S+)/;
-	$xxmax = $xxmin;
-	$yymax = $yymin;
-    }
-    else
+# now find out the apparent size of the plot using the specified linear scaling
+if (!$geographic && $projection eq "x" && $plot_scale)
     {
-	($xx,$yy) = $line =~ /(\S+)\s+(\S+)/;
-	$xxmin = ($xx < $xxmin ? $xx : $xxmin);
-	$xxmax = ($xx > $xxmax ? $xx : $xxmax);
-	$yymin = ($yy < $yymin ? $yy : $yymin);
-	$yymax = ($yy > $yymax ? $yy : $yymax);
-    }
-}
-$dxx = $xxmax - $xxmin;
-$dyy = $yymax - $yymin;
+    if ($plot_scale =~ /(\S+)\/(\S+)/)
+        {
+        ($xscale,$yscale) = $plot_scale =~ /(\S+)\/(\S+)/;
+        }
+    else
+        {
+        ($xscale) = $plot_scale =~ /(\S+)/;
+        $yscale = $xscale;
+        }
+    $xxmin = $xmin * $xscale;
+    $xxmax = $xmax * $xscale;
+    $yymin = $ymin * $yscale;
+    $yymax = $ymax * $yscale;
 
+    $dxx = $xxmax - $xxmin;
+    $dyy = $yymax - $yymin;
+    }
+
+# or find out the apparent size of the plot using gmt mapproject
+else
+    {
+    `echo $xmin $ymin > tmp$$.dat`;
+    `echo $xmax $ymin >> tmp$$.dat`;
+    `echo $xmax $ymax >> tmp$$.dat`;
+    `echo $xmin $ymax >> tmp$$.dat`;
+    @projected = `gmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
+    `/bin/rm -f tmp$$.dat`;
+    print "gmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot\n";
+    
+    while (@projected)
+        {
+            $line = shift @projected;
+        print $line;
+            if(!$xxmin)
+                {
+                ($xxmin,$yymin) = $line =~ /(\S+)\s+(\S+)/;
+                $xxmax = $xxmin;
+                $yymax = $yymin;
+                }
+            else
+                {
+                ($xx,$yy) = $line =~ /(\S+)\s+(\S+)/;
+                $xxmin = ($xx < $xxmin ? $xx : $xxmin);
+                $xxmax = ($xx > $xxmax ? $xx : $xxmax);
+                $yymin = ($yy < $yymin ? $yy : $yymin);
+                $yymax = ($yy > $yymax ? $yy : $yymax);
+                }
+        }
+    $dxx = $xxmax - $xxmin;
+    $dyy = $yymax - $yymin;
+    }
 
 # check for valid scaling
 if ($dxx == 0.0 && $dyy == 0.0)
@@ -1094,9 +1019,9 @@ elsif ($use_width)
 	}
 
 # place the origin so plot is more or less centered
-$xoffset = ($width - $plot_width
+$xoffset = ($width - abs($plot_width)
 	- $space_left - $space_right) / 2 + $space_left;
-$yoffset = ($height - $plot_height
+$yoffset = ($height - abs($plot_height)
 	- $space_bottom - $space_top) / 2 + $space_bottom;
 
 # get plot degree annotation for geographic maps
@@ -1144,10 +1069,21 @@ if ($coast_control
 	$coast_resolution = "f";
 	}
 
+# if length scale bar requested check to see if map center needs to be defined
+if ($length_scale && $length_scale =~ /\S+center\S+/)
+        {
+        # add map lon lat (or x y) center to the length scale argument
+        ($a, $c) = $length_scale =~ /(\S+)center(\S+)/;
+        $xcen = 0.5 * ($xmin + $xmax);
+        $ycen = 0.5 * ($ymin + $ymax);
+        $b = "$xcen/$ycen";
+        $length_scale = "$a$b$c";
+        }
+
 # come up with the filenames
 $cmdfile = "$root.cmd";
 $psfile = "$root.ps";
-$gmtfile = "gmtdefaults4\$\$";
+$gmtfile = "gmt.conf\$\$";
 
 # set some gmtisms
 $first_gmt = 1;
@@ -1156,35 +1092,27 @@ $middle = "-K -O -V >> \$PS_FILE";
 $end = "-O -V >> \$PS_FILE";
 
 # set macro gmt default settings
-$gmt_def = "MEASURE_UNIT/inch";
+$gmt_def = "PROJ_LENGTH_UNIT/inch";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}+";
+$gmt_def = "PS_MEDIA/$page_gmt_name{$pagesize}";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "ANOT_FONT/Helvetica";
+$gmt_def = "FONT_ANNOT_PRIMARY/$page_anot_font{$pagesize},Helvetica,black";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "LABEL_FONT/Helvetica";
+$gmt_def = "FONT_ANNOT_SECONDARY/$page_anot_font{$pagesize},Helvetica,black";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "HEADER_FONT/Helvetica";
+$gmt_def = "FONT_LABEL/$page_anot_font{$pagesize},Helvetica,black";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "ANOT_FONT_SIZE/$page_anot_font{$pagesize}";
+$gmt_def = "FONT_TITLE/$page_header_font{$pagesize},Helvetica,black";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "LABEL_FONT_SIZE/$page_anot_font{$pagesize}";
+$gmt_def = "PS_PAGE_ORIENTATION/LANDSCAPE";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "HEADER_FONT_SIZE/$page_header_font{$pagesize}";
+$gmt_def = "COLOR_BACKGROUND/black";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "FRAME_WIDTH/$frame_size";
+$gmt_def = "COLOR_FOREGROUND/white";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "TICK_LENGTH/$tick_size";
+$gmt_def = "COLOR_NAN/white";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "PAGE_ORIENTATION/LANDSCAPE";
-push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "COLOR_BACKGROUND/0/0/0";
-push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "COLOR_FOREGROUND/255/255/255";
-push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "COLOR_NAN/255/255/255";
-push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "PLOT_DEGREE_FORMAT/$degree_format";
+$gmt_def = "FORMAT_GEO_MAP/$degree_format";
 push(@gmt_macro_defs, $gmt_def);
 
 # open the shellscript file
@@ -1211,15 +1139,17 @@ print FCMD "set MAP_REGION      = $bounds_plot\n";
 printf FCMD "set X_OFFSET        = %1.5g\n", $xoffset;
 printf FCMD "set Y_OFFSET        = %1.5g\n", $yoffset;
 
-# Reset GMT defaults, saving old defaults
-print FCMD "#\n# Save existing GMT defaults\n";
-print FCMD "echo Saving GMT defaults...\n";
-print FCMD "gmtdefaults -L >! $gmtfile\n";
-print FCMD "#\n# Set new GMT defaults\n";
-print FCMD "echo Setting new GMT defaults...\n";
+# Set temporary GMT defaults
+print FCMD "#\n# Delete any existing gmt.conf file\n";
+print FCMD "if (-e gmt.conf) then\n";
+print FCMD "echo Deleting gmt.conf...\n";
+print FCMD "/bin/rm gmt.conf\n";
+print FCMD "endif\n";
+print FCMD "#\n# Set temporary GMT defaults\n";
+print FCMD "echo Setting temporary GMT defaults...\n";
 foreach $gmt_def (@gmt_macro_defs) {
 	($gmt_par, $gmt_var) = $gmt_def =~ /^([^\/]+)\/(.+)/;
-	print FCMD "gmtset $gmt_par $gmt_var\n";
+	print FCMD "gmt gmtset $gmt_par $gmt_var\n";
 	}
 
 # Reset GMT defaults as per user commands
@@ -1281,46 +1211,31 @@ if ($nlabels < 3)
 # set basemap axes annotation
 if ($tick_info)
 	{
-	if ($tick_info =~ /.*\/.*/)
-		{
-		($xtick, $ytick) = $tick_info =~ /(.*)\/(.*)/;
-		}
-	if ($tick_info =~ /.*:\..*/)
-		{
-		($title) = $tick_info =~ /.*:\.(.*)/;
-		}
-	else
-		{
-		$title = $tlabel;
-		}
-	if ($xtick && $ytick)
-		{
-		$axes = "$xtick:\"$xlabel\":/$ytick:\"$ylabel\"::.\"$title\":";
-		}
-	else
-		{
-		$axes = "$axes:.\"$title\":";
-		}
+	$axes = "-B$tick_info";
 	}
 elsif ($projection =~ /^[Xx].*/ && !$geographic)
 	{
 	# figure out some reasonable tick intervals for the basemap
 	&GetBaseTickLinear;
-	$axes = "$base_tick_x:\"$xlabel\":/$base_tick_y:\"$ylabel\"::.\"$tlabel\":";
+	$axes = "-Bx$base_tick_x+l\"$xlabel\" -By$base_tick_y+l\"$ylabel\"";
 	}
 else
 	{
 	# figure out some reasonable tick intervals for the basemap
 	&GetBaseTick;
-	$axes = "$base_tick:\"$xlabel\":/$base_tick:\"$ylabel\"::.\"$tlabel\":";
+	$axes = "-B$base_tick";
+	}
+if ($tlabel)
+	{
+	$axes = "$axes -B+t\"$tlabel\"";
 	}
 
 # do xy plots
 for ($i = 0; $i < scalar(@xyfiles); $i++)
 	{
 	printf FCMD "#\n# Make xy data plot\n";
-	printf FCMD "echo Running psxy...\n";
-	printf FCMD "psxy $xyfiles[$i] \\\n\t";
+	printf FCMD "echo Running gmt psxy...\n";
+	printf FCMD "gmt psxy $xyfiles[$i] \\\n\t";
 	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
 	if ($xysymbols[$i] ne "N")
@@ -1335,10 +1250,10 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 		{
 		printf FCMD "-G$xyfills[$i] \\\n\t";
 		}
-	if ($xysegments[$i] ne "N")
-		{
-		printf FCMD "-M \\\n\t";
-		}
+#	if ($xysegments[$i] ne "N")
+#		{
+#		printf FCMD "-M \\\n\t";
+#		}
 	if ($portrait)
 		{
 		printf FCMD "-P ";
@@ -1358,8 +1273,8 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 if ($coast_control)
 	{
 	printf FCMD "#\n# Make coastline data plot\n";
-	printf FCMD "echo Running pscoast...\n";
-	printf FCMD "pscoast \\\n\t";
+	printf FCMD "echo Running gmt pscoast...\n";
+	printf FCMD "gmt pscoast \\\n\t";
 	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
 	if ($coast_lakefill)
@@ -1409,8 +1324,8 @@ if ($coast_control)
 if (@text)
 	{
 	printf FCMD "#\n# Make text labels\n";
-	printf FCMD "echo Running pstext...\n";
-	printf FCMD "pstext -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "echo Running gmt pstext...\n";
+	printf FCMD "gmt pstext -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
 	printf FCMD "$middle <<EOT\n";
 	foreach $text_info (@text) {
@@ -1425,10 +1340,10 @@ if (@text)
 
 # do psbasemap plot
 printf FCMD "#\n# Make basemap\n";
-printf FCMD "echo Running psbasemap...\n";
-printf FCMD "psbasemap -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+printf FCMD "echo Running gmt psbasemap...\n";
+printf FCMD "gmt psbasemap -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 printf FCMD "-R\$MAP_REGION \\\n\t";
-printf FCMD "-B$axes \\\n\t";
+printf FCMD "$axes \\\n\t";
 if ($length_scale)
 	{
 	printf FCMD "-L$length_scale \\\n\t";
@@ -1450,6 +1365,7 @@ printf FCMD "$end\n";
 # delete surplus files
 print FCMD "#\n# Delete surplus files\n";
 print FCMD "echo Deleting surplus files...\n";
+print FCMD "/bin/rm -f gmt.conf\n";
 if (!$file_cpt)
 	{
 	print FCMD "/bin/rm -f \$CPT_FILE\n";
@@ -1464,12 +1380,6 @@ if ($delete_temp_files) {
 	printf FCMD "/bin/rm -f $file \n";
     }
 }
-
-
-# reset GMT defaults
-print FCMD "#\n# Reset GMT default fonts\n";
-print FCMD "echo Resetting GMT fonts...\n";
-print FCMD "/bin/mv $gmtfile .gmtdefaults4\n";
 
 # display image on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";
@@ -1544,13 +1454,17 @@ elsif ($ps_viewer eq "evince")
 	}
 if ($no_view_ps)
 	{
+        print FCMD "#if (!($#argv > 0 && (\"$1\" == \"-N\" || \"$1\" == \"-n\"))) then\n";
 	print FCMD "#echo Running $ps_viewer in background...\n";
 	print FCMD "#$ps_viewer $view_pageflag \$PS_FILE &\n";
+        print FCMD "#endif\n";
 	}
 else
 	{
+        print FCMD "if (!($#argv > 0 && (\"$1\" == \"-N\" || \"$1\" == \"-n\"))) then\n";
 	print FCMD "echo Running $ps_viewer in background...\n";
 	print FCMD "$ps_viewer $view_pageflag \$PS_FILE &\n";
+        print FCMD "endif\n";
 	}
 
 # claim it's all over
@@ -1820,16 +1734,6 @@ $width_max_portrait = $page_width_in{$pagesize}
 		- $space_left - $space_right;
 $height_max_portrait = $page_height_in{$pagesize}
 		- $space_bottom - $space_top;
-$frame_size = 0.075;
-if (($frame_size / $height_max_portrait) > 0.01)
-	{
-	$frame_size = 0.01 * $height_max_portrait;
-	}
-$tick_size = 0.075;
-if (($tick_size / $height_max_portrait) > 0.01)
-	{
-	$tick_size = 0.01 * $height_max_portrait;
-	}
 }
 #-----------------------------------------------------------------------
 sub GetProjection {
@@ -2191,27 +2095,27 @@ sub GetBaseTick {
 	$base_tick = &min($base_tick_x, $base_tick_y);
 	if ($base_tick < 0.0002777777)
 		{
-		$base_tick = "1c";
+		$base_tick = "1s";
 		}
 	elsif ($base_tick < 0.0005555555)
 		{
-		$base_tick = "2c";
+		$base_tick = "2s";
 		}
 	elsif ($base_tick < 0.0013888889)
 		{
-		$base_tick = "5c";
+		$base_tick = "5s";
 		}
 	elsif ($base_tick < 0.0027777778)
 		{
-		$base_tick = "10c";
+		$base_tick = "10s";
 		}
 	elsif ($base_tick < 0.0041666667)
 		{
-		$base_tick = "15c";
+		$base_tick = "15s";
 		}
 	elsif ($base_tick < 0.0083333333)
 		{
-		$base_tick = "30c";
+		$base_tick = "30s";
 		}
 	elsif ($base_tick < 0.0166667)
 		{

@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbmosaic</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  13 March 2014 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 January 2017 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -251,18 +251,30 @@ and northings (meters) rather than in geographic coordinates
 (longitude and latitude degrees).
 <P>
 <A NAME="lbAF">&nbsp;</A>
-<H2>AUTHORSHIP</H2>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
 
-David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+David W. Caress
 <BR>
 
 <BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
-Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+Dale N. Chayes
 <BR>
 
-<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
 <A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
@@ -330,20 +342,20 @@ Default:  <I>xdim</I> = <I>ydim</I> = 101.
 Sets the grid cell spacing to <I>dx</I> in longitude and <I>dy</I>
 in latitude. If <I>units</I> is not specified, the <I>dx</I>
 and <I>dy</I> values are assumed to be in meters. Valid values
-for <I>units</I> include &quot;km&quot;, &quot;meters&quot;, and &quot;degrees&quot;.
+for <I>units</I> include &quot;km&quot;, &quot;meters&quot;, &quot;feet&quot;, &quot;degrees&quot;, &quot;arcmin&quot;, and &quot;arcsec&quot;.
 If not in degrees, the grid cell spacing values are converted to
-degrees using the central latitude of the grid. If
-<I>dy</I> = 0.0, then the latitude cell spacing will be set
-equal to the longitude cell spacing (after conversion to
-degrees, if necessary).
-By default, the grid spacing is calculated from
+degrees. For &quot;km&quot; and &quot;meters&quot;, the conversion to degrees is made using the
+distance per degree latitude calculated for the Earth's surface at the central
+latitude of the grid. If <I>dy</I> = 0.0, then the latitude cell spacing will
+be set equal to the longitude cell spacing (after conversion to degrees, if
+necessary). By default, the grid spacing is calculated from
 the grid bounds and the grid dimensions. When the user
 uses the <B>-E</B> option to set the cell spacings, the
 grid dimensions are calculated using the grid bounds and
 grid cell spacings. However, slight adjustments to the
 grid cell spacings are usually required to keep
 the grid bounds as specified. Appending an ! to the end of
-the <B>-E</B> arguments forces <B>mbmosaic</B> to use the
+the <B>-E</B> arguments forces <B>mbgrid</B> to use the
 exact grid cell spacing values specified by adjusting the
 grid bounds.
 Default: If neither the <B>-E</B> or <B>-D</B> options are specified,
@@ -917,7 +929,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
 <P>
 <BR>&nbsp;Program&nbsp;mbmosaic
-<BR>&nbsp;Version&nbsp;$Id:&nbsp;mbmosaic.1&nbsp;2172&nbsp;2014-03-14&nbsp;07:28:54Z&nbsp;caress&nbsp;$
+<BR>&nbsp;Version&nbsp;$Id:&nbsp;mbmosaic.1&nbsp;2300&nbsp;2017-04-15&nbsp;08:28:27Z&nbsp;caress&nbsp;$
 <BR>&nbsp;MB-system&nbsp;Version&nbsp;4.5
 <P>
 <BR>&nbsp;MBMOSAIC&nbsp;Parameters:
@@ -8569,7 +8581,7 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
 <DT><A HREF="#lbAG">OPTIONS</A><DD>
 <DT><A HREF="#lbAH">EXAMPLES</A><DD>
 <DT><A HREF="#lbAI">SEE ALSO</A><DD>
@@ -8580,12 +8592,9 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 13 March 2014</P></CENTER>
+Last Updated: 3 January 2017</P></CENTER>
 
 <HR>
-<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
-<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
-to MB-System Home Page...</A></P>
 
 </BODY>
 </HTML>

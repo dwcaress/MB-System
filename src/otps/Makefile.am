@@ -1,17 +1,22 @@
 bin_PROGRAMS = mbotps
 
+if BUILD_MBTRN
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
+endif
+
 AM_CFLAGS = ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio ${libnetcdf_CPPFLAGS}
-if BUILD_GSF
-  AM_CPPFLAGS += -I${top_srcdir}/src/gsf
-endif
+AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
+        -I${top_srcdir}/src/gsf \
+        $(MBTRNINCDIR) \
+        ${libnetcdf_CPPFLAGS}
 
 AM_LDFLAGS = 
 
 LIBS = ${top_builddir}/src/mbio/libmbio.la \
 	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-	$(LIBM)
+	$(MBTRNLIB) $(LIBM)
 
 mbotps_SOURCES = mbotps.c
 

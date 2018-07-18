@@ -1,22 +1,23 @@
-bin_PROGRAMS = mbcontour mbgrdtiff mbswath
+lib_LTLIBRARIES = mbsystem.la
 
-AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+if BUILD_MBTRN
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
+endif
+
+include_HEADERS = 
 
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-	      -I${top_srcdir}/src/mbaux \
-	      ${libgmt_CPPFLAGS} \
-	      ${libnetcdf_CPPFLAGS}
+        -I${top_srcdir}/src/mbaux \
+        $(MBTRNINCDIR) \
+        ${libgmt_CPPFLAGS} \
+        ${libgdal_CPPFLAGS} \
+        ${libnetcdf_CPPFLAGS}
+AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_LDFLAGS = 
-
-LIBS = $(top_builddir)/src/mbio/libmbio.la \
-	${libgmt_LIBS} ${libnetcdf_LIBS} \
-	$(LIBM)
-
-mbcontour_SOURCES = mbcontour.c
-mbcontour_LDADD = $(top_builddir)/src/mbaux/libmbaux.la $(top_builddir)/src/mbaux/libmbps.la
-
-mbgrdtiff_SOURCES = mbgrdtiff.c
-
-mbswath_SOURCES = mbswath.c
-mbswath_LDADD = $(top_builddir)/src/mbaux/libmbaux.la
+mbsystem_la_LDFLAGS = -module -avoid-version -shared
+mbsystem_la_SOURCES = mbswath.c mbcontour.c mbgrdtiff.c
+mbsystem_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
+        ${top_builddir}/src/mbaux/libmbaux.la \
+        ${libgmt_LIBS} ${libgdal_LIBS} ${libnetcdf_LIBS} \
+        $(MBTRNLIB) 

@@ -41,10 +41,8 @@ for sidescan and/or amplitude data by calculating average amplitudes
 as a function of the seafloor
 grazing angle.</li>
   <li> <a href="mbclean.html">mbclean</a>: Identifies and flags bad
-beams in swath sonar bathymetry data.</li>
-  <li> <a href="mbcontour.html">mbcontour</a>: Generate GMT compatible
-Postscript
-color swath contour plots.</li>
+    beams in swath sonar bathymetry data.</li>
+  <li><a href="mbconfig.html">mbconfig</a>: Provides command line access to the MB-System version and to the locations of the levitus database and the OTPS tidal correction software. </li>
   <li> <a href="mbcopy.html">mbcopy</a>: Copy swath sonar data files.</li>
   <li> <a href="mbctdlist.html">mbctdlist</a>: List CTD data in swath sonar data files.</li>
   <li> <a href="mbdatalist.html">mbdatalist</a>: Parses recursive
@@ -70,18 +68,12 @@ in swath sonar bathymetry data.</li>
     sonar
   data formats supported by the MBIO library.</li>
   <li> <a href="mbgetesf.html">mbgetesf</a>: Extract bathymetry edits
-in
-edit
-save file format.</li>
-  <li> <a href="mbgrdtiff.html">mbgrdtiff</a>: Generate TIFF image
-from
-gridded
-data.</li>
+in edit save file format.</li>
+  <li> <a href="mbgpstide.html">mbgpstide</a>: Generate tide files from the height
+above ellipsoid data in the 'h' datagrams of Kongsberg multibeam data files</li>
   <li> <a href="mbgrdviz.html">mbgrdviz</a>: Vizualize GMT grids.</li>
   <li> <a href="mbgrid.html">mbgrid</a>: Grid bathymetry, amplitude,
-and
-sidescan
-data from swath sonar data files.</li>
+and sidescan data from swath sonar data files.</li>
   <li> <a href="mbhistogram.html">mbhistogram</a>: Obtain histogram of
 bathymetry,
 amplitude, or sidescan data from swath sonar data files.</li>
@@ -103,6 +95,7 @@ which is representative of the mean annual water column for a specified
 1 degree by 1 degree region.</li>
   <li> <a href="mblist.html">mblist</a>: List data in swath sonar data
 files.</li>
+  <li> <a href="mbmakeplatform.html">mbmakeplatform</a>: Create or modify an MB-System platform file, which represents a survey system as a set of sensors with positional and angular offsets.</li>
   <li> <a href="mbmosaic.html">mbmosaic</a>: Mosaic sidescan and
 amplitude
 data.</li>
@@ -119,6 +112,7 @@ data.</li>
     bathymetry edits from Simrad Neptune software into edit save file
   format.</li>
   <li><a href="mbotps.html">mbotps</a>: Generate open ocean tidal model for specified time and location using the Oregon State Tidal Prediction Software (OTPS) package.</li>
+  <li> <a href="mbpreprocess.html">mbpreprocess</a>: Perform preprocessing of the logged data comprising a survey, including applying lever arm corrections (if neccessary) and setting up the MB-System processing environment.</li>
   <li> <a href="mbprocess.html">mbprocess</a>: Process swath sonar
 data
 files, including
@@ -146,6 +140,7 @@ Output some basic statistics of segy seismic data files.</li>
   <li><a href="mbset.html">mbset</a>:
     Create and modify parameter files used
   to control mbprocess.</li>
+  <li><a href="mbsslayout.html">mbsslayout</a>: Translate time-based sidescan sonar data into backscatter laid out into a regular array of pixels on the seafloor by projecting onto a topographic model.</li>
   <li> <a href="mbstripnan.html">mbstripnan</a>: Filter to remove NaN
 nodes.</li>
   <li> <a href="mbsvplist.html">mbsvplist</a>: Extract water sound
@@ -154,9 +149,6 @@ velocity profiles
   <li> <a href="mbsvpselect.html">mbsvpselect</a>: Select the best
 available sound speed model for each swath file in a survey according to 
 user specified criteria.</li>
-  <li> <a href="mbswath.html">mbswath</a>: Generate GMT compatible
-Postscript
-color and color shaded relief swath plots.</li>
   <li> <a href="mbswplspreprocess.html">mbswplspreprocess</a>: Preprocess
 SwathPlus SXP data (format 222), including applying time lag and biases to
 attitude and navigation data.</li>
@@ -177,6 +169,18 @@ format id 71).</li>
   <li> <a href="mb7kpreprocess.html">mb7kpreprocess</a>: Preprocess
 Reson 7k data (format 88), including applying time lag and biases to
 attitude and navigation data.</li>
+</ul>
+MB-system also includes three plug-in modules for the GMT software package that are built as a shared library that can be called by GMT. Here are links to the Unix manual
+pages:
+<ul>
+  <li> <a href="mbcontour.html">mbcontour</a>: Generate GMT compatible
+Postscript
+color swath contour plots.</li>
+  <li> <a href="mbgrdtiff.html">mbgrdtiff</a>: Generate TIFF image
+from gridded data.</li>
+  <li> <a href="mbswath.html">mbswath</a>: Generate GMT compatible
+Postscript
+color and color shaded relief swath plots.</li>
 </ul>
 Macros are programs or shellscripts which make use of programs from the
 MB-System and other software packages to accomplish common tasks
@@ -258,10 +262,5 @@ and writes a shellscript which will generate GMT plot of the data.</li>
 <p>
 </p>
 <hr width="67%">
-<p><a href="mbsystem_home.html"><img src="mbsystem_logo_small.gif"
- align="bottom" border="0" height="51" width="154"></a><a
- href="mbsystem_home.html">Back
-to MB-System Home Page...</a>
-</p>
 </body>
 </html>

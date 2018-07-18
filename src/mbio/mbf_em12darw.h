@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_em12darw.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1994-2014 by
+ *    Copyright (c) 1994-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,45 +19,6 @@
  * Authors:	D. W. Caress (L-DEO)
  *		R. B. Owens (University of Oxford)
  * Date:	January 20, 1994
- * $Log: mbf_em12darw.h,v $
- * Revision 5.3  2003/12/04 23:10:22  caress
- * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
- *
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.3  2000/09/30  06:29:44  caress
- * Snapshot for Dale.
- *
- * Revision 4.2  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.0  1994/10/21  12:35:05  caress
- * Release V4.0
- *
- * Revision 4.0  1994/10/21  12:35:05  caress
- * Release V4.0
- *
- * Revision 1.1  1994/10/21  12:20:01  caress
- * Initial revision
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.0  1994/03/05  22:54:09  caress
- * First cut.
  *
  *
  */
@@ -91,37 +52,37 @@
 #define MBF_EM12DARW_BEAMS 81
 
 struct mbf_em12darw_struct {
-	short	func;		/* record type; 100=comment, 150=data */
-	short	year;		/* TWO-digit year */
-	short 	jday;		/* Julian day  */
-	short 	minute;		/* minute of day */
-	short	secs;		/* seconds x 100 */
-	double	latitude;	/* latitude (for units see corflag) */
-	double	longitude;	/* longitude (for units see corflag) */
-	short	corflag;	/* Co-ordinate flag: 0=Lat/Long, 1=UTM North,
-					2=UTM South  */
-	float	utm_merd;	/* UTM Meridian if corflag=1,2  */
-	short	utm_zone;	/* UTM Zone if corflag=1,2  */
-	short	posq;		/* Quality factor of Position data */
-	int	pingno;		/* ping number */
-	short	mode;		/* resolution mode */
-	float	depthl;		/* depth of centrebeam */
-	float	speed;		/* Ship's speed */
-	float	gyro;		/* Ship's Heading */
-	float	roll;		/* Ship's Roll */
-	float	pitch;		/* Ship's Pitch */
-	float	heave;		/* Ship's Heave */
-	float	sndval;		/* Sound Velocity */
-	short	depth[MBF_EM12DARW_BEAMS];
-				/* Beam Depth scaled (0.1/0.2) */
-	short	distacr[MBF_EM12DARW_BEAMS];
-				/* Beam Across Distance, scaled (0.2/0.5) */
-	short	distalo[MBF_EM12DARW_BEAMS];
-				/* Beam Along Distance, scaled (0.2/0.5) */
-	short	range[MBF_EM12DARW_BEAMS];
-				/* Beam Range, scaled (0.2/0.8) */
-	short	refl[MBF_EM12DARW_BEAMS];
-				/* Beam Reflectivity, scaled 0.5 */
-	short	beamq[MBF_EM12DARW_BEAMS];
-				/* Beam Quality, unscaled */
+	short func;       /* record type; 100=comment, 150=data */
+	short year;       /* TWO-digit year */
+	short jday;       /* Julian day  */
+	short minute;     /* minute of day */
+	short secs;       /* seconds x 100 */
+	double latitude;  /* latitude (for units see corflag) */
+	double longitude; /* longitude (for units see corflag) */
+	short corflag;    /* Co-ordinate flag: 0=Lat/Long, 1=UTM North,
+	              2=UTM South  */
+	float utm_merd;   /* UTM Meridian if corflag=1,2  */
+	short utm_zone;   /* UTM Zone if corflag=1,2  */
+	short posq;       /* Quality factor of Position data */
+	int pingno;       /* ping number */
+	short mode;       /* resolution mode */
+	float depthl;     /* depth of centrebeam */
+	float speed;      /* Ship's speed */
+	float gyro;       /* Ship's Heading */
+	float roll;       /* Ship's Roll */
+	float pitch;      /* Ship's Pitch */
+	float heave;      /* Ship's Heave */
+	float sndval;     /* Sound Velocity */
+	short depth[MBF_EM12DARW_BEAMS];
+	/* Beam Depth scaled (0.1/0.2) */
+	short distacr[MBF_EM12DARW_BEAMS];
+	/* Beam Across Distance, scaled (0.2/0.5) */
+	short distalo[MBF_EM12DARW_BEAMS];
+	/* Beam Along Distance, scaled (0.2/0.5) */
+	short range[MBF_EM12DARW_BEAMS];
+	/* Beam Range, scaled (0.2/0.8) */
+	short refl[MBF_EM12DARW_BEAMS];
+	/* Beam Reflectivity, scaled 0.5 */
+	short beamq[MBF_EM12DARW_BEAMS];
+	/* Beam Quality, unscaled */
 };

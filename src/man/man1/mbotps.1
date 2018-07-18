@@ -1,4 +1,4 @@
-.TH mbotps 1 "12 July 2014" "MB-System 5.0" "MB-System 5.0"
+.TH mbotps 1 "6 May 2018" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbotps\fP \- Predicts tides using the OSU Tidal Prediction Software (OTPS) distribution.
 
@@ -7,9 +7,13 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbotps\fP [\fB\-A\fP\fItideformat\fP \fB\-B\fP\fIyear/month/day/hour/minute/second\fP
+\fB\-C\fP\fItidestationformat\fP
 \fB\-D\fP\fIinterval\fP \fB\-E\fP\fIyear/month/day/hour/minute/second
-\fB\-F\fP\fIformat\fP \fB\-I\fP\fIdatalist.mb-1\fP
-\fB\-M\fP \fB\-O\fP\fIoutput\fP \fB\-P\fP\fIotps_location\fP \fB\-R\fP\fIlon/lat\fP \fB\-V\fP]
+\fB\-F\fP\fIformat\fP \fB\-I\fP\fIdatalist\fP
+\fB\-M\fP \fB\-N\fP\fItidestationfile\fP \fB\-O\fP\fIoutput\fP
+\fB\-P\fP\fIotps_location\fP
+\fB\-R\fP\fIlon/lat\fP \fB-S\fP \fB\-T\fP\fImodel\fP
+\fB\-U\fP\fItidestationlon/tidestationlat\fP \fB\-V\fP]
 
 .SH DESCRIPTION
 \fBMBotps\fP is a utility that predicts tides using the OTPS (OSU Tidal Prediction
@@ -65,6 +69,19 @@ edited to have the following contents:
     /usr/local/OTPSnc/DATA/DATA/uv.ES2008.nc
 .br
 
+The OTPS2 models are structured similarly, so that the tpxo8atlas model consists of
+four files:
+    Model_atlas
+    hf.tpxo8_atlas_30_v1
+    uv.tpxo8_atlas_30_v1
+    grid_tpxo8atlas_30_v1
+.br
+where, if these are located in the directory /usr/local/Cellar/otps/2/DATA/,
+the contents of the file Model_atlas is:
+    /usr/local/Cellar/otps/2/DATA/hf.tpxo8_atlas_30_v1
+    /usr/local/Cellar/otps/2/DATA/uv.tpxo8_atlas_30_v1
+    /usr/local/Cellar/otps/2/DATA/grid_tpxo8atlas_30_v1
+
 \fBMBotps\fP can be operated in two modes. First, users may use the \fB\-R\fP,
 \fB\-B\fP, and \fB\-E\fP options to specify a location and the beginning and end times of
 a tidal model for that location. The \fB\-D\fP option sets the time interval of values in
@@ -77,14 +94,33 @@ locations at intervals specified with the \fB\-D\fP option, and if the \fB\-M\fP
 is specified, the swath file's processing parameter file is modified so that \fBmbprocess\fP
 applies the tidal model during processing.
 
-.SH AUTHORSHIP
-David W. Caress (caress@mbari.org)
+The \fB\-C\fP\fItidestationformat\fP, \fB\-N\fP\fItidestationfile\fP, and 
+\fB\-U\fP\fItidestationlon/tidestationlat\fP commands together allow users to input
+observations from a tide station; these observations can be used to calculate
+corrections to tidal model values in the vicinity of the tide station.
+If tide station data are specified, then \fBMBotps\fP calculates
+the difference between the observed and modeled tide at that station for each data
+point in the input tide station data. This difference time series is then used as
+a correction to the output tide models, whether at a location specified with the
+\fB\-R\fP\fIlon/lat\fP option or for swath data specified with the
+\fB\-I\fP\fIdatalist\fP option.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
 .br
   Monterey Bay Aquarium Research Institute
 .br
-Dale N. Chayes (dale@ldeo.columbia.edu)
+Dale N. Chayes
 .br
-  Lamont-Doherty Earth Observatory
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
 
 .SH OPTIONS
 .TP
@@ -102,6 +138,20 @@ If \fItideformat\fP = 1, then the output format is:
  	time_d tide
 .br
 where time_d is in seconds since January 1, 1970 and tide is in meters.
+.TP
+.B \-C
+\fItidestationformat
+.br
+This option sets the format of the tide station data in the file specified using
+the \fB-N\fP\fItidestationfile\fP option. The tide station data may be in one of
+four ASCII, space delimited, table formats:
+  \fItidestationformat\fP=1: format is <time_d tide>
+  \fItidestationformat\fP=2: format is <yr mon day hour min sec tide>
+  \fItidestationformat\fP=3: format is <yr jday hour min sec tide>
+  \fItidestationformat\fP=4: format is <yr jday daymin sec tide>
+.br
+Note that in format 1 the value time_d = decimal seconds since 1/1/1970 and that
+format 4 the value daymin = decimal minutes since the start of day.
 .TP
 .B \-B
 \fIyr/mo/da/hr/mn/sc\fP
@@ -161,6 +211,12 @@ then this option causes each swath file's parameter file to be modified so that
 \fBmbprocess\fP will read and apply the ancilliary tidal model file created by
 \fBmbotps\fP.
 .TP
+.B \-N
+\fItidestationfile\fP
+.br
+Sets the filename of the tide station data file used to correct the output tide
+model.
+.TP
 .B \-O
 \fIfilename\fP
 .br
@@ -179,11 +235,22 @@ the tide model to be used by \fBpredict_tide\fP.
 Sets the longitude and latitude position at which the tidal model will be
 calculated.
 .TP
+.B \-S
+If tide models are being generated for swath files specified using the \fB-I\fP option,
+then skip files that already have an existing tide model.
+.TP
 .B \-T
-\fIfilename\fP
+\fImodel\fP
 .br
 Sets the name of the OTPSnc tidal model to be used. This model must be part of
-the local OTPSnc installation.
+the local OTPSnc installation. Examples include "tpxo7.2" and "altas".
+Default: "tpxo7.2"
+.TP
+.B \-U
+\fIlongitude/latitude\fP
+.br
+Sets the longitude and latitude position of the tide station from which the data
+specified with the \fB\-N\fP\fItidestationfile\fP.
 .TP
 .B \-V
 Increases the verbosity of \fBmbotps\fP.

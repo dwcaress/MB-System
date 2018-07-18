@@ -1,0 +1,569 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbminirovnav</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbminirovnav</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  29 September 2017 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbminirovnav</B> - Merges MBARI MiniROV data logs and outputs the ROV navigation
+in the format used for other ROV navigation at MBARI (format 165, MBF_MBARIROV). 
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbminirovnav</B> [
+<BR>
+
+<B>--help</B>
+<BR>
+
+<B>--input</B>=<I>fileroot</I>
+<BR>
+
+<B>--input-nav-file</B>=<I>file</I>
+<BR>
+
+<B>--input-ctd-file</B>=<I>file</I>
+<BR>
+
+<B>--input-dvl-file</B>=<I>file</I>
+<BR>
+
+<B>--input-rov-file</B>=<I>file</I>
+<BR>
+
+<B>--interpolate-position</B>
+<BR>
+
+<B>--interval</B>=<I>seconds</I>
+<BR>
+
+<B>--output</B>=<I>file</I>
+<BR>
+
+<B>--rov-dive-start</B>=<I>yyyymmddhhmmss</I>
+<BR>
+
+<B>--rov-dive-end</B>=<I>yyyymmddhhmmss</I>
+<BR>
+
+<B>--utm-zone</B>=<I>zone_id/NorS</I>
+<BR>
+
+<B>--verbose</B> ]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+The MBARI MiniROV logs navigation and related data in four
+files during each dive. These include USBL tracking in the form of position fixes
+derived from the Winfrog software package, CTD data including pressure depth,
+ROV platform data including heading, roll, and pitch, and DVL data including
+altitude and velocity over bottom whenever the Doppler Velocity Log (DVL) has
+bottom lock. This data logging structure began with MiniROV dive 100 on September 5,
+2017. This program bminirovnav reads the four MiniROV log files and outputs
+a single ROV navigation file in the format typically used by MBARI for
+ROV Doc Ricketts and ROV Ventana navigation. <B>MB-System</B> supports MBARI ROV
+navigation as format 165 (MBF_MBARIROV). The combined MiniROV navigation can then
+be interactively edited using the tool <B>mbnavedit</B>.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--help</B>
+
+<DD>
+<BR>
+
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>--input</B>=<I>fileroot</I>
+
+<DD>
+<BR>
+
+The MBARI MiniROV logs files with a consistent naming scheme. For instance, the
+first set of files associated with expedition ARA08C are:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;CTD_090517000000.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DVL_090517000000.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;NAV_090517000000.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;ROV_090517000000.txt
+<BR>
+
+<BR>&nbsp;This&nbsp;option&nbsp;allows&nbsp;one&nbsp;to&nbsp;specify&nbsp;the&nbsp;date&nbsp;value&nbsp;(e.g.&nbsp;&quot;090517&quot;)&nbsp;that&nbsp;then
+<BR>&nbsp;determines&nbsp;the&nbsp;filenames&nbsp;of&nbsp;the&nbsp;four&nbsp;log&nbsp;files.&nbsp;Alternatively,&nbsp;the&nbsp;four&nbsp;logfile
+<BR>&nbsp;names&nbsp;can&nbsp;be&nbsp;specified&nbsp;individually&nbsp;with&nbsp;the&nbsp;--input-ctd-file,
+<BR>&nbsp;--input-dvl-file,&nbsp;--input-nav-file,&nbsp;and&nbsp;--input-rov-file&nbsp;options.
+<DT><B>--input-ctd-file</B>=<I>file</I>
+
+<DD>
+<BR>
+
+Specifies the MiniROV CTD data logfile to be read. This file includes the MiniROV's
+pressure depth values.
+<DT><B>--input-dvl-file</B>=<I>file</I>
+
+<DD>
+<BR>
+
+Specifies the MiniROV DVL data logfile to be read. This file includes the MiniROV's
+altitude and velocity over bottom values (when the ROV is close enough to the
+seafloor for the DVL to have bottom lock).
+<DT><B>--input-nav-file</B>=<I>file</I>
+
+<DD>
+<BR>
+
+Specifies the MiniROV NAV data logfile to be read. This file includes the MiniROV's
+lateral position values as estimated by an Ultra Short Baseline tracking sonar
+and passed through the Winfrog software package.
+<DT><B>--input-rov-file</B>=<I>file</I>
+
+<DD>
+<BR>
+
+Specifies the MiniROV ROV data logfile to be read. This file includes the MiniROV's
+heading, roll, and pitch values.
+<DT><B>--interpolate-position</B>
+
+<DD>
+<BR>
+
+This option causes repeated position values to be replaced with
+values linearly interpolated between the occasional changed (new) values. 
+See the discussion in the example section section below for why this option
+is not recommended.
+TP
+<B>--interval</B>=<I>seconds</I>
+
+<BR>
+
+This option sets the time interval in seconds of the output format 165 ROV
+navigation data. The default is 1.0 seconds.
+<DT><B>--output</B>=<I>file</I>
+
+<DD>
+<BR>
+
+Specifies the filename for the output format 165 ROV navigation data.
+<DT><B>--rov-dive-start</B>=<I>yyyymmddhhmmss</I>
+
+<DD>
+<BR>
+
+Specifies the start time of the output format 165 ROV navigation data.
+<DT><B>--rov-dive-end</B>=<I>yyyymmddhhmmss</I>
+
+<DD>
+<BR>
+
+Specifies the end time of the output format 165 ROV navigation data.
+<DT><B>--utm-zone</B>=<I>zone_id/NorS</I>
+
+<DD>
+<BR>
+
+Specifies the UTM zone used to calculate UTM eastings and northings from the
+longitude and latitude values derived from the NAV log file. By default,
+<B>mbminirovnav</B> calculates the UTM zone based on the average longitude and
+latitude contained in the input NAV log file.
+<DT><B>--verbose</B> ]
+
+<DD>
+The --verbose option causes the program to be verbose.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLE</H2>
+
+During the 2017 Beaufort Sea cruise ARA08C on the South Korean icebreaker Araon,
+the MBARI MiniROV was used for ten ROV dives during six operational days
+(September 5, 6, 8, 9, 10, 12). The MiniROV data are logged in four ASCII text
+day files defined by UTC time, with names of the form XXX_mmddyyyy000000.txt
+where XXX is CTD, DVL, NAV, or ROV. For instance, the first set of files
+associated with expedition ARA08C are listed here:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;CTD_090517000000.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DVL_090517000000.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;NAV_090517000000.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;ROV_090517000000.txt
+<BR>
+
+<P>
+The CTD files contain the serial output of the CTD sensor in CSV form, with a
+beginning that includes calibration coefficients as comments:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#SN:&nbsp;0361
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#CAL&nbsp;DATE:&nbsp;161116
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#INST&nbsp;DATE:&nbsp;200117
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#Soc:&nbsp;.5617073
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#Voffset:&nbsp;-.4905716
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#Tau20:&nbsp;1.15
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#A:&nbsp;-.002684434
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#B:&nbsp;.0001176004
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#C:&nbsp;-.000001882225
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#E:&nbsp;.036
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#FIELDS=TIME,C,T,D,S,O2uM,O2raw,DGH_T,C2_T,C2_C
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504629902.228,2.474,7.233,5.071,31.741,-87.877,0.000,7.332,5.514,0.076
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504629904.528,2.474,7.233,5.707,31.741,-87.873,0.000,7.332,5.514,0.076
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504629906.728,2.474,7.236,6.267,31.741,-87.884,0.000,7.332,5.514,0.076
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504629908.935,2.475,7.235,6.839,31.741,-87.892,0.000,7.332,5.514,0.076
+<BR>
+
+The fields of interest for the ROV navigation data are the timestamp (which is
+in epoch seconds, or seconds since 1970, in UTC) and the depth value, which
+derives from the CTD's pressure sensor.
+<P>
+The DVL files are also CSV, with the following form:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#FIELDS,time,Depth,S_Time,bx,by,bz,Satus
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649788.514,0.000,758463.000,-99999.000,-99999.000,-99999.000,58.000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649790.719,0.000,758712.000,-99999.000,-99999.000,-99999.000,58.000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649792.920,0.000,758961.000,-99999.000,-99999.000,-99999.000,2.000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649795.120,7.976,759109.000,-407.000,12.000,-159.000,2.000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649797.321,0.000,759304.000,-99999.000,-99999.000,-99999.000,2.000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649799.521,0.000,759497.000,-99999.000,-99999.000,-99999.000,2.000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649801.721,0.000,759735.000,-99999.000,-99999.000,-99999.000,2.000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649803.921,0.000,759928.000,-99999.000,-99999.000,-99999.000,2.000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649806.122,7.355,760142.000,-8.000,38.000,-189.000,2.000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649808.323,0.000,760365.000,-99999.000,-99999.000,-99999.000,2.000
+<BR>
+
+Here the &quot;Depth&quot; field is actually altitude in meters, which is nonzero only when
+the DVL has bottom lock (which is also when the bx, by, and bz velocity components
+are not -99999.000). The altitude value is currently used in the output ROV
+navigation. The DVL velocity components are not currently used, but should be used
+in the calculation of an optimal navigation model.
+<P>
+The NAV files are simply $GPGLL strings output by the Winfrog software program
+when it is interfaced with an Ultra Short Baseline (USBL) tracking sonar appended
+after a CSV timestamp in UTC epoch seconds:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#FIELDS,time,$GPGLL
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649757.995,$GPGLL,6952.70206,N,13903.45914,W,221550.15,V,N*68
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649760.205,$GPGLL,6952.70237,N,13903.46025,W,221555.21,V,N*60
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649762.405,$GPGLL,6952.70237,N,13903.46025,W,221555.21,V,N*60
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649764.607,$GPGLL,6952.70237,N,13903.46025,W,221555.21,V,N*60
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649766.906,$GPGLL,6952.70237,N,13903.46025,W,221555.21,V,N*60
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649769.106,$GPGLL,6952.70272,N,13903.46148,W,221600.16,V,N*6C
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649771.312,$GPGLL,6952.70272,N,13903.46148,W,221600.16,V,N*6C
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649773.513,$GPGLL,6952.70305,N,13903.46286,W,221605.23,V,N*6F
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649775.713,$GPGLL,6952.70305,N,13903.46286,W,221605.23,V,N*6F
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+<BR>
+
+Because the datalogger currently appends an EOL character on top of the EOL that
+is already in the $GPGLL string, these files appear to have empty alternate lines
+in a text editor. This feature is likely to be fixed in the future. The values of
+interest to ROV navigation are the ROV position in latitude and longitude, which
+are presented in the form of
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;$GPGLL,ddmm.mmmmm,H,dddmm.mmmmm,H&nbsp;
+<BR>
+
+where &quot;dd&quot; or &quot;ddd&quot; are degrees, &quot;mm.mmmmm&quot; are decimal minutes, and H is the
+hemisphere (N or S for north or south for latitude; E or W for east or west for
+longitude). Note that the datalogger saves the most recent position fix about
+every two seconds, which means that when the USBL fails to provide a new position
+fix the logged position does not change. Thus, repeated positions correspond to
+a lack of new data.
+<P>
+Finally, the ROV files are CSV ASCII text files in the following form:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#FIELDS,time,x,y,z,yaw,magna_amps,F1,F2,F3,F4,F5-6,Heading,Pitch,Roll
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649787.899,-0.000,-0.000,-11.126,-0.000,3.530,1.508,-1.056,1.508,-1.056,-10.000,77.389,1.242,-4.974
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649790.099,-0.000,-0.000,-11.099,-0.000,3.520,1.192,-1.143,1.192,-1.143,-10.000,77.832,-0.353,-6.566
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649792.301,-0.000,-0.000,-11.153,-0.000,3.510,0.410,-0.383,0.410,-0.383,-10.000,77.580,-2.960,-5.878
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649794.503,-0.000,-0.000,-10.989,-0.000,3.510,-0.048,-1.232,-0.048,-1.232,-10.000,79.641,-1.444,-5.637
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649796.717,-0.000,-0.000,-11.099,-0.000,3.490,0.801,-0.104,0.801,-0.104,-10.000,80.332,-2.918,-6.626
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649798.917,-0.000,-0.000,-11.044,-0.000,3.520,0.176,-1.530,0.176,-1.530,-10.000,80.748,-1.917,-5.723
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649801.216,-0.000,-0.000,-11.153,-0.000,3.520,1.752,-0.497,1.752,-0.497,-10.000,83.300,-2.980,-6.701
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649803.416,5.097,-0.000,-11.126,-0.000,3.650,0.639,2.402,0.639,2.402,-10.000,82.556,-2.840,-4.664
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649805.618,6.581,0.483,-11.153,-0.000,4.980,9.577,7.055,9.253,8.021,-10.000,82.143,-2.174,-6.512
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;1504649807.818,6.718,0.873,-11.126,-0.000,4.890,6.255,6.351,5.111,8.097,-10.000,76.531,-0.979,-3.645
+<BR>
+
+Here the values of interest to ROV navigation are the heading, pitch and roll.
+<P>
+This program, <B>mbminirovnav</B> requires all four log files (CTD, DVL, NAV and ROV)
+to produce the output ROV navigation in format 165 files that can be further processed
+or plotted with <B>MB-System</B>. In practice, ROV dives often cross over the UTC
+day boundaries, and so it is frequently sensible to concatenate the data from an
+entire expedition and extract only the data of interest for individual ROV dives.
+<P>
+For the case of the ARA08C MiniROV dives, only the time spent with ROV on bottom
+is of interest, and so we break up the navigation into files associated with the
+on-bottom components of each of the ten dives. What follows is a workflow that
+produces a format 165 file for each of the dives according to the known
+on and off bottom times in UTC. Because ROV dives cross the UTC day boundaries,
+we start by concatenating all of the log files for the expedition into single
+long files, and then use those long files as the inputs to <B>mbminirovnav</B>.
+<P>
+The start and end times are defined by the <B>--rov-dive-start</B> and
+<B>--rov-dive-end</B> commands.
+<P>
+The format 165 ROV navigation files include UTM
+easting and northing fields but no place to define which UTM zone is used.
+By default, <B>mbminirovnav</B> will use the average input longitude and latitude
+values to determine the UTM zone to use, but the zone can also be specified using
+using the <B>--utm-zone</B> command. In the case of the ARA08C MiniROV dives,
+some were in UTM zone 7 and others in UTM zone 8, and we specify which to use
+for each dive.
+<P>
+This example also invokes the <B>--interpolate-position</B> command, which causes
+<B>mbminirovnav</B> to interpolate longitude and latitude values onto the output
+times. All of the other values are interpolated onto the output times regardless.
+USBL tracking of an ROV is intermittent in that interrogration usually occurs
+at intervals of a few seconds and that many, if not most, interrogations
+are unsuccessful. New positions are passed from Winfrog into the MiniROV only
+when they become available. The MiniROV navigation logging records the most recent
+position (in the form of the $GPGLL string sent from Winfrog) every two seconds
+or so; these values thus repeat until a new value is available. By default,
+<B>mbminirovnav</B> replicates this data flow in the output format 165 ROV navigation
+file, repeating position values until now positions are available.
+If the <B>--interpolate-position</B> option
+is specified, <B>mbminirovnav</B> instead replaces repeated position values with
+values linearly interpolated between the occasional changed (new) values. This
+may actually be undesirable if some of the USBL fixes are badly wrong (outliers).
+The interactive program <B>mbnavedit</B> recognizes repeated positions as potentially
+null, and allows one to flag bad fixes and apply interpolation that only
+uses the unrepeated and unflagged fixes. Therefore, the recommended approach is
+to not use the <B>--interpolate-position</B> option in <B>mbminirovnav</B>, and to
+instead apply the interpolation using <B>mbnavadjust</B>.
+<P>
+<P>
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Processing&nbsp;MiniROV&nbsp;log&nbsp;files&nbsp;into&nbsp;MB-System&nbsp;compatible&nbsp;ROV&nbsp;navigation
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Wrote&nbsp;new&nbsp;tool&nbsp;mbminirovnav&nbsp;to&nbsp;be&nbsp;included&nbsp;in&nbsp;MB-System&nbsp;that&nbsp;outputs
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;format&nbsp;165&nbsp;ROV&nbsp;navigation&nbsp;files.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Dive_#<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>on_bottom_(Z)<TT>&nbsp;&nbsp;&nbsp;</TT>off_bottom_(Z)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UTM_Zone<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;100<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;5-Sep<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>16:54<TT>&nbsp;&nbsp;&nbsp;</TT>5-Sep<TT>&nbsp;&nbsp;&nbsp;</TT>17:56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;101<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;5-Sep<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20:07<TT>&nbsp;&nbsp;&nbsp;</TT>5-Sep<TT>&nbsp;&nbsp;&nbsp;</TT>22:05&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;102<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;6-Sep<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1:55<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>6-Sep<TT>&nbsp;&nbsp;&nbsp;</TT>02:39&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;103<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;6-Sep<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20:56<TT>&nbsp;&nbsp;&nbsp;</TT>6-Sep<TT>&nbsp;&nbsp;&nbsp;</TT>22:46&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;104<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;8-Sep<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>16:30<TT>&nbsp;&nbsp;&nbsp;</TT>8-Sep<TT>&nbsp;&nbsp;&nbsp;</TT>19:12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;105<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;8-Sep<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>23:43<TT>&nbsp;&nbsp;&nbsp;</TT>9-Sep<TT>&nbsp;&nbsp;&nbsp;</TT>02:15&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;106<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;9-Sep<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>18:00<TT>&nbsp;&nbsp;&nbsp;</TT>9-Sep<TT>&nbsp;&nbsp;&nbsp;</TT>21:19&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;107<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;9-Sep<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>23:38<TT>&nbsp;&nbsp;&nbsp;</TT>10-Sep<TT>&nbsp;&nbsp;</TT>02:18&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;108<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;10-Sep<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>19:27<TT>&nbsp;&nbsp;&nbsp;</TT>10-Sep<TT>&nbsp;&nbsp;</TT>23:15&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;109<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;12-Sep<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>16:41<TT>&nbsp;&nbsp;&nbsp;</TT>12-Sep<TT>&nbsp;&nbsp;</TT>19:16&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;First&nbsp;concatenate&nbsp;all&nbsp;the&nbsp;MiniROV&nbsp;log&nbsp;files&nbsp;locally
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;cat&nbsp;../MiniROVArctic2017logfiles/CTD*txt&nbsp;&gt;&nbsp;MiniROV_CTD_2017Araon_ARA8C.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;cat&nbsp;../MiniROVArctic2017logfiles/DVL*txt&nbsp;&gt;&nbsp;MiniROV_DVL_2017Araon_ARA8C.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;cat&nbsp;../MiniROVArctic2017logfiles/NAV*txt&nbsp;&gt;&nbsp;MiniROV_NAV_2017Araon_ARA8C.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;cat&nbsp;../MiniROVArctic2017logfiles/ROV*txt&nbsp;&gt;&nbsp;MiniROV_ROV_2017Araon_ARA8C.txt
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Generate&nbsp;ROV&nbsp;navigation&nbsp;for&nbsp;MiniROV&nbsp;dive&nbsp;100
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbminirovnav&nbsp;--input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=MiniROVnav_100_20170905_ARA8C.mb165&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--utm-zone=8N&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-start=2017/09/05/16/54/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-end=2017/09/05/17/56/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--interpolate-position&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--verbose
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Generate&nbsp;ROV&nbsp;navigation&nbsp;for&nbsp;MiniROV&nbsp;dive&nbsp;101
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbminirovnav&nbsp;--input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=MiniROVnav_101_20170905_ARA8C.mb165&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--utm-zone=8N&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-start=2017/09/05/20/07/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-end=2017/09/05/22/05/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--interpolate-position&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--verbose
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Generate&nbsp;ROV&nbsp;navigation&nbsp;for&nbsp;MiniROV&nbsp;dive&nbsp;102
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbminirovnav&nbsp;--input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=MiniROVnav_102_20170905_ARA8C.mb165&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--utm-zone=8N&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-start=2017/09/06/01/58/30&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-end=2017/09/06/02/30/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--interpolate-position&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--verbose
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Generate&nbsp;ROV&nbsp;navigation&nbsp;for&nbsp;MiniROV&nbsp;dive&nbsp;103
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbminirovnav&nbsp;--input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=MiniROVnav_103_20170906_ARA8C.mb165&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--utm-zone=7N&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-start=2017/09/06/20/56/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-end=2017/09/06/22/46/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--interpolate-position&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--verbose
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Generate&nbsp;ROV&nbsp;navigation&nbsp;for&nbsp;MiniROV&nbsp;dive&nbsp;104
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbminirovnav&nbsp;--input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=MiniROVnav_104_20170908_ARA8C.mb165&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--utm-zone=7N&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-start=2017/09/08/16/30/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-end=2017/09/08/19/12/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--interpolate-position&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--verbose
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Generate&nbsp;ROV&nbsp;navigation&nbsp;for&nbsp;MiniROV&nbsp;dive&nbsp;105
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbminirovnav&nbsp;--input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=MiniROVnav_105_20170908_ARA8C.mb165&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--utm-zone=7N&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-start=2017/09/08/23/43/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-end=2017/09/09/02/14/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--interpolate-position&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--verbose
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Generate&nbsp;ROV&nbsp;navigation&nbsp;for&nbsp;MiniROV&nbsp;dive&nbsp;106
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbminirovnav&nbsp;--input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=MiniROVnav_106_20170909_ARA8C.mb165&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--utm-zone=7N&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-start=2017/09/09/18/00/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-end=2017/09/10/21/19/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--interpolate-position&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--verbose
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Generate&nbsp;ROV&nbsp;navigation&nbsp;for&nbsp;MiniROV&nbsp;dive&nbsp;107
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbminirovnav&nbsp;--input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=MiniROVnav_107_20170909_ARA8C.mb165&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--utm-zone=7N&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-start=2017/09/09/23/38/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-end=2017/09/10/02/18/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--interpolate-position&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--verbose
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Generate&nbsp;ROV&nbsp;navigation&nbsp;for&nbsp;MiniROV&nbsp;dive&nbsp;108
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbminirovnav&nbsp;--input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=MiniROVnav_108_20170910_ARA8C.mb165&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--utm-zone=7N&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-start=2017/09/10/19/27/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-end=2017/09/10/23/15/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--interpolate-position&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--verbose
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Generate&nbsp;ROV&nbsp;navigation&nbsp;for&nbsp;MiniROV&nbsp;dive&nbsp;109
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbminirovnav&nbsp;--input-nav-file=MiniROV_NAV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-ctd-file=MiniROV_CTD_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-dvl-file=MiniROV_DVL_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input-rov-file=MiniROV_ROV_2017Araon_ARA8C.txt&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=MiniROVnav_109_20170912_ARA8C.mb165&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--utm-zone=8N&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-start=2017/09/12/16/41/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--rov-dive-end=2017/09/12/19/16/00&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--interpolate-position&nbsp;&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--verbose
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Da.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLE</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 29 September 2017</P></CENTER>
+
+<HR>
+
+</BODY>
+</HTML>

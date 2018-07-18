@@ -1,4 +1,4 @@
-.TH mbset 1 "10 November 2014" "MB-System 5.0" "MB-System 5.0"
+.TH mbset 1 "20 July 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbset\fP \- Sets values in \fBmbprocess\fP parameter files.
 
@@ -172,6 +172,10 @@ The \fBmbprocess\fP parameter file commands modified by \fBmbset\fP are:
         sets navigation longitude shift (degrees) [0.0]
    NAVSHIFTLAT constant
         sets navigation latitude shift (degrees) [0.0]
+   NAVSHIFTX constant
+        sets navigation longitude shift (meters) [0.0]
+   NAVSHIFTY constant
+        sets navigation latitude shift (meters) [0.0]
 
  ADJUSTED NAVIGATION MERGING:
    NAVADJMODE mode
@@ -771,14 +775,22 @@ for a survey; the adjustments are numbered sequentially from
 .br
 and so on. These navigation files can be read independently using format 166.
 
-.SH AUTHORSHIP
-David W. Caress (caress@mbari.org)
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
 .br
   Monterey Bay Aquarium Research Institute
 .br
-Dale N. Chayes (dale@ldeo.columbia.edu)
+Dale N. Chayes
 .br
-  Lamont-Doherty Earth Observatory
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
 
 .SH OPTIONS
 .TP

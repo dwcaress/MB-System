@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_mstiffss.h	10/14/94
  *	$Id$
  *
- *    Copyright (c) 1998-2014 by
+ *    Copyright (c) 1998-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,32 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	April 7,  1998
- *
- * $Log: mbf_mstiffss.h,v $
- * Revision 5.3  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.2  2003/01/15 20:51:48  caress
- * Release 5.0.beta28
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.1  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.0  1998/10/05  18:30:03  caress
- * MB-System version 4.6beta
- *
- * Revision 1.1  1998/10/05  18:22:40  caress
- * Initial revision
- *
- * Revision 1.1  1998/10/05  17:46:15  caress
- * Initial revision
- *
  *
  *
  */
@@ -136,68 +110,68 @@
 #define MBF_MSTIFFSS_BUFFERSIZE 1024
 
 /* number of sidescan pixels for Sea Scan sidescan sonars */
-#define MBF_MSTIFFSS_PIXELS	1024
+#define MBF_MSTIFFSS_PIXELS 1024
 
 /* threshold of sidescan values for detecting bottom return */
-#define MBF_MSTIFF_TRANSMIT_BINS	10
-#define MBF_MSTIFF_BOTTOM_THRESHOLD	10
+#define MBF_MSTIFF_TRANSMIT_BINS 10
+#define MBF_MSTIFF_BOTTOM_THRESHOLD 10
 
 /* MSTIFF data field tags */
-#define Annotation	273
-#define AnnotationCount	272
-#define Annotation2	279
-#define Annotation2Count	278
-#define Annotation3	281
-#define Annotation3Count	280
-#define BinsPerChannel	260
-#define BitsPerBin	258
-#define Compression	254
-#define CondensedImage	255
-#define CreatorVersion	301
-#define Description	256
-#define Fathometer	287
-#define Fathometer2	296
-#define FathometerCount	286
-#define History	257
-#define LeftChannel	263
-#define LeftChannel2	299
-#define Magnetometer	289
-#define MagnetometerCount	288
-#define MagnetometerParms	291
-#define MagnetometerParms2	303
-#define Marker	269
-#define MarkerCount	268
-#define Marker2	277
-#define Marker2Count	276
-#define Marker3	284
-#define Marker3Count	283
-#define Marker4	295
-#define Marker4Count	294
-#define Marker5	307
-#define Marker5Count	306
-#define NavInfo	267
-#define NavInfo2	275
-#define NavInfo3	282
-#define NavInfo4	293
-#define NavInfo5	297
-#define NavInfo6	308
-#define NavInfoCount	266
-#define NavInterpolationTimeout	304
-#define PingNavInfo	274
-#define RightChannel	264
-#define RightChannel2	300
-#define ScrollDirection	261
-#define SonarDataInfo	265
-#define SonarDataInfo2	292
-#define SonarDataInfo3	298
-#define SonarLines	259
-#define SurveyPlotterImage	271
-#define SurveyPlotterParms	270
-#define SurveyPlotterParms2	290
-#define SurveyPlotterParms3	302
-#define SurveyPlotterParms4	305
-#define TimeCorrelation	262
-#define Y2KTimeCorrelation	285
+#define Annotation 273
+#define AnnotationCount 272
+#define Annotation2 279
+#define Annotation2Count 278
+#define Annotation3 281
+#define Annotation3Count 280
+#define BinsPerChannel 260
+#define BitsPerBin 258
+#define Compression 254
+#define CondensedImage 255
+#define CreatorVersion 301
+#define Description 256
+#define Fathometer 287
+#define Fathometer2 296
+#define FathometerCount 286
+#define History 257
+#define LeftChannel 263
+#define LeftChannel2 299
+#define Magnetometer 289
+#define MagnetometerCount 288
+#define MagnetometerParms 291
+#define MagnetometerParms2 303
+#define Marker 269
+#define MarkerCount 268
+#define Marker2 277
+#define Marker2Count 276
+#define Marker3 284
+#define Marker3Count 283
+#define Marker4 295
+#define Marker4Count 294
+#define Marker5 307
+#define Marker5Count 306
+#define NavInfo 267
+#define NavInfo2 275
+#define NavInfo3 282
+#define NavInfo4 293
+#define NavInfo5 297
+#define NavInfo6 308
+#define NavInfoCount 266
+#define NavInterpolationTimeout 304
+#define PingNavInfo 274
+#define RightChannel 264
+#define RightChannel2 300
+#define ScrollDirection 261
+#define SonarDataInfo 265
+#define SonarDataInfo2 292
+#define SonarDataInfo3 298
+#define SonarLines 259
+#define SurveyPlotterImage 271
+#define SurveyPlotterParms 270
+#define SurveyPlotterParms2 290
+#define SurveyPlotterParms3 302
+#define SurveyPlotterParms4 305
+#define TimeCorrelation 262
+#define Y2KTimeCorrelation 285
 
 #define FREQ_150 0
 #define FREQ_300 1
@@ -205,28 +179,27 @@
 #define FREQ_1200 3
 #define FREQ_UNKNOWN 4
 
-struct mbf_mstiffss_struct
-	{
+struct mbf_mstiffss_struct {
 	/* time stamp */
-	double	time_d;		/* unix time */
+	double time_d; /* unix time */
 
 	/* position */
-	double	lat;		/* latitude in degrees */
-	double	lon;		/* longitude in degrees */
+	double lat; /* latitude in degrees */
+	double lon; /* longitude in degrees */
 
 	/* other values */
-	double	heading;	    /* heading in degrees */
-	double	course;	    	    /* course made good in degrees */
-	double	speed;		    /* fore-aft speed in km/hr */
-	double	altitude;	    /* altitude in meters */
-	double	slant_range_max;    /* meters */
-	double	range_delay;	    /* meters */
-	double	sample_interval;    /* meters */
-	double	sonar_depth;	    /* sonar depth in meters */
-	double	frequency;    /* sonar frequency in Hz */
+	double heading;         /* heading in degrees */
+	double course;          /* course made good in degrees */
+	double speed;           /* fore-aft speed in km/hr */
+	double altitude;        /* altitude in meters */
+	double slant_range_max; /* meters */
+	double range_delay;     /* meters */
+	double sample_interval; /* meters */
+	double sonar_depth;     /* sonar depth in meters */
+	double frequency;       /* sonar frequency in Hz */
 
 	/* sidescan data */
-	int	pixels_ss;	/* number of pixels */
-	unsigned char	ss[MBF_MSTIFFSS_PIXELS];
-	double	ssacrosstrack[MBF_MSTIFFSS_PIXELS];
-	};
+	int pixels_ss; /* number of pixels */
+	unsigned char ss[MBF_MSTIFFSS_PIXELS];
+	double ssacrosstrack[MBF_MSTIFFSS_PIXELS];
+};

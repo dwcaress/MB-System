@@ -2,7 +2,7 @@
  *    The MB-system:	mbbs_iomrv2.c	3/3/2014
  *	$Id$
  *
- *    Copyright (c) 2014-2014 by
+ *    Copyright (c) 2014-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -46,8 +46,7 @@ extern int bs_ionaninit;
 extern float bs_ionanf;
 extern double bs_ionand;
 
-int
-mbbs_mr1_xdrpnghdrv2(Ping *png, XDR *xdrs)
+int mbbs_mr1_xdrpnghdrv2(Ping *png, XDR *xdrs)
 /*
    Internal routine.
    Does XDR decoding of an obsolete MR1 version 2 ping header.
@@ -58,19 +57,19 @@ mbbs_mr1_xdrpnghdrv2(Ping *png, XDR *xdrs)
 	unsigned long sidebc;
 	int mr1_xdrsidev2(PingSide *, XDR *, unsigned long *);
 
-	bs_iobytecnt= 0;
+	bs_iobytecnt = 0;
 
 	/* output in obsolete format not allowed! */
 	if (xdrs->x_op == XDR_ENCODE)
 		return 0;
 
 	if (!bs_ionaninit) {
-		bs_ionanf= mbbs_nanf();
-		bs_ionand= mbbs_nand();
-		bs_ionaninit= 1;
+		bs_ionanf = mbbs_nanf();
+		bs_ionand = mbbs_nand();
+		bs_ionaninit = 1;
 	}
 
-	png->png_flags= PNG_BTYSSFLAGSABSENT;
+	png->png_flags = PNG_BTYSSFLAGSABSENT;
 
 	/* depending upon the platform, the size of the timeval
 	   struct's fields may be 4 or 8 bytes; for backward
@@ -78,120 +77,119 @@ mbbs_mr1_xdrpnghdrv2(Ping *png, XDR *xdrs)
 	   we use 4-byte primitives */
 	if (!xdr_int(xdrs, &tvsec))
 		return 0;
-	bs_iobytecnt+= 4;
-	png->png_tm.tv_sec= tvsec;
+	bs_iobytecnt += 4;
+	png->png_tm.tv_sec = tvsec;
 	if (!xdr_int(xdrs, &tvusec))
 		return 0;
-	bs_iobytecnt+= 4;
-	png->png_tm.tv_usec= tvusec;
+	bs_iobytecnt += 4;
+	png->png_tm.tv_usec = tvusec;
 
 	if (!xdr_float(xdrs, &(png->png_period)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_double(xdrs, &(png->png_slon)))
 		return 0;
-	bs_iobytecnt+= 8;
+	bs_iobytecnt += 8;
 	if (!xdr_double(xdrs, &(png->png_slat)))
 		return 0;
-	bs_iobytecnt+= 8;
+	bs_iobytecnt += 8;
 	if (!xdr_float(xdrs, &(png->png_scourse)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_laybackrng)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_laybackbrg)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_double(xdrs, &(png->png_tlon)))
 		return 0;
-	bs_iobytecnt+= 8;
+	bs_iobytecnt += 8;
 	if (!xdr_double(xdrs, &(png->png_tlat)))
 		return 0;
-	bs_iobytecnt+= 8;
+	bs_iobytecnt += 8;
 	if (!xdr_float(xdrs, &(png->png_tcourse)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 
 	if (!xdr_float(xdrs, &(png->png_compass.sns_int)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_int(xdrs, &(png->png_compass.sns_nsamps)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_compass.sns_repval)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_depth.sns_int)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_int(xdrs, &(png->png_depth.sns_nsamps)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_depth.sns_repval)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_pitch.sns_int)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_int(xdrs, &(png->png_pitch.sns_nsamps)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_pitch.sns_repval)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_roll.sns_int)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_int(xdrs, &(png->png_roll.sns_nsamps)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_roll.sns_repval)))
 		return 0;
-	bs_iobytecnt+= 4;
-	png->png_snspad= 0;
+	bs_iobytecnt += 4;
+	png->png_snspad = 0;
 
 	if (!xdr_float(xdrs, &(png->png_temp)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_ssincr)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 
-	png->png_ssyoffsetmode= PNG_SSYOM_UNKNOWN;
+	png->png_ssyoffsetmode = PNG_SSYOM_UNKNOWN;
 
 	if (!xdr_float(xdrs, &(png->png_alt)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_magcorr)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 	if (!xdr_float(xdrs, &(png->png_sndvel)))
 		return 0;
-	bs_iobytecnt+= 4;
+	bs_iobytecnt += 4;
 
-	png->png_cond= bs_ionanf;
-	png->png_magx= bs_ionanf;
-	png->png_magy= bs_ionanf;
-	png->png_magz= bs_ionanf;
+	png->png_cond = bs_ionanf;
+	png->png_magx = bs_ionanf;
+	png->png_magy = bs_ionanf;
+	png->png_magz = bs_ionanf;
 
 	if (!mr1_xdrsidev2(&(png->png_sides[ACP_PORT]), xdrs, &sidebc))
 		return 0;
-	bs_iobytecnt+= sidebc;
-	png->png_sides[ACP_PORT].ps_ssndrmask= 0.;
-	png->png_sides[ACP_PORT].ps_ssyoffset= bs_ionanf;
+	bs_iobytecnt += sidebc;
+	png->png_sides[ACP_PORT].ps_ssndrmask = 0.;
+	png->png_sides[ACP_PORT].ps_ssyoffset = bs_ionanf;
 
 	if (!mr1_xdrsidev2(&(png->png_sides[ACP_STBD]), xdrs, &sidebc))
 		return 0;
-	bs_iobytecnt+= sidebc;
-	png->png_sides[ACP_STBD].ps_ssndrmask= 0.;
-	png->png_sides[ACP_STBD].ps_ssyoffset= bs_ionanf;
+	bs_iobytecnt += sidebc;
+	png->png_sides[ACP_STBD].ps_ssndrmask = 0.;
+	png->png_sides[ACP_STBD].ps_ssyoffset = bs_ionanf;
 
 	return 1;
 }
 
-int
-mr1_xdrsidev2(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
+int mr1_xdrsidev2(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
 /*
    Internal routine.
    Does XDR decoding of an obsolete MR1 version 2 PingSide header.
@@ -199,7 +197,7 @@ mr1_xdrsidev2(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
    Returns 1 if successful, 0 otherwise.
 */
 {
-	*bytecnt= 0;
+	*bytecnt = 0;
 
 	/* output in obsolete format not allowed! */
 	if (xdrs->x_op == XDR_ENCODE)
@@ -207,27 +205,27 @@ mr1_xdrsidev2(PingSide *ps, XDR *xdrs, unsigned long *bytecnt)
 
 	if (!xdr_float(xdrs, &(ps->ps_xmitpwr)))
 		return 0;
-	*bytecnt+= 4;
+	*bytecnt += 4;
 	if (!xdr_float(xdrs, &(ps->ps_gain)))
 		return 0;
-	*bytecnt+= 4;
+	*bytecnt += 4;
 	if (!xdr_float(xdrs, &(ps->ps_pulse)))
 		return 0;
-	*bytecnt+= 4;
+	*bytecnt += 4;
 	if (!xdr_float(xdrs, &(ps->ps_bdrange)))
 		return 0;
-	*bytecnt+= 4;
+	*bytecnt += 4;
 	if (!xdr_int(xdrs, &(ps->ps_btycount)))
 		return 0;
-	*bytecnt+= 4;
-	ps->ps_btypad= 0;
+	*bytecnt += 4;
+	ps->ps_btypad = 0;
 	if (!xdr_float(xdrs, &(ps->ps_ssxoffset)))
 		return 0;
-	*bytecnt+= 4;
+	*bytecnt += 4;
 	if (!xdr_int(xdrs, &(ps->ps_sscount)))
 		return 0;
-	*bytecnt+= 4;
-	ps->ps_sspad= 0;
+	*bytecnt += 4;
+	ps->ps_sspad = 0;
 
 	return 1;
 }

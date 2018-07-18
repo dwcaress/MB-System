@@ -3,7 +3,7 @@
 #    The MB-system:	mbm_makedatalist.perl	27/1/2006
 #    $Id$
 #
-#    Copyright (c) 2006-2014 by
+#    Copyright (c) 2006-2017 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -35,91 +35,175 @@
 # Version:
 #   $Id$
 #
-# Revisions:
-#   $Log: mbm_makedatalist.perl,v $
-#   Revision 5.1  2006/04/11 19:12:06  caress
-#   Macro now handles data in remote directories.
-#
-#   Revision 5.0  2006/02/03 21:06:18  caress
-#   Initial version of macro to generate a datalist of all recognizable swath files in a directory.
-#
-#
 #
 $program_name = "mbm_makedatalist";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('HhI:i:O:o:Vv');
+&MBGetopts('HhF:f:I:i:O:o:PpS:s:TtVv');
 
-$help =    		($opt_H || $opt_h);
-$directory = 		($opt_I || $opt_i || ".");
+$format_specified =	($opt_F || $opt_f);
+$help =    			($opt_H || $opt_h);
+$directory = 		($opt_I || $opt_i);
 $datalist =    		($opt_O || $opt_o || "datalist.mb-1");
-$verbose = 		($opt_V || $opt_v);
+$ignoreprocessed = 	($opt_P || $opt_p);
+$suffix =    		($opt_S || $opt_s);
+$disablesorting =   ($opt_T || $opt_t);
+$verbose = 			($opt_V || $opt_v);
 
 # print out help message if required
-if ($help)
-	{
+if ($help) {
 	print "\n$program_name:\n";
 	print "\nVersion: $Id$\n";
-        print "Macro to generate an MB-System datalist file referencing all\n";
-        print "identifiable swath files in the specified directory. If no directory\n";
-        print "is specified with the -I option, then the current directory is used.\n";
-        print "The resulting datalist will be named datalist.mb-1 by default.\n";
-
-        print "\nBasic Usage:\n\tmbm_makedatalist [-Idirectory -Odatalist -H -V]\n";
+	print "Macro to generate an MB-System datalist file referencing all\n";
+	print "identifiable swath files in the specified directory. If no directory\n";
+	print "is specified with the -I option, then the current directory is used.\n";
+	print "The resulting datalist will be named datalist.mb-1 by default.\n";
+	print "\fBMbm_makedatalist\fP is a macro to generate an MB-System datalist file\n";
+	print "referencing all identifiable swath files in the specified target directory.\n";
+	print "Datalists are fundamental structures in \fBMB-System\fP workflows because they\n";
+	print "allow programs to operate on sets of swath data files.\n";
+	print "Datalist files are text lists of swath data files and their format ids with each\n";
+	print "file entry taking up a single line. These lists may contain references to other\n";
+	print "datalists, making them recursive. Datalists may also contain comments and parsing\n";
+	print "directives that, for example, determine whether parsing returns references to\n";
+	print "raw or processed data files. See the \fBMB-System\fP  manual page for details\n";
+	print "on the format and structure of datalists.  \n";
+	print "\nBasic Usage:\n\tmbm_makedatalist [-Fformat -Idirectory -Odatalist -P -Ssuffix -T -H -V]\n";
 	exit 0;
-	}
+}
 
 # tell the world we got started
-if ($verbose)
-	{
-	print "\nRunning $program_name...\n";
+if ($verbose) {
+	print "\nRunning $program_name...\n\n";
+	if ($directory) {
+        print " - Checking for swath files in directory $directory\n";
+    } else {
+		print " - Checking for swath files in the current directory\n";
 	}
+	if ($suffix) {
+        print " - Checking for files with suffix $suffix\n";
+		if ($ignoreprocessed) {
+            print " - Ignoring files with specified suffix preceded by letter p, e.g. p$suffix\n";
+        }
+        
+    } else {
+		print " - Checking all files for those that meet swath data naming conventions\n";
+	}
+	if ($disablesorting) {
+		if ($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".KMALL"
+            || $suffix eq ".kmall" || $suffix eq ".mb56" || $suffix eq ".mb57"
+            || $suffix eq ".mb58" || $suffix eq ".mb59") {
+			print " - Sorting Kongsberg multibeam files into time order is disabled.\n"
+        }
+		else {
+			print " - Request to disable time sorting of Kongsberg multibeam files ignored because a Kongsberg multibeam file\n   suffix (.all or .ALL) has not been specified with the -S option\n"
+        }
+    } else {
+		if ($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".KMALL" || $suffix eq ".kmall"
+			|| $suffix eq ".mb56" || $suffix eq ".mb57" || $suffix eq ".mb58" || $suffix eq ".mb59") {
+			print " - Attempting to sort Kongsberg multibeam files into time order based on filenames.\n"
+        }
+    }
+	if ($format_specified) {
+        print " - Assigning format id $format to all files\n";
+    } else {
+		print " - Using format ids consistent with filenames\n";
+	}        
+}
 
-# get list of files in specified directory
-@filelist = `ls -1 $directory`;
+# get list of files in specified directory, with desired suffix if specified
+if ($directory) {
+    if ($suffix) {
+        $lsarg = "$directory/*$suffix";
+    } else {
+        $lsarg = "$directory/*";        
+    }
+} elsif ($suffix) {
+    $lsarg = "*$suffix";    
+} else {
+    $lsarg = "";    
+}
+
+if ($ignoreprocessed && $suffix) {
+    @filelist = `/bin/ls -1 $lsarg | grep -v p$suffix`;
+} else {
+    @filelist = `/bin/ls -1 $lsarg`;    
+}
 
 # loop over the list of files counting identifiable swath files
 $count = 0;
-foreach $file (@filelist)
-	{
+foreach $file (@filelist) {
 	chop $file;
-	$format = `mbformat -L -I $file`;
-	chop $format;
-	if ($format != 0 && ($file ne $datalist || $directory ne "."))
-		{
-		$count++;
-		if ($directory ne ".")
-			{
-			$path = "$directory/$file";
-			}
-		else
-			{
-			$path = $file;
-			}
-		push(@outfilelist, $path);
-		push(@outformatlist, $format);
-		}
+	if ($format_specified) {
+        $format = $format_specified;
+    } else {
+		$format = `mbformat -L -I $file`;
+		chop $format;
 	}
+    
+	if ($format != 0 && ($file ne $datalist || $directory ne ".")) {
+		$count++;
+		push(@outfilelist, $file);
+		push(@outformatlist, $format);
+	}
+}
+
+# If the suffix is *.all and -T is specified, attempt to time order the filenames
+if (($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".mb56"
+     || $suffix eq ".mb57" || $suffix eq ".mb58" || $suffix eq ".mb59")
+        && !$disablesorting) {
+    # loop over the list of files
+	for ($i = 0; $i < scalar(@outfilelist); $i++) {
+		$file = $outfilelist[$i];
+		$format = $outformatlist[$i];
+		($start, $yyyymmdd, $hhmmss, $end) = $file =~ /(\d{4})_(\d{8})_(\d{6})_(\S+)/;
+		$tmpname = $yyyymmdd . "^" . $hhmmss . "^" . $start . "^" . $end . "^" . $i . "^" . $format;
+		push(@sortfilelist, $tmpname);
+		$count++;
+	}
+	@sortedfilelist = sort @sortfilelist;
+    $ii = 0;
+	foreach $tmpname (@sortedfilelist) {
+		($yyyymmdd, $hhmmss, $start, $end, $i, $format) = $tmpname =~ /(\d{8})\^(\d{6})\^(\d{4})\^(\S+)\^(\S+)\^(\S+)/;
+		$file = $start . "_" . $yyyymmdd . "_" . $hhmmss . "_" . $end;
+        if ($directory) {
+            $outfilelist[$ii] = "$directory/$file";
+        } else {
+            $outfilelist[$ii] = $file;
+        }
+		$outformatlist[$ii] = $format;
+        $ii++;
+	}
+}
 
 # open output datalist
-if ($count > 0)
-	{
-	if (!open(DATALIST,">$datalist"))
-		{
+$count = scalar(@outfilelist);
+if ($count > 0) {
+	if (!open(DATALIST,">$datalist")) {
 		die "\n$program_name:\nUnable to output output datalist file $datalist\nExiting...\n";
-		}
+	}
 
 	# loop over the list of files
-	for ($i = 0; $i < scalar(@outfilelist); $i++)
-		{
+	if ($verbose) {
+        print "\nOutputting $count file listings to datalist file $datalist\n";
+    }
+	for ($i = 0; $i < scalar(@outfilelist); $i++) {
 		print DATALIST "$outfilelist[$i] $outformatlist[$i]\n";
-		$count++;
-		}
-
-	# close datalist
-	close DATALIST;
+		if ($verbose) {
+            print "$outfilelist[$i] $outformatlist[$i]\n";
+        }
+    }
+	if ($verbose) {
+        print "\nAll done!\n\n";
 	}
+	close DATALIST;
+	
+} else {
+	if ($verbose) {
+        print "No swath files identified therefore no datalist created...\n";
+	}
+}
 
 # done
 exit 0;

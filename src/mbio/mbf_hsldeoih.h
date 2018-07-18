@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hsldeoih.h	3/11/93
  *	$Id$
  *
- *    Copyright (c) 1993-2014 by
+ *    Copyright (c) 1993-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,48 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	March 11, 1993
- * $Log: mbf_hsldeoih.h,v $
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.4  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.3  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.2  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.2  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.1  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.2  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.1  1994/02/17  21:19:08  caress
- * Updated associated MBIO format id in comments.
- *
- * Revision 4.0  1994/02/17  20:59:54  caress
- * First cut at new version. No changes.
- *
- * Revision 3.0  1993/05/14  22:51:50  sohara
- * initial version
  *
  */
 /*
@@ -143,360 +101,349 @@
 #define MBF_HSLDEOIH_LABEL 1684108385
 
 /* data record kind values */
-#define MBF_HSLDEOIH_KIND_DATA			1
-#define MBF_HSLDEOIH_KIND_COMMENT		2
-#define MBF_HSLDEOIH_KIND_CALIBRATE		4
-#define MBF_HSLDEOIH_KIND_MEAN_VELOCITY		5
-#define MBF_HSLDEOIH_KIND_VELOCITY_PROFILE	6
-#define MBF_HSLDEOIH_KIND_STANDBY		7
-#define MBF_HSLDEOIH_KIND_NAV_SOURCE		8
-#define MBF_HSLDEOIH_OLDKIND_CALIBRATE		3
-#define MBF_HSLDEOIH_OLDKIND_MEAN_VELOCITY	4
-#define MBF_HSLDEOIH_OLDKIND_VELOCITY_PROFILE	5
-#define MBF_HSLDEOIH_OLDKIND_STANDBY		6
-#define MBF_HSLDEOIH_OLDKIND_NAV_SOURCE		7
+#define MBF_HSLDEOIH_KIND_DATA 1
+#define MBF_HSLDEOIH_KIND_COMMENT 2
+#define MBF_HSLDEOIH_KIND_CALIBRATE 4
+#define MBF_HSLDEOIH_KIND_MEAN_VELOCITY 5
+#define MBF_HSLDEOIH_KIND_VELOCITY_PROFILE 6
+#define MBF_HSLDEOIH_KIND_STANDBY 7
+#define MBF_HSLDEOIH_KIND_NAV_SOURCE 8
+#define MBF_HSLDEOIH_OLDKIND_CALIBRATE 3
+#define MBF_HSLDEOIH_OLDKIND_MEAN_VELOCITY 4
+#define MBF_HSLDEOIH_OLDKIND_VELOCITY_PROFILE 5
+#define MBF_HSLDEOIH_OLDKIND_STANDBY 6
+#define MBF_HSLDEOIH_OLDKIND_NAV_SOURCE 7
 
 /* array matching gain values to appropriate beam */
-static int which_gain[MBSYS_HSDS_BEAMS] =
-			{ 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-			  4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6,
-			  7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
-			 10,10,10,10,11,11,11,11,12,12,12,12,
-			 13,13,13,13,14,14,14,14,15 };
+static int which_gain[MBSYS_HSDS_BEAMS] = {0,  0,  1,  1,  1,  1,  2,  2,  2,  2,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5,
+                                           5,  5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9,  10, 10,
+                                           10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 15};
 
 /* complete data structure containing everything */
-struct mbf_hsldeoih_struct
-	{
+struct mbf_hsldeoih_struct {
 	/* type of data record */
-	int	kind;
+	int kind;
 
 	/* position (all records ) */
-	double	lon;
-	double	lat;
+	double lon;
+	double lat;
 
 	/* time stamp (all records ) */
-	int	year;
-	int	month;
-	int	day;
-	int	hour;
-	int	minute;
-	int	second;
-	int	alt_minute;
-	int	alt_second;
+	int year;
+	int month;
+	int day;
+	int hour;
+	int minute;
+	int second;
+	int alt_minute;
+	int alt_second;
 
 	/* additional navigation and depths (ERGNMESS and ERGNEICH) */
-	double	course_true;
-	double	speed_transverse;
-	double	speed;
-	char	speed_reference[2];
-	double	pitch;
-	int	track;
-	double	depth_center;
-	double	depth_scale;
-	int	spare;
-	int	distance[MBF_HSLDEOIH_BEAMS];
-	int	depth[MBF_HSLDEOIH_BEAMS];
+	double course_true;
+	double speed_transverse;
+	double speed;
+	char speed_reference[2];
+	double pitch;
+	int track;
+	double depth_center;
+	double depth_scale;
+	int spare;
+	int distance[MBF_HSLDEOIH_BEAMS];
+	int depth[MBF_HSLDEOIH_BEAMS];
 
 	/* travel time data (ERGNSLZT) */
-	double	course_ground;
-	double	speed_ground;
-	double	heave;
-	double	roll;
-	double	time_center;
-	double	time_scale;
-	int	time[MBF_HSLDEOIH_BEAMS];
-	double	gyro[11];
+	double course_ground;
+	double speed_ground;
+	double heave;
+	double roll;
+	double time_center;
+	double time_scale;
+	int time[MBF_HSLDEOIH_BEAMS];
+	double gyro[11];
 
 	/* amplitude data (ERGNAMPL) */
-	char	mode[2];
-	int	trans_strbd;
-	int	trans_vert;
-	int	trans_port;
-	int	pulse_len_strbd;
-	int	pulse_len_vert;
-	int	pulse_len_port;
-	int	gain_start;
-	int	r_compensation_factor;
-	int	compensation_start;
-	int	increase_start;
-	int	tvc_near;
-	int	tvc_far;
-	int	increase_int_near;
-	int	increase_int_far;
-	int	gain_center;
-	double	filter_gain;
-	int	amplitude_center;
-	int	echo_duration_center;
-	int	echo_scale_center;
-	int	gain[16];
-	int	amplitude[MBF_HSLDEOIH_BEAMS];
-	int	echo_scale[16];
-	int	echo_duration[MBF_HSLDEOIH_BEAMS];
+	char mode[2];
+	int trans_strbd;
+	int trans_vert;
+	int trans_port;
+	int pulse_len_strbd;
+	int pulse_len_vert;
+	int pulse_len_port;
+	int gain_start;
+	int r_compensation_factor;
+	int compensation_start;
+	int increase_start;
+	int tvc_near;
+	int tvc_far;
+	int increase_int_near;
+	int increase_int_far;
+	int gain_center;
+	double filter_gain;
+	int amplitude_center;
+	int echo_duration_center;
+	int echo_scale_center;
+	int gain[16];
+	int amplitude[MBF_HSLDEOIH_BEAMS];
+	int echo_scale[16];
+	int echo_duration[MBF_HSLDEOIH_BEAMS];
 
 	/* mean velocity (ERGNHYDI) */
-	double	draught;
-	double	vel_mean;
-	double	vel_keel;
-	double	tide;
+	double draught;
+	double vel_mean;
+	double vel_keel;
+	double tide;
 
 	/* water velocity profile (HS_ERGNCTDS) */
-	int	num_vel;
-	double	vdepth[MBF_HSLDEOIH_MAXVEL];
-	double	velocity[MBF_HSLDEOIH_MAXVEL];
+	int num_vel;
+	double vdepth[MBF_HSLDEOIH_MAXVEL];
+	double velocity[MBF_HSLDEOIH_MAXVEL];
 
 	/* navigation source (ERGNPOSI) */
-	double	pos_corr_x;
-	double	pos_corr_y;
-	char	sensors[10];
+	double pos_corr_x;
+	double pos_corr_y;
+	char sensors[10];
 
 	/* comment (LDEOCMNT) */
-	char	comment[MBF_HSLDEOIH_MAXLINE];
+	char comment[MBF_HSLDEOIH_MAXLINE];
 
 	/* processed backscatter data */
-	double	back_scale;
-	int	back[MBF_HSLDEOIH_BEAMS];
-	};
+	double back_scale;
+	int back[MBF_HSLDEOIH_BEAMS];
+};
 
 /* data structure for navigation source records */
-struct mbf_hsldeoih_nav_source_struct
-	{
+struct mbf_hsldeoih_nav_source_struct {
 	/* position */
-	float		lon;
-	float		lat;
+	float lon;
+	float lat;
 
 	/* time stamp */
-	short int	year;
-	short int	month;
-	short int	day;
-	short int	hour;
-	short int	minute;
-	short int	second;
-	short int	alt_minute;
-	short int	alt_second;
+	short int year;
+	short int month;
+	short int day;
+	short int hour;
+	short int minute;
+	short int second;
+	short int alt_minute;
+	short int alt_second;
 
 	/* navigation source */
-	float	pos_corr_x;
-	float	pos_corr_y;
-	char	sensors[10];
-	};
+	float pos_corr_x;
+	float pos_corr_y;
+	char sensors[10];
+};
 
 /* data structure for mean velocity records */
-struct mbf_hsldeoih_mean_velocity_struct
-	{
+struct mbf_hsldeoih_mean_velocity_struct {
 	/* position */
-	float		lon;
-	float		lat;
+	float lon;
+	float lat;
 
 	/* time stamp */
-	short int	year;
-	short int	month;
-	short int	day;
-	short int	hour;
-	short int	minute;
-	short int	second;
-	short int	alt_minute;
-	short int	alt_second;
+	short int year;
+	short int month;
+	short int day;
+	short int hour;
+	short int minute;
+	short int second;
+	short int alt_minute;
+	short int alt_second;
 
 	/* mean velocity */
-	float		draught;
-	float		vel_mean;
-	float		vel_keel;
-	float		tide;
-	};
+	float draught;
+	float vel_mean;
+	float vel_keel;
+	float tide;
+};
 
 /* data structure for velocity profile records */
-struct mbf_hsldeoih_velocity_profile_struct
-	{
+struct mbf_hsldeoih_velocity_profile_struct {
 	/* position */
-	float		lon;
-	float		lat;
+	float lon;
+	float lat;
 
 	/* time stamp */
-	short int	year;
-	short int	month;
-	short int	day;
-	short int	hour;
-	short int	minute;
-	short int	second;
+	short int year;
+	short int month;
+	short int day;
+	short int hour;
+	short int minute;
+	short int second;
 
 	/* water velocity profile */
-	int	num_vel;
-	float	vdepth[MBF_HSLDEOIH_MAXVEL];
-	float	velocity[MBF_HSLDEOIH_MAXVEL];
-	};
+	int num_vel;
+	float vdepth[MBF_HSLDEOIH_MAXVEL];
+	float velocity[MBF_HSLDEOIH_MAXVEL];
+};
 
 /* data structure for standby records */
-struct mbf_hsldeoih_standby_struct
-	{
+struct mbf_hsldeoih_standby_struct {
 	/* position */
-	float		lon;
-	float		lat;
+	float lon;
+	float lat;
 
 	/* time stamp */
-	short int	year;
-	short int	month;
-	short int	day;
-	short int	hour;
-	short int	minute;
-	short int	second;
-	short int	alt_minute;
-	short int	alt_second;
+	short int year;
+	short int month;
+	short int day;
+	short int hour;
+	short int minute;
+	short int second;
+	short int alt_minute;
+	short int alt_second;
 
 	/* additional navigation */
-	float		course_true;
-	float		speed_transverse;
-	float		speed;
-	char		speed_reference[2];
-	float		pitch;
-	short int	track;
-	float		depth_center;
-	};
+	float course_true;
+	float speed_transverse;
+	float speed;
+	char speed_reference[2];
+	float pitch;
+	short int track;
+	float depth_center;
+};
 
 /* data structure for survey data records */
-struct mbf_hsldeoih_survey_struct
-	{
+struct mbf_hsldeoih_survey_struct {
 	/* position */
-	float		lon;
-	float		lat;
+	float lon;
+	float lat;
 
 	/* time stamp */
-	short int	year;
-	short int	month;
-	short int	day;
-	short int	hour;
-	short int	minute;
-	short int	second;
-	short int	alt_minute;
-	short int	alt_second;
+	short int year;
+	short int month;
+	short int day;
+	short int hour;
+	short int minute;
+	short int second;
+	short int alt_minute;
+	short int alt_second;
 
 	/* additional navigation and depths */
-	float		course_true;
-	float		speed_transverse;
-	float		speed;
-	char		speed_reference[2];
-	float		pitch;
-	short int	track;
-	float		depth_center;
-	float		depth_scale;
-	short int	spare;
-	short int	distance[MBF_HSLDEOIH_BEAMS];
-	short int	depth[MBF_HSLDEOIH_BEAMS];
+	float course_true;
+	float speed_transverse;
+	float speed;
+	char speed_reference[2];
+	float pitch;
+	short int track;
+	float depth_center;
+	float depth_scale;
+	short int spare;
+	short int distance[MBF_HSLDEOIH_BEAMS];
+	short int depth[MBF_HSLDEOIH_BEAMS];
 
 	/* travel time data */
-	float		course_ground;
-	float		speed_ground;
-	float		heave;
-	float		roll;
-	float		time_center;
-	float		time_scale;
-	short int	time[MBF_HSLDEOIH_BEAMS];
-	float		gyro[11];
+	float course_ground;
+	float speed_ground;
+	float heave;
+	float roll;
+	float time_center;
+	float time_scale;
+	short int time[MBF_HSLDEOIH_BEAMS];
+	float gyro[11];
 
 	/* amplitude data */
-	char		mode[2];
-	short int	trans_strbd;
-	short int	trans_vert;
-	short int	trans_port;
-	short int	pulse_len_strbd;
-	short int	pulse_len_vert;
-	short int	pulse_len_port;
-	short int	gain_start;
-	short int	r_compensation_factor;
-	short int	compensation_start;
-	short int	increase_start;
-	short int	tvc_near;
-	short int	tvc_far;
-	short int	increase_int_near;
-	short int	increase_int_far;
-	short int	gain_center;
-	float		filter_gain;
-	short int	amplitude_center;
-	short int	echo_duration_center;
-	short int	echo_scale_center;
-	short int	gain[16];
-	short int	amplitude[MBF_HSLDEOIH_BEAMS];
-	short int	echo_scale[16];
-	short int	echo_duration[MBF_HSLDEOIH_BEAMS];
+	char mode[2];
+	short int trans_strbd;
+	short int trans_vert;
+	short int trans_port;
+	short int pulse_len_strbd;
+	short int pulse_len_vert;
+	short int pulse_len_port;
+	short int gain_start;
+	short int r_compensation_factor;
+	short int compensation_start;
+	short int increase_start;
+	short int tvc_near;
+	short int tvc_far;
+	short int increase_int_near;
+	short int increase_int_far;
+	short int gain_center;
+	float filter_gain;
+	short int amplitude_center;
+	short int echo_duration_center;
+	short int echo_scale_center;
+	short int gain[16];
+	short int amplitude[MBF_HSLDEOIH_BEAMS];
+	short int echo_scale[16];
+	short int echo_duration[MBF_HSLDEOIH_BEAMS];
 
 	/* processed backscatter data */
-	float		back_scale;
-	short int	back[MBF_HSLDEOIH_BEAMS];
-	};
+	float back_scale;
+	short int back[MBF_HSLDEOIH_BEAMS];
+};
 
 /* data structure for calibrate data records */
-struct mbf_hsldeoih_calibrate_struct
-	{
+struct mbf_hsldeoih_calibrate_struct {
 	/* position */
-	float		lon;
-	float		lat;
+	float lon;
+	float lat;
 
 	/* time stamp */
-	short int	year;
-	short int	month;
-	short int	day;
-	short int	hour;
-	short int	minute;
-	short int	second;
-	short int	alt_minute;
-	short int	alt_second;
+	short int year;
+	short int month;
+	short int day;
+	short int hour;
+	short int minute;
+	short int second;
+	short int alt_minute;
+	short int alt_second;
 
 	/* additional navigation and depths */
-	float		course_true;
-	float		speed_transverse;
-	float		speed;
-	char		speed_reference[2];
-	float		pitch;
-	short int	track;
-	float		depth_center;
-	float		depth_scale;
-	short int	spare;
-	short int	distance[MBF_HSLDEOIH_BEAMS];
-	short int	depth[MBF_HSLDEOIH_BEAMS];
+	float course_true;
+	float speed_transverse;
+	float speed;
+	char speed_reference[2];
+	float pitch;
+	short int track;
+	float depth_center;
+	float depth_scale;
+	short int spare;
+	short int distance[MBF_HSLDEOIH_BEAMS];
+	short int depth[MBF_HSLDEOIH_BEAMS];
 
 	/* travel time data */
-	float		course_ground;
-	float		speed_ground;
-	float		heave;
-	float		roll;
-	float		time_center;
-	float		time_scale;
-	short int	time[MBF_HSLDEOIH_BEAMS];
-	float		gyro[11];
+	float course_ground;
+	float speed_ground;
+	float heave;
+	float roll;
+	float time_center;
+	float time_scale;
+	short int time[MBF_HSLDEOIH_BEAMS];
+	float gyro[11];
 
 	/* amplitude data */
-	char		mode[2];
-	short int	trans_strbd;
-	short int	trans_vert;
-	short int	trans_port;
-	short int	pulse_len_strbd;
-	short int	pulse_len_vert;
-	short int	pulse_len_port;
-	short int	gain_start;
-	short int	r_compensation_factor;
-	short int	compensation_start;
-	short int	increase_start;
-	short int	tvc_near;
-	short int	tvc_far;
-	short int	increase_int_near;
-	short int	increase_int_far;
-	short int	gain_center;
-	float		filter_gain;
-	short int	amplitude_center;
-	short int	echo_duration_center;
-	short int	echo_scale_center;
-	short int	gain[16];
-	short int	amplitude[MBF_HSLDEOIH_BEAMS];
-	short int	echo_scale[16];
-	short int	echo_duration[MBF_HSLDEOIH_BEAMS];
+	char mode[2];
+	short int trans_strbd;
+	short int trans_vert;
+	short int trans_port;
+	short int pulse_len_strbd;
+	short int pulse_len_vert;
+	short int pulse_len_port;
+	short int gain_start;
+	short int r_compensation_factor;
+	short int compensation_start;
+	short int increase_start;
+	short int tvc_near;
+	short int tvc_far;
+	short int increase_int_near;
+	short int increase_int_far;
+	short int gain_center;
+	float filter_gain;
+	short int amplitude_center;
+	short int echo_duration_center;
+	short int echo_scale_center;
+	short int gain[16];
+	short int amplitude[MBF_HSLDEOIH_BEAMS];
+	short int echo_scale[16];
+	short int echo_duration[MBF_HSLDEOIH_BEAMS];
 
 	/* processed backscatter data */
-	float		back_scale;
-	short int	back[MBF_HSLDEOIH_BEAMS];
-	};
+	float back_scale;
+	short int back[MBF_HSLDEOIH_BEAMS];
+};
 
 /* data structure for comment records */
-struct mbf_hsldeoih_comment_struct
-	{
+struct mbf_hsldeoih_comment_struct {
 	/* comment */
-	char	comment[MBF_HSLDEOIH_MAXLINE];
-	};
+	char comment[MBF_HSLDEOIH_MAXLINE];
+};

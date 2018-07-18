@@ -36,23 +36,23 @@
  *
  ********************************************************************/
 #ifndef _GSF_ENC_H_
-   #define _GSF_ENC_H_
+#define _GSF_ENC_H_
 
-   #include "gsf.h"
-   #include "gsf_ft.h"
+#include "gsf.h"
+#include "gsf_ft.h"
 
-   int OPTLK gsfEncodeHeader(unsigned char *sptr, gsfHeader *header);
-   int OPTLK gsfEncodeSwathBathySummary(unsigned char *sptr, gsfSwathBathySummary *sum);
-   int OPTLK gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing *ping, GSF_FILE_TABLE *ft, int handle);
-   int OPTLK gsfEncodeSoundVelocityProfile(unsigned char *sptr, gsfSVP *svp);
-   int OPTLK gsfEncodeProcessingParameters(unsigned char *sptr, gsfProcessingParameters *pparam);
-   int OPTLK gsfEncodeSensorParameters(unsigned char *sptr, gsfSensorParameters *sparam);
-   int OPTLK gsfEncodeComment(unsigned char *sptr, gsfComment *comment);
-   int OPTLK gsfEncodeHistory(unsigned char *sptr, gsfHistory *history);
-   int OPTLK gsfEncodeNavigationError(unsigned char *sptr, gsfNavigationError *nav_error);
-   int OPTLK gsfEncodeHVNavigationError(unsigned char *sptr, gsfHVNavigationError *hv_nav_error);
-   int OPTLK gsfEncodeSinglebeam (unsigned char *sptr, gsfSingleBeamPing * ping);
-   int OPTLK gsfEncodeAttitude(unsigned char *sptr, gsfAttitude * attitude);
-   int OPTLK gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping);
+int OPTLK gsfEncodeHeader(unsigned char *sptr, gsfHeader *header);
+int OPTLK gsfEncodeSwathBathySummary(unsigned char *sptr, gsfSwathBathySummary *sum);
+int OPTLK gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing *ping, GSF_FILE_TABLE *ft, int handle);
+int OPTLK gsfEncodeSoundVelocityProfile(unsigned char *sptr, gsfSVP *svp);
+int OPTLK gsfEncodeProcessingParameters(unsigned char *sptr, gsfProcessingParameters *pparam);
+int OPTLK gsfEncodeSensorParameters(unsigned char *sptr, gsfSensorParameters *sparam);
+int OPTLK gsfEncodeComment(unsigned char *sptr, gsfComment *comment);
+int OPTLK gsfEncodeHistory(unsigned char *sptr, gsfHistory *history);
+int OPTLK gsfEncodeNavigationError(unsigned char *sptr, gsfNavigationError *nav_error);
+int OPTLK gsfEncodeHVNavigationError(unsigned char *sptr, gsfHVNavigationError *hv_nav_error);
+int OPTLK gsfEncodeSinglebeam(unsigned char *sptr, gsfSingleBeamPing *ping);
+int OPTLK gsfEncodeAttitude(unsigned char *sptr, gsfAttitude *attitude);
+int OPTLK gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping);
 
 #endif

@@ -1,4 +1,4 @@
-.TH mbclean 1 "16 September 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean 1 "1 August 2016" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbclean\fP \- Tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -9,10 +9,11 @@ Version 5.0
 \fBmbclean\fP [\fB\-A\fImax\fP \fB\-B\fIlow/high\fP \fB\-C\fIslope/units\fP
 \fB\-D\fImin/max\fP \fB\-F\fIformat\fP
 \fB\-G\fIfraction_low/fraction_high\fP
-\fB\-I\fIinfile\fP \fB\-L\fIlonflip\fP \fB\-O\fIoutfile\fP
-\fB\-M\fImode\fP \fB\-Q\fIbackup\fP \fB\-R\fImaxheadingrate\fP \fB\-S\fIslope/mode/units\fP
-\fB\-T\fItolerance\fP \fB\-U\fInmin\fP \fB\-X\fIbeamsleft/beamsright\fP
-\fB\-Y\fIdistanceleft/distanceright\fP \fB\-V \-H\fP]
+\fB\-I\fIinfile\fP \fB\-K\fIrange_min\fP \fB\-L\fIlonflip\fP
+\fB\-M\fImode\fP \fB\-O\fIoutfile\fP \fB\-P\fImin_speed/max_speed\fP \fB\-Q\fIbackup\fP
+\fB\-R\fImaxheadingrate\fP \fB\-S\fIslope/mode/units\fP
+\fB\-T\fItolerance\fP \fB\-U\fInmin\fP \fB\-W\fIwest/east/south/north\fP \fB\-X\fIbeamsleft/beamsright\fP
+\fB\-Y\fIdistanceleft/distanceright\fP \fB\-Z \-V \-H\fP]
 
 .SH DESCRIPTION
 \fBmbclean\fP identifies and flags artifacts in swath sonar bathymetry data.
@@ -38,23 +39,34 @@ as follows:
 .br
  	1. Flag specified numbers of outer beams
  		(\fB\-X\fP option).
- 	2. Flag outer beams by acrosstrack distance
- 		(\fB\-Y\fP option).
- 	3. Flag soundings outside specified acceptable
+ 	2. Flag outer beams and/or unflag inner beams
+        by acrosstrack distance (\fB\-Y\fP option).
+ 	3. Flag all beams in pings outside specified
+ 		acceptable speed range (\fB\-P\fP option).
+ 	4. Flag all beams in pings outside specified
+ 		acceptable position bounds (\fB\-W\fP option).
+ 	5. Flag all beams in pings with zero
+ 		longitude and latitude values (\fB\-Z\fP option).
+ 	6. Flag soundings outside specified acceptable
  		depth range (\fB\-B\fP option).
- 	4. Flag pings with excessive heading change rate
-	        (\fB\-R\fP option).
- 	5. Zap "rails" (\fB\-Q\fP option).
- 	6. Flag soundings outside acceptable depth range
+ 	7. Flag soundings with ranges less than
+ 		specified minimum value (\fB\-B\fP option).
+ 	8. Flag pings with excessive heading change rate
+ 	        (\fB\-R\fP option).
+ 	9. Zap "rails" (\fB\-Q\fP option).
+ 	10. Flag soundings with acrosstrack distances 
+ 		greater than specified maximum value
+ 		(\fB\-B\fP option).
+ 	11. Flag soundings outside acceptable depth range
  		using fractions of local median depth
  		(\fB\-G\fP option).
- 	7. Flag soundings outside acceptable depth range
+ 	12. Flag soundings outside acceptable depth range
  		using deviation from local median depth
  		(\fB\-A\fP option).
- 	8. Flag soundings associated with spikes (\fB\-S\fP option).
- 	9. Flag soundings associated with excessive slopes
+ 	13. Flag soundings associated with spikes (\fB\-S\fP option).
+ 	14. Flag soundings associated with excessive slopes
  		(\fB\-C\fP option or default).
- 	10. Flag all soundings in pings with too few
+ 	15. Flag all soundings in pings with too few
  		good soundings (\fB\-U\fP option).
 
 This program flags beams by outputting the flags as
@@ -70,18 +82,31 @@ The \fBmbprocess\fP program is also used to merge
 edited navigation, recalculate bathymetry, and apply
 other corrections to swath bathymetry data.
 
-.SH AUTHORSHIP
-David W. Caress (caress@mbari.org)
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
 .br
   Monterey Bay Aquarium Research Institute
 .br
-Dale N. Chayes (dale@ldeo.columbia.edu)
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH ALSO CONTRIBUTED TO THIS PROGRAM
+Alberto Malinverno
 .br
   Lamont-Doherty Earth Observatory
 .br
-Alberto Malinverno
+Dana Yoerger
 .br
-  Schlumberger-Doll
+  Woods Hole Oceanographic Institution
 
 .SH OPTIONS
 .TP
@@ -191,6 +216,13 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "datalist.mb-1".
 .TP
+.B \-K
+\fIrange_min\fP
+.br
+This option causes all unflagged beams with ranges less than
+\fIrange_min\fP to be flagged as bad. The value \fIrange_min\fP
+is specified in meters.
+.TP
 .B \-L
 \fIlonflip\fP
 .br
@@ -212,13 +244,15 @@ are handled.
  			The flagged beam is the one furthest from the local
  			median depth.
  	\fImode\fP = 2:	Flags both beams associated with each outlier slope.
- 	\fImode\fP = 3:	Zeros one beam associated with each outlier slope.
- 			The zeroed beam is the one furthest from the local
- 			median depth.
- 	\fImode\fP = 4:	Zeros both beams associated with each outlier slope.
-If the data format of the input file
-prohibits storage of negative depths, an error message will be output
-and the program will exit. Default: \fImode\fP = 1.
+Default: \fImode\fP = 1.
+.TP
+.B \-P
+\fIspeed_low/speed_high\fP
+.br
+This option causes \fBmbclean\fP to flag as bad all beams in pings
+associated with platform speed outside the acceptable range from
+\fIspeed_low\fP to \fIspeed_high\fP. The speed values are specified
+in km/hour.
 .TP
 .B \-Q
 \fIbackup\fP
@@ -269,7 +303,7 @@ Default: \fIslope\fP = 1.0
 .br
 If requested this option will reset the timestamps of edit events from an
 existing esf file to exactly match the timestamps of the survey pings. The
-/fItolerance/fP value sets how close timestamps must be in seconds to be
+\fItolerance\fP value sets how close timestamps must be in seconds to be
 considered a match. This option handles the case where survey data have been
 processed using non-\fBMB-System\fP software and a user is extracting the
 edits from one set of files with \fBmbgetesf\fP and then applying them to
@@ -283,6 +317,19 @@ halves of pings which contain fewer than \fInmin\fP good bathymetry
 values. All bathymetry values in the affected half-pings are
 flagged.
 .TP
+.B \-V
+Normally, \fBmbclean\fP works "silently" without outputting
+anything to the stderr stream.  If the
+\fB\-V\fP flag is given, then \fBmbclean\fP works in a "verbose" mode and
+outputs the program version being used, all error status messages,
+and the number of beams flagged as bad.
+.TP
+.B \-W
+\fIwest/east/south/north\fP
+.br
+This option causes \fBmbclean\fP to flag as bad all beams in pings
+with navigation outside the specified acceptable bounds. 
+.TP
 .B \-X
 \fIzap_beams\fP
 .br
@@ -290,12 +337,23 @@ If this option is used, the outermost \fIzap_beams\fP at both ends
 of the swath are flagged as bad; this is useful if the outer beams
 are known to be unreliable. Default: \fIzap_beams\fP = 0.
 .TP
-.B \-V
-Normally, \fBmbclean\fP works "silently" without outputting
-anything to the stderr stream.  If the
-\fB\-V\fP flag is given, then \fBmbclean\fP works in a "verbose" mode and
-outputs the program version being used, all error status messages,
-and the number of beams flagged as bad.
+.B \-Y
+\fIdistanceleft/distanceright[/mode]\fP
+.br
+This option causes \fBmbclean\fP to flag and/or unflag beams according to
+acrosstrack distance. If \fImode\fP=1 or is not specified, then all beams 
+outside the specified range (acrosstrack distances more to port/left than \fIdistanceleft\fP
+or more to starboard/right than \fIdistanceright\fP) will be flagged as bad.
+If \fImode\fP=2, then all beams inside the specified range
+(acrosstrack distances more to starboard/right than \fIdistanceleft\fP
+and more to port/left than \fIdistanceright\fP) will be flagged as good.
+The distances are defined in meters, and distances to port of nadir are
+negative.
+.TP
+.B \-Z
+.br
+This option causes \fBmbclean\fP to flag as bad all beams in pings
+with zero longitude and latitude values. 
 
 .SH EXAMPLES
 Suppose one wishes to do a first pass edit of
@@ -335,7 +393,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	1665 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	Processing 0002_20020425_011607.mb57
  	259 bathymetry data records processed
@@ -349,7 +406,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	242 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	Processing 0003_20020425_022926.mb57
  	65 bathymetry data records processed
@@ -363,7 +419,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	506 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	Processing 0004_20020425_024336.mb57
  	410 bathymetry data records processed
@@ -377,7 +432,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	148 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	Processing 0005_20020425_034057.mb57
  	252 bathymetry data records processed
@@ -391,7 +445,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	100 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	Processing 0006_20020425_045013.mb57
  	562 bathymetry data records processed
@@ -405,7 +458,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 excessive spikes identified
  	41 beams flagged
  	0 beams unflagged
- 	0 beams zeroed
 
  	MBclean Processing Totals:
  	-------------------------
@@ -424,7 +476,6 @@ is flagged. Here is an example of the nonverbose output:
 	0 total excessive spikes identified
  	2702 total beams flagged
  	0 total beams unflagged
- 	0 total beams zeroed
 
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbedit\fP(1),

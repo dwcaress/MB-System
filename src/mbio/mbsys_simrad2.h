@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_simrad2.h		10/9/98
  *	$Id$
  *
- *    Copyright (c) 1998-2014 by
+ *    Copyright (c) 1998-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -33,14 +33,6 @@
  *
  * Author:	D. W. Caress
  * Date:	October 9, 1998
- *
- * $Log: mbsys_simrad2.h,v $
- * Revision 5.22  2009/03/02 18:51:52  caress
- * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
- *
- * Revision 5.21  2008/03/01 09:14:03  caress
- * Some housekeeping changes.
- *
  *
  */
 /*
@@ -238,782 +230,839 @@
 #endif
 
 /* sonar models */
-#define	MBSYS_SIMRAD2_UNKNOWN	0
-#define	MBSYS_SIMRAD2_EM120	120
-#define	MBSYS_SIMRAD2_EM300	300
-#define	MBSYS_SIMRAD2_EM1002	1002
-#define	MBSYS_SIMRAD2_EM2000	2000
-#define	MBSYS_SIMRAD2_EM3000	3000
-#define	MBSYS_SIMRAD2_EM3000D_1	3001
-#define	MBSYS_SIMRAD2_EM3000D_2	3002
-#define	MBSYS_SIMRAD2_EM3000D_3	3003
-#define	MBSYS_SIMRAD2_EM3000D_4	3004
-#define	MBSYS_SIMRAD2_EM3000D_5	3005
-#define	MBSYS_SIMRAD2_EM3000D_6	3006
-#define	MBSYS_SIMRAD2_EM3000D_7	3007
-#define	MBSYS_SIMRAD2_EM3000D_8	3008
-#define	MBSYS_SIMRAD2_EM3002	3020
-#define	MBSYS_SIMRAD2_EM710	 710
+#define MBSYS_SIMRAD2_UNKNOWN 0
+#define MBSYS_SIMRAD2_EM120 120
+#define MBSYS_SIMRAD2_EM300 300
+#define MBSYS_SIMRAD2_EM1002 1002
+#define MBSYS_SIMRAD2_EM2000 2000
+#define MBSYS_SIMRAD2_EM3000 3000
+#define MBSYS_SIMRAD2_EM3000D_1 3001
+#define MBSYS_SIMRAD2_EM3000D_2 3002
+#define MBSYS_SIMRAD2_EM3000D_3 3003
+#define MBSYS_SIMRAD2_EM3000D_4 3004
+#define MBSYS_SIMRAD2_EM3000D_5 3005
+#define MBSYS_SIMRAD2_EM3000D_6 3006
+#define MBSYS_SIMRAD2_EM3000D_7 3007
+#define MBSYS_SIMRAD2_EM3000D_8 3008
+#define MBSYS_SIMRAD2_EM3002 3020
+#define MBSYS_SIMRAD2_EM710 710
 
-#define	MBSYS_SIMRAD2_EM12S	9901
-#define	MBSYS_SIMRAD2_EM12D	9902
-#define	MBSYS_SIMRAD2_EM121	9903
-#define	MBSYS_SIMRAD2_EM100	9904
-#define	MBSYS_SIMRAD2_EM1000	9905
+#define MBSYS_SIMRAD2_EM12S 9901
+#define MBSYS_SIMRAD2_EM12D 9902
+#define MBSYS_SIMRAD2_EM121 9903
+#define MBSYS_SIMRAD2_EM100 9904
+#define MBSYS_SIMRAD2_EM1000 9905
 
 /* maximum number of beams and pixels */
-#define	MBSYS_SIMRAD2_MAXBEAMS		254
-#define	MBSYS_SIMRAD2_MAXPIXELS		1024
-#define	MBSYS_SIMRAD2_MAXRAWPIXELS	65535
-#define MBSYS_SIMRAD2_MAXTX		19
-#define	MBSYS_SIMRAD2_MAXSVP		1024
-#define	MBSYS_SIMRAD2_MAXATTITUDE	256
-#define	MBSYS_SIMRAD2_MAXHEADING	256
-#define	MBSYS_SIMRAD2_MAXSSV		256
-#define	MBSYS_SIMRAD2_MAXTILT		256
-#define	MBSYS_SIMRAD2_COMMENT_LENGTH	256
-#define	MBSYS_SIMRAD2_BUFFER_SIZE	2048
+#define MBSYS_SIMRAD2_MAXBEAMS 254
+#define MBSYS_SIMRAD2_MAXPIXELS 1024
+#define MBSYS_SIMRAD2_MAXRAWPIXELS 65535
+#define MBSYS_SIMRAD2_MAXTX 19
+#define MBSYS_SIMRAD2_MAXSVP 1024
+#define MBSYS_SIMRAD2_MAXATTITUDE 256
+#define MBSYS_SIMRAD2_MAXHEADING 256
+#define MBSYS_SIMRAD2_MAXSSV 256
+#define MBSYS_SIMRAD2_MAXTILT 256
+#define MBSYS_SIMRAD2_COMMENT_LENGTH 256
+#define MBSYS_SIMRAD2_BUFFER_SIZE 2048
+#define MBSYS_SIMRAD2_MAXQUALITYFACTORS 4
+
+/* set source of vertical location */
+#define MBSYS_SIMRAD2_ZMODE_UNKNOWN 0
+#define MBSYS_SIMRAD2_ZMODE_USE_HEAVE_ONLY 1
+#define MBSYS_SIMRAD2_ZMODE_USE_SENSORDEPTH_ONLY 2
+#define MBSYS_SIMRAD2_ZMODE_USE_SENSORDEPTH_AND_HEAVE 3
 
 /* datagram start and end byte */
-#define	EM2_START_BYTE		0x02
-#define	EM2_END_BYTE		0x03
-#define	EM2_END			0x03
+#define EM2_START_BYTE 0x02
+#define EM2_END_BYTE 0x03
+#define EM2_END 0x03
 
 /* datagram types including start byte */
-#define	EM2_NONE		0
-#define	EM2_STOP2		0x0230
-#define	EM2_STATUS		0x0231
-#define	EM2_OFF			0x0231
-#define	EM2_ON			0x0232
-#define	EM2_ATTITUDE		0x0241
-#define	EM2_CLOCK		0x0243
-#define	EM2_BATH		0x0244
-#define	EM2_SBDEPTH		0x0245
-#define	EM2_RAWBEAM		0x0246
-#define	EM2_SSV			0x0247
-#define	EM2_HEADING		0x0248
-#define	EM2_START		0x0249
-#define	EM2_TILT		0x024A
-#define	EM2_CBECHO		0x024B
-#define	EM2_POS			0x0250
-#define	EM2_RUN_PARAMETER	0x0252
-#define	EM2_SS			0x0253
-#define	EM2_TIDE		0x0254
-#define	EM2_SVP2		0x0255
-#define	EM2_SVP			0x0256
-#define	EM2_SSPINPUT		0x0257
-#define	EM2_RAWBEAM2		0x0265
-#define	EM2_RAWBEAM3		0x0266
-#define	EM2_HEIGHT		0x0268
-#define	EM2_STOP		0x0269
-#define	EM2_WATERCOLUMN		0x026B
-#define	EM2_REMOTE		0x0270
-#define	EM2_SSP			0x0273
-#define	EM2_BATH_MBA		0x02E1
-#define	EM2_SS_MBA		0x02E2
+#define EM2_NONE 0
+#define EM2_STOP2 0x0230
+#define EM2_STATUS 0x0231
+#define EM2_OFF 0x0231
+#define EM2_ON 0x0232
+#define EM2_EXTRAPARAMETERS 0x0233
+#define EM2_ATTITUDE 0x0241
+#define EM2_CLOCK 0x0243
+#define EM2_BATH 0x0244
+#define EM2_SBDEPTH 0x0245
+#define EM2_RAWBEAM 0x0246
+#define EM2_SSV 0x0247
+#define EM2_HEADING 0x0248
+#define EM2_START 0x0249
+#define EM2_TILT 0x024A
+#define EM2_CBECHO 0x024B
+#define EM2_POS 0x0250
+#define EM2_RUN_PARAMETER 0x0252
+#define EM2_SS 0x0253
+#define EM2_TIDE 0x0254
+#define EM2_SVP2 0x0255
+#define EM2_SVP 0x0256
+#define EM2_SSPINPUT 0x0257
+#define EM2_RAWBEAM2 0x0265
+#define EM2_RAWBEAM3 0x0266
+#define EM2_HEIGHT 0x0268
+#define EM2_STOP 0x0269
+#define EM2_WATERCOLUMN 0x026B
+#define EM2_REMOTE 0x0270
+#define EM2_SSP 0x0273
+#define EM2_BATH_MBA 0x02E1
+#define EM2_SS_MBA 0x02E2
 
 /* datagram types */
-#define	EM2_ID_STOP2		0x30
-#define	EM2_ID_STATUS		0x31
-#define	EM2_ID_OFF		0x31
-#define	EM2_ID_ON		0x32
-#define	EM2_ID_ATTITUDE		0x41
-#define	EM2_ID_CLOCK		0x43
-#define	EM2_ID_BATH		0x44
-#define	EM2_ID_SBDEPTH		0x45
-#define	EM2_ID_RAWBEAM		0x46
-#define	EM2_ID_SSV		0x47
-#define	EM2_ID_HEADING		0x48
-#define	EM2_ID_START		0x49
-#define	EM2_ID_TILT		0x4A
-#define	EM2_ID_CBECHO		0x4B
-#define	EM2_ID_POS		0x50
-#define	EM2_ID_RUN_PARAMETER	0x52
-#define	EM2_ID_SS		0x53
-#define	EM2_ID_TIDE		0x54
-#define	EM2_ID_SVP2		0x55
-#define	EM2_ID_SVP		0x56
-#define	EM2_ID_SSPINPUT		0x57
-#define	EM2_ID_RAWBEAM2		0x65
-#define	EM2_ID_RAWBEAM3		0x66
-#define	EM2_ID_HEIGHT		0x68
-#define	EM2_ID_STOP		0x69
-#define	EM2_ID_WATERCOLUMN	0x6B
-#define	EM2_ID_REMOTE		0x70
-#define	EM2_ID_SSP		0x73
-#define	EM2_ID_BATH_MBA		0xE1
-#define	EM2_ID_SS_MBA		0xE2
+#define EM2_ID_STOP2 0x30
+#define EM2_ID_STATUS 0x31
+#define EM2_ID_OFF 0x31
+#define EM2_ID_ON 0x32
+#define EM2_ID_EXTRAPARAMETERS 0x33
+#define EM2_ID_ATTITUDE 0x41
+#define EM2_ID_CLOCK 0x43
+#define EM2_ID_BATH 0x44
+#define EM2_ID_SBDEPTH 0x45
+#define EM2_ID_RAWBEAM 0x46
+#define EM2_ID_SSV 0x47
+#define EM2_ID_HEADING 0x48
+#define EM2_ID_START 0x49
+#define EM2_ID_TILT 0x4A
+#define EM2_ID_CBECHO 0x4B
+#define EM2_ID_POS 0x50
+#define EM2_ID_RUN_PARAMETER 0x52
+#define EM2_ID_SS 0x53
+#define EM2_ID_TIDE 0x54
+#define EM2_ID_SVP2 0x55
+#define EM2_ID_SVP 0x56
+#define EM2_ID_SSPINPUT 0x57
+#define EM2_ID_RAWBEAM2 0x65
+#define EM2_ID_RAWBEAM3 0x66
+#define EM2_ID_HEIGHT 0x68
+#define EM2_ID_STOP 0x69
+#define EM2_ID_WATERCOLUMN 0x6B
+#define EM2_ID_REMOTE 0x70
+#define EM2_ID_SSP 0x73
+#define EM2_ID_BATH_MBA 0xE1
+#define EM2_ID_SS_MBA 0xE2
 
 /* datagram sizes where constant */
-#define	EM2_RUN_PARAMETER_SIZE		52
-#define	EM2_CLOCK_SIZE			28
-#define	EM2_TIDE_SIZE			30
-#define	EM2_HEIGHT_SIZE			24
-#define	EM2_START_HEADER_SIZE		14
-#define	EM2_HEADING_HEADER_SIZE		14
-#define	EM2_HEADING_SLICE_SIZE		4
-#define	EM2_SSV_HEADER_SIZE		14
-#define	EM2_SSV_SLICE_SIZE		4
-#define	EM2_TILT_HEADER_SIZE		14
-#define	EM2_TILT_SLICE_SIZE		4
-#define	EM2_ATTITUDE_HEADER_SIZE	14
-#define	EM2_ATTITUDE_SLICE_SIZE		12
-#define	EM2_POS_HEADER_SIZE		30
-#define	EM2_SVP_HEADER_SIZE		24
-#define	EM2_SVP_SLICE_SIZE		4
-#define	EM2_SVP2_HEADER_SIZE		24
-#define	EM2_SVP2_SLICE_SIZE		8
-#define	EM2_BATH_HEADER_SIZE		24
-#define	EM2_BATH_BEAM_SIZE		16
-#define	EM2_BATH_MBA_HEADER_SIZE	34
-#define	EM2_BATH_MBA_BEAM_SIZE		18
-#define	EM2_RAWBEAM_HEADER_SIZE		16
-#define	EM2_RAWBEAM_BEAM_SIZE		8
-#define	EM2_RAWBEAM2_HEADER_SIZE	42
-#define	EM2_RAWBEAM2_BEAM_SIZE		16
-#define	EM2_RAWBEAM2_TX_SIZE		12
-#define	EM2_RAWBEAM3_HEADER_SIZE	32
-#define	EM2_RAWBEAM3_BEAM_SIZE		12
-#define	EM2_RAWBEAM3_TX_SIZE		20
-#define	EM2_SS_HEADER_SIZE		28
-#define	EM2_SS_BEAM_SIZE		6
-#define	EM2_SS_MBA_HEADER_SIZE		32
-#define	EM2_SS_MBA_BEAM_SIZE		6
-#define	EM2_WC_HEADER_SIZE		36
-#define	EM2_WC_TX_SIZE			6
-#define	EM2_WC_BEAM_SIZE		10
+#define EM2_EXTRAPARAMETERS_HEADER_SIZE 14
+#define EM2_RUN_PARAMETER_SIZE 52
+#define EM2_CLOCK_SIZE 28
+#define EM2_TIDE_SIZE 30
+#define EM2_HEIGHT_SIZE 24
+#define EM2_START_HEADER_SIZE 14
+#define EM2_HEADING_HEADER_SIZE 14
+#define EM2_HEADING_SLICE_SIZE 4
+#define EM2_SSV_HEADER_SIZE 14
+#define EM2_SSV_SLICE_SIZE 4
+#define EM2_TILT_HEADER_SIZE 14
+#define EM2_TILT_SLICE_SIZE 4
+#define EM2_ATTITUDE_HEADER_SIZE 14
+#define EM2_ATTITUDE_SLICE_SIZE 12
+#define EM2_POS_HEADER_SIZE 30
+#define EM2_SVP_HEADER_SIZE 24
+#define EM2_SVP_SLICE_SIZE 4
+#define EM2_SVP2_HEADER_SIZE 24
+#define EM2_SVP2_SLICE_SIZE 8
+#define EM2_BATH_HEADER_SIZE 24
+#define EM2_BATH_BEAM_SIZE 16
+#define EM2_BATH_MBA_HEADER_SIZE 34
+#define EM2_BATH_MBA_BEAM_SIZE 18
+#define EM2_RAWBEAM_HEADER_SIZE 16
+#define EM2_RAWBEAM_BEAM_SIZE 8
+#define EM2_RAWBEAM2_HEADER_SIZE 42
+#define EM2_RAWBEAM2_BEAM_SIZE 16
+#define EM2_RAWBEAM2_TX_SIZE 12
+#define EM2_RAWBEAM3_HEADER_SIZE 32
+#define EM2_RAWBEAM3_BEAM_SIZE 12
+#define EM2_RAWBEAM3_TX_SIZE 20
+#define EM2_SS_HEADER_SIZE 28
+#define EM2_SS_BEAM_SIZE 6
+#define EM2_SS_MBA_HEADER_SIZE 32
+#define EM2_SS_MBA_BEAM_SIZE 6
+#define EM2_WC_HEADER_SIZE 36
+#define EM2_WC_TX_SIZE 6
+#define EM2_WC_BEAM_SIZE 10
 
 /* invalid value flags */
-#define	EM2_INVALID_AMP			0x7F
-#define	EM2_INVALID_CHAR		0xFF
-#define	EM2_INVALID_SHORT		0xFFFF
-#define EM2_INVALID_U_INT		0xFFFFFFFF
-#define EM2_INVALID_INT			0x7FFFFFFF
+#define EM2_INVALID_AMP 0x7F
+#define EM2_INVALID_CHAR 0xFF
+#define EM2_INVALID_SHORT 0xFFFF
+#define EM2_INVALID_U_INT 0xFFFFFFFF
+#define EM2_INVALID_INT 0x7FFFFFFF
 
 /* internal data structure for survey data */
-struct mbsys_simrad2_ping_struct
-	{
-	int	png_date;	/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	png_msec;	/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	png_count;	/* sequential counter or input identifier */
-	int	png_serial;	/* system 1 or system 2 serial number */
-	int	png_latitude;	/* latitude in decimal degrees * 20000000
-				    (negative in southern hemisphere)
-				    if valid, invalid = 0x7FFFFFFF */
-	int	png_longitude;	/* longitude in decimal degrees * 10000000
-				    (negative in western hemisphere)
-				    if valid, invalid = 0x7FFFFFFF */
-	int	png_speed;	/* speed over ground (cm/sec) if valid,
-				    invalid = 0xFFFF */
-	int	png_heading;	/* heading (0.01 deg) */
-	int	png_heave;	/* heave from interpolation (0.01 m) */
-	int	png_roll;	/* roll from interpolation (0.01 deg) */
-	int	png_pitch;	/* pitch from interpolation (0.01 deg) */
-	int	png_ssv;	/* sound speed at transducer (0.1 m/sec) */
-	int	png_xducer_depth;
-				/* transmit transducer depth (0.01 m)
-				    - The transmit transducer depth plus the
-					depth offset multiplier times 65536 cm
-					should be added to the beam depths to
-					derive the depths re the water line.
-					The depth offset multiplier will usually
-					be zero, except when the EM3000 sonar
-					head is on an underwater vehicle at a
-					depth greater than about 650 m. Note that
-					the offset multiplier will be negative
-					(-1) if the actual heave is large enough
-					to bring the transmit transducer above
-					the water line. This may represent a valid
-					situation,  but may also be due to an
-					erroneously set installation depth of
-					the either transducer or the water line. */
-	int	png_offset_multiplier;
-				/* transmit transducer depth offset multiplier
-				   - see note 7 above */
-	int	png_nbeams_max;	/* maximum number of beams possible */
-	int	png_nbeams;	/* number of valid beams */
-	int	png_depth_res;	/* depth resolution (0.01 m) */
-	int	png_distance_res;
-				/* x and y resolution (0.01 m) */
-	int	png_sample_rate;
-				/* sampling rate (Hz) OR depth difference between
-				    sonar heads in EM3000D - see note 9 above */
-	int	png_depth[MBSYS_SIMRAD2_MAXBEAMS];
-				/* depths in depth resolution units */
-	int	png_acrosstrack[MBSYS_SIMRAD2_MAXBEAMS];
-				/* acrosstrack distances in distance resolution units */
-	int	png_alongtrack[MBSYS_SIMRAD2_MAXBEAMS];
-				/* alongtrack distances in distance resolution units */
-	int	png_depression[MBSYS_SIMRAD2_MAXBEAMS];
-				/* Primary beam angles in one of two formats (see note 10 above)
-				   1) Corrected format - gives beam depression angles
-				        in 0.01 degree. These are the takeoff angles used
-					in raytracing calculations.
-				   2) Uncorrected format - gives beam pointing angles
-				        in 0.01 degree. These values are relative to
-					the transducer array and have not been corrected
-					for vessel motion. */
-	int	png_azimuth[MBSYS_SIMRAD2_MAXBEAMS];
-				/* Secondary beam angles in one of two formats (see note 10 above)
-				   1) Corrected format - gives beam azimuth angles
-				        in 0.01 degree. These values used to rotate sounding
-					position relative to the sonar after raytracing.
-				   2) Uncorrected format - combines a flag indicating that
-				        the angles are in the uncorrected format with
-					beam tilt angles. Values greater than
-					35999 indicate the uncorrected format is in use. The
-					beam tilt angles are given as (value - 54000) in
-					0.01 degree; the tilt angles give the tilt of the
-					transmitted ping due to compensation for vessel
-					motion. */
-	int	png_range[MBSYS_SIMRAD2_MAXBEAMS];
-				/* Ranges in one of two formats (see note 10 above):
-				   1) Corrected format - the ranges are one way
-				        travel times in time units defined as half
-					the inverse sampling rate.
-				   2) Uncorrected format - the ranges are raw two
-				        way travel times in time units defined as
-					half the inverse sampling rate. These values
-					have not been corrected for changes in the
-					heave during the ping cycle. */
-	int	png_quality[MBSYS_SIMRAD2_MAXBEAMS];
-				/* 0-254 */
-	int	png_window[MBSYS_SIMRAD2_MAXBEAMS];
-				/* samples/4 */
-	int	png_amp[MBSYS_SIMRAD2_MAXBEAMS];
-				/* 0.5 dB */
-	int	png_beam_num[MBSYS_SIMRAD2_MAXBEAMS];
-				/* beam 128 is first beam on
-				    second head of EM3000D */
-	char	png_beamflag[MBSYS_SIMRAD2_MAXBEAMS];
-				/* uses standard MB-System beamflags */
+struct mbsys_simrad2_ping_struct {
+	int png_date;      /* date = year*10000 + month*100 + day
+	                   Feb 26, 1995 = 19950226 */
+	int png_msec;      /* time since midnight in msec
+	                   08:12:51.234 = 29570234 */
+	int png_count;     /* sequential counter or input identifier */
+	int png_serial;    /* system 1 or system 2 serial number */
+	int png_latitude;  /* latitude in decimal degrees * 20000000
+	               (negative in southern hemisphere)
+	               if valid, invalid = 0x7FFFFFFF */
+	int png_longitude; /* longitude in decimal degrees * 10000000
+	               (negative in western hemisphere)
+	               if valid, invalid = 0x7FFFFFFF */
+	int png_speed;     /* speed over ground (cm/sec) if valid,
+	                   invalid = 0xFFFF */
+	int png_heading;   /* heading (0.01 deg) */
+	int png_heave;     /* heave from interpolation (0.01 m) */
+	int png_roll;      /* roll from interpolation (0.01 deg) */
+	int png_pitch;     /* pitch from interpolation (0.01 deg) */
+	int png_ssv;       /* sound speed at transducer (0.1 m/sec) */
+	int png_xducer_depth;
+	/* transmit transducer depth (0.01 m)
+	    - The transmit transducer depth plus the
+	    depth offset multiplier times 65536 cm
+	    should be added to the beam depths to
+	    derive the depths re the water line.
+	    The depth offset multiplier will usually
+	    be zero, except when the EM3000 sonar
+	    head is on an underwater vehicle at a
+	    depth greater than about 650 m. Note that
+	    the offset multiplier will be negative
+	    (-1) if the actual heave is large enough
+	    to bring the transmit transducer above
+	    the water line. This may represent a valid
+	    situation,  but may also be due to an
+	    erroneously set installation depth of
+	    the either transducer or the water line. */
+	int png_offset_multiplier;
+	/* transmit transducer depth offset multiplier
+	   - see note 7 above */
+	int png_nbeams_max; /* maximum number of beams possible */
+	int png_nbeams;     /* number of valid beams */
+	int png_depth_res;  /* depth resolution (0.01 m) */
+	int png_distance_res;
+	/* x and y resolution (0.01 m) */
+	int png_sample_rate;
+	/* sampling rate (Hz) OR depth difference between
+	    sonar heads in EM3000D - see note 9 above */
+	int png_depth[MBSYS_SIMRAD2_MAXBEAMS];
+	/* depths in depth resolution units */
+	int png_acrosstrack[MBSYS_SIMRAD2_MAXBEAMS];
+	/* acrosstrack distances in distance resolution units */
+	int png_alongtrack[MBSYS_SIMRAD2_MAXBEAMS];
+	/* alongtrack distances in distance resolution units */
+	int png_depression[MBSYS_SIMRAD2_MAXBEAMS];
+	/* Primary beam angles in one of two formats (see note 10 above)
+	   1) Corrected format - gives beam depression angles
+	        in 0.01 degree. These are the takeoff angles used
+	    in raytracing calculations.
+	   2) Uncorrected format - gives beam pointing angles
+	        in 0.01 degree. These values are relative to
+	    the transducer array and have not been corrected
+	    for vessel motion. */
+	int png_azimuth[MBSYS_SIMRAD2_MAXBEAMS];
+	/* Secondary beam angles in one of two formats (see note 10 above)
+	   1) Corrected format - gives beam azimuth angles
+	        in 0.01 degree. These values used to rotate sounding
+	    position relative to the sonar after raytracing.
+	   2) Uncorrected format - combines a flag indicating that
+	        the angles are in the uncorrected format with
+	    beam tilt angles. Values greater than
+	    35999 indicate the uncorrected format is in use. The
+	    beam tilt angles are given as (value - 54000) in
+	    0.01 degree; the tilt angles give the tilt of the
+	    transmitted ping due to compensation for vessel
+	    motion. */
+	int png_range[MBSYS_SIMRAD2_MAXBEAMS];
+	/* Ranges in one of two formats (see note 10 above):
+	   1) Corrected format - the ranges are one way
+	        travel times in time units defined as half
+	    the inverse sampling rate.
+	   2) Uncorrected format - the ranges are raw two
+	        way travel times in time units defined as
+	    half the inverse sampling rate. These values
+	    have not been corrected for changes in the
+	    heave during the ping cycle. */
+	int png_quality[MBSYS_SIMRAD2_MAXBEAMS];
+	/* 0-254 */
+	int png_window[MBSYS_SIMRAD2_MAXBEAMS];
+	/* samples/4 */
+	int png_amp[MBSYS_SIMRAD2_MAXBEAMS];
+	/* 0.5 dB */
+	int png_beam_num[MBSYS_SIMRAD2_MAXBEAMS];
+	/* beam 128 is first beam on
+	    second head of EM3000D */
+	char png_beamflag[MBSYS_SIMRAD2_MAXBEAMS];
+	/* uses standard MB-System beamflags */
 
 	/* raw travel time and angle data */
-	int	png_raw1_read;	/* flag indicating actual reading of old rawbeam record */
-	int	png_raw2_read;	/* flag indicating actual reading of new rawbeam record */
-	int	png_raw_date;	/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	png_raw_msec;	/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	png_raw_count;	/* sequential counter or input identifier */
-	int	png_raw_serial;	/* system 1 or system 2 serial number */
-	int	png_raw_heading;	/* heading (0.01 deg) */
-	int	png_raw_ssv;		/* sound speed at transducer (0.1 m/sec) */
-	int	png_raw_xducer_depth;	/* transmit transducer depth (0.01 m) */
-	int	png_raw_nbeams_max;	/* maximum number of beams possible */
-	int	png_raw_nbeams;		/* number of raw travel times and angles
-					    - nonzero only if raw beam record read */
-	int	png_raw_depth_res;	/* depth resolution (0.01 m) */
-	int	png_raw_distance_res;	/* x and y resolution (0.01 m) */
-	int	png_raw_sample_rate;	/* sampling rate (Hz or 0.01 Hz) */
-	int	png_raw_status;		/* status from PU/TRU */
-	int	png_raw_rangenormal;	/* normal incidence range (meters) */
-	int	png_raw_normalbackscatter; /* normal incidence backscatter (dB) (-60 to +9) */
-	int	png_raw_obliquebackscatter; /* oblique incidence backscatter (dB) (-60 to +9) */
-	int	png_raw_fixedgain;	/* fixed gain (dB) (0 to 30) */
-	int	png_raw_txpower;	/* transmit power (dB) (0, -10, or -20) */
-	int	png_raw_mode;		/* sonar mode:
-						0 : very shallow
-						1 : shallow
-						2 : medium
-						3 : deep
-						4 : very deep
-						5 : extra deep */
-	int	png_raw_coverage;	/* swath width (degrees) (10 to 150 degrees) */
-	int	png_raw_yawstabheading; /* yaw stabilization heading (0.01 degrees) */
-	int	png_raw_ntx;		/* number of TX pulses (1 to 9) */
-	int	png_raw_txlastbeam[MBSYS_SIMRAD2_MAXTX];/* last beam number in this TX pulse */
-	int	png_raw_txtiltangle[MBSYS_SIMRAD2_MAXTX];/* tilt angle (0.01 deg) */
-	int	png_raw_txheading[MBSYS_SIMRAD2_MAXTX];	/* heading (0.01 deg) */
-	int	png_raw_txroll[MBSYS_SIMRAD2_MAXTX];	/* roll (0.01 deg) */
-	int	png_raw_txpitch[MBSYS_SIMRAD2_MAXTX];	/* pitch angle (0.01 deg) */
-	int	png_raw_txheave[MBSYS_SIMRAD2_MAXTX];	/* heave (0.01 m) */
-	int	png_raw_rxrange[MBSYS_SIMRAD2_MAXBEAMS];
-				/* Ranges as raw two way travel times in time
-					units defined as one-fourth the inverse
-					sampling rate. These values have not
-					been corrected for changes in the
-					heave during the ping cycle. */
-	int	png_raw_rxquality[MBSYS_SIMRAD2_MAXBEAMS];	/* beam quality flag */
-	int	png_raw_rxwindow[MBSYS_SIMRAD2_MAXBEAMS];	/* length of detection window */
-	int	png_raw_rxamp[MBSYS_SIMRAD2_MAXBEAMS];		/* 0.5 dB */
-	int	png_raw_rxbeam_num[MBSYS_SIMRAD2_MAXBEAMS];
-				/* beam 128 is first beam on
-				    second head of EM3000D */
-	int	png_raw_rxpointangle[MBSYS_SIMRAD2_MAXBEAMS];
-				/* Raw beam pointing angles in 0.01 degree,
-					positive to port.
-					These values are relative to the transducer
-					array and have not been corrected
-					for vessel motion. */
-	int	png_raw_rxtiltangle[MBSYS_SIMRAD2_MAXBEAMS];
-				/* Raw transmit tilt angles in 0.01 degree,
-					positive forward.
-					These values are relative to the transducer
-					array and have not been corrected
-					for vessel motion. */
-	int	png_raw_rxheading[MBSYS_SIMRAD2_MAXBEAMS];	/* heading (0.01 deg) */
-	int	png_raw_rxroll[MBSYS_SIMRAD2_MAXBEAMS];	/* roll (0.01 deg) */
-	int	png_raw_rxpitch[MBSYS_SIMRAD2_MAXBEAMS];	/* pitch angle (0.01 deg) */
-	int	png_raw_rxheave[MBSYS_SIMRAD2_MAXBEAMS];	/* heave (0.01 m) */
+	int png_raw1_read;        /* flag indicating actual reading of old rawbeam record */
+	int png_raw2_read;        /* flag indicating actual reading of new rawbeam record */
+	int png_raw_date;         /* date = year*10000 + month*100 + day
+	                      Feb 26, 1995 = 19950226 */
+	int png_raw_msec;         /* time since midnight in msec
+	                      08:12:51.234 = 29570234 */
+	int png_raw_count;        /* sequential counter or input identifier */
+	int png_raw_serial;       /* system 1 or system 2 serial number */
+	int png_raw_heading;      /* heading (0.01 deg) */
+	int png_raw_ssv;          /* sound speed at transducer (0.1 m/sec) */
+	int png_raw_xducer_depth; /* transmit transducer depth (0.01 m) */
+	int png_raw_nbeams_max;   /* maximum number of beams possible */
+	int png_raw_nbeams;    /* number of raw travel times and angles
+	                   - nonzero only if raw beam record read */
+	int png_raw_depth_res; /* depth resolution (0.01 m) */
+	int png_raw_distance_res;                     /* x and y resolution (0.01 m) */
+	int png_raw_sample_rate;                      /* sampling rate (Hz or 0.01 Hz) */
+	int png_raw_status;                           /* status from PU/TRU */
+	int png_raw_rangenormal;                      /* normal incidence range (meters) */
+	int png_raw_normalbackscatter;                /* normal incidence backscatter (dB) (-60 to +9) */
+	int png_raw_obliquebackscatter;               /* oblique incidence backscatter (dB) (-60 to +9) */
+	int png_raw_fixedgain;                        /* fixed gain (dB) (0 to 30) */
+	int png_raw_txpower;                          /* transmit power (dB) (0, -10, or -20) */
+	int png_raw_mode;                             /* sonar mode:
+	                                          0 : very shallow
+	                                          1 : shallow
+	                                          2 : medium
+	                                          3 : deep
+	                                          4 : very deep
+	                                          5 : extra deep */
+	int png_raw_coverage;                         /* swath width (degrees) (10 to 150 degrees) */
+	int png_raw_yawstabheading;                   /* yaw stabilization heading (0.01 degrees) */
+	int png_raw_ntx;                              /* number of TX pulses (1 to 9) */
+	int png_raw_txlastbeam[MBSYS_SIMRAD2_MAXTX];  /* last beam number in this TX pulse */
+	int png_raw_txtiltangle[MBSYS_SIMRAD2_MAXTX]; /* tilt angle (0.01 deg) */
+	int png_raw_txheading[MBSYS_SIMRAD2_MAXTX];   /* heading (0.01 deg) */
+	int png_raw_txroll[MBSYS_SIMRAD2_MAXTX];      /* roll (0.01 deg) */
+	int png_raw_txpitch[MBSYS_SIMRAD2_MAXTX];     /* pitch angle (0.01 deg) */
+	int png_raw_txheave[MBSYS_SIMRAD2_MAXTX];     /* heave (0.01 m) */
+	int png_raw_rxrange[MBSYS_SIMRAD2_MAXBEAMS];
+	/* Ranges as raw two way travel times in time
+	    units defined as one-fourth the inverse
+	    sampling rate. These values have not
+	    been corrected for changes in the
+	    heave during the ping cycle. */
+	int png_raw_rxquality[MBSYS_SIMRAD2_MAXBEAMS]; /* beam quality flag */
+	int png_raw_rxwindow[MBSYS_SIMRAD2_MAXBEAMS];  /* length of detection window */
+	int png_raw_rxamp[MBSYS_SIMRAD2_MAXBEAMS];     /* 0.5 dB */
+	int png_raw_rxbeam_num[MBSYS_SIMRAD2_MAXBEAMS];
+	/* beam 128 is first beam on
+	    second head of EM3000D */
+	int png_raw_rxpointangle[MBSYS_SIMRAD2_MAXBEAMS];
+	/* Raw beam pointing angles in 0.01 degree,
+	    positive to port.
+	    These values are relative to the transducer
+	    array and have not been corrected
+	    for vessel motion. */
+	int png_raw_rxtiltangle[MBSYS_SIMRAD2_MAXBEAMS];
+	/* Raw transmit tilt angles in 0.01 degree,
+	    positive forward.
+	    These values are relative to the transducer
+	    array and have not been corrected
+	    for vessel motion. */
+	int png_raw_rxheading[MBSYS_SIMRAD2_MAXBEAMS]; /* heading (0.01 deg) */
+	int png_raw_rxroll[MBSYS_SIMRAD2_MAXBEAMS];    /* roll (0.01 deg) */
+	int png_raw_rxpitch[MBSYS_SIMRAD2_MAXBEAMS];   /* pitch angle (0.01 deg) */
+	int png_raw_rxheave[MBSYS_SIMRAD2_MAXBEAMS];   /* heave (0.01 m) */
 
 	/* raw travel time and angle data version 3 */
-	int	png_raw3_read;	/* flag indicating actual reading of newer rawbeam record */
-	int	png_raw3_date;	/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	png_raw3_msec;	/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	png_raw3_count;	/* sequential counter or input identifier */
-	int	png_raw3_serial;	/* system 1 or system 2 serial number */
-	int	png_raw3_ntx;		/* number of TX pulses (1 to 9) */
-	int	png_raw3_nbeams;		/* number of raw travel times and angles
-					    - nonzero only if raw beam record read */
-	int	png_raw3_sample_rate;	/* sampling rate (Hz or 0.01 Hz) */
-	int	png_raw3_xducer_depth;	/* transmit transducer depth (0.01 m) */
-	int	png_raw3_ssv;		/* sound speed at transducer (0.1 m/sec) */
-	int	png_raw3_nbeams_max;	/* maximum number of beams possible */
-	int	png_raw3_txtiltangle[MBSYS_SIMRAD2_MAXTX];/* tilt angle (0.01 deg) */
-	int	png_raw3_txfocus[MBSYS_SIMRAD2_MAXTX];   /* focus range (0.1 m)
-								0 = no focus */
-	int	png_raw3_txsignallength[MBSYS_SIMRAD2_MAXTX];	/* signal length (usec) */
-	int	png_raw3_txoffset[MBSYS_SIMRAD2_MAXTX];	/* transmit time offset (usec) */
-	int	png_raw3_txcenter[MBSYS_SIMRAD2_MAXTX];	/* center frequency (Hz) */
-	int	png_raw3_txbandwidth[MBSYS_SIMRAD2_MAXTX];	/* bandwidth (10 Hz) */
-	int	png_raw3_txwaveform[MBSYS_SIMRAD2_MAXTX];	/* signal waveform identifier
-									0 = CW, 1 = FM */
-	int	png_raw3_txsector[MBSYS_SIMRAD2_MAXTX];	/* transmit sector number (0-19) */
-	int	png_raw3_rxpointangle[MBSYS_SIMRAD2_MAXBEAMS];
-				/* Raw beam pointing angles in 0.01 degree,
-					positive to port.
-					These values are relative to the transducer
-					array and have not been corrected
-					for vessel motion. */
-	int	png_raw3_rxrange[MBSYS_SIMRAD2_MAXBEAMS];	/* Ranges (0.25 samples) */
-	int	png_raw3_rxsector[MBSYS_SIMRAD2_MAXBEAMS];	/* transmit sector identifier */
-	int	png_raw3_rxamp[MBSYS_SIMRAD2_MAXBEAMS];		/* 0.5 dB */
-	int	png_raw3_rxquality[MBSYS_SIMRAD2_MAXBEAMS];	/* beam quality flag */
-	int	png_raw3_rxwindow[MBSYS_SIMRAD2_MAXBEAMS];	/* length of detection window */
-	int	png_raw3_rxbeam_num[MBSYS_SIMRAD2_MAXBEAMS];
-				/* beam 128 is first beam on
-				    second head of EM3000D */
-	int	png_raw3_rxspare[MBSYS_SIMRAD2_MAXBEAMS];	/* spare */
+	int png_raw3_read;         /* flag indicating actual reading of newer rawbeam record */
+	int png_raw3_date;         /* date = year*10000 + month*100 + day
+	                       Feb 26, 1995 = 19950226 */
+	int png_raw3_msec;         /* time since midnight in msec
+	                       08:12:51.234 = 29570234 */
+	int png_raw3_count;        /* sequential counter or input identifier */
+	int png_raw3_serial;       /* system 1 or system 2 serial number */
+	int png_raw3_ntx;          /* number of TX pulses (1 to 9) */
+	int png_raw3_nbeams;       /* number of raw travel times and angles
+	                   - nonzero only if raw beam record read */
+	int png_raw3_sample_rate;  /* sampling rate (Hz or 0.01 Hz) */
+	int png_raw3_xducer_depth; /* transmit transducer depth (0.01 m) */
+	int png_raw3_ssv;          /* sound speed at transducer (0.1 m/sec) */
+	int png_raw3_nbeams_max;   /* maximum number of beams possible */
+	int png_raw3_txtiltangle[MBSYS_SIMRAD2_MAXTX];    /* tilt angle (0.01 deg) */
+	int png_raw3_txfocus[MBSYS_SIMRAD2_MAXTX];        /* focus range (0.1 m)
+	                                 0 = no focus */
+	int png_raw3_txsignallength[MBSYS_SIMRAD2_MAXTX]; /* signal length (usec) */
+	int png_raw3_txoffset[MBSYS_SIMRAD2_MAXTX];       /* transmit time offset (usec) */
+	int png_raw3_txcenter[MBSYS_SIMRAD2_MAXTX];       /* center frequency (Hz) */
+	int png_raw3_txbandwidth[MBSYS_SIMRAD2_MAXTX];    /* bandwidth (10 Hz) */
+	int png_raw3_txwaveform[MBSYS_SIMRAD2_MAXTX]; /* signal waveform identifier
+	                              0 = CW, 1 = FM */
+	int png_raw3_txsector[MBSYS_SIMRAD2_MAXTX];   /* transmit sector number (0-19) */
+	int png_raw3_rxpointangle[MBSYS_SIMRAD2_MAXBEAMS];
+	/* Raw beam pointing angles in 0.01 degree,
+	    positive to port.
+	    These values are relative to the transducer
+	    array and have not been corrected
+	    for vessel motion. */
+	int png_raw3_rxrange[MBSYS_SIMRAD2_MAXBEAMS];   /* Ranges (0.25 samples) */
+	int png_raw3_rxsector[MBSYS_SIMRAD2_MAXBEAMS];  /* transmit sector identifier */
+	int png_raw3_rxamp[MBSYS_SIMRAD2_MAXBEAMS];     /* 0.5 dB */
+	int png_raw3_rxquality[MBSYS_SIMRAD2_MAXBEAMS]; /* beam quality flag */
+	int png_raw3_rxwindow[MBSYS_SIMRAD2_MAXBEAMS];  /* length of detection window */
+	int png_raw3_rxbeam_num[MBSYS_SIMRAD2_MAXBEAMS];
+	/* beam 128 is first beam on
+	    second head of EM3000D */
+	int png_raw3_rxspare[MBSYS_SIMRAD2_MAXBEAMS]; /* spare */
 
 	/* sidescan */
-	int	png_ss_read;	/* flag indicating actual reading of sidescan record */
-	int	png_ss_date;	/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	png_ss_msec;	/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	png_ss_count;	/* sequential counter or input identifier */
-	int	png_ss_serial;	/* system 1 or system 2 serial number */
-	int	png_max_range;	/* old: max range of ping in number of samples */
-				/* current: mean absorption coefficient in 0.01 db/km */
-				/* also: used to store sidescan pixel size in range (m)
-				    for old Simrad multibeams (e.g. EM12, EM1000) */
-	int	png_r_zero;	/* old: range to normal incidence used in TVG
-				    (R0 predicted) in samples */
-				/* current: pulse length in usec */
-	int	png_r_zero_corr;/* range to normal incidence used to correct
-				    sample amplitudes in number of samples */
-	int	png_tvg_start;	/* start sample of TVG ramp if not enough
-				    dynamic range (0 otherwise) */
-	int	png_tvg_stop;	/* stop sample of TVG ramp if not enough
-				    dynamic range (0 otherwise) */
-	int	png_bsn;	/* normal incidence backscatter (BSN) in dB */
-	int	png_bso;	/* oblique incidence backscatter (BSO) in dB */
-	int	png_tx;		/* Tx beamwidth in 0.1 degree */
-	int	png_tvg_crossover;
-				/* TVG law crossover angle in degrees */
-	int	png_nbeams_ss;	/* number of beams with sidescan */
-	int	png_npixels;	/* number of pixels of sidescan */
-	int	png_beam_index[MBSYS_SIMRAD2_MAXBEAMS];
-				/* beam index number */
-	int	png_sort_direction[MBSYS_SIMRAD2_MAXBEAMS];
-				/* sorting direction - first sample in beam has lowest
-				    range if 1, highest if -1. */
-	int	png_beam_samples[MBSYS_SIMRAD2_MAXBEAMS];
-				/* number of sidescan samples derived from
-					each beam */
-	int	png_start_sample[MBSYS_SIMRAD2_MAXBEAMS];
-				/* start sample number */
-	int	png_center_sample[MBSYS_SIMRAD2_MAXBEAMS];
-				/* center sample number */
+	int png_ss_read;   /* flag indicating actual reading of sidescan record */
+	int png_ss_date;   /* date = year*10000 + month*100 + day
+	               Feb 26, 1995 = 19950226 */
+	int png_ss_msec;   /* time since midnight in msec
+	               08:12:51.234 = 29570234 */
+	int png_ss_count;  /* sequential counter or input identifier */
+	int png_ss_serial; /* system 1 or system 2 serial number */
+	int png_max_range; /* old: max range of ping in number of samples */
+	                   /* current: mean absorption coefficient in 0.01 db/km */
+	/* also: used to store sidescan pixel size in range (m)
+	    for old Simrad multibeams (e.g. EM12, EM1000) */
+	int png_r_zero;      /* old: range to normal incidence used in TVG
+	                     (R0 predicted) in samples */
+	                     /* current: pulse length in usec */
+	int png_r_zero_corr; /* range to normal incidence used to correct
+	                 sample amplitudes in number of samples */
+	int png_tvg_start;   /* start sample of TVG ramp if not enough
+	                 dynamic range (0 otherwise) */
+	int png_tvg_stop;    /* stop sample of TVG ramp if not enough
+	                 dynamic range (0 otherwise) */
+	int png_bsn;         /* normal incidence backscatter (BSN) in dB */
+	int png_bso;         /* oblique incidence backscatter (BSO) in dB */
+	int png_tx;          /* Tx beamwidth in 0.1 degree */
+	int png_tvg_crossover;
+	/* TVG law crossover angle in degrees */
+	int png_nbeams_ss; /* number of beams with sidescan */
+	int png_npixels;   /* number of pixels of sidescan */
+	int png_beam_index[MBSYS_SIMRAD2_MAXBEAMS];
+	/* beam index number */
+	int png_sort_direction[MBSYS_SIMRAD2_MAXBEAMS];
+	/* sorting direction - first sample in beam has lowest
+	    range if 1, highest if -1. */
+	int png_beam_samples[MBSYS_SIMRAD2_MAXBEAMS];
+	/* number of sidescan samples derived from
+	    each beam */
+	int png_start_sample[MBSYS_SIMRAD2_MAXBEAMS];
+	/* start sample number */
+	int png_center_sample[MBSYS_SIMRAD2_MAXBEAMS];
+	/* center sample number */
 	mb_s_char png_ssraw[MBSYS_SIMRAD2_MAXRAWPIXELS];
-				/* the raw sidescan ordered port to starboard */
-	int	png_pixel_size;	/* processed sidescan pixel size in cm */
-	int	png_pixels_ss;	/* number of processed sidescan pixels stored */
-	short	png_ss[MBSYS_SIMRAD2_MAXPIXELS];
-				/* the processed sidescan ordered port to starboard */
-	short	png_ssalongtrack[MBSYS_SIMRAD2_MAXPIXELS];
-				/* the processed sidescan alongtrack distances
-					in distance resolution units */
-	};
+	/* the raw sidescan ordered port to starboard */
+	int png_pixel_size; /* processed sidescan pixel size in cm */
+	int png_pixels_ss;  /* number of processed sidescan pixels stored */
+	short png_ss[MBSYS_SIMRAD2_MAXPIXELS];
+	/* the processed sidescan ordered port to starboard */
+	short png_ssalongtrack[MBSYS_SIMRAD2_MAXPIXELS];
+	/* the processed sidescan alongtrack distances
+	    in distance resolution units */
+};
+
+/* internal data structure for extra parameters */
+struct mbsys_simrad2_extraparameters_struct {
+	int xtr_date;   /* extra parameters date = year*10000 + month*100 + day
+	        Feb 26, 1995 = 19950226 */
+	int xtr_msec;   /* extra parameters time since midnight in msec
+	                08:12:51.234 = 29570234 */
+	int xtr_count;  /* ping counter */
+	int xtr_serial; /* system 1 or 2 serial number */
+	int xtr_id;     /* content identifier:
+	                            1:  Calib.txt file for angle offset
+	                            2:  Log all heights (positioning system quality factors)
+	                            3:  Sound velocity at transducer
+	                            4:  Sound velocity profile
+	                            5:  Multicast RX status */
+	int xtr_data_size;
+	int xtr_nalloc;
+	char *xtr_data; /* variable array following from content identifier and record size */
+
+	/* case xtr_id == 2: Log all heights (positioning system quality factors) */
+	int xtr_pqf_activepositioning;  /* active positioning system (0-2) */
+	short xtr_pqf_qfsetting[3];     /* quality factor setting for each positioning system
+	                                        0: External PU decode
+	                                        1: PU decodes Q-factor (default)
+	                                    Each positioning system has its own individual setting.
+	                                    Value Ô1Õ indicates that the PU should decode the quality
+	                                    factors in the traditional way. This is the default.
+	                                    Value Ô0Õ indicates that the PU should skip quality factor
+	                                    decoding as this is performed externally. The PU should
+	                                    always transmit the height datagram ÔhÕ.*/
+	int xtr_pqf_nqualityfactors[3]; /* number of quality factors for each positioning system
+	                                    Each positioning system have an independent set of
+	                                    additional quality factors. The number of quality
+	                                    factors for each system must be specified.
+	                                    Default value is 0.*/
+	                                /* Each quality factor is described by two entries, the
+	                                   quality factor itself and a limit, forming a pair.
+	                                   This results in a variable number of such pairs,
+	                                   depending on how many additional quality factors is set
+	                                   by the operator. If no quality factors are defined,
+	                                   no pairs are included. The sequence of pairs is important.
+	                                   First, all pairs for positioning system 1 is listed,
+	                                   if any. Next any pairs for positioning system 2 and at
+	                                   the end, any pairs for positioning system 3. */
+	int xtr_pqf_qfvalues[3][MBSYS_SIMRAD2_MAXQUALITYFACTORS];
+	/* A quality factor is a positive number. Currently no
+	   upper limit is imposed. */
+	int xtr_pqf_qflimits[3][MBSYS_SIMRAD2_MAXQUALITYFACTORS];
+	/* Uncertainty in position fix in cm. This uncertainty
+	   is associated with the quality factor value.
+	   Currently not used. */
+};
 
 /* internal data structure for attitude data */
-struct mbsys_simrad2_wcbeam_struct
-	{
-	int	wtc_rxpointangle;	/* Beam pointing angles in 0.01 degree,
-						positive to port. These values are roll stabilized. */
-	int	wtc_start_sample;	/* start sample number */
-	int	wtc_beam_samples;	/* number of water column samples derived from
-						each beam */
-	int	wtc_beam_spare;		/* unknown */
-	int	wtc_sector;		/* transmit sector identifier */
-	int	wtc_beam;  		/* beam 128 is first beam on
-				  	  	second head of EM3000D */
+struct mbsys_simrad2_wcbeam_struct {
+	int wtc_rxpointangle; /* Beam pointing angles in 0.01 degree,
+	                  positive to port. These values are roll stabilized. */
+	int wtc_start_sample; /* start sample number */
+	int wtc_beam_samples; /* number of water column samples derived from
+	                  each beam */
+	int wtc_beam_spare;   /* unknown */
+	int wtc_sector;       /* transmit sector identifier */
+	int wtc_beam;         /* beam 128 is first beam on
+	                      second head of EM3000D */
 	mb_s_char wtc_amp[MBSYS_SIMRAD2_MAXRAWPIXELS]; /* water column amplitude (dB) */
-	};
+};
 
 /* internal data structure for attitude data */
-struct mbsys_simrad2_watercolumn_struct
-	{
-	int	wtc_date;	/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	wtc_msec;	/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	wtc_count;	/* sequential counter or input identifier */
-	int	wtc_serial;	/* system 1 or system 2 serial number */
-	int	wtc_ndatagrams;	/* number of datagrams used to represent
-						the water column for this ping */
-	int	wtc_datagram;	/* number this datagram */
-	int	wtc_ntx;	/* number of transmit sectors */
-	int	wtc_nrx;	/* number of receive beams */
-	int	wtc_nbeam;	/* number of beams in this datagram */
-	int	wtc_ssv;	/* sound speed at transducer (0.1 m/sec) */
-	int	wtc_sfreq;	/* sampling frequency (0.01 Hz) */
-	int	wtc_heave;	/* tx time heave at transducer (0.01 m) */
-	int	wtc_spare1;	/* spare */
-	int	wtc_spare2;	/* spare */
-	int	wtc_spare3;	/* spare */
-	int	wtc_txtiltangle[MBSYS_SIMRAD2_MAXTX];	/* tilt angle (0.01 deg) */
-	int	wtc_txcenter[MBSYS_SIMRAD2_MAXTX];	/* center frequency (Hz) */
-	int	wtc_txsector[MBSYS_SIMRAD2_MAXTX];	/* transmit sector number (0-19) */
+struct mbsys_simrad2_watercolumn_struct {
+	int wtc_date;       /* date = year*10000 + month*100 + day
+	                    Feb 26, 1995 = 19950226 */
+	int wtc_msec;       /* time since midnight in msec
+	                    08:12:51.234 = 29570234 */
+	int wtc_count;      /* sequential counter or input identifier */
+	int wtc_serial;     /* system 1 or system 2 serial number */
+	int wtc_ndatagrams; /* number of datagrams used to represent
+	                    the water column for this ping */
+	int wtc_datagram;   /* number this datagram */
+	int wtc_ntx;        /* number of transmit sectors */
+	int wtc_nrx;        /* number of receive beams */
+	int wtc_nbeam;      /* number of beams in this datagram */
+	int wtc_ssv;        /* sound speed at transducer (0.1 m/sec) */
+	int wtc_sfreq;      /* sampling frequency (0.01 Hz) */
+	int wtc_heave;      /* tx time heave at transducer (0.01 m) */
+	int wtc_spare1;     /* spare */
+	int wtc_spare2;     /* spare */
+	int wtc_spare3;     /* spare */
+	int wtc_txtiltangle[MBSYS_SIMRAD2_MAXTX]; /* tilt angle (0.01 deg) */
+	int wtc_txcenter[MBSYS_SIMRAD2_MAXTX];    /* center frequency (Hz) */
+	int wtc_txsector[MBSYS_SIMRAD2_MAXTX];    /* transmit sector number (0-19) */
 	struct mbsys_simrad2_wcbeam_struct beam[MBSYS_SIMRAD2_MAXBEAMS];
-	};
+};
 
 /* internal data structure for attitude data */
-struct mbsys_simrad2_attitude_struct
-	{
-	int	att_date;	/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	att_msec;	/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	att_count;	/* sequential counter or input identifier */
-	int	att_serial;	/* system 1 or system 2 serial number */
-	int	att_ndata;	/* number of attitude data */
-	int	att_time[MBSYS_SIMRAD2_MAXATTITUDE];
-				/* time since record start (msec) */
-	int	att_sensor_status[MBSYS_SIMRAD2_MAXATTITUDE];
-				/* see note 12 above */
-	int	att_roll[MBSYS_SIMRAD2_MAXATTITUDE];
-				/* roll (0.01 degree) */
-	int	att_pitch[MBSYS_SIMRAD2_MAXATTITUDE];
-				/* pitch (0.01 degree) */
-	int	att_heave[MBSYS_SIMRAD2_MAXATTITUDE];
-				/* heave (cm) */
-	int	att_heading[MBSYS_SIMRAD2_MAXATTITUDE];
-				/* heading (0.01 degree) */
-	int	att_heading_status;
-				/* heading status (0=inactive) */
-	};
+struct mbsys_simrad2_attitude_struct {
+	int att_date;   /* date = year*10000 + month*100 + day
+	                Feb 26, 1995 = 19950226 */
+	int att_msec;   /* time since midnight in msec
+	                08:12:51.234 = 29570234 */
+	int att_count;  /* sequential counter or input identifier */
+	int att_serial; /* system 1 or system 2 serial number */
+	int att_ndata;  /* number of attitude data */
+	int att_time[MBSYS_SIMRAD2_MAXATTITUDE];
+	/* time since record start (msec) */
+	int att_sensor_status[MBSYS_SIMRAD2_MAXATTITUDE];
+	/* see note 12 above */
+	int att_roll[MBSYS_SIMRAD2_MAXATTITUDE];
+	/* roll (0.01 degree) */
+	int att_pitch[MBSYS_SIMRAD2_MAXATTITUDE];
+	/* pitch (0.01 degree) */
+	int att_heave[MBSYS_SIMRAD2_MAXATTITUDE];
+	/* heave (cm) */
+	int att_heading[MBSYS_SIMRAD2_MAXATTITUDE];
+	/* heading (0.01 degree) */
+	int att_heading_status;
+	/* heading status (0=inactive) */
+};
 
 /* internal data structure for heading data */
-struct mbsys_simrad2_heading_struct
-	{
-	int	hed_date;	/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	hed_msec;	/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	hed_count;	/* sequential counter or input identifier */
-	int	hed_serial;	/* system 1 or system 2 serial number */
-	int	hed_ndata;	/* number of heading data */
-	int	hed_time[MBSYS_SIMRAD2_MAXHEADING];
-				/* time since record start (msec) */
-	int	hed_heading[MBSYS_SIMRAD2_MAXHEADING];
-				/* heading (0.01 degree) */
-	int	hed_heading_status;
-				/* heading status (0=inactive) */
-	};
+struct mbsys_simrad2_heading_struct {
+	int hed_date;   /* date = year*10000 + month*100 + day
+	                Feb 26, 1995 = 19950226 */
+	int hed_msec;   /* time since midnight in msec
+	                08:12:51.234 = 29570234 */
+	int hed_count;  /* sequential counter or input identifier */
+	int hed_serial; /* system 1 or system 2 serial number */
+	int hed_ndata;  /* number of heading data */
+	int hed_time[MBSYS_SIMRAD2_MAXHEADING];
+	/* time since record start (msec) */
+	int hed_heading[MBSYS_SIMRAD2_MAXHEADING];
+	/* heading (0.01 degree) */
+	int hed_heading_status;
+	/* heading status (0=inactive) */
+};
 
 /* internal data structure for ssv data */
-struct mbsys_simrad2_ssv_struct
-	{
-	int	ssv_date;	/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	ssv_msec;	/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	ssv_count;	/* sequential counter or input identifier */
-	int	ssv_serial;	/* system 1 or system 2 serial number */
-	int	ssv_ndata;	/* number of ssv data */
-	int	ssv_time[MBSYS_SIMRAD2_MAXSSV];
-				/* time since record start (msec) */
-	int	ssv_ssv[MBSYS_SIMRAD2_MAXSSV];
-				/* ssv (0.1 m/s) */
-	};
+struct mbsys_simrad2_ssv_struct {
+	int ssv_date;   /* date = year*10000 + month*100 + day
+	                Feb 26, 1995 = 19950226 */
+	int ssv_msec;   /* time since midnight in msec
+	                08:12:51.234 = 29570234 */
+	int ssv_count;  /* sequential counter or input identifier */
+	int ssv_serial; /* system 1 or system 2 serial number */
+	int ssv_ndata;  /* number of ssv data */
+	int ssv_time[MBSYS_SIMRAD2_MAXSSV];
+	/* time since record start (msec) */
+	int ssv_ssv[MBSYS_SIMRAD2_MAXSSV];
+	/* ssv (0.1 m/s) */
+};
 
 /* internal data structure for tilt data */
-struct mbsys_simrad2_tilt_struct
-	{
-	int	tlt_date;	/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	tlt_msec;	/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	tlt_count;	/* sequential counter or input identifier */
-	int	tlt_serial;	/* system 1 or system 2 serial number */
-	int	tlt_ndata;	/* number of tilt data */
-	int	tlt_time[MBSYS_SIMRAD2_MAXTILT];
-				/* time since record start (msec) */
-	int	tlt_tilt[MBSYS_SIMRAD2_MAXTILT];
-				/* tilt + forward (0.01 degree) */
-	};
+struct mbsys_simrad2_tilt_struct {
+	int tlt_date;   /* date = year*10000 + month*100 + day
+	                Feb 26, 1995 = 19950226 */
+	int tlt_msec;   /* time since midnight in msec
+	                08:12:51.234 = 29570234 */
+	int tlt_count;  /* sequential counter or input identifier */
+	int tlt_serial; /* system 1 or system 2 serial number */
+	int tlt_ndata;  /* number of tilt data */
+	int tlt_time[MBSYS_SIMRAD2_MAXTILT];
+	/* time since record start (msec) */
+	int tlt_tilt[MBSYS_SIMRAD2_MAXTILT];
+	/* tilt + forward (0.01 degree) */
+};
 
 /* internal data structure */
-struct mbsys_simrad2_struct
-	{
+struct mbsys_simrad2_struct {
 	/* type of data record */
-	int	kind;		/* MB-System record ID */
-	int	type;		/* Simrad datagram ID */
+	int kind; /* MB-System record ID */
+	int type; /* Simrad datagram ID */
 
 	/* type of sonar */
-	int	sonar;		/* Type of Simrad sonar */
-	int	numberheads;	/* Number of sonar heads (1 or 2) */
+	int sonar;       /* Type of Simrad sonar */
+	int numberheads; /* Number of sonar heads (1 or 2) */
 
 	/* time stamp */
-	int	date;		/* date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	msec;		/* time since midnight in msec
-				    08:12:51.234 = 29570234 */
+	int date; /* date = year*10000 + month*100 + day
+	          Feb 26, 1995 = 19950226 */
+	int msec; /* time since midnight in msec
+	          08:12:51.234 = 29570234 */
 
 	/* installation parameter values */
-	int	par_date;	/* installation parameter date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	par_msec;	/* installation parameter time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	par_line_num;	/* survey line number */
-	int	par_serial_1;	/* system 1 serial number */
-	int	par_serial_2;	/* system 2 serial number */
-	double	par_wlz;	/* water line vertical location (m) */
-	int	par_smh;	/* system main head serial number */
-	double	par_s1z;	/* transducer 1 vertical location (m) */
-	double	par_s1x;	/* transducer 1 along location (m) */
-	double	par_s1y;	/* transducer 1 athwart location (m) */
-	double	par_s1h;	/* transducer 1 heading (deg) */
-	double	par_s1r;	/* transducer 1 roll (m) */
-	double	par_s1p;	/* transducer 1 pitch (m) */
-	int	par_s1n;	/* transducer 1 number of modules */
-	double	par_s2z;	/* transducer 2 vertical location (m) */
-	double	par_s2x;	/* transducer 2 along location (m) */
-	double	par_s2y;	/* transducer 2 athwart location (m) */
-	double	par_s2h;	/* transducer 2 heading (deg) */
-	double	par_s2r;	/* transducer 2 roll (m) */
-	double	par_s2p;	/* transducer 2 pitch (m) */
-	int	par_s2n;	/* transducer 2 number of modules */
-	double	par_go1;	/* system (sonar head 1) gain offset */
-	double	par_go2;	/* sonar head 2 gain offset */
-	char	par_tsv[16];	/* transmitter (sonar head 1) software version */
-	char	par_rsv[16];	/* receiver (sonar head 2) software version */
-	char	par_bsv[16];	/* beamformer software version */
-	char	par_psv[16];	/* processing unit software version */
-	char	par_osv[16];	/* operator station software version */
-	double	par_dsd;	/* depth sensor time delay (msec) */
-	double	par_dso;	/* depth sensor offset */
-	double	par_dsf;	/* depth sensor scale factor */
-	char	par_dsh[2];	/* depth sensor heave (IN or NI) */
-	int	par_aps;	/* active position system number */
-	int	par_p1m;	/* position system 1 motion compensation (boolean) */
-	int	par_p1t;	/* position system 1 time stamp used
-				    (0=system time, 1=position input time) */
-	double	par_p1z;	/* position system 1 vertical location (m) */
-	double	par_p1x;	/* position system 1 along location (m) */
-	double	par_p1y;	/* position system 1 athwart location (m) */
-	double	par_p1d;	/* position system 1 time delay (sec) */
-	char	par_p1g[16];	/* position system 1 geodetic datum */
-	int	par_p2m;	/* position system 2 motion compensation (boolean) */
-	int	par_p2t;	/* position system 2 time stamp used
-				    (0=system time, 1=position input time) */
-	double	par_p2z;	/* position system 2 vertical location (m) */
-	double	par_p2x;	/* position system 2 along location (m) */
-	double	par_p2y;	/* position system 2 athwart location (m) */
-	double	par_p2d;	/* position system 2 time delay (sec) */
-	char	par_p2g[16];	/* position system 2 geodetic datum */
-	int	par_p3m;	/* position system 3 motion compensation (boolean) */
-	int	par_p3t;	/* position system 3 time stamp used
-				    (0=system time, 1=position input time) */
-	double	par_p3z;	/* position system 3 vertical location (m) */
-	double	par_p3x;	/* position system 3 along location (m) */
-	double	par_p3y;	/* position system 3 athwart location (m) */
-	double	par_p3d;	/* position system 3 time delay (sec) */
-	char	par_p3g[16];	/* position system 3 geodetic datum */
-	double	par_msz;	/* motion sensor vertical location (m) */
-	double	par_msx;	/* motion sensor along location (m) */
-	double	par_msy;	/* motion sensor athwart location (m) */
-	char	par_mrp[2];	/* motion sensor roll reference plane (HO or RP) */
-	double	par_msd;	/* motion sensor time delay (sec) */
-	double	par_msr;	/* motion sensor roll offset (deg) */
-	double	par_msp;	/* motion sensor pitch offset (deg) */
-	double	par_msg;	/* motion sensor heading offset (deg) */
-	double	par_gcg;	/* gyro compass heading offset (deg) */
-	char	par_cpr[4];	/* cartographic projection */
-	char	par_rop[MBSYS_SIMRAD2_COMMENT_LENGTH];
-				/* responsible operator */
-	char	par_sid[MBSYS_SIMRAD2_COMMENT_LENGTH];
-				/* survey identifier */
-	char	par_pll[MBSYS_SIMRAD2_COMMENT_LENGTH];
-				/* survey line identifier (planned line number) */
-	char	par_com[MBSYS_SIMRAD2_COMMENT_LENGTH];
-				/* comment */
+	int par_date;     /* installation parameter date = year*10000 + month*100 + day
+	                  Feb 26, 1995 = 19950226 */
+	int par_msec;     /* installation parameter time since midnight in msec
+	                  08:12:51.234 = 29570234 */
+	int par_line_num; /* survey line number */
+	int par_serial_1; /* system 1 serial number */
+	int par_serial_2; /* system 2 serial number */
+	double par_wlz;   /* water line vertical location (m) */
+	int par_smh;      /* system main head serial number */
+	double par_s1z;   /* transducer 1 vertical location (m) */
+	double par_s1x;   /* transducer 1 along location (m) */
+	double par_s1y;   /* transducer 1 athwart location (m) */
+	double par_s1h;   /* transducer 1 heading (deg) */
+	double par_s1r;   /* transducer 1 roll (m) */
+	double par_s1p;   /* transducer 1 pitch (m) */
+	int par_s1n;      /* transducer 1 number of modules */
+	double par_s2z;   /* transducer 2 vertical location (m) */
+	double par_s2x;   /* transducer 2 along location (m) */
+	double par_s2y;   /* transducer 2 athwart location (m) */
+	double par_s2h;   /* transducer 2 heading (deg) */
+	double par_s2r;   /* transducer 2 roll (m) */
+	double par_s2p;   /* transducer 2 pitch (m) */
+	int par_s2n;      /* transducer 2 number of modules */
+	double par_go1;   /* system (sonar head 1) gain offset */
+	double par_go2;   /* sonar head 2 gain offset */
+	char par_tsv[16]; /* transmitter (sonar head 1) software version */
+	char par_rsv[16]; /* receiver (sonar head 2) software version */
+	char par_bsv[16]; /* beamformer software version */
+	char par_psv[16]; /* processing unit software version */
+	char par_osv[16]; /* operator station software version */
+	double par_dsd;   /* depth sensor time delay (msec) */
+	double par_dso;   /* depth sensor offset */
+	double par_dsf;   /* depth sensor scale factor */
+	char par_dsh[2];  /* depth sensor heave (IN or NI) */
+	int par_aps;      /* active position system number */
+	int par_p1m;      /* position system 1 motion compensation (boolean) */
+	int par_p1t;      /* position system 1 time stamp used
+	                  (0=system time, 1=position input time) */
+	double par_p1z;   /* position system 1 vertical location (m) */
+	double par_p1x;   /* position system 1 along location (m) */
+	double par_p1y;   /* position system 1 athwart location (m) */
+	double par_p1d;   /* position system 1 time delay (sec) */
+	char par_p1g[16]; /* position system 1 geodetic datum */
+	int par_p2m;      /* position system 2 motion compensation (boolean) */
+	int par_p2t;      /* position system 2 time stamp used
+	                  (0=system time, 1=position input time) */
+	double par_p2z;   /* position system 2 vertical location (m) */
+	double par_p2x;   /* position system 2 along location (m) */
+	double par_p2y;   /* position system 2 athwart location (m) */
+	double par_p2d;   /* position system 2 time delay (sec) */
+	char par_p2g[16]; /* position system 2 geodetic datum */
+	int par_p3m;      /* position system 3 motion compensation (boolean) */
+	int par_p3t;      /* position system 3 time stamp used
+	                  (0=system time, 1=position input time) */
+	double par_p3z;   /* position system 3 vertical location (m) */
+	double par_p3x;   /* position system 3 along location (m) */
+	double par_p3y;   /* position system 3 athwart location (m) */
+	double par_p3d;   /* position system 3 time delay (sec) */
+	char par_p3g[16]; /* position system 3 geodetic datum */
+	double par_msz;   /* motion sensor vertical location (m) */
+	double par_msx;   /* motion sensor along location (m) */
+	double par_msy;   /* motion sensor athwart location (m) */
+	char par_mrp[2];  /* motion sensor roll reference plane (HO or RP) */
+	double par_msd;   /* motion sensor time delay (sec) */
+	double par_msr;   /* motion sensor roll offset (deg) */
+	double par_msp;   /* motion sensor pitch offset (deg) */
+	double par_msg;   /* motion sensor heading offset (deg) */
+	double par_gcg;   /* gyro compass heading offset (deg) */
+	char par_cpr[4];  /* cartographic projection */
+	char par_rop[MBSYS_SIMRAD2_COMMENT_LENGTH];
+	/* responsible operator */
+	char par_sid[MBSYS_SIMRAD2_COMMENT_LENGTH];
+	/* survey identifier */
+	char par_pll[MBSYS_SIMRAD2_COMMENT_LENGTH];
+	/* survey line identifier (planned line number) */
+	char par_com[MBSYS_SIMRAD2_COMMENT_LENGTH];
+	/* comment */
 
 	/* runtime parameter values */
-	int	run_date;	/* runtime parameter date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	run_msec;	/* runtime parameter time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	run_ping_count;	/* ping counter */
-	int	run_serial;	/* system 1 or 2 serial number */
-	int	run_status;	/* system status */
-	int	run_mode;	/* system mode:
-				    0 : nearfield (EM3000) or very shallow (EM300)
-				    1 :	normal (EM3000) or shallow (EM300)
-				    2 : medium (EM300)
-				    3 : deep (EM300)
-				    4 : very deep (EM300) */
-	int	run_filter_id;	/* filter identifier - the two lowest bits
-				    indicate spike filter strength:
-					00 : off
-					01 : weak
-					10 : medium
-					11 : strong
-				    bit 2 is set if the slope filter is on
-				    bit 3 is set if the sidelobe filter is on
-				    bit 4 is set if the range windows are expanded
-				    bit 5 is set if the smoothing filter is on
-				    bit	6 is set if the interference filter is on */
-	int	run_min_depth;	/* minimum depth (m) */
-	int	run_max_depth;	/* maximum depth (m) */
-	int	run_absorption;	/* absorption coefficient (0.01 dB/km) */
+	int run_date;       /* runtime parameter date = year*10000 + month*100 + day
+	                    Feb 26, 1995 = 19950226 */
+	int run_msec;       /* runtime parameter time since midnight in msec
+	                    08:12:51.234 = 29570234 */
+	int run_ping_count; /* ping counter */
+	int run_serial;     /* system 1 or 2 serial number */
+	int run_status;     /* system status */
+	int run_mode;       /* system mode:
+	                    0 : nearfield (EM3000) or very shallow (EM300)
+	                    1 :	normal (EM3000) or shallow (EM300)
+	                    2 : medium (EM300)
+	                    3 : deep (EM300)
+	                    4 : very deep (EM300) */
+	int run_filter_id;  /* filter identifier - the two lowest bits
+	                indicate spike filter strength:
+	                00 : off
+	                01 : weak
+	                10 : medium
+	                11 : strong
+	                bit 2 is set if the slope filter is on
+	                bit 3 is set if the sidelobe filter is on
+	                bit 4 is set if the range windows are expanded
+	                bit 5 is set if the smoothing filter is on
+	                bit	6 is set if the interference filter is on */
+	int run_min_depth;  /* minimum depth (m) */
+	int run_max_depth;  /* maximum depth (m) */
+	int run_absorption; /* absorption coefficient (0.01 dB/km) */
 
-	int	run_tran_pulse;	/* transmit pulse length (usec) */
-	int	run_tran_beam;	/* transmit beamwidth (0.1 deg) */
-	int	run_tran_pow;	/* transmit power reduction (dB) */
-	int	run_rec_beam;	/* receiver beamwidth (0.1 deg) */
-	int	run_rec_band;	/* receiver bandwidth (50 hz) */
-	int	run_rec_gain;	/* receiver fixed gain (dB) */
-	int	run_tvg_cross;	/* TVG law crossover angle (deg) */
-	int	run_ssv_source;	/* source of sound speed at transducer:
-				    0 : from sensor
-				    1 : manual
-				    2 : from profile */
-	int	run_max_swath;	/* maximum swath width (m) */
-	int	run_beam_space;	/* beam spacing:
-				    0 : determined by beamwidth (EM3000)
-				    1 : equidistant
-				    2 : equiangle */
-	int	run_swath_angle;/* coverage sector of swath (deg) */
-	int	run_stab_mode;	/* yaw and pitch stabilization mode:
-				    The upper bit (bit 7) is set if pitch
-				    stabilization is on.
-				    The two lower bits are used to show yaw
-				    stabilization mode as follows:
-					00 : none
-					01 : to survey line heading
-					10 : to mean vessel heading
-					11 : to manually entered heading */
-	char	run_spare[6];
+	int run_tran_pulse;  /* transmit pulse length (usec) */
+	int run_tran_beam;   /* transmit beamwidth (0.1 deg) */
+	int run_tran_pow;    /* transmit power reduction (dB) */
+	int run_rec_beam;    /* receiver beamwidth (0.1 deg) */
+	int run_rec_band;    /* receiver bandwidth (50 hz) */
+	int run_rec_gain;    /* receiver fixed gain (dB) */
+	int run_tvg_cross;   /* TVG law crossover angle (deg) */
+	int run_ssv_source;  /* source of sound speed at transducer:
+	                 0 : from sensor
+	                 1 : manual
+	                 2 : from profile */
+	int run_max_swath;   /* maximum swath width (m) */
+	int run_beam_space;  /* beam spacing:
+	                 0 : determined by beamwidth (EM3000)
+	                 1 : equidistant
+	                 2 : equiangle */
+	int run_swath_angle; /* coverage sector of swath (deg) */
+	int run_stab_mode;   /* yaw and pitch stabilization mode:
+	                 The upper bit (bit 7) is set if pitch
+	                 stabilization is on.
+	                 The two lower bits are used to show yaw
+	                 stabilization mode as follows:
+	                 00 : none
+	                 01 : to survey line heading
+	                 10 : to mean vessel heading
+	                 11 : to manually entered heading */
+	char run_spare[6];
 
 	/* sound velocity profile */
-	int	svp_use_date;	/* date at start of use
-				    date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	svp_use_msec;	/* time at start of use since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	svp_count;	/* sequential counter or input identifier */
-	int	svp_serial;	/* system 1 serial number */
-	int	svp_origin_date;/* date at svp origin
-				    date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	svp_origin_msec;/* time at svp origin since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	svp_num;	/* number of svp entries */
-	int	svp_depth_res;	/* depth resolution (cm) */
-	int	svp_depth[MBSYS_SIMRAD2_MAXSVP];
-				/* depth of svp entries (according to svp_depth_res) */
-	int	svp_vel[MBSYS_SIMRAD2_MAXSVP];
-				/* sound speed of svp entries (0.1 m/sec) */
+	int svp_use_date; /* date at start of use
+	              date = year*10000 + month*100 + day
+	              Feb 26, 1995 = 19950226 */
+	int svp_use_msec; /* time at start of use since midnight in msec
+	              08:12:51.234 = 29570234 */
+	int svp_count;    /* sequential counter or input identifier */
+	int svp_serial;   /* system 1 serial number */
+	int svp_origin_date; /* date at svp origin
+	                 date = year*10000 + month*100 + day
+	                 Feb 26, 1995 = 19950226 */
+	int svp_origin_msec; /* time at svp origin since midnight in msec
+	                 08:12:51.234 = 29570234 */
+	int svp_num;         /* number of svp entries */
+	int svp_depth_res;   /* depth resolution (cm) */
+	int svp_depth[MBSYS_SIMRAD2_MAXSVP];
+	/* depth of svp entries (according to svp_depth_res) */
+	int svp_vel[MBSYS_SIMRAD2_MAXSVP];
+	/* sound speed of svp entries (0.1 m/sec) */
 
 	/* position */
-	int	pos_date;	/* position date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	pos_msec;	/* position time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	pos_count;	/* sequential counter */
-	int	pos_serial;	/* system 1 serial number */
-	int	pos_latitude;	/* latitude in decimal degrees * 20000000
-				    (negative in southern hemisphere)
-				    if valid, invalid = 0x7FFFFFFF */
-	int	pos_longitude;	/* longitude in decimal degrees * 10000000
-				    (negative in western hemisphere)
-				    if valid, invalid = 0x7FFFFFFF */
-	int	pos_quality;	/* measure of position fix quality (cm) */
-	int	pos_speed;	/* speed over ground (cm/sec) if valid,
-				    invalid = 0xFFFF */
-	int	pos_course;	/* course over ground (0.01 deg) if valid,
-				    invalid = 0xFFFF */
-	int	pos_heading;	/* heading (0.01 deg) if valid,
-				    invalid = 0xFFFF */
-	int	pos_heave;	/* heave from interpolation (0.01 m) */
-	int	pos_roll;	/* roll from interpolation (0.01 deg) */
-	int	pos_pitch;	/* pitch from interpolation (0.01 deg) */
-	int	pos_system;	/* position system number, type, and realtime use
-				    - position system number given by two lowest bits
-				    - fifth bit set means position must be derived
-					from input Simrad 90 datagram
-				    - sixth bit set means valid time is that of
-					input datagram */
-	int	pos_input_size;	/* number of bytes in input position datagram */
-	char	pos_input[256];	/* position input datagram as received, minus
-				    header and tail (such as NMEA 0183 $ and CRLF) */
+	int pos_date;       /* position date = year*10000 + month*100 + day
+	                    Feb 26, 1995 = 19950226 */
+	int pos_msec;       /* position time since midnight in msec
+	                    08:12:51.234 = 29570234 */
+	int pos_count;      /* sequential counter */
+	int pos_serial;     /* system 1 serial number */
+	int pos_latitude;   /* latitude in decimal degrees * 20000000
+	                (negative in southern hemisphere)
+	                if valid, invalid = 0x7FFFFFFF */
+	int pos_longitude;  /* longitude in decimal degrees * 10000000
+	                (negative in western hemisphere)
+	                if valid, invalid = 0x7FFFFFFF */
+	int pos_quality;    /* measure of position fix quality (cm) */
+	int pos_speed;      /* speed over ground (cm/sec) if valid,
+	                    invalid = 0xFFFF */
+	int pos_course;     /* course over ground (0.01 deg) if valid,
+	                    invalid = 0xFFFF */
+	int pos_heading;    /* heading (0.01 deg) if valid,
+	                invalid = 0xFFFF */
+	int pos_heave;      /* heave from interpolation (0.01 m) */
+	int pos_roll;       /* roll from interpolation (0.01 deg) */
+	int pos_pitch;      /* pitch from interpolation (0.01 deg) */
+	int pos_system;     /* position system number, type, and realtime use
+	                    - position system number given by two lowest bits
+	                    - fifth bit set means position must be derived
+	                    from input Simrad 90 datagram
+	                    - sixth bit set means valid time is that of
+	                    input datagram */
+	int pos_input_size; /* number of bytes in input position datagram */
+	char pos_input[256]; /* position input datagram as received, minus
+	             header and tail (such as NMEA 0183 $ and CRLF) */
 
 	/* height */
-	int	hgt_date;	/* height date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	hgt_msec;	/* height time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	hgt_count;	/* sequential counter */
-	int	hgt_serial;	/* system 1 serial number */
-	int	hgt_height;	/* height (0.01 m) */
-	int	hgt_type;	/* height type as given in input datagram or if
-				    zero the height is derived from the GGK datagram
-				    and is the height of the water level re the
-				    vertical datum */
+	int hgt_date;   /* height date = year*10000 + month*100 + day
+	                Feb 26, 1995 = 19950226 */
+	int hgt_msec;   /* height time since midnight in msec
+	                08:12:51.234 = 29570234 */
+	int hgt_count;  /* sequential counter */
+	int hgt_serial; /* system 1 serial number */
+	int hgt_height; /* height (0.01 m) */
+	int hgt_type;   /* height type as given in input datagram or if
+	                zero the height is derived from the GGK datagram
+	                and is the height of the water level re the
+	                vertical datum */
 
 	/* tide */
-	int	tid_date;	/* tide date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	tid_msec;	/* tide time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	tid_count;	/* sequential counter */
-	int	tid_serial;	/* system 1 serial number */
-	int	tid_origin_date;/* tide input date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	tid_origin_msec;/* tide input time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	tid_tide;	/* tide offset (0.01 m) */
+	int tid_date;        /* tide date = year*10000 + month*100 + day
+	                     Feb 26, 1995 = 19950226 */
+	int tid_msec;        /* tide time since midnight in msec
+	                     08:12:51.234 = 29570234 */
+	int tid_count;       /* sequential counter */
+	int tid_serial;      /* system 1 serial number */
+	int tid_origin_date; /* tide input date = year*10000 + month*100 + day
+	                 Feb 26, 1995 = 19950226 */
+	int tid_origin_msec; /* tide input time since midnight in msec
+	                 08:12:51.234 = 29570234 */
+	int tid_tide;        /* tide offset (0.01 m) */
 
 	/* clock */
-	int	clk_date;	/* system date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	clk_msec;	/* system time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	clk_count;	/* sequential counter */
-	int	clk_serial;	/* system 1 serial number */
-	int	clk_origin_date;/* external clock date = year*10000 + month*100 + day
-				    Feb 26, 1995 = 19950226 */
-	int	clk_origin_msec;/* external clock time since midnight in msec
-				    08:12:51.234 = 29570234 */
-	int	clk_1_pps_use;	/* if 1 then the internal clock is synchronized
-				    to an external 1 PPS signal, if 0 then not */
+	int clk_date;        /* system date = year*10000 + month*100 + day
+	                     Feb 26, 1995 = 19950226 */
+	int clk_msec;        /* system time since midnight in msec
+	                     08:12:51.234 = 29570234 */
+	int clk_count;       /* sequential counter */
+	int clk_serial;      /* system 1 serial number */
+	int clk_origin_date; /* external clock date = year*10000 + month*100 + day
+	                 Feb 26, 1995 = 19950226 */
+	int clk_origin_msec; /* external clock time since midnight in msec
+	                 08:12:51.234 = 29570234 */
+	int clk_1_pps_use; /* if 1 then the internal clock is synchronized
+	               to an external 1 PPS signal, if 0 then not */
+
+	/* pointer to extra parameters data structure */
+	struct mbsys_simrad2_extraparameters_struct *extraparameters;
 
 	/* pointer to attitude data structure */
 	struct mbsys_simrad2_attitude_struct *attitude;
@@ -1033,104 +1082,56 @@ struct mbsys_simrad2_struct
 
 	/* pointer to water column data structure */
 	struct mbsys_simrad2_watercolumn_struct *wc;
-	};
-
+};
 
 /* system specific function prototypes */
-int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
-int mbsys_simrad2_survey_alloc(int verbose,
-			void *mbio_ptr, void *store_ptr,
-			int *error);
-int mbsys_simrad2_wc_alloc(int verbose,
-			void *mbio_ptr, void *store_ptr,
-			int *error);
-int mbsys_simrad2_attitude_alloc(int verbose,
-			void *mbio_ptr, void *store_ptr,
-			int *error);
-int mbsys_simrad2_heading_alloc(int verbose,
-			void *mbio_ptr, void *store_ptr,
-			int *error);
-int mbsys_simrad2_ssv_alloc(int verbose,
-			void *mbio_ptr, void *store_ptr,
-			int *error);
-int mbsys_simrad2_tilt_alloc(int verbose,
-			void *mbio_ptr, void *store_ptr,
-			int *error);
-int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr,
-			int *error);
+int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
+int mbsys_simrad2_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbsys_simrad2_extraparameters_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbsys_simrad2_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbsys_simrad2_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbsys_simrad2_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbsys_simrad2_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbsys_simrad2_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_simrad2_zero_ss(int verbose, void *store_ptr, int *error);
-int mbsys_simrad2_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_simrad2_pingnumber(int verbose, void *mbio_ptr,
-			int *pingnumber, int *error);
-int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading,
-			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
-			int kind, int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading,
-			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp,
-			double *bathacrosstrack, double *bathalongtrack,
-			double *ss, double *ssacrosstrack, double *ssalongtrack,
-			char *comment, int *error);
-int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams,
-			double *ttimes, double *angles,
-			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset,
-			double *draft, double *ssv, int *error);
-int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *detects, int *error);
-int mbsys_simrad2_pulses(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int *nbeams, int *pulses, int *error);
-int mbsys_simrad2_gains(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transmit_gain, double *pulse_length,
-			double *receive_gain, int *error);
-int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude,
-			int *error);
-int mbsys_simrad2_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
-			int nmax, int *kind, int *n,
-			int *time_i, double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, int time_i[7], double *time_d,
-			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft,
-			double *roll, double *pitch, double *heave,
-			int *error);
-int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-			int time_i[7], double time_d,
-			double navlon, double navlat,
-			double speed, double heading, double draft,
-			double roll, double pitch, double heave,
-			int *error);
-int mbsys_simrad2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind,
-			int *nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp,
-			double *depth, double *velocity,
-			int *error);
-int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
-			void *store_ptr, void *copy_ptr,
-			int *error);
-int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
-		int pixel_size_set, double *pixel_size,
-		int swath_width_set, double *swath_width,
-		int pixel_int,
-		int *error);
+int mbsys_simrad2_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
+                             int *error);
+int mbsys_simrad2_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+int mbsys_simrad2_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
+int mbsys_simrad2_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
+int mbsys_simrad2_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr,
+                             int *error);
+int mbsys_simrad2_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error);
+int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
+                          double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
+                          double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
+                          double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i[7], double time_d, double navlon,
+                         double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
+                         double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
+                         double *ssalongtrack, char *comment, int *error);
+int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
+                         double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
+                         double *ssv, int *error);
+int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
+int mbsys_simrad2_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error);
+int mbsys_simrad2_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
+                        double *receive_gain, int *error);
+int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
+                                   double *altitude, int *error);
+int mbsys_simrad2_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i,
+                               double *time_d, double *navlon, double *navlat, double *speed, double *heading, double *draft,
+                               double *roll, double *pitch, double *heave, int *error);
+int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
+                              double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
+                              double *pitch, double *heave, int *error);
+int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
+                             double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
+                             int *error);
+int mbsys_simrad2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
+                              int *error);
+int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
+int mbsys_simrad2_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
+                         int swath_width_set, double *swath_width, int pixel_int, int *error);

@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbset</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  10 November 2014 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  20 July 2016 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -197,6 +197,10 @@ The <B>mbprocess</B> parameter file commands modified by <B>mbset</B> are:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;longitude&nbsp;shift&nbsp;(degrees)&nbsp;[0.0]
 <BR>&nbsp;&nbsp;&nbsp;NAVSHIFTLAT&nbsp;constant
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;latitude&nbsp;shift&nbsp;(degrees)&nbsp;[0.0]
+<BR>&nbsp;&nbsp;&nbsp;NAVSHIFTX&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;longitude&nbsp;shift&nbsp;(meters)&nbsp;[0.0]
+<BR>&nbsp;&nbsp;&nbsp;NAVSHIFTY&nbsp;constant
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets&nbsp;navigation&nbsp;latitude&nbsp;shift&nbsp;(meters)&nbsp;[0.0]
 <P>
 <BR>&nbsp;ADJUSTED&nbsp;NAVIGATION&nbsp;MERGING:
 <BR>&nbsp;&nbsp;&nbsp;NAVADJMODE&nbsp;mode
@@ -801,18 +805,30 @@ for a survey; the adjustments are numbered sequentially from
 and so on. These navigation files can be read independently using format 166.
 <P>
 <A NAME="lbAH">&nbsp;</A>
-<H2>AUTHORSHIP</H2>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
 
-David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+David W. Caress
 <BR>
 
 <BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
-Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+Dale N. Chayes
 <BR>
 
-<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>OPTIONS</H2>
@@ -910,7 +926,7 @@ an mbprocess parameter file &quot;0051_20010829_223755.mb57.par&quot;.
 The contents of the parameter file are:
 <P>
 <BR>&nbsp;##&nbsp;MB-System&nbsp;processing&nbsp;parameter&nbsp;file
-<BR>&nbsp;##&nbsp;Written&nbsp;by&nbsp;mb_pr_writepar&nbsp;version&nbsp;$Id:&nbsp;mbset.1&nbsp;2210&nbsp;2014-11-10&nbsp;19:53:01Z&nbsp;caress&nbsp;$
+<BR>&nbsp;##&nbsp;Written&nbsp;by&nbsp;mb_pr_writepar&nbsp;version&nbsp;$Id:&nbsp;mbset.1&nbsp;2300&nbsp;2017-04-15&nbsp;08:28:27Z&nbsp;caress&nbsp;$
 <BR>&nbsp;##&nbsp;MB-system&nbsp;Version&nbsp;5.0.beta22
 <BR>&nbsp;##&nbsp;Generated&nbsp;by&nbsp;user&nbsp;&lt;caress&gt;&nbsp;on&nbsp;cpu&nbsp;&lt;menard&gt;&nbsp;at&nbsp;&lt;Fri&nbsp;Sep&nbsp;&nbsp;6&nbsp;21:27:41&nbsp;2002&gt;
 <BR>&nbsp;##
@@ -1115,11 +1131,11 @@ To process the data, run mbprocess:
 <P>
 <BR>&nbsp;The&nbsp;output&nbsp;to&nbsp;the&nbsp;terminal&nbsp;is:
 <BR>&nbsp;Program&nbsp;mbprocess
-<BR>&nbsp;Version&nbsp;$Id:&nbsp;mbset.1&nbsp;2210&nbsp;2014-11-10&nbsp;19:53:01Z&nbsp;caress&nbsp;$
+<BR>&nbsp;Version&nbsp;$Id:&nbsp;mbset.1&nbsp;2300&nbsp;2017-04-15&nbsp;08:28:27Z&nbsp;caress&nbsp;$
 <BR>&nbsp;MB-System&nbsp;Version&nbsp;5.0.beta07
 <P>
 <BR>&nbsp;Program&nbsp;&lt;mbprocess&gt;
-<BR>&nbsp;Version&nbsp;$Id:&nbsp;mbset.1&nbsp;2210&nbsp;2014-11-10&nbsp;19:53:01Z&nbsp;caress&nbsp;$
+<BR>&nbsp;Version&nbsp;$Id:&nbsp;mbset.1&nbsp;2300&nbsp;2017-04-15&nbsp;08:28:27Z&nbsp;caress&nbsp;$
 <BR>&nbsp;MB-system&nbsp;Version&nbsp;5.0.beta07
 <P>
 <BR>&nbsp;Program&nbsp;Operation:
@@ -1275,7 +1291,7 @@ Oh yeah...
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
 <DT><A HREF="#lbAF">MBPROCESS PARAMETER FILE COMMANDS</A><DD>
 <DT><A HREF="#lbAG">ANCILLARY DATA FILES</A><DD>
-<DT><A HREF="#lbAH">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAH">MB-SYSTEM AUTHORSHIP</A><DD>
 <DT><A HREF="#lbAI">OPTIONS</A><DD>
 <DT><A HREF="#lbAJ">EXAMPLES</A><DD>
 <DT><A HREF="#lbAK">SEE ALSO</A><DD>
@@ -1285,12 +1301,9 @@ Oh yeah...
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 10 November 2014</P></CENTER>
+Last Updated: 20 July 2016</P></CENTER>
 
 <HR>
-<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
-<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
-to MB-System Home Page...</A></P>
 
 </BODY>
 </HTML>

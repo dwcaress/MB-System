@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hsatlraw.h	1/20/93
  *	$Id$
  *
- *    Copyright (c) 1993-2014 by
+ *    Copyright (c) 1993-2017 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,48 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
- * $Log: mbf_hsatlraw.h,v $
- * Revision 5.2  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.1  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.0  2000/12/01 22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.4  2000/09/30  06:34:20  caress
- * Snapshot for Dale.
- *
- * Revision 4.3  1998/10/05  18:32:27  caress
- * MB-System version 4.6beta
- *
- * Revision 4.2  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.2  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.1  1994/10/21  12:20:01  caress
- * Release V4.0
- *
- * Revision 4.0  1994/03/06  00:01:56  caress
- * First cut at version 4.0
- *
- * Revision 4.2  1994/03/03  03:39:43  caress
- * Fixed copyright message.
- *
- * Revision 4.1  1994/02/17  21:19:08  caress
- * Updated associated MBIO format id in comments.
- *
- * Revision 4.0  1994/02/17  20:59:54  caress
- * First cut at new version. No changes.
- *
- * Revision 3.0  1993/05/14  22:50:34  sohara
- * initial version
  *
  */
 /*
@@ -117,107 +75,104 @@
 #define MBF_HSATLRAW_BEAMS 59
 
 /* define id's for the different types of raw Hydrosweep records */
-#define MBF_HSATLRAW_RECORDS	11
-#define	MBF_HSATLRAW_NONE	0
-#define	MBF_HSATLRAW_RAW_LINE	1
-#define	MBF_HSATLRAW_ERGNHYDI	2
-#define	MBF_HSATLRAW_ERGNPARA	3
-#define	MBF_HSATLRAW_ERGNPOSI	4
-#define	MBF_HSATLRAW_ERGNEICH	5
-#define	MBF_HSATLRAW_ERGNMESS	6
-#define	MBF_HSATLRAW_ERGNSLZT	7
-#define	MBF_HSATLRAW_ERGNCTDS	8
-#define	MBF_HSATLRAW_ERGNAMPL	9
-#define	MBF_HSATLRAW_LDEOCMNT	10
-char *mbf_hsatlraw_labels[] = {
-	"NONE    ", "RAW_LINE", "ERGNHYDI", "ERGNPARA", "ERGNPOSI",
-	"ERGNEICH", "ERGNMESS", "ERGNSLZT", "ERGNCTDS", "ERGNAMPL",
-	"LDEOCMNT"};
+#define MBF_HSATLRAW_RECORDS 11
+#define MBF_HSATLRAW_NONE 0
+#define MBF_HSATLRAW_RAW_LINE 1
+#define MBF_HSATLRAW_ERGNHYDI 2
+#define MBF_HSATLRAW_ERGNPARA 3
+#define MBF_HSATLRAW_ERGNPOSI 4
+#define MBF_HSATLRAW_ERGNEICH 5
+#define MBF_HSATLRAW_ERGNMESS 6
+#define MBF_HSATLRAW_ERGNSLZT 7
+#define MBF_HSATLRAW_ERGNCTDS 8
+#define MBF_HSATLRAW_ERGNAMPL 9
+#define MBF_HSATLRAW_LDEOCMNT 10
+char *mbf_hsatlraw_labels[] = {"NONE    ", "RAW_LINE", "ERGNHYDI", "ERGNPARA", "ERGNPOSI", "ERGNEICH",
+                               "ERGNMESS", "ERGNSLZT", "ERGNCTDS", "ERGNAMPL", "LDEOCMNT"};
 
-struct mbf_hsatlraw_struct
-	{
+struct mbf_hsatlraw_struct {
 	/* type of data record */
-	int	kind;
+	int kind;
 
 	/* position (all records ) */
-	double	lon;
-	double	lat;
+	double lon;
+	double lat;
 
 	/* time stamp (all records ) */
-	int	year;
-	int	month;
-	int	day;
-	int	hour;
-	int	minute;
-	int	second;
-	int	alt_minute;
-	int	alt_second;
+	int year;
+	int month;
+	int day;
+	int hour;
+	int minute;
+	int second;
+	int alt_minute;
+	int alt_second;
 
 	/* additional navigation and depths (ERGNMESS and ERGNEICH) */
-	double	course_true;
-	double	speed_transverse;
-	double	speed;
-	char	speed_reference[2];
-	double	pitch;
-	int	track;
-	double	depth_center;
-	double	depth_scale;
-	int	spare;
-	int	distance[MBF_HSATLRAW_BEAMS];
-	int	depth[MBF_HSATLRAW_BEAMS];
+	double course_true;
+	double speed_transverse;
+	double speed;
+	char speed_reference[2];
+	double pitch;
+	int track;
+	double depth_center;
+	double depth_scale;
+	int spare;
+	int distance[MBF_HSATLRAW_BEAMS];
+	int depth[MBF_HSATLRAW_BEAMS];
 
 	/* travel time data (ERGNSLZT) */
-	double	course_ground;
-	double	speed_ground;
-	double	heave;
-	double	roll;
-	double	time_center;
-	double	time_scale;
-	int	time[MBF_HSATLRAW_BEAMS];
-	double	gyro[11];
+	double course_ground;
+	double speed_ground;
+	double heave;
+	double roll;
+	double time_center;
+	double time_scale;
+	int time[MBF_HSATLRAW_BEAMS];
+	double gyro[11];
 
 	/* amplitude data (ERGNAMPL) */
-	char	mode[2];
-	int	trans_strbd;
-	int	trans_vert;
-	int	trans_port;
-	int	pulse_len_strbd;
-	int	pulse_len_vert;
-	int	pulse_len_port;
-	int	gain_start;
-	int	r_compensation_factor;
-	int	compensation_start;
-	int	increase_start;
-	int	tvc_near;
-	int	tvc_far;
-	int	increase_int_near;
-	int	increase_int_far;
-	int	gain_center;
-	double	filter_gain;
-	int	amplitude_center;
-	int	echo_duration_center;
-	int	echo_scale_center;
-	int	gain[16];
-	int	amplitude[MBF_HSATLRAW_BEAMS];
-	int	echo_scale[16];
-	int	echo_duration[MBF_HSATLRAW_BEAMS];
+	char mode[2];
+	int trans_strbd;
+	int trans_vert;
+	int trans_port;
+	int pulse_len_strbd;
+	int pulse_len_vert;
+	int pulse_len_port;
+	int gain_start;
+	int r_compensation_factor;
+	int compensation_start;
+	int increase_start;
+	int tvc_near;
+	int tvc_far;
+	int increase_int_near;
+	int increase_int_far;
+	int gain_center;
+	double filter_gain;
+	int amplitude_center;
+	int echo_duration_center;
+	int echo_scale_center;
+	int gain[16];
+	int amplitude[MBF_HSATLRAW_BEAMS];
+	int echo_scale[16];
+	int echo_duration[MBF_HSATLRAW_BEAMS];
 
 	/* mean velocity (ERGNHYDI) */
-	double	draught;
-	double	vel_mean;
-	double	vel_keel;
-	double	tide;
+	double draught;
+	double vel_mean;
+	double vel_keel;
+	double tide;
 
 	/* water velocity profile (HS_ERGNCTDS) */
-	int	num_vel;
-	double	vdepth[MBF_HSATLRAW_MAXVEL];
-	double	velocity[MBF_HSATLRAW_MAXVEL];
+	int num_vel;
+	double vdepth[MBF_HSATLRAW_MAXVEL];
+	double velocity[MBF_HSATLRAW_MAXVEL];
 
 	/* navigation source (ERGNPOSI) */
-	double	pos_corr_x;
-	double	pos_corr_y;
-	char	sensors[10];
+	double pos_corr_x;
+	double pos_corr_y;
+	char sensors[10];
 
 	/* comment (LDEOCMNT) */
-	char	comment[MBF_HSATLRAW_MAXLINE];
-	};
+	char comment[MBF_HSATLRAW_MAXLINE];
+};

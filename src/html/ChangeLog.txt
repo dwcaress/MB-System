@@ -15,7 +15,96 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
-
+  Version 5.5.2342       June 28, 2018
+  Version 5.5.2340       June 26, 2018
+  Version 5.5.2339       June 25, 2018
+* Version 5.5.2336       June 6, 2018
+  Version 5.5.2335       May 6, 2018
+  Version 5.5.2334       April 18, 2018
+  Version 5.5.2333       April 18, 2018
+  Version 5.5.2332       April 17, 2018
+  Version 5.5.2331       April 10, 2018
+  Version 5.5.2330       March 7, 2018
+  Version 5.5.2329       February 12, 2018
+  Version 5.5.2328       January 31, 2018
+* Version 5.5.2327       January 23, 2018
+  Version 5.5.2324       January 18, 2018
+  Version 5.5.2323       December 7, 2017
+  Version 5.5.2322       November 25, 2017
+* Version 5.5.2321       October 26, 2017
+  Version 5.5.2320       October 18, 2017
+* Version 5.5.2319       October 16, 2017
+* Version 5.5.2318       September 29, 2017
+* Version 5.5.2314       August 24, 2017
+* Version 5.5.2313       August 9, 2017
+  Version 5.5.2312       July 14, 2017
+  Version 5.5.2311       June 20, 2017
+* Version 5.5.2309       June 4, 2017
+  Version 5.5.2306       May 27, 2017
+  Version 5.5.2305       May 13, 2017
+  Version 5.5.2304       May 6, 2017
+  Version 5.5.2303       April 28, 2017
+  Version 5.5.2302       April 20, 2017
+  Version 5.5.2301       April 17, 2017
+  Version 5.5.2300       April 15, 2017
+  Version 5.5.2299       April 10, 2017
+  Version 5.5.2297       April 5, 2017
+  Version 5.5.2296       March 31, 2017
+  Version 5.5.2295       March 26, 2017
+  Version 5.5.2294       March 21, 2017
+  Version 5.5.2293       March 6, 2017
+  Version 5.5.2290       January 2, 2017
+  Version 5.5.2289       December 2, 2016
+  Version 5.5.2287       November 29, 2016
+  Version 5.5.2286       November 8, 2016
+  Version 5.5.2285       November 3, 2016
+* Version 5.5.2284       October 23, 2016
+  Version 5.5.2282       August 25, 2016
+  Version 5.5.2281       August 7, 2016
+* Version 5.5.2279       July 8, 2016
+* Version 5.5.2278       July 1, 2016
+  Version 5.5.2277       June 25, 2016
+  Version 5.5.2275       May 17, 2016
+* Version 5.5.2274       May 5, 2016
+  Version 5.5.2271       April 1, 2016
+* Version 5.5.2270       March 24, 2016
+  Version 5.5.2268       March 14, 2016
+* Version 5.5.2267       February 11, 2016
+  Version 5.5.2265       February 11, 2016
+  Version 5.5.2264       February 2, 2016
+* Version 5.5.2263       January 7, 2016
+  Version 5.5.2260       December 22, 2015
+  Version 5.5.2259       October 27, 2015
+  Version 5.5.2258       October 5, 2015
+  Version 5.5.2257       September 1, 2015
+  Version 5.5.2256       August 24, 2015
+  Version 5.5.2255       August 11, 2015
+  Version 5.5.2254       July 23, 2015
+* Version 5.5.2252       July 1, 2015
+* Version 5.5.2251       June 30, 2015
+  Version 5.5.2250       June 29, 2015
+  Version 5.5.2249       June 26, 2015
+* Version 5.5.2248       May 31, 2015
+  Version 5.5.2247       May 29, 2015
+* Version 5.5.2246       May 27, 2015
+* Version 5.5.2243       May 22, 2015
+* Version 5.5.2242       May 16, 2015
+  Version 5.5.2241       May 12, 2015
+  Version 5.5.2240       May 8, 2015
+  Version 5.5.2239       May 6, 2015
+  Version 5.5.2238       April 14, 2015
+  Version 5.5.2237       March 23, 2015
+  Version 5.5.2234       March 5, 2015
+* Version 5.5.2233       February 23, 2015
+  Version 5.5.2232       February 21, 2015
+  Version 5.5.2231       February 20, 2015
+  Version 5.5.2230       February 18, 2015
+  Version 5.5.2229       February 14, 2015
+  Version 5.5.2228       February 6, 2015
+* Version 5.4.2220       January 22, 2015 (Last GMT4-compatible archive revision, released February 27, 2015)
+  Version 5.4.2219       December 11, 2014
+  Version 5.4.2218       December 4, 2014
+  Version 5.4.2217       December 1, 2014
 * Version 5.4.2213       November 13, 2014
   Version 5.4.2210       November 10, 2014
 * Version 5.4.2209       November 4, 2014
@@ -189,8 +278,1366 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
   Version 5.0.beta00     April 6, 2001
 
 -------------------------------------------------------------------------------
+MB-SYSTEM VERSION 5.5 RELEASE NOTES:
+-------------------------------------------------------------------------------
+
+-----> 5.5.2342 (June 26, 2018)
+
+Mbgpstide: New program contributed by Gordon Keith. This program generates tide
+files from the height above ellipsoid data in the 'h' datagrams of Simrad files.
+There is an option to include fixed offsets and geoid differences. This development
+was funded by Geoscience Australia with the understanding that the 
+code would be made available to the general MB-System distribution.
+
+-----> 5.5.2340 (June 26, 2018)
+
+Autoconf build system: Restructured to build successfully with the mbtrn capability
+enabled using the --enable-mbtrn option of the configure script.
+
+Mb_input_init() in src/mbio/mb_read_init.c: Allows calling program to initialize
+arbitrary input method by supplying functions to open, read bytes, and close the
+input. This capability is used by mbtrnpreprocess to read multibeam data over a
+socket directly from a sonar.
+
+Binary file i/o functions in src/mbio/mb_fileio.c: Can now read from an arbitrary
+input method defined by the mb_input_init() function.
+
+Mbtrnpreprocess: moved from src/mbtrn to src/utilities.
+
+Mbnavadjust: now stores only valid, unflagged soundings in the section files, which
+are format 71. Previously all soundings, including null and flagged, were stored.
+
+-----> 5.5.2339 (June 25, 2018)
+
+Mbgrid: Modified to use correct gridding algorithm when reading fbt files
+lacking the sonar type value.
+
+Mbcopy: Modified to ensure that the sonar type value is embedded in fbt files
+written by mbcopy.
+
+Format MBF_LDEOIH (MBIO format id 71): I/O module modified to ensure the sonar
+type value is embedded in fbt files.
+
+Mbm_bpr: added generic data input format
+
+src/mbtrn: added directory under src named mbtrn that contains code to enable
+terrain relative navigation (TRN) on autonomous underwater vehicle (AUV) platforms.
+These programs and library, particularly including mbtrnpreprocess, are built
+optionally providing the configure script is run with the --enable-mbtrn option.
+
+Mbtrnpreprocess: Program to read multibeam data from a Reson 7K sonar in realtime,
+decimate and filter the bathymetry data, and provide the data to a terrain relative
+navigation (TRN) client that localizes the AUV position relative to a pre-existing
+map using the current bathymetry data.
+
+-----> 5.5.2336 (June 6, 2018)
+
+Mbpreprocess and format MBF_3DWISSLR (232): Add option --kluge-fix-wissl-timestamps
+to fix a timestamp problem with the initial version of the 3D at Depth WiSSL (wide
+swath lidar).
+
+Mbbackangle and mbprocess: Lidar intensity correction calculations now appropriate
+for linear data instead of log-scaled data.
+
+src/mbaux/mb_intersectgrid.c: Added function mb_topogrid_bounds() that returns the
+lon-lat bounds of a topography grid previously loaded using the mb_topogrid_init()
+function.
+
+-----> 5.5.2335 (May 6, 2018)
+
+Mbm_bpr: Added ability to parse pressure data from Sonardyne AMT beacons. Also
+added optional smoothing of the BPR depth data used to calculate tides.
+
+Mbotps: Made the options -Ctidestationformat, -Ntidestationfile, and
+-Utidestationlon/tidestationlat introduced last month actually work. One can now
+use nearby tide station data to correct tide models calculated for the location
+and time of survey data.
+
+Mbm_route2mission: Altered to reflect the increased mission duration possible
+for MBARI Mapping AUVs.
+
+Format 88 (MBF_RESON7KR): Fixed handling of beams when using the version 2
+raw detection data records.
+
+-----> 5.5.2334 (April 18, 2018)
+
+Mbprocess, mbareaclean, mbclean, mbedit, mbeditviz, mbrphsbias, mbneptune2esf:
+Reset MB_ESF_MAXTIMEDIFF_X10 value in mb_process.h to 0.0011 to handle old
+beamflags with millisecond truncated timetags.
+
+Mbareaclean, mbclean, mbrphsbias: Fixed the previous fixes .
+
+-----> 5.5.2333 (April 18, 2018)
+
+Mbprocess, mbareaclean, mbclean, mbedit, mbeditviz, mbrphsbias, mbneptune2esf:
+Decreased time range where multiplicity of pings will consider close records
+as the same from 100 to 1 microsecond.
+
+-----> 5.5.2332 (April 17, 2018)
+
+Mbprocess, mbareaclean, mbclean, mbedit, mbeditviz, mbrphsbias, mbneptune2esf:
+Fixed problem recocognizing multiplicity of pings when ping times are close to
+but not exactly the same. This problem was recognized in XSE data from a
+SeaBeam 3020 multibeam, but could potentially have impacted data from other
+sensors.
+
+-----> 5.5.2331 (April 10, 2018)
+
+Mbm_makedatalist: Fixed problem with use of perl sort function when handling
+Kongsberg multibeam data. Also fixed problem with specifying a directory using
+the -I option.
+
+Mbotps: Added new options -Ctidestationformat, -Ntidestationfile, and
+-Utidestationlon/tidestationlat. Together these commands allow users to input
+observations from a tide station; these observations can be used to calculate
+corrections to tidal model values in the vicinity of the tide station. If tide
+station data are specified, then MBotps calculates the difference between the
+observed and modeled tide at that station for each data point in the input tide
+station data. This difference time series is then used as a correction to the
+output tide models, whether at a location specified with the -Rlon/lat option or
+for swath data specified with the -Idatalist option.
+
+Mbmakeplatform: Fixed initialization of the organization and documentation_url
+fields.
+
+Mbtrnpreprocess: Continued development of this new tool, particularly adding
+interprocess communication via TCP-IP sockets.
+
+-----> 5.5.2330 (March 7, 2018)
+
+Proj: Removed the embedded Proj source package from the MB-System archive and
+distribution. From now on Proj is strictly a prerequisite for building MB-System.
+
+Mbtrnpreprocess: Added initial version of new tool for real-time multibeam data
+filtering as part of the implementation of terrain aided navigation on MBARI
+AUVs. Specifically, mbtrnpreprocess accesses realtime s7k data from a Reson 7125
+multibeam sonar, decimates and filters the bathymetry, and than passes the
+decimated and filtered soundings on to an application that attempts to locate
+the AUV in real time relative to a pre-existing multibeam bathymetry survey. This
+allows repeat AUV surveys to execute exactly the desired survey tracks.
+
+Format MBF_3DWISSLP (233): Many fixes to the code supporting WiSSL lidar data.
+
+-----> 5.5.2329 (February 12, 2018)
+
+Format MBF_3DWISSLP (233): Rewrote the processing format for the 3D at Depth
+wide swath lidar (WiSSL) system delivered to MBARI in December 2017. The new
+version of the format is more compact and is read and written much faster.
+
+Edit Save Files (*.esf) and mbedit, mbclean, mbareaclean, mbeditviz: Fixed
+problem in which flags were sometimes not applied
+to all soundings in pings that are less than 0.1 milliseconds earlier or later than
+another ping or scan.
+
+MBeditviz: Replaced use of the global edit files (*.gef) by mbeditviz with use of
+new edit files called reverse edit save files (*.resf). The *.gef files were generated
+by mbpreprocess using mbgetesf. The *.resf files are generated by mbprocess.
+
+Mbm_route2mission: Fixed generation of Dorado AUV missions with waypoint_bottom
+behaviours.
+
+-----> 5.5.2328 (January 31, 2018)
+
+Edit Save Files (*.esf): The edit save file format has been augmented to include
+a mode value that can include implicitly setting all soundings not set by a beamflag
+in the file to a null value (mode == 1) or a valid value (mode = 2). The default
+remains to change sounding beamflag values only for beams explicitly set by an
+edit event. The only means to create ESF files with implicit beamflag modes is
+using mbgetesf with -M4 or -M5, and the only use of implicit beamflag modes is in
+the MBedtiviz *.gef files. The new ESF files have a version 3 tag; old ESF files
+will continue to work fine.
+
+MBgetesf: Augmented to output edit save files in two new modes. If -M4 is specified,
+the beamflags of null beams will not be output, but the ESF mode is set so that
+the beamflags of any soundings not specified will be set null. If -M5 is specified,
+the beamflags of valid beams will not be output, but the ESF mode is set so that
+the beamflags of any soundings not specified will be set valid.
+
+MBpreprocess: Generates *.gef files using mbgetesf with the -M4 rather than -M2
+option.
+
+MBinfo: Fixed memory allocation problem that led to crashes reading data in formats
+MBF_3DWISSLR (232) and MBF_3DWISSLP (233).
+
+-----> 5.5.2327 (January 23, 2018)
+
+Build system: Restructure the use of the mb_config.h file so that compiling on
+Ubuntu 17 succeeds (issue related to stdint.h includes)
+
+-----> 5.5.2325 (January 23, 2018)
+
+MBinfo: Fixed bug in JSON output (Christian Ferreira)
+
+-----> 5.5.2324 (January 18, 2018)
+
+MBpreprocess: Added support for the 3D at Depth
+wide swath lidar (WiSSL) system delivered to MBARI in December 2017.
+
+Formats MBF_3DWISSLR (232) and MBF_3DWISSLP (233): Added support for the 3D at Depth
+wide swath lidar (WiSSL) system delivered to MBARI in December 2017.
+
+MBm_route2mission: Fixed implementation of inserting surfacing events into missions
+at line start and end waypoints.
+
+Many source files: Changes to variable names in GMT grid header and CPT structures for GMT 6.
+
+-----> 5.5.2323 (December 7, 2017)
+
+MBnavadjust: fixed crashes that happened when files or surveys are held fixed.
+
+-----> 5.5.2322 (November 25, 2017)
+
+Mbpreprocess: Now set so that input Imagenex DeltaT data in the vendor format
+MBF_IMAGE83P (191) will be output in the processing format MBF_IMAGEMBA (192)
+after pre-processing.
+
+Mb7k2jstar: Now outputs in the current jstar format rather than a >10 year old
+variant.
+
+Formats MBF_EDGJSTAR (132) and MBF_EDGJSTR2 (133) supporting Edgetech Jstar (*.jsf)
+files: Changed code to support recent and current versions of Jstar format files.
+The code should recognize and convert older variants, particularly those written
+by past versions of MB-System.
+
+Various source files (mk_cheby.c, geod_for.c, mbsys_xse.c, mbsys_sb2100.c,
+mbsys_elacmk2.c, mbsys_elac.c, mbr_xtfr8101.c, mbbs_defines.h):
+Added curly brackets, changed beamflag setting calculations, and reformatted
+some lines in order to silence compiler warnings.
+
+-----> 5.5.2321 (October 26, 2017)
+
+Mbgrdviz: fixed bug in displaying overlays.
+
+Mbpreprocess: Added some kluge fixes to time jumps in ancilliary data. New commands
+are --kluge-ancilliary-time-jumps and --kluge-mbaripressure-time-jumps.
+
+Mbextractsegy: fixed bug in the output plotting script.
+
+Format 88 (MBF_RESON7KR): Fixed confusion between Depth and Height s7k data records.
+
+-----> 5.5.2320 (October 18, 2017)
+
+Mbgrdviz: Now, when overlays are displayed in mbgrdviz, the only areas rendered
+are those where both the primary and overlay grids are defined.
+
+-----> 5.5.2319 (October 16, 2017)
+
+Mbprocess: Fixed bug that caused mbprocess to (sometimes) never finish while
+continuing to write to the output file.
+
+-----> 5.5.2318 (September 29, 2017)
+
+Mbnavadjust: Fixed bug that often, but not always, caused the inversion to blow
+up and crash the program.
+
+General: Fixed problem with data record type informational messages
+
+General: Fixed problem with time gap nonfatal error detection
+
+MBpreprocess: Added --skip-existing option that causes MBpreprocess to skip
+preprocessing of files referenced in the input datalist that have already been
+preprocessed. This allows efficiently adding new files to a survey, particularly
+in a shipboard context where one is trying to process new data as they are
+collected.
+
+MBotps: Added -S option that causes MBotps to skip calculating a tidal correction
+model for files referenced in the input datalist that already have models calculated
+by mbotps. The skipped files will not be viewed as out-of-date by mbprocess, and
+thus will not be reprocessed if mbprocess or mbm_multiprocess are run.
+This allows efficiently adding new files to a survey, particularly
+in a shipboard context where one is trying to process new data as they are
+collected.
+
+MBgrdviz: Added capability to output site data as Winfrog waypoint (*.WPT) files.
+
+MBeditviz: Added capability to optimize an additional bias parameter (sort of...)
+in the 3D sounding view. The new parameter is a "snell correction", referring to
+adjusting the receive beam angles of multibeam data by applying a Snell's law
+correction equivalent to changing the speed of sound used for beam forming. This
+parameter is expressed as a ratio of the new to original sound speed, so that
+a snell correction value of 1.00 corresponds to no change, a value of 0.995
+corresponds to a slight reduction in the sound speed, and a value 1.005
+corresponds to a slight increase in the sound speed. This correction is intended
+for near-bottom surveys from submerged platforms (ROVs or AUVs) where sound speed
+is calculated from CTD data (and values may plausibly be slightly erroneous) and
+where errors due to raytracing through an incorrect model of the water column
+sound speed are unlikely to be significant. This correction is generally not useful
+for multibeam data collected from a surface vessel.
+
+MBminirovnav: Added new program that processes raw MBARI MiniROV data logs to
+produce standard MBARI ROV navigation files (format MBF_MBARIROV)
+MBpreprocess: Add option to skip preprocessing files in the input datalist that
+have already been fully preprocessed.
+
+MBsegygrid: Added a trace mode=2 to the -Smode[/start/end[/schan/echan]] command
+for which start and end refer to shot numbers and all traces within that range of
+shot numbers are plotted. Effectively  the channel numbers are ignored by setting
+all trace channels to 0 and plotting channel 0.
+
+MBsslayout: Changed arguments to have '-' rather than '_' characters between
+words in multiword commands (e.g. --topo_grid_file is now --topo-grid-file).
+Also now have code identifying the fileroot of the input file and using that in
+the construction of output file names so that the input format suffix is not
+embedded in the middle of the output filename. Also improved the swathplotting
+script generated by mbsslayout.
+
+Formats 132 (MBF_EDGJSTAR) and 133 (MBF_EDGJSR2): Fixed preprocessing function in
+the i/o module so that altitude values read in by mbpreprocess are actually applied
+in the output file.
+
+Format 160 (MBF_SEGYSEGY): Added recognition of this format by file suffixes
+*.SEG and *.seg (in addition to *.SEGY and *.segy).
+
+MBm_makedatalist and Formats 56, 57, 58 59 (MBF_EM300RAW, MBF_EM300MBA, MBF_EM710RAW,
+MBF_EM710MBA): The mbm_makedatalist macro will now attempt to sort Kongsberg data
+into time order based on filenames when the file suffixes follow the MB-System
+convention (*.mb56, *.mb57, *.mb58, *.mb59). Previously this functionality was
+only applied to files with the *.all suffix. This capability is applied by default
+but can be disabled with the -T option.
+
+-----> 5.5.2314 (August 24, 2017)
+
+Mbprocess: Fixed bug in which mbprocess sometimes crashed for files that have not
+had bathymetry edited or filtered.
+
+Mbprocess: Code used to read GMT grid files modified so that if the GMT API call
+to read a grid fails, that call will be repeated every 0.1 seconds for 10 seconds
+until it succeeds. This should allow multiple instances of mbprocess to read the
+same grid files used for processing without interfering (the current GMT libraries
+have problems with multiple simultaneous reading of a grid file over some network
+mounted filesystems).
+
+Format 88 (MBF_RESON7KR): Augmented the preprocess function to properly implement
+a correction to the sound speed value used for beamforming, with consequential
+changes to the recalculated bathymetry.
+
+Mbpreprocess: Changed so that it ancilliary data is specified to be read from
+external file(s) but one of those files does not exist, the program terminates
+with an error message.
+
+-----> 5.5.2313 (August 9, 2017)
+
+Format 88 (MBF_RESON7KR): Fixed problem handling Reson data preprocessed or
+processed using a version older than 5.3.2004 which in some cases causes the
+alongtrack and acrosstrack values to be swapped.
+
+-----> 5.5.2312 (July 14, 2017)
+
+MBedit: Added togglebutton to the View menu that allows to control whether
+flagged soundings are displayed (previously flagged but valid soundings were
+always displayed).
+
+MBauvloglist: Added ability to recalculate MBARI Mapping AUV CTD data using
+corrected calibration coefficients. This allows one to output a corrected time
+series of sound speed.
+
+Proj: Removed the embedded Proj library from MB-System. One must now have Proj
+installed separately in order to build MB-System (which is always the case
+anyway).
+
+MBpreprocess: Added several new options.
+
+MBgrdtiff, mbcontour, mbswath, mbps: Changed defines in *.c files to reflect the
+versioning of GMT 6
+
+-----> 5.5.2311 (June 20, 2017)
+
+MBnavadjust: Fixed bug that preventing importing data into a new project.
+
+-----> 5.5.2309 (June 4, 2017)
+
+Applied reformatting to all *.c and *.h files using the tool clang-format as
+suggested by Joaquim Luis.
+
+Updated copyright statements to 2017.
+
+Updated mbotps to use the current best OSU tidal model (atlas_tpxo8_1).
+
+-----> 5.5.2306 (May 27, 2017)
+
+Format 88 (MBF_RESON7KR): Fixed a couple of bugs in the i/o module identified
+by Kurt Schwehr.
+
+Format 121 (MBF_GSFGENMB): Fixed handling of attitude records.
+
+-----> 5.5.2305 (May 13, 2017)
+
+MBdatalist: Fixed bug involving operating on datalist files other than the default
+datalist.mb-1.
+
+MBpreprocess: Added option --kluge-soundspeed-tweak=factor that applies a
+multiplicative correction to the water sound speed at the sonar arrays. This
+both changes the beam angles by a Snell's law correction and affects the
+calculation of bathymetry using the travel times.
+
+MBconfig: Added options to print out the installation location, the compile
+flags needed to compile code using MB-System libraries, and the linker flags
+needed to link programs that call functions in MB-System libraries.
+
+MBextractsegy: Force jpeg renderings of the section plots to be portrait style.
+
+MBinfo: Fix bug in XML output disabling output of minimum good beam counts in
+some cases.
+
+-----> 5.5.2304 (May 6, 2017)
+
+MBpreprocess: Fixed generation of *.baa, *.bsa, and *.bah files so they include
+only data relevant to the associated swath file, which means samples from
+10 seconds before the first survey data through 10 seconds after the last survey
+data. The program now removes any pre-existing *.ata, *.sta, *.ath, *.baa,
+*.bsa, and *.bah files.
+
+MBconfig: New program to provide command line access to the MB-System version
+and the locations of the Levitus database and the OTPS tide prediction software.
+
+MBlevitus: The variable storing the location of the Levitus database file has
+been changed from "ifile" to "levitusfile".
+
+Datalist parsing: The mb_datalist_read() function changed with the 5.5.2299
+revision, including adding a new argument. The old version of that function is
+now available within the API as mb_datalist_readorg().
+
+-----> 5.5.2303 (April 28, 2017)
+
+MBpreprocess and MBeditviz: Changed the ancilliary files used to store the
+asynchronous attitude and heading data used by MBeditviz for time latency modeling
+from text to binary. The text *.ata, *.sta, and *.ath files generated by
+mbpreprocess (and formerly by mb7kpreprocess and mbkongsbergpreprocess) are
+replaced by *.baa, *.bsa, and *.bah files respectively. The size of the the binary
+files is about half of the previous text files; the i/o speed for loading data
+is improved as well.
+
+Configure script: Fixed problems with specifying the location of the netCDF,
+GDAL, and GMT config programs.
+
+MBswath: Fixed bug that caused occasional crashes.
+
+-----> 5.5.2302 (April 20, 2017)
+
+Formats 56 and 57 (MBF_EM300RAW and MBF_EM300MBA): Fixed handling of sensordepth
+and heave data by mbpreprocess and mbprocess. Tide correction and recalculation
+by raytracing work correctly again. Added preprocessing function to the i/o
+module. Users should now use mbpreprocess for preprocessing old Kongsberg
+multibeam data so that navigation is properly interpolated and beam flagging
+works correctly.
+
+Mbm_plot, mbm_grdplot, mbm_xyplot: The plotting macros now handle negative scaled
+(reverse) axes properly (e.g. sound speed plots with depth increasing downwards).
+
+Mbdatalist: Now supports long command line options (old short options are
+deprecated but still work).
+
+-----> 5.5.2301 (April 17, 2017)
+
+Mbpreprocess and Format 88 (MBF_RESON7KR): Fixed application of kluge-beam-tweak
+option for Reson 7k (format 88) data.
+
+-----> 5.5.2300 (April 15, 2017)
+
+Formats 58 and 59 (MBF_EM710RAW and MBF_EM710MBA): Fixed memory leak.
+
+Formats 59 (MBF_EM710MBA): Fixed calculation of interpolated heave when
+recalculating bathymetry by raytracing.
+
+Format 88 (MBF_RESON7KR): Fixed memory leaks.
+
+Mbm_arc2grd: Rewritten to use GMT modules grdconvert and grdedit.
+
+-----> 5.5.2299 (April 10, 2017)
+
+Formats 58 and 59 (MBF_EM710RAW and MBF_EM710MBA): Fixed handling of sensordepth
+and heave data during preprocessing. Program mbkongsbergpreprocess is now
+deprecated and will be removed from the distribution soon. Users should now
+use mbpreprocess for preprocessing Kongsberg multibeam data.
+
+Format 88 (MBF_RESON7KR): Fixed bug in handling of TVG data records.
+
+Mbdatalist: Added a new option -D that causes mbdatalist to list the unique
+datalist files referenced as a recursive datalist structure is parsed. The
+recursion level of each datalist file is indicated in the listing.
+
+Mblist and mbnavlist: Augmented the -Zsegmenttag option for printing out segment
+start lines in the output. Normally the string segmenttag is a single character
+that is recognized by GMT as a segment beginning when parsing tabular data. Now,
+if segmenttag == "swathfile" the segment start lines will consist of the character
+'#' followed by the path to the source swath file, and if segmenttag == "datalist"
+the segment start lines will consist of the character '#' followed by the path
+to the source datalist file
+
+-----> 5.5.2297 (April 5, 2017)
+
+All i/o modules: Added sensordepth_source to the arguments of the
+mbr_info_XXXXXXXX() functions in the i/o modules.
+
+Mbpreprocess: Added ability to define default sources (in terms of data record
+types) for the various asynchronous ancilliary data types in Kongsberg and Reson
+data.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Kongsberg reports some bathymetry
+bottom picks that are interpolated or extrapolated from valid soundings. Until
+now MB-System has treated these interpolated soundings as valid but flagged.
+MB-System now recognizes interpolated soundings as a different type, neither
+valid nor null. These soundings can no longer be seen or edited with MBedit or
+MBeditviz.
+
+Mbm_makedatalist: Added option to suppress processed files (e.g. *p.mb88) from
+inclusion in the output datalist.
+
+-----> 5.5.2296 (March 31, 2017)
+
+Mbm_makedatalist: Major capability augmentation for this tool, preparing for
+automated setup of the processing environment. This macro will now construct
+datalists from files matching a user specified  filename suffix, and will
+attempt to sort raw Kongsberg multibeam data files into time order.
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA): Fixed to handle EM712 data and
+other Kongsberg multibeams now generating more than 512 beams.
+
+Mbm_grd2arc: Fix provided by Monica Schwehr for compatibility to *.grd files
+generated with the current GMT.
+
+-----> 5.5.2295 (March 26, 2017)
+
+Mbm_plot, mbm_grdplot, mbm_xyplot, mbm_3dgrdplot: Changes to the manual pages
+to reflect the new syntax for map scales (the -MGL option in the MB-System plot
+macros) in GMT 5.3.X
+
+Mbnavadjust: Fixed bug in calling scripts within the project directory for users
+that do not include "." in their path environment variable. Problem identified
+by Monica Schwehr.
+
+Mbpreprocess: Added functionality to handle specialized, format-specific
+preprocessing tasks and to handle changes to data timestamps. Currently set to
+work with generic data, Reson 7k data (format 88), and 3DatDepth Lidar data
+(format 231). Code written for mbpreprocess to work with Kongsberg data, but
+not yet tested.
+
+Format 88 (MBF_RESON7KR) and Mb7kpreprocess: Mb7kpreprocess is deprecated, with
+preprocessing of Reson 7k data to be done by mbpreprocess.
+
+Format 121 (MBF_GSFGENMB): Integrated latest release of GSF from Leidos (3.07)
+
+-----> 5.5.2294 (March 21, 2017)
+
+Mbsvpselect: Fixes by Ammar Aljuhne and Christian Ferreira of MARUM.
+
+-----> 5.5.2293 (March 6, 2017)
+
+Mb7kpreprocess: Fixed bug in handling old MBARI Mapping AUV with navigation
+and attitude data in deprecated "Bluefin" records.
+
+Mbnavlist: Added ability to output positions in a projected coordinate system.
+
+Mblist: Use ping count as ping number when the data format does not include
+ping or shot number.
+
+Format 21 (MBF_HSATLRAW): Fixed bug in handling zero length comments.
+
+Format 231 (MBF_3DDEPTHP): Fixed bug in handling angular offset values in
+preprocessing.
+
+-----> 5.5.2292 (January 30, 2017)
+
+Mblist: Added ability to output positions in a projected coordinate system, 
+to output positions of the sensor instead of soundings or pixels, or to output
+positions relative to the sensor in the world frame.
+
+Mbm_route2mission: Fixed handling of waypoint spacing for constant depth segments
+of missions.
+
+Mbnavadjust: Now outputs the altered project less frequently (every tenth new tie
+instead of every tie).
+
+-----> 5.5.2291 (January 12, 2017)
+
+Mbnavedit: interpolation of selected navigation values now also flags the original
+values so they are not used in calculating a navigation model.
+
+General: fixed a number of memory leaks by switching all remaining mb_malloc(),
+mb_realloc(), and mb_free() calls to mb_mallocd(), mb_reallocd(), and mb_freed().
+
+Mbnavadjust: prevent occasional corruption of the mbnavadjust project by not
+allowing excessively large offset values to result from unstable inversions.
+
+-----> 5.5.2290 (January 2, 2017)
+
+Mbinfo: applied fixes from Suzanne O'Hara to JSON output from mbinfo.
+
+Mbnavadjust: Fixed problem in which tie snav times became incorrect - these values
+are now reset when the project is read.
+
+Mbgrid and mbmosaic: added code to mbaux/mb_readwritegrd.c that will enable use
+of new GMT5 grid mode flags, solving the problem of creating geographic grids
+that can be directly read into ESRI ArcGIS. These modes will appear in GMT 5.3.2
+sometime early in 2017. Thanks to Paul Wessel for diagnosing and fixing this
+longstanding issue.
+
+Mbgrid and mbmosaic: implemented suggestion by Paul Wessel that the calculation
+of grid dimensions be done with a lrint() rounding call rather than implicit
+truncation. This will change the behavior of the -Edx/dy/units option, but the
+resulting grid dimensions will be more consistent with users expectations.
+
+-----> 5.5.2289 (December 2, 2016)
+
+Mbnavadjust: Fixed auto set vertical level function to use the same block inversion
+now used for the first stage of the main inversion. Also set this function so that
+for z offset changes less than a threshold (currently 0.10 m) the x and y offsets
+are not repicked.
+
+Mbnavadjustmerge: Fixed import and export of tie lists to allow moving ties between
+projects.
+
+-----> 5.5.2287 (November 29, 2016)
+
+Mbm_makesvp: added capability to extract sound speed values from survey data
+records as well as ctd data records, and to optionall produce sound speed models extending
+to the surface and the deep ocean even if the data are available only for a limited
+depth range.
+
+Mbnavadjust: Modified the inversion algorithm to once again have a first stage
+solution for "block" (survey) average offsets followed by the main inversion to
+satisfy all of the navigation tie offsets in detail.
+
+Mbnavadjust: updated the documentation of the inversion algorithm.
+
+Mbprocess: fixed rare singularity in the raytracing code.
+
+-----> 5.5.2286 (November 8, 2016)
+
+Mbsvplist: Added -R command to set longitude-latitude bounds within which the
+-S option will cause ssv values to be output.
+
+Mbgrdviz: Added start5 and end5 waypoint types to routes.
+
+-----> 5.5.2285 (November 3, 2016)
+
+Mbnavadjust: Added a first step in the inversion in which mbnavadjust solves for
+average offsets for each survey ("block"). The offsets associated with this
+average model are removed from the tie offsets before the full inversion. The
+smoothing penalty is thus applied to deviations from the average model rather
+than the full navigation adjustment model.
+
+-----> 5.5.2284 (October 23, 2016)
+
+Fixed some typos preparing for full release.
+
+-----> 5.5.2283 (October 23, 2016)
+
+mbmakeplatform: fixed bug that caused core dumps when built with gcc.
+
+mbaux/mb_cheb.c: Added open source least squares solver LSQR by Michael A. Saunders
+(in C version translated from Fortran by Michael P. Friedlander),
+
+Mbnavadjust: Switch navigation matrix solution algorithm to LSQR.
+
+Mbnavadjust: Fixed bug that reset the z-offset-width value to 5-m every time
+a project was read.
+
+Mb7kpreprocess: Now will use complete platform description when reading older
+Reson 7k data.
+
+Mb7kpreprocess: Now allows users to specify the the sources of asynchronous ancilliary data
+(position, sensor depth, heading, attitude) to be merged with the survey data.
+
+Mbgrdviz, mbeditviz, mbnavadjust: pick actions will now print out positions to
+the shell in both decimal degrees and degrees + minutes.
+
+Mbextractsegy: Now uses psconvert from GMT instead of convert from imagemagick.
+
+mbm_grdplot: Once again handles section plots from mbextractsegy properly.
+
+mbm_arc2grd, mbm_dslnavfix, mbm_grd2arc, mbm_grd2geovrml, mbm_grd3dplot,
+mbm_grdcut, mbm_grdinfo, mbm_grdplo, mbm_grdtiff, mbm_grid, mbm_histplot,
+mbm_plot, mbm_utm, mbm_xyplot: Modified to work properly with GMT 5.3
+
+mbprocess: fixed correction of sidescan and amplitude data using topographic
+grid so that the correction is actually calculated and applied.
+
+-----> 5.5.2282 (August 25, 2016)
+
+Mbnavadjustmerge: Added --set-ties-xyonly-by-time=timethreshold option.
+
+Mbnavadjust: Improved program behavior with respect to generating the grid used
+for the project visualization view.
+
+Mbedit: Changed behavior so that using the slider to change the number of pings
+viewed also changes the number of pings to step proportionately.
+
+-----> 5.5.2281 (August 7, 2016)
+
+Mbnavadjustmerge: Added --unset-skipped-crossings-by-block=survey1/survey2
+and --unset-skipped-crossings-between-surveys options, and made the
+--import-tie-list=filename and --export-tie-list=filename options work
+correctly.
+
+Mbclean: Added option to flag outer beams and/or unflag inner beams
+by acrosstrack distance (-Y option).
+
+-----> 5.5.2279 (July 8, 2016)
+
+Bathymetry editing (mbedit, mbeditviz, mbclean, mbareaclean): fixed problem in
+which mbprocess failed to successfully apply new edits generated using mbeditviz
+on files with existing, old esf (edit save files) files. Yet another consequence
+of adapting to very short ping intervals...
+Existing edit save files can now be fixed using mbclean -T0.0011.
+
+Mbm_grdtiff: Added support for image display program feh.
+
+-----> 5.5.2278 (July 1, 2016)
+
+Mbkongsbergpreprocess (Formats 58 & 59): Fixed modification of png_xducer_depth
+value to not include lever arms or heave, as SIS records sensor depth value
+in height datagrams that are already compensated for lever arms and heave.
+
+-----> 5.5.2277 (June 25, 2016)
+
+Mbm_xyplot, mbm_grdplot: fixed problem generating plots using linear axes. Recent
+changes to GMT cause gmt mapproject to generate an error when passed non-map
+(e.g. non lon lat) values with a linear projection (after three decades of
+working just fine....). Created a workaround by treating linear plots as a
+special case.
+
+Mbeditviz, mbedit, mbclean: Fixed problem with edit save files in which old format
+*.esf files where generated by mbeditviz. This does not work well with data where
+separate ping timestamps differ by less than 10 milliseconds (e.g. current
+generation Kongsberg multibeams reporting fore and aft pings from each ping cycle
+and 3DatDepth lidar data).
+
+Mbkongsbergpreprocess (Formats 58 & 59): Fixed handling of sonar depth and heave 
+values in Kongsberg multibeam data logged using SIS on a submerged platform.
+
+Format 201 (MBF_HYSWEEP1): Changed handling of file header data to enable the
+extraction of platform definition data by the program mbmakeplatform.
+
+MBmakeplatform: Now capable of extracting the list of sensors and the associated
+offsets from Hypack HSX files, and outputting an MB-System platform file.
+
+MBhysweeppreprocess: Now allows for sensor offsets to be defined by an
+MB-System platform file, which can be extracted from HSX data files with
+mbmakeplatform, and can be modified and augmented using the same program.
+
+MBeditviz: Added a new sounding filter mode that calculates the sounding density
+for a 3D "voxel" representation of the selected volume, and then flags soundings
+in voxels containing less than a threshold of soundings. This algorithm flags
+isolated soundings, an approach that is particularly useful for submarine
+lidar data. This filter is accessible from the "action" menu of the 3D sounding
+window.
+
+-----> 5.5.2276 (May 31, 2016)
+
+MBeditviz: Added algorithm to flag isolated soundings by analyzing the 3D
+distribution of currently selected soundings. Soundings are flagged in voxels
+containing less than a desired threshold of soundings. This option is accessed
+from the <Action> menu of the 3D sounding view.
+
+Format 201 (MBF_HYSWEEP1) and mbhysweeppreprocess: Fixed handling of data that
+have beam takeoff angles calculated without attitude correction. Changed the
+default heave sign convention.
+
+Format 231 (MBF_3DDEPTHP): Now handles files with broken data records a bit more
+gracefully.
+
+-----> 5.5.2275 (May 17, 2016)
+
+MBnavadjust: Fixed display of navigation in visualization view. Fixed overwriting
+of zoffsetwidth value when projects are read in. Fixed autopicking when view mode
+is survey-vs-survey blocks.
+
+MBkongsbergpreprocess: Added capability to merge sonardepth from a separate ascii
+file consisting of Unix time and sonardepth pairs.
+
+Makefiles and mbr_gsfgenmb.c: Fixed typos noted by Joaquim Luis.
+
+General: Fixed several warnings generated by the new gcc version in Ubuntu 16.
+
+-----> 5.5.2274 (May 5, 2016)
+
+Configure.cmd and "How to Get" web page: Updated with instructions for
+installing in Ubuntu, including Ubuntu 16.04.
+
+MBgrdviz, MBeditviz: New radiobox in the Controls->Projections dialog allows
+user to change interactive pick annotations so that longitude and latitude
+values are shown as degrees + decimal minutes or decimal degrees, as desired
+
+MBeditviz: Fixed bug involving some isnan calls according to suggestion by
+Gordon Keith - MB-System now builds on Ubuntu 16.04.
+
+Mbswath: Fixed bug in handling format for single input files, as suggested by
+Joaquim Luis.
+
+Mbnavadjustmerge: Added commands to set the mode of all ties as XYZ, XY only, or
+Z only.
+
+Many source files: Added a number of #ifdef preprocessor statements to handle
+building on Windows, generally following suggestions by Joaquim Luis.
+
+Many source files: Fixed a number of warnings related to typing and prototyping
+issues.
+
+-----> 5.5.2271 (April 1, 2016)
+
+MBnavadjust: Added numbers of crossings and ties to the table listing of
+survey-vs-survey blocks.
+
+Formats 58 and 59 (MBF_EM710RAW & MBF_EM710MBA): added EM850 to supported
+third generation Kongsberg multibeams.
+
+-----> 5.5.2270 (March 24, 2016)
+
+MBnavadjust: Now plots ties within missions (surveys) in dark blue and ties
+between mission in light blue in the bathymetry visualization.
+
+Mbm_route2mission: Calculates AUV ascent time with a 1.5 safety factor instead
+of a 1.2 safety factor to ensure the new Mapping AUV always makes it to the
+surface before timing out.
+
+-----> 5.5.2269 (March 23, 2016)
+
+MBkongsbergpreprocess, and formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA) for
+current generation Kongsberg multibeam data: Changed so that the default source
+for attitude data used in recalculating bathymetry from travel times and angles
+is the "active" source originally used by the sonar rather than always being
+motion sensor 1.
+
+MBnavadjust: Fixed creation of bathymetry grid (gridding scripts were not being
+set executable). Removed data from fixed files from the bathymetry grid.
+
+MBkongsbergpreprocess: Now by default uses the same attitude data stream used
+by the sonar in realtime, as opposed to using data from "motion sensor 1"
+regardless of whether that was the active realtime sensor.
+
+Bathymetry editing programs (MBedit, MBeditviz, MBareaclean, MBclean): fixed
+beam edit code so that no attempt is made to sort zero length arrays of beam
+flags.
+
+-----> 5.5.2268 (March 14, 2016)
+
+Mbnavadjust: Added integrated mbgrdviz-style visualization of the bathymetry in
+an Mbnavadjust project. Users can select crossings or ties by clicking on the
+navigation in the map view. If two selected sections do not already have a
+defined crossing, a crossing can be created and analyzed. The new version of
+mbnavadjust will upgrade old projects to include the bathymetry grid. The
+new GUI commands include <Update Grids> under the <Action> menu, and
+<Visualize Survey> under the <View> menu. The documentation, such as it is,
+does not yet cover these new features.
+
+Mbm_multicopy and mbm_multidatalist: Fixed bugs identified (along with fixes) by
+Martin Ernst of HafenCity University in Hamburg, Germany.
+
+Mbswath, mbcontour, mbgrdtiff: added #ifdefs for compatibility with the upcoming
+GMT 5.3 release. A number of GMT functions called by the MB-System GMT modules
+are being renamed.
+
+Format 21 (MBF_HSATLRAW): Added some logic to handle problems in a very old HSDS
+dataset collected on the R/V Ewing and available at the archive formally known
+as NGDC.
+
+-----> 5.5.2267 (February 11, 2016)
+
+Mbeditviz: Added capability to do automated optimization for bias parameters
+from the 3D soundings view. Optimization options are accessed from the "Action"
+menu.
+
+Mb7kpreprocess: Added capability to tweak beam angles through a Snell's law
+type correction (kluge mode 9).
+
+Mbgetesf, mbdumpesf, mbedit, mbeditviz, mbareaclean, mbclean, mbprocess:
+Fixed problem handling certain old ESF files (edit save files) that had timestamps
+truncated to milliseconds instead of microseconds. New ESF files now have a
+header indicating the version and time of creation. Version 2 ESF files are
+presumed to have timestamps consistent with datafiles to a +/-1 microsecond
+precision.
+
+Documentation: Corrected instructions for building MB-System on Ubuntu machines.
+
+-----> 5.5.2264 (February 4, 2016)
+
+Mbgrid, mbm_dslnavfix, mbm_grd2arc, mbm_grd3dplot, mbm_grdplot, mbm_grdtiff,
+mbm_histplot, mgm_plot, mbm_utm, mbm_xyplot: Replaced call to "grdinfo" with
+call to "gmt grdinfo" for compatibility with GMT5 installations that do not
+include soft links to the old GMT4 programs.
+
+Mbauvloglist: Added ability to calculate and output potential temperature when
+parsing an MBARI Dorado AUV CTD log. Includes adding a potential temperature
+calculation function to src/mbio/mb_absorption.c
+
+Mbpreprocess: Fixed problem with application of changes to roll and pitch values.
+
+MBnavadjustmerge: Enabled exporting and importing lists of ties.
+
+-----> 5.5.2263 (January 7, 2016)
+
+Formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA) for current generation Kongsberg
+multibeam data: Fixed problems handling tide correction and applying heave when
+recalculating bathymetry through raytracing.
+
+Format 59 (MBF_EM710MBA): Worked on preprocessing function called by mbpreprocess.
+Not done yet...
+
+Format 88 (MBF_RESON7KR): Worked on preprocessing function called by mbpreprocess.
+Not done yet...
+
+mbio/mb_access.c: Added explicitly setting the target sensor id to the
+mb_preprocess() function call.
+
+Mbm_grdtiff: Fixed bug in grdinfo call.
+
+GMT integration: Removed GMT header files from mbsystem/gmt because GMT 5.2.1
+now installs full development headers. MB-System is now not compatible with any
+version of GMT prior to 5.2.1.
+
+Configure build system: Now uses built in configuration tools in GMT and netCDF
+so that command line arguments to the configure script specifying GMT and netCDF
+library locations are no longer necessary.
+
+mbio/mb_io.h and mbio/mb_platform.c: Added fields to platform structure:
+                  mb_longname     documentation_url;
+                  double          start_time_d;
+                  double          end_time_d;
+                  int             start_time_i[7];
+                  int             end_time_i[7];
+
+Mbmakeplatform: Added commands:
+                  --platform-documentation-url=string
+                  --platform-start-time=yyyy/mm/dd/hh/mm/ss.ssssss
+                  --platform-end-time=yyyy/mm/dd/hh/mm/ss.ssssss
+
+-----> 5.5.2259 (October 27, 2015)
+
+Mbpreprocess: Now called format-specific preprocess function if available and
+applied generic preprocessing otherwise. The first format specific preprocessing
+to be defined is for Reson 7k data (MBIO format 88).
+
+Mb7kpreprocess: Modified optional fixing of multibeam ping times assuming a
+specified constant ping interval.
+
+Mbmakembplatform: Added manual page.
+
+mbio/mb_navint.c: Added MBIO API functions mb_apply_time_latency() and
+mb_apply_time_filter().
+
+Mbeditviz: Fixed application of time latency to sonardepth.
+
+-----> 5.5.2258 (October 5, 2015)
+
+Mbnavadjust: Added output of route files including all unfixed ties for each
+survey and all crossings for each survey.
+
+Mbmakeplatform: Added new program to create or modify platform files.
+
+Format 58 (MBF_EM710RAW): Added functions needed for mbmakeplatform to
+automatically extract a platform model with sensor offsets.
+
+Format 59 (MBF_EM710MBA): Added functions needed for mbmakeplatform to
+automatically extract a platform model with sensor offsets.
+
+Format 88 (MBF_RESON7KR): Added functions needed for mbmakeplatform to
+automatically extract a platform model with sensor offsets.
+
+Mb7kpreprocess: Added kluge mode (-K6) to fix a time stamp problem with recent
+MBARI Mapping AUV data. Specifically, due to the application of time disciplining
+to the Reson computer clock using two occasionally inconsistent time sources,
+sometimes there are abrupt shifts in the ping time stamps for one to three pings.
+This mode detects and corrects these time tears.
+
+-----> 5.5.2257 (September 1, 2015)
+
+Mbpreprocess: Using platform functions to handle sensor offsets. Read platform
+file or command line offsets and calculate sensor offsets. Updated bathymetry
+calculations.
+
+General: Added functions mb_platform_orientation and
+mb_platform_orientation_target on mbio/mb_platform. Cleaned
+mb_platform_orientation_offset. Change all MB_PLATFORM_MATH* functions to
+DEEGREES inputs/outputs on mbio/mb_platform_math. Fixed bug on
+mb_platform_lever.
+
+-----> 5.5.2256 (August 24, 2015)
+
+Mbeditviz: Improved the way to handle sensor offsets. Improved
+mbeditviz_apply_timelag the way to handle angles corrections. Cleaned
+mbeditviz_beam_position to make it more clear.
+
+mbio/mb_platform_math.c: Added new math functions
+mb_platform_math_attitude_offset_corrected_by_nav and
+mb_platform_math_attitude_rotate_beam to handle sensor offset corrections.
+
+-----> 5.5.2255 (August 11, 2015)
+
+Mbnavadjust: Set limits on application of smoothing via penalizing the first
+and second derivatives of the navigation pertuturbation (particularly the
+second derivative) in the inversion algorithm. This change has been implemented
+to prevent the inversion from becoming unstable as the smoothing parameter is
+made larger.
+
+Mbprocess: Fixed problem with handling of sensor depth changes due to tide
+correction or lever arm correction.
+
+-----> 5.5.2254 (July 23, 2015)
+
+Autotools build system: Disabled dist and distclean targets in the makefiles
+produced by the configure script. We do not use the autotools system to
+generate production distributions, so the existence of these targets defined
+by default caused some confusion.
+
+Mbset and mbprocess: Added NAVSHIFTX and NAVSHIFTY options to the mbprocess
+parameter file definition.
+
+Mbgrid: Fixed the -Kbackground option for the case of producing grids in
+projected coordinate systems.
+
+General: Improved the way to handle sensor offsets on mbio/mb_platform.c
+and changed the way is currently used in mb7kpreprocess. Added
+mbio/mb_platform_math.c to the archive. This source file includes math
+functions to calculate angular offsets.
+
+-----> 5.5.2252 (July 1, 2015)
+
+Mbedit, mbnavedit, mbnavadjust, mbvelocitytool: Fix X11 font initialization
+problem created in the 2251 commit.
+
+-----> 5.5.2251 (June 30, 2015)
+
+Mblist, mbnavlist, mbctdlist: Changed time outputs so that decimal second
+values will be formatted according to the locale (e.g. decimal delineation by
+commas in Europe).
+
+Mbedit, mbnavedit, mbnavadjust, mbvelocitytool, mbgrdviz, mbeditviz: Set up
+preprocessor defines to allow fonts to be defined using the CFLAGS
+environment variable.
+
+-----> 5.5.2250 (June 29, 2015)
+
+Mbedit, mbnavedit, mbvelocitytool, mbgrdviz, mbeditviz: Removed call to X11
+function XtSetLanguageProc() in all graphical tools. This call apparently
+causes the program locale to be reset according system defaults, even if the
+program implicitly begins in the standard C locale. If the system locale uses
+"," rather than "." as the decimal point marker (e.g. a normal European locale),
+then a GMT 5 initialization will probably fail on reading fonts, at least on
+many if not all Linux distributions. Thanks to Giancarlo Troni for figuring this
+one out.
+
+General: Added mbio/mb_platform.c to the archive. This source file includes the
+functions to read, write, and use platform, sensor, and sensor offset definitions.
+At this time the mb_platform_*() functions are only used in mb7kpreprocess, but
+they will soon be used in mbprocess and all the preprocess programs.
+
+Mbprocess: changed application of tide corrections so that these corrections are
+applied to the platform depth values rather than the bathymetry values. The result
+is the same, but now the navigation (or trajectory) of the processed files is
+corrected in addition to the bathymetry.
+
+-----> 5.5.2249 (June 26, 2015)
+
+Format 121 (MBF_GSFGENMB): Kluge added to the GSF format i/o module to handle
+beam angles incorrectly constructed so that angles from vertical are negative
+for port side beams when all aziumuthal angles are uniformaly zero (=starboard).
+
+General: Added platform, sensor, and sensor offset definitions to mb_io.h for
+use in flexibly defining a platform consisting of many sensors with relative
+positional and angular offsets. Also added functions to read and write
+platform files using these definitions. Have not completed the function to perform
+lever arm calculations using this platform definition. Initially these functions
+will be used in mb7kpreprocess, but ultimately these will be used generally
+in MB-System.
+
+Mb7kpreprocess: initial implementation using the new platform file and structure
+definitions.
+
+-----> 5.5.2248 (May 31, 2015)
+
+Mbgrdviz and mbview: Fixed casts between int and pointer that seem to be
+responsible for mbgrdviz crashes.
+
+-----> 5.5.2247 (May 29, 2015)
+
+General: Cleaned up missing function prototypes through much of the codebase
+(excepting externally written libraries gsf, sapi, bsio) in an effort to fix
+crashes of mbgrdviz and other programs.
+
+-----> 5.5.2246 (May 27, 2015)
+
+Mbswath, mbcontour, mbgrdtiff: Updated GMT5 header files in src/gmt to enable
+building on Ubuntu Linux, CentOs Linux, and CygWin while maintaining
+compatibility with GMT 5.1.2.
+
+Mbedit, mbnavedit, mbvelocitytool, mbgrdviz, mbeditviz: Incomplete tweaks to
+font handling to enable use of fonts other than Helvetica, Times, and Courier.
+
+-----> 5.5.2243 (May 22, 2015)
+
+Rewrote the configure.ac file to fix logic flaws in the configure script.
+
+-----> 5.5.2242 (May 16, 2015)
+
+Mbswath, mbcontour, mbgrdtiff: Updated files in src/gmt for compatibility with
+GMT 5.1.2.
+
+-----> 5.5.2241 (May 12, 2015)
+
+Format 59 (MBF_EM710MBA): Fixed flag causing erroneous warning that beam flags
+are not supported for this format (beam flags are supported).
+
+Many source files: further changes to precompiler directives suggested by Joaquim Luis
+in order to enable building under Windows.
+
+-----> 5.5.2240 (May 8, 2015)
+
+Format 241 (MBF_WASSPENL): Fixed recognition of *.nwsf suffix.
+
+Mbclean: fixed bug in beam position calculation identified by Joaquim Luis.
+
+-----> 5.5.2239 (May 6, 2015)
+
+Format 241 (MBF_WASSPENL): Now supports WASSP multibeam data conforming to
+the WASSP ICD 2.4. MB-System is storing beam flags in unused bytes in the
+existing CORBATHY data records (specifically the "empty" field in the
+CORBATHY beam data specified in ICD 2.4).
+
+Many source files: changes to precompiler directives suggested by Joaquim Luis
+in order to enable building under Windows.
+
+Mbnavadjust: Modified the inversion to separate the vertical and lateral
+covariance so that lateral offsets do not bleed into the vertical offset
+model.
+
+Mb7kpreprocess: Fixed bug that treated null soundings as good for datasets
+without detection records.
+
+Mbdumpesf: Added capability to output in the edit save file format in addition
+to ASCII text, and to ignore specified types of edit events (e.g. copy an esf
+file while removing all beam null events).
+
+Build system: Fixed bug that caused configure to fail if netCDF has a pkg-config
+installation while GMT5 is in a specified but nonstandard location.
+
+-----> 5.5.2238 (April 15, 2015)
+
+Mbnavadjust: Recast and improved the inversion. Added a "perturbation" model
+display which does not include the average offsets between the individual surveys
+in projects involving multiple surveys.
+
+Mbcontour, mbswath, mbgrdtiff: Included fixes suggested by Joaquim Luis for
+compatibility with the next GMT5 release.
+
+Mbclean: Removed -M3 and -M4 options that previously caused the program to null
+(or zero) rather than flag bad soundings. This is an obsolete feature that only
+made sense prior to existence of mbprocess.
+
+Mbbackangle: Fixed mbm_grdplot call to no longer use an obsolete option.
+
+-----> 5.5.2237 (March 23, 2015)
+
+Mbnavadjust, mbnavedit: Removed references to GMT and netCDF in the Makefile.am
+file in both source directories.
+
+-----> 5.5.2236 (March 23, 2015)
+
+Mbnavadjust, mbnavadjustmerge: Added a new type of constraint referred to as a
+global tie. Each data section can have one of its navigation points tied to
+the fixed global frame of reference with a specified x, y, z offset (or just x
+and y, or just z) and x, y, and z uncertainties in the offset values. These
+global ties are set using mbnavadjustmerge. The relevant mbnavadjustmerge
+commands are:
+    --set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
+    --set-global-tie-xyz=file:section[:snav]
+    --set-global-tie-xyonly=file:section[:snav]
+    --set-global-tie-zonly=file:section[:snav]
+
+Mbnavadjustmerge: Added ability to unset (delete) global ties and crossing ties.
+The relevant mbnavadjustmerge commands are:
+    --unset-global-tie=file:section
+    --unset-tie=file1:section1/file2:section2
+
+Mbnavadjust, mbnavadjustmerge: Explicitly added references to libgmt and libpsl in
+the src/mbnavadjust/Makefile.am file so that the mbnavadjust and mbnavadjustmerge
+executables are linked to those libraries. This is to solve a mysterious dependency
+of mbnavadjust on libgmt on CentOs6 - the program was failing due inability to find
+libgmt.so.5 even though the code does not reference any GMT or GMT5 function or header
+file. Presumably this change will go away when the mystery is solved.
+
+Mbsslayout: fixed automatically generated plottin script.
+
+Mbm_route2mission: Added multibeam maximum range value.
+
+-----> 5.5.2234 (March 5, 2015)
+
+Plot macros (mbm_grdplot, mbm_grd3dplot, mbm_grdtiff, mbm_histplot, mbm_plot,
+mbm_xyplot): Now generate plotting scripts that will not attempt to display the
+plot on the screen if invoked with a "-N" command line argument.
+
+Format 64 (MBF_MR1PRVR2): Added include of <sys/time.h> in mbbs_defines.h to
+facilitate building under cygwin.
+
+Multi-macros (mbm_multiprocess, mbm_multicopy, mbm_multidatalist): Changed to
+use datalist.mb-1 as default input and to use 4 as the default number of CPUs.
+
+Mbedit: Added fast scroll through a file if the forward or back mouse buttons
+are held down more than 2 seconds.
+
+Mbextractsegy, mbsslayout: Changed output section/line plotting script so that
+it will not attempt to display the plot on the screen if invoked with a "-N"
+command line argument.
+
+Mbprocess: Reduced informational output when not in verbose mode to make the
+output from use of mbm_multiprocess cleaner.
+
+-----> 5.5.2233 (February 23, 2015)
+
+Release 5.5.2233
+
+Mbm_grdplot, mbm_grdtiff: Generated plot scripts now set foregound and background
+colors based on the -D option.
+
+Mbmroute2mission: Now allows the maximum planned climb rate of the AUV to be
+specified with the -U option
+
+-----> 5.5.2232 (February 21, 2015)
+
+Mbm_plot, mbm_grdplot, mbm_grd3dplot, mbhistplot: Changed handling of gmt defaults
+so that any local gmt.conf file is deleted before any gmtset calls are made, and
+the resulting gmt.conf file is deleted before the plot script ends.
+
+Mbswath: fixed calculation of beam or pixel footprints in mode requesting real
+footprint plotting.
+
+-----> 5.5.2231 (February 20, 2015)
+
+Mb7kpreprocess: Switched beam angle calculation to the mb_beaudoin() function
+already used by mbkongsbergpreprocess (contributed by Jonathan Beaudoin).
+
+Mbm_bpr: Made compatible with GMT5.
+
+-----> 5.5.2230 (February 18, 2015)
+
+Mbgrdtiff: Fixed ordering of rows and columns in the output image.
+
+Mbm_route2mission: Added output of a mission alititude profile plot.
+
+Mbauvloglist: Added capability of binary output.
+
+Mb7kpreprocess: Fixed so that bathymetry calculation uses roll merged at
+the bottom detect time for all of the possible combinations of Reson 7k
+data record types.
+
+Mbpreprocess: Fixed to exclude zero longitude or lattitude values from the
+tables used for interpolation onto ping times.
+
+Mbrolltimelag: Fixed automatically generated roll-slope correlation plot.
+
+-----> 5.5.2229 (February 14, 2015)
+
+Format 121 (MBF_GSFGENMB): The i/o module will now allocate and initialize arrays
+of beamflags and alongtrack distance when those are not included in the input file.
+
+Mbfilter: removed failing check for existance of sidescan data.
+
+Mbsegygrid: flipped grid convention for compatibility with GMT5.
+
+Mbm_plot, mbm_grdplot, mbm_grd3dplot, mbm_histplot: further changes for compatibility
+with GMT5.
+
+Mbm_route2mission: Compatibility with GMT5.
+
+Mbcontour, mbswath: More changes for compatibility with GMT5.
+
+-----> 5.5.2228 (February 6, 2015)
+
+Install_makefiles: the old install_makefiles build system no longer 
+functions and has been removed.
+
+Mbgrid: When using the two-step weighted footprint slope algorithm, mbgrid
+only reads files on the second pass through the input datalist that contained
+useful data in the first pass.
+
+Major changes made to integrate MB-System with GMT5:
+  The code will no longer compile or work with GMT4.5.
+  Changes include:
+    -updating functions in libmbaux  that read and write GMT grids
+    -deletion of src/mbaux/mb_pslibface.c
+    -changes to all programs that read or write GMT grids,
+    -the former programs mbcontour, mbswath, and mbgrdtiff are now GMT5
+      modules built as part of a shared library.
+    -changes to all of the plot macros (e.g. mbm_grdplot) that make use of GMT
+
+Format 88 (MBF_RESON7KR): Update Reson 7k i/o module to handle TVG records.
+
+-------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.4 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.4.2219 (December 11, 2014)
+
+Mbnavadjust: Fixed fixed memory management issue related to fbt files.
+
+Mb7kpreprocess: Moved toward correct handling of sensor offsets.
+
+Mbpreprocess: Moved toward correct handling of sensor offsets.
+
+-----> 5.4.2218 (December 4, 2014)
+
+Mbinfo: Fixed JSON format output to file (previously missed final closing bracket).
+
+
+-----> 5.4.2217 (December 1, 2014)
+
+Mbclean: Implemented additional flagging tests contributed by Suzanne O'Hara,
+including speed range (-Pspeed_min/speed_max), ping navigation bounds
+(-Rwest/east/south/north), and zero longitude and latitude values (-Z).
+Also, a minimum depth at nadir test embedded by Dana Yoerger for all data
+(circa 2010) has been recast into a minimum range test option (-Krange_min). 
+
+Format 71 (MBF_MBLDEOIH) and fbt files: fixed a problem with the i/o module
+as updated in 5.4.2216.
+
+-----> 5.4.2216 (November 30, 2014)
+
+Format 251 (MBF_PHOTGRAM): We have added a new data format and associated data
+system supporting photogrammetric topography calculated from stereo pair
+photographs. This format includes navigation and attitude data. Each 2D group
+of bathymetry values is derived with a single stereo pair. A file consists of a
+sequence of stereo pair bathymetry, each set of which has a timestamp, navigation
+and attitude as well as bathymetry values. The format 251 files are generated
+from stereo pairs (and navigation and attitude data) by a set of tools that
+are not currently in MB-System, but which will be added to MB-System in the
+future. 
+
+Mbeditviz and Mbgrdviz: Now allow selection of a single navigation point.
+
+Mbeditviz and mbgrid: Now handle point topography data (e.g. xyz soundings, lidar
+soundings, photogrammetry topography) differently than multibeam soundings even
+when the footprint algorithm is specified. Point data are now treated as such,
+and no longer are associated with nonsensical beam footprints.
+
+Format 71 (MBF_MBLDEOIH) and fbt files: We have defined a new data record header (version 5)
+that represents the number of bathymetry beams, amplitude beams, and sidescan
+pixels as four-byte int values rather than two-byte short values. This supports
+data constructs that have more than 32768 bathymetry values, as can be the case
+for dense photogrammetry data derived from stereo-pair photography. The i/o module
+only uses the version 5 header when there are more than 32768 bathymetry values
+in the associated sonar ping, lidar scan, or photographic stereo pair. Otherwise,
+the previously existing version 4 header is used. Consequently, for all previously
+supported data types there will be no change to the MBF_MBLDEOIH format or to
+fbt files.
+
+General: MB-System now defines several types of bathymetry data:
+      MB_TOPOGRAPHY_TYPE_UNKNOWN		0
+      MB_TOPOGRAPHY_TYPE_ECHOSOUNDER	        1
+      MB_TOPOGRAPHY_TYPE_MULTIBEAM		2
+      MB_TOPOGRAPHY_TYPE_SIDESCAN		3
+      MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC	4
+      MB_TOPOGRAPHY_TYPE_LIDAR      	        5
+      MB_TOPOGRAPHY_TYPE_CAMERA     	        6
+      MB_TOPOGRAPHY_TYPE_GRID     	        7
+      MB_TOPOGRAPHY_TYPE_POINT       	        8
+The immediate utility of differentiating between data types is to
+allow gridding algorithms to handle data appropriately. As discussed
+above, the footprint gridding algorithms are now only applied by
+mbgrid or mbeditviz to multibeam bathymetry. Other differences in
+data processing will be added in the future.
+
+General: The sort function and related comparison function declarations
+in MB-System have been corrected to be consistent with qsort() from stdlib.
 
 -----> 5.4.2213 (November 13, 2014)
 

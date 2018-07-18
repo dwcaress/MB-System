@@ -60,7 +60,7 @@
 #include "gsf.h"
 
 /* Global external data defined in this module */
-extern int      gsfError;                               /* defined in gsf.c */
+extern int gsfError; /* defined in gsf.c */
 
 /* Function prototypes for this file */
 
@@ -106,146 +106,129 @@ extern int      gsfError;                               /* defined in gsf.c */
  *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
  *
  ********************************************************************/
-int
-gsfFileSupportsRecalculateXYZ(int handle, int *status)
-{
-    int             ret;
-    int             i;
-    int             rec_size;
-    int             att_rec;
-    int             svp_rec;
-    int             param_rec;
-    int             ping_rec;
-    gsfDataID       id;
-    gsfRecords      rec;
+int gsfFileSupportsRecalculateXYZ(int handle, int *status) {
+	int ret;
+	int i;
+	int rec_size;
+	int att_rec;
+	int svp_rec;
+	int param_rec;
+	int ping_rec;
+	gsfDataID id;
+	gsfRecords rec;
 
-    memset (&id, 0, sizeof(id));
-    memset (&rec, 0, sizeof(rec));
-    att_rec = 0;
-    svp_rec = 0;
-    param_rec = 0;
-    ping_rec = 0;
+	memset(&id, 0, sizeof(id));
+	memset(&rec, 0, sizeof(rec));
+	att_rec = 0;
+	svp_rec = 0;
+	param_rec = 0;
+	ping_rec = 0;
 
-    *status = 0;
+	*status = 0;
 
-    /* Rewind the file so that the pointer is at the first record. */
-    ret = gsfSeek(handle, GSF_REWIND);
-    if (ret)
-    {
-        gsfError = GSF_FILE_SEEK_ERROR;
-        return (-1);
-    }
+	/* Rewind the file so that the pointer is at the first record. */
+	ret = gsfSeek(handle, GSF_REWIND);
+	if (ret) {
+		gsfError = GSF_FILE_SEEK_ERROR;
+		return (-1);
+	}
 
-    for (i = 0; i < 100; i++)
-    {
-        rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
-        if (rec_size < 0)
-        {
-            if (gsfError == GSF_READ_TO_END_OF_FILE)
-            {
-                ret = gsfSeek(handle, GSF_REWIND);
-                if (ret)
-                {
-                    gsfError = GSF_FILE_SEEK_ERROR;
-                    return (-1);
-                }
-                return(0);
-            }
-            else
-            {
-                /* gsfError should already be set to indicate the type of failure that occurred */
-                return (-1);
-            }
-        }
+	for (i = 0; i < 100; i++) {
+		rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
+		if (rec_size < 0) {
+			if (gsfError == GSF_READ_TO_END_OF_FILE) {
+				ret = gsfSeek(handle, GSF_REWIND);
+				if (ret) {
+					gsfError = GSF_FILE_SEEK_ERROR;
+					return (-1);
+				}
+				return (0);
+			}
+			else {
+				/* gsfError should already be set to indicate the type of failure that occurred */
+				return (-1);
+			}
+		}
 
-        switch (id.recordID)
-        {
-            default:
-            case (GSF_RECORD_NAVIGATION_ERROR):
-            case (GSF_RECORD_SWATH_BATHY_SUMMARY):
-            case (GSF_RECORD_HISTORY):
-            case (GSF_RECORD_SENSOR_PARAMETERS):
-            case (GSF_RECORD_COMMENT):
-            case (GSF_RECORD_HEADER):
-                break;
+		switch (id.recordID) {
+		default:
+		case (GSF_RECORD_NAVIGATION_ERROR):
+		case (GSF_RECORD_SWATH_BATHY_SUMMARY):
+		case (GSF_RECORD_HISTORY):
+		case (GSF_RECORD_SENSOR_PARAMETERS):
+		case (GSF_RECORD_COMMENT):
+		case (GSF_RECORD_HEADER):
+			break;
 
-            case (GSF_RECORD_SWATH_BATHYMETRY_PING):
-                if ((rec.mb_ping.travel_time) && (rec.mb_ping.beam_angle))
-                {
-                    switch (rec.mb_ping.sensor_id)
-                    {
-                        default:
-                            break;
+		case (GSF_RECORD_SWATH_BATHYMETRY_PING):
+			if ((rec.mb_ping.travel_time) && (rec.mb_ping.beam_angle)) {
+				switch (rec.mb_ping.sensor_id) {
+				default:
+					break;
 
-                        case GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_RESON_7125_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM300_RAW_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM1002_RAW_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM2000_RAW_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM3000_RAW_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM120_RAW_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM3002_RAW_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM3000D_RAW_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM3002D_RAW_SPECIFIC:
-                            ping_rec++;
-                            break;
+				case GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_RESON_7125_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM300_RAW_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM1002_RAW_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM2000_RAW_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM3000_RAW_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM120_RAW_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM3002_RAW_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM3000D_RAW_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM3002D_RAW_SPECIFIC:
+					ping_rec++;
+					break;
 
-                        case GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC:
-                            if (rec.mb_ping.sector_number)
-                            {
-                                ping_rec++;
-                            }
-                            break;
-                    }
-                }
-                break;
+				case GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC:
+					if (rec.mb_ping.sector_number) {
+						ping_rec++;
+					}
+					break;
+				}
+			}
+			break;
 
-            case (GSF_RECORD_SOUND_VELOCITY_PROFILE):
-                if (rec.svp.number_points > 1)
-                {
-                    svp_rec++;
-                }
-                break;
+		case (GSF_RECORD_SOUND_VELOCITY_PROFILE):
+			if (rec.svp.number_points > 1) {
+				svp_rec++;
+			}
+			break;
 
-            case (GSF_RECORD_PROCESSING_PARAMETERS):
-                if (rec.process_parameters.number_parameters > 1)
-                {
-                    param_rec++;
-                }
-                break;
+		case (GSF_RECORD_PROCESSING_PARAMETERS):
+			if (rec.process_parameters.number_parameters > 1) {
+				param_rec++;
+			}
+			break;
 
-            case (GSF_RECORD_ATTITUDE):
-                if (rec.attitude.num_measurements > 1)
-                {
-                    att_rec++;
-                }
-                break;
-        }
+		case (GSF_RECORD_ATTITUDE):
+			if (rec.attitude.num_measurements > 1) {
+				att_rec++;
+			}
+			break;
+		}
 
-        if (ping_rec && svp_rec && param_rec && att_rec)
-        {
-            *status = 1;
-            break;
-        }
-    }
+		if (ping_rec && svp_rec && param_rec && att_rec) {
+			*status = 1;
+			break;
+		}
+	}
 
-    /* reset the file pointer to where it was when function was called */
-    /* Rewind the file so that the pointer is at the first record. */
-    ret = gsfSeek(handle, GSF_REWIND);
-    if (ret)
-    {
-        gsfError = GSF_FILE_SEEK_ERROR;
-        return (-1);
-    }
+	/* reset the file pointer to where it was when function was called */
+	/* Rewind the file so that the pointer is at the first record. */
+	ret = gsfSeek(handle, GSF_REWIND);
+	if (ret) {
+		gsfError = GSF_FILE_SEEK_ERROR;
+		return (-1);
+	}
 
-    return (0);
+	return (0);
 }
 
 /********************************************************************
@@ -289,120 +272,104 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
  *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
  *
  ********************************************************************/
-int
-gsfFileSupportsRecalculateTPU(int handle, int *status)
-{
-    int             ret;
-    int             i;
-    int             rec_size;
-    int             svp_rec;
-    int             param_rec;
-    int             ping_rec;
-    gsfDataID       id;
-    gsfRecords      rec;
+int gsfFileSupportsRecalculateTPU(int handle, int *status) {
+	int ret;
+	int i;
+	int rec_size;
+	int svp_rec;
+	int param_rec;
+	int ping_rec;
+	gsfDataID id;
+	gsfRecords rec;
 
-    memset (&id, 0, sizeof(id));
-    memset (&rec, 0, sizeof(rec));
-    svp_rec = 0;
-    param_rec = 0;
-    ping_rec = 0;
+	memset(&id, 0, sizeof(id));
+	memset(&rec, 0, sizeof(rec));
+	svp_rec = 0;
+	param_rec = 0;
+	ping_rec = 0;
 
-    *status = 0;
+	*status = 0;
 
-    /* Rewind the file so that the pointer is at the first record. */
-    ret = gsfSeek(handle, GSF_REWIND);
-    if (ret)
-    {
-        gsfError = GSF_FILE_SEEK_ERROR;
-        return (-1);
-    }
+	/* Rewind the file so that the pointer is at the first record. */
+	ret = gsfSeek(handle, GSF_REWIND);
+	if (ret) {
+		gsfError = GSF_FILE_SEEK_ERROR;
+		return (-1);
+	}
 
-    for (i = 0; i < 100; i++)
-    {
-        rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
-        if (rec_size < 0)
-        {
-            if (gsfError == GSF_READ_TO_END_OF_FILE)
-            {
-                ret = gsfSeek(handle, GSF_REWIND);
-                if (ret)
-                {
-                    gsfError = GSF_FILE_SEEK_ERROR;
-                    return (-1);
-                }
-                return(0);
-            }
-            else
-            {
-                /* gsfError should already be set to indicate the type of failure that occurred */
-                return (-1);
-            }
-        }
+	for (i = 0; i < 100; i++) {
+		rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
+		if (rec_size < 0) {
+			if (gsfError == GSF_READ_TO_END_OF_FILE) {
+				ret = gsfSeek(handle, GSF_REWIND);
+				if (ret) {
+					gsfError = GSF_FILE_SEEK_ERROR;
+					return (-1);
+				}
+				return (0);
+			}
+			else {
+				/* gsfError should already be set to indicate the type of failure that occurred */
+				return (-1);
+			}
+		}
 
-        switch (id.recordID)
-        {
-            default:
-            case (GSF_RECORD_NAVIGATION_ERROR):
-            case (GSF_RECORD_SWATH_BATHY_SUMMARY):
-            case (GSF_RECORD_HISTORY):
-            case (GSF_RECORD_SENSOR_PARAMETERS):
-            case (GSF_RECORD_COMMENT):
-            case (GSF_RECORD_HEADER):
-                break;
+		switch (id.recordID) {
+		default:
+		case (GSF_RECORD_NAVIGATION_ERROR):
+		case (GSF_RECORD_SWATH_BATHY_SUMMARY):
+		case (GSF_RECORD_HISTORY):
+		case (GSF_RECORD_SENSOR_PARAMETERS):
+		case (GSF_RECORD_COMMENT):
+		case (GSF_RECORD_HEADER):
+			break;
 
-            case (GSF_RECORD_SWATH_BATHYMETRY_PING):
-                if ((rec.mb_ping.depth) && (rec.mb_ping.across_track))
-                {
-                    switch (rec.mb_ping.sensor_id)
-                    {
-                        case GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC:
-                        case GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC:
-                            if ((rec.mb_ping.sector_number) && (rec.mb_ping.sensor_data.gsfEM4Specific.sector[0].signal_length > 0))
-                            {
-                                ping_rec++;
-                            }
-                            break;
+		case (GSF_RECORD_SWATH_BATHYMETRY_PING):
+			if ((rec.mb_ping.depth) && (rec.mb_ping.across_track)) {
+				switch (rec.mb_ping.sensor_id) {
+				case GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC:
+				case GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC:
+					if ((rec.mb_ping.sector_number) && (rec.mb_ping.sensor_data.gsfEM4Specific.sector[0].signal_length > 0)) {
+						ping_rec++;
+					}
+					break;
 
-                        default:
-                            ping_rec++;
-                            break;
-                    }
-                }
-                break;
+				default:
+					ping_rec++;
+					break;
+				}
+			}
+			break;
 
-            case (GSF_RECORD_SOUND_VELOCITY_PROFILE):
-                if (rec.svp.number_points > 1)
-                {
-                    svp_rec++;
-                }
-                break;
+		case (GSF_RECORD_SOUND_VELOCITY_PROFILE):
+			if (rec.svp.number_points > 1) {
+				svp_rec++;
+			}
+			break;
 
-            case (GSF_RECORD_PROCESSING_PARAMETERS):
-                if (rec.process_parameters.number_parameters > 1)
-                {
-                    param_rec++;
-                }
-                break;
-        }
+		case (GSF_RECORD_PROCESSING_PARAMETERS):
+			if (rec.process_parameters.number_parameters > 1) {
+				param_rec++;
+			}
+			break;
+		}
 
-        if (ping_rec && svp_rec && param_rec)
-        {
-            *status = 1;
-            break;
-        }
-    }
+		if (ping_rec && svp_rec && param_rec) {
+			*status = 1;
+			break;
+		}
+	}
 
-    /* reset the file pointer to where it was when function was called */
-    /* Rewind the file so that the pointer is at the first record. */
-    ret = gsfSeek(handle, GSF_REWIND);
-    if (ret)
-    {
-        gsfError = GSF_FILE_SEEK_ERROR;
-        return (-1);
-    }
+	/* reset the file pointer to where it was when function was called */
+	/* Rewind the file so that the pointer is at the first record. */
+	ret = gsfSeek(handle, GSF_REWIND);
+	if (ret) {
+		gsfError = GSF_FILE_SEEK_ERROR;
+		return (-1);
+	}
 
-    return (0);
+	return (0);
 }
 
 /********************************************************************
@@ -447,106 +414,92 @@ gsfFileSupportsRecalculateTPU(int handle, int *status)
  *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
  *
  ********************************************************************/
-int
-gsfFileSupportsRecalculateNominalDepth(int handle, int *status)
-{
-    int             ret;
-    int             i;
-    int             rec_size;
-    int             svp_rec;
-    int             param_rec;
-    int             ping_rec;
-    gsfDataID       id;
-    gsfRecords      rec;
+int gsfFileSupportsRecalculateNominalDepth(int handle, int *status) {
+	int ret;
+	int i;
+	int rec_size;
+	int svp_rec;
+	int param_rec;
+	int ping_rec;
+	gsfDataID id;
+	gsfRecords rec;
 
-    memset (&id, 0, sizeof(id));
-    memset (&rec, 0, sizeof(rec));
-    svp_rec = 0;
-    param_rec = 0;
-    ping_rec = 0;
+	memset(&id, 0, sizeof(id));
+	memset(&rec, 0, sizeof(rec));
+	svp_rec = 0;
+	param_rec = 0;
+	ping_rec = 0;
 
-    *status = 0;
+	*status = 0;
 
-    /* Rewind the file so that the pointer is at the first record. */
-    ret = gsfSeek(handle, GSF_REWIND);
-    if (ret)
-    {
-        gsfError = GSF_FILE_SEEK_ERROR;
-        return (-1);
-    }
+	/* Rewind the file so that the pointer is at the first record. */
+	ret = gsfSeek(handle, GSF_REWIND);
+	if (ret) {
+		gsfError = GSF_FILE_SEEK_ERROR;
+		return (-1);
+	}
 
-    for (i = 0; i < 100; i++)
-    {
-        rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
-        if (rec_size < 0)
-        {
-            if (gsfError == GSF_READ_TO_END_OF_FILE)
-            {
-                ret = gsfSeek(handle, GSF_REWIND);
-                if (ret)
-                {
-                    gsfError = GSF_FILE_SEEK_ERROR;
-                    return (-1);
-                }
-                return(0);
-            }
-            else
-            {
-                /* gsfError should already be set to indicate the type of failure that occurred */
-                return (-1);
-            }
-        }
+	for (i = 0; i < 100; i++) {
+		rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
+		if (rec_size < 0) {
+			if (gsfError == GSF_READ_TO_END_OF_FILE) {
+				ret = gsfSeek(handle, GSF_REWIND);
+				if (ret) {
+					gsfError = GSF_FILE_SEEK_ERROR;
+					return (-1);
+				}
+				return (0);
+			}
+			else {
+				/* gsfError should already be set to indicate the type of failure that occurred */
+				return (-1);
+			}
+		}
 
-        switch (id.recordID)
-        {
-            default:
-            case (GSF_RECORD_NAVIGATION_ERROR):
-            case (GSF_RECORD_SWATH_BATHY_SUMMARY):
-            case (GSF_RECORD_HISTORY):
-            case (GSF_RECORD_SENSOR_PARAMETERS):
-            case (GSF_RECORD_COMMENT):
-            case (GSF_RECORD_HEADER):
-                break;
+		switch (id.recordID) {
+		default:
+		case (GSF_RECORD_NAVIGATION_ERROR):
+		case (GSF_RECORD_SWATH_BATHY_SUMMARY):
+		case (GSF_RECORD_HISTORY):
+		case (GSF_RECORD_SENSOR_PARAMETERS):
+		case (GSF_RECORD_COMMENT):
+		case (GSF_RECORD_HEADER):
+			break;
 
-            case (GSF_RECORD_SWATH_BATHYMETRY_PING):
-                if ((rec.mb_ping.depth))
-                {
-                     ping_rec++;
-                }
-                break;
+		case (GSF_RECORD_SWATH_BATHYMETRY_PING):
+			if ((rec.mb_ping.depth)) {
+				ping_rec++;
+			}
+			break;
 
-            case (GSF_RECORD_SOUND_VELOCITY_PROFILE):
-                if (rec.svp.number_points > 1)
-                {
-                    svp_rec++;
-                }
-                break;
+		case (GSF_RECORD_SOUND_VELOCITY_PROFILE):
+			if (rec.svp.number_points > 1) {
+				svp_rec++;
+			}
+			break;
 
-            case (GSF_RECORD_PROCESSING_PARAMETERS):
-                if (rec.process_parameters.number_parameters > 1)
-                {
-                    param_rec++;
-                }
-                break;
-        }
+		case (GSF_RECORD_PROCESSING_PARAMETERS):
+			if (rec.process_parameters.number_parameters > 1) {
+				param_rec++;
+			}
+			break;
+		}
 
-        if (ping_rec && svp_rec && param_rec)
-        {
-            *status = 1;
-            break;
-        }
-    }
+		if (ping_rec && svp_rec && param_rec) {
+			*status = 1;
+			break;
+		}
+	}
 
-    /* reset the file pointer to where it was when function was called */
-    /* Rewind the file so that the pointer is at the first record. */
-    ret = gsfSeek(handle, GSF_REWIND);
-    if (ret)
-    {
-        gsfError = GSF_FILE_SEEK_ERROR;
-        return (-1);
-    }
+	/* reset the file pointer to where it was when function was called */
+	/* Rewind the file so that the pointer is at the first record. */
+	ret = gsfSeek(handle, GSF_REWIND);
+	if (ret) {
+		gsfError = GSF_FILE_SEEK_ERROR;
+		return (-1);
+	}
 
-    return (0);
+	return (0);
 }
 
 /********************************************************************
@@ -592,77 +545,65 @@ gsfFileSupportsRecalculateNominalDepth(int handle, int *status)
  *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
  *
  ********************************************************************/
-int
-gsfFileContainsMBAmplitude(int handle, int *status)
-{
-    int             ret;
-    int             i;
-    int             rec_size;
-    int             mb_ping;
-    gsfDataID       id;
-    gsfRecords      rec;
+int gsfFileContainsMBAmplitude(int handle, int *status) {
+	int ret;
+	int i;
+	int rec_size;
+	int mb_ping;
+	gsfDataID id;
+	gsfRecords rec;
 
-    memset (&id, 0, sizeof(id));
-    memset (&rec, 0, sizeof(rec));
-    mb_ping = 0;
-    *status = 0;
+	memset(&id, 0, sizeof(id));
+	memset(&rec, 0, sizeof(rec));
+	mb_ping = 0;
+	*status = 0;
 
-    /* Rewind the file so that the pointer is at the first record. */
-    ret = gsfSeek(handle, GSF_REWIND);
-    if (ret)
-    {
-        gsfError = GSF_FILE_SEEK_ERROR;
-        return (-1);
-    }
+	/* Rewind the file so that the pointer is at the first record. */
+	ret = gsfSeek(handle, GSF_REWIND);
+	if (ret) {
+		gsfError = GSF_FILE_SEEK_ERROR;
+		return (-1);
+	}
 
-    for (i = 0; i < 100; i++)
-    {
-        rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
-        if (rec_size < 0)
-        {
-            if (gsfError == GSF_READ_TO_END_OF_FILE)
-            {
-                ret = gsfSeek(handle, GSF_REWIND);
-                if (ret)
-                {
-                    gsfError = GSF_FILE_SEEK_ERROR;
-                    return (-1);
-                }
-                return(0);
-            }
-            else
-            {
-                /* gsfError should already be set to indicate the type of failure that occurred */
-                return (-1);
-            }
-        }
+	for (i = 0; i < 100; i++) {
+		rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
+		if (rec_size < 0) {
+			if (gsfError == GSF_READ_TO_END_OF_FILE) {
+				ret = gsfSeek(handle, GSF_REWIND);
+				if (ret) {
+					gsfError = GSF_FILE_SEEK_ERROR;
+					return (-1);
+				}
+				return (0);
+			}
+			else {
+				/* gsfError should already be set to indicate the type of failure that occurred */
+				return (-1);
+			}
+		}
 
-        switch (id.recordID)
-        {
-            case (GSF_RECORD_SWATH_BATHYMETRY_PING):
-                if ((rec.mb_ping.mc_amplitude) || (rec.mb_ping.mr_amplitude))
-                {
-                    *status = 1;
-                }
-                mb_ping = 1;
-                break;
-        }
-        if (mb_ping == 1)
-        {
-            break;
-        }
-    }
+		switch (id.recordID) {
+		case (GSF_RECORD_SWATH_BATHYMETRY_PING):
+			if ((rec.mb_ping.mc_amplitude) || (rec.mb_ping.mr_amplitude)) {
+				*status = 1;
+			}
+			mb_ping = 1;
+			break;
+		}
+		if (mb_ping == 1) {
+			break;
+		}
+	}
 
-    /* reset the file pointer to where it was when function was called */
-    /* Rewind the file so that the pointer is at the first record. */
-    ret = gsfSeek(handle, GSF_REWIND);
-    if (ret)
-    {
-        gsfError = GSF_FILE_SEEK_ERROR;
-        return (-1);
-    }
+	/* reset the file pointer to where it was when function was called */
+	/* Rewind the file so that the pointer is at the first record. */
+	ret = gsfSeek(handle, GSF_REWIND);
+	if (ret) {
+		gsfError = GSF_FILE_SEEK_ERROR;
+		return (-1);
+	}
 
-    return (0);
+	return (0);
 }
 
 /********************************************************************
@@ -708,76 +649,63 @@ gsfFileContainsMBAmplitude(int handle, int *status)
  *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
  *
  ********************************************************************/
-int
-gsfFileContainsMBImagery(int handle, int *status)
-{
-    int             ret;
-    int             i;
-    int             rec_size;
-    int             mb_ping;
-    gsfDataID       id;
-    gsfRecords      rec;
+int gsfFileContainsMBImagery(int handle, int *status) {
+	int ret;
+	int i;
+	int rec_size;
+	int mb_ping;
+	gsfDataID id;
+	gsfRecords rec;
 
-    memset (&id, 0, sizeof(id));
-    memset (&rec, 0, sizeof(rec));
-    mb_ping = 0;
-    *status = 0;
+	memset(&id, 0, sizeof(id));
+	memset(&rec, 0, sizeof(rec));
+	mb_ping = 0;
+	*status = 0;
 
-    /* Rewind the file so that the pointer is at the first record. */
-    ret = gsfSeek(handle, GSF_REWIND);
-    if (ret)
-    {
-        gsfError = GSF_FILE_SEEK_ERROR;
-        return (-1);
-    }
+	/* Rewind the file so that the pointer is at the first record. */
+	ret = gsfSeek(handle, GSF_REWIND);
+	if (ret) {
+		gsfError = GSF_FILE_SEEK_ERROR;
+		return (-1);
+	}
 
-    for (i = 0; i < 100; i++)
-    {
-        rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
-        if (rec_size < 0)
-        {
-            if (gsfError == GSF_READ_TO_END_OF_FILE)
-            {
-                ret = gsfSeek(handle, GSF_REWIND);
-                if (ret)
-                {
-                    gsfError = GSF_FILE_SEEK_ERROR;
-                    return (-1);
-                }
-                return(0);
-            }
-            else
-            {
-                /* gsfError should already be set to indicate the type of failure that occurred */
-                return (-1);
-            }
-        }
+	for (i = 0; i < 100; i++) {
+		rec_size = gsfRead(handle, GSF_NEXT_RECORD, &id, &rec, NULL, 0);
+		if (rec_size < 0) {
+			if (gsfError == GSF_READ_TO_END_OF_FILE) {
+				ret = gsfSeek(handle, GSF_REWIND);
+				if (ret) {
+					gsfError = GSF_FILE_SEEK_ERROR;
+					return (-1);
+				}
+				return (0);
+			}
+			else {
+				/* gsfError should already be set to indicate the type of failure that occurred */
+				return (-1);
+			}
+		}
 
-        switch (id.recordID)
-        {
-            case (GSF_RECORD_SWATH_BATHYMETRY_PING):
-                if ((rec.mb_ping.brb_inten) && (rec.mb_ping.brb_inten->time_series))
-                {
-                    *status = 1;
-                }
-                mb_ping = 1;
-                break;
-        }
-        if (mb_ping == 1)
-        {
-            break;
-        }
-    }
+		switch (id.recordID) {
+		case (GSF_RECORD_SWATH_BATHYMETRY_PING):
+			if ((rec.mb_ping.brb_inten) && (rec.mb_ping.brb_inten->time_series)) {
+				*status = 1;
+			}
+			mb_ping = 1;
+			break;
+		}
+		if (mb_ping == 1) {
+			break;
+		}
+	}
 
-    /* reset the file pointer to where it was when function was called */
-    /* Rewind the file so that the pointer is at the first record. */
-    ret = gsfSeek(handle, GSF_REWIND);
-    if (ret)
-    {
-        gsfError = GSF_FILE_SEEK_ERROR;
-        return (-1);
-    }
+	/* reset the file pointer to where it was when function was called */
+	/* Rewind the file so that the pointer is at the first record. */
+	ret = gsfSeek(handle, GSF_REWIND);
+	if (ret) {
+		gsfError = GSF_FILE_SEEK_ERROR;
+		return (-1);
+	}
 
-    return (0);
+	return (0);
 }
-
