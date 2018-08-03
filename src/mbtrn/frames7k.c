@@ -67,6 +67,7 @@
 #include "iowrap.h"
 #include "mdebug.h"
 #include "mbtrn.h"
+#include "mconfig.h"
 
 /////////////////////////
 // Macros
@@ -236,6 +237,12 @@ int main(int argc, char **argv)
     if(cfg.cycles<=0){
         forever=true;
     }
+    
+    if (cfg.verbose) {
+        mcfg_configure(NULL,0);
+        mdb_set(MBTRN,MDL_DEBUG);
+    }
+
     if (NULL != s) {
         // initialize reader
         // create and open socket connection
@@ -265,7 +272,9 @@ int main(int argc, char **argv)
             // here, separate poll, parse, enumeration and raw buffer reads
             MDEBUG("polling cycle[%d/%d]\n",count,cfg.cycles);
             MDEBUG("calling xread\n");
-            if( (istat = mbtrn_reader_xread(reader,buf,cfg.size,tmout,MBR_ALLOW_PARTIAL)) > 0){
+//            fprintf(stderr,"WARN - using alt xread\n");
+            if( (istat = mbtrn_reader_xread_new(reader,buf,cfg.size,tmout,MBR_BLOCK,0)) > 0){
+//            if( (istat = mbtrn_reader_xread_orig(reader,buf,cfg.size,tmout,MBR_ALLOW_PARTIAL)) > 0){
                 MDEBUG("xread %d/%d OK  [%d] - returned [%d/%d]\n",count,cfg.cycles,rstat,istat,cfg.size);
                 MDEBUG("enumerating frames\n");
                 // enumerate over the frames, show them
@@ -277,7 +286,12 @@ int main(int argc, char **argv)
                     drfe = mbtrn_reader_next(reader);
                 }
             }else{
-                MERROR("xread %d/%d ERR [%d] - returned [%d/%d]\n",count+1,cfg.cycles,rstat,istat,cfg.size);
+                MERROR("ERR - xread - cycle[%d/%d] rstat[%d] - returned istat/sz[%d/%d]\n",count+1,cfg.cycles,rstat,istat,cfg.size);
+                if (me_errno==ME_ESOCK || me_errno==ME_ERCV) {
+                    MERROR("socket closed - reconnecting in 5 sec\n");
+                    sleep(5);
+                    mbtrn_reader_connect(reader);
+                }
             }
         }
     }

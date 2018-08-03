@@ -46,6 +46,7 @@
 #include "r7kc.h"
 #include "iowrap.h"
 #include "mlist.h"
+#include "mlog.h"
 #include "mconfig.h"
 
 /* ping structure definition */
@@ -89,8 +90,8 @@ struct mbtrnpreprocess_ping_struct {
 
 #define MBTRNPREPROCESS_LOGFILE_TIMELENGTH 900.0
 
-int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error);
-int mbtrnpreprocess_closelog(int verbose, FILE **logfp, int *error);
+int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, void **mbio_ptr, int *error);
+int mbtrnpreprocess_closelog(int verbose, FILE **logfp, void **mbio_ptr, int *error);
 int mbtrnpreprocess_postlog(int verbose, FILE *logfp, char *message, int *error);
 int mbtrnpreprocess_logparameters(int verbose,
                                 FILE *logfp,
@@ -120,6 +121,7 @@ int mbtrnpreprocess_logstatistics(int verbose,
 int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int *error);
 int mbtrnpreprocess_input_read(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error);
 int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error);
+int mbtrnpreprocess_init_debug(int verbose);
 
 static char version_id[] = "$Id$";
 static char program_name[] = "mbtrnpreprocess";
@@ -144,6 +146,8 @@ uint32_t reader_capacity=RESON_READER_CAPACITY_DFL;
 #define TRN_NPEERS (TRN_MAX_PEER+1)
 #define TRN_HBTOK_DFL 10
 #define MBTPP 1
+typedef enum{INPUT_MODE_SOCKET=1,INPUT_MODE_FILE=2}input_mode_t;
+input_mode_t input_mode;
 
 iow_peer_t *trn_peer = NULL;
 mlist_t *trn_plist = NULL;
@@ -155,6 +159,48 @@ int trn_tx_count=0;
 int trn_rx_count=0;
 int trn_tx_bytes=0;
 int trn_rx_bytes=0;
+int trn_cli_con=0;
+int trn_cli_dis=0;
+int trn_src_con=0;
+int trn_src_dis=0;
+
+#define TRN_BLOG_NAME "tbin"
+#define TRN_BLOG_DESC "trn binary data"
+#define TRN_MLOG_NAME "tmsg"
+#define TRN_LOG_EXT ".log"
+#define TRN_MLOG_DESC "trn message log"
+#define SZ_1M (1024*1024)
+#define SZ_1G (1024*1024*1024)
+#define TRN_CMD_LINE_BYTES 2048
+#define TRN_STATUS_INTERVAL_SEC_DFL 30
+
+mlog_id_t BLOG_ID=0x1;
+mlog_id_t MLOG_ID=0x2;
+
+mlog_config_t blog_conf = {
+    100*SZ_1M, ML_NOLIMIT, ML_NOLIMIT,
+    ML_OSEG|ML_LIMLEN,
+    ML_FILE,ML_TFMT_ISO1806};
+
+mlog_config_t mlog_conf = {
+    ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT,
+    ML_MONO,
+    ML_FILE,ML_TFMT_ISO1806};
+
+char *trn_blog_path=NULL;
+char *trn_mlog_path=NULL;
+
+mlog_t *trn_blog=NULL;
+mlog_t *trn_mlog=NULL;
+iow_flags_t flags = IOW_RDWR|IOW_APPEND|IOW_CREATE;
+iow_mode_t mode = IOW_RU|IOW_WU|IOW_RG|IOW_WG;
+bool trn_blog_en = true;
+bool trn_mlog_en = true;
+int64_t trn_pub_delay_msec=0;
+char g_cmd_line[TRN_CMD_LINE_BYTES]={0};
+char *g_log_dir=NULL;
+struct timespec session_start={0},session_now={0},session_loop={0};
+uint32_t trn_status_interval_sec = TRN_STATUS_INTERVAL_SEC_DFL;
 
 /*--------------------------------------------------------------------*/
 
@@ -168,16 +214,20 @@ int main(int argc, char **argv) {
 							    "\t--rhost=hostname\n"
 							    "\t--thost=hostname\n"
 							    "\t--hbeat=n\n"
+							    "\t--delay-msec=n\n"
+                                "\t--no-blog\n"
+							    "\t--no-mlog\n"
+							    "\t--statsec\n"
                                 "\t--format=format\n"
                                 "\t--platform-file\n"
                                 "\t--platform-target-sensor\n"
                                 "\t--log-directory=path\n"
                                 "\t--output=file [or SOCKET:<port>]\n"
                                 "\t--projection=projection_id\n"
-                                "\t--swathwidth=value\n"
+                                "\t--swath-width=value\n"
                                 "\t--soundings=value\n"
                                 "\t--median-filter=threshold/nx/ny\n";
-	extern char *optarg;
+	extern char WIN_DECLSPEC *optarg;
 	int option_index;
 	int errflg = 0;
 	int c;
@@ -212,8 +262,12 @@ int main(int argc, char **argv) {
 							          {"rhost", required_argument, NULL, 0},
 								      {"thost", required_argument, NULL, 0},
 							          {"rcap", required_argument, NULL, 0},
-                                      {"hbeat", required_argument, NULL, 0},
-        							  {"format", required_argument, NULL, 0},
+        							  {"hbeat", required_argument, NULL, 0},
+							          {"delay-msec", required_argument, NULL, 0},
+        							  {"no-blog", no_argument, NULL, 0},
+								      {"no-mlog", no_argument, NULL, 0},
+        							  {"statsec", required_argument, NULL, 0},
+								      {"format", required_argument, NULL, 0},
 	                                  {"platform-file", required_argument, NULL, 0},
 	                                  {"platform-target-sensor", required_argument, NULL, 0},
 	                                  {"log-directory", required_argument, NULL, 0},
@@ -246,9 +300,6 @@ int main(int argc, char **argv) {
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
-	int obeams_bath;
-	int obeams_amp;
-	int opixels_ss;
 	mb_path ifile;
 	mb_path dfile;
 	void *imbio_ptr = NULL;
@@ -258,6 +309,12 @@ int main(int argc, char **argv) {
 	int kind;
 	int ndata = 0;
 	char comment[MB_COMMENT_MAXLINE];
+    
+    int oformat = 71;
+    int obeams_bath;
+    int obeams_amp;
+    int opixels_ss;
+	void *ombio_ptr = NULL;
 
 	/* platform definition file */
 	mb_path platform_file;
@@ -367,6 +424,11 @@ int main(int argc, char **argv) {
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
+    // register session start time
+    clock_gettime(CLOCK_MONOTONIC, &session_start);
+    clock_gettime(CLOCK_MONOTONIC, &session_now);
+    clock_gettime(CLOCK_MONOTONIC, &session_loop);
+
 	/* set default input and output */
     memset(input, 0, sizeof(mb_path));
     memset(output, 0, sizeof(mb_path));
@@ -374,6 +436,20 @@ int main(int argc, char **argv) {
 	strcpy(input, "datalist.mb-1");
 	strcpy(output, "stdout");
 
+    memset(g_cmd_line,0,TRN_CMD_LINE_BYTES);
+    char *ip=g_cmd_line;
+    int ilen=0;
+    for (int x=0;x<argc;x++){
+        if ((ip+strlen(argv[x])-g_cmd_line) > TRN_CMD_LINE_BYTES) {
+            fprintf(stderr,"warning - logged cmdline truncated\n");
+            break;
+        }
+        ilen=sprintf(ip," %s",argv[x]);
+        ip+=ilen;
+    }
+    g_cmd_line[TRN_CMD_LINE_BYTES-1]='\0';
+    g_log_dir=strdup("./");
+    
 	/* process argument list */
 	while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
 		switch (c) {
@@ -395,6 +471,11 @@ int main(int argc, char **argv) {
 			/* input */
             else if (strcmp("input", options[option_index].name) == 0) {
                 strcpy(input, optarg);
+                if (strstr(input,"socket")) {
+                    input_mode=INPUT_MODE_SOCKET;
+                }else{
+                    input_mode=INPUT_MODE_FILE;
+                }
             }
             else if (strcmp("rhost", options[option_index].name) == 0) {
                 char *ocopy=strdup(optarg);
@@ -424,8 +505,25 @@ int main(int argc, char **argv) {
             else if (strcmp("rcap", options[option_index].name) == 0) {
                 sscanf(optarg,"%u",&reader_capacity);
             }
+                // heartbeat (pings)
             else if (strcmp("hbeat", options[option_index].name) == 0) {
                 sscanf(optarg,"%d",&trn_hbtok);
+            }
+                // ping delay
+            else if (strcmp("delay-msec", options[option_index].name) == 0) {
+                sscanf(optarg,"%lld",&trn_pub_delay_msec);
+            }
+                /* disable TRN binary log output */
+            else if (strcmp("no-blog", options[option_index].name) == 0) {
+                trn_blog_en=false;
+            }
+                /* disable TRN message log output */
+            else if (strcmp("no-mlog", options[option_index].name) == 0) {
+                trn_mlog_en=false;
+            }
+                /* status log interval (s) */
+            else if (strcmp("statsec", options[option_index].name) == 0) {
+                sscanf(optarg,"%d",&trn_status_interval_sec);
             }
 
 			/* format */
@@ -478,10 +576,13 @@ int main(int argc, char **argv) {
                 }
                 else {
                     make_logs = MB_YES;
+                    free(g_log_dir);
+                    g_log_dir=strdup(log_directory);
+                    fprintf(stderr, "\nusing log directory %s...\n",g_log_dir);
                 }
 			}
 
-			/* swathwidth */
+			/* swath-width */
 			else if ((strcmp("swath-width", options[option_index].name) == 0)) {
 				n = sscanf(optarg, "%lf", &swath_width);
 			}
@@ -579,6 +680,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nusage: %s\n", usage_message);
 		exit(error);
 	}
+
+    mbtrnpreprocess_init_debug(verbose);
     
 	/* load platform definition if specified */
 	if (use_platform_file == MB_YES) {
@@ -731,10 +834,10 @@ int main(int argc, char **argv) {
                     n_soundings_flagged = 0;
                     n_soundings_written = 0;
                     
-                    status = mbtrnpreprocess_closelog(verbose, &logfp, &error);
+                    status = mbtrnpreprocess_closelog(verbose, &logfp, &ombio_ptr, &error);
                 }
                 
-                status = mbtrnpreprocess_openlog(verbose, log_directory, &logfp, &error);
+                status = mbtrnpreprocess_openlog(verbose, log_directory, &logfp, &ombio_ptr, &error);
                 if (status == MB_SUCCESS) {
                     gettimeofday(&timeofday, &timezone);
                     log_file_open_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
@@ -747,7 +850,12 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "\nLog file could not be opened in directory %s...\n", log_directory);
                     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
                     exit(error);
-                }                
+                    
+                    /* close existing mb71 file */
+                    if (ombio_ptr != NULL) {
+                    status = mb_close(verbose, &ombio_ptr, &error);
+                    }
+                }
             }
         }
 
@@ -891,6 +999,8 @@ int main(int argc, char **argv) {
                 now_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
 //fprintf(stderr,"CHECKING AT MIDDLE OF LOOP: logfp:%p log_file_open_time_d:%.6f now_time_d:%.6f\n", logfp, log_file_open_time_d, now_time_d);
                 if (logfp == NULL || (now_time_d - log_file_open_time_d) > MBTRNPREPROCESS_LOGFILE_TIMELENGTH){
+                    
+                    /* if old log file open finish it off */
                     if (logfp != NULL) {
                         status = mbtrnpreprocess_logstatistics(verbose, logfp,
                                                 n_pings_read,
@@ -922,10 +1032,11 @@ int main(int argc, char **argv) {
                         n_soundings_flagged = 0;
                         n_soundings_written = 0;
                         
-                        status = mbtrnpreprocess_closelog(verbose, &logfp, &error);
+                        status = mbtrnpreprocess_closelog(verbose, &logfp, &ombio_ptr, &error);
                     }
 
-                    status = mbtrnpreprocess_openlog(verbose, log_directory, &logfp, &error);
+                    /* open log */
+                    status = mbtrnpreprocess_openlog(verbose, log_directory, &logfp, &ombio_ptr, &error);
                     if (status == MB_SUCCESS) {
                         gettimeofday(&timeofday, &timezone);
                         log_file_open_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
@@ -938,7 +1049,8 @@ int main(int argc, char **argv) {
                         fprintf(stderr, "\nLog file could not be opened in directory %s...\n", log_directory);
                         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
                         exit(error);
-                    }                
+                    }
+
                 }
             }
 
@@ -951,6 +1063,8 @@ int main(int argc, char **argv) {
                                 &ping[idataread].beams_bath, &ping[idataread].beams_amp, &ping[idataread].pixels_ss, ping[idataread].beamflag,
                                 ping[idataread].bath, ping[idataread].amp, ping[idataread].bathacrosstrack, ping[idataread].bathalongtrack,
                                 ping[idataread].ss, ping[idataread].ssacrosstrack, ping[idataread].ssalongtrack, comment, &error);
+
+//            MMDEBUG(APP4,"mb_get_all - status[%d] kind[%d] err[%d]\n",status, kind, error);
 
             if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
                 ping[idataread].count = ndata;
@@ -981,8 +1095,7 @@ int main(int argc, char **argv) {
                         if (ping[i].count == n_ping_process)
                             i_ping_process = i;
                     }
-fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
-        ndata,ping[idataread].time_d,ping[idataread].navlon,ping[idataread].navlat,ping[idataread].heading);
+//fprintf(stdout, "\nProcess some data: ndata:%d counts: ", ndata);
 //for (i = 0; i < n_buffer_max; i++) {
 //    fprintf(stdout,"%d ", ping[i].count);
 //}
@@ -1016,6 +1129,7 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
                     for (j = beam_start; j <= beam_end; j++) {
                         if ((j - beam_start) % beam_decimation == 0) {
                             if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
+                                
                                 /* apply median filtering to this sounding */
                                 if (median_filter_n_total > 1) {
                                     /* accumulate soundings for median filter */
@@ -1081,7 +1195,9 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
                         }
                     }
                     /* pack the data into a TRN MB1 packet and either send it to TRN or write it to a file */
-                    else {                        
+                    else {
+                        n_soundings_written++;
+                        
                         /* make sure buffer is large enough to hold the packet */
                         mb1_size = MBTRNPREPROCESS_MB1_HEADER_SIZE
                                     + n_output * MBTRNPREPROCESS_MB1_SOUNDING_SIZE
@@ -1140,7 +1256,6 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
                                             ping[i_ping_process].bathacrosstrack[j],
                                            ping[i_ping_process].bath[j]);
 
-                                n_soundings_written++;
                             }
                         }
                         
@@ -1153,6 +1268,7 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
                         }
                         mb_put_binary_int(MB_YES, checksum, &output_buffer[index]); index += 4;
                         
+                        
                         /* send the packet to TRN */
                         if (output_mode == MBTRNPREPROCESS_OUTPUT_TRN) {
                            // Send the data packet to TRN
@@ -1164,11 +1280,12 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
                             int svc=0;
                             iow_peer_t *plist=mlist_head(trn_plist);
 
-                            MMDEBUG(APP4,"waiting for trn_peer connection\n");
+                            MMDEBUG(APP4,"checking trn host socket\n");
                             iobytes = iow_recvfrom(trn_osocket, trn_peer->addr, cmsg, TRN_MSG_CON_LEN);
                             switch (iobytes) {
                                 case 0:
-                                    MMINFO(APP,"iow_recvfrom peer id[%d] returned 0; peer socket closed\n",trn_peer->id);
+                                    MMINFO(APP,"err - recvfrom ret 0 (socket closed) removing cli[%d]\n",trn_peer->id);
+                                    mlog_tprintf(MLOG_ID,"recvfrom ret 0 (socket closed) removing cli[%d]\n",trn_peer->id);
                                     // remove from list
                                     if(sscanf(trn_peer->service,"%d",&svc)==1){
                                         iow_peer_t *peer = (iow_peer_t *)mlist_vlookup(trn_plist, &svc, mbtrn_peer_vcmp);
@@ -1179,7 +1296,7 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
     
                                     break;
                                 case -1:
-                                    MMDEBUG(APP4,"iow_recvfrom peer id[%d] returned -1 [%d/%s]\n",trn_peer->id,errno,strerror(errno));
+                                    MMDEBUG(APP4,"err - recvfrom cli[%d] ret -1 [%d/%s]\n",trn_peer->id,errno,strerror(errno));
 //                                    switch (errno) {
 //                                        case EAGAIN:
 //                                            MMINFO(APP,"EAGAIN/EWOULDBLOCK\n");
@@ -1219,7 +1336,8 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
                                                 // [could make additive, i.e. +=]
                                                 pp->heartbeat = trn_hbtok;
                                             }else{
-                                                MMINFO(APP3,"adding to peer list id[%d] addr[%p]\n",svc,trn_peer);
+                                                mlog_tprintf(MLOG_ID,"client connected id[%d] addr[%p]\n",svc,trn_peer);
+                                                MMINFO(APP3,"adding to client list id[%d] addr[%p]\n",svc,trn_peer);
                                                 // otherwise, add to the list
                                                 trn_peer->id = svc;
                                                 trn_peer->heartbeat = trn_hbtok;
@@ -1227,20 +1345,27 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
                                                 mlist_add(trn_plist, (void *)trn_peer);
                                                 trn_peer = iow_peer_new();
                                                 pp=trn_peer;
+                                                trn_cli_con++;
                                             }
+                                        }else{
+                                            mlog_tprintf(MLOG_ID,"err - svc scanf failed svc[%s]\n",trn_peer->service);
                                         }
                                         
-                                        MMINFO(APP2,"Received %d bytes from peer[%d] %s:%s\n",
+                                        MMINFO(APP2,"rx [%d]b cli[%d/%s:%s]\n",
                                               iobytes, svc, trn_peer->chost, trn_peer->service);
+//                                        mlog_tprintf(MLOG_ID,"rx [%zd]b cli[%d/%s:%s]\n",iobytes, svc, trn_peer->chost, trn_peer->service);
                                         
                                         if ( NULL!=pp && (iobytes = iow_sendto(trn_osocket, pp->addr, (byte *)"ACK", 4 )) > 0) {
-                                            MMINFO(APP2,"Send ACK %d bytes to peer[%d] %s:%s\n",
+                                            MMDEBUG(APP4,"tx ACK [%d]b cli[%d/%s:%s]\n",
                                                    iobytes, svc, pp->chost, pp->service);
+//                                            mlog_tprintf(MLOG_ID,"tx ACK [%zd]b cli[%d/%s:%s]\n",iobytes, svc, pp->chost, pp->service);
+                                        }else{
+                                            mlog_tprintf(MLOG_ID,"tx cli[%d] failed pp[%p] iobytes[%zd]\n",svc,pp,iobytes);
                                         }
 
                                     }else{
-                                        MERROR("getnameinfo (recv) peer id[%d] failed [%d %s]\n",trn_peer->id,test,gai_strerror(test));
-                                        MMINFO(APP2,"peer[%d] received %d bytes\n",trn_peer->id,iobytes);
+                                        MMERROR(APP2,"err - getnameinfo(rx) cli[%d]  [%d/%s]\n",trn_peer->id,test,gai_strerror(test));
+                                        mlog_tprintf(MLOG_ID,"err - getnameinfo(rx) cli[%d]  [%d/%s]\n",trn_peer->id,test,gai_strerror(test));
                                     }
                                     
                                     break;
@@ -1249,10 +1374,14 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
                             // send output to clients
                             plist = (iow_peer_t *)mlist_first(trn_plist);
                             idx=0;
+                            if(trn_blog_en){
+                                mlog_write(BLOG_ID,(byte *)output_buffer,mb1_size);
+                            }
                             while (plist != NULL) {
                                 
+                                plist->heartbeat--;
+
                                 if ( (iobytes = iow_sendto(trn_osocket, plist->addr, (byte *)output_buffer, mb1_size )) > 0) {
-                                    plist->heartbeat--;
                                     trn_tx_count++;
                                     trn_tx_bytes+=iobytes;
                                     memset(plist->chost,0,NI_MAXHOST);
@@ -1260,29 +1389,62 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
                                     if((test=getnameinfo(plist->addr->ainfo->ai_addr,
                                                          IOW_ADDR_LEN, plist->chost, NI_MAXHOST,
                                                          plist->service, NI_MAXSERV, NI_DGRAM))==0){ //NI_NUMERICSERV
-                                        MMINFO(APP2,"Sent %5d bytes to peer[%d] hb[%d] %s:%s\n",
-                                              iobytes, idx, plist->heartbeat,plist->chost, plist->service);
+                                        MMDEBUG(APP4,"tx TRN [%5d]b cli[%d/%s:%s] hb[%d]\n",
+                                              iobytes, idx, plist->chost, plist->service, plist->heartbeat);
                                     }else{
-                                        MERROR("getnameinfo (send) peer[%d] failed [%d %s]\n",idx,test,gai_strerror(test));
-                                        MMINFO(APP,"send peer[%d] OK [%d]\n",idx,iobytes);
+//                                        MERROR("err - getnameinfo(tx) cli[%d] [%d/%s]\n",idx,test,gai_strerror(test));
+                                        MMERROR(APP,"err - getnameinfo(tx) cli[%d] [%d/%s]\n",idx,test,gai_strerror(test));
+                                        mlog_tprintf(MLOG_ID,"err - getnameinfo(tx) cli[%d] [%d/%s]\n",idx,test,gai_strerror(test));
                                     }
                                     
-                                    // check heartbeat, remove expired peers
-                                    if (plist->heartbeat==0) {
-                                        MMINFO(APP2,"peer[%d] id[%d] heartbeat expired\n",idx,plist->id);
-                                        mlist_remove(trn_plist,plist);
-                                    }
                                 }else{
-                                    MERROR("send peer[%d] failed [%d]\n",idx,iobytes);
+                                    MERROR("err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno));
+                                    mlog_tprintf(MLOG_ID,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno));
+                                }
+                                // check heartbeat, remove expired peers
+                                if (NULL!=plist && plist->heartbeat==0) {
+                                    MMDEBUG(APP4,"hbeat=0 cli[%d/%d] - removed\n",idx,plist->id);
+                                    mlog_tprintf(MLOG_ID,"hbeat=0 cli[%d/%d] - removed\n",idx,plist->id);
+                                    mlist_remove(trn_plist,plist);
+                                    trn_cli_dis++;
                                 }
                                 plist=(iow_peer_t *)mlist_next(trn_plist);
                                 idx++;
                             }
                             
+
+                            if (trn_pub_delay_msec>0) {
+                                struct timespec delay={0};
+                                struct timespec rem={0};
+                                delay.tv_sec = trn_pub_delay_msec/1000;
+                                delay.tv_nsec = (trn_pub_delay_msec%1000)*1000000L;
+                                MMDEBUG(APP5,"delaying msec[%lld] sec:nsec[%ld:%ld]\n",trn_pub_delay_msec,delay.tv_sec,delay.tv_nsec);
+                                while (nanosleep(&delay,&rem)<0) {
+                                    MMDEBUG(APP5,"sleep interrupted\n");
+                                    delay.tv_sec=rem.tv_sec;
+                                    delay.tv_nsec=rem.tv_nsec;
+                                }
+
+                            }
+                            
+                            // periodically log status
+                            if (trn_status_interval_sec>0) {
+                                clock_gettime(CLOCK_MONOTONIC, &session_now);
+                                if ( (session_now.tv_sec-session_loop.tv_sec) >= trn_status_interval_sec ) {
+                                    mlog_tprintf(MLOG_ID,"ut[%lu] src[%d/%d] cli[%d/%d/%d] tx[%d/%d] rx[%d/%d]\n",
+                                                 (session_now.tv_sec-session_start.tv_sec),
+                                                 trn_src_con,trn_src_dis,
+                                                 mlist_size(trn_plist),trn_cli_con,trn_cli_dis,
+                                                 trn_tx_count,trn_tx_bytes,trn_rx_count,trn_rx_bytes);
+                                    session_loop.tv_sec=session_now.tv_sec;
+                                    session_loop.tv_nsec=0;
+                                }
+                            }
 //                            MMINFO(APP,"tx_count[%d] tx_bytes[%d]\n",trn_tx_count,trn_tx_bytes);
 //                            MMINFO(APP,"rx_count[%d] rx_bytes[%d]\n",trn_rx_count,trn_rx_bytes);
 
                         }// end MBTRNPREPROCESS_OUTPUT_TRN
+                        
                         /* write the packet to a file */
                         else if (output_mode == MBTRNPREPROCESS_OUTPUT_FILE) {
                             fwrite(output_buffer, mb1_size, 1, ofp);
@@ -1307,60 +1469,120 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
                 }
             }else{
                 MMINFO(APP4,"mb_get_all failed: status[%d] kind[%d] err[%d]\n",status, kind, error);
+//                fprintf(stderr,"mb_get_all failed: status[%d] kind[%d] err[%d]\n",status, kind, error);
+//                if ( (status == MB_FAILURE) && (error==MB_ERROR_EOF) && (output_mode == MBTRNPREPROCESS_OUTPUT_TRN)) {
+//                    status = MB_SUCCESS;
+//                    error = MB_ERROR_NO_ERROR;
+//                }
+                if ( (status == MB_FAILURE) && (error==MB_ERROR_EOF) && (input_mode == INPUT_MODE_SOCKET)) {
+                    fprintf(stderr,"EOF (input socket) - clear status/error\n");
+                    status = MB_SUCCESS;
+                    error = MB_ERROR_NO_ERROR;
+                    // check connection status
+                    // only reconnect if disconnected
+                    mbtrn_reader_t *reader = ((struct mb_io_struct *)imbio_ptr)->mbsp;
+                    if (NULL!=reader && reader->state==MBS_INITIALIZED) {
+                        
+                        // empty the reader's record frame container
+                        mbtrn_reader_purge(reader);
+                        fprintf(stderr,"input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
+                        mlog_tprintf(MLOG_ID,"input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
+                        trn_src_dis++;
+                        if (mbtrn_reader_connect(reader)==0) {
+                            fprintf(stderr,"input socket connected status[%s]\n",mbtrn_strstate(reader->state));
+                            mlog_tprintf(MLOG_ID,"input socket connected status[%s]\n",mbtrn_strstate(reader->state));
+                            trn_src_con++;
+                        }else{
+                            fprintf(stderr,"input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
+                            mlog_tprintf(MLOG_ID,"input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
+                            sleep(5);
+                        }
+                   }
+
+                }
             }
+            
             if (status == MB_FAILURE) {
-                // if libmbtrn ESOCK error,
+                
+                // if libmbtrn ESOCK error, then keep going
                 if ( (me_errno==ME_ESOCK) || (me_errno==ME_ERCV)) {
+                    fprintf(stderr,"MB_FAILURE - me_error[%d/%s] (input socket may be disconnected)\n",me_errno,me_strerror(me_errno));
                     // try to reconnect to server
                     mbtrn_reader_t *reader = ((struct mb_io_struct *)imbio_ptr)->mbsp;
                     // empty the reader's record frame container
                     mbtrn_reader_purge(reader);
-                    fprintf(stderr,"server trying reconnect [%s]\n",mbtrn_strstate(reader->state));
+                    fprintf(stderr,"input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
+                    mlog_tprintf(MLOG_ID,"input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
+                    trn_src_dis++;
                     if (mbtrn_reader_connect(reader)==0) {
-                        fprintf(stderr,"server reconnected status[%s]\n",mbtrn_strstate(reader->state));
+                        fprintf(stderr,"input socket connected status[%s]\n",mbtrn_strstate(reader->state));
+                        mlog_tprintf(MLOG_ID,"input socket connected status[%s]\n",mbtrn_strstate(reader->state));
+                        trn_src_con++;
                     }else{
-                        fprintf(stderr,"server reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
+                        fprintf(stderr,"input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
+                        mlog_tprintf(MLOG_ID,"input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
                         sleep(5);
                     }
                 }else{
-                if (error > 0)
-                    done = MB_YES;
+                    if (error > 0){
+                        fprintf(stderr,"MB_FAILURE - error>0 : setting done flag\n");
+                    	done = MB_YES;
+                    }
                 }
-                status = MB_SUCCESS;
-                error = MB_ERROR_NO_ERROR;
             }
 		}
-
+        
 		/* close the files */
-		status = mb_close(verbose, &imbio_ptr, &error);
-        if (logfp != NULL)
-            sprintf(log_message, "Multibeam File <%s> closed", ifile);
-        mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
-        if (verbose > 0)
-            fprintf(stderr,"\n%s\n", log_message);
+        if (input_mode==INPUT_MODE_SOCKET) {
+            fprintf(stderr,"socket input mode - continue (probably shouldn't be here)\n");
+            read_data = MB_YES;
+        }else{
+            fprintf(stderr,"file input mode - file cleanup\n");
+            MTRACE();
+            status = mb_close(verbose, &imbio_ptr, &error);
+            MTRACE();
             
-        sprintf(log_message, "MBIO format id: %d", format);
-        if (logfp != NULL)
+            if (logfp != NULL){
+                sprintf(log_message, "Multibeam File <%s> closed", ifile);
+            }
+            
             mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
-        if (verbose > 0)
-            fprintf(stderr,"%s\n", log_message);
-
-		/* give the statistics */
-
-		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
-			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
-			else
-				read_data = MB_NO;
-		}
-		else {
-			read_data = MB_NO;
-		}
-
+            if (verbose != 0){
+                fprintf(stderr,"\n%s\n", log_message);
+            }
+            
+            sprintf(log_message, "MBIO format id: %d", format);
+            if (logfp != NULL){
+                mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
+            }
+            
+            if (verbose > 0){
+                fprintf(stderr,"%s\n", log_message);
+            }
+            
+            fflush(logfp);
+            
+            /* give the statistics */
+            /* figure out whether and what to read next */
+            if (read_datalist == MB_YES) {
+                if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS){
+                    MDEBUG("read_datalist status[%d] - continuing\n",status);
+                    read_data = MB_YES;
+                }else{
+                    MDEBUG("read_datalist status[%d] - done\n",status);
+                    read_data = MB_NO;
+                }
+            }else {
+                MDEBUG("read_datalist == NO\n");
+                read_data = MB_NO;
+            }
+        }
+        MTRACE();
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+    
+    fprintf(stderr,"exit loop\n");
+    if (read_datalist == MB_YES)
 		mb_datalist_close(verbose, &datalist, &error);
         
     /* close log file */
@@ -1398,21 +1620,28 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
          n_soundings_flagged = 0;
          n_soundings_written = 0;
          
-         status = mbtrnpreprocess_closelog(verbose, &logfp, &error);
+         status = mbtrnpreprocess_closelog(verbose, &logfp, &ombio_ptr, &error);
      }
         
     /* close output */
     if (output_mode == MBTRNPREPROCESS_OUTPUT_FILE) {
         fclose(ofp);
     }
+    
+    /* release arrays */
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&median_filter_soundings, &error);
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&output_buffer, &error);
 
 	/* check memory */
-	if (verbose >= 4)
+	//if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
 	/* give the statistics */
 	if (verbose >= 1) {
 	}
+
+    MTRACE();
+    fprintf(stderr,"exit app [%d]\n",error);
 
 	/* end it all */
 	exit(error);
@@ -1420,7 +1649,7 @@ fprintf(stdout, "Process a ping: ndata:%d time:%f lon:%f lat:%f heading:%f\n",
 }
 /*--------------------------------------------------------------------*/
 
-int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error) {
+int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, void **mbio_ptr, int *error) {
 
 	/* local variables */
 	char *function_name = "mbtrnpreprocess_openlog";
@@ -1434,7 +1663,10 @@ int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, in
 	char date[32], user[128], *user_ptr;
     mb_path host;
     mb_path log_file;
+    mb_path mblog_file;
     mb_path log_message;
+    int obeams_bath, obeams_amp, opixels_ss;
+    char *message;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1444,11 +1676,13 @@ int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, in
 		fprintf(stderr, "dbg2       log_directory:      %s\n", log_directory);
 		fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
 		fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
+		fprintf(stderr, "dbg2       mbio_ptr:           %p\n", mbio_ptr);
+		fprintf(stderr, "dbg2       *mbio_ptr:          %p\n", *mbio_ptr);
 	}
  
     /* close existing log file */
     if (*logfp != NULL) {
-        mbtrnpreprocess_closelog(verbose, logfp, error);
+        mbtrnpreprocess_closelog(verbose, logfp, mbio_ptr, error);
     }
    
     /* get time and user data */
@@ -1483,12 +1717,28 @@ int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, in
         exit(*error);
     }
 
+    /* initialize writing the output filtered swath file */
+    sprintf(mblog_file, "%s/%s_mbtrnpreprocess_log.txt", log_directory, date);
+    obeams_bath = 512;
+    obeams_amp = 0;
+    opixels_ss = 0;
+    if ((status = mb_write_init(verbose, mblog_file, 71, mbio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, error)) !=
+        MB_SUCCESS) {
+        mb_error(verbose, *error, &message);
+        fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
+        fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", mblog_file);
+        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+    }
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
 		fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
+		fprintf(stderr, "dbg2       mbio_ptr:           %p\n", mbio_ptr);
+		fprintf(stderr, "dbg2       *mbio_ptr:          %p\n", *mbio_ptr);
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:             %d\n", status);
@@ -1500,7 +1750,7 @@ int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, in
 
 /*--------------------------------------------------------------------*/
 
-int mbtrnpreprocess_closelog(int verbose, FILE **logfp, int *error) {
+int mbtrnpreprocess_closelog(int verbose, FILE **logfp, void **mbio_ptr, int *error) {
 
 	/* local variables */
 	char *function_name = "mbtrnpreprocess_closelog";
@@ -1514,6 +1764,8 @@ int mbtrnpreprocess_closelog(int verbose, FILE **logfp, int *error) {
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
 		fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
 		fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
+		fprintf(stderr, "dbg2       mbio_ptr:           %p\n", mbio_ptr);
+		fprintf(stderr, "dbg2       *mbio_ptr:          %p\n", *mbio_ptr);
 	}
     
      /* close log file */
@@ -1523,11 +1775,16 @@ int mbtrnpreprocess_closelog(int verbose, FILE **logfp, int *error) {
         *logfp = NULL;
     }
 
+    /* close the output filtered swath file */
+	status = mb_close(verbose, mbio_ptr, error);
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
+		fprintf(stderr, "dbg2       mbio_ptr:           %p\n", mbio_ptr);
+		fprintf(stderr, "dbg2       *mbio_ptr:          %p\n", *mbio_ptr);
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:             %d\n", status);
@@ -1759,31 +2016,11 @@ int mbtrnpreprocess_logstatistics(int verbose,
 	return (status);
 }
 
+
 /*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int *error) {
-
-	/* local variables */
-	char *function_name = "mbtrnpreprocess_input_open";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
+int mbtrnpreprocess_init_debug(int verbose)
+{
  
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p,%p\n", mbio_ptr,&mbio_ptr);
-		fprintf(stderr, "dbg2       inputname:  %s\n", inputname);
-	}
-
-	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
     /* Open and initialize the socket based input for reading using function
      * mbtrnpreprocess_input_read(). Allocate an internal, hidden buffer to hold data from
      * full s7k records while waiting to return bytes from those records as
@@ -1805,7 +2042,7 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
     // MDL_UNSET,MDL_NONE
     // MDL_FATAL, MDL_ERROR, MDL_WARN
     // MDL_INFO, MDL_DEBUG
-
+    
     mdb_set(MDI_ALL,MDL_NONE);
     switch (verbose) {
         case 0:
@@ -1840,9 +2077,9 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
             break;
         case -4:
             mdb_set(APP,MDL_DEBUG);
-//            mdb_set(APP1,MDL_DEBUG);
-//            mdb_set(APP2,MDL_DEBUG);
-//            mdb_set(APP3,MDL_DEBUG);
+            //            mdb_set(APP1,MDL_DEBUG);
+            //            mdb_set(APP2,MDL_DEBUG);
+            //            mdb_set(APP3,MDL_DEBUG);
             mdb_set(APP4,MDL_DEBUG);
             mdb_set(MBTRN,MDL_DEBUG);
             mdb_set(R7K,MDL_DEBUG);
@@ -1874,13 +2111,86 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
             mdb_set(RPARSER,MDL_DEBUG);
             break;
     }
+    
+    // make session time string to use
+    // in log file names
+    char date[32]={0};
+    time_t rawtime;
+    struct tm *gmt;
+    
+    time(&rawtime);
+    // Get GMT time
+    gmt = gmtime(&rawtime);
+    // format YYYYMMDD-HHMMSS
+    sprintf(date, "%04d%02d%02d-%02d%02d%02d",
+            (gmt->tm_year+1900),(gmt->tm_mon+1),gmt->tm_mday,
+            gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
+
+    // open trn data log
+    if (trn_blog_en) {
+        trn_blog_path = (char *)malloc(512);
+        sprintf(trn_blog_path,"%s//%s-%s%s",g_log_dir,TRN_BLOG_NAME,date,TRN_LOG_EXT);
+        trn_blog = mlog_new(trn_blog_path,&blog_conf);
+        mlog_show(trn_blog,true,5);
+        mlog_open(trn_blog, flags, mode);
+        mlog_add(trn_blog,BLOG_ID,TRN_BLOG_DESC);
+    }
+    // open trn message log
+    if (trn_mlog_en) {
+        trn_mlog_path = (char *)malloc(512);
+        sprintf(trn_mlog_path,"%s//%s-%s%s",g_log_dir,TRN_MLOG_NAME,date,TRN_LOG_EXT);
+        trn_mlog = mlog_new(trn_mlog_path,&mlog_conf);
+        mlog_show(trn_mlog,true,5);
+        mlog_open(trn_mlog, flags, mode);
+        mlog_add(trn_mlog,MLOG_ID,TRN_MLOG_DESC);
+		mlog_tprintf(MLOG_ID,"*** mbtrn session start ***\n");
+		mlog_tprintf(MLOG_ID,"cmdline [%s]\n",g_cmd_line);
+    }else{
+        fprintf(stderr,"*** mbtrn session start ***\n");
+        fprintf(stderr,"cmdline [%s]\n",g_cmd_line);
+    }
+    
+    return 0;
+}
+int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int *error) {
+
+	/* local variables */
+	char *function_name = "mbtrnpreprocess_input_open";
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+ 
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p,%p\n", mbio_ptr,&mbio_ptr);
+		fprintf(stderr, "dbg2       inputname:  %s\n", inputname);
+	}
+
+	/* get pointer to mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* set initial status */
+	status = MB_SUCCESS;
+
+    /* Open and initialize the socket based input for reading using function
+     * mbtrnpreprocess_input_read(). Allocate an internal, hidden buffer to hold data from
+     * full s7k records while waiting to return bytes from those records as
+     * requested by the MBIO read functions.
+     * Store the relevant pointers and parameters within the
+     * mb_io_struct structure *mb_io_ptr. */
+    
     MMDEBUG(APP,"configuring mbtrn_reader using %s:%d\n",reson_hostname,reson_port);
     mb_io_ptr->mbsp = mbtrn_reader_create(reson_hostname,reson_port,reader_capacity, reson_subs, reson_nsubs);
+    if (mb_io_ptr->mbsp->state==MBS_CONNECTED || mb_io_ptr->mbsp->state==MBS_SUBSCRIBED) {
+        trn_src_con++;
+    }
     if (verbose>=1) {
         mbtrn_reader_show(mb_io_ptr->mbsp,true,5);
     }
-    fprintf(stderr,"CREATED READER mbsp[%p]\n",mb_io_ptr->mbsp);
-    
+
     /* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);

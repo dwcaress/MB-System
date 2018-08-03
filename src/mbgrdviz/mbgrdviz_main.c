@@ -121,10 +121,10 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr);
 int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *pathraw, char *pathprocessed, int format,
                         int formatorg, double weight, int *error);
 int do_mbgrdviz_readgrd(size_t instance, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue,
-                        int *nxy, int *nx, int *ny, double *min, double *max, double *xmin, double *xmax, double *ymin,
+                        int *nxy, int *n_columns, int *n_rows, double *min, double *max, double *xmin, double *xmax, double *ymin,
                         double *ymax, double *dx, double *dy, float **data);
 int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double factor3, int *grid_projection_mode,
-                         char *grid_projection_id, float *nodatavalue, int *nxy, int *nx, int *ny, double *min, double *max,
+                         char *grid_projection_id, float *nodatavalue, int *nxy, int *n_columns, int *n_rows, double *min, double *max,
                          double *xmin, double *xmax, double *ymin, double *ymax, double *dx, double *dy, float **data);
 void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_data);

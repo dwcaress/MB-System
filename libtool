@@ -1,5 +1,5 @@
 #! /bin/sh
-# Generated automatically by config.status (mbsystem) 5.5.2342
+# Generated automatically by config.status (mbsystem) 5.5.2344
 # Libtool was configured on host haxby.shore.mbari.org:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
@@ -67,13 +67,13 @@ PATH_SEPARATOR=":"
 
 # The host system.
 host_alias=
-host=x86_64-apple-darwin17.6.0
-host_os=darwin17.6.0
+host=x86_64-apple-darwin17.7.0
+host_os=darwin17.7.0
 
 # The build system.
 build_alias=
-build=x86_64-apple-darwin17.6.0
-build_os=darwin17.6.0
+build=x86_64-apple-darwin17.7.0
+build_os=darwin17.7.0
 
 # A sed program that does not truncate output.
 SED="/usr/bin/sed"

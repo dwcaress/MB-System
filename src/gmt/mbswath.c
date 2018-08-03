@@ -85,6 +85,8 @@
 #define gmt_rgb_syntax GMT_rgb_syntax
 #define gmt_set_grddim GMT_set_grddim
 #define gmt_show_name_and_purpose GMT_show_name_and_purpose
+#elif GMT_MAJOR_VERSION == 6
+#define gmt_get_cpt(a,b,c,d,e) gmt_get_cpt(a,b,c,d,e,0.0)
 #endif
 
 EXTERN_MSC int GMT_mbswath(void *API, int mode, void *args);

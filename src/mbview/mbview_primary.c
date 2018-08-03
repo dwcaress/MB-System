@@ -76,7 +76,7 @@ static char rcs_id[] = "$Id$";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_projection_mode, char *primary_grid_projection_id,
-                          float primary_nodatavalue, int primary_nx, int primary_ny, double primary_min, double primary_max,
+                          float primary_nodatavalue, int primary_n_columns, int primary_n_rows, double primary_min, double primary_max,
                           double primary_xmin, double primary_xmax, double primary_ymin, double primary_ymax, double primary_dx,
                           double primary_dy, float *primary_data, int *error)
 
@@ -98,8 +98,8 @@ int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_project
 		fprintf(stderr, "dbg2       primary_grid_projection_mode: %d\n", primary_grid_projection_mode);
 		fprintf(stderr, "dbg2       primary_grid_projection_id:   %s\n", primary_grid_projection_id);
 		fprintf(stderr, "dbg2       primary_nodatavalue:          %f\n", primary_nodatavalue);
-		fprintf(stderr, "dbg2       primary_nx:                   %d\n", primary_nx);
-		fprintf(stderr, "dbg2       primary_ny:                   %d\n", primary_ny);
+		fprintf(stderr, "dbg2       primary_n_columns:            %d\n", primary_n_columns);
+		fprintf(stderr, "dbg2       primary_n_rows:               %d\n", primary_n_rows);
 		fprintf(stderr, "dbg2       primary_min:                  %f\n", primary_min);
 		fprintf(stderr, "dbg2       primary_max:                  %f\n", primary_max);
 		fprintf(stderr, "dbg2       primary_xmin:                 %f\n", primary_xmin);
@@ -119,9 +119,9 @@ int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_project
 	data->primary_grid_projection_mode = primary_grid_projection_mode;
 	strcpy(data->primary_grid_projection_id, primary_grid_projection_id);
 	data->primary_nodatavalue = primary_nodatavalue;
-	data->primary_nxy = primary_nx * primary_ny;
-	data->primary_nx = primary_nx;
-	data->primary_ny = primary_ny;
+	data->primary_nxy = primary_n_columns * primary_n_rows;
+	data->primary_n_columns = primary_n_columns;
+	data->primary_n_rows = primary_n_rows;
 	data->primary_min = primary_min;
 	data->primary_max = primary_max;
 	data->primary_xmin = primary_xmin;
@@ -131,9 +131,9 @@ int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_project
 	data->primary_dx = primary_dx;
 	data->primary_dy = primary_dy;
 	data->viewbounds[0] = 0;
-	data->viewbounds[1] = data->primary_nx;
+	data->viewbounds[1] = data->primary_n_columns;
 	data->viewbounds[2] = 0;
-	data->viewbounds[3] = data->primary_ny;
+	data->viewbounds[3] = data->primary_n_rows;
 
 	/* allocate required arrays */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, (void **)&data->primary_data, error);
@@ -192,7 +192,7 @@ int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_project
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_updateprimarygrid(int verbose, size_t instance, int primary_nx, int primary_ny, float *primary_data, int *error)
+int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns, int primary_n_rows, float *primary_data, int *error)
 
 {
 	/* local variables */
@@ -211,8 +211,8 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_nx, int p
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
 		fprintf(stderr, "dbg2       instance:                     %zu\n", instance);
-		fprintf(stderr, "dbg2       primary_nx:                   %d\n", primary_nx);
-		fprintf(stderr, "dbg2       primary_ny:                   %d\n", primary_ny);
+		fprintf(stderr, "dbg2       primary_n_columns:            %d\n", primary_n_columns);
+		fprintf(stderr, "dbg2       primary_n_rows:               %d\n", primary_n_rows);
 		fprintf(stderr, "dbg2       primary_data:                 %p\n", primary_data);
 	}
 
@@ -221,9 +221,9 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_nx, int p
 	data = &(view->data);
 
 	/* set value and calculate derivative */
-	if (primary_nx == data->primary_nx && primary_ny == data->primary_ny) {
+	if (primary_n_columns == data->primary_n_columns && primary_n_rows == data->primary_n_rows) {
 		first = MB_YES;
-		for (k = 0; k < data->primary_nx * data->primary_ny; k++) {
+		for (k = 0; k < data->primary_n_columns * data->primary_n_rows; k++) {
 			data->primary_data[k] = primary_data[k];
 			if (first == MB_YES && primary_data[k] != data->primary_nodatavalue) {
 				data->primary_min = data->primary_data[k];
@@ -235,8 +235,8 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_nx, int p
 				data->primary_max = MAX(data->primary_max, data->primary_data[k]);
 			}
 		}
-		for (i = 0; i < data->primary_nx; i++) {
-			for (j = 0; j < data->primary_ny; j++) {
+		for (i = 0; i < data->primary_n_columns; i++) {
+			for (j = 0; j < data->primary_n_rows; j++) {
 				mbview_derivative(instance, i, j);
 			}
 		}
@@ -296,9 +296,9 @@ int mbview_updateprimarygridcell(int verbose, size_t instance, int primary_ix, i
 	data = &(view->data);
 
 	/* set value */
-	if (primary_ix >= 0 && primary_ix < data->primary_nx && primary_jy >= 0 && primary_jy < data->primary_ny) {
+	if (primary_ix >= 0 && primary_ix < data->primary_n_columns && primary_jy >= 0 && primary_jy < data->primary_n_rows) {
 		/* update the cell value */
-		k = primary_ix * data->primary_ny + primary_jy;
+		k = primary_ix * data->primary_n_rows + primary_jy;
 		data->primary_data[k] = value;
 		data->primary_stat_z[k / 8] = data->primary_stat_z[k / 8] & (255 - statmask[k % 8]);
 		data->primary_stat_color[k / 8] = data->primary_stat_color[k / 8] & (255 - statmask[k % 8]);

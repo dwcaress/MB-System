@@ -527,13 +527,22 @@ typedef struct r7k_rd_rcnak_s
 #define R7K_FRAME_HEADER_BYTES (sizeof(r7k_nf_headers_t))
 /// @def R7K_NF_BYTES
 /// @brief size of NF header
-#define R7K_NF_BYTES (sizeof(r7k_nf_t))
+/// (sizeof(r7k_nf_t))
+#define R7K_NF_BYTES 36
+
 /// @def R7K_DRF_BYTES
 /// @brief size of DRF header (not including data or checksum).
-#define R7K_DRF_BYTES (sizeof(r7k_drf_t))
+/// (sizeof(r7k_drf_t))
+#define R7K_DRF_BYTES 64
+
 /// @def R7K_CHECKSUM_BYTES
 /// @brief size of DRF checksum
-#define R7K_CHECKSUM_BYTES (sizeof(r7k_checksum_t))
+/// (sizeof(r7k_checksum_t))
+#define R7K_CHECKSUM_BYTES 4
+
+/// @def R7K_NF_PROTO_BYTES
+/// @brief size of NF protocol version (bytes)
+#define R7K_NF_PROTO_BYTES (sizeof(uint16_t))
 
 /// @def R7K_NF_OFS2PTR(bp,ofs)
 /// @brief cast byte pointer, offset to network frame pointer.
@@ -553,12 +562,30 @@ typedef struct r7k_rd_rcnak_s
 /// @param[in] ofs offset
 /// @return checksum pointer
 #define R7K_CHK_OFS2PTR(bp,ofs) ((r7k_checksum_t *)(bp+ofs))
-/// @def DRF_SIZE(m)
+/// @def R7K_MSG_DRF_SIZE(m)
 /// @brief size of data record frame (including data, checksum).
-/// @param[in] bp byte pointer
-/// @param[in] ofs offset
+/// @param[in] m message pointer
 /// @return data record frame size (bytes)
-#define DRF_SIZE(m) (sizeof(r7k_empty_drf_t)+m->data_size)
+#define R7K_MSG_DRF_SIZE(m) (R7K_DRF_BYTES+m->data_size+R7K_CHECKSUM_BYTES)
+
+/// @def R7K_MSG_NF_PACKET_SIZE(m)
+/// @brief network frame packet size value
+/// @param[in] m message pointer
+/// @return network frame packet size (bytes)
+//#define R7K_MSG_NF_PACKET_SIZE(m) (m->msg_len-R7K_CHECKSUM_BYTES)
+#define R7K_MSG_NF_PACKET_SIZE(m) (R7K_DRF_BYTES+m->data_size+R7K_CHECKSUM_BYTES+R7K_NF_BYTES)
+
+/// @def R7K_MSG_NF_TOTAL_SIZE(m)
+/// @brief network frame total size value
+/// @param[in] m message pointer
+/// @return network frame total size (bytes)
+#define R7K_MSG_NF_TOTAL_SIZE(m) (R7K_DRF_BYTES+m->data_size+R7K_CHECKSUM_BYTES)
+
+/// @def R7K_MSG_NF_OFFSET(m)
+/// @brief network frame offset value
+/// @param[in] m message pointer
+/// @return network frame offset (bytes)
+#define R7K_MSG_NF_OFFSET(m) (R7K_NF_BYTES)
 
 /// @def R7K_DRFC_SIZE_INC
 /// @brief default data record frame container buffer size (bytes).
@@ -572,6 +599,10 @@ typedef struct r7k_rd_rcnak_s
 /// @def R7K_SUBSCRIBE_TIMEOUT_MS
 /// @brief timeout for socket IO during subscription transaction.
 #define R7K_SUBSCRIBE_TIMEOUT_MS 5000
+
+#define SEC_PER_MIN (60)
+#define SEC_PER_HOUR (SEC_PER_MIN*60)
+#define SEC_PER_DAY (SEC_PER_HOUR*24)
 
 /////////////////////////
 // Exports

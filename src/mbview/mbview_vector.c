@@ -777,8 +777,8 @@ int mbview_drawvector(size_t instance, int rez) {
 	if (shared.shareddata.vector_mode != MBV_VECTOR_OFF && data->vector_view_mode == MBV_VIEW_ON &&
 	    shared.shareddata.nvector > 0) {
 		/* get size according to viewbounds */
-		k0 = data->viewbounds[0] * data->primary_ny + data->viewbounds[2];
-		k1 = data->viewbounds[1] * data->primary_ny + data->viewbounds[3];
+		k0 = data->viewbounds[0] * data->primary_n_rows + data->viewbounds[2];
+		k1 = data->viewbounds[1] * data->primary_n_rows + data->viewbounds[3];
 		xx = data->primary_x[k1] - data->primary_x[k0];
 		yy = data->primary_y[k1] - data->primary_y[k0];
 		ballsize = 0.001 * sqrt(xx * xx + yy * yy);

@@ -94,21 +94,15 @@
 /// @def ADDRSTR_BYTES
 /// @brief address string length
 #define ADDRSTR_BYTES 64
-#ifndef NSEC_PER_SEC
 /// @def NSEC_PER_SEC
 /// @brief time conversion
 #define NSEC_PER_SEC 1000000000L
-#endif
-#ifndef USEC_PER_SEC
 /// @def USEC_PER_SEC
 /// @brief time conversion
 #define USEC_PER_SEC 1000000L
-#endif
-#ifndef MSEC_PER_SEC
 /// @def MSEC_PER_SEC
 /// @brief time conversion
 #define MSEC_PER_SEC 1000L
-#endif
 
 /// @typedef struct ip_addr_s iow_addr_t
 /// @brief IP address structure

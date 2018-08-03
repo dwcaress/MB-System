@@ -92,7 +92,7 @@
 #define TINDENT 32
 /// @def TREPORT(i)
 /// @brief formatted report output
-#define TREPORT(i) fprintf(stderr,"%s%*c[%3s][%3d]\n",tnames[i],(int)(TINDENT-strlen(tnames[i])),' ',(tstatus[i]==tsuccess[i]?"OK":"ERR"),tstatus[i]);
+#define TREPORT(i) fprintf(stderr,"%s%*c[%3s][%3d]\n",tnames[i],(TINDENT-strlen(tnames[i])),' ',(tstatus[i]==tsuccess[i]?"OK":"ERR"),tstatus[i]);
 /// @def TCLEAR
 /// @brief clear (zero) test structures
 #define TCLEAR() { \
@@ -224,7 +224,8 @@ static int s_test_mbtrn(const char *host,const char *file)
     int istat=0;
     for (int i=0; i<cycles; i++) {
         MDEBUG("calling xread\n");
-        if( (istat = mbtrn_reader_xread(reader,buf,len,tmout,MBR_ALLOW_PARTIAL)) > 0){
+//        if( (istat = mbtrn_reader_xread(reader,buf,len,tmout,MBR_ALLOW_PARTIAL)) > 0){
+        if( (istat = mbtrn_reader_xread_new(reader,buf,len,tmout,MBR_BLOCK,0)) > 0){
             MDEBUG("xread %d/%d OK  [%d] - returned [%d/%d]\n",i+1,cycles,rstat,istat,len);
           //  MDEBUG("size/length/pending %u/%u/%u\n",r7k_drfcon_size(reader->fc),r7k_drfcon_length(reader->fc),r7k_drfcon_pending(reader->fc));
          }else{

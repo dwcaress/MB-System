@@ -2381,8 +2381,8 @@ int mbview_drawroute(size_t instance, int rez) {
 	/* Generate GL lists to be plotted */
 	if (shared.shareddata.route_mode != MBV_ROUTE_OFF && data->route_view_mode == MBV_VIEW_ON && shared.shareddata.nroute > 0) {
 		/* get size according to viewbounds */
-		k0 = data->viewbounds[0] * data->primary_ny + data->viewbounds[2];
-		k1 = data->viewbounds[1] * data->primary_ny + data->viewbounds[3];
+		k0 = data->viewbounds[0] * data->primary_n_rows + data->viewbounds[2];
+		k1 = data->viewbounds[1] * data->primary_n_rows + data->viewbounds[3];
 		xx = data->primary_x[k1] - data->primary_x[k0];
 		yy = data->primary_y[k1] - data->primary_y[k0];
 		routesizesmall = 0.004 * sqrt(xx * xx + yy * yy);

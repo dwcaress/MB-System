@@ -43,7 +43,7 @@
 
 /* turn on debug statements here */
 //#define MBR_RESON7KR_DEBUG 1
-//#define MBR_RESON7KR_DEBUG2 1
+#define MBR_RESON7KR_DEBUG2 1
 //#define MBR_RESON7KR_DEBUG3 1
 
 /* essential function prototypes */
@@ -756,15 +756,23 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		bathymetry->serial_number = v2rawdetection->serial_number;
 		bathymetry->ping_number = v2rawdetection->ping_number;
 		bathymetry->multi_ping = v2rawdetection->multi_ping;
-		bathymetry->number_beams = v2rawdetection->beam_descriptor[v2rawdetection->number_beams-1] + 1;
+        if (v2rawdetection->number_beams > 0) {
+            bathymetry->number_beams = v2rawdetection->beam_descriptor[v2rawdetection->number_beams-1] + 1;
+        }
+        else {
+            bathymetry->number_beams = 0;
+        }
 		bathymetry->layer_comp_flag = 0;
 		bathymetry->sound_vel_flag = 0;
-		if (volatilesettings->sound_velocity > 0.0)
+		if (volatilesettings->sound_velocity > 0.0) {
 			bathymetry->sound_velocity = volatilesettings->sound_velocity;
-		else if (bluefin->environmental[0].sound_speed > 0.0)
+		}
+		else if (bluefin->environmental[0].sound_speed > 0.0) {
 			bathymetry->sound_velocity = bluefin->environmental[0].sound_speed;
-		else
+		}
+		else {
 			bathymetry->sound_velocity = 1500.0;
+		}
 		bathymetry->optionaldata = MB_NO;
 		store->read_bathymetry = MB_YES;
 	}
@@ -780,12 +788,15 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		bathymetry->number_beams = v2detection->number_beams;
 		bathymetry->layer_comp_flag = 0;
 		bathymetry->sound_vel_flag = 0;
-		if (volatilesettings->sound_velocity > 0.0)
+		if (volatilesettings->sound_velocity > 0.0) {
 			bathymetry->sound_velocity = volatilesettings->sound_velocity;
-		else if (bluefin->environmental[0].sound_speed > 0.0)
+		}
+		else if (bluefin->environmental[0].sound_speed > 0.0) {
 			bathymetry->sound_velocity = bluefin->environmental[0].sound_speed;
-		else
+		}
+		else {
 			bathymetry->sound_velocity = 1500.0;
+		}
 		bathymetry->optionaldata = MB_NO;
 		store->read_bathymetry = MB_YES;
 	}
@@ -1147,8 +1158,32 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	done = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
 	while (done == MB_NO) {
-		/* if no header saved get next record label */
-		if (*save_flag == MB_NO) {
+
+		/* if previously read record stored use it first */
+		if (*save_flag == MB_YES) {
+			*save_flag = MB_NO;
+			mbr_reson7kr_chk_header(verbose, mbio_ptr, buffersave, recordid, deviceid, enumerator, size);
+			for (i = 0; i < *size; i++)
+				buffer[i] = buffersave[i];
+		}
+
+#ifdef MBTRN_ENABLED
+        /* if reading from a socket ask for the entire next record
+         * - the buffer is allocated to
+         *     MBSYS_RESON7K_BUFFER_STARTSIZE = 65536 bytes (64 kB)
+         *   at stream initialization
+         *   which should be large enough for any single 7k record */
+        else if (mb_io_ptr->mbsp != NULL) {
+			read_len = (size_t)MBSYS_RESON7K_BUFFER_STARTSIZE;
+			status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
+            mbr_reson7kr_chk_header(verbose, mbio_ptr, buffer, recordid, deviceid, enumerator, size);
+        }
+#endif
+
+		/* else if reading from a file deal with possibility of corruption by
+		 * first finding the next sync block, then reading the heading, and then
+		 * finally reading the rest of the record */
+		else {
 			/* read next record header into buffer */
 			read_len = (size_t)MBSYS_RESON7K_VERSIONSYNCSIZE;
 			status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
@@ -1212,14 +1247,6 @@ Have a nice day...\n");
 				fprintf(stderr, "RESON7KR record:skip:%d recordid:%x %d deviceid:%x %d enumerator:%x %d size:%d done:%d\n", skip,
 				        *recordid, *recordid, *deviceid, *deviceid, *enumerator, *enumerator, *size, done);
 #endif
-		}
-
-		/* else use saved record */
-		else {
-			*save_flag = MB_NO;
-			mbr_reson7kr_chk_header(verbose, mbio_ptr, buffersave, recordid, deviceid, enumerator, size);
-			for (i = 0; i < *size; i++)
-				buffer[i] = buffersave[i];
 		}
 
 		/* check for ping record and ping number */

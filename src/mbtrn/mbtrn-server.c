@@ -196,13 +196,13 @@ static  int s_server_handle_request(mbtrn_server_t *svr, char *req, int client_f
         prth->ticket = 1;
         //byte x[16]="ABCDEF0123456789";
         memcpy(prth->tracking_number, "ABCDEF0123456789",strlen("ABCDEF0123456789"));
-        msg->drf->size           = DRF_SIZE(msg);
+        msg->drf->size           = R7K_MSG_DRF_SIZE(msg);
         msg->drf->record_type_id = R7K_RT_REMCON_ACK;
         msg->drf->device_id      = R7K_DEVID_7KCENTER;
         msg->nf->tx_id       = r7k_txid();
         msg->nf->seq_number  = 0;
-        msg->nf->packet_size = msg->msg_len;
-        msg->nf->total_size  = msg->msg_len - sizeof(r7k_nf_t);
+        msg->nf->packet_size = R7K_MSG_NF_PACKET_SIZE(msg);
+        msg->nf->total_size  = R7K_MSG_NF_TOTAL_SIZE(msg);
  
         r7k_msg_set_checksum(msg);
         MDEBUG("sending SUB ACK:\n");

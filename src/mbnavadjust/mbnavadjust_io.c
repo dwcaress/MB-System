@@ -2168,7 +2168,7 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
 		overlap2[i] = 0;
 	}
 
-	/* check coverage masks for overlap */
+	/* get overlap region bounds and focus point */
 	first = MB_YES;
 	*lonmin = 0.0;
 	*lonmax = 0.0;
@@ -2178,7 +2178,7 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
 	dy1 = (section1->latmax - section1->latmin) / MBNA_MASK_DIM;
 	dx2 = (section2->lonmax - section2->lonmin) / MBNA_MASK_DIM;
 	dy2 = (section2->latmax - section2->latmin) / MBNA_MASK_DIM;
-	for (ii1 = 0; ii1 < MBNA_MASK_DIM; ii1++)
+	for (ii1 = 0; ii1 < MBNA_MASK_DIM; ii1++) {
 		for (jj1 = 0; jj1 < MBNA_MASK_DIM; jj1++) {
 			kk1 = ii1 + jj1 * MBNA_MASK_DIM;
 			if (section1->coverage[kk1] == 1) {
@@ -2186,7 +2186,7 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
 				lon1max = section1->lonmin + dx1 * (ii1 + 1);
 				lat1min = section1->latmin + dy1 * jj1;
 				lat1max = section1->latmin + dy1 * (jj1 + 1);
-				for (ii2 = 0; ii2 < MBNA_MASK_DIM; ii2++)
+				for (ii2 = 0; ii2 < MBNA_MASK_DIM; ii2++) {
 					for (jj2 = 0; jj2 < MBNA_MASK_DIM; jj2++) {
 						kk2 = ii2 + jj2 * MBNA_MASK_DIM;
 						if (section2->coverage[kk2] == 1) {
@@ -2213,8 +2213,10 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
 							}
 						}
 					}
+                }
 			}
 		}
+    }
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2224,6 +2226,77 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
 		fprintf(stderr, "dbg2       lonmax:      %.10f\n", *lonmax);
 		fprintf(stderr, "dbg2       latmin:      %.10f\n", *latmin);
 		fprintf(stderr, "dbg2       latmax:      %.10f\n", *latmax);
+		fprintf(stderr, "dbg2       error:       %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:      %d\n", status);
+	}
+
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbnavadjust_crossing_focuspoint(int verbose, struct mbna_project *project, int crossing_id,
+                                    double offset_x, double offset_y, int *isnav1_focus, int *isnav2_focus,
+                                    double *lon_focus, double *lat_focus, int *error) {
+	/* local variables */
+	char *function_name = "mbnavadjust_crossing_focuspoint";
+	int status = MB_SUCCESS;
+	struct mbna_file *file;
+	struct mbna_crossing *crossing;
+	struct mbna_section *section1;
+	struct mbna_section *section2;
+    int snav_1_closest;
+    int snav_2_closest;
+    int isnav1, isnav2;
+    double dx, dy;
+    double distance, distance_closest;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
+		fprintf(stderr, "dbg2       project:              %p\n", project);
+		fprintf(stderr, "dbg2       crossing_id:          %d\n", crossing_id);
+		fprintf(stderr, "dbg2       offset_x:             %f\n", offset_x);
+		fprintf(stderr, "dbg2       offset_y:             %f\n", offset_y);
+	}
+
+	/* get crossing */
+	crossing = (struct mbna_crossing *)&project->crossings[crossing_id];
+
+	/* get section endpoints */
+	file = &project->files[crossing->file_id_1];
+	section1 = &file->sections[crossing->section_1];
+	file = &project->files[crossing->file_id_2];
+	section2 = &file->sections[crossing->section_2];
+    
+    /* find focus point - center of the line segment connecting the two closest 
+     * approach nav points */
+    snav_1_closest = 0;
+    snav_2_closest = 0;
+    distance_closest = 999999999.999;
+    for (isnav1=0; isnav1 < section1->num_snav; isnav1++) {
+        for (isnav2=0; isnav2 < section2->num_snav; isnav2++) {
+            dx = (section2->snav_lon[isnav2] + offset_x - section1->snav_lon[isnav1]) / project->mtodeglon;
+            dy = (section2->snav_lat[isnav2] + offset_y - section1->snav_lat[isnav1]) / project->mtodeglat;
+            distance = sqrt(dx * dx + dy * dy);
+            if (distance < distance_closest) {
+                distance_closest = distance;
+                snav_1_closest = isnav1;
+                snav_2_closest = isnav2;
+            }
+        }
+    }
+    *lon_focus = 0.5 * (section1->snav_lon[snav_1_closest] + section2->snav_lon[snav_2_closest]);
+    *lat_focus = 0.5 * (section1->snav_lat[snav_1_closest] + section2->snav_lat[snav_2_closest]);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       lon_focus:   %.10f\n", *lon_focus);
+		fprintf(stderr, "dbg2       lat_focus:   %.10f\n", *lat_focus);
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:      %d\n", status);

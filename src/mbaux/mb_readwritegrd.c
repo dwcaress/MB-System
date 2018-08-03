@@ -46,7 +46,7 @@ static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------------*/
 int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue, int *nxy,
-                    int *nx, int *ny, double *min, double *max, double *xmin, double *xmax, double *ymin, double *ymax,
+                    int *n_columns, int *n_rows, double *min, double *max, double *xmin, double *xmax, double *ymin, double *ymax,
                     double *dx, double *dy, float **data, float **data_dzdx, float **data_dzdy, int *error) {
 	char function_name[] = "mb_read_gmt_grd";
 	int status = MB_SUCCESS;
@@ -163,9 +163,9 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	
 			/* set up internal arrays */
 			*nodatavalue = MIN(MB_DEFAULT_GRID_NODATA, header->z_min - 10 * (header->z_max - header->z_min));
-			*nxy = header->nx * header->ny;
-			*nx = header->nx;
-			*ny = header->ny;
+			*nxy = header->n_columns * header->n_rows;
+			*n_columns = header->n_columns;
+			*n_rows = header->n_rows;
 			*xmin = header->wesn[0];
 			*xmax = header->wesn[1];
 			*ymin = header->wesn[2];
@@ -191,10 +191,10 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	
 		/* copy grid data, reordering to internal convention */
 		if (status == MB_SUCCESS) {
-			for (i = 0; i < *nx; i++)
-				for (j = 0; j < *ny; j++) {
-					k = i * *ny + j;
-					kk = (*ny + header->pad[2] + header->pad[3] - 1 - j) * (*nx + header->pad[0] + header->pad[1]) +
+			for (i = 0; i < *n_columns; i++)
+				for (j = 0; j < *n_rows; j++) {
+					k = i * *n_rows + j;
+					kk = (*n_rows + header->pad[2] + header->pad[3] - 1 - j) * (*n_columns + header->pad[0] + header->pad[1]) +
 						 (i + header->pad[0]);
 					if (MB_IS_FNAN(G->data[kk]))
 						(*data)[k] = *nodatavalue;
@@ -212,31 +212,31 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 				ddx /= mtodeglon;
 				ddy /= mtodeglon;
 			}
-			for (i = 0; i < *nx; i++)
-				for (j = 0; j < *ny; j++) {
-					k = i * (*ny) + j;
+			for (i = 0; i < *n_columns; i++)
+				for (j = 0; j < *n_rows; j++) {
+					k = i * (*n_rows) + j;
 					ii = 0;
 					jj = 0;
 					if (i > 0) {
-						kx0 = (i - 1) * (*ny) + j;
+						kx0 = (i - 1) * (*n_rows) + j;
 						ii++;
 					}
 					else
 						kx0 = k;
-					if (i < *nx - 1) {
-						kx2 = (i + 1) * (*ny) + j;
+					if (i < *n_columns - 1) {
+						kx2 = (i + 1) * (*n_rows) + j;
 						ii++;
 					}
 					else
 						kx0 = k;
 					if (j > 0) {
-						ky0 = i * (*ny) + j + 1;
+						ky0 = i * (*n_rows) + j + 1;
 						jj++;
 					}
 					else
 						ky0 = k;
-					if (j < *ny - 1) {
-						ky2 = i * (*ny) + j - 1;
+					if (j < *n_rows - 1) {
+						ky2 = i * (*n_rows) + j - 1;
 						jj++;
 					}
 					else
@@ -260,7 +260,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	/* print debug info */
 	if (verbose > 0) {
 		fprintf(stderr, "\nGrid read:\n");
-		fprintf(stderr, "  Dimensions:     %d %d\n", header->nx, header->ny);
+		fprintf(stderr, "  Dimensions:     %d %d\n", header->n_columns, header->n_rows);
 		fprintf(stderr, "  Registration:   %d\n", header->registration);
 		if (modeltype == ModelTypeProjected) {
 			fprintf(stderr, "  Projected Coordinate System Name: %s\n", projectionname);
@@ -296,7 +296,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBA function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       Dimensions: %d %d\n", header->nx, header->ny);
+		fprintf(stderr, "dbg2       Dimensions: %d %d\n", header->n_columns, header->n_rows);
 		if (modeltype == ModelTypeProjected) {
 			fprintf(stderr, "dbg2       Projected Coordinate System Name: %s\n", projectionname);
 			fprintf(stderr, "dbg2       Projected Coordinate System ID:   %d\n", projectionid);
@@ -315,8 +315,8 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 		fprintf(stderr, "dbg2       grid_projection_mode:     %d\n", *grid_projection_mode);
 		fprintf(stderr, "dbg2       grid_projection_id:       %s\n", grid_projection_id);
 		fprintf(stderr, "dbg2       nodatavalue:              %f\n", *nodatavalue);
-		fprintf(stderr, "dbg2       nx:                       %d\n", *nx);
-		fprintf(stderr, "dbg2       ny:                       %d\n", *ny);
+		fprintf(stderr, "dbg2       n_columns:                %d\n", *n_columns);
+		fprintf(stderr, "dbg2       n_rows:                   %d\n", *n_rows);
 		fprintf(stderr, "dbg2       min:                      %f\n", *min);
 		fprintf(stderr, "dbg2       max:                      %f\n", *max);
 		fprintf(stderr, "dbg2       xmin:                     %f\n", *xmin);
@@ -338,7 +338,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
  * function write_cdfgrd writes output grid to a
  * GMT version 2 netCDF grd file
  */
-int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue, int nx, int ny, double xmin, double xmax,
+int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue, int n_columns, int n_rows, double xmin, double xmax,
                      double ymin, double ymax, double zmin, double zmax, double dx, double dy, char *xlab, char *ylab, char *zlab,
                      char *titl, char *projection, int argc, char **argv, int *error) {
 	char *function_name = "mb_write_gmt_grd";
@@ -383,8 +383,8 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 		fprintf(stderr, "dbg2       grdfile:    %s\n", grdfile);
 		fprintf(stderr, "dbg2       grid:       %p\n", (void *)grid);
 		fprintf(stderr, "dbg2       nodatavalue:%f\n", nodatavalue);
-		fprintf(stderr, "dbg2       nx:         %d\n", nx);
-		fprintf(stderr, "dbg2       ny:         %d\n", ny);
+		fprintf(stderr, "dbg2       n_columns:  %d\n", n_columns);
+		fprintf(stderr, "dbg2       n_rows:     %d\n", n_rows);
 		fprintf(stderr, "dbg2       xmin:       %f\n", xmin);
 		fprintf(stderr, "dbg2       xmax:       %f\n", xmax);
 		fprintf(stderr, "dbg2       ymin:       %f\n", ymin);
@@ -411,10 +411,10 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	/* set grid creation control values */
 	/* GMT_GRID_NODE_REG (0) for node grids, GMT_GRID_PIXEL_REG (1) for pixel grids */
 	nx_node_registration = lround((xmax - xmin) / dx + 1);
-	if (nx == nx_node_registration) {
+	if (n_columns == nx_node_registration) {
 		registration = GMT_GRID_NODE_REG;
 	}
-	else if (nx == nx_node_registration - 1) {
+	else if (n_columns == nx_node_registration - 1) {
 		registration = GMT_GRID_PIXEL_REG;
 	}
 	else {
@@ -501,10 +501,10 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	/* recopy grid data, reordering from internal convention to grd file convention */
 	if (status == MB_SUCCESS) {
 		MB_MAKE_FNAN(NaN);
-		for (i = 0; i < nx; i++)
-			for (j = 0; j < ny; j++) {
-				k = i * ny + j;
-				kk = (ny - 1 - j) * nx + i;
+		for (i = 0; i < n_columns; i++)
+			for (j = 0; j < n_rows; j++) {
+				k = i * n_rows + j;
+				kk = (n_rows - 1 - j) * n_columns + i;
 				if (grid[k] == nodatavalue)
 					G->data[kk] = NaN;
 				else {
@@ -542,7 +542,7 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	/* print info */
 	if (verbose > 0) {
 		fprintf(stderr, "\nGrid to be written:\n");
-		fprintf(stderr, "  Dimensions:     %d %d\n", header->nx, header->ny);
+		fprintf(stderr, "  Dimensions:     %d %d\n", header->n_columns, header->n_rows);
 		fprintf(stderr, "  Registration:   %d\n", header->registration);
 		if (modeltype == ModelTypeProjected) {
 			fprintf(stderr, "  Projected Coordinate System Name: %s\n", projectionname);

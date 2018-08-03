@@ -89,7 +89,36 @@ typedef enum {CS_NEW,CS_INITIALIZED,CS_CONNECTED} mbtrn_cstate;
 typedef enum {MBS_NEW,MBS_INITIALIZED,MBS_CONNECTED,MBS_SUBSCRIBED} mbtrn_state_t;
 /// @typedef enum mbtrn_flags_t mbtrn_flags_t
 /// @brief reader behavior flags
-typedef enum{MBR_ALLOW_PARTIAL=0x01, MBR_FORCE=0x2, MBR_IFLUSH=0x4, MBR_OFLUSH=0x8, MBR_FLUSH=0x10} mbtrn_flags_t;
+typedef enum{MBR_ALLOW_PARTIAL=0x01, MBR_FORCE=0x2, MBR_IFLUSH=0x4, MBR_OFLUSH=0x8, MBR_FLUSH=0x10,MBR_NOFLUSH=0x20,MBR_BLOCK=0x40,MBR_NONBLOCK=0x80} mbtrn_flags_t;
+
+/// @typedef enum mbstat_ch_u64_t mbstat_ch_u64_t
+/// @brief statistics channel indices
+typedef enum{MST_SCON_TOT=0,MST_SCON_ACT,MST_CCON_TOT,MST_REC_TOT,MST_PUB_TOT} mbstat_ch_u64_t;
+/// @typedef enum mbstat_ch_i64_t mbstat_ch_i64_t
+/// @brief statistics channel indices
+typedef enum{MST_I640=0} mbstat_ch_i64_t;
+/// @typedef enum mbstat_ch_d_t mbstat_ch_d_t
+/// @brief statistics channel indices
+typedef enum{MST_D0=0} mbstat_ch_d_t;
+
+#define MBTRN_STAT_CHANNELS 16
+
+/// @typedef struct mbtrn_stats_s mbtrn_stats_t
+/// @brief mbtrn reader stat
+typedef struct mbtrn_stats_s{
+    /// @var mbtrn_stats_s::start_time
+    /// @brief total client connections
+    time_t start_time;
+    /// @var mbtrn_stats_s::chan_u64
+    /// @brief unsigned 64 bit integers
+    int64_t chan_i64[MBTRN_STAT_CHANNELS];
+    /// @var mbtrn_stats_s::chan_u64
+    /// @brief unsigned 64 bit integers
+    uint64_t chan_u64[MBTRN_STAT_CHANNELS];
+    /// @var mbtrn_stats_s::chan_d
+    /// @brief double values
+    double chan_d[MBTRN_STAT_CHANNELS];
+}mbtrn_stats_t;
 
 /// @typedef struct mbtrn_connection_s mbtrn_connection_t
 /// @brief connection structure
@@ -187,6 +216,9 @@ typedef struct mbtrn_reader_s
 /// @def MBTRN_PING_INTERVAL_MSEC
 /// @brief ping interval (msec)
 #define MBTRN_PING_INTERVAL_MSEC    350
+/// @def MBTRN_READ_RETRIES
+/// @brief read retries
+#define MBTRN_READ_RETRIES    10
 
 /// @def R7K_PING_BUF_BYTES
 /// @brief TBD
@@ -209,7 +241,8 @@ void mbtrn_reader_show(mbtrn_reader_t *self, bool verbose, uint16_t indent);
 const char *mbtrn_strstate(mbtrn_state_t state);
 
 int64_t mbtrn_reader_poll(mbtrn_reader_t *self, byte *dest, uint32_t len, uint32_t tmout_ms);
-int64_t mbtrn_reader_xread(mbtrn_reader_t *self, byte *dest, uint32_t len, uint32_t tmout_ms, mbtrn_flags_t flags);
+int64_t mbtrn_reader_xread_orig(mbtrn_reader_t *self, byte *dest, uint32_t len, uint32_t tmout_ms, mbtrn_flags_t flags);
+int64_t mbtrn_reader_xread_new(mbtrn_reader_t *self, byte *dest, uint32_t len, uint32_t tmout_ms,  mbtrn_flags_t flags, uint32_t max_age_ms);
 int64_t mbtrn_reader_parse(mbtrn_reader_t *self, byte *src, uint32_t len, r7k_drf_container_t *dest);
 
 int64_t mbtrn_reader_read(mbtrn_reader_t *self, byte *dest, uint32_t len);

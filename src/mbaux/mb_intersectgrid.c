@@ -67,7 +67,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **top
 	strcpy(topogrid->file, topogridfile);
 	topogrid->data = NULL;
 	status = mb_read_gmt_grd(verbose, topogrid->file, &topogrid->projection_mode, topogrid->projection_id, &topogrid->nodatavalue,
-	                         &topogrid->nxy, &topogrid->nx, &topogrid->ny, &topogrid->min, &topogrid->max, &topogrid->xmin,
+	                         &topogrid->nxy, &topogrid->n_columns, &topogrid->n_rows, &topogrid->min, &topogrid->max, &topogrid->xmin,
 	                         &topogrid->xmax, &topogrid->ymin, &topogrid->ymax, &topogrid->dx, &topogrid->dy, &topogrid->data,
 	                         NULL, NULL, error);
 
@@ -123,8 +123,8 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **top
 		fprintf(stderr, "dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
 		fprintf(stderr, "dbg2       topogrid->nodatavalue:     %f\n", topogrid->nodatavalue);
 		fprintf(stderr, "dbg2       topogrid->nxy:             %d\n", topogrid->nxy);
-		fprintf(stderr, "dbg2       topogrid->nx:              %d\n", topogrid->nx);
-		fprintf(stderr, "dbg2       topogrid->ny:              %d\n", topogrid->ny);
+		fprintf(stderr, "dbg2       topogrid->n_columns:       %d\n", topogrid->n_columns);
+		fprintf(stderr, "dbg2       topogrid->n_rows:          %d\n", topogrid->n_rows);
 		fprintf(stderr, "dbg2       topogrid->min:             %f\n", topogrid->min);
 		fprintf(stderr, "dbg2       topogrid->max:             %f\n", topogrid->max);
 		fprintf(stderr, "dbg2       topogrid->xmin:            %f\n", topogrid->xmin);
@@ -200,8 +200,8 @@ int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navl
 		fprintf(stderr, "dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
 		fprintf(stderr, "dbg2       topogrid->nodatavalue:     %f\n", topogrid->nodatavalue);
 		fprintf(stderr, "dbg2       topogrid->nxy:             %d\n", topogrid->nxy);
-		fprintf(stderr, "dbg2       topogrid->nx:              %d\n", topogrid->nx);
-		fprintf(stderr, "dbg2       topogrid->ny:              %d\n", topogrid->ny);
+		fprintf(stderr, "dbg2       topogrid->n_columns:       %d\n", topogrid->n_columns);
+		fprintf(stderr, "dbg2       topogrid->n_rows:          %d\n", topogrid->n_rows);
 		fprintf(stderr, "dbg2       topogrid->min:             %f\n", topogrid->min);
 		fprintf(stderr, "dbg2       topogrid->max:             %f\n", topogrid->max);
 		fprintf(stderr, "dbg2       topogrid->xmin:            %f\n", topogrid->xmin);
@@ -218,10 +218,10 @@ int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navl
 	*topo = 0.0;
 	i = (int)((navlon - topogrid->xmin) / topogrid->dx);
 	j = (int)((navlat - topogrid->ymin) / topogrid->dy);
-	if (i >= 0 && i < topogrid->nx - 1 && j >= 0 && j < topogrid->ny - 1) {
+	if (i >= 0 && i < topogrid->n_columns - 1 && j >= 0 && j < topogrid->n_rows - 1) {
 		for (ii = i; ii <= i + 1; ii++)
 			for (jj = j; jj <= j + 1; jj++) {
-				k = ii * topogrid->ny + jj;
+				k = ii * topogrid->n_rows + jj;
 				if (topogrid->data[k] != topogrid->nodatavalue) {
 					nfound++;
 					*topo += topogrid->data[k];
@@ -271,8 +271,8 @@ int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *e
 		fprintf(stderr, "dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
 		fprintf(stderr, "dbg2       topogrid->nodatavalue:     %f\n", topogrid->nodatavalue);
 		fprintf(stderr, "dbg2       topogrid->nxy:             %d\n", topogrid->nxy);
-		fprintf(stderr, "dbg2       topogrid->nx:              %d\n", topogrid->nx);
-		fprintf(stderr, "dbg2       topogrid->ny:              %d\n", topogrid->ny);
+		fprintf(stderr, "dbg2       topogrid->n_columns:       %d\n", topogrid->n_columns);
+		fprintf(stderr, "dbg2       topogrid->n_rows:          %d\n", topogrid->n_rows);
 		fprintf(stderr, "dbg2       topogrid->min:             %f\n", topogrid->min);
 		fprintf(stderr, "dbg2       topogrid->max:             %f\n", topogrid->max);
 		fprintf(stderr, "dbg2       topogrid->xmin:            %f\n", topogrid->xmin);
@@ -348,8 +348,8 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 		fprintf(stderr, "dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
 		fprintf(stderr, "dbg2       topogrid->nodatavalue:     %f\n", topogrid->nodatavalue);
 		fprintf(stderr, "dbg2       topogrid->nxy:             %d\n", topogrid->nxy);
-		fprintf(stderr, "dbg2       topogrid->nx:              %d\n", topogrid->nx);
-		fprintf(stderr, "dbg2       topogrid->ny:              %d\n", topogrid->ny);
+		fprintf(stderr, "dbg2       topogrid->n_columns:       %d\n", topogrid->n_columns);
+		fprintf(stderr, "dbg2       topogrid->n_rows:          %d\n", topogrid->n_rows);
 		fprintf(stderr, "dbg2       topogrid->min:             %f\n", topogrid->min);
 		fprintf(stderr, "dbg2       topogrid->max:             %f\n", topogrid->max);
 		fprintf(stderr, "dbg2       topogrid->xmin:            %f\n", topogrid->xmin);
@@ -381,10 +381,10 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 		topog = 0.0;
 		i = (int)((navlon - topogrid->xmin) / topogrid->dx);
 		j = (int)((navlat - topogrid->ymin) / topogrid->dy);
-		if (i >= 0 && i < topogrid->nx - 1 && j >= 0 && j < topogrid->ny - 1) {
+		if (i >= 0 && i < topogrid->n_columns - 1 && j >= 0 && j < topogrid->n_rows - 1) {
 			for (ii = i; ii <= i + 1; ii++)
 				for (jj = j; jj <= j + 1; jj++) {
-					k = ii * topogrid->ny + jj;
+					k = ii * topogrid->n_rows + jj;
 					if (topogrid->data[k] != topogrid->nodatavalue) {
 						nfound++;
 						topog += topogrid->data[k];
@@ -420,10 +420,10 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 		topog = 0.0;
 		i = (int)((lontest - topogrid->xmin) / topogrid->dx);
 		j = (int)((lattest - topogrid->ymin) / topogrid->dy);
-		if (i >= 0 && i < topogrid->nx - 1 && j >= 0 && j < topogrid->ny - 1) {
+		if (i >= 0 && i < topogrid->n_columns - 1 && j >= 0 && j < topogrid->n_rows - 1) {
 			for (ii = i; ii <= i + 1; ii++)
 				for (jj = j; jj <= j + 1; jj++) {
-					k = ii * topogrid->ny + jj;
+					k = ii * topogrid->n_rows + jj;
 					if (topogrid->data[k] != topogrid->nodatavalue) {
 						nfound++;
 						topog += topogrid->data[k];
@@ -532,8 +532,8 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 		fprintf(stderr, "dbg2       topogrid->projection_id:   %s\n", topogrid->projection_id);
 		fprintf(stderr, "dbg2       topogrid->nodatavalue:     %f\n", topogrid->nodatavalue);
 		fprintf(stderr, "dbg2       topogrid->nxy:             %d\n", topogrid->nxy);
-		fprintf(stderr, "dbg2       topogrid->nx:              %d\n", topogrid->nx);
-		fprintf(stderr, "dbg2       topogrid->ny:              %d\n", topogrid->ny);
+		fprintf(stderr, "dbg2       topogrid->n_columns:       %d\n", topogrid->n_columns);
+		fprintf(stderr, "dbg2       topogrid->n_rows:          %d\n", topogrid->n_rows);
 		fprintf(stderr, "dbg2       topogrid->min:             %f\n", topogrid->min);
 		fprintf(stderr, "dbg2       topogrid->max:             %f\n", topogrid->max);
 		fprintf(stderr, "dbg2       topogrid->xmin:            %f\n", topogrid->xmin);

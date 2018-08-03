@@ -549,8 +549,8 @@ int mbview_picksize(size_t instance) {
 	/* resize and redrape pick marks if required */
 	if (data->pickinfo_mode == MBV_PICK_ONEPOINT || data->pickinfo_mode == MBV_PICK_TWOPOINT) {
 		/* set size of 'X' marks in gl units for 3D case */
-		scalefactor = MIN(((double)(data->viewbounds[1] - data->viewbounds[0])) / ((double)data->primary_nx),
-		                  ((double)(data->viewbounds[3] - data->viewbounds[2])) / ((double)data->primary_ny));
+		scalefactor = MIN(((double)(data->viewbounds[1] - data->viewbounds[0])) / ((double)data->primary_n_columns),
+		                  ((double)(data->viewbounds[3] - data->viewbounds[2])) / ((double)data->primary_n_rows));
 		xlength = 0.05 * scalefactor;
 
 		/* set pick location x marker */

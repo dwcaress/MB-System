@@ -321,7 +321,7 @@ int main(int argc, char **argv)
         MMDEBUG(ID_APP,"connect [%s:%d]\n",cfg.host,cfg.port);
         if ( (test=iow_connect(s))==0) {
             do{
-                if( (test=iow_sendto(s,NULL,(byte *)"REQ",4))>0){
+                if( (test=iow_sendto(s,NULL,"REQ",4))>0){
                     trn_tx_count++;
                     trn_tx_bytes+=test;
                     rcycles=5;

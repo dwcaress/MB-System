@@ -4302,12 +4302,6 @@ void do_modelplot_show(Widget w, XtPointer client_data, XtPointer call_data) {
 	mbna_modelplot_zoom_x2 = 0;
 	mbna_modelplot_start = 0;
 	mbna_modelplot_end = 0;
-	mbna_modelplot_pickfile = MBNA_SELECT_NONE;
-	mbna_modelplot_picksection = MBNA_SELECT_NONE;
-	mbna_modelplot_picksnav = MBNA_SELECT_NONE;
-	mbna_block_select = MBNA_SELECT_NONE;
-	mbna_block_select1 = MBNA_SELECT_NONE;
-	mbna_block_select2 = MBNA_SELECT_NONE;
 
 	/* update status */
 	do_update_status();
