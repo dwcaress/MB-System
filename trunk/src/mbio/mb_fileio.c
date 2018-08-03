@@ -188,7 +188,8 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
     else {
         if (mb_io_ptr->mbsp != NULL) {
             // use the socket reader
-            if( (read_len = mbtrn_reader_xread(mb_io_ptr->mbsp,(byte *)buffer,*size,350,MBR_ALLOW_PARTIAL)) != *size){
+            //if( (read_len = mbtrn_reader_xread(mb_io_ptr->mbsp,(byte *)buffer,*size,350,MBR_ALLOW_PARTIAL)) != *size){
+            if( (read_len = mbtrn_reader_xread_new(mb_io_ptr->mbsp,(byte *)buffer,*size,350,MBR_BLOCK,0)) != *size){
                 status = MB_FAILURE;
                 *error = MB_ERROR_EOF;
                 *size = read_len;

@@ -599,8 +599,8 @@ int mbview_reset(size_t instance) {
 		/* grid data */
 		data->primary_nodatavalue = MBV_DEFAULT_NODATA;
 		data->primary_nxy = 0;
-		data->primary_nx = 0;
-		data->primary_ny = 0;
+		data->primary_n_columns = 0;
+		data->primary_n_rows = 0;
 		data->primary_xmin = 0.0;
 		data->primary_xmax = 0.0;
 		data->primary_ymin = 0.0;
@@ -621,8 +621,8 @@ int mbview_reset(size_t instance) {
 		data->secondary_sameas_primary = MB_NO;
 		data->secondary_nodatavalue = MBV_DEFAULT_NODATA;
 		data->secondary_nxy = 0;
-		data->secondary_nx = 0;
-		data->secondary_ny = 0;
+		data->secondary_n_columns = 0;
+		data->secondary_n_rows = 0;
 		data->secondary_xmin = 0.0;
 		data->secondary_xmax = 0.0;
 		data->secondary_ymin = 0.0;
@@ -995,8 +995,8 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		/* primary grid data */
 		fprintf(stderr, "dbg2       primary_nodatavalue:       %f\n", data->primary_nodatavalue);
 		fprintf(stderr, "dbg2       primary_nxy:               %d\n", data->primary_nxy);
-		fprintf(stderr, "dbg2       primary_nx:                %d\n", data->primary_nx);
-		fprintf(stderr, "dbg2       primary_ny:                %d\n", data->primary_ny);
+		fprintf(stderr, "dbg2       primary_n_columns:         %d\n", data->primary_n_columns);
+		fprintf(stderr, "dbg2       primary_n_rows:            %d\n", data->primary_n_rows);
 		fprintf(stderr, "dbg2       primary_min:               %f\n", data->primary_min);
 		fprintf(stderr, "dbg2       primary_max:               %f\n", data->primary_max);
 		fprintf(stderr, "dbg2       primary_xmin:              %f\n", data->primary_xmin);
@@ -1021,8 +1021,8 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr, "dbg2       secondary_sameas_primary:  %d\n", data->secondary_sameas_primary);
 		fprintf(stderr, "dbg2       secondary_nodatavalue:     %f\n", data->secondary_nodatavalue);
 		fprintf(stderr, "dbg2       secondary_nxy:             %d\n", data->secondary_nxy);
-		fprintf(stderr, "dbg2       secondary_nx:              %d\n", data->secondary_nx);
-		fprintf(stderr, "dbg2       secondary_ny:              %d\n", data->secondary_ny);
+		fprintf(stderr, "dbg2       secondary_n_columns:       %d\n", data->secondary_n_columns);
+		fprintf(stderr, "dbg2       secondary_n_rows:          %d\n", data->secondary_n_rows);
 		fprintf(stderr, "dbg2       secondary_xmin:            %f\n", data->secondary_xmin);
 		fprintf(stderr, "dbg2       secondary_xmax:            %f\n", data->secondary_xmax);
 		fprintf(stderr, "dbg2       secondary_ymin:            %f\n", data->secondary_ymin);
@@ -1702,8 +1702,8 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		/* primary grid data */
 		fprintf(stderr, "dbg2       primary_nodatavalue:       %f\n", data->primary_nodatavalue);
 		fprintf(stderr, "dbg2       primary_nxy:               %d\n", data->primary_nxy);
-		fprintf(stderr, "dbg2       primary_nx:                %d\n", data->primary_nx);
-		fprintf(stderr, "dbg2       primary_ny:                %d\n", data->primary_ny);
+		fprintf(stderr, "dbg2       primary_n_columns:         %d\n", data->primary_n_columns);
+		fprintf(stderr, "dbg2       primary_n_rows:            %d\n", data->primary_n_rows);
 		fprintf(stderr, "dbg2       primary_min:               %f\n", data->primary_min);
 		fprintf(stderr, "dbg2       primary_max:               %f\n", data->primary_max);
 		fprintf(stderr, "dbg2       primary_xmin:              %f\n", data->primary_xmin);
@@ -1728,8 +1728,8 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		fprintf(stderr, "dbg2       secondary_sameas_primary:  %d\n", data->secondary_sameas_primary);
 		fprintf(stderr, "dbg2       secondary_nodatavalue:     %f\n", data->secondary_nodatavalue);
 		fprintf(stderr, "dbg2       secondary_nxy:             %d\n", data->secondary_nxy);
-		fprintf(stderr, "dbg2       secondary_nx:              %d\n", data->secondary_nx);
-		fprintf(stderr, "dbg2       secondary_ny:              %d\n", data->secondary_ny);
+		fprintf(stderr, "dbg2       secondary_n_columns:       %d\n", data->secondary_n_columns);
+		fprintf(stderr, "dbg2       secondary_n_rows:          %d\n", data->secondary_n_rows);
 		fprintf(stderr, "dbg2       secondary_xmin:            %f\n", data->secondary_xmin);
 		fprintf(stderr, "dbg2       secondary_xmax:            %f\n", data->secondary_xmax);
 		fprintf(stderr, "dbg2       secondary_ymin:            %f\n", data->secondary_ymin);
@@ -8799,8 +8799,8 @@ int do_mbview_workfunction(XtPointer client_data) {
 			ncalc = 0;
 			for (k = view->colordonecount; k < data->primary_nxy && ncalc < MBV_NUMBACKGROUNDCALC; k++) {
 				if (!(data->primary_stat_color[k / 8] & statmask[k % 8])) {
-					i = k / data->primary_ny;
-					j = k % data->primary_ny;
+					i = k / data->primary_n_columns;
+					j = k % data->primary_n_rows;
 					if (use_histogram == MB_NO)
 						mbview_colorpoint(view, data, i, j, k);
 					else

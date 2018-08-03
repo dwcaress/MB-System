@@ -395,6 +395,9 @@ int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int 
 int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project, int crossing_id, double offset_x,
                                        double offset_y, double *lonmin, double *lonmax, double *latmin, double *latmax,
                                        int *error);
+int mbnavadjust_crossing_focuspoint(int verbose, struct mbna_project *project, int crossing_id,
+                                    double offset_x, double offset_y, int *isnav1_focus, int *isnav2_focus,
+                                    double *lon_focus, double *lat_focus, int *error);
 int mbnavadjust_set_plot_functions(int verbose, struct mbna_project *project,
                              void *plot, void *newpen, void *setline,
                              void *justify_string, void *plot_string, int *error);

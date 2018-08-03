@@ -299,10 +299,10 @@ int mbview_projectdata(size_t instance) {
 	fprintf(stderr,"  Display scale: %f\n", view->scale);*/
 
 	/* set x and y arrays */
-	for (i = 0; i < data->primary_nx; i++) {
-		for (j = 0; j < data->primary_ny; j++) {
+	for (i = 0; i < data->primary_n_columns; i++) {
+		for (j = 0; j < data->primary_n_rows; j++) {
 			/* get raw values in grid */
-			k = i * data->primary_ny + j;
+			k = i * data->primary_n_rows + j;
 			xgrid = data->primary_xmin + i * data->primary_dx;
 			ygrid = data->primary_ymin + j * data->primary_dy;
 
@@ -339,12 +339,12 @@ int mbview_projectdata(size_t instance) {
 
 		/* dump out of loop if plotting already done at a higher recursion */
 		if (view->plot_done == MB_YES)
-			i = data->primary_nx;
+			i = data->primary_n_columns;
 	}
 
 	/* calculate derivatives of primary data */
-	for (i = 0; i < data->primary_nx; i++) {
-		for (j = 0; j < data->primary_ny; j++) {
+	for (i = 0; i < data->primary_n_columns; i++) {
+		for (j = 0; j < data->primary_n_rows; j++) {
 			mbview_derivative(instance, i, j);
 		}
 
@@ -354,7 +354,7 @@ int mbview_projectdata(size_t instance) {
 
 		/* dump out of loop if plotting already done at a higher recursion */
 		if (view->plot_done == MB_YES)
-			i = data->primary_nx;
+			i = data->primary_n_columns;
 	}
 
 	/* clear zscale for grid */
@@ -408,22 +408,22 @@ int mbview_derivative(size_t instance, int i, int j) {
 
 	/* figure if x derivative can be calculated */
 	derivative_ok = MB_NO;
-	k = i * data->primary_ny + j;
+	k = i * data->primary_n_rows + j;
 	if (i == 0) {
-		k1 = i * data->primary_ny + j;
-		k2 = (i + 1) * data->primary_ny + j;
+		k1 = i * data->primary_n_rows + j;
+		k2 = (i + 1) * data->primary_n_rows + j;
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
 			derivative_ok = MB_YES;
 	}
-	else if (i == data->primary_nx - 1) {
-		k1 = (i - 1) * data->primary_ny + j;
-		k2 = i * data->primary_ny + j;
+	else if (i == data->primary_n_columns - 1) {
+		k1 = (i - 1) * data->primary_n_rows + j;
+		k2 = i * data->primary_n_rows + j;
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
 			derivative_ok = MB_YES;
 	}
 	else {
-		k1 = (i - 1) * data->primary_ny + j;
-		k2 = (i + 1) * data->primary_ny + j;
+		k1 = (i - 1) * data->primary_n_rows + j;
+		k2 = (i + 1) * data->primary_n_rows + j;
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
 			derivative_ok = MB_YES;
 		else if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k] != data->primary_nodatavalue) {
@@ -450,21 +450,21 @@ int mbview_derivative(size_t instance, int i, int j) {
 	/* figure if y derivative can be calculated */
 	derivative_ok = MB_NO;
 	if (j == 0) {
-		k1 = i * data->primary_ny + j;
-		k2 = i * data->primary_ny + (j + 1);
+		k1 = i * data->primary_n_rows + j;
+		k2 = i * data->primary_n_rows + (j + 1);
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
 			derivative_ok = MB_YES;
 	}
-	else if (i == data->primary_ny - 1) {
-		k1 = i * data->primary_ny + (j - 1);
-		k2 = i * data->primary_ny + j;
+	else if (i == data->primary_n_rows - 1) {
+		k1 = i * data->primary_n_rows + (j - 1);
+		k2 = i * data->primary_n_rows + j;
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
 			derivative_ok = MB_YES;
 	}
 	else {
-		k1 = i * data->primary_ny + (j - 1);
-		k = i * data->primary_ny + j;
-		k2 = i * data->primary_ny + (j + 1);
+		k1 = i * data->primary_n_rows + (j - 1);
+		k = i * data->primary_n_rows + j;
+		k2 = i * data->primary_n_rows + (j + 1);
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
 			derivative_ok = MB_YES;
 		else if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k] != data->primary_nodatavalue) {
@@ -720,8 +720,8 @@ int mbview_zscalegridpoint(size_t instance, int k) {
 	}
 	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) {
 		/* must reproject everything in this case */
-		i = k / data->primary_ny;
-		j = k % data->primary_ny;
+		i = k / data->primary_n_rows;
+		j = k % data->primary_n_rows;
 		xgrid = data->primary_xmin + i * data->primary_dx;
 		ygrid = data->primary_ymin + j * data->primary_dy;
 
@@ -1453,10 +1453,10 @@ int mbview_projectll2xyzgrid(size_t instance, double xlon, double ylat, double *
 	*zdata = 0.0;
 	i = (int)((*xgrid - data->primary_xmin) / data->primary_dx);
 	j = (int)((*ygrid - data->primary_ymin) / data->primary_dy);
-	if (i >= 0 && i < data->primary_nx - 1 && j >= 0 && j < data->primary_ny - 1) {
+	if (i >= 0 && i < data->primary_n_columns - 1 && j >= 0 && j < data->primary_n_rows - 1) {
 		for (ii = i; ii <= i + 1; ii++)
 			for (jj = j; jj <= j + 1; jj++) {
-				k = ii * data->primary_ny + jj;
+				k = ii * data->primary_n_rows + jj;
 				if (data->primary_data[k] != data->primary_nodatavalue) {
 					nfound++;
 					*zdata += data->primary_data[k];
@@ -3399,10 +3399,10 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_str
 	jj = (ysgrid - data->secondary_ymin) / data->secondary_dy;
 
 	/* answer only defined within grid bounds */
-	if (ii < 0 || ii >= data->secondary_nx || jj < 0 || jj >= data->secondary_ny) {
+	if (ii < 0 || ii >= data->secondary_n_columns || jj < 0 || jj >= data->secondary_n_rows) {
 		*secondary_value = data->secondary_nodatavalue;
 	} else {
-		kk = ii * data->secondary_ny + jj;
+		kk = ii * data->secondary_n_rows + jj;
 		*secondary_value = data->secondary_data[kk];
 	}
 
@@ -3455,11 +3455,11 @@ int mbview_contour(size_t instance, int rez) {
 	if (rez == MBV_REZ_FULL)
 		stride = 1;
 	else if (rez == MBV_REZ_HIGH)
-		stride = MAX((int)ceil(((double)data->primary_nx) / ((double)data->hirez_dimension)),
-		             (int)ceil(((double)data->primary_ny) / ((double)data->hirez_dimension)));
+		stride = MAX((int)ceil(((double)data->primary_n_columns) / ((double)data->hirez_dimension)),
+		             (int)ceil(((double)data->primary_n_rows) / ((double)data->hirez_dimension)));
 	else
-		stride = MAX((int)ceil(((double)data->primary_nx) / ((double)data->lorez_dimension)),
-		             (int)ceil(((double)data->primary_ny) / ((double)data->lorez_dimension)));
+		stride = MAX((int)ceil(((double)data->primary_n_columns) / ((double)data->lorez_dimension)),
+		             (int)ceil(((double)data->primary_n_rows) / ((double)data->lorez_dimension)));
 
 	/* start openGL list */
 	if (rez == MBV_REZ_FULL) {
@@ -3491,13 +3491,13 @@ int mbview_contour(size_t instance, int rez) {
 	}
 
 	/* construct the contour segments in each triangle */
-	for (i = 0; i < data->primary_nx - stride; i += stride) {
-		for (j = 0; j < data->primary_ny - stride; j += stride) {
+	for (i = 0; i < data->primary_n_columns - stride; i += stride) {
+		for (j = 0; j < data->primary_n_rows - stride; j += stride) {
 			/* get vertex id's */
-			vertex[0] = i * data->primary_ny + j;
-			vertex[1] = (i + stride) * data->primary_ny + j;
-			vertex[2] = i * data->primary_ny + j + stride;
-			vertex[3] = (i + stride) * data->primary_ny + j + stride;
+			vertex[0] = i * data->primary_n_rows + j;
+			vertex[1] = (i + stride) * data->primary_n_rows + j;
+			vertex[2] = i * data->primary_n_rows + j + stride;
+			vertex[3] = (i + stride) * data->primary_n_rows + j + stride;
 
 			/* check if either triangle can be contoured */
 			triangleA = MB_NO;
@@ -3678,7 +3678,7 @@ int mbview_contour(size_t instance, int rez) {
 
 		/* dump out of loop if plotting already done at a higher recursion */
 		if (view->plot_done == MB_YES)
-			i = data->primary_nx;
+			i = data->primary_n_columns;
 	}
 
 	/* end openGL list */
@@ -3740,17 +3740,17 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, int *found, dou
 	j = (int)((ygrid - data->primary_ymin) / data->primary_dy);
 
 	/* fail if outside grid */
-	if (i < 0 || i >= data->primary_nx - 1 || j < 0 || j >= data->primary_ny - 1) {
+	if (i < 0 || i >= data->primary_n_columns - 1 || j < 0 || j >= data->primary_n_rows - 1) {
 		*found = MB_NO;
 		*zdata = 0.0;
 	}
 
 	/* check all four points and average the good ones */
 	else {
-		k = i * data->primary_ny + j;
-		l = (i + 1) * data->primary_ny + j;
-		m = i * data->primary_ny + j + 1;
-		n = (i + 1) * data->primary_ny + j + 1;
+		k = i * data->primary_n_rows + j;
+		l = (i + 1) * data->primary_n_rows + j;
+		m = i * data->primary_n_rows + j + 1;
+		n = (i + 1) * data->primary_n_rows + j + 1;
 		nsum = 0;
 		zdatasum = 0.0;
 		if (data->primary_data[k] != data->primary_nodatavalue) {

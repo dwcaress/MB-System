@@ -84,8 +84,8 @@
 /// @typedef struct emu7k_stats_s emu7k_stats_t
 /// @brief server stat
 typedef struct emu7k_stats_s{
-    /// @var emu7k_stats_s::con_total
-    /// @brief total client connections
+    /// @var emu7k_stats_s::start_time
+    /// @brief start time
     time_t start_time;
     /// @var emu7k_stats_s::con_total
     /// @brief total client connections

@@ -175,10 +175,10 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr);
 int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *pathraw, char *pathprocessed, int format,
                         int formatorg, double weight, int *error);
 int do_mbgrdviz_readgrd(size_t instance, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue,
-                        int *nxy, int *nx, int *ny, double *min, double *max, double *xmin, double *xmax, double *ymin,
+                        int *nxy, int *n_columns, int *n_rows, double *min, double *max, double *xmin, double *xmax, double *ymin,
                         double *ymax, double *dx, double *dy, float **data);
 int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double factor3, int *grid_projection_mode,
-                         char *grid_projection_id, float *nodatavalue, int *nxy, int *nx, int *ny, double *min, double *max,
+                         char *grid_projection_id, float *nodatavalue, int *nxy, int *n_columns, int *n_rows, double *min, double *max,
                          double *xmin, double *xmax, double *ymin, double *ymax, double *dx, double *dy, float **data);
 void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_data);
@@ -1721,8 +1721,8 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
 	char mbv_display_projection_id[MB_PATH_MAXLINE];
 	float mbv_primary_nodatavalue;
 	int mbv_primary_nxy;
-	int mbv_primary_nx;
-	int mbv_primary_ny;
+	int mbv_primary_n_columns;
+	int mbv_primary_n_rows;
 	double mbv_primary_min;
 	double mbv_primary_max;
 	double mbv_primary_xmin;
@@ -1782,15 +1782,15 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
 		/* read in the grd file */
 		if (status == MB_SUCCESS && input_file_ptr != NULL)
 			status = mb_read_gmt_grd(verbose, input_file_ptr, &mbv_primary_grid_projection_mode, mbv_primary_grid_projection_id,
-			                         &mbv_primary_nodatavalue, &mbv_primary_nxy, &mbv_primary_nx, &mbv_primary_ny,
+			                         &mbv_primary_nodatavalue, &mbv_primary_nxy, &mbv_primary_n_columns, &mbv_primary_n_rows,
 			                         &mbv_primary_min, &mbv_primary_max, &mbv_primary_xmin, &mbv_primary_xmax, &mbv_primary_ymin,
 			                         &mbv_primary_ymax, &mbv_primary_dx, &mbv_primary_dy, &mbv_primary_data, NULL, NULL, &error);
 
 		else if (status == MB_SUCCESS)
 			status =
 			    do_mbgrdviz_opentest(instance, 1000.0, 3.0, 2.0, &mbv_primary_grid_projection_mode,
-			                         mbv_primary_grid_projection_id, &mbv_primary_nodatavalue, &mbv_primary_nxy, &mbv_primary_nx,
-			                         &mbv_primary_ny, &mbv_primary_min, &mbv_primary_max, &mbv_primary_xmin, &mbv_primary_xmax,
+			                         mbv_primary_grid_projection_id, &mbv_primary_nodatavalue, &mbv_primary_nxy, &mbv_primary_n_columns,
+			                         &mbv_primary_n_rows, &mbv_primary_min, &mbv_primary_max, &mbv_primary_xmin, &mbv_primary_xmax,
 			                         &mbv_primary_ymin, &mbv_primary_ymax, &mbv_primary_dx, &mbv_primary_dy, &mbv_primary_data);
 
 		/* set parameters */
@@ -1908,7 +1908,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
 		/* set primary grid data */
 		if (status == MB_SUCCESS)
 			status = mbview_setprimarygrid(verbose, instance, mbv_primary_grid_projection_mode, mbv_primary_grid_projection_id,
-			                               mbv_primary_nodatavalue, mbv_primary_nx, mbv_primary_ny, mbv_primary_min,
+			                               mbv_primary_nodatavalue, mbv_primary_n_columns, mbv_primary_n_rows, mbv_primary_min,
 			                               mbv_primary_max, mbv_primary_xmin, mbv_primary_xmax, mbv_primary_ymin,
 			                               mbv_primary_ymax, mbv_primary_dx, mbv_primary_dy, mbv_primary_data, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_primary_data, &error);
@@ -2009,8 +2009,8 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr) {
 	char mbv_secondary_grid_projection_id[MB_PATH_MAXLINE];
 	float mbv_secondary_nodatavalue;
 	int mbv_secondary_nxy;
-	int mbv_secondary_nx;
-	int mbv_secondary_ny;
+	int mbv_secondary_n_columns;
+	int mbv_secondary_n_rows;
 	double mbv_secondary_min;
 	double mbv_secondary_max;
 	double mbv_secondary_xmin;
@@ -2039,14 +2039,14 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr) {
 		if (status == MB_SUCCESS && input_file_ptr != NULL)
 			status = mb_read_gmt_grd(verbose, input_file_ptr, &mbv_secondary_grid_projection_mode,
 			                         mbv_secondary_grid_projection_id, &mbv_secondary_nodatavalue, &mbv_secondary_nxy,
-			                         &mbv_secondary_nx, &mbv_secondary_ny, &mbv_secondary_min, &mbv_secondary_max,
+			                         &mbv_secondary_n_columns, &mbv_secondary_n_rows, &mbv_secondary_min, &mbv_secondary_max,
 			                         &mbv_secondary_xmin, &mbv_secondary_xmax, &mbv_secondary_ymin, &mbv_secondary_ymax,
 			                         &mbv_secondary_dx, &mbv_secondary_dy, &mbv_secondary_data, NULL, NULL, &error);
 
 		else if (status == MB_SUCCESS)
 			status = do_mbgrdviz_opentest(instance, 1000.0, 6.0, 1.5, &mbv_secondary_grid_projection_mode,
 			                              mbv_secondary_grid_projection_id, &mbv_secondary_nodatavalue, &mbv_secondary_nxy,
-			                              &mbv_secondary_nx, &mbv_secondary_ny, &mbv_secondary_min, &mbv_secondary_max,
+			                              &mbv_secondary_n_columns, &mbv_secondary_n_rows, &mbv_secondary_min, &mbv_secondary_max,
 			                              &mbv_secondary_xmin, &mbv_secondary_xmax, &mbv_secondary_ymin, &mbv_secondary_ymax,
 			                              &mbv_secondary_dx, &mbv_secondary_dy, &mbv_secondary_data);
 
@@ -2065,7 +2065,7 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr) {
 		if (status == MB_SUCCESS) {
 			status =
 			    mbview_setsecondarygrid(verbose, instance, mbv_secondary_grid_projection_mode, mbv_secondary_grid_projection_id,
-			                            mbv_secondary_nodatavalue, mbv_secondary_nx, mbv_secondary_ny, mbv_secondary_min,
+			                            mbv_secondary_nodatavalue, mbv_secondary_n_columns, mbv_secondary_n_rows, mbv_secondary_min,
 			                            mbv_secondary_max, mbv_secondary_xmin, mbv_secondary_xmax, mbv_secondary_ymin,
 			                            mbv_secondary_ymax, mbv_secondary_dx, mbv_secondary_dy, mbv_secondary_data, &error);
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_secondary_data, &error);
@@ -2812,6 +2812,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 	double settlingtime = 3.0;
     double altitude = 3.0;
     double heading = 3.0;
+    int turndirection = 1;
 
 	/* time, user, host variables */
 	time_t right_now;
@@ -2927,6 +2928,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 					settlingtime = 3.0;
                     altitude = 3.0;
                     heading = 0.0;
+                    turndirection = 1;
                     /* for now set heading and altitude at start only */
                     fprintf(sfp, "ALT, %.3f, 0.1, 3\r\n", altitude);
                     fprintf(sfp, "HDG, %.3f, 1, 6, 3\r\n", heading);
@@ -2942,7 +2944,11 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 							xx = (routelon[j] - lon_origin) / mtodeglon;
 							yy = (routelat[j] - lat_origin) / mtodeglat;
 							zz = -altitude;
+                            heading = routebearing[j];
+                            if (j % 2 == 0)
+                                turndirection *= -1;
 							fprintf(sfp, "POS, %.3f, %.3f, %.3f, %.3f, %.3f\r\n", yy, xx, zz, vvspeed, settlingtime);
+                            fprintf(sfp, "HDG, %.3f, %d, 6, %.3f\r\n", heading, turndirection, settlingtime);
 						}
 					}
 
@@ -4025,8 +4031,8 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
 		status = mbview_projectforward(instance, MB_YES, data->primary_xmax, data->primary_ymax,
 		                               0.5 * (data->primary_min + data->primary_max), &bounds[1], &bounds[3], &xd, &yd, &zd);
 		mb_coor_scale(verbose, 0.5 * (bounds[2] + bounds[3]), &mtodeglon, &mtodeglat);
-		cellsize = 0.0005 * (((bounds[3] - bounds[2]) / ((double)data->primary_ny) / mtodeglat) +
-		                     ((bounds[1] - bounds[0]) / ((double)data->primary_nx) / mtodeglon));
+		cellsize = 0.0005 * (((bounds[3] - bounds[2]) / ((double)data->primary_n_rows) / mtodeglat) +
+		                     ((bounds[1] - bounds[0]) / ((double)data->primary_n_columns) / mtodeglon));
 	}
 
 	/* rationalize bounds and lonflip */
@@ -4272,7 +4278,7 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double factor3, int *grid_projection_mode,
-                         char *grid_projection_id, float *nodatavalue, int *nxy, int *nx, int *ny, double *min, double *max,
+                         char *grid_projection_id, float *nodatavalue, int *nxy, int *n_columns, int *n_rows, double *min, double *max,
                          double *xmin, double *xmax, double *ymin, double *ymax, double *dx, double *dy, float **data) {
 	char function_name[] = "do_mbgrdviz_opentest";
 	int status = MB_SUCCESS;
@@ -4293,15 +4299,15 @@ int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double
 	*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
 	sprintf(grid_projection_id, "epsg%d", GCS_WGS_84);
 	*nodatavalue = MBV_DEFAULT_NODATA;
-	*nx = 501;
-	*ny = 501;
-	*nxy = *nx * *ny;
+	*n_columns = 501;
+	*n_rows = 501;
+	*nxy = *n_columns * *n_rows;
 	*xmin = -1.0;
 	*xmax = 1.0;
 	*ymin = -1.0;
 	*ymax = 1.0;
-	*dx = (*xmax - *xmin) / (*nx - 1);
-	*dy = (*ymax - *ymin) / (*ny - 1);
+	*dx = (*xmax - *xmin) / (*n_columns - 1);
+	*dy = (*ymax - *ymin) / (*n_rows - 1);
 	*min = 0.0;
 	*max = 1000.0;
 	*min = 0.0;
@@ -4316,9 +4322,9 @@ int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double
 		exit(error);
 	}
 
-	for (i = 0; i < *nx; i++)
-		for (j = 0; j < *ny; j++) {
-			k = i * *ny + j;
+	for (i = 0; i < *n_columns; i++)
+		for (j = 0; j < *n_rows; j++) {
+			k = i * *n_rows + j;
 			xx = *xmin + i * *dx;
 			yy = *ymin + j * *dy;
 			usedata[k] = factor1 * sin(factor2 * M_PI * xx) * sin(factor2 * M_PI * yy) * exp(-factor3 * xx * yy);
@@ -4357,8 +4363,8 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 	int mbv_lorez_navdecimate;
 	int mbv_hirez_navdecimate;
 	int mbv_primary_nxy;
-	int mbv_primary_nx;
-	int mbv_primary_ny;
+	int mbv_primary_n_columns;
+	int mbv_primary_n_rows;
 	double mbv_primary_min;
 	double mbv_primary_max;
 	double mbv_primary_xmin;
@@ -4369,8 +4375,8 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 	double mbv_primary_dy;
 	float *mbv_primary_data;
 	int mbv_secondary_nxy;
-	int mbv_secondary_nx;
-	int mbv_secondary_ny;
+	int mbv_secondary_n_columns;
+	int mbv_secondary_n_rows;
 	double mbv_secondary_min;
 	double mbv_secondary_max;
 	double mbv_secondary_xmin;
@@ -4453,23 +4459,23 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 		jymin = (mbv_primary_ymin - data_source->primary_ymin) / mbv_primary_dy;
 		jymax = ((mbv_primary_ymax - data_source->primary_ymin) / mbv_primary_dy) + 1;
 		ixmin = MAX(ixmin, 0);
-		ixmax = MIN(ixmax, data_source->primary_nx - 1);
+		ixmax = MIN(ixmax, data_source->primary_n_columns - 1);
 		jymin = MAX(jymin, 0);
-		jymax = MIN(jymax, data_source->primary_ny - 1);
+		jymax = MIN(jymax, data_source->primary_n_rows - 1);
 		mbv_primary_xmin = data_source->primary_xmin + mbv_primary_dx * ixmin;
 		mbv_primary_xmax = data_source->primary_xmin + mbv_primary_dx * ixmax;
 		mbv_primary_ymin = data_source->primary_ymin + mbv_primary_dy * jymin;
 		mbv_primary_ymax = data_source->primary_ymin + mbv_primary_dy * jymax;
-		mbv_primary_nx = ixmax - ixmin + 1;
-		mbv_primary_ny = jymax - jymin + 1;
-		mbv_primary_nxy = mbv_primary_nx * mbv_primary_ny;
+		mbv_primary_n_columns = ixmax - ixmin + 1;
+		mbv_primary_n_rows = jymax - jymin + 1;
+		mbv_primary_nxy = mbv_primary_n_columns * mbv_primary_n_rows;
 		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * mbv_primary_nxy, (void **)&mbv_primary_data, &error);
 		mbv_primary_min = data_source->primary_nodatavalue;
 		mbv_primary_max = data_source->primary_nodatavalue;
-		for (i = 0; i < mbv_primary_nx; i++) {
-			for (j = 0; j < mbv_primary_ny; j++) {
-				k = i * mbv_primary_ny + j;
-				ksource = (i + ixmin) * data_source->primary_ny + (j + jymin);
+		for (i = 0; i < mbv_primary_n_columns; i++) {
+			for (j = 0; j < mbv_primary_n_rows; j++) {
+				k = i * mbv_primary_n_rows + j;
+				ksource = (i + ixmin) * data_source->primary_n_rows + (j + jymin);
 				mbv_primary_data[k] = data_source->primary_data[ksource];
 				if (mbv_primary_data[k] != data_source->primary_nodatavalue) {
 					if (mbv_primary_min == data_source->primary_nodatavalue || mbv_primary_data[k] < mbv_primary_min) {
@@ -4500,7 +4506,7 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 		if (status == MB_SUCCESS)
 			status = mbview_setprimarygrid(verbose, instance, data_source->primary_grid_projection_mode,
 			                               data_source->primary_grid_projection_id, data_source->primary_nodatavalue,
-			                               mbv_primary_nx, mbv_primary_ny, mbv_primary_min, mbv_primary_max, mbv_primary_xmin,
+			                               mbv_primary_n_columns, mbv_primary_n_rows, mbv_primary_min, mbv_primary_max, mbv_primary_xmin,
 			                               mbv_primary_xmax, mbv_primary_ymin, mbv_primary_ymax, mbv_primary_dx, mbv_primary_dy,
 			                               mbv_primary_data, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_primary_data, &error);
@@ -4589,24 +4595,24 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 			jymin = (mbv_secondary_ymin - data_source->secondary_ymin) / mbv_secondary_dy;
 			jymax = ((mbv_secondary_ymax - data_source->secondary_ymin) / mbv_secondary_dy) + 1;
 			ixmin = MAX(ixmin, 0);
-			ixmax = MIN(ixmax, data_source->secondary_nx - 1);
+			ixmax = MIN(ixmax, data_source->secondary_n_columns - 1);
 			jymin = MAX(jymin, 0);
-			jymax = MIN(jymax, data_source->secondary_ny - 1);
+			jymax = MIN(jymax, data_source->secondary_n_rows - 1);
 			mbv_secondary_xmin = data_source->secondary_xmin + mbv_secondary_dx * ixmin;
 			mbv_secondary_xmax = data_source->secondary_xmin + mbv_secondary_dx * ixmax;
 			mbv_secondary_ymin = data_source->secondary_ymin + mbv_secondary_dy * jymin;
 			mbv_secondary_ymax = data_source->secondary_ymin + mbv_secondary_dy * jymax;
-			mbv_secondary_nx = ixmax - ixmin + 1;
-			mbv_secondary_ny = jymax - jymin + 1;
-			mbv_secondary_nxy = mbv_secondary_nx * mbv_secondary_ny;
+			mbv_secondary_n_columns = ixmax - ixmin + 1;
+			mbv_secondary_n_rows = jymax - jymin + 1;
+			mbv_secondary_nxy = mbv_secondary_n_columns * mbv_secondary_n_rows;
 			status =
 			    mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * mbv_secondary_nxy, (void **)&mbv_secondary_data, &error);
 			mbv_secondary_min = data_source->secondary_nodatavalue;
 			mbv_secondary_max = data_source->secondary_nodatavalue;
-			for (i = 0; i < mbv_secondary_nx; i++) {
-				for (j = 0; j < mbv_secondary_ny; j++) {
-					k = i * mbv_secondary_ny + j;
-					ksource = (i + ixmin) * data_source->secondary_ny + (j + jymin);
+			for (i = 0; i < mbv_secondary_n_columns; i++) {
+				for (j = 0; j < mbv_secondary_n_rows; j++) {
+					k = i * mbv_secondary_n_rows + j;
+					ksource = (i + ixmin) * data_source->secondary_n_rows + (j + jymin);
 					mbv_secondary_data[k] = data_source->secondary_data[ksource];
 					if (mbv_secondary_data[k] != data_source->secondary_nodatavalue) {
 						if (mbv_secondary_min == data_source->secondary_nodatavalue ||
@@ -4625,7 +4631,7 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 			if (status == MB_SUCCESS)
 				status = mbview_setsecondarygrid(verbose, instance, data_source->secondary_grid_projection_mode,
 				                                 data_source->secondary_grid_projection_id, data_source->secondary_nodatavalue,
-				                                 mbv_secondary_nx, mbv_secondary_ny, mbv_secondary_min, mbv_secondary_max,
+				                                 mbv_secondary_n_columns, mbv_secondary_n_rows, mbv_secondary_min, mbv_secondary_max,
 				                                 mbv_secondary_xmin, mbv_secondary_xmax, mbv_secondary_ymin, mbv_secondary_ymax,
 				                                 mbv_secondary_dx, mbv_secondary_dy, mbv_secondary_data, &error);
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_secondary_data, &error);

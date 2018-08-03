@@ -3966,32 +3966,44 @@ int mbnavadjust_crossing_load() {
 			mbna_snav_2_time_d = tie->snav_2_time_d;
 			mbna_snav_2_lon = section2->snav_lon[mbna_snav_2];
 			mbna_snav_2_lat = section2->snav_lat[mbna_snav_2];
-			mbna_offset_x = tie->offset_x;
-			mbna_offset_y = tie->offset_y;
-			mbna_offset_z = tie->offset_z_m;
-			/* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
-			file1 = (struct mbna_file *)&project.files[mbna_file_id_1];
-			file2 = (struct mbna_file *)&project.files[mbna_file_id_2];
-			section1 = (struct mbna_section *)&file1->sections[mbna_section_1];
-			section2 = (struct mbna_section *)&file2->sections[mbna_section_2];
 			mbna_invert_offset_x = section2->snav_lon_offset[mbna_snav_2] - section1->snav_lon_offset[mbna_snav_1];
 			mbna_invert_offset_y = section2->snav_lat_offset[mbna_snav_2] - section1->snav_lat_offset[mbna_snav_1];
 			mbna_invert_offset_z = section2->snav_z_offset[mbna_snav_2] - section1->snav_z_offset[mbna_snav_1];
+			mbna_offset_x = tie->offset_x;
+			mbna_offset_y = tie->offset_y;
+			mbna_offset_z = tie->offset_z_m;
 		}
 		else if (project.inversion_status != MBNA_INVERSION_NONE) {
+			mbna_snav_1 = 0;
+			mbna_snav_1_time_d = section1->snav_time_d[mbna_snav_1];
+			mbna_snav_1_lon = section1->snav_lon[mbna_snav_1];
+			mbna_snav_1_lat = section1->snav_lat[mbna_snav_1];
+			mbna_snav_2 = 0;
+			mbna_snav_2_time_d = section2->snav_time_d[mbna_snav_2];
+			mbna_snav_2_lon = section2->snav_lon[mbna_snav_2];
+			mbna_snav_2_lat = section2->snav_lat[mbna_snav_2];
 			mbna_invert_offset_x = section2->snav_lon_offset[mbna_snav_2] - section1->snav_lon_offset[mbna_snav_1];
 			mbna_invert_offset_y = section2->snav_lat_offset[mbna_snav_2] - section1->snav_lat_offset[mbna_snav_1];
 			mbna_invert_offset_z = section2->snav_z_offset[mbna_snav_2] - section1->snav_z_offset[mbna_snav_1];
 			mbna_offset_x = mbna_invert_offset_x;
 			mbna_offset_y = mbna_invert_offset_y;
 			mbna_offset_z = mbna_invert_offset_z;
-			/* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
 		}
 		else {
-			mbna_offset_x = 0.0;
-			mbna_offset_y = 0.0;
-			mbna_offset_z = 0.0;
-			/* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
+			mbna_snav_1 = 0;
+			mbna_snav_1_time_d = section1->snav_time_d[mbna_snav_1];
+			mbna_snav_1_lon = section1->snav_lon[mbna_snav_1];
+			mbna_snav_1_lat = section1->snav_lat[mbna_snav_1];
+			mbna_snav_2 = 0;
+			mbna_snav_2_time_d = section2->snav_time_d[mbna_snav_2];
+			mbna_snav_2_lon = section2->snav_lon[mbna_snav_2];
+			mbna_snav_2_lat = section2->snav_lat[mbna_snav_2];
+			mbna_invert_offset_x = 0.0;
+			mbna_invert_offset_y = 0.0;
+			mbna_invert_offset_z = 0.0;
+			mbna_offset_x = mbna_invert_offset_x;
+			mbna_offset_y = mbna_invert_offset_y;
+			mbna_offset_z = mbna_invert_offset_z;
 		}
 		mbna_lon_min = MIN(section1->lonmin, section2->lonmin + mbna_offset_x);
 		mbna_lon_max = MAX(section1->lonmax, section2->lonmax + mbna_offset_x);
@@ -5372,8 +5384,9 @@ void mbnavadjust_naverr_plot(int plotmode) {
 
 		/* plot overlap box */
 		mbnavadjust_crossing_overlapbounds(mbna_verbose, &project, mbna_current_crossing, mbna_offset_x, mbna_offset_y,
-		                                   &mbna_overlap_lon_min, &mbna_overlap_lon_max, &mbna_overlap_lat_min,
-		                                   &mbna_overlap_lat_max, &error);
+		                                   &mbna_overlap_lon_min, &mbna_overlap_lon_max,
+                                           &mbna_overlap_lat_min, &mbna_overlap_lat_max,
+                                           &error);
 		ix1 = (int)(mbna_plotx_scale * (mbna_overlap_lon_min - mbna_plot_lon_min));
 		iy1 = (int)(cont_borders[3] - mbna_ploty_scale * (mbna_overlap_lat_min - mbna_plot_lat_min));
 		ix2 = (int)(mbna_plotx_scale * (mbna_overlap_lon_max - mbna_plot_lon_min));
@@ -5591,11 +5604,11 @@ int mbnavadjust_autopick(int do_vertical) {
 	int status = MB_SUCCESS;
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
-	double firstsonardepth1, firsttime_d1, secondsonardepth1, secondtime_d1, dsonardepth1;
-	double firstsonardepth2, firsttime_d2, secondsonardepth2, secondtime_d2, dsonardepth2;
-	double overlap_scale;
-	int found, process;
+	double dlon, dlat, overlap_scale;
+	int process;
 	int nprocess;
+    int isnav1_focus, isnav2_focus;
+    double lon_focus, lat_focus;
 	int i, j, k;
 
 	/* print input debug statements */
@@ -5869,14 +5882,17 @@ int mbnavadjust_autopick(int do_vertical) {
 					mbna_minmisfit_xh/mbna_mtodeglon,mbna_minmisfit_yh/mbna_mtodeglat,mbna_minmisfit_zh); */
 				}
 
-				/* set plot bounds to overlap region */
-				mbnavadjust_crossing_overlapbounds(mbna_verbose, &project, mbna_current_crossing, mbna_offset_x, mbna_offset_y,
-				                                   &mbna_overlap_lon_min, &mbna_overlap_lon_max, &mbna_overlap_lat_min,
-				                                   &mbna_overlap_lat_max, &error);
+				/* set plot bounds to overlap region and recalculate misfit */
+                mbnavadjust_crossing_overlapbounds(mbna_verbose, &project, mbna_current_crossing, mbna_offset_x, mbna_offset_y,
+                                                   &mbna_overlap_lon_min, &mbna_overlap_lon_max,
+                                                   &mbna_overlap_lat_min, &mbna_overlap_lat_max,
+                                                   &error);
 				mbna_plot_lon_min = mbna_overlap_lon_min;
 				mbna_plot_lon_max = mbna_overlap_lon_max;
 				mbna_plot_lat_min = mbna_overlap_lat_min;
 				mbna_plot_lat_max = mbna_overlap_lat_max;
+                
+                /* get characteristic scale of the overlap region */
 				overlap_scale = MIN((mbna_overlap_lon_max - mbna_overlap_lon_min) / mbna_mtodeglon,
 				                    (mbna_overlap_lat_max - mbna_overlap_lat_min) / mbna_mtodeglat);
 
@@ -5885,7 +5901,35 @@ int mbnavadjust_autopick(int do_vertical) {
 
 				/* get misfit */
 				mbnavadjust_get_misfit();
+                
+                /* The overlap focus point is currently the center of the line
+                 * connecting the two closest approach nav points. It could also
+                 * be the centroid of the overlap regions. */
+                mbnavadjust_crossing_focuspoint(mbna_verbose, &project, mbna_current_crossing, mbna_offset_x, mbna_offset_y,
+                                                   &isnav1_focus, &isnav2_focus, &lon_focus, &lat_focus,
+                                                   &error);
+                
+				/* If nonzero overlap region and focus point inside the overlap region,
+                 * set plot bounds to cover one-quarter
+                 * of overlap region centered on the focus point and
+                 * recalculate misfit. */
+                if (mbna_overlap_lon_max > mbna_overlap_lon_min && mbna_overlap_lat_max > mbna_overlap_lat_min
+                    && lon_focus >= mbna_overlap_lon_min && lon_focus <= mbna_overlap_lon_max
+                    && lat_focus >= mbna_overlap_lat_min && lat_focus <= mbna_overlap_lat_max) {
+                    dlon =  0.25 * (mbna_overlap_lon_max - mbna_overlap_lon_min);
+                    dlat =  0.25 * (mbna_overlap_lat_max - mbna_overlap_lat_min);
+                    mbna_plot_lon_min = MAX((lon_focus - dlon), mbna_overlap_lon_min);
+                    mbna_plot_lon_max = MIN((lon_focus + dlon), mbna_overlap_lon_max);
+                    mbna_plot_lat_min = MAX((lat_focus - dlat), mbna_overlap_lat_min);
+                    mbna_plot_lat_max = MIN((lat_focus + dlat), mbna_overlap_lat_max);
 
+                    /* get naverr plot scaling */
+                    mbnavadjust_naverr_scale();
+
+                    /* get misfit */
+                    mbnavadjust_get_misfit();
+                }
+                
 				/* check uncertainty estimate for a good pick */
 				/* fprintf(stderr,"mbnavadjust_autopick C crossing:%d overlap:%d overlap_scale:%f current offsets:%f %f %f
 				minmisfit3D:%f %f %f  minmisfit2D:%f %f %f\n", mbna_current_crossing,crossing->overlap,overlap_scale,
@@ -5920,47 +5964,7 @@ int mbnavadjust_autopick(int do_vertical) {
 
 					/* add tie */
 					mbnavadjust_naverr_addtie();
-
-					/* deal with each tie */
-					for (j = 0; j < crossing->num_ties; j++) {
-						tie = &(crossing->ties[j]);
-
-						/* calculate sonardepth change rate for swath1 */
-						found = MB_NO;
-						for (k = 0; k < swathraw1->npings; k++) {
-							if (swathraw1->pingraws[k].time_d > tie->snav_1_time_d - 2.0 && found == MB_NO) {
-								firstsonardepth1 = swathraw1->pingraws[k].draft;
-								firsttime_d1 = swathraw1->pingraws[k].time_d;
-								found = MB_YES;
-							}
-							if (swathraw1->pingraws[k].time_d < tie->snav_1_time_d + 2.0) {
-								secondsonardepth1 = swathraw1->pingraws[k].draft;
-								secondtime_d1 = swathraw1->pingraws[k].time_d;
-							}
-						}
-						dsonardepth1 = (secondsonardepth1 - firstsonardepth1) / (secondtime_d1 - firsttime_d1);
-
-						/* calculate sonardepth change rate for swath2 */
-						found = MB_NO;
-						for (k = 0; k < swathraw2->npings; k++) {
-							if (swathraw2->pingraws[k].time_d > tie->snav_2_time_d - 2.0 && found == MB_NO) {
-								firstsonardepth2 = swathraw2->pingraws[k].draft;
-								firsttime_d2 = swathraw2->pingraws[k].time_d;
-								found = MB_YES;
-							}
-							if (swathraw2->pingraws[k].time_d < tie->snav_2_time_d + 2.0) {
-								secondsonardepth2 = swathraw2->pingraws[k].draft;
-								secondtime_d2 = swathraw2->pingraws[k].time_d;
-							}
-						}
-						dsonardepth2 = (secondsonardepth2 - firstsonardepth2) / (secondtime_d2 - firsttime_d2);
-						/* fprintf(stderr,"mbnavadjust_autopick D crossing:%d tie:%d zoffset:%f   sdrate1:%f %f %f  sdrate2:%f %f
-						%f   inferred time lag:%f\n", i,j,tie->offset_z_m, (secondsonardepth1 - firstsonardepth1), (secondtime_d1
-						- firsttime_d1), dsonardepth1, (secondsonardepth2 - firstsonardepth2), (secondtime_d2 - firsttime_d2),
-						dsonardepth2, tie->offset_z_m / (dsonardepth2 - dsonardepth1)); */
-					}
-				}
-				else {
+				} else {
 					fprintf(stderr, " AUTOPICK FAILED\n");
 				}
 
@@ -6800,9 +6804,10 @@ int mbnavadjust_autosetsvsvertical() {
 				mbnavadjust_get_misfit();
 
 				/* set plot bounds to overlap region */
-				mbnavadjust_crossing_overlapbounds(mbna_verbose, &project, mbna_current_crossing, mbna_offset_x, mbna_offset_y,
-				                                   &mbna_overlap_lon_min, &mbna_overlap_lon_max, &mbna_overlap_lat_min,
-				                                   &mbna_overlap_lat_max, &error);
+                mbnavadjust_crossing_overlapbounds(mbna_verbose, &project, mbna_current_crossing, mbna_offset_x, mbna_offset_y,
+                                                   &mbna_overlap_lon_min, &mbna_overlap_lon_max,
+                                                   &mbna_overlap_lat_min, &mbna_overlap_lat_max,
+                                                   &error);
 				mbna_plot_lon_min = mbna_overlap_lon_min;
 				mbna_plot_lon_max = mbna_overlap_lon_max;
 				mbna_plot_lat_min = mbna_overlap_lat_min;

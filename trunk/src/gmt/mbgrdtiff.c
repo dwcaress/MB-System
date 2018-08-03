@@ -359,6 +359,9 @@ int tiff_offset[] = {
 #define gmt_rgb_syntax GMT_rgb_syntax
 #define gmt_set_grddim GMT_set_grddim
 #define gmt_show_name_and_purpose GMT_show_name_and_purpose
+#elif GMT_MAJOR_VERSION == 6
+#define gmt_get_cpt(a,b,c,d,e) gmt_get_cpt(a,b,c,d,e,0.0)
+#define gmt_M_grd_is_global gmt_grd_is_global
 #endif
 
 EXTERN_MSC int GMT_mbgrdtiff(void *API, int mode, void *args);
@@ -994,14 +997,14 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		GMT_Report(API, GMT_MSG_VERBOSE, "Warning: Patterns in cpt file only apply to -T\n");
 	GMT_Report(API, GMT_MSG_VERBOSE, "Evaluate pixel colors\n");
 
-	NaN_rgb = (P) ? P->patch[GMT_NAN].rgb : GMT->current.setting.color_patch[GMT_NAN];
+	NaN_rgb = (P) ? P->bfn[GMT_NAN].rgb : GMT->current.setting.color_patch[GMT_NAN];
 	if (Ctrl->Q.active) {
 		if (gray_only) {
 			GMT_Report(API, GMT_MSG_VERBOSE,
 			           "Your image is grayscale only but -Q requires 24-bit; image will be converted to 24-bit.\n");
 			gray_only = false;
 			NaN_rgb = red; /* Arbitrarily pick red as the NaN color since image is gray only */
-			gmt_M_memcpy(P->patch[GMT_NAN].rgb, red, 4, double);
+			gmt_M_memcpy(P->bfn[GMT_NAN].rgb, red, 4, double);
 		}
 		rgb_used = gmt_M_memory(GMT, NULL, 256 * 256 * 256, unsigned char);
 	}
@@ -1017,7 +1020,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		bitimage_24 = gmt_M_memory(GMT, NULL, image_size, unsigned char);
 		if (P && Ctrl->Q.active) {
 			for (k = 0; k < 3; k++)
-				bitimage_24[k] = gmt_M_u255(P->patch[GMT_NAN].rgb[k]);
+				bitimage_24[k] = gmt_M_u255(P->bfn[GMT_NAN].rgb[k]);
 		}
 		tiff_image = bitimage_24;
 	}
@@ -1081,8 +1084,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		}
 
 		if (P && Ctrl->Q.active) { /* Check that we found an unused r/g/b value so colormasking will work OK */
-			index = (gmt_M_u255(P->patch[GMT_NAN].rgb[0]) * 256 + gmt_M_u255(P->patch[GMT_NAN].rgb[1])) * 256 +
-			        gmt_M_u255(P->patch[GMT_NAN].rgb[2]);
+			index = (gmt_M_u255(P->bfn[GMT_NAN].rgb[0]) * 256 + gmt_M_u255(P->bfn[GMT_NAN].rgb[1])) * 256 +
+			        gmt_M_u255(P->bfn[GMT_NAN].rgb[2]);
 			if (rgb_used[index]) { /* This r/g/b already appears in the image as a non-NaN color; we must find a replacement NaN
 				                      color */
 				for (index = 0, ks = -1; ks == -1 && index < 256 * 256 * 256; index++)
@@ -1098,10 +1101,10 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 					bitimage_24[1] = (unsigned char)((ks >> 8) & 255);
 					bitimage_24[2] = (unsigned char)(ks & 255);
 					GMT_Report(API, GMT_MSG_VERBOSE, "Warning: transparency color reset from %s to color %d/%d/%d\n",
-					           gmt_putrgb(GMT, P->patch[GMT_NAN].rgb), (int)bitimage_24[0], (int)bitimage_24[1],
+					           gmt_putrgb(GMT, P->bfn[GMT_NAN].rgb), (int)bitimage_24[0], (int)bitimage_24[1],
 					           (int)bitimage_24[2]);
 					for (k = 0; k < 3; k++)
-						P->patch[GMT_NAN].rgb[k] = gmt_M_is255(bitimage_24[k]); /* Set new NaN color */
+						P->bfn[GMT_NAN].rgb[k] = gmt_M_is255(bitimage_24[k]); /* Set new NaN color */
 				}
 			}
 		}

@@ -518,10 +518,10 @@ int do_mbview_workfunction(XtPointer client_data);
 
 /* mbview_primary.c function prototypes */
 int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_projection_mode, char *primary_grid_projection_id,
-                          float primary_nodatavalue, int primary_nx, int primary_ny, double primary_min, double primary_max,
+                          float primary_nodatavalue, int primary_n_columns, int primary_n_rows, double primary_min, double primary_max,
                           double primary_xmin, double primary_xmax, double primary_ymin, double primary_ymax, double primary_dx,
                           double primary_dy, float *primary_data, int *error);
-int mbview_updateprimarygrid(int verbose, size_t instance, int primary_nx, int primary_ny, float *primary_data, int *error);
+int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns, int primary_n_rows, float *primary_data, int *error);
 int mbview_updateprimarygridcell(int verbose, size_t instance, int primary_ix, int primary_jy, float value, int *error);
 int mbview_setprimarycolortable(int verbose, size_t instance, int primary_colortable, int primary_colortable_mode,
                                 double primary_colortable_min, double primary_colortable_max, int *error);
@@ -530,10 +530,10 @@ int mbview_setslopecolortable(int verbose, size_t instance, int slope_colortable
 
 /* mbview_secondary.c function prototypes */
 int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_projection_mode, char *secondary_grid_projection_id,
-                            float secondary_nodatavalue, int secondary_nx, int secondary_ny, double secondary_min,
+                            float secondary_nodatavalue, int secondary_n_columns, int secondary_n_rows, double secondary_min,
                             double secondary_max, double secondary_xmin, double secondary_xmax, double secondary_ymin,
                             double secondary_ymax, double secondary_dx, double secondary_dy, float *secondary_data, int *error);
-int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_nx, int secondary_ny, float *secondary_data,
+int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_columns, int secondary_n_rows, float *secondary_data,
                                int *error);
 int mbview_updatesecondarygridcell(int verbose, size_t instance, int primary_ix, int primary_jy, float value, int *error);
 int mbview_setsecondarycolortable(int verbose, size_t instance, int secondary_colortable, int secondary_colortable_mode,

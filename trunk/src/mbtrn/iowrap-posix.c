@@ -794,7 +794,8 @@ int64_t iow_read_tmout(iow_socket_t *s, byte *buf, uint32_t len, uint32_t timeou
                 if (FD_ISSET(s->fd, &read_fds)){
                    // MMINFO(IOW,"readfs [%d/%d] ready to read\n",s->fd,fdmax);
                     
-                    if (( nbytes = recv(s->fd, pbuf, (len-read_total), 0)) > 0) {
+//                    if (( nbytes = recv(s->fd, pbuf, (len-read_total), 0)) > 0) {
+                    if (( nbytes = read(s->fd, pbuf, (len-read_total))) > 0) {
                         //MMINFO(IOW,"read %d bytes\n",nbytes);
                         read_total+=nbytes;
                         pbuf+=nbytes;
@@ -1145,7 +1146,7 @@ int64_t iow_read(iow_file_t *self, byte *dest, uint32_t len)
     int64_t retval=-1;
     if (NULL != self && NULL!=dest && len!=0) {
         ssize_t test=0;
-        if( (test=read(self->fd, dest, len))>0){
+        if( (test=read(self->fd, dest, len))>=0){
             retval = (int64_t)test;
         }else{
             MERROR("read failed [%d/%s]\n",errno,strerror(errno));
@@ -1172,7 +1173,7 @@ int64_t iow_write(iow_file_t *self, byte *src, uint32_t len)
         if( (test=write(self->fd, src, len))>0){
             retval = (int64_t)test;
         }else{
-            MERROR("read failed [%d/%s]\n",errno,strerror(errno));
+            MERROR("write failed [%d/%s]\n",errno,strerror(errno));
         }
     }else{
         MERROR("invalid argument\n");

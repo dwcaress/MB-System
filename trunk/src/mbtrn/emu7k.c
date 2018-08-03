@@ -147,7 +147,7 @@ emu7k_client_t *emu7k_client_new(int fd, uint32_t nsubs, int32_t *subs)
     emu7k_client_t *self = (emu7k_client_t *)malloc(sizeof(emu7k_client_t));
     if (self) {
         self->fd=fd;
-        self->sub_count=nsubs;
+        self->sub_count=(nsubs<0?0:nsubs);
         self->sub_list=NULL;
         if (self->sub_count > 0) {
             self->sub_list = (int32_t *)malloc(self->sub_count * sizeof(int32_t));
@@ -316,44 +316,65 @@ static int64_t read_s7k_rec(emu7k_record_t *dest, iow_file_t *src, int64_t ofs)
     int64_t rbytes=0;
     uint32_t req_len=R7K_DRF_BYTES;
     off_t file_end = iow_seek(src,0,IOW_END);
-    
+
     if (NULL!=dest && NULL!=src && ofs<file_end && ofs>=0) {
-        
+       
         if (NULL == dest->header) {
             dest->header=(byte *)malloc(R7K_DRF_BYTES);
         }
-        
+        memset(dest->header,0,R7K_DRF_BYTES);
         if(iow_seek(src,ofs,IOW_SET)>=0){
-            
+          
             off_t frame_head = iow_seek(src,0,IOW_CUR);
 
             if( (rbytes=iow_read(src,dest->header,req_len))==req_len){
              
                 r7k_drf_t *drf = (r7k_drf_t *)dest->header;
 
+                // drf offset value starts at sync pattern,
+                // after proto ver and offset (both uint16_t)
                 if (drf->protocol_version == R7K_DRF_PROTO_VER &&
                     drf->offset == R7K_DRF_BYTES-2*sizeof(uint16_t) &&
-                    drf->size > R7K_DRF_BYTES &&
+                    drf->size >= R7K_DRF_BYTES+R7K_CHECKSUM_BYTES &&
                     drf->sync_pattern == R7K_DRF_SYNC_PATTERN
                     ) {
-                    
+                
                     dest->header = (byte *)realloc(dest->header, drf->size);
                     drf = (r7k_drf_t *)dest->header;
 
                     byte *pdata = dest->header+R7K_DRF_BYTES;
                     req_len = (drf->size-R7K_DRF_BYTES);
-                    
+                    memset( pdata, 0, req_len );
+            
                     if ((rbytes=iow_read(src,pdata,req_len))==req_len) {
                         dest->head     = frame_head;
                         dest->tail     = iow_seek(src,0,IOW_CUR);
                         dest->time     = R7KTIME2D(drf->_7ktime);
                         dest->data     = pdata;
-                        dest->data_len = req_len;
+                        // data_len includes data+checksum
+                        dest->data_len = drf->size-R7K_DRF_BYTES;
                         dest->rtype    = drf->record_type_id;
                         retval         = drf->size;
+                       
+                        byte *pd =(byte *)drf;
+                        uint32_t vchk = r7k_checksum(pd, (uint32_t)(drf->size-R7K_CHECKSUM_BYTES) );
+                        pd =(byte *)drf;
+                        pd += ((size_t)drf->size-R7K_CHECKSUM_BYTES);
+                        uint32_t *pchk = (uint32_t *)pd;
                         
+//                        fprintf(stderr,"oooooooooooo\n");
+//                        fprintf(stderr,"read DRF record data_len[%"PRId64"] drf->size[%"PRId32"]\n",dest->data_len,drf->size);
+//                        fprintf(stderr,"pchk[%08X] vchk[%08X] pchk-drf[%"PRIu32"]\n", (uint32_t)(*pchk), vchk, (((byte *)pchk)-pd));
+//
+//                        r7k_drf_show(drf,false,5);
+//                        r7k_hex_show(dest->header,R7K_DRF_BYTES,16,true,5);
+//                        fprintf(stderr,"...\n");
+//                        r7k_hex_show( (dest->header+drf->size-32),32,16,true,5);
+//                        fprintf(stderr,"oooooooooooo\n");
+
                         if(g_verbose>=4){
-	                        emu7k_rec_show(dest,false,5);
+                            
+                          emu7k_rec_show(dest,false,5);
 //                        MMDEBUG(APP1,"type[%d]\n",dest->rtype);
 //                        MMDEBUG(APP1,"time[%.3lf]\n",dest->time);
 //                        MMDEBUG(APP1,"head[%"PRId64"]\n",dest->head);
@@ -366,7 +387,7 @@ static int64_t read_s7k_rec(emu7k_record_t *dest, iow_file_t *src, int64_t ofs)
                     }
                     
                 }else{
-                    MERROR("invalid header frame_head[0x%0X] nf_sz[%"PRId32"] drf_sz[%"PRId32"]\n",(unsigned int)frame_head,(uint32_t)R7K_NF_BYTES,(uint32_t)R7K_DRF_BYTES);
+                    MERROR("invalid header frame_head[0x%0X] nf_sz[%d] drf_sz[%d]\n",(unsigned int)frame_head,R7K_NF_BYTES,R7K_DRF_BYTES);
                     if(g_verbose>=1){
 	                    r7k_drf_show(drf,false,5);
                     }
@@ -428,33 +449,42 @@ static void *s_server_publish(void *arg)
                             if (cur.rtype == client->sub_list[i]) {
 
                                 //MMDEBUG(APP1,"client has sub to type[%d]\n",cur.rtype);
+                                uint32_t payload_len = cur.data_len-R7K_CHECKSUM_BYTES;
                                 
-                                r7k_msg_t *msg = r7k_msg_new(cur.data_len);
+                                r7k_msg_t *msg = r7k_msg_new(payload_len);
+                                
                                 memcpy(msg->drf,cur.header,R7K_DRF_BYTES);
-                                memcpy(msg->data,cur.data,cur.data_len);
+                                memcpy(msg->data,cur.data,payload_len);
                                 
                                 msg->nf->tx_id       = r7k_txid();
                                 msg->nf->seq_number  = seq_number++;
-                                msg->nf->packet_size = msg->msg_len;
-                                msg->nf->total_size  = msg->msg_len - sizeof(r7k_nf_t);
+                                msg->nf->offset      = R7K_MSG_NF_OFFSET(msg);
+                                msg->nf->packet_size = R7K_MSG_NF_PACKET_SIZE(msg);
+                                msg->nf->total_size  = R7K_MSG_NF_TOTAL_SIZE(msg);
+
                                 r7k_msg_set_checksum(msg);
-                                
 //                                MMDEBUG(APP1,"publishing rtype[%d] @ofs[%"PRId64"] to client[%d]:\n",cur.rtype,cur.head,client->fd);
                                 
-                                MMDEBUG(APP3," cli[%d]\n",client->fd);
+                                MMDEBUG(APP3," cli[%d] msg_len[%"PRIu32"] cur.data_len[%"PRId64"]\n",client->fd,msg->msg_len,cur.data_len);
                                 if(g_verbose>=3){
-                                    emu7k_rec_show(&cur,false,5);
+        
+//                                    emu7k_rec_show(&cur,false,5);
 //                                MMDEBUG(APP1,"type[%d]\n",cur.rtype);
 //                                MMDEBUG(APP1,"time[%.3lf]\n",cur.time);
 //                                MMDEBUG(APP1,"head[%"PRId64"]\n",cur.head);
 //                                MMDEBUG(APP1,"tail[%"PRId64"]\n",cur.tail);
 //                                MMDEBUG(APP1,"size[%"PRId64"/%"PRIu32"]\n",(cur.tail-cur.head),msg->drf->size);
-                                    r7k_drf_show(msg->drf,false,5);
+                                    r7k_msg_show(msg,true,5);
+//                                    r7k_nf_show(msg->nf,true,5);
+//                                    r7k_drf_show(msg->drf,true,5);
                                 }
+                                
+//                                r7k_hex_show((byte *)msg->nf, R7K_NF_BYTES, 12, true, 5);
 
-                                if(r7k_msg_send(client->sock_if,msg)==-1 && errno==EPIPE){
+                                if(r7k_msg_send(client->sock_if,msg)==-1 && (errno==EPIPE || errno==ECONNRESET)){
                                     delete_client=true;
                                 }
+
                                 stats->pub_total++;
                                 stats->pub_cycle++;
                                 r7k_msg_destroy(&msg);
@@ -499,7 +529,7 @@ static void *s_server_publish(void *arg)
                         stats->rec_cycle=0;
                         stats->pub_cycle=0;
                         
-                        MMDEBUG(APP2,"reached end of file fs[%"PRId64"] ofs[%"PRId64"]\n",(int64_t)file_end,cur.tail);
+                        MMDEBUG(APP2,"reached end of file fs[%lld] ofs[%"PRId64"]\n",file_end,cur.tail);
                         if (svr->cfg->restart) {
                             MMDEBUG(APP2,"restarting\n");
                             cur.tail=0;
@@ -592,13 +622,13 @@ static int s_server_handle_request(emu7k_t *svr, byte *req, int rlen, int client
                 r7k_rth_7501_ack_t *prth = (r7k_rth_7501_ack_t *)(msg->data);
                 prth->ticket = 1;
                 memcpy(prth->tracking_number, "ABCDEF0123456789",strlen("ABCDEF0123456789"));
-                msg->drf->size           = DRF_SIZE(msg);
+                msg->drf->size           = R7K_MSG_DRF_SIZE(msg);
                 msg->drf->record_type_id = R7K_RT_REMCON_ACK;
                 msg->drf->device_id      = R7K_DEVID_7KCENTER;
                 msg->nf->tx_id       = r7k_txid();
                 msg->nf->seq_number  = 0;
-                msg->nf->packet_size = msg->msg_len;
-                msg->nf->total_size  = msg->msg_len - sizeof(r7k_nf_t);
+                msg->nf->packet_size = R7K_MSG_NF_PACKET_SIZE(msg);
+                msg->nf->total_size  = R7K_MSG_NF_TOTAL_SIZE(msg);
                 r7k_msg_set_checksum(msg);
                 
                 MMDEBUG(APP1,"sending SUB ACK:\n");
@@ -813,16 +843,16 @@ int emu7k_stop(emu7k_t *self)
 /// @return none
 static void s_show_help()
 {
-    char help_message[] = "\nStream raw reson bytes to console\n";
-    char usage_message[] = "\nstream7k [options]\n"
-    "--verbose n   : verbose output level (n>=0)\n"
-    "--host s      : host IP address or name\n"
-    "--port n      : TCP/IP port\n"
-    "--file s      : data file path (.s7k)\n"
-    "--min-delay n : minimum publish delay (msec)\n"
-    "--restart     : restart data when end of file is reached\n"
-    "--no-restart  : stop when end of file is reached\n"
-    "--statn n     : stop when end of file is reached\n"
+    char help_message[] = "\nEmulate 7k Center using .s7k file data\n";
+    char usage_message[] = "\nemu7k --file=<file> [options]\n"
+    "--verbose=n    : verbose output level\n"
+    "--host=s       : host IP address or name\n"
+    "--port=n       : TCP/IP port\n"
+    "--file=s       : data file path (.s7k)\n"
+    "--min-delay=n  : minimum packet processing delay (msec)\n"
+    "--restart      : restart data when end of file is reached\n"
+    "--no-restart   : stop when end of file is reached\n"
+    "--statn=n      : stop when end of file is reached\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -1032,7 +1062,7 @@ int main(int argc, char **argv)
     s_parse_args(argc, argv, &cfg);
 
     // create/configure server socket
-    iow_socket_t *svr_socket = iow_socket_new(cfg.host, R7K_7KCENTER_PORT, ST_TCP);
+    iow_socket_t *svr_socket = iow_socket_new(cfg.host, cfg.port, ST_TCP);
     // create/configure input file
     iow_file_t *svr_data = iow_file_new(cfg.file_path);
 

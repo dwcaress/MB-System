@@ -5229,7 +5229,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 		fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
 	}
 
-	/* always successful */
+	/* start successful */
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
@@ -5726,15 +5726,15 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 			/* if the optional data are not all available, this ping
 			    is not useful, and is discarded by setting
 			    *error to MB_ERROR_MISSING_NAVATTITUDE */
-			if (interp_status == MB_FAILURE) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_MISSING_NAVATTITUDE;
-			}
+			//if (interp_status == MB_FAILURE) {
+			//	status = MB_FAILURE;
+			//	*error = MB_ERROR_MISSING_NAVATTITUDE;
+			//}
 
 			/*--------------------------------------------------------------*/
 			/* recalculate bathymetry  */
 			/*--------------------------------------------------------------*/
-			if (bathymetry->optionaldata == MB_NO || pars->recalculate_bathymetry == MB_YES) {
+			if (status == MB_SUCCESS && (bathymetry->optionaldata == MB_NO || pars->recalculate_bathymetry == MB_YES)) {
 
 				/* print debug statements */
 				if (verbose >= 2) {
@@ -5934,19 +5934,19 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 						/* get roll at bottom return time for this beam */
 						interp_status =
 						    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
-						                     time_d + bathymetry->range[i], &beamroll, &jattitude, error);
+						                     time_d + bathymetry->range[i], &beamroll, &jattitude, &interp_error);
 						beamrollr = DTR * beamroll;
 
 						/* get pitch at bottom return time for this beam */
 						interp_status =
 						    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
-						                     time_d + bathymetry->range[i], &beampitch, &jattitude, error);
+						                     time_d + bathymetry->range[i], &beampitch, &jattitude, &interp_error);
 						beampitchr = DTR * beampitch;
 
 						/* get heading at bottom return time for this beam */
 						interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
 						                                         pars->n_heading, time_d + bathymetry->range[i], &beamheading,
-						                                         &jheading, error);
+						                                         &jheading, &interp_error);
 						beamheadingr = DTR * beamheading;
 
 						/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
@@ -5967,10 +5967,22 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 						tx_orientation.roll = roll;
 						tx_orientation.pitch = pitch;
 						tx_orientation.heading = heading;
+                        /*if (tx_align.heading > 90.0 && tx_align.heading < 270.0) {
+                            tx_align.heading -= 180.0;
+                            tx_align.roll *= -1.0;
+                            tx_align.pitch *= -1.0;
+                            tx_steer *= -1.0;
+                        }*/
 						rx_steer = -RTD * v2rawdetection->rx_angle[j];
 						rx_orientation.roll = beamroll;
 						rx_orientation.pitch = beampitch;
 						rx_orientation.heading = beamheading;
+                        /*if (rx_align.heading > 90.0 && rx_align.heading < 270.0) {
+                            rx_align.heading -= 180.0;
+                            rx_align.roll *= -1.0;
+                            rx_align.pitch *= -1.0;
+                            rx_steer *= -1.0;
+                        }*/
 						reference_heading = heading;
 
 						status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
@@ -6020,14 +6032,14 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 							/* get roll at bottom return time for this beam */
 							interp_status =
 							    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
-							                     time_d + bathymetry->range[i], &beamroll, &jattitude, error);
+							                     time_d + bathymetry->range[i], &beamroll, &jattitude, &interp_error);
 						}
 						beamrollr = DTR * beamroll;
 
 						/* get heading at bottom return time for this beam */
 						interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
 						                                         pars->n_heading, time_d + bathymetry->range[i], &beamheading,
-						                                         &jheading, error);
+						                                         &jheading, &interp_error);
 						beamheadingr = DTR * beamheading;
 
 						/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
@@ -6097,14 +6109,14 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 							/* get roll at bottom return time for this beam */
 							interp_status =
 							    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
-							                     time_d + bathymetry->range[i], &beamroll, &jattitude, error);
+							                     time_d + bathymetry->range[i], &beamroll, &jattitude, &interp_error);
 						}
 						beamrollr = DTR * beamroll;
 
 						/* get heading at bottom return time for this beam */
 						interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
 						                                         pars->n_heading, time_d + bathymetry->range[i], &beamheading,
-						                                         &jheading, error);
+						                                         &jheading, &interp_error);
 						beamheadingr = DTR * beamheading;
 
 						/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
@@ -6174,7 +6186,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 								/* get roll at bottom return time for this beam */
 								interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1,
 								                                 pars->n_attitude, time_d + bathymetry->range[i], &beamroll,
-								                                 &jattitude, error);
+								                                 &jattitude, &interp_error);
 							}
 							beamrollr = DTR * beamroll;
 
@@ -6185,13 +6197,13 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 							else {
 								interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
 								                                 pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
-								                                 &jattitude, error);
+								                                 &jattitude, &interp_error);
 							}
 
 							/* get heading at bottom return time for this beam */
 							interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
 							                                         pars->n_heading, time_d + bathymetry->range[i], &beamheading,
-							                                         &jheading, error);
+							                                         &jheading, &interp_error);
 							beamheadingr = DTR * beamheading;
 
 							/* calculate beam angles for raytracing using Jon Beaudoin's code based on:

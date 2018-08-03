@@ -79,7 +79,7 @@ static char rcs_id[] = "$Id$";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_projection_mode, char *secondary_grid_projection_id,
-                            float secondary_nodatavalue, int secondary_nx, int secondary_ny, double secondary_min,
+                            float secondary_nodatavalue, int secondary_n_columns, int secondary_n_rows, double secondary_min,
                             double secondary_max, double secondary_xmin, double secondary_xmax, double secondary_ymin,
                             double secondary_ymax, double secondary_dx, double secondary_dy, float *secondary_data, int *error)
 
@@ -103,8 +103,8 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 		fprintf(stderr, "dbg2       secondary_grid_projection_mode:   %d\n", secondary_grid_projection_mode);
 		fprintf(stderr, "dbg2       secondary_grid_projection_id:     %s\n", secondary_grid_projection_id);
 		fprintf(stderr, "dbg2       secondary_nodatavalue:       %f\n", secondary_nodatavalue);
-		fprintf(stderr, "dbg2       secondary_nx:                %d\n", secondary_nx);
-		fprintf(stderr, "dbg2       secondary_ny:                %d\n", secondary_ny);
+		fprintf(stderr, "dbg2       secondary_n_columns:         %d\n", secondary_n_columns);
+		fprintf(stderr, "dbg2       secondary_n_rows:            %d\n", secondary_n_rows);
 		fprintf(stderr, "dbg2       secondary_min:               %f\n", secondary_min);
 		fprintf(stderr, "dbg2       secondary_max:               %f\n", secondary_max);
 		fprintf(stderr, "dbg2       secondary_xmin:              %f\n", secondary_xmin);
@@ -124,9 +124,9 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 	data->secondary_grid_projection_mode = secondary_grid_projection_mode;
 	strcpy(data->secondary_grid_projection_id, secondary_grid_projection_id);
 	data->secondary_nodatavalue = secondary_nodatavalue;
-	data->secondary_nxy = secondary_nx * secondary_ny;
-	data->secondary_nx = secondary_nx;
-	data->secondary_ny = secondary_ny;
+	data->secondary_nxy = secondary_n_columns * secondary_n_rows;
+	data->secondary_n_columns = secondary_n_columns;
+	data->secondary_n_rows = secondary_n_rows;
 	data->secondary_min = secondary_min;
 	data->secondary_max = secondary_max;
 	data->secondary_xmin = secondary_xmin;
@@ -149,7 +149,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
  
 	/* check if secondary grid has same bounds and dimensions as primary grid so
 	    that overlay calculations are trivial */
-	if (data->secondary_nx == data->primary_nx && data->secondary_ny == data->primary_ny &&
+	if (data->secondary_n_columns == data->primary_n_columns && data->secondary_n_rows == data->primary_n_rows &&
 	    (fabs(data->secondary_xmin - data->primary_xmin) < 0.1 * data->primary_dx) &&
 	    (fabs(data->secondary_xmax - data->primary_xmax) < 0.1 * data->primary_dx) &&
 	    (fabs(data->secondary_ymin - data->primary_ymin) < 0.1 * data->primary_dy) &&
@@ -193,7 +193,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_nx, int secondary_ny, float *secondary_data,
+int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_columns, int secondary_n_rows, float *secondary_data,
                                int *error)
 
 {
@@ -213,8 +213,8 @@ int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_nx, i
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
 		fprintf(stderr, "dbg2       instance:                     %zu\n", instance);
-		fprintf(stderr, "dbg2       secondary_nx:                 %d\n", secondary_nx);
-		fprintf(stderr, "dbg2       secondary_ny:                 %d\n", secondary_ny);
+		fprintf(stderr, "dbg2       secondary_n_columns:          %d\n", secondary_n_columns);
+		fprintf(stderr, "dbg2       secondary_n_rows:             %d\n", secondary_n_rows);
 		fprintf(stderr, "dbg2       secondary_data:               %p\n", secondary_data);
 	}
 
@@ -223,9 +223,9 @@ int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_nx, i
 	data = &(view->data);
 
 	/* set value */
-	if (secondary_nx == data->secondary_nx && secondary_ny == data->secondary_ny) {
+	if (secondary_n_columns == data->secondary_n_columns && secondary_n_rows == data->secondary_n_rows) {
 		first = MB_YES;
-		for (k = 0; k < data->secondary_nx * data->secondary_ny; k++) {
+		for (k = 0; k < data->secondary_n_columns * data->secondary_n_rows; k++) {
 			data->secondary_data[k] = secondary_data[k];
 			if (first == MB_YES && secondary_data[k] != data->secondary_nodatavalue) {
 				data->secondary_min = data->secondary_data[k];
@@ -289,9 +289,9 @@ int mbview_updatesecondarygridcell(int verbose, size_t instance, int secondary_i
 	data = &(view->data);
 
 	/* set value */
-	if (secondary_ix >= 0 && secondary_ix < data->secondary_nx && secondary_jy >= 0 && secondary_jy < data->secondary_ny) {
+	if (secondary_ix >= 0 && secondary_ix < data->secondary_n_columns && secondary_jy >= 0 && secondary_jy < data->secondary_n_rows) {
 		/* update the cell value */
-		k = secondary_ix * data->secondary_ny + secondary_jy;
+		k = secondary_ix * data->secondary_n_rows + secondary_jy;
 		data->secondary_data[k] = value;
 	}
 
