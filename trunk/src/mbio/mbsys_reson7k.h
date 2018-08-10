@@ -142,7 +142,7 @@
 #define R7KRECID_7kDataStorageStatus 7052
 #define R7KRECID_7kCalibratedSnippetData 7058
 #define R7KRECID_7kFileHeader 7200
-#define R7KRECID_7kTrigger 7300
+#define R7KRECID_7kFileCatalog 7300
 #define R7KRECID_7kTriggerSequenceSetup 7301
 #define R7KRECID_7kTriggerSequenceDone 7302
 #define R7KRECID_7kTimeMessage 7400
@@ -156,6 +156,7 @@
 #define R7KRECID_7kSoundVelocity 7610
 #define R7KRECID_7kAbsorptionLoss 7611
 #define R7KRECID_7kSpreadingLoss 7612
+#define R7KRECID_7kFiller 7777
 #define R7KRECID_8100SonarData 8100
 
 /* 11000-11199 reserved for Payload Controller command records */

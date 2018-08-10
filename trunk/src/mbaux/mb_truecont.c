@@ -38,6 +38,7 @@
 #define ISTROKE -2
 #define IOR -3
 #define EPS 0.0001
+#define NUM_BEAMS_ALLOC_MIN 16
 
 /* local function prototypes */
 int mb_tcontour(int verbose, struct swath *data, int *error);
@@ -132,15 +133,15 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
 	for (i = 0; i < npings_max; i++) {
 		ping = &dataptr->pings[i];
 		ping->beams_bath = 0;
-		ping->beams_bath_alloc = beams_bath;
+		ping->beams_bath_alloc = MAX(beams_bath, NUM_BEAMS_ALLOC_MIN);
 		ping->beamflag = NULL;
 		ping->bath = NULL;
 		ping->bathlon = NULL;
 		ping->bathlat = NULL;
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(char), (void **)&(ping->beamflag), error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(ping->bath), error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(ping->bathlon), error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(ping->bathlat), error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, ping->beams_bath_alloc * sizeof(char), (void **)&(ping->beamflag), error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, ping->beams_bath_alloc * sizeof(double), (void **)&(ping->bath), error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, ping->beams_bath_alloc * sizeof(double), (void **)&(ping->bathlon), error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, ping->beams_bath_alloc * sizeof(double), (void **)&(ping->bathlat), error);
 		if (contour_algorithm == MB_CONTOUR_TRIANGLES) {
 			ping->bflag[0] = NULL;
 			ping->bflag[1] = NULL;
@@ -148,8 +149,8 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
 		else {
 			ping->bflag[0] = NULL;
 			ping->bflag[1] = NULL;
-			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(int), (void **)&(ping->bflag[0]), error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(int), (void **)&(ping->bflag[1]), error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, ping->beams_bath_alloc * sizeof(int), (void **)&(ping->bflag[0]), error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, ping->beams_bath_alloc * sizeof(int), (void **)&(ping->bflag[1]), error);
 		}
 	}
 
@@ -1464,7 +1465,7 @@ int get_start_old(struct swath *data, int *k, int *i, int *j, int *d, int *close
 
 	/* search left (j = 0) */
 	for (ii = 0; ii < data->npings - 1; ii++)
-		if (data->pings[ii].bflag[1][0]) {
+		if (data->pings[ii].beams_bath > 0 && data->pings[ii].bflag[1][0]) {
 			*k = 1;
 			*i = ii;
 			*j = 0;
@@ -1474,7 +1475,7 @@ int get_start_old(struct swath *data, int *k, int *i, int *j, int *d, int *close
 
 	/* search right (j = beams_bath-1) */
 	for (ii = 0; ii < data->npings - 1; ii++)
-		if (data->pings[ii].bflag[1][data->pings[ii].beams_bath - 1]) {
+		if (data->pings[ii].beams_bath > 0 && data->pings[ii].bflag[1][data->pings[ii].beams_bath - 1]) {
 			*k = 1;
 			*i = ii;
 			*j = data->pings[ii].beams_bath - 1;
@@ -1525,7 +1526,8 @@ int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd, int k, 
 		it[edge] = i + ioff[edge][k][d];
 		jt[edge] = j + joff[edge][k][d];
 		dt[edge] = doff[edge][k][d];
-		if (it[edge] < 0 || it[edge] >= data->npings || jt[edge] < 0 || jt[edge] >= data->pings[i].beams_bath)
+		if (it[edge] < 0 || it[edge] >= data->npings || jt[edge] < 0
+            || jt[edge] >= data->pings[i].beams_bath || data->pings[it[edge]].beams_bath <= 0)
 			ifedge[edge] = 0;
 		else
 			ifedge[edge] = data->pings[it[edge]].bflag[kt[edge]][jt[edge]];

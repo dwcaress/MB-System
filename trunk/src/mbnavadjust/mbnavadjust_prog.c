@@ -724,7 +724,6 @@ int mbnavadjust_file_open(char *projectname) {
 			nameptr = projectname;
 		if (strlen(nameptr) > 4 && strcmp(&nameptr[strlen(nameptr) - 4], ".nvh") == 0)
 			nameptr[strlen(nameptr) - 4] = '\0';
-		fprintf(stderr, "projectname:%s nameptr:%s strlen:%ld\n", projectname, nameptr, strlen(nameptr));
 		if (strlen(nameptr) > 0) {
 			strcpy(project.name, nameptr);
 			if (slashptr != (char *)NULL) {
@@ -740,8 +739,8 @@ int mbnavadjust_file_open(char *projectname) {
 			strcpy(project.datadir, project.path);
 			strcat(project.datadir, project.name);
 			strcat(project.datadir, ".dir");
-			fprintf(stderr, "In mbnavadjust_file_open: name:%s\npath:%s\nhome:%s\ndatadir:%s\n", project.name, project.path,
-			        project.home, project.datadir);
+			fprintf(stderr, "\nOpening MBnavadjust project:\n\tname:%s\n\tpath:%s\n\thome:%s\n\tdatadir:%s\n",
+                    project.name, project.path, project.home, project.datadir);
 
 			/* cant open unless file or directory already exist */
 			if (stat(project.home, &statbuf) != 0) {
@@ -1016,11 +1015,6 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 	double *ssacrosstrack = NULL;
 	double *ssalongtrack = NULL;
 	char comment[MB_COMMENT_MAXLINE];
-    int beams_bath_culled = 0;
-	char *beamflag_culled = NULL;
-	double *bath_culled = NULL;
-	double *bathacrosstrack_culled = NULL;
-	double *bathalongtrack_culled = NULL;
 
 	int sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
     int sensorhead = 0;
@@ -1166,10 +1160,6 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 		ss = NULL;
 		ssacrosstrack = NULL;
 		ssalongtrack = NULL;
-        beamflag_culled = NULL;
-	    bath_culled = NULL;
-	    bathacrosstrack_culled = NULL;
-	    bathalongtrack_culled = NULL;
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -1191,15 +1181,6 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 			status =
 			    mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag_culled, &error);
-		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath_culled, &error);
-		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack_culled,
-			                           &error);
-		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack_culled,
-			                           &error);
 
 		/* if error initializing memory then don't read the file */
 		if (error != MB_ERROR_NO_ERROR) {
@@ -1593,7 +1574,6 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 					file->num_snavs++;
 					project.num_snavs++;
 				}
-                beams_bath_culled = 0;
 				for (i = 0; i < beams_bath; i++) {
 					if (mb_beam_ok(beamflag[i]) && bath[i] != 0.0) {
 						good_beams++;
@@ -1618,12 +1598,6 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 							section->depthmax = bath[i];
 						else
 							section->depthmax = MAX(section->depthmax, bath[i]);
-                            
-                        beamflag_culled[beams_bath_culled] = beamflag[i];
-                        bath_culled[beams_bath_culled] = bath[i];
-                        bathacrosstrack_culled[beams_bath_culled] = bathacrosstrack[i];
-                        bathalongtrack_culled[beams_bath_culled] = bathalongtrack[i];
-                        beams_bath_culled++;
 					}
 					else {
 						beamflag[i] = MB_FLAG_NULL;
@@ -1640,15 +1614,15 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 					file->num_sections,
 					time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
 					navlon,navlat,speed,heading,distance,section->distance,
-					beams_bath_culled,beams_amp,pixels_ss);*/
+					beams_bath,beams_amp,pixels_ss);*/
 
 					/* get depth and distance scaling */
 					depthmax = 0.0;
 					distmax = 0.0;
-					for (i = 0; i < beams_bath_culled; i++) {
-						depthmax = MAX(depthmax, fabs(bath_culled[i]));
-						distmax = MAX(distmax, fabs(bathacrosstrack_culled[i]));
-						distmax = MAX(distmax, fabs(bathalongtrack_culled[i]));
+					for (i = 0; i < beams_bath; i++) {
+						depthmax = MAX(depthmax, fabs(bath[i]));
+						distmax = MAX(distmax, fabs(bathacrosstrack[i]));
+						distmax = MAX(distmax, fabs(bathalongtrack[i]));
 					}
 					depthscale = MAX(0.001, depthmax / 32000);
 					distscale = MAX(0.001, distmax / 32000);
@@ -1662,9 +1636,9 @@ int mbnavadjust_import_file(char *path, int iformat, int firstfile) {
 					/* write out data */
 					status = mb_put_all(mbna_verbose, ombio_ptr, ostore_ptr,
                                         MB_YES, MB_DATA_DATA, time_i, time_d, navlon, navlat,
-					                    speed, heading, beams_bath_culled, 0, 0,
-                                        beamflag_culled, bath_culled, amp,
-                                        bathacrosstrack_culled, bathalongtrack_culled,
+					                    speed, heading, beams_bath, 0, 0,
+                                        beamflag, bath, amp,
+                                        bathacrosstrack, bathalongtrack,
 					                    ss, ssacrosstrack, ssalongtrack, comment, &error);
 				}
 			}

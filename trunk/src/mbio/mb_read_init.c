@@ -231,6 +231,8 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	mb_io_ptr->save12 = 0;
 	mb_io_ptr->save13 = 0;
 	mb_io_ptr->save14 = 0;
+	mb_io_ptr->save15 = 0;
+	mb_io_ptr->save16 = 0;
 	mb_io_ptr->saved1 = 0;
 	mb_io_ptr->saved2 = 0;
 	mb_io_ptr->saved3 = 0;

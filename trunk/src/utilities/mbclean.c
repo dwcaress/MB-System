@@ -119,10 +119,10 @@ static char rcs_id[] = "$Id$";
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBCLEAN";
-	char help_message[] = "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  "
-	                      "based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output "
-	                      "streams \nare stdin and stdout.";
+	char program_name[] = "mbclean";
+	char help_message[] = "Mbclean  identifies  and  flags  artifacts in swath sonar bathymetry data.\n"
+                            "Several algorithms are available for identifying  artifacts;  \n"
+                            "multiple  algorithms  can  be applied in a single pass.\n";
 	char usage_message[] = "mbclean [-Amax -Blow/high -Cslope/unit -Dmin/max \n"
 	                       "\t-Fformat -Gfraction_low/fraction_high -Iinfile -Krange_min \n"
 	                       "\t-Llonflip -Mmode -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate \n"

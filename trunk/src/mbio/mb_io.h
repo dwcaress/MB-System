@@ -667,6 +667,8 @@ struct mb_io_struct {
 	int save12;
 	int save13;
 	int save14;
+    int save15;
+    int save16;
 	double saved1;
 	double saved2;
 	double saved3;
