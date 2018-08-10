@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2345       August 10, 2018
   Version 5.5.2344       August 3, 2018
   Version 5.5.2343       July 10, 2018
 * Version 5.5.2342       June 29, 2018
@@ -282,6 +283,22 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+Mbmakeplatform: Fixed segmentation fault when modifications to the platform model
+are specified before a command that initializes the platform.
+
+Mbcopy and Format 88 (MBF_RESON7KR): Added hook to mbcopy  so that it can output
+bathymetry only records when copying format 88 (*.s7k) data. This option is
+enabled by using the -N argument twice, and is used to generate data files that
+mimic the minimal data record stream requested by mbtrnpreprocess.
+
+Mbnavadjust: Undid the modification of 5.5.2340 that stores only valid, unflagged
+soundings in the section files, which are format 71. This turned out to be a very
+bad idea because it sometimes breaks the contouring used for display of the
+navigation crossings.
+
+Mbnavadjust: Changed so that sensordepth values are included in the navigation points
+stored in the project file (*.nvh file).
 
 -----> 5.5.2344 (August 3, 2018)
 

@@ -190,8 +190,8 @@ int main(int argc, char **argv) {
 	int median_filter = MB_NO;
 	double median_filter_threshold = 0.25;
 	int median_filter_nmin = 10;
-	int density_filter = MB_NO;
-	int density_filter_nmax = 0;
+	int mediandensity_filter = MB_NO;
+	int mediandensity_filter_nmax = 0;
 	int plane_fit = MB_NO;
 	double plane_fit_threshold = 0.05;
 	int plane_fit_nmin = 10;
@@ -334,8 +334,8 @@ int main(int argc, char **argv) {
 			if (n > 1)
 				median_filter_nmin = i1;
 			if (n > 2) {
-				density_filter = MB_YES;
-				density_filter_nmax = i2;
+				mediandensity_filter = MB_YES;
+				mediandensity_filter_nmax = i2;
 			}
 			flag++;
 			break;
@@ -445,8 +445,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       median_filter:             %d\n", median_filter);
 		fprintf(stderr, "dbg2       median_filter_threshold:   %f\n", median_filter_threshold);
 		fprintf(stderr, "dbg2       median_filter_nmin:        %d\n", median_filter_nmin);
-		fprintf(stderr, "dbg2       density_filter:            %d\n", density_filter);
-		fprintf(stderr, "dbg2       density_filter_nmax:       %d\n", density_filter_nmax);
+		fprintf(stderr, "dbg2       mediandensity_filter:      %d\n", mediandensity_filter);
+		fprintf(stderr, "dbg2       mediandensity_filter_nmax: %d\n", mediandensity_filter_nmax);
 		fprintf(stderr, "dbg2       plane_fit:                 %d\n", plane_fit);
 		fprintf(stderr, "dbg2       plane_fit_threshold:       %f\n", plane_fit_threshold);
 		fprintf(stderr, "dbg2       plane_fit_nmin:            %d\n", plane_fit_nmin);
@@ -544,12 +544,12 @@ int main(int argc, char **argv) {
 		}
 		else
 			fprintf(stderr, "     Median filter: OFF\n");
-		if (density_filter == MB_YES) {
-			fprintf(stderr, "     Density filter: ON\n");
-			fprintf(stderr, "     Density filter maximum N:    %d\n", density_filter_nmax);
+		if (mediandensity_filter == MB_YES) {
+			fprintf(stderr, "     Median Density filter: ON\n");
+			fprintf(stderr, "     Median Density filter maximum N:    %d\n", mediandensity_filter_nmax);
 		}
 		else
-			fprintf(stderr, "     Density filter: OFF\n");
+			fprintf(stderr, "     Median Density filter: OFF\n");
 		if (plane_fit == MB_YES) {
 			fprintf(stderr, "     Plane fit:     ON\n");
 			fprintf(stderr, "     Plane fit threshold:        %f\n", median_filter_threshold);
@@ -1021,12 +1021,12 @@ int main(int argc, char **argv) {
 					/* run qsort */
 					qsort((char *)bindepths, binnum, sizeof(double), (void *)mb_double_compare);
 					median_depth = bindepths[binnum / 2];
-					if (density_filter == MB_YES && binnum / 2 - density_filter_nmax / 2 >= 0)
-						median_depth_low = bindepths[binnum / 2 + density_filter_nmax / 2];
+					if (mediandensity_filter == MB_YES && binnum / 2 - mediandensity_filter_nmax / 2 >= 0)
+						median_depth_low = bindepths[binnum / 2 + mediandensity_filter_nmax / 2];
 					else
 						median_depth_low = bindepths[0];
-					if (density_filter == MB_YES && binnum / 2 + density_filter_nmax / 2 < binnum)
-						median_depth_high = bindepths[binnum / 2 + density_filter_nmax / 2];
+					if (mediandensity_filter == MB_YES && binnum / 2 + mediandensity_filter_nmax / 2 < binnum)
+						median_depth_high = bindepths[binnum / 2 + mediandensity_filter_nmax / 2];
 					else
 						median_depth_high = bindepths[binnum - 1];
 					/* if (binnum>0)
@@ -1040,7 +1040,7 @@ int main(int argc, char **argv) {
 						flagsounding = MB_NO;
 						if (fabs(sndg->sndg_depth - median_depth) > threshold)
 							flagsounding = MB_YES;
-						if (density_filter == MB_YES &&
+						if (mediandensity_filter == MB_YES &&
 						    (sndg->sndg_depth > median_depth_high || sndg->sndg_depth < median_depth_low))
 							flagsounding = MB_YES;
 						/*fprintf(stderr,"sounding:%d file:%d time_d:%f depth:%f median:%f altitude:%f threshold:%f",

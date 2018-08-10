@@ -185,6 +185,7 @@ struct mbna_section {
 	double snav_time_d[MBNA_SNAV_NUM];
 	double snav_lon[MBNA_SNAV_NUM];
 	double snav_lat[MBNA_SNAV_NUM];
+    double snav_sensordepth[MBNA_SNAV_NUM];
 	double snav_lon_offset[MBNA_SNAV_NUM];
 	double snav_lat_offset[MBNA_SNAV_NUM];
 	double snav_z_offset[MBNA_SNAV_NUM];
@@ -404,6 +405,7 @@ int mbnavadjust_set_plot_functions(int verbose, struct mbna_project *project,
 int mbnavadjust_section_load(int verbose, struct mbna_project *project,
                              int file_id, int section_id,
                              void **swathraw_ptr, void **swath_ptr, int num_pings, int *error);
+int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
                                   int file_id, void *swathraw_ptr, void *swath_ptr,
                                   double zoffset, int *error);

@@ -57,6 +57,10 @@
 #define MBCOPY_ANY_TO_MBLDEOIH 5
 #define MBCOPY_RESON8K_TO_GSF 6
 
+#define MBCOPY_STRIPMODE_NONE       0
+#define MBCOPY_STRIPMODE_COMMENTS   1
+#define MBCOPY_STRIPMODE_BATHYONLY  2
+
 /* function prototypes */
 int setup_transfer_rules(int verbose, int ibeams, int obeams, int *istart, int *iend, int *offset, int *error);
 int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, struct mbsys_xse_struct *ostore, int *error);
@@ -213,7 +217,7 @@ int main(int argc, char **argv) {
 	int insertcomments = MB_NO;
 	int bathonly = MB_NO;
 	char commentfile[MB_PATH_MAXLINE];
-	int stripcomments = MB_NO;
+	int stripmode = MBCOPY_STRIPMODE_NONE;
 	int copymode = MBCOPY_PARTIAL;
 	int use_sleep = MB_NO;
 	int inbounds = MB_YES;
@@ -306,7 +310,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'N':
 		case 'n':
-			stripcomments = MB_YES;
+			stripmode++;
 			break;
 		case 'O':
 		case 'o':
@@ -400,7 +404,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       merge file:     %s\n", mfile);
 		fprintf(stderr, "dbg2       insert comments:%d\n", insertcomments);
 		fprintf(stderr, "dbg2       comment file:   %s\n", commentfile);
-		fprintf(stderr, "dbg2       strip comments: %d\n", stripcomments);
+		fprintf(stderr, "dbg2       stripmode:      %d\n", stripmode);
 		fprintf(stderr, "dbg2       bath only:      %d\n", bathonly);
 		fprintf(stderr, "dbg2       use sleep:      %d\n", use_sleep);
 		fprintf(stderr, "dbg2       sleep factor:   %f\n", sleep_factor);
@@ -500,6 +504,11 @@ int main(int argc, char **argv) {
 	if (bathonly == MB_YES && oformat == MBF_MBLDEOIH) {
 		omb_io_ptr->save1 = fbtversion;
 	}
+    
+    /* if stripmode set to more than strip comments, then set flag in imb_io_ptr */
+    if (stripmode > MBCOPY_STRIPMODE_COMMENTS) {
+        omb_io_ptr->save15 = MB_YES;
+    }
 
 	/* determine if full or partial copies will be made */
 	if (pings == 1 && imb_io_ptr->system != MB_SYS_NONE && imb_io_ptr->system == omb_io_ptr->system)
@@ -639,7 +648,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* write comments to beginning of output file */
-	if (stripcomments == MB_NO) {
+	if (stripmode == MBCOPY_STRIPMODE_NONE) {
 		kind = MB_DATA_COMMENT;
 		strncpy(comment, "\0", 256);
 		sprintf(comment, "These data copied by program %s version %s", program_name, rcs_id);
@@ -1020,7 +1029,7 @@ int main(int argc, char **argv) {
 
 		/* write some data */
 		if ((error == MB_ERROR_NO_ERROR && kind != MB_DATA_COMMENT && inbounds == MB_YES) ||
-		    (kind == MB_DATA_COMMENT && stripcomments == MB_NO)) {
+		    (kind == MB_DATA_COMMENT && stripmode == MBCOPY_STRIPMODE_NONE)) {
 			status = mb_put_all(verbose, ombio_ptr, ostore_ptr, MB_NO, kind, time_i, time_d, navlon, navlat, speed, heading,
 			                    obeams_bath, obeams_amp, opixels_ss, obeamflag, obath, oamp, obathacrosstrack, obathalongtrack,
 			                    oss, ossacrosstrack, ossalongtrack, comment, &error);
