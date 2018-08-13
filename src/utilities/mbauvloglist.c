@@ -39,8 +39,8 @@
 #include "mb_aux.h"
 
 /* local defines */
-#define NFIELDSMAX 50
-#define MAX_OPTIONS 50
+#define NFIELDSMAX 512
+#define MAX_OPTIONS 512
 #define TYPE_UNKNOWN 0
 #define TYPE_TIMETAG 1
 #define TYPE_INTEGER 2
@@ -462,7 +462,8 @@ int main(int argc, char **argv) {
 
 	nfields = 0;
 	recordsize = 0;
-	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer && strncmp(buffer, "# begin", 7) != 0) {
+	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer &&
+           strncmp(buffer, "# begin", 7) != 0) {
 		nscan = sscanf(buffer, "# %s %s %s", type, fields[nfields].name, fields[nfields].format);
 		if (nscan == 2) {
 			if (printheader == MB_YES)

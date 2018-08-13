@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2346       August 13, 2018
   Version 5.5.2345       August 10, 2018
   Version 5.5.2344       August 3, 2018
   Version 5.5.2343       July 10, 2018
@@ -283,6 +284,19 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2346 (August 13, 2018)
+
+Mbauvloglist: augmented dimensioning of fields array to allow up to 500 data fields.
+
+Mbnavadjust: Changed output of project so a single navigation offset model file is
+output that can be parsed to get x, y, and z offset components for plotting etc.
+
+Format MBF_SBURIVAX (format id 15): Augmented the i/o module to handle negative
+longitude values (the format should use unsigned shorts but clearly data exist
+using signed values).
+
+-----> 5.5.2345 (August 10, 2018)
 
 Mbmakeplatform: Fixed segmentation fault when modifications to the platform model
 are specified before a command that initializes the platform.

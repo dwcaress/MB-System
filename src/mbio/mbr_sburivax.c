@@ -324,6 +324,7 @@ int mbr_rt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_sb_struct *store;
 	char *datacomment;
 	short dummy;
+    double tmplon;
 	int i;
 	int id;
 
@@ -418,6 +419,12 @@ int mbr_rt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->kind = dataplus->kind;
 
 		/* position */
+        if (data->lon2u < 0) {
+            /* if longitude stored with negative values wrap into positive 0-360 domain */
+            tmplon = 360.0 + data->lon2u / 60. + data->lon2b / 600000.;
+            data->lon2u = (short)(60.0 * tmplon);
+            data->lon2b = (short)(600000.0 * (tmplon - data->lon2u / 60.0));
+        }
 		store->lon2u = data->lon2u;
 		store->lon2b = data->lon2b;
 		store->lat2u = data->lat2u;
