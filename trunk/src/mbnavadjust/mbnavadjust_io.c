@@ -1248,7 +1248,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 	/* local variables */
 	char *function_name = "mbnavadjust_write_project";
 	int status = MB_SUCCESS;
-	FILE *hfp, *xfp, *yfp;
+	FILE *hfp;
 	struct mbna_file *file, *file_1, *file_2;
 	struct mbna_section *section, *section_1, *section_2;
 	struct mbna_crossing *crossing;
@@ -1256,9 +1256,9 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 	char datalist[STRING_MAX];
 	char routefile[STRING_MAX];
 	char routename[STRING_MAX];
-	char xoffsetfile[STRING_MAX];
-	char yoffsetfile[STRING_MAX];
+	char offsetfile[STRING_MAX];
 	double navlon1, navlon2, navlat1, navlat2;
+    int time_i[7];
 	int nroute;
 	int snav_1, snav_2;
 	int ncrossings_true = 0;
@@ -2000,32 +2000,32 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 
 	/* output offset vectors */
 	if (project->inversion_status == MBNA_INVERSION_CURRENT) {
-		sprintf(xoffsetfile, "%s%s_dx.txt", project->path, project->name);
-		sprintf(yoffsetfile, "%s%s_dy.txt", project->path, project->name);
-		if ((xfp = fopen(xoffsetfile, "w")) != NULL && (yfp = fopen(yoffsetfile, "w")) != NULL) {
+		sprintf(offsetfile, "%s%s_offset.txt", project->path, project->name);
+		if ((hfp = fopen(offsetfile, "w")) != NULL) {
 			for (i = 0; i < project->num_files; i++) {
 				file = &project->files[i];
 				for (j = 0; j < file->num_sections; j++) {
 					section = &file->sections[j];
 					mb_coor_scale(verbose, 0.5 * (section->latmin + section->latmax), &mtodeglon, &mtodeglat);
 					for (k = 0; k < section->num_snav; k++) {
-						fprintf(xfp, "%.10f %.10f %.10f\n", section->snav_lon[k], section->snav_lat[k],
-						        section->snav_lon_offset[k] / mtodeglon);
-						fprintf(yfp, "%.10f %.10f %.10f\n", section->snav_lon[k], section->snav_lat[k],
-						        section->snav_lat_offset[k] / mtodeglat);
+                        mb_get_date(verbose, section->snav_time_d[k], time_i);
+                        fprintf(hfp, "%4.4d:%4.4d:%2.2d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %.6f %8.3f %8.3f %6.3f\n",
+                                        i, j, k, time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+                                        section->snav_time_d[k],
+                                        (section->snav_lon_offset[k] / mtodeglon),
+                                        (section->snav_lat_offset[k] / mtodeglat),
+                                        section->snav_z_offset[k]);
 					}
 				}
 			}
-			fclose(xfp);
-			fclose(yfp);
+			fclose(hfp);
 		}
 
 		/* else set error */
 		else {
 			status = MB_FAILURE;
 			*error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr, "Unable to update project %s\n > Offset vector files: %s %s\n", project->name, xoffsetfile,
-			        yoffsetfile);
+			fprintf(stderr, "Unable to update project %s\n > Offset file: %s\n", project->name, offsetfile);
 		}
 	}
 
