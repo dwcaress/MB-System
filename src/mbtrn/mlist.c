@@ -514,6 +514,7 @@ void mlist_remove(mlist_t *self, void *item)
                         if (pa==NULL) {
                             // is tail
                             self->tail=pb;
+                            self->tail->next=NULL;
                             self->cursor=(self->cursor==plist? NULL : self->cursor);
                         }else{
                             // not tail
@@ -526,10 +527,8 @@ void mlist_remove(mlist_t *self, void *item)
                     //MDEBUG("freeing item[%p] plist[%p] w/ destroy\n",plist->data,plist);
                     // free item, list entry
                     if (plist->free_fn!=NULL) {
-                        
                         plist->free_fn(plist->data);
                     }else if(self->afree_fn!=NULL){
-                        
                         self->afree_fn(plist->data);
                     }
 

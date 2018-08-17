@@ -90,23 +90,27 @@
 #define ADDR_OCTETS 4
 /// @def PORTSTR_BYTES
 /// @brief length or port string
-#define PORTSTR_BYTES 8
+#define PORTSTR_BYTES 16
 /// @def ADDRSTR_BYTES
 /// @brief address string length
 #define ADDRSTR_BYTES 64
 /// @def NSEC_PER_SEC
 /// @brief time conversion
+#ifndef NSEC_PER_SEC
 #define NSEC_PER_SEC 1000000000L
+#endif
 /// @def USEC_PER_SEC
 /// @brief time conversion
+#ifndef USEC_PER_SEC
 #define USEC_PER_SEC 1000000L
+#endif
 /// @def MSEC_PER_SEC
 /// @brief time conversion
 #define MSEC_PER_SEC 1000L
 
 /// @typedef struct ip_addr_s iow_addr_t
 /// @brief IP address structure
-typedef struct ip_addr_s
+ struct ip_addr_s
 {
     /// @var ip_addr_s::hints
     /// @brief address for opening a socket
@@ -126,7 +130,7 @@ typedef struct ip_addr_s
     /// @var ip_addr_s::portstr
     /// @brief IP port as string
     char portstr[PORTSTR_BYTES];
-}iow_addr_t;
+};
 
 /// @struct iow_socket_s
 /// @brief wrapped socket
@@ -152,12 +156,6 @@ struct iow_socket_s
 
 /// @struct iow_pstats_s
 /// @brief peer connection statistics
-struct iow_pstats_s;
-/// @typedef struct iow_pstats_s iow_pstats_t
-/// @brief typedef for peer
-typedef struct iow_pstats_s iow_pstats_t;
-/// @struct iow_pstats_s
-/// @brief peer connection statistics
 struct iow_pstats_s
 {
     time_t t_connect;
@@ -171,19 +169,12 @@ struct iow_pstats_s
 };
 
 /// @struct iow_peer_s
-/// @brief peer connection (e.g. UDP client)
-struct iow_peer_s;
-/// @typedef struct iow_peer_s iow_peer_t
-/// @brief typedef for peer
-typedef struct iow_peer_s iow_peer_t;
-
-/// @struct iow_peer_s
 /// @brief peer connection structure definition
 struct iow_peer_s
 {
     /// @var iow_peer_s::addr
     /// @brief IP address
-    iow_addr_t *addr;
+    struct ip_addr_s *addr;
     /// @var iow_peer_s::chost
     /// @brief peer hostname
     char chost[NI_MAXHOST];
@@ -199,11 +190,11 @@ struct iow_peer_s
     uint16_t heartbeat;
     /// @var iow_peer_s::stats
     /// @brief connection statistics
-    iow_pstats_t stats;
+    struct iow_pstats_s stats;
     /// @var iow_peer_s::next
     /// @brief applications may use to form linked lists
     /// @sa mlist.h
-    iow_peer_t *next;
+    struct iow_peer_s *next;
 };
 
 /// @struct iow_file_s
@@ -226,7 +217,7 @@ struct iow_file_s
 
 /// @typedef struct iow_thread_s iow_thread_t
 /// @brief wrapped thread representation (posix implementation)
-typedef struct iow_thread_s
+struct iow_thread_s
 {
     /// @var iow_thread_s::t
     /// @brief posix thread
@@ -237,16 +228,16 @@ typedef struct iow_thread_s
     /// @var iow_thread_s::status
     /// @brief thread exit status
     void **status;
-}iow_thread_t;
+};
 
 /// @typedef struct iow_mutex_s iow_mutex_t
 /// @brief wrapped mutex representation (posix implementation)
-typedef struct iow_mutex_s
+struct iow_mutex_s
 {
     /// @var iow_mutex_s::m
     /// @brief posix mutex
     pthread_mutex_t m;
-}iow_mutex_t;
+};
 
 /////////////////////////
 // Macros

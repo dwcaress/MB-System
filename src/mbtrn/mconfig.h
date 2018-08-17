@@ -82,58 +82,77 @@
 /// @brief debug module ID.use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
 #define MBTRN      1
+/// @def MBTRNV
+/// @brief debug module ID.use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
+/// The value 0 is reserved (for global setting); values must be >= 1
+#define MBTRNV     2
 /// @def R7K
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define R7K        2
+#define R7K        3
 /// @def MREADER
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define MREADER    3
+#define MREADER    4
 /// @def RPARSER
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define RPARSER    4
+#define RPARSER    5
 /// @def DRFCON
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define DRFCON     5
+#define DRFCON     6
 /// @def IOW
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define IOW        6
+#define IOW        7
 /// @def APP
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define APP        7
+#define APP        8
 /// @def APP1
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define APP1       8
+#define APP1       9
 /// @def APP2
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define APP2       9
+#define APP2       10
 /// @def APP3
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define APP3       10
+#define APP3       11
 /// @def APP4
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define APP4       11
+#define APP4       12
 /// @def APP5
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define APP5       12
+#define APP5       13
 /// @def MAX_MODULE
 /// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
 /// The value 0 is reserved (for global setting); values must be >= 1
-#define MAX_MODULE 13
+#define MAX_MODULE 14
 
 /////////////////////////
 // Macros
 /////////////////////////
+
+/// @def MBTRN_TIMING
+/// @brief enable timing output measurements and console output
+/// [iowrap-posix.c, mbtrn.c...]
+#undef MBTRN_TIMING
+
+/// @def MBTR_STATS_EN
+/// @brief enable statistics measurements and logging
+/// [mbtrnpreprocess.c, mbtrn.c...]
+#define MBTR_STATS_EN
+/// @def MBTRNPP_STAT_PERIOD_SEC
+/// @brief default period at which to log statistics measurements
+/// may set on mbtrnpreprocess command line using --statsec option
+/// [mbtrnpreprocess.c, mbtrn.c...]
+#define MBTRNPP_STAT_PERIOD_SEC ((double)20.0)
 
 /// @def MC_DFL_LEVEL
 /// @brief default debug level

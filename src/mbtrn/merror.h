@@ -96,7 +96,8 @@ typedef enum{
     ME_ESOCK=0x800,
     ME_ENOMEM=0x1000,
     ME_ENOSPACE=0x2000,
-    ME_EWRITE=0x4000
+    ME_EWRITE=0x4000,
+    ME_EOF=0x8000
 } m_err_t;
 
 /////////////////////////

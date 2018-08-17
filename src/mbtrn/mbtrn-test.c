@@ -92,7 +92,7 @@
 #define TINDENT 32
 /// @def TREPORT(i)
 /// @brief formatted report output
-#define TREPORT(i) fprintf(stderr,"%s%*c[%3s][%3d]\n",tnames[i],(TINDENT-strlen(tnames[i])),' ',(tstatus[i]==tsuccess[i]?"OK":"ERR"),tstatus[i]);
+#define TREPORT(i) fprintf(stderr,"%s%*c[%3s][%3d]\n",tnames[i],(int)(TINDENT-strlen(tnames[i])),' ',(tstatus[i]==tsuccess[i]?"OK":"ERR"),tstatus[i]);
 /// @def TCLEAR
 /// @brief clear (zero) test structures
 #define TCLEAR() { \
@@ -159,13 +159,12 @@ static int s_test_mbtrn(const char *host,const char *file)
     mcfg_configure(mcfg,1);
    // mcfg_configure(NULL,0);
     
-    mbtrn_reader_t *reader = mbtrn_reader_create(host,R7K_7KCENTER_PORT,reader_size, subs, nsubs);
+    mbtrn_reader_t *reader = mbtrn_reader_new(host,R7K_7KCENTER_PORT,reader_size, subs, nsubs);
  
     
     // show reader config
     mbtrn_reader_show(reader,true, 5);
     
-    uint32_t pstat=0;
     uint32_t read_bytes=0;
     byte buf[MBTRN_TRN_PING_BYTES]={0};
 
@@ -225,7 +224,7 @@ static int s_test_mbtrn(const char *host,const char *file)
     for (int i=0; i<cycles; i++) {
         MDEBUG("calling xread\n");
 //        if( (istat = mbtrn_reader_xread(reader,buf,len,tmout,MBR_ALLOW_PARTIAL)) > 0){
-        if( (istat = mbtrn_reader_xread_new(reader,buf,len,tmout,MBR_BLOCK,0)) > 0){
+        if( (istat = mbtrn_reader_xread(reader,buf,len,tmout,MBR_BLOCK,0)) > 0){
             MDEBUG("xread %d/%d OK  [%d] - returned [%d/%d]\n",i+1,cycles,rstat,istat,len);
           //  MDEBUG("size/length/pending %u/%u/%u\n",r7k_drfcon_size(reader->fc),r7k_drfcon_length(reader->fc),r7k_drfcon_pending(reader->fc));
          }else{
@@ -258,9 +257,9 @@ int test(const char *host,char *dfile)
     tsuccess[si]=0;
     tstatus[si++]=mdb_test();
 
-//    tnames[si]="bad_test";
-//    tsuccess[si]=0;
-//    tstatus[si++]=s_bad_test();
+    tnames[si]="bad_test";
+    tsuccess[si]=0;
+    tstatus[si++]=s_bad_test();
 //
 //    tnames[si]="mbtrn_net";
 //    tsuccess[si]=0;
@@ -282,9 +281,9 @@ int test(const char *host,char *dfile)
 //    tsuccess[si]=0;
 //    tstatus[si++]=cbuf_test();
 //
-//    tnames[si]="test_mbtrn";
-//    tsuccess[si]=0;
-//    tstatus[si++]=s_test_mbtrn(host,dfile);
+    tnames[si]="test_mbtrn";
+    tsuccess[si]=0;
+    tstatus[si++]=s_test_mbtrn(host,dfile);
 
     tnames[si]="mlog_test";
     tsuccess[si]=0;

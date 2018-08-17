@@ -1,5 +1,5 @@
 ///
-/// @file emu7k.h
+/// @file emu7k2.h
 /// @authors k. headley
 /// @date 06 nov 2012
  
@@ -74,6 +74,7 @@
 #include <pthread.h>
 #include "iowrap.h"
 #include "r7kc.h"
+#include "mbtrn.h"
 #include "mlist.h"
 #include "mconfig.h"
 
@@ -127,13 +128,28 @@ typedef struct app_cfg_s{
     int port;
     /// @var app_cfg_s::min_delay
     /// @brief minimum publish delay
-    uint32_t min_delay;
+    int32_t min_delay;
     /// @var app_cfg_s::restart
     /// @brief restart at file end
     bool restart;
     /// @var app_cfg_s::statn
     /// @brief stat report interval (records)
     uint32_t statn;
+    /// @var app_cfg_s::xdt
+    /// @brief delay every xdt sec for xds sec
+    time_t xdt;
+    /// @var app_cfg_s::xdstart
+    /// @brief delay every xdt sec for xds sec
+    time_t xdstart;
+    /// @var app_cfg_s::xds
+    /// @brief delay every xdn records for xds sec
+    int xds;
+    /// @var app_cfg_s::netframe_input
+    /// @brief input file contains netframes
+    bool netframe_input;
+    /// @var app_cfg_s::file_list
+    /// @brief data source file list
+    mlist_t *file_paths;
 }app_cfg_t;
 
 /// @typedef struct emu7k_record_s emu7k_record_t
@@ -174,15 +190,15 @@ typedef struct emu7k_s
     /// @var emu7k_s::sock_if
     /// @brief socket interface
     iow_socket_t *sock_if;
-    /// @var emu7k_s::in_file
-    /// @brief file interface
-    iow_file_t *in_file;
     /// @var emu7k_s::t
     /// @brief server thread
     iow_thread_t *t;
     /// @var emu7k_s::w
     /// @brief worker thread
     iow_thread_t *w;
+    /// @var emu7k_s::reader
+    /// @brief s7k stream reader
+    mbtrn_reader_t *reader;
     /// @var emu7k_s::max_clients
     /// @brief max allowed client connections
     uint32_t max_clients;
@@ -204,15 +220,17 @@ typedef struct emu7k_s
     /// @var emu7k_s::cfg
     /// @brief application config
     app_cfg_t *cfg;
+    /// @var emu7k_s::file_list
+    /// @brief source file list
+    mlist_t *file_list;
 }emu7k_t;
 
 /////////////////////////
 // Macros
 /////////////////////////
-
 /// @def MAX_DELAY_DFL_SEC
 /// @brief max inter-packet delay
-#define MAX_DELAY_DFL_SEC 3
+#define MAX_DELAY_DFL_SEC ((double)3.0)
 
 /// @def MIN_DELAY_DFL_SEC
 /// @brief min inter-packet delay
@@ -258,7 +276,8 @@ typedef enum {REQ=1,SUB,STOP}server_req_id;
 emu7k_client_t *emu7k_client_new(int fd, uint32_t nsubs, int32_t *subs);
 void emu7k_client_destroy(emu7k_client_t **pself);
 
-emu7k_t *emu7k_new(iow_socket_t *s, iow_file_t *mb_data);
+emu7k_t *emu7k_new(iow_socket_t *s, iow_file_t *mb_data, app_cfg_t *cfg);
+emu7k_t *emu7k_lnew(iow_socket_t *s, mlist_t *path_list, app_cfg_t *cfg);
 void emu7k_destroy(emu7k_t **pself);
 
 void emu7k_show(emu7k_t *self, bool verbose, uint16_t indent);

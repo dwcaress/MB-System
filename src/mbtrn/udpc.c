@@ -66,11 +66,20 @@
 #include <string.h>
 #include <errno.h>
 #include "iowrap.h"
+#include "mbtrn.h"
 #include "mdebug.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
+#define UDPC_NAME "udpc"
+#ifndef UDPC_BUILD
+/// @def UDPC_BUILD
+/// @brief module build date.
+/// Sourced from CFLAGS in Makefile
+/// w/ -DMBTRN_BUILD=`date`
+#define UDPC_BUILD ""VERSION_STRING(MBTRN_BUILD)
+#endif
 
 // These macros should only be defined for
 // application main files rather than general C files
@@ -147,7 +156,9 @@ static void s_show_help()
     char help_message[] = "\nUDP server\n";
     char usage_message[] = "\nudps [options]\n"
     "--verbose  : verbose output\n"
-    "--port     : UDP server port\n"
+    "--help     : output help message\n"
+    "--version  : output version info\n"
+    "--port      : UDP server port\n"
     "--blocking : blocking receive [0:1]\n"
     "--host     : UDP server host\n"
     "\n";
@@ -169,47 +180,53 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     int option_index;
     int c;
     bool help=false;
+    bool version=false;
     
     static struct option options[] = {
         {"verbose", no_argument, NULL, 0},
         {"help", no_argument, NULL, 0},
+        {"version", no_argument, NULL, 0},
         {"host", required_argument, NULL, 0},
         {"port", required_argument, NULL, 0},
         {"blocking", required_argument, NULL, 0},
         {"cycles", required_argument, NULL, 0},
        {NULL, 0, NULL, 0}};
 
-    /* process argument list */
+    // process argument list 
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
         switch (c) {
-                /* long options all return c=0 */
+                // long options all return c=0 
             case 0:
-                /* verbose */
+                // verbose 
                 if (strcmp("verbose", options[option_index].name) == 0) {
                     cfg->verbose=true;
                 }
                 
-                /* help */
+                // help 
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
                 }
+                // version 
+                else if (strcmp("version", options[option_index].name) == 0) {
+                    version = true;
+                }
                 
-                /* host */
+                // host 
                 else if (strcmp("host", options[option_index].name) == 0) {
                     if(cfg->host!=NULL){
                         free(cfg->host);
                     }
                     cfg->host=strdup(optarg);
                 }
-                /* host */
+                // host 
                 else if (strcmp("blocking", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->blocking);
                 }
-                /* port */
+                // port 
                 else if (strcmp("port", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->port);
                 }
-                /* cycles */
+                // cycles 
                 else if (strcmp("cycles", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->cycles);
                 }
@@ -218,7 +235,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 help=true;
                 break;
         }
+        if (version) {
+            mbtrn_show_app_version(UDPC_NAME,UDPC_BUILD);
+            exit(0);
+        }
         if (help) {
+            mbtrn_show_app_version(UDPC_NAME,UDPC_BUILD);
             s_show_help();
             exit(0);
         }
@@ -246,7 +268,6 @@ int main(int argc, char **argv)
 {
     
     int test=0;
-    iow_peer_t *peer=iow_peer_new();
 
     byte buf[UDPS_BUF_LEN]={0};
     
@@ -265,7 +286,7 @@ int main(int argc, char **argv)
         MDEBUG("connect [%s:%d]\n",cfg.host,cfg.port);
         if ( (test=iow_connect(s))==0) {
             do{
-                if( (test=iow_sendto(s,NULL,"REQ",4))>0){
+                if( (test=iow_sendto(s,NULL,(byte *)"REQ",4))>0){
                     MDEBUG("sendto OK [%d]\n",test);
                     do{
                         memset(buf,0,128);
