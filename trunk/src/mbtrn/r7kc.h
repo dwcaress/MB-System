@@ -316,6 +316,37 @@ typedef struct r7k_msg_s
     r7k_checksum_t checksum;
 }r7k_msg_t;
 
+/// @typedef struct r7k_frame_info_s r7k_frame_info_t
+/// @brief r7k message structure
+//typedef struct r7k_frame_info_s
+//{
+//    /// @var r7k_msg_s::msg_len
+//    /// @brief length of message (bytes)
+//    uint32_t total_len;
+//    /// @var r7k_msg_s::data_size
+//    /// @brief size of message data (bytes)
+//    uint32_t data_len;
+//    /// @var r7k_msg_s::timestamp
+//    /// @brief frame timestamp
+//    double timestamp;
+////    /// @var r7k_msg_s::nf
+////    /// @brief Network Frame (NF) structure reference
+////    byte *nf;
+////    /// @var r7k_msg_s::drf
+////    /// @brief Data Record Frame (DRF) structure reference
+////    byte *drf;
+////    /// @var r7k_msg_s::data
+////    /// @brief message data buffer
+////    byte *data;
+////    /// @var r7k_msg_s::checksum
+////    /// @brief DRF checksum value
+////    byte *checksum;
+//    /// @var r7k_msg_s::checksum
+//    /// @brief DRF checksum value
+//    uint32_t cs_ofs;
+//
+//}r7k_frame_info_t;
+
 /// @typedef struct r7k_nf_headers_s r7k_nf_headers_t
 /// @brief 7k center network frame headers. does not include data or checksum.
 typedef struct r7k_nf_headers_s
@@ -455,7 +486,7 @@ typedef struct r7k_rd_rcnak_s
 // max frame bytes is defined in Reson DRF.
 /// @def R7K_MAX_FRAME_BYTES
 /// @brief max 7k center frame size (bytes).
-#define R7K_MAX_FRAME_BYTES    60000
+#define R7K_MAX_FRAME_BYTES    600000 //60000
 // max frames/record is a guess
 /// @def R7K_MAX_RECORD_FRAMES
 /// @brief max record frames per ping (empirical/estimate).
@@ -544,6 +575,10 @@ typedef struct r7k_rd_rcnak_s
 /// @brief size of NF protocol version (bytes)
 #define R7K_NF_PROTO_BYTES (sizeof(uint16_t))
 
+/// @def R7K_DRF_PROTO_BYTES
+/// @brief size of DRF protocol version (bytes)
+#define R7K_DRF_PROTO_BYTES (sizeof(uint16_t))
+
 /// @def R7K_NF_OFS2PTR(bp,ofs)
 /// @brief cast byte pointer, offset to network frame pointer.
 /// @param[in] bp byte pointer
@@ -604,6 +639,11 @@ typedef struct r7k_rd_rcnak_s
 #define SEC_PER_HOUR (SEC_PER_MIN*60)
 #define SEC_PER_DAY (SEC_PER_HOUR*24)
 
+#define S_PER_M ((double)60.0)
+#define S_PER_H ((double)S_PER_M*60.0)
+#define S_PER_D ((double)S_PER_H*24.0)
+#define S_PER_Y ((double)S_PER_D*365.0)
+
 /////////////////////////
 // Exports
 /////////////////////////
@@ -620,6 +660,7 @@ void r7k_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, ui
 int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles);
 
 // R7K packet frame (DRF/NF) API
+double r7k_7ktime2d(r7k_time_t *r7kt);
 
 r7k_nf_t  *r7k_nf_new();
 void r7k_nf_destroy(r7k_nf_t **pself);

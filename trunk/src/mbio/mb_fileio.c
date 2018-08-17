@@ -186,21 +186,30 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
     }
 #ifdef MBTRN_ENABLED
     else {
-        if (mb_io_ptr->mbsp != NULL) {
+        if (NULL != mb_io_ptr->mbsp) {
             // use the socket reader
-            //if( (read_len = mbtrn_reader_xread(mb_io_ptr->mbsp,(byte *)buffer,*size,350,MBR_ALLOW_PARTIAL)) != *size){
-            if( (read_len = mbtrn_reader_xread_new(mb_io_ptr->mbsp,(byte *)buffer,*size,350,MBR_BLOCK,0)) != *size){
-                status = MB_FAILURE;
-                *error = MB_ERROR_EOF;
-                *size = read_len;
+            // read and return single frame
+            uint32_t sync_bytes=0;
+            int64_t rbytes=-1;
+
+            if( (rbytes = mbtrn_read_stripped_frame(mb_io_ptr->mbsp, buffer, R7K_MAX_FRAME_BYTES, MBR_NET_STREAM, 0.0, MBTRN_READ_TMOUT_MSEC,  &sync_bytes)) < 0){
+          
+                status   = MB_FAILURE;
+                *error   = MB_ERROR_EOF;
+                *size    = (size_t)rbytes;
                 if (me_errno==ME_ESOCK) {
                     fprintf(stderr,"mbtrn_reader server connection closed.\n");
+                }else if (me_errno==ME_EOF) {
+                    fprintf(stderr,"mbtrn_reader end of file (server connection closed).\n");
+                }else{
+                    fprintf(stderr,"mbtrn_read_stripped_frame me_errno %d/%s\n",me_errno,me_strerror(me_errno));
                 }
-            }
-            else {
+            }else {
                 *error = MB_ERROR_NO_ERROR;
+                *size    = (size_t)rbytes;
             }
-        } else {
+        }
+        else{
             fprintf(stderr,"mb_io file and socket pointers both NULL\n");
             status = MB_FAILURE;
             *error = MB_ERROR_EOF;

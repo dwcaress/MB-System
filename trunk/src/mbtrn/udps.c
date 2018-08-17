@@ -66,11 +66,20 @@
 #include <string.h>
 #include <errno.h>
 #include "iowrap.h"
+#include "mbtrn.h"
 #include "mdebug.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
+#define UDPS_NAME "udps"
+#ifndef UDPS_BUILD
+/// @def UDPS_BUILD
+/// @brief module build date.
+/// Sourced from CFLAGS in Makefile
+/// w/ -DMBTRN_BUILD=`date`
+#define UDPS_BUILD ""VERSION_STRING(MBTRN_BUILD)
+#endif
 
 // These macros should only be defined for
 // application main files rather than general C files
@@ -153,6 +162,8 @@ static void s_show_help()
     char help_message[] = "\nUDP server\n";
     char usage_message[] = "\nudps [options]\n"
     "--verbose  : verbose output\n"
+    "--help     : output help message\n"
+    "--version  : output version info\n"
     "--port     : UDP server port\n"
     "--blocking : blocking receive [0:1]\n"
 //    "--host    : number of cycles (dfl 0 - until CTRL-C)\n"
@@ -175,10 +186,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     int option_index;
     int c;
     bool help=false;
+    bool version=false;
     
     static struct option options[] = {
         {"verbose", no_argument, NULL, 0},
         {"help", no_argument, NULL, 0},
+        {"version", no_argument, NULL, 0},
 //        {"host", required_argument, NULL, 0},
         {"port", required_argument, NULL, 0},
         {"blocking", required_argument, NULL, 0},
@@ -198,6 +211,10 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 /* help */
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
+                }
+                /* version */
+                else if (strcmp("version", options[option_index].name) == 0) {
+                    version = true;
                 }
                 
                 /* host */
@@ -224,7 +241,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 help=true;
                 break;
         }
+        if (version) {
+            mbtrn_show_app_version(UDPS_NAME,UDPS_BUILD);
+            exit(0);
+        }
         if (help) {
+            mbtrn_show_app_version(UDPS_NAME,UDPS_BUILD);
             s_show_help();
             exit(0);
         }
@@ -282,7 +304,7 @@ int main(int argc, char **argv)
                 MDEBUG("waiting to receive (%s)...\n",(cfg.blocking==0?"non-blocking":"blocking"));
                 memset(buf,0,UDPS_BUF_LEN);
 
-//                MDEBUG("peer[%d] p[%p]  ainfo[%p]\n",peer_count,&peers[peer_count],peers[peer_count]->ainfo);\
+//                MDEBUG("peer[%d] p[%p]  ainfo[%p]\n",peer_count,&peers[peer_count],peers[peer_count]->ainfo);
 
                 iobytes = iow_recvfrom(s, peers[peer_count]->addr, buf, UDPS_BUF_LEN);
                 switch (iobytes) {

@@ -791,7 +791,7 @@ mlog_t *mlog_new(const char *file_path, mlog_config_t *config)
             self->stime = 0;
             
             
-//            self->file  = iow_file_new(NULL);
+            self->file  = iow_file_new(NULL);
             char *tpath = s_seg_path(file_path,self,0);
             self->file  = iow_file_new(tpath);
             free(tpath);
@@ -827,8 +827,8 @@ void mlog_destroy(mlog_t **pself)
 {
     if (NULL!=pself) {
         mlog_t *self = *pself;
-        if (NULL != self) {
-            if ( NULL!=self->cfg){
+        if (NULL!=self) {
+            if ( NULL!=(self->cfg)){
                 mlog_config_destroy(&self->cfg);
             }
             iow_file_destroy(&self->file);

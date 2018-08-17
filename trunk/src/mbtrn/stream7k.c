@@ -63,9 +63,13 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <stdarg.h>
+#include <signal.h>
 #include "r7kc.h"
 #include "iowrap.h"
+#include "merror.h"
+#include "mbtrn.h"
 #include "mdebug.h"
+#include "mconfig.h"
 
 /////////////////////////
 // Macros
@@ -90,9 +94,18 @@
  "GNU General Public License for more details (http://www.gnu.org/licenses/gpl-3.0.html)\n"
  */
 
+#define STREAM7K_NAME "stream7k"
+#ifndef STREAM7K_BUILD
+/// @def STREAM7K_BUILD
+/// @brief module build date.
+/// Sourced from CFLAGS in Makefile
+/// w/ -DMBTRN_BUILD=`date`
+#define STREAM7K_BUILD ""VERSION_STRING(MBTRN_BUILD)
+#endif
+
 /// @def RESON_HOST_DFL
 /// @brief default reson hostname
-#define RESON_HOST_DFL "134.89.13.49"
+#define RESON_HOST_DFL "localhost"
 
 /////////////////////////
 // Declarations
@@ -103,7 +116,7 @@
 typedef struct app_cfg_s{
     /// @var app_cfg_s::verbose
     /// @brief verbose output flag
-    bool verbose;
+    int verbose;
     /// @var app_cfg_s::host
     /// @brief hostname
     char *host;
@@ -113,6 +126,7 @@ typedef struct app_cfg_s{
 }app_cfg_t;
 
 static void s_show_help();
+static bool g_stop_flag=false;
 
 /////////////////////////
 // Imports
@@ -131,17 +145,17 @@ static void s_show_help();
 /// @return none
 static void s_show_help()
 {
-    char help_message[] = "\nStream raw reson bytes to console\n";
-    char usage_message[] = "\nstream7k [options]\n"
-    "--verbose : verbose output\n"
-    "--host    : reson host name or IP address\n"
-    "--cycles  : number of cycles (dfl 0 - until CTRL-C)\n"
+    char help_message[] = "\n Stream raw reson bytes to console\n";
+    char usage_message[] = "\n stream7k [options]\n"
+    "\n Options:\n"
+    "  --verbose=n : verbose output\n"
+    "  --host      : reson host name or IP address\n"
+    "  --cycles    : number of cycles (dfl 0 - until CTRL-C)\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
 }
 // End function s_show_help
-
 
 /// @fn void parse_args(int argc, char ** argv, app_cfg_t * cfg)
 /// @brief parse command line args, set application configuration.
@@ -155,10 +169,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     int option_index;
     int c;
     bool help=false;
+    bool version=false;
     
     static struct option options[] = {
-        {"verbose", no_argument, NULL, 0},
+        {"verbose", required_argument, NULL, 0},
         {"help", no_argument, NULL, 0},
+        {"version", no_argument, NULL, 0},
         {"host", required_argument, NULL, 0},
         {"cycles", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
@@ -170,9 +186,14 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             case 0:
                 /* verbose */
                 if (strcmp("verbose", options[option_index].name) == 0) {
-                    cfg->verbose=true;
+                    sscanf(optarg,"%d",&cfg->verbose);
                 }
                 
+                // version
+                if (strcmp("version", options[option_index].name) == 0) {
+                    version=true;
+                }
+
                 /* help */
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
@@ -191,7 +212,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 help=true;
                 break;
         }
+        if (version) {
+            mbtrn_show_app_version(STREAM7K_NAME, STREAM7K_BUILD);
+            exit(0);
+        }
         if (help) {
+            mbtrn_show_app_version(STREAM7K_NAME, STREAM7K_BUILD);
             s_show_help();
             exit(0);
         }
@@ -199,6 +225,25 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
 }
 // End function parse_args
 
+/// @fn void termination_handler (int signum)
+/// @brief termination signal handler.
+/// @param[in] signum signal number
+/// @return none
+static void s_termination_handler (int signum)
+{
+    switch (signum) {
+        case SIGINT:
+        case SIGHUP:
+        case SIGTERM:
+            MMDEBUG(APP2,"received sig[%d]\n",signum);
+            g_stop_flag=true;
+            break;
+        default:
+            MERROR("not handled[%d]\n",signum);
+            break;
+    }
+}
+// End function termination_handler
 
 /// @fn int main(int argc, char ** argv)
 /// @brief stream7k main entry point.
@@ -210,8 +255,14 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
 /// @return 0 on success, -1 otherwise
 int main(int argc, char **argv)
 {
-    const char *host=RESON_HOST_DFL;
-    
+    // configure signal handling
+    // for main thread
+    struct sigaction saStruct;
+    sigemptyset(&saStruct.sa_mask);
+    saStruct.sa_flags = 0;
+    saStruct.sa_handler = s_termination_handler;
+    sigaction(SIGINT, &saStruct, NULL);
+
     uint32_t nsubs=11;
     uint32_t subs[]={1003, 1006, 1008, 1010, 1012, 1013, 1015,
         1016, 7000, 7004, 7027};
@@ -220,19 +271,67 @@ int main(int argc, char **argv)
     
     parse_args(argc, argv, &cfg);
     
-    iow_socket_t *s = iow_socket_new(cfg.host, R7K_7KCENTER_PORT, ST_TCP);
-    
-    if (NULL != s) {
-        MDEBUG("connecting [%s]\n",cfg.host);
-        if (iow_connect(s)==0) {
-            MDEBUG("subscribing [%u]\n",nsubs);
-            if(r7k_subscribe(s, subs, nsubs)==0){
-                MDEBUG("streaming c[%d]\n",cfg.cycles);
-                r7k_stream_show(s,1024, 350, cfg.cycles);
-            }
-        }
-        free(cfg.host);
+    mcfg_configure(NULL,0);
+    mdb_set(MDI_ALL,MDL_UNSET);
+    mdb_set(IOW,MDL_ERROR);
+    mdb_set(R7K,MDL_ERROR);
+    mdb_set(MBTRN,MDL_ERROR);
+    switch (cfg.verbose) {
+        case 0:
+            mdb_set(MDI_ALL,MDL_UNSET);
+            break;
+        case 1:
+            mdb_set(APP1,MDL_DEBUG);
+            break;
+        case 2:
+            mdb_set(APP1,MDL_DEBUG);
+            mdb_set(IOW,MDL_DEBUG);
+            mdb_set(R7K,MDL_DEBUG);
+            mdb_set(MBTRN,MDL_DEBUG);
+            break;
+        default:
+            break;
     }
+    
+    iow_socket_t *s = NULL;
+    int cycle_count=0;
+    
+    while (!g_stop_flag) {
+        s = iow_socket_new(cfg.host, R7K_7KCENTER_PORT, ST_TCP);
+        if (NULL != s) {
+            MMDEBUG(APP1,"connecting [%s]\n",cfg.host);
+            if (iow_connect(s)==0) {
+                
+                if(r7k_subscribe(s, subs, nsubs)==0){
+                    int test=iow_set_blocking(s,true);
+                    MMDEBUG(APP1,"set_blocking ret[%d]\n",test);
+                    MMDEBUG(APP1,"subscribing [%u]\n",nsubs);
+                   MMDEBUG(APP1,"streaming c[%d]\n",cfg.cycles);
+                    r7k_stream_show(s,1024, 350, cfg.cycles);
+                    cycle_count++;
+                }else{
+                    MMDEBUG(APP1,"subscribe failed [%d/%s]\n",me_errno,strerror(me_errno));
+                }
+            }else{
+                MMDEBUG(APP1,"connnect failed [%d/%s]\n",me_errno,strerror(me_errno));
+            }
+        }else{
+            MMDEBUG(APP1,"iow_socket_new failed [%d/%s]\n",me_errno,strerror(me_errno));
+        }
+        if (cfg.cycles>0 && (cycle_count>=cfg.cycles)) {
+            g_stop_flag=true;
+        }else{
+        MMDEBUG(APP1,"retrying connection in 5 s\n");
+        iow_socket_destroy(&s);
+        sleep(5);
+        }
+    }
+    if (g_stop_flag) {
+        MMDEBUG(APP2,"stop flag set\n");
+    }
+    
+    free(cfg.host);
+
     return 0;
 }
 // End function main

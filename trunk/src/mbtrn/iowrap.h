@@ -76,7 +76,7 @@
 #include "merror.h"
 /// @def IOW_ADDR_LEN
 /// @brief address structure size
-#define IOW_ADDR_LEN sizeof(struct sockaddr_in)
+#define IOW_ADDR_LEN (sizeof(struct sockaddr_in))
 //#pragma message "Compiling __unix__"
 #if defined(__CYGWIN__)
 //#pragma message "__CYGWIN__ is defined"
@@ -101,12 +101,9 @@
 // Type Definitions
 /////////////////////////
 
-/// @def MAX_ADDR_BYTES
-/// @brief address length
-#define MAX_ADDR_BYTES 64
-/// @def ADDR_OCTETS
-/// @brief address octets
-#define ADDR_OCTETS 4
+/// @typedef uint8_t byte
+/// @brief typedef for byte
+typedef uint8_t byte;
 
 /// @struct ip_addr_s
 /// @brief IP address structure
@@ -136,17 +133,6 @@ struct iow_peer_s;
 /// @brief peer (client) connection typedef
 typedef struct iow_peer_s iow_peer_t;
 
-/// @struct iow_file_s
-/// @brief wrapped file representation (posix implementation)
-struct iow_file_s;
-/// @typedef struct iow_file_s iow_file_t
-/// @brief wrapped file typedef
-typedef struct iow_file_s iow_file_t;
-
-/// @typedef uint8_t byte
-/// @brief typedef for byte
-typedef uint8_t byte;
-
 /// @struct iow_thread_s
 /// @brief wrapped thread representation (posix implementation)
 struct iow_thread_s;
@@ -161,13 +147,17 @@ struct iow_mutex_s;
 /// @brief wrapped mutex typedef
 typedef struct iow_mutex_s iow_mutex_t;
 
+/// @struct iow_file_s
+/// @brief wrapped file representation (posix implementation)
+struct iow_file_s;
+/// @typedef struct iow_file_s iow_file_t
+/// @brief wrapped file typedef
+typedef struct iow_file_s iow_file_t;
+
 /// @typedef void *(*)(void *) mbtrn_thread_fn
 /// @brief thread function
 typedef void *(* mbtrn_thread_fn)(void *arg);
 
-/// @typedef enum mbtrn_ctype mbtrn_ctype
-/// @brief connection endpoint types
-typedef enum {CT_NULL,CT_STDIN,CT_STDOUT,CT_STDERR,CT_FILE,CT_SOCKET} mbtrn_ctype;
 
 /// @typedef enum mbtrn_socket_state mbtrn_socket_state
 /// @brief socket states
@@ -177,17 +167,43 @@ typedef enum {SS_ERROR=-1,SS_CREATED,SS_CONFIGURED, SS_BOUND, SS_LISTENING, SS_L
 /// @brief connection status
 typedef enum {IO_OK=0,IO_ETMOUT,IO_ERCV,IO_ESEL,IO_ESOCK, IO_EINC} mbtrn_status_id;
 
-/// @typedef enum iow_socket_type iow_socket_type
+/// @typedef enum iow_socket_ctype iow_socket_ctype
 /// @brief socket connection types (TCP, UDP)
-typedef enum {ST_TCP=0,ST_UDP}iow_socket_type;
+typedef enum {ST_TCP=0,ST_UDP}iow_socket_ctype;
 
 /// @typedef enum iow_flags_t iow_flags_t
 /// @brief file attribute flags
-typedef enum {IOW_RONLY=0x1,IOW_WONLY=0x2,IOW_RDWR=0x4,IOW_APPEND=0x8,IOW_CREATE=0x10,IOW_TRUNC=0x20,IOW_NONBLOCK=0x40} iow_flags_t;
+typedef enum {
+    IOW_RONLY=0x1,
+    IOW_WONLY=0x2,
+    IOW_RDWR=0x4,
+    IOW_APPEND=0x8,
+    IOW_CREATE=0x10,
+    IOW_TRUNC=0x20,
+    IOW_NONBLOCK=0x40,
+    IOW_SYNC=0x80,
+    IOW_RSYNC=0x100,
+    IOW_DSYNC=0x200,
+    IOW_ASYNC=0x400,
+    IOW_EXCL=0x400
+//    IOW_DIRECT=0x800
+} iow_flags_t;
 
 /// @typedef enum iow_mode_t iow_mode_t
 /// @brief file permission flags
-typedef enum{IOW_RWXU=0x800,IOW_RU=0x400,IOW_WU=0x200,IOW_XU=0x100,IOW_RWXG=0x80,IOW_RG=0x40,IOW_WG=0x20,IOW_XG=0x10,IOW_RWXO=0x8,IOW_RO=0x4,IOW_WO=0x2,IOW_XO=0x1} iow_mode_t;
+typedef enum{
+    IOW_RWXU=0x800,
+    IOW_RU=0x400,
+    IOW_WU=0x200,
+    IOW_XU=0x100,
+    IOW_RWXG=0x80,
+    IOW_RG=0x40,
+    IOW_WG=0x20,
+    IOW_XG=0x10,
+    IOW_RWXO=0x8,
+    IOW_RO=0x4,
+    IOW_WO=0x2,
+    IOW_XO=0x1} iow_mode_t;
 
 /// @typedef enum iow_mode_t iow_whence_t
 /// @brief file seek flags
@@ -203,7 +219,7 @@ typedef enum{IOW_SET=0, IOW_CUR, IOW_END} iow_whence_t;
 
 // iow socket API
 
-iow_socket_t *iow_socket_new(const char *host, int port, iow_socket_type type);
+iow_socket_t *iow_socket_new(const char *host, int port, iow_socket_ctype type);
 void iow_socket_destroy(iow_socket_t **pself);
 iow_addr_t *iow_addr_new();
 void iow_addr_destroy(iow_addr_t **pself);
@@ -213,10 +229,12 @@ void iow_peer_destroy(iow_peer_t **pself);
 void iow_peer_free(void *pself);
 void iow_pstats_show(iow_pstats_t *self, bool verbose, uint16_t indent);
 
+double iow_dtime();
+double iow_mdtime(double mod);
 
 // pass in NULL socket to create dynamically
 
-int iow_configure(iow_socket_t *s, const char *host, int port, iow_socket_type type, uint16_t qlen);
+int iow_configure(iow_socket_t *s, const char *host, int port, iow_socket_ctype type, uint16_t qlen);
 iow_socket_t *iow_wrap_fd(int fd);
 
 int iow_bind(iow_socket_t *s);
@@ -226,6 +244,7 @@ int64_t iow_send(iow_socket_t *s,byte *buf, uint32_t len);
 int64_t iow_sendto(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len);
 int64_t iow_recv(iow_socket_t *s, byte *buf, uint32_t len);
 int64_t iow_recvfrom(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len);
+int64_t iow_recvfrom2(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len,int flags);
 int64_t iow_read_tmout(iow_socket_t *s, byte *buf, uint32_t len, uint32_t timeout_msec);
 int iow_set_blocking(iow_socket_t *s, bool enabled);
 char *iow_addr2str(iow_socket_t *s, char *dest, size_t len);

@@ -285,6 +285,13 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.5.2347 (August 17, 2018)
+
+Mbtrnpreprocess: precruise update of mbtrnpreprocess and related tools used for
+optional install of AUV terrain relative navigation. Excepting for a few debug
+print statement changes, this matches the 20180814 mbtrnpreprocess installation
+of Kent Headly on MBARI Mapping AUV 2.
+
 -----> 5.5.2346 (August 13, 2018)
 
 Mbauvloglist: augmented dimensioning of fields array to allow up to 500 data fields.

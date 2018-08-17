@@ -91,7 +91,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = tmbtrn$(EXEEXT) stream7k$(EXEEXT) frames7k$(EXEEXT) \
-	trnc$(EXEEXT) emu7k$(EXEEXT)
+	trnc$(EXEEXT) emu7k$(EXEEXT) blogr$(EXEEXT) blogtx$(EXEEXT)
 subdir = src/mbtrn
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -148,6 +148,12 @@ libmbtrn_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libmbtrn_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(bin_PROGRAMS)
+am_blogr_OBJECTS = blogr.$(OBJEXT)
+blogr_OBJECTS = $(am_blogr_OBJECTS)
+blogr_DEPENDENCIES = libmbtrn.la
+am_blogtx_OBJECTS = blogtx.$(OBJEXT)
+blogtx_OBJECTS = $(am_blogtx_OBJECTS)
+blogtx_DEPENDENCIES = libmbtrn.la
 am_emu7k_OBJECTS = emu7k.$(OBJEXT)
 emu7k_OBJECTS = $(am_emu7k_OBJECTS)
 emu7k_DEPENDENCIES = libmbtrn.la
@@ -197,8 +203,9 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libmbtrn_la_SOURCES) $(emu7k_SOURCES) $(frames7k_SOURCES) \
-	$(stream7k_SOURCES) $(tmbtrn_SOURCES) $(trnc_SOURCES)
+SOURCES = $(libmbtrn_la_SOURCES) $(blogr_SOURCES) $(blogtx_SOURCES) \
+	$(emu7k_SOURCES) $(frames7k_SOURCES) $(stream7k_SOURCES) \
+	$(tmbtrn_SOURCES) $(trnc_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -396,8 +403,9 @@ include_HEADERS = cbuffer.h \
 				r7kc.h
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
-AM_CPPFLAGS = -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/trn -DHAVE_CONFIG_H  -DWITH_TEST -DMD_OLEVEL=MD_DEBUG
-AM_LDFLAGS = -L$(top_builddir)/src/mbtrn
+
+# add -DMBTRN_VER="<version>" to override version defined in mbtrn.h
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn -DHAVE_CONFIG_H  -DWITH_TEST -DMD_OLEVEL=MD_DEBUG -D_GNU_SOURCE -DMBTRN_BUILD="`date +%Y/%m/%dT%H:%M:%S%z`"
 libmbtrn_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbtrn_la_SOURCES = \
 				cbuffer.c \
@@ -423,6 +431,10 @@ trnc_SOURCES = trnc.c
 trnc_LDADD = libmbtrn.la
 emu7k_SOURCES = emu7k.c
 emu7k_LDADD = libmbtrn.la
+blogr_SOURCES = blogr.c
+blogr_LDADD = libmbtrn.la
+blogtx_SOURCES = blogtx.c
+blogtx_LDADD = libmbtrn.la
 CLEANFILES = 
 DISTCLEANFILES = 
 all: all-am
@@ -546,6 +558,14 @@ clean-binPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
+blogr$(EXEEXT): $(blogr_OBJECTS) $(blogr_DEPENDENCIES) $(EXTRA_blogr_DEPENDENCIES) 
+	@rm -f blogr$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(blogr_OBJECTS) $(blogr_LDADD) $(LIBS)
+
+blogtx$(EXEEXT): $(blogtx_OBJECTS) $(blogtx_DEPENDENCIES) $(EXTRA_blogtx_DEPENDENCIES) 
+	@rm -f blogtx$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(blogtx_OBJECTS) $(blogtx_LDADD) $(LIBS)
+
 emu7k$(EXEEXT): $(emu7k_OBJECTS) $(emu7k_DEPENDENCIES) $(EXTRA_emu7k_DEPENDENCIES) 
 	@rm -f emu7k$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(emu7k_OBJECTS) $(emu7k_LDADD) $(LIBS)
@@ -572,6 +592,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blogr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blogtx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cbuffer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emu7k.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frames7k.Po@am__quote@

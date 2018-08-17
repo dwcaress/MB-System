@@ -59,34 +59,38 @@ GNU General Public License for more details
 /////////////////////////
 // Headers 
 /////////////////////////
+#if defined(__CYGWIN__)
+#include <Windows.h>
+#endif
 
-#include <stdio.h>
+// for OSX clock functions
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
+#include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdarg.h>
 #include <inttypes.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
 #include <netinet/in.h>
 #include <errno.h>
 #include <string.h>
+#include <math.h>
 #include "iowrap.h"
 #include "mdebug.h"
 #include "mconfig.h"
+#include "r7kc.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
-#ifndef MSG_NOSIGNAL
-# define MSG_NOSIGNAL 0
-# ifdef SO_NOSIGPIPE
-#  define USE_SO_NOSIGPIPE
-# else
-#  error "Cannot block SIGPIPE!"
-# endif
-#endif
 
 // These macros should only be defined for 
 // application main files rather than general C files
@@ -226,7 +230,7 @@ int iow_set_blocking(iow_socket_t *s, bool enabled)
     if (NULL != s) {
         int flags = fcntl(s->fd, F_GETFL, 0);
         if (flags != -1){
-            flags = enabled ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
+            flags = (enabled ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK));
             retval = fcntl(s->fd, F_SETFL, flags);
         }// else error
     }// else invalid arg
@@ -355,7 +359,8 @@ void iow_peer_free(void *pself)
     if (NULL!=pself) {
         iow_peer_t *self = (iow_peer_t *)pself;
         if (NULL!=self) {
-            iow_addr_destroy(&self->addr);
+//            iow_addr_destroy(&self->addr);
+            iow_peer_destroy(&self);
             free(self);
             self=NULL;
         }
@@ -385,13 +390,13 @@ void iow_pstats_show(iow_pstats_t *self, bool verbose, uint16_t indent)
 }
 // End function mbtrn_reader_show
 
-/// @fn iow_socket_t * iow_socket_new(const char * host, int port, iow_socket_type type)
+/// @fn iow_socket_t * iow_socket_new(const char * host, int port, iow_socket_ctype type)
 /// @brief create new socket instance.
 /// @param[in] host connection IP address
 /// @param[in] port connection IP port
 /// @param[in] type ST_UDP or ST_TCP
 /// @return new socket instance reference.
-iow_socket_t *iow_socket_new(const char *host, int port, iow_socket_type type)
+iow_socket_t *iow_socket_new(const char *host, int port, iow_socket_ctype type)
 {
     iow_socket_t *self = (iow_socket_t *)malloc(sizeof(iow_socket_t));
     if (self) {
@@ -443,7 +448,7 @@ iow_socket_t *iow_wrap_fd(int fd)
 }
 // End function iow_wrap_fd
 
-/// @fn int iow_configure(iow_socket_t * s, const char * host, int port, iow_socket_type type, uint16_t qlen)
+/// @fn int iow_configure(iow_socket_t * s, const char * host, int port, iow_socket_ctype type, uint16_t qlen)
 /// @brief configure a socket instance.
 /// @param[in] s socket reference
 /// @param[in] host connection host
@@ -451,24 +456,31 @@ iow_socket_t *iow_wrap_fd(int fd)
 /// @param[in] type ST_UDP, ST_TCP
 /// @param[in] qlen number of connections (for servers)
 /// @return 0 on success, -1 otherwise.
-int iow_configure(iow_socket_t *s, const char *host, int port, iow_socket_type type, uint16_t qlen)
+int iow_configure(iow_socket_t *s, const char *host, int port, iow_socket_ctype type, uint16_t qlen)
 {
     int retval=-1;
-    if (NULL != (s->addr->host)) {
-        free(s->addr->host);
-    }
     if (NULL != host) {
+        if (NULL != (s->addr->host)) {
+            free(s->addr->host);
+            s->addr->host=NULL;
+        }
         s->addr->host=strdup(host);
     }
+    
     s->addr->port=port;
     s->qlen=qlen;
     memset(s->addr->portstr,0,PORTSTR_BYTES*sizeof(char));
     sprintf(s->addr->portstr,"%d",port);
+    
     memset(&s->addr->hints,0,sizeof(struct addrinfo));
-    s->addr->hints.ai_family=PF_INET;
     MMDEBUG(IOW,"configuring type [%s]\n",(type==ST_TCP ? "SOCK_STREAM" : "SOCK_DGRAM"));
+    s->addr->hints.ai_family=PF_INET;
     s->addr->hints.ai_socktype=(type==ST_TCP ? SOCK_STREAM : SOCK_DGRAM);
     s->addr->hints.ai_flags=AI_PASSIVE;
+    s->addr->hints.ai_protocol=0;
+    s->addr->hints.ai_canonname=NULL;
+    s->addr->hints.ai_addr=NULL;
+    s->addr->hints.ai_next=NULL;
     s->status=SS_CREATED;
     
     int status=0;
@@ -487,18 +499,26 @@ int iow_configure(iow_socket_t *s, const char *host, int port, iow_socket_type t
         s->addr->alist = rp;
         
         for (; rp!=NULL; rp = rp->ai_next) {
-//            MMDEBUG(IOW,"rp[%p]\n",rp);
+////            MMDEBUG(IOW,"rp[%p]\n",rp);
+//            fprintf(stderr,"iow_configure - rp family[%s] type[%s]\n",
+//                    (rp->ai_family==AF_INET?"IPv4":"IPv6"),
+//                    (rp->ai_socktype==SOCK_STREAM?"TCP":"UDP"));
+            
             s->fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
             if (s->fd>0){
                 s->status=SS_CONFIGURED;
                 s->addr->ainfo = rp;
-                MMDEBUG(IOW,"socket created[%d] ainfo[%p] alist[%p]\n",s->fd,s->addr->ainfo,s->addr->alist);
-#ifdef USE_SO_NOSIGPIPE
-                retval=1;
-                if (setsockopt(s->fd, SOL_SOCKET, SO_NOSIGPIPE, (void*)&retval, sizeof(retval)) != 0) {
-                    fprintf(stderr, "failed to set SO_NOSIGPIPE on socket [%d/%s]\n", errno,strerror(errno));
-                }
+
+//                int sokeepalive=1;
+//                setsockopt(s->fd,SOL_SOCKET,SO_KEEPALIVE,&sokeepalive,sizeof(sokeepalive));
+//                struct linger solinger={0};
+//                setsockopt(s->fd,SOL_SOCKET,SO_LINGER,&solinger,sizeof(solinger));
+#if defined(__APPLE__)
+                // this is the OSX alternative to the MSG_NOSIGNAL flag for send()
+                int so_nosigpipe=1;
+                setsockopt(s->fd,SOL_SOCKET,SO_NOSIGPIPE,&so_nosigpipe,sizeof(so_nosigpipe));
 #endif
+                MMDEBUG(IOW,"socket created[%d] ainfo[%p] alist[%p]\n",s->fd,s->addr->ainfo,s->addr->alist);
                 retval=0;
                 break;
             }else {
@@ -507,7 +527,7 @@ int iow_configure(iow_socket_t *s, const char *host, int port, iow_socket_type t
             }
             close(s->fd);
             s->fd=-1;
-            s->status = SS_CONFIGURED;
+            s->status = SS_CREATED;//SS_CONFIGURED;
        }
     }else{
         fprintf(stderr, "getaddrinfo error: %d/%s\n",status, gai_strerror(status));
@@ -526,7 +546,7 @@ int iow_configure(iow_socket_t *s, const char *host, int port, iow_socket_type t
 int iow_connect(iow_socket_t *s)
 {
     int retval=-1;
-    if (NULL != s && NULL != s->addr->ainfo) {
+    if ( (NULL != s) && (NULL != s->addr->ainfo)) {
         if (connect(s->fd, s->addr->ainfo->ai_addr, s->addr->ainfo->ai_addrlen)==0) {
             // success
             char buf[ADDRSTR_BYTES]={0};
@@ -642,9 +662,19 @@ int64_t iow_send(iow_socket_t *s,byte *buf, uint32_t len)
     if (NULL != s && NULL != buf && len>0) {
         if (s->status == SS_CONNECTED) {
             if (s->type==ST_TCP) {
+//                fprintf(stderr,">>>>>>>>>>>>>>>>> IOW_SEND : buf[%p] len[%"PRIu32"]\n",buf,len);
+//                r7k_hex_show(buf,len,16,true,5);
+                
+#if defined(__APPLE__)
+                // must also set socket option SO_NOSIGPIPE
+                if( (retval = send(s->fd,buf,len,0))<=0){
+                    MERROR("ERR - send fd[%d] returned %"PRId64" [%d/%s]\n",s->fd,retval,errno,strerror(errno));
+                }
+#else
                 if( (retval = send(s->fd,buf,len,MSG_NOSIGNAL))<=0){
                     MERROR("ERR - send fd[%d] returned %"PRId64" [%d/%s]\n",s->fd,retval,errno,strerror(errno));
                 }
+#endif
             }
         }else{
          // not ready to send;
@@ -673,8 +703,12 @@ int64_t iow_sendto(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len)
 
             if (s->type==ST_UDP ) {
                 
-                struct sockaddr *dest_addr = (peer==NULL?NULL:(peer->ainfo->ai_addr));
-                
+//                struct sockaddr *dest_addr = (peer==NULL? NULL:(peer->ainfo->ai_addr));
+                struct sockaddr *dest_addr = NULL;
+                if (NULL!=peer && NULL!=peer->ainfo) {
+                    dest_addr = peer->ainfo->ai_addr;
+                }
+
                 if( (retval = sendto(s->fd,buf,len,0,dest_addr,IOW_ADDR_LEN)) > 0){
 //                    MMDEBUG(IOW,"sendto OK [%lld]\n",retval);
                 }else{
@@ -730,11 +764,12 @@ int64_t iow_recvfrom(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len)
         struct sockaddr *dest_addr=(peer==NULL?NULL:peer->ainfo->ai_addr);
         socklen_t addrlen = (peer==NULL?0:IOW_ADDR_LEN);
 
+//        fprintf(stderr,"recvfrom peer[%p] dest_addr[%p] ai_family[%d] addrlen[%d]\n",peer,(peer?peer->ainfo->ai_addr:NULL),(int)(peer?peer->ainfo->ai_family:-1),(int)(peer?peer->ainfo->ai_addrlen:-1));
         
         if( (retval = recvfrom(s->fd,buf,len,0,dest_addr,&addrlen))>0){
            // MMDEBUG(IOW,"received data peer[%p] dest[%p] ainfo[%p] [%lld]\n",peer,dest_addr,peer->ainfo,retval);
         }else{
-//            MMDEBUG(IOW,"recvfrom failed [%d %s]\n",errno,strerror(errno));
+            MMDEBUG(IOW,"recvfrom failed [%d %s]\n",errno,strerror(errno));
         }
     }else{
         MERROR("invalid arguments\n");
@@ -743,6 +778,281 @@ int64_t iow_recvfrom(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len)
 }
 // End function iow_recvfrom
 
+/// @fn int64_t iow_recvfrom2(iow_socket_t * s, iow_addr_t * peer, byte * buf, uint32_t len)
+/// @brief TBD.
+/// @param[in] s socket instance
+/// @param[in] peer peer address
+/// @param[in] buf destination buffer
+/// @param[in] len number of bytes to receive
+/// @return number of bytes received on success, -1 otherwise
+int64_t iow_recvfrom2(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len, int flags)
+{
+    int64_t retval= 0;
+    
+    if (NULL != s && NULL!=buf && len>0) {
+        
+        struct sockaddr *dest_addr=(peer==NULL?NULL:peer->ainfo->ai_addr);
+        socklen_t addrlen = (peer==NULL?0:IOW_ADDR_LEN);
+        
+//        fprintf(stderr,"recvfrom peer[%p] dest_addr[%p] ai_family[%d] addrlen[%d]\n",peer,(peer?peer->ainfo->ai_addr:NULL),(int)(peer?peer->ainfo->ai_family:-1),(int)(peer?peer->ainfo->ai_addrlen:-1));
+        
+        if( (retval = recvfrom(s->fd,buf,len,flags,dest_addr,&addrlen))>0){
+            // MMDEBUG(IOW,"received data peer[%p] dest[%p] ainfo[%p] [%lld]\n",peer,dest_addr,peer->ainfo,retval);
+        }else{
+            MMDEBUG(IOW,"recvfrom failed [%d %s]\n",errno,strerror(errno));
+        }
+    }else{
+        MERROR("invalid arguments\n");
+    }
+    return retval;
+}
+// End function iow_recvfrom
+
+
+///// @fn int64_t iow_read_tmout(iow_socket_t * s, byte * buf, uint32_t len, uint32_t timeout_msec)
+///// @brief read bytes from socket until length or timeout exceeded.
+///// @param[in] s socket instance
+///// @param[in] buf data buffer
+///// @param[in] len max bytes to receive
+///// @param[in] timeout_msec timeout (milliseconds)
+///// @return number of bytes received on success, -1 otherwise
+//int64_t iow_read_tmout(iow_socket_t *s, byte *buf, uint32_t len, uint32_t timeout_msec)
+//{
+//    me_errno=ME_OK;
+//    int64_t retval=0;
+//    double t_rem=(double)timeout_msec;
+//    int nbytes=0;
+//    struct timespec now={0},start={0};
+//
+//    uint32_t read_total=0;
+//    uint32_t loops=0;
+//    if ( (NULL!=s) && s->fd>0 && (NULL!=buf) && len>0) {
+//        struct timeval tv;
+//        fd_set read_fds;
+//        int fdmax;
+//        int stat=0;
+//
+//        byte *pbuf=buf;
+//        memset(buf,0,len);
+//        
+//        if (timeout_msec>0) {
+//            tv.tv_sec = timeout_msec/1000;
+//            tv.tv_usec = 1000*(timeout_msec%1000);
+//        }else{
+//            // use 100 ms default
+//            tv.tv_sec = 0;
+//            tv.tv_usec = 250000;
+//        }
+//        
+//        clock_gettime(CLOCK_MONOTONIC, &start);
+//        
+//        double start_ns = (double)((1000000000.*start.tv_sec+start.tv_nsec));
+//        double to_ns    = (double)timeout_msec*1000000.;
+//
+//        while (read_total<len && t_rem>0 && pbuf<(buf+len) ) {
+//            loops++;
+//            FD_ZERO(&read_fds);
+//            FD_SET(s->fd,&read_fds);
+//            fdmax = s->fd;
+//            
+//            if( (stat=select(fdmax+1, &read_fds, NULL, NULL, &tv)) != -1){
+//                if (FD_ISSET(s->fd, &read_fds)){
+//                   // MMINFO(IOW,"readfs [%d/%d] ready to read\n",s->fd,fdmax);
+//                    
+////                    if (( nbytes = recv(s->fd, pbuf, (len-read_total), 0)) > 0) {
+////                    if (( nbytes = read(s->fd, pbuf, (len-read_total))) > 0) {
+//                    if (( nbytes = read(s->fd, pbuf, (len-read_total))) > 0) {
+////                       MMINFO(IOW,"read %d bytes\n",nbytes);
+//                        read_total+=nbytes;
+//                        pbuf+=nbytes;
+//                        retval=read_total;
+//                    }else{
+//                        // got error or connection closed by server
+//                      
+//                        // when server side disconnects
+//                        // read and recv both return 0 or -1 and set one
+//                        // of several error conditions. This ambiguity (that it
+//                        // may return 0) can be resolved via error values.
+//                        // The errors differ depending on how the server socket
+//                        // is shutdown (i.e. test client calls close, not sure what
+//                        // 7k center does, but they generate different errors)
+//                        // Also, the errors extend beyond those explicitly
+//                        // mentioned by the read manpage, though it does say
+//                        // that other errors may be indicated.
+//                        // when the server stops sending (and is connected)
+//                        // FD_ISSET (correctly) returns 0/false.
+//                        //
+//                        // The errors that indicate socket shutdown include
+//                        // EWOULDBLOCK/EAGAIN (these may share the same errno)
+//                        // [errno 11/Resource Temporarily Unavailable]
+//                        // ENOTCONN
+//                        // [errno 107/Transport endpoint is not connected]
+//                        // ECONNREFUSED
+//                        // [errno 111/Connection refused]
+//                        // ECONNRESET
+//                        // [errno 104/Connection reset by peer]
+//                        // ENOENT
+//                        // [errno 2/No such file or directory]
+//
+//                        fprintf(stderr,"ERR - read[%d] sock[%d] [%d/%s]\n", nbytes, s->fd,errno,strerror(errno));
+//                        
+//                        switch (errno) {
+//                            case EWOULDBLOCK:
+//                                fprintf(stderr,"EAGAIN/EWOULDBLOCK setting socket error %d\n", s->fd);
+//                                me_errno=ME_ESOCK;
+//                                break;
+//
+//                            case ENOTCONN:
+//                                fprintf(stderr,"ENOTCONN socket %d setting socket error\n", s->fd);
+//                                me_errno=ME_ESOCK;
+//                                retval=-1;
+//                                break;
+//                            case EINVAL:
+//                                fprintf(stderr,"EINVAL socket %d setting socket error\n", s->fd);
+//                                me_errno=ME_ESOCK;
+//                                retval=-1;
+//                                break;
+//                            case EBADF:
+//                                fprintf(stderr,"EBADF socket %d\n", s->fd);
+//                                break;
+//                            case EIO:
+//                                fprintf(stderr,"EIO socket %d\n", s->fd);
+//                                break;
+//                            case EFAULT:
+//                                fprintf(stderr,"EFAULT socket %d\n", s->fd);
+//                                break;
+//                            case EINTR:
+//                                fprintf(stderr,"EINTR socket %d\n", s->fd);
+//                                break;
+//                            case ENOENT:
+//                                fprintf(stderr,"ENOENT socket %d setting socket error\n", s->fd);
+//                                me_errno=ME_ESOCK;
+//                                break;
+//                            case ECONNRESET:
+//                                fprintf(stderr,"ECONNRESET socket %d setting socket error\n", s->fd);
+//                                me_errno=ME_ESOCK;
+//                                break;
+//                           default:
+//                                fprintf(stderr,"read: socket %d unrecognized err [%d/%s] setting socket error\n", s->fd,errno,strerror(errno));
+//                               me_errno=ME_ESOCK;
+//                                break;
+//                        }
+//                        if (me_errno==ME_ESOCK) {
+//                            // bail out if socket error (disconnect)
+//                            // otherwise, keep going (timeout)
+//                            break;
+//                        }
+//                    }
+//                    FD_CLR(s->fd, &read_fds); // remove from master set
+//                }
+//            }else{
+//                MMDEBUG(IOW,"select err [%d/%s]\n",errno,strerror(errno));
+//                fprintf(stderr,"select err [%d/%s]\n",errno,strerror(errno));
+//                if (errno==EINTR) {
+//                    // select got signal before timeout expired
+//                    MMDEBUG(IOW,"EINTR\n");
+//                }
+//            }
+//
+//            // select may be interrupted before its timeout
+//            // Update timeout value and retry for remaining time
+//            clock_gettime(CLOCK_MONOTONIC, &now);
+//            if (timeout_msec>0) {
+//                double now_ns   = (double)((1000000000.*(now.tv_sec)+now.tv_nsec));
+//
+//
+//                double x = (to_ns -  (now_ns - start_ns));
+//                t_rem = (x<t_rem ? x:t_rem);
+//	
+//                // don't rely on tv after select returns, since
+//                // - select may have been interrupted by a signal
+//                // - it isn't portable to rely on select setting it to the
+//                //   time not slept.
+//
+//                tv.tv_sec  = (int32_t)(t_rem/1000000000L);
+//                tv.tv_usec = (int32_t)(1000*((int32_t)t_rem%1000));
+//            }else{
+//                tv.tv_sec = 0;
+//                tv.tv_usec = 250000;
+//            }
+//        }// while
+//     }// ERR - invalid arg
+//    
+//        if (read_total==len) {
+//            // read complete - OK
+//            me_errno=ME_OK;
+//        }else{
+//
+//            switch (me_errno) {
+//                case ME_ERCV:
+//                case ME_ESOCK:
+//                    // use me_errno
+//                    break;
+//                    
+//                default:
+//                    if (t_rem<0) {
+//                        // timed out
+//                        me_errno=ME_ETMOUT;
+//                    }else{
+//                        // incomplete
+//                        me_errno=ME_EINC;
+//                    }
+//            }
+//        }
+////    MMDEBUG(IOW,"t[%.0lf] n[%u/%u] rv[%d] loops[%u]\n",t_rem,read_total,len,retval,loops);
+////    if (loops==1) {
+////        MMDEBUG(IOW,"start[ %lu : %lu] now[%lu : %lu]\n",start.tv_sec, start.tv_nsec,now.tv_sec,now.tv_nsec);
+////    }
+//
+//    return retval;
+//}
+//// End function iow_read_tmout
+
+/// @fn double iow_dtime()
+/// @brief get system time as a double
+/// @return system time as double, with usec precision
+///  if supported by platform
+double iow_dtime()
+{
+    double retval=0.0;
+    struct timespec now={0};
+
+#if defined(__linux__) || defined(__CYGWIN__)
+    clock_gettime(CLOCK_MONOTONIC, &now); //CLOCK_REALTIME, CLOCK_MONOTONIC_RAW, CLOCK_PROCESS_CPUTIME_ID
+    retval=((double)now.tv_sec+((double)now.tv_nsec/(double)1.0e9));
+#elif defined(__MACH__)
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    now.tv_sec = mts.tv_sec;
+    now.tv_nsec = mts.tv_nsec;
+    retval=((double)now.tv_sec+((double)now.tv_nsec/(double)1.0e9));
+#else
+    fprintf(stderr,"iow_dtime - not implemented\n");
+#endif
+
+    
+    return retval;
+}
+/// @fn double iow_mdtime(double mod)
+/// @brief get system time as a double
+/// @return system time as double, with usec precision
+///  if supported by platform
+double iow_mdtime(double mod)
+{
+    double retval = 0.0;
+    double now = iow_dtime();
+
+    if (mod>0.0) {
+        retval = fmod(now,mod);
+    }else{
+        retval =  now;
+    }
+  
+    return retval;
+}
 
 /// @fn int64_t iow_read_tmout(iow_socket_t * s, byte * buf, uint32_t len, uint32_t timeout_msec)
 /// @brief read bytes from socket until length or timeout exceeded.
@@ -756,122 +1066,230 @@ int64_t iow_read_tmout(iow_socket_t *s, byte *buf, uint32_t len, uint32_t timeou
     me_errno=ME_OK;
     int64_t retval=0;
     double t_rem=(double)timeout_msec;
-    int nbytes=0;
-    struct timespec now={0},start={0};
+    int64_t nbytes=0;
+    int64_t read_total=0;
+    
+    double start_sec   = iow_dtime();
+    double now_sec     = 0.0;
+    double to_sec      = (double)timeout_msec/1000.0;
+    double elapsed_sec = 0.0;
+    bool err_quit=false;
+#if defined(__CYGWIN__)
+    
+    static LARGE_INTEGER pfreq={0};
+    if (pfreq.QuadPart==0) {
+        QueryPerformanceCounter(&pfreq);
+    }
+    
+#endif
 
-    uint32_t read_total=0;
-    uint32_t loops=0;
-    if ( (NULL!=s) && s->fd>0 && (NULL!=buf) && len>0) {
-        struct timeval tv;
-        fd_set read_fds;
-        int fdmax;
-        int stat=0;
-
+     if ( (NULL!=s) && s->fd>0 && (NULL!=buf) && len>0) {
+         
         byte *pbuf=buf;
         memset(buf,0,len);
-        
-        if (timeout_msec>0) {
-            tv.tv_sec = timeout_msec/1000;
-            tv.tv_usec = 1000*(timeout_msec%1000);
-        }else{
-            // use 100 ms default
-            tv.tv_sec = 0;
-            tv.tv_usec = 250000;
-        }
-        
-        clock_gettime(CLOCK_MONOTONIC, &start);
-        
-        double start_ns = (double)((1000000000.*start.tv_sec+start.tv_nsec));
-        double to_ns    = (double)timeout_msec*1000000.;
+         
+      
+//         fprintf(stderr,"#### read_tmout - fd[%d] buf[%p] len[%"PRIu32"] to[%"PRIu32"]\n",s->fd,buf,len, timeout_msec);
 
-        while (read_total<len && t_rem>0 && pbuf<(buf+len) ) {
-            loops++;
-            FD_ZERO(&read_fds);
-            FD_SET(s->fd,&read_fds);
-            fdmax = s->fd;
+//         fprintf(stderr,"#### read_tmout - buf[%p] len[%"PRIu32"] to[%"PRIu32"]\n",buf,len, timeout_msec);
+        while (err_quit==false && read_total<len && elapsed_sec<to_sec && pbuf<(buf+len) ) {
+
             
-            if( (stat=select(fdmax+1, &read_fds, NULL, NULL, &tv)) != -1){
-                if (FD_ISSET(s->fd, &read_fds)){
-                   // MMINFO(IOW,"readfs [%d/%d] ready to read\n",s->fd,fdmax);
-                    
-//                    if (( nbytes = recv(s->fd, pbuf, (len-read_total), 0)) > 0) {
-                    if (( nbytes = read(s->fd, pbuf, (len-read_total))) > 0) {
-                        //MMINFO(IOW,"read %d bytes\n",nbytes);
-                        read_total+=nbytes;
-                        pbuf+=nbytes;
-                        retval=read_total;
-                    }else{
-                        // got error or connection closed by server
-                        if (nbytes == 0) {
-                            // connection closed
-                            fprintf(stderr,"ERR - socket %d closed\n", s->fd);
-                            retval = -1;
-                            me_errno = ME_ESOCK;
-                            break;
-                        } else if(nbytes<0) {
-                            fprintf(stderr,"ERR - recv failed socket[%d] [%d/%s]\n",s->fd,errno,strerror(errno));
-                            retval = -1;
-                            me_errno = ME_ERCV;
-                            break;
-                        }
-                    }
-                    FD_CLR(s->fd, &read_fds); // remove from master set
-                }
-            }else{
-                MMDEBUG(IOW,"select err [%d/%s]\n",errno,strerror(errno));
-                if (errno==EINTR) {
-                    // select got signal before timeout expired
-                    MMDEBUG(IOW,"EINTR\n");
-                }
-            }
+#ifdef MBTRN_TIMING
+#if defined(__CYGWIN__)
+
+//            LARGE_INTEGER start={0};
+//            QueryPerformanceCounter(&start);
+//
+//            FILETIME ft, epoch_ft;
+//            SYSTEMTIME epoch_st = {1970,1, 0, 1, 0, 0, 0, 0};
+//            ULARGE_INTEGER a, b;
+//            GetSystemTimeAsFileTime(&ft);
+//            SystemTimeToFileTime(&epoch_st, &epoch_ft);
+//            memcpy(&a, &ft, sizeof(ULARGE_INTEGER));
+//            memcpy(&b, &epoch_ft, sizeof(ULARGE_INTEGER));
+//            ULARGE_INTEGER start;
+//            start.QuadPart = a.QuadPart - b.QuadPart;
+
+            double start=iow_dtime();
+
+#else
+            double start = iow_dtime();
+#endif
+#endif
+            // read from the file/socket
+           nbytes = read(s->fd, pbuf, (len-read_total));
+
+#ifdef MBTRN_TIMING
+#if defined(__CYGWIN__)
+//            LARGE_INTEGER stop={0};
+//            QueryPerformanceCounter(&stop);
             
-            clock_gettime(CLOCK_MONOTONIC, &now);
-            if (timeout_msec>0) {
-                double now_ns   = (double)((1000000000.*(now.tv_sec)+now.tv_nsec));
+//            GetSystemTimeAsFileTime(&ft);
+//            SystemTimeToFileTime(&epoch_st, &epoch_ft);
+//            memcpy(&a, &ft, sizeof(ULARGE_INTEGER));
+//            memcpy(&b, &epoch_ft, sizeof(ULARGE_INTEGER));
+//            ULARGE_INTEGER stop;
+//            stop.QuadPart = a.QuadPart - b.QuadPart;
+//
+//            double diff = ((double)stop.QuadPart-start.QuadPart)/pfreq.QuadPart;
+//            fprintf(stderr,"crdxt %0.3g\n",diff);
+//            if (diff>0.1) {
+//                fprintf(stderr,"*********************************\n");
+//            }
 
 
-                double x = (to_ns -  (now_ns - start_ns));
-                t_rem = (x<t_rem ? x:t_rem);
-	
-                // don't rely on tv after select returns, since
-                // - select may have been interrupted by a signal
-                // - it isn't portable to rely on select setting it to the
-                //   time not slept.
+            double stop=iow_dtime();
+            double diff=(stop-start);
+            fprintf(stderr,"%11.5lf crdxt %0.4e\n",stop,diff);
+#else
+ 
+            double stop=iow_dtime();
+            double diff=(stop-start);
+            fprintf(stderr,"%11.5lf lrdxt %0.4e\n",stop, diff);
+#endif
+#endif
+//            fprintf(stderr,"read returned [%"PRId64"/%"PRId64"] [%d/%s]\n",nbytes,(len-read_total),errno,strerror(errno));
 
-                tv.tv_sec  = (int32_t)(t_rem/1000000000L);
-                tv.tv_usec = (int32_t)(1000*((int32_t)t_rem%1000));
+            if (nbytes > 0) {
+                read_total+=nbytes;
+                pbuf+=nbytes;
+                retval=read_total;
+//                fprintf(stderr,"read_total %"PRId64"\n",read_total);
             }else{
-                tv.tv_sec = 0;
-                tv.tv_usec = 250000;
-            }
-        }// while
-     }// ERR - invalid arg
-    
-        if (read_total==len) {
-            // read complete - OK
-            me_errno=ME_OK;
-        }else{
-
-            switch (me_errno) {
-                case ME_ERCV:
-                case ME_ESOCK:
-                    // use me_errno
-                    break;
-                    
-                default:
-                    if (t_rem<0) {
-                        // timed out
+                // got error or connection closed by server
+                
+                // when server side disconnects
+                // read and recv both return 0 or -1 and set one
+                // of several error conditions. This ambiguity (that it
+                // may return 0) can be resolved via error values.
+                // The errors differ depending on how the server socket
+                // is shutdown (i.e. test client calls close, not sure what
+                // 7k center does, but they generate different errors)
+                // Also, the errors extend beyond those explicitly
+                // mentioned by the read manpage, though it does say
+                // that other errors may be indicated.
+                // when the server stops sending (and is connected)
+                // FD_ISSET (correctly) returns 0/false.
+                //
+                // The errors that indicate socket shutdown include
+                // EWOULDBLOCK/EAGAIN (these may share the same errno)
+                // [errno 11/Resource Temporarily Unavailable]
+                // ENOTCONN
+                // [errno 107/Transport endpoint is not connected]
+                // ECONNREFUSED
+                // [errno 111/Connection refused]
+                // ECONNRESET
+                // [errno 104/Connection reset by peer]
+                // ENOENT
+                // [errno 2/No such file or directory]
+                
+                fprintf(stderr,"ERR - read[%"PRId64"] sock[%d] [%d/%s]\n", nbytes, s->fd,errno,strerror(errno));
+                
+                switch (errno) {
+                    case 0:
+                        fprintf(stderr,"read 0 (EOF) setting EOF %d\n", s->fd);
+                        me_errno=ME_EOF;
+                        retval=-1;
+                        break;
+                    case EWOULDBLOCK:
+                        fprintf(stderr,"EAGAIN/EWOULDBLOCK setting socket error %d\n", s->fd);
+                        me_errno=ME_ESOCK;
+                        retval=-1;
+                       break;
+                        
+                    case ENOTCONN:
+                        fprintf(stderr,"ENOTCONN socket %d setting socket error\n", s->fd);
+                        me_errno=ME_ESOCK;
+                        retval=-1;
+                        break;
+                    case EINVAL:
+                        fprintf(stderr,"EINVAL socket %d setting socket error\n", s->fd);
+                        me_errno=ME_ESOCK;
+                        retval=-1;
+                        break;
+                    case EBADF:
+                        fprintf(stderr,"EBADF socket %d\n", s->fd);
+                        break;
+                    case EIO:
+                        fprintf(stderr,"EIO socket %d\n", s->fd);
+                        break;
+                    case EFAULT:
+                        fprintf(stderr,"EFAULT socket %d\n", s->fd);
+                        break;
+                    case EINTR:
+                        fprintf(stderr,"EINTR socket %d\n", s->fd);
+                        break;
+                    case ENOENT:
+                        fprintf(stderr,"ENOENT socket %d setting socket error\n", s->fd);
+                        me_errno=ME_ESOCK;
+                        retval=-1;
+                        break;
+                    case ECONNRESET:
+                        fprintf(stderr,"ECONNRESET socket %d setting socket error\n", s->fd);
+                        me_errno=ME_ESOCK;
+                        retval=-1;
+                        break;
+                    case ETIMEDOUT:
+                        fprintf(stderr,"ETIMEOUT socket %d setting timeout error\n", s->fd);
                         me_errno=ME_ETMOUT;
-                    }else{
-                        // incomplete
-                        me_errno=ME_EINC;
-                    }
+                        retval=-1;
+                        break;
+                    default:
+                        fprintf(stderr,"read: socket %d unrecognized err [%d/%s] setting socket error\n", s->fd,errno,strerror(errno));
+                        me_errno=ME_ESOCK;
+                        retval=-1;
+                        break;
+                }
+                if (me_errno==ME_ESOCK || me_errno==ME_EOF || me_errno==ME_ETMOUT) {
+                    // bail out if socket error (disconnect)
+                    // otherwise, keep going (timeout)
+                    err_quit=true;
+                    break;
+                }
             }
+            
+            if (timeout_msec>0) {
+                // select/read may be interrupted before its timeout
+                // Update timeout value and retry for remaining time
+                now_sec = iow_dtime();
+                elapsed_sec   = now_sec-start_sec;
+                
+#ifdef MBTRN_TIMING
+                fprintf(stderr,"%11.5lf chktime %.6lf\n",now_sec, elapsed_sec);
+#endif
+            }
+            
+        }// while
+
+    }// ERR - invalid arg
+    
+    if (read_total==len) {
+        // read complete - OK
+        me_errno=ME_OK;
+//        fprintf(stderr,"read filled request - buf:\n");
+//        r7k_hex_show(buf,len,16,true,5);
+    }else{
+        
+        switch (me_errno) {
+            case ME_ERCV:
+            case ME_ESOCK:
+            case ME_EOF:
+            case ME_ETMOUT:
+                // use me_errno
+                break;
+                
+            default:
+                if (t_rem<0) {
+                    // timed out
+                    me_errno=ME_ETMOUT;
+                }else{
+                    // incomplete
+                    me_errno=ME_EINC;
+                }
         }
-//    MMDEBUG(IOW,"t[%.0lf] n[%u/%u] rv[%d] loops[%u]\n",t_rem,read_total,len,retval,loops);
-//    if (loops==1) {
-//        MMDEBUG(IOW,"start[ %lu : %lu] now[%lu : %lu]\n",start.tv_sec, start.tv_nsec,now.tv_sec,now.tv_nsec);
-//    }
+    }
+//    fprintf(stderr,"#### read_tmout ret[%"PRId64"/%"PRIu32"] time[%.5lf/%.5lf]\n",retval,len,elapsed_sec,to_sec);
 
     return retval;
 }
@@ -892,6 +1310,20 @@ static int s_iow2posix_flags(int iflags)
     pflags |= ( (iflags&IOW_CREATE  )!=0 ? O_CREAT    : 0 );
     pflags |= ( (iflags&IOW_TRUNC   )!=0 ? O_TRUNC    : 0 );
     pflags |= ( (iflags&IOW_NONBLOCK)!=0 ? O_NONBLOCK : 0 );
+    pflags |= ( (iflags&IOW_DSYNC   )!=0 ? O_DSYNC    : 0 );
+#if defined(__APPLE__)
+    pflags |= ( (iflags&IOW_RSYNC   )!=0 ? O_SYNC    : 0 );
+#else
+    pflags |= ( (iflags&IOW_RSYNC   )!=0 ? O_RSYNC    : 0 );
+#endif
+    pflags |= ( (iflags&IOW_SYNC    )!=0 ? O_SYNC     : 0 );
+#if defined(__CYGWIN__)
+    pflags |= ( (iflags&IOW_ASYNC   )!=0 ? O_SYNC    : 0 );
+#else
+    pflags |= ( (iflags&IOW_ASYNC   )!=0 ? O_ASYNC    : 0 );
+#endif
+    pflags |= ( (iflags&IOW_EXCL    )!=0 ? O_EXCL     : 0 );
+//    pflags |= ( (iflags&IOW_DIRECT  )!=0 ? O_DIRECT   : 0 );
     
     return pflags;
 }
@@ -1104,7 +1536,7 @@ int iow_rename(iow_file_t *self,const char *path)
 /// @return number of bytes read >=0 on success, or -1 otherwise.
 int64_t iow_seek(iow_file_t *self, uint32_t ofs, iow_whence_t whence)
 {
-    int64_t retval=-1;
+    off_t retval= (off_t)-1;
     if (NULL != self) {
         off_t test=0;
         off_t offset=ofs;
@@ -1120,10 +1552,12 @@ int64_t iow_seek(iow_file_t *self, uint32_t ofs, iow_whence_t whence)
                 pwhence=SEEK_END;
                 break;
             default:
+                MERROR("ERR - invalid mode[%d]\n",whence);
                 break;
         }
-        if( (test=lseek(self->fd, offset, pwhence))>=0){
-            retval = (int64_t)test;
+        if( (pwhence!=-1) && (test=lseek(self->fd, offset, pwhence))>=0){
+            retval = test;
+//            fprintf(stderr,"iow_seek - seek fd[%d] returned[%"PRId32"] [%d/%s]\n",self->fd,(int32_t)test,errno,strerror(errno));
         }else{
             MERROR("seek failed [%d/%s]\n",errno,strerror(errno));
         }

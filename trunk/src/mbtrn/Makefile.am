@@ -16,9 +16,9 @@ include_HEADERS = cbuffer.h \
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/trn -DHAVE_CONFIG_H  -DWITH_TEST -DMD_OLEVEL=MD_DEBUG
+# add -DMBTRN_VER="<version>" to override version defined in mbtrn.h
 
-AM_LDFLAGS = -L$(top_builddir)/src/mbtrn
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn -DHAVE_CONFIG_H  -DWITH_TEST -DMD_OLEVEL=MD_DEBUG -D_GNU_SOURCE -DMBTRN_BUILD="`date +%Y/%m/%dT%H:%M:%S%z`"
 
 libmbtrn_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -37,7 +37,7 @@ libmbtrn_la_SOURCES = \
 
 libmbtrn_la_LIBADD = -lpthread
 
-bin_PROGRAMS = tmbtrn stream7k frames7k trnc emu7k
+bin_PROGRAMS = tmbtrn stream7k frames7k trnc emu7k blogr blogtx
 
 tmbtrn_SOURCES = mbtrn-test.c
 tmbtrn_LDADD = libmbtrn.la
@@ -54,6 +54,11 @@ trnc_LDADD = libmbtrn.la
 emu7k_SOURCES = emu7k.c
 emu7k_LDADD = libmbtrn.la
 
+blogr_SOURCES = blogr.c
+blogr_LDADD = libmbtrn.la
+
+blogtx_SOURCES = blogtx.c
+blogtx_LDADD = libmbtrn.la
 
 CLEANFILES =
 DISTCLEANFILES =

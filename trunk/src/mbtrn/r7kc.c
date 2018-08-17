@@ -60,6 +60,10 @@ GNU General Public License for more details
 /////////////////////////
 #include <inttypes.h>
 #include <errno.h>
+#include <time.h>
+#include <sys/time.h>
+#include <math.h>
+
 #include "r7kc.h"
 #include "mconfig.h"
 #include "mdebug.h"
@@ -246,21 +250,7 @@ void r7k_update_time(r7k_time_t *t7k)
         t7k->day     = tms.tm_yday;
         t7k->hours   = tms.tm_hour;
         t7k->minutes = tms.tm_min;
-        t7k->seconds = (tms.tm_sec == 60. ? 0. : (float)tms.tm_sec);
-        
-        // Posix time (nsec resolution)
-        // not supported on OSX, Windows
-        // struct timespec ts;
-        // clock_gettime(CLOCK_REALTIME, &ts);
-        // time_t tt = ts.tv_sec;
-        // struct tm tms=NULL;
-        // gmtime_r(&tt, &tms);
-        // drf->_7ktime.year    = tms.tm_year%100;
-        // drf->_7ktime.day     = tms.tm_yday;
-        // drf->_7ktime.hours   = tms.tm_hour;
-        // drf->_7ktime.minutes = tms.tm_min;
-        // drf->_7ktime.seconds = tms.tm_sec + ((float)ts.tv_nsec/1000000000.);
-        
+        t7k->seconds = (tms.tm_sec == 60. ? 0. : (float)tms.tm_sec);        
     }
 }
 // End function r7k_update_time
@@ -695,17 +685,44 @@ int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles)
             retval=0;
         }else if(test<0){
            MMDEBUG(R7K,"ERR [%d/%s]\n",me_errno,me_strerror(me_errno));
-            err = (me_errno==ME_ETMOUT ? err : err+1 );
+            err++;
             tmout = (me_errno==ME_ETMOUT ? tmout+1 : tmout );
+            if (me_errno==ME_ETMOUT || me_errno==ME_EOF || me_errno==ME_ESOCK) {
+                break;
+            }
         }else{
            MMDEBUG(R7K,"read returned 0\n");
             zero++;
+            if (me_errno==ME_ESOCK || me_errno==ME_EOF) {
+                break;
+            }
         }
     }
     return retval;
 }
 // End function r7k_stream_show
 
+double r7k_7ktime2d(r7k_time_t *r7kt)
+{
+    double retval=0.0;
+    
+    if (NULL != r7kt) {
+
+        double pti=0.0;
+        double ptf=modf(r7kt->seconds, &pti);
+        struct tm tms = {0};
+        char tstr[64]={0};
+        sprintf(tstr,"%u %u %02d:%02d:%02.0f",r7kt->year,r7kt->day,r7kt->hours,r7kt->minutes,pti);
+        
+        strptime(tstr,"%Y %j %H:%M:%S",&tms);
+        tms.tm_isdst=-1;
+        time_t tt = mktime(&tms);
+        retval=(double)tt+ptf;
+        
+    }// else invalid argument
+    
+    return retval;
+}
 
 /// @fn r7k_nf_t * r7k_nf_new()
 /// @brief create new r7k network frame structure. used mostly by components.
@@ -862,7 +879,7 @@ void r7k_drf_show(r7k_drf_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[size            %15u]\n",indent,(indent>0?" ":""), self->size);
         fprintf(stderr,"%*s[opt_data_offset %15u]\n",indent,(indent>0?" ":""), self->opt_data_offset);
         fprintf(stderr,"%*s[opt_data_id     %15u]\n",indent,(indent>0?" ":""), self->opt_data_id);
-        fprintf(stderr,"%*s[_7ktime   %02hu %03hu %02hhu:%02hhu:%2.3f]\n", \
+        fprintf(stderr,"%*s[_7ktime   %02hu %03hu %02hhu:%02hhu:%06.3f]\n", \
                 indent,(indent>0?" ":""), self->_7ktime.year, self->_7ktime.day, \
                 self->_7ktime.hours, self->_7ktime.minutes, self->_7ktime.seconds);
         fprintf(stderr,"%*s[record_version  %15hu]\n",indent,(indent>0?" ":""), self->record_version);
@@ -1636,12 +1653,6 @@ int r7k_msg_send(iow_socket_t *s, r7k_msg_t *self)
 //        r7k_nf_show((r7k_nf_t *)buf,true,4);
         int64_t status=0;
 
-        // for some reason, msg_len is 4 bytes too long?
-        // or extra bytes are being written?
-        // sending with msg_len-4 works correctly,
-        // but where are the extra 4 bytes coming from?
-        
-//        if( (status=iow_send(s,buf,self->msg_len-4))>0){
         if( (status=iow_send(s,buf,self->msg_len))>0){
             retval=0;
         }else{

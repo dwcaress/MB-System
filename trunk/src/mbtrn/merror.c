@@ -158,6 +158,9 @@ const char *me_strerror(int merrno)
         case ME_ENOSPACE:
             retval="ENOSPACE";
             break;
+        case ME_EOF:
+            retval="EOF";
+            break;
             
         default:
             break;
