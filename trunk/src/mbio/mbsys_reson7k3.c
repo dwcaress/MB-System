@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c 2324 2018-01-19 03:04:33Z caress $
+ *	$Id$
  *
  *    Copyright (c) 2004-2017 by
  *    David W. Caress (caress@mbari.org)
@@ -46,7 +46,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char svn_id[] = "$Id: mbsys_reson7k.c 2324 2018-01-19 03:04:33Z caress $";
+static char svn_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header *header, int *error) {
