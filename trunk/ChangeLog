@@ -15,6 +15,9 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.5.2349       September 6, 2018
+  Version 5.5.2348       August 20, 2018
+  Version 5.5.2347       August 17, 2018
   Version 5.5.2346       August 13, 2018
   Version 5.5.2345       August 10, 2018
   Version 5.5.2344       August 3, 2018
@@ -284,6 +287,19 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.5.2349 (September 6, 2018)
+
+Mbnavadjust: Added a sorted ties list view for which the list of ties is ordered
+from largest misfit magnitude to smallest where the misfit is measured between
+the tie offset and the offset of the most recent inversion. This allows one to
+easily inspect the most poorly fit ties. Also augmented stored information about
+global ties. Also made some changes to the inversion algorithm.
+
+-----> 5.5.2348 (August 20, 2018)
+
+Reson 7k V3 support: Added files mbr_reson7k3.c mbsys_reson7k3.c mbsys_reson7k3.h
+while working towards support of version 3 7k data (by Christian Ferreira).
 
 -----> 5.5.2347 (August 17, 2018)
 

@@ -178,6 +178,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
 			project->grid_status = MBNA_GRID_NONE;
 			project->modelplot = MB_NO;
 			project->modelplot_style = MBNA_MODELPLOT_TIMESERIES;
+            project->modelplot_uptodate = MB_NO;
 			project->logfp = NULL;
 			project->precision = SIGMA_MINIMUM;
 			project->smoothing = MBNA_SMOOTHING_DEFAULT;
@@ -723,68 +724,66 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
                         }
 
 						/* global fixed frame tie, whether defined or not */
-						if (version_id >= 305) {
+                        section->global_tie_status = MBNA_TIE_NONE;
+                        section->global_tie_snav = MBNA_SELECT_NONE;
+                        section->global_tie_inversion_status = MBNA_INVERSION_NONE;
+                        section->offset_x = 0.0;
+                        section->offset_y = 0.0;
+                        section->offset_x_m = 0.0;
+                        section->offset_y_m = 0.0;
+                        section->offset_z_m = 0.0;
+                        section->xsigma = 0.0;
+                        section->ysigma = 0.0;
+                        section->zsigma = 0.0;
+                        section->inversion_offset_x = 0.0;
+                        section->inversion_offset_y = 0.0;
+                        section->inversion_offset_x_m = 0.0;
+                        section->inversion_offset_y_m = 0.0;
+                        section->inversion_offset_z_m = 0.0;
+                        section->dx_m = 0.0;
+                        section->dy_m = 0.0;
+                        section->dz_m = 0.0;
+                        section->sigma_m = 0.0;
+                        section->dr1_m = 0.0;
+                        section->dr2_m = 0.0;
+                        section->dr3_m = 0.0;
+                        section->rsigma_m = 0.0;
+                        
+						if (version_id >= 309) {
 							if (status == MB_SUCCESS)
 								result = fgets(buffer, BUFFER_MAX, hfp);
 							if (status == MB_SUCCESS && result == buffer)
-								nscan =
-								    sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf", &section->global_tie_status,
-								           &section->global_tie_snav, &section->global_tie_offset_x,
-								           &section->global_tie_offset_y, &section->global_tie_offset_z_m,
-								           &section->global_tie_xsigma, &section->global_tie_ysigma, &section->global_tie_zsigma);
-							mb_coor_scale(verbose, 0.5 * (section->latmin + section->latmax), &mtodeglon, &mtodeglat);
-							section->global_tie_offset_x_m = section->global_tie_offset_x / mtodeglon;
-							section->global_tie_offset_y_m = section->global_tie_offset_y / mtodeglat;
+								nscan = sscanf(buffer, "GLOBALTIE %d %d %d %lf %lf %lf %lf %lf %lf",
+                                                &section->global_tie_status, &section->global_tie_snav,
+                                                &section->global_tie_inversion_status,
+                                                &section->offset_x, &section->offset_y, &section->offset_z_m,
+                                                &section->xsigma, &section->ysigma, &section->zsigma);
+						}
+						else if (version_id >= 305) {
+							if (status == MB_SUCCESS)
+								result = fgets(buffer, BUFFER_MAX, hfp);
+							if (status == MB_SUCCESS && result == buffer)
+								nscan = sscanf(buffer, "GLOBALTIE %d %d %lf %lf %lf %lf %lf %lf",
+                                                &section->global_tie_status, &section->global_tie_snav,
+                                                &section->offset_x, &section->offset_y, &section->offset_z_m,
+                                                &section->xsigma, &section->ysigma, &section->zsigma);
+							if (section->global_tie_status != MBNA_TIE_NONE) {
+                                section->global_tie_inversion_status = project->inversion_status;
+							}
 						}
 						else if (version_id == 304) {
 							if (status == MB_SUCCESS)
 								result = fgets(buffer, BUFFER_MAX, hfp);
 							if (status == MB_SUCCESS && result == buffer)
-								nscan = sscanf(buffer, "GLOBALTIE %d %lf %lf %lf %lf %lf %lf", &section->global_tie_snav,
-								               &section->global_tie_offset_x, &section->global_tie_offset_y,
-								               &section->global_tie_offset_z_m, &section->global_tie_xsigma,
-								               &section->global_tie_ysigma, &section->global_tie_zsigma);
-							if (section->global_tie_snav != MBNA_SELECT_NONE)
+								nscan = sscanf(buffer, "GLOBALTIE %d %lf %lf %lf %lf %lf %lf",
+                                                &section->global_tie_snav,
+                                                &section->offset_x, &section->offset_y, &section->offset_z_m,
+                                                &section->xsigma, &section->ysigma, &section->zsigma);
+							if (section->global_tie_snav != MBNA_SELECT_NONE) {
 								section->global_tie_status = MBNA_TIE_XYZ;
-							else
-								section->global_tie_status = MBNA_TIE_NONE;
-							mb_coor_scale(verbose, 0.5 * (section->latmin + section->latmax), &mtodeglon, &mtodeglat);
-							section->global_tie_offset_x_m = section->global_tie_offset_x / mtodeglon;
-							section->global_tie_offset_y_m = section->global_tie_offset_y / mtodeglat;
+                                section->global_tie_inversion_status = project->inversion_status;
+ 							}
 						}
-						else {
-							section->global_tie_status = MBNA_TIE_NONE;
-							section->global_tie_snav = MBNA_SELECT_NONE;
-							section->global_tie_offset_x = 0.0;
-							section->global_tie_offset_y = 0.0;
-							section->global_tie_offset_x_m = 0.0;
-							section->global_tie_offset_y_m = 0.0;
-							section->global_tie_offset_z_m = 0.0;
-							section->global_tie_xsigma = 0.0;
-							section->global_tie_ysigma = 0.0;
-							section->global_tie_zsigma = 0.0;
-						}
-					}
-				}
-				
-				/* add sensordepth values to snav lists if needed */
-                if (version_id < 308) {
-fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values to section snav arrays...\n", version_id);
-                    status = mbnavadjust_fix_section_sensordepth(verbose, project, error);
-                }
-
-				/* count the number of blocks */
-				if (version_id < 306) {
-					project->num_blocks = 0;
-					for (i = 0; i < project->num_files; i++) {
-						file = &project->files[i];
-						if (i == 0 || file->sections[0].continuity == MB_NO) {
-							project->num_blocks++;
-						}
-						file->block = project->num_blocks - 1;
-						file->block_offset_x = 0.0;
-						file->block_offset_y = 0.0;
-						file->block_offset_z = 0.0;
 					}
 				}
 
@@ -817,16 +816,54 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
 					// i, file->path, project->lon_min, project->lon_max, project->lat_min, project->lat_max);
 				}
 				mb_coor_scale(verbose, 0.5 * (project->lat_min + project->lat_max), &project->mtodeglon, &project->mtodeglat);
-                
-                /* if project version < 308 then load each section in order to add snav_sensordepth[] values */
+				
+				/* add sensordepth values to snav lists if needed */
                 if (version_id < 308) {
-                    for (i = 0; i < project->num_files; i++) {
-                        file = &project->files[i];
-						for (j = 0; j < file->num_sections; j++) {
-							section = &file->sections[j];
+fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values to section snav arrays...\n", version_id);
+                    status = mbnavadjust_fix_section_sensordepth(verbose, project, error);
+                }
+
+				/* count the number of blocks */
+				if (version_id < 306) {
+					project->num_blocks = 0;
+					for (i = 0; i < project->num_files; i++) {
+						file = &project->files[i];
+						if (i == 0 || file->sections[0].continuity == MB_NO) {
+							project->num_blocks++;
 						}
+						file->block = project->num_blocks - 1;
+						file->block_offset_x = 0.0;
+						file->block_offset_y = 0.0;
+						file->block_offset_z = 0.0;
 					}
 				}
+                
+                /* now do scaling of global ties since mtodeglon and mtodeglat are defined */
+				for (i = 0; i < project->num_files; i++) {
+					file = &project->files[i];
+					for (j = 0; j < file->num_sections; j++) {
+						section = &file->sections[j];
+                        if (section->global_tie_status != MBNA_TIE_NONE) {
+                            section->offset_x_m = section->offset_x / project->mtodeglon;
+                            section->offset_y_m = section->offset_y / project->mtodeglat;
+                            if (section->global_tie_inversion_status != MBNA_INVERSION_NONE) {
+                                section->inversion_offset_x = section->snav_lon_offset[section->global_tie_snav];
+                                section->inversion_offset_y = section->snav_lat_offset[section->global_tie_snav];
+                                section->inversion_offset_x_m = section->snav_lon_offset[section->global_tie_snav] / project->mtodeglon;
+                                section->inversion_offset_y_m = section->snav_lat_offset[section->global_tie_snav] / project->mtodeglat;
+                                section->inversion_offset_z_m = section->snav_z_offset[section->global_tie_snav];
+                                section->dx_m = section->offset_x_m - section->inversion_offset_x_m;
+                                section->dy_m = section->offset_y_m - section->inversion_offset_y_m;
+                                section->dz_m = section->offset_z_m - section->inversion_offset_z_m;
+                                section->sigma_m = sqrt(section->dx_m * section->dx_m + section->dy_m * section->dy_m + section->dz_m * section->dz_m);
+                                section->dr1_m = section->inversion_offset_x_m / section->xsigma;
+                                section->dr2_m = section->inversion_offset_y_m / section->ysigma;
+                                section->dr3_m = section->inversion_offset_z_m / section->zsigma;
+                                section->rsigma_m = sqrt(section->dr1_m * section->dr1_m + section->dr2_m * section->dr2_m + section->dr3_m * section->dr3_m);
+                            }
+                        }
+                    }
+                }
 
 				/* read crossings */
 				project->num_crossings_analyzed = 0;
@@ -1037,16 +1074,27 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
 
 							/* calculate offsets in local meters */
 							if (status == MB_SUCCESS) {
-								section1 = &(project->files[crossing->file_id_1].sections[crossing->section_1]);
-								section2 = &(project->files[crossing->file_id_2].sections[crossing->section_2]);
-								mb_coor_scale(
-								    verbose,
-								    0.5 * (MIN(section1->latmin, section2->latmin) + MAX(section1->latmax, section2->latmax)),
-								    &mtodeglon, &mtodeglat);
-								tie->offset_x_m = tie->offset_x / mtodeglon;
-								tie->offset_y_m = tie->offset_y / mtodeglat;
-								tie->inversion_offset_x_m = tie->inversion_offset_x / mtodeglon;
-								tie->inversion_offset_y_m = tie->inversion_offset_y / mtodeglat;
+								tie->offset_x_m = tie->offset_x / project->mtodeglon;
+								tie->offset_y_m = tie->offset_y / project->mtodeglat;
+                                tie->inversion_offset_x_m = tie->inversion_offset_x / project->mtodeglon;
+                                tie->inversion_offset_y_m = tie->inversion_offset_y / project->mtodeglat;
+                                tie->dx_m = tie->offset_x_m - tie->inversion_offset_x_m;
+                                tie->dy_m = tie->offset_y_m - tie->inversion_offset_y_m;
+                                tie->dz_m = tie->offset_z_m - tie->inversion_offset_z_m;
+                                tie->sigma_m = sqrt(tie->dx_m * tie->dx_m + tie->dy_m * tie->dy_m + tie->dz_m * tie->dz_m);
+                                tie->dr1_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax1[0] +
+                                               (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax1[1] +
+                                               (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax1[2]) /
+                                          tie->sigmar1;
+                                tie->dr2_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax2[0] +
+                                               (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax2[1] +
+                                               (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax2[2]) /
+                                          tie->sigmar2;
+                                tie->dr3_m = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax3[0] +
+                                               (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax3[1] +
+                                               (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax3[2]) /
+                                          tie->sigmar3;
+                                tie->rsigma_m = sqrt(tie->dr1_m * tie->dr1_m + tie->dr2_m * tie->dr2_m + tie->dr3_m * tie->dr3_m);
 							}
 						}
 					}
@@ -1079,6 +1127,14 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
 							tie->inversion_offset_x_m *= -1.0;
 							tie->inversion_offset_y_m *= -1.0;
 							tie->inversion_offset_z_m *= -1.0;
+                            tie->dx_m *= -1.0;
+                            tie->dy_m *= -1.0;
+                            tie->dz_m *= -1.0;
+                            //tie->sigma_m;
+                            tie->dr1_m *= -1.0;
+                            tie->dr2_m *= -1.0;
+                            tie->dr3_m *= -1.0;
+                            //tie->rsigma_m;
 						}
 					}
 
@@ -1288,7 +1344,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 
 	/* open and write home file */
 	if ((hfp = fopen(project->home, "w")) != NULL) {
-		fprintf(stderr, "Writing project %s\n", project->name);
+		fprintf(stderr, "Writing project %s (file version 3.09)\n", project->name);
 		right_now = time((time_t *)0);
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
@@ -1302,7 +1358,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 		fprintf(hfp, "##MBNAVADJUST PROJECT\n");
 		fprintf(hfp, "MB-SYSTEM_VERSION\t%s\n", MB_VERSION);
 		fprintf(hfp, "PROGRAM_VERSION\t%s\n", version_id);
-		fprintf(hfp, "FILE_VERSION\t3.08\n");
+		fprintf(hfp, "FILE_VERSION\t3.09\n");
 		fprintf(hfp, "ORIGIN\tGenerated by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 		fprintf(hfp, "NAME\t%s\n", project->name);
 		fprintf(hfp, "PATH\t%s\n", project->path);
@@ -1348,10 +1404,10 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
                             section->snav_lon[k], section->snav_lat[k], section->snav_sensordepth[k],
 					        section->snav_lon_offset[k], section->snav_lat_offset[k], section->snav_z_offset[k]);
 				}
-				fprintf(hfp, "GLOBALTIE %2d %4d %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n", section->global_tie_status,
-				        section->global_tie_snav, section->global_tie_offset_x, section->global_tie_offset_y,
-				        section->global_tie_offset_z_m, section->global_tie_xsigma, section->global_tie_ysigma,
-				        section->global_tie_zsigma);
+				fprintf(hfp, "GLOBALTIE %2d %4d %2d %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n",
+                        section->global_tie_status, section->global_tie_snav, section->global_tie_inversion_status,
+                        section->offset_x, section->offset_y, section->offset_z_m,
+                        section->xsigma, section->ysigma, section->zsigma);
 			}
 		}
 

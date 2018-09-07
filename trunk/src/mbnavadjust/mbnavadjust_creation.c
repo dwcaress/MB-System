@@ -163,6 +163,7 @@ extern void do_view_showgoodcrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showbettercrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showtruecrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showties(Widget, XtPointer, XtPointer);
+extern void do_view_showtiessorted(Widget, XtPointer, XtPointer);
 extern void do_view_showallsurveys(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedsurveys(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedblock(Widget, XtPointer, XtPointer);
@@ -865,6 +866,30 @@ Widget CreatemainWindow(Widget parent) {
 	}
 
 	XtAddCallback(pushButton_showties, XmNactivateCallback, do_view_showties, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_view, (char *)"Show Ties Sorted", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-120-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_showtiessorted = XmCreatePushButton(pulldownMenu_view, (char *)"pushButton_showtiessorted", args, ac);
+		XtManageChild(pushButton_showtiessorted);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_showtiessorted, XmNactivateCallback, do_view_showtiessorted, (XtPointer)0);
 
 	ac = 0;
 	separator13 = XmCreateSeparator(pulldownMenu_view, (char *)"separator13", args, ac);
