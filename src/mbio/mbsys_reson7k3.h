@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k3.h	3/3/2004
- *	$Id: mbsys_reson7k3.h 2308 2017-06-04 19:55:48Z caress $
+ *	$Id$
  *
  *    Copyright (c) 2004-2017 by
  *    David W. Caress (caress@mbari.org)
