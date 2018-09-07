@@ -56,32 +56,33 @@ static char version_id[] = "$Id$";
 #define MOD_MODE_SET_GLOBAL_TIE_XY 3
 #define MOD_MODE_SET_GLOBAL_TIE_Z 4
 #define MOD_MODE_UNSET_GLOBAL_TIE 5
-#define MOD_MODE_ADD_CROSSING 6
-#define MOD_MODE_SET_TIE 7
-#define MOD_MODE_SET_TIE_XYZ 8
-#define MOD_MODE_SET_TIE_XY 9
-#define MOD_MODE_SET_TIE_Z 10
-#define MOD_MODE_UNSET_TIE 11
-#define MOD_MODE_SET_TIES_XYZ_ALL 12
-#define MOD_MODE_SET_TIES_XY_ALL 13
-#define MOD_MODE_SET_TIES_Z_ALL 14
-#define MOD_MODE_SET_TIES_XYZ_FILE 15
-#define MOD_MODE_SET_TIES_XY_FILE 16
-#define MOD_MODE_SET_TIES_Z_FILE 17
-#define MOD_MODE_SET_TIES_XYZ_SURVEY 18
-#define MOD_MODE_SET_TIES_XY_SURVEY 19
-#define MOD_MODE_SET_TIES_Z_SURVEY 20
-#define MOD_MODE_SET_TIES_XYZ_BLOCK 21
-#define MOD_MODE_SET_TIES_XY_BLOCK 22
-#define MOD_MODE_SET_TIES_Z_BLOCK 23
-#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 24
-#define MOD_MODE_SET_TIES_XY_BY_TIME 25
-#define MOD_MODE_SKIP_UNSET_CROSSINGS 26
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 27
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 28
-#define MOD_MODE_INSERT_DISCONTINUITY 29
-#define MOD_MODE_REIMPORT_FILE 30
-#define MOD_MODE_REIMPORT_ALL_FILES 31
+#define MOD_MODE_UNSET_ALL_GLOBAL_TIES 6
+#define MOD_MODE_ADD_CROSSING 7
+#define MOD_MODE_SET_TIE 8
+#define MOD_MODE_SET_TIE_XYZ 9
+#define MOD_MODE_SET_TIE_XY 10
+#define MOD_MODE_SET_TIE_Z 11
+#define MOD_MODE_UNSET_TIE 12
+#define MOD_MODE_SET_TIES_XYZ_ALL 13
+#define MOD_MODE_SET_TIES_XY_ALL 14
+#define MOD_MODE_SET_TIES_Z_ALL 15
+#define MOD_MODE_SET_TIES_XYZ_FILE 16
+#define MOD_MODE_SET_TIES_XY_FILE 17
+#define MOD_MODE_SET_TIES_Z_FILE 18
+#define MOD_MODE_SET_TIES_XYZ_SURVEY 19
+#define MOD_MODE_SET_TIES_XY_SURVEY 20
+#define MOD_MODE_SET_TIES_Z_SURVEY 21
+#define MOD_MODE_SET_TIES_XYZ_BLOCK 22
+#define MOD_MODE_SET_TIES_XY_BLOCK 23
+#define MOD_MODE_SET_TIES_Z_BLOCK 24
+#define MOD_MODE_SET_TIES_ZOFFSET_BLOCK 25
+#define MOD_MODE_SET_TIES_XY_BY_TIME 26
+#define MOD_MODE_SKIP_UNSET_CROSSINGS 27
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 28
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 29
+#define MOD_MODE_INSERT_DISCONTINUITY 30
+#define MOD_MODE_REIMPORT_FILE 31
+#define MOD_MODE_REIMPORT_ALL_FILES 32
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -117,6 +118,7 @@ int main(int argc, char **argv) {
 	                       "\t--set-global-tie-xyonly=file:section[:snav]\n"
 	                       "\t--set-global-tie-zonly=file:section[:snav]\n"
 	                       "\t--unset-global-tie=file:section\n"
+                           "\t--unset-all-global-ties\n"
 	                       "\t--add-crossing=file1:section1/file2:section2\n"
 	                       "\t--set-tie=file1/file2/xoffset/yoffset/zoffset\n"
 	                       "\t--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset\n"
@@ -174,6 +176,7 @@ int main(int argc, char **argv) {
 	                                  {"set-global-tie-xyonly", required_argument, NULL, 0},
 	                                  {"set-global-tie-zonly", required_argument, NULL, 0},
 	                                  {"unset-global-tie", required_argument, NULL, 0},
+	                                  {"unset-all-global-ties", no_argument, NULL, 0},
 	                                  {"add-crossing", required_argument, NULL, 0},
 	                                  {"set-tie", required_argument, NULL, 0},
 	                                  {"set-tie-xyz", required_argument, NULL, 0},
@@ -216,6 +219,7 @@ int main(int argc, char **argv) {
 	int project_output_set = MB_NO;
 	int import_tie_list_set = MB_NO;
 	int export_tie_list_set = MB_NO;
+    int update_datalist = MB_NO;
 	struct mbna_project project_inputbase;
 	struct mbna_project project_inputadd;
 	struct mbna_project project_output;
@@ -322,7 +326,7 @@ int main(int argc, char **argv) {
 				else if (project_inputadd_set == MB_NO) {
 					strcpy(project_inputadd_path, optarg);
 					project_inputadd_set = MB_YES;
-				}
+ 				}
 				else {
 					fprintf(stderr, "Input projects already set:\n\t%s\n\t%s\nProject %s ignored...\n\n", project_inputbase_path,
 					        project_inputadd_path, optarg);
@@ -465,6 +469,15 @@ int main(int argc, char **argv) {
 					else {
 						fprintf(stderr, "Failure to parse --set-global-tie-z=%s\n\tmod command ignored\n\n", optarg);
 					}
+				}
+				else {
+					fprintf(stderr, "Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n", optarg);
+				}
+			}
+			else if (strcmp("unset-all-global-ties", options[option_index].name) == 0) {
+				if (num_mods < NUMBER_MODS_MAX) {
+					mods[num_mods].mode = MOD_MODE_UNSET_ALL_GLOBAL_TIES;
+					num_mods++;
 				}
 				else {
 					fprintf(stderr, "Maximum number of mod commands reached:\n\t--add-crossing=%s command ignored\n\n", optarg);
@@ -1025,11 +1038,13 @@ int main(int argc, char **argv) {
 	else if (project_inputbase_set == MB_YES && project_inputadd_set == MB_NO && project_output_set == MB_YES) {
 		project_output_set = MB_YES;
 		mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_COPY;
+        update_datalist = MB_YES;
 	}
 	else if (project_inputbase_set == MB_YES && project_inputadd_set == MB_YES && project_output_set == MB_NO) {
 		strcpy(project_output_path, project_inputbase_path);
 		project_output_set = MB_YES;
 		mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_ADD;
+        update_datalist = MB_YES;
 	}
 	else if (project_inputbase_set == MB_YES && project_inputadd_set == MB_YES && project_output_set == MB_YES &&
 	         strcmp(project_output_path, project_inputadd_path) == 0) {
@@ -1119,6 +1134,7 @@ int main(int argc, char **argv) {
 		// project_output.grid_status = project_inputbase.grid_status;
 		// project_output.modelplot = project_inputbase.modelplot;
 		// project_output.modelplot_style = project_inputbase.modelplot_style;
+        // project_output.modelplot_uptodate = MB_NO;
 		// project_output.logfp;
 
 		/* allocate and copy the files */
@@ -1394,33 +1410,42 @@ int main(int argc, char **argv) {
 					if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav) {
 						section1->global_tie_status = MBNA_TIE_XYZ;
 						section1->global_tie_snav = mods[imod].snav1;
-						section1->global_tie_offset_x = mods[imod].xoffset * mtodeglon;
-						section1->global_tie_offset_y = mods[imod].yoffset * mtodeglat;
-						section1->global_tie_offset_x_m = mods[imod].xoffset;
-						section1->global_tie_offset_y_m = mods[imod].yoffset;
-						section1->global_tie_offset_z_m = mods[imod].zoffset;
-						section1->global_tie_xsigma = mods[imod].xsigma;
-						section1->global_tie_ysigma = mods[imod].ysigma;
-						section1->global_tie_zsigma = mods[imod].zsigma;
+                        section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
+						section1->offset_x = mods[imod].xoffset * mtodeglon;
+						section1->offset_y = mods[imod].yoffset * mtodeglat;
+						section1->offset_x_m = mods[imod].xoffset;
+						section1->offset_y_m = mods[imod].yoffset;
+						section1->offset_z_m = mods[imod].zoffset;
+						section1->xsigma = mods[imod].xsigma;
+						section1->ysigma = mods[imod].ysigma;
+						section1->zsigma = mods[imod].zsigma;
 					}
 					else {
 						section1->global_tie_status = MBNA_TIE_NONE;
 						section1->global_tie_snav = MBNA_SELECT_NONE;
-						section1->global_tie_offset_x = 0.0;
-						section1->global_tie_offset_y = 0.0;
-						;
-						section1->global_tie_offset_x_m = 0.0;
-						section1->global_tie_offset_y_m = 0.0;
-						;
-						section1->global_tie_offset_z_m = 0.0;
-						;
-						section1->global_tie_xsigma = 0.0;
-						;
-						section1->global_tie_ysigma = 0.0;
-						;
-						section1->global_tie_zsigma = 0.0;
-						;
+                        section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
+						section1->offset_x = 0.0;
+						section1->offset_y = 0.0;
+						section1->offset_x_m = 0.0;
+						section1->offset_y_m = 0.0;
+						section1->offset_z_m = 0.0;
+						section1->xsigma = 0.0;
+						section1->ysigma = 0.0;
+						section1->zsigma = 0.0;
 					}
+                section1->inversion_offset_x = 0.0;
+                section1->inversion_offset_y = 0.0;
+                section1->inversion_offset_x_m = 0.0;
+                section1->inversion_offset_y_m = 0.0;
+                section1->inversion_offset_z_m = 0.0;
+                section1->dx_m = 0.0;
+                section1->dy_m = 0.0;
+                section1->dz_m = 0.0;
+                section1->sigma_m = 0.0;
+                section1->dr1_m = 0.0;
+                section1->dr2_m = 0.0;
+                section1->dr3_m = 0.0;
+                section1->rsigma_m = 0.0;
 				}
 			}
 			break;
@@ -1503,9 +1528,69 @@ int main(int argc, char **argv) {
 				if (mods[imod].section1 >= 0 && mods[imod].section1 < file1->num_sections) {
 					section1 = (struct mbna_section *)&file1->sections[mods[imod].section1];
 					section1->global_tie_status = MBNA_TIE_NONE;
+                    section1->global_tie_snav = MBNA_SELECT_NONE;
+                    section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
+                    section1->offset_x = 0.0;
+                    section1->offset_y = 0.0;
+                    section1->offset_x_m = 0.0;
+                    section1->offset_y_m = 0.0;
+                    section1->offset_z_m = 0.0;
+                    section1->xsigma = 0.0;
+                    section1->ysigma = 0.0;
+                    section1->zsigma = 0.0;
+                    section1->inversion_offset_x = 0.0;
+                    section1->inversion_offset_y = 0.0;
+                    section1->inversion_offset_x_m = 0.0;
+                    section1->inversion_offset_y_m = 0.0;
+                    section1->inversion_offset_z_m = 0.0;
+                    section1->dx_m = 0.0;
+                    section1->dy_m = 0.0;
+                    section1->dz_m = 0.0;
+                    section1->sigma_m = 0.0;
+                    section1->dr1_m = 0.0;
+                    section1->dr2_m = 0.0;
+                    section1->dr3_m = 0.0;
+                    section1->rsigma_m = 0.0;
 				}
 			}
 			break;
+        
+        case MOD_MODE_UNSET_ALL_GLOBAL_TIES:
+            for (ifile = 0; ifile < project_output.num_files; ifile++) {
+                file = &project_output.files[ifile];
+                for (isection = 0; isection < file->num_sections; isection++) {
+                    section1 = &file->sections[isection];
+                    if (section1->global_tie_status != MBNA_TIE_NONE) {
+                        section1->global_tie_status = MBNA_TIE_NONE;
+                        section1->global_tie_snav = 0;
+                        section1->global_tie_status = MBNA_TIE_NONE;
+                        section1->global_tie_snav = MBNA_SELECT_NONE;
+                        section1->global_tie_inversion_status = MBNA_INVERSION_NONE;
+                        section1->offset_x = 0.0;
+                        section1->offset_y = 0.0;
+                        section1->offset_x_m = 0.0;
+                        section1->offset_y_m = 0.0;
+                        section1->offset_z_m = 0.0;
+                        section1->xsigma = 0.0;
+                        section1->ysigma = 0.0;
+                        section1->zsigma = 0.0;
+                        section1->inversion_offset_x = 0.0;
+                        section1->inversion_offset_y = 0.0;
+                        section1->inversion_offset_x_m = 0.0;
+                        section1->inversion_offset_y_m = 0.0;
+                        section1->inversion_offset_z_m = 0.0;
+                        section1->dx_m = 0.0;
+                        section1->dy_m = 0.0;
+                        section1->dz_m = 0.0;
+                        section1->sigma_m = 0.0;
+                        section1->dr1_m = 0.0;
+                        section1->dr2_m = 0.0;
+                        section1->dr3_m = 0.0;
+                        section1->rsigma_m = 0.0;
+                    }
+                }
+            }
+            break;
 
 		case MOD_MODE_ADD_CROSSING:
 			fprintf(stderr, "\nCommand add-crossing=%4.4d:%4.4d/%4.4d:%4.4d\n", mods[imod].file1, mods[imod].section1,
@@ -2396,15 +2481,29 @@ int main(int argc, char **argv) {
 					section = &(file->sections[import_globaltie_section_id]);
 					section->global_tie_status = import_globaltie_status;
 					section->global_tie_snav = import_globaltie_snav;
-					section->global_tie_offset_x_m = import_globaltie_offset_x_m;
-					section->global_tie_offset_y_m = import_globaltie_offset_y_m;
-					section->global_tie_offset_z_m = import_globaltie_offset_z_m;
-					section->global_tie_xsigma = import_globaltie_offset_xsigma;
-					section->global_tie_ysigma = import_globaltie_offset_ysigma;
-					section->global_tie_zsigma = import_globaltie_offset_zsigma;
+                    section->global_tie_inversion_status = MBNA_INVERSION_NONE;
+					section->offset_x_m = import_globaltie_offset_x_m;
+					section->offset_y_m = import_globaltie_offset_y_m;
+					section->offset_z_m = import_globaltie_offset_z_m;
+					section->xsigma = import_globaltie_offset_xsigma;
+					section->ysigma = import_globaltie_offset_ysigma;
+					section->zsigma = import_globaltie_offset_zsigma;
 					mb_coor_scale(verbose, 0.5 * (section->latmin + section->latmax), &mtodeglon, &mtodeglat);
-					section->global_tie_offset_x = section->global_tie_offset_x_m * mtodeglon;
-					section->global_tie_offset_y = section->global_tie_offset_y_m * mtodeglat;
+					section->offset_x = section->offset_x_m * mtodeglon;
+					section->offset_y = section->offset_y_m * mtodeglat;
+                    section->inversion_offset_x = 0.0;
+                    section->inversion_offset_y = 0.0;
+                    section->inversion_offset_x_m = 0.0;
+                    section->inversion_offset_y_m = 0.0;
+                    section->inversion_offset_z_m = 0.0;
+                    section->dx_m = 0.0;
+                    section->dy_m = 0.0;
+                    section->dz_m = 0.0;
+                    section->sigma_m = 0.0;
+                    section->dr1_m = 0.0;
+                    section->dr2_m = 0.0;
+                    section->dr3_m = 0.0;
+                    section->rsigma_m = 0.0;
 				}
 			}
 
@@ -2783,8 +2882,8 @@ int main(int argc, char **argv) {
 				if (section->global_tie_status != MBNA_TIE_NONE) {
 					fprintf(tfp, "GLOBALTIE %s %1d %16.6f %13.8f %13.8f %13.8f %13.8f %13.8f %13.8f\n", file->path,
 					        section->global_tie_status, section->snav_time_d[section->global_tie_snav],
-					        section->global_tie_offset_x_m, section->global_tie_offset_y_m, section->global_tie_offset_z_m,
-					        section->global_tie_xsigma, section->global_tie_ysigma, section->global_tie_zsigma);
+					        section->offset_x_m, section->offset_y_m, section->offset_z_m,
+					        section->xsigma, section->ysigma, section->zsigma);
 				}
 			}
 		}
@@ -2807,25 +2906,27 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 
-		/* update datalist and ancilliary files */
-		sprintf(filename, "%s/%s.dir/datalist.mb-1", project_output.path, project_output.name);
-		if ((tfp = fopen(filename, "w")) != NULL) {
-			for (i = 0; i < project_output.num_files; i++) {
-				file1 = &project_output.files[i];
-				for (j = 0; j < file1->num_sections; j++) {
-					fprintf(tfp, "%s/nvs_%4.4d_%4.4d.mb71 71\n", project_output.datadir, file1->id, j);
-				}
-			}
-			fclose(tfp);
-		}
-		sprintf(filename, "cd %s/%s.dir ; mbdatalist -Idatalist.mb-1 -O -Z -V", project_output.path, project_output.name);
-		shellstatus = system(filename);
-		sprintf(filename, "%s/%s.dir/mbgrid.cmd", project_output.path, project_output.name);
-		if ((tfp = fopen(filename, "w")) != NULL) {
-			fprintf(tfp, "mbgrid -I datalistp.mb-1 \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopo\n\n");
-			fclose(tfp);
-		}
-	}
+        if (update_datalist == MB_YES) {
+            /* update datalist and ancilliary files */
+            sprintf(filename, "%s/%s.dir/datalist.mb-1", project_output.path, project_output.name);
+            if ((tfp = fopen(filename, "w")) != NULL) {
+                for (i = 0; i < project_output.num_files; i++) {
+                    file1 = &project_output.files[i];
+                    for (j = 0; j < file1->num_sections; j++) {
+                        fprintf(tfp, "%s/nvs_%4.4d_%4.4d.mb71 71\n", project_output.datadir, file1->id, j);
+                    }
+                }
+                fclose(tfp);
+            }
+            sprintf(filename, "cd %s/%s.dir ; mbdatalist -Idatalist.mb-1 -O -Z -V", project_output.path, project_output.name);
+            shellstatus = system(filename);
+            sprintf(filename, "%s/%s.dir/mbgrid.cmd", project_output.path, project_output.name);
+            if ((tfp = fopen(filename, "w")) != NULL) {
+                fprintf(tfp, "mbgrid -I datalistp.mb-1 \\\n\t-A2 -F5 -N -C2 \\\n\t-O ProjectTopo\n\n");
+                fclose(tfp);
+            }
+        }
+    }
 
 	/* check memory */
 	if (verbose >= 4)

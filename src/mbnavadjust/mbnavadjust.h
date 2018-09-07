@@ -250,7 +250,7 @@ int mbnavadjust_zerozoffsets(void);
 int mbnavadjust_invertnav(void);
 int mbnavadjust_applynav(void);
 int mbnavadjust_updategrid(void);
-int mbnavadjust_modelplot_plot(void);
+int mbnavadjust_modelplot_plot(const char *sourcefile, int sourceline);
 int mbnavadjust_set_modelplot_graphics(void *modp_xgid, int *modp_borders);
 int mbnavadjust_modelplot_plot_timeseries(void);
 int mbnavadjust_modelplot_plot_perturbation(void);
@@ -263,6 +263,7 @@ int mbnavadjust_modelplot_middlepick(int x, int y);
 int mbnavadjust_modelplot_setzoom(void);
 int mbnavadjust_modelplot_clearblock(void);
 int mbnavadjust_crossing_compare(const void *a, const void *b);
+int mbnavadjust_tie_compare(const void *a, const void *b);
 
 int mbnavadjust_open_visualization(int which_grid);
 int mbnavadjust_dismiss_visualization(void);
