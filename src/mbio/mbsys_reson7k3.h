@@ -1745,8 +1745,8 @@ typedef struct s7kr_installation_struct {
 	u8 software_version[128];          /* Software version info */
 	u16 s7k_version_len;               /* Length of 7k software version info in bytes */
 	u8 s7k_version[128];               /* 7k software version info */
-	u16 protocal_version_len;          /* Length of protocal version info in bytes */
-	u8 protocal_version[128];          /* Protocal version info */
+	u16 protocal_version_len;          /* Length of protocol version info in bytes */
+	u8 protocal_version[128];          /* Protocol version info */
 	f32 transmit_x;                    /* Sonar transmit array X offset (m) */
 	f32 transmit_y;                    /* Sonar transmit array Y offset (m) */
 	f32 transmit_z;                    /* Sonar transmit array Z offset (m) */

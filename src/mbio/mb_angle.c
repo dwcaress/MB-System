@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mb_angle.c includes the "mb_" functions used to translate between
- * the two coordinate systems that are relevent to the calculation
+ * the two coordinate systems that are relevant to the calculation
  * of bathymetry data. The following
  * is a description of these coordinate systems:
  *

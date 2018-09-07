@@ -49,9 +49,9 @@
  * dwc          1-9-98    Added EncodeElacMkIISpecific to support the Elac
  *                        Bottomchart MkII sonar.
  * jsb          09/28/98  Added gsfEncodeHVNavigationError. This change made
- *                        in responce to CRs: GSF-98-001, and GSF-98-002. Also
+ *                        in response to CRs: GSF-98-001, and GSF-98-002. Also
  *                        added support for horizontal error ping array subrecord
- *                        in responce to CR: GSF-98-003. Removed the computation of
+ *                        in response to CR: GSF-98-003. Removed the computation of
  *                        error_sum from gsfEncodeSwathBathymetryPing, now the library
  *                        will write horizontal and vertical depth estimates for each
  *                        ping if the array pointers are non-null.
@@ -60,7 +60,7 @@
  * wkm          8-02-99   Updated EncodeCmpSassSpecific to include lntens (heave) with CMP SASS data.
  * bac          10-24-00  Updated EncodeEM3Specific to include data fields from updated
  *                        EM series runtime parameter datagram.
- * bac          07-18-01  Added support for the Reson 8100 series of sonars.  Also removed the useage
+ * bac          07-18-01  Added support for the Reson 8100 series of sonars.  Also removed the usage
  *                        of C++ reserved words "class" and "operator".
  * bac          10-12-01  Added a new attitude record definition.  The attitude record provides
  *                        a method for logging full time-series attitude measurements in the GSF
@@ -558,7 +558,7 @@ static int EncodeNOSHDBSpecific(unsigned char *sptr, gsfSBSensorSpecific *sdata)
  *
  * Returns :
  *  This function returns the number of bytes encoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_UNRECOGNIZED_SENSOR_ID
@@ -786,7 +786,7 @@ int gsfEncodeSinglebeam(unsigned char *sptr, gsfSingleBeamPing *ping) {
  *
  * Returns :
  *  This function returns the number of bytes encoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_UNRECOGNIZED_SENSOR_ID
@@ -1721,7 +1721,7 @@ static int EncodeScaleFactors(unsigned char *sptr, gsfScaleFactors *sf) {
  *
  * Returns :
  *  This function returns the number of bytes encoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -1794,7 +1794,7 @@ static int EncodeTwoByteArray(unsigned char *sptr, double *array, int num_beams,
  *
  * Returns :
  *  This function returns the number of bytes encoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -1867,7 +1867,7 @@ static int EncodeSignedTwoByteArray(unsigned char *sptr, double *array, int num_
  *
  * Returns :
  *  This function returns the number of bytes encoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -1940,7 +1940,7 @@ static int EncodeFourByteArray(unsigned char *sptr, double *array, int num_beams
  *
  * Returns :
  *  This function returns the number of bytes encoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -2013,7 +2013,7 @@ static int EncodeSignedFourByteArray(unsigned char *sptr, double *array, int num
  *
  * Returns :
  *  This function returns the number of bytes encoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -2085,7 +2085,7 @@ static int EncodeByteArray(unsigned char *sptr, double *array, int num_beams, gs
  *
  * Returns :
  *  This function returns the number of bytes encoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -2153,7 +2153,7 @@ static int EncodeSignedByteArray(unsigned char *sptr, double *array, int num_bea
  *
  * Returns :
  *  This function returns the number of bytes encoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -2921,7 +2921,7 @@ static int EncodeTypeIIISeaBeamSpecific(unsigned char *sptr, gsfSensorSpecific *
  *
  * Function Name : EncodeSeaMapSpecific
  *
- * Description : not implimented yet
+ * Description : not implemented yet
  *
  * Inputs :
  *    sptr = a pointer to an unsigned char buffer to write into
@@ -3634,7 +3634,7 @@ static int EncodeEM3Specific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_
 	 * }
 	 */
 
-	/* The next four byte value specifies the existance of the run-time data strucutre */
+	/* The next four byte value specifies the existence of the run-time data strucutre */
 	ltemp = htonl(run_time_id);
 	memcpy(p, &ltemp, 4);
 	p += 4;

@@ -106,7 +106,7 @@
 **  * The tabbing environment is converted by counting characters and adding
 **    spaces. This might go wrong (outside <PRE>)
 **  * Some pages look beter if man2html works in troff mode, especially pages
-**    with tables. You can deside at compile time which made you want to use.
+**    with tables. You can decide at compile time which made you want to use.
 **
 **    -DNROFF=0     troff mode
 **    -DNROFF=1     nroff mode   (default)

@@ -4256,7 +4256,7 @@ and mbedit edit save files.\n";
 					}
 				}
 				
-				/* save the orginal beamflag states */
+				/* save the orignal beamflag states */
 				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
 					for (i = 0; i < nbath; i++) {
 						beamflagorg[i] = beamflag[i];

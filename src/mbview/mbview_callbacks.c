@@ -3733,9 +3733,9 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					}
 				}
 
-				/* handle vertical exagerate */
+				/* handle vertical exaggerate */
 				else if (data->mouse_mode == MBV_MOUSE_ROTATE) {
-					/* set cursor for exagerate */
+					/* set cursor for exaggerate */
 					XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
 
 					view->exageration_save = data->exageration;
@@ -4165,9 +4165,9 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					mbview_plotlow(instance);
 				}
 
-				/* handle vertical exagerate */
+				/* handle vertical exaggerate */
 				else if (data->mouse_mode == MBV_MOUSE_ROTATE) {
-					/* set cursor for exagerate */
+					/* set cursor for exaggerate */
 					XDefineCursor(view->dpy, view->xid, view->FleurRedCursor);
 
 					/* change vertical exageration of 3D map */
@@ -4500,13 +4500,13 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					view->viewboundscount = MBV_BOUNDSFREQUENCY;
 				}
 
-				/* handle vertical exagerate */
+				/* handle vertical exaggerate */
 				else if (data->mouse_mode == MBV_MOUSE_ROTATE) {
 					/* set flag to reset view bounds */
 					view->viewboundscount = MBV_BOUNDSFREQUENCY;
 				}
 
-				/* handle vertical exagerate */
+				/* handle vertical exaggerate */
 				else if (data->mouse_mode == MBV_MOUSE_VIEWPOINT) {
 					/* set flag to reset view bounds */
 					view->viewboundscount = MBV_BOUNDSFREQUENCY;
@@ -6270,7 +6270,7 @@ void set_mbview_mouse_mode(size_t instance, int mode) {
 		XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_mode_rnavfile, True, False);
 	}
 
-	/* set widget sensitivity and visability */
+	/* set widget sensitivity and visibility */
 	if (data->display_mode == MBV_DISPLAY_2D) {
 		XtVaSetValues(mb3dviewptr->mbview_toggleButton_mode_rotate, XmNsensitive, False, NULL);
 		XtVaSetValues(mb3dviewptr->mbview_toggleButton_mode_viewpoint, XmNsensitive, False, NULL);

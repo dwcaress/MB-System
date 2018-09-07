@@ -77,7 +77,7 @@
  * bac 07-18-01  Added a sensor specific subrecord for the Reson 8100 series of sonars.  Also
  *               made modifications for use with C++ code.  The typedef for each sensor specific
  *               structure has been modfied to have a different name than the element of the SensorSpecific
- *               union.  Also removed the useage of C++ reserved words "class" and "operator".  These
+ *               union.  Also removed the usage of C++ reserved words "class" and "operator".  These
  *               modifications will potentially require some changes to application code.
  * bac 10-12-01  Added a new attitude record definition.  The attitude record provides a method for
  *               logging full time-series attitude measurements in the GSF file, instead of attitude
@@ -116,7 +116,7 @@
  * mab 02-01-09  Updates to support Reson 7125. Added new subrecord IDs and subrecord definitions for Kongsberg
  *                sonar systems where TWTT and angle are populated from raw range and beam angle datagram. Added
  *                new subrecord definition for EM2000.  Bug fixes in gsfOpen and gsfPercent.
- * mab 06-11-09  Moved GSF_MAX_RECORD_SIZE from 256KB to 512KB to accomodate Reson7125 imagery.
+ * mab 06-11-09  Moved GSF_MAX_RECORD_SIZE from 256KB to 512KB to accommodate Reson7125 imagery.
  * jsb 01-14-10  Added new function prototypes to return various status information about the opened GSF file.
  * clb 04-21-11  Changed version from 03.02 to 03.03
  * clb 05-11-11  Changed the value of GSF_NULL_DEPTH_CORRECTOR (STR 19142)
@@ -219,7 +219,7 @@ typedef struct t_gsfDataID {
 	int reserved;          /* up to 9 bits */
 	unsigned int recordID; /* bits 00-11 => data type number */
 	                       /* bits 12-22 => registry number */
-	int record_number;     /* specifies the nth occurance of */
+	int record_number;     /* specifies the nth occurrence of */
 	                       /* record type specified by recordID */
 	                       /* relavent only for direct access */
 	                       /* the record_number counts from 1 */
@@ -680,7 +680,7 @@ typedef struct t_gsfReson7100Specific {
 typedef struct t_gsfSeaBeam2112Specific {
 	int mode;                    /* bit mapped, see macros below */
 	double surface_velocity;     /* meters/second */
-	char ssv_source;             /* (V)elocimiter, (M)anual, (T)emperature,
+	char ssv_source;             /* (V)elocimiter, (M)annual, (T)emperature,
 	                                (E)xternal, or (U)nknown */
 	int ping_gain;               /* dB */
 	int pulse_width;             /* in milliseconds */
@@ -1561,7 +1561,7 @@ typedef struct t_gsfNavigationError {
 
 /* jsb As of GSF v1.07, This new navigation error record replaces gsfNavigationError.
  *  The definition of gsfNavigationError will remain in the specification for several
- *  release of GSF for backwards compatability. (The HV stands for Horizontal and Vertical)
+ *  release of GSF for backwards compatibility. (The HV stands for Horizontal and Vertical)
  */
 typedef struct t_gsfHVNavigationError {
 	struct timespec nav_error_time;
@@ -1930,7 +1930,7 @@ int OPTLK gsfOpen(const char *filename, const int mode, int *handle);
  *     reference for all future file access.
  *
  * Returns :
- *  This funciton returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *     GSF_BAD_ACCESS_MODE
@@ -1970,7 +1970,7 @@ int OPTLK gsfOpenBuffered(const char *filename, const int mode, int *handle, int
  *  buf_size = an integer buffer size in bytes.
  *
  * Returns :
- *  This funciton returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *     GSF_BAD_ACCESS_MODE
@@ -1989,7 +1989,7 @@ int OPTLK gsfClose(const int handle);
  *  handle = the handle of the gsf file to be closed.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_BAD_FILE_HANDLE
@@ -2010,7 +2010,7 @@ int OPTLK gsfSeek(int handle, int option);
  *     written or just read.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_BAD_FILE_HANDLE
@@ -2058,7 +2058,7 @@ int OPTLK gsfRead(int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *
  *
  * Returns :
  *  This function returns the number of bytes read if successful,
- *  or -1 if an error occured.
+ *  or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_BAD_FILE_HANDLE
@@ -2107,7 +2107,7 @@ int OPTLK gsfWrite(int handle, gsfDataID *id, gsfRecords *record);
  *
  * Returns :
  *  This function returns the number of bytes written if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_BAD_FILE_HANDLE
@@ -2143,7 +2143,7 @@ int OPTLK gsfLoadScaleFactor(gsfScaleFactors *sf, unsigned int subrecordID, char
  *  offset = the "DC" offset to scale the data by.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_TOO_MANY_ARRAY_SUBRECORDS
@@ -2165,7 +2165,7 @@ int OPTLK gsfGetScaleFactor(int handle, unsigned int subrecordID, unsigned char 
  *  offset = the address of a double to contain the scaling DC offset.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_TOO_MANY_ARRAY_SUBRECORDS
@@ -2238,7 +2238,7 @@ int OPTLK gsfIndexTime(int, int, int, time_t *, long *);
  *
  * Returns :
  *  This function returns the record number if successful, or -1 if an
- *  error occured.
+ *  error occurred.
  *
  * Error Conditions :
  *    GSF_RECORD_TYPE_NOT_AVAILABLE
@@ -2277,7 +2277,7 @@ int OPTLK gsfGetNumberRecords(int handle, int desiredRecord);
  * Returns :
  *  This function returns the number of records of type desiredRecord
  *  contained in the GSF file designated by handle, or -1 if an error
- *  occured.
+ *  occurred.
  *
  * Error Conditions :
  *  GSF_BAD_FILE_HANDLE
@@ -2327,7 +2327,7 @@ int OPTLK gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int 
  *         parameters are to be written in the "KEYWORK=VALUE" form.
  *     handle = the integer handle to the file set by gsfOpen.
  *     numArrays = the integer value specifying the number of pairs of
- *         arrays which need to have seperate parameters tracked.
+ *         arrays which need to have separate parameters tracked.
  *
  * Returns : This function returns zero if successful, or -1 if an error
  *  occurs.
@@ -2356,7 +2356,7 @@ int OPTLK gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numArrays);
  *         parameters in "KEYWORK=VALUE" form are to be read.
  *     p = a pointer to the gsfMBParams data structure which will be populated.
  *     numArrays = the integer value specifying the number of pairs of
- *         arrays which need to have seperate parameters tracked.
+ *         arrays which need to have separate parameters tracked.
  *
  * Returns : This function returns zero if successful, or -1 if an error
  *  occurs.
@@ -2382,7 +2382,7 @@ int OPTLK gsfGetSwathBathyBeamWidths(const gsfRecords *data, double *fore_aft, d
  *         value of GSF_BEAM_WIDTH_UNKNOWN is used when the beam width is not known.
  *
  * Returns : This function returns zero if successful, or -1 if an error
- *     occured.
+ *     occurred.
  *
  * Error Conditions : unrecognized sonar id or mode.
  */
@@ -2433,7 +2433,7 @@ int OPTLK gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, unsigned in
  *      argument.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_TOO_MANY_ARRAY_SUBRECORDS
@@ -2461,7 +2461,7 @@ int OPTLK gsfGetSwathBathyArrayMinMax(const gsfSwathBathyPing *ping, unsigned in
  *      this array type.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID
@@ -2744,7 +2744,7 @@ int gsfStat(const char *filename, long long *sz);
  *             of the GSF file size from the stat64 system call.
  *
  * Returns :
- *  This funciton returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *     GSF_FOPEN_ERROR

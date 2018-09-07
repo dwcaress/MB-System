@@ -58,7 +58,7 @@
  *      followed by two bytes representing the checksum for
  *      the data bytes.  MB-System does not calculate checksums
  *      and puts 0's in the checksum bytes.
- *   5. The relevent telegram start codes, types, and sizes are:
+ *   5. The relevant telegram start codes, types, and sizes are:
  *         0x0285: Start                                  421 data bytes
  *         0x0286: Stop                                   421 data bytes
  *         0x0287: Parameter                              421 data bytes
@@ -84,7 +84,7 @@
  *      it is necessary to extrapolate the navigation for each ping
  *      at read time from the last navigation fix.  The frequency of
  *      GPS fixes generally assures that this is not a problem, but
- *      we offer no guarentees that this will always be the case.
+ *      we offer no guarantees that this will always be the case.
  *
  */
 

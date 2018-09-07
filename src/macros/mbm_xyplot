@@ -389,7 +389,7 @@ else
 
 # Each file may have any of several optional arguments. Most are quite
 # straightforward, however the column flag (C) warrents some
-# explaination. The column flag allows the user to specify the columns
+# explanation. The column flag allows the user to specify the columns
 # to be plotted by utilizing a simple syntax in which a column is
 # specified by c[N] where N deones the column number. The full syntax
 # is then c#[xcol]_c#[ycol] where the underbar delimits the syntax for
@@ -628,7 +628,7 @@ if (!$bounds_plot)
 #	die "Improper data limits: x: $xmin $xmax  y: $ymin $ymax\n$program_name aborted.\n"
 #	}
 
-# set the relevent page width and height
+# set the relevant page width and height
 &GetPageSize;
 
 # get user constraints on map scale
@@ -1725,7 +1725,7 @@ sub GetPageSize {
 	$space_right =  1.00 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
 
-# set the relevent page width and height
+# set the relevant page width and height
 $width_max_landscape = $page_height_in{$pagesize}
 		- $space_left - $space_right;
 $height_max_landscape = $page_width_in{$pagesize}

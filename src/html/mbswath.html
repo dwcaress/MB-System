@@ -47,7 +47,7 @@ Version 5.0
 or color shaded relief using <B>GMT</B> (Generic Mapping Tools).
 Like <B>mbcontour</B>, <B>mbswath</B>
 is fully compatible with the <B>GMT</B> package version 5, including the use
-of GMT style color pallete (cpt) files to control the color table.
+of GMT style color palette (cpt) files to control the color table.
 A 24-bit true color <I>PostScript</I> file is output using one of
 three methods. Unless individual polygon fills are used (<B>-1</B> option),
 only one call to <B>mbswath</B> can be made for each plot because the
@@ -67,7 +67,7 @@ in the input file lies inside the plot bounds, that input
 file is skipped. This allows users to maintain a single master list
 of data files for use in all plotting without the performance penalty
 of <B>mbswath</B> reading through all the data files, even those
-with no relevent data. We recommend that users maintain a &quot;.inf&quot;
+with no relevant data. We recommend that users maintain a &quot;.inf&quot;
 file for each swath data file used for gridding or plotting. The
 <B>GMT</B> modules <B>mbcontour</B> and <B>mbgrid</B> also use &quot;.inf&quot; files
 in the same fashion.
@@ -508,7 +508,7 @@ If &quot;F&quot; is appended to <I>mode</I>, then <B>mbswath</B> will attempt
 to plot amplitude or sidescan data that have been filtered with <B>mbfilter</B>.
 If the desired filtered data files do not exist, plotting will fail and
 <B>mbswath</B> will exit with an error message. Filtered amplitude
-data are stored in ancilliary files ending with &quot;.ffa&quot;, and filtered
+data are stored in ancillary files ending with &quot;.ffa&quot;, and filtered
 sidescan files end in &quot;.ffs&quot;. Filtering of bathymetry data is not supported,
 and so appending &quot;F&quot; to <I>mode</I> values of 1 or 2 will have no effect.
 Default: <I>mode</I> = 1;

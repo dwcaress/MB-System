@@ -492,7 +492,7 @@ int main(int argc, char **argv) {
 	double rollpitch_offset_roll = 0.0;
 	double rollpitch_offset_pitch = 0.0;
 
-	/* output asynchronous and synchronous time series ancilliary files */
+	/* output asynchronous and synchronous time series ancillary files */
 	char athfile[MB_PATH_MAXLINE];
 	char atsfile[MB_PATH_MAXLINE];
 	char atafile[MB_PATH_MAXLINE];
@@ -1067,7 +1067,7 @@ int main(int argc, char **argv) {
 			        rangeoffset[i]);
 	}
 
-	fprintf(stderr, "Ancilliary data sources:\n");
+	fprintf(stderr, "Ancillary data sources:\n");
 	fprintf(stderr, "\tnav_source:          %d\n", nav_source);
 	fprintf(stderr, "\tattitude_source:     %d\n", attitude_source);
 	fprintf(stderr, "\theading_source:      %d\n", heading_source);

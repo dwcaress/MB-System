@@ -804,7 +804,7 @@ typedef struct s7k_fsdwssheader_struct {
 	unsigned short minute;          /*  50 -  51 : Minute (0 - 59) */
 	unsigned short second;          /*  52 -  53 : Second (0 - 59) */
 	/* -------------------------------------------------------------------- */
-	/* Auxillary sensor information */
+	/* Auxiliary sensor information */
 	/* -------------------------------------------------------------------- */
 	short heading;      /*  54 -  55 : Compass heading (minutes) */
 	short pitch;        /*  56 -  57 : Pitch (minutes) */
@@ -1010,8 +1010,8 @@ typedef struct s7k_bluefin_environmental_struct {
 	                                    integers representing -5V to +5V
 	                                  - initial use is for PMEL eH and optical
 	                                    backscatter sensors */
-	int sensor_time_sec;          /* Ancilliary sensor time (unix seconds) */
-	int sensor_time_nsec;         /* Ancilliary sensor time (nanno seconds) */
+	int sensor_time_sec;          /* Ancillary sensor time (unix seconds) */
+	int sensor_time_nsec;         /* Ancillary sensor time (nanno seconds) */
 	unsigned short sensor1;       /* voltage: 0 = -5.00V, 65535 = +5.00V */
 	unsigned short sensor2;       /* voltage: 0 = -5.00V, 65535 = +5.00V */
 	unsigned short sensor3;       /* voltage: 0 = -5.00V, 65535 = +5.00V */
@@ -1834,8 +1834,8 @@ typedef struct s7kr_installation_struct {
 	char software_version[128];          /* Software version info */
 	unsigned short s7k_version_len;      /* Length of 7k software version info in bytes */
 	char s7k_version[128];               /* 7k software version info */
-	unsigned short protocal_version_len; /* Length of protocal version info in bytes */
-	char protocal_version[128];          /* Protocal version info */
+	unsigned short protocal_version_len; /* Length of protocol version info in bytes */
+	char protocal_version[128];          /* Protocol version info */
 	float transmit_x;                    /* Sonar transmit array X offset (m) */
 	float transmit_y;                    /* Sonar transmit array Y offset (m) */
 	float transmit_z;                    /* Sonar transmit array Z offset (m) */

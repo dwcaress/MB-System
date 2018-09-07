@@ -5657,7 +5657,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 			}
 
 			/*--------------------------------------------------------------*/
-			/* interpolate ancilliary values  */
+			/* interpolate ancillary values  */
 			/*--------------------------------------------------------------*/
 			interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d,
 			                                           &navlon, &jnav, &interp_error);

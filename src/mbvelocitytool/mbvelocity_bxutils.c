@@ -1100,7 +1100,7 @@ static Boolean CvtStringToXmStringTable ARGLIST((d, args, num_args, fromVal, toV
 			 * since we don't have a widget to send to the XtConvertAndStore
 			 * function. Side effects are that we can never get these
 			 * compound strings cached and that no destructor function is
-			 * called when the strings leave existance, but we nuke 'em
+			 * called when the strings leave existence, but we nuke 'em
 			 * in the XmStringTable destuctor.
 			 */
 			CvtStringToXmString(d, args, num_args, &fVal, &tVal, NULL);
@@ -1383,15 +1383,15 @@ void BX_SET_BACKGROUND_COLOR ARGLIST((w, args, argcnt, bg_color)) ARG(Widget, w)
 	 *
 	 */
 	if ((bottomShadowLoc == UNSET) || (topShadowLoc == UNSET) || (selectLoc == UNSET) || (fgLoc == UNSET)) {
-		Arg larg[1];
+		Arg large[1];
 		Colormap cmap;
 		Pixel topShadow;
 		Pixel bottomShadow;
 		Pixel select;
 		Pixel fgColor;
 
-		XtSetArg(larg[0], XmNcolormap, &cmap);
-		XtGetValues(w, larg, 1);
+		XtSetArg(large[0], XmNcolormap, &cmap);
+		XtGetValues(w, large, 1);
 		XmGetColors(XtScreen(w), cmap, bg_color, &fgColor, &topShadow, &bottomShadow, &select);
 
 		if (topShadowLoc == UNSET) {
@@ -2516,7 +2516,7 @@ static int CreateXImage ARGLIST((display, visual, depth, width, height, image_re
  * The functions below are written from X11R5 MIT's code (XImUtil.c)
  *
  * The idea is to have faster functions than the standard XPutPixel function
- * to build the image data. Indeed we can speed up things by supressing tests
+ * to build the image data. Indeed we can speed up things by suppressing tests
  * performed for each pixel. We do exactly the same tests but at the image
  * level. Assuming that we use only ZPixmap images.
  */
@@ -3022,7 +3022,7 @@ static int xpmGetC ARGLIST((mdata)) GRA(bxxpmData *, mdata) {
 			mdata->Comment[0] = c;
 
 			/*
-			 * skip the string begining comment
+			 * skip the string beginning comment
 			 */
 			do {
 				c = getc(mdata->stream.file);
@@ -3030,7 +3030,7 @@ static int xpmGetC ARGLIST((mdata)) GRA(bxxpmData *, mdata) {
 			} while (c == mdata->Bcmt[n] && mdata->Bcmt[n] != '\0' && c != EOF);
 
 			if (mdata->Bcmt[n] != '\0') {
-				/* this wasn't the begining of a comment */
+				/* this wasn't the beginning of a comment */
 				/* put characters back in the order that we got them */
 				for (a = n; a > 0; a--)
 					xpmUngetC(mdata->Comment[a], mdata);

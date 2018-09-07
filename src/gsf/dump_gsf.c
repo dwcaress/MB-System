@@ -58,8 +58,8 @@ static void printMBPing(int rec_number);
  *    argc = an integer argument counter
  *    argv = a pointer to an array of character string command line arguments
  *
- * Returns : This function (program) returns a zero if succesful, or a non
- *  zero value if unsuccesful to the invokation environment.
+ * Returns : This function (program) returns a zero if successful, or a non
+ *  zero value if unsuccessful to the invokation environment.
  *
  * Error Conditions :
  *
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 
 	/* check the command line arguments */
 	if (argc < 3) {
-		fprintf(stderr, "Useage: %s [-s] -f <gsf filename> [-pt] [-t mm/dd/yy hh:mm:ss]\n", argv[0]);
+		fprintf(stderr, "Usage: %s [-s] -f <gsf filename> [-pt] [-t mm/dd/yy hh:mm:ss]\n", argv[0]);
 		fprintf(stderr, "-s: short output a page at a time\n");
 		fprintf(stderr, "-f: for specifying the input file\n");
 		fprintf(stderr, "-pt: short output showing only ping times, all pings printed to stdout\n");
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	/* Reset the file pointer to the begining of the file */
+	/* Reset the file pointer to the beginning of the file */
 	if (gsfSeek(gsfHandle, GSF_REWIND)) {
 		gsfPrintError(stderr);
 		exit(1);

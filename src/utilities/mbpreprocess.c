@@ -929,7 +929,7 @@ int main(int argc, char **argv) {
 			}
 
 			/*-------------------------------------------------------
-			 * Define time domain filtering of ancilliary data such as
+			 * Define time domain filtering of ancillary data such as
 			 * nav, sensordepth, heading, attitude, and altitude */
 
 			/* filter */
@@ -1104,7 +1104,7 @@ int main(int argc, char **argv) {
 	if (time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE && time_latency_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
 		time_latency_apply = MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
 
-	/* if no affected data have been specified apply filtering to all ancilliary data */
+	/* if no affected data have been specified apply filtering to all ancillary data */
 	if (filter_length > 0.0 && filter_apply == MBPREPROCESS_TIME_LATENCY_APPLY_NONE)
 		filter_apply = MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
 
@@ -1365,7 +1365,7 @@ int main(int argc, char **argv) {
 	}
 
 	/*-------------------------------------------------------------------*/
-	/* load ancilliary data from external files if requested */
+	/* load ancillary data from external files if requested */
 
 	/* start by loading time latency model if required */
 	if (time_latency_mode == MB_SENSOR_TIME_LATENCY_MODEL) {
@@ -1388,7 +1388,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "%d time_latency records loaded from file %s\n", time_latency_num, time_latency_file);
 	}
 
-	/* import specified ancilliary data */
+	/* import specified ancillary data */
 	if (nav_mode == MBPREPROCESS_MERGE_FILE) {
 		status = mb_loadnavdata(verbose, nav_file, nav_file_format, lonflip, &n_nav, &n_nav_alloc, &nav_time_d, &nav_navlon, &nav_navlat,
 		               &nav_speed, &error);
@@ -1506,7 +1506,7 @@ int main(int argc, char **argv) {
 
 	/*-------------------------------------------------------------------*/
 
-	/* Do first pass through the data collecting ancilliary data from the desired source records */
+	/* Do first pass through the data collecting ancillary data from the desired source records */
 
 	/* get format if required */
 	if (format == 0)
@@ -1538,7 +1538,7 @@ int main(int argc, char **argv) {
 
 	/* loop over all files to be read */
 	while (read_data == MB_YES) {
-		/* if origin of the ancilliary data has not been specified, figure out
+		/* if origin of the ancillary data has not been specified, figure out
 		   defaults based on the first file's format */
 		if (nav_mode == MBPREPROCESS_MERGE_OFF) {
 			if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
@@ -2050,11 +2050,11 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* deal with ancilliary data time jump corrections */
+	/* deal with ancillary data time jump corrections */
 	if  (kluge_timejumps_ancilliary == MB_YES) {
 		if (verbose > 0) {
 			fprintf(stderr, "\n-----------------------------------------------\n");
-			fprintf(stderr, "Applying time jump corrections to ancilliary data:\n");
+			fprintf(stderr, "Applying time jump corrections to ancillary data:\n");
 		}
 		
 		/* position */
@@ -2631,49 +2631,49 @@ int main(int argc, char **argv) {
 			sprintf(afile, "%s.ata", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 				if (verbose > 0)
-					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+					fprintf(stderr, "Deleting old ancillary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.ath", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 				if (verbose > 0)
-					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+					fprintf(stderr, "Deleting old ancillary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.ats", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 				if (verbose > 0)
-					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+					fprintf(stderr, "Deleting old ancillary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.sta", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 				if (verbose > 0)
-					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+					fprintf(stderr, "Deleting old ancillary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.baa", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 				if (verbose > 0)
-					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+					fprintf(stderr, "Deleting old ancillary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.bah", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 				if (verbose > 0)
-					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+					fprintf(stderr, "Deleting old ancillary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.bas", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 				if (verbose > 0)
-					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+					fprintf(stderr, "Deleting old ancillary file %s\n", afile);
 				remove(afile);
 			}
 			sprintf(afile, "%s.bsa", ofile);
 			if ((fstat = stat(afile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 				if (verbose > 0)
-					fprintf(stderr, "Deleting old ancilliary file %s\n", afile);
+					fprintf(stderr, "Deleting old ancillary file %s\n", afile);
 				remove(afile);
 			}
 	
@@ -2853,7 +2853,7 @@ int main(int argc, char **argv) {
 						timestamp_changed = MB_YES;
 					}
 	
-					/* use available asynchronous ancilliary data to replace
+					/* use available asynchronous ancillary data to replace
 						nav sensordepth heading attitude values for record timestamp  */
 					if (n_nav > 0) {
 						interp_status = mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, n_nav, time_d,
@@ -3162,7 +3162,7 @@ int main(int argc, char **argv) {
 			/* close the synchronous attitude file */
 			fclose(afp);
 	
-			/* if success then generate ancilliary files */
+			/* if success then generate ancillary files */
 			if (status == MB_SUCCESS) {
 	
 				/* generate inf fnv and fbt files */

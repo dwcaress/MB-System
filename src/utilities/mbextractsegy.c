@@ -1356,7 +1356,7 @@ int main(int argc, char **argv) {
 			read_data = MB_NO;
 		}
 
-		/* close output file if conditions warrent */
+		/* close output file if conditions warrant */
 		if (read_data == MB_NO || (output_file_set == MB_NO && nroutepoint < 2 && ntimepoint < 2)) {
 			/* close current output file */
 			if (fp != NULL) {

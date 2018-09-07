@@ -152,7 +152,7 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-/* 	function mb_get_date_string returns a string formated as:
+/* 	function mb_get_date_string returns a string formatted as:
  *          yyyy/mm/dd:hh:mm:ss.ssssss
  * 	from the number of seconds after 1/1/70 00:00:0 */
 int mb_get_date_string(int verbose, double time_d, char *string) {

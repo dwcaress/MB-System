@@ -92,10 +92,10 @@ typedef struct t_gsfFileTable {
 	long long file_size;       /* The file's size when gsfOpen is called */
 	long long previous_record; /* File offset to previous record */
 	int buf_size;              /* Standard library buffer size */
-	int bufferedBytes;         /* How many bytes we've transfered */
+	int bufferedBytes;         /* How many bytes we've transferred */
 	int occupied;              /* Is this table slot being used */
 	int update_flag;           /* Is the file open for update */
-	int direct_access;         /* Is the file open for direct acess */
+	int direct_access;         /* Is the file open for direct access */
 	int read_write_flag;       /* State variable for last I/O operation (1=read, 2=write) */
 	int scales_read;           /* Set when scale factors are read in with ping record */
 	int access_mode;           /* How was the file opened */

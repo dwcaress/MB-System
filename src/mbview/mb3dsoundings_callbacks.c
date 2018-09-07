@@ -1463,7 +1463,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 					/* set button3down flag */
 					mb3dsoundings.button3down = MB_YES;
 
-					/* set cursor for exagerate */
+					/* set cursor for exaggerate */
 					XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
 					              mb3dsoundings.FleurBlackCursor);
 
@@ -1475,7 +1475,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 					/* set button3down flag */
 					mb3dsoundings.button3down = MB_YES;
 
-					/* set cursor for exagerate */
+					/* set cursor for exaggerate */
 					XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
 					              mb3dsoundings.FleurBlackCursor);
 
@@ -1572,7 +1572,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 			else if (mb3dsoundings.button3down == MB_YES) {
 				/* rotate mode */
 				if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) {
-					/* set cursor for exagerate */
+					/* set cursor for exaggerate */
 					XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
 					              mb3dsoundings.FleurRedCursor);
 
@@ -2821,7 +2821,7 @@ soundingdata->num_soundings); */
 		glEnd();
 	}
 
-	/* save the screen positions of the soundings to facillitate picking */
+	/* save the screen positions of the soundings to facilitate picking */
 	for (i = 0; i < soundingdata->num_soundings; i++) {
 		sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 		if (mb_beam_ok(sounding->beamflag)) {

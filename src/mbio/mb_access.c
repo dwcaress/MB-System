@@ -1382,7 +1382,7 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double
  * contains the angle from acrosstrack (phi below). This
  * coordinate system is distinct from the roll-pitch coordinates
  * appropriate for correcting roll and pitch values. The following
- * is a description of these relevent coordinate systems:
+ * is a description of these relevant coordinate systems:
  *
  * Notes on Coordinate Systems used in MB-System
  *

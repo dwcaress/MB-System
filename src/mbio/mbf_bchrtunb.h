@@ -33,7 +33,7 @@
  *      followed by two bytes representing the checksum for
  *      the data bytes.  MB-System does not calculate checksums
  *      and puts 0's in the checksum bytes.
- *   5. The relevent telegram start codes, types, and sizes are:
+ *   5. The relevant telegram start codes, types, and sizes are:
  *         0x0250: Comment (Defined only for MB-System)   200 data bytes
  *         0x0251: Position                                36 data bytes
  *         0x0252: Parameter                               56 data bytes

@@ -350,7 +350,7 @@ fully functional. These are:
   (GMT) libraries and programs for much of its graphics. GMT also includes a
   detailed global coastline database. GMT has been developed by Professor Paul
   Wessel of SOEST (School of Ocean and Earth Science and Technology at the
-  Univeristy of Hawaii) and Dr. Walter H. F. Smith of NOAA. The GMT source code
+  University of Hawaii) and Dr. Walter H. F. Smith of NOAA. The GMT source code
   is available from the GMT web page.
 - NetCDF version 3.5.1 or later: Both GMT and MB-System require the NCAR netCDF
   library.
@@ -423,11 +423,11 @@ pages.
 MB-SYSTEM DISCUSSION LIST
 -------------------------------------------------------------------------------
 
-We maintain an MB-System discussion email list to facillitate communication
+We maintain an MB-System discussion email list to facilitate communication
 among MB-System developers and users. We encourage users with questions and/or
 problems to use this list rather than emailing the developers directly. One
 must subscribe to the list in order to post messages, but the message archive is
-publically viewable and searchable over a web interface. The maximum message
+publicly viewable and searchable over a web interface. The maximum message
 size in this list is 100K.
 
 The web interface to the list is at:
@@ -452,6 +452,6 @@ BUGS:
 
 There are undoubtably bugs in this software. Although we make no promises about
 how rapidly problems will be fixed, we strongly encourage users to notify us of
-bugs (and fixes!!). We will continue to support this software for the forseeable
+bugs (and fixes!!). We will continue to support this software for the foreseeable
 future.
 -------------------------------------------------------------------------------

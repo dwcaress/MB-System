@@ -72,7 +72,7 @@
  *
  * Mbsvpselect reads the .inf file of each swath file referenced in a recursive
  * datalist structure to determine the location and collection time of the
- * relevant data. The ancilliary *.inf, *.fbt, and *.fnv files must be created
+ * relevant data. The ancillary *.inf, *.fbt, and *.fnv files must be created
  * first. The water sound speed models (called SVPs by convention as an acronym
  * for Sound Velocity Profiles) to be used must include one of three supported
  * file headers specifying the time and location of the model.
@@ -96,9 +96,9 @@
  *
  * 1) Set up a survey (or surveys) for MB-System processing in the usual way,
  *    including creating a datalist file referencing the swath data of interest
- *    and generating the ancilliary *.inf, *.fbt, and *.fnv files for each of
+ *    and generating the ancillary *.inf, *.fbt, and *.fnv files for each of
  *    the swath files.
- * 2) Create an svplist file (analagous to a datalist, but referencing the
+ * 2) Create an svplist file (analogous to a datalist, but referencing the
  *    relevant SVP files). Each SVP file is expected to be a text file with
  *    depth-sound speed pairs on each line (depth in meters, sound speed in
  *    meters/second) excepting for a header line at the start of each discrete

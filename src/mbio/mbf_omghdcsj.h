@@ -394,13 +394,13 @@ struct mbf_omghdcsj_profile_struct {
 	unsigned int watercol_offset_2nd;
 	unsigned int watercol_size_2nd;
 
-	/* New fields to accomodate un-TVG-ing kongsberg data */
+	/* New fields to accommodate un-TVG-ing kongsberg data */
 	unsigned short range_to_normal_incidence;
 
 	/* units of 1,000,000,000 of the Optech laser microsecond(?) time stamp */
 	unsigned int laser_timestampRef;
 
-	/* Added to accomodate EM710 (and EM302/EM122) transmit sector info */
+	/* Added to accommodate EM710 (and EM302/EM122) transmit sector info */
 
 	unsigned int tx_sector_offset;
 	unsigned short num_tx_sectors;

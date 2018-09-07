@@ -600,7 +600,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 			fprintf(stderr, "dbg2       %4d %4d  %f %f %f\n", i, data->pingid[i], data->x[i], data->y[i], data->z[i]);
 	}
 
-	/* if no depth variation dont bother */
+	/* if no depth variation don't bother */
 	if ((bathmax - bathmin) < EPS)
 		return (status);
 
@@ -1169,7 +1169,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
 		}
 	}
 
-	/* if no depth variation dont bother */
+	/* if no depth variation don't bother */
 	if ((bathmax - bathmin) < EPS)
 		return (status);
 
@@ -1565,7 +1565,7 @@ int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd, int k, 
 	else if (*closed && kbeg == k && ibeg == i && jbeg == j)
 		return (0);
 
-	/* if no edge is found and contour is closed but doesnt close then */
+	/* if no edge is found and contour is closed but doesn't close then */
 	/* reverse order of points and start over */
 	else if (*closed) {
 		for (ii = 0; ii < data->nsave / 2; ii++) {

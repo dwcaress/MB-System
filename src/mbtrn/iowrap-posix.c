@@ -636,7 +636,7 @@ int iow_accept(iow_socket_t *s)
 
         s->fd = accept(s->fd, (struct sockaddr *)&client_addr, &addr_size);
         if (s->fd != -1) {
-            MMINFO(IOW,"server recieved connection from client on socket [%d]\n",s->fd);
+            MMINFO(IOW,"server received connection from client on socket [%d]\n",s->fd);
             retval = s->fd;
         }else{
             // accept failed
@@ -1847,7 +1847,7 @@ void *iow_test_svr(void *arg)
                         
                         newfd = accept(s->fd, (struct sockaddr *)&client_addr, &addr_size);
                         if (newfd != -1) {
-                            MMINFO(IOW,"server recieved connection from client on socket [%d]\n",newfd);
+                            MMINFO(IOW,"server received connection from client on socket [%d]\n",newfd);
                             FD_SET(newfd,&read_fds);
                             if (newfd>fdmax) {
                                 fdmax=newfd;

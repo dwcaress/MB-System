@@ -747,7 +747,7 @@ int mbnavadjust_file_open(char *projectname) {
 			fprintf(stderr, "\nOpening MBnavadjust project:\n\tname:%s\n\tpath:%s\n\thome:%s\n\tdatadir:%s\n",
                     project.name, project.path, project.home, project.datadir);
 
-			/* cant open unless file or directory already exist */
+			/* can't open unless file or directory already exist */
 			if (stat(project.home, &statbuf) != 0) {
 				strcpy(error1, "Unable to open project!");
 				strcpy(error2, "Home file does not exist.");
@@ -10664,7 +10664,7 @@ int mbnavadjust_updategrid() {
 		fprintf(stderr, "Executing:\n%s\n\n", command);
 		shellstatus = system(command);
 
-		/* run mbdatalist to create datalistp.mb-1, update ancilliary files,
+		/* run mbdatalist to create datalistp.mb-1, update ancillary files,
 		    and clear any processing lock files */
 		sprintf(message, " > Running mbdatalist in project\n");
 		do_info_add(message, MB_NO);
@@ -15058,7 +15058,7 @@ int mbnavadjust_open_visualization(int which_grid) {
 			}
 
 			/* else if grid geographic and more northerly than 84 deg N then use
-			        North Univeral Polar Stereographic Projection */
+			        North Universal Polar Stereographic Projection */
 			else if (mbv_primary_ymin > 84.0) {
 				mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
 				projectionid = 32661;
@@ -15066,7 +15066,7 @@ int mbnavadjust_open_visualization(int which_grid) {
 			}
 
 			/* else if grid geographic and more southerly than 80 deg S then use
-			        South Univeral Polar Stereographic Projection */
+			        South Universal Polar Stereographic Projection */
 			else if (mbv_primary_ymax < 80.0) {
 				mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
 				projectionid = 32761;

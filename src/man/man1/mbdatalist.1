@@ -3,7 +3,7 @@
 \fBmbdatalist\fP \- parses recursive datalist structures, performing one or more
 tasks on the swath files referenced in the datalist(s). The default action is to
 print out out the complete list of data files, formats, and file weights; other
-possible tasks include creating ancilliary (fbt, fnv, and inf) files as part of setting up an
+possible tasks include creating ancillary (fbt, fnv, and inf) files as part of setting up an
 MB-System processing environment, removing orphaned lock files, and creating
 convenience datalists that referenced processed swath files.
 
@@ -190,7 +190,7 @@ copied to the current directory and creates a datalist
 (names "datalist.mb-1") that references the copied swath files.
 The copy function will not be done if the \fI--make-ancilliary\fP, \fI--update-ancilliary\fP, or \fI--problem\fP options are specified.
 If the \fI--processed\fP, \fI--bounds\fP, and \fI--raw\fP options are specified these
-functions will modify which swath files are copied. Any ancilliary files
+functions will modify which swath files are copied. Any ancillary files
 (e.g. *inf metadata files) will also be copied, but processed data
 files derived from the target copied files will not be copied.
 .TP
@@ -480,5 +480,5 @@ yields:
 .SH BUGS
 No true bugs here, only distantly related arthropods... Yum.
 Seriously, it would be better if the copy function preserved
-the modification times of the copied swath files and ancilliary
+the modification times of the copied swath files and ancillary
 files. Copying of processed files should also be an option.

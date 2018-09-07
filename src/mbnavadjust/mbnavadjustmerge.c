@@ -2907,7 +2907,7 @@ int main(int argc, char **argv) {
 		}
 
         if (update_datalist == MB_YES) {
-            /* update datalist and ancilliary files */
+            /* update datalist and ancillary files */
             sprintf(filename, "%s/%s.dir/datalist.mb-1", project_output.path, project_output.name);
             if ((tfp = fopen(filename, "w")) != NULL) {
                 for (i = 0; i < project_output.num_files; i++) {

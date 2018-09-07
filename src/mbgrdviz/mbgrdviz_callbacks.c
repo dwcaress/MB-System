@@ -1872,7 +1872,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
 			}
 
 			/* else if grid geographic and more northerly than 84 deg N then use
-			        North Univeral Polar Stereographic Projection */
+			        North Universal Polar Stereographic Projection */
 			else if (mbv_primary_ymin > 84.0) {
 				mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
 				projectionid = 32661;
@@ -1880,7 +1880,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
 			}
 
 			/* else if grid geographic and more southerly than 80 deg S then use
-			        South Univeral Polar Stereographic Projection */
+			        South Universal Polar Stereographic Projection */
 			else if (mbv_primary_ymax < 80.0) {
 				mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
 				projectionid = 32761;
