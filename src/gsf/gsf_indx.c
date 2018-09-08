@@ -233,7 +233,7 @@ void gsf_register_progress_callback(GSF_PROGRESS_CALLBACK progressCB) { gsf_prog
  *     handle.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions : ??????????
  *
@@ -458,7 +458,7 @@ int gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft) {
  *     handle.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *
@@ -1012,7 +1012,7 @@ static int gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *
  *     handle.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *
@@ -1850,7 +1850,7 @@ static void close_temp_file(int type, FILE *fp) {
  *  handle = gsf file handle assigned by gsfOpen or gsfOpenBuffered
  *
  * Returns :
- *  This function returns zero if successfull, or -1
+ *  This function returns zero if successful, or -1
  *
  * Error Conditions :
  *

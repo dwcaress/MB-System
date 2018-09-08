@@ -1,7 +1,7 @@
 .TH mbm_multidatalist 1 "3 June 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_multidatalist\fP \- Macro to use mbdatalist with the \fB\-O\fP option
-to generate standard  ancilliary files, using parallel processes.
+to generate standard  ancillary files, using parallel processes.
 
 .SH VERSION
 Version 5.0
@@ -12,7 +12,7 @@ Version 5.0
 
 .SH DESCRIPTION
 
-\fBmbm_multidatalist\fP is a macro used to efficiently generate ancilliary files
+\fBmbm_multidatalist\fP is a macro used to efficiently generate ancillary files
 for the swath data files referenced in the input datalist file. This is
 accomplished by executing \fBmbdatalist\fP with the \fB\-O\fP or \fB\-N\fP option
 for each swath file.
@@ -112,7 +112,7 @@ One can generate a datalist called datalistr.mb-1 referencing these
 three swath files using a text editor or by using \fBawk\fP:
  	ls \-1 *.mb88 | awk '{print $1" 88"}' > datalist.mb-1
 .br
-In order to generate the usual ancilliary files (*.inf, *.fbt, and *.fnv files)
+In order to generate the usual ancillary files (*.inf, *.fbt, and *.fnv files)
 use the \fBmbm_multidatalist\fP macro:
  	mbm_multidatalist \-I datalist.mb-1 \-X2 \-V
 .br

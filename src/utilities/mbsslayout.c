@@ -960,7 +960,7 @@ int main(int argc, char **argv) {
 			}
 
 			/*-------------------------------------------------------
-			 * Define time domain filtering of ancilliary data such as
+			 * Define time domain filtering of ancillary data such as
 			 * nav, sensordepth, heading, attitude, and altitude */
 
 			/* filter */
@@ -1345,7 +1345,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	/*-------------------------------------------------------------------*/
-	/* load ancilliary data from external files if requested */
+	/* load ancillary data from external files if requested */
 
 	/* start by loading time latency model if required */
 	if (time_latency_mode == MB_SENSOR_TIME_LATENCY_MODEL) {
@@ -1356,7 +1356,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "%d time_latency records loaded from file %s\n", time_latency_num, time_latency_file);
 	}
 
-	/* import specified ancilliary data */
+	/* import specified ancillary data */
 	if (nav_mode == MBSSLAYOUT_MERGE_FILE) {
 		mb_loadnavdata(verbose, nav_file, nav_file_format, lonflip, &n_nav, &n_nav_alloc, &nav_time_d, &nav_navlon, &nav_navlat,
 		               &nav_speed, &error);
@@ -1574,7 +1574,7 @@ int main(int argc, char **argv) {
 
 	/*-------------------------------------------------------------------*/
 
-	/* Do first pass through the data collecting ancilliary data from the desired source records */
+	/* Do first pass through the data collecting ancillary data from the desired source records */
 
 	/* get format if required */
 	if (format == 0)

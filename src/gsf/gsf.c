@@ -48,7 +48,7 @@
  *                numOpenFiles with *handle as argument to gsfRead and gsfWrite
  *                within gsfOpen and gsfOpenBuffered.  This repairs problems which
  *                can occur when a single application is accessing multiple files.
- * jsb  04/18/97  Added gsf version dependancy on approach to padding records out
+ * jsb  04/18/97  Added gsf version dependency on approach to padding records out
  *                to four byte boundary. This is required in order to support the
  *                update access modes for versions prior to 1.03.  Replaced use of
  *                fgetpos, fsetpos with ftell, fseek.  This was done so that we can
@@ -71,10 +71,10 @@
  * jsb  04/05/00  Updated so that an application can work with up to GSF_MAX_OPEN_FILES at
  *                a time.  Prior to these updates an application could only open (GSF_MAX_OPEN_FILES-1)
  *                files at a time. Also updated gsfOpen and gsfOpenBuffered to return the correct
- *                error code if a failure occures reading the file header.
+ *                error code if a failure occurs reading the file header.
  * bac 07-18-01   Made modifications for use with C++ code.  The typedef for each sensor
  *                specific structure has been modified to have a different name than the
- *                element of the SensorSpecific union.  Also removed the useage of C++
+ *                element of the SensorSpecific union.  Also removed the usage of C++
  *                reserved words "class" and "operator".  These modifications will potentially
  *                require some changes to application code. Added support for the Reson 8100 series of sonars.
  * bac 10-12-01   Added a new attitude record definition.  The attitude record provides a method for
@@ -231,7 +231,7 @@ static int gsfNumberParams(char *param);
  *             of the GSF file size from the stat64 system call.
  *
  * Returns :
- *  This funciton returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *     GSF_FOPEN_ERROR
@@ -301,7 +301,7 @@ int gsfStat(const char *filename, long long *sz) {
  *     reference for all future file access.
  *
  * Returns :
- *  This funciton returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *     GSF_BAD_ACCESS_MODE
@@ -544,7 +544,7 @@ int gsfOpen(const char *filename, const int mode, int *handle) {
 		gsfFileTable[fileTableIndex].direct_access = 0;
 	}
 
-	/* Save the file acess mode */
+	/* Save the file access mode */
 	switch (mode) {
 	case GSF_CREATE:
 		gsfFileTable[fileTableIndex].access_mode = GSF_CREATE;
@@ -612,7 +612,7 @@ int gsfOpen(const char *filename, const int mode, int *handle) {
  *  buf_size = an integer buffer size in bytes.
  *
  * Returns :
- *  This funciton returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *     GSF_BAD_ACCESS_MODE
@@ -855,7 +855,7 @@ int gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_s
 		gsfFileTable[fileTableIndex].direct_access = 0;
 	}
 
-	/* Save the file acess mode */
+	/* Save the file access mode */
 	switch (mode) {
 	case GSF_CREATE:
 		gsfFileTable[fileTableIndex].access_mode = GSF_CREATE;
@@ -902,7 +902,7 @@ int gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_s
  *  handle = the handle of the gsf file to be closed.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_BAD_FILE_HANDLE
@@ -973,7 +973,7 @@ int gsfClose(const int handle) {
  *     written or just read.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_BAD_FILE_HANDLE
@@ -1080,7 +1080,7 @@ int gsfSeek(int handle, int option) {
  *
  * Returns :
  *  This function returns the number of bytes read if successful,
- *  or -1 if an error occured.
+ *  or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_BAD_FILE_HANDLE
@@ -1144,7 +1144,7 @@ int gsfRead(int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *rptr, 
  * Description : gsfUnpackStream is a static function (not available to
  *   application programs) which is used by gsfRead to read and decode
  *   gsf records. It performs the bulk of the processing required to read
- *   a gsf record.  This processing exists as a function seperate from
+ *   a gsf record.  This processing exists as a function separate from
  *   gsfRead since it is required both by gsfRead and by gsfSeekRecord.
  *   gsfUnpackStream is used by gsfSeekRecord to read a ping record with
  *   scale factors, which is required to support direct access.
@@ -1162,7 +1162,7 @@ int gsfRead(int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *rptr, 
  *
  * Returns :
  *  This function returns the number of bytes read if successful,
- *  or -1 if an error occured.
+ *  or -1 if an error occurred.
  *
  * Returns :
  *
@@ -1491,7 +1491,7 @@ static int gsfUnpackStream(int handle, int desiredRecord, gsfDataID *dataID, gsf
  * Function Name : gsfSeekRecord
  *
  * Description : This function moves the current gsf file position to the
- *    begining of the nth record of a specific type.  The record number and
+ *    beginning of the nth record of a specific type.  The record number and
  *    type of interest are specified by id.record_number and id.recordID.
  *    The byte offset into the file for the record of interest is retreaved
  *    from the index file created by a previous call to gsfOpen with one of
@@ -1505,7 +1505,7 @@ static int gsfUnpackStream(int handle, int desiredRecord, gsfDataID *dataID, gsf
  *       the record of interest.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *  GSF_BAD_FILE_HANDLE
@@ -1678,7 +1678,7 @@ static int gsfSeekRecord(int handle, gsfDataID *id) {
  *
  * Returns :
  *  This function returns the number of bytes written if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_BAD_FILE_HANDLE
@@ -1963,7 +1963,7 @@ int gsfWrite(int handle, gsfDataID *id, gsfRecords *rptr) {
  *  offset = the "DC" offset to scale the data by.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_TOO_MANY_ARRAY_SUBRECORDS
@@ -2522,7 +2522,7 @@ const char *gsfStringError(void) {
 	/* jsb 10/11/98; These macro names are too long to be unique, when compiled under HP-UX 10.20
 	 *  This needs to be scheduled for resolution in a future release.
 	case (GSF_HEADER_RECORD_ENCODE_FAILED):
-		ptr = "GSF Error encoding header recrod";
+		ptr = "GSF Error encoding header record";
 		break;
 
 	case GSF_MB_PING_RECORD_ENCODE_FAILED:
@@ -2659,7 +2659,7 @@ const char *gsfStringError(void) {
  *
  * Returns :
  *  This function returns the record number if successful, or -1 if an
- *  error occured.
+ *  error occurred.
  *
  * Error Conditions :
  *    GSF_RECORD_TYPE_NOT_AVAILABLE
@@ -2790,7 +2790,7 @@ int gsfPercent(int handle) {
 		return (-1);
 	}
 
-	/* Retreive the current file position */
+	/* Retrieve the current file position */
 	rc = ftell(gsfFileTable[handle - 1].fp);
 	if (rc == -1) {
 		gsfError = GSF_FILE_TELL_ERROR;
@@ -2821,7 +2821,7 @@ int gsfPercent(int handle) {
  * Returns :
  *  This function returns the number of records of type desiredRecord
  *  contained in the GSF file designated by handle, or -1 if an error
- *  occured.
+ *  occurred.
  *
  * Error Conditions :
  *  GSF_BAD_FILE_HANDLE
@@ -6199,7 +6199,7 @@ int gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArr
  *         parameters in "KEYWORK=VALUE" form are to be read.
  *     p = a pointer to the gsfMBParams data structure which will be populated.
  *     numArrays = the integer value specifying the number of pairs of
- *         arrays which need to have seperate parameters tracked.
+ *         arrays which need to have separate parameters tracked.
  *
  * Returns : This function returns zero if successful, or -1 if an error
  *  occurs.
@@ -6974,7 +6974,7 @@ static int gsfNumberParams(char *param) {
  *         be loaded with the sonar's athwartship beam width in degrees.
  *
  * Returns : This function returns zero if successful, or -1 if an error
- *     occured.
+ *     occurred.
  *
  * Error Conditions : unrecognized sonar id or mode.
  *
@@ -7326,7 +7326,7 @@ int gsfIsStarboardPing(const gsfRecords *data) {
  *      (a value of 0.1 would indicate decimeter precision for depth)
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_TOO_MANY_ARRAY_SUBRECORDS
@@ -7489,7 +7489,7 @@ int gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, unsigned int subr
  *      this array type.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID

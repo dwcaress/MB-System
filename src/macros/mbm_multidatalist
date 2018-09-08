@@ -18,7 +18,7 @@
 #   mbm_multidatalist
 #
 # Purpose:
-#   Perl shellscript to generate standard ancilliary files using
+#   Perl shellscript to generate standard ancillary files using
 #   parallel mbdatalist -O processes
 #
 # Usage:
@@ -52,7 +52,7 @@ if ($help)
 	{
 	print "\n$program_name:\n";
 	print "\nVersion: mbm_multidatalist.pl 19XX 2011-07-18 15:40:00Z ferreira\n";
-	print "\nMacro to use mbdatalist with the -O option to generate standard ancilliary files, using parallel processes\n";
+	print "\nMacro to use mbdatalist with the -O option to generate standard ancillary files, using parallel processes\n";
 	print "\n";
 	print "\nBasic Usage: \n\n";
 	print "\t$program_name -Idatalist -Xnprocesses [-N -H -V]\n\n";

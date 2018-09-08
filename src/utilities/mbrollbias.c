@@ -870,7 +870,7 @@ int main(int argc, char **argv) {
 					}
 					fprintf(outfp, "Roll bias:   %f (%f degrees)\n", roll_bias, atan(roll_bias) / DTR);
 					fprintf(outfp, "Roll bias is positive to starboard, negative to port.\n");
-					fprintf(outfp, "A postive roll bias means the vertical reference used by \n    the swath system is biased to "
+					fprintf(outfp, "A positive roll bias means the vertical reference used by \n    the swath system is biased to "
 					               "starboard, \n    giving rise to shallow bathymetry to port and \n    deep bathymetry to "
 					               "starboard.\n");
 				}
@@ -984,7 +984,7 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 
 		for (j = 0; j < n; j++) {
 			/*find last unused row and set its pointer*/
-			/*  this row contians the apex of the triangle*/
+			/*  this row contains the apex of the triangle*/
 			if (line[j] == 0) {
 				l1 = j; /*apex of triangle*/
 				isub[n - 1] = j;

@@ -142,7 +142,7 @@ applied for destination pixels holding more than one sample. After the averaging
 calculated, empty pixels surrounded by valid data can be filled by interpolation.
 
 The maximum number of pixels in the output swath sidescan is 4001. By default,
-\fBmbsslayout\fP varies the pixel size between pings in order to accomodate the
+\fBmbsslayout\fP varies the pixel size between pings in order to accommodate the
 full sidescan swath width within 4001 pixels. The calculation of the swath width W is:
    W = 2.2 * sqrt(R * R - A * A)
 .br
@@ -169,8 +169,8 @@ the bottom picks from the port and starboard time series sidescan channels.
 
 Navigation, attitude, altitude, and water sound speed values will by default, if available,
 derive from values contained in the time-based sidescan files. If necessary or
-desired, the ancilliary values can be merged from separate files. Time latency
-corrections can be made to the ancilliary data time series if needed.
+desired, the ancillary values can be merged from separate files. Time latency
+corrections can be made to the ancillary data time series if needed.
 
 Once the sidescan data have been laid out onto the seafloor and output to format
 71 swath files, they can be further
@@ -225,7 +225,7 @@ from the input filename via use of the \fBMB-System\fP suffix convention
 .br
 This option specifies an \fBMB-System\fP platform file to be read and used to
 define the positional and angular offsets between sensors on the source survey
-platform. Often the embedded navigation and attitude (and other ancilliary) data
+platform. Often the embedded navigation and attitude (and other ancillary) data
 are already referenced to the relevant sidescan sonar; in this case no platform
 model is required during sidescan layout. However, if the available navigation
 and attitude data are referenced to another sensor or location on the survey
@@ -276,7 +276,7 @@ using a range threshold specified using the \fB\-\-line-range-threshold\fP optio
 ..TP
 .B \-\-line-range-threshold\fP=\fIvalue\fP
 .br
-Specifies the range theshold used to define when survey navigation reaches a
+Specifies the range threshold used to define when survey navigation reaches a
 survey line waypoint. The range (distance) of the survey navigation to the waypoint
 should decrease as the waypoint is approached. The waypoint is considered to be
 reached when the range stops decreasing and starts to increase, provided the range

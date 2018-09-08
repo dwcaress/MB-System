@@ -46,14 +46,14 @@
  * dwc          1/9/98    Added DecodeElacMkIISpecific to support the Elac
  *                        Bottomchart MkII sonar.
  * jsb          09/28/98  Added gsfDecodeHVNavigationError. This addresses CRs:
- *                        98-001 and 98-002. In responce to NAVO CR: 98-003, added
+ *                        98-001 and 98-002. In response to NAVO CR: 98-003, added
  *                        support for horizontal_error ping array subrecord.
  * jsb          12/29/98  Added support for Simrad em3000 series sonar systems.
  * wkm          3-30-99   Added DecodeCmpSassSpecific to deal with Compressed SASS data.
  * wkm          8-02-99   Updated DecodeCmpSassSpecific to include lntens (heave) with Compressed SASS data.
  * bac          10-24-00  Updated DecodeEM3Specific to include data fields from updated
  *                        EM series runtime parameter datagram.
- * bac          07-18-01  Added support for the Reson 8100 series of sonars.  Also removed the useage
+ * bac          07-18-01  Added support for the Reson 8100 series of sonars.  Also removed the usage
  *                        of C++ reserved words "class" and "operator".
  * bac          10-12-01  Added a new attitude record definition.  The attitude record provides
  *                        a method for logging full time-series attitude measurements in the GSF
@@ -216,7 +216,7 @@ static int DecodeR2SonicImagerySpecific(gsfSensorImagery *sdata, unsigned char *
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    none
@@ -243,7 +243,7 @@ int gsfDecodeHeader(gsfHeader *header, unsigned char *sptr) {
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    none
@@ -514,7 +514,7 @@ static int DecodeNOSHDBSpecific(gsfSBSensorSpecific *sdata, unsigned char *sptr)
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_UNRECOGNIZED_SENSOR_ID
@@ -693,7 +693,7 @@ int gsfDecodeSinglebeam(gsfSingleBeamPing *ping, unsigned char *sptr, GSF_FILE_T
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *   GSF_UNRECOGNIZED_SUBRECORD_ID
@@ -1648,7 +1648,7 @@ int gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, G
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_TOO_MANY_ARRAY_SUBRECORDS
@@ -1746,7 +1746,7 @@ static int DecodeScaleFactors(gsfScaleFactors *sf, unsigned char *sptr) {
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -1841,7 +1841,7 @@ static int DecodeTwoByteArray(double **array, unsigned char *sptr, int num_beams
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -1935,7 +1935,7 @@ static int DecodeSignedTwoByteArray(double **array, char *sptr, int num_beams, g
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -2030,7 +2030,7 @@ static int DecodeFourByteArray(double **array, unsigned char *sptr, int num_beam
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -2124,7 +2124,7 @@ static int DecodeSignedFourByteArray(double **array, char *sptr, int num_beams, 
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -2219,7 +2219,7 @@ static int DecodeByteArray(double **array, unsigned char *sptr, int num_beams, g
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -2311,7 +2311,7 @@ static int DecodeFromByteToUnsignedShortArray(unsigned short **array, unsigned c
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
@@ -2394,7 +2394,7 @@ static int DecodeSignedByteArray(double **array, char *sptr, int num_beams, gsfS
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_INVALID_NUM_BEAMS
@@ -2470,7 +2470,7 @@ static int DecodeBeamFlagsArray(unsigned char **array, unsigned char *sptr, int 
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_INVALID_NUM_BEAMS
@@ -3028,7 +3028,7 @@ static int DecodeSASSSpecific(gsfSensorSpecific *sdata, unsigned char *sptr) {
  *
  * Function Name : DecodeTypeIIISeaBeamSpecific
  *
- * Description : not implimented yet
+ * Description : not implemented yet
  *
  * Inputs :
  *    sdata = a pointer to the union of sensor specific data to be loaded
@@ -3083,7 +3083,7 @@ static int DecodeTypeIIISeaBeamSpecific(gsfSensorSpecific *sdata, unsigned char 
  *
  * Function Name : DecodeSeaMapSpecific
  *
- * Description : not implimented yet
+ * Description : not implemented yet
  *
  * Inputs :
  *    sdata = a pointer to the union of sensor specific data to be loaded
@@ -3638,7 +3638,7 @@ static int DecodeEM3Specific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_
 	sdata->gsfEM3Specific.offset_multiplier = (signed int)*p;
 	p += 1;
 
-	/* The next four byte value specifies the existance of the run-time data strucutre */
+	/* The next four byte value specifies the existence of the run-time data strucutre */
 	memcpy(&ltemp, p, 4);
 	run_time_id = ntohl(ltemp);
 	p += 4;
@@ -6667,7 +6667,7 @@ static int DecodeBRBIntensity(gsfBRBIntensity **idata, unsigned char *sptr, int 
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_MEMORY_ALLOCATION_FAILED
@@ -6800,7 +6800,7 @@ int gsfDecodeSoundVelocityProfile(gsfSVP *svp, GSF_FILE_TABLE *ft, unsigned char
  *   ft = a pointer to the GSF_FILE_TABLE entry for the data file being decoded
  *   sptr = a pointer to the unsigned char buffer to read from
  *
- * Returns : This function returns the number of bytes decoded if succesful,
+ * Returns : This function returns the number of bytes decoded if successful,
  *  or -1 on error.
  *
  * Error Conditions :
@@ -6969,7 +6969,7 @@ int gsfDecodeSensorParameters(gsfSensorParameters *param, GSF_FILE_TABLE *ft, un
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_MEMORY_ALLOCATION_FAILED
@@ -7040,7 +7040,7 @@ int gsfDecodeComment(gsfComment *comment, GSF_FILE_TABLE *ft, unsigned char *spt
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_MEMORY_ALLOCATION_FAILED
@@ -7350,7 +7350,7 @@ static void LocalAddTimes(struct timespec *base_time, double delta_time, struct 
  *
  * Returns :
  *  This function returns the number of bytes decoded if successful, or
- *  -1 if an error occured.
+ *  -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_MEMORY_ALLOCATION_FAILED

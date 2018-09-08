@@ -1917,7 +1917,7 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 		}
 
 		/*--------------------------------------------------------------*/
-		/* interpolate ancilliary values from arrays provided by mbpreprocess  */
+		/* interpolate ancillary values from arrays provided by mbpreprocess  */
 		/*--------------------------------------------------------------*/
 
 		/* get time */

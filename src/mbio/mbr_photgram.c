@@ -64,7 +64,7 @@
  *              Data record identifier              4U      (0x44445047 = "DDPG" = 1145327687)
  *              Time stamp (MB-System time_d)       8F      Decimal seconds since 1970/1/1/ 00:00:00
  *              Longitude                           8F      Decimal degrees
- *              Lattitude                           8F      Decimal degrees
+ *              Latitude                           8F      Decimal degrees
  *              Sensor depth                        8F      Meters
  *              Heading                             4F      Decimal degrees
  *              Roll                                4F      Decimal degrees
@@ -93,7 +93,7 @@
  *              Data record identifier              4U      (0x4444494E = "DDIN" = 1145325902)
  *              Time stamp (MB-System time_d)       8F      Decimal seconds since 1970/1/1/ 00:00:00
  *              Longitude                           8F      Decimal degrees
- *              Lattitude                           8F      Decimal degrees
+ *              Latitude                           8F      Decimal degrees
  *              Sensor depth                        8F      Meters
  *              Heading                             4F      Decimal degrees
  *              Roll                                4F      Decimal degrees

@@ -620,7 +620,7 @@ control points are specified by file, section, and nav point numbers separated
 by ":". The fifth through seventh columns are the longitude, latitude and vertical
 offsets (in meters) set interactively by the user. These represent the distance the second
 navigation control point must be moved relative to the first in order to make
-the bathymetry in the two swaths match. The tenth through twelth columns show the
+the bathymetry in the two swaths match. The tenth through twelfth columns show the
 magnitude of the three axes of the uncertainly ellipsoid associated with each tie.
 The uncertainly ellipsoid is estimated as a 3x3 tensor and used to weight the tie
 offsets in the navigation adjustment inversion. Here the major and second axes are
@@ -1561,7 +1561,7 @@ are imported.
 
 The size of the matrix problem will vary with the number of navigation
 control points, tie points, fixed points, and time gaps. However, the addition
-of the speed minimization constraints guarentees that the
+of the speed minimization constraints guarantees that the
 number of constraints will always be larger than the number of unknowns, and
 so we will always be solving an overdetermined least squares problem.
 Each of the above equations contribute one row to the matrix problem, and each

@@ -608,7 +608,7 @@ int main(int argc, char **argv) {
 				status = mb_ctd(verbose, mbio_ptr, store_ptr, &kind, &nctd, ctd_time_d, ctd_conductivity, ctd_temperature,
 				                ctd_depth, ctd_salinity, ctd_soundspeed, &error);
 
-				/* extract ancilliary sensor data */
+				/* extract ancillary sensor data */
 				status = mb_ancilliarysensor(verbose, mbio_ptr, store_ptr, &kind, &nsensor, sensor_time_d, sensor1, sensor2,
 				                             sensor3, sensor4, sensor5, sensor6, sensor7, sensor8, &error);
 

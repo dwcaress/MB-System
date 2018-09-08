@@ -116,7 +116,7 @@ sub usage {
       --white:      Create image with white background instead of black
       --zmax        Clip grid at this maximum elevation - adjusts the
       <maxclip>:    color lookup table.
-      --zmin        Clip grid at this minumum elevation - adjusts the
+      --zmin        Clip grid at this minimum elevation - adjusts the
       <minclip>:    color lookup table.
 
     Optional make_geovrml(1) parameters:

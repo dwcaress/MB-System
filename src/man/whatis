@@ -46,7 +46,7 @@ mbm_grid(1)              - Create an executable shellscript which will generate 
 mbm_histplot(1)          - Create an executable shellscript which will generate a GMT histogram plot of a dataset
 mbm_makedatalist(1)      - Macro to generate a datalist of the swath files in a specified directory
 mbm_multicopy(1)         - Apply mbcopy to all files referenced through a datalist using parallel processes. As with mbm_copy, the MB-System file suffix convention is used to name the output files
-mbm_multidatalist(1)     - Macro to use mbdatalist with the -O option to generate standard  ancilliary files, using parallel processes
+mbm_multidatalist(1)     - Macro to use mbdatalist with the -O option to generate standard  ancillary files, using parallel processes
 mbm_multiprocess(1)      - Macro to run mbprocess on the swath files referenced by a datalist using parallel processes
 mbm_plot(1)              - Create an executable shellscript which will generate a GMT plot of swath sonar swath data
 mbm_route2mission(1)     - Macro to convert an mbgrdviz route file into an MBARI AUV mission script

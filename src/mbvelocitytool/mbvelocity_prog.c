@@ -1715,7 +1715,7 @@ int mbvt_action_mouse_up(int x, int y) {
 /*--------------------------------------------------------------------*/
 /* This function is continuously called as long as the left mouse is  */
 /*   is depressed. It moves the selected point with elastic lines     */
-/*   untill the button is released.                                   */
+/*   until the button is released.                                   */
 /* Called by:                                                         */
 /*                  action_canvas_event                               */
 /* Functions called:                                                  */
@@ -2258,7 +2258,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		error = MB_ERROR_NO_ERROR;
 	}
 
-	/* allocate resicual arrays to accomodate greatest number of beams */
+	/* allocate resicual arrays to accommodate greatest number of beams */
 	if (status == MB_SUCCESS) {
 		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&depth, &error);
 		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&acrosstrack, &error);

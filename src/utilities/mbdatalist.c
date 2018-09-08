@@ -197,14 +197,14 @@ int main(int argc, char **argv) {
 				flag++;
 			}
 
-			/* make ancilliary files */
+			/* make ancillary files */
 			else if (strcmp("make-ancilliary", options[option_index].name) == 0) {
 				force_update = MB_YES;
 				make_inf = MB_YES;
 				flag++;
 			}
 
-			/* update ancilliary files */
+			/* update ancillary files */
 			else if (strcmp("update-ancilliary", options[option_index].name) == 0) {
 				make_inf = MB_YES;
 				flag++;
@@ -420,7 +420,7 @@ int main(int argc, char **argv) {
 		if (verbose > 0)
 			fprintf(output, "Convenience datalist file %s created...\n", file);
 
-		/* exit unless building ancilliary files has also been requested */
+		/* exit unless building ancillary files has also been requested */
 		if (make_inf == MB_NO)
 			exit(error);
 	}

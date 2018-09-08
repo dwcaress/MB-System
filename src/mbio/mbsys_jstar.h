@@ -82,7 +82,7 @@
 struct mbsys_jstar_message_struct {
 	/* Message Header */
 	unsigned short start_marker; /* bytes 0-1,    Marker for the start of header (0x1601) */
-	mb_u_char version;           /* byte  2,      Version of protocal used */
+	mb_u_char version;           /* byte  2,      Version of protocol used */
 	mb_u_char session;           /* byte  3,      Session identifier */
 	unsigned short type;         /* bytes 4-5,    Message type (80 - sonar trace data ) */
 	mb_u_char command;           /* bytes 6,      Command type */
@@ -847,7 +847,7 @@ struct mbsys_jstar_ssold_struct {
 	unsigned short minute;          /*  50 -  51 : Minute (0 - 59) */
 	unsigned short second;          /*  52 -  53 : Second (0 - 59) */
 	/* -------------------------------------------------------------------- */
-	/* Auxillary sensor information */
+	/* Auxiliary sensor information */
 	/* -------------------------------------------------------------------- */
 	short heading;      /*  54 -  55 : Compass heading (minutes) */
 	short pitch;        /*  56 -  57 : Pitch (minutes) */

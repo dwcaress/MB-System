@@ -325,7 +325,7 @@ void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int
  *                         to zero on initial call.  nsig is automatically
  *                         incremented by this routine and must not be
  *                         redefined on subsequent calls by calling program.
- *    x(1..nc)  -----  - inital guess for the eigenvector.
+ *    x(1..nc)  -----  - initial guess for the eigenvector.
  *    dx(1...nc) ----  - temporary storage array for x(.).
  *    sigma(1..nsmx)-  - array for holding the chebyshev origin shifts.
  *                         each call to lseig performs ncyc+1 iterations.
@@ -358,7 +358,7 @@ void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int
  *        the relative size of the component of the largest eigenvector in
  *        the initial iteration.  from this, an upper-bound is calculated
  *        for the largest eigenvalue, sup.  sup will always be larger than
- *        smax and reflects the uncertainty due to an anomolous bad choice
+ *        smax and reflects the uncertainty due to an anomalous bad choice
  *        for the starting vector.
  *-------------------------
  * sample calling sequence
@@ -1418,7 +1418,7 @@ goto_800:
 		        " %s       rnorm  = %11.5e     arnorm = %11.5e\n",
 		        exit, istop, itn, exit, anorm, acond, exit, bnorm, xnorm, exit, rnorm, arnorm);
 		fprintf(nout,
-		        " %s       max dx = %7.1e occured at itn %-9d\n"
+		        " %s       max dx = %7.1e occurred at itn %-9d\n"
 		        " %s              = %7.1e*xnorm\n",
 		        exit, dxmax, maxdx, exit, dxmax / (xnorm + 1.0e-20));
 		fprintf(nout, " %s       %s\n", exit, msg[istop]);

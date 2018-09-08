@@ -18,7 +18,7 @@ Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index
 <H2>NAME</H2>
 
 <B>mbm_multidatalist</B> - Macro to use mbdatalist with the <B>-O</B> option
-to generate standard  ancilliary files, using parallel processes.
+to generate standard  ancillary files, using parallel processes.
 <P>
 <A NAME="lbAC">&nbsp;</A>
 <H2>VERSION</H2>
@@ -35,7 +35,7 @@ Version 5.0
 <H2>DESCRIPTION</H2>
 
 <P>
-<B>mbm_multidatalist</B> is a macro used to efficiently generate ancilliary files
+<B>mbm_multidatalist</B> is a macro used to efficiently generate ancillary files
 for the swath data files referenced in the input datalist file. This is
 accomplished by executing <B>mbdatalist</B> with the <B>-O</B> or <B>-N</B> option
 for each swath file.
@@ -166,7 +166,7 @@ three swath files using a text editor or by using <B>awk</B>:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ls&nbsp;-1&nbsp;*.mb88&nbsp;|&nbsp;awk&nbsp;'{print&nbsp;$1&quot;&nbsp;88&quot;}'&nbsp;&gt;&nbsp;datalist.mb-1<BR>
 <BR>
 
-In order to generate the usual ancilliary files (*.inf, *.fbt, and *.fnv files)
+In order to generate the usual ancillary files (*.inf, *.fbt, and *.fnv files)
 use the <B>mbm_multidatalist</B> macro:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_multidatalist&nbsp;-I&nbsp;datalist.mb-1&nbsp;-X2&nbsp;-V<BR>
 <BR>

@@ -111,7 +111,7 @@
  *      it is necessary to extrapolate the navigation for each ping
  *      at read time from the last navigation fix.  The frequency of
  *      GPS fixes generally assures that this is not a problem, but
- *      we offer no guarentees that this will always be the case.
+ *      we offer no guarantees that this will always be the case.
  *      In this format the navigation fix datagrams include copies of
  *      the ASCII data records (typically NMEA 0183) input into the
  *      sonar by the navigation system.

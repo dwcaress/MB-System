@@ -112,7 +112,7 @@
  *      it is necessary to extrapolate the navigation for each ping
  *      at read time from the last navigation fix.  The frequency of
  *      GPS fixes generally assures that this is not a problem, but
- *      we offer no guarentees that this will always be the case.
+ *      we offer no guarantees that this will always be the case.
  *      In this format the navigation fix datagrams include copies of
  *      the ASCII data records (typically NMEA 0183) input into the
  *      sonar by the navigation system.
@@ -1101,7 +1101,7 @@ struct mbsys_simrad3_struct {
 	int par_vse;    /* Attitude velocity sensor 1 ethernet port
 	                 *      0 = Not in use
 	                 *      1 = Use the existing ethernet port used
-	                 *          for communciation to topside
+	                 *          for communication to topside
 	                 *      2 = Use ethernet 2 (if available). Network address
 	                 *          and mask are set up by VSI and VSM */
 	int par_vtu;    /* Attitude velocity sensor 2 UDP port address (UDP6)
@@ -1109,7 +1109,7 @@ struct mbsys_simrad3_struct {
 	int par_vte;    /* Attitude velocity sensor 2 ethernet port
 	                 *      0 = Not in use
 	                 *      1 = Use the existing ethernet port used
-	                 *          for communciation to topside
+	                 *          for communication to topside
 	                 *      2 = Use ethernet 2 (if available). Network address
 	                 *          and mask are set up by VSI and VSM */
 	int par_aro;    /* Active roll/pitch sensor input port

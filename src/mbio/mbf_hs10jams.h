@@ -126,7 +126,7 @@
  *      44.    4    Gate width (R/L) [1-4]
  *      45.    4    Gate width (F/B) [1-4]
  *      46.    4    Selection of beam pattern [1-3]
- *      47.    4    Interferance removal
+ *      47.    4    Interference removal
  *                    0:OFF, 1:ON
  *      48.    4    KP shift [1-32]
  *      49.    4    Sonar mode [0]

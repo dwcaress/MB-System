@@ -90,7 +90,7 @@ The basic steps for building MB-System using the configure script are:
         % make
         % make install
 
-The configure script is intended to discern the enviroment, locate prerequisite
+The configure script is intended to discern the environment, locate prerequisite
 packages, and construct the makefiles with a minimum of user intervention. In
 practice, users generally need to set at least some options when using the
 configure script in order to successfully build, install, and run MB-System.

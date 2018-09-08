@@ -24,7 +24,7 @@
  *practical
  * way to handle all of the various ping modes and transducer configurations.
  *
- * 2. Strip rejected samples from pings. In some aquisition configurations,
+ * 2. Strip rejected samples from pings. In some acquisition configurations,
  * the BathySwath records thousands of samples per ping, rejects them all,
  * and then re-saves hundreds more "processed" samples which have been subject
  * to filtering, statistical aggredation, and other desirable data reduction
@@ -38,7 +38,7 @@
  *
  * 3. Copy raw amplitude to the processed amplitude slot. SXP files store
  * both a raw and processed amplitude value for each sample in the ping.
- * MB Sytem works only with the processed amplitude slot. This option will
+ * MB System works only with the processed amplitude slot. This option will
  * reset the processed amplitude slot back to the original raw value stored
  * in the file.
  *

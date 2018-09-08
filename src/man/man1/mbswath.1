@@ -24,7 +24,7 @@ Version 5.0
 or color shaded relief using \fBGMT\fP (Generic Mapping Tools).
 Like \fBmbcontour\fP, \fBmbswath\fP
 is fully compatible with the \fBGMT\fP package version 5, including the use
-of GMT style color pallete (cpt) files to control the color table.
+of GMT style color palette (cpt) files to control the color table.
 A 24-bit true color \fIPostScript\fP file is output using one of
 three methods. Unless individual polygon fills are used (\fB\-1\fP option),
 only one call to \fBmbswath\fP can be made for each plot because the
@@ -44,7 +44,7 @@ in the input file lies inside the plot bounds, that input
 file is skipped. This allows users to maintain a single master list
 of data files for use in all plotting without the performance penalty
 of \fBmbswath\fP reading through all the data files, even those
-with no relevent data. We recommend that users maintain a ".inf"
+with no relevant data. We recommend that users maintain a ".inf"
 file for each swath data file used for gridding or plotting. The
 \fBGMT\fP modules \fBmbcontour\fP and \fBmbgrid\fP also use ".inf" files
 in the same fashion.
@@ -393,7 +393,7 @@ If "F" is appended to \fImode\fP, then \fBmbswath\fP will attempt
 to plot amplitude or sidescan data that have been filtered with \fBmbfilter\fP.
 If the desired filtered data files do not exist, plotting will fail and
 \fBmbswath\fP will exit with an error message. Filtered amplitude
-data are stored in ancilliary files ending with ".ffa", and filtered
+data are stored in ancillary files ending with ".ffa", and filtered
 sidescan files end in ".ffs". Filtering of bathymetry data is not supported,
 and so appending "F" to \fImode\fP values of 1 or 2 will have no effect.
 Default: \fImode\fP = 1;

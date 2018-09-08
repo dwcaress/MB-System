@@ -2584,7 +2584,7 @@ fprintf(stderr, "\n");
      * to a correct value at each even minute. Therefore look for large time offsets
      * immediately after the minute mark, and treat the post shift timestamp as correct.
      * Interpolate between the post-minute timestamps to correct all the other timestamps.
-     * Note that large postive clock drifts lead to two timestamps at the minute mark,
+     * Note that large positive clock drifts lead to two timestamps at the minute mark,
      * one incorrect and the second correct, while negative clock drifts lead to a
      * gap in time prior to the minute mark. Also, some datasets have little, if any,
      * clock drift even though the problem exists.

@@ -77,7 +77,7 @@
  *  11. A survey record may or may not include a RAWSONAR record and a WCD_NAVI record.
  *  12. The UNH/CCOM data samples contain adjacent GENBATHY and CORBATHY records for each ping.
  *      The ENL-logged data have separate groups of GENBATHY records and CORBATHY records,
- *      with each CORBATHY record occuring 10 to 30 records after the corresponding
+ *      with each CORBATHY record occurring 10 to 30 records after the corresponding
  *      GENBATHY record. Consequently, parsing these data would require buffering the GENBATHY
  *      records to match them with the right CORBATHY record. The current I/O module is
  *      not implemented with GENBATHY buffering, and will not work with the ENL data sample.
@@ -129,7 +129,7 @@ struct mbsys_wassp_genbathy_struct {
 	/* Supported Products: - WMB-3250 */
 	/* Uncorrected Bathymetry
 	 * All the bottom detection points will be supplied as range and angle values.
-	 * The length of the output message is variable, dependant on the number of beam data.
+	 * The length of the output message is variable, dependent on the number of beam data.
 	 * In addition to the Flags the sample number will be set to zero when detection is invalid. */
 	/* unsigned int sync; */      /* 0x77F9345A */
 	/* unsigned int size; */      /* Size in bytes of this record from start of sync pattern to end of checksum */

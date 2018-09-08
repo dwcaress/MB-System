@@ -305,7 +305,7 @@ int main(int argc, char **argv) {
 	double depthsensoroffy = 0.0;
 	double depthsensoroffz = 0.0;
 
-	/* output asynchronous and synchronous time series ancilliary files */
+	/* output asynchronous and synchronous time series ancillary files */
 	char athfile[MB_PATH_MAXLINE];
 	char atsfile[MB_PATH_MAXLINE];
 	char atafile[MB_PATH_MAXLINE];
@@ -2306,7 +2306,7 @@ int main(int argc, char **argv) {
 						                                         ndat_heading, time_d, &heading, &jheading, &error);
 					}
 					else {
-						/* if from embedded ancilliary data apply installation parameters */
+						/* if from embedded ancillary data apply installation parameters */
 						mb_hedint_interp(verbose, imbio_ptr, time_d, &heading, &error);
 					}
 					if (heading < 0.0)
@@ -2323,7 +2323,7 @@ int main(int argc, char **argv) {
 							                                          time_d, &navlat, &jnav, &error);
 					}
 					else {
-						/* if from embedded ancilliary data apply installation parameters */
+						/* if from embedded ancillary data apply installation parameters */
 						mb_navint_interp(verbose, imbio_ptr, time_d, heading, 0.0, &navlon, &navlat, &speed, &error);
 					}
 

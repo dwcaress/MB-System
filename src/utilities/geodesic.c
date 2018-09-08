@@ -738,7 +738,7 @@ real geod_geninverse(const struct geod_geodesic *g, real lat1, real lon1, real l
 						continue;
 					}
 				}
-				/* Either dv was not postive or updated value was outside legal
+				/* Either dv was not positive or updated value was outside legal
 				 * range.  Use the midpoint of the bracket as the next estimate.
 				 * This mechanism is not needed for the WGS84 ellipsoid, but it does
 				 * catch problems with more eccentric ellipsoids.  Its efficacy is
@@ -1250,7 +1250,7 @@ real A3f(const struct geod_geodesic *g, real eps) {
 
 void C3f(const struct geod_geodesic *g, real eps, real c[]) {
 	/* Evaluate C3 coeffs by Horner's method
-	 * Elements c[1] thru c[nC3 - 1] are set */
+	 * Elements c[1] through c[nC3 - 1] are set */
 	int i, j, k;
 	real mult = 1;
 	for (j = nC3x, k = nC3 - 1; k;) {
@@ -1268,7 +1268,7 @@ void C3f(const struct geod_geodesic *g, real eps, real c[]) {
 
 void C4f(const struct geod_geodesic *g, real eps, real c[]) {
 	/* Evaluate C4 coeffs by Horner's method
-	 * Elements c[0] thru c[nC4 - 1] are set */
+	 * Elements c[0] through c[nC4 - 1] are set */
 	int i, j, k;
 	real mult = 1;
 	for (j = nC4x, k = nC4; k;) {

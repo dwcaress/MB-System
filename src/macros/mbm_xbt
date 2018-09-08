@@ -75,7 +75,7 @@
 #      - expanded mbm_xbt header info
 #      - copy all source header info into the output file
 #      - convert to use "standard" perl getopts
-#      - move useage message to function
+#      - move usage message to function
 #
 #
 # Version:
@@ -113,7 +113,7 @@ my $MK21    = 3;
 
 if ( ! (getopts('I:i:S:s:F:f:L:l:VvHh'))) {
   print "$0: error on input\n";
-  useage();
+  usage();
   exit 0;
 }
 
@@ -127,7 +127,7 @@ my $latitude = ($opt_L || $opt_l); # Latitude for pressure conversion
 
 # print out help message if requested
 if ($help) {
-  useage();
+  usage();
   exit 0;
 }
 
@@ -274,8 +274,8 @@ exit 0;
 
 
 #----------------------------
-# useage();
-sub useage {
+# usage();
+sub usage {
 
 
     print "\nUsage: $ProgramName -Ifile \n";
@@ -295,7 +295,7 @@ sub useage {
     print "    Sippican MK12 export data format              2\n";
     print "    Sippican MK21 (edf)                           3\n";
     print "\n";
-}				# End of useage()
+}				# End of usage()
 
 
 
@@ -366,7 +366,7 @@ sub SpartonHeader (*$*$;) {
 
 #-----------------------------------------------------------------------
 # MK12header - deals with the MK12 XBT Header, which is of variable
-# length. This routine parses the incomming data and watches for a
+# length. This routine parses the incoming data and watches for a
 # numeric pattern of ##### ###### to indicate the start of data.
 #
 # Usage:

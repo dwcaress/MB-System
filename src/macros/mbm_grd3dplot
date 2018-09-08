@@ -883,7 +883,7 @@ if ($data_scale)
 		}
 	}
 
-# set the relevent page width and height
+# set the relevant page width and height
 &GetPageSize;
 
 # get user constraints on map scale
@@ -2654,7 +2654,7 @@ else
 			    / $page_height_in{"a"};
 	}
 
-# set the relevent page width and height
+# set the relevant page width and height
 $width_max_landscape = $page_height_in{$pagesize}
 		- $space_left - $space_right;
 $height_max_landscape = $page_width_in{$pagesize}

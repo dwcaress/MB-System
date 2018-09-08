@@ -2684,7 +2684,7 @@ int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct
 		fprintf(stderr, "dbg2       Negative histogram for sea level colortable:\n");
 		for (i = 0; i < MBV_NUM_COLORS; i++)
 			fprintf(stderr, "dbg2       value[%d]:   %f\n", i, histogram[MBV_NUM_COLORS + i]);
-		fprintf(stderr, "dbg2       Postive histogram for sea level colortable:\n");
+		fprintf(stderr, "dbg2       Positive histogram for sea level colortable:\n");
 		for (i = 0; i < MBV_NUM_COLORS; i++)
 			fprintf(stderr, "dbg2       value[%d]:   %f\n", i, histogram[2 * MBV_NUM_COLORS + i]);
 		fprintf(stderr, "dbg2  Return status:\n");

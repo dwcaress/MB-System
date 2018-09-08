@@ -124,7 +124,7 @@ processing environments. </LI>
   
   <UL>
   <LI>Updating the processing of one or more surveys with MBprocess can be time consuming because each swath file must be processed in turn.</LI>
-  <LI>Since the processing of each file depends only on the parameter and ancilliary files parallel to that file, the use of MBprocess is inherently parallelizable.</LI>
+  <LI>Since the processing of each file depends only on the parameter and ancillary files parallel to that file, the use of MBprocess is inherently parallelizable.</LI>
   <LI>The file locking mechanism described above allows users to simultaneously run multiple instances of MBprocess on the same datalist structure.</LI>
   <LI>Each MBprocess instance will parse through the datalist structure and attempt to process each swath file in turn.</LI>
   <LI>Swath files will be skipped if they are up-to-date, or if they are locked.</LI>

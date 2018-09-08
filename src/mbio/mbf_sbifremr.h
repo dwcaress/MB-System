@@ -43,7 +43,7 @@
  *   4. Comments can be embedded in the data as lines beginning
  *      with "##".
  *   5. The depth values are stored as negative numbers (topography
- *      rather than bathymetry). In order to accomodate flagging
+ *      rather than bathymetry). In order to accommodate flagging
  *      of suspect depths, the flagged depths are stored as
  *      positive numbers. This does not affect the internal
  *      MB-System convention of flagging depths with negative

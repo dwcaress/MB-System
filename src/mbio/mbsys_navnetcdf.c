@@ -161,7 +161,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 		strcpy(store->mbHistCode_format_C, "%d");
 		strcpy(store->mbHistCode_orientation, "direct");
 		strcpy(store->mbHistAutor_type, "string");
-		strcpy(store->mbHistAutor_long_name, "History autor");
+		strcpy(store->mbHistAutor_long_name, "History author");
 		strcpy(store->mbHistAutor_name_code, "MB_HISTORY_AUTOR");
 		strcpy(store->mbHistModule_type, "string");
 		strcpy(store->mbHistModule_long_name, "History module");

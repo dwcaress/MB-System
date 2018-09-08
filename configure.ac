@@ -135,7 +135,7 @@ dnl Check Endian size
 BYTESWAP=no
 AC_C_BIGENDIAN([BYTESWAP=no], [BYTESWAP=yes],
     AC_MSG_ERROR(Unknown endian state),
-    AC_MSG_ERROR(Universial endianess not supported)
+    AC_MSG_ERROR(Universial endianness not supported)
 )
 if test BYTESWAP == "no" ; then
     AC_DEFINE(ENDIAN_BIG, 1, [Machine is bigendian, (Byteswapping off)])
