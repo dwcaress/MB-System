@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.6.1          September 11, 2018
   Version 5.5.2350       September 6, 2018
   Version 5.5.2348       August 20, 2018
   Version 5.5.2347       August 17, 2018
@@ -283,6 +284,23 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
   Version 5.0.beta02     June 30, 2001
   Version 5.0.beta01     June 8, 2001
   Version 5.0.beta00     April 6, 2001
+
+-------------------------------------------------------------------------------
+MB-SYSTEM VERSION 5.6 RELEASE NOTES:
+-------------------------------------------------------------------------------
+
+-----> 5.6.001 (September 11, 2018)
+
+MB-System Source Code Archive: We moved the source code archive to GitHub. The
+URL for the repository is:
+        https://github.com/dwcaress/MB-System/
+        
+Mbtrn: Added source files src/mbtrn/blogr.c and  src/mbtrn/blogtx.c
+
+Format 88 (MBF_RESON7KR): Fixed problem in the mbsys_reson7k_preprocess() function
+in which the interpolated and time latency corrected attitude values calculated
+for each beam bottom return time were not fully corrected for the receive head
+angular offsets.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.5 RELEASE NOTES:
