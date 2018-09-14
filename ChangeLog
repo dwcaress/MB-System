@@ -289,13 +289,12 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.6 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.6.001 (September 11, 2018)
+-----> 5.6.002 (September 14, 2018)
 
-MB-System Source Code Archive: We moved the source code archive to GitHub. The
-URL for the repository is:
-        https://github.com/dwcaress/MB-System/
-        
-Mbtrn: Added source files src/mbtrn/blogr.c and  src/mbtrn/blogtx.c
+Format 88 (MBF_RESON7KR): Corrected application of attitude offsets to bathymetry
+calculation in mbsys_reson7k_preprocess().
+
+-----> 5.6.001 (September 11, 2018)
 
 Format 88 (MBF_RESON7KR): Fixed problem in the mbsys_reson7k_preprocess() function
 in which the interpolated and time latency corrected attitude values calculated
