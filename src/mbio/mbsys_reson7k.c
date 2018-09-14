@@ -5188,12 +5188,9 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 	double speed = 0.0;
 	double altitude = 0.0;
 	double sensordepth = 0.0;
-	double heading = 0.0;
-	double beamheading, beamheadingr;
-	double roll = 0.0;
-	double rollr, beamroll, beamrollr;
-	double pitch = 0.0;
-	double pitchr, beampitch, beampitchr;
+	double heading, headingc, beamheading = 0.0;
+	double roll, rollc, beamroll = 0.0;
+	double pitch, pitchc, beampitch = 0.0;
 	double heave = 0.0;
 	double beamheave;
 	double soundspeed;
@@ -5698,13 +5695,13 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
 				/* calculate sonar attitude */
 				status = mb_platform_orientation_target(verbose, (void *)platform, pars->target_sensor, 0, heading, roll, pitch,
-				                                        &heading, &roll, &pitch, error);
+				                                        &headingc, &rollc, &pitchc, error);
 			}
 
 			/* get local translation between lon lat degrees and meters */
 			mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-			headingx = sin(DTR * heading);
-			headingy = cos(DTR * heading);
+			headingx = sin(DTR * headingc);
+			headingy = cos(DTR * headingc);
 
 			/* if a valid speed is not available calculate it */
 			if (interp_status == MB_SUCCESS && speed <= 0.0) {
@@ -5776,11 +5773,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 				/* set ping values */
 				bathymetry->longitude = DTR * navlon;
 				bathymetry->latitude = DTR * navlat;
-				bathymetry->heading = DTR * heading;
+				bathymetry->heading = DTR * headingc;
 				bathymetry->height_source = 1;
 				bathymetry->tide = 0.0;
-				bathymetry->roll = DTR * roll;
-				bathymetry->pitch = DTR * pitch;
+				bathymetry->roll = DTR * rollc;
+				bathymetry->pitch = DTR * pitchc;
 				bathymetry->heave = heave;
 				if ((volatilesettings->receive_flags & 0x2) != 0) {
 					bathymetry->vehicle_height = -sensordepth - heave;
@@ -5796,13 +5793,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 					soundspeed = bluefin->environmental[0].sound_speed;
 				else
 					soundspeed = 1500.0;
-				rollr = DTR * roll;
-				pitchr = DTR * pitch;
 
 				/* zero atttitude correction if requested */
 				if (kluge_zeroattitudecorrection == MB_YES) {
-					rollr = 0.0;
-					pitchr = 0.0;
+					roll = 0.0;
+					pitch = 0.0;
 				}
 
 				/* zero alongtrack angles if requested */
@@ -5931,27 +5926,44 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 						bathymetry->quality[i] = v2rawdetection->quality[j];
 
 						/* get roll at bottom return time for this beam */
-						interp_status =
-						    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+                        if (pars->n_attitude > 0) {
+                            interp_status =
+                                mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
 						                     time_d + bathymetry->range[i], &beamroll, &jattitude, &interp_error);
+                        }
+                        else {
+                            beamroll = roll;
+                        }
 
 						/* get pitch at bottom return time for this beam */
-						interp_status =
-						    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+                        if (pars->n_attitude > 0) {
+                            interp_status =
+                                mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
 						                     time_d + bathymetry->range[i], &beampitch, &jattitude, &interp_error);
+                        }
+                        else {
+                            beampitch = pitch;
+                        }
 
 						/* get heading at bottom return time for this beam */
-						interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                        if (pars->n_heading > 0) {
+                            interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
 						                                         pars->n_heading, time_d + bathymetry->range[i], &beamheading,
 						                                         &jheading, &interp_error);
+                        }
+                        else {
+                            beamheading = heading;
+                        }
 
-                        /* calculate sonar attitude */
-                        status = mb_platform_orientation_target(verbose, (void *)platform, pars->target_sensor, 0,
-                                                                beamheading, beamroll, beampitch,
-                                                                &beamheading, &beamroll, &beampitch, error);
-						beamrollr = DTR * beamroll;
-						beampitchr = DTR * beampitch;
-						beamheadingr = DTR * beamheading;
+						/* get heave at bottom return time for this beam */
+                        if (pars->n_attitude > 0) {
+                            interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
+                                                         pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
+                                                         &jattitude, &interp_error);
+                        }
+                        else {
+                            beamheave = heave;
+                        }
 
 						/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
 						    Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
@@ -6002,7 +6014,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 						zz = rr * cos(DTR * theta);
 						bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 						bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-						bathymetry->depth[i] = zz + sensordepth - heave;
+						bathymetry->depth[i] = zz + sensordepth - 0.5 * (heave + beamheave);
 						bathymetry->pointing_angle[i] = DTR * theta;
 						bathymetry->azimuth_angle[i] = DTR * phi;
 						// fprintf(stderr,"beam:%d time_d:%f heading:%f %f roll:%f %f pitch:%f %f theta:%f phi:%f bath:%f %f
@@ -6019,37 +6031,55 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 						bathymetry->range[i] = v2detection->range[j];
 						bathymetry->quality[i] = v2detectionsetup->quality[j];
 
-						/* compensate for pitch if not already compensated */
-						if ((volatilesettings->transmit_flags & 0xF) != 0) {
-							beampitch = 0.0;
-						}
-						else {
-							beampitch = pitch;
-						}
+                        /* compensate for roll if not already compensated */
+                        if ((volatilesettings->receive_flags & 0x1) != 0) {
+                            beamroll = 0.0;
+                        }
+                        else if (pars->n_attitude > 0) {
+                            /* get roll at bottom return time for this beam */
+                            interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1,
+                                                             pars->n_attitude, time_d + bathymetry->range[i], &beamroll,
+                                                             &jattitude, &interp_error);
+                        }
+                        else {
+                            beamroll = roll;
+                        }
 
-						/* compensate for roll if not already compensated */
-						if ((volatilesettings->receive_flags & 0x1) != 0) {
-							beamroll = 0.0;
-						}
-						else {
-							/* get roll at bottom return time for this beam */
-							interp_status =
-							    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
-							                     time_d + bathymetry->range[i], &beamroll, &jattitude, &interp_error);
-						}
+                        /* compensate for pitch if not already compensated */
+                        if ((volatilesettings->transmit_flags & 0xF) != 0) {
+                            beampitch = 0.0;
+                        }
+                        else if (pars->n_attitude > 0) {
+                            interp_status =
+                                mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+                                                 time_d + bathymetry->range[i], &beampitch, &jattitude, &interp_error);
+                        }
+                        else {
+                            beampitch = pitch;
+                        }
 
-						/* get heading at bottom return time for this beam */
-						interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
-						                                         pars->n_heading, time_d + bathymetry->range[i], &beamheading,
-						                                         &jheading, &interp_error);
+                        /* get heading at bottom return time for this beam */
+                        if (pars->n_heading > 0) {
+                            interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                                                                 pars->n_heading, time_d + bathymetry->range[i], &beamheading,
+                                                                 &jheading, &interp_error);
+                        }
+                        else {
+                            beamheading = heading;
+                        }
 
-                        /* calculate sonar attitude */
-                        status = mb_platform_orientation_target(verbose, (void *)platform, pars->target_sensor, 0,
-                                                                beamheading, beamroll, beampitch,
-                                                                &beamheading, &beamroll, &beampitch, error);
-						beamrollr = DTR * beamroll;
-						beampitchr = DTR * beampitch;
-						beamheadingr = DTR * beamheading;
+                        /* compensate for heave if not already compensated */
+                        if ((volatilesettings->receive_flags & 0x2) != 0) {
+                            beamheave = 0.0;
+                        }
+                        else if (pars->n_attitude > 0) {
+                            interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
+                                                             pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
+                                                             &jattitude, &interp_error);
+                        }
+                        else {
+                            beamheave = heave;
+                        }
 
 						/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
 						    Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
@@ -6088,7 +6118,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 						zz = rr * cos(DTR * theta);
 						bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 						bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-						bathymetry->depth[i] = zz + sensordepth - heave;
+						bathymetry->depth[i] = zz + sensordepth - 0.5 * (heave + beamheave);
 						bathymetry->pointing_angle[i] = DTR * theta;
 						bathymetry->azimuth_angle[i] = DTR * phi;
 					}
@@ -6101,37 +6131,55 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 						bathymetry->range[i] = v2detection->range[i];
 						/* bathymetry->quality[i] set in bathymetry record */
 
-						/* compensate for pitch if not already compensated */
-						if ((volatilesettings->transmit_flags & 0xF) != 0) {
-							beampitch = 0.0;
-						}
-						else {
-							beampitch = pitch;
-						}
+                        /* compensate for roll if not already compensated */
+                        if ((volatilesettings->receive_flags & 0x1) != 0) {
+                            beamroll = 0.0;
+                        }
+                        else if (pars->n_attitude > 0) {
+                            /* get roll at bottom return time for this beam */
+                            interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1,
+                                                             pars->n_attitude, time_d + bathymetry->range[i], &beamroll,
+                                                             &jattitude, &interp_error);
+                        }
+                        else {
+                            beamroll = roll;
+                        }
 
-						/* compensate for roll if not already compensated */
-						if ((volatilesettings->receive_flags & 0x1) != 0) {
-							beamroll = 0.0;
-						}
-						else {
-							/* get roll at bottom return time for this beam */
-							interp_status =
-							    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
-							                     time_d + bathymetry->range[i], &beamroll, &jattitude, &interp_error);
-						}
+                        /* compensate for pitch if not already compensated */
+                        if ((volatilesettings->transmit_flags & 0xF) != 0) {
+                            beampitch = 0.0;
+                        }
+                        else if (pars->n_attitude > 0) {
+                            interp_status =
+                                mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+                                                 time_d + bathymetry->range[i], &beampitch, &jattitude, &interp_error);
+                        }
+                        else {
+                            beampitch = pitch;
+                        }
 
-						/* get heading at bottom return time for this beam */
-						interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
-						                                         pars->n_heading, time_d + bathymetry->range[i], &beamheading,
-						                                         &jheading, &interp_error);
+                        /* get heading at bottom return time for this beam */
+                        if (pars->n_heading > 0) {
+                            interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                                                                 pars->n_heading, time_d + bathymetry->range[i], &beamheading,
+                                                                 &jheading, &interp_error);
+                        }
+                        else {
+                            beamheading = heading;
+                        }
 
-                        /* calculate sonar attitude */
-                        status = mb_platform_orientation_target(verbose, (void *)platform, pars->target_sensor, 0,
-                                                                beamheading, beamroll, beampitch,
-                                                                &beamheading, &beamroll, &beampitch, error);
-						beamrollr = DTR * beamroll;
-						beampitchr = DTR * beampitch;
-						beamheadingr = DTR * beamheading;
+                        /* compensate for heave if not already compensated */
+                        if ((volatilesettings->receive_flags & 0x2) != 0) {
+                            beamheave = 0.0;
+                        }
+                        else if (pars->n_attitude > 0) {
+                            interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
+                                                             pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
+                                                             &jattitude, &interp_error);
+                        }
+                        else {
+                            beamheave = heave;
+                        }
 
 						/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
 						    Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
@@ -6170,7 +6218,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 						zz = rr * cos(DTR * theta);
 						bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 						bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-						bathymetry->depth[i] = zz + sensordepth - heave;
+						bathymetry->depth[i] = zz + sensordepth - 0.5 * (heave + beamheave);
 						bathymetry->pointing_angle[i] = DTR * theta;
 						bathymetry->azimuth_angle[i] = DTR * phi;
 					}
@@ -6183,42 +6231,56 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 						/* bathymetry->range[i] set */
 						/* bathymetry->quality[i] set */
 						if ((bathymetry->quality[i] & 15) > 0) {
-							/* compensate for pitch if not already compensated */
-							if ((volatilesettings->transmit_flags & 0xF) != 0) {
-								beampitch = 0.0;
-							}
-							else {
-								beampitch = pitch;
-							}
-							beampitchr = DTR * beampitch;
 
-							/* compensate for roll if not already compensated */
-							if ((volatilesettings->receive_flags & 0x1) != 0) {
-								beamroll = 0.0;
-							}
-							else {
-								/* get roll at bottom return time for this beam */
-								interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1,
-								                                 pars->n_attitude, time_d + bathymetry->range[i], &beamroll,
-								                                 &jattitude, &interp_error);
-							}
-							beamrollr = DTR * beamroll;
-
-							/* compensate for heave if not already compensated */
-							if ((volatilesettings->receive_flags & 0x2) != 0) {
-								beamheave = 0.0;
-							}
-							else {
-								interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
-								                                 pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
-								                                 &jattitude, &interp_error);
-							}
-
-							/* get heading at bottom return time for this beam */
-							interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
-							                                         pars->n_heading, time_d + bathymetry->range[i], &beamheading,
-							                                         &jheading, &interp_error);
-							beamheadingr = DTR * beamheading;
+                            /* compensate for roll if not already compensated */
+                            if ((volatilesettings->receive_flags & 0x1) != 0) {
+                                beamroll = 0.0;
+                            }
+                            else if (pars->n_attitude > 0) {
+                                /* get roll at bottom return time for this beam */
+                                interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1,
+                                                                 pars->n_attitude, time_d + bathymetry->range[i], &beamroll,
+                                                                 &jattitude, &interp_error);
+                            }
+                            else {
+                                beamroll = roll;
+                            }
+    
+                            /* compensate for pitch if not already compensated */
+                            if ((volatilesettings->transmit_flags & 0xF) != 0) {
+                                beampitch = 0.0;
+                            }
+                            else if (pars->n_attitude > 0) {
+                                interp_status =
+                                    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+                                                     time_d + bathymetry->range[i], &beampitch, &jattitude, &interp_error);
+                            }
+                            else {
+                                beampitch = pitch;
+                            }
+    
+                            /* get heading at bottom return time for this beam */
+                            if (pars->n_heading > 0) {
+                                interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                                                                     pars->n_heading, time_d + bathymetry->range[i], &beamheading,
+                                                                     &jheading, &interp_error);
+                            }
+                            else {
+                                beamheading = heading;
+                            }
+    
+                            /* compensate for heave if not already compensated */
+                            if ((volatilesettings->receive_flags & 0x2) != 0) {
+                                beamheave = 0.0;
+                            }
+                            else if (pars->n_attitude > 0) {
+                                interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
+                                                                 pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
+                                                                 &jattitude, &interp_error);
+                            }
+                            else {
+                                beamheave = heave;
+                            }
 
 							/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
 							    Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
@@ -6257,7 +6319,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 							zz = rr * cos(DTR * theta);
 							bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-							bathymetry->depth[i] = zz + sensordepth - heave;
+							bathymetry->depth[i] = zz + sensordepth - 0.5 * (heave + beamheave);
 							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
 						}
