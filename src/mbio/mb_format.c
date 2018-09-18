@@ -413,7 +413,6 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:             %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1039,7 +1038,6 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 		fprintf(stderr, "dbg2       status:             %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1097,7 +1095,6 @@ int mb_format(int verbose, int *format, int *error) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1159,7 +1156,6 @@ int mb_format_system(int verbose, int *format, int *system, int *error) {
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1222,7 +1218,6 @@ int mb_format_dimensions(int verbose, int *format, int *beams_bath_max, int *bea
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1281,7 +1276,6 @@ int mb_format_description(int verbose, int *format, char *description, int *erro
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1345,7 +1339,6 @@ int mb_format_flags(int verbose, int *format, int *variable_beams, int *travelti
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1413,7 +1406,6 @@ int mb_format_source(int verbose, int *format, int *platform_source, int *nav_so
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1476,7 +1468,6 @@ int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, doub
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2855,7 +2846,6 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

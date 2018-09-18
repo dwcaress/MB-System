@@ -266,7 +266,6 @@ int mbr_register_em710mba(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -344,7 +343,6 @@ int mbr_info_em710mba(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -393,7 +391,6 @@ int mbr_alm_em710mba(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -431,7 +428,6 @@ int mbr_dem_em710mba(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -594,7 +590,6 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -632,7 +627,6 @@ int mbr_wt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1272,7 +1266,6 @@ Have a nice day...\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1427,7 +1420,6 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1586,7 +1578,6 @@ int mbr_em710mba_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2195,7 +2186,6 @@ file will return error */
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2322,7 +2312,6 @@ int mbr_em710mba_rd_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2405,7 +2394,6 @@ int mbr_em710mba_rd_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2489,7 +2477,6 @@ int mbr_em710mba_rd_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2570,7 +2557,6 @@ int mbr_em710mba_rd_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2692,7 +2678,6 @@ int mbr_em710mba_rd_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2810,7 +2795,6 @@ int mbr_em710mba_rd_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2928,7 +2912,6 @@ int mbr_em710mba_rd_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3089,7 +3072,6 @@ int mbr_em710mba_rd_extraparameters(int verbose, void *mbio_ptr, int swap, struc
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3230,7 +3212,6 @@ int mbr_em710mba_rd_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3393,7 +3374,6 @@ int mbr_em710mba_rd_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3559,7 +3539,6 @@ int mbr_em710mba_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3680,7 +3659,6 @@ int mbr_em710mba_rd_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3799,7 +3777,6 @@ int mbr_em710mba_rd_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4003,7 +3980,6 @@ int mbr_em710mba_rd_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4236,7 +4212,6 @@ int mbr_em710mba_rd_bath2_mba(int verbose, void *mbio_ptr, int swap, struct mbsy
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4475,7 +4450,6 @@ int mbr_em710mba_rd_bath3_mba(int verbose, void *mbio_ptr, int swap, struct mbsy
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4717,7 +4691,6 @@ int mbr_em710mba_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4883,7 +4856,6 @@ int mbr_em710mba_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5209,7 +5181,6 @@ int mbr_em710mba_rd_ss2_mba(int verbose, void *mbio_ptr, int swap, struct mbsys_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5413,7 +5384,6 @@ int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5713,7 +5683,6 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6304,7 +6273,6 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6474,7 +6442,6 @@ int mbr_em710mba_wr_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6623,7 +6590,6 @@ int mbr_em710mba_wr_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6738,7 +6704,6 @@ int mbr_em710mba_wr_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6848,7 +6813,6 @@ int mbr_em710mba_wr_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6961,7 +6925,6 @@ int mbr_em710mba_wr_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -7111,7 +7074,6 @@ int mbr_em710mba_wr_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -7259,7 +7221,6 @@ int mbr_em710mba_wr_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -7407,7 +7368,6 @@ int mbr_em710mba_wr_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -7559,7 +7519,6 @@ int mbr_em710mba_wr_extraparameters(int verbose, void *mbio_ptr, int swap, struc
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -7714,7 +7673,6 @@ int mbr_em710mba_wr_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -7884,7 +7842,6 @@ int mbr_em710mba_wr_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -8033,7 +7990,6 @@ int mbr_em710mba_wr_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -8183,7 +8139,6 @@ int mbr_em710mba_wr_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -8333,7 +8288,6 @@ int mbr_em710mba_wr_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -8502,7 +8456,6 @@ int mbr_em710mba_wr_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -8691,7 +8644,6 @@ int mbr_em710mba_wr_bath3_mba(int verbose, void *mbio_ptr, int swap, struct mbsy
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -8898,7 +8850,6 @@ int mbr_em710mba_wr_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -9050,7 +9001,6 @@ int mbr_em710mba_wr_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -9293,7 +9243,6 @@ int mbr_em710mba_wr_ss2_mba(int verbose, void *mbio_ptr, int swap, struct mbsys_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -9511,7 +9460,6 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

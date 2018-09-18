@@ -1343,7 +1343,6 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 

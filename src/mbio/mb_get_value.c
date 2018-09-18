@@ -244,7 +244,6 @@ int mb_get_bounds(char *text, double *bounds) {
 	else
 		status = MB_FAILURE;
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
