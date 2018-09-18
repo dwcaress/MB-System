@@ -223,7 +223,6 @@ int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -253,7 +252,6 @@ int mbsys_reson8k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -311,7 +309,6 @@ int mbsys_reson8k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -512,7 +509,6 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -640,7 +636,6 @@ int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -747,7 +742,6 @@ int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -840,7 +834,6 @@ int mbsys_reson8k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -932,7 +925,6 @@ int mbsys_reson8k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1107,7 +1099,6 @@ int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1202,7 +1193,6 @@ int mbsys_reson8k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1274,7 +1264,6 @@ int mbsys_reson8k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1326,7 +1315,6 @@ int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1367,7 +1355,6 @@ int mbsys_reson8k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1600,7 +1587,6 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

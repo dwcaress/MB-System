@@ -190,7 +190,6 @@ int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -268,7 +267,6 @@ int mbr_info_wasspenl(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -321,7 +319,6 @@ int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -364,7 +361,6 @@ int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -414,7 +410,6 @@ int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -460,7 +455,6 @@ int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -708,7 +702,6 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -844,7 +837,6 @@ int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -983,7 +975,6 @@ int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1115,7 +1106,6 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1236,7 +1226,6 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1305,7 +1294,6 @@ int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1390,7 +1378,6 @@ int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1495,7 +1482,6 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1623,7 +1609,6 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1712,7 +1697,6 @@ int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1781,7 +1765,6 @@ int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1839,7 +1822,6 @@ int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1908,7 +1890,6 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2054,7 +2035,6 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2207,7 +2187,6 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2342,7 +2321,6 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2432,7 +2410,6 @@ int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2538,7 +2515,6 @@ int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2652,7 +2628,6 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2793,7 +2768,6 @@ int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2903,7 +2877,6 @@ int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2969,7 +2942,6 @@ int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3050,7 +3022,6 @@ int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3116,7 +3087,6 @@ int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, vo
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

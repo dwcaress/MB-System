@@ -124,7 +124,6 @@ int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_alloc */
 /*--------------------------------------------------------------------*/
@@ -188,7 +187,6 @@ int mbsys_swathplus_deall(int verbose, void *mbio_ptr, void **store_ptr, int *er
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_deall */
 /*--------------------------------------------------------------------*/
@@ -257,7 +255,6 @@ int mbsys_swathplus_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_dimensions */
 /*--------------------------------------------------------------------*/
@@ -312,7 +309,6 @@ int mbsys_swathplus_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_pingnumber */
 /*--------------------------------------------------------------------*/
@@ -351,7 +347,6 @@ int mbsys_swathplus_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_sonartype */
 /*--------------------------------------------------------------------*/
@@ -390,7 +385,6 @@ int mbsys_swathplus_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, i
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_sidescantype */
 /*--------------------------------------------------------------------*/
@@ -645,7 +639,6 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_extract */
 /*--------------------------------------------------------------------*/
@@ -848,7 +841,6 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_insert */
 /*--------------------------------------------------------------------*/
@@ -981,7 +973,6 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_ttimes */
 /*--------------------------------------------------------------------*/
@@ -1065,7 +1056,6 @@ int mbsys_swathplus_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_detects */
 /*--------------------------------------------------------------------*/
@@ -1146,7 +1136,6 @@ int mbsys_swathplus_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_gains */
 /*--------------------------------------------------------------------*/
@@ -1239,7 +1228,6 @@ int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_extract_altitude */
 /*--------------------------------------------------------------------*/
@@ -1364,7 +1352,6 @@ int mbsys_swathplus_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 		fprintf(stderr, "dbg2       status:        %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_extract_nav */
 /*--------------------------------------------------------------------*/
@@ -1705,7 +1692,6 @@ int mbsys_swathplus_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbsys_swathplus_copy */
 /*-------------------------------------------------------------------*/
@@ -1762,7 +1748,6 @@ int swpls_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid, i
 		fprintf(stderr, "dbg2       status:        %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_chk_header */
 /* --------------------------------------------------------------------*/
@@ -2205,7 +2190,6 @@ int swpls_rd_sxiheader(int verbose, char *buffer, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_sxiheader */
 /*--------------------------------------------------------------------*/
@@ -2330,7 +2314,6 @@ int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_sxiping */
 /*--------------------------------------------------------------------*/
@@ -2394,7 +2377,6 @@ int swpls_rd_attitude(int verbose, char *buffer, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_attitude */
 /*--------------------------------------------------------------------*/
@@ -2454,7 +2436,6 @@ int swpls_rd_posll(int verbose, char *buffer, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_posll */
 /*--------------------------------------------------------------------*/
@@ -2514,7 +2495,6 @@ int swpls_rd_posen(int verbose, char *buffer, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_posen */
 /*--------------------------------------------------------------------*/
@@ -2572,7 +2552,6 @@ int swpls_rd_ssv(int verbose, char *buffer, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_ssv */
 /*--------------------------------------------------------------------*/
@@ -2630,7 +2609,6 @@ int swpls_rd_tide(int verbose, char *buffer, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_tide */
 /*--------------------------------------------------------------------*/
@@ -2688,7 +2666,6 @@ int swpls_rd_echosounder(int verbose, char *buffer, void *store_ptr, int *error)
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_echosounder */
 /*--------------------------------------------------------------------*/
@@ -2748,7 +2725,6 @@ int swpls_rd_agds(int verbose, char *buffer, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_agds */
 /*--------------------------------------------------------------------*/
@@ -2812,7 +2788,6 @@ int swpls_rd_pos_offset(int verbose, char *buffer, void *store_ptr, int *error) 
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_pos_offset */
 /*--------------------------------------------------------------------*/
@@ -2876,7 +2851,6 @@ int swpls_rd_imu_offset(int verbose, char *buffer, void *store_ptr, int *error) 
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_imu_offset */
 /*--------------------------------------------------------------------*/
@@ -2948,7 +2922,6 @@ int swpls_rd_txer_offset(int verbose, char *buffer, void *store_ptr, int *error)
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_txer_offset */
 /*--------------------------------------------------------------------*/
@@ -3006,7 +2979,6 @@ int swpls_rd_wl_offset(int verbose, char *buffer, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2      status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_rd_wl_offset */
 /*--------------------------------------------------------------------*/
@@ -3169,7 +3141,6 @@ int swpls_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:    %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_data */
 /*-------------------------------------------------------------------*/
@@ -3244,7 +3215,6 @@ int swpls_wr_sxpheader(int verbose, int *bufferalloc, char **bufferptr, void *st
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_sxpheader */
 /*---------------------------------------------------------------------*/
@@ -3419,7 +3389,6 @@ int swpls_wr_sxpping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_sxpping */
 /*------------------------------------------------------------*/
@@ -3503,7 +3472,6 @@ int swpls_wr_projection(int verbose, int *bufferalloc, char **bufferptr, void *s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_projection */
 /*------------------------------------------------------------*/
@@ -3587,7 +3555,6 @@ int swpls_wr_comment(int verbose, int *bufferalloc, char **bufferptr, void *stor
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_comment */
 /*-------------------------------------------------------------------*/
@@ -3662,7 +3629,6 @@ int swpls_wr_sxiheader(int verbose, int *bufferalloc, char **bufferptr, void *st
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_sxiheader */
 /*-------------------------------------------------------------------*/
@@ -3770,7 +3736,6 @@ int swpls_wr_sxiping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_sxiping */
 /*-------------------------------------------------------------------*/
@@ -3855,7 +3820,6 @@ int swpls_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, void *sto
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_attitude */
 /*-------------------------------------------------------------------*/
@@ -3936,7 +3900,6 @@ int swpls_wr_posll(int verbose, int *bufferalloc, char **bufferptr, void *store_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_posll */
 /*-------------------------------------------------------------------*/
@@ -4017,7 +3980,6 @@ int swpls_wr_posen(int verbose, int *bufferalloc, char **bufferptr, void *store_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_posen */
 /*-------------------------------------------------------------------*/
@@ -4096,7 +4058,6 @@ int swpls_wr_ssv(int verbose, int *bufferalloc, char **bufferptr, void *store_pt
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_ssv */
 /*-------------------------------------------------------------------*/
@@ -4175,7 +4136,6 @@ int swpls_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *store_p
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_tide */
 /*-------------------------------------------------------------------*/
@@ -4252,7 +4212,6 @@ int swpls_wr_echosounder(int verbose, int *bufferalloc, char **bufferptr, void *
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_echosounder */
 /*-------------------------------------------------------------------*/
@@ -4333,7 +4292,6 @@ int swpls_wr_agds(int verbose, int *bufferalloc, char **bufferptr, void *store_p
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_agds */
 /*-------------------------------------------------------------------*/
@@ -4418,7 +4376,6 @@ int swpls_wr_pos_offset(int verbose, int *bufferalloc, char **bufferptr, void *s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_pos_offset */
 /*-------------------------------------------------------------------*/
@@ -4503,7 +4460,6 @@ int swpls_wr_imu_offset(int verbose, int *bufferalloc, char **bufferptr, void *s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_imu_offset */
 /*-------------------------------------------------------------------*/
@@ -4596,7 +4552,6 @@ int swpls_wr_txer_offset(int verbose, int *bufferalloc, char **bufferptr, void *
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_txer_offset */
 /*-------------------------------------------------------------------*/
@@ -4675,7 +4630,6 @@ int swpls_wr_wl_offset(int verbose, int *bufferalloc, char **bufferptr, void *st
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_wr_wl_offset */
 /*----------------------------------------------------------------------*/
@@ -4713,7 +4667,6 @@ int swpls_pr_sxpheader(int verbose, FILE *fout, swpls_header *header, int *error
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_sxpheader */
 /*----------------------------------------------------------------------*/
@@ -4801,7 +4754,6 @@ int swpls_pr_sxpping(int verbose, FILE *fout, swpls_sxpping *ping, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_sxpping */
 /*----------------------------------------------------------------------*/
@@ -4845,7 +4797,6 @@ int swpls_pr_projection(int verbose, FILE *fout, swpls_projection *projection, i
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_projection */
 /*----------------------------------------------------------------------*/
@@ -4890,7 +4841,6 @@ int swpls_pr_comment(int verbose, FILE *fout, swpls_comment *comment, int *error
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_comment */
 /*----------------------------------------------------------------------*/
@@ -4928,7 +4878,6 @@ int swpls_pr_sxiheader(int verbose, FILE *fout, swpls_header *header, int *error
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_sxiheader */
 /*----------------------------------------------------------------------*/
@@ -4988,7 +4937,6 @@ int swpls_pr_sxiping(int verbose, FILE *fout, swpls_sxiping *ping, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_sxiping */
 /*----------------------------------------------------------------------*/
@@ -5033,7 +4981,6 @@ int swpls_pr_attitude(int verbose, FILE *fout, swpls_attitude *attitude, int *er
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_attitude */
 /*----------------------------------------------------------------------*/
@@ -5077,7 +5024,6 @@ int swpls_pr_posll(int verbose, FILE *fout, swpls_posll *posll, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_posll */
 /*----------------------------------------------------------------------*/
@@ -5122,7 +5068,6 @@ int swpls_pr_posen(int verbose, FILE *fout, swpls_posen *posen, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_posen */
 /*----------------------------------------------------------------------*/
@@ -5165,7 +5110,6 @@ int swpls_pr_ssv(int verbose, FILE *fout, swpls_ssv *ssv, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_ssv */
 /*----------------------------------------------------------------------*/
@@ -5208,7 +5152,6 @@ int swpls_pr_tide(int verbose, FILE *fout, swpls_tide *tide, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_tide */
 /*----------------------------------------------------------------------*/
@@ -5252,7 +5195,6 @@ int swpls_pr_echosounder(int verbose, FILE *fout, swpls_echosounder *echosounder
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_echosounder */
 /*----------------------------------------------------------------------*/
@@ -5296,7 +5238,6 @@ int swpls_pr_agds(int verbose, FILE *fout, swpls_agds *agds, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_agds */
 /*----------------------------------------------------------------------*/
@@ -5342,7 +5283,6 @@ int swpls_pr_pos_offset(int verbose, FILE *fout, swpls_pos_offset *pos_offset, i
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_pos_offset */
 /*----------------------------------------------------------------------*/
@@ -5388,7 +5328,6 @@ int swpls_pr_imu_offset(int verbose, FILE *fout, swpls_imu_offset *imu_offset, i
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* swpls_pr_imu_offset */
 /*----------------------------------------------------------------------*/
@@ -5438,7 +5377,7 @@ int swpls_pr_txer_offset(int verbose, FILE *fout, swpls_txer_offset *txer_offset
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
+
 	return (status);
 } /* swpls_pr_txer_offset */
 /*----------------------------------------------------------------------*/

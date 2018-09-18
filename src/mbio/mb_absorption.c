@@ -200,7 +200,6 @@ int mb_absorption(int verbose, double frequency, double temperature, double sali
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -259,7 +258,6 @@ int mb_potential_temperature(int verbose, double temperature, double salinity, d
 		fprintf(stderr, "dbg2       status:                %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -361,7 +359,6 @@ int mb_seabird_density(int verbose, double salinity, double temperature, double 
 		fprintf(stderr, "dbg2       status:                %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -409,7 +406,6 @@ int mb_seabird_depth(int verbose, double pressure, double latitude, double *dept
 		fprintf(stderr, "dbg2       status:                %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 
 }
@@ -480,7 +476,6 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
 		fprintf(stderr, "dbg2       status:                %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 
 }
@@ -570,7 +565,7 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 				- 0.340597039004e-3 * temperature * salinity * pressure;
 		*soundspeed = c000 + dct + dcs + dcp + dcstp;
 	}
-	
+
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
@@ -585,7 +580,6 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 		fprintf(stderr, "dbg2       status:                %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 
 }

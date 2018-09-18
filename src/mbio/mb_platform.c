@@ -128,7 +128,6 @@ int mb_platform_init(int verbose, void **platform_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:			     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -206,7 +205,6 @@ int mb_platform_setinfo(int verbose, void *platform_ptr, int type, char *name, c
 		fprintf(stderr, "dbg2       status:			     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -343,7 +341,6 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -438,7 +435,6 @@ int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, 
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -527,7 +523,6 @@ int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isen
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -707,7 +702,6 @@ int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_ty
 		fprintf(stderr, "dbg2       status:			              		%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -789,7 +783,6 @@ int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -1136,7 +1129,6 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1533,7 +1525,6 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1669,7 +1660,6 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1742,7 +1732,6 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1826,7 +1815,6 @@ int mb_platform_orientation(int verbose, void *platform_ptr, double heading, dou
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1911,7 +1899,6 @@ int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetse
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2007,7 +1994,6 @@ int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetse
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2129,7 +2115,6 @@ int mb_platform_print(int verbose, void *platform_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:			%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

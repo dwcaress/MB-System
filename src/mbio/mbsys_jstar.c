@@ -87,7 +87,6 @@ int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -133,7 +132,6 @@ int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -202,7 +200,6 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -258,7 +255,6 @@ int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *er
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -580,7 +576,6 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -900,7 +895,6 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1206,7 +1200,6 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1284,7 +1277,6 @@ int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1358,7 +1350,6 @@ int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1448,7 +1439,6 @@ int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1535,7 +1525,6 @@ int mbsys_jstar_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, do
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1745,7 +1734,6 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1922,7 +1910,6 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1997,7 +1984,6 @@ int mbsys_jstar_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2119,7 +2105,6 @@ int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2245,7 +2230,6 @@ int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int k
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2480,7 +2464,6 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2687,7 +2670,6 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2919,7 +2901,6 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2997,7 +2978,6 @@ int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3118,7 +3098,6 @@ int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *c
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

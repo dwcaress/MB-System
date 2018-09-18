@@ -80,7 +80,6 @@ int mb_version(int verbose, char *version_string, int *version_id, int *version_
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -180,7 +179,6 @@ int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bound
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -281,7 +279,6 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -334,7 +331,6 @@ int mb_lonflip(int verbose, int *lonflip) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -430,7 +426,6 @@ int mb_mbview_defaults(int verbose, int *primary_colortable, int *primary_colort
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -483,7 +478,6 @@ int mb_fbtversion(int verbose, int *fbtversion) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -546,7 +540,6 @@ int mb_uselockfiles(int verbose, int *uselockfiles) {
 		fprintf(stderr, "dbg2       status:       %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -599,7 +592,6 @@ int mb_fileiobuffer(int verbose, int *fileiobuffer) {
 		fprintf(stderr, "dbg2       status:       %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

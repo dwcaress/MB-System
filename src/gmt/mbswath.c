@@ -1728,7 +1728,6 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1934,7 +1933,6 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2051,7 +2049,6 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2148,7 +2145,6 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2297,7 +2293,6 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GM
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2361,7 +2356,6 @@ int mbswath_plot_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2441,7 +2435,6 @@ int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *e
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

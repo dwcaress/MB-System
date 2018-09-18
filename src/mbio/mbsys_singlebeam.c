@@ -133,7 +133,6 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -163,7 +162,6 @@ int mbsys_singlebeam_deall(int verbose, void *mbio_ptr, void **store_ptr, int *e
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -220,7 +218,6 @@ int mbsys_singlebeam_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -258,7 +255,6 @@ int mbsys_singlebeam_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, in
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -300,7 +296,6 @@ int mbsys_singlebeam_segynumber(int verbose, void *mbio_ptr, int *line, int *sho
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -438,7 +433,6 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -538,7 +532,6 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -634,7 +627,6 @@ int mbsys_singlebeam_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -713,7 +705,6 @@ int mbsys_singlebeam_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -799,7 +790,6 @@ int mbsys_singlebeam_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -928,7 +918,6 @@ int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1008,7 +997,6 @@ int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1081,7 +1069,6 @@ int mbsys_singlebeam_swathbounds(int verbose, void *mbio_ptr, void *store_ptr, i
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1118,7 +1105,6 @@ int mbsys_singlebeam_copy(int verbose, void *mbio_ptr, void *store_ptr, void *co
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1166,7 +1152,6 @@ int mbsys_singlebeam_pressuredepth(int verbose, double pressure, double latitude
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

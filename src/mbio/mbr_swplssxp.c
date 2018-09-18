@@ -171,7 +171,6 @@ int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbr_register_swplssxp */
 /*--------------------------------------------------------------------*/
@@ -249,7 +248,6 @@ int mbr_info_swplssxp(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbr_info_swplssxp */
 /*--------------------------------------------------------------------*/
@@ -322,7 +320,6 @@ int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbr_alm_swplssxp */
 /*--------------------------------------------------------------------*/
@@ -365,7 +362,6 @@ int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbr_dem_swplssxp */
 /*--------------------------------------------------------------------*/
@@ -455,7 +451,6 @@ int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbr_rt_swplssxp */
 /*--------------------------------------------------------------------*/
@@ -529,7 +524,6 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbr_wt_swplssxp */
 /*--------------------------------------------------------------------*/
@@ -683,6 +677,5 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /* mbr_swplssxp_rd_data */

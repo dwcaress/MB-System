@@ -155,7 +155,6 @@ int mbr_register_sbifremr(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -232,7 +231,6 @@ int mbr_info_sbifremr(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -271,7 +269,6 @@ int mbr_alm_sbifremr(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -305,7 +302,6 @@ int mbr_dem_sbifremr(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -385,7 +381,6 @@ int mbr_rt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -474,7 +469,6 @@ int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -741,7 +735,6 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -888,7 +881,6 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

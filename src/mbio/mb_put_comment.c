@@ -82,7 +82,6 @@ int mb_put_comment(int verbose, void *mbio_ptr, char *comment, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

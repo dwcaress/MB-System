@@ -156,7 +156,6 @@ int mbr_register_mr1aldeo(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -234,7 +233,6 @@ int mbr_info_mr1aldeo(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -284,7 +282,6 @@ int mbr_alm_mr1aldeo(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -318,7 +315,6 @@ int mbr_dem_mr1aldeo(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -418,7 +414,6 @@ int mbr_zero_mr1aldeo(int verbose, struct mbf_mr1aldeo_struct *data, int *error)
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -533,7 +528,6 @@ int mbr_rt_mr1aldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -646,7 +640,6 @@ int mbr_wt_mr1aldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -726,7 +719,6 @@ int mbr_mr1aldeo_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -794,7 +786,6 @@ int mbr_mr1aldeo_rd_hdr(int verbose, XDR *xdrs, struct mbf_mr1aldeo_struct *data
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1007,7 +998,6 @@ int mbr_mr1aldeo_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1aldeo_struct *dat
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1092,7 +1082,6 @@ int mbr_mr1aldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1aldeo_struct
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1159,7 +1148,6 @@ int mbr_mr1aldeo_wr_hdr(int verbose, XDR *xdrs, struct mbf_mr1aldeo_struct *data
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1297,7 +1285,6 @@ int mbr_mr1aldeo_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1aldeo_struct *dat
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

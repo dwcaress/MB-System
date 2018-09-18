@@ -170,7 +170,6 @@ int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -247,7 +246,6 @@ int mbr_info_cbat8101(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -289,7 +287,6 @@ int mbr_alm_cbat8101(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -323,7 +320,6 @@ int mbr_dem_cbat8101(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -466,7 +462,6 @@ int mbr_zero_cbat8101(int verbose, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -648,7 +643,6 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -795,7 +789,6 @@ int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -977,7 +970,6 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1027,7 +1019,6 @@ int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat81
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1186,7 +1177,6 @@ int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1303,7 +1293,6 @@ int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1403,7 +1392,6 @@ int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1503,7 +1491,6 @@ int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1669,7 +1656,6 @@ int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1743,7 +1729,6 @@ int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap, struct mbf_cbat81
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1825,7 +1810,6 @@ int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbf_cbat8
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1894,7 +1878,6 @@ int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1974,7 +1957,6 @@ int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2155,7 +2137,6 @@ int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2295,7 +2276,6 @@ int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2433,7 +2413,6 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2621,7 +2600,6 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2717,7 +2695,6 @@ int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2823,7 +2800,6 @@ int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, void *data_ptr, 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

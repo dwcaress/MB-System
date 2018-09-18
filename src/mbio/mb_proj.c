@@ -127,7 +127,6 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -167,7 +166,6 @@ int mb_proj_free(int verbose, void **pjptr, int *error) {
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -215,7 +213,6 @@ int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *ea
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -263,7 +260,6 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -307,7 +303,6 @@ int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, d
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

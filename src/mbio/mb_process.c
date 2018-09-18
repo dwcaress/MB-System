@@ -164,7 +164,6 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1321,7 +1320,6 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1768,7 +1766,6 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1810,7 +1807,6 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1879,7 +1875,6 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1941,7 +1936,6 @@ int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *er
 		fprintf(stderr, "dbg2       status:	%d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2164,7 +2158,6 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 		fprintf(stderr, "dbg2       status:       %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2210,7 +2203,6 @@ int mb_pr_update_ofile(int verbose, char *file, int mbp_ofile_specified, char *m
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2250,7 +2242,6 @@ int mb_pr_update_format(int verbose, char *file, int mbp_format_specified, int m
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2298,7 +2289,6 @@ int mb_pr_update_rollbias(int verbose, char *file, int mbp_rollbias_mode, double
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2341,7 +2331,6 @@ int mb_pr_update_pitchbias(int verbose, char *file, int mbp_pitchbias_mode, doub
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2389,7 +2378,6 @@ int mb_pr_update_draft(int verbose, char *file, int mbp_draft_mode, double mbp_d
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2434,7 +2422,6 @@ int mb_pr_update_heave(int verbose, char *file, int mbp_heave_mode, double mbp_h
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2489,7 +2476,6 @@ int mb_pr_update_lever(int verbose, char *file, int mbp_lever_mode, double mbp_v
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2535,7 +2521,6 @@ int mb_pr_update_tide(int verbose, char *file, int mbp_tide_mode, char *mbp_tide
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2578,7 +2563,6 @@ int mb_pr_update_tt(int verbose, char *file, int mbp_tt_mode, double mbp_tt_mult
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2621,7 +2605,6 @@ int mb_pr_update_ssv(int verbose, char *file, int mbp_ssv_mode, double mbp_ssv, 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2670,7 +2653,6 @@ int mb_pr_update_svp(int verbose, char *file, int mbp_svp_mode, char *mbp_svpfil
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2711,7 +2693,6 @@ int mb_pr_update_static(int verbose, char *file, int mbp_static_mode, char *mbp_
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2757,7 +2738,6 @@ int mb_pr_update_navadj(int verbose, char *file, int mbp_navadj_mode, char *mbp_
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2804,7 +2784,6 @@ int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2851,7 +2830,6 @@ int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, ch
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2908,7 +2886,6 @@ int mb_pr_update_nav(int verbose, char *file, int mbp_nav_mode, char *mbp_navfil
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2962,7 +2939,6 @@ int mb_pr_update_navshift(int verbose, char *file, int mbp_nav_shift, double mbp
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3002,7 +2978,6 @@ int mb_pr_update_heading(int verbose, char *file, int mbp_heading_mode, double m
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3054,7 +3029,6 @@ int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3095,7 +3069,6 @@ int mb_pr_update_edit(int verbose, char *file, int mbp_edit_mode, char *mbp_edit
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3149,7 +3122,6 @@ int mb_pr_update_ampcorr(int verbose, char *file, int mbp_ampcorr_mode, char *mb
 		fprintf(stderr, "dbg2       status:                   %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3203,7 +3175,6 @@ int mb_pr_update_sscorr(int verbose, char *file, int mbp_sscorr_mode, char *mbp_
 		fprintf(stderr, "dbg2       status:                   %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3248,7 +3219,6 @@ int mb_pr_update_ssrecalc(int verbose, char *file, int mbp_ssrecalc_mode, double
 		fprintf(stderr, "dbg2       status:                   %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3325,7 +3295,6 @@ int mb_pr_update_metadata(int verbose, char *file, char *mbp_meta_vessel, char *
 		fprintf(stderr, "dbg2       status:                   %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3383,7 +3352,6 @@ int mb_pr_update_kluges(int verbose, char *file, int mbp_kluge001, int mbp_kluge
 		fprintf(stderr, "dbg2       status:                   %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3441,7 +3409,6 @@ int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3478,7 +3445,6 @@ int mb_pr_get_format(int verbose, char *file, int *mbp_format_specified, int *mb
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3520,7 +3486,6 @@ int mb_pr_get_rollbias(int verbose, char *file, int *mbp_rollbias_mode, double *
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3557,7 +3522,6 @@ int mb_pr_get_pitchbias(int verbose, char *file, int *mbp_pitchbias_mode, double
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3599,7 +3563,6 @@ int mb_pr_get_draft(int verbose, char *file, int *mbp_draft_mode, double *mbp_dr
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3638,7 +3601,6 @@ int mb_pr_get_heave(int verbose, char *file, int *mbp_heave_mode, double *mbp_he
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3687,7 +3649,6 @@ int mb_pr_get_lever(int verbose, char *file, int *mbp_lever_mode, double *mbp_vr
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3727,7 +3688,6 @@ int mb_pr_get_tide(int verbose, char *file, int *mbp_tide_mode, char *mbp_tidefi
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3764,7 +3724,6 @@ int mb_pr_get_tt(int verbose, char *file, int *mbp_tt_mode, double *mbp_tt_mult,
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3801,7 +3760,6 @@ int mb_pr_get_ssv(int verbose, char *file, int *mbp_ssv_mode, double *mbp_ssv, i
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3844,7 +3802,6 @@ int mb_pr_get_svp(int verbose, char *file, int *mbp_svp_mode, char *mbp_svpfile,
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3882,7 +3839,6 @@ int mb_pr_get_static(int verbose, char *file, int *mbp_static_mode, char *mbp_st
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3925,7 +3881,6 @@ int mb_pr_get_navadj(int verbose, char *file, int *mbp_navadj_mode, char *mbp_na
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3966,7 +3921,6 @@ int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mb
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4007,7 +3961,6 @@ int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char
 		fprintf(stderr, "dbg2       status:                %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4061,7 +4014,6 @@ int mb_pr_get_nav(int verbose, char *file, int *mbp_nav_mode, char *mbp_navfile,
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4112,7 +4064,6 @@ int mb_pr_get_navshift(int verbose, char *file, int *mbp_nav_shift, double *mbp_
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 } /*--------------------------------------------------------------------*/
 int mb_pr_get_heading(int verbose, char *file, int *mbp_heading_mode, double *mbp_headingbias, int *error) {
@@ -4148,7 +4099,6 @@ int mb_pr_get_heading(int verbose, char *file, int *mbp_heading_mode, double *mb
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4197,7 +4147,6 @@ int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_ki
 		fprintf(stderr, "dbg2       status:             %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4235,7 +4184,6 @@ int mb_pr_get_edit(int verbose, char *file, int *mbp_edit_mode, char *mbp_editfi
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4286,7 +4234,6 @@ int mb_pr_get_ampcorr(int verbose, char *file, int *mbp_ampcorr_mode, char *mbp_
 		fprintf(stderr, "dbg2       status:                   %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4337,7 +4284,6 @@ int mb_pr_get_sscorr(int verbose, char *file, int *mbp_sscorr_mode, char *mbp_ss
 		fprintf(stderr, "dbg2       status:                   %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4379,7 +4325,6 @@ int mb_pr_get_ssrecalc(int verbose, char *file, int *mbp_ssrecalc_mode, double *
 		fprintf(stderr, "dbg2       status:                   %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4453,7 +4398,6 @@ int mb_pr_get_metadata(int verbose, char *file, char *mbp_meta_vessel, char *mbp
 		fprintf(stderr, "dbg2       status:                   %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4508,7 +4452,6 @@ int mb_pr_get_kluges(int verbose, char *file, int *mbp_kluge001, int *mbp_kluge0
 		fprintf(stderr, "dbg2       status:                   %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4606,7 +4549,6 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4758,7 +4700,6 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4855,7 +4796,6 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4927,7 +4867,6 @@ int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y,
 		fprintf(stderr, "dbg2       inside:          %d\n", inside);
 	}
 
-	/* return status */
 	return (inside);
 }
 /*--------------------------------------------------------------------*/
@@ -5010,7 +4949,6 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5098,7 +5036,6 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5175,7 +5112,6 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, i
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

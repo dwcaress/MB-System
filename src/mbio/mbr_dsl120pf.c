@@ -159,7 +159,6 @@ int mbr_register_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -237,7 +236,6 @@ int mbr_info_dsl120pf(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -309,7 +307,6 @@ int mbr_alm_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -343,7 +340,6 @@ int mbr_dem_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -444,7 +440,6 @@ int mbr_zero_dsl120pf(int verbose, char *data_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -550,7 +545,6 @@ int mbr_rt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -656,7 +650,6 @@ int mbr_wt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -826,7 +819,6 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -985,7 +977,6 @@ int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1038,7 +1029,6 @@ int mbr_dsl120pf_rd_dataheader(int verbose, void *mbio_ptr, FILE *mbfp, char *ty
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1129,7 +1119,6 @@ int mbr_dsl120pf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1223,7 +1212,6 @@ int mbr_dsl120pf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1285,7 +1273,6 @@ int mbr_dsl120pf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1342,7 +1329,6 @@ int mbr_dsl120pf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1529,7 +1515,6 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1719,7 +1704,6 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1855,7 +1839,6 @@ int mbr_dsl120pf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

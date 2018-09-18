@@ -182,7 +182,6 @@ int mb_platform_math_attitude_offset(int verbose, double target_offset_roll, dou
 		fprintf(stderr, "dbg2       status:			               %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -251,7 +250,6 @@ int mb_platform_math_attitude_platform(int verbose, double nav_attitude_roll, do
 		fprintf(stderr, "dbg2       status:			   %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -318,7 +316,6 @@ int mb_platform_math_attitude_target(int verbose, double source_attitude_roll, d
 		fprintf(stderr, "dbg2       status:			 %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -402,7 +399,6 @@ int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_a
 		fprintf(stderr, "dbg2       status:			 %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -459,6 +455,5 @@ int mb_platform_math_attitude_rotate_beam(int verbose, double beam_acrosstrack, 
 		fprintf(stderr, "dbg2       status:			 %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }

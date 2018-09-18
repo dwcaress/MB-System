@@ -89,7 +89,6 @@ int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -136,7 +135,6 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -272,7 +270,6 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -413,7 +410,6 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -541,7 +537,6 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -641,7 +636,6 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -723,7 +717,6 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int star
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -824,7 +817,6 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -902,7 +894,6 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, i
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -986,7 +977,6 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1051,7 +1041,6 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1097,7 +1086,6 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1143,7 +1131,6 @@ int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

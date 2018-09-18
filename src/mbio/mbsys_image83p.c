@@ -75,7 +75,6 @@ int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *err
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -105,7 +104,6 @@ int mbsys_image83p_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -162,7 +160,6 @@ int mbsys_image83p_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -303,7 +300,6 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -414,7 +410,6 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -514,7 +509,6 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -593,7 +587,6 @@ int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -676,7 +669,6 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -804,7 +796,6 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -884,7 +875,6 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -926,7 +916,6 @@ int mbsys_image83p_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

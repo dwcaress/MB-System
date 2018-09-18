@@ -241,7 +241,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -581,7 +580,6 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -673,7 +671,6 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -723,7 +720,6 @@ int mb_get_fbt(int verbose, char *file, int *format, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -773,7 +769,6 @@ int mb_get_fnv(int verbose, char *file, int *format, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -827,7 +822,6 @@ int mb_get_ffa(int verbose, char *file, int *format, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -881,7 +875,6 @@ int mb_get_ffs(int verbose, char *file, int *format, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1017,7 +1010,6 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -1122,7 +1114,6 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1404,7 +1395,6 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
