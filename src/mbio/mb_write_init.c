@@ -580,7 +580,6 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

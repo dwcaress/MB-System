@@ -131,7 +131,6 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

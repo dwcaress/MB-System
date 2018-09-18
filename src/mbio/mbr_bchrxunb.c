@@ -169,7 +169,6 @@ int mbr_register_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -246,7 +245,6 @@ int mbr_info_bchrxunb(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -289,7 +287,6 @@ int mbr_alm_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -323,7 +320,6 @@ int mbr_dem_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -470,7 +466,6 @@ int mbr_zero_bchrxunb(int verbose, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -661,7 +656,6 @@ int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -817,7 +811,6 @@ int mbr_wt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -947,7 +940,6 @@ int mbr_bchrxunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -996,7 +988,6 @@ int mbr_bchrxunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1178,7 +1169,6 @@ int mbr_bchrxunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrxunb_struc
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1297,7 +1287,6 @@ int mbr_bchrxunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *dat
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1394,7 +1383,6 @@ int mbr_bchrxunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *dat
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1566,7 +1554,6 @@ int mbr_bchrxunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1738,7 +1725,6 @@ int mbr_bchrxunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1910,7 +1896,6 @@ int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1979,7 +1964,6 @@ int mbr_bchrxunb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2059,7 +2043,6 @@ int mbr_bchrxunb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2264,7 +2247,6 @@ int mbr_bchrxunb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *erro
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2402,7 +2384,6 @@ int mbr_bchrxunb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2525,7 +2506,6 @@ int mbr_bchrxunb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2718,7 +2698,6 @@ int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2911,7 +2890,6 @@ int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3104,7 +3082,6 @@ int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

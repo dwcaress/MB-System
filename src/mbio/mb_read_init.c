@@ -655,7 +655,6 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1124,7 +1123,6 @@ int mb_input_init(int verbose, char *file, int format,
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

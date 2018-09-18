@@ -206,7 +206,6 @@ int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -285,7 +284,6 @@ int mbr_info_em300mba(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -334,7 +332,6 @@ int mbr_alm_em300mba(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -367,7 +364,6 @@ int mbr_dem_em300mba(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -560,7 +556,6 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -600,7 +595,6 @@ int mbr_wt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1287,7 +1281,6 @@ Have a nice day...\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1456,7 +1449,6 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1827,7 +1819,6 @@ file will return error */
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1953,7 +1944,6 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2034,7 +2024,6 @@ int mbr_em300mba_rd_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2116,7 +2105,6 @@ int mbr_em300mba_rd_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2195,7 +2183,6 @@ int mbr_em300mba_rd_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2317,7 +2304,6 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2437,7 +2423,6 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2557,7 +2542,6 @@ int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2701,7 +2685,6 @@ int mbr_em300mba_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2832,7 +2815,6 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3000,7 +2982,6 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3123,7 +3104,6 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3244,7 +3224,6 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3463,7 +3442,6 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3609,7 +3587,6 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -3841,7 +3818,6 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4061,7 +4037,6 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4407,7 +4382,6 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4613,7 +4587,6 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -4827,7 +4800,6 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5153,7 +5125,6 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5315,7 +5286,6 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5443,7 +5413,6 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5572,7 +5541,6 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5698,7 +5666,6 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5875,7 +5842,6 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6050,7 +6016,6 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6225,7 +6190,6 @@ int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6404,7 +6368,6 @@ int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6586,7 +6549,6 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6762,7 +6724,6 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6939,7 +6900,6 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -7157,7 +7117,6 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -7341,7 +7300,6 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -7601,7 +7559,6 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -7844,7 +7801,6 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -8127,7 +8083,6 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -8386,7 +8341,6 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

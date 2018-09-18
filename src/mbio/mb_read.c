@@ -704,7 +704,6 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

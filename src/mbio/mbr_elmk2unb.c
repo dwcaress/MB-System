@@ -165,7 +165,6 @@ int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -243,7 +242,6 @@ int mbr_info_elmk2unb(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       status:         %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -285,7 +283,6 @@ int mbr_alm_elmk2unb(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -319,7 +316,6 @@ int mbr_dem_elmk2unb(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -466,7 +462,6 @@ int mbr_zero_elmk2unb(int verbose, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -668,7 +663,6 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -821,7 +815,6 @@ int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -937,7 +930,6 @@ int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -986,7 +978,6 @@ int mbr_elmk2unb_rd_comment(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1168,7 +1159,6 @@ int mbr_elmk2unb_rd_parameter(int verbose, FILE *mbfp, struct mbf_elmk2unb_struc
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1287,7 +1277,6 @@ int mbr_elmk2unb_rd_pos(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *dat
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1384,7 +1373,6 @@ int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *dat
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1583,7 +1571,6 @@ int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1646,7 +1633,6 @@ int mbr_elmk2unb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1726,7 +1712,6 @@ int mbr_elmk2unb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1931,7 +1916,6 @@ int mbr_elmk2unb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *erro
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2069,7 +2053,6 @@ int mbr_elmk2unb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2192,7 +2175,6 @@ int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2415,7 +2397,6 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

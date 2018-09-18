@@ -84,7 +84,6 @@ int mb_mem_debug_on(int verbose, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -123,7 +122,6 @@ int mb_mem_debug_off(int verbose, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -202,7 +200,6 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -284,7 +281,6 @@ int mb_mallocd(int verbose, const char *sourcefile, int sourceline, size_t size,
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -391,7 +387,6 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -507,7 +502,6 @@ int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -592,7 +586,6 @@ int mb_free(int verbose, void **ptr, int *error) {
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -679,7 +672,6 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -728,7 +720,6 @@ int mb_memory_clear(int verbose, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -771,7 +762,6 @@ int mb_memory_status(int verbose, int *nalloc, int *nallocmax, int *overflow, si
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -822,7 +812,6 @@ int mb_memory_list(int verbose, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -918,7 +907,6 @@ int mb_register_array(int verbose, void *mbio_ptr, int type, size_t size, void *
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1220,7 +1208,6 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 	//}
 	//}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1268,7 +1255,6 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1308,7 +1294,6 @@ int mb_list_arrays(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1392,7 +1377,6 @@ int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

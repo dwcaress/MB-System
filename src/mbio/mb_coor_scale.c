@@ -85,7 +85,6 @@ int mb_coor_scale(int verbose, double latitude, double *mtodeglon, double *mtode
 		fprintf(stderr, "dbg2       status:    %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -133,7 +132,6 @@ int mb_apply_lonflip(int verbose, int lonflip, double *longitude) {
 		fprintf(stderr, "dbg2       status:    %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

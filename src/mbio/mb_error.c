@@ -77,7 +77,6 @@ int mb_error(int verbose, int error, char **message) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -116,7 +115,6 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -155,7 +153,6 @@ int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -194,7 +191,6 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -234,7 +230,6 @@ int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -272,7 +267,6 @@ int mb_notice_message(int verbose, int notice, char **message) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

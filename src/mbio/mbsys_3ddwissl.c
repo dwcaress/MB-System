@@ -272,7 +272,6 @@ int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3ddwissl_alloc */
 /*----------------------------------------------------------------------*/
@@ -320,7 +319,6 @@ int mbsys_3ddwissl_deall(int verbose,      /* in: verbosity level set on command
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3ddwissl_deall */
 /*----------------------------------------------------------------------*/
@@ -384,7 +382,6 @@ int mbsys_3ddwissl_dimensions(int verbose, void *mbio_ptr, /* in: verbosity leve
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* print return status */
 	return status;
 } /* mbsys_3ddwissl_dimensions */
 /*--------------------------------------------------------------------*/
@@ -704,7 +701,6 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 		fprintf(stderr, "dbg2       status:        %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -757,7 +753,6 @@ int mbsys_3ddwissl_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1028,7 +1023,6 @@ int mbsys_3ddwissl_insert(int verbose,     /* in: verbosity level set on command
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3ddwissl_insert */
 /*--------------------------------------------------------------------*/
@@ -1213,7 +1207,6 @@ int mbsys_3ddwissl_detects(int verbose,     /* in: verbosity level set on comman
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3ddwissl_detects */
 /*--------------------------------------------------------------------*/
@@ -1384,7 +1377,6 @@ int mbsys_3ddwissl_gains(int verbose,           /* in: verbosity level set on co
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3ddwissl_gains */
 /*--------------------------------------------------------------------*/
@@ -1478,7 +1470,6 @@ int mbsys_3ddwissl_extract_altitude(
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3ddwissl_extract_altitude */
 /*--------------------------------------------------------------------*/
@@ -1859,7 +1850,6 @@ int mbsys_3ddwissl_extract_svp(int verbose,      /* in: verbosity level set on c
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3ddwissl_extract_svp */
 /*----------------------------------------------------------------------*/
@@ -1922,7 +1912,6 @@ int mbsys_3ddwissl_insert_svp(int verbose,      /* in: verbosity level set on co
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3ddwissl_insert_svp */
 /*----------------------------------------------------------------------*/
@@ -2242,7 +2231,6 @@ int mbsys_3ddwissl_print_store(int verbose,     /* in: verbosity level set on co
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3ddwissl_print_store */
 /*--------------------------------------------------------------------*/
@@ -2446,7 +2434,6 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 
 } /* mbsys_3ddwissl_calculatebathymetry */
@@ -2788,7 +2775,6 @@ fprintf(stderr, "\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 
 } /* mbsys_3ddwissl_fixwissltimestamps */
@@ -2939,7 +2925,6 @@ mb_io_ptr->indextable[i].read);
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 
 } /* mbsys_3ddwissl_applywissltimestamps */

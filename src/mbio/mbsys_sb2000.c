@@ -72,7 +72,6 @@ int mbsys_sb2000_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -102,7 +101,6 @@ int mbsys_sb2000_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -159,7 +157,6 @@ int mbsys_sb2000_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -340,7 +337,6 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -497,7 +493,6 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -595,7 +590,6 @@ int mbsys_sb2000_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -674,7 +668,6 @@ int mbsys_sb2000_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -766,7 +759,6 @@ int mbsys_sb2000_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -899,7 +891,6 @@ int mbsys_sb2000_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -981,7 +972,6 @@ int mbsys_sb2000_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1022,7 +1012,6 @@ int mbsys_sb2000_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

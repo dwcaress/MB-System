@@ -77,7 +77,6 @@ int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -115,7 +114,6 @@ int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr, int *e
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 
@@ -173,7 +171,6 @@ int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -211,7 +208,6 @@ int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, in
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -250,7 +246,6 @@ int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -289,7 +284,6 @@ int mbsys_stereopair_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -511,7 +505,6 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -656,7 +649,6 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -756,7 +748,6 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -838,7 +829,6 @@ int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -917,7 +907,6 @@ int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -988,7 +977,6 @@ int mbsys_stereopair_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1123,7 +1111,6 @@ int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 		fprintf(stderr, "dbg2       status:        %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1263,7 +1250,6 @@ int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1362,7 +1348,6 @@ int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1404,7 +1389,6 @@ int mbsys_stereopair_copy(int verbose, void *mbio_ptr, void *store_ptr, void *co
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

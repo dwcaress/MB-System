@@ -306,7 +306,6 @@ int mbsys_3datdepthlidar_alloc(int verbose,      /* in: verbosity level set on c
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3datdepthlidar_alloc */
 /*----------------------------------------------------------------------*/
@@ -353,7 +352,6 @@ int mbsys_3datdepthlidar_deall(int verbose,      /* in: verbosity level set on c
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3datdepthlidar_deall */
 /*----------------------------------------------------------------------*/
@@ -422,7 +420,6 @@ int mbsys_3datdepthlidar_dimensions(int verbose, void *mbio_ptr, /* in: verbosit
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* print return status */
 	return status;
 } /* mbsys_3datdepthlidar_dimensions */
 /*--------------------------------------------------------------------*/
@@ -711,7 +708,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 		fprintf(stderr, "dbg2       status:        %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -960,7 +956,6 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3datdepthlidar_insert */
 /*--------------------------------------------------------------------*/
@@ -1155,7 +1150,6 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3datdepthlidar_detects */
 /*--------------------------------------------------------------------*/
@@ -1331,7 +1325,6 @@ int mbsys_3datdepthlidar_gains(int verbose,           /* in: verbosity level set
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3datdepthlidar_gains */
 /*--------------------------------------------------------------------*/
@@ -1419,7 +1412,6 @@ int mbsys_3datdepthlidar_extract_altitude(
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3datdepthlidar_extract_altitude */
 /*--------------------------------------------------------------------*/
@@ -1815,7 +1807,6 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
 		fprintf(stderr, "dbg2       status:            %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3datdepthlidar_extract_svp */
 /*----------------------------------------------------------------------*/
@@ -1878,7 +1869,6 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3datdepthlidar_insert_svp */
 /*----------------------------------------------------------------------*/
@@ -2076,7 +2066,6 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3datdepthlidar_print_store */
 /*--------------------------------------------------------------------*/
@@ -2178,7 +2167,6 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return status;
 } /* mbsys_3datdepthlidar_print_store */
 /*--------------------------------------------------------------------*/
