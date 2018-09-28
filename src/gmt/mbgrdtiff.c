@@ -360,7 +360,6 @@ int tiff_offset[] = {
 #define gmt_set_grddim GMT_set_grddim
 #define gmt_show_name_and_purpose GMT_show_name_and_purpose
 #elif GMT_MAJOR_VERSION == 6
-#define gmt_get_cpt(a,b,c,d,e) gmt_get_cpt(a,b,c,d,e,0.0)
 #define gmt_M_grd_is_global gmt_grd_is_global
 #endif
 
