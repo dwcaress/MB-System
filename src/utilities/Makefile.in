@@ -110,10 +110,11 @@ bin_PROGRAMS = mbconfig$(EXEEXT) mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
 	mbtime$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
 subdir = src/utilities
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
+	$(top_srcdir)/m4/ax_check_link_flag.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(include_HEADERS)
@@ -446,6 +447,10 @@ GDAL_CONF = @GDAL_CONF@
 GMT_CONF = @GMT_CONF@
 GMT_PLUGINDIR = @GMT_PLUGINDIR@
 GREP = @GREP@
+HARDEN_BINCFLAGS = @HARDEN_BINCFLAGS@
+HARDEN_BINLDFLAGS = @HARDEN_BINLDFLAGS@
+HARDEN_CFLAGS = @HARDEN_CFLAGS@
+HARDEN_LDFLAGS = @HARDEN_LDFLAGS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@

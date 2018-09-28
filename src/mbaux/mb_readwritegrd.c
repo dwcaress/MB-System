@@ -258,7 +258,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	}
 
 	/* print debug info */
-	if (verbose > 0) {
+	if (status == MB_SUCCESS && verbose > 0) {
 		fprintf(stderr, "\nGrid read:\n");
 		fprintf(stderr, "  Dimensions:     %d %d\n", header->n_columns, header->n_rows);
 		fprintf(stderr, "  Registration:   %d\n", header->registration);
@@ -296,36 +296,38 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBA function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       Dimensions: %d %d\n", header->n_columns, header->n_rows);
-		if (modeltype == ModelTypeProjected) {
-			fprintf(stderr, "dbg2       Projected Coordinate System Name: %s\n", projectionname);
-			fprintf(stderr, "dbg2       Projected Coordinate System ID:   %d\n", projectionid);
-			fprintf(stderr, "dbg2       Easting:                  %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
-			fprintf(stderr, "dbg2       Northing:                 %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
+		if (status == MB_SUCCESS) {
+		        fprintf(stderr, "dbg2       Dimensions: %d %d\n", header->n_columns, header->n_rows);
+		        if (modeltype == ModelTypeProjected) {
+			        fprintf(stderr, "dbg2       Projected Coordinate System Name: %s\n", projectionname);
+			        fprintf(stderr, "dbg2       Projected Coordinate System ID:   %d\n", projectionid);
+			        fprintf(stderr, "dbg2       Easting:                  %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
+			        fprintf(stderr, "dbg2       Northing:                 %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
+		        }
+		        else {
+			        fprintf(stderr, "dbg2       Geographic Coordinate System Name: %s\n", projectionname);
+			        fprintf(stderr, "dbg2       Geographic Coordinate System ID:   %d\n", projectionid);
+			        fprintf(stderr, "dbg2       Longitude:                %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
+			        fprintf(stderr, "dbg2       Latitude:                 %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
+		        }
+		        fprintf(stderr, "dbg2       Internal Grid Projection Mode: %d\n", *grid_projection_mode);
+		        fprintf(stderr, "dbg2       Internal Grid Projection ID:   %s\n", grid_projection_id);
+		        fprintf(stderr, "Data Read:\n");
+		        fprintf(stderr, "dbg2       grid_projection_mode:     %d\n", *grid_projection_mode);
+		        fprintf(stderr, "dbg2       grid_projection_id:       %s\n", grid_projection_id);
+		        fprintf(stderr, "dbg2       nodatavalue:              %f\n", *nodatavalue);
+		        fprintf(stderr, "dbg2       n_columns:                %d\n", *n_columns);
+		        fprintf(stderr, "dbg2       n_rows:                   %d\n", *n_rows);
+		        fprintf(stderr, "dbg2       min:                      %f\n", *min);
+		        fprintf(stderr, "dbg2       max:                      %f\n", *max);
+		        fprintf(stderr, "dbg2       xmin:                     %f\n", *xmin);
+		        fprintf(stderr, "dbg2       xmax:                     %f\n", *xmax);
+		        fprintf(stderr, "dbg2       ymin:                     %f\n", *ymin);
+		        fprintf(stderr, "dbg2       ymax:                     %f\n", *ymax);
+		        fprintf(stderr, "dbg2       dx:                       %f\n", *dx);
+		        fprintf(stderr, "dbg2       dy:                       %f\n", *dy);
+		        fprintf(stderr, "dbg2       data:                     %p\n", *data);
 		}
-		else {
-			fprintf(stderr, "dbg2       Geographic Coordinate System Name: %s\n", projectionname);
-			fprintf(stderr, "dbg2       Geographic Coordinate System ID:   %d\n", projectionid);
-			fprintf(stderr, "dbg2       Longitude:                %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
-			fprintf(stderr, "dbg2       Latitude:                 %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
-		}
-		fprintf(stderr, "dbg2       Internal Grid Projection Mode: %d\n", *grid_projection_mode);
-		fprintf(stderr, "dbg2       Internal Grid Projection ID:   %s\n", grid_projection_id);
-		fprintf(stderr, "Data Read:\n");
-		fprintf(stderr, "dbg2       grid_projection_mode:     %d\n", *grid_projection_mode);
-		fprintf(stderr, "dbg2       grid_projection_id:       %s\n", grid_projection_id);
-		fprintf(stderr, "dbg2       nodatavalue:              %f\n", *nodatavalue);
-		fprintf(stderr, "dbg2       n_columns:                %d\n", *n_columns);
-		fprintf(stderr, "dbg2       n_rows:                   %d\n", *n_rows);
-		fprintf(stderr, "dbg2       min:                      %f\n", *min);
-		fprintf(stderr, "dbg2       max:                      %f\n", *max);
-		fprintf(stderr, "dbg2       xmin:                     %f\n", *xmin);
-		fprintf(stderr, "dbg2       xmax:                     %f\n", *xmax);
-		fprintf(stderr, "dbg2       ymin:                     %f\n", *ymin);
-		fprintf(stderr, "dbg2       ymax:                     %f\n", *ymax);
-		fprintf(stderr, "dbg2       dx:                       %f\n", *dx);
-		fprintf(stderr, "dbg2       dy:                       %f\n", *dy);
-		fprintf(stderr, "dbg2       data:                     %p\n", *data);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
