@@ -99,6 +99,7 @@ AS_ECHO(["        --with-opengl-lib     - location of OpenGL libs (optional)"])
 AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"])
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
+AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
 AS_ECHO(["        make"])
@@ -201,6 +202,91 @@ AC_CHECK_FUNC(xdrmem_create, XDR_LIB=, [
   ])
 ])
 AC_SUBST(XDR_LIB)
+
+dnl--------------------------------------------------------------------
+dnl Enable compiler and linker options to frustrate memory corruption exploits
+dnl including generating Position Independent Executables (PIE)
+dnl using --enable-hardening
+dnl--------------------------------------------------------------------
+
+dnl HARDENING START
+dnl This is taken from https://github.com/kmcallister/autoharden
+dnl With some very small modifications (to remove C++ checking for instance)
+dnl made by https://git.insomnia247.nl/irc/unreal4/blob/unreal40/configure.ac
+# We want to check for compiler flag support, but there is no way to make
+# clang's "argument unused" warning fatal.  So we invoke the compiler through a
+# wrapper script that greps for this message.
+saved_CC="$CC"
+saved_CXX="$CXX"
+saved_LD="$LD"
+flag_wrap="$srcdir/extras/wrap-compiler-for-flag-check"
+CC="$flag_wrap $CC"
+CXX="$flag_wrap $CXX"
+LD="$flag_wrap $LD"
+
+# We use the same hardening flags for C and C++.  We must check that each flag
+# is supported by both compilers.
+AC_DEFUN([check_cc_cxx_flag],
+ [AC_LANG_PUSH(C)
+  AX_CHECK_COMPILE_FLAG([$1],
+   [AC_LANG_PUSH(C)
+    AX_CHECK_COMPILE_FLAG([$1], [$2], [$3], [-Werror $4])
+    AC_LANG_POP(C)],
+   [$3], [-Werror $4])
+  AC_LANG_POP(C)])
+
+AC_DEFUN([check_link_flag],
+ [AX_CHECK_LINK_FLAG([$1], [$2], [$3], [-Werror $4])])
+
+AC_ARG_ENABLE([hardening],
+  [AS_HELP_STRING([--enable-hardening],
+    [Enable compiler and linker options to frustrate memory corruption exploits @<:@yes@:>@])],
+  [hardening="$enableval"],
+  [hardening="no"])
+
+HARDEN_CFLAGS=""
+HARDEN_LDFLAGS=""
+AS_ECHO(["Checking for hardening enabled.... $hardening"])
+
+AS_IF([test x"$hardening" != x"no"], [
+  check_cc_cxx_flag([-fno-strict-overflow], [HARDEN_CFLAGS="$HARDEN_CFLAGS -fno-strict-overflow"])
+
+  # This one will likely succeed, even on platforms where it does nothing.
+  check_cc_cxx_flag([-D_FORTIFY_SOURCE=2], [HARDEN_CFLAGS="$HARDEN_CFLAGS -D_FORTIFY_SOURCE=2"])
+
+  check_cc_cxx_flag([-fstack-protector-all],
+   [check_link_flag([-fstack-protector-all],
+     [HARDEN_CFLAGS="$HARDEN_CFLAGS -fstack-protector-all"
+      check_cc_cxx_flag([-Wstack-protector], [HARDEN_CFLAGS="$HARDEN_CFLAGS -Wstack-protector"],
+        [], [-fstack-protector-all])
+      check_cc_cxx_flag([--param ssp-buffer-size=1], [HARDEN_CFLAGS="$HARDEN_CFLAGS --param ssp-buffer-size=1"],
+        [], [-fstack-protector-all])])])
+
+  # At the link step, we might want -pie (GCC) or -Wl,-pie (Clang on OS X)
+  #
+  # The linker checks also compile code, so we need to include -fPIE as well.
+  check_cc_cxx_flag([-fPIE],
+   [check_link_flag([-fPIE -pie],
+     [HARDEN_BINCFLAGS="-fPIE"
+      HARDEN_BINLDFLAGS="-pie"],
+     [check_link_flag([-fPIE -Wl,-pie],
+       [HARDEN_BINCFLAGS="-fPIE"
+        HARDEN_BINLDFLAGS="-Wl,-pie"])])])
+
+  check_link_flag([-Wl,-z,relro],
+   [HARDEN_LDFLAGS="$HARDEN_LDFLAGS -Wl,-z,relro"
+    check_link_flag([-Wl,-z,now], [HARDEN_LDFLAGS="$HARDEN_LDFLAGS -Wl,-z,now"])])
+    ])
+AC_SUBST([HARDEN_CFLAGS])
+AC_SUBST([HARDEN_LDFLAGS])
+AC_SUBST([HARDEN_BINCFLAGS])
+AC_SUBST([HARDEN_BINLDFLAGS])
+
+# End of flag tests.
+CC="$saved_CC"
+CXX="$saved_CXX"
+LD="$saved_LD"
+dnl HARDENING END
 
 dnl--------------------------------------------------------------------
 dnl Shared Data Section
@@ -418,21 +504,21 @@ else
 fi
 if test -x "$GMT_CONF" ; then
     AC_MSG_CHECKING(for GMT includes)
-    GMT_INC=`$GMT_CONF --cflags`
+    GMT_INC=`$GMT_CONF --cflags 2>/dev/null`
     AC_MSG_RESULT($GMT_INC)
     AC_MSG_CHECKING(for GMT libs)
-    GMT_LIB=`$GMT_CONF --libs`
-    DEP_LIBS=`$GMT_CONF --dep-libs`
+    GMT_LIB=`$GMT_CONF --libs 2>/dev/null`
+    DEP_LIBS=`$GMT_CONF --dep-libs 2>/dev/null`
     AC_MSG_RESULT($GMT_LIB)
     GMT_LIB_PATH=`echo $GMT_LIB | sed 's/^-L//;s/\ .*//'`
     rpath="$GMT_LIB_PATH"
     AC_MSG_CHECKING(for 32/64-bit GMT5 installation)
-    bits=`$GMT_CONF --bits`
+    bits=`$GMT_CONF --bits 2>/dev/null`
     GCC_64="-m${bits}"
     LDFLAGS="$LDFLAGS -m${bits}"
     AC_MSG_RESULT(found ${bits}-bit)
     AC_MSG_CHECKING(for GMT plugin location)
-    GMT_PLUGINDIR=`$GMT_CONF --plugindir`
+    GMT_PLUGINDIR=`$GMT_CONF --plugindir 2>/dev/null`
     AC_MSG_RESULT($GMT_PLUGINDIR)
 
     libgmt_CPPFLAGS="$GMT_INC"
@@ -824,6 +910,15 @@ if test "x$enable_shared" = xyes ; then
     AS_ECHO(["Building Shared Libs: Yes"])
 else
     AS_ECHO(["Building Shared Libs: No"])
+fi
+if test x"$hardening" != x"no" ; then
+    AS_ECHO(["Hardening Enabled: Yes"])
+    AS_ECHO(["HARDEN_CFLAGS:     $HARDEN_CFLAGS"])
+    AS_ECHO(["HARDEN_LDFLAGS:    $HARDEN_LDFLAGS"])
+    AS_ECHO(["HARDEN_BINCFLAGS:  $HARDEN_BINCFLAGS"])
+    AS_ECHO(["HARDEN_BINLDFLAGS: $HARDEN_BINLDFLAGS"])
+else
+    AS_ECHO(["Hardening Enabled: No"])
 fi
 if test $BYTESWAP = "yes" ; then
     AS_ECHO(["Byteswapping: Enabled"])

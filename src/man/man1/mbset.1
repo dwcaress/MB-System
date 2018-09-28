@@ -1,4 +1,4 @@
-.TH mbset 1 "20 July 2016" "MB-System 5.0" "MB-System 5.0"
+.TH mbset 1 "14 September 2018" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbset\fP \- Sets values in \fBmbprocess\fP parameter files.
 
@@ -251,11 +251,15 @@ The \fBmbprocess\fP parameter file commands modified by \fBmbset\fP are:
           kind = 0 : cut applied to bathymetry data
           kind = 1 : cut applied to amplitude data
           kind = 2 : cut applied to sidescan data
-          mode = 0 : min and max indicate start and end
+          mode = 0 : no data are flagged or zeroed
+          mode = 1 : min and max indicate start and end
                      beam/pixel numbers between which data
                      are flagged or zeroed
-          mode = 1 : min and max indicate start and end
+          mode = 2 : min and max indicate start and end
                      acrosstrack distance (m) between which
+                     data are flagged or zeroed
+          mode = 3 : min and max indicate minimumn and 
+                     platform speed (km/hr) between which
                      data are flagged or zeroed
    BATHCUTNUMBER min max
         adds new bathymetry data cutting command where

@@ -3074,6 +3074,7 @@ void do_naverr_addtie(Widget w, XtPointer client_data, XtPointer call_data) {
 	do_update_naverr();
 	do_update_status();
 	if (project.modelplot == MB_YES) {
+        project.modelplot_uptodate = MB_NO;
 		do_update_modelplot_status();
 		mbnavadjust_modelplot_plot(__FILE__, __LINE__);
 	}
@@ -3094,6 +3095,7 @@ void do_naverr_deletetie(Widget w, XtPointer client_data, XtPointer call_data) {
 	do_update_naverr();
 	do_update_status();
 	if (project.modelplot == MB_YES) {
+        project.modelplot_uptodate = MB_NO;
 		do_update_modelplot_status();
 		mbnavadjust_modelplot_plot(__FILE__, __LINE__);
 	}
@@ -3114,6 +3116,7 @@ void do_naverr_selecttie(Widget w, XtPointer client_data, XtPointer call_data) {
 	do_update_naverr();
 	do_update_status();
 	if (project.modelplot == MB_YES) {
+        project.modelplot_uptodate = MB_NO;
 		do_update_modelplot_status();
 		mbnavadjust_modelplot_plot(__FILE__, __LINE__);
 	}
@@ -3133,6 +3136,7 @@ void do_naverr_unset(Widget w, XtPointer client_data, XtPointer call_data) {
 	do_update_naverr();
 	do_update_status();
 	if (project.modelplot == MB_YES) {
+        project.modelplot_uptodate = MB_NO;
 		do_update_modelplot_status();
 		mbnavadjust_modelplot_plot(__FILE__, __LINE__);
 	}
@@ -3154,6 +3158,7 @@ void do_naverr_setnone(Widget w, XtPointer client_data, XtPointer call_data) {
 	do_update_naverr();
 	do_update_status();
 	if (project.modelplot == MB_YES) {
+        project.modelplot_uptodate = MB_NO;
 		do_update_modelplot_status();
 		mbnavadjust_modelplot_plot(__FILE__, __LINE__);
 	}
@@ -3174,6 +3179,7 @@ void do_naverr_setoffset(Widget w, XtPointer client_data, XtPointer call_data) {
 	do_update_naverr();
 	do_update_status();
 	if (project.modelplot == MB_YES) {
+        project.modelplot_uptodate = MB_NO;
 		do_update_modelplot_status();
 		mbnavadjust_modelplot_plot(__FILE__, __LINE__);
 	}
