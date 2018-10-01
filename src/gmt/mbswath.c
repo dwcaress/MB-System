@@ -85,6 +85,7 @@
 #define gmt_rgb_syntax GMT_rgb_syntax
 #define gmt_set_grddim GMT_set_grddim
 #define gmt_show_name_and_purpose GMT_show_name_and_purpose
+#endif
 
 EXTERN_MSC int GMT_mbswath(void *API, int mode, void *args);
 
