@@ -107,7 +107,8 @@ bin_PROGRAMS = mbconfig$(EXEEXT) mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
 	mbsegyinfo$(EXEEXT) mbsegylist$(EXEEXT) mbset$(EXEEXT) \
 	mbsslayout$(EXEEXT) mbstripnan$(EXEEXT) mbsvplist$(EXEEXT) \
 	mbsvpselect$(EXEEXT) mbswplspreprocess$(EXEEXT) \
-	mbtime$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
+	mbtime$(EXEEXT) mbvoxelclean$(EXEEXT) $(am__EXEEXT_1) \
+	$(am__EXEEXT_2)
 subdir = src/utilities
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -305,6 +306,9 @@ mbtrnpreprocess_OBJECTS = $(am_mbtrnpreprocess_OBJECTS)
 @BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 @BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1) $(MBTRNLIB) \
 @BUILD_MBTRN_TRUE@	$(am__DEPENDENCIES_1)
+am_mbvoxelclean_OBJECTS = mbvoxelclean.$(OBJEXT)
+mbvoxelclean_OBJECTS = $(am_mbvoxelclean_OBJECTS)
+mbvoxelclean_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -362,7 +366,7 @@ SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
 	$(mbsslayout_SOURCES) $(mbstripnan_SOURCES) \
 	$(mbsvplist_SOURCES) $(mbsvpselect_SOURCES) \
 	$(mbswplspreprocess_SOURCES) $(mbtime_SOURCES) \
-	$(mbtrnpreprocess_SOURCES)
+	$(mbtrnpreprocess_SOURCES) $(mbvoxelclean_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -658,6 +662,7 @@ mbsvpselect_SOURCES = mbsvpselect.c geodesic.c
 mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbswplspreprocess_SOURCES = mbswplspreprocess.c
 mbtime_SOURCES = mbtime.c
+mbvoxelclean_SOURCES = mbvoxelclean.c
 @BUILD_FFTW_TRUE@mbsegypsd_LDADD = ${top_builddir}/src/mbaux/libmbaux.la \
 @BUILD_FFTW_TRUE@                  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${libfftw_LIBS}
 
@@ -966,6 +971,10 @@ mbtrnpreprocess$(EXEEXT): $(mbtrnpreprocess_OBJECTS) $(mbtrnpreprocess_DEPENDENC
 	@rm -f mbtrnpreprocess$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mbtrnpreprocess_OBJECTS) $(mbtrnpreprocess_LDADD) $(LIBS)
 
+mbvoxelclean$(EXEEXT): $(mbvoxelclean_OBJECTS) $(mbvoxelclean_DEPENDENCIES) $(EXTRA_mbvoxelclean_DEPENDENCIES) 
+	@rm -f mbvoxelclean$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mbvoxelclean_OBJECTS) $(mbvoxelclean_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -1025,6 +1034,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbswplspreprocess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtime.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrnpreprocess.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbvoxelclean.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

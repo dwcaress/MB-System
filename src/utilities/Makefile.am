@@ -57,6 +57,7 @@ bin_PROGRAMS = mbconfig \
         mbsvpselect \
         mbswplspreprocess \
         mbtime \
+        mbvoxelclean \
         $(FFTW_PROG) \
         $(MBTRN_PROG)
 
@@ -144,6 +145,7 @@ mbsvpselect_SOURCES = mbsvpselect.c geodesic.c
 mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbswplspreprocess_SOURCES = mbswplspreprocess.c
 mbtime_SOURCES = mbtime.c
+mbvoxelclean_SOURCES = mbvoxelclean.c
 if BUILD_FFTW
 mbsegypsd_LDADD = ${top_builddir}/src/mbaux/libmbaux.la \
                   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${libfftw_LIBS}
