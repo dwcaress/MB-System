@@ -489,7 +489,7 @@ int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 int mbsys_swathplus_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_swathplus_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                int *error);
-int mbsys_swathplus_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+int mbsys_swathplus_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 int mbsys_swathplus_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 int mbsys_swathplus_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
 

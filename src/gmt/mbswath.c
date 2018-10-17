@@ -138,7 +138,7 @@ struct ping {
 	double heading;
 	double distance;
 	double altitude;
-	double sonardepth;
+	double sensordepth;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -996,7 +996,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 				status =
 				    mb_read(verbose, Ctrl->mbio_ptr, &(pingcur->kind), &(pingcur->pings), pingcur->time_i, &(pingcur->time_d),
 				            &(pingcur->navlon), &(pingcur->navlat), &(pingcur->speed), &(pingcur->heading), &(pingcur->distance),
-				            &(pingcur->altitude), &(pingcur->sonardepth), &(pingcur->beams_bath), &(pingcur->beams_amp),
+				            &(pingcur->altitude), &(pingcur->sensordepth), &(pingcur->beams_bath), &(pingcur->beams_amp),
 				            &(pingcur->pixels_ss), pingcur->beamflag, pingcur->bath, pingcur->amp, pingcur->bathlon,
 				            pingcur->bathlat, pingcur->ss, pingcur->sslon, pingcur->sslat, pingcur->comment, &error);
 
@@ -2390,7 +2390,7 @@ int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *e
 	ping1->heading = ping2->heading;
 	ping1->distance = ping2->distance;
 	ping1->altitude = ping2->altitude;
-	ping1->sonardepth = ping2->sonardepth;
+	ping1->sensordepth = ping2->sensordepth;
 	strncpy(ping1->comment, ping2->comment, MB_COMMENT_MAXLINE - 1);
 	ping1->beams_bath = ping2->beams_bath;
 	ping1->beams_amp = ping2->beams_amp;

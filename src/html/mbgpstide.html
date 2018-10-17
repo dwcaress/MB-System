@@ -1,0 +1,298 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbgpstide</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbgpstide</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  5 June 2018 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbgpstide</B> - Generates tide model from GPS altitude data.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbgpstide</B> 
+<BR>
+
+[
+<BR>
+
+<B>--verbose</B>   {<B>-V</B>}
+<BR>
+
+<B>--help</B>   {<B>-H</B>}
+<BR>
+
+<B>--tideformat</B>=<I>TIDEFORMAT</I>   {<B>-A</B> <I>TIDEFORMAT</I>}
+<BR>
+
+<B>--interval</B>=<I>INTERVAL</I>   {<B>-D</B> <I>INTERVAL</I>}
+<BR>
+
+<B>--format</B>=<I>FORMATID</I>   {<B>-F</B> <I>FORMATID</I>}
+<BR>
+
+<B>--input</B>=<I>FILENAME</I>   {<B>-I</B> <I>FILENAME</I>}
+<BR>
+
+<B>--setparameters</B>   {<B>-M</B>}
+<BR>
+
+<B>--output</B>=<I>OUTPUT</I>   {<B>-O</B> <I>OUTPUT</I>}
+<BR>
+
+<B>--offset</B>=<I>OFFSET</I>   {<B>-R</B> <I>OFFSET</I>}
+<BR>
+
+<B>--skipexisting</B>   {<B>-S</B>}
+<BR>
+
+<B>--geoid</B>=<I>GEOID_MODEL</I>   {<B>-T</B> <I>GEOID_MODEL</I>}
+<BR>
+
+<B>--use</B>=<I>SOURCE</I>   {<B>-U</B> <I>SOURCE</I>}
+<BR>
+
+]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>MBgpstide</B> is a utility that generates tide files from the altitude 
+(height above elipsoid) information derived from GPS stored in the swath files. 
+The height may be adjusted by a fixed offset (<B>-R</B>) or for a geoid (<B>-T</B>).
+<P>
+This allows bathymetry to be referenced to a specific ellipsoid or geoid rather
+than water level.
+<P>
+The source of the GPS information is format specific.
+For Simrad format data files (formats 56-59) this data is the Height telegram.
+For GSF files the height is taken from the ping header.
+<P>
+Geoid differences are calculated from a grid file containing the offset between the
+ellipsoid used by the GPS and desired geoid. 
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A  </B><I>TIDEFORMAT</I>, --tideformat=<I>TIDEFORMAT</I>
+
+<DD>
+<BR>
+
+This option sets the tide format of the output text tide model files.
+If <I>TIDEFORMAT</I> = 2 (the default), the tide is output in this format:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>year&nbsp;month&nbsp;day&nbsp;hour&nbsp;minute&nbsp;second&nbsp;tide<BR>
+<BR>
+
+where the tide value is in meters.
+If <I>TIDEFORMAT</I> = 1, then the output format is:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>time_d&nbsp;tide<BR>
+<BR>
+
+where time_d is in seconds since January 1, 1970 and tide is in meters.
+If <I>TIDEFORMAT</I> = 5 (CARIS compatible), the tide is output in this format:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>year/month/day&nbsp;hour:minute:decimal_second&nbsp;tide<BR>
+<BR>
+
+where the tide value is in meters. 
+<I>TIDEFORMAT</I> = 5 should not be used with <B>-M</B> as this format is not recognised by mbprocess.
+<P>
+<DT><B>-D </B><I>INTERVAL</I>, --interval=<I>INTERVAL</I>
+
+<DD>
+<BR>
+
+This option sets the time interval between tidal model values in seconds.
+Default: 300 seconds (5 minutes).
+An <I>INTERVAL</I> of <B>0</B> will cause a value to be output for each height encountered.
+In this case tide format is <B>-A1</B> is required to prevent duplicate timestamps.
+<DT><B>-F </B><I>FORMAT</I>, --format=<I>FORMAT</I>
+
+<DD>
+<BR>
+
+Sets the data format of the input swath data file specified with the
+<B>-I</B> option. If <I>FORMAT</I> &lt; 0, then the input file specified
+with the <B>-I</B> option will actually contain a list of input swath sonar
+data files. This program uses the <B>MBIO</B> library and will read any
+swath sonar format with timestamps supported by <B>MBIO</B>.
+A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. The default format is
+set using <B>mbdefaults</B>.
+<DT><B>-H</B>, --help
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I </B><I>INFILE</I>, --input=<I>INFILE</I>
+
+<DD>
+<BR>
+
+Sets the input filename. If <I>FORMAT</I> &gt; 0 (set with the
+<B>-f</B> option) then the swath sonar data contained in <I>INFILE</I>
+is read and processed. If <I>FORMAT</I> &lt; 0, then <I>INFILE</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>INFILE</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>
+
+This program uses the <B>MBIO</B> library and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>INFILE</I> = &quot;datalist.mb-1&quot;.
+<DT><B>-M</B>, --setparameters
+
+<DD>
+This option causes each swath file's parameter file to be modified so that
+<B>mbprocess</B> will read and apply the ancillary tidal model file created by
+<B>mbgpstide</B>.
+<DT><B>-O </B><I>OUTFILE</I>, --output=<I>OUTFILE</I>
+
+<DD>
+<BR>
+
+Sets the filename of the tidal model output. If <B>-O</B> is not specified then 
+for each input file a file <I>filename</I>.gps.tde will be created. 
+Intervals which include file breaks (cover the end of one file and the start of another)
+may have different values for tide files generated for each input, 
+but will only have one averaged value if a single output file is specified.
+A value of &quot;-&quot; (<B>-O-</B>) will output to standard out (not compatible with <B>-M</B>).
+<DT><B>-R </B><I>OFFSET</I>, --offset=<I>OFFSET</I>
+
+<DD>
+<I>offset</I>
+<BR>
+
+Adds the constant <I>OFFSET</I> to the tide model.
+<DT><B>-S</B>, --skipexisting
+
+<DD>
+If tide models are being generated for swath files specified using the <B>-I</B> option
+(the <B>-O</B> option is not used),
+then skip files that already have an existing tide model (.gps.tde file).
+<DT><B>-T </B><I>MODEL</I>, --geoid=<I>MODEL</I>
+
+<DD>
+<BR>
+
+Specifies the geoid difference model to use to offset the tide. 
+The difference model should be a GMT grid with the height difference between the 
+ellipsoid and the geoid as the cell value for each cell.
+The GMT <B>grdtrack</B> program will be used to extract values from the grid along 
+the vessel track.
+<P>
+For example, 
+<A HREF="http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_gis.html">http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/egm08_gis.html</A>
+provides access to download of ESRI grids of difference between WGS84 and EMG2008.
+The ESRI grids can be converted to GMT grids using the GMT command <B>grdconvert</B>:
+<BR>&nbsp;&nbsp;wget&nbsp;&nbsp;<A HREF="http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/GIS/world_geoid/s45e135.zip">http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/GIS/world_geoid/s45e135.zip</A>
+<BR>&nbsp;&nbsp;unzip&nbsp;s45e135.zip
+<BR>&nbsp;&nbsp;grdconvert&nbsp;s45e135/s45e135/&nbsp;s45e135.grd
+<BR>&nbsp;&nbsp;mbgpstide&nbsp;-Ts45e135.grd
+<DT><B>-U </B><I>SOURCE</I>, --use=<I>SOURCE</I>
+
+<DD>
+<BR>
+
+Specifies the source to use for altitude data.
+Supported values for <I>SOURCE</I> are <B>0</B> for Simrad Height telegrams or 
+GSF height above elipsoid and <B>1</B> for GSF height above vertical datum.
+<DT><B>-V</B>, --verbose
+
+<DD>
+Increases the verbosity of <B>mbgpstide</B>.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B>mbprocess</B>, <B>mbset</B>
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 5 June 2018</P></CENTER>
+
+<HR>
+
+</BODY>
+</HTML>

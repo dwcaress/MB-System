@@ -690,7 +690,7 @@ struct mb_io_struct {
 
 	/* function pointers for extracting and inserting data */
 	int (*mb_io_dimensions)(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
-	int (*mb_io_pingnumber)(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+	int (*mb_io_pingnumber)(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 	int (*mb_io_segynumber)(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, int *error);
 	int (*mb_io_sonartype)(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 	int (*mb_io_sidescantype)(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);

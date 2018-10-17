@@ -854,7 +854,7 @@ int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
                              int *error);
 int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
-int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error);
 int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,

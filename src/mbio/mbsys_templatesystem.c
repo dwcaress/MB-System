@@ -179,7 +179,7 @@ int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error) {
+int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
 	char *function_name = "mbsys_templatesystem_pingnumber";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -207,7 +207,7 @@ int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, int *pingnumber
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       pingnumber: %d\n", *pingnumber);
+		fprintf(stderr, "dbg2       pingnumber: %u\n", *pingnumber);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);

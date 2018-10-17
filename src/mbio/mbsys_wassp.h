@@ -639,7 +639,7 @@ struct mbsys_wassp_struct {
 int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 int mbsys_wassp_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 // int mbsys_wassp_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 //                        int *ss_type, int *error);

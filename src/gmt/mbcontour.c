@@ -613,7 +613,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	double heading;
 	double distance;
 	double altitude;
-	double sonardepth;
+	double sensordepth;
 	char *beamflag = NULL;
 	double *bath = NULL;
 	double *bathlon = NULL;
@@ -623,7 +623,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	double *sslon = NULL;
 	double *sslat = NULL;
 	mb_path comment;
-	int pingnumber;
+	unsigned int pingnumber;
 
 	/* plot control variables */
 	int contour_algorithm = MB_CONTOUR_OLD;
@@ -1074,7 +1074,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 			while (done == MB_NO) {
 				/* read the next ping */
 				status = mb_read(verbose, mbio_ptr, &kind, &pings_read, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-				                 &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
+				                 &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 				                 bathlon, bathlat, ss, sslon, sslat, comment, &error);
 
 				/* get pingnumber */
@@ -1110,6 +1110,7 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 					pingcur->navlon = navlon;
 					pingcur->navlat = navlat;
 					pingcur->heading = heading;
+                    pingcur->sensordepth = sensordepth;
 					pingcur->beams_bath = beams_bath;
 					pingcur->pingnumber = pingnumber;
 					for (i = 0; i < beams_bath; i++) {

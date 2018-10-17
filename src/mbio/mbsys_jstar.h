@@ -908,7 +908,7 @@ struct mbsys_jstar_struct {
 int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 int mbsys_jstar_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr,
                            int *error);
 int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,

@@ -233,7 +233,7 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 int mbsys_singlebeam_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_singlebeam_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                 int *error);
-int mbsys_singlebeam_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+int mbsys_singlebeam_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 int mbsys_singlebeam_segynumber(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, int *error);
 int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                              double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,

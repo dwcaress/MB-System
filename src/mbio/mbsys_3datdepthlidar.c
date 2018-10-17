@@ -425,7 +425,7 @@ int mbsys_3datdepthlidar_dimensions(int verbose, void *mbio_ptr, /* in: verbosit
 /*--------------------------------------------------------------------*/
 int mbsys_3datdepthlidar_pingnumber(int verbose,     /* in: verbosity level set on command line 0..N */
                                     void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
-                                    int *pingnumber, /* out: swathplus ping number */
+                                    unsigned int *pingnumber, /* out: swathplus ping number */
                                     int *error       /* out: see mb_status.h:/MB_ERROR/ */
                                     ) {
 	char *function_name = "mbsys_3datdepthlidar_pingnumber";
@@ -457,7 +457,7 @@ int mbsys_3datdepthlidar_pingnumber(int verbose,     /* in: verbosity level set 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       pingnumber: %d\n", *pingnumber);
+		fprintf(stderr, "dbg2       pingnumber: %u\n", *pingnumber);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);

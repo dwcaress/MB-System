@@ -1,0 +1,347 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbvoxelclean</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbvoxelclean</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  9 October 2018 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbvoxelclean</B> - 3D density filter.used to flag and unflag swath soundings,
+particularly from lidar sensors.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<DL COMPACT>
+<DT><B>mbvoxelclean</B><DD>
+<BR>
+
+[
+<BR>
+
+<B>--verbose</B>
+<BR>
+
+<B>--help</B>
+<BR>
+
+<B>--input</B>=<I>infile</I>
+<BR>
+
+<B>--input</B>=<I>datalist</I>
+<BR>
+
+<B>--format</B>=<I>value</I>
+<BR>
+
+<B>--voxel-size</B>=<I>xysize[/zsize]</I>
+<BR>
+
+<B>--occupy-threshold</B>=<I>value</I>
+<BR>
+
+<B>--count-flagged</B>
+<BR>
+
+<B>--flag-empty</B>
+<BR>
+
+<B>--ignore-empty</B>
+<BR>
+
+<B>--unflag-occupied</B>
+<BR>
+
+<B>--ignore-occupied</B>
+<BR>
+
+<B>--range-minimum</B>=<I>value</I>
+<BR>
+
+<B>--range-maximum</B>=<I>value</I>
+<BR>
+
+]
+<P>
+</DL>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+mbvoxelclean identifies and flags artifacts in swath bathymetry data
+using a 3D density filter. The notion applied is that true targets
+(e.g. the seafloor) result in dense regions of soundings while sparse soundings
+in the water column or the subsurface are erroneous and can be flagged as bad.
+This technique is more appropriate for lidar data than multibeam sonar data.
+The resulting sounding edit events are output to edit save files which can be
+applied to the data by the program mbprocess. These are the same edit save
+files created and/or modified by <B>mbedit</B>, <B>mbeditviz</B>, <B>mbedit</B>,
+and <B>mbclean</B>. The input data are one swath file or a datalist referencing
+multiple swath files. Each file is read and processed separately.
+The rectangular prism including all of the flagged and unflagged soundings
+is divided into 3D voxels of the specified size. All of the soundings are
+read into memory and associated with one of the voxels. Once all of
+data are read, a density filter is applied such that containing more than a
+specified threshold of soundings are considered to be occupied by a valid target and
+voxels containing less than the threshold are considered to be empty.
+The user may specify one or both of the following actions:
+<BR>&nbsp;&nbsp;1)&nbsp;Previously&nbsp;unflagged&nbsp;soundings&nbsp;in&nbsp;an&nbsp;empty&nbsp;voxel&nbsp;are&nbsp;flagged&nbsp;as&nbsp;bad.
+<BR>&nbsp;&nbsp;2)&nbsp;Previously&nbsp;flagged&nbsp;soundings&nbsp;in&nbsp;a&nbsp;full&nbsp;voxel&nbsp;are&nbsp;unflagged.
+This program will also apply specified minimum and maximum range filters.
+If a sounding's flag status is changed, that flagging action is output
+to the edit save file of the swath file containing that sounding. This
+program will create edit save files if necessary, or append to those that
+already exist.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--verbose</B><DD>
+Normally, mbvoxelclean works &quot;silently&quot; without outputting anything to the stderr
+stream.  If verbosity is specified, then mbvoxelclean works in a &quot;verbose&quot; mode and
+outputs information about the files processed and the numbers of soundings flagged
+and unflagged.
+<DT><B>--help</B><DD>
+<BR>
+
+This  &quot;help&quot; flag cause the program to print out a description of its operation and then exit immediately.
+<DT><B>--input</B>=<I>infile</I><DD>
+<DT><B>--input</B>=<I>datalist</I><DD>
+<BR>
+
+Sets the input filename. If <I>format</I> &gt; 0 (set with the  <B>--format</B><I> option)  then  the
+swath  sonar  data contained in infile is read and processed. If format &lt; 0,
+then infile is assumed to be a datalist, which is an ascii file containing a list  of  the  input
+swath sonar data files to be processed and their formats.  The program will
+read and process the data in each one of these files. In
+the infile file, each data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datafile1&nbsp;11
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datafile2&nbsp;24
+This  program  uses  the MBIO library and will read or write any swath sonar
+format supported by MBIO. A list of the swath sonar data  formats  currently
+supported  by  MBIO  and their identifier values is given in the MBIO manual
+page. Default: datalist</I> = &quot;datalist.mb-1&quot;.
+<DT><B>--format</B>=<I>value</I><DD>
+<BR>
+
+Sets the data format id of the input file specified with the <B>--input</B> option.
+If <I>format</I> &lt; 0, then the input file specified
+with the <B>-I</B> option will actually contain a list of input swath sonar
+data files. This program uses the <B>MBIO</B> library
+and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page.
+<DT><B>--voxel-size</B>=<I>xysize[/zsize]</I><DD>
+<BR>
+
+Sets the size of the voxels used for calculating the density filter, in meters.
+Each voxel has uniform east-west (x) and north-south (y) width specified by
+<B>xysize</B>. The vertical (z) voxel width <I>zsize</I>can be different, but
+matches <I>xysize</I> if not specified.
+<DT><B>--occupy-threshold</B>=<I>value</I><DD>
+<BR>
+
+Sets the count threshold used to determine if a voxel is occupied or empty. If
+the number of counted soundings within a voxel is &gt;= <I>threshold</I>, then that
+voxel is occupied. Otherwise the voxel is empty.
+<DT><B>--count-flagged</B><DD>
+<BR>
+
+If this option is specified then the soundings counted to determine if voxels
+are occupied or empty includes all soundings, including those previously flagged
+as bad. Otherwise only soundings that are unflagged  before <B>mbvoxelclean</B>
+is run are counted.
+<DT><B>--flag-empty</B><DD>
+<BR>
+
+If this option is specified then any unflagged soundings in voxels considered
+empty are flagged as bad. This is the default behavior.
+<DT><B>--ignore-empty</B><DD>
+<BR>
+
+If this option is specified then any unflagged soundings in voxels considered
+empty are are left unflagged.
+<DT><B>--unflag-occupied</B><DD>
+<BR>
+
+If this option is specified then any flagged soundings in voxels considered
+occupied are unflagged. This is the default behavior.
+<DT><B>--ignore-occupied</B><DD>
+<BR>
+
+If this option is specified then any flagged soundings in voxels considered
+occupied are left flagged. This is the default behavior.
+<DT><B>--range-minimum</B>=<I>min-range</I><DD>
+<BR>
+
+If a <I>min-range</I> value is specified, then any unflagged soundings that are
+closer to the sensor than <I>min-range</I> are flagged.
+<DT><B>--range-maximum</B>=<I>max-range</I>]&quot;;<DD>
+<BR>
+
+If a <I>max-range</I> value is specified, then any unflagged soundings that are
+farther from the sensor than <I>max-range</I> are flagged.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one wishes to filter the soundings in three lidar files in the format
+produced by the 3D at Depth WiSSL sensor (WiSSL = Wide Swath Subsea Lidar).
+A datalist referencing these six files exists as the file datalist.mb-1 and
+has the contents:
+<BR>&nbsp;&nbsp;20180925_145000_NorthernSteep.mb233&nbsp;233
+<BR>&nbsp;&nbsp;20180925_145100_NorthernSteep.mb233&nbsp;233
+<BR>&nbsp;&nbsp;20180925_145200_NorthernSteep.mb233&nbsp;233
+<BR>
+
+Use the following to apply a density filter to each of these files using voxels
+that are 0.04 m X 0.04 m X 0.04 m and an occupy threshold of 5. This command
+causes <B>mbvoxelclean</B> to flag any soundings found in voxels containing less
+than 5 valid soundings.
+<P>
+<P>
+<BR>&nbsp;&nbsp;mbvoxelclean&nbsp;--input=datalist.mb-1&nbsp;&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;--voxel-size=0.04/0.04&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;--occupy-threshold=5&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;--flag-empty&nbsp;\
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;--verbose
+<P>
+The verbose output looks like:
+<P>
+<BR>&nbsp;&nbsp;Program&nbsp;mbvoxelclean
+<BR>&nbsp;&nbsp;Version&nbsp;$Id:&nbsp;&nbsp;$
+<BR>&nbsp;&nbsp;MB-system&nbsp;Version&nbsp;5.6.002
+<BR>&nbsp;&nbsp;---------------------------------
+<BR>&nbsp;&nbsp;Processing&nbsp;20180925_145000_NorthernSteep.mb233...
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Actually&nbsp;reading&nbsp;20180925_145000_NorthernSteep.mb233.fbt...<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Opening&nbsp;edit&nbsp;save&nbsp;file...<BR>
+<BR>&nbsp;&nbsp;5454&nbsp;survey&nbsp;data&nbsp;records&nbsp;processed
+<BR>&nbsp;&nbsp;4362859&nbsp;beams&nbsp;good&nbsp;originally
+<BR>&nbsp;&nbsp;25495&nbsp;beams&nbsp;flagged&nbsp;originally
+<BR>&nbsp;&nbsp;8701246&nbsp;beams&nbsp;null&nbsp;originally
+<BR>&nbsp;&nbsp;2615&nbsp;beams&nbsp;flagged&nbsp;by&nbsp;density&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;beams&nbsp;unflagged&nbsp;by&nbsp;density&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;beams&nbsp;flagged&nbsp;by&nbsp;minimum&nbsp;range&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;beams&nbsp;unflagged&nbsp;by&nbsp;maximum&nbsp;range&nbsp;filter
+<BR>&nbsp;&nbsp;---------------------------------
+<BR>&nbsp;&nbsp;Processing&nbsp;20180925_145100_NorthernSteep.mb233...
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Actually&nbsp;reading&nbsp;20180925_145100_NorthernSteep.mb233.fbt...<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Opening&nbsp;edit&nbsp;save&nbsp;file...<BR>
+<BR>&nbsp;&nbsp;5452&nbsp;survey&nbsp;data&nbsp;records&nbsp;processed
+<BR>&nbsp;&nbsp;4361125&nbsp;beams&nbsp;good&nbsp;originally
+<BR>&nbsp;&nbsp;24250&nbsp;beams&nbsp;flagged&nbsp;originally
+<BR>&nbsp;&nbsp;8699425&nbsp;beams&nbsp;null&nbsp;originally
+<BR>&nbsp;&nbsp;3051&nbsp;beams&nbsp;flagged&nbsp;by&nbsp;density&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;beams&nbsp;unflagged&nbsp;by&nbsp;density&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;beams&nbsp;flagged&nbsp;by&nbsp;minimum&nbsp;range&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;beams&nbsp;unflagged&nbsp;by&nbsp;maximum&nbsp;range&nbsp;filter
+<BR>&nbsp;&nbsp;---------------------------------
+<BR>&nbsp;&nbsp;Processing&nbsp;20180925_145200_NorthernSteep.mb233...
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Actually&nbsp;reading&nbsp;20180925_145200_NorthernSteep.mb233.fbt...<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Opening&nbsp;edit&nbsp;save&nbsp;file...<BR>
+<BR>&nbsp;&nbsp;5453&nbsp;survey&nbsp;data&nbsp;records&nbsp;processed
+<BR>&nbsp;&nbsp;4361528&nbsp;beams&nbsp;good&nbsp;originally
+<BR>&nbsp;&nbsp;30589&nbsp;beams&nbsp;flagged&nbsp;originally
+<BR>&nbsp;&nbsp;8695083&nbsp;beams&nbsp;null&nbsp;originally
+<BR>&nbsp;&nbsp;17709&nbsp;beams&nbsp;flagged&nbsp;by&nbsp;density&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;beams&nbsp;unflagged&nbsp;by&nbsp;density&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;beams&nbsp;flagged&nbsp;by&nbsp;minimum&nbsp;range&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;beams&nbsp;unflagged&nbsp;by&nbsp;maximum&nbsp;range&nbsp;filter
+<P>
+<BR>&nbsp;&nbsp;---------------------------------
+<BR>&nbsp;&nbsp;MBvoxelclean&nbsp;Processing&nbsp;Totals:
+<BR>&nbsp;&nbsp;---------------------------------
+<BR>&nbsp;&nbsp;3&nbsp;total&nbsp;swath&nbsp;data&nbsp;files&nbsp;processed
+<BR>&nbsp;&nbsp;16359&nbsp;total&nbsp;survey&nbsp;data&nbsp;records&nbsp;processed
+<BR>&nbsp;&nbsp;13085512&nbsp;total&nbsp;beams&nbsp;good&nbsp;originally
+<BR>&nbsp;&nbsp;80334&nbsp;total&nbsp;beams&nbsp;flagged&nbsp;originally
+<BR>&nbsp;&nbsp;26095754&nbsp;total&nbsp;beams&nbsp;null&nbsp;originally
+<BR>&nbsp;&nbsp;0&nbsp;total&nbsp;beams&nbsp;flagged&nbsp;in&nbsp;old&nbsp;esf&nbsp;file
+<BR>&nbsp;&nbsp;0&nbsp;total&nbsp;beams&nbsp;unflagged&nbsp;in&nbsp;old&nbsp;esf&nbsp;file
+<BR>&nbsp;&nbsp;23375&nbsp;total&nbsp;beams&nbsp;flagged&nbsp;by&nbsp;density&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;total&nbsp;beams&nbsp;unflagged&nbsp;by&nbsp;density&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;total&nbsp;beams&nbsp;flagged&nbsp;by&nbsp;minimum&nbsp;range&nbsp;filter
+<BR>&nbsp;&nbsp;0&nbsp;total&nbsp;beams&nbsp;unflagged&nbsp;by&nbsp;maximum&nbsp;range&nbsp;filter
+<P>
+<BR>
+
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbedit.html">mbedit</A></B>(1),
+<B><A HREF="mbinfo.html">mbinfo</A></B>(1) <B><A HREF="mbprocess.html">mbprocess</A></B>(1),
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Hay errores aqui.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 9 October 2018</P></CENTER>
+
+<HR>
+
+</BODY>
+</HTML>
