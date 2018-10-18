@@ -1372,7 +1372,7 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error);
 int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error);
-int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
 int mbsys_simrad3_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr,

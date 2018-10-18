@@ -320,7 +320,7 @@ int mbsys_3datdepthlidar_alloc(int verbose, void *mbio_ptr, void **store_ptr, in
 int mbsys_3datdepthlidar_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_3datdepthlidar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                     int *error);
-int mbsys_3datdepthlidar_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+int mbsys_3datdepthlidar_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 int mbsys_3datdepthlidar_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr,
                                     int *error);
 int mbsys_3datdepthlidar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,

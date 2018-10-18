@@ -399,7 +399,8 @@ mbswath.1 \
 mbswplspreprocess.1 \
 mbsystem.1 \
 mbtime.1 \
-mbvelocitytool.1
+mbvelocitytool.1 \
+mbvoxelclean.1
 
 EXTRA_DIST = $(man_MANS)
 all: all-am

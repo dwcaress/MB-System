@@ -40,7 +40,7 @@
  *           File Magic Number                             0x3D08   2 (1 UINT16)
  *           File version                                  1        2 (1 UINT16)
  *           File sub version                              1        2 (1 UINT16)
- *           
+ *
  * Scan Information
  *           AZ, Cross track angle start, typical (deg)             4 (1 float32)
  *           AZ, Cross track angle end, typical (deg)               4 (1 float32)
@@ -48,11 +48,11 @@
  *           Number pulses per LOS                                  1 (1 UINT8)
  *           Scan lines per this File, Head A                       2 (1 UINT16)
  *           Scan lines per this File, Head B                       2 (1 UINT16)
- *           
+ *
  * Calibration Information
  *           Calibration Structure, Head A                          Size of calibration structure
  *           Calibration Structure, Head B                          Size of calibration structure
- * 
+ *
  * Pulse ID and Timestamp ( 1 to n Scans )
  *           Record ID – Head A or B              0x3D53, 0x3D54    2 (1 UINT16)
  *           Timestamp year (true year)                             2 (1 UINT16)
@@ -81,7 +81,7 @@
  *           Pulse time offset (sec)                                4 (1 float32)
  *           LOS Range 1 ( from glass front ) meters                4 (1 float32)
  *           ...
- *           LOS Range n ( from glass front ) meters                4 (1 float32) 
+ *           LOS Range n ( from glass front ) meters                4 (1 float32)
  *           Amplitude LOS 1 / peak of signal                       2 (1 UINT16)
  *           ...
  *           Amplitude LOS n / peak of signal                       2 (1 UINT16)
@@ -159,7 +159,7 @@
  *           File Magic Number                             0x3D08   2 (1 UINT16)
  *           File version                                  1        2 (1 UINT16)
  *           File sub version                              1        2 (1 UINT16)
- *           
+ *
  * Scan Information
  *           AZ, Cross track angle start, typical (deg)             4 (1 float32)
  *           AZ, Cross track angle end, typical (deg)               4 (1 float32)
@@ -167,11 +167,11 @@
  *           Number pulses per LOS                                  1 (1 UINT8)
  *           Scan lines per this File, Head A                       2 (1 UINT16)
  *           Scan lines per this File, Head B                       2 (1 UINT16)
- *           
+ *
  * Calibration Information
  *           Calibration Structure, Head A                          450 bytes
  *           Calibration Structure, Head B                          450 bytes
- * 
+ *
  * Pulse ID and Timestamp ( 1 to n Scans )
  *           Record ID – Head A or B              0x3D53, 0x3D54    2 (1 UINT16)
  *           Timestamp year (true year)                             2 (1 UINT16)
@@ -200,7 +200,7 @@
  *           Pulse time offset (sec)                                4 (1 float32)
  *           LOS Range 1 ( from glass front ) meters                4 (1 float32)
  *           ...
- *           LOS Range n ( from glass front ) meters                4 (1 float32) 
+ *           LOS Range n ( from glass front ) meters                4 (1 float32)
  *           Amplitude LOS 1 / peak of signal                       2 (1 UINT16)
  *           ...
  *           Amplitude LOS n / peak of signal                       2 (1 UINT16)
@@ -286,20 +286,20 @@
 #define MBSYS_3DDWISSL_V1S1_PRO_SCAN_HEADER_SIZE      100
 #define MBSYS_3DDWISSL_V1S1_PRO_PULSE_HEADER_SIZE     66
 #define MBSYS_3DDWISSL_V1S1_PRO_SOUNDING_SIZE         22
-    
+
     /* Instrument geometry for dual optical heads - the sensor reference point
      * is the midpoint on bottom of the mounting bracketry  as per the WiSSL
      * mechanical ICD. The raw data all reference ranges to the center point of the
      * front of the glass on each optical head. Here are the distance offsets of
      * those points to the sensor reference point:
-     * 
+     *
      *   Head A (aft mounted, pointed to port):
      *     dx (acrosstrack): -0.48126 inches = -0.012224004 m
      *     dy (alongtrack):  -4.73551 inches = -0.120281954 m
      *     dz (vertical:     -2.44115 inches = -0.062005210 m
      *     droll (in xz plane, + to starboard): +22.08 degrees
      *     dpitch (in yz plane, + forward): -4.68
-     *     
+     *
      *   Head B (forward mounted, pointed to starboard):
      *     dx (acrosstrack): +0.48126 inches = +0.012224004 m
      *     dy (alongtrack):  +4.73551 inches = +0.120281954 m
@@ -320,22 +320,57 @@
 //#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.08        // ICD value +22.08
 //#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -5.01         // ICD value -5.01
 
+//#define MBSYS_3DDWISSL_FILEHEADER                 0
+//#define MBSYS_3DDWISSL_HEADA                      1
+//#define MBSYS_3DDWISSL_HEADB                      2
+//#define MBSYS_3DDWISSL_COMMENT                    3
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           +0.012224004
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.062005210
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -1.20         // ICD value 0.0
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -21.440       // ICD value -22.08
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -5.440        // ICD value -4.68
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           -0.012224004
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.120281954
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.062005210
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.20         // ICD value 0.0
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +21.440       // ICD value +22.08
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.230        // ICD value -5.01  pitch too much 1.5 cm = 0.143 deg, roll too much 2.5 cm = 0.239 deg
+
+// Values from Tank Test
+//#define MBSYS_3DDWISSL_FILEHEADER                 0
+//#define MBSYS_3DDWISSL_HEADA                      1
+//#define MBSYS_3DDWISSL_HEADB                      2
+//#define MBSYS_3DDWISSL_COMMENT                    3
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           -0.031775996 // ICD value +0.012224004    -0.044 ==> -0.031775996
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.056005210 // ICD value +0.062005210   -0.012  ==> +0.056005210
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -1.20        // ICD value 0.0
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -22.53       // ICD value -22.08
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -5.590       // ICD value -4.68
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           +0.031775996 // ICD value -0.012224004    +0.044 ==> +0.031775996
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.120281954
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.074005210 // ICD value  +0.062005210   +0.012  ==> +0.074005210
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.20        // ICD value 0.0
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.53       // ICD value +22.08
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.080       // ICD value -5.01
+
 #define MBSYS_3DDWISSL_FILEHEADER                 0
 #define MBSYS_3DDWISSL_HEADA                      1
 #define MBSYS_3DDWISSL_HEADB                      2
 #define MBSYS_3DDWISSL_COMMENT                    3
-#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           +0.012224004
-#define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954
-#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.062005210
-#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -1.20         // ICD value 0.0
-#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -21.440       // ICD value -22.08
-#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -5.440        // ICD value -4.68
-#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           -0.012224004
-#define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.120281954
-#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.062005210
-#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.20         // ICD value 0.0
-#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +21.440       // ICD value +22.08
-#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.230        // ICD value -5.01  pitch too much 1.5 cm = 0.143 deg, roll too much 2.5 cm = 0.239 deg
+#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           -0.032775996 // ICD value +0.012224004
+#define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.102281954 // ICD value -0.120281954
+#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.050005210 // ICD value +0.062005210
+#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -1.20        // ICD value 0.0
+#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -22.53       // ICD value -22.08
+#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -5.590       // ICD value -4.68
+#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           +0.032775996 // ICD value -0.012224004
+#define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.102281954 // ICD value +0.120281954
+#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.074005210 // ICD value  +0.062005210
+#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.20        // ICD value 0.0
+#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.53       // ICD value +22.08
+#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.080       // ICD value -5.01
 
 #define MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD 2000.0
 #define MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE        0.0
@@ -439,7 +474,7 @@ struct mbsys_3ddwissl_pulse_struct {
 
 /* 3DatDepth LIDAR data structure */
 struct mbsys_3ddwissl_struct {
-    
+
 	/* Type of data record */
 	int kind; /* MB-System record ID */
 
@@ -448,7 +483,7 @@ struct mbsys_3ddwissl_struct {
     unsigned short magic_number;    /* 0x3D08 */
 	unsigned short file_version;    /* 1 */
 	unsigned short sub_version;     /* 1 = initial version from 3DatDepth, extended for MB-System */
-    
+
     /* Scan Information */
     float cross_track_angle_start; /* AZ, Cross track angle start, typical (deg) */
     float cross_track_angle_end; /* AZ, Cross track angle end, typical (deg) */
@@ -470,13 +505,13 @@ struct mbsys_3ddwissl_struct {
     double headb_offset_heading_deg;            /* head B heading offset (degrees) -22.08 */
     double headb_offset_roll_deg;               /* head B roll offset (degrees) -22.08 */
     double headb_offset_pitch_deg;              /* head B pitch offset (degrees) -5.01 */
-    
+
     /* head A calibration */
     struct mbsys_3ddwissl_calibration_struct calibration_a;
 
     /* head B calibration */
     struct mbsys_3ddwissl_calibration_struct calibration_b;
-    
+
 	/* Scan information from raw records */
     unsigned short record_id;       /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or 0x3D74) */
     unsigned int scan_size;         /* bytes of scan record minus 4 (record_id + scan_size) */
@@ -530,7 +565,7 @@ int mbsys_3ddwissl_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *err
 int mbsys_3ddwissl_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_3ddwissl_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                     int *error);
-int mbsys_3ddwissl_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+int mbsys_3ddwissl_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 int mbsys_3ddwissl_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr,
                                     int *error);
 int mbsys_3ddwissl_sensorhead(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead, int *error);
@@ -574,13 +609,3 @@ int mbsys_3ddwissl_indextablefix(int verbose, void *mbio_ptr, int num_indextable
                                  void *indextable_ptr, int *error);
 int mbsys_3ddwissl_indextableapply(int verbose, void *mbio_ptr, int num_indextable,
                                    void *indextable_ptr, int n_file, int *error);
-
-
-
-
-
-
-
-
-
-

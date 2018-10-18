@@ -37,7 +37,8 @@ struct ping {
 	double navlon;
 	double navlat;
 	double heading;
-	int pingnumber;
+    double sensordepth;
+	unsigned int pingnumber;
 	int beams_bath;
 	int beams_bath_alloc;
 	char *beamflag;

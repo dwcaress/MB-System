@@ -5624,7 +5624,9 @@ and mbedit edit save files.\n";
 							else if (mb_beam_check_flag_sonar(beamflagorg[i])) {
 								action = MBP_EDIT_SONAR;
 							}
-						status = mbprocess_save_edit(verbose, resf_fp, time_d, i, action, &error);
+						status = mbprocess_save_edit(verbose, resf_fp, time_d,
+                                                     i + pingmultiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+                                                     action, &error);
 						}
 					}
 				}
