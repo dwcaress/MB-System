@@ -65,6 +65,8 @@
 #include <stdarg.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
+
 #include "iowrap.h"
 #include "mbtrn.h"
 #include "mdebug.h"
@@ -100,15 +102,34 @@
  "GNU General Public License for more details (http://www.gnu.org/licenses/gpl-3.0.html)\n"
  */
 
-/// @def UDPS_HOST_DFL
+/// @def UDPC_HOST_DFL
 /// @brief default server host
-#define UDPS_HOST_DFL "localhost"
-/// @def UDPS_PORT_DFL
+#define UDPC_HOST_DFL "localhost"
+/// @def UDPC_PORT_DFL
 /// @brief default UDP socket port
-#define UDPS_PORT_DFL 9999
-/// @def UDPS_BUF_LEN
+#define UDPC_PORT_DFL 27000
+/// @def UDPC_BUF_LEN
 /// @brief default buffer length
-#define UDPS_BUF_LEN   128
+#define UDPC_BUF_LEN   128
+/// @def UDPC_LOOP_DELAY_SEC
+/// @brief loop delay
+#define UDPC_LOOP_DELAY_SEC 1
+
+/// @def UDPC_BLOCK_DFL
+/// @brief socket blocking default
+#define UDPC_BLOCK_DFL   0
+
+/// @def UDPC_CYCLES_DFL
+/// @brief cycles default
+#define UDPC_CYCLES_DFL   -1
+
+/// @def UDPC_DELAY_MSEC_DFL
+/// @brief delay default
+#define UDPC_DELAY_MSEC_DFL 0
+
+/// @def UDPC_VERBOSE_DFL
+/// @brief verbose output default
+#define UDPC_VERBOSE_DFL false
 
 /////////////////////////
 // Declarations
@@ -143,6 +164,7 @@ static void s_show_help();
 /////////////////////////
 // Module Global Variables
 /////////////////////////
+static bool g_interrupt=false;
 
 /////////////////////////
 // Function Definitions
@@ -158,7 +180,7 @@ static void s_show_help()
     "--verbose  : verbose output\n"
     "--help     : output help message\n"
     "--version  : output version info\n"
-    "--port      : UDP server port\n"
+    "--port     : UDP server port\n"
     "--blocking : blocking receive [0:1]\n"
     "--host     : UDP server host\n"
     "\n";
@@ -166,7 +188,6 @@ static void s_show_help()
     printf("%s",usage_message);
 }
 // End function s_show_help
-
 
 /// @fn void parse_args(int argc, char ** argv, app_cfg_t * cfg)
 /// @brief parse command line args, set application configuration.
@@ -190,43 +211,43 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"port", required_argument, NULL, 0},
         {"blocking", required_argument, NULL, 0},
         {"cycles", required_argument, NULL, 0},
-       {NULL, 0, NULL, 0}};
-
-    // process argument list 
+        {NULL, 0, NULL, 0}};
+    
+    // process argument list
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
         switch (c) {
-                // long options all return c=0 
+                // long options all return c=0
             case 0:
-                // verbose 
+                // verbose
                 if (strcmp("verbose", options[option_index].name) == 0) {
                     cfg->verbose=true;
                 }
                 
-                // help 
+                // help
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
                 }
-                // version 
+                // version
                 else if (strcmp("version", options[option_index].name) == 0) {
                     version = true;
                 }
                 
-                // host 
+                // host
                 else if (strcmp("host", options[option_index].name) == 0) {
                     if(cfg->host!=NULL){
                         free(cfg->host);
                     }
                     cfg->host=strdup(optarg);
                 }
-                // host 
+                // blocking
                 else if (strcmp("blocking", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->blocking);
                 }
-                // port 
+                // port
                 else if (strcmp("port", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->port);
                 }
-                // cycles 
+                // cycles
                 else if (strcmp("cycles", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->cycles);
                 }
@@ -253,6 +274,95 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
 }
 // End function parse_args
 
+/// @fn void termination_handler (int signum)
+/// @brief termination signal handler.
+/// @param[in] signum signal number
+/// @return none
+static void s_termination_handler (int signum)
+{
+    switch (signum) {
+        case SIGINT:
+        case SIGHUP:
+        case SIGTERM:
+            MDEBUG("sig received[%d]\n",signum);
+            g_interrupt=true;
+            break;
+        default:
+            fprintf(stderr,"s_termination_handler: sig not handled[%d]\n",signum);
+            break;
+    }
+}
+// End function termination_handler
+
+/// @fn int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
+/// @brief upd client main entry point.
+/// @param[in] s socket reference (ready to connect)
+/// @param[in] cfg app config reference
+/// @return 0 on success, -1 otherwise
+static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
+{
+    int retval=-1;
+    
+    if (NULL!=cfg && NULL!=s) {
+        int test=0;
+        byte buf[UDPC_BUF_LEN]={0};
+        int cycles=cfg->cycles;
+        bool done=false;
+        
+        MDEBUG("connect [%s:%d]\n",cfg->host,cfg->port);
+        if ( (test=iow_connect(s))==0) {
+            do{
+                if( (test=iow_sendto(s,NULL,(byte *)"REQ",4,0))>0){
+                    MDEBUG("sendto OK [%d]\n",test);
+                    retval=0;
+                    memset(buf,0,128);
+                    
+                    MDEBUG("fd[%d] waiting for server (%s)...\n",s->fd,(cfg->blocking==0?"non-blocking":"blocking"));
+                    test = iow_recvfrom(s, NULL, buf, UDPC_BUF_LEN);
+                    switch (test) {
+                        case 0:
+                            MDEBUG("iow_recvfrom returned 0; peer socket closed\n");
+                            retval=-1;
+                            break;
+                        case -1:
+                            MDEBUG("iow_recvfrom returned -1 [%d/%s]\n",errno,strerror(errno));
+                            
+                            switch (errno) {
+                                case ENOTCONN:
+                                case ECONNREFUSED:
+                                    // host not connected
+                                    // wait and retry
+                                    sleep(5);
+                                    break;
+                                    
+                                default:
+                                    MDEBUG("iow_recvfrom error [%d/%s]\n",errno,strerror(errno));
+                                    break;
+                            }
+                            break;
+                            
+                        default:
+                            MDEBUG("fd[%d] received %d bytes\n",s->fd,test);
+                            break;
+                    }
+                    // check cycles or wait
+                    if (--cycles==0) {
+                        done=true;
+                    }else{
+                        sleep(UDPC_LOOP_DELAY_SEC);
+                    }
+                }
+            }while( !done && !g_interrupt);
+        }else{
+            MERROR("connect failed [%d]\n",test);
+        }
+        
+    }else{
+        MERROR("ERR - invalid argument\n");
+    }
+    
+    return retval;
+}
 
 /// @fn int main(int argc, char ** argv)
 /// @brief upd client main entry point.
@@ -266,59 +376,44 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
 /// @return 0 on success, -1 otherwise
 int main(int argc, char **argv)
 {
-    
-    int test=0;
-
-    byte buf[UDPS_BUF_LEN]={0};
+    int retval=-1;
     
     // set default app configuration
-    app_cfg_t cfg = {true,strdup(UDPS_HOST_DFL),UDPS_PORT_DFL,1,-1};
+    app_cfg_t cfg_s = {
+        UDPC_VERBOSE_DFL,
+        strdup(UDPC_HOST_DFL),
+        UDPC_PORT_DFL,
+        UDPC_BLOCK_DFL,
+        UDPC_CYCLES_DFL
+    };
+    app_cfg_t *cfg=&cfg_s;
+    
+    // configure signal handling
+    // for main thread
+    struct sigaction saStruct;
+    sigemptyset(&saStruct.sa_mask);
+    saStruct.sa_flags = 0;
+    saStruct.sa_handler = s_termination_handler;
+    sigaction(SIGINT, &saStruct, NULL);
     
     // parse command line args (update config)
-    parse_args(argc, argv, &cfg);
+    parse_args(argc, argv, cfg);
     
     // create socket
-    iow_socket_t *s = iow_socket_new(cfg.host, cfg.port, ST_UDP);
-    iow_set_blocking(s,(cfg.blocking==0?false:true));
+    iow_socket_t *s = iow_socket_new(cfg->host, cfg->port, ST_UDP);
+    iow_set_blocking(s,(cfg->blocking==0?false:true));
+    //    struct linger so_linger={0};
+    //    setsockopt(s->fd,SOL_SOCKET,SO_LINGER,&so_linger,sizeof(so_linger));
     
-    int cycles=cfg.cycles;
-   if (NULL != s) {
-        MDEBUG("connect [%s:%d]\n",cfg.host,cfg.port);
-        if ( (test=iow_connect(s))==0) {
-            do{
-                if( (test=iow_sendto(s,NULL,(byte *)"REQ",4))>0){
-                    MDEBUG("sendto OK [%d]\n",test);
-                    do{
-                        memset(buf,0,128);
-                        
-                        MDEBUG("fd[%d] waiting for server (%s)...\n",s->fd,(cfg.blocking==0?"non-blocking":"blocking"));
-                        test = iow_recvfrom(s, NULL, buf, UDPS_BUF_LEN);
-                        switch (test) {
-                            case 0:
-                                MDEBUG("iow_recvfrom returned 0; peer socket closed\n");
-                                break;
-                            case -1:
-                                MDEBUG("iow_recvfrom returned -1 [%d/%s]\n",errno,strerror(errno));
-                                break;
-                                
-                            default:
-                                MDEBUG("fd[%d] received %d bytes\n",s->fd,test);
-                                break;
-                        }
-                        sleep(1);
-                    }while (--cycles != 0);
-                    // set this to exit
-                    cycles=1;
-                }
-                sleep(1);
-            }while(--cycles != 0);
-        }else{
-            MERROR("connect failed [%d]\n",test);
-        }
-        free(cfg.host);
-        iow_socket_destroy(&s);
-    }
-    return 0;
+    // run the app
+    retval=s_app_main(s, cfg);
+    shutdown(s->fd,SHUT_RDWR);
+    
+    // release resources
+    free(cfg->host);
+    iow_socket_destroy(&s);
+    MDEBUG("done\n\n");
+    return retval;
 }
 // End function main
 

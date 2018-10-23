@@ -63,37 +63,35 @@ struct mbtrn_sounding
    double lon;            /* vehicle position longitude degrees */
    double depth;          /* vehicle position depth meters */
    double hdg;            /* vehicle heading in radians */
+   unsigned int ping_number;       /* ping number */
    unsigned int nbeams;   /* number of beams in this record */
-
    struct mbtrn_beam_data beams[MAX_NBEAMS];
 };
+
+/* Header for MB-TRN communication packets
+ */
+struct mbtrn_header
+{
+    unsigned int type;
+    unsigned int size;
+};
+
+/* MB-TRN MB1 communications packet consists of header and sounding data
+ */
+struct mbtrn_mb1
+{
+    struct mbtrn_header    header;
+    struct mbtrn_sounding  sounding;
+};
+
 #pragma pack(pop)
 
 /* Size of non-beam (non-variable) sounding data */
-#define MBTRN_FIXED_SIZE   (5*sizeof(double)+sizeof(unsigned int))
-
-
-/* Header for MB-TRN communication packets
-*/ 
-struct mbtrn_header 
-{
-  unsigned int type;
-  unsigned int size;
-};
-
+#define MBTRN_FIXED_SIZE   (5*sizeof(double)+2*sizeof(unsigned int))
 /* Linear size of the header */
 #define MBTRN_HEADER_SIZE  (2*sizeof(unsigned int))
 /* Offset to the beam data */
 #define MBTRN_BEAMS_OFFSET (MBTRN_HEADER_SIZE+MBTRN_FIXED_SIZE)
-
-
-/* MB-TRN MB1 communications packet consists of header and sounding data
-*/ 
-struct mbtrn_mb1
-{
-  struct mbtrn_header    header;
-  struct mbtrn_sounding  sounding;
-};
 
 
 /* Linearize an mbtrn_mb1 struct into a vector of size vsize, Checksum included.

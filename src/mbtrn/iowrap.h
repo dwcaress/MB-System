@@ -241,7 +241,7 @@ int iow_bind(iow_socket_t *s);
 int iow_connect(iow_socket_t *s);
 int iow_listen(iow_socket_t *s);
 int64_t iow_send(iow_socket_t *s,byte *buf, uint32_t len);
-int64_t iow_sendto(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len);
+int64_t iow_sendto(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len, int32_t flags);
 int64_t iow_recv(iow_socket_t *s, byte *buf, uint32_t len);
 int64_t iow_recvfrom(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len);
 int64_t iow_recvfrom2(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len,int flags);

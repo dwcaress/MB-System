@@ -96,7 +96,7 @@
 
 /// @def RESON_HOST_DFL
 /// @brief default reson hostname
-#define RESON_HOST_DFL "134.89.13.49"
+#define RESON_HOST_DFL "localhost"
 
 #define FRAMES7K_NAME "frames7k"
 #ifndef FRAMES7K_BUILD
@@ -321,7 +321,6 @@ int main(int argc, char **argv)
         forever=true;
     }
     
-    
     mcfg_configure(NULL,0);
     if (cfg.verbose>0) {
         mdb_set(APP1,MDL_DEBUG);
@@ -336,11 +335,8 @@ int main(int argc, char **argv)
         mdb_set(MBTRNV,MDL_ERROR);
     }
     
-    
-    
     // initialize reader
     // create and open socket connection
-    
     mbtrn_reader_t *reader = mbtrn_reader_new(cfg.host,R7K_7KCENTER_PORT,cfg.size, subs, nsubs);
     
     // show reader config
@@ -360,7 +356,6 @@ int main(int argc, char **argv)
         byte fbuf[MAX_FRAME_BYTES_7K]={0};
         //            if( (istat = mbtrn_read_frame(reader, fbuf,MAX_FRAME_BYTES_7K, &finfo, MBR_NET_STREAM,0.0, MBTRN_READ_TMOUT_MSEC )) > 0){
         if( (istat = mbtrn_read_frame(reader, fbuf, MAX_FRAME_BYTES_7K, MBR_NET_STREAM, 0.0, MBTRN_READ_TMOUT_MSEC,&lost_bytes )) > 0){
-            
             
             MMDEBUG(APP1,"mbtrn_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n",count,cfg.cycles,istat,lost_bytes);
             
@@ -408,7 +403,6 @@ int main(int argc, char **argv)
         //                }
         //            }
     }
-    
     
     return 0;
 }
