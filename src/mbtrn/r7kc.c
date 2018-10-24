@@ -649,7 +649,7 @@ uint32_t r7k_parse(byte *src, uint32_t len, r7k_drf_container_t *dest, r7k_parse
 /// @param[in] tmout_ms read timeout
 /// @param[in] cycles number of cycles to read (<=0 read forever)
 /// @return 0 on success, -1 otherwise
-int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles)
+int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool *interrupt)
 {
     int retval=-1;
     int x=(sz<=0?16:sz);
@@ -666,7 +666,8 @@ int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles)
     //    MERROR("cycles[%d] forever[%s] c||f[%s]\n",cycles,(forever?"Y":"N"),(forever || (cycles>0) ? "Y" :"N"));
 
     // read cycles or forever (cycles<=0)
-    while ( forever || (count++ < cycles)) {
+    while ( (forever || (count++ < cycles)) &&
+           (NULL!=interrupt && !(*interrupt)) ) {
         memset(buf,0,x);
         test = iow_read_tmout(s, buf, x, tmout_ms);
         if(test>0){

@@ -670,7 +670,7 @@ uint16_t r7k_txid();
 uint32_t r7k_checksum(byte *pdata, uint32_t len);
 void r7k_update_time(r7k_time_t *t7k);
 void r7k_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent);
-int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles);
+int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool *interrupt);
 
 // R7K packet frame (DRF/NF) API
 double r7k_7ktime2d(r7k_time_t *r7kt);

@@ -295,7 +295,7 @@ static int s_app_main (app_cfg_t *cfg)
                         MMDEBUG(APP1,"set_blocking ret[%d]\n",test);
                         MMDEBUG(APP1,"subscribing [%u]\n",nsubs);
                         MMDEBUG(APP1,"streaming c[%d]\n",cfg->cycles);
-                        r7k_stream_show(s,1024, 350, cfg->cycles);
+                        r7k_stream_show(s,1024, 350, cfg->cycles,&g_stop_flag);
                         cycle_count++;
                     }else{
                         MMDEBUG(APP1,"subscribe failed [%d/%s]\n",me_errno,strerror(me_errno));
@@ -309,9 +309,11 @@ static int s_app_main (app_cfg_t *cfg)
             if (cfg->cycles>0 && (cycle_count>=cfg->cycles)) {
                 g_stop_flag=true;
             }else{
-                MMDEBUG(APP1,"retrying connection in 5 s\n");
-                iow_socket_destroy(&s);
-                sleep(5);
+                if (!g_stop_flag) {
+                    MMDEBUG(APP1,"retrying connection in 5 s\n");
+                    iow_socket_destroy(&s);
+                    sleep(5);
+                }
             }
         }
         if (g_stop_flag) {
@@ -345,8 +347,10 @@ int main(int argc, char **argv)
     app_cfg_t cfg_s = {true,strdup(RESON_HOST_DFL),0};
     app_cfg_t *cfg = &cfg_s;
     
+    // parse command line options
     parse_args(argc, argv, cfg);
     
+    // run app
     retval=s_app_main(cfg);
     
     free(cfg->host);
