@@ -317,13 +317,13 @@ static int s_app_main (app_cfg_t *cfg)
         retval=0;
         while ( (forever || (count<cfg->cycles)) && !g_stop_flag) {
             count++;
-            
+            // clear frame buffer
             memset(frame_buf,0,MAX_FRAME_BYTES_7K);
-            
+            // read frame
             if( (istat = mbtrn_read_frame(reader, frame_buf, MAX_FRAME_BYTES_7K, MBR_NET_STREAM, 0.0, MBTRN_READ_TMOUT_MSEC,&lost_bytes )) > 0){
                 
                 MMDEBUG(APP1,"mbtrn_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n",count,cfg->cycles,istat,lost_bytes);
-                
+                // show contents
                 if (cfg->verbose>=1) {
                     r7k_nf_t *nf = (r7k_nf_t *)(frame_buf);
                     r7k_drf_t *drf = (r7k_drf_t *)(frame_buf+R7K_NF_BYTES);
@@ -336,8 +336,8 @@ static int s_app_main (app_cfg_t *cfg)
                         r7k_hex_show(frame_buf,istat,16,true,5);
                     }
                 }
-                memset(frame_buf,0,MAX_FRAME_BYTES_7K);
             }else{
+                // read error
                 MERROR("ERR - mbtrn_read_frame - cycle[%d/%d] ret[%d] lost[%d]\n",count+1,cfg->cycles,istat,lost_bytes);
                 if (me_errno==ME_ESOCK || me_errno==ME_EOF || me_errno==ME_ERCV) {
                     MERROR("socket closed - reconnecting in 5 sec\n");
@@ -346,6 +346,7 @@ static int s_app_main (app_cfg_t *cfg)
                 }
             }
         }
+        
         if (g_stop_flag) {
             MMDEBUG(APP2,"interrupted - exiting cycles[%d/%d]\n",count,cfg->cycles);
         }else{
@@ -354,7 +355,7 @@ static int s_app_main (app_cfg_t *cfg)
     }// else invalid argument
     return retval;
 }
-// End function termination_handler
+// End function s_app_main
 
 /// @fn int main(int argc, char ** argv)
 /// @brief frames7k main entry point.

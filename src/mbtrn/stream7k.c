@@ -322,7 +322,7 @@ static int s_app_main (app_cfg_t *cfg)
     }// else invalid argument
     return retval;
 }
-// End function termination_handler
+// End function s_app_main
 
 /// @fn int main(int argc, char ** argv)
 /// @brief stream7k main entry point.
