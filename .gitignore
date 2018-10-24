@@ -1,6 +1,6 @@
-aclocal.m4
 libtool
 configure
+aclocal.m4
 Makefile
 Makefile.in
 autom4te.cache/*
@@ -15,5 +15,6 @@ src/*/.libs
 src/Makefile
 src/*/Makefile
 src/*/*/Makefile
+src/Makefile.in
 src/*/Makefile.in
 src/*/*/Makefile.in
