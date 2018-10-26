@@ -81,9 +81,8 @@
 /////////////////////////
 
 /// @def TEST_HOST
-/// @brief default host (TODO: remove this)
-#define TEST_HOST "134.89.13.49"
-//#define TEST_HOST "192.168.1.90"
+/// @brief default host
+#define TEST_HOST "localhost"
 /// @def MAX_TESTS
 /// @brief number of unit tests
 #define MAX_TESTS 16

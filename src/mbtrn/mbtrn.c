@@ -106,7 +106,16 @@
 /////////////////////////
 // Declarations
 /////////////////////////
-const char *mbtr_stevent_labels[]={ \
+
+/////////////////////////
+// Imports
+/////////////////////////
+
+/////////////////////////
+// Module Global Variables
+/////////////////////////
+
+static const char *mbtr_stevent_labels[]={ \
     "frame_valid",
     "frame_invalid",
     "nf_valid",
@@ -133,7 +142,8 @@ const char *mbtr_stevent_labels[]={ \
     "fc_read",
     "fc_refill"
 };
-const char *mbtr_ststatus_labels[]={ \
+
+static const char *mbtr_ststatus_labels[]={ \
     "frame_valid_bytes",
     "nf_valid_bytes",
     "drf_valid_bytes",
@@ -141,24 +151,17 @@ const char *mbtr_ststatus_labels[]={ \
     "drf_inval_bytes",
     "sub_frames"
 };
-const char *mbtr_stchan_labels[]={ \
-    "mbtrn_refill_xt"
+
+static const char *mbtr_stchan_labels[]={ \
+    //    "mbtrn_refill_xt",
+    "mbtrn_7kframe_skew"
 };
 
-const char **mbtr_stats_labels[MBTR_LABEL_COUNT]={
+static const char **mbtr_stats_labels[MBTR_LABEL_COUNT]={
     mbtr_stevent_labels,
     mbtr_ststatus_labels,
     mbtr_stchan_labels
 };
-
-/////////////////////////
-// Imports
-/////////////////////////
-
-/////////////////////////
-// Module Global Variables
-/////////////////////////
-
 
 /////////////////////////
 // Function Definitions
@@ -171,6 +174,8 @@ const char *mbtrn_get_version()
 {
     return LIBMBTRN_VERSION;
 }
+// End function mbtrn_get_version
+
 /// @fn const char *mbtrn_get_build()
 /// @brief get build string.
 /// @return version string
@@ -178,6 +183,8 @@ const char *mbtrn_get_build()
 {
     return LIBMBTRN_BUILD;
 }
+// End function mbtrn_get_build
+
 /// @fn void mbtrn_show_app_version(const char *app_version)
 /// @brief get version string.
 /// @return version string
@@ -185,6 +192,7 @@ void mbtrn_show_app_version(const char *app_name, const char *app_version)
 {
     printf("\n %s built[%s] libmbtrn[v%s / %s] \n\n",app_name, app_version, mbtrn_get_version(),mbtrn_get_build());
 }
+// End function mbtrn_show_app_version
 
 /// @fn int mbtrn_reader_connect(*self)
 /// @brief connect to 7k center and subscribe to records.
@@ -335,6 +343,11 @@ void mbtrn_reader_destroy(mbtrn_reader_t **pself)
 }
 // End function mbtrn_reader_destroy
 
+/// @fn void mbtrn_reader_reset_socket(mbtrn_reader_t *self)
+/// @brief set logger
+/// @param[in] self pointer to instance
+/// @param[in] log  pointer to log instance
+/// @return none
 void mbtrn_reader_reset_socket(mbtrn_reader_t *self)
 {
     if (NULL!=self) {
@@ -343,6 +356,7 @@ void mbtrn_reader_reset_socket(mbtrn_reader_t *self)
         self->sockif->status=SS_CONFIGURED;
     }
 }
+// End function mbtrn_reader_reset_socket
 
 /// @fn void mbtrn_reader_setlog(mbtrn_reader_t *self, mlog_t *log, mlog_id_t id, const char *desc)
 /// @brief set logger
@@ -363,6 +377,7 @@ void mbtrn_reader_set_log(mbtrn_reader_t *self, mlog_t *log, mlog_id_t id, char 
     }
     return;
 }
+// End function mbtrn_reader_set_log
 
 /// @fn void mbtrn_reader_set_logstream(mbtrn_reader_t *self, FILE *log)
 /// @brief set logger
@@ -379,6 +394,7 @@ void mbtrn_reader_set_logstream(mbtrn_reader_t *self, FILE *log)
     }
     return;
 }
+// End function mbtrn_reader_set_logstream
 
 /// @fn int mbtrn_reader_set_file(mbtrn_reader_t *self, iow_file_t *file)
 /// @brief set current reader file
@@ -405,10 +421,11 @@ int mbtrn_reader_set_file(mbtrn_reader_t *self, iow_file_t *file)
     }
     return retval;
 }
+// End function mbtrn_reader_set_file
 
-/// @fn  mbtrn_stats_t *mbtrn_stats_new()
+/// @fn mbtrn_stats_t *mbtrn_stats_new()
 /// @brief create new stats structure
-/// @return mbtrn_stats_t
+/// @return mbtrn_stats_t on success, NULL otherwise
 mbtr_stats_t *mbtrn_stats_new(uint32_t ev_counters, uint32_t st_counters, uint32_t tm_channels, const char ***labels)
 {
     mbtr_stats_t *self = (mbtr_stats_t *)malloc(sizeof(mbtr_stats_t));
@@ -434,8 +451,9 @@ mbtr_stats_t *mbtrn_stats_new(uint32_t ev_counters, uint32_t st_counters, uint32
     }
     return self;
 }
+// End function mbtrn_stats_new
 
-/// @fn  void mbtrn_stats_destroy(mbtrn_stats_t **pself)
+/// @fn void mbtrn_stats_destroy(mbtrn_stats_t **pself)
 /// @brief release mbtrn_stats_t resources
 /// @return none
 void mbtrn_stats_destroy(mbtr_stats_t **pself)
@@ -451,7 +469,15 @@ void mbtrn_stats_destroy(mbtr_stats_t **pself)
         *pself=NULL;
     }
 }
+// End function mbtrn_stats_destroy
 
+/// @fn mbtrn_stats_set_period(mbtr_stats_t *self, double period_start, double period_sec)
+/// @brief set stats period
+/// @param[in] log_id log ID
+/// @param[in] self mbtrn_stats reference
+/// @param[in] period_start period start time
+/// @param[in] period_sec period duration
+/// @return none
 void mbtrn_stats_set_period(mbtr_stats_t *self, double period_start, double period_sec)
 {
     if (NULL!=self) {
@@ -459,10 +485,21 @@ void mbtrn_stats_set_period(mbtr_stats_t *self, double period_start, double peri
         self->stat_period_sec=period_sec;
     }
 }
+// End function mbtrn_stats_set_period
 
+/// @fn int mbtrn_log_timing(mlog_id_t log_id, mbtrn_stat_chan_t *stats,  double timestamp, char *type_str, const char **labels, int channels)
+/// @brief log timing measurements
+/// @param[in] log_id log ID
+/// @param[in] stats mbtrn_stats reference
+/// @param[in] timestamp time
+/// @param[in] type_str channel type string
+/// @param[in] labels pointer to channel labels
+/// @param[in] channels pointer to channels
+/// @return 0 on success, -1 otherwise
 int mbtrn_log_timing(mlog_id_t log_id, mbtrn_stat_chan_t *stats,  double timestamp, char *type_str, const char **labels, int channels)
 {
-    if (NULL!=stats && NULL!=labels && channels>0) {
+    int retval=-1;
+   if (NULL!=stats && NULL!=labels && channels>0) {
         for (int i=0; i<channels ; i++){
             mlog_tprintf(log_id,"%.3lf,%s,%s,%llu,%1.3g,%1.3g,%1.3g\n",
                          timestamp,
@@ -473,13 +510,25 @@ int mbtrn_log_timing(mlog_id_t log_id, mbtrn_stat_chan_t *stats,  double timesta
                          stats[i].max,
                          stats[i].avg);
         }
-    }
-    return 0;
+       retval=0;
+   }
+    return retval;
 }
+// End function mbtrn_log_timing
 
+/// @fn int mbtrn_log_counts(mlog_id_t log_id, uint32_t *counts, double timestamp, char *type_str, const char **labels, int channels)
+/// @brief log statistics
+/// @param[in] log_id log ID
+/// @param[in] counts pointer to counts
+/// @param[in] timestamp time
+/// @param[in] type_str channel type string
+/// @param[in] labels pointer to channel labels
+/// @param[in] channels pointer to channels
+/// @return 0 on success, -1 otherwise
 int mbtrn_log_counts(mlog_id_t log_id, uint32_t *counts, double timestamp, char *type_str, const char **labels, int channels)
 {
-    if (NULL!=counts && NULL!=labels && channels>0) {
+    int retval=-1;
+   if (NULL!=counts && NULL!=labels && channels>0) {
         for (int i=0; i<channels ; i++){
             mlog_tprintf(log_id,"%.3lf,%s,%s,%"PRIu32"\n",
                          timestamp,
@@ -487,14 +536,20 @@ int mbtrn_log_counts(mlog_id_t log_id, uint32_t *counts, double timestamp, char 
                          labels[i],
                          counts[i]);
         }
+       retval=0;
     }
-    return 0;
+    return retval;
 }
+// End function mbtrn_log_counts
 
-int mbtrn_log_stats(mbtr_stats_t *stats,
-                    double now,
-                    mlog_id_t log_id,
-                    mbtr_stat_flags flags)
+/// @fn int mbtrn_log_stats(mbtr_stats_t *stats, double now, mlog_id_t log_id, mbtr_stat_flags flags)
+/// @brief log statistics
+/// @param[in] stats mbtrn_stats reference
+/// @param[in] now timestamp
+/// @param[in] log_id log ID
+/// @param[in] flags options
+/// @return 0 on success, -1 otherwise
+int mbtrn_log_stats(mbtr_stats_t *stats, double now, mlog_id_t log_id, mbtr_stat_flags flags)
 {
     int retval=-1;
     if (NULL!=stats) {
@@ -519,7 +574,12 @@ int mbtrn_log_stats(mbtr_stats_t *stats,
     }
     return retval;
 }
+// End function mbtrn_log_stats
 
+/// @fn mbtr_stats_t *mbtrn_reader_get_statlabels()
+/// @brief get statistics reference for mbtrn_reader
+/// @param[in] self mbtrn_reader reference
+/// @return mbtrn_reader reference on success, NULL otherwise
 mbtr_stats_t *mbtrn_reader_get_stats(mbtrn_reader_t *self)
 {
     mbtr_stats_t *retval=NULL;
@@ -528,11 +588,22 @@ mbtr_stats_t *mbtrn_reader_get_stats(mbtrn_reader_t *self)
     }
     return retval;
 }
+// End function mbtrn_reset_pstats
 
+/// @fn const char ***mbtrn_reader_get_statlabels()
+/// @brief get statistics labels
+/// @return stats label array reference
 const char ***mbtrn_reader_get_statlabels()
 {
     return mbtr_stats_labels;
 }
+// End function mbtrn_reset_pstats
+
+/// @fn mbtrn_reset_pstats(mbtr_stats_t *stats, uint32_t channels)
+/// @brief reset statistics
+/// @param[in] stats mbtr_stats reference
+/// @param[in] channels number of channels
+/// @return none
 void mbtrn_reset_pstats(mbtr_stats_t *stats, uint32_t channels)
 {
     if (NULL != stats && channels>0) {
@@ -540,12 +611,19 @@ void mbtrn_reset_pstats(mbtr_stats_t *stats, uint32_t channels)
         memset(stats->per_stats,0,(channels*sizeof(mbtrn_stat_chan_t)));
     }
 }
+// End function mbtrn_reset_pstats
 
-
+/// @fn int mbtrn_update_stats(mbtr_stats_t *stats, uint32_t channels, mbtr_stat_flags flags)
+/// @brief update mbtrn statistics
+/// @param[in] stats mbtr_stats reference
+/// @param[in] channels number of channels
+/// @param[in] flags processing options
+/// @return 0 on success, -1 otherwise
 int mbtrn_update_stats(mbtr_stats_t *stats, uint32_t channels, mbtr_stat_flags flags)
 {
+    int retval=-1;
+    
     if (NULL!=stats) {
-
         
         // update all stats channels
         for (uint32_t i=0; i<channels ; i++){
@@ -578,10 +656,13 @@ int mbtrn_update_stats(mbtr_stats_t *stats, uint32_t channels, mbtr_stat_flags f
         for (uint32_t i=0; i<channels ; i++){
             stats->measurements[i].value=0.0;
         }
-    }
+        retval=0;
+        
+    } // else invalid arg
 
-    return 0;
+    return retval;
 }
+// End function mbtrn_update_stats
 
 /// @fn iow_socket_t * mbtrn_reader_sockif(mbtrn_reader_t * self)
 /// @brief get reader socket interface.
@@ -1513,9 +1594,10 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                     time_t tt = mktime(&tms);
                     double ptime=(double)tt+ptf;
                     
-                    struct timespec res;
-                    clock_getres(CLOCK_MONOTONIC, &res);
-                    fprintf(stderr,"%11.5lf cskew %+0.4e\n",iow_dtime(),(double)(stime-ptime));
+//                    struct timespec res;
+//                    clock_getres(CLOCK_MONOTONIC, &res);
+//                    fprintf(stderr,"%11.5lf cskew %+0.4e\n",iow_dtime(),(double)(stime-ptime));
+                    MBTR_SW_SET(self->stats->measurements[MBTR_CH_7KFRAME_SKEW],(stime-ptime));
                     
 #else
                     struct timeval stv={0};
@@ -1534,9 +1616,10 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                     time_t tt = mktime(&tms);
                     double ptime=ptf+(double)tt;
                     //                fprintf(stderr,"lrdfr : [%s] ptime[%.3lf] stime[%.3lf] (s-p)[%+6.3lf]\n",tstr,ptime,stime,(double)(stime-ptime));
-                    struct timespec res;
-                    clock_getres(CLOCK_MONOTONIC, &res);
-                    fprintf(stderr,"%11.5lf lskew %+0.4e\n",iow_dtime(), (double)(stime-ptime));
+//                    struct timespec res;
+//                    clock_getres(CLOCK_MONOTONIC, &res);
+//                    fprintf(stderr,"%11.5lf lskew %+0.4e\n",iow_dtime(), (double)(stime-ptime));
+                    MBTR_SW_SET(self->stats->measurements[MBTR_CH_7KFRAME_SKEW],(stime-ptime));
 #endif
 #endif
                     
@@ -1821,7 +1904,8 @@ int64_t mbtrn_read_frame(mbtrn_reader_t *self, byte *dest,
     }
     MMDEBUG(MBTRNV,"returning [%lld]\n",retval);
     return retval;
- }// End function mbtrn_read_frame
+ }
+// End function mbtrn_read_frame
 
 /// @fn iint64_t mbtrn_read_nf_dep (mbtrn_reader_t *self, byte *dest, uint32_t *sync_bytes, uint32_t timeout_msec)
 /// @brief read network frame (deprecated).
@@ -1995,7 +2079,7 @@ int mbtrn_read_nf_dep(mbtrn_reader_t *self, byte *dest, uint32_t *sync_bytes, ui
     return retval;
 }// End function mbtrn_read_nf_dep
 
-/// @fn iint64_t mbtrn_read_drf_dep (mbtrn_reader_t *self, byte *dest, uint32_t len, r7k_nf_t *nf, double newer_than, uint32_t *sync_bytes, uint32_t timeout_msec)
+/// @fn int64_t mbtrn_read_drf_dep (mbtrn_reader_t *self, byte *dest, uint32_t len, r7k_nf_t *nf, double newer_than, uint32_t *sync_bytes, uint32_t timeout_msec)
 /// @brief read data record frame (deprecated).
 /// @param[in] self reader reference
 /// @param[in] dest destination buffer
@@ -2161,8 +2245,8 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
         byte *pdest=dest;
         byte *psrc=buf;
         r7k_nf_t *pnf=NULL;
-        r7k_drf_t *pdrf=NULL;
         byte *pbuf=buf;
+        r7k_drf_t *pdrf=NULL;
         int64_t read_bytes=0;
     
         if (flags&MBR_NET_STREAM) {
@@ -2194,6 +2278,7 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
 
 #ifdef MBTRN_TIMING
 #if defined(__CYGWIN__)
+                if (NULL!=pdrf) {
                 FILETIME ft, epoch_ft;
                 SYSTEMTIME epoch_st = {1970,1, 0, 1, 0, 0, 0, 0};
                 ULARGE_INTEGER a, b;
@@ -2221,8 +2306,10 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
                 struct timespec res;
                 clock_getres(CLOCK_MONOTONIC, &res);
                 fprintf(stderr,"%11.5lf cskew %+0.4e\n",iow_dtime(),(double)(stime-ptime));
+                }
 
 #elif defined(__linux__)
+                if (NULL!=pdrf) {
                 struct timeval stv={0};
                 gettimeofday(&stv,NULL);
                 double stime = (double)stv.tv_sec+((double)stv.tv_usec/1000000.0)+(7*3600);
@@ -2242,6 +2329,8 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
                 struct timespec res;
                 clock_getres(CLOCK_MONOTONIC, &res);
                 fprintf(stderr,"%11.5lf lskew %+0.4e\n",iow_dtime(), (double)(stime-ptime));
+                }
+
 #else
                 fprintf(stderr,"MBTRN_TIMING - skew not implemented\n");
                
@@ -2305,7 +2394,9 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
         memset(buf,0,R7K_MAX_FRAME_BYTES);
         pbuf=buf;
         pnf=NULL;
-        pdrf=NULL;
+        if (pdrf) {
+            pdrf=NULL;
+        }
         
     }else{
         MERROR("invalid argument\n");
@@ -2313,11 +2404,11 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
     MMDEBUG(MBTRN,"returning [%lld]\n",retval);
     return retval;
 }
+// End function mbtrn_read_frame_dep
 
-/// @fn int64_t mbtrn_read_frames(mbtrn_reader_t *self, byte *dest, uint32_t len, uint32_t nframes, uint32_t max_age_ms )
+/// @fn int64_t mbtrn_read_frames_dep(mbtrn_reader_t *self, byte *dest, uint32_t len, uint32_t nframes, uint32_t max_age_ms )
 /// @brief add data record frames to reader container w/ age new than specified time.
 /// @param[in] self reader reference
-/// @param[in] dest destination buffer
 /// @param[in] nframes number of frames to read
 /// @param[in] newer_than filter packets by time (reject if older than newer_than)
 /// @param[in] timeout_msec timeout to use for reads
@@ -2424,7 +2515,14 @@ int64_t mbtrn_read_frames_dep(mbtrn_reader_t *self, uint32_t nframes, double new
 
     return retval;
 }
+// End function mbtrn_read_frames_dep
 
+/// @fn int64_t mbtrn_refill(mbtrn_reader_t *self, uint32_t max_age_ms, uint32_t timeout_msec )
+/// @brief add data record frames to reader container w/ age new than specified time.
+/// @param[in] self reader reference
+/// @param[in] max_age_ms reject packets older than max_age_ms
+/// @param[in] timeout_msec timeout to use for reads
+/// @return number of bytes read on success, -1 otherwise
 int64_t mbtrn_refill(mbtrn_reader_t *self, uint32_t max_age_ms, uint32_t timeout_msec )
 {
     int64_t retval=-1;
@@ -2494,6 +2592,7 @@ int64_t mbtrn_refill(mbtrn_reader_t *self, uint32_t max_age_ms, uint32_t timeout
     }
     return retval;
 }
+// End function mbtrn_refill
 
 /// @fn int64_t mbtrn_reader_xread(mbtrn_reader_t * self, byte * dest, uint32_t len, uint32_t tmout_ms, mbtrn_flags_t flags)
 /// @brief combined poll and parse operation. used by MB System to
@@ -2571,7 +2670,7 @@ int64_t mbtrn_reader_xread(mbtrn_reader_t *self, byte *dest, uint32_t len, uint3
 					
                     MMDEBUG(MBTRN,"refilling drfcon \n");
 
-                    MBTR_SW_START(self->stats->measurements[MBTR_CH_MBTRN_REFILL_XT],iow_dtime());
+//                    MBTR_SW_START(self->stats->measurements[MBTR_CH_MBTRN_REFILL_XT],iow_dtime());
 
                    if( (rstat=mbtrn_refill(self, max_age_ms, tmout_ms ))<=0){
                         // quit if socket closed, else keep trying
@@ -2583,7 +2682,7 @@ int64_t mbtrn_reader_xread(mbtrn_reader_t *self, byte *dest, uint32_t len, uint3
                             break;
                         }
                     }
-                    MBTR_SW_LAP(self->stats->measurements[MBTR_CH_MBTRN_REFILL_XT],iow_dtime());
+//                    MBTR_SW_LAP(self->stats->measurements[MBTR_CH_MBTRN_REFILL_XT],iow_dtime());
                 }
           
                 // break if done
@@ -2607,6 +2706,7 @@ int64_t mbtrn_reader_xread(mbtrn_reader_t *self, byte *dest, uint32_t len, uint3
     }
     return retval;
 }
+// End function mbtrn_reader_xread
 
 /// @fn int64_t mbtrn_reader_xread_frmae(mbtrn_reader_t * self, byte * dest, uint32_t len)
 /// @brief combined poll and parse operation. used by MB System to
@@ -2624,6 +2724,8 @@ int64_t mbtrn_reader_xread_frame(mbtrn_reader_t *self, byte *dest, uint32_t len)
     }// else invalid arg
     return retval;
 }
+// End function mbtrn_reader_xread_frame
+
 
 /// @fn int64_t mbtrn_reader_xread(mbtrn_reader_t * self, byte * dest, uint32_t len, uint32_t tmout_ms, mbtrn_flags_t flags)
 /// @brief combined poll and parse operation. used by MB System to
@@ -2766,8 +2868,7 @@ int64_t mbtrn_reader_xread_orig(mbtrn_reader_t *self, byte *dest, uint32_t len, 
 //    MMDEBUG(MBTRN,"retval[%lld] merr[%d/%s]\n",retval,me_errno,me_strerror(me_errno));
     return retval;
 }
-// End function mbtrn_reader_xread
-
+// End function mbtrn_reader_xread_orig
 
 /// @fn int64_t mbtrn_reader_read(mbtrn_reader_t * self, byte * dest, uint32_t len)
 /// @brief read from reson 7k center socket.
@@ -2789,7 +2890,6 @@ int64_t mbtrn_reader_read(mbtrn_reader_t *self, byte *dest, uint32_t len)
 }
 // End function mbtrn_reader_read
 
-
 /// @fn int64_t mbtrn_reader_seek(mbtrn_reader_t * self, uint32_t ofs)
 /// @brief set output buffer (read) pointer.
 /// @param[in] self reader reference
@@ -2809,7 +2909,6 @@ int64_t mbtrn_reader_seek(mbtrn_reader_t *self, uint32_t ofs)
 }
 // End function mbtrn_reader_seek
 
-
 /// @fn int64_t mbtrn_reader_tell(mbtrn_reader_t * self)
 /// @brief return current output buffer (read) pointer position.
 /// @param[in] self reader reference
@@ -2827,7 +2926,6 @@ int64_t mbtrn_reader_tell(mbtrn_reader_t *self)
     return retval;
 }
 // End function mbtrn_reader_tell
-
 
 /// @fn uint32_t mbtrn_reader_frames(mbtrn_reader_t * self)
 /// @brief return number of data record frames currently in buffer.
@@ -2847,7 +2945,6 @@ uint32_t mbtrn_reader_frames(mbtrn_reader_t *self)
 }
 // End function mbtrn_reader_frames
 
-
 /// @fn r7k_drf_t * mbtrn_reader_enumerate(mbtrn_reader_t * self)
 /// @brief set buffer pointer to first frame and return a pointer to it.
 /// @param[in] self reader reference
@@ -2863,7 +2960,6 @@ r7k_drf_t *mbtrn_reader_enumerate(mbtrn_reader_t *self)
     return retval;
 }
 // End function mbtrn_reader_enumerate
-
 
 /// @fn r7k_drf_t * mbtrn_reader_next(mbtrn_reader_t * self)
 /// @brief return reference to next frame in reader buffer.
@@ -2882,7 +2978,7 @@ r7k_drf_t    *mbtrn_reader_next(mbtrn_reader_t *self)
 }
 // End function mbtrn_reader_next
 
-/// @fn mbtrn_reader_issub(mbtrn_reader_t *self, uint32_t record_type)
+/// @fn _Bool mbtrn_reader_issub(mbtrn_reader_t *self, uint32_t record_type)
 /// @brief return true if record type is on subscription list.
 /// @param[in] self reader reference
 /// @param[in] record_type packet type to check
@@ -2936,5 +3032,4 @@ bool mbtrn_peer_vcmp(void *item, void *value)
     return retval;
 }
 // End function mbtrn_peer_vcmp
-
 

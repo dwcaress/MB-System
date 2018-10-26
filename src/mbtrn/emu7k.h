@@ -150,6 +150,9 @@ typedef struct app_cfg_s{
     /// @var app_cfg_s::file_list
     /// @brief data source file list
     mlist_t *file_paths;
+    /// @var app_cfg_s::start_offset
+    /// @brief skip start_offset bytes
+    uint32_t start_offset;
 }app_cfg_t;
 
 /// @typedef struct emu7k_record_s emu7k_record_t

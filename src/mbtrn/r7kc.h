@@ -505,7 +505,6 @@ typedef struct r7k_rd_rcnak_s
 /// per record, etc.
 #define R7K_MAX_PING_RECORDS 32
 
-
 /// @def R7K_RTID_SUB
 /// @brief 7K Center message type subscribe to message streams.
 #define R7K_RTID_SUB            1051
@@ -635,13 +634,27 @@ typedef struct r7k_rd_rcnak_s
 /// @brief timeout for socket IO during subscription transaction.
 #define R7K_SUBSCRIBE_TIMEOUT_MS 5000
 
+/// @def SEC_PER_MIN
+/// @brief time conversion - seconds/minute
 #define SEC_PER_MIN (60)
+/// @def SEC_PER_HOUR
+/// @brief time conversion - seconds/hour
 #define SEC_PER_HOUR (SEC_PER_MIN*60)
+/// @def SEC_PER_DAY
+/// @brief time conversion - seconds/day
 #define SEC_PER_DAY (SEC_PER_HOUR*24)
 
+/// @def S_PER_M
+/// @brief time conversion - seconds/minute (double)
 #define S_PER_M ((double)60.0)
+/// @def S_PER_H
+/// @brief time conversion - seconds/hour (double)
 #define S_PER_H ((double)S_PER_M*60.0)
+/// @def S_PER_D
+/// @brief time conversion - seconds/day (double)
 #define S_PER_D ((double)S_PER_H*24.0)
+/// @def S_PER_Y
+/// @brief time conversion - seconds/year (double)
 #define S_PER_Y ((double)S_PER_D*365.0)
 
 /////////////////////////
@@ -657,7 +670,7 @@ uint16_t r7k_txid();
 uint32_t r7k_checksum(byte *pdata, uint32_t len);
 void r7k_update_time(r7k_time_t *t7k);
 void r7k_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent);
-int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles);
+int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool *interrupt);
 
 // R7K packet frame (DRF/NF) API
 double r7k_7ktime2d(r7k_time_t *r7kt);

@@ -199,7 +199,7 @@ typedef int32_t mlog_id_t;
 /// @brief path delimiter
 #define ML_SYS_PATH_DEL '/'
 /// @def ML_SYS_EXT_DEL
-/// @brief extension delimiter
+/// @brief extention delimiter
 #define ML_SYS_EXT_DEL '.'
 #elif defined(__WIN32) || defined(_WIN64)
 #define ML_SYS_PATH_DEL '\\'
