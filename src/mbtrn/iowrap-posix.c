@@ -111,7 +111,6 @@ GNU General Public License for more details
 "GNU General Public License for more details (http://www.gnu.org/licenses/gpl-3.0.html)\n"
 */
 
-
 /////////////////////////
 // Declarations 
 /////////////////////////
@@ -128,28 +127,6 @@ GNU General Public License for more details
 // Function Definitions
 /////////////////////////
 
-// socket Allocate a socket descriptor
-// bind Associate a socket with an IP address and port number
-// listen Tell a socket to listen for incoming connections
-// accept Accept an incoming connection on a listening socket
-// connect Connect a socket to a server
-// close Close a socket descriptor
-// setsockopt(), getsockopt() Set various options for a socket
-// recv(), recvfrom() Receive data on a socket
-// send(), sendto() Send data out over a socket
-//  getaddrinfo(), freeaddrinfo(), gai_strerror(), Get information about a host name and/or service and load up a struct sockaddr with the result
-// getnameinfo Look up the host name and service name information for a given struct sockaddr->
-// gethostname Returns the name of the system
-// gethostbyname, gethostbyaddr Get an IP address for a hostname, or vice-versa
-// getpeername Return address info about the remote side of the connection
-// fcntl Control socket descriptors
-// htons(), htonl(), ntohs(), ntohl() Convert multi-byte integer types from host byte order to network byte order
-// inet_ntoa(), inet_aton(), inet_addr Convert IP addresses from a dots-and-number string to a struct in_addr and back
-// inet_ntop(), inet_pton() Convert IP addresses to human-readable form and back.
-// poll Test for events on multiple sockets simultaneously
-// select Check if sockets descriptors are ready to read/write
-// perror(), strerror() Print an error as a human-readable string
-
 /// @fn iow_thread_t * iow_thread_new()
 /// @brief create new thread.
 /// @return pointer to thread
@@ -162,7 +139,6 @@ iow_thread_t *iow_thread_new()
     return self;
 }
 // End function iow_thread_new
-
 
 /// @fn void iow_thread_destroy(iow_thread_t ** pself)
 /// @brief release thread resources.
@@ -179,7 +155,6 @@ void iow_thread_destroy(iow_thread_t **pself)
     }
 }
 // End function iow_thread_destroy
-
 
 /// @fn int iow_thread_start(iow_thread_t * thread, mbtrn_thread_fn func, void * arg)
 /// @brief start thread.
@@ -203,7 +178,6 @@ int iow_thread_start(iow_thread_t *thread, mbtrn_thread_fn func, void *arg)
 }
 // End function iow_thread_start
 
-
 /// @fn int iow_thread_join(iow_thread_t * thread)
 /// @brief wait for thread to complete.
 /// @param[in] thread thread instance
@@ -217,7 +191,6 @@ int iow_thread_join(iow_thread_t *thread){
     return retval;
 }
 // End function iow_thread_join
-
 
 /// @fn int iow_set_blocking(iow_socket_t * s, _Bool enabled)
 /// @brief configure socket to block or not block.
@@ -239,7 +212,6 @@ int iow_set_blocking(iow_socket_t *s, bool enabled)
 }
 // End function iow_set_blocking
 
-
 /// @fn iow_addr_t * iow_addr_new()
 /// @brief create new IP address.
 /// should be destroyed with iow_addr_destroy.
@@ -256,7 +228,6 @@ iow_addr_t *iow_addr_new()
     return self;
 }
 // End function iow_addr_new
-
 
 /// @fn void iow_addr_destroy(iow_addr_t ** pself)
 /// @brief release resources for iow_address instance.
@@ -292,7 +263,6 @@ void iow_addr_destroy(iow_addr_t **pself)
 }
 // End function iow_addr_destroy
 
-
 /// @fn void iow_addr_init(iow_addr_t * self)
 /// @brief initialize address instance (zeros members).
 /// @param[in] self address instance
@@ -314,7 +284,6 @@ void iow_addr_init(iow_addr_t *self)
 }
 // End function iow_addr_init
 
-
 /// @fn iow_peer_t * iow_peer_new()
 /// @brief create new network peer (e.g. UDP client).
 /// caller should release resources using iow_peer_destroy.
@@ -330,7 +299,6 @@ iow_peer_t *iow_peer_new()
     return self;
 }
 // End function iow_peer_new
-
 
 /// @fn void iow_peer_destroy(iow_peer_t ** pself)
 /// @brief release peer resources.
@@ -411,7 +379,6 @@ iow_socket_t *iow_socket_new(const char *host, int port, iow_socket_ctype type)
 }
 // End function iow_socket_new
 
-
 /// @fn void iow_socket_destroy(iow_socket_t ** pself)
 /// @brief release socket resources.
 /// @param[in] pself pointer to instance reference
@@ -429,7 +396,6 @@ void iow_socket_destroy(iow_socket_t **pself)
     }
 }
 // End function iow_socket_destroy
-
 
 /// @fn iow_socket_t * iow_wrap_fd(int fd)
 /// @brief wrap file descriptor in iow_socket.
@@ -538,7 +504,6 @@ int iow_configure(iow_socket_t *s, const char *host, int port, iow_socket_ctype 
 }
 // End function iow_configure
 
-
 /// @fn int iow_connect(iow_socket_t * s)
 /// @brief connect (to server) socket.
 /// @param[in] s socket instance.
@@ -563,7 +528,6 @@ int iow_connect(iow_socket_t *s)
 }
 // End function iow_connect
 
-
 /// @fn int iow_bind(iow_socket_t * s)
 /// @brief bind (server) socket to port.
 /// @param[in] s socket instance
@@ -587,7 +551,6 @@ int iow_bind(iow_socket_t *s)
     return retval;
 }
 // End function iow_bind
-
 
 /// @fn int iow_listen(iow_socket_t * s)
 /// @brief listen for connections on (server) socket.
@@ -621,7 +584,6 @@ int iow_listen(iow_socket_t *s)
 }
 // End function iow_listen
 
-
 /// @fn int iow_accept(iow_socket_t * s)
 /// @brief accept (client) connection on socket.
 /// @param[in] s socket instance
@@ -636,7 +598,7 @@ int iow_accept(iow_socket_t *s)
 
         s->fd = accept(s->fd, (struct sockaddr *)&client_addr, &addr_size);
         if (s->fd != -1) {
-            MMINFO(IOW,"server received connection from client on socket [%d]\n",s->fd);
+            MMINFO(IOW,"server recieved connection from client on socket [%d]\n",s->fd);
             retval = s->fd;
         }else{
             // accept failed
@@ -648,7 +610,6 @@ int iow_accept(iow_socket_t *s)
     return retval;
 }
 // End function iow_accept
-
 
 /// @fn int64_t iow_send(iow_socket_t *s, byte *buf, uint32_t len)
 /// @brief send data via socket.
@@ -687,15 +648,15 @@ int64_t iow_send(iow_socket_t *s,byte *buf, uint32_t len)
 }
 // End function iow_send
 
-
-/// @fn int64_t iow_sendto(iow_socket_t * s, iow_addr_t * peer, byte * buf, uint32_t len)
+/// @fn int64_t iow_sendto(iow_socket_t * s, iow_addr_t * peer, byte * buf, uint32_t len, int32_t flags)
 /// @brief send data via (UDP) socket.
 /// @param[in] s socket instance
 /// @param[in] peer peer address
 /// @param[in] buf data buffer
 /// @param[in] len number of bytes to send
+/// @param[in] flags optional flags
 /// @return number of bytes sent on success, -1 ohterwise.
-int64_t iow_sendto(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len)
+int64_t iow_sendto(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len, int32_t flags)
 {
     int64_t retval=-1;
     if (NULL != s && NULL != buf && len>0) {
@@ -709,7 +670,7 @@ int64_t iow_sendto(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len)
                     dest_addr = peer->ainfo->ai_addr;
                 }
 
-                if( (retval = sendto(s->fd,buf,len,0,dest_addr,IOW_ADDR_LEN)) > 0){
+                if( (retval = sendto(s->fd,buf,len,flags,dest_addr,IOW_ADDR_LEN)) > 0){
 //                    MMDEBUG(IOW,"sendto OK [%lld]\n",retval);
                 }else{
 //                    MERROR("ERR - sendto returned %lld [%d/%s]\n",retval,errno,strerror(errno));
@@ -728,7 +689,6 @@ int64_t iow_sendto(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len)
 }
 // End function iow_sendto
 
-
 /// @fn int64_t iow_recv(iow_socket_t * s, byte * buf, uint32_t len)
 /// @brief receive bytes on socket.
 /// @param[in] s socket instance
@@ -746,7 +706,6 @@ int64_t iow_recv(iow_socket_t *s, byte *buf, uint32_t len)
     return retval;
 }
 // End function iow_recv
-
 
 /// @fn int64_t iow_recvfrom(iow_socket_t * s, iow_addr_t * peer, byte * buf, uint32_t len)
 /// @brief TBD.
@@ -807,7 +766,6 @@ int64_t iow_recvfrom2(iow_socket_t *s, iow_addr_t *peer, byte *buf, uint32_t len
     return retval;
 }
 // End function iow_recvfrom
-
 
 ///// @fn int64_t iow_read_tmout(iow_socket_t * s, byte * buf, uint32_t len, uint32_t timeout_msec)
 ///// @brief read bytes from socket until length or timeout exceeded.
@@ -1036,6 +994,8 @@ double iow_dtime()
     
     return retval;
 }
+// End function iow_dtime
+
 /// @fn double iow_mdtime(double mod)
 /// @brief get system time as a double
 /// @return system time as double, with usec precision
@@ -1053,6 +1013,7 @@ double iow_mdtime(double mod)
   
     return retval;
 }
+// End function iow_mdtime
 
 /// @fn int64_t iow_read_tmout(iow_socket_t * s, byte * buf, uint32_t len, uint32_t timeout_msec)
 /// @brief read bytes from socket until length or timeout exceeded.
@@ -1095,6 +1056,7 @@ int64_t iow_read_tmout(iow_socket_t *s, byte *buf, uint32_t len, uint32_t timeou
         while (err_quit==false && read_total<len && elapsed_sec<to_sec && pbuf<(buf+len) ) {
 
             
+#if 0
 #ifdef MBTRN_TIMING
 #if defined(__CYGWIN__)
 
@@ -1117,9 +1079,11 @@ int64_t iow_read_tmout(iow_socket_t *s, byte *buf, uint32_t len, uint32_t timeou
             double start = iow_dtime();
 #endif
 #endif
+#endif
             // read from the file/socket
            nbytes = read(s->fd, pbuf, (len-read_total));
 
+#if 0
 #ifdef MBTRN_TIMING
 #if defined(__CYGWIN__)
 //            LARGE_INTEGER stop={0};
@@ -1147,6 +1111,7 @@ int64_t iow_read_tmout(iow_socket_t *s, byte *buf, uint32_t len, uint32_t timeou
             double stop=iow_dtime();
             double diff=(stop-start);
             fprintf(stderr,"%11.5lf lrdxt %0.4e\n",stop, diff);
+#endif
 #endif
 #endif
 //            fprintf(stderr,"read returned [%"PRId64"/%"PRId64"] [%d/%s]\n",nbytes,(len-read_total),errno,strerror(errno));
@@ -1255,8 +1220,10 @@ int64_t iow_read_tmout(iow_socket_t *s, byte *buf, uint32_t len, uint32_t timeou
                 now_sec = iow_dtime();
                 elapsed_sec   = now_sec-start_sec;
                 
+#if 0
 #ifdef MBTRN_TIMING
                 fprintf(stderr,"%11.5lf chktime %.6lf\n",now_sec, elapsed_sec);
+#endif
 #endif
             }
             
@@ -1329,7 +1296,6 @@ static int s_iow2posix_flags(int iflags)
 }
 // End function s_iow2posix_flags
 
-
 /// @fn mode_t s_iow2posix_mode(iow_mode_t imode)
 /// @brief convert iow to posix file (permission) mode flags.
 /// @param[in] imode iow file modes
@@ -1357,7 +1323,6 @@ static mode_t s_iow2posix_mode(iow_mode_t imode)
 }
 // End function s_iow2posix_mode
 
-
 /// @fn iow_file_t * iow_file_new(const char * path)
 /// @brief new file instance. This is the equivalent of a file descriptor.
 /// @param[in] path file path
@@ -1377,7 +1342,6 @@ iow_file_t *iow_file_new(const char *path)
     return self;
 }
 // End function iow_file_new
-
 
 /// @fn void iow_file_destroy(iow_file_t ** pself)
 /// @brief release file resources.
@@ -1416,7 +1380,6 @@ void iow_file_show(iow_file_t *self, bool verbose, uint16_t indent)
 }
 // End function iow_file_show
 
-
 /// @fn int iow_open(iow_file_t * self, iow_flags_t flags)
 /// @brief open a file.
 /// @param[in] self file reference
@@ -1441,7 +1404,6 @@ int iow_open(iow_file_t *self,iow_flags_t flags)
     return retval;
 }
 // End function iow_open
-
 
 /// @fn int iow_mopen(iow_file_t * self, iow_flags_t flags, iow_mode_t mode)
 /// @brief open file, specify permission modes.
@@ -1471,7 +1433,6 @@ int iow_mopen(iow_file_t *self,iow_flags_t flags,iow_mode_t mode )
     return retval;
 }
 // End function iow_mopen
-
 
 /// @fn int iow_close(iow_file_t * self)
 /// @brief close a file.
@@ -1527,7 +1488,6 @@ int iow_rename(iow_file_t *self,const char *path)
     return retval;
 }
 // End function iow_rename
-
 
 /// @fn int64_t iow_seek(iow_file_t *self, uint32_t ofs)
 /// @brief move cursor to specified offset
@@ -1592,7 +1552,6 @@ int64_t iow_read(iow_file_t *self, byte *dest, uint32_t len)
 }
 // End function iow_read
 
-
 /// @fn int64_t iow_write(iow_file_t * self, byte * src, uint32_t len)
 /// @brief write bytes to file (advances input pointer.
 /// @param[in] self file instance
@@ -1616,7 +1575,6 @@ int64_t iow_write(iow_file_t *self, byte *src, uint32_t len)
 }
 // End function iow_write
 
-
 /// @fn int iow_ftruncate(iow_file_t * self, uint32_t len)
 /// @brief truncate file to specified length.
 /// @param[in] self file instance
@@ -1631,7 +1589,6 @@ int iow_ftruncate(iow_file_t *self, uint32_t len)
     return retval;
 }
 // End function iow_ftruncate
-
 
 /// @fn int iow_fprintf(iow_file_t * self, char * fmt, ...)
 /// @brief formatted print to file.
@@ -1656,7 +1613,6 @@ int iow_fprintf(iow_file_t *self, char *fmt, ...)
 }
 // End function iow_fprintf
 
-
 /// @fn int iow_vfprintf(iow_file_t * self, char * fmt, va_list args)
 /// @param[in] self file instance
 /// @param[in] fmt print format (e.g. stdio printf)
@@ -1677,7 +1633,6 @@ int iow_vfprintf(iow_file_t *self, char *fmt, va_list args)
 }
 // End function iow_vfprintf
 
-
 /// @fn int iow_flush(iow_file_t * self)
 /// @brief flush, attempt to sync to disk.
 /// calls fsync; may not actually force write to disk until closed
@@ -1695,7 +1650,6 @@ int iow_flush(iow_file_t *self)
     
 }
 // End function iow_flush
-
 
 /// @fn int64_t iow_fsize(iow_file_t * self)
 /// @brief file size.
@@ -1718,7 +1672,6 @@ int64_t iow_fsize(iow_file_t *self)
 }
 // End function iow_fsize
 
-
 /// @fn time_t iow_mtime(const char * path)
 /// @brief return modification time of file (seconds since 1/1/70).
 /// @param[in] path file path
@@ -1739,7 +1692,6 @@ time_t iow_mtime(const char *path)
     return retval;
 }
 // End function iow_mtime
-
 
 // iow mutex API
 /// @fn iow_mutex_t * iow_mutex_new()
@@ -1773,7 +1725,6 @@ void iow_mutex_destroy(iow_mutex_t **pself)
 }
 // End function iow_mutex_destroy
 
-
 /// @fn int iow_mutex_lock(iow_mutex_t * self)
 /// @brief lock a mutex.
 /// @param[in] self mutex reference
@@ -1801,8 +1752,6 @@ int iow_mutex_unlock(iow_mutex_t *self)
 	return retval;
 }
 // End function iow_mutex_unlock
-
-
 
 #ifdef WITH_TEST
 
@@ -1847,7 +1796,7 @@ void *iow_test_svr(void *arg)
                         
                         newfd = accept(s->fd, (struct sockaddr *)&client_addr, &addr_size);
                         if (newfd != -1) {
-                            MMINFO(IOW,"server received connection from client on socket [%d]\n",newfd);
+                            MMINFO(IOW,"server recieved connection from client on socket [%d]\n",newfd);
                             FD_SET(newfd,&read_fds);
                             if (newfd>fdmax) {
                                 fdmax=newfd;

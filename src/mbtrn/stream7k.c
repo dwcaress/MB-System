@@ -179,12 +179,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"cycles", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
 
-    /* process argument list */
+    // process argument list 
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
         switch (c) {
-                /* long options all return c=0 */
+                // long options all return c=0 
             case 0:
-                /* verbose */
+                // verbose 
                 if (strcmp("verbose", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->verbose);
                 }
@@ -194,16 +194,16 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                     version=true;
                 }
 
-                /* help */
+                // help 
                 else if (strcmp("help", options[option_index].name) == 0) {
                     help = true;
                 }
                 
-                /* host */
+                // host 
                 else if (strcmp("host", options[option_index].name) == 0) {
                     cfg->host=strdup(optarg);
                 }
-                /* cycles */
+                // cycles 
                 else if (strcmp("cycles", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->cycles);
                 }
@@ -222,6 +222,28 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
+
+    mcfg_configure(NULL,0);
+    mdb_set(MDI_ALL,MDL_UNSET);
+    mdb_set(IOW,MDL_ERROR);
+    mdb_set(R7K,MDL_ERROR);
+    mdb_set(MBTRN,MDL_ERROR);
+    switch (cfg->verbose) {
+        case 0:
+            mdb_set(MDI_ALL,MDL_UNSET);
+            break;
+        case 1:
+            mdb_set(APP1,MDL_DEBUG);
+            break;
+        case 2:
+            mdb_set(APP1,MDL_DEBUG);
+            mdb_set(IOW,MDL_DEBUG);
+            mdb_set(R7K,MDL_DEBUG);
+            mdb_set(MBTRN,MDL_DEBUG);
+            break;
+        default:
+            break;
+    }
 }
 // End function parse_args
 
@@ -245,6 +267,63 @@ static void s_termination_handler (int signum)
 }
 // End function termination_handler
 
+/// @fn int s_app_main (app_cfg_t *cfg)
+/// @brief app main.
+/// @param[in] cfg app_cfg_t reference
+/// @return 0 on success, -1 otherwise
+static int s_app_main (app_cfg_t *cfg)
+{
+    int retval=-1;
+    
+    if (NULL!=cfg) {
+        retval=0;
+        
+        uint32_t nsubs=11;
+        uint32_t subs[]={1003, 1006, 1008, 1010, 1012, 1013, 1015,
+            1016, 7000, 7004, 7027};
+        iow_socket_t *s = NULL;
+        int cycle_count=0;
+        
+        while (!g_stop_flag) {
+            s = iow_socket_new(cfg->host, R7K_7KCENTER_PORT, ST_TCP);
+            if (NULL != s) {
+                MMDEBUG(APP1,"connecting [%s]\n",cfg->host);
+                if (iow_connect(s)==0) {
+                    
+                    if(r7k_subscribe(s, subs, nsubs)==0){
+                        int test=iow_set_blocking(s,true);
+                        MMDEBUG(APP1,"set_blocking ret[%d]\n",test);
+                        MMDEBUG(APP1,"subscribing [%u]\n",nsubs);
+                        MMDEBUG(APP1,"streaming c[%d]\n",cfg->cycles);
+                        r7k_stream_show(s,1024, 350, cfg->cycles,&g_stop_flag);
+                        cycle_count++;
+                    }else{
+                        MMDEBUG(APP1,"subscribe failed [%d/%s]\n",me_errno,strerror(me_errno));
+                    }
+                }else{
+                    MMDEBUG(APP1,"connnect failed [%d/%s]\n",me_errno,strerror(me_errno));
+                }
+            }else{
+                MMDEBUG(APP1,"iow_socket_new failed [%d/%s]\n",me_errno,strerror(me_errno));
+            }
+            if (cfg->cycles>0 && (cycle_count>=cfg->cycles)) {
+                g_stop_flag=true;
+            }else{
+                if (!g_stop_flag) {
+                    MMDEBUG(APP1,"retrying connection in 5 s\n");
+                    iow_socket_destroy(&s);
+                    sleep(5);
+                }
+            }
+        }
+        if (g_stop_flag) {
+            MMDEBUG(APP2,"stop flag set\n");
+        }
+    }// else invalid argument
+    return retval;
+}
+// End function s_app_main
+
 /// @fn int main(int argc, char ** argv)
 /// @brief stream7k main entry point.
 /// subscribe to reson 7k center data streams, and output
@@ -255,6 +334,8 @@ static void s_termination_handler (int signum)
 /// @return 0 on success, -1 otherwise
 int main(int argc, char **argv)
 {
+    int retval=-1;
+    
     // configure signal handling
     // for main thread
     struct sigaction saStruct;
@@ -263,76 +344,18 @@ int main(int argc, char **argv)
     saStruct.sa_handler = s_termination_handler;
     sigaction(SIGINT, &saStruct, NULL);
 
-    uint32_t nsubs=11;
-    uint32_t subs[]={1003, 1006, 1008, 1010, 1012, 1013, 1015,
-        1016, 7000, 7004, 7027};
+    app_cfg_t cfg_s = {true,strdup(RESON_HOST_DFL),0};
+    app_cfg_t *cfg = &cfg_s;
     
-    app_cfg_t cfg = {true,strdup(RESON_HOST_DFL),0};
+    // parse command line options
+    parse_args(argc, argv, cfg);
     
-    parse_args(argc, argv, &cfg);
+    // run app
+    retval=s_app_main(cfg);
     
-    mcfg_configure(NULL,0);
-    mdb_set(MDI_ALL,MDL_UNSET);
-    mdb_set(IOW,MDL_ERROR);
-    mdb_set(R7K,MDL_ERROR);
-    mdb_set(MBTRN,MDL_ERROR);
-    switch (cfg.verbose) {
-        case 0:
-            mdb_set(MDI_ALL,MDL_UNSET);
-            break;
-        case 1:
-            mdb_set(APP1,MDL_DEBUG);
-            break;
-        case 2:
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(IOW,MDL_DEBUG);
-            mdb_set(R7K,MDL_DEBUG);
-            mdb_set(MBTRN,MDL_DEBUG);
-            break;
-        default:
-            break;
-    }
-    
-    iow_socket_t *s = NULL;
-    int cycle_count=0;
-    
-    while (!g_stop_flag) {
-        s = iow_socket_new(cfg.host, R7K_7KCENTER_PORT, ST_TCP);
-        if (NULL != s) {
-            MMDEBUG(APP1,"connecting [%s]\n",cfg.host);
-            if (iow_connect(s)==0) {
-                
-                if(r7k_subscribe(s, subs, nsubs)==0){
-                    int test=iow_set_blocking(s,true);
-                    MMDEBUG(APP1,"set_blocking ret[%d]\n",test);
-                    MMDEBUG(APP1,"subscribing [%u]\n",nsubs);
-                   MMDEBUG(APP1,"streaming c[%d]\n",cfg.cycles);
-                    r7k_stream_show(s,1024, 350, cfg.cycles);
-                    cycle_count++;
-                }else{
-                    MMDEBUG(APP1,"subscribe failed [%d/%s]\n",me_errno,strerror(me_errno));
-                }
-            }else{
-                MMDEBUG(APP1,"connnect failed [%d/%s]\n",me_errno,strerror(me_errno));
-            }
-        }else{
-            MMDEBUG(APP1,"iow_socket_new failed [%d/%s]\n",me_errno,strerror(me_errno));
-        }
-        if (cfg.cycles>0 && (cycle_count>=cfg.cycles)) {
-            g_stop_flag=true;
-        }else{
-        MMDEBUG(APP1,"retrying connection in 5 s\n");
-        iow_socket_destroy(&s);
-        sleep(5);
-        }
-    }
-    if (g_stop_flag) {
-        MMDEBUG(APP2,"stop flag set\n");
-    }
-    
-    free(cfg.host);
+    free(cfg->host);
 
-    return 0;
+    return retval;
 }
 // End function main
 

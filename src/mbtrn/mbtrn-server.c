@@ -268,7 +268,7 @@ static void *s_server_main(void *arg)
                            
                            newfd = accept(s->fd, (struct sockaddr *)&client_addr, &addr_size);
                            if (newfd != -1) {
-                               MINFO("server received connection from client on socket [%d]\n",newfd);
+                               MINFO("server recieved connection from client on socket [%d]\n",newfd);
                                FD_SET(newfd,&read_fds);
                                if (newfd>fdmax) {
                                    fdmax=newfd;

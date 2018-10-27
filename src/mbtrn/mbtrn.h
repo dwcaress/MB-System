@@ -111,6 +111,8 @@ typedef enum{
     MBR_RESYNC_DRF=0x1000
 } mbtrn_flags_t;
 
+/// @typedef enum mbtrn_parse_state_t mbtrn_parse_state_t
+/// @brief 7k frame parsing states
 typedef enum{
     MBR_STATE_START=0,
     MBR_STATE_READ_ERR,
@@ -129,6 +131,8 @@ typedef enum{
     MBR_STATE_DISCONNECTED
 } mbtrn_parse_state_t;
 
+/// @typedef enum mbtrn_parse_action_t mbtrn_parse_action_t
+/// @brief 7k frame parsing actions
 typedef enum{
     MBR_ACTION_NOOP=0,
     MBR_ACTION_READ,
@@ -171,25 +175,45 @@ typedef struct mbtrn_stats_s{
     double chan_d[MBTRN_STAT_CHANNELS];
 }mbtrn_stats_t;
 
+/// @typedef struct mbtrn_stat_chan_s mbtrn_stat_chan_t
+/// @brief mbtrn stats channel average
 typedef struct mbtrn_stat_chan_s
 {
+    /// @var mbtrn_stat_chan_s::n
+    /// @brief average N
     uint64_t n;
+    /// @var mbtrn_stat_chan_s::sum
+    /// @brief average sum
     double sum;
+    /// @var mbtrn_stat_chan_s::min
+    /// @brief min value
     double min;
+    /// @var mbtrn_stat_chan_s::max
+    /// @brief max value
     double max;
+    /// @var mbtrn_stat_chan_s::avg
+    /// @brief average value
     double avg;
 }mbtrn_stat_chan_t;
 
-/// @typedef struct mbtrn_cmeas_s mbtrn_cmeas_s
+/// @typedef struct mbtrn_cmeas_s mbtrn_cmeas_t
 /// @brief structure for measuring continuous quantities
 /// and intervals (e.g. floating point)
 typedef struct mbtrn_cmeas_s
 {
+    /// @var mbtrn_cmeas_s::start
+    /// @brief measurement start time
     double start;
+    /// @var mbtrn_cmeas_s::stop
+    /// @brief measurement stop time
     double stop;
+    /// @var mbtrn_cmeas_s::value
+    /// @brief measurement value
     double value;
 }mbtrn_cmeas_t;
 
+/// @typedef enum mbtr_stevent_id mbtr_stevent_id
+/// @brief diagnostic event IDs
 typedef enum{
     MBTR_EV_FRAME_VALID=0,
     MBTR_EV_FRAME_INVALID,
@@ -219,6 +243,8 @@ typedef enum{
     MBTR_EV_COUNT
 }mbtr_stevent_id;
 
+/// @typedef enum mbtr_ststatus_id mbtr_ststatus_id
+/// @brief diagnostic status (integers) metrics IDs
 typedef enum{
     MBTR_STA_FRAME_VAL_BYTES=0,
     MBTR_STA_NF_VAL_BYTES,
@@ -229,27 +255,60 @@ typedef enum{
     MBTR_STA_COUNT
 }mbtr_ststatus_id;
 
+/// @typedef enum mbtr_stchan_id mbtr_stchan_id
+/// @brief diagnostic status (floating point) measurement IDs
 typedef enum{
-    MBTR_CH_MBTRN_REFILL_XT=0,
+//    MBTR_CH_MBTRN_REFILL_XT=0
+    MBTR_CH_7KFRAME_SKEW=0,
     MBTR_CH_COUNT
 }mbtr_stchan_id;
 
+/// @typedef enum uint32_t mbtrn_dmeas_t
+/// @brief diagnostic integer status type
 typedef uint32_t mbtrn_dmeas_t;
 
+/// @typedef enum mbtr_stat_flags mbtr_stat_flags
+/// @brief diagnostic category types
 typedef enum {MBTF_STATUS=0x1, MBTF_EVENT=0x2, MBTF_PSTAT=0x4, MBTF_ASTAT=0x8, MBTF_READER=0x10}mbtr_stat_flags;
+/// @typedef enum mbtr_label_id mbtr_label_id
+/// @brief diagnostic label category types
 typedef enum {MBTR_LABEL_EV=0, MBTR_LABEL_ST, MBTR_LABEL_ME, MBTR_LABEL_COUNT}mbtr_label_id;
 
+/// @typedef struct mbtr_stats_s mbtr_stats_t
+/// @brief structure for diagnostic measurement channels
 typedef struct mbtr_stats_s{
+    /// @var mbtr_stats_s::stat_period_start
+    /// @brief statics period start time (decimal seconds)
     double stat_period_start;
+    /// @var mbtr_stats_s::stat_period_sec
+    /// @brief statics period duration (s)
     double stat_period_sec;
+    /// @var mbtr_stats_s::ev_n
+    /// @brief event channels
     uint32_t ev_n;
+    /// @var mbtr_stats_s::st_n
+    /// @brief status channels
     uint32_t st_n;
+    /// @var mbtr_stats_s::tm_n
+    /// @brief timing channels
     uint32_t tm_n;
+    /// @var mbtr_stats_s::events
+    /// @brief integer event channels
     mbtrn_dmeas_t *events;
+    /// @var mbtr_stats_s:: status
+    /// @brief integer status channels
     mbtrn_dmeas_t *status;
+    /// @var mbtr_stats_s::measurements
+    /// @brief floating point measurement channels
     mbtrn_cmeas_t *measurements;
+    /// @var mbtr_stats_s::per_stats
+    /// @brief periodic stats
     mbtrn_stat_chan_t *per_stats;
+    /// @var mbtr_stats_s::agg_stats
+    /// @brief aggregate (cumulative) stats
     mbtrn_stat_chan_t *agg_stats;
+    /// @var mbtr_stats_s::labels
+    /// @brief metric channel labels
     const char ***labels;
 }mbtr_stats_t;
 
@@ -294,38 +353,88 @@ typedef struct mbtrn_reader_s
 /////////////////////////
 
 #ifndef MBTRN_VER
-#define MBTRN_VER 1.4.3
+/// @def MBTRN_VER
+/// @brief MBTRN library build version.
+#define MBTRN_VER 1.4.5
 #endif
 #ifndef MBTRN_BUILD
+/// @def MBTRN_BUILD
+/// @brief MBTRN library build date.
+/// Sourced from CFLAGS in Makefile
+/// w/ -DMBTRN_BUILD=`date`
 #define MBTRN_BUILD "0000/00/00T00:00:00-0000"
 #endif
 
+/// @def VERSION_HELPER
+/// @brief version string helper.
 #define VERSION_HELPER(s) #s
+/// @def VERSION_STRING
+/// @brief version string macro.
 #define VERSION_STRING(s) VERSION_HELPER(s)
+/// @def LIBMBTRN_VERSION
+/// @brief library version string macro.
 #define LIBMBTRN_VERSION ""VERSION_STRING(MBTRN_VER)
+/// @def LIBMBTRN_BUILD
+/// @brief library version build date string macro.
 #define LIBMBTRN_BUILD ""VERSION_STRING(MBTRN_BUILD)
 
 // enable using MBTR_STATS_EN definition in mconfig.h
 #ifdef MBTR_STATS_EN
 // some of these are trivial - using macros
 // so they can be compiled out with one #define
+
+/// @def MBTR_SW_START
+/// @brief diagnostics - stopwatch start
 #define MBTR_SW_START(w,t)           (w.start=t)
+/// @def MBTR_SW_STOP
+/// @brief diagnostics - stopwatch stop
 #define MBTR_SW_STOP(w,t)            (w.stop=t)
+/// @def MBTR_SW_LAP
+/// @brief diagnostics - stopwatch lap (increment value by t-start)
 #define MBTR_SW_LAP(w,t)             (w.value += (t-w.start))
+/// @def MBTR_SW_REC
+/// @brief diagnostics - stopwatch record (assign stop-start to value)
 #define MBTR_SW_REC(w)               (w.value = (w.stop-w.start))
+/// @def MBTR_SW_DIV
+/// @brief diagnostics - stopwatch div (divide and assign)
 #define MBTR_SW_DIV(w,n)             (w.value = (w.value/(double)n))
+/// @def MBTR_SW_SET
+/// @brief diagnostics - stopwatch set (set value=t)
+#define MBTR_SW_SET(w,t)             (w.value=t)
+/// @def MBTR_SW_RESET
+/// @brief diagnostics - stopwatch reset (reset value=0)
 #define MBTR_SW_RESET(w)             (w.value=0.0)
+/// @def MBTR_SW_ELAPSED
+/// @brief diagnostics - stopwatch elapsed (value)
 #define MBTR_SW_ELAPSED(w)           (w.value)
 
+/// @def MBTR_COUNTER_INC
+/// @brief diagnostics - counter increment
 #define MBTR_COUNTER_INC(v)         (v++)
+/// @def MBTR_COUNTER_DEC
+/// @brief diagnostics - counter decrement
 #define MBTR_COUNTER_DEC(v)         (v--)
+/// @def MBTR_COUNTER_ADD
+/// @brief diagnostics - counter add value
 #define MBTR_COUNTER_ADD(v,n)       ((v) += (n))
+/// @def MBTR_COUNTER_ADIF
+/// @brief diagnostics - counter add (a-v)
 #define MBTR_COUNTER_ADIF(v,a,b)    (v += (a-b))
+/// @def MBTR_COUNTER_SET
+/// @brief diagnostics - counter set value
 #define MBTR_COUNTER_SET(v,n)       (v = n)
+/// @def MBTR_COUNTER_GET
+/// @brief diagnostics - get counter value
 #define MBTR_COUNTER_GET(v)         (v)
 
+/// @def MBTR_STATS_SMAX
+/// @brief stats - greater of v,a
 #define MBTR_STATS_SMAX(v,a)        ( (a > v.max) ? a : v.max)
+/// @def MBTR_STATS_SMIN
+/// @brief stats - less of v,a
 #define MBTR_STATS_SMIN(v,a)        ( (a < v.min) ? a : v.min)
+/// @def MBTR_STATS_AVG
+/// @brief stats - average (or DBL_MAX if N<=0)
 #define MBTR_STATS_AVG(v)           ( (v.n>0 ? (double)(v.sum)/(v.n) : DBL_MAX) )
 
 #else

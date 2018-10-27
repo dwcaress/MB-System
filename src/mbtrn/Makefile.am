@@ -37,7 +37,7 @@ libmbtrn_la_SOURCES = \
 
 libmbtrn_la_LIBADD = -lpthread
 
-bin_PROGRAMS = tmbtrn stream7k frames7k trnc emu7k blogr blogtx
+bin_PROGRAMS = tmbtrn stream7k frames7k trnc emu7k tbinx udps udpc
 
 tmbtrn_SOURCES = mbtrn-test.c
 tmbtrn_LDADD = libmbtrn.la
@@ -54,11 +54,14 @@ trnc_LDADD = libmbtrn.la
 emu7k_SOURCES = emu7k.c
 emu7k_LDADD = libmbtrn.la
 
-blogr_SOURCES = blogr.c
-blogr_LDADD = libmbtrn.la
+tbinx_SOURCES = tbinx.c
+tbinx_LDADD = libmbtrn.la
 
-blogtx_SOURCES = blogtx.c
-blogtx_LDADD = libmbtrn.la
+udps_SOURCES = udps.c
+udps_LDADD = libmbtrn.la
+
+udpc_SOURCES = udpc.c
+udpc_LDADD = libmbtrn.la
 
 CLEANFILES =
 DISTCLEANFILES =

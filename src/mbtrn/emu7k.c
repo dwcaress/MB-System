@@ -111,27 +111,23 @@
 #define EMU7K_BUILD ""VERSION_STRING(MBTRN_BUILD)
 #endif
 
+/// @def CUR_FRAME
+/// @brief current frame index
+#define CUR_FRAME 0
+/// @def NXT_FRAME
+/// @brief next frame index
+#define NXT_FRAME 1
+/// @def TDIFF
+/// @brief diff time (b-a)
+#define TDIFF(a,b) (b-a)
+
 /////////////////////////
 // Declarations 
 /////////////////////////
-
-static bool g_interrupt=false;
-static int g_verbose=0;
-
 static void s_show_help();
 static void s_parse_args(int argc, char **argv, app_cfg_t *cfg);
 static int s_server_handle_request(emu7k_t *svr, byte *req, int rlen, int client_fd);
 static void *s_server_publish(void *arg);
-
-
-//#define S_PER_M ((double)60.0)
-//#define S_PER_H ((double)S_PER_M*60.0)
-//#define S_PER_D ((double)S_PER_H*24.0)
-//#define S_PER_Y ((double)S_PER_D*365.0)
-//
-//#define R7KTIME2D(r7kt) ((double)r7kt.seconds+r7kt.year*S_PER_Y + r7kt.day*S_PER_D + r7kt.hours*S_PER_H + r7kt.minutes*S_PER_M)
-
-#define TDIFF(a,b) (b-a)
 
 /////////////////////////
 // Imports
@@ -140,6 +136,8 @@ static void *s_server_publish(void *arg);
 /////////////////////////
 // Module Global Variables
 /////////////////////////
+static bool g_interrupt=false;
+static int g_verbose=0;
 
 /////////////////////////
 // Function Definitions
@@ -165,6 +163,7 @@ emu7k_client_t *emu7k_client_new(int fd, uint32_t nsubs, int32_t *subs)
     }
     return self;
 }
+// End function emu7k_client_new
 
 /// @fn void emu7k_client_destroy(emu7k_client_t **pself)
 /// @brief release client resources.
@@ -187,6 +186,7 @@ void emu7k_client_destroy(emu7k_client_t **pself)
     }
    return;
 }
+// End function emu7k_client_destroy
 
 /// @fn emu7k_t * emu7k_new(iow_socket_t * s, iow_file_t * mb_data, app_cfg_t *cfg)
 /// @brief create new emu7k test server - emulate reson 7k center
@@ -290,7 +290,6 @@ void emu7k_destroy(emu7k_t **pself)
     return;
 }
 // End function emu7k_destroy
-
 
 /// @fn void emu7k_rec_show(emu7k_t *self, bool verbose, uint16_t indent)
 /// @brief emu7k statistics parameter summary to stderr.
@@ -398,10 +397,7 @@ static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t 
     
     return retval;
 }
-
-
-#define CUR_FRAME 0
-#define NXT_FRAME 1
+// End function read_s7k_frame
 
 /// @fn void * s_server_publish(void * arg)
 /// @brief test server publishing thread function.
@@ -428,10 +424,12 @@ static void *s_server_publish(void *arg)
 
         // iterate over the file list
         iow_file_t *source_file = (iow_file_t *)mlist_first(svr->file_list);
+        uint32_t start_offset = svr->cfg->start_offset;
+        
         while (NULL!=source_file && !svr->stop) {
             double sys_start = 0.0;
             double str_start = 0.0;
-            double cur_time  = 0.0;
+            double pkt_time  = 0.0;
             double sys_now   = 0.0;
             double min_delay = ((double)svr->cfg->min_delay)/1000.0;
             double max_delay = MAX_DELAY_DFL_SEC;
@@ -457,7 +455,14 @@ static void *s_server_publish(void *arg)
                 emu7k_stat_t *stats = &svr->stats;
                 
                 off_t file_end = iow_seek(source_file,0,IOW_END);
-                iow_seek(source_file,0,IOW_SET);
+                if ((off_t)start_offset>=file_end) {
+                    iow_seek(source_file,file_end,IOW_SET);
+                    start_offset-=file_end;
+                }else{
+                    iow_seek(source_file,start_offset,IOW_SET);
+                    start_offset=0;
+                }
+//                iow_seek(source_file,0,IOW_SET);
                 off_t file_cur = iow_seek(source_file,0,IOW_CUR);
                 
                 memset((void *)cur_frame,0,R7K_MAX_FRAME_BYTES*sizeof(byte));
@@ -533,25 +538,34 @@ static void *s_server_publish(void *arg)
                                     if (min_delay>=0.0) {
                                         // get current time
                                         sys_now  = iow_dtime();
-                                        cur_time = r7k_7ktime2d(&pdrf[CUR_FRAME]->_7ktime);
+                                        pkt_time = r7k_7ktime2d(&pdrf[CUR_FRAME]->_7ktime);
                                         // compare packet time and real time
                                         // relative to start times
                                         double sys_diff = sys_now-sys_start;
-                                        double str_diff = cur_time-str_start;
+                                        double str_diff = pkt_time-str_start;
                                         double twait = 0.0;
                                         // if packet is behind, send it
                                         // if packet is ahead delay
                                         if (str_diff>0.0) {
                                             if (str_diff>sys_diff) {
                                                 twait = str_diff-sys_diff;
+                                                // Since the stream jumped ahead,
+                                                // delay, then advance the
+                                                // elapsed system time by moving
+                                                // the start back, rather than
+                                                // advancing the system clock.
+                                                sys_start -= twait;
                                             }else{
                                                 twait = 0.0;
                                             }
                                         }else{
                                             twait = 0.0;
                                         }
-                                        
-                                        // adjust delay max/min constraints
+                                        MMDEBUG(APP1,"\n");
+                                        MMDEBUG(APP1,"sys_start[%14.3lf] sys_now [%14.3lf] sys_dif[%14.3lf]\n",sys_start,sys_now,sys_diff);
+                                        MMDEBUG(APP1,"str_start[%14.3lf] pkt_time[%14.3lf] str_dif[%14.3lf]\n",str_start,pkt_time,str_diff);
+                                        MMDEBUG(APP1,"twait[%7.3lf]\n",twait);
+                                       // adjust delay max/min constraints
                                         if (min_delay==0.0 && twait>max_delay) {
                                             // max_delay only applied to
                                             // minimize long stream delays.
@@ -580,7 +594,7 @@ static void *s_server_publish(void *arg)
                                         }
                                     }// else no delay
                                                                         
-                                    MMDEBUG(APP1,">>>> sending frame ofs[%"PRId32"] len[%"PRIu32"] type[%"PRIu32"] ts[%.3lf]\n",(int32_t)file_cur,pnf[CUR_FRAME]->packet_size,pdrf[CUR_FRAME]->record_type_id,cur_time);
+                                    MMDEBUG(APP1,">>>> sending frame ofs[%"PRId32"] len[%6"PRIu32"] txid[%5"PRIu16"] seq[%"PRIu32"] type[%"PRIu32"] ts[%.3lf]\n",(int32_t)file_cur,pnf[CUR_FRAME]->packet_size,pnf[CUR_FRAME]->tx_id, pnf[CUR_FRAME]->seq_number, pdrf[CUR_FRAME]->record_type_id,pkt_time);
                                     
                                     if( svr->cfg->verbose>=3) {
                                         r7k_nf_show(pnf[CUR_FRAME],false,5);
@@ -733,7 +747,7 @@ static void *s_server_publish(void *arg)
  
 	
 }
-// End function s_server_main
+// End function s_server_publish
 
 /// @fn int s_server_handle_request(emu7k_t * svr, char * req, int client_fd)
 /// @brief handle client request.
@@ -947,7 +961,6 @@ void *s_server_main(void *arg)
 }
 // End function s_server_main
 
-
 /// @fn int emu7k_start(emu7k_t * self)
 /// @brief start test server in a thread.
 /// @param[in] self server reference
@@ -966,7 +979,6 @@ int emu7k_start(emu7k_t *self)
     return retval;
 }
 // End function emu7k_start
-
 
 /// @fn int emu7k_stop(emu7k_t * self)
 /// @brief stop server thread.
@@ -1006,6 +1018,7 @@ static void s_show_help()
     "  --statn=n      : output stats every n records\n"
     "  --xdelay=n/s   : [test feature] wait s seconds every n messages\n"
     "  --nf           : input includes network frames\n"
+    "  --offset=n     : start offset\n"
     "\n";
 //    "--file=s       : data file path (.s7k)\n"
     printf("%s",help_message);
@@ -1040,6 +1053,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"no-restart", no_argument, NULL, 0},
         {"xdelay", required_argument, NULL, 0},
         {"nf", no_argument, NULL, 0},
+        {"offset", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
     
     // process argument list
@@ -1101,6 +1115,10 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("nf", options[option_index].name) == 0) {
                     cfg->netframe_input=true;
                 }
+                // offset
+                else if (strcmp("offset", options[option_index].name) == 0) {
+                    sscanf(optarg,"%"PRIu32"",&cfg->start_offset);
+                }
                 break;
             default:
                 help=true;
@@ -1117,9 +1135,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         }
     }// while
     
-//    fprintf(stderr,"argc[%d] option_index[%d] optind[%d]\n",argc,option_index,optind);
     for (int i=optind; i<argc; i++) {
-//        MDEBUG("file[%s]\n",argv[i]);
         mlist_add(cfg->file_paths,strdup(argv[i]));
     }
     
@@ -1132,6 +1148,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         MDEBUG("statn     [%d]\n",cfg->statn);
         MDEBUG("min-delay [%u]\n",cfg->min_delay);
         MDEBUG("nf        [%c]\n",(cfg->netframe_input?'Y':'N'));
+        MDEBUG("offset    [%"PRIu32"]\n",cfg->start_offset);
         MDEBUG("xds       [%d]\n",cfg->xds);
         MDEBUG("paths     [%p]\n",cfg->file_paths);
         MDEBUG("files:\n");
@@ -1219,7 +1236,6 @@ static void s_termination_handler (int signum)
 }
 // End function termination_handler
 
-
 /// @fn int main(int argc, char ** argv)
 /// @brief frames7k main entry point.
 /// subscribe to reson 7k center data streams, and output
@@ -1252,7 +1268,8 @@ int main(int argc, char **argv)
         STATN_DFL_REC,
         0,0,0,
         false,
-    	file_paths
+    	file_paths,
+        0
     };
 
     // parse command line args
@@ -1288,6 +1305,3 @@ int main(int argc, char **argv)
     return 0;
 }
 // End function main
-
-
-

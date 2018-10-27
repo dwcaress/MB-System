@@ -187,7 +187,6 @@ int r7k_subscribe(iow_socket_t *s, uint32_t *records, uint32_t record_count)
 }
 // End function r7k_subscribe
 
-
 /// @fn int r7k_unsubscribe(iow_socket_t * s)
 /// @brief unsubscribe from reson 7k records (not implemented).
 /// @param[in] s socket reference
@@ -200,7 +199,6 @@ int r7k_unsubscribe(iow_socket_t *s)
 }
 // End function r7k_unsubscribe
 
-
 /// @fn uint16_t r7k_txid()
 /// @brief transmission ID (for messages sent to r7kc).
 /// @return transmission ID 0-65535
@@ -210,7 +208,6 @@ uint16_t r7k_txid()
     return ++txid;
 }
 // End function r7k_txid
-
 
 /// @fn uint32_t r7k_checksum(byte * pdata, uint32_t len)
 /// @brief return r7k checksum for data.
@@ -233,7 +230,6 @@ uint32_t r7k_checksum(byte *pdata, uint32_t len)
 }
 // End function r7k_checksum
 
-
 /// @fn void r7k_update_time(r7k_time_t * t7k)
 /// @brief set the time in r7k time format.
 /// @param[in] t7k r7k time structure reference
@@ -254,7 +250,6 @@ void r7k_update_time(r7k_time_t *t7k)
     }
 }
 // End function r7k_update_time
-
 
 /// @fn void r7k_hex_show(byte * data, uint32_t len, uint16_t cols, _Bool show_offsets, uint16_t indent)
 /// @brief output data buffer bytes in hex to stderr.
@@ -304,7 +299,6 @@ void r7k_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, ui
 }
 // End function r7k_hex_show
 
-
 /// @fn void r7k_parser_show(r7k_parse_stat_t * self, _Bool verbose, uint16_t indent)
 /// @brief output r7k parser statistics to stderr.
 /// @param[in] self parser stats structure reference
@@ -325,7 +319,6 @@ void r7k_parser_show(r7k_parse_stat_t *self, bool verbose, uint16_t indent)
     }
 }
 // End function r7k_parser_show
-
 
 /// @fn char * r7k_parser_str(r7k_parse_stat_t * self, char * dest, uint32_t len, _Bool verbose, uint16_t indent)
 /// @brief output parser statistics to a string. Caller must free.
@@ -454,7 +447,6 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
     return retval;
 }
 // End function r7k_parser_str
-
 
 // extract valid DRFs from raw network frames
 // stops when src parsed or dest full
@@ -650,7 +642,6 @@ uint32_t r7k_parse(byte *src, uint32_t len, r7k_drf_container_t *dest, r7k_parse
 }
 // End function r7k_parse
 
-
 /// @fn int r7k_stream_show(iow_socket_t * s, int sz, uint32_t tmout_ms, int cycles)
 /// @brief output raw r7k stream to stderr as formatted ASCII hex.
 /// @param[in] s r7k host socket
@@ -658,7 +649,7 @@ uint32_t r7k_parse(byte *src, uint32_t len, r7k_drf_container_t *dest, r7k_parse
 /// @param[in] tmout_ms read timeout
 /// @param[in] cycles number of cycles to read (<=0 read forever)
 /// @return 0 on success, -1 otherwise
-int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles)
+int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool *interrupt)
 {
     int retval=-1;
     int x=(sz<=0?16:sz);
@@ -675,7 +666,8 @@ int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles)
     //    MERROR("cycles[%d] forever[%s] c||f[%s]\n",cycles,(forever?"Y":"N"),(forever || (cycles>0) ? "Y" :"N"));
 
     // read cycles or forever (cycles<=0)
-    while ( forever || (count++ < cycles)) {
+    while ( (forever || (count++ < cycles)) &&
+           (NULL!=interrupt && !(*interrupt)) ) {
         memset(buf,0,x);
         test = iow_read_tmout(s, buf, x, tmout_ms);
         if(test>0){
@@ -702,6 +694,10 @@ int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles)
 }
 // End function r7k_stream_show
 
+/// @fn r7k_7ktime2d(r7k_time_t *r7kt)
+/// @brief convert 7ktime to decimal time
+/// @param[in] r7kt 7ktime reference
+/// @return decimal time on success, 0.0 otherwise
 double r7k_7ktime2d(r7k_time_t *r7kt)
 {
     double retval=0.0;
@@ -723,6 +719,7 @@ double r7k_7ktime2d(r7k_time_t *r7kt)
     
     return retval;
 }
+// End function r7k_7ktime2d
 
 /// @fn r7k_nf_t * r7k_nf_new()
 /// @brief create new r7k network frame structure. used mostly by components.
@@ -736,7 +733,6 @@ r7k_nf_t *r7k_nf_new()
     return self;
 }
 // End function r7k_nf_new
-
 
 /// @fn void r7k_nf_destroy(r7k_nf_t ** pself)
 /// @brief release network frame structure resources.
@@ -754,7 +750,6 @@ void r7k_nf_destroy(r7k_nf_t **pself)
 	
 }
 // End function r7k_nf_destroy
-
 
 /// @fn r7k_nf_t * r7k_nf_init(r7k_nf_t ** pnf, _Bool erase)
 /// @brief initialize network frame with common defaults. create new
@@ -804,7 +799,6 @@ r7k_nf_t * r7k_nf_init(r7k_nf_t **pnf,bool erase)
 }
 // End function r7k_nf_init
 
-
 /// @fn void r7k_nf_show(r7k_nf_t * self, _Bool verbose, uint16_t indent)
 /// @brief output network frame structure parameter summary to stderr.
 /// @param[in] self network fram struct reference
@@ -831,7 +825,6 @@ void r7k_nf_show(r7k_nf_t *self, bool verbose, uint16_t indent)
     
 }
 // End function r7k_nf_show
-
 
 /// @fn r7k_drf_t * r7k_drf_new()
 /// @brief TBD.
@@ -861,7 +854,6 @@ void r7k_drf_destroy(r7k_drf_t **pself)
     }
 }
 // End function r7k_drf_destroy
-
 
 /// @fn void r7k_drf_show(r7k_drf_t * self, _Bool verbose, uint16_t indent)
 /// @brief TBD.
@@ -909,7 +901,6 @@ void r7k_drf_show(r7k_drf_t *self, bool verbose, uint16_t indent)
 }
 // End function r7k_drf_show
 
-
 /// @fn r7k_checksum_t r7k_drf_get_checksum(r7k_drf_t * self)
 /// @brief return checksum of parsed data record frame (DRF).
 /// @param[in] self drf reference
@@ -926,7 +917,6 @@ r7k_checksum_t r7k_drf_get_checksum(r7k_drf_t *self)
     return retval;
 }
 // End function r7k_drf_get_checksum
-
 
 /// @fn void r7k_drf_init(r7k_drf_t * drf, _Bool erase)
 /// @brief initialize a data record frame structure.
@@ -975,7 +965,6 @@ void r7k_drf_init(r7k_drf_t *drf, bool erase)
 }
 // End function r7k_drf_init
 
-
 // DRF container API
 /// @fn r7k_drf_container_t * r7k_drfcon_new(uint32_t size)
 /// @brief create new data record frame (DRF) container. DRF container
@@ -1010,7 +999,6 @@ r7k_drf_container_t *r7k_drfcon_new(uint32_t size)
 }
 // End function r7k_drfcon_new
 
-
 /// @fn void r7k_drfcon_destroy(r7k_drf_container_t ** pself)
 /// @brief release data record frame container resources.
 /// @param[in] pself pointer to instance reference
@@ -1032,7 +1020,6 @@ void r7k_drfcon_destroy(r7k_drf_container_t **pself)
     }
 }
 // End function r7k_drfcon_destroy
-
 
 /// @fn void r7k_drfcon_show(r7k_drf_container_t * self, _Bool verbose, uint16_t indent)
 /// @brief output data record frame (DRF)  container parameter summary to stderr.
@@ -1062,8 +1049,6 @@ void r7k_drfcon_show(r7k_drf_container_t *self, bool verbose, uint16_t indent)
 }
 // End function r7k_drfcon_show
 
-
-// add one data record frame
 /// @fn int r7k_drfcon_resize(r7k_drf_container_t * self, uint32_t new_size)
 /// @brief resize a data record frame (DRF) container buffer.
 /// @param[in] self DRF container reference
@@ -1103,7 +1088,6 @@ int r7k_drfcon_resize(r7k_drf_container_t *self, uint32_t new_size)
 }
 // End function r7k_drfcon_resize
 
-// add one data record frame
 /// @fn int r7k_drfcon_add(r7k_drf_container_t * self, byte * src, uint32_t len)
 /// @brief add a new data record frame (DRF) to a DRF container.
 /// @param[in] self DRF container reference
@@ -1160,7 +1144,6 @@ int r7k_drfcon_add(r7k_drf_container_t *self, byte *src, uint32_t len)
 }
 // End function r7k_drfcon_add
 
-
 /// @fn int r7k_drfcon_flush(r7k_drf_container_t * self)
 /// @brief clear data record frame (DRF) container buffer.
 /// @param[in] self DRF reference
@@ -1187,7 +1170,6 @@ int r7k_drfcon_flush(r7k_drf_container_t *self)
 }
 // End function r7k_drfcon_flush
 
-
 /// @fn int r7k_drfcon_seek(r7k_drf_container_t * self, uint32_t ofs)
 /// @brief set data record frame (DRF) container output (read) pointer offset.
 /// @param[in] self DRF container reference
@@ -1205,7 +1187,6 @@ int r7k_drfcon_seek(r7k_drf_container_t *self, uint32_t ofs)
 }
 // End function r7k_drfcon_seek
 
-
 /// @fn uint32_t r7k_drfcon_tell(r7k_drf_container_t * self)
 /// @brief return current output (read) pointer offset.
 /// @param[in] self DRF container reference
@@ -1219,7 +1200,6 @@ uint32_t r7k_drfcon_tell(r7k_drf_container_t *self)
     return retval;
 }
 // End function r7k_drfcon_tell
-
 
 /// @fn uint32_t r7k_drfcon_read(r7k_drf_container_t * self, byte * dest, uint32_t len)
 /// @brief read bytes from the data record frame (DRF) container.
@@ -1261,7 +1241,6 @@ uint32_t r7k_drfcon_read(r7k_drf_container_t *self, byte *dest, uint32_t len)
 }
 // End function r7k_drfcon_read
 
-
 /// @fn uint32_t r7k_drfcon_size(r7k_drf_container_t * self)
 /// @brief return total capacity (bytes) of data record frame (DRF) container.
 /// @param[in] self DRF container reference
@@ -1275,7 +1254,6 @@ uint32_t r7k_drfcon_size(r7k_drf_container_t *self)
     return retval;
 }
 // End function r7k_drfcon_size
-
 
 /// @fn uint32_t r7k_drfcon_length(r7k_drf_container_t * self)
 /// @brief total number of bytes currently in data record frame (DRF) container.
@@ -1291,7 +1269,6 @@ uint32_t r7k_drfcon_length(r7k_drf_container_t *self)
 }
 // End function r7k_drfcon_length
 
-
 /// @fn uint32_t r7k_drfcon_pending(r7k_drf_container_t * self)
 /// @brief return number of unread bytes in data record frame (DRF) container.
 /// @param[in] self DRF container reference
@@ -1305,7 +1282,6 @@ uint32_t r7k_drfcon_pending(r7k_drf_container_t *self)
    return retval;
 }
 // End function r7k_drfcon_pending
-
 
 /// @fn uint32_t r7k_drfcon_space(r7k_drf_container_t * self)
 /// @brief return amount of space available (bytes) for writing in data record frame (DRF) container.
@@ -1321,7 +1297,6 @@ uint32_t r7k_drfcon_space(r7k_drf_container_t *self)
 }
 // End function r7k_drfcon_space
 
-
 /// @fn uint32_t r7k_drfcon_frames(r7k_drf_container_t * self)
 /// @brief number of data record frames (DRFs) in container.
 /// @param[in] self DRF container reference
@@ -1335,7 +1310,6 @@ uint32_t r7k_drfcon_frames(r7k_drf_container_t *self)
     return retval;
 }
 // End function r7k_drfcon_frames
-
 
 /// @fn int r7k_drfcon_bytes(r7k_drf_container_t * self, uint32_t ofs, byte * dest, uint32_t len)
 /// @brief copy bytes from a data record frame (DRF) container to a specified buffer.
@@ -1359,7 +1333,6 @@ int r7k_drfcon_bytes(r7k_drf_container_t *self, uint32_t ofs, byte *dest, uint32
 }
 // End function r7k_drfcon_bytes
 
-
 /// @fn r7k_drf_t * r7k_drfcon_enumerate(r7k_drf_container_t * self)
 /// @brief return first data record frame (DRF) in container. subsequent calls
 /// to r7k_drfcon_next() will return the next frame(s) in the container.
@@ -1376,7 +1349,6 @@ r7k_drf_t* r7k_drfcon_enumerate(r7k_drf_container_t *self)
     return retval;
 }
 // End function r7k_drfcon_enumerate
-
 
 /// @fn r7k_drf_t * r7k_drfcon_next(r7k_drf_container_t * self)
 /// @brief return next first data record frame (DRF) in container.
@@ -1398,7 +1370,6 @@ r7k_drf_t* r7k_drfcon_next(r7k_drf_container_t *self)
     return retval;
 }
 // End function r7k_drfcon_next
-
 
 /// @fn r7k_msg_t * r7k_msg_new(uint32_t data_len)
 /// @brief create new r7k protocol message structure.
@@ -1433,7 +1404,6 @@ r7k_msg_t *r7k_msg_new(uint32_t data_len)
 }
 // End function r7k_msg_new
 
-
 /// @fn void r7k_msg_destroy(r7k_msg_t ** pself)
 /// @brief release message structure resources.
 /// @param[in] pself pointer to message reference
@@ -1458,8 +1428,6 @@ void r7k_msg_destroy(r7k_msg_t **pself)
     }
 }
 // End function r7k_msg_destroy
-
-
 
 /// @fn void r7k_msg_show(r7k_msg_t * self, _Bool verbose, uint16_t indent)
 /// @brief output r7k message parameter summary to stderr.
@@ -1491,7 +1459,6 @@ void r7k_msg_show(r7k_msg_t *self, bool verbose, uint16_t indent)
 }
 // End function r7k_msg_show
 
-
 /// @fn uint32_t r7k_msg_set_checksum(r7k_msg_t * self)
 /// @brief set the checksum for an r7k message structure.
 /// @param[in] self r7k message reference
@@ -1520,7 +1487,6 @@ uint32_t r7k_msg_set_checksum(r7k_msg_t *self)
     return cs_save;
 }
 // End function r7k_msg_set_checksum
-
 
 /// @fn byte * r7k_msg_serialize(r7k_msg_t * self)
 /// @brief serialize r7k message into new network frame buffer.
@@ -1564,7 +1530,6 @@ byte *r7k_msg_serialize(r7k_msg_t *self)
     return retval;
 }
 // End function r7k_msg_serialize
-
 
 /// @fn int r7k_msg_receive(iow_socket_t * s, r7k_msg_t ** dest, uint32_t timeout_msec)
 /// @brief receive network frame from 7k center into r7k message structure.
@@ -1636,8 +1601,6 @@ int r7k_msg_receive(iow_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
 }
 // End function r7k_msg_receive
 
-
-
 /// @fn int r7k_msg_send(iow_socket_t * s, r7k_msg_t * self)
 /// @brief serialize and send an r7k message to 7k center.
 /// @param[in] s socket reference
@@ -1666,8 +1629,6 @@ int r7k_msg_send(iow_socket_t *s, r7k_msg_t *self)
     return retval;
 }
 // End function r7k_msg_send
-
-
 
 /// @fn int r7k_test()
 /// @brief r7k unit test(s).
