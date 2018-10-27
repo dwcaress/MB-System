@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbtrnpreprocess 
+ * mbtrnpreprocess
  *
  * Author:	D. W. Caress
  * Date:	February 18, 1995
@@ -400,8 +400,8 @@ int main(int argc, char **argv) {
 	 * 		--swath-width=value
 	 * 		--soundings=value
 	 * 		--median-filter=threshold/nacrosstrack/nalongtrack
-	 * 		
-	 * 		
+	 *
+	 *
 	 */
 	static struct option options[] = {{"help", no_argument, NULL, 0},
 	                                  {"verbose", required_argument, NULL, 0},
@@ -480,7 +480,7 @@ int main(int argc, char **argv) {
 	int n_buffer_max = 1;
 	struct mbtrnpreprocess_ping_struct ping[MBTRNPREPROCESS_BUFFER_DEFAULT];
 	int done;
-    
+
     /* counting parameters */
     int n_pings_read = 0;
     int n_soundings_read = 0;
@@ -524,7 +524,7 @@ int main(int argc, char **argv) {
     int n_output_buffer_alloc = 0;
     size_t mb1_size, index;
     unsigned int checksum;
-    
+
     /* log file parameters */
     int make_logs = MB_NO;
     mb_path log_directory;
@@ -541,7 +541,7 @@ int main(int argc, char **argv) {
     int i, ii, j, jj, n;
     int jj0, jj1, dj;
     int ii0, ii1, di;
- 
+
  	struct timeval timeofday;
     struct timezone timezone;
     double time_d;
@@ -581,7 +581,7 @@ int main(int argc, char **argv) {
     // in log file names
     time_t rawtime;
     struct tm *gmt;
-    
+
     time(&rawtime);
     // Get GMT time
     gmt = gmtime(&rawtime);
@@ -591,7 +591,7 @@ int main(int argc, char **argv) {
             gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
     memset(g_cmd_line,0,TRN_CMD_LINE_BYTES);
-    
+
     char *ip=g_cmd_line;
     int ilen=0;
     for (int x=0;x<argc;x++){
@@ -604,7 +604,7 @@ int main(int argc, char **argv) {
     }
     g_cmd_line[TRN_CMD_LINE_BYTES-1]='\0';
     g_log_dir=strdup("./");
-    
+
 	/* process argument list */
 	while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
 		switch (c) {
@@ -847,9 +847,9 @@ int main(int argc, char **argv) {
     double start_sys_time = (double)stv.tv_sec+((double)stv.tv_usec/1000000.0)+(7*3600);
     fprintf(stderr,"%11.5lf systime %.4lf\n",iow_dtime(), start_sys_time);
 #endif
-    
+
     mbtrnpreprocess_init_debug(verbose);
-    
+
 	/* load platform definition if specified */
 	if (use_platform_file == MB_YES) {
 		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
@@ -880,7 +880,7 @@ int main(int argc, char **argv) {
 		if (target_sensor >= 0)
 			sensor_target = &(platform->sensors[target_sensor]);
 	}
-    
+
     /* initialize output */
     if (output_mode == MBTRNPREPROCESS_OUTPUT_STDOUT) {
 
@@ -919,7 +919,7 @@ int main(int argc, char **argv) {
     if (median_filter == MB_YES) {
         median_filter_n_total = median_filter_n_across * median_filter_n_along;
         median_filter_n_min = median_filter_n_total / 2;
- 
+
         /* allocate memory for median filter */
         if (error == MB_ERROR_NO_ERROR) {
             status = mb_mallocd(verbose, __FILE__, __LINE__,
@@ -966,7 +966,7 @@ int main(int argc, char **argv) {
     MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_STATS_XT], iow_dtime());
 	/* loop over all files to be read */
 	while (read_data == MB_YES) {
-    
+
         /* open log file if specified */
         if (make_logs == MB_YES) {
             gettimeofday(&timeofday, &timezone);
@@ -1003,10 +1003,10 @@ int main(int argc, char **argv) {
                     n_soundings_decimated = 0;
                     n_soundings_flagged = 0;
                     n_soundings_written = 0;
-                    
+
                     status = mbtrnpreprocess_closelog(verbose, &logfp, &error);
                 }
-                
+
                 status = mbtrnpreprocess_openlog(verbose, log_directory, &logfp, &error);
                 if (status == MB_SUCCESS) {
                     gettimeofday(&timeofday, &timezone);
@@ -1020,7 +1020,7 @@ int main(int argc, char **argv) {
                     fprintf(stderr, "\nLog file could not be opened in directory %s...\n", log_directory);
                     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
                     exit(error);
-                }                
+                }
             }
         }
 
@@ -1038,27 +1038,27 @@ int main(int argc, char **argv) {
                                        &mbtrnpreprocess_input_read,
                                        &mbtrnpreprocess_input_close,
                                        &error) != MB_SUCCESS)) {
-                
+
                 sprintf(log_message, "MBIO Error returned from function <mb_input_init>");
                 if (logfp != NULL)
                     mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
                 fprintf(stderr,"\n%s\n", log_message);
-                
+
                 mb_error(verbose, error, &message);
                 if (logfp != NULL)
                     mbtrnpreprocess_postlog(verbose, logfp, message, &error);
                 fprintf(stderr,"%s\n", message);
-                
+
                 sprintf(log_message, "Multibeam data socket <%s> not initialized for reading", ifile);
                 if (logfp != NULL)
                     mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
                 fprintf(stderr,"\n%s\n", log_message);
-                
+
                 sprintf(log_message, "Program <%s> Terminated", program_name);
                 if (logfp != NULL)
                     mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
                 fprintf(stderr,"\n%s\n", log_message);
-                
+
                 exit(error);
             } else {
 
@@ -1067,7 +1067,7 @@ int main(int argc, char **argv) {
                     mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
                 if (verbose > 0)
                     fprintf(stderr,"\n%s\n", log_message);
-                
+
                 sprintf(log_message, "MBIO format id: %d", format);
                 if (logfp != NULL)
                     mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
@@ -1075,33 +1075,33 @@ int main(int argc, char **argv) {
                     fprintf(stderr,"%s\n", log_message);
             }
         }
-        
+
         /* otherwised open swath data files as is normal for MB-System programs */
         else {
 
             if ((status = mb_read_init(verbose, ifile, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
                                        &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
-                
+
                sprintf(log_message, "MBIO Error returned from function <mb_read_init>");
                 if (logfp != NULL)
                     mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
                 fprintf(stderr,"\n%s\n", log_message);
-                
+
                 mb_error(verbose, error, &message);
                 if (logfp != NULL)
                     mbtrnpreprocess_postlog(verbose, logfp, message, &error);
                 fprintf(stderr,"%s\n", message);
-                
+
                 sprintf(log_message, "Multibeam File <%s> not initialized for reading", ifile);
                 if (logfp != NULL)
                     mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
                 fprintf(stderr,"\n%s\n", log_message);
-                
+
                 sprintf(log_message, "Program <%s> Terminated", program_name);
                 if (logfp != NULL)
                     mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
                 fprintf(stderr,"\n%s\n", log_message);
-                
+
                 exit(error);
             } else {
                 sprintf(log_message, "Multibeam File <%s> initialized for reading", ifile);
@@ -1109,7 +1109,7 @@ int main(int argc, char **argv) {
                     mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
                 if (verbose > 0)
                     fprintf(stderr,"\n%s\n", log_message);
-                
+
                 sprintf(log_message, "MBIO format id: %d", format);
                 if (logfp != NULL)
                     mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
@@ -1149,7 +1149,7 @@ int main(int argc, char **argv) {
 				status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
 				                           (void **)&ping[i].ssalongtrack, &error);
 		}
-                
+
         /* plan on storing enough pings for median filter */
         n_buffer_max = median_filter_n_along;
         n_ping_process = n_buffer_max / 2;
@@ -1196,7 +1196,7 @@ int main(int argc, char **argv) {
                         n_soundings_decimated = 0;
                         n_soundings_flagged = 0;
                         n_soundings_written = 0;
-                        
+
                         status = mbtrnpreprocess_closelog(verbose, &logfp, &error);
                     }
 
@@ -1213,7 +1213,7 @@ int main(int argc, char **argv) {
                         fprintf(stderr, "\nLog file could not be opened in directory %s...\n", log_directory);
                         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
                         exit(error);
-                    }                
+                    }
                 }
             }
 
@@ -1266,7 +1266,7 @@ int main(int argc, char **argv) {
 //    fprintf(stdout,"%d ", ping[i].count);
 //}
 //fprintf(stdout," : process %d\n", i_ping_process);
-                    
+
                     /* apply swath width */
                     threshold_tangent = tan(DTR * 0.5 * swath_width);
                     beam_start = ping[i_ping_process].beams_bath - 1;
@@ -1277,16 +1277,16 @@ int main(int argc, char **argv) {
                                         / (ping[i_ping_process].bath[j]
                                             - ping[i_ping_process].sonardepth);
                             if (fabs(tangent) > threshold_tangent
-                                && mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) { 
+                                && mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                                 ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-                                n_soundings_trimmed++;                                
+                                n_soundings_trimmed++;
                             } else {
                                 beam_start = MIN(beam_start, j);
                                 beam_end = MAX(beam_end, j);
                             }
                         }
                     }
-                    
+
                     /* apply decimation - only consider outputting decimated soundings */
                     beam_decimation = ((beam_end - beam_start + 1) / n_output_soundings) + 1;
                     dj = median_filter_n_across / 2;
@@ -1309,14 +1309,14 @@ int main(int argc, char **argv) {
                                             }
                                         }
                                     }
-                                    
+
                                     /* run qsort */
                                     qsort((char *)median_filter_soundings, n_median_filter_soundings,
                                           sizeof(double), (void *)mb_double_compare);
                                     median = median_filter_soundings[n_median_filter_soundings / 2];
 //fprintf(stdout, "Beam %3d of %d:%d bath:%.3f n:%3d:%3d median:%.3f ", j, beam_start, beam_end,
 //ping[i_ping_process].bath[j], n_median_filter_soundings, median_filter_n_min, median);
-                                    
+
                                     /* apply median filter - also flag soundings that don't have enough neighbors to filter */
                                     if (n_median_filter_soundings < median_filter_n_min
                                         || fabs(ping[i_ping_process].bath[j] - median) > median_filter_threshold * median) {
@@ -1326,14 +1326,14 @@ int main(int argc, char **argv) {
 //fprintf(stdout, "**filtered**");
                                     }
 //fprintf(stdout, "\n");
-                                    
+
                                 }
                                 if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                                     n_output++;
                                 }
                             }
                         }
-                        else if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) { 
+                        else if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
                             ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
                             n_soundings_decimated++;
                         }
@@ -1362,7 +1362,7 @@ int main(int argc, char **argv) {
                     /* pack the data into a TRN MB1 packet and either send it to TRN or write it to a file */
                     else {
                         n_soundings_written++;
-                        
+
                         /* make sure buffer is large enough to hold the packet */
                         mb1_size = MBTRNPREPROCESS_MB1_HEADER_SIZE
                                     + n_output * MBTRNPREPROCESS_MB1_SOUNDING_SIZE
@@ -1379,7 +1379,7 @@ int main(int argc, char **argv) {
                                 exit(error);
                             }
                         }
-                        
+
                         // get ping number
                         mb_pingnumber(verbose, imbio_ptr, &ping_number, &error);
 
@@ -1390,7 +1390,7 @@ int main(int argc, char **argv) {
                         output_buffer[index] = '1'; index++;
                         output_buffer[index] = 0; index++;
                         mb_put_binary_int(MB_YES, mb1_size, &output_buffer[index]); index += 4;
-                        
+
                         mb_put_binary_double(MB_YES, ping[i_ping_process].time_d, &output_buffer[index]); index += 8;
                         mb_put_binary_double(MB_YES, ping[i_ping_process].navlat, &output_buffer[index]); index += 8;
                         mb_put_binary_double(MB_YES, ping[i_ping_process].navlon, &output_buffer[index]); index += 8;
@@ -1417,7 +1417,7 @@ int main(int argc, char **argv) {
 
                         for (j = 0; j < ping[i_ping_process].beams_bath; j++) {
                             if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
-                                
+
                                 mb_put_binary_int(MB_YES, j, &output_buffer[index]);
                                 index += 4;
                                 mb_put_binary_double(MB_YES, ping[i_ping_process].bathalongtrack[j], &output_buffer[index]); index += 8;
@@ -1435,7 +1435,7 @@ int main(int argc, char **argv) {
 
                             }
                         }
-                        
+
                         /* add the checksum */
                         checksum = 0;
                         unsigned char *cp = (unsigned char *)output_buffer;
@@ -1443,24 +1443,24 @@ int main(int argc, char **argv) {
 //                            checksum += (unsigned int) output_buffer[j];
                             checksum += (unsigned int) (*cp++);
                         }
-                        MMDEBUG(APP1,"before put : chk[%08X/%u] idx[%d] mb1sz[%d]\n",checksum,checksum,index,mb1_size);
+                        MMDEBUG(APP1,"before put : chk[%08X/%u] idx[%zu] mb1sz[%zu]\n",checksum,checksum,index,mb1_size);
                         mb_put_binary_int(MB_YES, checksum, &output_buffer[index]); index += 4;
-                        MMDEBUG(APP1,"after put : chk[%08X] idx[%d] mb1sz[%d]\n",checksum,index,mb1_size);
-                        
+                        MMDEBUG(APP1,"after put : chk[%08X] idx[%zu] mb1sz[%zu]\n",checksum,index,mb1_size);
+
                         MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_MBPING_XT], iow_dtime());
 
                         /* send the packet to TRN */
                         if (output_mode == MBTRNPREPROCESS_OUTPUT_TRN) {
-                            
+
                             MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CYCLES]);
-                            
+
 //                            struct timeval stv={0};
 //                            gettimeofday(&stv,NULL);
 //                            double stime = (double)stv.tv_sec+((double)stv.tv_usec/1000000.0);
 //                            double ptime=ping[i_ping_process].time_d;
 //                            fprintf(stderr,"mbtx : ptime[%.3lf] stime[%.3lf] (s-p)[%+6.3lf]**\n",ptime,stime,(stime-ptime));
 //                            fprintf(stderr,"mbtx : (s-p)[%+6.3lf]**\n",(stime-ptime));
-                            
+
                             // log current TRN message
                             if(trn_blog_en){
                                 mlog_write(BLOG_ID,(byte *)output_buffer,mb1_size);
@@ -1476,7 +1476,7 @@ int main(int argc, char **argv) {
                            iow_peer_t *psub = (iow_peer_t *)mlist_first(trn_plist);
                             idx=0;
                             while (psub != NULL) {
-                               
+
                                 psub->heartbeat--;
 
                                 iobytes = iow_sendto(trn_osocket, psub->addr, (byte *)output_buffer, mb1_size, 0 );
@@ -1486,16 +1486,16 @@ int main(int argc, char **argv) {
                                     MBTR_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_TRN_TX_BYTES],iobytes);
                                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRN_PUBN]);
                                     MBTR_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_TRN_PUB_BYTES],iobytes);
-                                   
-                                    
-                                    MMDEBUG(APP4,"tx TRN [%5zd]b cli[%d/%s:%s] hb[%d]\n", iobytes, idx, psub->chost, psub->service, psub->heartbeat);
-                                    
+
+
+                                    MMDEBUG(APP4,"tx TRN [%5d]b cli[%d/%s:%s] hb[%d]\n", iobytes, idx, psub->chost, psub->service, psub->heartbeat);
+
                                 }else{
                                     MERROR("err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno));
                                     mlog_tprintf(MLOG_ID,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno));
                                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRN_TX]);
                                 }
-                               
+
                                 // check heartbeat, remove expired peers
                                 if (NULL!=psub && psub->heartbeat==0) {
                                     MMDEBUG(APP4,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id);
@@ -1507,22 +1507,22 @@ int main(int argc, char **argv) {
                                 psub=(iow_peer_t *)mlist_next(trn_plist);
                                 idx++;
                             }// while psub
-                            
+
                             MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_TRNTX_XT], iow_dtime());
 
                             // check trn socket for client messages (connection, heartbeat)
                             byte cmsg[TRN_MSG_CON_LEN];
                              int svc=0;
-                            
+
                             MMDEBUG(APP4,"checking trn host socket\n");
                             bool trn_recv_pending=true;
                             do{
                                 MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_TRNRX_XT], iow_dtime());
-                                
+
                                 iobytes = iow_recvfrom(trn_osocket, trn_peer->addr, cmsg, TRN_MSG_CON_LEN);
-                                
+
                                 MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_TRNRX_XT], iow_dtime());
-                                
+
                                 switch (iobytes) {
                                     case 0:
                                         // no bytes returned (socket closed)
@@ -1546,28 +1546,28 @@ int main(int argc, char **argv) {
                                         MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_RXE]);
                                         trn_recv_pending=false;
                                         break;
-                                        
+
                                     default:
                                         // bytes received
                                         MBTR_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_CLI_RX_BYTES],iobytes);
                                         MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_RXN]);
-                                        
+
                                         const char *ctest=NULL;
                                         uint16_t port=0xFFFF;
                                         struct sockaddr_in *psin = NULL;
                                         if (NULL != trn_peer->addr &&
                                             NULL != trn_peer->addr->ainfo &&
                                             NULL != trn_peer->addr->ainfo->ai_addr) {
-                                            
+
                                             psin = (struct sockaddr_in *)trn_peer->addr->ainfo->ai_addr;
                                             ctest = inet_ntop(AF_INET, &psin->sin_addr, trn_peer->chost, IOW_ADDR_LEN);
                                             if (NULL!=ctest) {
-                                                
+
                                                 port = ntohs(psin->sin_port);
-                                                
+
                                                 svc = port;
                                                 snprintf(trn_peer->service,NI_MAXSERV,"%d",svc);
-                                                
+
                                                 iow_peer_t *pclient=NULL;
                                                 pclient = (iow_peer_t *)mlist_vlookup(trn_plist,&svc,mbtrn_peer_vcmp);
                                                 if (pclient!=NULL) {
@@ -1587,23 +1587,23 @@ int main(int argc, char **argv) {
                                                     pclient=trn_peer;
                                                     // create a new peer for next read
                                                     trn_peer = iow_peer_new();
-                                                    
+
                                                     mlog_tprintf(MLOG_ID,"client connected id[%d] addr[%p]\n",svc,trn_peer);
                                                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_CONN]);
                                                 }
-                                                
-                                                MMINFO(APP2,"rx [%zd]b cli[%d/%s:%s]\n",iobytes, svc, trn_peer->chost, trn_peer->service);
+
+                                                MMINFO(APP2,"rx [%d]b cli[%d/%s:%s]\n",iobytes, svc, trn_peer->chost, trn_peer->service);
                                                 // mlog_tprintf(MLOG_ID,"rx [%zd]b cli[%d/%s:%s]\n",iobytes, svc, trn_peer->chost, trn_peer->service);
-                                                
+
                                                 // send ACK to client
                                                 iobytes = iow_sendto(trn_osocket, pclient->addr, (byte *)"ACK", 4, 0 );
                                                 if ( (NULL!=pclient) && ( iobytes > 0) ) {
-                                                    
-                                                    MMDEBUG(APP4,"tx ACK [%zd]b cli[%d/%s:%s]\n", iobytes, svc, pclient->chost, pclient->service);
+
+                                                    MMDEBUG(APP4,"tx ACK [%d]b cli[%d/%s:%s]\n", iobytes, svc, pclient->chost, pclient->service);
                                                     // mlog_tprintf(MLOG_ID,"tx ACK [%zd]b cli[%d/%s:%s]\n",iobytes, svc, pclient->chost, pclient->service);
                                                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_ACKN]);
                                                     MBTR_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_CLI_ACK_BYTES],iobytes);
-                                                    
+
                                                 }else{
                                                     // ACK failed
                                                     mlog_tprintf(MLOG_ID,"tx cli[%d] failed pclient[%p] iobytes[%zd] [%d/%s]\n",svc,pclient,iobytes,errno,strerror(errno));
@@ -1619,7 +1619,7 @@ int main(int argc, char **argv) {
                                             mlog_tprintf(MLOG_ID,"err - NULL cliaddr(rx) cli[%d]\n",trn_peer->id);
                                             MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLIADDR_RX]);
                                         }
-                                        
+
                                         break;
                                 }// switch iobytes
                             }while(trn_recv_pending);
@@ -1640,7 +1640,7 @@ int main(int argc, char **argv) {
                             MBTRNPP_UPDATE_STATS(app_stats, MLOG_ID, MBTRNPP_STAT_FLAGS);
 
                         }// end MBTRNPREPROCESS_OUTPUT_TRN
-                        
+
                         /* write the packet to a file */
                         else if (output_mode == MBTRNPREPROCESS_OUTPUT_FILE) {
                             fwrite(output_buffer, mb1_size, 1, ofp);
@@ -1648,7 +1648,7 @@ int main(int argc, char **argv) {
                         }
                     }
                 }
-               
+
                 /* move data in buffer */
                 if (ndata >= n_buffer_max) {
                     ndata--;
@@ -1664,24 +1664,24 @@ int main(int argc, char **argv) {
                         idataread = 0;
                 }
             }else{
-                
+
                 MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBGETFAIL_XT], iow_dtime());
                MMINFO(APP4,"mb_get_all failed: status[%d] kind[%d] err[%d]\n",status, kind, error);
-                
+
                 if ( (status == MB_FAILURE) && (error==MB_ERROR_EOF) && (input_mode == INPUT_MODE_SOCKET)) {
-                    
+
                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_EMBGETALL]);
-                    
+
                     fprintf(stderr,"EOF (input socket) - clear status/error\n");
                     status = MB_SUCCESS;
                     error = MB_ERROR_NO_ERROR;
-                    
+
                     // check connection status
                     // only reconnect if disconnected
                     mbtrn_reader_t *reader = ((struct mb_io_struct *)imbio_ptr)->mbsp;
-                    if (NULL!=reader && reader->state==MBS_INITIALIZED || (me_errno==ME_ESOCK) || (me_errno==ME_EOF)  ) {
+                    if ((NULL!=reader && reader->state==MBS_INITIALIZED) || (me_errno==ME_ESOCK) || (me_errno==ME_EOF)  ) {
                         MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ESRC_SOCKET]);
-                        
+
                         // empty the reader's record frame container
                         mbtrn_reader_purge(reader);
                         fprintf(stderr,"mbtrnpp: input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
@@ -1695,7 +1695,7 @@ int main(int argc, char **argv) {
                             fprintf(stderr,"mbtrnpp: input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
                             mlog_tprintf(MLOG_ID,"mbtrnpp: input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
                             MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ESRC_CON]);
-                            
+
                             struct timespec twait={0},trem={0};
                             twait.tv_sec=5;
                             nanosleep(&twait,&trem);
@@ -1707,9 +1707,9 @@ int main(int argc, char **argv) {
            }
 
             MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBPOST_XT], iow_dtime());
-          
+
             if (status == MB_FAILURE) {
-                
+
                 // if libmbtrn ESOCK error, then keep going
                 if ( (me_errno==ME_ESOCK) || (me_errno==ME_EOF) || (me_errno==ME_ERCV)) {
                     fprintf(stderr,"mbtrnpp: MB_FAILURE - me_error[%d/%s] (input socket may be disconnected)\n",me_errno,me_strerror(me_errno));
@@ -1717,10 +1717,10 @@ int main(int argc, char **argv) {
                     mbtrn_reader_t *reader = ((struct mb_io_struct *)imbio_ptr)->mbsp;
                     // empty the reader's record frame container
                     mbtrn_reader_purge(reader);
-                    
+
                     fprintf(stderr,"mbtrnpp: MB_FAILURE - input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
                     mlog_tprintf(MLOG_ID,"input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
-                    
+
                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_DISN]);
 
                     if (mbtrn_reader_connect(reader,true)==0) {
@@ -1731,7 +1731,7 @@ int main(int argc, char **argv) {
                         fprintf(stderr,"mbtrnpp: MB_FAILURE - input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
                         mlog_tprintf(MLOG_ID,"mbtrnpp: MB_FAILURE - input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
                         MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ESRC_CON]);
- 
+
                         struct timespec twait={0},trem={0};
                         twait.tv_sec=5;
                         nanosleep(&twait,&trem);
@@ -1746,7 +1746,7 @@ int main(int argc, char **argv) {
             }
             MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_MBPOST_XT], iow_dtime());
 	}
-        
+
 		/* close the files */
         if (input_mode==INPUT_MODE_SOCKET) {
             fprintf(stderr,"socket input mode - continue (probably shouldn't be here)\n");
@@ -1754,27 +1754,27 @@ int main(int argc, char **argv) {
         }else{
             fprintf(stderr,"file input mode - file cleanup\n");
             status = mb_close(verbose, &imbio_ptr, &error);
-            
+
             if (logfp != NULL){
                 sprintf(log_message, "Multibeam File <%s> closed", ifile);
             }
-            
+
             mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
             if (verbose != 0){
                 fprintf(stderr,"\n%s\n", log_message);
             }
-            
+
             sprintf(log_message, "MBIO format id: %d", format);
             if (logfp != NULL){
                 mbtrnpreprocess_postlog(verbose, logfp, log_message, &error);
             }
-            
+
             if (verbose > 0){
                 fprintf(stderr,"%s\n", log_message);
             }
-            
+
             fflush(logfp);
-            
+
             /* give the statistics */
             /* figure out whether and what to read next */
             if (read_datalist == MB_YES) {
@@ -1792,11 +1792,11 @@ int main(int argc, char **argv) {
         }
         /* end loop over files in list */
 	}
-    
+
     fprintf(stderr,"exit loop\n");
     if (read_datalist == MB_YES)
 		mb_datalist_close(verbose, &datalist, &error);
-        
+
     /* close log file */
     gettimeofday(&timeofday, &timezone);
     now_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
@@ -1831,10 +1831,10 @@ int main(int argc, char **argv) {
          n_soundings_decimated = 0;
          n_soundings_flagged = 0;
          n_soundings_written = 0;
-         
+
          status = mbtrnpreprocess_closelog(verbose, &logfp, &error);
      }
-        
+
     /* close output */
     if (output_mode == MBTRNPREPROCESS_OUTPUT_FILE) {
         fclose(ofp);
@@ -1852,7 +1852,7 @@ int main(int argc, char **argv) {
 
 	/* end it all */
 	exit(error);
-    
+
 }
 /*--------------------------------------------------------------------*/
 
@@ -1881,17 +1881,17 @@ int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, in
 		fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
 		fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
 	}
- 
+
     /* close existing log file */
     if (*logfp != NULL) {
         mbtrnpreprocess_closelog(verbose, logfp, error);
     }
-   
+
     /* get time and user data */
     gettimeofday(&timeofday, &timezone);
     time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
     status = mb_get_date(verbose, time_d, time_i);
-    sprintf(date, "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d", 
+    sprintf(date, "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d",
             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6]);
      if ((user_ptr = getenv("USER")) == NULL)
         user_ptr = getenv("LOGNAME");
@@ -1900,7 +1900,7 @@ int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, in
     else
         strcpy(user, "unknown");
     gethostname(host, sizeof(mb_path));
-    
+
     /* open new log file */
     sprintf(log_file, "%s/%s_mbtrnpreprocess_log.txt", log_directory,   date);
     *logfp = fopen(log_file, "w");
@@ -1910,7 +1910,7 @@ int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, in
             fprintf(stderr, "Program %s log file\n-------------------\n", program_name);
         }
         sprintf(log_message, "Opened by user %s on cpu %s", user, host);
-        mbtrnpreprocess_postlog(verbose, *logfp, log_message, error);        
+        mbtrnpreprocess_postlog(verbose, *logfp, log_message, error);
     }
     else {
         *error = MB_ERROR_OPEN_FAIL;
@@ -1942,7 +1942,7 @@ int mbtrnpreprocess_closelog(int verbose, FILE **logfp, int *error) {
 	char *function_name = "mbtrnpreprocess_closelog";
 	int status = MB_SUCCESS;
     char *log_message = "Closing mbtrnpreprocess log file";
- 
+
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1951,7 +1951,7 @@ int mbtrnpreprocess_closelog(int verbose, FILE **logfp, int *error) {
 		fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
 		fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
 	}
-    
+
      /* close log file */
     if (logfp != NULL) {
         mbtrnpreprocess_postlog(verbose, *logfp, log_message, error);
@@ -1987,7 +1987,7 @@ int mbtrnpreprocess_postlog(int verbose, FILE *logfp, char *log_message, int *er
     double time_d;
     int time_i[7];
     char date[32];
- 
+
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1996,22 +1996,22 @@ int mbtrnpreprocess_postlog(int verbose, FILE *logfp, char *log_message, int *er
 		fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
 		fprintf(stderr, "dbg2       log_message:        %s\n", log_message);
 	}
-   
+
     /* get time  */
     gettimeofday(&timeofday, &timezone);
     time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
     status = mb_get_date(verbose, time_d, time_i);
-    sprintf(date, "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d", 
+    sprintf(date, "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d",
             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6]);
-   
+
     /* post log_message */
     if (logfp != NULL) {
-        fprintf(logfp, "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n", 
+        fprintf(logfp, "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n",
             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
             log_message);
     }
     if (verbose > 0) {
-        fprintf(stderr, "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n", 
+        fprintf(stderr, "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n",
             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
             log_message);
     }
@@ -2048,7 +2048,7 @@ int mbtrnpreprocess_logparameters(int verbose,
 	char *function_name = "mbtrnpreprocess_logparameters";
 	int status = MB_SUCCESS;
     mb_path log_message;
- 
+
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2066,36 +2066,36 @@ int mbtrnpreprocess_logparameters(int verbose,
 		fprintf(stderr, "dbg2       median_filter_threshold:      %f\n", median_filter_threshold);
 		fprintf(stderr, "dbg2       n_buffer_max:                 %d\n", n_buffer_max);
 	}
-    
+
     /* post log_message */
     if (logfp != NULL) {
         sprintf(log_message, "       input:                    %s", input);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
         sprintf(log_message, "       format:                   %d", format);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
         sprintf(log_message, "       output:                   %s", output);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
         sprintf(log_message, "       swath_width:              %f", swath_width);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
         sprintf(log_message, "       n_output_soundings:       %d", n_output_soundings);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
         sprintf(log_message, "       median_filter:            %d", median_filter);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
         sprintf(log_message, "       median_filter_n_across:   %d", median_filter_n_across);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
         sprintf(log_message, "       median_filter_n_along:    %d", median_filter_n_along);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
         sprintf(log_message, "       median_filter_threshold:  %f", median_filter_threshold);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
         sprintf(log_message, "       n_buffer_max:             %d", n_buffer_max);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
     }
@@ -2131,7 +2131,7 @@ int mbtrnpreprocess_logstatistics(int verbose,
 	char *function_name = "mbtrnpreprocess_logstatistics";
 	int status = MB_SUCCESS;
     mb_path log_message;
- 
+
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2148,7 +2148,7 @@ int mbtrnpreprocess_logstatistics(int verbose,
 		fprintf(stderr, "dbg2       n_soundings_flagged:          %d\n", n_soundings_flagged);
 		fprintf(stderr, "dbg2       n_soundings_written:          %d\n", n_soundings_written);
 	}
-    
+
     /* post log_message */
     if (logfp != NULL) {
 		sprintf(log_message, "Log File Statistics:");
@@ -2156,28 +2156,28 @@ int mbtrnpreprocess_logstatistics(int verbose,
 
 		sprintf(log_message, "       n_pings_read:                 %d", n_pings_read);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
 		sprintf(log_message, "       n_soundings_read:             %d", n_soundings_read);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
 		sprintf(log_message, "       n_soundings_valid_read:       %d", n_soundings_valid_read);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
 		sprintf(log_message, "       n_soundings_flagged_read:     %d", n_soundings_flagged_read);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
 		sprintf(log_message, "       n_soundings_null_read:        %d", n_soundings_null_read);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
 		sprintf(log_message, "       n_soundings_trimmed:          %d", n_pings_read);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
 		sprintf(log_message, "       n_soundings_decimated:        %d", n_soundings_decimated);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
 		sprintf(log_message, "       n_soundings_flagged:          %d", n_soundings_flagged);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-        
+
 		sprintf(log_message, "       n_soundings_written:          %d", n_soundings_written);
         mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
      }
@@ -2215,6 +2215,7 @@ int mbtrnpreprocess_log_min(mbtrn_stat_chan_t *stats)
                      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_CLI_RXN]),
                      MBTR_COUNTER_GET(app_stats->stats->status[MBTPP_STA_CLI_RX_BYTES]));
     }
+    return 0;
 }
 
 int mbtrnpreprocess_update_stats(mbtrnpp_stats_t *stats, mlog_id_t log_id, mbtr_stat_flags flags)
@@ -2222,7 +2223,7 @@ int mbtrnpreprocess_update_stats(mbtrnpp_stats_t *stats, mlog_id_t log_id, mbtr_
 
     if (NULL!=stats) {
         double stats_now = iow_dtime();
-        
+
         if (log_clock_res) {
             // log the timing clock resolution (once)
             struct timespec res;
@@ -2230,7 +2231,7 @@ int mbtrnpreprocess_update_stats(mbtrnpp_stats_t *stats, mlog_id_t log_id, mbtr_
             mlog_tprintf(MLOG_ID,"%.3lf,i,clkres_mono,s[%ld] ns[%ld]\n",stats_now,res.tv_sec,res.tv_nsec);
             log_clock_res=false;
         }
- 
+
         // we can only measure the previous stats cycle...
         if (stats->stats->per_stats[MBTPP_CH_CYCLE_XT].n>0) {
             // get the timing of the last cycle
@@ -2241,22 +2242,22 @@ int mbtrnpreprocess_update_stats(mbtrnpp_stats_t *stats, mlog_id_t log_id, mbtr_
             MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_STATS_XT], (stats_now-0.0001));
             MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_STATS_XT], stats_now);
         }
-       
+
         // end the cycle timer here
         // [start at the end if this function]
         MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], stats_now);
-       
+
         // measure dtime execution time (twice), while we're at it
         MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], iow_dtime());
         MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], iow_dtime());
         MBTR_SW_DIV(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], 2.0);
-      
+
         // update uptime
         stats->uptime = stats_now-stats->session_start;
-        
+
         // update throughput measurement
         stats->stats->measurements[MBTPP_CH_THRUPUT].value =( stats->uptime>0.0 ? (double)stats->stats->status[MBTPP_STA_TRN_TX_BYTES]/stats->uptime:0.0);
-        
+
         fprintf(stderr,"cycle_xt: stat_now[%.4lf] start[%.4lf] stop[%.4lf] value[%.4lf]\n",
                 stats_now,
                 app_stats->stats->measurements[MBTPP_CH_CYCLE_XT].start,
@@ -2264,7 +2265,7 @@ int mbtrnpreprocess_update_stats(mbtrnpp_stats_t *stats, mlog_id_t log_id, mbtr_
                 app_stats->stats->measurements[MBTPP_CH_CYCLE_XT].value);
         // update stats
         mbtrn_update_stats(stats->stats, MBTPP_CH_COUNT, flags);
-      
+
         fprintf(stderr,"cycle_xt.p: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
                 app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].n,
                 app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].sum,
@@ -2292,31 +2293,31 @@ int mbtrnpreprocess_update_stats(mbtrnpp_stats_t *stats, mlog_id_t log_id, mbtr_
         // check stats periods, process if ready
         if ( (stats->stats->stat_period_sec>0.0) &&
             ((stats_now - stats->stats->stat_period_start) >  stats->stats->stat_period_sec)) {
-           
+
             // start log execution timer
             MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_LOG_XT], iow_dtime());
-            
+
             mlog_tprintf(MLOG_ID,"%.3lf,i,uptime,%0.3lf\n",stats_now,stats->uptime);
             mbtrn_log_stats(stats->stats, stats_now, log_id, flags);
-            
+
             if (flags&MBTF_READER) {
                 mbtrn_log_stats(reader_stats, stats_now, log_id, flags);
             }
-            
+
             // reset period stats
             mbtrn_reset_pstats(stats->stats, MBTPP_CH_COUNT);
             mbtrn_reset_pstats(reader_stats, MBTR_CH_COUNT);
-            
+
             // reset period timer
             stats->stats->stat_period_start = stats_now;
-            
+
             // stop log execution timer
             MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_LOG_XT], iow_dtime());
         }
- 
+
         // start cycle timer
         MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], iow_dtime());
-     
+
         // update stats execution time variables
         stats_prev_start=stats_now;
         stats_prev_end=iow_dtime();
@@ -2333,7 +2334,7 @@ mbtrnpp_stats_t *mbtrnpreprocess_stats_new(uint32_t ev_counters, uint32_t status
         self->session_start = iow_dtime();
         self->uptime = 0.0;
         self->stats = mbtrn_stats_new(ev_counters, status_counters, tm_channels, mbtrnpp_stats_labels);
-        
+
         mbtrn_stats_set_period(self->stats,pstart,psec);
     }
     return self;
@@ -2341,19 +2342,19 @@ mbtrnpp_stats_t *mbtrnpreprocess_stats_new(uint32_t ev_counters, uint32_t status
 
 int mbtrnpreprocess_init_debug(int verbose)
 {
- 
+
     /* Open and initialize the socket based input for reading using function
      * mbtrnpreprocess_input_read(). Allocate an internal, hidden buffer to hold data from
      * full s7k records while waiting to return bytes from those records as
      * requested by the MBIO read functions.
      * Store the relevant pointers and parameters within the
      * mb_io_struct structure *mb_io_ptr. */
-    
+
     // initialize reader
     // create and open socket connection
     mcfg_configure(NULL,0);
     mdb_set_name(APP,"mbtrnpreprocess");
-    
+
     // use MDI_ALL to globally set module debug output
     // may also set per module basis using module IDs
     // defined in mconfig.h:
@@ -2363,7 +2364,7 @@ int mbtrnpreprocess_init_debug(int verbose)
     // MDL_UNSET,MDL_NONE
     // MDL_FATAL, MDL_ERROR, MDL_WARN
     // MDL_INFO, MDL_DEBUG
-    
+
     mdb_set(MDI_ALL,MDL_NONE);
     switch (verbose) {
         case 0:
@@ -2432,7 +2433,7 @@ int mbtrnpreprocess_init_debug(int verbose)
             mdb_set(RPARSER,MDL_DEBUG);
             break;
     }
-    
+
 
     // open trn data log
     if (trn_blog_en) {
@@ -2458,7 +2459,7 @@ int mbtrnpreprocess_init_debug(int verbose)
         fprintf(stderr,"*** mbtrn session start ***\n");
         fprintf(stderr,"cmdline [%s]\n",g_cmd_line);
     }
-    
+
     app_stats = mbtrnpreprocess_stats_new(MBTPP_EV_COUNT,
                                           MBTPP_STA_COUNT,
                                           MBTPP_CH_COUNT,
@@ -2473,7 +2474,7 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
 	char *function_name = "mbtrnpreprocess_input_open";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
- 
+
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2496,34 +2497,34 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
      * requested by the MBIO read functions.
      * Store the relevant pointers and parameters within the
      * mb_io_struct structure *mb_io_ptr. */
-    
+
     MMDEBUG(APP,"configuring mbtrn_reader using %s:%d\n",reson_hostname,reson_port);
     mb_io_ptr->mbsp = mbtrn_reader_new(reson_hostname,reson_port,reader_capacity, reson_subs, reson_nsubs);
-    
+
     if (mb_io_ptr->mbsp->state==MBS_CONNECTED || mb_io_ptr->mbsp->state==MBS_SUBSCRIBED) {
         MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_CONN]);
     }
-   
+
     // get global reader stats reference
     reader_stats=mbtrn_reader_get_stats(mb_io_ptr->mbsp);
     mbtrn_stats_set_period(reader_stats, app_stats->stats->stat_period_start, app_stats->stats->stat_period_sec);
-    
+
     // configure reader data log
     if (mbr_blog_en && NULL!=mb_io_ptr->mbsp) {
         // open mbr data log
         mbr_blog_path = (char *)malloc(512);
         sprintf(mbr_blog_path,"%s//%s-%s%s",g_log_dir,MBR_BLOG_NAME,session_date,TRN_LOG_EXT);
-        
+
         mbr_blog = mlog_new(mbr_blog_path,&mbrlog_conf);
         mlog_show(mbr_blog,true,5);
         mlog_open(mbr_blog, flags, mode);
 
 
         mbtrn_reader_set_log(mb_io_ptr->mbsp,mbr_blog,RLOG_ID,MBR_BLOG_DESC);
-        
+
 //        mbr_blogs = fopen(mbr_blog_path,"a+");
 //        mbtrn_reader_set_logstream(mb_io_ptr->mbsp,mbr_blogs);
-       
+
     }
 
     if (verbose>=1) {
@@ -2546,12 +2547,12 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
 /*--------------------------------------------------------------------*/
 
 int mbtrnpreprocess_input_read(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error) {
-    
+
 	/* local variables */
 	char *function_name = "mbtrnpreprocess_input_read";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
- 
+
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2592,12 +2593,12 @@ int mbtrnpreprocess_input_read(int verbose, void *mbio_ptr, size_t size, char *b
 /*--------------------------------------------------------------------*/
 
 int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error) {
-    
+
 	/* local variables */
 	char *function_name = "mbtrnpreprocess_input_close";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
- 
+
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2615,7 +2616,7 @@ int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error) {
 
      /* Close the socket based input for reading using function
      * mbtrnpreprocess_input_read(). Deallocate the internal, hidden buffer and any
-     * other resources that were allocated by mbtrnpreprocess_input_init(). */    
+     * other resources that were allocated by mbtrnpreprocess_input_init(). */
 
 	/* print output debug statements */
 	if (verbose >= 2) {
