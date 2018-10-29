@@ -417,7 +417,7 @@ typedef struct t_gsfDataID {
 /* above, does have the timespec structure defined. __APPLE__ will be set when  */
 /* compiled with Apple's gcc on OSX and other third party compilers, so we use it to */
 /* insure the definition below does not conflict. */
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__CYGWIN__)
 
 struct timespec {
 	time_t tv_sec;
