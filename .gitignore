@@ -1,11 +1,11 @@
-libtool
-configure
-aclocal.m4
-Makefile
-Makefile.in
+/libtool
+/configure
+/aclocal.m4
+/Makefile
+/Makefile.in
+/config.log
+/config.status
 autom4te.cache/*
-config.log
-config.status
 src/*/*.o
 src/*/*.lo
 src/*/*.la
@@ -17,6 +17,7 @@ src/*/*/Makefile
 src/Makefile.in
 src/*/Makefile.in
 src/*/*/Makefile.in
+src/*/*exe
 src/mbedit/mbedit
 src/mbeditviz/mbeditviz
 src/mbgrdviz/mbgrdviz
