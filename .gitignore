@@ -32,6 +32,9 @@ src/mbtrn/frames7k
 src/mbtrn/stream7k
 src/mbtrn/tmbtrn
 src/mbtrn/trnc
+src/mbtrn/tbinx
+src/mbtrn/udpc
+src/mbtrn/udps
 src/mbvelocitytool/mbvelocitytool
 src/otps/mbotps
 src/utilities/levitus.h
