@@ -4,6 +4,7 @@
 /config.log
 /config.status
 autom4te.cache/*
+<<<<<<< HEAD
 src/**/*.o
 src/**/*.lo
 src/**/*.la
@@ -12,6 +13,7 @@ src/**/.libs
 src/**/Makefile
 src/**/Makefile.in
 src/**/*.exe
+src/gmt/mbswath.c.tmp
 src/mbedit/mbedit
 src/mbeditviz/mbeditviz
 src/mbgrdviz/mbgrdviz
