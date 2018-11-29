@@ -24,4 +24,3 @@ mbgrdviz_LDADD = ${top_builddir}/src/mbio/libmbio.la \
 		${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
 		${libmotif_LIBS} ${libopengl_LIBS} \
 		$(LIBM)
-
