@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbedit</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  1 July 2017 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  24 November 2018 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -267,7 +267,8 @@ This program uses the <B>MBIO</B> library and will read any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
-Default: <I>format</I> = 11.
+By default the <I>format</I> id value is inferred fusing the <B>MB-System</B>
+convention of an &quot;.mbXX&quot; suffix (the XX corresponds to the <B>MBIO</B> format id).
 <DT><B>-G</B>
 
 <DD>
@@ -288,8 +289,10 @@ of its operation and then exit immediately.
 
 Sets the data file from which the input data will be read at startup.
 This option is usually used only when <B>MBedit</B> is started
-automatically from some other process. The <B>-F</B> option should
-also be used to set the data format id. If the <B>-B</B> option is
+automatically from some other process. The <B>-F</B> option can
+be used to set the data format id if the filename does not conform to the
+<B>MB-System</B> convention of an &quot;.mbXX&quot; suffix (the XX corresponds to the
+<B>MBIO</B> format id). If the <B>-B</B> option is
 not used to specify browse mode, then the edit save output file is
 automatically set as <I>infile</I> with &quot;.esf&quot; appended.
 <DT><B>-X</B>
@@ -1068,7 +1071,7 @@ window for <B>mbedit</B> is not resizable.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 1 July 2017</P></CENTER>
+Last Updated: 24 November 2018</P></CENTER>
 
 <HR>
 

@@ -15,7 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
-  Version 5.6.20181128   November 28, 2018
+  Version 5.6.20181129   November 29, 2018
   Version 5.6.20181016   October 16, 2018
   Version 5.6.002        September 14, 2018
   Version 5.6.002        September 11, 2018
@@ -292,7 +292,7 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.6 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.6.20181128 (November 28, 2018)
+-----> 5.6.20181129 (November 29, 2018)
 
 MBgrdtiff, mbm_grdtiff: Added -Nnudge_x/nudge_y option to apply a positional offset
 in meters relative to the input grid or mosaic.
