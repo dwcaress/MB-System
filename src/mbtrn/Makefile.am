@@ -63,5 +63,7 @@ udps_LDADD = libmbtrn.la
 udpc_SOURCES = udpc.c
 udpc_LDADD = libmbtrn.la
 
+dist_bin_SCRIPTS = mbtrnpp.sh emu7k.sh
+
 CLEANFILES =
 DISTCLEANFILES =
