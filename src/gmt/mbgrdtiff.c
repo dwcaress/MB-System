@@ -406,9 +406,11 @@ struct MBGRDTIFF_CTRL {
 	struct M { /* -M */
 		bool active;
 	} M;
-	struct N { /* -N */
+	struct Nudge { /* -N<nudge_x>/<nudge_y> */
 		bool active;
-	} N;
+    double nudge_x;
+    double nudge_y;
+	} Nudge;
 	struct mbO { /* -O */
 		bool active;
 		char *file;
@@ -460,7 +462,7 @@ int GMT_mbgrdtiff_usage(struct GMTAPI_CTRL *API, int level) {
 		return (GMT_NOERROR);
 	GMT_Message(API, GMT_TIME_NONE, "usage: mbgrdtiff <grd_z>|<grd_r> <grd_g> <grd_b> %s [%s] [-C<cpt>] [-Ei[|<dpi>]]\n",
 	            GMT_J_OPT, GMT_B_OPT);
-	GMT_Message(API, GMT_TIME_NONE, "\t[-G[f|b]<rgb>] [-I<intensgrid>|<value>] [-K] [-M] [-N] [-O] [-P] [-Q]\n");
+	GMT_Message(API, GMT_TIME_NONE, "\t[-G[f|b]<rgb>] [-I<intensgrid>|<value>] [-K] [-M] [-N<nudge_x>/<nudge_y>] [-O] [-P] [-Q]\n");
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
 	GMT_Message(API, GMT_TIME_NONE, "\t[%s] [%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT,
 	            GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
@@ -485,7 +487,7 @@ int GMT_mbgrdtiff_usage(struct GMTAPI_CTRL *API, int level) {
 	GMT_Message(API, GMT_TIME_NONE, "\t   For a constant intensity, just give the value instead.\n");
 	GMT_Option(API, "K");
 	GMT_Message(API, GMT_TIME_NONE, "\t-M Force monochrome image.\n");
-	GMT_Message(API, GMT_TIME_NONE, "\t-N Do not clip image at the map boundary.\n");
+	GMT_Message(API, GMT_TIME_NONE, "\t-N<nudge_x>/<nudge_y>\n");
 	GMT_Option(API, "O,P");
 	GMT_Message(API, GMT_TIME_NONE, "\t-Q Use PS Level 3 colormasking to make nodes with z = NaN transparent.\n");
 	GMT_Option(API, "R");
@@ -597,8 +599,13 @@ int GMT_mbgrdtiff_parse(struct GMT_CTRL *GMT, struct MBGRDTIFF_CTRL *Ctrl, struc
 		case 'M': /* Monochrome image */
 			Ctrl->M.active = true;
 			break;
-		case 'N': /* Do not clip at map boundary */
-			Ctrl->N.active = true;
+		case 'N': /* -N<nudge_x>/<nudge_y> Offset location of image by
+                  nudge_x meters east and nudge_y meters north */
+      if (sscanf(opt->arg, "%lf/%lf", &Ctrl->Nudge.nudge_x, &Ctrl->Nudge.nudge_y) == 2) {
+        Ctrl->Nudge.active = true;
+      } else {
+        Ctrl->Nudge.active = false;
+      }
 			break;
 		case 'O': /* Output file */
 			Ctrl->O.active = true;
@@ -731,7 +738,8 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	int utmzone;
 	int keyindex;
 
-	unsigned short value_short;
+	double mtodeglon, mtodeglat;
+  unsigned short value_short;
 	int value_int;
 	double value_double;
 	size_t write_size;
@@ -875,13 +883,6 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		nx = gmt_M_get_n(GMT, wesn[XLO], wesn[XHI], Grid_orig[0]->header->inc[GMT_X], Grid_orig[0]->header->registration);
 		ny = gmt_M_get_n(GMT, wesn[YLO], wesn[YHI], Grid_orig[0]->header->inc[GMT_Y], Grid_orig[0]->header->registration);
 	}
-
-	//	if (!Ctrl->A.active) {	/* Otherwise we are not writting any postscript */
-	//		PSL = gmt_plotinit (GMT, options);
-	//		gmt_plane_perspective (GMT, GMT->current.proj.z_project.view_plane, GMT->current.proj.z_level);
-	//		gmt_plotcanvas (GMT);	/* Fill canvas if requested */
-	//		if (!Ctrl->N.active) gmt_map_clip_on (GMT, GMT->session.no_rgb, 3);
-	//	}
 
 	/* Read data */
 
@@ -1229,6 +1230,25 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 		modeltype = ModelTypeGeographic;
 		projectionid = GCS_WGS_84;
 	}
+
+  /* apply shift or "nudge" to grid bounds so that the GeoTiff location is shifted
+      as desired - the nudge_x and nudge_y values are defined in meters and must
+      be translated to the image bounds coordinates */
+  if (Ctrl->Nudge.active == true) {
+    /* geographic coordinates so convert Ctrl->Nudge.nudge_x and Ctrl->Nudge.nudge_y to degress lon and lat */
+    if (modeltype == ModelTypeGeographic) {
+      mb_coor_scale(0, 0.5 * (header_work->wesn[YLO] + header_work->wesn[YHI]), &mtodeglon, &mtodeglat);
+      header_work->wesn[XLO] += Ctrl->Nudge.nudge_x * mtodeglon;
+      header_work->wesn[XHI] += Ctrl->Nudge.nudge_x * mtodeglon;
+      header_work->wesn[YLO] += Ctrl->Nudge.nudge_y * mtodeglat;
+      header_work->wesn[YHI] += Ctrl->Nudge.nudge_y * mtodeglat;
+    } else {
+      header_work->wesn[XLO] += Ctrl->Nudge.nudge_x;
+      header_work->wesn[XHI] += Ctrl->Nudge.nudge_x;
+      header_work->wesn[YLO] += Ctrl->Nudge.nudge_y;
+      header_work->wesn[YHI] += Ctrl->Nudge.nudge_y;
+    }
+  }
 
 	/* Google Earth Pro requires GeoTiffs longitude to be in -180 to +180 domain
 	 * make sure geographic images have the origin in the right domain unless
@@ -1601,7 +1621,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	}
 
 	/* write out world file contents */
-	fprintf(tfp, "%f\r\n0.0\r\n0.0\r\n%f\r\n%f\r\n%f\r\n", dx, -dy, header_work->wesn[XLO] - 0.5 * dx,
+	fprintf(tfp, "%.9f\r\n0.0\r\n0.0\r\n%.9f\r\n%.9f\r\n%.9f\r\n", dx, -dy, header_work->wesn[XLO] - 0.5 * dx,
 	        header_work->wesn[YHI] + 0.5 * dy);
 
 	/* close the world file */
@@ -1613,14 +1633,6 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 	fprintf(stderr, "3 Work header:\n\tnx:%d ny:%d registration:%d\n\tWESN: %f %f %f %f\n\tinc: %f %f\n", header_work->n_columns,
 	        header_work->n_rows, header_work->registration, header_work->wesn[XLO], header_work->wesn[XHI], header_work->wesn[YLO],
 	        header_work->wesn[YHI], header_work->inc[0], header_work->inc[1]);
-
-	//	if (!Ctrl->A.active) {
-	//		if (!Ctrl->N.active) gmt_map_clip_off (GMT);
-	//
-	//		gmt_map_basemap (GMT);
-	//		gmt_plane_perspective (GMT, -1, 0.0);
-	//		gmt_plotend (GMT);
-	//	}
 
 	/* Free bitimage arrays. gmt_M_free will not complain if they have not been used (NULL) */
 	if (P && P->is_bw)

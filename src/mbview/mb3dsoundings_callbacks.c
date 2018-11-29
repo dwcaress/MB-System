@@ -356,7 +356,7 @@ int mb3dsoundings_updategui() {
 }
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_updatemodetoggles() {
-	
+
 	/* set the mode toggles */
 	if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
 		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_toggle, TRUE, FALSE);
@@ -1660,7 +1660,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
 
 		/* Deal with KeyPress events */
 		if (event->xany.type == KeyPress) {
-			/* fprintf(stderr,"KeyPress event\n"); */
+			fprintf(stderr,"KeyPress event\n");
 			/* Get key pressed - buffer[0] */
 			actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
 
@@ -2888,7 +2888,7 @@ soundingdata->num_soundings); */
 
 /*---------------------------------------------------------------------------------------*/
 int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias,
-								  double *headingbias, double *timelag, double *snell, 
+								  double *headingbias, double *timelag, double *snell,
                                   int *error) {
 	/* fprintf(stderr,"Called mb3dsoundings_get_bias_values\n"); */
 
@@ -3803,7 +3803,7 @@ void do_mb3dsdg_mouse_panzoom(Widget w, XtPointer client_data, XtPointer call_da
 
 	/* set mouse mode label */
 	mb3dsoundings_updatelabelmousemode();
-	
+
 }
 
 /*---------------------------------------------------------------------------------------*/

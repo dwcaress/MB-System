@@ -40,7 +40,7 @@
  *           File Magic Number                             0x3D08   2 (1 UINT16)
  *           File version                                  1        2 (1 UINT16)
  *           File sub version                              1        2 (1 UINT16)
- *           
+ *
  * Scan Information
  *           AZ, Cross track angle start, typical (deg)             4 (1 float32)
  *           AZ, Cross track angle end, typical (deg)               4 (1 float32)
@@ -48,11 +48,11 @@
  *           Number pulses per LOS                                  1 (1 UINT8)
  *           Scan lines per this File, Head A                       2 (1 UINT16)
  *           Scan lines per this File, Head B                       2 (1 UINT16)
- *           
+ *
  * Calibration Information
  *           Calibration Structure, Head A                          Size of calibration structure
  *           Calibration Structure, Head B                          Size of calibration structure
- * 
+ *
  * Pulse ID and Timestamp ( 1 to n Scans )
  *           Record ID – Head A or B              0x3D53, 0x3D54    2 (1 UINT16)
  *           Timestamp year (true year)                             2 (1 UINT16)
@@ -81,7 +81,7 @@
  *           Pulse time offset (sec)                                4 (1 float32)
  *           LOS Range 1 ( from glass front ) meters                4 (1 float32)
  *           ...
- *           LOS Range n ( from glass front ) meters                4 (1 float32) 
+ *           LOS Range n ( from glass front ) meters                4 (1 float32)
  *           Amplitude LOS 1 / peak of signal                       2 (1 UINT16)
  *           ...
  *           Amplitude LOS n / peak of signal                       2 (1 UINT16)
@@ -198,7 +198,7 @@ int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command
 	store = (struct mbsys_3ddwissl_struct *)*store_ptr;
 
 	/* initialize everything */
-	
+
 	/* Type of data record */
 	store->kind = MB_DATA_NONE; /* MB-System record ID */
 
@@ -207,7 +207,7 @@ int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command
 	store->magic_number = 0x3D08; /* 0x3D08 */
 	store->file_version = 1; /* 1 */
 	store->sub_version = 1; /* 1 = initial version from 3DatDepth, extended for MB-System */
-    
+
     /* Scan Information */
     store->cross_track_angle_start = 0.0; /* AZ, Cross track angle start, typical (deg) */
     store->cross_track_angle_end = 0.0; /* AZ, Cross track angle end, typical (deg) */
@@ -215,12 +215,12 @@ int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command
     store->soundings_per_pulse = 0; /* soundings per pulse (line of sight, or LOS) */
 	store->heada_scans_per_file = 0; /* number of heada scans in this file */
 	store->headb_scans_per_file = 0; /* number of headb scans in this file */
-    
+
     /* head A calibration */
 	memset((void *)&store->calibration_a, 0, sizeof(struct mbsys_3ddwissl_calibration_struct));
 
 	memset((void *)&store->calibration_b, 0, sizeof(struct mbsys_3ddwissl_calibration_struct));
-   
+
 	/* Scan Information */
     store->record_id = MB_DATA_NONE;       /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or 0x3D74) */
     store->year = 0;
@@ -248,7 +248,7 @@ int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command
     store->heading = 0.0;      /* lidar heading (degrees) */
     store->roll = 0.0;         /* lidar roll (degrees) */
     store->pitch = 0.0;        /* lidar pitch (degrees) */
-    
+
 	store->scan_count = 0; /* global scan count */
     store->size_pulse_record_raw = 0;         /* for original logged records
                                                  * - calculated from file header values */
@@ -609,7 +609,7 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 
 		/* set time */
 		pulse->time_d = store->time_d + (double)pulse->time_offset;
-		
+
 		/* initialize values */
 		navlon = store->navlon;
 		navlat = store->navlat;
@@ -650,7 +650,7 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 			interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
 			                                 pulse->time_d, &roll, &jattitude, &interp_error);
 			pulse->roll_offset = (float)(roll - store->roll);
-			
+
 			interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
 			                                 pulse->time_d, &pitch, &jattitude, &interp_error);
 			pulse->pitch_offset = (float)(pitch - store->pitch);
@@ -688,6 +688,22 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	} else {
 		target_altitude = MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE;
 	}
+  if (pars->head1_offsets == MB_YES) {
+    store->heada_offset_x_m = pars->head1_offsets_x;
+    store->heada_offset_y_m = pars->head1_offsets_y;
+    store->heada_offset_z_m = pars->head1_offsets_z;
+    store->heada_offset_heading_deg = pars->head1_offsets_heading;
+    store->heada_offset_roll_deg = pars->head1_offsets_roll;
+    store->heada_offset_pitch_deg = pars->head1_offsets_pitch;
+  }
+  if (pars->head2_offsets == MB_YES) {
+    store->headb_offset_x_m = pars->head2_offsets_x;
+    store->headb_offset_y_m = pars->head2_offsets_y;
+    store->headb_offset_z_m = pars->head2_offsets_z;
+    store->headb_offset_heading_deg = pars->head2_offsets_heading;
+    store->headb_offset_roll_deg = pars->head2_offsets_roll;
+    store->headb_offset_pitch_deg = pars->head2_offsets_pitch;
+  }
 	status = mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
 					amplitude_threshold, target_altitude, error);
 
@@ -961,7 +977,7 @@ int mbsys_3ddwissl_insert(int verbose,     /* in: verbosity level set on command
 		store->navlat = navlat;
 		store->speed = speed;
 		store->heading = heading;
-		
+
 		/* check for allocation of space */
 		if (store->soundings_per_pulse <= 0)
 			store->soundings_per_pulse = 1;
@@ -2159,7 +2175,7 @@ int mbsys_3ddwissl_print_store(int verbose,     /* in: verbosity level set on co
 		fprintf(stderr, "%s     minutes:                       %u\n", first, store->minutes);
 		fprintf(stderr, "%s     seconds:                       %u\n", first, store->seconds);
 		fprintf(stderr, "%s     nanoseconds:                   %u\n", first, store->nanoseconds);
-		
+
 		fprintf(stderr, "%s     gain:                          %u\n", first, store->gain);
 		fprintf(stderr, "%s     digitizer_temperature:         %f\n", first, store->digitizer_temperature);
 		fprintf(stderr, "%s     ctd_temperature:               %f\n", first, store->ctd_temperature);
@@ -2183,7 +2199,7 @@ int mbsys_3ddwissl_print_store(int verbose,     /* in: verbosity level set on co
 		fprintf(stderr, "%s     size_pulse_record_raw:         %u\n", first, store->size_pulse_record_raw);
 		fprintf(stderr, "%s     size_pulse_record_processed:   %u\n", first, store->size_pulse_record_processed);
 		fprintf(stderr, "%s     bathymetry_calculated:         %u\n", first, store->bathymetry_calculated);
-		
+
 		fprintf(stderr, "%s     num_pulses_alloc:              %d\n", first, store->num_pulses_alloc);
 		for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++) {
 			pulse = &(store->pulses[ipulse]);
@@ -2204,7 +2220,7 @@ int mbsys_3ddwissl_print_store(int verbose,     /* in: verbosity level set on co
 			for (isounding = 0; isounding < store->soundings_per_pulse; isounding++) {
 				sounding = &(pulse->soundings[isounding]);
 				fprintf(stderr, "%s     --------\n", first);
-				fprintf(stderr, "%s     isounding:                     %d\n", first, isounding);			
+				fprintf(stderr, "%s     isounding:                     %d\n", first, isounding);
 				fprintf(stderr, "%s     range:                         %f\n", first, sounding->range);
 			    fprintf(stderr, "%s     amplitude:                     %d\n", first, sounding->amplitude);
 				fprintf(stderr, "%s     beamflag:                      %u\n", first, sounding->beamflag);
@@ -2298,7 +2314,7 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 
 		/* get scaling */
 		mb_coor_scale(verbose, store->navlat, &mtodeglon, &mtodeglat);
-		
+
 		/* set offsets according to which optical head these soundings come from */
 		if (store->record_id == MBSYS_3DDWISSL_RECORD_RAWHEADA || store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADA) {
 			/* optical head A */
@@ -2322,7 +2338,7 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 			head_offset_roll_deg = store->headb_offset_roll_deg;
 			head_offset_pitch_deg = store->headb_offset_pitch_deg;
 		}
-		
+
 		/* figure out valid amplitude threshold */
 		for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++) {
 			pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
@@ -2344,10 +2360,10 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 			amplitude_largest = 0;
 			for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
 				sounding = &pulse->soundings[isounding];
-				
+
 				/* valid pulses have nonzero ranges */
 				if (sounding->range > 0.001) {
-	
+
 					/* apply pitch and roll */
 					alpha = angle_el_sign * pulse->angle_el
 										+ store->pitch
@@ -2357,7 +2373,7 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 										+ store->roll
 										+ head_offset_roll_deg
 										+ pulse->roll_offset;
-					
+
 					/* calculate amplitude range factor */
 					if (target_altitude > 0.0) {
 						target_range = target_altitude
@@ -2371,17 +2387,17 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 					}
 //fprintf(stderr,"amplitude_max:%d amplitude_threshold:%f amplitude_factor:%f\n",
 //amplitude_max, amplitude_threshold, amplitude_factor);
-	
+
 					/* set beamflag */
 					if (sounding->amplitude * amplitude_factor >= amplitude_threshold)
 						sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
 					else
 						sounding->beamflag = MB_FLAG_NULL;
-	
+
 					/* translate to takeoff coordinates */
 					mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
 					phi += head_offset_heading_deg + pulse->heading_offset;
-	
+
 					/* get lateral and vertical components of range */
 					xx = sounding->range * sin(DTR * theta);
 					sounding->depth = sounding->range * cos(DTR * theta)
@@ -2393,8 +2409,8 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 					sounding->alongtrack = xx * sin(DTR * phi)
 										+ head_offset_y_m
 										+ pulse->alongtrack_offset;
-		
-										
+
+
 					/* check for largest amplitude */
 					if (sounding->amplitude > amplitude_largest) {
 						amplitude_largest = sounding->amplitude;
@@ -2409,7 +2425,7 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 					sounding->alongtrack = 0.0;
 				}
 			}
-				
+
 			/* reset beam flags */
 			if (isounding_largest >= 0) {
 				sounding = &pulse->soundings[isounding_largest];
@@ -2443,10 +2459,10 @@ int mbsys_3ddwissl_wissl_indextable_compare1(const void *a, const void *b) {
     struct mb_io_indextable_struct *aa;
     struct mb_io_indextable_struct *bb;
     int result = 0;
-    
+
     aa = (struct mb_io_indextable_struct*) a;
     bb = (struct mb_io_indextable_struct*) b;
-    
+
     if (aa->subsensor < bb->subsensor) {
         result = -1;
     }
@@ -2465,7 +2481,7 @@ int mbsys_3ddwissl_wissl_indextable_compare1(const void *a, const void *b) {
     else if (aa->subsensor_index > bb->subsensor_index) {
         result = 1;
     }
-    
+
     return(result);
 }
 
@@ -2474,7 +2490,7 @@ int mbsys_3ddwissl_wissl_indextable_compare2(const void *a, const void *b) {
     struct mb_io_indextable_struct *aa;
     struct mb_io_indextable_struct *bb;
     int result = 0;
-    
+
     aa = (struct mb_io_indextable_struct*) a;
     bb = (struct mb_io_indextable_struct*) b;
     if (aa->time_d_corrected < bb->time_d_corrected)
@@ -2576,10 +2592,10 @@ fprintf(stderr, "\n");
      * gap in time prior to the minute mark. Also, some datasets have little, if any,
      * clock drift even though the problem exists.
      */
-    
+
     /* calculate the approximate expected time between scan timestamps */
     dt_threshold = 2.30 * store->pulses_per_scan / MBSYS_3DDWISSL_LASERPULSERATE;
-    
+
     /* find the index bounds of sorted data from the two WiSSL optical heads */
     head_a_start = num_indextable;
     head_a_end = -1;
@@ -2601,7 +2617,7 @@ fprintf(stderr, "\n");
     }
 //fprintf(stderr,"head_a_start:%d head_a_end:%d\n", head_a_start, head_a_end);
 //fprintf(stderr,"head_b_start:%d head_b_end:%d\n\n", head_b_start, head_b_end);
-     
+
     /* deal with head A data - start by identifying all good timestamps */
     dt = 0.0;
     num_good_timestamps = 0;
@@ -2626,7 +2642,7 @@ fprintf(stderr, "\n");
     }
 //fprintf(stderr,"\nHead A: dt_threshold:%f num_good_timestamps:%d first_good_timestamp:%d last_good_timestamp:%d\n\n",
 //dt_threshold, num_good_timestamps,first_good_timestamp,last_good_timestamp);
-    
+
     /* if good timestamps found then extrapolate and interpolate the other timestamps */
     if (last_good_timestamp > first_good_timestamp) {
         dt = (indextable[last_good_timestamp].time_d_corrected - indextable[first_good_timestamp].time_d_corrected)
@@ -2664,7 +2680,7 @@ fprintf(stderr, "\n");
                 done = MB_YES;
         }
     }
-    
+
     /* if no good timestamps identified assume all are good and reset all
         timestamps to the original values */
     else {
@@ -2672,7 +2688,7 @@ fprintf(stderr, "\n");
             indextable[i].time_d_corrected = indextable[i].time_d_org;
         }
     }
-    
+
     /* deal with head B data - start by identifying all good timestamps */
     dt = 0.0;
     num_good_timestamps = 0;
@@ -2697,7 +2713,7 @@ fprintf(stderr, "\n");
     }
 //fprintf(stderr,"\nHead B: dt_threshold:%f num_good_timestamps:%d first_good_timestamp:%d last_good_timestamp:%d\n",
 //dt_threshold, num_good_timestamps,first_good_timestamp,last_good_timestamp);
-    
+
     /* if good timestamps found then extrapolate and interpolate the other timestamps */
     if (last_good_timestamp > first_good_timestamp) {
         dt = (indextable[last_good_timestamp].time_d_corrected - indextable[first_good_timestamp].time_d_corrected)
@@ -2734,7 +2750,7 @@ fprintf(stderr, "\n");
                 done = MB_YES;
         }
     }
-    
+
     /* if no good timestamps identified assume all are good and reset all
         timestamps to the original values */
     else {
@@ -2742,7 +2758,7 @@ fprintf(stderr, "\n");
             indextable[i].time_d_corrected = indextable[i].time_d_org;
         }
     }
-    
+
 /*fprintf(stderr,"\nCorrected Timestamp Index Table:\n");
 dt = 0.0;
 for (i=0;i<num_indextable;i++) {
@@ -2765,7 +2781,7 @@ if (indextable[i].time_d_corrected - nearest_minute_time_d >= 0.0
     fprintf(stderr, " $$$$$");
 fprintf(stderr, "\n");
 }*/
-    
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -2843,7 +2859,7 @@ mb_io_ptr->indextable[i].read);
 
     /* correct timestamps in the file's internal index table using information
      * supplied in the external index table */
-    
+
     /* find the start and end of relevant entries in the global index table */
     giindex_a_begin = -1;
     giindex_a_end = -1;
@@ -2863,7 +2879,7 @@ mb_io_ptr->indextable[i].read);
             }
         }
     }
-    
+
     /* replace timestamps with corrected values from the global index table */
     for (iindex = 0; iindex < mb_io_ptr->num_indextable; iindex++) {
         if (mb_io_ptr->indextable[iindex].subsensor == MBSYS_3DDWISSL_HEADA) {
@@ -2876,9 +2892,9 @@ indextable[giindex].subsensor, indextable[giindex].subsensor_index,
 mb_io_ptr->indextable[iindex].time_d_org,
 indextable[giindex].time_d_org,
 indextable[giindex].time_d_corrected);*/
-                    mb_io_ptr->indextable[iindex].time_d_corrected = indextable[giindex].time_d_corrected; 
+                    mb_io_ptr->indextable[iindex].time_d_corrected = indextable[giindex].time_d_corrected;
                 }
-            
+
             }
         }
         else if (mb_io_ptr->indextable[iindex].subsensor == MBSYS_3DDWISSL_HEADB) {
@@ -2891,13 +2907,13 @@ indextable[giindex].subsensor, indextable[giindex].subsensor_index,
 mb_io_ptr->indextable[iindex].time_d_org,
 indextable[giindex].time_d_org,
 indextable[giindex].time_d_corrected);*/
-                    mb_io_ptr->indextable[iindex].time_d_corrected = indextable[giindex].time_d_corrected; 
+                    mb_io_ptr->indextable[iindex].time_d_corrected = indextable[giindex].time_d_corrected;
                 }
-            
+
             }
         }
     }
-    
+
     /* resort the file's index table using the new timestamps */
     qsort((void *)mb_io_ptr->indextable, mb_io_ptr->num_indextable,
               sizeof(struct mb_io_indextable_struct),

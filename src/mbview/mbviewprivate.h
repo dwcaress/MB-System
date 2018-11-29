@@ -83,7 +83,7 @@
 
 #define MBV_NUM_COLORS 11
 
-#define MBV_NUM_ACTIONS 20
+#define MBV_NUM_ACTIONS 25
 
 /* Spheroid parameters */
 #define MBV_SPHEROID_RADIUS 6371000.0

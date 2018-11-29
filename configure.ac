@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.6.20181016],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.6.20181128],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "16 October 2018", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "28 November 2018", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -646,7 +646,7 @@ fi
 GOT_MOTIF=no
 MOTIF_SETTING=no
 if test "$GOT_X11" = "yes" ; then
-    
+
     dnl Check for Motif library libXm
     AS_ECHO(["Check for Motif library libXm"])
     AC_ARG_WITH(motif-lib, [  --with-motif-lib=DIR    Location of MOTIF library],
@@ -721,7 +721,7 @@ if test "$GOT_X11" = "yes" ; then
         fi
         dnl Done checking for Motif headers
     fi
-    
+
     dnl Substitute Motif library and header arguments
     AC_SUBST([libmotif_LIBS], [$libmotif_LIBS])
     AC_SUBST([libmotif_CPPFLAGS], [$libmotif_CPPFLAGS])
@@ -739,7 +739,7 @@ AS_ECHO(["Check for OpenGL libraries libGL libGLU and header files GL/gl.h GL/gl
 GOT_OPENGL=no
 OPENGL_SETTING=no
 if test "$GOT_MOTIF" = "yes" ; then
-    
+
     dnl Check for OpenGL libraries libGLU libGL
     AS_ECHO(["Check for OpenGL libraries libGLU libGL"])
     AC_ARG_WITH(opengl-lib, [  --with-opengl-lib=DIR    Location of OpenGL library],
@@ -820,7 +820,7 @@ if test "$GOT_MOTIF" = "yes" ; then
         fi
         dnl Done checking for OpenGL headers
     fi
-    
+
     dnl Substitute OpenGL library and header arguments
     AC_SUBST([libopengl_LIBS], [$libopengl_LIBS])
     AC_SUBST([libopengl_CPPFLAGS], [$libopengl_CPPFLAGS])

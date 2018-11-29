@@ -32,7 +32,7 @@
 #
 # Basic Usage:
 #   mbm_grdtiff -Ifile [-Amagnitude[/azimuth/elevation]
-#            -Gcolor_mode -H -Kintensity_file -Oroot
+#            -Gcolor_mode -H -Kintensity_file -Nnudge_x/nudge_y -Oroot
 #            -S[color/shade] -V
 #            -Wcolor_style[/pallette[/ncolors]] ]
 #
@@ -127,7 +127,7 @@ while (@grdinfo)
 # Deal with command line arguments (accept but do not necessarily use any argument
 # accepted by mbm_grdplot)
 $command_line = "@ARGV";
-&MBGetopts('A:a:D%d%G%g%HhI:i:J:j:K:k:L:l:M+m+O:o:P:p:QqR:r:S%s%TtU:u:VvW:w:XxYyZ:z:');
+&MBGetopts('A:a:D%d%G%g%HhI:i:J:j:K:k:L:l:M+m+N:n:O:o:P:p:QqR:r:S%s%TtU:u:VvW:w:XxYyZ:z:');
 $shade_control = 	($opt_A || $opt_a);
 $color_flip_mode = 	($flg_D || $flg_d);
 $color_flip_control = 	($opt_D || $opt_d);
@@ -136,6 +136,7 @@ $help =    		($opt_H || $opt_h);
 $file_data =    	($opt_I || $opt_i);
 $file_intensity =    	($opt_K || $opt_k);
 $misc = 		($opt_M || $opt_m);
+$nudge = 		($opt_N || $opt_n);
 $root =    		($opt_O || $opt_o);
 $no_view_tiff = 	($opt_Q || $opt_q);
 $bounds = 		($opt_R || $opt_r);
@@ -224,6 +225,16 @@ if ($misc)
 			{
 			$make_worldfile = 1;
 			}
+		}
+	}
+
+# parse nudge values
+if ($nudge)
+	{
+	if ($nudge =~ /^(\S+)\/(\S+)/)
+		{
+		($nudge_x, $nudge_y) = $nudge =~ /^(\S+)\/(\S+)/;
+		$use_nudge = 1;
 		}
 	}
 
@@ -1289,6 +1300,10 @@ if ($color_mode)
 		}
 	printf FCMD "-O\$TIFF_FILE \\\n\t";
 	printf FCMD "-R\$MAP_REGION -Jx1.0 \\\n\t";
+	if ($use_nudge)
+		{
+		printf FCMD "-N$nudge_x\/$nudge_y \\\n\t";
+		}
 	printf FCMD "-C\$CPT_FILE \\\n\t";
 	if ($color_mode == 2 || $color_mode == 3)
 		{
@@ -1440,12 +1455,13 @@ if ($verbose)
 		{
 		print "    Data scale factor:        $data_scale\n";
 		}
-	printf "    Longitude min max:        %9.4f  %9.4f\n",
-		$xmin, $xmax;
-	printf "    Latitude min max:         %9.4f  %9.4f\n",
-		$ymin, $ymax;
-	printf "    Data min max:             %9.4g  %9.4g\n",
-		$zmin, $zmax;
+	printf "    Longitude min max:        %9.4f  %9.4f\n", $xmin, $xmax;
+	printf "    Latitude min max:         %9.4f  %9.4f\n", $ymin, $ymax;
+	printf "    Data min max:             %9.4g  %9.4g\n", $zmin, $zmax;
+	if ($use_nudge)
+		{
+    printf "    Nudge applied:        %.3f m east  %.3f m north\n", $nudge_x, $nudge_y;
+		}
 	print "\n  Primary Grid Plotting Controls:\n";
 	if ($color_mode && $stretch_color)
 		{

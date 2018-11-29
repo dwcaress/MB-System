@@ -3442,7 +3442,7 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 		imagelist = (struct mb_imagelist_struct *)*imagelist_ptr;
 		imagelist->open = MB_NO;
 		imagelist->recursion = 0;
-        imagelist->leftrightstereo = MB_IMAGESTATUS_NONE;
+    imagelist->leftrightstereo = MB_IMAGESTATUS_NONE;
 		imagelist->printed = MB_NO;
 		strcpy(imagelist->path, "");
 		imagelist->imagelist = NULL;
@@ -3527,7 +3527,7 @@ int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *path0, char *path1, char *dpath, 
+int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *path0, char *path1, char *dpath,
                       double *time_d, double *dtime_d, int *error) {
 	/* local variables */
 	char *function_name = "mb_imagelist_read";
@@ -3588,141 +3588,150 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 						status = MB_FAILURE;
 						*error = MB_ERROR_EOF;
 					}
-                    
-                    /* check for special tags */
-                    else if (buffer[0] == '#') {
-                        if (strncmp(buffer, "#SINGLE", 7) == 0) {
-                            imagelist->leftrightstereo = MB_IMAGESTATUS_LEFT;
-                        }
-                        else if (strncmp(buffer, "#LEFT", 5) == 0) {
-                            imagelist->leftrightstereo = MB_IMAGESTATUS_LEFT;
-                        }
-                        else if (strncmp(buffer, "#RIGHT", 6) == 0) {
-                            imagelist->leftrightstereo = MB_IMAGESTATUS_RIGHT;
-                        }
-                        else if (strncmp(buffer, "#STEREO", 7) == 0) {
-                            imagelist->leftrightstereo = MB_IMAGESTATUS_STEREO;
-                        }
-                    }
+
+          /* check for special tags */
+          else if (buffer[0] == '#') {
+              if (strncmp(buffer, "#SINGLE", 7) == 0) {
+                  imagelist->leftrightstereo = MB_IMAGESTATUS_LEFT;
+              }
+              else if (strncmp(buffer, "#LEFT", 5) == 0) {
+                  imagelist->leftrightstereo = MB_IMAGESTATUS_LEFT;
+              }
+              else if (strncmp(buffer, "#RIGHT", 6) == 0) {
+                  imagelist->leftrightstereo = MB_IMAGESTATUS_RIGHT;
+              }
+              else if (strncmp(buffer, "#STEREO", 7) == 0) {
+                  imagelist->leftrightstereo = MB_IMAGESTATUS_STEREO;
+              }
+              else if (strncmp(buffer, "#LEFTCAMERA", 5) == 0) {
+                  imagelist->leftrightstereo = MB_IMAGESTATUS_LEFT;
+              }
+              else if (strncmp(buffer, "#RIGHTCAMERA", 6) == 0) {
+                  imagelist->leftrightstereo = MB_IMAGESTATUS_RIGHT;
+              }
+              else if (strncmp(buffer, "#STEREOCAMERA", 7) == 0) {
+                  imagelist->leftrightstereo = MB_IMAGESTATUS_STEREO;
+              }
+          }
 
 					/* check for valid image entry */
 					else {
-                        /* try to read a stereo pair entry */
-                        nscan = sscanf(buffer, "%s %s %lf %lf", path0, path1, time_d, dtime_d);
-                        if (nscan == 4) {
-                            
-                            /* if relative path make it global */
-                            if (strcmp(path0, "NULL") != 0) {
-                                if (path0[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
-                                    (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
-                                    strcpy(tmpstr, path0);
-                                    strncpy(path0, imagelist->path, len);
-                                    path0[len] = '\0';
-                                    strcat(path0, tmpstr);
-                                }
-                            
-                                /* check if path0 exists and can be opened */
-                                fstat = stat(path0, &file_status);
-                                if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
-                                    *imagestatus = *imagestatus | MB_IMAGESTATUS_LEFT;
-                                }
-                                
-                                /* if imagelist entry cannot be opened and verbose output warning */
-                                else if (verbose > 0) {
-                                    fprintf(stderr, "MBIO Warning: Imagelist entry skipped because it could not be opened!\n");
-                                    fprintf(stderr, "\tImagelist: %s\n", imagelist->path);
-                                    fprintf(stderr, "\tFile:     %s\n", path0);
-                                }
-                            }
+              /* try to read a stereo pair entry */
+              nscan = sscanf(buffer, "%s %s %lf %lf", path0, path1, time_d, dtime_d);
+              if (nscan == 4) {
 
-                            /* if relative path make it global */
-                            if (strcmp(path1, "NULL") != 0) {
-                                if (path1[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
-                                    (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
-                                    strcpy(tmpstr, path1);
-                                    strncpy(path1, imagelist->path, len);
-                                    path1[len] = '\0';
-                                    strcat(path1, tmpstr);
-                                }
-                            
-                                /* check if path0 exists and can be opened */
-                                fstat = stat(path1, &file_status);
-                                if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
-                                    *imagestatus = *imagestatus | MB_IMAGESTATUS_RIGHT;
-                                }
-                                
-                                /* if imagelist entry cannot be opened and verbose output warning */
-                                else if (verbose > 0) {
-                                    fprintf(stderr, "MBIO Warning: Imagelist entry skipped because it could not be opened!\n");
-                                    fprintf(stderr, "\tImagelist: %s\n", imagelist->path);
-                                    fprintf(stderr, "\tFile:     %s\n", path1);
-                                }
-                            }
-                        }
-                        
-                        /* else try to read a single image entry */
-                        /* line should have one path and one time stamp */
-                        else if ((nscan = sscanf(buffer, "%s %lf", path0, time_d)) == 2) {
-                            if (strcmp(path0, "NULL") != 0) {
-    
-                                /* if relative path make it global */
-                                if (path0[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
-                                    (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
-                                    strcpy(tmpstr, path0);
-                                    strncpy(path0, imagelist->path, len);
-                                    path0[len] = '\0';
-                                    strcat(path0, tmpstr);
-                                    path1[0] = '\0';
-                                }
+                  /* if relative path make it global */
+                  if (strcmp(path0, "NULL") != 0) {
+                      if (path0[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
+                          (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
+                          strcpy(tmpstr, path0);
+                          strncpy(path0, imagelist->path, len);
+                          path0[len] = '\0';
+                          strcat(path0, tmpstr);
+                      }
 
-                                /* check if path0 exists and can be opened */
-                                fstat = stat(path0, &file_status);
-                                if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
+                      /* check if path0 exists and can be opened */
+                      fstat = stat(path0, &file_status);
+                      if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
+                          *imagestatus = *imagestatus | MB_IMAGESTATUS_LEFT;
+                      }
 
-                                    /* set status */
-                                    if (imagelist->leftrightstereo == MB_IMAGESTATUS_SINGLE) {
-                                        *imagestatus = MB_IMAGESTATUS_SINGLE;
-                                    }
-                                    else if (imagelist->leftrightstereo == MB_IMAGESTATUS_LEFT) {
-                                        *imagestatus = MB_IMAGESTATUS_LEFT;
-                                    }
-                                    else if (imagelist->leftrightstereo == MB_IMAGESTATUS_RIGHT) {
-                                        *imagestatus = MB_IMAGESTATUS_RIGHT;
-                                        strcpy(path1, path0);
-                                        path0[0] = '\0';
-                                    }
-                                    else {
-                                        *imagestatus = MB_IMAGESTATUS_SINGLE;
-                                    }
-                                }
-                            }
-                        }
-                        
-                        /* else try to read a single imagelist entry */
-                        else {
-                            /* line should have one path only */
-                            nscan = sscanf(buffer, "%s", path0);
-                            path1[0] = '\0';
-                            if (nscan == 1 && strcmp(path0, "NULL") != 0) {
-    
-                                /* if relative path make it global */
-                                if (path0[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
-                                    (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
-                                    strcpy(tmpstr, path0);
-                                    strncpy(path0, imagelist->path, len);
-                                    path0[len] = '\0';
-                                    strcat(path0, tmpstr);
-                                }
+                      /* if imagelist entry cannot be opened and verbose output warning */
+                      else if (verbose > 0) {
+                          fprintf(stderr, "MBIO Warning: Imagelist entry skipped because it could not be opened!\n");
+                          fprintf(stderr, "\tImagelist: %s\n", imagelist->path);
+                          fprintf(stderr, "\tFile:     %s\n", path0);
+                      }
+                  }
 
-                                /* check if path0 exists and can be opened */
-                                fstat = stat(path0, &file_status);
-                                if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
+                  /* if relative path make it global */
+                  if (strcmp(path1, "NULL") != 0) {
+                      if (path1[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
+                          (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
+                          strcpy(tmpstr, path1);
+                          strncpy(path1, imagelist->path, len);
+                          path1[len] = '\0';
+                          strcat(path1, tmpstr);
+                      }
 
-                                    /* set status */
-                                    *imagestatus = MB_IMAGESTATUS_IMAGELIST;
-                                }
-                            }
-                        }
+                      /* check if path0 exists and can be opened */
+                      fstat = stat(path1, &file_status);
+                      if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
+                          *imagestatus = *imagestatus | MB_IMAGESTATUS_RIGHT;
+                      }
+
+                      /* if imagelist entry cannot be opened and verbose output warning */
+                      else if (verbose > 0) {
+                          fprintf(stderr, "MBIO Warning: Imagelist entry skipped because it could not be opened!\n");
+                          fprintf(stderr, "\tImagelist: %s\n", imagelist->path);
+                          fprintf(stderr, "\tFile:     %s\n", path1);
+                      }
+                  }
+              }
+
+              /* else try to read a single image entry */
+              /* line should have one path and one time stamp */
+              else if ((nscan = sscanf(buffer, "%s %lf", path0, time_d)) == 2) {
+                  if (strcmp(path0, "NULL") != 0) {
+
+                      /* if relative path make it global */
+                      if (path0[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
+                          (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
+                          strcpy(tmpstr, path0);
+                          strncpy(path0, imagelist->path, len);
+                          path0[len] = '\0';
+                          strcat(path0, tmpstr);
+                          path1[0] = '\0';
+                      }
+
+                      /* check if path0 exists and can be opened */
+                      fstat = stat(path0, &file_status);
+                      if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
+
+                          /* set status */
+                          if (imagelist->leftrightstereo == MB_IMAGESTATUS_SINGLE) {
+                              *imagestatus = MB_IMAGESTATUS_SINGLE;
+                          }
+                          else if (imagelist->leftrightstereo == MB_IMAGESTATUS_LEFT) {
+                              *imagestatus = MB_IMAGESTATUS_LEFT;
+                          }
+                          else if (imagelist->leftrightstereo == MB_IMAGESTATUS_RIGHT) {
+                              *imagestatus = MB_IMAGESTATUS_RIGHT;
+                              strcpy(path1, path0);
+                              path0[0] = '\0';
+                          }
+                          else {
+                              *imagestatus = MB_IMAGESTATUS_SINGLE;
+                          }
+                      }
+                  }
+              }
+
+              /* else try to read a single imagelist entry */
+              else {
+                  /* line should have one path only */
+                  nscan = sscanf(buffer, "%s", path0);
+                  path1[0] = '\0';
+                  if (nscan == 1 && strcmp(path0, "NULL") != 0) {
+
+                      /* if relative path make it global */
+                      if (path0[0] != '/' && strrchr(imagelist->path, '/') != NULL &&
+                          (len = strrchr(imagelist->path, '/') - imagelist->path + 1) > 1) {
+                          strcpy(tmpstr, path0);
+                          strncpy(path0, imagelist->path, len);
+                          path0[len] = '\0';
+                          strcat(path0, tmpstr);
+                      }
+
+                      /* check if path0 exists and can be opened */
+                      fstat = stat(path0, &file_status);
+                      if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
+
+                          /* set status */
+                          *imagestatus = MB_IMAGESTATUS_IMAGELIST;
+                      }
+                  }
+              }
 
 						/* deal with file */
 						if (*imagestatus != MB_IMAGESTATUS_NONE && *imagestatus != MB_IMAGESTATUS_IMAGELIST) {
