@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbclean</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  1 August 2016 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  28 November 2018 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -31,7 +31,8 @@ Version 5.0
 <B>-D</B><I>min/max</I> <B>-F</B><I>format</I>
 <B>-G</B><I>fraction_low/fraction_high</I>
 <B>-I</B><I>infile</I> <B>-K</B><I>range_min</I> <B>-L</B><I>lonflip</I>
-<B>-M</B><I>mode</I> <B>-O</B><I>outfile</I> <B>-P</B><I>min_speed/max_speed</I> <B>-Q</B><I>backup</I>
+<B>-M</B><I>mode</I> <B>-N</B><I>tolerance</I> <B>-O</B><I>outfile</I>
+<B>-P</B><I>min_speed/max_speed</I> <B>-Q</B><I>backup</I>
 <B>-R</B><I>maxheadingrate</I> <B>-S</B><I>slope/mode/units</I>
 <B>-T</B><I>tolerance</I> <B>-U</B><I>nmin</I> <B>-W</B><I>west/east/south/north</I> <B>-X</B><I>beamsleft/beamsright</I>
 <B>-Y</B><I>distanceleft/distanceright</I> <B>-Z -V -H</B>]
@@ -78,7 +79,7 @@ as follows:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>8.&nbsp;Flag&nbsp;pings&nbsp;with&nbsp;excessive&nbsp;heading&nbsp;change&nbsp;rate<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<B>-R</B>&nbsp;option).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>9.&nbsp;Zap&nbsp;&quot;rails&quot;&nbsp;(<B>-Q</B>&nbsp;option).<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>10.&nbsp;Flag&nbsp;soundings&nbsp;with&nbsp;acrosstrack&nbsp;distances&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>10.&nbsp;Flag&nbsp;soundings&nbsp;with&nbsp;acrosstrack&nbsp;distances<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>greater&nbsp;than&nbsp;specified&nbsp;maximum&nbsp;value<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-B</B>&nbsp;option).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>11.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
@@ -92,6 +93,8 @@ as follows:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-C</B>&nbsp;option&nbsp;or&nbsp;default).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>15.&nbsp;Flag&nbsp;all&nbsp;soundings&nbsp;in&nbsp;pings&nbsp;with&nbsp;too&nbsp;few<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>good&nbsp;soundings&nbsp;(<B>-U</B>&nbsp;option).<BR>
+<BR>&nbsp;&nbsp;16.&nbsp;Flag&nbsp;all&nbsp;soundings&nbsp;in&nbsp;pings&nbsp;that&nbsp;on&nbsp;average&nbsp;deviate&nbsp;too&nbsp;much&nbsp;from&nbsp;the
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;pings&nbsp;before&nbsp;and&nbsp;after&nbsp;(<B>-N</B>&nbsp;option).
 <P>
 This program flags beams by outputting the flags as
 edit events to an &quot;edit save file&quot;, like that produced
@@ -308,6 +311,17 @@ are handled.
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>median&nbsp;depth.<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Flags&nbsp;both&nbsp;beams&nbsp;associated&nbsp;with&nbsp;each&nbsp;outlier&nbsp;slope.<BR>
 Default: <I>mode</I> = 1.
+<DT><B>-N</B>
+
+<DD>
+<I>threshold</I>
+<BR>
+
+When specified <B>mbclean</B> calculates the rms deviation between each ping and
+the pings before and after. When the rms deviation exceeds the specified threshold,
+then all unflagged valid soundings in that ping are flagged as bad. This option is
+generally used to detect and remove data pings affected by interference from other
+active sonars.
 <DT><B>-P</B>
 
 <DD>
@@ -406,7 +420,7 @@ and the number of beams flagged as bad.
 <BR>
 
 This option causes <B>mbclean</B> to flag as bad all beams in pings
-with navigation outside the specified acceptable bounds. 
+with navigation outside the specified acceptable bounds.
 <DT><B>-X</B>
 
 <DD>
@@ -423,7 +437,7 @@ are known to be unreliable. Default: <I>zap_beams</I> = 0.
 <BR>
 
 This option causes <B>mbclean</B> to flag and/or unflag beams according to
-acrosstrack distance. If <I>mode</I>=1 or is not specified, then all beams 
+acrosstrack distance. If <I>mode</I>=1 or is not specified, then all beams
 outside the specified range (acrosstrack distances more to port/left than <I>distanceleft</I>
 or more to starboard/right than <I>distanceright</I>) will be flagged as bad.
 If <I>mode</I>=2, then all beams inside the specified range
@@ -437,7 +451,7 @@ negative.
 <BR>
 
 This option causes <B>mbclean</B> to flag as bad all beams in pings
-with zero longitude and latitude values. 
+with zero longitude and latitude values.
 <P>
 </DL>
 <A NAME="lbAI">&nbsp;</A>
@@ -604,7 +618,7 @@ bathymetry data (e.g. <B>mbedit</B>).
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 1 August 2016</P></CENTER>
+Last Updated: 28 November 2018</P></CENTER>
 
 <HR>
 

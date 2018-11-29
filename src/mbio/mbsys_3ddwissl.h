@@ -307,6 +307,10 @@
      *     droll (in xz plane, + to starboard): -22.08 degrees
      *     dpitch (in yz plane, + forward): -5.01
      */
+#define MBSYS_3DDWISSL_FILEHEADER                 0
+#define MBSYS_3DDWISSL_HEADA                      1
+#define MBSYS_3DDWISSL_HEADB                      2
+#define MBSYS_3DDWISSL_COMMENT                    3
 #define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           +0.012224004  // ICD value +0.012224004
 #define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954  // ICD value -0.120281954
 #define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.062005210  // ICD value +0.062005210

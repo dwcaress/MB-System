@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbpreprocess</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  6 June 2018 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  28 November 2018 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -28,7 +28,7 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbpreprocess</B> [ 
+<B>mbpreprocess</B> [
 <BR>
 
 <B>--verbose</B>
@@ -116,13 +116,17 @@ Version 5.0
 <B>--no-change-survey</B>
 <B>--multibeam-sidescan-source</B>=<I>RECORDID</I>
 <B>--sounding-amplitude-filter</B>=<I>THRESHOLD</I>
+<B>--sounding-altitude-filter</B>=<I>THRESHOLD</I>
+<B>--ignore-water-column</B>
+<B>--head1-offsets</B>=<I>X/Y/Z/HEADING/ROLL/PITCH</I>
+<B>--head2-offsets</B>=<I>X/Y/Z/HEADING/ROLL/PITCH</I>
 <BR>
 
 <B>--kluge-time-jumps</B>=<I>SECONDS</I>
 <B>--kluge-ancilliary-time-jumps</B>=<I>SECONDS</I>
-<B>--kluge-mbaripressure-time-jumps</B>=<I>threshold
-</I><B>--kluge-beam-tweak</B>=<I>FACTOR</I>
-<B>--kluge-soundspeed-tweak</B>=<I>factor</I>
+<B>--kluge-mbaripressure-time-jumps</B>=<I>THRESHOLD</I>
+<B>--kluge-beam-tweak</B>=<I>FACTOR</I>
+<B>--kluge-soundspeed-tweak</B>=<I>FACTOR</I>
 <B>--kluge-zero-attitude-correction</B>
 <B>--kluge-zero-alongtrack-angles</B>
 <B>--kluge-fix-wissl-timestamps</B>
@@ -290,12 +294,12 @@ value are:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ddmmyy&nbsp;hhmmssss&nbsp;ddmmmmmmmN&nbsp;dddmmmmmmmE
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;dd&nbsp;is&nbsp;day&nbsp;of&nbsp;the&nbsp;month,&nbsp;mm&nbsp;is&nbsp;the&nbsp;month,&nbsp;yy&nbsp;is&nbsp;the&nbsp;two&nbsp;digit&nbsp;year,
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hh&nbsp;is&nbsp;the&nbsp;hour,&nbsp;mm&nbsp;is&nbsp;the&nbsp;minute,&nbsp;and&nbsp;ssss&nbsp;is&nbsp;seconds&nbsp;*&nbsp;100.
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;latitude&nbsp;is&nbsp;given&nbsp;as&nbsp;ddmmmmmmmN&nbsp;where&nbsp;dd&nbsp;are&nbsp;integer&nbsp;degrees,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;latitude&nbsp;is&nbsp;given&nbsp;as&nbsp;ddmmmmmmmN&nbsp;where&nbsp;dd&nbsp;are&nbsp;integer&nbsp;degrees,
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mmmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;100000,&nbsp;and&nbsp;N&nbsp;is&nbsp;'N'&nbsp;for&nbsp;north&nbsp;and&nbsp;'S'&nbsp;for&nbsp;south&nbsp;latitude.
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as&nbsp;dddmmmmmmmE&nbsp;where&nbsp;ddd&nbsp;are&nbsp;integer&nbsp;degrees,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as&nbsp;dddmmmmmmmE&nbsp;where&nbsp;ddd&nbsp;are&nbsp;integer&nbsp;degrees,
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mmmmmmm&nbsp;is&nbsp;minutes&nbsp;*&nbsp;100000,&nbsp;and&nbsp;E&nbsp;is&nbsp;'E'&nbsp;for&nbsp;east&nbsp;and&nbsp;'W'&nbsp;for&nbsp;west&nbsp;longitude.
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+<P>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;day_minute&nbsp;values&nbsp;are&nbsp;integers,
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;second&nbsp;value&nbsp;is&nbsp;decimal,&nbsp;and&nbsp;longitude&nbsp;and&nbsp;latitude&nbsp;are&nbsp;in&nbsp;decimal
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;degrees.&nbsp;The&nbsp;longitude&nbsp;is&nbsp;given&nbsp;as
@@ -486,9 +490,17 @@ of different record types present in a data file.
 <DT><B>--sounding-amplitude-filter=</B><I>THRESHOLD</I>
 
 <DD>
-<DT><B>--sounding-amplitude-filter=</B><I>THRESHOLD</I>
+<DT><B>--sounding-altitude-filter=</B><I>THRESHOLD</I>
 
 <DD>
+<DT><B>--head1-offsets</B>=<I>X/Y/Z/HEADING/ROLL/PITCH</I>
+
+<DD>
+<DT><B>--head2-offsets</B>=<I>X/Y/Z/HEADING/ROLL/PITCH</I>
+
+<DD>
+<BR>
+
 <DT><B>--kluge-time-jumps=</B><I>SECONDS</I>
 
 <DD>
@@ -550,7 +562,7 @@ Oh yeah.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 6 June 2018</P></CENTER>
+Last Updated: 28 November 2018</P></CENTER>
 
 <HR>
 

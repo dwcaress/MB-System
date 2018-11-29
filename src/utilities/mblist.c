@@ -220,7 +220,7 @@ int main(int argc, char **argv) {
 	double *ssalongtrack = NULL;
 	char comment[MB_COMMENT_MAXLINE];
 	int icomment = 0;
-	int pingnumber;
+	unsigned int pingnumber;
 
 	/* additional time variables */
 	int first_m = MB_YES;
