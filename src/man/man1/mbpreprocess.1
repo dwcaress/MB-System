@@ -1,4 +1,4 @@
-.TH mbpreprocess 1 "6 June 2018" "MB-System 5.0" "MB-System 5.0"
+.TH mbpreprocess 1 "28 November 2018" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbpreprocess\fP \- performs preprocessing of swath sonar data as part of setting
 up an MB-System processing structure for a dataset.
@@ -7,7 +7,7 @@ up an MB-System processing structure for a dataset.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbpreprocess\fP [ 
+\fBmbpreprocess\fP [
 .br
 \fB--verbose\fP
 \fB--help\fP
@@ -78,12 +78,16 @@ Version 5.0
 \fB--no-change-survey\fP
 \fB--multibeam-sidescan-source\fP=\fIRECORDID\fP
 \fB--sounding-amplitude-filter\fP=\fITHRESHOLD\fP
+\fB--sounding-altitude-filter\fP=\fITHRESHOLD\fP
+\fB--ignore-water-column\fP
+\fB--head1-offsets\fP=\fIX/Y/Z/HEADING/ROLL/PITCH\fP
+\fB--head2-offsets\fP=\fIX/Y/Z/HEADING/ROLL/PITCH\fP
 .br
 \fB--kluge-time-jumps\fP=\fISECONDS\fP
 \fB--kluge-ancilliary-time-jumps\fP=\fISECONDS\fP
-\fB--kluge-mbaripressure-time-jumps\fP=\fIthreshold
+\fB--kluge-mbaripressure-time-jumps\fP=\fITHRESHOLD\fP
 \fB--kluge-beam-tweak\fP=\fIFACTOR\fP
-\fB--kluge-soundspeed-tweak\fP=\fIfactor\fP
+\fB--kluge-soundspeed-tweak\fP=\fIFACTOR\fP
 \fB--kluge-zero-attitude-correction\fP
 \fB--kluge-zero-alongtrack-angles\fP
 \fB--kluge-fix-wissl-timestamps\fP
@@ -216,12 +220,12 @@ value are:
         ddmmyy hhmmssss ddmmmmmmmN dddmmmmmmmE
       where dd is day of the month, mm is the month, yy is the two digit year,
       hh is the hour, mm is the minute, and ssss is seconds * 100.
-      The latitude is given as ddmmmmmmmN where dd are integer degrees, 
+      The latitude is given as ddmmmmmmmN where dd are integer degrees,
       mmmmmmm is minutes * 100000, and N is 'N' for north and 'S' for south latitude.
-      The longitude is given as dddmmmmmmmE where ddd are integer degrees, 
+      The longitude is given as dddmmmmmmmE where ddd are integer degrees,
       mmmmmmm is minutes * 100000, and E is 'E' for east and 'W' for west longitude.
-      
-      
+
+
       day_minute values are integers,
       the second value is decimal, and longitude and latitude are in decimal
       degrees. The longitude is given as
@@ -356,7 +360,12 @@ of different record types present in a data file.
 .TP
 .B --sounding-amplitude-filter=\fITHRESHOLD\fP
 .TP
-.B --sounding-amplitude-filter=\fITHRESHOLD\fP
+.B --sounding-altitude-filter=\fITHRESHOLD\fP
+.TP
+.B --head1-offsets\fP=\fIX/Y/Z/HEADING/ROLL/PITCH\fP
+.TP
+.B --head2-offsets\fP=\fIX/Y/Z/HEADING/ROLL/PITCH\fP
+.br
 .TP
 .B --kluge-time-jumps=\fISECONDS\fP
 .TP

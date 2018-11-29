@@ -1,4 +1,4 @@
-.TH mbgrdtiff 1 "5 February 2015" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrdtiff 1 "28 November 2018" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrdtiff\fP \- \fBGMT\fP plug-in module for generating a geographically
 located GeoTIFF image from a GMT grid file.
@@ -8,7 +8,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBgmt mbgrdtiff\fP \fB\-C\fIcptfile\fP \fB\-I\fIgrdfile\fP
-\fB\-O\fItiff_file\fP [\fB\-H\fP \fB\-K\fIintensfile\fP \fB\-V -W\fP]
+\fB\-O\fItiff_file\fP [\fB\-H\fP \fB\-K\fIintensfile\fP \fB-N\fInudge_x/nudge_y\fP \fB\-V -W\fP]
 
 .SH DESCRIPTION
 \fBmbgrdtiff\fP is a plug-in module to generate a Geographically located
@@ -99,6 +99,11 @@ Alternatively, \fIgrdfile\fP may be a list of grid files
 (one filename on each line) to be used together. If a
 list of files is supplied, the intensity files must
 conform in order to the list of data grid files they will shade.
+.TP
+.B \-N
+\fInudge_x/nudge_y\fP
+Specifies positional offset in meters of the output geotiff image relative to the
+input grid or mosaic.
 .TP
 .B \-O
 \fIroot\fP

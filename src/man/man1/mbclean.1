@@ -1,4 +1,4 @@
-.TH mbclean 1 "1 August 2016" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean 1 "28 November 2018" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbclean\fP \- Tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -10,7 +10,8 @@ Version 5.0
 \fB\-D\fImin/max\fP \fB\-F\fIformat\fP
 \fB\-G\fIfraction_low/fraction_high\fP
 \fB\-I\fIinfile\fP \fB\-K\fIrange_min\fP \fB\-L\fIlonflip\fP
-\fB\-M\fImode\fP \fB\-O\fIoutfile\fP \fB\-P\fImin_speed/max_speed\fP \fB\-Q\fIbackup\fP
+\fB\-M\fImode\fP \fB\-N\fItolerance\fP \fB\-O\fIoutfile\fP
+\fB\-P\fImin_speed/max_speed\fP \fB\-Q\fIbackup\fP
 \fB\-R\fImaxheadingrate\fP \fB\-S\fIslope/mode/units\fP
 \fB\-T\fItolerance\fP \fB\-U\fInmin\fP \fB\-W\fIwest/east/south/north\fP \fB\-X\fIbeamsleft/beamsright\fP
 \fB\-Y\fIdistanceleft/distanceright\fP \fB\-Z \-V \-H\fP]
@@ -54,7 +55,7 @@ as follows:
  	8. Flag pings with excessive heading change rate
  	        (\fB\-R\fP option).
  	9. Zap "rails" (\fB\-Q\fP option).
- 	10. Flag soundings with acrosstrack distances 
+ 	10. Flag soundings with acrosstrack distances
  		greater than specified maximum value
  		(\fB\-B\fP option).
  	11. Flag soundings outside acceptable depth range
@@ -68,6 +69,8 @@ as follows:
  		(\fB\-C\fP option or default).
  	15. Flag all soundings in pings with too few
  		good soundings (\fB\-U\fP option).
+  16. Flag all soundings in pings that on average deviate too much from the
+    pings before and after (\fB\-N\fP option).
 
 This program flags beams by outputting the flags as
 edit events to an "edit save file", like that produced
@@ -246,6 +249,15 @@ are handled.
  	\fImode\fP = 2:	Flags both beams associated with each outlier slope.
 Default: \fImode\fP = 1.
 .TP
+.B \-N
+\fIthreshold\fP
+.br
+When specified \fBmbclean\fP calculates the rms deviation between each ping and
+the pings before and after. When the rms deviation exceeds the specified threshold,
+then all unflagged valid soundings in that ping are flagged as bad. This option is
+generally used to detect and remove data pings affected by interference from other
+active sonars.
+.TP
 .B \-P
 \fIspeed_low/speed_high\fP
 .br
@@ -328,7 +340,7 @@ and the number of beams flagged as bad.
 \fIwest/east/south/north\fP
 .br
 This option causes \fBmbclean\fP to flag as bad all beams in pings
-with navigation outside the specified acceptable bounds. 
+with navigation outside the specified acceptable bounds.
 .TP
 .B \-X
 \fIzap_beams\fP
@@ -341,7 +353,7 @@ are known to be unreliable. Default: \fIzap_beams\fP = 0.
 \fIdistanceleft/distanceright[/mode]\fP
 .br
 This option causes \fBmbclean\fP to flag and/or unflag beams according to
-acrosstrack distance. If \fImode\fP=1 or is not specified, then all beams 
+acrosstrack distance. If \fImode\fP=1 or is not specified, then all beams
 outside the specified range (acrosstrack distances more to port/left than \fIdistanceleft\fP
 or more to starboard/right than \fIdistanceright\fP) will be flagged as bad.
 If \fImode\fP=2, then all beams inside the specified range
@@ -353,7 +365,7 @@ negative.
 .B \-Z
 .br
 This option causes \fBmbclean\fP to flag as bad all beams in pings
-with zero longitude and latitude values. 
+with zero longitude and latitude values.
 
 .SH EXAMPLES
 Suppose one wishes to do a first pass edit of

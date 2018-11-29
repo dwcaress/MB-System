@@ -35,6 +35,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <time.h>
+#include <uuid/uuid.h>
 
 /* MBIO include files */
 #include "mb_status.h"
@@ -70,10 +71,11 @@
 #define MBGRDVIZ_SAVEWINFROGWPT 10
 #define MBGRDVIZ_SAVEDEGDECMIN 11
 #define MBGRDVIZ_SAVELNW 12
-#define MBGRDVIZ_SAVESITE 13
-#define MBGRDVIZ_SAVESITEWPT 14
-#define MBGRDVIZ_SAVEPROFILE 15
-#define MBGRDVIZ_REALTIME 16
+#define MBGRDVIZ_SAVEGREENSEAYML 13
+#define MBGRDVIZ_SAVESITE 14
+#define MBGRDVIZ_SAVESITEWPT 15
+#define MBGRDVIZ_SAVEPROFILE 16
+#define MBGRDVIZ_REALTIME 17
 
 /* Projection defines */
 #define ModelTypeProjected 1
@@ -170,6 +172,7 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr);
+int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr);
 int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *pathraw, char *pathprocessed, int format,
@@ -1309,6 +1312,48 @@ void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPoi
 	XmStringFree((XmString)tmp0);
 }
 /*---------------------------------------------------------------------------------------*/
+void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_data, XtPointer call_data) {
+	char function_name[] = "do_mbgrdviz_fileSelectionBox_savegreenseayml";
+	Cardinal ac = 0;
+	Arg args[256];
+	size_t instance;
+	size_t actionid;
+	XmString tmp0;
+	Boolean argok;
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct *)call_data;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       w:           %p\n", w);
+		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+		fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+	}
+
+	/* get instance */
+	instance = (size_t)client_data;
+
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Save Route as Greensea YML File");
+	ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString)BX_CONVERT(dialogShell_open, "*", XmRXmString, 0, &argok);
+	XtSetArg(args[ac], XmNpattern, tmp0);
+	ac++;
+	actionid = MBGRDVIZ_SAVEGREENSEAYML * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+	ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+	XmStringFree((XmString)tmp0);
+}
+/*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, XtPointer call_data) {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_saveprofile";
 	Cardinal ac = 0;
@@ -1624,12 +1669,19 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
 		status = do_mbgrdviz_savedegdecmin(instance, file_ptr);
 	}
 
-	/* else write route data as Hypack lnw file */
-	else if (mode == MBGRDVIZ_SAVELNW) {
-		/* write route file */
-		do_mbview_message_on("Saving route as Hypack LNW file...", instance);
-		status = do_mbgrdviz_savelnw(instance, file_ptr);
-	}
+  	/* else write route data as Hypack lnw file */
+  	else if (mode == MBGRDVIZ_SAVELNW) {
+  		/* write route file */
+  		do_mbview_message_on("Saving route as Hypack LNW file...", instance);
+  		status = do_mbgrdviz_savelnw(instance, file_ptr);
+  	}
+
+    	/* else write route data as Hypack lnw file */
+    	else if (mode == MBGRDVIZ_SAVEGREENSEAYML) {
+    		/* write route file */
+    		do_mbview_message_on("Saving route as Greensea YML file...", instance);
+    		status = do_mbgrdviz_savegreenseayml(instance, file_ptr);
+    	}
 
 	/* else write route data */
 	else if (mode == MBGRDVIZ_SAVEPROFILE) {
@@ -1968,6 +2020,8 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
 				                 "Save Route as Degrees + Decimal Minutes File", MBV_EXISTMASK_ROUTE, &error);
 				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savelnw, "Save Route as Hypack LNW File",
 				                 MBV_EXISTMASK_ROUTE, &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savegreenseayml, "Save Route as Greensea YML File",
+                 				 MBV_EXISTMASK_ROUTE, &error);
 				mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveprofile, "Save Profile File",
 				                 MBV_PICKMASK_TWOPOINT + MBV_PICKMASK_ROUTE + MBV_PICKMASK_NAVTWOPOINT, &error);
 
@@ -2090,7 +2144,8 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
 	char function_name[] = "do_mbgrdviz_opensite";
 	int status = MB_SUCCESS;
 	FILE *sfp;
-	char buffer[MB_PATH_MAXLINE];
+	mb_path buffer;
+  mb_path lonstring, latstring;
 	int nsite;
 	double *sitelon;
 	double *sitelat;
@@ -2102,6 +2157,7 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
 	char *name;
 	int nget;
 	int site_ok;
+  double londeg, lonmin, latdeg, latmin;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2165,10 +2221,28 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
 
 				/* deal with site in form: lon lat topo color size name */
 				if (buffer[0] != '#') {
-					nget = sscanf(buffer, "%lf %lf %lf %d %d %[^\n]", &sitelon[nsite], &sitelat[nsite], &sitetopo[nsite],
+					nget = sscanf(buffer, "%s %s %lf %d %d %[^\n]", lonstring, latstring, &sitetopo[nsite],
 					              &sitecolor[nsite], &sitesize[nsite], sitename[nsite]);
-					if (nget >= 2)
-						site_ok = MB_YES;
+          if (nget >= 2) {
+            if (strchr(lonstring, ':') != NULL) {
+              if (sscanf(lonstring, "%lf:%lf", &londeg,&lonmin) == 2) {
+                sitelon[nsite] = copysign((fabs(londeg) + fabs(lonmin) / 60.0), londeg);
+                site_ok = MB_YES;
+              }
+            } else if (sscanf(lonstring, "%lf", &sitelon[nsite]) == 1) {
+                site_ok = MB_YES;
+            }
+            if (site_ok == MB_YES) {
+              if (strchr(latstring, ':') != NULL) {
+                if (sscanf(latstring, "%lf:%lf", &latdeg,&latmin) == 2) {
+                  sitelat[nsite] = copysign((fabs(latdeg) + fabs(latmin) / 60.0), latdeg);
+                }
+              } else if (sscanf(latstring, "%lf", &sitelat[nsite]) == 1) {
+              } else {
+                site_ok = MB_NO;
+              }
+            }
+          }
 				}
 				if (site_ok == MB_YES) {
 					if (nget < 6) {
@@ -2253,7 +2327,7 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
 	/* read data for valid instance */
 	if (instance != MBV_NO_WINDOW) {
 
-		/* get the number of sites to be written to the outpuf file */
+		/* get the number of sites to be written to the output file */
 		status = mbview_getsitecount(verbose, instance, &nsite, &error);
 		if (status == MB_SUCCESS && nsite <= 0) {
 			fprintf(stderr, "Unable to write site file...\nCurrently %d sites defined for instance %zu!\n", nsite, instance);
@@ -2366,7 +2440,7 @@ int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr) {
 	/* read data for valid instance */
 	if (instance != MBV_NO_WINDOW) {
 
-		/* get the number of sites to be written to the outpuf file */
+		/* get the number of sites to be written to the output file */
 		status = mbview_getsitecount(verbose, instance, &nsite, &error);
 		if (status == MB_SUCCESS && nsite <= 0) {
 			fprintf(stderr, "Unable to write site file...\nCurrently %d sites defined for instance %zu!\n", nsite, instance);
@@ -2633,7 +2707,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
 	/* read data for valid instance */
 	if (instance != MBV_NO_WINDOW) {
 
-		/* get the number of routes to be written to the outpuf file */
+		/* get the number of routes to be written to the output file */
 		status = mbview_getroutecount(verbose, instance, &nroute, &error);
 		for (iroute = 0; iroute < nroute; iroute++) {
 			mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
@@ -2830,7 +2904,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 	/* read data for valid instance */
 	if (instance != MBV_NO_WINDOW) {
 
-		/* get the number of routes to be written to the outpuf file */
+		/* get the number of routes to be written to the output file */
 		status = mbview_getroutecount(verbose, instance, &nroute, &error);
 		for (iroute = 0; iroute < nroute; iroute++) {
 			mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
@@ -3026,7 +3100,7 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr) {
 	/* read data for valid instance */
 	if (instance != MBV_NO_WINDOW) {
 
-		/* get the number of routes to be written to the outpuf file */
+		/* get the number of routes to be written to the output file */
 		status = mbview_getroutecount(verbose, instance, &nroute, &error);
 		if (nroute <= 0) {
 			fprintf(stderr, "Unable to write route file...\nCurrently %d routes defined for instance %zu!\n", nroute, instance);
@@ -3136,7 +3210,7 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr) {
 	/* read data for valid instance */
 	if (instance != MBV_NO_WINDOW) {
 
-		/* get the number of routes to be written to the outpuf file */
+		/* get the number of routes to be written to the output file */
 		status = mbview_getroutecount(verbose, instance, &nroute, &error);
 		if (nroute <= 0) {
 			fprintf(stderr, "Unable to write route file...\nCurrently %d routes defined for instance %zu!\n", nroute, instance);
@@ -3249,7 +3323,7 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr) {
 	/* read data for valid instance */
 	if (instance != MBV_NO_WINDOW) {
 
-		/* get the number of routes to be written to the outpuf file */
+		/* get the number of routes to be written to the output file */
 		status = mbview_getroutecount(verbose, instance, &nroute, &error);
 		if (nroute <= 0) {
 			fprintf(stderr, "Unable to write route file...\nCurrently %d routes defined for instance %zu!\n", nroute, instance);
@@ -3387,7 +3461,7 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr) {
 	/* read data for valid instance */
 	if (instance != MBV_NO_WINDOW) {
 
-		/* get the number of routes to be written to the outpuf file */
+		/* get the number of routes to be written to the output file */
 		status = mbview_getroutecount(verbose, instance, &nroute, &error);
 		if (nroute <= 0) {
 			fprintf(stderr, "Unable to write route file...\nCurrently %d routes defined for instance %zu!\n", nroute, instance);
@@ -3503,6 +3577,172 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr) {
 			if (npointalloc > 0) {
 				status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
 				                                &distlateral, &distovertopo, &slope, &error);
+			}
+		}
+	}
+
+	/* all done */
+	return (status);
+}
+/*---------------------------------------------------------------------------------------*/
+
+int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
+	char function_name[] = "do_mbgrdviz_savegreenseayml";
+	int status = MB_SUCCESS;
+	FILE *sfp;
+	int nroute = 0;
+	int npoint = 0;
+	int nintpoint = 0;
+	int npointtotal = 0;
+	int npointalloc = 0;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	int *routewaypoint = NULL;
+	double *routetopo = NULL;
+	double *routebearing = NULL;
+	double *distlateral = NULL;
+	double *distovertopo = NULL;
+	double *slope = NULL;
+	int routecolor;
+	int routesize;
+	mb_path routename;
+  int selected;
+	char *error_message;
+	char projection_id[MB_PATH_MAXLINE];
+	void *pjptr = NULL;
+	int proj_status;
+  int nroutewrite = 0;
+  int iroutewrite = 0;
+	int iroute, j, n;
+  uuid_t mission_uuid, *waypoints_uuid;
+  char uuid_str[37];
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
+	}
+
+	/* read data for valid instance */
+	if (instance != MBV_NO_WINDOW) {
+
+		/* get the number of routes to be written to the output file */
+		status = mbview_getroutecount(verbose, instance, &nroute, &error);
+		for (iroute = 0; iroute < nroute; iroute++) {
+			mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
+			if (selected == MB_YES) {
+				nroutewrite++;
+        iroutewrite = iroute;
+      }
+		}
+		if (nroutewrite == 0 && nroute == 1) {
+			nroutewrite = 1;
+      iroutewrite = 0;
+    }
+		if (nroutewrite != 1) {
+			fprintf(stderr, "Unable to write Greensea YML survey script...\n");
+      fprintf(stderr, "Exactly one route must be selected, but %d routes are selected for instance %zu!\n", nroutewrite, instance);
+			XBell((Display *)XtDisplay(mainWindow), 100);
+			status = MB_FAILURE;
+		}
+
+		/* initialize the output file */
+		if (status == MB_SUCCESS && nroutewrite == 1) {
+			/* open the output file */
+			if ((sfp = fopen(output_file_ptr, "w")) == NULL) {
+				error = MB_ERROR_OPEN_FAIL;
+				status = MB_FAILURE;
+				fprintf(stderr, "\nUnable to Open Greensea survey script file <%s> for writing\n", output_file_ptr);
+				XBell((Display *)XtDisplay(mainWindow), 100);
+			}
+		}
+
+		/* if all ok proceed to extract and output routes */
+		if (status == MB_SUCCESS) {
+			/* get point count for current route */
+			status = mbview_getroutepointcount(verbose, instance, iroutewrite, &npoint, &nintpoint, &error);
+
+			/* allocate route arrays */
+			npointtotal = npoint + nintpoint;
+			if (status == MB_SUCCESS && npointalloc < npointtotal) {
+				status = mbview_allocroutearrays(verbose, npointtotal, &routelon, &routelat, &routewaypoint, &routetopo,
+				                                 &routebearing, &distlateral, &distovertopo, &slope, &error);
+        if (status == MB_SUCCESS) {
+          status = mb_mallocd(verbose, __FILE__, __LINE__, npointtotal * sizeof(uuid_t), (void **)&waypoints_uuid, &error);
+        }
+				if (status == MB_SUCCESS) {
+					npointalloc = npointtotal;
+				}
+
+				/* if error initializing memory then cancel dealing with this route */
+				else {
+					fprintf(stderr, "Unable to write route...\nArray allocation for %d points failed for instance %zu!\n",
+					        npointtotal, instance);
+					XBell((Display *)XtDisplay(mainWindow), 100);
+					npoint = 0;
+					nintpoint = 0;
+					npointtotal = 0;
+				}
+			}
+
+			/* extract data for route */
+			status = mbview_getroute(verbose, instance, iroutewrite, &npointtotal,
+                                routelon, routelat, routewaypoint, routetopo,
+			                          routebearing, distlateral, distovertopo, slope,
+                                &routecolor, &routesize, routename, &error);
+
+      /* output header of mission */
+      fprintf(sfp, "mission_data:\n");
+      uuid_generate(mission_uuid);
+      uuid_unparse(mission_uuid, uuid_str);
+      fprintf(sfp, "  - id: %s\n", uuid_str);
+      fprintf(sfp, "    name: Low_Altitude_Survey\n");
+      fprintf(sfp, "    locked: true\n");
+      fprintf(sfp, "    waypoints:\n");
+
+			/* write the route points */
+      for (j = 0; j < npointtotal; j++) {
+				if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE) {
+          uuid_generate(waypoints_uuid[j]);
+          uuid_unparse(waypoints_uuid[j], uuid_str);
+          fprintf(sfp, "    - id: %s\n", uuid_str);
+				}
+			}
+      fprintf(sfp, "waypoint_data:\n");
+      n = 0;
+      for (j = 0; j < npointtotal; j++) {
+				if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE) {
+          uuid_unparse(waypoints_uuid[j], uuid_str);
+          fprintf(sfp, "  - id: %s\n", uuid_str);
+          fprintf(sfp, "    name: SPS%4.4d\n", n);
+          fprintf(sfp, "    x: %.9f\n", routelon[j]);
+          fprintf(sfp, "    y: %.9f\n", routelat[j]);
+          fprintf(sfp, "    z: %.3f\n", 3.0);
+          fprintf(sfp, "    tolerance: %.3f\n", 0.500);
+          fprintf(sfp, "    z_alt: true\n");
+          fprintf(sfp, "    z_matters: true\n");
+          fprintf(sfp, "    speed: %.3f\n", 0.150);
+          fprintf(sfp, "    use_speed: true\n");
+          fprintf(sfp, "    effort: 70.000\n");
+          if (j==0)
+            fprintf(sfp, "    heading: %.3f\n", routebearing[j]);
+          else
+              fprintf(sfp, "    heading: %.3f\n", routebearing[j-1]);
+          fprintf(sfp, "    heading_mode: FIXED\n");
+          n++;
+				}
+			}
+
+			/* close the output file */
+			fclose(sfp);
+
+			/* deallocate arrays */
+			if (npointalloc > 0) {
+				status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
+				                                &distlateral, &distovertopo, &slope, &error);
+        status = mb_freed(verbose, __FILE__, __LINE__, (void **)&waypoints_uuid, &error);
 			}
 		}
 	}
@@ -3711,7 +3951,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
 	/* read data for valid instance */
 	if (instance != MBV_NO_WINDOW) {
 
-		/* get the number of profiles to be written to the outpuf file */
+		/* get the number of profiles to be written to the output file */
 		status = mbview_getprofilecount(verbose, instance, &npoints, &error);
 		if (npoints <= 0) {
 			fprintf(stderr, "Unable to write profile file...\nCurrently %d profile points defined for instance %zu!\n", npoints,
@@ -4731,7 +4971,8 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
 	struct mbview_shareddata_struct *shareddata;
 	struct mbview_nav_struct *nav;
 	mb_path mbeditviz_cmd;
-	mb_path filearg;
+	mb_path datalist_file;
+  FILE *dfp;
 	int nselected;
 	int shellstatus;
 	int i;
@@ -4763,22 +5004,27 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
 	if (status == MB_SUCCESS && shareddata->nnav > 0) {
 		for (i = 0; i < shareddata->nnav; i++) {
 			nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
-			fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n", i, nav->name, nav->pathraw, nav->format,
-			        nav->nselected);
 			nselected += nav->nselected;
-			if (nav->nselected > 0) {
-				sprintf(filearg, " -F%d -I%s", nav->format, nav->pathraw);
-				strncat(mbeditviz_cmd, filearg, MB_PATH_MAXLINE - 3);
-				fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n", nav->nselected, nselected, filearg);
-			}
-		}
-	}
+    }
+    if(nselected > 0) {
+      sprintf(datalist_file,"tmp_datalist_%d.mb-1", getpid());
+      dfp = fopen(datalist_file, "w");
+      if (dfp != NULL) {
+    		for (i = 0; i < shareddata->nnav; i++) {
+    			nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+          if (nav->nselected > 0) {
+    			  fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n",
+                            i, nav->name, nav->pathraw, nav->format, nav->nselected);
+            fprintf(dfp, "%s %d\n", nav->pathraw, nav->format);
+          }
+    		}
+        fclose(dfp);
+        sprintf(mbeditviz_cmd, "mbeditviz -I%s -R &", datalist_file);
+		    fprintf(stderr, "Calling mbeditviz: %s\n", mbeditviz_cmd);
+		    shellstatus = system(mbeditviz_cmd);
 
-	/* open all data files with selected nav into mbeditviz */
-	if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
-		strncat(mbeditviz_cmd, " &", MB_PATH_MAXLINE);
-		fprintf(stderr, "Calling mbeditviz: %s\n", mbeditviz_cmd);
-		shellstatus = system(mbeditviz_cmd);
+      }
+    }
 	}
 
 	/* update widgets of all mbview windows */

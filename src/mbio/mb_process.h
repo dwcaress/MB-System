@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_process.h	9/11/00
+ *    The MB-system:  mb_process.h  9/11/00
  *    $Id$
  *
  *    Copyright (c) 2000-2018 by
@@ -40,7 +40,7 @@
  * with default values in square brackets:
  *
  * GENERAL PARAMETERS:
- *   EXPLICIT			    # causes mbprocess to set modes implicitely
+ *   EXPLICIT          # causes mbprocess to set modes implicitely
  *                                  # - e.g. the SVPFILE command will also set
  *                                  #   raytracing on even if the RAYTRACE command
  *                                  #   is not given [explicit mode commands required]
@@ -290,7 +290,7 @@
  *   LEVERMODE mode                 # sets heave correction by lever correction [0]
  *                                  #   0: no heave correction by lever calculation
  *                                  #   1: heave correction by lever calculation
- *				    # - note: lever calculation finds heave at the
+ *            # - note: lever calculation finds heave at the
  *                                  #   sonar head location by adding motion
  *                                  #   inferred from roll and pitch projected
  *                                  #   from the vru location.
@@ -464,82 +464,82 @@
  *                                  #   - this correction subtracts the heave
  *                                  #     value from the sonar depth
  *   KLUGE003                       # processing kluge 003
- *				    #   enables correction of beam angles in SeaBeam 2112 data
- *				    #   - a data sample from the SeaBeam 2112 on
- *				    #     the USCG Icebreaker Healy (collected on
- *				    #     23 July 2003) was found to have an error
- *				    #     in which the beam angles had 0.25 times
- *				    #     the roll added
- *				    #   - this correction subtracts 0.25 * roll
- *				    #     from the beam angles before the bathymetry
- *				    #     is recalculated by raytracing through a
- *				    #     water sound velocity profile
- *				    #   - the mbprocess parameter files must be
- *				    #     set to enable bathymetry recalculation
- *				    #     by raytracing in order to apply this
- *				    #     correction
+ *            #   enables correction of beam angles in SeaBeam 2112 data
+ *            #   - a data sample from the SeaBeam 2112 on
+ *            #     the USCG Icebreaker Healy (collected on
+ *            #     23 July 2003) was found to have an error
+ *            #     in which the beam angles had 0.25 times
+ *            #     the roll added
+ *            #   - this correction subtracts 0.25 * roll
+ *            #     from the beam angles before the bathymetry
+ *            #     is recalculated by raytracing through a
+ *            #     water sound velocity profile
+ *            #   - the mbprocess parameter files must be
+ *            #     set to enable bathymetry recalculation
+ *            #     by raytracing in order to apply this
+ *            #     correction
  *   KLUGE004                       # processing kluge 004
- *				    #   deletes survey data associated with duplicate
- *				    #   or reversed time tags
- *				    #   - if survey data records are encountered
- *				    #     with time tags less than or equal to the
- *				    #     last good time tag, an error is set and
- *				    #     the data record is not output to the
- *				    #     processed data file.
+ *            #   deletes survey data associated with duplicate
+ *            #   or reversed time tags
+ *            #   - if survey data records are encountered
+ *            #     with time tags less than or equal to the
+ *            #     last good time tag, an error is set and
+ *            #     the data record is not output to the
+ *            #     processed data file.
  *   KLUGE005                       # processing kluge 005
- *				    #   replaces survey record timestamps with
- *				    #   timestamps of corresponding merged navigation
- *				    #   records
- *				    #   - this feature allows users to fix
- *				    #     timestamp errors using MBnavedit and
- *				    #     then insert the corrected timestamps
- *				    #     into processed data
+ *            #   replaces survey record timestamps with
+ *            #   timestamps of corresponding merged navigation
+ *            #   records
+ *            #   - this feature allows users to fix
+ *            #     timestamp errors using MBnavedit and
+ *            #     then insert the corrected timestamps
+ *            #     into processed data
  *   KLUGE006                       # processing kluge 006
  *                                  #   changes sonar depth / draft values without
  *                                  #   changing bathymetry values
  *   KLUGE007                       # processing kluge 007
- *				    #   zeros alongtrack values greater than half
- *				    #   the altitude
- *				    #   - this targets some SeaBeam 2112 data originally
+ *            #   zeros alongtrack values greater than half
+ *            #   the altitude
+ *            #   - this targets some SeaBeam 2112 data originally
  *                                  #     processed using MB-System 4.6.10 that had
  *                                  #     a few pings with bad sidescan alongtrack values
- *				    #   - its not clear if this problem originated with
- *				    #     the data or a bug in MB-System 4.6.10
+ *            #   - its not clear if this problem originated with
+ *            #     the data or a bug in MB-System 4.6.10
  *   KLUGE008                       # processing kluge 008 (not yet defined)
- *				    #   - occasionaly odd processing problems will
- *				    #     occur that are specific to a particular
- *				    #     survey or sonar version
- *				    #   - mbprocess will allow one-time fixes to
- *				    #     be defined as "kluges" that can be turned
- *				    #     on through the parameter files.
+ *            #   - occasionaly odd processing problems will
+ *            #     occur that are specific to a particular
+ *            #     survey or sonar version
+ *            #   - mbprocess will allow one-time fixes to
+ *            #     be defined as "kluges" that can be turned
+ *            #     on through the parameter files.
  *   KLUGE009                       # processing kluge 009 (not yet defined)
- *				    #   - occasionaly odd processing problems will
- *				    #     occur that are specific to a particular
- *				    #     survey or sonar version
- *				    #   - mbprocess will allow one-time fixes to
- *				    #     be defined as "kluges" that can be turned
- *				    #     on through the parameter files.
+ *            #   - occasionaly odd processing problems will
+ *            #     occur that are specific to a particular
+ *            #     survey or sonar version
+ *            #   - mbprocess will allow one-time fixes to
+ *            #     be defined as "kluges" that can be turned
+ *            #     on through the parameter files.
  *   KLUGE010                       # processing kluge 010 (not yet defined)
- *				    #   - occasionaly odd processing problems will
- *				    #     occur that are specific to a particular
- *				    #     survey or sonar version
- *				    #   - mbprocess will allow one-time fixes to
- *				    #     be defined as "kluges" that can be turned
- *				    #     on through the parameter files.
+ *            #   - occasionaly odd processing problems will
+ *            #     occur that are specific to a particular
+ *            #     survey or sonar version
+ *            #   - mbprocess will allow one-time fixes to
+ *            #     be defined as "kluges" that can be turned
+ *            #     on through the parameter files.
  *
  * MBprocess and its associated functions and programs use
  * the following file naming convention. The unprocessed swath
  * data file should have a name like "fileroot.mbxxx", where
  * fileroot can be anything and xxx corresponds to the MB-System
  * format id number. Given this kind of filename, we then have:
- *	fileroot.mbxxx.par	    : parameter file
- *	fileroot.mbxxx.nve	    : edited navigation from
- *					mbnavedit
- *	fileroot.mbxxx.nvX	    : adjusted navigation from
- *					mbnavadjust, with
- *					X={0,1,2,3,4,5,6,7,8,9}
- *	fileroot.mbxxx.esf	    : bathymetry edit save file
- *					from mbedit
+ *  fileroot.mbxxx.par      : parameter file
+ *  fileroot.mbxxx.nve      : edited navigation from
+ *          mbnavedit
+ *  fileroot.mbxxx.nvX      : adjusted navigation from
+ *          mbnavadjust, with
+ *          X={0,1,2,3,4,5,6,7,8,9}
+ *  fileroot.mbxxx.esf      : bathymetry edit save file
+ *          from mbedit
  *
  * MBprocess and its associated programs utilize a simple file locking
  * mechanism to prevent multiple users or processes from working on
@@ -556,9 +556,9 @@
  * the resetting of files left locked by crashed programs.
  *
  *
- * Author:	D. W. Caress
- * Date:	September 11, 2000
- * Updated:	August 4, 2009 (R/V Zephyr, Cleft Segment, Juan de Fuca Ridge)
+ * Author:  D. W. Caress
+ * Date:  September 11, 2000
+ * Updated:  August 4, 2009 (R/V Zephyr, Cleft Segment, Juan de Fuca Ridge)
  *
  *
  */
@@ -706,217 +706,231 @@
 /* structure holding mbpreprocess parameters to be passed to preprocess
  * functions of i/o modules */
 struct mb_preprocess_struct {
-	int target_sensor;
+  int target_sensor;
 
-	int timestamp_changed;
-	double time_d;
+  int timestamp_changed;
+  double time_d;
 
-	int n_nav;
-	double *nav_time_d;
-	double *nav_lon;
-	double *nav_lat;
-	double *nav_speed;
+  int n_nav;
+  double *nav_time_d;
+  double *nav_lon;
+  double *nav_lat;
+  double *nav_speed;
 
-	int n_sensordepth;
-	double *sensordepth_time_d;
-	double *sensordepth_sensordepth;
+  int n_sensordepth;
+  double *sensordepth_time_d;
+  double *sensordepth_sensordepth;
 
-	int n_heading;
-	double *heading_time_d;
-	double *heading_heading;
+  int n_heading;
+  double *heading_time_d;
+  double *heading_heading;
 
-	int n_altitude;
-	double *altitude_time_d;
-	double *altitude_altitude;
+  int n_altitude;
+  double *altitude_time_d;
+  double *altitude_altitude;
 
-	int n_attitude;
-	double *attitude_time_d;
-	double *attitude_roll;
-	double *attitude_pitch;
-	double *attitude_heave;
+  int n_attitude;
+  double *attitude_time_d;
+  double *attitude_roll;
+  double *attitude_pitch;
+  double *attitude_heave;
 
-	int n_soundspeed;
-	double *soundspeed_time_d;
-	double *soundspeed_soundspeed;
+  int n_soundspeed;
+  double *soundspeed_time_d;
+  double *soundspeed_soundspeed;
 
-	int no_change_survey;
-	int multibeam_sidescan_source;
-    int modify_soundspeed;
-	int recalculate_bathymetry;
-    int sounding_amplitude_filter;
-    double sounding_amplitude_threshold;
-    int sounding_altitude_filter;
-    double sounding_target_altitude;
-    int ignore_water_column;
+  int no_change_survey;
+  int multibeam_sidescan_source;
+  int modify_soundspeed;
+  int recalculate_bathymetry;
+  int sounding_amplitude_filter;
+  double sounding_amplitude_threshold;
+  int sounding_altitude_filter;
+  double sounding_target_altitude;
+  int ignore_water_column;
+  int head1_offsets;
+  double head1_offsets_x;
+  double head1_offsets_y;
+  double head1_offsets_z;
+  double head1_offsets_heading;
+  double head1_offsets_roll;
+  double head1_offsets_pitch;
+  int head2_offsets;
+  double head2_offsets_x;
+  double head2_offsets_y;
+  double head2_offsets_z;
+  double head2_offsets_heading;
+  double head2_offsets_roll;
+  double head2_offsets_pitch;
 
-	int n_kluge;
-	int kluge_id[MB_PR_KLUGE_NUM_MAX];
-	char kluge_pars[MB_PR_KLUGE_NUM_MAX * MB_PR_KLUGE_PAR_SIZE];
+  int n_kluge;
+  int kluge_id[MB_PR_KLUGE_NUM_MAX];
+  char kluge_pars[MB_PR_KLUGE_NUM_MAX * MB_PR_KLUGE_PAR_SIZE];
 };
 
 /* structure holding mbprocess parameters */
 struct mb_process_struct {
-	/* general parameters */
-	int mbp_ifile_specified;
-	char mbp_ifile[MBP_FILENAMESIZE];
-	int mbp_ofile_specified;
-	char mbp_ofile[MBP_FILENAMESIZE];
-	int mbp_format_specified;
-	int mbp_format;
+  /* general parameters */
+  int mbp_ifile_specified;
+  char mbp_ifile[MBP_FILENAMESIZE];
+  int mbp_ofile_specified;
+  char mbp_ofile[MBP_FILENAMESIZE];
+  int mbp_format_specified;
+  int mbp_format;
 
-	/* navigation merging */
-	int mbp_nav_mode;
-	char mbp_navfile[MBP_FILENAMESIZE];
-	int mbp_nav_format;
-	int mbp_nav_heading;
-	int mbp_nav_speed;
-	int mbp_nav_draft;
-	int mbp_nav_attitude;
-	int mbp_nav_algorithm;
-	double mbp_nav_timeshift;
-	int mbp_nav_shift;
-	double mbp_nav_offsetx;
-	double mbp_nav_offsety;
-	double mbp_nav_offsetz;
-	double mbp_nav_shiftlon;
-	double mbp_nav_shiftlat;
-	double mbp_nav_shiftx;
-	double mbp_nav_shifty;
+  /* navigation merging */
+  int mbp_nav_mode;
+  char mbp_navfile[MBP_FILENAMESIZE];
+  int mbp_nav_format;
+  int mbp_nav_heading;
+  int mbp_nav_speed;
+  int mbp_nav_draft;
+  int mbp_nav_attitude;
+  int mbp_nav_algorithm;
+  double mbp_nav_timeshift;
+  int mbp_nav_shift;
+  double mbp_nav_offsetx;
+  double mbp_nav_offsety;
+  double mbp_nav_offsetz;
+  double mbp_nav_shiftlon;
+  double mbp_nav_shiftlat;
+  double mbp_nav_shiftx;
+  double mbp_nav_shifty;
 
-	/* adjusted navigation merging */
-	int mbp_navadj_mode;
-	char mbp_navadjfile[MBP_FILENAMESIZE];
-	int mbp_navadj_algorithm;
+  /* adjusted navigation merging */
+  int mbp_navadj_mode;
+  char mbp_navadjfile[MBP_FILENAMESIZE];
+  int mbp_navadj_algorithm;
 
-	/* attitude merging */
-	int mbp_attitude_mode;
-	char mbp_attitudefile[MBP_FILENAMESIZE];
-	int mbp_attitude_format;
+  /* attitude merging */
+  int mbp_attitude_mode;
+  char mbp_attitudefile[MBP_FILENAMESIZE];
+  int mbp_attitude_format;
 
-	/* sonardepth merging */
-	int mbp_sonardepth_mode;
-	char mbp_sonardepthfile[MBP_FILENAMESIZE];
-	int mbp_sonardepth_format;
+  /* sonardepth merging */
+  int mbp_sonardepth_mode;
+  char mbp_sonardepthfile[MBP_FILENAMESIZE];
+  int mbp_sonardepth_format;
 
-	/* data cutting */
-	int mbp_cut_num;
-	int mbp_cut_kind[MBP_CUT_NUM_MAX];
-	int mbp_cut_mode[MBP_CUT_NUM_MAX];
-	double mbp_cut_min[MBP_CUT_NUM_MAX];
-	double mbp_cut_max[MBP_CUT_NUM_MAX];
+  /* data cutting */
+  int mbp_cut_num;
+  int mbp_cut_kind[MBP_CUT_NUM_MAX];
+  int mbp_cut_mode[MBP_CUT_NUM_MAX];
+  double mbp_cut_min[MBP_CUT_NUM_MAX];
+  double mbp_cut_max[MBP_CUT_NUM_MAX];
 
-	/* bathymetry editing */
-	int mbp_edit_mode;
-	char mbp_editfile[MBP_FILENAMESIZE];
+  /* bathymetry editing */
+  int mbp_edit_mode;
+  char mbp_editfile[MBP_FILENAMESIZE];
 
-	/* bathymetry recalculation */
-	int mbp_bathrecalc_mode;
-	int mbp_svp_mode;
-	char mbp_svpfile[MBP_FILENAMESIZE];
-	int mbp_ssv_mode;
-	double mbp_ssv;
-	int mbp_tt_mode;
-	double mbp_tt_mult;
-	int mbp_angle_mode;
-	int mbp_corrected;
-	int mbp_static_mode;
-	char mbp_staticfile[MBP_FILENAMESIZE];
+  /* bathymetry recalculation */
+  int mbp_bathrecalc_mode;
+  int mbp_svp_mode;
+  char mbp_svpfile[MBP_FILENAMESIZE];
+  int mbp_ssv_mode;
+  double mbp_ssv;
+  int mbp_tt_mode;
+  double mbp_tt_mult;
+  int mbp_angle_mode;
+  int mbp_corrected;
+  int mbp_static_mode;
+  char mbp_staticfile[MBP_FILENAMESIZE];
 
-	/* draft correction */
-	int mbp_draft_mode;
-	double mbp_draft;
-	double mbp_draft_offset;
-	double mbp_draft_mult;
+  /* draft correction */
+  int mbp_draft_mode;
+  double mbp_draft;
+  double mbp_draft_offset;
+  double mbp_draft_mult;
 
-	/* heave correction */
-	int mbp_heave_mode;
-	double mbp_heave;
-	double mbp_heave_mult;
+  /* heave correction */
+  int mbp_heave_mode;
+  double mbp_heave;
+  double mbp_heave_mult;
 
-	/* lever correction */
-	int mbp_lever_mode;
-	double mbp_vru_offsetx;
-	double mbp_vru_offsety;
-	double mbp_vru_offsetz;
-	double mbp_sonar_offsetx;
-	double mbp_sonar_offsety;
-	double mbp_sonar_offsetz;
+  /* lever correction */
+  int mbp_lever_mode;
+  double mbp_vru_offsetx;
+  double mbp_vru_offsety;
+  double mbp_vru_offsetz;
+  double mbp_sonar_offsetx;
+  double mbp_sonar_offsety;
+  double mbp_sonar_offsetz;
 
-	/* roll correction */
-	int mbp_rollbias_mode;
-	double mbp_rollbias;
-	double mbp_rollbias_port;
-	double mbp_rollbias_stbd;
+  /* roll correction */
+  int mbp_rollbias_mode;
+  double mbp_rollbias;
+  double mbp_rollbias_port;
+  double mbp_rollbias_stbd;
 
-	/* pitch correction */
-	int mbp_pitchbias_mode;
-	double mbp_pitchbias;
+  /* pitch correction */
+  int mbp_pitchbias_mode;
+  double mbp_pitchbias;
 
-	/* heading correction */
-	int mbp_heading_mode;
-	double mbp_headingbias;
+  /* heading correction */
+  int mbp_heading_mode;
+  double mbp_headingbias;
 
-	/* tide correction */
-	int mbp_tide_mode;
-	char mbp_tidefile[MBP_FILENAMESIZE];
-	int mbp_tide_format;
+  /* tide correction */
+  int mbp_tide_mode;
+  char mbp_tidefile[MBP_FILENAMESIZE];
+  int mbp_tide_format;
 
-	/* amplitude correction */
-	int mbp_ampcorr_mode;
-	char mbp_ampcorrfile[MBP_FILENAMESIZE];
-	int mbp_ampcorr_type;
-	int mbp_ampcorr_symmetry;
-	double mbp_ampcorr_angle;
-	int mbp_ampcorr_slope;
+  /* amplitude correction */
+  int mbp_ampcorr_mode;
+  char mbp_ampcorrfile[MBP_FILENAMESIZE];
+  int mbp_ampcorr_type;
+  int mbp_ampcorr_symmetry;
+  double mbp_ampcorr_angle;
+  int mbp_ampcorr_slope;
 
-	/* sidescan correction */
-	int mbp_sscorr_mode;
-	char mbp_sscorrfile[MBP_FILENAMESIZE];
-	int mbp_sscorr_type;
-	int mbp_sscorr_symmetry;
-	double mbp_sscorr_angle;
-	int mbp_sscorr_slope;
+  /* sidescan correction */
+  int mbp_sscorr_mode;
+  char mbp_sscorrfile[MBP_FILENAMESIZE];
+  int mbp_sscorr_type;
+  int mbp_sscorr_symmetry;
+  double mbp_sscorr_angle;
+  int mbp_sscorr_slope;
 
-	/* amplitude and sidescan correction */
-	char mbp_ampsscorr_topofile[MBP_FILENAMESIZE];
+  /* amplitude and sidescan correction */
+  char mbp_ampsscorr_topofile[MBP_FILENAMESIZE];
 
-	/* sidescan recalculation */
-	int mbp_ssrecalc_mode;
-	double mbp_ssrecalc_pixelsize;
-	double mbp_ssrecalc_swathwidth;
-	int mbp_ssrecalc_interpolate;
+  /* sidescan recalculation */
+  int mbp_ssrecalc_mode;
+  double mbp_ssrecalc_pixelsize;
+  double mbp_ssrecalc_swathwidth;
+  int mbp_ssrecalc_interpolate;
 
-	/* metadata strings */
-	char mbp_meta_vessel[MBP_FILENAMESIZE];
-	char mbp_meta_institution[MBP_FILENAMESIZE];
-	char mbp_meta_platform[MBP_FILENAMESIZE];
-	char mbp_meta_sonar[MBP_FILENAMESIZE];
-	char mbp_meta_sonarversion[MBP_FILENAMESIZE];
-	char mbp_meta_cruiseid[MBP_FILENAMESIZE];
-	char mbp_meta_cruisename[MBP_FILENAMESIZE];
-	char mbp_meta_pi[MBP_FILENAMESIZE];
-	char mbp_meta_piinstitution[MBP_FILENAMESIZE];
-	char mbp_meta_client[MBP_FILENAMESIZE];
-	int mbp_meta_svcorrected;
-	int mbp_meta_tidecorrected;
-	int mbp_meta_batheditmanual;
-	int mbp_meta_batheditauto;
-	double mbp_meta_rollbias;
-	double mbp_meta_pitchbias;
-	double mbp_meta_headingbias;
-	double mbp_meta_draft;
+  /* metadata strings */
+  char mbp_meta_vessel[MBP_FILENAMESIZE];
+  char mbp_meta_institution[MBP_FILENAMESIZE];
+  char mbp_meta_platform[MBP_FILENAMESIZE];
+  char mbp_meta_sonar[MBP_FILENAMESIZE];
+  char mbp_meta_sonarversion[MBP_FILENAMESIZE];
+  char mbp_meta_cruiseid[MBP_FILENAMESIZE];
+  char mbp_meta_cruisename[MBP_FILENAMESIZE];
+  char mbp_meta_pi[MBP_FILENAMESIZE];
+  char mbp_meta_piinstitution[MBP_FILENAMESIZE];
+  char mbp_meta_client[MBP_FILENAMESIZE];
+  int mbp_meta_svcorrected;
+  int mbp_meta_tidecorrected;
+  int mbp_meta_batheditmanual;
+  int mbp_meta_batheditauto;
+  double mbp_meta_rollbias;
+  double mbp_meta_pitchbias;
+  double mbp_meta_headingbias;
+  double mbp_meta_draft;
 
-	/* processing kluges */
-	int mbp_kluge001;
-	int mbp_kluge002;
-	int mbp_kluge003;
-	int mbp_kluge004;
-	int mbp_kluge005;
-	int mbp_kluge006;
-	int mbp_kluge007;
-	int mbp_kluge008;
-	int mbp_kluge009;
-	int mbp_kluge010;
+  /* processing kluges */
+  int mbp_kluge001;
+  int mbp_kluge002;
+  int mbp_kluge003;
+  int mbp_kluge004;
+  int mbp_kluge005;
+  int mbp_kluge006;
+  int mbp_kluge007;
+  int mbp_kluge008;
+  int mbp_kluge009;
+  int mbp_kluge010;
 };
 
 /* edit save file definitions */
@@ -927,22 +941,22 @@ struct mb_process_struct {
 #define MB_ESF_MAXTIMEDIFF_X10 0.0011
 #define MB_ESF_MULTIPLICITY_FACTOR 100000000
 struct mb_edit_struct {
-	double time_d;
-	int beam;
-	int action;
-	int use;
+  double time_d;
+  int beam;
+  int action;
+  int use;
 };
 struct mb_esf_struct {
-	char esffile[MB_PATH_MAXLINE];
-	char esstream[MB_PATH_MAXLINE];
-	int byteswapped;
-	int version;
+  char esffile[MB_PATH_MAXLINE];
+  char esstream[MB_PATH_MAXLINE];
+  int byteswapped;
+  int version;
     int mode;
-	int nedit;
-	struct mb_edit_struct *edit;
-	FILE *esffp;
-	FILE *essfp;
-	int startnextsearch;
+  int nedit;
+  struct mb_edit_struct *edit;
+  FILE *esffp;
+  FILE *essfp;
+  int startnextsearch;
 };
 
 int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error);

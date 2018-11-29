@@ -1983,7 +1983,7 @@ int main(int argc, char **argv) {
 
 						if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
 						    error == MB_ERROR_NO_ERROR) {
-                        
+
                             /* if needed try again to get topography type */
                             if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
                                 status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);
@@ -2431,7 +2431,7 @@ int main(int argc, char **argv) {
 
 						if ((datatype == MBGRID_DATA_BATHYMETRY || datatype == MBGRID_DATA_TOPOGRAPHY) &&
 						    error == MB_ERROR_NO_ERROR) {
-                        
+
                             /* if needed try again to get topography type */
                             if (topo_type == MB_TOPOGRAPHY_TYPE_UNKNOWN) {
                                 status = mb_sonartype(verbose, mbio_ptr, mb_io_ptr->store_data, &topo_type, &error);

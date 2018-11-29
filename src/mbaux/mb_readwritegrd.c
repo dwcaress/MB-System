@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_grdio.c	12/10/2007
+ *    The MB-system:	mb_readwritegrd.c	12/10/2007
  *    $Id$
  *
  *    Copyright (c) 2007-2017 by
@@ -75,7 +75,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       grdfile:         %s\n", grdfile);
 	}
-	
+
 	/* check if the file exists and is readable */
 	if (stat(grdfile, &file_status) == 0
 		&& (file_status.st_mode & S_IFMT) != S_IFDIR
@@ -90,7 +90,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 
 	/* if file exists proceed */
 	if (status == MB_SUCCESS) {
-		
+
 		/* Initialize new GMT session */
 		if ((API = GMT_Create_Session(function_name, 2U, 0U, NULL)) == NULL) {
 			fprintf(stderr, "\nUnable to initialize a GMT session with GMT_Create_Session() in function %s\n", function_name);
@@ -98,7 +98,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 			fprintf(stderr, "Program terminated\n");
 			exit(EXIT_FAILURE);
 		}
-	
+
 		/* read in the grid */
 		num_tries = 0;
 		while (G == NULL && num_tries < 100) {
@@ -118,7 +118,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 			fprintf(stderr, "Program terminated\n");
 			exit(EXIT_FAILURE);
 		}
-	
+
 		/* proceed if ok */
 		if (status == MB_SUCCESS) {
 			/* try to get projection from the grd file remark */
@@ -160,7 +160,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 				*grid_projection_mode = MB_PROJECTION_GEOGRAPHIC;
 				sprintf(grid_projection_id, "epsg%d", projectionid);
 			}
-	
+
 			/* set up internal arrays */
 			*nodatavalue = MIN(MB_DEFAULT_GRID_NODATA, header->z_min - 10 * (header->z_max - header->z_min));
 			*nxy = header->n_columns * header->n_rows;
@@ -174,7 +174,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 			*dy = header->inc[1];
 			*min = header->z_min;
 			*max = header->z_max;
-	
+
 			status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * (*nxy), (void **)&usedata, error);
 			if (status == MB_SUCCESS) {
 				*data = usedata;
@@ -188,7 +188,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 				*data_dzdy = usedata;
 			}
 		}
-	
+
 		/* copy grid data, reordering to internal convention */
 		if (status == MB_SUCCESS) {
 			for (i = 0; i < *n_columns; i++)
@@ -202,7 +202,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 						(*data)[k] = G->data[kk];
 				}
 		}
-	
+
 		/* calculate derivatives */
 		if (status == MB_SUCCESS && data_dzdx != NULL && data_dzdy != NULL) {
 			ddx = *dx;
@@ -247,7 +247,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 						(*data_dzdy)[k] = ((*data)[ky2] - (*data)[ky0]) / (((double)jj) * ddy);
 				}
 		}
-	
+
 		/* Destroy GMT session */
 		if (GMT_Destroy_Session(API) != 0) {
 			fprintf(stderr, "\nUnable to destroy a GMT session with GMT_Destroy_Session() in function %s\n", function_name);
@@ -289,7 +289,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 		fprintf(stderr, "    size:                   %zu\n", header->size);
 		fprintf(stderr, "    pad:                    %d %d %d %d\n", header->pad[0], header->pad[1], header->pad[2],
 		        header->pad[3]);
-		fprintf(stderr, "    data ptr:               %p\n", G->data);
+		fprintf(stderr, "    data ptr:               %p\n", data);
 	}
 
 	/* print output debug statements */

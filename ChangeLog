@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.6.20181128   November 28, 2018
   Version 5.6.20181016   October 16, 2018
   Version 5.6.002        September 14, 2018
   Version 5.6.002        September 11, 2018
@@ -290,6 +291,32 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.6 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.6.20181128 (November 28, 2018)
+
+MBgrdtiff, mbm_grdtiff: Added -Nnudge_x/nudge_y option to apply a positional offset
+in meters relative to the input grid or mosaic.
+
+MBgrdviz, mbeditviz: Changed mechanism by which files selected from navigation in
+mbgrdviz are opened into mbeditviz. Previously the selection of too many files
+in mbgrdviz would cause a crash when the pulldown menu item to open those into
+mbeditviz was selected (too many == something like >10). Now an arbitrarily large
+number of files can be selected because a temporary datalist is written by mbgrdviz
+and then opened into mbeditbiz.
+
+MBpreprocess: Added options --head1-offsets=x/y/z/heading/roll/pitch and
+heading2-offsets=x/y/z/heading/roll/pitch which allow one to set the positional
+and angular offsets between the separate heads on a dual head sonar or lidar. These
+offset values are used in calculating bathymetry from raw travel times and angles.
+The values specified with the new options generally override values embedded in
+either the i/o module source code or the input data files. The initial usage is
+for lidar bathymetry in the MBF_3DWISSLR and MBF_3DWISSLP formats.
+
+MBclean: Added -Nthreshold option to detect and remove pings affected by
+significant interference. This option works by calculating the rms deviation between
+the soundings of each ping and the pings immediately before and after. When the
+rms deviation exceeds the specified threshold, all unflagged soundings in that
+ping are flagged as bad.
 
 -----> 5.6.20181016 (October 16, 2018)
 

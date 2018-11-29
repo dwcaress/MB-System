@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
                             "multiple  algorithms  can  be applied in a single pass.\n";
 	char usage_message[] = "mbclean [-Amax -Blow/high -Cslope/unit -Dmin/max \n"
 	                       "\t-Fformat -Gfraction_low/fraction_high -Iinfile -Krange_min \n"
-	                       "\t-Llonflip -Mmode -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate \n"
+	                       "\t-Llonflip -Mmode Ntolerance -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate \n"
 	                       "\t-Sspike_slope/mode/format -Ttolerance -Wwest/east/south/north \n"
 	                       "\t-Xbeamsleft/beamsright -Ydistanceleft/distanceright[/mode] -Z\n\t-V -H]\n\n";
 	extern char *optarg;
@@ -210,6 +210,7 @@ int main(int argc, char **argv) {
 	int nmintot = 0;
 	int nbadtot = 0;
 	int nspiketot = 0;
+	int npingdeviationtot = 0;
 	int nflagtot = 0;
 	int nunflagtot = 0;
 	int nflagesftot = 0;
@@ -233,6 +234,7 @@ int main(int argc, char **argv) {
 	int nmin = 0;
 	int nbad = 0;
 	int nspike = 0;
+	int npingdeviation = 0;
 	int nflag = 0;
 	int nunflag = 0;
 	int nflagesf = 0;
@@ -280,6 +282,12 @@ int main(int argc, char **argv) {
 	int num_good_min;
 	int num_good;
 	int action;
+	int check_ping_deviation = MB_NO;
+	double ping_deviation_tolerance = 1.0;
+	double devsqsum = 0.0;
+	int ndevsqsum = 0;
+	double dev, ping_deviation;
+
 
 	/* rail processing variables */
 	int center;
@@ -356,7 +364,7 @@ int main(int argc, char **argv) {
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:K:k:L:l:I:i:M:m:Q:q:P:p:R:r:S:s:T:t:U:u:W:w:X:x:Y:y:Zz")) !=
+	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:K:k:L:l:I:i:M:m:N:n:Q:q:P:p:R:r:S:s:T:t:U:u:W:w:X:x:Y:y:Zz")) !=
 	       -1) {
 		switch (c) {
 		case 'H':
@@ -431,6 +439,12 @@ int main(int argc, char **argv) {
 		case 'M':
 		case 'm':
 			sscanf(optarg, "%d", &mode);
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			sscanf(optarg, "%lf", &ping_deviation_tolerance);
+			check_ping_deviation = MB_YES;
 			flag++;
 			break;
 		case 'P':
@@ -618,6 +632,8 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       speed_high:           %f\n", speed_high);
 		fprintf(stderr, "dbg2       check_position_bounds:%d\n", check_position_bounds);
 		fprintf(stderr, "dbg2       check_zero_position:  %d\n", check_zero_position);
+		fprintf(stderr, "dbg2       check_ping_deviation: %d\n", check_ping_deviation);
+		fprintf(stderr, "dbg2       ping_deviation_tolerance:  %f\n", ping_deviation_tolerance);
 	}
 
 	/* if help desired then print it and exit */
@@ -1521,6 +1537,50 @@ int main(int argc, char **argv) {
 							}
 						}
 					}
+
+					/* check ping deviation */
+					if (check_ping_deviation == MB_YES && nrec >= 3) {
+						devsqsum = 0.0;
+						ndevsqsum = 0;
+						for (i = 0; i < ping[irec].beams_bath; i++) {
+							if (mb_beam_ok(ping[irec-1].beamflag[i])
+								&& mb_beam_ok(ping[irec].beamflag[i])
+								&& mb_beam_ok(ping[irec+1].beamflag[i])) {
+								dev = (ping[irec].bath[i] - ping[irec+1].bath[i])
+											+ (ping[irec].bath[i] - ping[irec-1].bath[i]);
+								devsqsum += dev * dev;
+								ndevsqsum++;
+							}
+						}
+						if (ndevsqsum > (ping[irec].beams_bath / 4)) {
+							ping_deviation = sqrt(devsqsum / ndevsqsum);
+//if (ping_deviation > ping_deviation_tolerance/2)
+//fprintf(stderr, "PING DEVIATION: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f - %3d %f %f - %d\n",
+//ping[irec].time_i[0], ping[irec].time_i[1], ping[irec].time_i[2],
+//ping[irec].time_i[3], ping[irec].time_i[4], ping[irec].time_i[5],
+//ping[irec].time_i[6], i, ping[irec].bath[i],
+//ndevsqsum, ping_deviation, ping_deviation_tolerance,
+//(ping_deviation > ping_deviation_tolerance));
+							if (ping_deviation > ping_deviation_tolerance) {
+								for (i = 0; i < ping[irec].beams_bath; i++) {
+									if (mb_beam_ok(ping[irec].beamflag[i])) {
+										if (verbose >= 1)
+											fprintf(stderr, "p: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %3d %f %f\n",
+											        ping[irec].time_i[0], ping[irec].time_i[1], ping[irec].time_i[2],
+											        ping[irec].time_i[3], ping[irec].time_i[4], ping[irec].time_i[5],
+											        ping[irec].time_i[6], i, ping[irec].bath[i],
+															ndevsqsum, ping_deviation, ping_deviation_tolerance);
+										ping[irec].beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+										npingdeviation++;
+										nflag++;
+										mb_ess_save(verbose, &esf, ping[irec].time_d,
+										            i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, MBP_EDIT_FILTER,
+										            &error);
+									}
+								}
+							}
+						}
+					}
 				}
 
 				/* write out edits from completed pings */
@@ -1631,6 +1691,7 @@ int main(int argc, char **argv) {
 			nmintot += nmin;
 			nbadtot += nbad;
 			nspiketot += nspike;
+			npingdeviationtot += npingdeviation;
 			nflagtot += nflag;
 			nunflagtot += nunflag;
 
@@ -1657,6 +1718,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "%d max heading rate pings identified\n", nmax_heading_rate);
 				fprintf(stderr, "%d excessive slopes identified\n", nbad);
 				fprintf(stderr, "%d excessive spikes identified\n", nspike);
+				fprintf(stderr, "%d ping deviations identified\n", npingdeviation);
 				fprintf(stderr, "%d beams flagged\n", nflag);
 				fprintf(stderr, "%d beams unflagged\n", nunflag);
 			}
@@ -1702,6 +1764,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "%d total max heading rate beams identified\n", nmax_heading_ratetot);
 		fprintf(stderr, "%d total excessive spikes identified\n", nspiketot);
 		fprintf(stderr, "%d total excessive slopes identified\n", nbadtot);
+		fprintf(stderr, "%d ping deviations identified\n", npingdeviationtot);
 		fprintf(stderr, "%d total beams flagged\n", nflagtot);
 		fprintf(stderr, "%d total beams unflagged\n", nunflagtot);
 	}

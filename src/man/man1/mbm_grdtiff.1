@@ -1,4 +1,4 @@
-.TH mbm_grdtiff 1 "28 September 2013" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_grdtiff 1 "28 November 2018" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grdtiff\fP \- Create an executable shellscript which will generate
 a TIFF image of gridded data in a GMT grd file.
@@ -9,7 +9,7 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbm_grdtiff\fP \fB\-I\fP\fIfile\fP
 [\fB\-A\fP\fImagnitude[/azimuth/elevation]\fP
-\fB\-G\fP\fIcolor_mode\fP \fB\-H\fP \fB\-K\fP\fIintensity_file\fP
+\fB\-G\fP\fIcolor_mode\fP \fB\-H\fP \fB\-K\fP\fIintensity_file\fP \fB-N\fInudge_x/nudge_y\fP
 \fB\-O\fP\fIroot\fP \fB\-S\fP\fI[color/shade]\fP
 \fB\-V\fP
 \fB\-W\fP\fI[color_style\fP[\fI/palette\fP[\fIncolors\fP]] | \fIcptfile]\fP ]
@@ -143,6 +143,11 @@ Alternatively, \fIgrdfile\fP may be a list of grid files
 (one filename on each line) to be used together. If a
 list of file is supplied, the intensity files must
 conform in order to the data grid files they will shade.
+.TP
+.B \-N
+\fInudge_x/nudge_y\fP
+Specifies positional offset in meters of the output geotiff image relative to the
+input grid or mosaic.
 .TP
 .B \-O
 \fIroot\fP

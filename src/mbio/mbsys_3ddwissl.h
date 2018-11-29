@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_3ddwissl.h	12/19/2017
- *	$Id$
+ *    The MB-system:  mbsys_3ddwissl.h  12/19/2017
+ *  $Id$
  *
  *    Copyright (c) 2018-2018 by
  *    David W. Caress (caress@mbari.org)
@@ -17,8 +17,8 @@
  * the 3DatDepth WiSSL (wide swath lidar) submarine lidar:
  *      MBF_3DDWISSL : MBIO ID 232 - 3DatDepth WiSSL vendor format
  *
- * Author:	David W. Caress
- * Date:	December 19, 2017
+ * Author:  David W. Caress
+ * Date:  December 19, 2017
  *
  */
 /*
@@ -33,7 +33,7 @@
  *--------------------------------------------------------------------------------
  * Range Angle Angle data format (binary)
  * 3D at Depth raw WiSSL data format
- *              Item	                                Value	            Bytes
+ *              Item                                  Value              Bytes
  * ---------------------------------------------------------------------------------------
  * File Header
  *           Record ID – WiSSL                             0x3D47   2 (1 UINT16)
@@ -307,18 +307,18 @@
      *     droll (in xz plane, + to starboard): -22.08 degrees
      *     dpitch (in yz plane, + forward): -5.01
      */
-//#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           +0.012224004
-//#define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954
-//#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.062005210
-//#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -0.0         // ICD value 0.0
-//#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -22.08        // ICD value -22.08
-//#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -4.68         // ICD value -4.68
-//#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           -0.012224004
-//#define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.120281954
-//#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.062005210
-//#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +0.00         // ICD value 0.0
-//#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.08        // ICD value +22.08
-//#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -5.01         // ICD value -5.01
+#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           +0.012224004  // ICD value +0.012224004
+#define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.120281954  // ICD value -0.120281954
+#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.062005210  // ICD value +0.062005210
+#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -0.0          // ICD value 0.0
+#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -22.08        // ICD value -22.08
+#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -4.68         // ICD value -4.68
+#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           -0.012224004  // ICD value -0.012224004
+#define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.120281954  // ICD value +0.120281954
+#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.062005210  // ICD value +0.062005210
+#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +0.00         // ICD value 0.0
+#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.08        // ICD value +22.08
+#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -5.01         // ICD value -5.01
 
 //#define MBSYS_3DDWISSL_FILEHEADER                 0
 //#define MBSYS_3DDWISSL_HEADA                      1
@@ -355,22 +355,22 @@
 //#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.53       // ICD value +22.08
 //#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.080       // ICD value -5.01
 
-#define MBSYS_3DDWISSL_FILEHEADER                 0
-#define MBSYS_3DDWISSL_HEADA                      1
-#define MBSYS_3DDWISSL_HEADB                      2
-#define MBSYS_3DDWISSL_COMMENT                    3
-#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           -0.032775996 // ICD value +0.012224004
-#define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.102281954 // ICD value -0.120281954
-#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.050005210 // ICD value +0.062005210
-#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -1.20        // ICD value 0.0
-#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -22.53       // ICD value -22.08
-#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -5.590       // ICD value -4.68
-#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           +0.032775996 // ICD value -0.012224004
-#define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.102281954 // ICD value +0.120281954
-#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.074005210 // ICD value  +0.062005210
-#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.20        // ICD value 0.0
-#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.53       // ICD value +22.08
-#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.080       // ICD value -5.01
+//#define MBSYS_3DDWISSL_FILEHEADER                 0
+//#define MBSYS_3DDWISSL_HEADA                      1
+//#define MBSYS_3DDWISSL_HEADB                      2
+//#define MBSYS_3DDWISSL_COMMENT                    3
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_X_M           -0.032775996 // ICD value +0.012224004
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_Y_M           -0.102281954 // ICD value -0.120281954
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_Z_M           +0.050005210 // ICD value +0.062005210
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_HEADING_DEG   -1.20        // ICD value 0.0
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_ROLL_DEG      -22.53       // ICD value -22.08
+//#define MBSYS_3DDWISSL_HEADA_OFFSET_PITCH_DEG     -5.590       // ICD value -4.68
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_X_M           +0.032775996 // ICD value -0.012224004
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_Y_M           +0.102281954 // ICD value +0.120281954
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_Z_M           +0.074005210 // ICD value  +0.062005210
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_HEADING_DEG   +1.20        // ICD value 0.0
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_ROLL_DEG      +22.53       // ICD value +22.08
+//#define MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG     -4.080       // ICD value -5.01
 
 #define MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD 2000.0
 #define MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE        0.0
@@ -434,14 +434,14 @@ struct mbsys_3ddwissl_calibration_struct {
 
 struct mbsys_3ddwissl_sounding_struct {
     /* raw information */
-	float range;                    /* meters from glass front */
-	short amplitude;                /* peak of signal - to 1023 */
+  float range;                    /* meters from glass front */
+  short amplitude;                /* peak of signal - to 1023 */
 
-	/* processed information incorporating pulse offsets and head offsets */
-	mb_u_char beamflag; /* MB-System beam flag */
-	float acrosstrack;  /* acrosstrack distance relative to overall sensor reference point (meters) */
-	float alongtrack;   /* alongtrack distance relative to overall sensor reference point (meters) */
-	float depth;        /* depth relative to overall sensor reference point (meters) */
+  /* processed information incorporating pulse offsets and head offsets */
+  mb_u_char beamflag; /* MB-System beam flag */
+  float acrosstrack;  /* acrosstrack distance relative to overall sensor reference point (meters) */
+  float alongtrack;   /* alongtrack distance relative to overall sensor reference point (meters) */
+  float depth;        /* depth relative to overall sensor reference point (meters) */
 };
 
 struct mbsys_3ddwissl_pulse_struct {
@@ -452,19 +452,19 @@ struct mbsys_3ddwissl_pulse_struct {
     float offset_el; /* AZ, Forward track offset, (m) */
     float time_offset; /* Pulse time offset (sec) */
 
-	/* processed information */
-	double time_d;              /* epoch time */
-	double acrosstrack_offset;  /* relative to start of scan using position
+  /* processed information */
+  double time_d;              /* epoch time */
+  double acrosstrack_offset;  /* relative to start of scan using position
                                  * and heading at start of scan */
-	double alongtrack_offset;   /* relative to start of scan using position
+  double alongtrack_offset;   /* relative to start of scan using position
                                  * and heading at start of scan */
-	double sensordepth_offset;  /* relative to start of scan using position
+  double sensordepth_offset;  /* relative to start of scan using position
                                  * and heading at start of scan */
-	float heading_offset;       /* relative to start of scan using position
+  float heading_offset;       /* relative to start of scan using position
                                  * and heading at start of scan */
-	float roll_offset;          /* relative to start of scan using position
+  float roll_offset;          /* relative to start of scan using position
                                  * and heading at start of scan */
-	float pitch_offset;         /* relative to start of scan using position
+  float pitch_offset;         /* relative to start of scan using position
                                  * and heading at start of scan */
 
     /* soundings */
@@ -475,22 +475,22 @@ struct mbsys_3ddwissl_pulse_struct {
 /* 3DatDepth LIDAR data structure */
 struct mbsys_3ddwissl_struct {
 
-	/* Type of data record */
-	int kind; /* MB-System record ID */
+  /* Type of data record */
+  int kind; /* MB-System record ID */
 
-	/* File Header */
+  /* File Header */
     unsigned short parameter_id;    /* 0x3D47 */
     unsigned short magic_number;    /* 0x3D08 */
-	unsigned short file_version;    /* 1 */
-	unsigned short sub_version;     /* 1 = initial version from 3DatDepth, extended for MB-System */
+  unsigned short file_version;    /* 1 */
+  unsigned short sub_version;     /* 1 = initial version from 3DatDepth, extended for MB-System */
 
     /* Scan Information */
     float cross_track_angle_start; /* AZ, Cross track angle start, typical (deg) */
     float cross_track_angle_end; /* AZ, Cross track angle end, typical (deg) */
     unsigned short pulses_per_scan; /* Pulses per cross track, scan line */
     unsigned short soundings_per_pulse; /* soundings per pulse (line of sight, or LOS) */
-	unsigned short heada_scans_per_file; /* number of heada scans in this file */
-	unsigned short headb_scans_per_file; /* number of headb scans in this file */
+  unsigned short heada_scans_per_file; /* number of heada scans in this file */
+  unsigned short headb_scans_per_file; /* number of headb scans in this file */
 
     /* WiSSL optical head positional and angular offsets */
     double heada_offset_x_m;                    /* head A x offset (m) -0.012224004 */
@@ -512,7 +512,7 @@ struct mbsys_3ddwissl_struct {
     /* head B calibration */
     struct mbsys_3ddwissl_calibration_struct calibration_b;
 
-	/* Scan information from raw records */
+  /* Scan information from raw records */
     unsigned short record_id;       /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or 0x3D74) */
     unsigned int scan_size;         /* bytes of scan record minus 4 (record_id + scan_size) */
     unsigned short year;
@@ -536,28 +536,28 @@ struct mbsys_3ddwissl_struct {
 
     /* merged navigation and attitude per each scan */
     double time_d;      /* epoch time - not in data file, calculated following reading */
-	double navlon;      /* absolute position longitude (degrees) */
-	double navlat;      /* absolute position latitude (degrees) */
-	double sensordepth; /* absolute position depth below sea surface (meters), includes any tide correction */
-	float speed;        /* lidar speed (m/s) */
-	float heading;      /* lidar heading (degrees) */
-	float roll;         /* lidar roll (degrees) */
-	float pitch;        /* lidar pitch (degrees) */
+    double navlon;      /* absolute position longitude (degrees) */
+    double navlat;      /* absolute position latitude (degrees) */
+    double sensordepth; /* absolute position depth below sea surface (meters), includes any tide correction */
+    float speed;        /* lidar speed (m/s) */
+    float heading;      /* lidar heading (degrees) */
+    float roll;         /* lidar roll (degrees) */
+    float pitch;        /* lidar pitch (degrees) */
     unsigned short validpulse_count;              /* number of valid (non-null) pulses stored in this record */
     unsigned short validsounding_count;           /* number of valid (non-null) soundings stored in this record */
 
-	unsigned int scan_count;                    /* global scan count */
+  unsigned int scan_count;                    /* global scan count */
     unsigned int size_pulse_record_raw;         /* for original logged records
                                                  * - calculated from file header values */
     unsigned int size_pulse_record_processed;   /* for extended processed records
                                                  * -  calculated from file header values */
     unsigned int bathymetry_calculated;         /* flag regarding calculation of bathymetry */
-	int num_pulses_alloc;      /* array allocated for this number of pulses */
+  int num_pulses_alloc;      /* array allocated for this number of pulses */
     struct mbsys_3ddwissl_pulse_struct *pulses;
 
-	/* comment */
-	unsigned short comment_len;       /* comment length in bytes */
-	char comment[MB_COMMENT_MAXLINE]; /* comment string */
+  /* comment */
+  unsigned short comment_len;       /* comment length in bytes */
+  char comment[MB_COMMENT_MAXLINE]; /* comment string */
 };
 
 /* System specific function prototypes */

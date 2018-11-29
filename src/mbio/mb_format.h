@@ -492,13 +492,13 @@ variable beams, bathymetry, amplitude, \
 binary, single files, 3DatDepth. */
 
 #define MBF_3DWISSLR 232
-/* 3D at Depth vendor format for 3D at Depth WiSSL 
+/* 3D at Depth vendor format for 3D at Depth WiSSL
 (Wide Swath Subsea Lidar, \
 variable beams, bathymetry, amplitude, \
 binary, single files, 3D at Depth. */
 
 #define MBF_3DWISSLP 233
-/* 3D at Depth processed format for 3D at Depth WiSSL 
+/* 3D at Depth processed format for 3D at Depth WiSSL
 (Wide Swath Subsea Lidar, \
 variable beams, bathymetry, amplitude, \
 binary, single files, MBARI. */
