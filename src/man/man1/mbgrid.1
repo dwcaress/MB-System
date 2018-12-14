@@ -1,4 +1,4 @@
-.TH mbgrid 1 "2 January 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid 1 "14 December 2018" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP \- Grid bathymetry, amplitude, or sidescan data
 from swath sonar data files.
@@ -20,12 +20,14 @@ Version 5.0
 .SH DESCRIPTION
 \fBmbgrid\fP is a utility used to grid bathymetry, amplitude, or sidescan
 data contained in a set of swath sonar data files. This program uses
-one of six algorithms to grid regions covered by swath sonar
+one of eight algorithms to grid regions covered by swath sonar
 swaths and then can fill in gaps between the swaths (to the degree
 specified by the user) using a thin plate spline interpolation.
-The gridding algorithms include gaussian weighted average,
-median filter, minimum filter (use minimum value in grid bin), and
-maximum filter (use maximum value in grid bin).
+The gridding algorithms include gaussian weighted mean,
+median filter, minimum filter, maximum filter, beam footprint considering local
+slope, beam footprint ignoring local slope, weighted mean near the minimum, and
+weighted mean near the maximum. The specifics of these algorithms are explained
+below.
 
 The user must specify a file containing a list of the data files to
 be used and their data formats (\fB\-I\fP), and a character string
@@ -98,11 +100,13 @@ The available gridding algorithms specified with the \fB-F\fP option are:
      4. Maximum filter
      5. Beam footprint with slope
      6. Beam footprint
+     7. Minimum weighted mean
+     8. Maximum weighted mean
 .br
 Algorithms 5 and 6 can only be used to grid bathymetry data, and are
 not available for gridding amplitude or sidescan data.
 
-If the default weighted average gridding scheme (\fB\-F\fP\fI1\fP) 
+If the default weighted average gridding scheme (\fB\-F\fP\fI1\fP)
 is being used, each data point's contribution to a Gaussian weighted
 average for each nearby grid cell is calculated as the point is read
 and added to the grid cell sums.  The weighting function is given by:
@@ -164,6 +168,22 @@ is located.
 
 The \fB\-F\fP\fI6\fP option results in beam footprint gridding of multibeam
 data without application of a local slope estimate.
+
+The minimum weighted mean algorithm is specified like the minimum filter but with
+a threshold value added (e.g. \fB\-F\fP\fI3/threshold\fP). Here the Gaussian
+weighted mean value is calculated using only the valid soundings that are within
+\fIthreshold\fP meters of the minimum sounding in the grid bin. This algorithm
+allows for sensible gridding when the soundings include three dimensional features
+such as overhangs or vertical walls, and the desired result is to represent the
+minimum or shallowest surface.
+
+The maximum weighted mean algorithm is specified like the maximum filter but with
+a threshold value added (e.g. \fB\-F\fP\fI4/threshold\fP). Here the Gaussian
+weighted mean value is calculated using only the valid soundings that are within
+\fIthreshold\fP meters of the maximum sounding in the grid bin. This algorithm
+allows for sensible gridding when the soundings include three dimensional features
+such as overhangs or vertical walls, and the desired result is to represent the
+maximum or deepest surface.
 
 Normally, all of the data which falls into the region of interest
 is used to construct the gridded data set. This means that the
@@ -341,16 +361,20 @@ the program sets the grid cell spacing to be 0.02 times the maximum
 sonar altitude in the input files.
 .TP
 .B \-F
-\fImode\fP
+\fImode[/threshold]\fP
 .br
 Sets the gridding algorithm to be used.
- 	\fImode\fP = 1:         Gaussian Weighted Mean
- 	\fImode\fP = 2:         Median Filter
- 	\fImode\fP = 3:         Minimum Filter
- 	\fImode\fP = 4:         Maximum Filter
- 	\fImode\fP = 5:         Weighted Sonar Footprint with slope
- 	\fImode\fP = 6:         Weighted Sonar Footprint
-The default is \fImode\fP = 1 (Gaussian Weighted Mean).
+ 	\fImode\fP = 1:               Gaussian Weighted Mean
+ 	\fImode\fP = 2:               Median Filter
+ 	\fImode\fP = 3:               Minimum Filter
+ 	\fImode\fP = 4:               Maximum Filter
+ 	\fImode\fP = 5:               Weighted Sonar Footprint with slope
+ 	\fImode\fP = 6:               Weighted Sonar Footprint
+ 	\fImode\fP = 3 + \fIthreshold\fP: Minimum Weighted Mean
+ 	\fImode\fP = 4 + \fIthreshold\fP: Maximum Weighted Mean
+.br
+When used, the \fIthreshold\fP value is defined in meters. The default gridding
+algorithm is \fImode\fP = 1 (Gaussian Weighted Mean).
 .TP
 .B \-G
 \fIgridkind\fP

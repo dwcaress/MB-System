@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.6.20181214   December 14, 2018
   Version 5.6.20181129   November 29, 2018
   Version 5.6.20181016   October 16, 2018
   Version 5.6.002        September 14, 2018
@@ -291,6 +292,21 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.6 RELEASE NOTES:
 -------------------------------------------------------------------------------
+-----> 5.6.20181214 (December 14, 2018)
+
+Format 121 (MBF_GSFGENMB): Changed GSFlib version to 3.08. MB-System also now
+builds and installs the program dump_gsf.
+
+MBgrid: Added two new gridding algorithms, minimum weighted mean and maximum
+weighted mean. These are both implementations of Gaussian weighted mean in which
+only valid soundings that are close to the minimum (or maximum) value in each
+grid cell are used. A threshold value in meters defines what close means; only
+soundings no further from the minimum (or maximum) than the threshold are used.
+These algorithms are useful when bathymetry data include areas that are not truly
+representable with a 2D grid because of vertical walls or multiple values (e.g.
+overhangs). These algorithms allow one to choose to follow the shallowest or
+deepest surfaces in the gridded model. These algorithms were specifically added
+to handle subsea lidar data that maps animals as well as the seafloor.
 
 -----> 5.6.20181129 (November 29, 2018)
 

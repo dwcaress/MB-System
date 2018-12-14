@@ -263,17 +263,19 @@ int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonar
 	    || mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC          /* 149 */
 	    || mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC         /* 150 */
 	    || mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2022_SPECIFIC    /* 151 */
-	    || mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC /* 152 */) {
+	    || mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC    /* 152 */
+	    || mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2020_SPECIFIC    /* 153 */
+	    || mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_TSERIES_SPECIFIC   /* 154 */) {
 		*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 	}
 	else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC /* 136 */
 	         || mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC /* 137 */) {
 		*sonartype = MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC;
 	}
-	else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC /* 136 */
-	         || mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC /* 137 */) {
-		*sonartype = MB_TOPOGRAPHY_TYPE_SIDESCAN;
-	}
+//	else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC /* 136 */
+//	         || mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC /* 137 */) {
+//		*sonartype = MB_TOPOGRAPHY_TYPE_SIDESCAN;
+//	}
 	else if (mb_ping->sensor_id == GSF_SINGLE_BEAM_SUBRECORD_ECHOTRAC_SPECIFIC        /* 201 */
 	         || mb_ping->sensor_id == GSF_SINGLE_BEAM_SUBRECORD_BATHY2000_SPECIFIC    /* 202 */
 	         || mb_ping->sensor_id == GSF_SINGLE_BEAM_SUBRECORD_MGD77_SPECIFIC        /* 203 */
