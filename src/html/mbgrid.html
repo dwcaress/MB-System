@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbgrid</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  2 January 2017 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  14 December 2018 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -43,12 +43,14 @@ Version 5.0
 
 <B>mbgrid</B> is a utility used to grid bathymetry, amplitude, or sidescan
 data contained in a set of swath sonar data files. This program uses
-one of six algorithms to grid regions covered by swath sonar
+one of eight algorithms to grid regions covered by swath sonar
 swaths and then can fill in gaps between the swaths (to the degree
 specified by the user) using a thin plate spline interpolation.
-The gridding algorithms include gaussian weighted average,
-median filter, minimum filter (use minimum value in grid bin), and
-maximum filter (use maximum value in grid bin).
+The gridding algorithms include gaussian weighted mean,
+median filter, minimum filter, maximum filter, beam footprint considering local
+slope, beam footprint ignoring local slope, weighted mean near the minimum, and
+weighted mean near the maximum. The specifics of these algorithms are explained
+below.
 <P>
 The user must specify a file containing a list of the data files to
 be used and their data formats (<B>-I</B>), and a character string
@@ -122,12 +124,14 @@ The available gridding algorithms specified with the <B>-F</B> option are:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.&nbsp;Maximum&nbsp;filter
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.&nbsp;Beam&nbsp;footprint&nbsp;with&nbsp;slope
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.&nbsp;Beam&nbsp;footprint
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.&nbsp;Minimum&nbsp;weighted&nbsp;mean
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.&nbsp;Maximum&nbsp;weighted&nbsp;mean
 <BR>
 
 Algorithms 5 and 6 can only be used to grid bathymetry data, and are
 not available for gridding amplitude or sidescan data.
 <P>
-If the default weighted average gridding scheme (<B>-F</B><I>1</I>) 
+If the default weighted average gridding scheme (<B>-F</B><I>1</I>)
 is being used, each data point's contribution to a Gaussian weighted
 average for each nearby grid cell is calculated as the point is read
 and added to the grid cell sums.  The weighting function is given by:
@@ -190,6 +194,22 @@ is located.
 <P>
 The <B>-F</B><I>6</I> option results in beam footprint gridding of multibeam
 data without application of a local slope estimate.
+<P>
+The minimum weighted mean algorithm is specified like the minimum filter but with
+a threshold value added (e.g. <B>-F</B><I>3/threshold</I>). Here the Gaussian
+weighted mean value is calculated using only the valid soundings that are within
+<I>threshold</I> meters of the minimum sounding in the grid bin. This algorithm
+allows for sensible gridding when the soundings include three dimensional features
+such as overhangs or vertical walls, and the desired result is to represent the
+minimum or shallowest surface.
+<P>
+The maximum weighted mean algorithm is specified like the maximum filter but with
+a threshold value added (e.g. <B>-F</B><I>4/threshold</I>). Here the Gaussian
+weighted mean value is calculated using only the valid soundings that are within
+<I>threshold</I> meters of the maximum sounding in the grid bin. This algorithm
+allows for sensible gridding when the soundings include three dimensional features
+such as overhangs or vertical walls, and the desired result is to represent the
+maximum or deepest surface.
 <P>
 Normally, all of the data which falls into the region of interest
 is used to construct the gridded data set. This means that the
@@ -390,17 +410,22 @@ sonar altitude in the input files.
 <DT><B>-F</B>
 
 <DD>
-<I>mode</I>
+<I>mode[/threshold]</I>
 <BR>
 
 Sets the gridding algorithm to be used.
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gaussian&nbsp;Weighted&nbsp;Mean<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Median&nbsp;Filter<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Filter<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;4:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum&nbsp;Filter<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted&nbsp;Sonar&nbsp;Footprint&nbsp;with&nbsp;slope<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;6:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted&nbsp;Sonar&nbsp;Footprint<BR>
-The default is <I>mode</I> = 1 (Gaussian Weighted Mean).
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gaussian&nbsp;Weighted&nbsp;Mean<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Median&nbsp;Filter<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Filter<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;4:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum&nbsp;Filter<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted&nbsp;Sonar&nbsp;Footprint&nbsp;with&nbsp;slope<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;6:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Weighted&nbsp;Sonar&nbsp;Footprint<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;3&nbsp;+&nbsp;<I>threshold</I>:&nbsp;Minimum&nbsp;Weighted&nbsp;Mean<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;4&nbsp;+&nbsp;<I>threshold</I>:&nbsp;Maximum&nbsp;Weighted&nbsp;Mean<BR>
+<BR>
+
+When used, the <I>threshold</I> value is defined in meters. The default gridding
+algorithm is <I>mode</I> = 1 (Gaussian Weighted Mean).
 <DT><B>-G</B>
 
 <DD>
@@ -8426,7 +8451,7 @@ the <B>-J</B> option, e.g. <B>-J</B><I>UTM10N</I> or <B>-J</B><I>epsg32749</I>.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 2 January 2017</P></CENTER>
+Last Updated: 14 December 2018</P></CENTER>
 
 <HR>
 
