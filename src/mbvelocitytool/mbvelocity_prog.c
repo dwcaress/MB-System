@@ -2249,7 +2249,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	status = mb_close(verbose, &mbio_ptr, &error);
 
 	/* Close ESF file if avialable */
-	if (esf.nedit > 0)
+	if (esf.edit != NULL || esf.esffp != NULL)
 		mb_esf_close(verbose, &esf, &error);
 
 	/* define success */

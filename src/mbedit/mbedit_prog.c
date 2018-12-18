@@ -4029,7 +4029,7 @@ int mbedit_close_file() {
 
 	/* close the files */
 	status = mb_close(verbose, &imbio_ptr, &error);
-	if (esf.nedit > 0 || esf.esffp != NULL) {
+	if (esf.edit != NULL || esf.esffp != NULL) {
 		status = mb_esf_close(verbose, &esf, &error);
 	}
 

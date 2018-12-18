@@ -1295,7 +1295,7 @@ by MBprocess.";
 		/* close the swath sonar file */
 		status = mb_close(verbose, &mbio_ptr, &error);
 		/* Close ESF file if avialable and open */
-		if (esf.nedit > 0)
+		if (esf.edit != NULL || esf.esffp != NULL)
 			mb_esf_close(verbose, &esf, &error);
 
 		if (dump == MB_NO && amplitude_on == MB_YES)
