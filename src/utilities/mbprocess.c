@@ -352,7 +352,7 @@ and mbedit edit save files.\n";
 	int neditduplicate;
 	int neditnotused;
 	int neditused;
-	
+
 	/* output reverse edit save file control variables */
 	mb_path resf_file;
 	FILE *resf_fp = NULL;
@@ -411,7 +411,7 @@ and mbedit edit save files.\n";
 
 	/* topography parameters */
 	struct mbprocess_grid_struct grid;
-	
+
 	/* output fbt and fnv files */
 	FILE *fnv_fp, *fbt_fp;
 	mb_path fnv_file, fbt_file;
@@ -3144,7 +3144,7 @@ and mbedit edit save files.\n";
 			/* reset error */
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
-			
+
 			/* open reverse edit save file (*.resf) */
 			sprintf(resf_file, "%s.resf", process.mbp_ifile);
 			if ((resf_fp = fopen(resf_file, "w")) == NULL) {
@@ -4255,7 +4255,7 @@ and mbedit edit save files.\n";
 						status = MB_FAILURE;
 					}
 				}
-				
+
 				/* save the orignal beamflag states */
 				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
 					for (i = 0; i < nbath; i++) {
@@ -5599,7 +5599,7 @@ and mbedit edit save files.\n";
 					                   namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack,
 					                   ssalongtrack, comment, &error);
 				}
-				
+
 				/*--------------------------------------------
 				  output any changed beamflags to the reverse
 				  edit save file (saving the change required
@@ -5714,7 +5714,7 @@ and mbedit edit save files.\n";
 			/* unlock the raw swath file */
 			if (uselockfiles == MB_YES)
 				lock_status = mb_pr_unlockswathfile(verbose, process.mbp_ifile, MBP_LOCK_PROCESS, program_name, &lock_error);
-				
+
 			/* close the *.resf file */
 			if (resf_fp != NULL) {
 				fclose(resf_fp);
@@ -5799,7 +5799,7 @@ and mbedit edit save files.\n";
 			}
 
 			/* deallocate arrays for beam edits */
-			if (esf.nedit > 0) {
+			if (process.mbp_edit_mode == MBP_EDIT_ON) {
 				mb_esf_close(verbose, &esf, &error);
 			}
 
