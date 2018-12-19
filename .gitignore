@@ -1,6 +1,5 @@
 /aclocal.m4
 /Makefile
-/Makefile.in
 /config.log
 /config.status
 autom4te.cache/*
@@ -11,9 +10,8 @@ src/**/*.la
 src/**/.deps
 src/**/.libs
 src/**/Makefile
-src/**/Makefile.in
 src/**/*.exe
-src/gmt/mbswath.c.tmp
+src/gsf/dump_gsf
 src/mbedit/mbedit
 src/mbeditviz/mbeditviz
 src/mbgrdviz/mbgrdviz
