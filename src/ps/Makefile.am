@@ -34,7 +34,6 @@ mblist.ps \
 mbm_arc2grd.ps \
 mbm_bpr.ps \
 mbm_copy.ps \
-mbm_dslnavfix.ps \
 mbm_fmtvel.ps \
 mbm_grd2arc.ps \
 mbm_grd2geovrml.ps \
@@ -53,7 +52,6 @@ mbm_plot.ps \
 mbm_route2mission.ps \
 mbm_stat.ps \
 mbm_utm.ps \
-mbm_vrefcheck.ps \
 mbm_xbt.ps \
 mbm_xyplot.ps \
 mbmosaic.ps \

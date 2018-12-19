@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+* Version 5.6.20181218   December 18, 2018
 * Version 5.6.20181217   December 17, 2018
   Version 5.6.20181214   December 14, 2018
   Version 5.6.20181129   November 29, 2018
@@ -293,6 +294,14 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.6 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.6.20181218 (December 18, 2018)
+
+Generated release package using github
+
+mbm_vrefcheck: Removed, never completed, never worked.
+
+mbm_dslnavfix: Removed, obsolete.
 
 -----> 5.6.20181217 (December 17, 2018)
 

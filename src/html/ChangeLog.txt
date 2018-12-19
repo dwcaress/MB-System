@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+* Version 5.6.20181217   December 17, 2018
   Version 5.6.20181214   December 14, 2018
   Version 5.6.20181129   November 29, 2018
   Version 5.6.20181016   October 16, 2018
@@ -292,10 +293,17 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.6 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.6.20181217 (December 17, 2018)
+
+Memory management: Fixed memory leak associated with allocation and deallocation
+of edit save file (*.esf) data.
+
 -----> 5.6.20181214 (December 14, 2018)
 
 Format 121 (MBF_GSFGENMB): Changed GSFlib version to 3.08. MB-System also now
-builds and installs the program dump_gsf.
+builds and installs the program dump_gsf. Fixed several array overruns in the GSFlib
+source code distributed by Leidos.
 
 MBgrid: Added two new gridding algorithms, minimum weighted mean and maximum
 weighted mean. These are both implementations of Gaussian weighted mean in which
