@@ -27,7 +27,7 @@
 /*
  * Notes on the mbsys_reson7k3 data structure:
  *   1. This format is defined by the 7k Data Format Definition (DFD) 
- *      document for Teledyne RESON SeaBat 7k format v3.08.
+ *      document for Teledyne RESON SeaBat 7k format v3.09.
  *   2. Reson 7k series multibeam sonars output bathymetry, per beam
  *      amplitude, sidescan data and water column.
  *   3. Reson 7k format is used also to log sidescan and subbottom
@@ -216,7 +216,7 @@
 #define R7KHDRSIZE_7kTVG 50
 #define R7KHDRSIZE_7kImage 56
 #define R7KHDRSIZE_7kPingMotion 44
-#define R7KHDRSIZE_7kAdaptiveGate 
+#define R7KHDRSIZE_7kAdaptiveGate 22
 #define R7KHDRSIZE_7kDetectionDataSetup 116
 #define R7KRDTSIZE_7kDetectionDataSetup 30
 #define R7KHDRSIZE_7kBeamformed 52
@@ -238,7 +238,7 @@
 #define R7KHDRSIZE_7kCompressedWaterColumn 44
 #define R7KHDRSIZE_7kSegmentedRawDetection 36
 #define R7KRDTSIZE_7kSegmentedRawDetection 100
-#define R7KHDRSIZE_7kCalibratedBeamData 56
+#define R7KHDRSIZE_7kCalibratedBeam 56
 #define R7KHDRSIZE_7kSystemEvents 12
 #define R7KHDRSIZE_7kSystemEventMessage 14
 #define R7KHDRSIZE_7kRDRRecordingStatus 566
@@ -270,6 +270,7 @@
 /* Device identifiers */
 #define R7KDEVID_SeaBatT20 20
 #define R7KDEVID_SeaBatT20Dual 22
+#define R7KDEVID_SeaBatF30 30
 #define R7KDEVID_SeaBatT50 50
 #define R7KDEVID_SeaBatT50Dual 52
 #define R7KDEVID_GenericPosition 100
@@ -345,7 +346,7 @@
 
 /* Structure size definitions */
 #define MBSYS_RESON7K_BUFFER_STARTSIZE 32768
-#define MBSYS_RESON7K_MAX_DEVICE 71
+#define MBSYS_RESON7K_MAX_DEVICE 73
 #define MBSYS_RESON7K_MAX_RECEIVERS 1024
 #define MBSYS_RESON7K_MAX_BEAMS 1024
 #define MBSYS_RESON7K_MAX_PIXELS 4096
@@ -459,8 +460,8 @@ typedef struct s7kr_position_struct {
 	s7k_header header;
 	u32 datum;        /* 0=WGS84; others reserved */
 	f32 latency;      /* Position sensor time latency (seconds) */
-	f64 latitude;     /* Latitude (radians) or northing in meters */
-	f64 longitude;    /* Longitude (radians) or easting in meters */
+	f64 latitude_northing;     /* Latitude (radians) or northing in meters */
+	f64 longitude_easting;    /* Longitude (radians) or easting in meters */
 	f64 height;       /* Height relative to datum (meters) */
 	u8 type;          /* Position type flag:
 	                     0: Geographical coordinates
@@ -553,12 +554,12 @@ typedef struct s7kr_motion_struct {
 	u16 n;         /* number of fields */
 	f32 frequency; /* sample rate (samples/second) */
 	i32 nalloc;    /* number of samples allocated */
-	f32 *x;
-	f32 *y;
-	f32 *z;
-	f32 *xa;
-	f32 *ya;
-	f32 *za;
+	f32 *x;          /* Motion data x */
+	f32 *y;          /* Motion data y */
+	f32 *z;          /* Motion data z */
+	f32 *xa;          /* Motion data x */
+	f32 *ya;          /* Motion data y */
+	f32 *za;          /* Motion data z */
 } s7kr_motion;
 
 /* Depth (record 1008) */
@@ -673,7 +674,7 @@ typedef struct s7kr_geodesy_struct {
 	                            3 - gradians
 	                            4 - arc-seconds */
 	f64 latitude_origin;     /* Latitude of origin */
-	f64 central_meriidan;    /* Central meridian */
+	f64 central_meridian;    /* Central meridian */
 	f64 false_easting;       /* False easting (meters) */
 	f64 false_northing;      /* False northing (meters) */
 	f64 central_scale_factor;  /* Central scale factor */
@@ -709,8 +710,8 @@ typedef struct s7kr_surveyline_struct {
 	                    (meters, 0 = no curvature in turns) */
 	c8 name[64];     /* Line name */
 	i32 nalloc;      /* Number of points allocated */
-	f64 *latitude;   /* Latitude (radians, -pi/2 to pi/2) */
-	f64 *longitude;  /* Longitude (radians -pi to pi) */
+	f64 *latitude_northing;   /* Latitude (radians, -pi/2 to pi/2) */
+	f64 *longitude_easting;  /* Longitude (radians -pi to pi) */
 } s7kr_surveyline;
 
 /* Navigation (record 1015) */
@@ -796,7 +797,7 @@ typedef struct s7kr_sonarinstallationids_struct {
 typedef struct s7kr_sonarpipeenvironment_struct {
 	s7k_header header;
 	u32 pipe_number;              /* Pipe identifier */
-	s7k_time s7kTime;             /* 7KTIME               u8*10   UTC.*/
+	s7k_time s7ktime;             /* 7KTIME               u8*10   UTC.*/
 	u32 ping_number;              /* Sequential number */
 	u32 multiping_number;         /* Sub number */
 	f32 pipe_diameter;            /* Diameter of pipe (meters) */
@@ -819,7 +820,7 @@ typedef struct s7kr_contactoutput_struct {
 	s7k_header header;
 	u32 target_id;             /* Contact unique ID */
 	u32 ping_number;           /* Sequential number */
-	s7k_time s7kTime;          /* 7KTIME               u8*10   UTC.*/
+	s7k_time s7ktime;          /* 7KTIME               u8*10   UTC.*/
 	u8 operator_name[128];     /* Optional textual name of the operator */
 	u32 contact_state;         /* 0 = created; 1 = modified; 2 = deleted */
 	f32 range;                 /* Range from sonar to contact (meters) */
@@ -845,7 +846,7 @@ typedef struct s7kr_contactoutput_struct {
 } s7kr_contactoutput;
 
 /* Reson 7k volatile sonar settings (record 7000) */
-typedef struct s7kr_volatilesettings_struct {
+typedef struct s7kr_sonarsettings_struct {
 	s7k_header header;
 	u64 serial_number;              /* Sonar serial number */
 	u32 ping_number;                /* Ping number */
@@ -929,8 +930,8 @@ typedef struct s7kr_volatilesettings_struct {
 	u32 projector_magic_no;         /* Projector selection */
 	f32 steering_vertical;          /* Projector steering angle vertical (radians) */
 	f32 steering_horizontal;        /* Projector steering angle horizontal (radians) */
-	f32 beamwidth_vertical;         /* Projector -3 dB beamwidth vertical (radians) */
-	f32 beamwidth_horizontal;       /* Projector -3 dB beamwidth horizontal (radians) */
+	f32 beamwidth_vertical;         /* Projector -3 dB beamwidth vertical (radians - along track) */
+	f32 beamwidth_horizontal;       /* Projector -3 dB beamwidth horizontal (radians - along track) */
 	f32 focal_point;                /* Projector focal point (meters) */
 	u32 projector_weighting;        /* Projector beam weighting window type:
 	                                     0 - rectangular
@@ -942,11 +943,11 @@ typedef struct s7kr_volatilesettings_struct {
 	                                     Bit 4-7: Yaw stabilization method
 	                                     Bit8-31: Reserved */
 	u32 hydrophone_magic_no;        /* Hydrophone selection (magic number) */
-	u32 receive_weighting;          /* Receiver beam weighting window type:
+	u32 rx_weighting;          /* Receiver beam weighting window type:
 	                                     0 - Chebyshev
 	                                     1 - Kaiser */
-	f32 receive_weighting_par;      /* Receiver beam weighting window parameter */
-	u32 receive_flags;              /* Receive flags bit field:
+	f32 rx_weighting_par;      /* Receiver beam weighting window parameter */
+	u32 rx_flags;              /* Receive flags bit field:
 	                                     Bit    0: Roll compensation indicator
 	                                     Bit    1: Reserved
 	                                     Bit    2: Heave compensation indicator
@@ -961,7 +962,7 @@ typedef struct s7kr_volatilesettings_struct {
 	                                               number of the ping in the multi-ping
 	                                               sequence.
 	                                     Bit24-31: Reserved */
-	f32 receive_width;              /* Receive beam width (radians) */
+	f32 rx_width;              /* Receive beam width (radians) */
 	f32 range_minimum;              /* Bottom detection minimum range (meters) */
 	f32 range_maximum;              /* Bottom detection maximum range (meters) */
 	f32 depth_minimum;              /* Bottom detection minimum depth (meters) */
@@ -970,7 +971,7 @@ typedef struct s7kr_volatilesettings_struct {
 	f32 sound_velocity;             /* Sound velocity (meters/second) */
 	f32 spreading;                  /* Spreading loss (dB) */
 	u16 reserved;                   /* reserved for future pulse shape description */
-} s7kr_volatilesettings;
+} s7kr_sonarsettings;
 
 /* Reson 7k device configuration structure (part of record 7001)*/
 typedef struct s7k_device_struct {
@@ -1110,7 +1111,7 @@ typedef struct s7kr_bathymetry_struct {
 	f32 roll;                                 /* Roll at transmit time */
 	f32 pitch;                                /* Pitch at transmit time */
 	f32 heave;                                /* Heave at transmit time in m*/
-	f32 vehicle_depth ;                       /* Vehicle depth at transmit time in m */
+	f32 vehicle_depth;                       /* Vehicle depth at transmit time in m */
 	f32 depth[MBSYS_RESON7K_MAX_BEAMS];       /* Depth releative to chart datum in meters */
 	f32 alongtrack[MBSYS_RESON7K_MAX_BEAMS];  /* Alongtrack distance in meters */
 	f32 acrosstrack[MBSYS_RESON7K_MAX_BEAMS];    /* Acrosstrack distance in meters */
@@ -1132,7 +1133,7 @@ typedef struct s7kr_sidescan_struct {
 	                             Bit 1-31: Reserved */
 	u32 number_samples;    /* number of samples */
 	u32 nadir_depth;       /* Nadir depth in samples */
-	f32 reserved;          /* Reserved */
+	f32 reserved[7];          /* Reserved */
 	u16 number_beams;      /* Number of sidescan beams per side (usually only one) */
 	u16 current_beam;      /* Beam number of this record (0 to number_beams - 1) */
 	u8 sample_size;        /* Number of bytes per sample, 1, 2 or 4 */
@@ -1187,7 +1188,7 @@ typedef struct s7kr_watercolumn_struct {
 	                           Bit 1: 
 	                           0 - aample ping subset
 	                           1 - beam ping subset */
-	u8 subset_flag;      /* Bit Field
+	u8 column_flag;      /* Bit Field
 	                        0 - All samples for a beam, followed by all 
 	                        samples for the next beam
 	                        1 - Sample 1 for all beams, followed by Sample 2
@@ -1239,7 +1240,7 @@ typedef struct s7kr_tvg_struct {
 	u32 n;                 /* number of samples */
 	u32 reserved[8];       /* Reserved records */
 	u32 nalloc;            /* Number of bytes allocated to tvg array */
-	void *tvg;             /* Array of tvg data */
+	f32 *tvg;             /* Array of tvg data */
 } s7kr_tvg;
 
 /* Reson 7k image data (record 7011) */
@@ -1254,12 +1255,12 @@ typedef struct s7kr_image_struct {
 	u16 color_depth;         /* Color depth per pixel in bytes */
 	u16 reserved;            /* Reserved record */
 	u16 compression;         /* Reserved for future use */
-	u32 n;                   /* Original samples prior to compression */
+	u32 samples;                   /* Original samples prior to compression */
 	u32 flag;                /* Bit field:
 	                            Bit 0: dB visualization
 	                            Bit 1: Un-stabilized beams */
 	f32 rx_delay;            /* Rx delay in fractional samples, zero when not applicable. */
-	u32 reserved[6];         /* Reserved record */
+	u32 reserved2[6];         /* Reserved record */
 	u32 nalloc;              /* Number of bytes allocated to image array */
 	void *image;             /* Array of image data */
 } s7kr_image;
@@ -1289,8 +1290,8 @@ typedef struct s7kr_pingmotion_struct {
 	                                 angle and rate are not reported)
 	                                 Bit 8-15: Reserved */
 	f32 frequency;              /* sampling frequency (Hz) */
-	f32 pitch;                  /* Pitch value at the ping time (radians) */
 	u32 nalloc;                 /* number of samples allocated */
+	f32 pitch;                  /* Pitch value at the ping time (radians) */
 	f32 *roll;                  /* Roll (radians) */
 	f32 *heading;               /* Heading (radians) */
 	f32 *heave;                 /* Heave (m) */
@@ -1452,10 +1453,10 @@ typedef struct s7kr_vernierprocessingdataraw_struct {
 	u32 reserved[2];         /* Reserved */
 	u16 smoothing_type;      /* Smoothing window type:
 	                             0 - retangular
-	                             1 - hamming
+	                             2 - hamming
 	                             99 - None */
 	u16 smoothing_length;    /* Smoothing window length [samples] */
-	u32 reserved[2];         /* Reserved */
+	u32 reserved2[2];         /* Reserved */
 	f32 magnitude;           /* Magnitude threshold for determination of data quality */
 	f32 min_qf;              /* Minimum quality factor (QF), default 0.5 */
 	f32 max_qf;              /* Minimum quality factor (QF), default 3.5 */
@@ -1464,7 +1465,7 @@ typedef struct s7kr_vernierprocessingdataraw_struct {
 	f32 max_angle;           /* Upper limit on possible elevation angles, 
 	                            normally -45 degrees (in radians) */
 	f32 elevation_coverage;  /* Normally 90 degrees (in radians) */
-	u32 reserved[4];         /* Reserved */
+	u32 reserved3[4];         /* Reserved */
 	s7k_anglemagnitude anglemagnitude[MBSYS_RESON7K_MAX_BEAMS];
 	                         /* Angle and magnitude data for each beam plus 
 	                            additional records */
@@ -1510,7 +1511,7 @@ typedef struct s7kr_bitereport_struct {
 	c8 source_name[64];              /* source name - null terminated string */
 	u8 source_address;               /* source address */
 	f32 reserved;                    /* reserved */
-	u16 reserved;                    /* reserved */
+	u16 reserved2;                    /* reserved */
 	s7k_time downlink_time;          /* Downlink time sent */
 	s7k_time uplink_time;            /* Uplink time received */
 	s7k_time bite_time;              /* BITE time received */
@@ -1595,7 +1596,7 @@ typedef struct s7kr_rawdetectiondata_struct {
 	f32 max_limit;                   /* Maximum sample number of gate limit */
 } s7kr_rawdetectiondata;
 
-/* Reson 7k raw detection data (part of record 7027) */
+/* Reson 7k raw detection data (Record 7027) */
 typedef struct s7kr_rawdetection_struct {
 	s7k_header header;
 	u64 serial_number;        /* Sonar serial number */
@@ -1626,7 +1627,10 @@ typedef struct s7kr_rawdetection_struct {
 	                             Bit 6: Has Snippets detection point flag
 	                             Bit 7-31 = Reserved */
 	f32 sampling_rate;        /* Sonar's sampling frequency in Hz */
-	f32 tx_angle;             /* Applied transmitter steering angle, in radians */
+	f32 tx_angle;             /* Applied transmitter steering angle, in radians. The angle is used for 
+	                                    pitch stabilization. It will be zero if the system doesn't have this feature.
+	                                    The value is the same as the Projector Beam Steering Angle of the
+	                                    7000 record. They are both filled with the same variable */
 	f32 applied_roll;         /* Roll value (in radians) applied to gates; 
 	                             zero if roll stabilization is ON. */
 	u32 reserved[15];         /* Reserved */
@@ -1652,7 +1656,7 @@ typedef struct s7kr_rawdetection_struct {
 	f32 roll;                                 /* Roll at transmit time */
 	f32 pitch;                                /* Pitch at transmit time */
 	f32 heave;                                /* Heave at transmit time in m*/
-	f32 vehicle_depth ;                       /* Vehicle depth at transmit time in m */
+	f32 vehicle_depth;                       /* Vehicle depth at transmit time in m */
 	f32 depth[MBSYS_RESON7K_MAX_BEAMS];       /* Depth releative to chart datum in meters */
 	f32 alongtrack[MBSYS_RESON7K_MAX_BEAMS];  /* Alongtrack distance in meters */
 	f32 acrosstrack[MBSYS_RESON7K_MAX_BEAMS];    /* Acrosstrack distance in meters */
@@ -1860,7 +1864,7 @@ typedef struct s7kr_compressedwatercolumn_struct {
 	                           >0 = sequence number of ping in the multi-ping sequence */
 	u16 number_beams;        /* Total number of beams in ping record */
 	u32 samples;             /*  */
-	u32 compressed-samples;  /* Number of samples (maximum over all beams if Flags bit 0 set 
+	u32 compressed_samples;  /* Number of samples (maximum over all beams if Flags bit 0 set 
 	                            [samples per beam varies]. Otherwise same as Samples(N) )
 	                            When all beams come with the same number of samples 
 	                            'Compressed Samples' is the same as 'Samples(N)' for each 
@@ -1902,7 +1906,7 @@ typedef struct s7kr_compressedwatercolumn_struct {
 	f32 sample_rate;         /* Effective sample rate after downsampling, if specified. */
 	f32 compression_factor;  /* Factor used in magnitude compression. */
 	u32 reserved;            /* Zero. Reserved for future use. */
-	s7k_compressedwatercolumndata compressedwatercolumndata
+	s7k_compressedwatercolumndata compressedwatercolumndata[MBSYS_RESON7K_MAX_BEAMS];
 } s7kr_compressedwatercolumn;
 
 /* Reson 7k Segmented Raw Detection Data (part of Record 7047) */
@@ -1929,7 +1933,7 @@ typedef struct s7kr_segmentedrawdetectiondata_struct {
 	                                 3 = Deconv */
 	f32 tx_pulse_envelope_parameter;  /* eg: Tukey.Alpha value. */
 	f32 tx_relative_src_level;    /* Tx relative Src Level In %. */
-	f32 rx_beam_algorithm;        /* Rx -3dB beam width */
+	f32 rx_beam_width;        /* Rx -3dB beam width */
 	u8 detection_algorithm;       /* 0 – G1_Simple
 	                                 1 – G1_BlendFilt
 	                                 2 – G2
@@ -1965,7 +1969,7 @@ typedef struct s7kr_segmentedrawdetectiondata_struct {
 	f32 rx_angle_cross;   /* Beam steering angle with reference to receiver’s 
 	                         acoustic center in the sonar reference frame, 
 	                         at the detection point; in radians */
-	u32 flags;            /* BIT FIELD: 
+	u32 flags2;            /* BIT FIELD: 
 	                         Bit 0:
 	                         1 – Magnitude based detection
 	                         Bit 1:
@@ -2042,6 +2046,8 @@ typedef struct s7kr_calibratedbeam_struct {
 	                             range 0 meters */
 } s7kr_calibratedbeam;
 
+/* Reson 7k Reserved (Record 7049) */
+
 /* Reson 7k System Events (part of Record 7050) */
 typedef struct s7kr_systemeventsdata_struct {
 	s7k_header header;
@@ -2049,9 +2055,9 @@ typedef struct s7kr_systemeventsdata_struct {
 	u16 event_id;
 	u32 device_id;
 	u16 system_enum;
-	u16 event_message_length
+	u16 event_message_length;
 	s7k_7ktime 7ktime;
-	u8 event_message;
+	u8 *event_message;
 } s7kr_systemeventsdata;
 
 /* Reson 7k System Events (Record 7050) */
@@ -2082,15 +2088,15 @@ typedef struct s7kr_systemeventmessage_struct {
 typedef struct s7kr_rdrrecordingstatusdata_struct {
 	s7k_header header;
 	u32 threshold_length;
-	u32 threshold_value_array;
+	u32 *threshold_value_array;
 	u32 included_records;
-	u32 included_records_array;
+	u32 *included_records_array;
 	u32 excluded_records;
-	u32 excluded_records_array;
+	u32 *excluded_records_array;
 	u32 included_devices;
-	u32 included_devices_array;
+	u32 *included_devices_array;
 	u32 excluded_devices;
-	u32 excluded_devices_array;
+	u32 *excluded_devices_array;
 } s7kr_rdrrecordingstatus;
 
 /* Reson 7k RDR Recording Status (Record 7052) */
@@ -2126,7 +2132,7 @@ typedef struct s7kr_rdrrecordingstatus_struct {
 	u8 ping_data;            /* Zero = no lead-in ping data
 	                            Non-zero = write 10 sec of lead-in ping data */
 	u16 reserved;            /* Reserved */
-	u32 reserved[4];         /* Reserved */
+	u32 reserved2[4];         /* Reserved */
 	s7k_rdrrecordingstatusdata rdrrecordingstatusdata;
 } s7kr_rdrrecordingstatus;
 
@@ -2144,11 +2150,11 @@ typedef struct s7kr_subscriptionsdata_struct {
 /* Reson 7k Subscriptions (Record 7053) */
 typedef struct s7kr_subscriptions_struct {
 	s7k_header header;
-	i32 subscriptions; /* Number of subscriptions */
+	i32 n_subscriptions; /* Number of subscriptions */
 	s7k_subscriptionsdata subscriptionsdata;
 } s7kr_subscriptions;
 
-/* Reson 7k System Events (Record 7054) */
+/* Reson 7k RDR Storage Recording (Record 7054) */
 typedef struct s7kr_rdrstoragerecording_struct {
 	s7k_header header;
 	u16 diskfree_percentage; /* Percentage of free disk space */
@@ -2210,16 +2216,14 @@ typedef struct s7kr_calibrationstatus_struct {
 
 /* Reson 7k Calibrated Sidescan Data (part of record 7057) */
 typedef struct s7kr_calibratedsidescanseries_struct {
-	u32 port_number        /* Indicates the beam number corresponding value was taken from */
-	u32 starboard_number;  /* Indicates the beam number corresponding value was taken from */
 	u32 nalloc;            /* Bytes allocated to hold the time series */
-	f32 *portbeams;        /* Magnitude/Phase series. First sample represents range 
+	u64 *portbeams;        /* Magnitude/Phase series. First sample represents range 
 	                          0 meters (total bytes per side) */
-	f32 *starboardbeams;   /* Magnitude/Phase series. First sample represents range 
+	u64 *starboardbeams;   /* Magnitude/Phase series. First sample represents range 
 	                          0 meters (total bytes per side) */
-	f64 *portbeams;        /* Magnitude/Phase series. First sample represents range 
+	u64 *portbeams_number;        /* Magnitude/Phase series. First sample represents range 
 	                          0 meters (total bytes per side) */
-	f64 *starboardbeams;   /* Magnitude/Phase series. First sample represents range 
+	u64 *starboardbeams_number;   /* Magnitude/Phase series. First sample represents range 
 	                          0 meters (total bytes per side) */
 } s7kr_calibratedsidescanseries;
 
@@ -2518,7 +2522,8 @@ typedef struct s7kr_filecatalogrecord_struct {
 	s7k_header header;
 	u32 size;            /* Size of this record type header */
 	u16 version;         /* 1 */
-	u32 records_n;       /* Number of records in the file */
+	u32 n;       /* Number of records in the file */
+	u32 nalloc;
 	u32 reserved;        /* Reserved */
 	s7k_filecatalogrecorddata filecatalogrecorddata;
 } s7kr_filecatalogrecord;
@@ -2567,7 +2572,7 @@ typedef struct s7kr_remotecontrolnotacknowledge_struct {
 	u32 error_code;     /* Error code */
 } s7kr_remotecontrolnotacknowledge;
 
-/* Reson 7k remote control sonar settings (record 7503) */
+/* Reson 7k Remote Control Sonar Settings (record 7503) */
 typedef struct s7kr_remotecontrolsettings_struct {
 	s7k_header header;
 	u64 serial_number;            /* Sonar serial number */
@@ -2575,7 +2580,7 @@ typedef struct s7kr_remotecontrolsettings_struct {
 	f32 frequency;                /* Center transmit frequency (in Hertz) */
 	f32 sample_rate;              /* Sample rate (in Hertz) */
 	f32 receiver_bandwidth;       /* Receiver bandwidth (in Hertz) */
-	f32 pulse_width;  cc          /* Transmit pulse length (seconds) */
+	f32 pulse_width;          /* Transmit pulse length (seconds) */
 	u32 pulse_type;               /* Pulse type identifier:
 	                                 0 - CW
 	                                 1 - linear chirp */
@@ -2689,7 +2694,9 @@ typedef struct s7kr_remotecontrolsettings_struct {
 	f32 absorption;              /* Absorption (in dB/km) */
 	f32 sound_velocity;          /* Sound velocity (meters/second) */
 	f32 spreading;               /* Spreading loss (dB) */
-	u8 reserved;                 /* Reserved */
+	u8 operation_mode;                 /* 0 = Vernier
+	                                                    3 = Triple Array and Phase (3 sets of records generated for
+	                                                    each ping - one for each stave) */
 	u8 autofilter_window;        /* Automatic filter window size in percent of the depth */
 	f32 tx_offset_x;             /* Offset of the transducer array in m, relative
 	                                to the receiver array on the x axis, positive
@@ -2714,7 +2721,7 @@ typedef struct s7kr_remotecontrolsettings_struct {
 	                                   2: Eqidistant
 	                                   3: Flex
 	                                   4: Intermediate */
-	u16 r7kcenter_mode;          /* 7kCenter mode:
+	u16 s7kcenter_mode;          /* 7kCenter mode:
 	                                   0: Normal
 	                                   1: Autopilot
 	                                   2: Calibration (IQ)
@@ -2753,7 +2760,7 @@ typedef struct s7kr_remotecontrolsettings_struct {
 	f32 depth_gate_tilt;         /* Angle in radians (positive to starboard) */
 	f32 applied_frequency;       /* Transmit frequency for UI slider. Will be different
 	                                from center frequency in full-rate dual-head */
-	u32 reserved4;               /* Reserved */
+	u32 element_number;               /* Selected receive element number for 7049 record */
 } s7kr_remotecontrolsettings;
 
 /* Reson 7k Common System Settings (Record 7504) */
@@ -3004,7 +3011,7 @@ struct mbsys_reson7k_struct {
 
 	/* ping record id's */
 	int current_ping_number;
-	int read_volatilesettings;
+	int read_sonarsettings;
 	int read_matchfilter;
 	int read_beamgeometry;
 	int read_remotecontrolsettings;
@@ -3089,7 +3096,7 @@ struct mbsys_reson7k_struct {
 	s7kr_contactoutput contactoutput;
 
 	/* Reson 7k volatile sonar settings (record 7000) */
-	s7kr_volatilesettings volatilesettings;
+	s7kr_sonarsettings sonarsettings;
 
 	/* Reson 7k configuration (record 7001) */
 	s7kr_configuration configuration;
@@ -3259,10 +3266,9 @@ struct mbsys_reson7k_struct {
 	int nrec_sonarinstallationids;
 	int nrec_sonarpipeenvironment;
 	int nrec_contactoutput;
-	int nrec_volatilesonarsettings;
+	int nrec_sonarsettings;
 	int nrec_configuration;
 	int nrec_matchfilter;
-	int nrec_beamgeometry;
 	int nrec_firmwarehardwareconfiguration;
 	int nrec_beamgeometry;
 	int nrec_bathymetry;
@@ -3308,7 +3314,6 @@ struct mbsys_reson7k_struct {
 	int nrec_soundvelocity;
 	int nrec_absorptionloss;
 	int nrec_spreadingloss;
-	int nrec_other;
 };
 
 /* 7K Macros */
@@ -3397,7 +3402,7 @@ int mbsys_reson7k_print_pantilt(int verbose, s7kr_pantilt *pantilt, int *error);
 int mbsys_reson7k_print_sonarinstallationids(int verbose, s7kr_sonarinstallationids *sonarinstallationids, int *error);
 int mbsys_reson7k_print_pantilt(int verbose, s7kr_sonarpipeenvironment *sonarpipeenvironment, int *error);
 int mbsys_reson7k_print_contactoutput(int verbose, s7kr_contactoutput *contactoutput, int *error);
-int mbsys_reson7k_print_volatilesettings(int verbose, s7kr_volatilesettings *volatilesettings, int *error);
+int mbsys_reson7k_print_sonarsettings(int verbose, s7kr_sonarsettings *sonarsettings, int *error);
 int mbsys_reson7k_print_device(int verbose, s7k_device *device, int *error);
 int mbsys_reson7k_print_configuration(int verbose, s7kr_configuration *configuration, int *error);
 int mbsys_reson7k_print_matchfilter(int verbose, s7kr_matchfilter *matchfilter, int *error);
