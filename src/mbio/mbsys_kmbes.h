@@ -27,7 +27,7 @@
  * Notes on the mbsys_kmbes data structure and associated format:
  *   1. This MBIO format supports the generic interface message output
  *      by the Konsberg EM datagram format.
- *   2. Reference: Konsberg EM datagram format Reg.no. 410224 rev A, September 2016
+ *   2. Reference: Konsberg EM datagram format Reg.no. 410224 rev F, November 2018
  *   3. The Konsberg EM datagram stream consists of several different data
  *      records that can vary among models and installations
  *   4. The Konsberg EM datagram format supports the following multibeam models (September 2016):
@@ -73,21 +73,26 @@
 /*---------------------------------------------------------------*/
 /* Datagram ID definitions */
 /* I - datagrams */
-#define MBSYS_KMBES_I_INSTALLATION_PARAM    "#IIP" // Installation parameters and sensor setup.
-#define MBSYS_KMBES_I_OP_RUNTIME            "#IOP" // Runtime parameters as chosen by operator.
+#define MBSYS_KMBES_I_INSTALLATION_PARAM        "#IIP" // Installation parameters and sensor setup.
+#define MBSYS_KMBES_I_OP_RUNTIME                "#IOP" // Runtime parameters as chosen by operator.
 
 /* S-datagrams */
-#define MBSYS_KMBES_S_POSITION               "#SPO" // Sensor POsition data
-#define MBSYS_KMBES_S_KM_BINARY              "#SKM" // KM binary sensor data
-#define MBSYS_KMBES_S_SOUND_VELOCITY_PROFILE "#SVP" // Sound Velocity Profile
-#define MBSYS_KMBES_S_CLOCK                  "#SCL" // Sensor CLock datagram
-#define MBSYS_KMBES_S_DEPTH                  "#SDE" // Sensor DEpth data
-#define MBSYS_KMBES_S_HEIGHT                 "#SHI" // Sensor HeIght data
-#define MBSYS_KMBES_S_HEADING                "#SHA" // Sensor HeAding
+#define MBSYS_KMBES_S_POSITION                  "#SPO" // Sensor POsition data
+#define MBSYS_KMBES_S_KM_BINARY                 "#SKM" // KM binary sensor data
+#define MBSYS_KMBES_S_SOUND_VELOCITY_PROFILE    "#SVP" // Sound Velocity Profile
+#define MBSYS_KMBES_S_SOUND_VELOCITY_TRANSDUCER "#SVT"
+#define MBSYS_KMBES_S_CLOCK                     "#SCL" // Sensor CLock datagram
+#define MBSYS_KMBES_S_DEPTH                     "#SDE" // Sensor DEpth data
+#define MBSYS_KMBES_S_HEIGHT                    "#SHI" // Sensor HeIght data
+#define MBSYS_KMBES_S_HEADING                   "#SHA" // Sensor HeAding
 
 /* M-datagrams */
-#define MBSYS_KMBES_M_RANGE_AND_DEPTH        "#MRZ" // Multibeam data for raw range, depth, reflectivity, seabed image(SI) etc.
-#define MBSYS_KMBES_M_WATER_COLUMN           "#MWC" // Multibeam water column datagram.
+#define MBSYS_KMBES_M_RANGE_AND_DEPTH           "#MRZ" // Multibeam data for raw range, depth, reflectivity, seabed image(SI) etc.
+#define MBSYS_KMBES_M_WATER_COLUMN              "#MWC" // Multibeam water column datagram.
+
+/* C-datagrams */
+#define MBSYS_KMBES_C_POSITION                   "#CPO"
+#define MBSYS_KMBES_C_HEAVE                      "#CHE"
 
 #define MBSYS_KMBES_SYNC_CHAR 0x23  // ascii "#"
 #define MBSYS_KMBES_QUAL_FACTOR_THRESHOLD 50
@@ -98,16 +103,20 @@
 #define MBSYS_KMBES_HEADER_SIZE 20
 #define MBSYS_KMBES_MAX_SPO_DATALENGTH 250
 #define MBSYS_KMBES_MAX_ATT_DATALENGTH 250
+#define MBSYS_KMBES_MAX_SVT_DATALENGTH 64
 #define MBSYS_KMBES_MAX_SCL_DATALENGTH 64
 #define MBSYS_KMBES_MAX_SDE_DATALENGTH 32
 #define MBSYS_KMBES_MAX_SHI_DATALENGTH 32
 #define MBSYS_KMBES_MAX_SHA_DATALENGTH 32
+#define MBSYS_KMBES_MAX_CPO_DATALENGTH 250
+#define MBSYS_KMBES_MAX_CHE_DATALENGTH 64
 #define MBSYS_KMBES_MAX_IIP_DATALENGTH 4096 // TODO: make sure this size will be sufficient
 #define MBSYS_KMBES_MAX_IOP_DATALENGTH 4096 // TODO: make sure this size will be sufficient
 #define MBSYS_KMBES_SPO_VAR_OFFSET 72
 #define MBSYS_KMBES_SCL_VAR_OFFSET 36
 #define MBSYS_KMBES_SDE_VAR_OFFSET 40
 #define MBSYS_KMBES_SHI_VAR_OFFSET 40
+#define MBSYS_KMBES_CPO_VAR_OFFSET 72
 #define MBSYS_KMBES_IIP_VAR_OFFSET 30
 #define MBSYS_KMBES_IOP_VAR_OFFSET 30
 
@@ -122,12 +131,22 @@
 #define MBSYS_KMBES_MAX_NUM_TX_PULSES 9
 #define MBSYS_KMBES_MAX_ATT_SAMPLES  148
 #define MBSYS_KMBES_MAX_SVP_POINTS 2000
+#define MBSYS_KMBES_MAX_SVT_SAMPLES 1
 #define MBSYS_KMBES_MAX_HEADING_SAMPLES 1000
 #define MBSYS_KMBES_MAX_NUM_MST_DGMS 256
-#define MBSYS_KMBES_MAX_NUM_MWC_DGMS 36  // MAX_NUM_TX_PULSES * 4 RX per TX
-#define MBSYS_KMBES_MAX_NUM_MRZ_DGMS 36  // MAX_NUM_TX_PULSES * 4 RX per TX
+#define MBSYS_KMBES_MAX_NUM_MWC_DGMS 256
+#define MBSYS_KMBES_MAX_NUM_MRZ_DGMS 32
 #define MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE 10
 // number of datagrams to add when index table size limit reached (dynamic allocation)
+
+/*---------------------------------------------------------------*/
+/* Other definitions */
+#define MBSYS_KMBES_UNAVAILABLE_POSFIX 0xffff
+#define MBSYS_KMBES_UNAVAILABLE_LATITUDE 200.0f
+#define MBSYS_KMBES_UNAVAILABLE_LONGITUDE 200.0f
+#define MBSYS_KMBES_UNAVAILABLE_SPEED -1.0f
+#define MBSYS_KMBES_UNAVAILABLE_COURSE -4.0f
+#define MBSYS_KMBES_UNAVAILABLE_ELLIPSOIDHEIGHT -999.0f
 
 #define MBSYS_KMBES_NANO pow(10.0, -9.0)
 /*---------------------------------------------------------------*/
@@ -145,6 +164,7 @@ typedef enum {
     SPO, // EM_DGM_S_POSITION
     SKM, // EM_DGM_S_KM_BINARY
     SVP, // EM_DGM_S_SOUND_VELOCITY_PROFILE
+    SVT, // EM_DGM_S_SOUND_VELOCITY_TRANSDUCER
     SCL, // EM_DGM_S_CLOCK
     SDE, // EM_DGM_S_DEPTH
     SHI, // EM_DGM_S_HEIGHT
@@ -153,6 +173,10 @@ typedef enum {
     /* M-datagrams */
     MRZ, // EM_DGM_M_RANGE_AND_DEPTH
     MWC  // EM_DGM_M_WATER_COLUMN
+
+    /* C-datagrams */
+    CPO, // EM_DGM_C_POSITION
+    CHE, // EM_DGM_C_HEAVE
 
 } mbsys_kmbes_emdgm_type;
 
@@ -262,7 +286,13 @@ struct mbsys_kmbes_skm_info {
                                          * 8	Coda Octopus MCOM */
     unsigned short numSamplesArray;     /* Number of KM binary sensor samples added in this datagram. */
     unsigned short numBytesPerSample;   /* Length in bytes of one whole KM binary sensor sample. */
-    unsigned short padding;
+    unsigned short sensorDataContents;  /* Field to indicate which information is available from the input sensor,
+                                         * at the given sensor format.
+                                         *      0 = not available
+                                         *      1 = data is available
+                                         * The bit pattern is used to determine sensorStatus from status field in
+                                         * #KMB samples. Only data available from sensor is check up against
+                                         * invalid/reduced performance in status, and summaries in sensorStatus. */
 };
 
 
@@ -352,7 +382,7 @@ struct mbsys_kmbes_skm {
     struct mbsys_kmbes_skm_sample sample[MBSYS_KMBES_MAX_ATT_SAMPLES];
 };
 
- #define MBSYS_KMBES_SKM_VERSION 0
+ #define MBSYS_KMBES_SKM_VERSION 1
 
 /************************************
      #SVP - Sound Velocity Profile
@@ -365,14 +395,18 @@ struct mbsys_kmbes_svp_point {
                                      * Valid range from 0.00 m to 12000 m. */
     float soundVelocity_mPerSec;    /* Measured sound velocity from profile. Unit m/s.
                                      * For a CTD profile, this will be the calculated sound velocity.*/
-    float absCoeff_dBPerkm;         /* Absorption coefficient. Unit dB per kilometre. */
+    unsigned int padding;
     float temp_C;                   /* Water temperature at given depth. Unit Celsius.
                                      * For a Sound velocity profile (S00), this will be set to 0.00. */
     float salinity;                 /* Salinity of water at given depth.
                                      * For a Sound velocity profile (S00), this will be set to 0.00. */
 };
 
-struct mbsys_kmbes_svp_common {
+struct mbsys_kmbes_svp {
+    /* #SVP - Sound Velocity Profile. */
+    /* Data from sound velocity profile or from CTD profile.
+     * Sound velocity is measured directly or estimated, respectively. */
+    struct mbsys_kmbes_header header;
     unsigned short numBytesCmnPart; /* Size in bytes of body part struct. Used for denoting size of rest of datagram. */
     unsigned short numSamples;      /* Number of sound velocity samples. */
     mb_u_char sensorFormat[4];      /* Sound velocity profile format:
@@ -386,19 +420,84 @@ struct mbsys_kmbes_svp_common {
     double longitude_deg;           /* Longitude in degrees. Negative if western hemisphere.
                                      * Position extracted from the Sound Velocity Profile.
                                      * Parameter is set to 200 if not found. */
-};
-
-struct mbsys_kmbes_svp {
-    /* #SVP - Sound Velocity Profile. */
-    /* Data from sound velocity profile or from CTD profile.
-     * Sound velocity is measured directly or estimated, respectively. */
-    struct mbsys_kmbes_header header;
-    struct mbsys_kmbes_svp_common cmnSvp;
     struct mbsys_kmbes_svp_point sensorData[MBSYS_KMBES_MAX_SVP_POINTS];
     /* SVP point samples, repeated numSamples times. */
 };
 
- #define MBSYS_KMBES_SVP_VERSION 0
+ #define MBSYS_KMBES_SVP_VERSION 1
+
+/************************************
+ * #SVT - Sensor sound Velocity measured at Transducer
+ ************************************/
+struct mbsys_kmbes_svt_info
+{
+    /* Part of Sound Velocity at Transducer datagram. */
+    unsigned short numBytesInfoPart;    /* Size in bytes of current struct. */
+    unsigned short sensorStatus;        /* Sensor status. To indicate quality of sensor data is valid or invalid.
+                                         * Quality may be invalid even if sensor is active and the PU receives data.
+                                         * Bit code vary according to type of sensor.
+                                         *
+                                         * Bits 0 -7 common to all sensors and #MRZ sensor status:
+                                         *
+                                         *      Bit number	Sensor data ---
+                                         *      0	        0 = Data OK
+                                         *                  1 = Data OK and sensor is chosen as active
+                                         *                  #SCL only: 1 = Valid data and 1PPS OK
+                                         *      1	        0
+                                         *      2	        0 = Data OK
+                                         *                  1 = Reduced performance
+                                         *                  #SCL only: 1 = Reduced performance, no time synchronisation of PU
+                                         *      3	        0
+                                         *      4	        0 = Data OK
+                                         *                  1 = Invalid data
+                                         *      5	        0
+                                         *      6	        0 = Velocity from sensor
+                                         *                  1 = Velocity calculated by PU */
+    unsigned short sensorInputFormat;   /* Format of raw data from input sensor, given in numerical code according to
+                                         * table below:
+                                         *      Code	Sensor format
+                                         *      1	    AML NMEA
+                                         *      2	    AML SV
+                                         *      3	    AML SVT
+                                         *      4	    AML SVP
+                                         *      5	    Micro SV
+                                         *      6	    Micro SVT
+                                         *      7	    Micro SVP
+                                         *      8	    Valeport MiniSVS */
+    unsigned short numSamplesArray;     /* Number of sensor samples added in this datagram. */
+    unsigned short numBytesPerSample;   /* Length in bytes of one whole SVT sensor sample. */
+    unsigned short sensorDataContents;  /* Field to indicate which information is available from the input sensor, at
+                                         * the given sensor format:
+                                         *      0 = not available
+                                         *      1 = data is available
+                                         * Expected data field in sensor input:
+                                         *      Bit number	Sensor data ---
+                                         *      0	        Sound Velocity
+                                         *      1	        Temperature
+                                         *      2	        Pressure
+                                         *      3	        Salinity */
+    float filterTime_sec;               /* Time parameter for moving median filter. Unit seconds */
+    float soundVelocity_mPerSec_offset; /* Offset for measured sound velocity set in K-Controller. Unit m/s */
+};
+
+struct mbsys_kmbes_svt_sample
+{
+    unsigned int time_sec;              /* Time in second. Epoch 1970-01-01. */
+    unsigned int time_nanosec;          /* Nano seconds remainder. Add to time_sec for more exact time. */
+    float soundVelocity_mPerSec;        /* Measured sound velocity from sound velocity probe. Unit m/s. */
+    float temp_C;                       /* Water temperature from sound velocity probe. Unit Celsius. */
+    float pressure_Pa;                  /* Pressure. Unit Pascal. */
+    float salinity;                     /* Salinity of water. Measured in g salt/kg sea water */
+};
+
+struct mbsys_kmbes_svt
+{
+    struct mbsys_kmbes_header header;
+    struct mbsys_kmbes_svt_info infoPart;
+    struct mbsys_kmbes_svt_sample sensorData[MBSYS_KMBES_MAX_SVT_SAMPLES];
+};
+
+#define MBSYS_KMBES_SVT_VERSION 0
 
 /************************************
      #SCL - Sensor CLock datagram
@@ -661,10 +760,10 @@ struct mbsys_kmbes_mrz_ping_info {
                                          * At time of midpoint of first tx pulse. Measured in the surface coordinate
                                          * system (SCS).See Coordinate systems 'Coordinate systems' for definition.
                                          * Used this to move depth point (XYZ) from vessel reference point to transducer (old datagram format). */
-    float x_txTransducerArm_SCS_m;      /* Distance between transducer (reference point) and vessel reference point in
+    float x_kmallToall_m;               /* Distance between transducer (reference point) and vessel reference point in
                                          * meters, in the surface coordinate system, at time of midpoint of first tx pulse.
                                          * Used this to move depth point (XYZ) from vessel reference point to transducer (old datagram format). */
-    float y_txTransducerArm_SCS_m;      /* Distance between transducer (reference point) and vessel reference point in
+    float y_kmallToall_m;               /* Distance between transducer (reference point) and vessel reference point in
                                          * meters, in the surface coordinate system, at time of midpoint of first tx pulse.
                                          * Used this to move depth point (XYZ) from vessel reference point to transducer (old datagram format). */
     mb_u_char latLongInfo;              /* Method of position determination from position sensor data:
@@ -983,6 +1082,69 @@ struct mbsys_kmbes_mwc {
 
 /*********************************************
 
+ Compatibility datagrams for .all to .kmall conversion support
+
+ *********************************************/
+
+/************************************
+ #CPO - Compatibility position sensor data
+ ************************************/
+struct mbsys_kmbes_cpo_data_block
+{
+    unsigned int timeFromSensor_sec;        /* UTC time from position sensor. Unit seconds. Epoch 1970-01-01. */
+    unsigned int timeFromSensor_nanosec;    /* UTC time from position sensor. Unit nano seconds remainder. */
+    float posFixQuality_m;                  /* Only if available as input from sensor. */
+    double correctedLat_deg;                /* Motion corrected (if enabled in K-Controller) data as used in depth
+                                             * calculations. Referred to antenna footprint at water level. Unit decimal
+                                             * degree. Parameter is set to define MBSYS_KMBES_UNAVAILABLE_LATITUDE if
+                                             * sensor inactive. */
+    double correctedLong_deg;               /* Motion corrected (if enabled in K-Controller) data as used in depth
+                                             * calculations. Referred to antenna footprint at water level. Unit decimal
+                                             * degree. Parameter is set to define MBSYS_KMBES_UNAVAILABLE_LONGITUDE if
+                                             * sensor inactive. */
+    float speedOverGround_mPerSec;          /* Speed over ground. Unit m/s. Motion corrected (if enabled in
+                                             * K-Controller) data as used in depth calculations. If unavailable or from
+                                             * inactive sensor, value set to define MBSYS_KMBES_UNAVAILABLE_SPEED. */
+    float courseOverGround_deg;             /* Course over ground. Unit degree. Motion corrected (if enabled in
+                                             * K-Controller) data as used in depth calculations. If unavailable or from
+                                             * inactive sensor, value set to define MBSYS_KMBES_UNAVAILABLE_COURSE. */
+    float ellipsoidHeightReRefPoint_m;      /* Height of antenna footprint above the ellipsoid. Unit meter. Motion
+                                             * corrected (if enabled in K-Controller) data as used in depth
+                                             * calculations. If unavailable or from inactive sensor, value set to
+                                             * define MBSYS_KMBES_UNAVAILABLE_ELLIPSOIDHEIGHT. */
+    char posDataFromSensor[MBSYS_KMBES_MAX_CPO_DATALENGTH];    /* Position data as received from sensor, i.e.
+                                                                * uncorrected for motion etc. */
+};
+
+struct mbsys_kmbes_cpo
+{
+    struct mbsys_kmbes_header header;
+    struct mbsys_kmbes_s_common cmnPart;
+    struct mbsys_kmbes_cpo_data_block sensorData;
+};
+
+#define MBSYS_KMBES_CPO_VERSION 0
+
+/************************************
+ #CHE - Compatibility heave data
+ ************************************/
+struct mbsys_kmbes_che_data
+{
+    /* Heave compatibility data part. Heave reference point at transducer instead of at vessel reference point */
+    float heave_m; /* Heave. Unit meter. Positive downwards. */
+};
+
+struct mbsys_kmbes_che
+{
+    struct mbsys_kmbes_header header;
+    struct mbsys_kmbes_s_common cmnPart;
+    struct mbsys_kmbes_che_data data;
+};
+
+#define MBSYS_KMBES_CHE_VERSION 0
+
+/*********************************************
+
    Installation and runtime datagrams
 
  *********************************************/
@@ -1038,8 +1200,8 @@ struct mbsys_kmbes_ib {
                                      * 1 = more messages to come */
     mb_u_char BISTStyle;            /* 0 = plain text
                                      * 1 = use style sheet */
-    signed char BISTNumber;         /* The BIST number executed. */
-    mb_u_char BISTStatus;           /* 0 = BIST executed with no errors
+    mb_u_char BISTNumber;           /* The BIST number executed. */
+    signed char BISTStatus;         /* 0 = BIST executed with no errors
                                      * positive number = warning
                                      * negative number = error */
     mb_u_char BISTText;             /* Result of the BIST. Starts with a synopsis of the result, followed by
@@ -1113,6 +1275,9 @@ struct mbsys_kmbes_struct {
     /* #SVP - Sound Velocity Profile data */
     struct mbsys_kmbes_svp svp;
 
+    /* #SVT - Sensor sound Velocity measured at Transducer */
+    struct mbsys_kmbes_svt svt;
+
     /* #SCL - Sensor CLock datagram */
     struct mbsys_kmbes_scl scl;
 
@@ -1121,7 +1286,6 @@ struct mbsys_kmbes_struct {
 
     /* #SHI - Sensor HeIght data */
     struct mbsys_kmbes_shi shi;
-
 
     /* #SHA - Sensor HeAding */
     struct mbsys_kmbes_sha sha;
@@ -1132,6 +1296,12 @@ struct mbsys_kmbes_struct {
 
     /* #MWC - Multibeam Water Column data */
     struct mbsys_kmbes_mwc mwc[MBSYS_KMBES_MAX_NUM_MWC_DGMS];
+
+    /* #CPO - Compatibility position sensor data */
+    struct mbsys_kmbes_cpo cpo;
+
+    /* #CHE - Compatibility heave data */
+    struct mbsys_kmbes_che che;
 
     /* #IIP - Info Installation PU */
     struct mbsys_kmbes_iip iip;

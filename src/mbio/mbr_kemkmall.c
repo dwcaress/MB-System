@@ -69,6 +69,7 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, int *error);
@@ -77,10 +78,13 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
@@ -89,6 +93,8 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
 int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
 static char rcs_id[] = "$Id: mbr_kemkmall.c 2308 2018-05-25 19:55:48Z caress $";
@@ -956,6 +962,9 @@ int mbr_kemkmall_id_dgm(int verbose, void *dgm_index_ptr, int *error) {
 	else if (strcmp(dgm_type_char, MBSYS_KMBES_S_SOUND_VELOCITY_PROFILE)==0) {
 		*emdgm_type = SVP;
 	}
+	else if (strcmp(dgm_type_char, MBSYS_KMBES_S_SOUND_VELOCITY_TRANSDUCER)==0) {
+		*emdgm_type = SVT;
+	}
 	else if (strcmp(dgm_type_char, MBSYS_KMBES_S_CLOCK)==0) {
 		*emdgm_type = SCL;
 	}
@@ -973,6 +982,12 @@ int mbr_kemkmall_id_dgm(int verbose, void *dgm_index_ptr, int *error) {
 	}
 	else if (strcmp(dgm_type_char, MBSYS_KMBES_M_WATER_COLUMN)==0) {
 		*emdgm_type = MWC;
+	}
+	else if (strcmp(dgm_type_char, MBSYS_KMBES_C_POSITION)==0) {
+		*emdgm_type = CPO;
+	}
+	else if (strcmp(dgm_type_char, MBSYS_KMBES_C_HEAVE)==0) {
+		*emdgm_type = CHE;
 	}
 	else {
 		*emdgm_type = UNKNOWN;
@@ -1109,6 +1124,13 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						done = MB_YES;
 					break;
 
+				case SVT:
+					/* #SVP - Sensor sound Velocity measured at Transducer */
+					status = mbr_kemkmall_rd_svt(verbose, buffer, store_ptr, error);
+					if (status == MB_SUCCESS)
+						done = MB_YES;
+					break;
+
 				case SCL:
 				    /* #SCL - Sensor CLock datagram */
 					status = mbr_kemkmall_rd_scl(verbose, buffer, store_ptr, error);
@@ -1148,6 +1170,20 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				    /* #MWC - multibeam water column datagram */
 					status = mbr_kemkmall_rd_mwc(verbose, buffer, store_ptr, error);
 					/* not done yet, keep going to insure multi-TX/RX and dual-swath modes are handled correctly. */
+					break;
+
+				case CPO:
+					/* #CPO - Compatibility position sensor data */
+					status = mbr_kemkmall_rd_cpo(verbose, buffer, store_ptr, error);
+					if (status == MB_SUCCESS)
+						done = MB_YES;
+					break;
+
+				case CHE:
+					/* #CHE - Compatibility heave data */
+					status = mbr_kemkmall_rd_che(verbose, buffer, store_ptr, error);
+					if (status == MB_SUCCESS)
+						done = MB_YES;
 					break;
 
 				case UNKNOWN:
@@ -1289,6 +1325,11 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
                 status = mbr_kemkmall_wr_svp(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
                 break;
 
+			case SVT:
+				/* #SVT - Sensor sound Velocity measured at Transducer */
+				status = mbr_kemkmall_wr_svt(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+				break;
+
             case SCL:
                 /* #SCL - Sensor CLock datagram */
                 status = mbr_kemkmall_wr_scl(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -1319,6 +1360,16 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
                 /* #MWC - multibeam water column datagram */
                 status = mbr_kemkmall_wr_mwc(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
                 break;
+
+			case CPO:
+				/* #CPO - Compatibility position sensor data */
+				status = mbr_kemkmall_wr_cpo(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+				break;
+
+			case CHE:
+				/* #CHE - Compatibility heave data */
+				status = mbr_kemkmall_wr_che(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+				break;
 
             case UNKNOWN:
                 /* Unknown datagram format */
@@ -1775,26 +1826,26 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, int *error){
 	index = MBSYS_KMBES_HEADER_SIZE;
 
 	/* svp common part */
-	mb_get_binary_short(MB_YES, &buffer[index], &(svp->cmnSvp.numBytesCmnPart));
+	mb_get_binary_short(MB_YES, &buffer[index], &(svp->numBytesCmnPart));
 	index += 2;
-	mb_get_binary_short(MB_YES, &buffer[index], &(svp->cmnSvp.numSamples));
+	mb_get_binary_short(MB_YES, &buffer[index], &(svp->numSamples));
 	index += 2;
-	memcpy(&svp->cmnSvp.sensorFormat, &buffer[index], 4);
+	memcpy(&svp->sensorFormat, &buffer[index], 4);
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(svp->cmnSvp.time_sec));
+	mb_get_binary_int(MB_YES, &buffer[index], &(svp->time_sec));
 	index += 4;
-	mb_get_binary_double(MB_YES, &buffer[index], &(svp->cmnSvp.latitude_deg));
+	mb_get_binary_double(MB_YES, &buffer[index], &(svp->latitude_deg));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(svp->cmnSvp.longitude_deg));
+	mb_get_binary_double(MB_YES, &buffer[index], &(svp->longitude_deg));
 	index += 8;
 
 	/* svp data block */
-	for (int i=0; i<(svp->cmnSvp.numSamples); i++ ) {
+	for (int i=0; i<(svp->numSamples); i++ ) {
 		mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].depth_m));
 		index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].soundVelocity_mPerSec));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].absCoeff_dBPerkm));
+		mb_get_binary_int(MB_YES, &buffer[index], &(svp->sensorData[i].padding));
 		index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].temp_C));
 		index += 4;
@@ -1822,17 +1873,17 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, int *error){
 		fprintf(stderr, "dbg5       svp->header.time_sec:                   %u\n", svp->header.time_sec);
 		fprintf(stderr, "dbg5       svp->header.time_nanosec:               %u\n", svp->header.time_nanosec);
 
-		fprintf(stderr, "dbg5       svp->cmnSvp.numBytesCmnPart:            %u\n", svp->cmnSvp.numBytesCmnPart);
-		fprintf(stderr, "dbg5       svp->cmnSvp.numSamples:                 %u\n", svp->cmnSvp.numSamples);
-		fprintf(stderr, "dbg5       svp->cmnSvp.sensorFormat:               %s\n", svp->cmnSvp.sensorFormat);
-		fprintf(stderr, "dbg5       svp->cmnSvp.time_sec:                   %u\n", svp->cmnSvp.time_sec);
-		fprintf(stderr, "dbg5       svp->cmnSvp.latitude_deg:               %f\n", svp->cmnSvp.latitude_deg);
-		fprintf(stderr, "dbg5       svp->cmnSvp.longitude_deg:              %f\n", svp->cmnSvp.longitude_deg);
+		fprintf(stderr, "dbg5       svp->numBytesCmnPart:            %u\n", svp->numBytesCmnPart);
+		fprintf(stderr, "dbg5       svp->numSamples:                 %u\n", svp->numSamples);
+		fprintf(stderr, "dbg5       svp->sensorFormat:               %s\n", svp->sensorFormat);
+		fprintf(stderr, "dbg5       svp->time_sec:                   %u\n", svp->time_sec);
+		fprintf(stderr, "dbg5       svp->latitude_deg:               %f\n", svp->latitude_deg);
+		fprintf(stderr, "dbg5       svp->longitude_deg:              %f\n", svp->longitude_deg);
 
-		for (int i = 0; i < (svp->cmnSvp.numSamples); i++) {
+		for (int i = 0; i < (svp->numSamples); i++) {
 			fprintf(stderr, "dbg5       svp->sensorData[%3d].depth_m:                      %f\n", i, svp->sensorData[i].depth_m);
 			fprintf(stderr, "dbg5       svp->sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svp->sensorData[i].soundVelocity_mPerSec);
-			fprintf(stderr, "dbg5       svp->sensorData[%3d].absCoeff_dBPerkm:             %f\n", i, svp->sensorData[i].absCoeff_dBPerkm);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].padding:                      %d\n", i, svp->sensorData[i].padding);
 			fprintf(stderr, "dbg5       svp->sensorData[%3d].temp_C:                       %f\n", i, svp->sensorData[i].temp_C);
 			fprintf(stderr, "dbg5       svp->sensorData[%3d].salinity:                     %f\n", i, svp->sensorData[i].salinity);
 		}
@@ -1851,6 +1902,119 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, int *error){
 	return (status);
 };
 
+int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, int *error){
+	char *function_name = "mbr_kemkmall_rd_svt";
+	int status = MB_SUCCESS;
+	struct mbsys_kmbes_struct *store;
+	struct mbsys_kmbes_index *dgm_index;
+	struct mbsys_kmbes_svt *svt;
+	int index;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_kmbes_struct *)store_ptr;
+	dgm_index = (struct mbsys_kmbes_index *)&store->dgm_index[store->dgm_count_id];
+	svt = &(store->svt);
+
+	/* get header */
+	svt->header = dgm_index->header;
+
+	/* extract the data */
+	index = MBSYS_KMBES_HEADER_SIZE;
+
+	/* svp info */
+	mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.numBytesInfoPart));
+	index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.sensorStatus));
+	index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.sensorInputFormat));
+	index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.numSamplesArray));
+	index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.numBytesPerSample));
+	index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(svt->infoPart.sensorDataContents));
+	index += 2;
+	mb_get_binary_float(MB_YES, &buffer[index], &(svt->infoPart.filterTime_sec));
+	index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &(svt->infoPart.soundVelocity_mPerSec_offset));
+	index += 4;
+
+	/* svt data blocks */
+	for (int i=0; i<(svt->infoPart.numSamplesArray); i++ ) {
+		mb_get_binary_int(MB_YES, &buffer[index], &(svt->sensorData[i].time_sec));
+		index += 4;
+		mb_get_binary_int(MB_YES, &buffer[index], &(svt->sensorData[i].time_nanosec));
+		index += 4;
+		mb_get_binary_float(MB_YES, &buffer[index], &(svt->sensorData[i].soundVelocity_mPerSec));
+		index += 4;
+		mb_get_binary_float(MB_YES, &buffer[index], &(svt->sensorData[i].temp_C));
+		index += 4;
+		mb_get_binary_float(MB_YES, &buffer[index], &(svt->sensorData[i].pressure_Pa));
+		index += 4;
+		mb_get_binary_float(MB_YES, &buffer[index], &(svt->sensorData[i].salinity));
+		index += 4;
+	}
+
+	/* set kind */
+	if (status == MB_SUCCESS) {
+		/* set kind */
+		store->kind = MB_DATA_SSV;
+	}
+	else {
+		store->kind = MB_DATA_NONE;
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       svt->header.numBytesDgm:                %u\n", svt->header.numBytesDgm);
+		fprintf(stderr, "dbg5       svt->header.dgmType:                    %s\n", svt->header.dgmType);
+		fprintf(stderr, "dbg5       svt->header.dgmVersion:                 %u\n", svt->header.dgmVersion);
+		fprintf(stderr, "dbg5       svt->header.systemID:                   %u\n", svt->header.systemID);
+		fprintf(stderr, "dbg5       svt->header.echoSounderID:              %u\n", svt->header.echoSounderID);
+		fprintf(stderr, "dbg5       svt->header.time_sec:                   %u\n", svt->header.time_sec);
+		fprintf(stderr, "dbg5       svt->header.time_nanosec:               %u\n", svt->header.time_nanosec);
+
+		fprintf(stderr, "dbg5       svt->infoPart.numBytesInfoPart:         %u\n", svt->infoPart.numBytesInfoPart);
+		fprintf(stderr, "dbg5       svt->infoPart.sensorStatus:             %u\n", svt->infoPart.sensorStatus);
+		fprintf(stderr, "dbg5       svt->infoPart.sensorInputFormat:        %u\n", svt->infoPart.sensorInputFormat);
+		fprintf(stderr, "dbg5       svt->infoPart.numSamplesArray:          %u\n", svt->infoPart.numSamplesArray);
+		fprintf(stderr, "dbg5       svt->infoPart.sensorDataContents:       %u\n", svt->infoPart.sensorDataContents);
+		fprintf(stderr, "dbg5       svt->infoPart.filterTime_sec:           %f\n", svt->infoPart.filterTime_sec);
+		fprintf(stderr, "dbg5       svt->infoPart.soundVelocity_mPerSec_offset: %f\n", svt->infoPart.soundVelocity_mPerSec_offset);
+
+		for (int i = 0; i < (svt->infoPart.numSamplesArray); i++) {
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].time_sec:                     %u\n", i, svt->sensorData[i].time_sec);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].time_nanosec:                 %u\n", i, svt->sensorData[i].time_nanosec);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svt->sensorData[i].soundVelocity_mPerSec);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].temp_C:                       %f\n", i, svt->sensorData[i].temp_C);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].pressure_Pa:                  %f\n", i, svt->sensorData[i].pressure_Pa);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].salinity:                     %f\n", i, svt->sensorData[i].salinity);
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	/* return status */
+	return (status);
+};
 
 int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_kemkmall_rd_scl";
@@ -3042,6 +3206,187 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, int *error) 
 
 }
 
+int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, int *error) {
+	char *function_name = "mbr_kemkmall_rd_cpo";
+	int status = MB_SUCCESS;
+	struct mbsys_kmbes_struct *store;
+	struct mbsys_kmbes_index *dgm_index;
+	struct mbsys_kmbes_cpo *cpo;
+	size_t numBytesRawSensorData;
+	int index;
+
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_kmbes_struct *)store_ptr;
+	dgm_index = (struct mbsys_kmbes_index *)&store->dgm_index[store->dgm_count_id];
+	cpo = &(store->cpo);
+
+	/* get header */
+	cpo->header = dgm_index->header;
+
+	numBytesRawSensorData = cpo->header.numBytesDgm - MBSYS_KMBES_CPO_VAR_OFFSET;
+
+	/* extract the data */
+	index = MBSYS_KMBES_HEADER_SIZE;
+
+
+	// common part
+	mb_get_binary_short(MB_YES, &buffer[index], &(cpo->cmnPart.numBytesCmnPart));
+	index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(cpo->cmnPart.sensorSystem));
+	index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(cpo->cmnPart.sensorStatus));
+	index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(cpo->cmnPart.padding));
+	index += 2;
+
+	// sensor data block
+	mb_get_binary_int(MB_YES, &buffer[index], &cpo->sensorData.timeFromSensor_sec);
+	index += 4;
+	mb_get_binary_int(MB_YES, &buffer[index], &cpo->sensorData.timeFromSensor_nanosec);
+	index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &cpo->sensorData.posFixQuality_m);
+	index += 4;
+	mb_get_binary_double(MB_YES, &buffer[index], &cpo->sensorData.correctedLat_deg);
+	index += 8;
+	mb_get_binary_double(MB_YES, &buffer[index], &cpo->sensorData.correctedLong_deg);
+	index += 8;
+	mb_get_binary_float(MB_YES, &buffer[index], &cpo->sensorData.speedOverGround_mPerSec);
+	index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &cpo->sensorData.courseOverGround_deg);
+	index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &cpo->sensorData.ellipsoidHeightReRefPoint_m);
+	index += 4;
+	memcpy(&cpo->sensorData.posDataFromSensor, &buffer[index], numBytesRawSensorData);
+	index += numBytesRawSensorData;
+
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       cpo->header.numBytesDgm:                %u\n", cpo->header.numBytesDgm);
+		fprintf(stderr, "dbg5       cpo->header.dgmType:                    %s\n", cpo->header.dgmType);
+		fprintf(stderr, "dbg5       cpo->header.dgmVersion:                 %u\n", cpo->header.dgmVersion);
+		fprintf(stderr, "dbg5       cpo->header.systemID:                   %u\n", cpo->header.systemID);
+		fprintf(stderr, "dbg5       cpo->header.echoSounderID:              %u\n", cpo->header.echoSounderID);
+		fprintf(stderr, "dbg5       cpo->header.time_sec:                   %u\n", cpo->header.time_sec);
+		fprintf(stderr, "dbg5       cpo->header.time_nanosec:               %u\n", cpo->header.time_nanosec);
+
+		fprintf(stderr, "dbg5       cpo->cmnPart.numBytesCmnPart:           %u\n", cpo->cmnPart.numBytesCmnPart);
+		fprintf(stderr, "dbg5       cpo->cmnPart.sensorSystem:              %u\n", cpo->cmnPart.sensorSystem);
+		fprintf(stderr, "dbg5       cpo->cmnPart.sensorStatus:              %u\n", cpo->cmnPart.sensorStatus);
+		fprintf(stderr, "dbg5       cpo->cmnPart.padding:                   %u\n", cpo->cmnPart.padding);
+
+		fprintf(stderr, "dbg5       cpo->sensorData.timeFromSensor_sec:     %u\n", cpo->sensorData.timeFromSensor_sec);
+		fprintf(stderr, "dbg5       cpo->sensorData.timeFromSensor_nanosec: %u\n", cpo->sensorData.timeFromSensor_nanosec);
+		fprintf(stderr, "dbg5       cpo->sensorData.posFixQuality_m:        %f\n", cpo->sensorData.posFixQuality_m);
+		fprintf(stderr, "dbg5       cpo->sensorData.correctedLat_deg:       %f\n", cpo->sensorData.correctedLat_deg);
+		fprintf(stderr, "dbg5       cpo->sensorData.correctedLong_deg:      %f\n", cpo->sensorData.correctedLong_deg);
+		fprintf(stderr, "dbg5       cpo->sensorData.speedOverGround_mPerSec:%f\n", cpo->sensorData.speedOverGround_mPerSec);
+		fprintf(stderr, "dbg5       cpo->sensorData.correctedLat_deg:       %f\n", cpo->sensorData.courseOverGround_deg);
+		fprintf(stderr, "dbg5       cpo->sensorData.correctedLong_deg:      %f\n", cpo->sensorData.ellipsoidHeightReRefPoint_m);
+		fprintf(stderr, "dbg5       cpo->sensorData.speedOverGround_mPerSec:%s\n", cpo->sensorData.posDataFromSensor);
+	}
+
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	/* return status */
+	return (status);
+};
+
+int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, int *error) {
+	char *function_name = "mbr_kemkmall_rd_che";
+	int status = MB_SUCCESS;
+	struct mbsys_kmbes_struct *store;
+	struct mbsys_kmbes_index *dgm_index;
+	struct mbsys_kmbes_che *che;
+	size_t numBytesRawSensorData;
+	int index;
+
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_kmbes_struct *)store_ptr;
+	dgm_index = (struct mbsys_kmbes_index *)&store->dgm_index[store->dgm_count_id];
+	che = &(store->che);
+
+	/* get header */
+	che->header = dgm_index->header;
+
+	/* extract the data */
+	index = MBSYS_KMBES_HEADER_SIZE;
+
+	// common part
+	mb_get_binary_short(MB_YES, &buffer[index], &(che->cmnPart.numBytesCmnPart));
+	index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(che->cmnPart.sensorSystem));
+	index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(che->cmnPart.sensorStatus));
+	index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(che->cmnPart.padding));
+	index += 2;
+
+	mb_get_binary_float(MB_YES, &buffer[index], &che->data.heave_m);
+	index += 4;
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       che->header.numBytesDgm:                %u\n", che->header.numBytesDgm);
+		fprintf(stderr, "dbg5       che->header.dgmType:                    %s\n", che->header.dgmType);
+		fprintf(stderr, "dbg5       che->header.dgmVersion:                 %u\n", che->header.dgmVersion);
+		fprintf(stderr, "dbg5       che->header.systemID:                   %u\n", che->header.systemID);
+		fprintf(stderr, "dbg5       che->header.echoSounderID:              %u\n", che->header.echoSounderID);
+		fprintf(stderr, "dbg5       che->header.time_sec:                   %u\n", che->header.time_sec);
+		fprintf(stderr, "dbg5       che->header.time_nanosec:               %u\n", che->header.time_nanosec);
+
+		fprintf(stderr, "dbg5       che->cmnPart.numBytesCmnPart:           %u\n", che->cmnPart.numBytesCmnPart);
+		fprintf(stderr, "dbg5       che->cmnPart.sensorSystem:              %u\n", che->cmnPart.sensorSystem);
+		fprintf(stderr, "dbg5       che->cmnPart.sensorStatus:              %u\n", che->cmnPart.sensorStatus);
+		fprintf(stderr, "dbg5       che->cmnPart.padding:                   %u\n", che->cmnPart.padding);
+
+		fprintf(stderr, "dbg5       che->data.heave_m:                      %f\n", che->data.heave_m);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	/* return status */
+	return (status);
+};
 
 int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_kemkmall_rd_iip";
@@ -3103,7 +3448,7 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, int *error) 
 		fprintf(stderr, "dbg5       iip->header.time_sec:                   %u\n", iip->header.time_sec);
 		fprintf(stderr, "dbg5       iip->header.time_nanosec:               %u\n", iip->header.time_nanosec);
 
-		fprintf(stderr, "dbg5       iip->iip->numBytesCmnPart:              %u\n", iip->numBytesCmnPart);
+		fprintf(stderr, "dbg5       iip->numBytesCmnPart:                   %u\n", iip->numBytesCmnPart);
 		fprintf(stderr, "dbg5       iip->info:                              %u\n", iip->info);
 		fprintf(stderr, "dbg5       iip->status:                            %u\n", iip->status);
 		fprintf(stderr, "dbg5       iip->install_txt:                       %s\n", iip->install_txt);
@@ -3626,7 +3971,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 
 int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_kemkmall_wr_skm";
+	char *function_name = "mbr_kemkmall_wr_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_kmbes_struct *store;
 	struct mbsys_kmbes_index *dgm_index;
@@ -3662,17 +4007,17 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 		fprintf(stderr, "dbg5       svp->header.time_sec:                   %u\n", svp->header.time_sec);
 		fprintf(stderr, "dbg5       svp->header.time_nanosec:               %u\n", svp->header.time_nanosec);
 
-		fprintf(stderr, "dbg5       svp->cmnSvp.numBytesCmnPart:            %u\n", svp->cmnSvp.numBytesCmnPart);
-		fprintf(stderr, "dbg5       svp->cmnSvp.numSamples:                 %u\n", svp->cmnSvp.numSamples);
-		fprintf(stderr, "dbg5       svp->cmnSvp.sensorFormat:               %s\n", svp->cmnSvp.sensorFormat);
-		fprintf(stderr, "dbg5       svp->cmnSvp.time_sec:                   %u\n", svp->cmnSvp.time_sec);
-		fprintf(stderr, "dbg5       svp->cmnSvp.latitude_deg:               %f\n", svp->cmnSvp.latitude_deg);
-		fprintf(stderr, "dbg5       svp->cmnSvp.longitude_deg:              %f\n", svp->cmnSvp.longitude_deg);
+		fprintf(stderr, "dbg5       svp->numBytesCmnPart:                   %u\n", svp->numBytesCmnPart);
+		fprintf(stderr, "dbg5       svp->numSamples:                        %u\n", svp->numSamples);
+		fprintf(stderr, "dbg5       svp->sensorFormat:                      %s\n", svp->sensorFormat);
+		fprintf(stderr, "dbg5       svp->time_sec:                          %u\n", svp->time_sec);
+		fprintf(stderr, "dbg5       svp->latitude_deg:                      %f\n", svp->latitude_deg);
+		fprintf(stderr, "dbg5       svp->longitude_deg:                     %f\n", svp->longitude_deg);
 
-		for (i = 0; i < (svp->cmnSvp.numSamples); i++) {
+		for (i = 0; i < (svp->numSamples); i++) {
 			fprintf(stderr, "dbg5       svp->sensorData[%3d].depth_m:                      %f\n", i, svp->sensorData[i].depth_m);
 			fprintf(stderr, "dbg5       svp->sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svp->sensorData[i].soundVelocity_mPerSec);
-			fprintf(stderr, "dbg5       svp->sensorData[%3d].absCoeff_dBPerkm:             %f\n", i, svp->sensorData[i].absCoeff_dBPerkm);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].padding:                      %d\n", i, svp->sensorData[i].padding);
 			fprintf(stderr, "dbg5       svp->sensorData[%3d].temp_C:                       %f\n", i, svp->sensorData[i].temp_C);
 			fprintf(stderr, "dbg5       svp->sensorData[%3d].salinity:                     %f\n", i, svp->sensorData[i].salinity);
 		}
@@ -3702,26 +4047,26 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 		index = MBSYS_KMBES_HEADER_SIZE;
 
 		/* svp common part */
-		mb_put_binary_short(MB_YES, svp->cmnSvp.numBytesCmnPart, &buffer[index]);
+		mb_put_binary_short(MB_YES, svp->numBytesCmnPart, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_YES, svp->cmnSvp.numSamples, &buffer[index]);
+		mb_put_binary_short(MB_YES, svp->numSamples, &buffer[index]);
 		index += 2;
-		memcpy(&buffer[index], &svp->cmnSvp.sensorFormat, 4);
+		memcpy(&buffer[index], &svp->sensorFormat, 4);
 		index += 4;
-		mb_put_binary_int(MB_YES, svp->cmnSvp.time_sec, &buffer[index]);
+		mb_put_binary_int(MB_YES, svp->time_sec, &buffer[index]);
 		index += 4;
-		mb_put_binary_double(MB_YES, svp->cmnSvp.latitude_deg, &buffer[index]);
+		mb_put_binary_double(MB_YES, svp->latitude_deg, &buffer[index]);
 		index += 8;
-		mb_put_binary_double(MB_YES, svp->cmnSvp.longitude_deg, &buffer[index]);
+		mb_put_binary_double(MB_YES, svp->longitude_deg, &buffer[index]);
 		index += 8;
 
 		/* svp data block */
-		for (i = 0; i < (svp->cmnSvp.numSamples); i++) {
+		for (i = 0; i < (svp->numSamples); i++) {
 			mb_put_binary_float(MB_YES, svp->sensorData[i].depth_m, &buffer[index]);
 			index += 4;
 			mb_put_binary_float(MB_YES, svp->sensorData[i].soundVelocity_mPerSec, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_YES, svp->sensorData[i].absCoeff_dBPerkm, &buffer[index]);
+			mb_put_binary_int(MB_YES, svp->sensorData[i].padding, &buffer[index]);
 			index += 4;
 			mb_put_binary_float(MB_YES, svp->sensorData[i].temp_C, &buffer[index]);
 			index += 4;
@@ -3746,6 +4091,133 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 	return (status);
 };
 
+int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+	char *function_name = "mbr_kemkmall_wr_svt";
+	int status = MB_SUCCESS;
+	struct mbsys_kmbes_struct *store;
+	struct mbsys_kmbes_index *dgm_index;
+	struct mbsys_kmbes_svt *svt;
+	char *buffer;
+	int index;
+	int i;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+		fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_kmbes_struct *)store_ptr;
+	dgm_index = (struct mbsys_kmbes_index *)&store->dgm_index[store->dgm_count_id];
+	svt = &(store->svt);
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       svt->header.numBytesDgm:                %u\n", svt->header.numBytesDgm);
+		fprintf(stderr, "dbg5       svt->header.dgmType:                    %s\n", svt->header.dgmType);
+		fprintf(stderr, "dbg5       svt->header.dgmVersion:                 %u\n", svt->header.dgmVersion);
+		fprintf(stderr, "dbg5       svt->header.systemID:                   %u\n", svt->header.systemID);
+		fprintf(stderr, "dbg5       svt->header.echoSounderID:              %u\n", svt->header.echoSounderID);
+		fprintf(stderr, "dbg5       svt->header.time_sec:                   %u\n", svt->header.time_sec);
+		fprintf(stderr, "dbg5       svt->header.time_nanosec:               %u\n", svt->header.time_nanosec);
+
+		fprintf(stderr, "dbg5       svt->infoPart.numBytesInfoPart:         %u\n", svt->infoPart.numBytesInfoPart);
+		fprintf(stderr, "dbg5       svt->infoPart.sensorStatus:             %u\n", svt->infoPart.sensorStatus);
+		fprintf(stderr, "dbg5       svt->infoPart.sensorInputFormat:        %u\n", svt->infoPart.sensorInputFormat);
+		fprintf(stderr, "dbg5       svt->infoPart.numSamplesArray:          %u\n", svt->infoPart.numSamplesArray);
+		fprintf(stderr, "dbg5       svt->infoPart.sensorDataContents:       %u\n", svt->infoPart.sensorDataContents);
+		fprintf(stderr, "dbg5       svt->infoPart.filterTime_sec:           %f\n", svt->infoPart.filterTime_sec);
+		fprintf(stderr, "dbg5       svt->infoPart.soundVelocity_mPerSec_offset: %f\n", svt->infoPart.soundVelocity_mPerSec_offset);
+
+		for (int i = 0; i < (svt->infoPart.numSamplesArray); i++) {
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].time_sec:                     %u\n", i, svt->sensorData[i].time_sec);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].time_nanosec:                 %u\n", i, svt->sensorData[i].time_nanosec);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svt->sensorData[i].soundVelocity_mPerSec);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].temp_C:                       %f\n", i, svt->sensorData[i].temp_C);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].pressure_Pa:                  %f\n", i, svt->sensorData[i].pressure_Pa);
+			fprintf(stderr, "dbg5       svp->sensorData[%3d].salinity:                     %f\n", i, svt->sensorData[i].salinity);
+		}
+	}
+
+	/* size of output record */
+	*size = dgm_index->header.numBytesDgm;
+
+	/* allocate memory to write rest of record if necessary */
+	if (*bufferalloc < *size) {
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size, (void **)bufferptr, error);
+		if (status != MB_SUCCESS)
+			*bufferalloc = 0;
+		else
+			*bufferalloc = *size;
+	}
+
+	/* proceed to write if buffer allocated */
+	if (status == MB_SUCCESS) {
+		/* get buffer for writing */
+		buffer = (char *) *bufferptr;
+
+		/* insert the header */
+		mbr_kemkmall_wr_header(verbose, bufferptr, store_ptr, error);
+
+		/* insert the data */
+		index = MBSYS_KMBES_HEADER_SIZE;
+
+		/* svt common part */
+		mb_put_binary_short(MB_YES, svt->infoPart.numBytesInfoPart, &buffer[index]);
+		index += 2;
+		mb_put_binary_short(MB_YES, svt->infoPart.sensorStatus, &buffer[index]);
+		index += 2;
+		mb_put_binary_short(MB_YES, svt->infoPart.sensorInputFormat, &buffer[index]);
+		index += 2;
+		mb_put_binary_short(MB_YES, svt->infoPart.numSamplesArray, &buffer[index]);
+		index += 2;
+		mb_put_binary_short(MB_YES, svt->infoPart.sensorDataContents, &buffer[index]);
+		index += 2;
+		mb_put_binary_float(MB_YES, svt->infoPart.filterTime_sec, &buffer[index]);
+		index += 4;
+		mb_put_binary_float(MB_YES, svt->infoPart.soundVelocity_mPerSec_offset, &buffer[index]);
+		index += 4;
+
+		/* svt data block */
+		for( i=0; i<svt->infoPart.numSamplesArray; i++ )
+		{
+			mb_put_binary_int(MB_YES, svt->sensorData[i].time_sec, &buffer[index]);
+			index += 4;
+			mb_put_binary_int(MB_YES, svt->sensorData[i].time_nanosec, &buffer[index]);
+			index += 4;
+			mb_put_binary_float(MB_YES, svt->sensorData[i].soundVelocity_mPerSec, &buffer[index]);
+			index += 4;
+			mb_put_binary_float(MB_YES, svt->sensorData[i].temp_C, &buffer[index]);
+			index += 4;
+			mb_put_binary_float(MB_YES, svt->sensorData[i].pressure_Pa, &buffer[index]);
+			index += 4;
+			mb_put_binary_float(MB_YES, svt->sensorData[i].salinity, &buffer[index]);
+			index += 4;
+		}
+
+		/* insert closing byte count */
+		mb_put_binary_int(MB_YES, svt->header.numBytesDgm, &buffer[index]);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	/* return status */
+	return (status);
+};
 
 int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	char *function_name = "mbr_kemkmall_wr_scl";
@@ -5004,6 +5476,229 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 	return (status);
 };
 
+int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+	char *function_name = "mbr_kemkmall_wr_cpo";
+	int status = MB_SUCCESS;
+	struct mbsys_kmbes_struct *store;
+	struct mbsys_kmbes_index *dgm_index;
+	struct mbsys_kmbes_cpo *cpo;
+	size_t numBytesRawSensorData;
+	char *buffer;
+	int index;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+		fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_kmbes_struct *)store_ptr;
+	dgm_index = (struct mbsys_kmbes_index *)&store->dgm_index[store->dgm_count_id];
+	cpo = &(store->cpo);
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       cpo->header.numBytesDgm:                %u\n", cpo->header.numBytesDgm);
+		fprintf(stderr, "dbg5       cpo->header.dgmType:                    %s\n", cpo->header.dgmType);
+		fprintf(stderr, "dbg5       cpo->header.dgmVersion:                 %u\n", cpo->header.dgmVersion);
+		fprintf(stderr, "dbg5       cpo->header.systemID:                   %u\n", cpo->header.systemID);
+		fprintf(stderr, "dbg5       cpo->header.echoSounderID:              %u\n", cpo->header.echoSounderID);
+		fprintf(stderr, "dbg5       cpo->header.time_sec:                   %u\n", cpo->header.time_sec);
+		fprintf(stderr, "dbg5       cpo->header.time_nanosec:               %u\n", cpo->header.time_nanosec);
+
+		fprintf(stderr, "dbg5       cpo->cmnPart.numBytesCmnPart:           %u\n", cpo->cmnPart.numBytesCmnPart);
+		fprintf(stderr, "dbg5       cpo->cmnPart.sensorSystem:              %u\n", cpo->cmnPart.sensorSystem);
+		fprintf(stderr, "dbg5       cpo->cmnPart.sensorStatus:              %u\n", cpo->cmnPart.sensorStatus);
+		fprintf(stderr, "dbg5       cpo->cmnPart.padding:                   %u\n", cpo->cmnPart.padding);
+
+		fprintf(stderr, "dbg5       cpo->sensorData.timeFromSensor_sec:     %u\n", cpo->sensorData.timeFromSensor_sec);
+		fprintf(stderr, "dbg5       cpo->sensorData.timeFromSensor_nanosec: %u\n", cpo->sensorData.timeFromSensor_nanosec);
+		fprintf(stderr, "dbg5       cpo->sensorData.posFixQuality_m:        %f\n", cpo->sensorData.posFixQuality_m);
+		fprintf(stderr, "dbg5       cpo->sensorData.correctedLat_deg:       %f\n", cpo->sensorData.correctedLat_deg);
+		fprintf(stderr, "dbg5       cpo->sensorData.correctedLong_deg:      %f\n", cpo->sensorData.correctedLong_deg);
+		fprintf(stderr, "dbg5       cpo->sensorData.speedOverGround_mPerSec:%f\n", cpo->sensorData.speedOverGround_mPerSec);
+		fprintf(stderr, "dbg5       cpo->sensorData.correctedLat_deg:       %f\n", cpo->sensorData.courseOverGround_deg);
+		fprintf(stderr, "dbg5       cpo->sensorData.correctedLong_deg:      %f\n", cpo->sensorData.ellipsoidHeightReRefPoint_m);
+		fprintf(stderr, "dbg5       cpo->sensorData.speedOverGround_mPerSec:%s\n", cpo->sensorData.posDataFromSensor);
+	}
+
+	/* size of output record */
+	*size = dgm_index->header.numBytesDgm;
+
+	/* allocate memory to write rest of record if necessary */
+	if (*bufferalloc < *size) {
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size, (void **)bufferptr, error);
+		if (status != MB_SUCCESS)
+			*bufferalloc = 0;
+		else
+			*bufferalloc = *size;
+	}
+
+	/* proceed to write if buffer allocated */
+	if (status == MB_SUCCESS) {
+		/* get buffer for writing */
+		buffer = (char *) *bufferptr;
+
+		/* insert the header */
+		mbr_kemkmall_wr_header(verbose, bufferptr, store_ptr, error);
+
+		/* insert the data */
+		index = MBSYS_KMBES_HEADER_SIZE;
+
+		/* common part */
+		mb_put_binary_short(MB_YES, cpo->cmnPart.numBytesCmnPart, &buffer[index]);
+		index += 2;
+		mb_put_binary_short(MB_YES, cpo->cmnPart.sensorSystem, &buffer[index]);
+		index += 2;
+		mb_put_binary_short(MB_YES, cpo->cmnPart.sensorStatus, &buffer[index]);
+		index += 2;
+		mb_put_binary_short(MB_YES, cpo->cmnPart.padding, &buffer[index]);
+		index += 2;
+
+		/* sensor data block */
+		mb_put_binary_int(MB_YES, cpo->sensorData.timeFromSensor_sec, &buffer[index]);
+		index += 4;
+		mb_put_binary_int(MB_YES, cpo->sensorData.timeFromSensor_nanosec, &buffer[index]);
+		index += 4;
+		mb_put_binary_float(MB_YES, cpo->sensorData.posFixQuality_m, &buffer[index]);
+		index += 4;
+		mb_put_binary_double(MB_YES, cpo->sensorData.correctedLat_deg, &buffer[index]);
+		index += 8;
+		mb_put_binary_double(MB_YES, cpo->sensorData.correctedLong_deg, &buffer[index]);
+		index += 8;
+		mb_put_binary_float(MB_YES, cpo->sensorData.speedOverGround_mPerSec, &buffer[index]);
+		index += 4;
+		mb_put_binary_float(MB_YES, cpo->sensorData.courseOverGround_deg, &buffer[index]);
+		index += 4;
+		mb_put_binary_float(MB_YES, cpo->sensorData.ellipsoidHeightReRefPoint_m, &buffer[index]);
+		index += 4;
+
+		/* raw data msg from sensor */
+		memcpy(&buffer[index], &(cpo->sensorData.posDataFromSensor), numBytesRawSensorData);
+		index += numBytesRawSensorData;
+
+		/* insert closing byte count */
+		mb_put_binary_int(MB_YES, cpo->header.numBytesDgm, &buffer[index]);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	/* return status */
+	return (status);
+};
+
+int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+	char *function_name = "mbr_kemkmall_wr_che";
+	int status = MB_SUCCESS;
+	struct mbsys_kmbes_struct *store;
+	struct mbsys_kmbes_index *dgm_index;
+	struct mbsys_kmbes_che *che;
+	size_t numBytesRawSensorData;
+	char *buffer;
+	int index;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+		fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_kmbes_struct *)store_ptr;
+	dgm_index = (struct mbsys_kmbes_index *)&store->dgm_index[store->dgm_count_id];
+	che = &(store->che);
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       che->header.numBytesDgm:                %u\n", che->header.numBytesDgm);
+		fprintf(stderr, "dbg5       che->header.dgmType:                    %s\n", che->header.dgmType);
+		fprintf(stderr, "dbg5       che->header.dgmVersion:                 %u\n", che->header.dgmVersion);
+		fprintf(stderr, "dbg5       che->header.systemID:                   %u\n", che->header.systemID);
+		fprintf(stderr, "dbg5       che->header.echoSounderID:              %u\n", che->header.echoSounderID);
+		fprintf(stderr, "dbg5       che->header.time_sec:                   %u\n", che->header.time_sec);
+		fprintf(stderr, "dbg5       che->header.time_nanosec:               %u\n", che->header.time_nanosec);
+
+		fprintf(stderr, "dbg5       che->cmnPart.numBytesCmnPart:           %u\n", che->cmnPart.numBytesCmnPart);
+		fprintf(stderr, "dbg5       che->cmnPart.sensorSystem:              %u\n", che->cmnPart.sensorSystem);
+		fprintf(stderr, "dbg5       che->cmnPart.sensorStatus:              %u\n", che->cmnPart.sensorStatus);
+		fprintf(stderr, "dbg5       che->cmnPart.padding:                   %u\n", che->cmnPart.padding);
+
+		fprintf(stderr, "dbg5       che->data.data.heave_m:                 %f\n", che->data.heave_m);
+	}
+
+	/* size of output record */
+	*size = dgm_index->header.numBytesDgm;
+
+	/* allocate memory to write rest of record if necessary */
+	if (*bufferalloc < *size) {
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size, (void **)bufferptr, error);
+		if (status != MB_SUCCESS)
+			*bufferalloc = 0;
+		else
+			*bufferalloc = *size;
+	}
+
+	/* proceed to write if buffer allocated */
+	if (status == MB_SUCCESS) {
+		/* get buffer for writing */
+		buffer = (char *) *bufferptr;
+
+		/* insert the header */
+		mbr_kemkmall_wr_header(verbose, bufferptr, store_ptr, error);
+
+		/* insert the data */
+		index = MBSYS_KMBES_HEADER_SIZE;
+
+		/* common part */
+		mb_put_binary_short(MB_YES, che->cmnPart.numBytesCmnPart, &buffer[index]);
+		index += 2;
+		mb_put_binary_short(MB_YES, che->cmnPart.sensorSystem, &buffer[index]);
+		index += 2;
+		mb_put_binary_short(MB_YES, che->cmnPart.sensorStatus, &buffer[index]);
+		index += 2;
+		mb_put_binary_short(MB_YES, che->cmnPart.padding, &buffer[index]);
+		index += 2;
+
+		/* sensor data block */
+		mb_put_binary_float(MB_YES, che->data.heave_m, &buffer[index]);
+		index += 4;
+
+		/* insert closing byte count */
+		mb_put_binary_int(MB_YES, che->header.numBytesDgm, &buffer[index]);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	/* return status */
+	return (status);
+};
 
 int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	char *function_name = "mbr_kemkmall_wr_iip";
