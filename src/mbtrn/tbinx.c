@@ -697,16 +697,16 @@ static int s_out_socket(iow_socket_t *s, trn_message_t *message)
                                 trn_cli_con++;
                             }
                             
-                            MMDEBUG(ID_APP,"rx [%zd]b cli[%d/%s:%s]\n", iobytes, svc, trn_peer->chost, trn_peer->service);
+                            MMDEBUG(ID_APP,"rx [%d]b cli[%d/%s:%s]\n", iobytes, svc, trn_peer->chost, trn_peer->service);
 
                             // send ACK
                             iobytes = iow_sendto(s, pclient->addr, (byte *)"ACK", 4, 0 );
                             if ( (NULL!=pclient) &&  (iobytes> 0) ) {
-                                MMDEBUG(ID_APP,"tx ACK [%zd]b cli[%d/%s:%s]\n",iobytes, svc, pclient->chost, pclient->service);
+                                MMDEBUG(ID_APP,"tx ACK [%d]b cli[%d/%s:%s]\n",iobytes, svc, pclient->chost, pclient->service);
                                 trn_tx_count++;
                                 trn_tx_bytes+=iobytes;
                             }else{
-                                fprintf(stderr,"tx cli[%d] failed pclient[%p] iobytes[%zd] [%d/%s]\n",svc,pclient,iobytes,errno,strerror(errno));
+                                fprintf(stderr,"tx cli[%d] failed pclient[%p] iobytes[%d] [%d/%s]\n",svc,pclient,iobytes,errno,strerror(errno));
                             }
                         }else{
                             MMERROR(ID_APP,"err - inet_ntop failed [%d/%s]\n",errno,strerror(errno));
@@ -738,7 +738,7 @@ static int s_out_socket(iow_socket_t *s, trn_message_t *message)
                 trn_msg_count++;
                 retval=0;
 
-                MMDEBUG(ID_APP,"tx TRN [%5zd]b cli[%d/%s:%s] hb[%d]\n",
+                MMDEBUG(ID_APP,"tx TRN [%5d]b cli[%d/%s:%s] hb[%d]\n",
                         iobytes, idx, psub->chost, psub->service, psub->heartbeat);
                 
             }else{

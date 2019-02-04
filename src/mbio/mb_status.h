@@ -125,7 +125,7 @@
 #define MB_FAILURE 0
 
 /* MBIO minimum and maximum error values */
-#define MB_ERROR_MIN -24
+#define MB_ERROR_MIN -25
 #define MB_ERROR_MAX 16
 
 /* MBIO function fatal error values */
@@ -172,6 +172,7 @@
 #define MB_ERROR_FILE_NOT_FOUND -22
 #define MB_ERROR_FILE_LOCKED -23
 #define MB_ERROR_INIT_FAIL -24
+#define MB_ERROR_SIDESCAN_IGNORED -25
 
 /* MBIO problem values */
 #define MB_PROBLEM_MAX 6
@@ -248,6 +249,7 @@ static char *nonfatal_error_msg[] = {
     "Requested file not found",
     "Requested file locked",
     "Initialization failed",
+    "Sidescan ignored",
 };
 static char *unknown_error_msg[] = {"Unknown error identifier"};
 
@@ -314,7 +316,10 @@ static char *notice_msg[] = {
     "MB_ERROR_MISSING_PROJECTIONS (ID=-19): Projection database cannot be read",
     "MB_ERROR_MISSING_NAVATTITUDE (ID=-20): Attitude data are missing for this ping",
     "MB_ERROR_NOT_ENOUGH_DATA (ID=-21): Not enough data to perform spline interpolation",
-    "MB_ERROR_FILE_NOT_FOUND (ID=-22): Required file cannot be found", "MB_ERROR_FILE_LOCKED (ID=-23): Required file locked",
+    "MB_ERROR_FILE_NOT_FOUND (ID=-22): Requested file cannot be found",
+    "MB_ERROR_FILE_LOCKED (ID=-23): Requested file locked",
+    "MB_ERROR_FILE_NOT_FOUND (ID=-24): Initialization failed",
+    "MB_ERROR_FILE_NOT_FOUND (ID=-25): Sidescan data ignored", 
 
     /* problem notices */
     "DATA PROBLEM (ID=1): No survey data found", "DATA PROBLEM (ID=2): Zero longitude or latitude in survey data",
