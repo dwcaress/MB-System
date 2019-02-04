@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hysweep.c	3.00	12/23/2011
  *	$Id$
  *
- *    Copyright (c) 2011-2017 by
+ *    Copyright (c) 2011-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

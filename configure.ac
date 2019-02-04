@@ -34,7 +34,7 @@ AS_ECHO(["----------------------------------------------------------------------
 AS_ECHO(["    The MB-system:    configure    12/7/2011"])
 AS_ECHO(["    $Id$"])
 AS_ECHO([" "])
-AS_ECHO(["    Copyright (c) 2011-2018 by"])
+AS_ECHO(["    Copyright (c) 2011-2019 by"])
 AS_ECHO(["    D. W. Caress (caress@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)"])
 AS_ECHO(["    Lamont-Doherty Earth Observatory"])

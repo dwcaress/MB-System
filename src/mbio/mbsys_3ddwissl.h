@@ -2,7 +2,7 @@
  *    The MB-system:  mbsys_3ddwissl.h  12/19/2017
  *  $Id$
  *
- *    Copyright (c) 2018-2018 by
+ *    Copyright (c) 2018-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

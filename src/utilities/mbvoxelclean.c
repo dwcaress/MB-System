@@ -2,7 +2,7 @@
  *    The MB-system:	mbvoxelclean.c	8/27/2018
  *    $Id:  $
  *
- *    Copyright (c) 2018-2018 by
+ *    Copyright (c) 2018-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
