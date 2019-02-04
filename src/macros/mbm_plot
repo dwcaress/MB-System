@@ -872,7 +872,7 @@ else
 	}
 
 # use mbdefaults to get the current system default postscript viewer
-$ps_viewer = "ghostview";
+$ps_viewer = "open";
 $lonflip = 0;
 @mbdefaults = `mbdefaults`;
 while (@mbdefaults)
@@ -2568,9 +2568,18 @@ if ($format > -1)
 	print FCMD "/bin/rm -f $file_list\n";
 	}
 
-# display image on screen if desired
+
+# display postscript plot on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";
-if ($ps_viewer eq "xpsview")
+if ($ps_viewer eq "Preview")
+	{
+  $ps_viewcmd = "open -a Preview \$PS_FILE \n";
+	}
+elsif ($ps_viewer eq "open")
+	{
+  $ps_viewcmd = "open \$PS_FILE \n";
+	}
+elsif ($ps_viewer eq "xpsview")
 	{
 	if ($portrait)
 		{
@@ -2580,6 +2589,7 @@ if ($ps_viewer eq "xpsview")
 		{
 		$view_pageflag = "-ps $pagesize -or landscape -maxp $xpsview_mem{$pagesize}";
 		}
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 elsif ($ps_viewer eq "pageview")
 	{
@@ -2591,6 +2601,7 @@ elsif ($ps_viewer eq "pageview")
 		{
 		$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
 		}
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 elsif ($ps_viewer eq "ghostview")
 	{
@@ -2602,6 +2613,7 @@ elsif ($ps_viewer eq "ghostview")
 		{
 		$view_pageflag = "-landscape -media BBox";
 		}
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 elsif ($ps_viewer eq "gv")
 	{
@@ -2623,6 +2635,7 @@ elsif ($ps_viewer eq "gv")
 			}
 		$view_pageflag = "--orientation=landscape --media=BBox -scale=$pagescale";
 		}
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 elsif ($ps_viewer eq "ggv")
 	{
@@ -2634,24 +2647,30 @@ elsif ($ps_viewer eq "ggv")
 		{
 		$view_pageflag = "--geometry=landscape";
 		}
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 elsif ($ps_viewer eq "evince")
 	{
 	$view_pageflag = " ";
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
+else
+  {
+  $ps_viewcmd = "$ps_viewer \$PS_FILE \n";
+  }
 if ($no_view_ps)
 	{
-        print FCMD "#if (!(\$#argv > 0 && (\"\$1\" == \"-N\" || \"\$1\" == \"-n\"))) then\n";
+  print FCMD "#if (!($#argv > 0 && (\"$1\" == \"-N\" || \"$1\" == \"-n\"))) then\n";
 	print FCMD "#echo Running $ps_viewer in background...\n";
 	print FCMD "#$ps_viewer $view_pageflag \$PS_FILE &\n";
-        print FCMD "#endif\n";
+  print FCMD "#endif\n";
 	}
 else
 	{
-        print FCMD "if (!(\$#argv > 0 && (\"\$1\" == \"-N\" || \"\$1\" == \"-n\"))) then\n";
+  print FCMD "if (!($#argv > 0 && (\"$1\" == \"-N\" || \"$1\" == \"-n\"))) then\n";
 	print FCMD "echo Running $ps_viewer in background...\n";
 	print FCMD "$ps_viewer $view_pageflag \$PS_FILE &\n";
-        print FCMD "endif\n";
+  print FCMD "endif\n";
 	}
 
 # claim it's all over

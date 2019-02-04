@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status;
+	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 
@@ -314,21 +314,21 @@ int main(int argc, char **argv) {
 				}
 				else if (action == MBP_EDIT_UNFLAG) {
 					beam_unflag++;
-					if (ignore_flag == MB_YES) {
+					if (ignore_unflag == MB_YES) {
 						ignore = MB_YES;
 						beam_unflag_ignore++;
 					}
 				}
 				else if (action == MBP_EDIT_ZERO) {
 					beam_zero++;
-					if (ignore_flag == MB_YES) {
+					if (ignore_zero == MB_YES) {
 						ignore = MB_YES;
 						beam_zero_ignore++;
 					}
 				}
 				else if (action == MBP_EDIT_FILTER) {
 					beam_filter++;
-					if (ignore_flag == MB_YES) {
+					if (ignore_filter == MB_YES) {
 						ignore = MB_YES;
 						beam_filter_ignore++;
 					}

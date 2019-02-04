@@ -676,16 +676,16 @@ struct mbsys_simrad2_extraparameters_struct {
 	                                        0: External PU decode
 	                                        1: PU decodes Q-factor (default)
 	                                    Each positioning system has its own individual setting.
-	                                    Value Ô1Õ indicates that the PU should decode the quality
+	                                    Value 1 indicates that the PU should decode the quality
 	                                    factors in the traditional way. This is the default.
-	                                    Value Ô0Õ indicates that the PU should skip quality factor
+	                                    Value 0 indicates that the PU should skip quality factor
 	                                    decoding as this is performed externally. The PU should
-	                                    always transmit the height datagram ÔhÕ.*/
+	                                    always transmit the height datagram 'h'. */
 	int xtr_pqf_nqualityfactors[3]; /* number of quality factors for each positioning system
 	                                    Each positioning system have an independent set of
 	                                    additional quality factors. The number of quality
 	                                    factors for each system must be specified.
-	                                    Default value is 0.*/
+	                                    Default value is 0. */
 	                                /* Each quality factor is described by two entries, the
 	                                   quality factor itself and a limit, forming a pair.
 	                                   This results in a variable number of such pairs,

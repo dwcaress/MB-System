@@ -1,7 +1,8 @@
-.TH mbm_grdplot 1 "20 March 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_grdplot 1 "4 February 2019" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grdplot\fP \- Create an executable shellscript which will generate
-a GMT map of gridded data in a GMT grd file.
+a GMT map of gridded data in a GMT grd file or image data in a georeferenced
+image file.
 
 .SH VERSION
 Version 5.0
@@ -52,8 +53,10 @@ Miscellaneous Options:
 .SH DESCRIPTION
 \fBmbm_grdplot\fP is a macro that generates a
 shellscript of \fBGMT\fP commands which,
-when executed, will generate a Postscript plot of gridded
-data.  Several styles of plots can be generated, including
+when executed, will generate a Postscript plot of raster
+data, whether in the form of gridded values that are mapped
+to colors or images in which the colors are already defined.
+Several styles of plots can be generated, including
 color fill maps, contour maps, color fill maps overlaid with
 contours, shaded relief color maps, slope magnitude maps,
 coastline maps, text labels, and xy data
@@ -159,6 +162,10 @@ Turns on color fill plot and sets the style of the plot.
  			magnitude.
         \fIcolor_mode\fP = 5: Color/gray fill shaded by
                         slope magnitude.
+        \fIcolor_mode\fP = 6: Image plot using embedded
+                        georeferencing.
+        \fIcolor_mode\fP = 7: Image plot using bounds
+                        specified with \fB-R\fP.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -374,6 +381,10 @@ Turns on color fill plot and sets the style of the plot.
  			magnitude.
         \fIcolor_mode\fP = 5: Color/gray fill shaded by
                         slope magnitude.
+        \fIcolor_mode\fP = 6: Image plot using embedded
+                        georeferencing.
+        \fIcolor_mode\fP = 7: Image plot using bounds
+                        specified with \fB-R\fP.
 .br
 See the \fBgrdimage\fP manual page for information on shading
 with intensity files
@@ -562,7 +573,7 @@ scale (for the plain scale, +u will instead select the unit to be appended to
 the distance length). Note: Use FONT_LABEL to change the label font and
 FONT_ANNOT_PRIMARY to change the annotation font. The height of the map scale
 is controlled by MAP_SCALE_HEIGHT, and the pen thickness is set by
-MAP_TICK_PEN_PRIMARY. 
+MAP_TICK_PEN_PRIMARY.
 .TP
 .B \-MGQ
 \fIdpi\fP

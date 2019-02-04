@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+* Version 5.7.2          February 4, 2019
 * Version 5.7.1          December 19, 2018
   Version 5.6.20181218   December 18, 2018
 * Version 5.6.20181217   December 17, 2018
@@ -291,6 +292,42 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
   Version 5.0.beta02     June 30, 2001
   Version 5.0.beta01     June 8, 2001
   Version 5.0.beta00     April 6, 2001
+
+-------------------------------------------------------------------------------
+MB-SYSTEM VERSION 5.7 RELEASE NOTES:
+-------------------------------------------------------------------------------
+
+-----> 5.7.2 (February 4, 2019)
+
+All files: Updated copyright to 2019.
+
+Mbdumpesf: Fixed the application of the ignore options, applying fixes provided by
+Povl Abrahamsen of the British Antarctic Survey in October 2017 (!)
+
+Mbclean: Fixed problem with heading-change-rate based flagging.
+
+Mbm_grdplot: supported generating plots of images (ie. Geotiffs) in addition to
+grids. Added two plot modes: -G6 will plot the image using the embedded georeferencing,
+and -G7 will plot the image using the bounds specified with the -R option as the
+bounds of the image.
+
+Format 56/57 (MBF_EM300RAW MBF_EM300MBA): Fixed crashing with some EM122 data by
+disabling attempted parsing of "extraparameters" datagrams, which appear to not
+conform to the format specification.
+
+Mbdefaults, Mbm_* plotting macros: Changed the definition of the programs used to
+view Postscript plots generated through the mbm_* plotting macros and for images
+(e.g. geotiffs generated using mbgrdtiff). Previously, the programs used by
+MB-System to view postscript files and images were explicitly defined using
+mbdefaults. Defining the viewing programs is still possible with mbdefaults, but
+the default is now to use the operating system's command line program
+that automatically opens a specified file using the user's default application
+for that kind of file. On Linux systems, this program is "xdg-open". On MacOs, this
+program is "open". On Cygwin systems, this program is "cygstart".
+
+-----> 5.7.1 (December 19, 2018)
+
+Initiated use of version tagging in Git.
 
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.6 RELEASE NOTES:

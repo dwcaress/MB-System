@@ -401,13 +401,13 @@ static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
                                 svc = port;
                                 snprintf(trn_peer->service,NI_MAXSERV,"%d",svc);
                                 
-                                MDEBUG("%11.3f Received %zd bytes from peer[%d] %s:%s\n",
+                                MDEBUG("%11.3f Received %d bytes from peer[%d] %s:%s\n",
                                        tarrival,iobytes, con_idx, trn_peer->chost, trn_peer->service);
                                 
                                 // send reply data to requesting peer
                                 if ( (iobytes = iow_sendto(s, trn_peer->addr, buf, UDPS_BUF_LEN, 0 )) > 0) {
                                     
-                                    MDEBUG("%11.3f Sent %zd bytes to peer[%d] %s:%s\n",
+                                    MDEBUG("%11.3f Sent %d bytes to peer[%d] %s:%s\n",
                                            iow_dtime(),iobytes, con_idx, trn_peer->chost, trn_peer->service);
                                     
                                 }else{

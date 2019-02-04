@@ -42,7 +42,7 @@
 #include "mb_swap.h"
 
 /* turn on debug statements here */
-/* #define MBR_EM300RAW_DEBUG 1 */
+// #define MBR_EM300RAW_DEBUG 1
 
 /* essential function prototypes */
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error);
@@ -1824,7 +1824,7 @@ important information in this record has
 already been read - next attempt to read
 file will return error */
 #ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[0], line[0], line[1], line[1], line[2],
+			fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[0], line[0], line[1], line[1], line[2],
 			        line[2]);
 #endif
 		}
@@ -2003,7 +2003,7 @@ int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 		if (line[EM2_RUN_PARAMETER_SIZE - 7] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[EM2_RUN_PARAMETER_SIZE - 7],
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[EM2_RUN_PARAMETER_SIZE - 7],
 		        line[EM2_RUN_PARAMETER_SIZE - 7], line[EM2_RUN_PARAMETER_SIZE - 6], line[EM2_RUN_PARAMETER_SIZE - 6],
 		        line[EM2_RUN_PARAMETER_SIZE - 5], line[EM2_RUN_PARAMETER_SIZE - 5]);
 #endif
@@ -2108,7 +2108,7 @@ int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 		if (line[EM2_CLOCK_SIZE - 7] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[EM2_CLOCK_SIZE - 7], line[EM2_CLOCK_SIZE - 7],
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[EM2_CLOCK_SIZE - 7], line[EM2_CLOCK_SIZE - 7],
 		        line[EM2_CLOCK_SIZE - 6], line[EM2_CLOCK_SIZE - 6], line[EM2_CLOCK_SIZE - 5], line[EM2_CLOCK_SIZE - 5]);
 #endif
 	}
@@ -2196,7 +2196,7 @@ int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		if (line[EM2_TIDE_SIZE - 7] == 0x03)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[EM2_TIDE_SIZE - 7], line[EM2_TIDE_SIZE - 7],
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[EM2_TIDE_SIZE - 7], line[EM2_TIDE_SIZE - 7],
 		        line[EM2_TIDE_SIZE - 6], line[EM2_TIDE_SIZE - 6], line[EM2_TIDE_SIZE - 5], line[EM2_TIDE_SIZE - 5]);
 #endif
 	}
@@ -2282,7 +2282,7 @@ int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 		if (line[EM2_HEIGHT_SIZE - 7] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[EM2_HEIGHT_SIZE - 7], line[EM2_HEIGHT_SIZE - 7],
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[EM2_HEIGHT_SIZE - 7], line[EM2_HEIGHT_SIZE - 7],
 		        line[EM2_HEIGHT_SIZE - 6], line[EM2_HEIGHT_SIZE - 6], line[EM2_HEIGHT_SIZE - 5], line[EM2_HEIGHT_SIZE - 5]);
 #endif
 	}
@@ -2407,7 +2407,7 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 		if (line[1] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
 #endif
 	}
 
@@ -2534,7 +2534,7 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		if (line[1] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
 #endif
 	}
 
@@ -2660,7 +2660,7 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		if (line[1] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
 #endif
 	}
 
@@ -2697,7 +2697,7 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar,
                                     int *goodend, int *error) {
-	char *function_name = "mbr_em710raw_rd_extraparameters";
+	char *function_name = "mbr_em300raw_rd_extraparameters";
 	int status = MB_SUCCESS;
 	struct mbsys_simrad2_extraparameters_struct *extraparameters;
 	char line[EM2_EXTRAPARAMETERS_HEADER_SIZE];
@@ -2764,9 +2764,10 @@ int mbr_em300raw_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 	}
 
 	/* parse data if possible */
-	if (status == MB_SUCCESS && extraparameters->xtr_id == 2) {
+/*	if (status == MB_SUCCESS && extraparameters->xtr_id == 2) {
 		index = 0;
 		mb_get_binary_int(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_activepositioning);
+    index +=4;
 		for (i = 0; i < 3; i++) {
 			mb_get_binary_short(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_qfsetting[i]);
 			index += 2;
@@ -2783,7 +2784,7 @@ int mbr_em300raw_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 				index += 4;
 			}
 		}
-	}
+	} */
 
 	/* now get last bytes of record */
 	if (status == MB_SUCCESS) {
@@ -2801,7 +2802,7 @@ int mbr_em300raw_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 		if (line[1] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
 #endif
 	}
 
@@ -2819,7 +2820,7 @@ int mbr_em300raw_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 		fprintf(stderr, "dbg5       xtr_id:          %d\n", extraparameters->xtr_id);
 		fprintf(stderr, "dbg5       xtr_data_size:   %d\n", extraparameters->xtr_data_size);
 		fprintf(stderr, "dbg5       xtr_nalloc:      %d\n", extraparameters->xtr_nalloc);
-		if (extraparameters->xtr_id == 2) {
+/*		if (extraparameters->xtr_id == 2) {
 			fprintf(stderr, "dbg5       xtr_pqf_activepositioning:          %d\n", extraparameters->xtr_pqf_activepositioning);
 			for (i = 0; i < 3; i++) {
 				fprintf(stderr, "dbg5       positioning system:%d qfsetting:%d nqf:%d\n", i,
@@ -2828,7 +2829,7 @@ int mbr_em300raw_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 					fprintf(stderr, "dbg5       quality factor:%d value:%d limit:%d\n", j,
 					        extraparameters->xtr_pqf_qfvalues[i][j], extraparameters->xtr_pqf_qflimits[i][j]);
 			}
-		}
+		}*/
 	}
 
 	/* print output debug statements */
@@ -2944,7 +2945,7 @@ int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		if (line[1] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
 #endif
 	}
 
@@ -3073,7 +3074,7 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 					*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 				if (sonar != MBSYS_SIMRAD2_EM3000)
-					fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[0], line[0], line[1], line[1], line[2],
+					fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[0], line[0], line[1], line[1], line[2],
 					        line[2]);
 #endif
 			}
@@ -3248,7 +3249,7 @@ int mbr_em300raw_rd_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		if (line[1] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
 #endif
 	}
 
@@ -3375,7 +3376,7 @@ int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		if (line[1] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
 #endif
 	}
 
@@ -3561,7 +3562,7 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		if (line[1] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
 #endif
 	}
 
@@ -3735,7 +3736,7 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 		if (line[1] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
 #endif
 	}
 
@@ -3946,7 +3947,7 @@ int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		if (line[1] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
 #endif
 	}
 
@@ -4186,7 +4187,7 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		if (line[1] == EM2_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
+		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[1], line[1], line[2], line[2], line[3], line[3]);
 #endif
 	}
 
@@ -4452,7 +4453,7 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 				read_len = fread(&line[1], 2, 1, mbfp);
 				*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-				fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[0], line[0], line[1], line[1], line[2],
+				fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[0], line[0], line[1], line[1], line[2],
 				        line[2]);
 #endif
 			}
@@ -4682,7 +4683,7 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 				read_len = fread(&line[1], 2, 1, mbfp);
 				*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
-				fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", line[0], line[0], line[1], line[1], line[2],
+				fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[0], line[0], line[1], line[1], line[2],
 				        line[2]);
 #endif
 			}
@@ -4843,7 +4844,7 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		status = mbr_em300raw_wr_tilt(verbose, mbfp, swap, store, error);
 	}
 	else if (store->kind == MB_DATA_PARAMETER) {
-#ifdef MBR_EM710RAW_DEBUG
+#ifdef MBR_EM300RAW_DEBUG
 		fprintf(stderr, "call mbr_em300raw_wr_extraparameters kind:%d type %x\n", store->kind, store->type);
 #endif
 		status = mbr_em300raw_wr_extraparameters(verbose, mbfp, swap, store, error);
@@ -6366,7 +6367,7 @@ int mbr_em300raw_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_extraparameters";
+	char *function_name = "mbr_em300raw_wr_extraparameters";
 	int status = MB_SUCCESS;
 	struct mbsys_simrad2_extraparameters_struct *extraparameters;
 	char line[EM2_EXTRAPARAMETERS_HEADER_SIZE];
@@ -6375,6 +6376,7 @@ int mbr_em300raw_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
+  int index;
 	int i, j;
 
 	/* print input debug statements */
@@ -6405,7 +6407,7 @@ int mbr_em300raw_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 		fprintf(stderr, "dbg5       xtr_id:          %d\n", extraparameters->xtr_id);
 		fprintf(stderr, "dbg5       xtr_data_size:   %d\n", extraparameters->xtr_data_size);
 		fprintf(stderr, "dbg5       xtr_nalloc:      %d\n", extraparameters->xtr_nalloc);
-		if (extraparameters->xtr_id == 2) {
+/*		if (extraparameters->xtr_id == 2) {
 			fprintf(stderr, "dbg5       xtr_pqf_activepositioning:          %d\n", extraparameters->xtr_pqf_activepositioning);
 			for (i = 0; i < 3; i++) {
 				fprintf(stderr, "dbg5       positioning system:%d qfsetting:%d nqf:%d\n", i,
@@ -6414,7 +6416,7 @@ int mbr_em300raw_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 					fprintf(stderr, "dbg5       quality factor:%d value:%d limit:%d\n", j,
 					        extraparameters->xtr_pqf_qfvalues[i][j], extraparameters->xtr_pqf_qflimits[i][j]);
 			}
-		}
+		}*/
 	}
 
 	/* zero checksum */
@@ -6496,7 +6498,7 @@ int mbr_em300raw_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 			checksum += uchar_ptr[j];
 
 		/* write out data */
-		write_len = fwrite(line, 1, extraparameters->xtr_data_size, mbfp);
+		write_len = fwrite(extraparameters->xtr_data, 1, extraparameters->xtr_data_size, mbfp);
 		if (write_len != extraparameters->xtr_data_size) {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
