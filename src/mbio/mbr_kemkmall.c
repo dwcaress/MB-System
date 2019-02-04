@@ -1684,6 +1684,8 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, int *error) 
 		index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.longitudeError_m));
 		index += 4;
+        mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.ellipsoidHeightError_m));
+        index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.rollError_deg));
 		index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.pitchError_deg));
@@ -1691,8 +1693,6 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, int *error) 
 		mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.headingError_deg));
 		index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.heaveError_m));
-		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.longitudeError_m));
 		index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(skm->sample[i].KMdefault.northAcceleration));
 		index += 4;
@@ -2584,9 +2584,9 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, int *error) 
 	index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.z_waterLevelReRefPoint_m));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.x_txTransducerArm_SCS_m));
+	mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.x_kmallToall_m));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.y_txTransducerArm_SCS_m));
+	mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.y_kmallToall_m));
 	index += 4;
 
 	mrz->pingInfo.latLongInfo = buffer[index];
@@ -2645,8 +2645,8 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, int *error) 
 		fprintf(stderr,"dbg5       soundSpeedAtTxDepth_mPerSec = %f\n", mrz->pingInfo.soundSpeedAtTxDepth_mPerSec);
 		fprintf(stderr,"dbg5       txTransducerDepth_m         = %f\n", mrz->pingInfo.txTransducerDepth_m);
 		fprintf(stderr,"dbg5       z_waterLevelReRefPoint_m    = %f\n", mrz->pingInfo.z_waterLevelReRefPoint_m);
-		fprintf(stderr,"dbg5       x_txTransducerArm_SCS_m     = %f\n", mrz->pingInfo.x_txTransducerArm_SCS_m);
-		fprintf(stderr,"dbg5       y_txTransducerArm_SCS_m     = %f\n", mrz->pingInfo.y_txTransducerArm_SCS_m);
+		fprintf(stderr,"dbg5       x_kmallToall_m              = %f\n", mrz->pingInfo.x_kmallToall_m);
+		fprintf(stderr,"dbg5       y_kmallToall_m              = %f\n", mrz->pingInfo.y_kmallToall_m);
 		fprintf(stderr,"dbg5       latLongInfo                 = %d\n", mrz->pingInfo.latLongInfo);
 		fprintf(stderr,"dbg5       posSensorStatus             = %d\n", mrz->pingInfo.posSensorStatus);
 		fprintf(stderr,"dbg5       attitudeSensorStatus        = %d\n", mrz->pingInfo.attitudeSensorStatus);
@@ -3795,7 +3795,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 		fprintf(stderr, "dbg5       skm->infoPart.sensorInputFormat:        %u\n", skm->infoPart.sensorInputFormat);
 		fprintf(stderr, "dbg5       skm->infoPart.numSamplesArray:          %u\n", skm->infoPart.numSamplesArray);
 		fprintf(stderr, "dbg5       skm->infoPart.numBytesPerSample:        %u\n", skm->infoPart.numBytesPerSample);
-		fprintf(stderr, "dbg5       skm->infoPart.padding:                  %u\n", skm->infoPart.padding);
+		fprintf(stderr, "dbg5       skm->infoPart.sensorDataContents:       %u\n", skm->infoPart.sensorDataContents);
 
 		for (int i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
 			fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.dgmType:                %s\n", i, skm->sample[i].KMdefault.dgmType);
@@ -3878,7 +3878,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 		index += 2;
 		mb_put_binary_short(MB_YES, skm->infoPart.numBytesPerSample, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_YES, skm->infoPart.padding, &buffer[index]);
+		mb_put_binary_short(MB_YES, skm->infoPart.sensorDataContents, &buffer[index]);
 		index += 2;
 
 		for (i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
@@ -3926,6 +3926,8 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 			index += 4;
 			mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.longitudeError_m, &buffer[index]);
 			index += 4;
+            mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.ellipsoidHeightError_m, &buffer[index]);
+            index += 4;
 			mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.rollError_deg, &buffer[index]);
 			index += 4;
 			mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.pitchError_deg, &buffer[index]);
@@ -3933,8 +3935,6 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 			mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.headingError_deg, &buffer[index]);
 			index += 4;
 			mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.heaveError_m, &buffer[index]);
-			index += 4;
-			mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.longitudeError_m, &buffer[index]);
 			index += 4;
 			mb_put_binary_float(MB_YES, skm->sample[i].KMdefault.northAcceleration, &buffer[index]);
 			index += 4;
@@ -4865,9 +4865,9 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 		index += 4;
 		mb_put_binary_float(MB_YES, mrz->pingInfo.z_waterLevelReRefPoint_m, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_YES, mrz->pingInfo.x_txTransducerArm_SCS_m, &buffer[index]);
+		mb_put_binary_float(MB_YES, mrz->pingInfo.x_kmallToall_m, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_YES, mrz->pingInfo.y_txTransducerArm_SCS_m, &buffer[index]);
+		mb_put_binary_float(MB_YES, mrz->pingInfo.y_kmallToall_m, &buffer[index]);
 		index += 4;
 
 		buffer[index] = mrz->pingInfo.latLongInfo;
@@ -4926,8 +4926,8 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 			fprintf(stderr, "dbg5       soundSpeedAtTxDepth_mPerSec = %f\n", mrz->pingInfo.soundSpeedAtTxDepth_mPerSec);
 			fprintf(stderr, "dbg5       txTransducerDepth_m         = %f\n", mrz->pingInfo.txTransducerDepth_m);
 			fprintf(stderr, "dbg5       z_waterLevelReRefPoint_m    = %f\n", mrz->pingInfo.z_waterLevelReRefPoint_m);
-			fprintf(stderr, "dbg5       x_txTransducerArm_SCS_m     = %f\n", mrz->pingInfo.x_txTransducerArm_SCS_m);
-			fprintf(stderr, "dbg5       y_txTransducerArm_SCS_m     = %f\n", mrz->pingInfo.y_txTransducerArm_SCS_m);
+			fprintf(stderr, "dbg5       x_kmallToall_m              = %f\n", mrz->pingInfo.x_kmallToall_m);
+			fprintf(stderr, "dbg5       y_kmallToall_m              = %f\n", mrz->pingInfo.y_kmallToall_m);
 			fprintf(stderr, "dbg5       latLongInfo                 = %d\n", mrz->pingInfo.latLongInfo);
 			fprintf(stderr, "dbg5       posSensorStatus             = %d\n", mrz->pingInfo.posSensorStatus);
 			fprintf(stderr, "dbg5       attitudeSensorStatus        = %d\n", mrz->pingInfo.attitudeSensorStatus);
