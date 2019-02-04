@@ -551,7 +551,8 @@ int main(int argc, char **argv) {
 	if (check_slope == MB_NO && zap_beams == MB_NO && flag_distance == MB_NO && unflag_distance == MB_NO && zap_rails == MB_NO &&
 	    check_spike == MB_NO && check_range == MB_NO && check_fraction == MB_NO && check_speed_good == MB_NO &&
 	    check_deviation == MB_NO && check_num_good_min == MB_NO && check_position_bounds == MB_NO &&
-	    check_zero_position == MB_NO && fix_edit_timestamps == MB_NO)
+	    check_zero_position == MB_NO && fix_edit_timestamps == MB_NO
+        && zap_max_heading_rate == MB_NO)
 		check_slope = MB_YES;
 
 	/* print starting message */
@@ -1153,13 +1154,19 @@ int main(int argc, char **argv) {
 					/* check for max heading rate if requested */
 					if (zap_max_heading_rate == MB_YES) {
 						double dh, heading_rate;
-						dh = (ping[irec].heading - last_heading);
-						if (dh > 180)
-							dh -= 360;
-						if (dh < -180)
-							dh += 360;
-						heading_rate = dh / (ping[irec].time_d - last_time);
-						// printf("heading rate is: %f\n",heading_rate);
+                        if (nrec > 1) {
+                            dh = ping[nrec-1].heading - ping[0].heading;
+                            if (dh > 180)
+                                dh -= 360;
+                            if (dh < -180)
+                                dh += 360;
+                            heading_rate = dh / (ping[nrec-1].time_d - ping[0].time_d);
+                        } else {
+                            heading_rate = 0.0;
+                        }
+                        printf("heading rate: %.3f deg/s",heading_rate);
+                        if (fabs(heading_rate) > max_heading_rate) printf(" ********");
+                        printf("\n");
 
 						last_time = ping[irec].time_d;
 						last_heading = ping[irec].heading;

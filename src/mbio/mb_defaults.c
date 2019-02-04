@@ -201,6 +201,18 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject) {
 	}
 
 /* set system default Postscript displayer */
+#ifdef LINUX
+	strcpy(psdisplay, "xdg-open");
+	strcpy(imgdisplay, "xdg-open");
+#endif
+#ifdef DARWIN
+	strcpy(psdisplay, "open");
+	strcpy(imgdisplay, "open");
+#endif
+#ifdef CYGWIN
+	strcpy(psdisplay, "cygstart");
+	strcpy(imgdisplay, "cygstart");
+#endif
 #ifdef IRIX
 	strcpy(psdisplay, "xpsview");
 	strcpy(imgdisplay, "xv");
@@ -217,10 +229,6 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject) {
 	strcpy(psdisplay, "gv");
 	strcpy(imgdisplay, "xv");
 #endif
-#ifdef LINUX
-	strcpy(psdisplay, "gv");
-	strcpy(imgdisplay, "gimp");
-#endif
 #ifdef SUN
 	strcpy(psdisplay, "pageview");
 	strcpy(imgdisplay, "xv");
@@ -229,17 +237,9 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject) {
 	strcpy(psdisplay, "gv");
 	strcpy(imgdisplay, "xv");
 #endif
-#ifdef DARWIN
-	strcpy(psdisplay, "gv");
-	strcpy(imgdisplay, "display");
-#endif
-#ifdef CYGWIN
-	strcpy(psdisplay, "gv");
-	strcpy(imgdisplay, "xv");
-#endif
 #ifdef OTHER
-	strcpy(psdisplay, "gv");
-	strcpy(imgdisplay, "xv");
+	strcpy(psdisplay, "xdg-open");
+	strcpy(imgdisplay, "xdg-open");
 #endif
 
 	/* successful no matter what happens */

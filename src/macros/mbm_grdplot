@@ -19,8 +19,10 @@
 #
 # Purpose:
 #   Macro to generate a shellscript of GMT commands which,
-#   when executed, will generate a Postscript plot of gridded
-#   data.  Several styles of plots can be generated, including
+#   when executed, will generate a Postscript plot of raster
+#   data, whether in the form of gridded values that are mapped
+#   to colors or images in which the colors are already defined.
+#   Several styles of plots can be generated, including
 #   color fill maps, contour maps, color fill maps overlaid with
 #   contours, shaded relief color maps, slope magnitude maps,
 #   coastline maps, text labels, and xy data
@@ -870,7 +872,7 @@ else
 	}
 
 # use mbdefaults to get the current system default postscript viewer
-$ps_viewer = "ghostview";
+$ps_viewer = "open";
 @mbdefaults = `mbdefaults`;
 while (@mbdefaults)
         {
@@ -1263,7 +1265,7 @@ else
     @projected = `gmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
     `/bin/rm -f tmp$$.dat`;
     print "gmt mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot\n";
-    
+
     while (@projected)
         {
             $line = shift @projected;
@@ -1314,7 +1316,7 @@ if (($use_scale && $plot_scale) || ($use_width && $plot_width))
 	{
 	$plot_width = $dxx;
 	$plot_height = $dyy;
-    
+
 print "dxx:$dxx dyy:$dyy plot_width:$plot_width plot_height:$plot_height\n";
 
 	# decide which plot orientation to use
@@ -1733,7 +1735,7 @@ if ($color_mode)
                     {
                     $iszero = 0;
                     }
-                
+
 		# interpolate brown colors above sealevel
 		for ($i = 0; $i <= $izero - 1; $i++)
 			{
@@ -1967,7 +1969,7 @@ if ($color_mode && $file_cpt)
 	{
 	$cptfile = $file_cpt;
 	}
-else
+elsif ($color_mode && $color_mode < 6)
 	{
 	$cptfile = "$root.cpt";
 	}
@@ -2029,10 +2031,14 @@ print FCMD "# $program_name $command_line\n";
 # Define shell variables
 print FCMD "#\n# Define shell variables used in this script:\n";
 print FCMD "set PS_FILE         = $psfile\n";
-print FCMD "set CPT_FILE        = $cptfile\n";
+if ($cptfile) {
+    print FCMD "set CPT_FILE        = $cptfile\n";
+}
 print FCMD "set MAP_PROJECTION  = $projection\n";
 print FCMD "set MAP_SCALE       = $projection_pars\n";
-print FCMD "set MAP_REGION      = $bounds_plot\n";
+if ($bounds_plot) {
+    print FCMD "set MAP_REGION      = $bounds_plot\n";
+}
 printf FCMD "set X_OFFSET        = %1.5g\n", $xoffset;
 printf FCMD "set Y_OFFSET        = %1.5g\n", $yoffset;
 
@@ -2061,7 +2067,7 @@ if (@gmt_defs)
 	}
 
 # generate color pallette table file if needed
-if ($color_mode && !$file_cpt)
+if ($color_mode && $color_mode < 6 && !$file_cpt)
 	{
 	# set slope cpt
 	if ($color_mode == 4)
@@ -2446,7 +2452,7 @@ elsif ($color_mode == 3 && $file_int)
 	}
 
 # get color by slope magnitude if needed
-elsif ($color_mode >= 4)
+elsif ($color_mode == 4)
 	{
 	printf FCMD "#\n# Get slope array\n";
 	printf FCMD "echo Getting slope array...\n";
@@ -2491,7 +2497,19 @@ if ($color_mode)
 		{
 		printf FCMD "gmt grdimage $file_use -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 		}
-	printf FCMD "-R\$MAP_REGION -C\$CPT_FILE \\\n\t";
+    printf FCMD "-R\$MAP_REGION \\\n\t";
+    if ($color_mode < 6)
+        {
+        printf FCMD "-C\$CPT_FILE \\\n\t";
+        }
+    elsif ($color_mode == 6)
+        {
+        printf FCMD "-D \\\n\t";
+        }
+    elsif ($color_mode == 7)
+        {
+        printf FCMD "-Dr \\\n\t";
+        }
 	if ($color_mode == 2 || $color_mode == 3)
 		{
 		printf FCMD "-I$file_shade \\\n\t";
@@ -2807,7 +2825,9 @@ if ($swathnavdatalist)
 	}
 
 # do psscale plot
-if ($color_mode && ($color_pallette < 5 || $color_pallette >= 8) && $gridprojected != 2)
+if ($color_mode  && $color_mode < 6
+    && ($color_pallette < 5 || $color_pallette >= 8)
+    && $gridprojected != 2)
 	{
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running gmt module psscale...\n";
@@ -2874,7 +2894,7 @@ printf FCMD "$end\n";
 print FCMD "#\n# Delete surplus files\n";
 print FCMD "echo Deleting surplus files...\n";
 print FCMD "/bin/rm -f gmt.conf\n";
-if (!$file_cpt)
+if ($cptfile && !$file_cpt)
 	{
 	print FCMD "/bin/rm -f \$CPT_FILE\n";
 	}
@@ -2887,9 +2907,18 @@ if ($file_slope)
 	printf FCMD "/bin/rm -f $file_slope\n";
 	}
 
-# display image on screen if desired
+
+# display postscript plot on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";
-if ($ps_viewer eq "xpsview")
+if ($ps_viewer eq "Preview")
+	{
+  $ps_viewcmd = "open -a Preview \$PS_FILE \n";
+	}
+elsif ($ps_viewer eq "open")
+	{
+  $ps_viewcmd = "open \$PS_FILE \n";
+	}
+elsif ($ps_viewer eq "xpsview")
 	{
 	if ($portrait)
 		{
@@ -2899,6 +2928,7 @@ if ($ps_viewer eq "xpsview")
 		{
 		$view_pageflag = "-ps $pagesize -or landscape -maxp $xpsview_mem{$pagesize}";
 		}
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 elsif ($ps_viewer eq "pageview")
 	{
@@ -2910,6 +2940,7 @@ elsif ($ps_viewer eq "pageview")
 		{
 		$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
 		}
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 elsif ($ps_viewer eq "ghostview")
 	{
@@ -2921,6 +2952,7 @@ elsif ($ps_viewer eq "ghostview")
 		{
 		$view_pageflag = "-landscape -media BBox";
 		}
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 elsif ($ps_viewer eq "gv")
 	{
@@ -2931,7 +2963,7 @@ elsif ($ps_viewer eq "gv")
 			{
 			$pagescale = 1.0;
 			}
-		$view_pageflag = "--orientation=portrait --media=BBox -scale=$pagescale -page=$psfile";
+		$view_pageflag = "--orientation=portrait --media=BBox -scale=$pagescale";
 		}
 	elsif ($landscape)
 		{
@@ -2940,8 +2972,9 @@ elsif ($ps_viewer eq "gv")
 			{
 			$pagescale = 1.0;
 			}
-		$view_pageflag = "--orientation=landscape --media=BBox -scale=$pagescale -page=$psfile";
+		$view_pageflag = "--orientation=landscape --media=BBox -scale=$pagescale";
 		}
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 elsif ($ps_viewer eq "ggv")
 	{
@@ -2953,24 +2986,30 @@ elsif ($ps_viewer eq "ggv")
 		{
 		$view_pageflag = "--geometry=landscape";
 		}
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 elsif ($ps_viewer eq "evince")
 	{
 	$view_pageflag = " ";
+  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
+else
+  {
+  $ps_viewcmd = "$ps_viewer \$PS_FILE \n";
+  }
 if ($no_view_ps)
 	{
-        print FCMD "#if (!(\$#argv > 0 && (\"\$1\" == \"-N\" || \"\$1\" == \"-n\"))) then\n";
+  print FCMD "#if (!($#argv > 0 && (\"$1\" == \"-N\" || \"$1\" == \"-n\"))) then\n";
 	print FCMD "#echo Running $ps_viewer in background...\n";
-	print FCMD "#$ps_viewer $view_pageflag $psfile &\n";
-        print FCMD "#endif\n";
+	print FCMD "#$ps_viewer $view_pageflag \$PS_FILE &\n";
+  print FCMD "#endif\n";
 	}
 else
 	{
-        print FCMD "if (!(\$#argv > 0 && (\"\$1\" == \"-N\" || \"\$1\" == \"-n\"))) then\n";
+  print FCMD "if (!($#argv > 0 && (\"$1\" == \"-N\" || \"$1\" == \"-n\"))) then\n";
 	print FCMD "echo Running $ps_viewer in background...\n";
-	print FCMD "$ps_viewer $view_pageflag $psfile &\n";
-        print FCMD "endif\n";
+	print FCMD "$ps_viewer $view_pageflag \$PS_FILE &\n";
+  print FCMD "endif\n";
 	}
 
 # claim it's all over
@@ -3012,6 +3051,14 @@ if ($verbose)
 	elsif ($color_mode == 5)
 		{
 		print "    Color Shaded by Slope Magnitude\n";
+		}
+	elsif ($color_mode == 6)
+		{
+		print "    Image Plot Using Embedded Georeferencing\n";
+		}
+	elsif ($color_mode == 7)
+		{
+		print "    Image Plot Using Specified Bounds for Georeferencing\n";
 		}
 	if ($contour_mode)
 		{
