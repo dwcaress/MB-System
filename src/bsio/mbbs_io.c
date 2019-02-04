@@ -2,7 +2,7 @@
  *    The MB-system:	mbbs_io.c	3/3/2014
  *	$Id$
  *
- *    Copyright (c) 2014-2017 by
+ *    Copyright (c) 2014-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

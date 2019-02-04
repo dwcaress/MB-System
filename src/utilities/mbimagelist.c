@@ -2,7 +2,7 @@
  *    The MB-system:	mbimagelist.c	10/10/2001
  *    $Id$
  *
- *    Copyright (c) 2001-2018 by
+ *    Copyright (c) 2001-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA, USA
