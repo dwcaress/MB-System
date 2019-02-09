@@ -1075,9 +1075,10 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			/* check for NaN value */
-			if (isnan(ping->png_depth[i])) {
+			if (isnan(ping->png_depth[i])
+          || isnan(ping->png_acrosstrack[i])
+          || isnan(ping->png_alongtrack[i])) {
 				ping->png_beamflag[i] = MB_FLAG_NULL;
-				ping->png_depth[i] = 0.0;
 			}
 		}
 

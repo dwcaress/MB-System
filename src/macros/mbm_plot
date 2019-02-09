@@ -55,6 +55,7 @@
 #            -MGL[f][x]lon0/lat0/slat/length[units][+llabel]
 #            -MGTx/y/size/angle/font/just/text
 #            -MGQdpi -MGU[/dx/dy/][label]
+#            -MIErresolution -MITtype
 #            -MMAfactor/mode/depth -MMByr/mo/da/hr/mn/sc
 #            -MMDmode/scale[/min/max] -MMEyr/mo/da/hr/mn/sc
 #            -MMNnplot -MMPpings -MMSspeedmin
@@ -287,6 +288,7 @@ if ($help)
 	print "\t\t-MGL[f][x]lon0/lat0/slat/length[m]\n";
 	print "\t\t-MGTx/y/size/angle/font/just/text\n";
 	print "\t\t-MGQdpi -MGU[/dx/dy/][label]\n";
+  print "\t\t-MIErresolution -MITtype\n";
 	print "\t\t-MMAfactor/mode/depth -MMByr/mo/da/hr/mn/sc\n";
 	print "\t\t-MMDmode/scale[/min/max] -MMEyr/mo/da/hr/mn/sc\n";
 	print "\t\t-MMLlonflip -MMNnplot -MMPpings -MMSspeedmin\n";
@@ -415,6 +417,31 @@ if ($misc)
 			$unix_stamp_on = 1;
 			}
 
+		# deal with image rendering
+		##############################
+
+		# set image rendering resolution
+		if ($cmd =~ /^[Ii][Ee]\S+/)
+			{
+			($image_resolution) = $cmd =~ /^[Ii][Ee](\S+)/;
+			$image_render = 1;
+      if (!$image_type)
+        {
+        $image_type = "j";
+        }
+			}
+
+		# set image rendering type
+		if ($cmd =~ /^[Ii][Tt]\S+/)
+			{
+			($image_type) = $cmd =~ /^[Ii][Tt](\S+)/;
+			$image_render = 1;
+      if (!$image_resolution)
+        {
+        $image_resolution = 300;
+        }
+			}
+
 		# deal with MB-System options
 		##############################
 
@@ -534,7 +561,6 @@ if ($misc)
 
 		# deal with pscoast options
 		##############################
-
 
 		# set pscoast lake fill
 		if ($cmd =~ /^[Tt][Cc]./)
@@ -869,29 +895,6 @@ else
 		{
 		$pagesize = "a";
 		}
-	}
-
-# use mbdefaults to get the current system default postscript viewer
-$ps_viewer = "open";
-$lonflip = 0;
-@mbdefaults = `mbdefaults`;
-while (@mbdefaults)
-        {
-        $line = shift @mbdefaults;
-        if ($line =~ /ps viewer:\s+(\S+)/)
-                {
-                ($ps_viewer) = $line =~ /ps viewer:\s+(\S+)/;
-                 }
-        elsif ($line =~ /lonflip:\s+(\S+)/)
-                {
-                ($lonflip) = $line =~ /lonflip:\s+(\S+)/;
-                 }
-        }
-
-# check environment variable
-if ($ENV{"MB_PS_VIEWER"})
-	{
-	$ps_viewer = $ENV{"MB_PS_VIEWER"};
 	}
 
 # Look for mapproject
@@ -1880,7 +1883,7 @@ $cptshadefile = "$root.shade.cpt";
 
 # set some gmtisms
 $first_gmt = 1;
-$first = "-X\$X_OFFSET -Y\$Y_OFFSET -K -V >! \$PS_FILE";
+$first = "-X\$X_OFFSET -Y\$Y_OFFSET -K -V > \$PS_FILE";
 $middle = "-K -O -V >> \$PS_FILE";
 $end = "-O -V >> \$PS_FILE";
 
@@ -2001,7 +2004,7 @@ if (!open(FCMD,">$cmdfile"))
 	}
 
 # write the shellscript header
-print FCMD "#! /bin/csh -f\n";
+print FCMD "#!/usr/bin/env bash\n";
 print FCMD "#\n# Shellscript to create Postscript plot of swath sonar data\n";
 print FCMD "# Created by macro $program_name\n";
 print FCMD "#\n# This shellscript created by following command line:\n";
@@ -2009,22 +2012,22 @@ print FCMD "# $program_name $command_line\n";
 
 # Define shell variables
 print FCMD "#\n# Define shell variables used in this script:\n";
-print FCMD "set PS_FILE         = $psfile\n";
-print FCMD "set CPT_FILE        = $cptfile\n";
-print FCMD "set MAP_PROJECTION  = $projection\n";
-print FCMD "set MAP_SCALE       = $projection_pars\n";
-print FCMD "set MAP_REGION      = $bounds_plot\n";
-printf FCMD "set X_OFFSET        = %1.5g\n", $xoffset;
-printf FCMD "set Y_OFFSET        = %1.5g\n", $yoffset;
-print FCMD "set INPUT_FILE      = $file_data\n";
-print FCMD "set INPUT_FORMAT    = $format\n";
+print FCMD "PS_FILE=$psfile\n";
+print FCMD "CPT_FILE=$cptfile\n";
+print FCMD "MAP_PROJECTION=$projection\n";
+print FCMD "MAP_SCALE=$projection_pars\n";
+print FCMD "MAP_REGION=$bounds_plot\n";
+printf FCMD "X_OFFSET=%1.5g\n", $xoffset;
+printf FCMD "Y_OFFSET=%1.5g\n", $yoffset;
+print FCMD "INPUT_FILE=$file_data\n";
+print FCMD "INPUT_FORMAT=$format\n";
 
 # Set temporary GMT defaults
 print FCMD "#\n# Delete any existing gmt.conf file\n";
-print FCMD "if (-e gmt.conf) then\n";
-print FCMD "echo Deleting gmt.conf...\n";
-print FCMD "/bin/rm gmt.conf\n";
-print FCMD "endif\n";
+print FCMD "if [ -e gmt.conf ]; then\n";
+print FCMD "  echo Deleting gmt.conf...\n";
+print FCMD "  /bin/rm gmt.conf\n";
+print FCMD "fi\n";
 print FCMD "#\n# Set temporary GMT defaults\n";
 print FCMD "echo Setting temporary GMT defaults...\n";
 foreach $gmt_def (@gmt_macro_defs) {
@@ -2568,110 +2571,87 @@ if ($format > -1)
 	print FCMD "/bin/rm -f $file_list\n";
 	}
 
-
-# display postscript plot on screen if desired
-print FCMD "#\n# Run $ps_viewer\n";
-if ($ps_viewer eq "Preview")
-	{
-  $ps_viewcmd = "open -a Preview \$PS_FILE \n";
-	}
-elsif ($ps_viewer eq "open")
-	{
-  $ps_viewcmd = "open \$PS_FILE \n";
-	}
-elsif ($ps_viewer eq "xpsview")
-	{
-	if ($portrait)
-		{
-		$view_pageflag = "-ps $pagesize -maxp $xpsview_mem{$pagesize}";
-		}
-	elsif ($landscape)
-		{
-		$view_pageflag = "-ps $pagesize -or landscape -maxp $xpsview_mem{$pagesize}";
-		}
-  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
-	}
-elsif ($ps_viewer eq "pageview")
-	{
-	if ($portrait)
-		{
-		$view_pageflag = "-w $page_width_in{$pagesize} -h $page_height_in{$pagesize}";
-		}
-	elsif ($landscape)
-		{
-		$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
-		}
-  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
-	}
-elsif ($ps_viewer eq "ghostview")
-	{
-	if ($portrait)
-		{
+# check mbdefaults and environment variables for a user defined postscript viewer
+# - otherwise attempt to use the system default postscript display program
+if ($no_view_ps) {
+  $hash = "#";
+} else {
+  $hash = "";
+}
+print FCMD "$hash"; print FCMD "#\n";
+print FCMD "$hash"; print FCMD "# Display Postscript file\n";
+print FCMD "$hash"; print FCMD "if [[ ! ( \$# > 0  && ( \$1 == \"-N\" || \$1 == \"-n\" ) ) ]]; then\n";
+print FCMD "$hash"; print FCMD "  echo Attempting to display the Postscript plot...\n\n";
+print FCMD "$hash"; print FCMD "  #\n";
+print FCMD "$hash"; print FCMD "  # Check for user defined Postscript Viewer\n";
+print FCMD "$hash"; print FCMD "  ps_viewer=\`mbdefaults | grep \"ps viewer:\" | cut -d \" \" -f 4\`\n";
+print FCMD "$hash"; print FCMD "  if [[ \$ps_viewer == \"Default\" ]]; then\n";
+print FCMD "$hash"; print FCMD "    ps_viewer=\"\"\n";
+print FCMD "$hash"; print FCMD "  fi\n";
+print FCMD "$hash"; print FCMD "  if [ -x \"\$(command -v \$ps_viewer)\" ]; then\n";
+print FCMD "$hash"; print FCMD "    echo Displaying \$PS_FILE using user specified program \$ps_viewer...\n";
+print FCMD "$hash"; print FCMD "    if [[ \$ps_viewer == \"gv\" ]]; then\n";
+if ($portrait) {
+	$pagescale = min((11.0 / $page_height_in{$pagesize}), 1.0);
+	$view_pageflag = "--orientation=portrait --media=BBox -scale=$pagescale";
+} else {
+	$pagescale = min((11.0 / $page_width_in{$pagesize}), 1.0);
+	$view_pageflag = "--orientation=landscape --media=BBox -scale=$pagescale";
+}
+print FCMD "$hash"; print FCMD "      gv $view_pageflag \$PS_FILE &\n";
+print FCMD "$hash"; print FCMD "    elif [[ \$ps_viewer == \"ggv\" ]]; then\n";
+if ($portrait) {
+	$view_pageflag = "--geometry=portrait";
+} else {
+	$view_pageflag = "--geometry=landscape";
+}
+print FCMD "$hash"; print FCMD "      ggv $view_pageflag \$PS_FILE &\n";
+print FCMD "$hash"; print FCMD "    elif [[ \$ps_viewer == \"ghostview\" ]]; then\n";
+if ($portrait) {
 		$view_pageflag = "-portrait -media BBox";
-		}
-	elsif ($landscape)
-		{
+} else {
 		$view_pageflag = "-landscape -media BBox";
-		}
-  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
-	}
-elsif ($ps_viewer eq "gv")
-	{
-	if ($portrait)
-		{
-		$pagescale = 11.0 / $page_height_in{$pagesize};
-		if ($pagescale > 1.0)
-			{
-			$pagescale = 1.0;
-			}
-		$view_pageflag = "--orientation=portrait --media=BBox -scale=$pagescale";
-		}
-	elsif ($landscape)
-		{
-		$pagescale = 11.0 / $page_width_in{$pagesize};
-		if ($pagescale > 1.0)
-			{
-			$pagescale = 1.0;
-			}
-		$view_pageflag = "--orientation=landscape --media=BBox -scale=$pagescale";
-		}
-  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
-	}
-elsif ($ps_viewer eq "ggv")
-	{
-	if ($portrait)
-		{
-		$view_pageflag = "--geometry=portrait";
-		}
-	elsif ($landscape)
-		{
-		$view_pageflag = "--geometry=landscape";
-		}
-  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
-	}
-elsif ($ps_viewer eq "evince")
-	{
-	$view_pageflag = " ";
-  $ps_viewcmd = "$ps_viewer $view_pageflag \$PS_FILE &\n";
-	}
-else
-  {
-  $ps_viewcmd = "$ps_viewer \$PS_FILE \n";
-  }
-if ($no_view_ps)
-	{
-  print FCMD "#if (!($#argv > 0 && (\"$1\" == \"-N\" || \"$1\" == \"-n\"))) then\n";
-	print FCMD "#echo Running $ps_viewer in background...\n";
-	print FCMD "#$ps_viewer $view_pageflag \$PS_FILE &\n";
-  print FCMD "#endif\n";
-	}
-else
-	{
-  print FCMD "if (!($#argv > 0 && (\"$1\" == \"-N\" || \"$1\" == \"-n\"))) then\n";
-	print FCMD "echo Running $ps_viewer in background...\n";
-	print FCMD "$ps_viewer $view_pageflag \$PS_FILE &\n";
-  print FCMD "endif\n";
-	}
+}
+print FCMD "$hash"; print FCMD "      ghostview $view_pageflag \$PS_FILE &\n";
+print FCMD "$hash"; print FCMD "    elif [[ \$ps_viewer == \"xpsview\" ]]; then\n";
+if ($portrait) {
+	$view_pageflag = "-ps $pagesize -maxp $xpsview_mem{$pagesize}";
+} else {
+	$view_pageflag = "-ps $pagesize -or landscape -maxp $xpsview_mem{$pagesize}";
+}
+print FCMD "$hash"; print FCMD "      xpsview $view_pageflag \$PS_FILE &\n";
+print FCMD "$hash"; print FCMD "    elif [[ \$ps_viewer == \"pageview\" ]]; then\n";
+if ($portrait) {
+	$view_pageflag = "-w $page_width_in{$pagesize} -h $page_height_in{$pagesize}";
+} else {
+	$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
+}
+print FCMD "$hash"; print FCMD "      pageview $view_pageflag \$PS_FILE &\n";
+print FCMD "$hash"; print FCMD "    else\n";
+print FCMD "$hash"; print FCMD "      \$ps_viewer \$PS_FILE &\n";
+print FCMD "$hash"; print FCMD "    fi\n";
+print FCMD "$hash"; print FCMD "  elif [ -x \"\$(command -v xdg-open)\" ]; then\n";
+print FCMD "$hash"; print FCMD "    echo Displaying $PS_FILE using system default program through xdg-open...\n";
+print FCMD "$hash"; print FCMD "    xdg-open \$PS_FILE\n";
+print FCMD "$hash"; print FCMD "  elif [ -x \"\$(command -v open)\" ]; then\n";
+print FCMD "$hash"; print FCMD "    echo Displaying $PS_FILE using system default program through open...\n";
+print FCMD "$hash"; print FCMD "    open \$PS_FILE\n";
+print FCMD "$hash"; print FCMD "  elif [ -x \"\$(command -v cygstart)\" ]; then\n";
+print FCMD "$hash"; print FCMD "    echo Displaying $PS_FILE using system default program through cygstart...\n";
+print FCMD "$hash"; print FCMD "    cygstart \$PS_FILE\n";
+print FCMD "$hash"; print FCMD "  fi\n";
+print FCMD "$hash"; print FCMD "fi\n";
+print FCMD "$hash"; print FCMD "#\n";
+if ($image_render) {
+  $hash = "";
+} else {
+  $hash = "#";
+  $image_type = "j";
+  $image_resolution = 300;
+}
+print FCMD "$hash"; print FCMD "# Render Postscript file into an image\n";
+print FCMD "$hash"; print FCMD "echo Using gmt psconvert to render the Postscript plot to an image...\n";
+print FCMD "$hash"; print FCMD "gmt psconvert \$PS_FILE -T$image_type -E$image_resolution -A -P\n";
 
 # claim it's all over
 print FCMD "#\n# All done!\n";
@@ -2786,6 +2766,16 @@ if ($verbose)
 		}
 	print "    Plotting shellscript:     $cmdfile\n";
 	print "    Plot file:                $psfile\n";
+  if ($image_render)
+    {
+    print "    Render to image:          On\n";
+    print "    Image resolution (dpi):   $image_resolution\n";
+    print "    Image type:               $image_type\n";
+    }
+  else
+    {
+    print "    Render to image:          Off\n";
+    }
 	print "\n  Plot Attributes:\n";
 	printf "    Plot width:               %.4f\n", $plot_width;
 	printf "    Plot height:              %.4f\n", $plot_height;
