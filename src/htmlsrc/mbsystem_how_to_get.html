@@ -41,23 +41,27 @@
 <p>MB-System is included in <a href="http://sites.google.com/site/poseidonlinux/">Poseidon Linux</a>, the "Scientific GNU/Linux". Poseidon is an Ubuntu Linux based distribution including a selection of open source software packages intended to support scientific research. In particular, it offers several specific tools in the areas of GIS, 3D Visualization, Mathematics, Statistics and several other fields of research.</p>
 <p><strong><u>UbuntuGIS for Ubuntu Linux</u></strong></p>
 <p>MB-System is one of the packages maintained in the <a href="https://wiki.ubuntu.com/UbuntuGIS">UbuntuGIS</a> repository.</p>
-<p><strong><u>OSGeo-Live Distribution</u></strong></p>
-	<p>The <a href="http://live.osgeo.org/">OSGeo-Live</a> distribution includes MB-System. OSGeo-Live is a self-contained bootable DVD, USB thumb drive or Virtual Machine based on <a href="http://lubuntu.net">Lubuntu</a> that includes a wide variety of open source geospatial software.</p>
 <p><strong><u>HomeBrew for MacOs</u></strong></p>
 <p>MB-System has been packaged for MacOs X using the <a href="http://brew.sh">Homebrew</a> package manager.
- If you have Homebrew installed, then MB-System and its prerequisites can be installed from the science "tap" using these two commands:</p>
+	</p>
+<p>MacOS does not include Homebrew by default, or a compiler suite or the X11 windowing system. First install XCode (the Apple development environment architected using the LLDB compiler suite) from the Apple App Store. Then install the current version of XQuartz available from the web page <a href="http://www.xquartz.org">http://www.xquartz.org</a>. Next, install homebrew by following the directions at the website. <a href="https://brew.sh">https://brew.sh</a> </p>
+<p>Once you have Homebrew installed, then MB-System and its prerequisites can be installed from a private MB-System "tap" using the following commands:</p>
 <dl>
-	<dd>brew tap homebrew/science</dd>
-	<dd>brew install mbsystem</dd>
+  <dd>brew update</dd>
+  <dd>brew tap dwcaress/mbsystem</dd>
+  <dd>brew install otps --with-tpxo8</dd>
+  <dd>brew install mbsystem</dd>
 </dl>
-<p>However, the MB-System package in homebrew/science frequently lags the most recent release and does not integrate with the OTPS tide modeling package. In order to install the current release and/or include  the tide correction functionality,  then install OTPS and MB-System from a private tap at:</p>
+<p>The tidal prediction software OTPS is installed using the MB-System tap because it is not included amongst the primary Homebrew taps. Installing OTPS requires a Fortran compiler, and may cause Homebrew to install all of the gcc compiler suite (which isn’t a problem other than the installation takes a while). Installing MB-System without first installing OTPS will install OTPS without a tide model, which then needs to be added manually. Installing MB-System using the ‐‐without-otps argument will forgo the tide prediction tools entirely.</p>
+
+	<p>To update mbsystem use these commands:</p>
 <dl>
-	<dd>brew install dwcaress/mbsystem/otps --with-tpxo8</dd>
-	<dd>brew install dwcaress/mbsystem/mbsystem</dd>
+  <dd>brew update</dd>
+  <dd>brew upgrade</dd>
 </dl>
-<p>Note that installing OTPS requires a Fortran compiler, and may cause Homebrew to install all of the gcc compiler suite.
 <p><strong><u>Fink for MacOs</u></strong></p>
-<p>MB-System has been packaged for MacOS X as part of the <a href="http://www.finkproject.org/">Fink Project</a>. The MB-System Fink package can be found at:</p>
+<p>MB-System has been packaged for MacOS X as part of the <a href="http://www.finkproject.org/">Fink Project</a>. for several years. Unfortunately, as of May 2017 there are library namespace issues associated with the OpenMotif package that result in MB-System graphical utilities not working. For now, we recommend installing MB-System on MacOS computers using the Homebrew package manager. Until further notice, we are not attempting to maintain or update the MB-System distribution in Fink.</p> 
+	<p>The MB-System Fink package can be found at:</p>
 <dl>
 	<dd><a href="http://pdb.finkproject.org/pdb/package.php/mbsystem">http://pdb.finkproject.org/pdb/package.php/mbsystem</a></dd>
 </dl>
@@ -65,7 +69,6 @@
 <dl>
 	<dd>fink install mbsystem</dd>
 </dl>
-<p>Unfortunately, as of May 2017 there are library namespace issues associated with the OpenMotif package that result in MB-System graphical utilities not working. For now, we recommend installing MB-System on MacOS computers using the Homebrew package manager.</p>
 <p><b>Acknowledgements</b></p>
 <p>Thanks to Christian Ferreira for creating and distributing Poseidon Linux, to Johan Van de Wauw for updating the MB-System package in UbuntuGIS, to Kurt Schwehr for maintaing the Fink MB-System package, to Anthony Lukach, Simon Dreutter, and Andrew Janke for maintaining the Homebrew MB-System package, and to Hamish Bowman for maintaining the OSGeo-Live MB-System package.</p>
 
