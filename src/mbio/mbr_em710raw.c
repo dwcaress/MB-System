@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_em710raw.c	2/26/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2017 by
+ *    Copyright (c) 2008-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1075,9 +1075,10 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			/* check for NaN value */
-			if (isnan(ping->png_depth[i])) {
+			if (isnan(ping->png_depth[i])
+          || isnan(ping->png_acrosstrack[i])
+          || isnan(ping->png_alongtrack[i])) {
 				ping->png_beamflag[i] = MB_FLAG_NULL;
-				ping->png_depth[i] = 0.0;
 			}
 		}
 

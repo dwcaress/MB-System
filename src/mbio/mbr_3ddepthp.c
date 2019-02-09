@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_3ddepthp.c	2/11/93
  *	$Id$
  *
- *    Copyright (c) 1993-2017 by
+ *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

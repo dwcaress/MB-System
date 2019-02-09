@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_simrad3.c	3.00	2/22/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2017 by
+ *    Copyright (c) 2008-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1435,9 +1435,10 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			}
 
 			/* check for NaN value */
-			if (isnan(ping->png_depth[i])) {
+			if (isnan(ping->png_depth[i])
+          || isnan(ping->png_acrosstrack[i])
+          || isnan(ping->png_alongtrack[i])) {
 				ping->png_beamflag[i] = MB_FLAG_NULL;
-				ping->png_depth[i] = 0.0;
 			}
 		}
 
@@ -2254,7 +2255,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		}
 
 		/* print debug statements */
-		if (verbose >= 5) {
+		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
 			fprintf(stderr, "dbg4  Extracted values:\n");
 			fprintf(stderr, "dbg4       kind:       %d\n", *kind);
@@ -2324,7 +2325,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*nss = 0;
 
 		/* print debug statements */
-		if (verbose >= 5) {
+		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
 			fprintf(stderr, "dbg4  Extracted values:\n");
 			fprintf(stderr, "dbg4       kind:       %d\n", *kind);
