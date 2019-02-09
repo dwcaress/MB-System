@@ -201,46 +201,14 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject) {
 	}
 
 /* set system default Postscript displayer */
-#ifdef LINUX
-	strcpy(psdisplay, "xdg-open");
-	strcpy(imgdisplay, "xdg-open");
-#endif
-#ifdef DARWIN
-	strcpy(psdisplay, "open");
-	strcpy(imgdisplay, "open");
-#endif
-#ifdef CYGWIN
-	strcpy(psdisplay, "cygstart");
-	strcpy(imgdisplay, "cygstart");
-#endif
-#ifdef IRIX
-	strcpy(psdisplay, "xpsview");
-	strcpy(imgdisplay, "xv");
-#endif
-#ifdef IRIX64
-	strcpy(psdisplay, "xpsview");
-	strcpy(imgdisplay, "xv");
-#endif
-#ifdef SOLARIS
-	strcpy(psdisplay, "pageview");
-	strcpy(imgdisplay, "xv");
-#endif
-#ifdef LYNX
-	strcpy(psdisplay, "gv");
-	strcpy(imgdisplay, "xv");
-#endif
-#ifdef SUN
-	strcpy(psdisplay, "pageview");
-	strcpy(imgdisplay, "xv");
-#endif
-#ifdef HPUX
-	strcpy(psdisplay, "gv");
-	strcpy(imgdisplay, "xv");
-#endif
-#ifdef OTHER
-	strcpy(psdisplay, "xdg-open");
-	strcpy(imgdisplay, "xdg-open");
-#endif
+/* for Linux, Darwin (Mac), OpenBSD, and Cygwin the system default programs
+   as set by the user should be used - the value "Default" results in the
+   appropriate program being used. On older Unix systems the relevant programs
+   need to be directly referenced.
+  If desired, users can set the default postscript and image screen viewers
+  using mbdefaults. */
+strcpy(psdisplay, "Default");
+strcpy(imgdisplay, "Default");
 
 	/* successful no matter what happens */
 	status = MB_SUCCESS;
