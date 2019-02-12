@@ -1883,7 +1883,7 @@ $cptshadefile = "$root.shade.cpt";
 
 # set some gmtisms
 $first_gmt = 1;
-$first = "-X\$X_OFFSET -Y\$Y_OFFSET -K -V > \$PS_FILE";
+$first = "-X\$X_OFFSET -Y\$Y_OFFSET -K -V >| \$PS_FILE";
 $middle = "-K -O -V >> \$PS_FILE";
 $end = "-O -V >> \$PS_FILE";
 
@@ -2051,7 +2051,7 @@ if ($format != -1)
 	{
 	print FCMD "#\n# Make datalist file \n";
 	print FCMD "echo Making datalist file...\n";
-	print FCMD "echo \$INPUT_FILE \$INPUT_FORMAT >! $file_list\n";
+	print FCMD "echo \$INPUT_FILE \$INPUT_FORMAT >| $file_list\n";
 	}
 
 # generate color pallette table file if needed
@@ -2112,7 +2112,7 @@ elsif ($color_mode)
 				$d2,@cptr[$i+1],@cptg[$i+1],@cptb[$i+1];
 			if ($i == 0)
 				{
-				print FCMD " >!";
+				print FCMD " >|";
 				}
 			else
 				{
@@ -2139,7 +2139,7 @@ elsif ($color_mode)
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
 			if ($i == ($ncolors - 2))
 				{
-				print FCMD " >!";
+				print FCMD " >|";
 				}
 			else
 				{
@@ -2166,7 +2166,7 @@ elsif ($color_mode)
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
 			if ($i == 0)
 				{
-				print FCMD " >!";
+				print FCMD " >|";
 				}
 			else
 				{
@@ -2193,7 +2193,7 @@ elsif ($color_mode)
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
 			if ($i == ($ncolors - 2))
 				{
-				print FCMD " >!";
+				print FCMD " >|";
 				}
 			else
 				{

@@ -733,7 +733,7 @@ $cmdfile = "$root.cmd";
 $psfile = "$root.ps";
 
 # set some gmtisms
-$first = "-X\$X_OFFSET -Y\$Y_OFFSET -V > \$PS_FILE";
+$first = "-X\$X_OFFSET -Y\$Y_OFFSET -V >| \$PS_FILE";
 
 # set macro gmt default settings
 $gmt_def = "PROJ_LENGTH_UNIT/inch";

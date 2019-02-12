@@ -298,6 +298,12 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.7.4 (February 12, 2019)
+
+Plotting macros (mbm_grdplot, mbm_grd3dplot, mbm_plot, mbm_xyplot, mbm_histplot):
+Fixed problem with plotting macro mbm_plot that caused failure of the plotting
+shellscript.
+
 -----> 5.7.3 (February 8, 2019)
 
 Plotting macros (mbm_grdplot, mbm_grd3dplot, mbm_plot, mbm_xyplot, mbm_histplot):
