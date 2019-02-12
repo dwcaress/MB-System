@@ -471,7 +471,7 @@ if ($format && $format != -1)
 	{
 	print FCMD "#\n# Make datalist file \n";
 	print FCMD "echo Making datalist file...\n";
-	print FCMD "echo \$INPUT_FILE \$INPUT_FORMAT >! $file_list\n";
+	print FCMD "echo \$INPUT_FILE \$INPUT_FORMAT >| $file_list\n";
 	}
 
 # do mbgrid if bathymetry or topography needed
