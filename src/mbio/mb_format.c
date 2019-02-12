@@ -360,6 +360,9 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 	else if (*format == MBF_PHOTGRAM) {
 		status = mbr_register_photgram(verbose, mbio_ptr, error);
 	}
+	else if (*format == MBF_KEMMBES) {
+		status = mbr_register_kemmbes(verbose, mbio_ptr, error);
+	}
 	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_FORMAT;
@@ -951,6 +954,12 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 		                           format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
 		                           platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
 		                           beamwidth_xtrack, beamwidth_ltrack, error);
+	}
+	else if (*format == MBF_KEMMBES) {
+		status = mbr_info_kemmbes(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
+								  format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
+								  platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
+								  beamwidth_xtrack, beamwidth_ltrack, error);
 	}
 	else if (*format == MBF_DATALIST) {
 		*format = MBF_DATALIST;

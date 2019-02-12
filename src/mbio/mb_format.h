@@ -73,9 +73,10 @@
 #define MB_SYS_3DDWISSL 36
 #define MB_SYS_WASSP 37
 #define MB_SYS_STEREOPAIR 38
+#define MB_SYS_KMBES 39
 
 /* Number of supported MBIO data formats */
-#define MB_FORMATS 79
+#define MB_FORMATS 80
 
 /* Data formats supported by MBIO */
 
@@ -515,6 +516,12 @@ stereo camera rigs, \
 bathymetry,  \
 variable soundings, binary, MBARI. */
 
+#define MBF_KEMKMALL 261
+/* Kongsberg multibeam echosounder system EM datagram format, \
+KMBES multibeams, \
+variable beams, bathymetry, amplitude, \
+binary. */
+
 /* format registration function prototypes */
 int mbr_register_sbsiomrg(int verbose, void *mbio_ptr, int *error);
 int mbr_register_sbsiocen(int verbose, void *mbio_ptr, int *error);
@@ -598,6 +605,7 @@ int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mgd77txt(int verbose, void *mbio_ptr, int *error);
 int mbr_register_mgd77tab(int verbose, void *mbio_ptr, int *error);
 int mbr_register_photgram(int verbose, void *mbio_ptr, int *error);
+int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error);
 int mbr_info_sbsiomrg(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
@@ -1013,5 +1021,10 @@ int mbr_info_photgram(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
+int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                     char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                     int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                     int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                     double *beamwidth_ltrack, int *error);
 /* end conditional include */
 #endif
