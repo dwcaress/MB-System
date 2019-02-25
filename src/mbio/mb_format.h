@@ -517,8 +517,8 @@ bathymetry,  \
 variable soundings, binary, MBARI. */
 
 #define MBF_KEMKMALL 261
-/* Kongsberg multibeam echosounder system EM datagram format, \
-KMBES multibeams, \
+/* Kongsberg multibeam echosounder system kmall datagram format, \
+Kongsberg fourth generation multibeam sonars (EM2040, EM712, EM304, EM124), \
 variable beams, bathymetry, amplitude, \
 binary. */
 

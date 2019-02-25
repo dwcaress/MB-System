@@ -613,8 +613,7 @@ the water column have been applied. */
 	int png_bsn;              /* normal incidence backscatter (BSN) (0.1 dB) */
 	int png_bso;              /* oblique incidence backscatter (BSO) (0.1 dB) */
 	int png_tx;               /* Tx beamwidth (0.1 deg) */
-	int png_tvg_crossover;
-	/* TVG law crossover angle (0.1 deg) */
+	int png_tvg_crossover; /* TVG law crossover angle (0.1 deg) */
 	int png_nbeams_ss; /* number of beams with sidescan */
 	int png_npixels;   /* number of pixels of sidescan */
 	int png_sort_direction[MBSYS_SIMRAD3_MAXBEAMS];

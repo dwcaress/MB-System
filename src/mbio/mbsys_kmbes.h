@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_kmbes.h	1/28/2014
- *	$Id: mbsys_kmbes.h 2308 2017-06-04 19:55:48Z caress $
+ *    The MB-system:	mbsys_kmbes.h	5/25/2018
+ *	$Id:  $
  *
- *    Copyright (c) 2014-2017 by
+ *    Copyright (c) 2018-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -50,6 +50,9 @@
  *      // I - datagrams
  *      IIP, // Info Installation PU
  *      IOP, // Runtime datagram
+ *      IBE, // BIST report
+ *      IBR, // BIST reply
+ *      IBS, // BIST short reply
  *
  *      // S-datagrams
  *      SPO, // Sensor POsition data
@@ -63,6 +66,14 @@
  *      // M-datagrams
  *      MRZ, // multibeam data for raw range, depth, reflectivity, seabed image(SI) etc.
  *      MWC, // water column multibeam data
+ *
+ *      // X-datagrams (extra - defined only for MB-System)
+ *      XMB, // The presence of this datagram indicates this file/stream has been
+ *           // written by MB-System.
+ *           // - this means that pings include a sidescan datagram MMS after the MRZ datagrams
+ *           // - this means that MB-System beamflags are embedded in the MRZ datagram soundings
+ *      XMC, // Comment datagram (MB-System only)
+ *      XMS, // MB-System multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
  */
 
 /* include mb_define.h */
@@ -91,8 +102,13 @@
 #define MBSYS_KMBES_M_WATER_COLUMN              "#MWC" // Multibeam water column datagram.
 
 /* C-datagrams */
-#define MBSYS_KMBES_C_POSITION                   "#CPO"
-#define MBSYS_KMBES_C_HEAVE                      "#CHE"
+#define MBSYS_KMBES_C_POSITION                  "#CPO"
+#define MBSYS_KMBES_C_HEAVE                     "#CHE"
+
+/* X-datagrams */
+#define MBSYS_KMBES_X_MBSYSTEM                 "#XMB" // Indicates these data written by MB-System (MB-System only)
+#define MBSYS_KMBES_X_COMMENT                  "#XMC" // Comment datagram (MB-System only)
+#define MBSYS_KMBES_X_PSEUDOSIDESCAN           "#XMS" // Multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
 
 #define MBSYS_KMBES_SYNC_CHAR 0x23  // ascii "#"
 #define MBSYS_KMBES_QUAL_FACTOR_THRESHOLD 50
@@ -100,6 +116,7 @@
 /*---------------------------------------------------------------*/
 /* Record size definitions (if needed for use in data reading and writing) */
 #define MBSYS_KMBES_START_BUFFER_SIZE 64000 // udp packet max is 64kbyte, but the KMBES K-Controller may concat a number of packets
+#define MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE 4096
 #define MBSYS_KMBES_HEADER_SIZE 20
 #define MBSYS_KMBES_MAX_SPO_DATALENGTH 250
 #define MBSYS_KMBES_MAX_ATT_DATALENGTH 250
@@ -110,8 +127,8 @@
 #define MBSYS_KMBES_MAX_SHA_DATALENGTH 32
 #define MBSYS_KMBES_MAX_CPO_DATALENGTH 250
 #define MBSYS_KMBES_MAX_CHE_DATALENGTH 64
-#define MBSYS_KMBES_MAX_IIP_DATALENGTH 4096 // TODO: make sure this size will be sufficient
-#define MBSYS_KMBES_MAX_IOP_DATALENGTH 4096 // TODO: make sure this size will be sufficient
+#define MBSYS_KMBES_MAX_IIP_DATALENGTH 4096
+#define MBSYS_KMBES_MAX_IOP_DATALENGTH 4096
 #define MBSYS_KMBES_SPO_VAR_OFFSET 72
 #define MBSYS_KMBES_SCL_VAR_OFFSET 36
 #define MBSYS_KMBES_SDE_VAR_OFFSET 40
@@ -122,8 +139,8 @@
 
 /*---------------------------------------------------------------*/
 /* Array size definitions (if needed for use in data reading and writing) */
-#define MBSYS_KMBES_MAXPIXELS 2048
 #define MBSYS_KMBES_MAX_NUM_BEAMS 1024
+#define MBSYS_KMBES_MAX_PIXELS 2048
 #define MBSYS_KMBES_MAX_EXTRA_DET 1024
 #define MBSYS_KMBES_MAX_EXTRA_DET_CLASSES 11
 #define MBSYS_KMBES_MAX_SIDESCAN_SAMP 60000
@@ -136,7 +153,6 @@
 #define MBSYS_KMBES_MAX_NUM_MST_DGMS 256
 #define MBSYS_KMBES_MAX_NUM_MWC_DGMS 256
 #define MBSYS_KMBES_MAX_NUM_MRZ_DGMS 32
-#define MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE 10
 // number of datagrams to add when index table size limit reached (dynamic allocation)
 
 /*---------------------------------------------------------------*/
@@ -149,6 +165,15 @@
 #define MBSYS_KMBES_UNAVAILABLE_ELLIPSOIDHEIGHT -999.0f
 
 #define MBSYS_KMBES_NANO pow(10.0, -9.0)
+
+/* invalid value flags */
+#define MBSYS_KMBES_INVALID_AMP     0x7F
+#define MBSYS_KMBES_INVALID_SS      0x7FFF
+#define MBSYS_KMBES_INVALID_CHAR    0xFF
+#define MBSYS_KMBES_INVALID_SHORT   0xFFFF
+#define MBSYS_KMBES_INVALID_U_INT   0xFFFFFFFF
+#define MBSYS_KMBES_INVALID_INT     0x7FFFFFFF
+
 /*---------------------------------------------------------------*/
 
 // Enumerate EM datagram types
@@ -172,11 +197,19 @@ typedef enum {
 
     /* M-datagrams */
     MRZ, // EM_DGM_M_RANGE_AND_DEPTH
-    MWC  // EM_DGM_M_WATER_COLUMN
+    MWC, // EM_DGM_M_WATER_COLUMN
 
     /* C-datagrams */
     CPO, // EM_DGM_C_POSITION
     CHE, // EM_DGM_C_HEAVE
+
+    // X-datagrams (extra - defined only for MB-System)
+    XMB, // The presence of this datagram indicates this file/stream has been
+         // written by MB-System.
+         // - this means that pings include a sidescan datagram MMS after the MRZ datagrams
+         // - this means that MB-System beamflags are embedded in the MRZ datagram soundings
+    XMC, // Comment datagram (MB-System only)
+    XMS, // MB-System multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
 
 } mbsys_kmbes_emdgm_type;
 
@@ -600,7 +633,7 @@ struct mbsys_kmbes_sha {
 
 struct mbsys_kmbes_m_partition {
     /* Multibeam (M) datagrams - data partition information. General for all M datagrams. */
-    /* f a multibeam depth datagram (or any other large datagram) exceeds the limit of an UPD package (64 kB),
+    /* If a multibeam depth datagram (or any other large datagram) exceeds the limit of an UPD package (64 kB),
      * the datagram is split into several datagrams =< 64 kB before sending from the PU. The parameters in
      * this struct will give information of the partitioning of datagrams. K-controller/SIS re-joins all UDP
      * packets/datagram parts to one datagram, and store it as one datagram in the .kmall files. Datagrams stored
@@ -875,7 +908,14 @@ struct mbsys_kmbes_mrz_sounding {
     mb_u_char postProcessingInfo;       /* For Kongsberg use. */
     mb_u_char detectionClass;           /* Detection class based on detected range. */
     mb_u_char detectionConfidenceLevel; /* Detection confidence level. */
-    unsigned short padding;
+    /* unsigned short padding; */       /* These two bytes specified as padding
+                                           in the Kongsberg specification but are
+                                           here used for the MB-System beam flag
+                                           - if the first mb_u_char == 1 then the
+                                             second byte is an MB-System beamflag */
+    char beamflag_enabled;              /* MB-system beamflag enabled iff == 1 */
+    char beamflag;                      /* MB-system beamflag value */
+
     float rangeFactor;                  /* Unit %. rangeFactor = 100 if main detection. */
     float qualityFactor;                /* Estimated standard deviation as % of the detected depth.
                                          * Quality Factor (QF) is calculated from IFREMER Quality Factor (IFQ):
@@ -946,7 +986,6 @@ struct mbsys_kmbes_mrz_sounding {
     unsigned short SInumSamples;            /* Seabed image. Number of range samples from the current beam, used to
                                              * form the seabed image. */
 
-    mb_u_char beamflag;                 /* MB-system beam FLAG category */
 };
 
 struct mbsys_kmbes_mrz_extra_si {
@@ -966,7 +1005,7 @@ struct mbsys_kmbes_mrz {
     /* #MRZ - Multibeam Raw Range and Depth datagram. The datagram also contains seabed image data. */
     /* Depths points (x,y,z) are calculated in meters, georeferred to the position of the vessel reference point
      * at the time of the first transmitted pulse of the ping. The depth point coordinates x and y are in the surface
-     * coordinate system (SCS), and are also given as delta latitude and delta longitude, referred to origo of the
+     * coordinate system (SCS), and are also given as delta latitude and delta longitude, referred to origin of the
      * VCS/SCS, at the time of the midpoint of the first transmitted pulse of the ping (equals time used in the
      * datagram header timestamp). See Coordinate systems for introduction to spatial reference points and coordinate
      * systems. Reference points are also described in Reference points and offsets. Explanation of the xyz reference
@@ -1036,18 +1075,6 @@ struct mbsys_kmbes_mwc_rx_info {
     float soundVelocity_mPerSec;        /* Sound speed at transducer, unit m/s. */
 };
 
-struct mbsys_kmbes_mwc_rx_beam_phase1 {
-    /* #MWC - specific info for each beam and water column sample. (Nrx * Ns) entries.
-     * Only added to datagram if phaseFlag = 1. */
-    signed char rxBeamPhase; /* Rx beam phase in 180/128 degree resolution. */
-};
-
-struct mbsys_kmbes_mwc_rx_beam_phase2 {
-    /* #MWC - specific info for each beam and water column sample. (Nrx * Ns) entries.
-     * Only added to datagram if phaseFlag = 2. */
-    short rxBeamPhase;  /* Rx beam phase in 0.01 degree resolution. */
-};
-
 struct mbsys_kmbes_mwc_rx_beam_data {
     /* #MWC - data block 2: receiver, specific info for each beam. */
     float beamPointAngReVertical_deg;
@@ -1058,10 +1085,18 @@ struct mbsys_kmbes_mwc_rx_beam_data {
      * is set to zero when the beam has no bottom detection */
     unsigned short beamTxSectorNum;
     unsigned short numSampleData;           /* Number of sample data for current beam. Also denoted Ns. */
-    signed char  *sampleAmplitude05dB_p;    /* Pointer to start of array with Water Column data. Lenght of
+    size_t sampleAmplitude05dB_p_alloc_size;
+    signed char  *sampleAmplitude05dB_p;    /* Pointer to start of array with Water Column data. Length of
                                              * array = numSampleData. Sample amplitudes in 0.5 dB resolution. */
-    struct mbsys_kmbes_mwc_rx_beam_phase1 rx_beam_phase1;
-    struct mbsys_kmbes_mwc_rx_beam_phase2 rx_beam_phase2;
+    /* If rxInfo->phaseFlag == 0 then the sampleAmplitude time series is not followed
+       by phase information. If rxInfo->phaseFlag == 1 then the sampleAmplitude time series
+       is followed immediately by a time series of numSampleData signed char values.
+       If rxInfo->phaseFlag == 2 then the sampleAmplitude time series
+       is followed immediately by a time series of numSampleData signed short values. */
+    size_t samplePhase8bit_alloc_size;
+    signed char *samplePhase8bit;  /* Rx beam phase in 180/128 degree resolution. */
+    size_t samplePhase16bit_alloc_size;
+    short *samplePhase16bit;       /* Rx beam phase in 0.01 degree resolution. */
 };
 
 struct mbsys_kmbes_mwc {
@@ -1072,10 +1107,8 @@ struct mbsys_kmbes_mwc {
     struct mbsys_kmbes_mwc_tx_info txInfo;
     struct mbsys_kmbes_mwc_tx_sector_data sectorData[MBSYS_KMBES_MAX_NUM_TX_PULSES];
     struct mbsys_kmbes_mwc_rx_info rxInfo;
+    size_t beamData_p_alloc_size;
     struct mbsys_kmbes_mwc_rx_beam_data *beamData_p;
-    /* Pointer to start of array with Water Column data. These data are followed by struct
-     * mbsys_kmbes_mwc_rx_beam_phase1 or struct mbsys_kmbes_mwc_rx_beam_phase2 if indicated in the
-     * field phaseFlag in struct mbsys_kmbes_mwc_rx_info. */
 };
 
  #define MBSYS_KMBES_MWC_VERSION 0
@@ -1210,6 +1243,65 @@ struct mbsys_kmbes_ib {
 
  #define MBSYS_KMBES_BIST_VERSION 0
 
+/*********************************************
+
+   X-datagrams (extra - defined only for MB-System)
+
+ *********************************************/
+
+/************************************
+
+    XMB, // The presence of this datagram indicates this file/stream has been
+         // written by MB-System.
+         // - this means that pings include a sidescan datagram MMS after the MRZ datagrams
+         // - this means that MB-System beamflags are embedded in the MRZ datagram soundings
+
+ ************************************/
+
+struct mbsys_kmbes_xmb {
+    /* Definition of #XMB datagram indicating these data have been written by MB-System */
+    struct mbsys_kmbes_header header;
+    int pseudosidescan_enabled;  /* Flag indicating ping data includes a pseudosidescan XMS datagram
+                                    following the the MRZ datagrams */
+    char unused[28];
+    char version[MB_COMMENT_MAXLINE];          /* MB-System version string */
+};
+
+ #define MBSYS_KMBES_XMB_VERSION 0
+
+/************************************
+
+    XMC, // Comment datagram (MB-System only)
+
+ ************************************/
+
+struct mbsys_kmbes_xmc {
+    /* Definition of #XMC datagram containing comment inserted by MB-System */
+    struct mbsys_kmbes_header header;
+    char unused[32];
+    char comment[MB_COMMENT_MAXLINE];          /* Comment string (null terminated) */
+};
+
+ #define MBSYS_KMBES_XMC_VERSION 0
+
+/************************************
+
+    XMS, // MB-System multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
+
+ ************************************/
+
+struct mbsys_kmbes_xms {
+    /* Definition of #XMS datagram containing multibeam pseudosidescan calculated by MB-System */
+    struct mbsys_kmbes_header header;
+    float pixel_size;                                  /* Pseudosidescan pixel width (meters) */
+    int pixels_ss;                                     /* Number of pseudosidescan pixels */
+    mb_u_char unused[32];
+    float ss[MBSYS_KMBES_MAX_PIXELS];           /* the processed sidescan values ordered port to starboard */
+    float ss_alongtrack[MBSYS_KMBES_MAX_PIXELS]; /* the processed sidescan alongtrack distances (meters) */
+};
+
+ #define MBSYS_KMBES_XMS_VERSION 0
+
 
 /*********************************************
 
@@ -1226,6 +1318,12 @@ struct mbsys_kmbes_unknown_struct {
     char *unknown_data;        /* unknown record stored as raw bytes */
 };
 
+
+/*********************************************
+
+   File indexing structures
+
+ *********************************************/
 
 /* EM dgm index data structure */
 struct mbsys_kmbes_index
@@ -1248,23 +1346,46 @@ struct mbsys_kmbes_index_table {
 };
 
 
+/*********************************************
+
+   Full data storage structure
+
+ *********************************************/
+
 /* Internal data structure */
 struct mbsys_kmbes_struct {
     /* Type of most recently read data record */
+    /* Translation of kind values:
+        MB_DATA_DATA              =  1: Set of MRZ datagrams associated with a single ping
+        MB_DATA_COMMENT           =  2:
+        MB_DATA_NAV               = 12: #SPO datagram
+        MB_DATA_ATTITUDE          = 18: #SKM datagram
+        MB_DATA_VELOCITY_PROFILE  =  6: #SVP datagram
+        MB_DATA_SSV               = 19: #SVT datagram
+        MB_DATA_CLOCK             = 14: #SCL datagram
+        MB_DATA_SONARDEPTH        = 59: #SDE datagram
+        MB_DATA_HEIGHT            = 16: #SHI datagram
+        MB_DATA_HEADING           = 17: #SHA datagram
+        MB_DATA_DATA              = 12: #MRZ datagram
+        MB_DATA_WATER_COLUMN      = 46: #MWC datagram
+        MB_DATA_NAV1              = 29: #CPO datagram
+        MB_DATA_HEAVE             = 64: #CHE datagram
+        MB_DATA_INSTALLATION      = 45: #IIP datagram
+        MB_DATA_RUN_PARAMETER     = 13: #IOP datagram
+        MB_DATA_BIST              = 65: #IBE datagram
+        MB_DATA_BIST1             = 66: #IBR datagram
+        MB_DATA_BIST2             = 67: #IBS datagram */
+
     int kind; /* MB-System record ID */
 
     /* MB-System time stamp of most recently read record */
     double time_d;
     int time_i[7];
 
-    /* Beam and pixel numbers */
+    /* Beam and pixel count totals for ping data (multiple MRZ datagrams) */
     int num_soundings;
-    int num_sidescan_samples;
-
-    /* EM datagram ID */
-    int dgm_count; // counts the number of datagrams associated with the same ping.
-    int dgm_count_id; // indexes the current datagram associated with ping.
-    struct mbsys_kmbes_index dgm_index[MBSYS_KMBES_MAX_NUM_MRZ_DGMS + MBSYS_KMBES_MAX_NUM_MWC_DGMS];
+    int num_backscatter_samples;
+    int num_pixels;
 
     /* #SPO - Sensor POsition data */
     struct mbsys_kmbes_spo spo;
@@ -1292,9 +1413,16 @@ struct mbsys_kmbes_struct {
 
     /* #MRZ - Multibeam data for raw range,
      * depth, reflectivity, seabed image(SI) etc. */
+    int n_mrz_read;
+    int n_mrz_needed;  // Number of MRZ datagrams for the current ping = mrz[mrz.cmnPart.rxFanIndex].cmnPart.rxFansPerPing
     struct mbsys_kmbes_mrz mrz[MBSYS_KMBES_MAX_NUM_MRZ_DGMS];
 
+    /* #XMS - MB-System pseudosidescan (included after MRZ datagrams when written by MB-System) */
+    struct mbsys_kmbes_xms xms;
+
     /* #MWC - Multibeam Water Column data */
+    int n_mwc_read;
+    int n_mwc_needed;  // Number of MWC datagrams for the current ping = mrz[mrz.cmnPart.rxFanIndex].cmnPart.rxFansPerPing
     struct mbsys_kmbes_mwc mwc[MBSYS_KMBES_MAX_NUM_MWC_DGMS];
 
     /* #CPO - Compatibility position sensor data */
@@ -1309,8 +1437,14 @@ struct mbsys_kmbes_struct {
     /* #IOP -  Runtime datagram */
     struct mbsys_kmbes_iop iop;
 
-    /* #IB - BIST Error Datagrams */
+    /* #IBE, #IBR, #IBS - BIST Error Datagrams */
     struct mbsys_kmbes_ib ib;
+
+    /* #XMB - datagram indicating these data have been written by MB-System */
+    struct mbsys_kmbes_xmb xmb;
+
+    /* #XMC - datagram containing comment inserted by MB-System */
+    struct mbsys_kmbes_xmc xmc;
 
     /* Unknown format */
     struct mbsys_kmbes_unknown_struct unknown_struct;
@@ -1335,7 +1469,7 @@ struct mbsys_kmbes_struct {
 int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_kmbes_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_kmbes_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_kmbes_pingnumber(int verbose, void *mbio_ptr, int *pingnumber, int *error);
+int mbsys_kmbes_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 int mbsys_kmbes_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 int mbsys_kmbes_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
 // int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
@@ -1419,6 +1553,6 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 //			double *sensor4, double *sensor5, double *sensor6,
 //			double *sensor7, double *sensor8, int *error);
 int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
-int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
+int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
 /*---------------------------------------------------------------*/

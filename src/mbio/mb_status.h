@@ -119,6 +119,11 @@
 #define MB_DATA_GEN_SENS 61              /* WASSP generic sensor data */
 #define MB_DATA_WC_PICKS 62              /* WASSP water column picks */
 #define MB_DATA_TIMESTAMP 63             /* JSTAR file timestamp */
+#define MB_DATA_HEAVE 64                 /* Kongsberg kmall */
+#define MB_DATA_BIST 65                  /* Kongsberg BIST report */
+#define MB_DATA_BIST1 66                 /* Kongsberg BIST reply */
+#define MB_DATA_BIST2 67                 /* Kongsberg BIST short reply */
+#define MB_DATA_MBSYSTEM 68              /* Written by MB-System - extension to Kongsberg kmall */
 
 /* MBIO function status convention */
 #define MB_SUCCESS 1
@@ -319,7 +324,7 @@ static char *notice_msg[] = {
     "MB_ERROR_FILE_NOT_FOUND (ID=-22): Requested file cannot be found",
     "MB_ERROR_FILE_LOCKED (ID=-23): Requested file locked",
     "MB_ERROR_FILE_NOT_FOUND (ID=-24): Initialization failed",
-    "MB_ERROR_FILE_NOT_FOUND (ID=-25): Sidescan data ignored", 
+    "MB_ERROR_FILE_NOT_FOUND (ID=-25): Sidescan data ignored",
 
     /* problem notices */
     "DATA PROBLEM (ID=1): No survey data found", "DATA PROBLEM (ID=2): Zero longitude or latitude in survey data",
