@@ -360,6 +360,9 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 	else if (*format == MBF_PHOTGRAM) {
 		status = mbr_register_photgram(verbose, mbio_ptr, error);
 	}
+	else if (*format == MBF_KEMKMALL) {
+		status = mbr_register_kemkmall(verbose, mbio_ptr, error);
+	}
 	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_FORMAT;
@@ -951,6 +954,12 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 		                           format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
 		                           platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
 		                           beamwidth_xtrack, beamwidth_ltrack, error);
+	}
+	else if (*format == MBF_KEMKMALL) {
+		status = mbr_info_kemkmall(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
+								  format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
+								  platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
+								  beamwidth_xtrack, beamwidth_ltrack, error);
 	}
 	else if (*format == MBF_DATALIST) {
 		*format = MBF_DATALIST;
@@ -1852,6 +1861,25 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 					strncpy(fileroot, filename, strlen(filename) - suffix_len);
 					fileroot[strlen(filename) - suffix_len] = '\0';
 				}
+				found = MB_YES;
+			}
+		}
+	}
+
+	/* look for Kongsberg multibeam *.kmall format suffix convention */
+	if (found == MB_NO) {
+		if (strlen(filename) > 6)
+			i = strlen(filename) - 6;
+		else
+			i = 0;
+		if ((suffix = strstr(&filename[i], ".kmall")) != NULL || (suffix = strstr(&filename[i], ".KMALL")) != NULL) {
+			suffix_len = strlen(suffix);
+			if (suffix_len == 6) {
+				if (fileroot != NULL) {
+					strncpy(fileroot, filename, strlen(filename) - suffix_len);
+					fileroot[strlen(filename) - suffix_len] = '\0';
+				}
+				*format = MBF_KEMKMALL;
 				found = MB_YES;
 			}
 		}

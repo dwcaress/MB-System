@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------
 # Version: $Id$
 #------------------------------------------------------------------------------
-# Notes on using the MB-System autotools based build system 
+# Notes on using the MB-System autotools based build system
 #------------------------------------------------------------------------------
 #
 # David W. Caress
@@ -69,13 +69,13 @@ make uninstall (to remove a previously installed version)
 #    --with-gmt-config     - location of GMT5 config script gmt-config
 #    --with-proj-lib       - location of PROJ libs
 #    --with-proj-include   - location of PROJ headers
-#    --with-fftw-lib       - location of FFTW3 libs 
-#    --with-fftw-include   - location of FFTW3 headers 
-#    --with-motif-lib      - location of Motif libs 
-#    --with-motif-include  - location of Motif headers 
-#    --with-opengl-lib     - location of OpenGL libs 
-#    --with-opengl-include - location of OpenGL headers 
-#    --with-otps-dir       - location of OTPS installation 
+#    --with-fftw-lib       - location of FFTW3 libs
+#    --with-fftw-include   - location of FFTW3 headers
+#    --with-motif-lib      - location of Motif libs
+#    --with-motif-include  - location of Motif headers
+#    --with-opengl-lib     - location of OpenGL libs
+#    --with-opengl-include - location of OpenGL headers
+#    --with-otps-dir       - location of OTPS installation
 #------------------------
 #   Installation option:
 #------------------------
@@ -116,11 +116,11 @@ brew install homebrew/science/gmt
 # Optionally, a homebrew tap is available:
 brew install dwcaress/mbsystem/otps --with-tpxo8
 #
-# These steps assume you have downloaded an MB-System distribution tar.gz file 
+# These steps assume you have downloaded an MB-System distribution tar.gz file
 # from the ftp site:
 #       ftp://mbsystemftp@ftp.mbari.org
 # The current distribution file is mbsystem-5.5.2307.tar.gz
-# 
+#
 # First, unpack the distribution using tar. This can be done in any location,
 # but if one is working in a root-owned area such as /usr/local/src, obtaining
 # root privileges using sudo is necessary for all steps:
@@ -149,26 +149,26 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 #------------------------------------------------------------------------------
 # Ubuntu Linux configure script command line example:
 #------------------------------------------------------------------------------
-# 
+#
 # The following procedure serves to install the current version of MB-System
 # (5.5.2307) on new installations of Ubuntu 14.04 and 16.04 in June 2017.
 # The methodology is essentially the same for both versions of
 # Ubuntu, with the exception that in 14.04LTS one must build GMT from source, but
 # in 16.04 a sufficiently recent GMT release is available in the package repository.
-# 
+#
 # GMT:
 # ----
 # GMT is a key prerequisite for MB-System, which now requires GMT 5.2.1 or later.
 # One can check which GMT version is available by querying the package manager in
 # a terminal:
         apt-cache show gmt
-# 
+#
 # If the repositories you are already accessing do not include GMT, one can add the
 # UbuntuGIS repo by typing:
         sudo add-apt-repository ppa:ubuntugis/ppa
         sudo apt-get update
         sudo apt-get upgrade
-# 
+#
 # These commands will add a GIS repository containing GMT, GDAL, GRASS,
 # QGIS, etc, including MB-System:
 #         https://launchpad.net/~ubuntugis/+archive/ubuntu/ppa
@@ -176,31 +176,31 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 # stable repository. As of early October 2016, the UbuntuGIS stable repository
 # includes GMT 5.1.2, which is not recent enough for the current MB-System
 # release.
-# 
+#
 # Fortunately, there is also an unstable version:
 #         https://launchpad.net/~ubuntugis/archive/ubuntu/ubuntugis-unstable
 # that includes more recent versions of some packages (although they have not
 # all been fully tested). As of early October 2016, GMT 5.2.1 is included in
 # the unstable repository.
-# 
+#
 # Once you have verified that GMT-5.2.1 or later is available to you, install the
 # primary package and the documentation, library files, development headers, and
 # hierarchical high resolution geography:
         sudo apt-get install gmt libgmt5 libgmt-dev gmt-gshhg gmt-doc
-# 
+#
 # If you need (or want) to build GMT5 from source, follow the installation instructions in the GMT
-# online wiki: 
+# online wiki:
 #        http://gmt.soest.hawaii.edu/projects/gmt/wiki/BuildingGMT#Building-GMT-from-source
 # or alternatively, there is an excellent GMT5 installation guide by Andrew Moody at:
 #        http://andrewjmoodie.com/2014/12/installing-the-generic-mapping-tools-5-gmt-5-1-x-on-ubuntu-linux/
-# 
+#
 # Motif:
 # ------
 # Another MB-System dependency that can be apparently unavailable is libmotif4. The
 # Motif widget set is used by all of the MB-System interactive graphical tools. Do
 # not use the old LessTif package - this served as a functional close of Motif long
 # ago, but no longer duplicates all of the needed Motif functionality. Instead,
-# install some version of Motif4. If 
+# install some version of Motif4. If
         apt-cache show libmotif4
 # indicates that libmotif4 is unavailable, then add the ubuntu extras repo using
 # the commands:
@@ -209,11 +209,11 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
             >> /etc/apt/sources.list.d/extra.list
         apt-get install update
 # You will need to re-login or open a new terminal in order for this to take effect.
-# 
+#
 # Install X11 dependencies of Motif as well as libmotif4:
         sudo apt-get install libx11-dev xorg-dev libmotif-dev libmotif4 \
-            libxp-dev mesa-common-dev libsdl1.2-dev libsdl-image1.2-dev 
-# 
+            libxp-dev mesa-common-dev libsdl1.2-dev libsdl-image1.2-dev
+#
 # Other dependencies:
 # -------------------
 # The many other MB-System dependencies are available for both 14.04 and 16.04, and
@@ -221,7 +221,7 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
         sudo apt-get install  build-essential gfortran nautilus-open-terminal \
             libfftw3-3 libfftw3-dev libnetcdf-dev netcdf-bin \
             libgdal-bin gdal-dev gv csh libgmt-dev libproj-dev
-# 
+#
 # Everything at once:
 # -------------------
 # In fact, it should be possible to install all MB-System dependencies in a single
@@ -232,14 +232,14 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
             build-essential gfortran nautilus-open-terminal \
             libfftw3-3 libfftw3-dev libnetcdf-dev netcdf-bin \
             libgdal-bin gdal-dev gv csh libgmt-dev libproj-dev
-# 
+#
 # MB-System:
 # ----------
-# These steps assume you have downloaded an MB-System distribution tar.gz file 
+# These steps assume you have downloaded an MB-System distribution tar.gz file
 # from the ftp site:
 #       ftp://mbsystemftp@ftp.mbari.org
 # The current distribution file is mbsystem-5.5.2307.tar.gz
-# 
+#
 # First, unpack the distribution using tar. This can be done in any location,
 # but if one is working in a root-owned area such as /usr/local/src, obtaining
 # root privileges using sudo is necessary for all steps:
@@ -251,25 +251,25 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 # to install MB-System in /usr/local, then only a simple call to configure is
 # required:
        sudo ./configure
-# 
+#
 # Once the makefiles have been generated by configure, build and install using:
         sudo make
         sudo make install
-# 
+#
 # In some cases the system and/or user environment impedes the successful use of
 # the GMT and/or MB-System shared libraries. In order to manually allow shared
 # libraries to be found for linking or running, one can either set the CFLAGS
 # environment variable during building or set the LD_LIBRARY_PATH environment
 # variable at login by adding a command to the user's ~/.profile or ~/.bashrc files.
-# 
+#
 # To set the CFLAGS environment variable during building include
 # "-Wl,-rpath -Wl,LIBDIR" in the configure command as shown here:
-# 
+#
 #       sudo CFLAGS="-Wl,-rpath -Wl,/usr/local/lib" ./configure
-# 
+#
 # To augment the LD_LIBRARY_PATH environment variable during login add a line to
 # the ~/.bashrc or ~/.profile file as shown here:
-# 
+#
 #       export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 #
 #------------------------------------------------------------------------------
@@ -281,12 +281,12 @@ sudo CFLAGS="-I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 # Install the prerequisites using yum:
 sudo yum install openmotif openmotif-devel fftw fftw-devel netcdf netcdf-devel \
 		proj proj-devel gdal-devel gmt gmt-devel gv
-# 
-# These steps assume you have downloaded an MB-System distribution tar.gz file 
+#
+# These steps assume you have downloaded an MB-System distribution tar.gz file
 # from the ftp site:
 #       ftp://mbsystemftp@ftp.mbari.org
 # The current distribution file is mbsystem-5.5.2307.tar.gz
-# 
+#
 # First, unpack the distribution using tar. This can be done in any location,
 # but if one is working in a root-owned area such as /usr/local/src, obtaining
 # root privileges using sudo is necessary for all steps:
@@ -392,9 +392,9 @@ sudo CFLAGS="-g -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
     --enable-mbtrn \
     --enable-hardening
 
-make -j
+make
 
-make -j install
+make install
 
 cd src/htmlsrc ; make_mbhtml ; cd ../..
 
