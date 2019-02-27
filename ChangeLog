@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.7.5beta1     February 26, 2019
   Version 5.7.5beta0     February 25, 2019
 * Version 5.7.4          February 12, 2019
 * Version 5.7.3          February 8, 2019
@@ -299,6 +300,14 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.7.5beta1 (February 27, 2019)
+
+Mbm_bpr: Augmented to work with Sonardyne AMT pressure data using PRS data records
+in addition to PR2 records.
+
+Mbotps: Fixed some issues with applying a tide station correction to time
+models.
 
 -----> 5.7.5beta0 (February 25, 2019)
 

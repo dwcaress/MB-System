@@ -444,7 +444,7 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #ifdef MBR_KEMKMALL_DEBUG
   fprintf(stderr, "About to call mbr_kemkmall_index_data...\n");
 #endif
-    status = mbr_kemkmall_index_data(5, mbio_ptr, store_ptr, error);
+    status = mbr_kemkmall_index_data(verbose, mbio_ptr, store_ptr, error);
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
@@ -1055,8 +1055,8 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     read_len = (size_t)dgm_index->header.numBytesDgm;
     if (*bufferalloc <= read_len) {
       *bufferalloc = ((read_len / MBSYS_KMBES_START_BUFFER_SIZE) + 1) * MBSYS_KMBES_START_BUFFER_SIZE;
-fprintf(stderr, "\nAlloc more buffer: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
-*bufferalloc, bufferptr, buffer, status);
+//fprintf(stderr, "\nAlloc more buffer: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
+//*bufferalloc, bufferptr, buffer, status);
       status = mb_reallocd(verbose, __FILE__, __LINE__, *bufferalloc, (void **)bufferptr, error);
       if (status != MB_SUCCESS) {
         *bufferalloc = 0;
@@ -1065,20 +1065,20 @@ fprintf(stderr, "\nAlloc more buffer: *bufferalloc:%d bufferptr:%p buffer:%p sta
       else {
         buffer = (char *)*bufferptr;
       }
-fprintf(stderr, "Realloc done: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
-*bufferalloc, bufferptr, buffer, status);
+//fprintf(stderr, "Realloc done: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
+//*bufferalloc, bufferptr, buffer, status);
     }
 
     /* read the next datagram */
     if (status == MB_SUCCESS) {
-fprintf(stderr, "Reading datagram %c%c%c%c size:%d *bufferalloc:%d bufferptr:%p buffer:%p\n",
-dgm_index->header.dgmType[0], dgm_index->header.dgmType[1],
-dgm_index->header.dgmType[2], dgm_index->header.dgmType[3],
-dgm_index->header.numBytesDgm, *bufferalloc, bufferptr, buffer);
+//fprintf(stderr, "Reading datagram %c%c%c%c size:%d *bufferalloc:%d bufferptr:%p buffer:%p\n",
+//dgm_index->header.dgmType[0], dgm_index->header.dgmType[1],
+//dgm_index->header.dgmType[2], dgm_index->header.dgmType[3],
+//dgm_index->header.numBytesDgm, *bufferalloc, bufferptr, buffer);
       fseek(mb_io_ptr->mbfp, dgm_index->file_pos, SEEK_SET);
       status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
       mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
-fprintf(stderr, "Read %zu bytes status:%d\n", read_len, status);
+//fprintf(stderr, "Read %zu bytes status:%d\n", read_len, status);
     }
 
     /* if valid read the record type */

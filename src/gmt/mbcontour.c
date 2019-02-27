@@ -535,7 +535,11 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 		}
 	}
 
+#if GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION > 3
 	n_errors += gmt_M_check_condition(GMT, !GMT->common.R.active[RSET], "Syntax error: Must specify -R option\n");
+#else
+	n_errors += gmt_M_check_condition(GMT, !GMT->common.R.active, "Syntax error: Must specify -R option\n");
+#endif
 	n_errors +=
 	    gmt_M_check_condition(GMT, !GMT->common.J.active, "Syntax error: Must specify a map projection with the -J option\n");
 	n_errors += gmt_M_check_condition(GMT, n_files != 1, "Syntax error: Must specify one input file(s)\n");
