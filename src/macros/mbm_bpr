@@ -22,7 +22,7 @@
 #   sensor into a tidal model for use by mbprocess
 #
 # Basic Usage:
-#   mbm_bpr -Ifile -Zzone -Dellipsoid [-F -Q -H -V]
+#   mbm_bpr -Ifile -Ooutput [-Doffset -Fformat Rlongitude/latitude -Swindow -Tmode -H -V]
 #
 # Author:
 #   David W. Caress
@@ -93,25 +93,25 @@ if ($format == 0) {
     while ($line=<FI>) {		# reading from the input
         ($tcount, $month, $day, $year, $hour, $minute, $second, $pressure, $temperature)
             = $line =~ /(\S+)\s+(\S+)\/(\S+)\/(\S+)\s+(\S+):(\S+):(\S+)\s+(\S+)\s+(\S+)/;
-    
+
         # Use the first value as the surface pressure provided it is valid
         if ($tcount == 1 && $pressure < 99999.0) {
             $surfacepressure = $pressure;
         }
-    
+
         # only use valid pressure values
         if ($pressure < 99999.0) {
             $time_d = `mbtime -T$year/$month/$day/$hour/$minute/$second`;
             chop($time_d);
             push (@time_ds, $time_d);
-        
+
             push (@years, $year);
             push (@months, $month);
             push (@days, $day);
             push (@hours, $hour);
             push (@minutes, $minute);
             push (@seconds, $second);
-        
+
             # Calculate the depth from pressure
             #
             # The following derives from Sea-Bird Electronics
@@ -144,7 +144,7 @@ if ($format == 0) {
             $x = (sin($latitude * $PI / 180.0))**2;
             $g = 9.780318 * ( 1.0 + ( 5.2788e-3  + 2.36e-5  * $x) * $x ) + 1.092e-6  * $pressuredbar;
             $depth = ((((-1.82e-15  * $pressuredbar + 2.279e-10 ) * $pressuredbar - 2.2512e-5 ) * $pressuredbar + 9.72659) * $pressuredbar) / $g;
-        
+
             push (@depths, $depth);
             $count++;
         }
@@ -153,21 +153,33 @@ if ($format == 0) {
 
 # Loop over the input records for Sonardyne format
 # Here the raw pressure values are in kPa == 10 dBar
-elsif ($format == 1) {
+elsif ($format == 1 || $format == 2) {
     $count = 0;
     $depthcount = 0;
     $depthsum = 0.0;
     $time_d_save = 0.0;
+    if ($format == 1) {
+      $tag = "PR2";
+    } else {
+      $tag = "PRS";
+    }
     while ($line=<FI>) {		# reading from the input
         @fields = split(",", $line);
-        if ($fields[0] eq "PR2" && $fields[1] ne "Record Time") {
+        if ($fields[0] eq $tag && $fields[1] ne "Record Time") {
             ($month,$day,$year,$hour,$minute) = $fields[1] =~ /(\S+)\/(\S+)\/(\S+)\s+(\S+):(\S+)/;
+            if ($year < 2000) {
+              if ($year < 50) {
+                $year += 2000;
+              } else {
+                $year += 1900;
+              }
+            }
             $second = 0.0;
             $time_d = `mbtime -T$year/$month/$day/$hour/$minute/$second`;
             chop($time_d);
             ($pressure) = $fields[4] =~ /(\S+)/;
 
-            # Use the first value as the surface pressure 
+            # Use the first value as the surface pressure
             if ($count == 0 && $depthcount == 0) {
                 $surfacepressure = $pressure;
             }
@@ -204,7 +216,7 @@ elsif ($format == 1) {
             $x = (sin($latitude * $PI / 180.0))**2;
             $g = 9.780318 * ( 1.0 + ( 5.2788e-3  + 2.36e-5  * $x) * $x ) + 1.092e-6  * $pressuredbar;
             $depth = ((((-1.82e-15  * $pressuredbar + 2.279e-10 ) * $pressuredbar - 2.2512e-5 ) * $pressuredbar + 9.72659) * $pressuredbar) / $g;
-            
+
             if ($time_d != $time_d_save && $depthcount > 0) {
                 $depth_save = $depthsum / $depthcount;
                 push (@time_ds, $time_d_save);
@@ -218,8 +230,12 @@ elsif ($format == 1) {
                 $count++;
                 $depthcount = 0;
                 $depthsum = 0.0;
+
+# if ($verbose && $count % 100 == 0) {
+#  print "Output $count pressure values $time_d_save $depth_save\n";
+# }
             }
-            
+
             $time_d_save = $time_d;
             $year_save = $year;
             $month_save = $month;
@@ -229,9 +245,10 @@ elsif ($format == 1) {
             $second_save = $second;
             $depthsum += $depth;
             $depthcount++;
+
         }
     }
-    
+
     if ($depthcount > 0) {
         $depth_save = $depthsum / $depthcount;
         push (@time_ds, $time_d_save);
@@ -248,13 +265,13 @@ elsif ($format == 1) {
 
 # Loop over the input records for generic format
 # Here the raw pressure values are in dBar
-elsif ($format == 2) {
+elsif ($format == 3) {
     $count = 0;
     while ($line=<FI>) {		# reading from the input
         ($time_d, $pressure) = $line =~ /(\S+)\s+(\S+)/;
         $time_str = `mbtime -M$time_d`;
         ($year, $month, $day, $hour, $minute, $second) = $time_str =~ /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
-        
+
         if ($year > 1970 && $year < 2100) {
 
             # Calculate the depth from pressure
@@ -289,7 +306,7 @@ elsif ($format == 2) {
             $x = (sin($latitude * $PI / 180.0))**2;
             $g = 9.780318 * ( 1.0 + ( 5.2788e-3  + 2.36e-5  * $x) * $x ) + 1.092e-6  * $pressuredbar;
             $depth = ((((-1.82e-15  * $pressuredbar + 2.279e-10 ) * $pressuredbar - 2.2512e-5 ) * $pressuredbar + 9.72659) * $pressuredbar) / $g;
-    
+
             push (@time_ds, $time_d);
             push (@years, $year);
             push (@months, $month);
@@ -333,7 +350,7 @@ if ($smooth && $count > 1) {
     for ($i = 0; $i < $count; $i++) {
         push (@sdepths, $depths[$i]);
     }
-    
+
 }
 
 # tell program status
@@ -459,7 +476,7 @@ if ($tmode == 0) {
   }
   $tidemax *= 1.1;
   if ($ntide > 0) {
-    $cmd = "mbm_xyplot -R$time_ds[0]/$time_ds[$count-1]/-$tidemax/$tidemax -IWblack:$ofile -IWred:$modelfile -O$plotfile -L\"Tide Data from BPR <$ofile> (black) & Tide Model (red):Seconds:Tide (meters)\" -V";
+    $cmd = "mbm_xyplot -R$time_ds[0]/$time_ds[$count-1]/-$tidemax/$tidemax -IWred:$modelfile -IWblack:$ofile -O$plotfile -L\"Tide Data from BPR <$ofile> (black) & Tide Model (red):Seconds:Tide (meters)\" -V";
   }
   else {
     $cmd = "mbm_xyplot -R$time_ds[0]/$time_ds[$count-1]/-$tidemax/$tidemax -IWblack:$ofile -O$plotfile -L\"Tide Data from BPR <$ofile>:Seconds:Tide (meters)\" -V";
