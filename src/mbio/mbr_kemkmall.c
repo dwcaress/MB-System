@@ -60,8 +60,7 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store_ptr, int *error);    //size_t block_size
 int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, void *new_index_ptr, int *error);
-int mbr_kemkmall_indextable_compare_time_d(const void *a, const void *b);
-int mbr_kemkmall_indextable_compare_rx_index(const void *a, const void *b);
+int mbr_kemkmall_indextable_compare(const void *a, const void *b);
 int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm_type_ptr, int *error);
@@ -151,8 +150,9 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_extract_svp = &mbsys_kmbes_extract_svp;
   mb_io_ptr->mb_io_insert_svp = &mbsys_kmbes_insert_svp;
   mb_io_ptr->mb_io_ttimes = &mbsys_kmbes_ttimes;
-//  mb_io_ptr->mb_io_detects = &mbsys_kmbes_detects;
-//  mb_io_ptr->mb_io_gains = &mbsys_kmbes_gains;
+  mb_io_ptr->mb_io_detects = &mbsys_kmbes_detects;
+  mb_io_ptr->mb_io_pulses = &mbsys_kmbes_pulses;
+  mb_io_ptr->mb_io_gains = &mbsys_kmbes_gains;
   mb_io_ptr->mb_io_copyrecord = &mbsys_kmbes_copy;
   mb_io_ptr->mb_io_extract_rawss = NULL;
   mb_io_ptr->mb_io_insert_rawss = NULL;
@@ -387,7 +387,7 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
     dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
     dgm_count = (int *)&mb_io_ptr->save1;
 
-    if (dgm_index_table->size >0) {
+    if (dgm_index_table->num_alloc > 0) {
       status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&dgm_index_table->indextable), error);
     }
     status = mb_freed(verbose, __FILE__, __LINE__, (void **)(&dgm_index_table), error);
@@ -511,7 +511,7 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   store = (struct mbsys_kmbes_struct *)store_ptr;
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "About to call mbr_kemkmall_wr_data record kind:%d\n", store->kind);
+  fprintf(stderr, "\nAbout to call mbr_kemkmall_wr_data record kind:%d\n", store->kind);
 #endif
 
   /* write next data to file */
@@ -553,6 +553,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   int index, skip, valid_id, num_bytes_dgm_end;
   int iip_location = -1;
   const int HEADER_SKIP = 8;
+  unsigned short pingCnt;
   int time_i[7];
   int i;
 
@@ -730,6 +731,52 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
             // TODO: what happens if alloc fails - while condition?
             break;
 
+          case XMS:
+            /* Valid multibeam pseudosidescan datagram: */
+            /* parse the dgm to get additional info about ping. */
+            /* this is necessary to insure multi-TX/RX and dual-swath modes are handled correctly. */
+
+            /* get ping info */
+            offset = (mb_io_ptr->file_pos + MBSYS_KMBES_HEADER_SIZE + sizeof(int));
+            fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
+
+            read_len = 12;
+            status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
+
+            if (status == MB_SUCCESS) {
+
+              /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
+              index = 0;
+              mb_get_binary_short(MB_YES, &buffer[index], &(pingCnt));
+
+              /* populate the datagram index entry */
+              dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+              dgm_index.emdgm_type = emdgm_type;
+              memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
+              dgm_index.file_pos = mb_io_ptr->file_pos;
+              dgm_index.ping_num = cmnPart.pingCnt;
+              dgm_index.rx_per_ping = 0;
+              dgm_index.rx_index = 0;
+              dgm_index.swaths_per_ping = 0;
+#ifdef MBR_KEMKMALL_DEBUG
+mb_get_date(verbose, dgm_index.time_d, time_i);
+fprintf(stderr,"%.4s:%d Cnt:%d rxFans:%d:%d swaths:%d along:%d tx:%d rx:%d numrx:%d alg:%d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+header.dgmType,emdgm_type, cmnPart.pingCnt, cmnPart.rxFansPerPing, cmnPart.rxFanIndex,
+cmnPart.swathsPerPing, cmnPart.swathAlongPosition, cmnPart.txTransducerInd,
+cmnPart.rxTransducerInd, cmnPart.numRxTransducers, cmnPart.algorithmType,
+time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
+#endif
+
+              status = mbr_kemkmall_add_dgm_to_dgm_index_table(verbose, dgm_index_table, &dgm_index, error);
+            }
+
+            if (status == MB_SUCCESS) {
+              offset = (size_t) (mb_io_ptr->file_pos + header.numBytesDgm);
+              fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
+            }
+            // TODO: what happens if alloc fails - while condition?
+            break;
+
           default:
             /* Other valid datagram: */
 
@@ -776,38 +823,43 @@ header.dgmType,emdgm_type, time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],tim
     *error = MB_ERROR_NO_ERROR;
   }
 
-  /* sort the datagram index table, leaving the datagrams up through the
-     #IIP datagram in place at the start of the file - in practice this means
-     any comment datagrams stay at the start of the file */
-  if (status == MB_SUCCESS && dgm_index_table->dgm_count > iip_location + 1) {
+  /* sort the index table into the order to be read */
+  if (status == MB_SUCCESS && dgm_index_table->dgm_count > 0) {
 
-    /* first sort by rx_index */
-    qsort((void *)&(dgm_index_table->indextable[iip_location+2]), dgm_index_table->dgm_count-iip_location-2,
-        sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare_rx_index);
+    /* each ping can have multiple MRZ and MWC datagrams - the ping timestamp is
+        the timestamp of the first MRZ datagram - add ping timestamp to index entries
+        for all MRZ and MWC datagrams */
+    /* start by sorting the index table on ping number alone, and then looping
+          over all datagrams in ping order setting the ping timestamp */
+    //qsort((void *)dgm_index_table->indextable, dgm_index_table->dgm_count,
+    //    sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare_pings);
 
-    /* then sort by timestamp, with MRZ and MWC from the same ping ordered with MRZ first. */
-    qsort((void *)&(dgm_index_table->indextable[iip_location+2]), dgm_index_table->dgm_count-iip_location-2,
-        sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare_time_d);
 
-    /* probably not the most efficient way to sort... */
-    /* but this will order the dgm's by time with secondary order by rxIndex. */
+    /* sort the datagram index table, leaving the datagrams up through the
+       #IIP datagram in place at the start of the file - in practice this means
+       any comment datagrams stay at the start of the file */
+
+    qsort((void *)dgm_index_table->indextable, dgm_index_table->dgm_count,
+        sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare);
+//    qsort((void *)&(dgm_index_table->indextable[iip_location+2]), dgm_index_table->dgm_count-iip_location-2,
+//        sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare);
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  printf("\n\nIndexed %ld valid EM datagrams:\n", dgm_index_table->dgm_count);
+  fprintf(stderr, "\n\nIndexed %ld valid EM datagrams:\n", dgm_index_table->dgm_count);
   for (i=0; i<dgm_index_table->dgm_count; i++)
   {
-    printf("ID: %4d, ", i);
-    printf("file_pos: %8.zu, ", dgm_index_table->indextable[i].file_pos);
-    printf("dgm: %.4s, ", dgm_index_table->indextable[i].header.dgmType);
-    printf("type: %2d, ", dgm_index_table->indextable[i].emdgm_type);
-    printf("size: %6u, ", dgm_index_table->indextable[i].header.numBytesDgm);
-    printf("time: %9.3f, ", dgm_index_table->indextable[i].time_d);
-    printf("ping: %5d, ", dgm_index_table->indextable[i].ping_num);
-    printf("rxIndex: %u/%u.\n", dgm_index_table->indextable[i].rx_index,
+    fprintf(stderr, "ID: %4d, ", i);
+    fprintf(stderr, "file_pos: %8.zu, ", dgm_index_table->indextable[i].file_pos);
+    fprintf(stderr, "dgm: %.4s, ", dgm_index_table->indextable[i].header.dgmType);
+    fprintf(stderr, "type: %2d, ", dgm_index_table->indextable[i].emdgm_type);
+    fprintf(stderr, "size: %6u, ", dgm_index_table->indextable[i].header.numBytesDgm);
+    fprintf(stderr, "time: %9.3f, ", dgm_index_table->indextable[i].time_d);
+    fprintf(stderr, "ping: %5d, ", dgm_index_table->indextable[i].ping_num);
+    fprintf(stderr, "rxIndex: %u/%u.\n", dgm_index_table->indextable[i].rx_index,
                                 dgm_index_table->indextable[i].rx_per_ping);
   }
-  printf("\n");
+  fprintf(stderr, "\n");
 #endif
 
   /* set file position back to the start */
@@ -860,14 +912,19 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
   status = mb_mallocd(verbose, __FILE__, __LINE__,
              sizeof(struct mbsys_kmbes_index_table), (void **)(&dgm_index_table), error);
 
-  size_bytes = MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE * sizeof(struct mbsys_kmbes_index);
   if (status == MB_SUCCESS) {
     dgm_index_table->dgm_count = 0;
-    dgm_index_table->size = MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE;
 
     /* allocate the datagram index table array */
+    size_bytes = MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE * sizeof(struct mbsys_kmbes_index);
     status = mb_mallocd(verbose, __FILE__, __LINE__, size_bytes,
                (void **)(&dgm_index_table->indextable), error);
+    if (status == MB_SUCCESS) {
+      dgm_index_table->num_alloc = MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE;
+    } else {
+      dgm_index_table->num_alloc = 0;
+
+    }
   }
 
   /* init internal data structure variables */
@@ -896,7 +953,7 @@ int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, 
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *new_dgm_index = NULL;
   size_t dgm_count = 0;
-  size_t new_size = 0;
+  size_t new_num_alloc = 0;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -916,16 +973,19 @@ int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, 
 
   /* reallocate the datagram index table array if needed */
   dgm_count = dgm_index_table->dgm_count;
-  if (dgm_count >= (dgm_index_table->size-1)) {
-    new_size = dgm_index_table->size + MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE;
+  if (dgm_count >= (dgm_index_table->num_alloc-1)) {
+    new_num_alloc = dgm_index_table->num_alloc + MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE;
 
     /* reallocate the datagram index table array */
     status = mb_reallocd(verbose, __FILE__, __LINE__,
-               sizeof(struct mbsys_kmbes_index)*new_size,
+               sizeof(struct mbsys_kmbes_index) * new_num_alloc,
                (void **)(&dgm_index_table->indextable), error);
 
     if (status == MB_SUCCESS) {
-      dgm_index_table->size = new_size;
+      dgm_index_table->num_alloc = new_num_alloc;
+    } else {
+      dgm_index_table->num_alloc = 0;
+      dgm_index_table->dgm_count = 0;
     }
   }
 
@@ -949,7 +1009,7 @@ int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, 
 
 /*--------------------------------------------------------------------*/
 
-int mbr_kemkmall_indextable_compare_time_d(const void *a, const void *b) {
+int mbr_kemkmall_indextable_compare(const void *a, const void *b) {
   struct mbsys_kmbes_index *aa = NULL;
   struct mbsys_kmbes_index *bb = NULL;
   int result = 0;
@@ -957,35 +1017,97 @@ int mbr_kemkmall_indextable_compare_time_d(const void *a, const void *b) {
   aa = (struct mbsys_kmbes_index*) a;
   bb = (struct mbsys_kmbes_index*) b;
 
-  /* if MRZ and MWC datagrams from the same ping are compared, MRZ is smaller (first) */
-  if (aa->ping_num == bb->ping_num && aa->emdgm_type == MRZ && bb->emdgm_type == MWC)
-    result = -1;
-  else if (aa->ping_num == bb->ping_num && aa->emdgm_type == MWC && bb->emdgm_type == MRZ)
-    result = 1;
+  /* compare so that index table of datagrams is ordered correctly
+      - Any comment datagrams should be at the beginning in time order
+      - The first datagram after any comments should be the IIP (installation parameters)
+      - The first datagram after the IIP should be the first IOP (runtime parameters)
+      - All other datagrams should be in time order, excepting that all datagrams
+        associated with a ping should be grouped together (MRZ, XMS, MWC)
+      - Within a ping datagram group, the MRZ datagrams should be first, then
+        the XMS datagram, then the MWC datagrams.
+      - The MRZ datagrams in a ping should be grouped by receiver index
+      - The MWC datagrams in a ping should be grouped by reciever index
+      */
 
-  /* otherwise just sort on time stamp */
+  /* deal with comment datagrams */
+  if (aa->emdgm_type == XMC || bb->emdgm_type == XMC) {
+    if (aa->emdgm_type == bb->emdgm_type) {
+      if (aa->time_d < bb->time_d)
+        result = -1;
+      else if (aa->time_d > bb->time_d)
+        result = 1;
+      else
+        result = 0;
+    }
+    else if (aa->emdgm_type == XMC)
+      result = -1;
+    else // if (bb->emdgm_type == XMC)
+      result = 1;
+  }
+
+  /* deal with IIP datagram */
+  else if (aa->emdgm_type == IIP) {
+    result = -1;
+  }
+  else if (bb->emdgm_type == IIP) {
+  result = 1;
+  }
+
+  /* deal with XMB datagram */
+  else if (aa->emdgm_type == XMB) {
+    result = -1;
+  }
+  else if (bb->emdgm_type == XMB) {
+  result = 1;
+  }
+
+  /* deal with both datagrams being ping datagrams (MRZ, XMS, MWC) */
+  else if ((aa->emdgm_type == MRZ || aa->emdgm_type == XMS || bb->emdgm_type == MWC)
+      && (bb->emdgm_type == MRZ || bb->emdgm_type == XMS || bb->emdgm_type == MWC)) {
+
+    /* if ping numbers are different order by time stamp */
+    if (aa->ping_num != bb->ping_num) {
+      if (aa->time_d < bb->time_d)
+        result = -1;
+      else if (aa->time_d > bb->time_d)
+        result = 1;
+      else
+        result = 0;
+    }
+
+    /* if ping numbers match */
+    else { /* if (aa->ping_num == bb->ping_num) */
+
+      /* if ping numbers match and datagram types are different order by MRZ < XMS < MWC */
+      if ((aa->emdgm_type == MRZ && bb->emdgm_type == XMS)
+          || (aa->emdgm_type == MRZ && bb->emdgm_type == MWC)
+          || (aa->emdgm_type == XMS && bb->emdgm_type == MWC))
+        result = -1;
+      else if ((bb->emdgm_type == MRZ && aa->emdgm_type == XMS)
+          || (bb->emdgm_type == MRZ && aa->emdgm_type == MWC)
+          || (bb->emdgm_type == XMS && aa->emdgm_type == MWC))
+        result = 1;
+
+      /* if ping numbers match and datagram types match order by receiver index
+          - set ping timestamp for later datagrams within the ping if possible */
+      else { //if (aa->emdgm_type == bb->emdgm_type)
+        if (aa->rx_index < bb->rx_index)
+          result = -1;
+        else if (aa->rx_index > bb->rx_index)
+          result = 1;
+        else // if (aa->rx_index == bb->rx_index) ==> this shouldn't happen
+          result = 0;
+      }
+    }
+  }
+
+  /* deal with all other pairs of datagrams - order by timestamp */
   else if (aa->time_d < bb->time_d)
     result = -1;
   else if (aa->time_d > bb->time_d)
     result = 1;
-
-  return(result);
-};
-
-/*--------------------------------------------------------------------*/
-
-int mbr_kemkmall_indextable_compare_rx_index(const void *a, const void *b) {
-  struct mbsys_kmbes_index *aa;
-  struct mbsys_kmbes_index *bb;
-  int result = 0;
-
-  aa = (struct mbsys_kmbes_index*) a;
-  bb = (struct mbsys_kmbes_index*) b;
-
-  if (aa->rx_index < bb->rx_index)
-    result = -1;
-  else if (aa->rx_index > bb->rx_index)
-    result = 1;
+  else
+    result = 0;
 
   return(result);
 };
@@ -1162,29 +1284,39 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
           status = mbr_kemkmall_rd_mrz(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
 
           /* check to see if done */
-          done = MB_YES;
-          store->n_mrz_read = 0;
-          store->n_mrz_needed = dgm_index->rx_per_ping;
-          for (imrz=0;imrz<dgm_index->rx_per_ping;imrz++) {
-            if (dgm_index->ping_num != store->mrz[imrz].cmnPart.pingCnt) {
-              done = MB_NO;
-            } else {
-              store->n_mrz_read++;
+          if (status != MB_SUCCESS) {
+            done = MB_NO;
+          } else {
+            done = MB_YES;
+            store->n_mrz_read = 0;
+            store->n_mrz_needed = dgm_index->rx_per_ping;
+            for (imrz=0;imrz<dgm_index->rx_per_ping;imrz++) {
+              if (dgm_index->ping_num != store->mrz[imrz].cmnPart.pingCnt) {
+                done = MB_NO;
+              } else {
+                store->n_mrz_read++;
+              }
+            }
+            store->num_soundings = 0;
+            store->num_backscatter_samples = 0;
+            store->num_pixels = 0;
+            if (done == MB_YES) {
+              for (imrz=0;imrz<dgm_index->rx_per_ping;imrz++) {
+                numSoundings = store->mrz[imrz].rxInfo.numSoundingsMaxMain + store->mrz[imrz].rxInfo.numExtraDetections;
+                numBackscatterSamples = 0;
+                for (isounding=0;isounding<numSoundings;isounding++) {
+                  numBackscatterSamples += store->mrz[imrz].sounding[isounding].SInumSamples;
+                }
+                store->num_soundings += numSoundings;
+                store->num_backscatter_samples += numBackscatterSamples;
+              }
             }
           }
-          store->num_soundings = 0;
-          store->num_backscatter_samples = 0;
-          store->num_pixels = 0;
-          if (done == MB_YES) {
-            for (imrz=0;imrz<dgm_index->rx_per_ping;imrz++) {
-              numSoundings = store->mrz[imrz].rxInfo.numSoundingsMaxMain + store->mrz[imrz].rxInfo.numExtraDetections;
-              numBackscatterSamples = 0;
-              for (isounding=0;isounding<numSoundings;isounding++) {
-                numBackscatterSamples += store->mrz[imrz].sounding[isounding].SInumSamples;
-              }
-              store->num_soundings += numSoundings;
-              store->num_backscatter_samples += numBackscatterSamples;
-            }
+
+          /* if pseudosidescan is expected and XMS datagram not read, then not done yet */
+          if (done == MB_YES && store->xmb.pseudosidescan_enabled == MB_YES
+              && dgm_index->ping_num != store->xms.pingCnt) {
+            done = MB_NO;
           }
           break;
 
@@ -1194,7 +1326,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
           status = mbr_kemkmall_rd_mwc(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
 
           /* check to see if done */
-          done = MB_YES;
+          //done = MB_YES;
           store->n_mwc_read = 0;
           store->n_mwc_needed = dgm_index->rx_per_ping;
           for (imwc=0;imwc<dgm_index->rx_per_ping;imwc++) {
@@ -1237,8 +1369,16 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         case XMS:
           /* #XMS - MB-System multibeam pseudosidescan */
           status = mbr_kemkmall_rd_xms(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
+          if (status != MB_SUCCESS) {
+            done = MB_NO;
+          } else {
+            if (store->n_mrz_read > 0 && store->n_mrz_read == store->n_mrz_needed
+                && store->mrz[0].cmnPart.pingCnt == store->xms.pingCnt) {
+              done = MB_YES;
+            } else {
+              done = MB_NO;
+            }
+          }
           break;
 
         case UNKNOWN:
@@ -1352,7 +1492,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
           status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
         break;
 
-      case MB_DATA_ATTITUDE:
+      case MB_DATA_NAV1:
         /* #SKM - KM binary sensor data */
         status = mbr_kemkmall_wr_skm(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
         if (status == MB_SUCCESS)
@@ -1424,7 +1564,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         }
         break;
 
-      case MB_DATA_NAV1:
+      case MB_DATA_NAV2:
         /* #CPO - Compatibility position sensor data */
         status = mbr_kemkmall_wr_cpo(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
         if (status == MB_SUCCESS)
@@ -1467,7 +1607,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL DATA WRITTEN: type:%d status:%d error:%d\n\n", store->kind, status, *error);
+  fprintf(stderr, "Data record written: type:%d status:%d error:%d\n", store->kind, status, *error);
 #endif
 
   /* print output debug statements */
@@ -1670,15 +1810,6 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
   index += 4;
   memcpy(&(spo->sensorData.posDataFromSensor), &buffer[index], numBytesRawSensorData);
 
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_NAV;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
-  }
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -1706,6 +1837,15 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       spo->sensorData.posDataFromSensor:      %s\n", spo->sensorData.posDataFromSensor);
   }
 
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_NAV;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
   /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -1714,6 +1854,12 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -1729,6 +1875,7 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
   int index = 0;
+  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -1767,7 +1914,7 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
   mb_get_binary_short(MB_YES, &buffer[index], &(skm->infoPart.sensorDataContents));
   index += 2;
 
-  for (int i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
+  for (i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
 
     /* KMbinary */
     memcpy(&(skm->sample[i].KMdefault.dgmType), &buffer[index], 4);
@@ -1838,15 +1985,6 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
     index += 4;
   }
 
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_ATTITUDE;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
-  }
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -1866,7 +2004,7 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       skm->infoPart.numBytesPerSample:        %u\n", skm->infoPart.numBytesPerSample);
     fprintf(stderr, "dbg5       skm->infoPart.sensorDataContents:       %u\n", skm->infoPart.sensorDataContents);
 
-    for (int i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
+    for (i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
       fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.dgmType:                %s\n", i, skm->sample[i].KMdefault.dgmType);
       fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.numBytesDgm:            %u\n", i, skm->sample[i].KMdefault.numBytesDgm);
       fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.dgmVersion:             %u\n", i, skm->sample[i].KMdefault.dgmVersion);
@@ -1911,6 +2049,15 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
 
   }
 
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_NAV1;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
   /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -1919,6 +2066,12 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -1933,6 +2086,7 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_svp *svp = NULL;
   int index = 0;
+  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -1970,7 +2124,7 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
   index += 8;
 
   /* svp data block */
-  for (int i=0; i<(svp->numSamples); i++ ) {
+  for (i=0; i<(svp->numSamples); i++ ) {
     mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].depth_m));
     index += 4;
     mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].soundVelocity_mPerSec));
@@ -1981,15 +2135,6 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
     index += 4;
     mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].salinity));
     index += 4;
-  }
-
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_VELOCITY_PROFILE;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
   }
 
   /* print debug statements */
@@ -2010,13 +2155,22 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       svp->latitude_deg:               %f\n", svp->latitude_deg);
     fprintf(stderr, "dbg5       svp->longitude_deg:              %f\n", svp->longitude_deg);
 
-    for (int i = 0; i < (svp->numSamples); i++) {
+    for (i = 0; i < (svp->numSamples); i++) {
       fprintf(stderr, "dbg5       svp->sensorData[%3d].depth_m:                      %f\n", i, svp->sensorData[i].depth_m);
       fprintf(stderr, "dbg5       svp->sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svp->sensorData[i].soundVelocity_mPerSec);
       fprintf(stderr, "dbg5       svp->sensorData[%3d].padding:                      %d\n", i, svp->sensorData[i].padding);
       fprintf(stderr, "dbg5       svp->sensorData[%3d].temp_C:                       %f\n", i, svp->sensorData[i].temp_C);
       fprintf(stderr, "dbg5       svp->sensorData[%3d].salinity:                     %f\n", i, svp->sensorData[i].salinity);
     }
+  }
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_VELOCITY_PROFILE;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
   }
 
   /* print output debug statements */
@@ -2027,6 +2181,12 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -2041,6 +2201,7 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_svt *svt = NULL;
   int index = 0;
+  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -2082,7 +2243,7 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
   index += 4;
 
   /* svt data blocks */
-  for (int i=0; i<(svt->infoPart.numSamplesArray); i++ ) {
+  for (i=0; i<(svt->infoPart.numSamplesArray); i++ ) {
     mb_get_binary_int(MB_YES, &buffer[index], &(svt->sensorData[i].time_sec));
     index += 4;
     mb_get_binary_int(MB_YES, &buffer[index], &(svt->sensorData[i].time_nanosec));
@@ -2095,15 +2256,6 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
     index += 4;
     mb_get_binary_float(MB_YES, &buffer[index], &(svt->sensorData[i].salinity));
     index += 4;
-  }
-
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_SSV;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
   }
 
   /* print debug statements */
@@ -2125,7 +2277,7 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       svt->infoPart.filterTime_sec:           %f\n", svt->infoPart.filterTime_sec);
     fprintf(stderr, "dbg5       svt->infoPart.soundVelocity_mPerSec_offset: %f\n", svt->infoPart.soundVelocity_mPerSec_offset);
 
-    for (int i = 0; i < (svt->infoPart.numSamplesArray); i++) {
+    for (i = 0; i < (svt->infoPart.numSamplesArray); i++) {
       fprintf(stderr, "dbg5       svp->sensorData[%3d].time_sec:                     %u\n", i, svt->sensorData[i].time_sec);
       fprintf(stderr, "dbg5       svp->sensorData[%3d].time_nanosec:                 %u\n", i, svt->sensorData[i].time_nanosec);
       fprintf(stderr, "dbg5       svp->sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svt->sensorData[i].soundVelocity_mPerSec);
@@ -2133,6 +2285,15 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
       fprintf(stderr, "dbg5       svp->sensorData[%3d].pressure_Pa:                  %f\n", i, svt->sensorData[i].pressure_Pa);
       fprintf(stderr, "dbg5       svp->sensorData[%3d].salinity:                     %f\n", i, svt->sensorData[i].salinity);
     }
+  }
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_SSV;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
   }
 
   /* print output debug statements */
@@ -2143,6 +2304,12 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -2200,15 +2367,6 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
   index += 4;
   memcpy(&(scl->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
 
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_CLOCK;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
-  }
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -2230,6 +2388,15 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       scl->sensorData.dataFromSensor:         %s\n", scl->sensorData.dataFromSensor);
   }
 
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_CLOCK;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
   /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -2238,6 +2405,12 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -2301,15 +2474,6 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
   index += 4;
   memcpy(&(sde->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
 
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_SONARDEPTH;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
-  }
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -2334,6 +2498,15 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       sde->sensorData.dataFromSensor:         %s\n", sde->sensorData.dataFromSensor);
   }
 
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_SONARDEPTH;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
   /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -2342,6 +2515,12 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -2399,15 +2578,6 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
   index += 4;
   memcpy(&(shi->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
 
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_HEIGHT;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
-  }
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -2429,6 +2599,15 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       shi->sensorData.dataFromSensor:         %s\n", shi->sensorData.dataFromSensor);
   }
 
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_HEIGHT;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
   /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -2437,6 +2616,12 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -2504,16 +2689,6 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
     index += sha->dataInfo.numBytesRawSensorData;
   }
 
-
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_HEADING;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
-  }
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -2535,11 +2710,20 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       sha->dataInfo.numBytesPerSample:        %u\n", sha->dataInfo.numBytesPerSample);
     fprintf(stderr, "dbg5       sha->dataInfo.numBytesRawSensorData:    %u\n", sha->dataInfo.numBytesRawSensorData);
 
-    for (int i = 0; i<(sha->dataInfo.numSamplesArray); i++) {
+    for (i = 0; i<(sha->dataInfo.numSamplesArray); i++) {
       fprintf(stderr, "dbg5       sha->sensorData[%3d].timeSinceRecStart_nanosec: %u\n", i, sha->sensorData[i].timeSinceRecStart_nanosec);
       fprintf(stderr, "dbg5       sha->sensorData[%3d].headingCorrected_deg:      %f\n", i, sha->sensorData[i].headingCorrected_deg);
       fprintf(stderr, "dbg5       sha->sensorData[%3d].dataFromSensor:            %s\n", i, sha->sensorData[i].dataFromSensor);
     }
+  }
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_HEADING;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
   }
 
   /* print output debug statements */
@@ -2550,6 +2734,12 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -2566,6 +2756,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   struct mbsys_kmbes_m_partition partition;
   struct mbsys_kmbes_m_body cmnPart;
   int index = 0;
+  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -2803,7 +2994,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* EMdgmMRZ_txSectorInfo - sector information */
-  for (int i = 0; i<(mrz->pingInfo.numTxSectors); i++)
+  for (i = 0; i<(mrz->pingInfo.numTxSectors); i++)
   {
     mrz->sectorInfo[i].txSectorNumb = buffer[index];
     index++;
@@ -2901,7 +3092,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* EMdgmMRZ_extraDetClassInfo -  Extra detection class info */
-  for (int i = 0; i<(mrz->rxInfo.numExtraDetectionClasses); i++)
+  for (i = 0; i<(mrz->rxInfo.numExtraDetectionClasses); i++)
   {
     mb_get_binary_short(MB_YES, &buffer[index], &(mrz->extraDetClassInfo[i].numExtraDetInClass));
     index += 2;
@@ -2923,7 +3114,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   /* EMdgmMRZ_sounding - Data for each sounding */
   int numSidescanSamples = 0;
   int numSoundings = mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections;
-  for (int i = 0; i<numSoundings; i++)
+  for (i = 0; i<numSoundings; i++)
   {
     mb_get_binary_short(MB_YES, &buffer[index], &(mrz->sounding[i].soundingIndex));
     index += 2;
@@ -3032,6 +3223,9 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
       if (mrz->sounding[i].detectionType >= 2) {
         mrz->sounding[i].beamflag = MB_FLAG_NULL;
       }
+      else if (mrz->sounding[i].detectionType == 1) {
+        mrz->sounding[i].beamflag = (char)(MB_FLAG_FLAG + MB_FLAG_SONAR);
+      }
       else if (mrz->sounding[i].qualityFactor > MBSYS_KMBES_QUAL_FACTOR_THRESHOLD) {
           mrz->sounding[i].beamflag = (char)(MB_FLAG_FLAG + MB_FLAG_SONAR);
       }
@@ -3089,7 +3283,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     }
   }
 
-  for (int i = 0; i<numSidescanSamples; i++)
+  for (i = 0; i<numSidescanSamples; i++)
   {
     mb_get_binary_short(MB_YES, &buffer[index], &(mrz->SIsample_desidB[i]));
     index += 2;
@@ -3112,6 +3306,15 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d ping:%d rx:%d/%d xms expected:%d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec,
+  cmnPart.pingCnt, cmnPart.rxFanIndex, cmnPart.rxFansPerPing,
+  store->xmb.pseudosidescan_enabled,
+  status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -3228,7 +3431,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* EMdgmMWCtxSectorData - transmit sector data, loop for all i = numTxSectors */
-  for (int i=0; i<(mwc->txInfo.numTxSectors); i++) {
+  for (i=0; i<(mwc->txInfo.numTxSectors); i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(mwc->sectorData[i].tiltAngleReTx_deg));
     index += 4;
     mb_get_binary_float(MB_YES, &buffer[index], &(mwc->sectorData[i].centreFreq_Hz));
@@ -3296,7 +3499,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (status == MB_SUCCESS) {
-    for (int i=0; i<(mwc->rxInfo.numBeams) && status == MB_SUCCESS; i++) {
+    for (i=0; i<(mwc->rxInfo.numBeams) && status == MB_SUCCESS; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(mwc->beamData_p[i].beamPointAngReVertical_deg));
       index += 4;
       mb_get_binary_short(MB_YES, &buffer[index], &(mwc->beamData_p[i].startRangeSampleNum));
@@ -3383,7 +3586,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
           fprintf(stderr, "dbg5       beamTxSectorNum         = %d\n", mwc->beamData_p[i].beamTxSectorNum);
           fprintf(stderr, "dbg5       numSampleData           = %d\n", mwc->beamData_p[i].numSampleData);
           fprintf(stderr, "dbg5       (amplitude phase)       = [\n");
-          for (int k = 0; k < (mwc->beamData_p[i].numSampleData); k++) {
+          for (k = 0; k < (mwc->beamData_p[i].numSampleData); k++) {
             if (k % 10 == 0)
               fprintf(stderr, "dbg5             ");
             if (mwc->rxInfo.phaseFlag == 1)
@@ -3417,6 +3620,12 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -3453,11 +3662,11 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
   /* copy the header */
   cpo->header = *header;
 
+  /* calc number of bytes for raw sensor data */
   numBytesRawSensorData = cpo->header.numBytesDgm - MBSYS_KMBES_CPO_VAR_OFFSET;
 
   /* extract the data */
   index = MBSYS_KMBES_HEADER_SIZE;
-
 
   // common part
   mb_get_binary_short(MB_YES, &buffer[index], &(cpo->cmnPart.numBytesCmnPart));
@@ -3489,7 +3698,6 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
   memcpy(&cpo->sensorData.posDataFromSensor, &buffer[index], numBytesRawSensorData);
   index += numBytesRawSensorData;
 
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -3517,6 +3725,14 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       cpo->sensorData.speedOverGround_mPerSec:%s\n", cpo->sensorData.posDataFromSensor);
   }
 
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_NAV2;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
 
   /* print output debug statements */
   if (verbose >= 2) {
@@ -3526,6 +3742,12 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -3596,6 +3818,15 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       che->data.heave_m:                      %f\n", che->data.heave_m);
   }
 
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_HEAVE;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
   /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -3604,6 +3835,12 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -3651,15 +3888,6 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   memcpy(&iip->install_txt, &buffer[index], numBytesRawSensorData);
 //fprintf(stderr, "\niip->install_txt:\n%s\n", iip->install_txt);
 
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_INSTALLATION;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
-  }
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -3677,6 +3905,15 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       iip->install_txt:                       %s\n", iip->install_txt);
   }
 
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_INSTALLATION;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
   /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -3685,6 +3922,12 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -3732,15 +3975,6 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
   index += 2;
   memcpy(&iop->runtime_txt, &buffer[index], numBytesRawSensorData);
 
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_RUN_PARAMETER; // TODO: check data kind
-  }
-  else {
-    store->kind = MB_DATA_NONE;
-  }
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -3758,6 +3992,15 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       iop->runtime_txt:                       %s\n", iop->runtime_txt);
   }
 
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_RUN_PARAMETER; // TODO: check data kind
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
   /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -3766,6 +4009,12 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -3815,15 +4064,6 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
   index += numBytesVersion;
   memset(&xmb->version[numBytesVersion], 0, MB_COMMENT_MAXLINE - numBytesVersion);
 
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_MBSYSTEM;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
-  }
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -3836,9 +4076,18 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       xmb->header.time_nanosec:               %u\n", xmb->header.time_nanosec);
 
     fprintf(stderr, "dbg5       xmb->pseudosidescan_enabled:            %d\n", xmb->pseudosidescan_enabled);
-    for (i=0;i<32;i++)
+    for (i=0;i<28;i++)
       fprintf(stderr, "dbg5       xmb->unused[%2d]:                        %u\n", i, xmb->unused[i]);
     fprintf(stderr, "dbg5       xmb->version:                           %s\n", xmb->version);
+  }
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_MBSYSTEM;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
   }
 
   /* print output debug statements */
@@ -3849,6 +4098,12 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -3896,15 +4151,6 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
   index += numBytesComment;
   memset(&xmc->comment[numBytesComment], 0, MB_COMMENT_MAXLINE - numBytesComment);
 
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_COMMENT;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
-  }
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -3921,6 +4167,15 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       xmc->comment:                           %s\n", xmc->comment);
   }
 
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_COMMENT;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
   /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -3929,6 +4184,12 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -3967,6 +4228,10 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
   /* extract the data */
   index = MBSYS_KMBES_HEADER_SIZE;
 
+  mb_get_binary_short(MB_YES, &buffer[index], &xms->pingCnt);
+  index += 2;
+  mb_get_binary_short(MB_YES, &buffer[index], &xms->spare);
+  index += 2;
   mb_get_binary_float(MB_YES, &buffer[index], &xms->pixel_size);
   index += 4;
   mb_get_binary_int(MB_YES, &buffer[index], &xms->pixels_ss);
@@ -3984,15 +4249,6 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
     index += 4;
   }
 
-  /* set kind */
-  if (status == MB_SUCCESS) {
-    /* set kind */
-    store->kind = MB_DATA_DATA;
-  }
-  else {
-    store->kind = MB_DATA_NONE;
-  }
-
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
@@ -4004,6 +4260,8 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       xms->header.time_sec:                   %u\n", xms->header.time_sec);
     fprintf(stderr, "dbg5       xms->header.time_nanosec:               %u\n", xms->header.time_nanosec);
 
+    fprintf(stderr, "dbg5       xms->pingCnt:                           %u\n", xms->pingCnt);
+    fprintf(stderr, "dbg5       xms->spare:                             %d\n", xms->spare);
     fprintf(stderr, "dbg5       xms->pixel_size:                        %f\n", xms->pixel_size);
     fprintf(stderr, "dbg5       xms->pixels_ss:                         %d\n", xms->pixels_ss);
     for (i=0;i<32;i++)
@@ -4011,6 +4269,15 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
     for (i=0;i<xms->pixels_ss;i++)
       fprintf(stderr, "dbg5       xms->ss[%2d]:                            %f %f\n",
                       i, xms->ss[i], xms->ss_alongtrack[i]);
+  }
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_DATA;
+  }
+  else {
+    store->kind = MB_DATA_NONE;
   }
 
   /* print output debug statements */
@@ -4021,6 +4288,12 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
 
   /* return status */
   return (status);
@@ -4057,6 +4330,12 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -4084,7 +4363,7 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       header->numBytesDgm:                    %u\n", header->numBytesDgm);
     fprintf(stderr, "dbg5       header->dgmType:                        %s\n", header->dgmType);
     fprintf(stderr, "dbg5       header->dgmVersion:                     %u\n", header->dgmVersion);
@@ -4137,6 +4416,7 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_spo *spo = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -4155,10 +4435,11 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   spo = &(store->spo);
+  header = &store->spo.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       spo->header.numBytesDgm:                %u\n", spo->header.numBytesDgm);
     fprintf(stderr, "dbg5       spo->header.dgmType:                    %s\n", spo->header.dgmType);
     fprintf(stderr, "dbg5       spo->header.dgmVersion:                 %u\n", spo->header.dgmVersion);
@@ -4254,6 +4535,12 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -4265,6 +4552,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
   int i;
@@ -4283,10 +4571,11 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   skm = &(store->skm);
+  header = &store->skm.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       skm->header.numBytesDgm:                %u\n", skm->header.numBytesDgm);
     fprintf(stderr, "dbg5       skm->header.dgmType:                    %s\n", skm->header.dgmType);
     fprintf(stderr, "dbg5       skm->header.dgmVersion:                 %u\n", skm->header.dgmVersion);
@@ -4303,7 +4592,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg5       skm->infoPart.numBytesPerSample:        %u\n", skm->infoPart.numBytesPerSample);
     fprintf(stderr, "dbg5       skm->infoPart.sensorDataContents:       %u\n", skm->infoPart.sensorDataContents);
 
-    for (int i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
+    for (i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
       fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.dgmType:                %s\n", i, skm->sample[i].KMdefault.dgmType);
       fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.numBytesDgm:            %u\n", i, skm->sample[i].KMdefault.numBytesDgm);
       fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.dgmVersion:             %u\n", i, skm->sample[i].KMdefault.dgmVersion);
@@ -4471,6 +4760,12 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -4482,6 +4777,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_svp *svp = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
   int i;
@@ -4500,10 +4796,11 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   svp = &(store->svp);
+  header = &store->svp.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       svp->header.numBytesDgm:                %u\n", svp->header.numBytesDgm);
     fprintf(stderr, "dbg5       svp->header.dgmType:                    %s\n", svp->header.dgmType);
     fprintf(stderr, "dbg5       svp->header.dgmVersion:                 %u\n", svp->header.dgmVersion);
@@ -4592,6 +4889,12 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -4603,6 +4906,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_svt *svt = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
   int i;
@@ -4621,10 +4925,11 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   svt = &(store->svt);
+  header = &store->svt.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       svt->header.numBytesDgm:                %u\n", svt->header.numBytesDgm);
     fprintf(stderr, "dbg5       svt->header.dgmType:                    %s\n", svt->header.dgmType);
     fprintf(stderr, "dbg5       svt->header.dgmVersion:                 %u\n", svt->header.dgmVersion);
@@ -4641,7 +4946,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg5       svt->infoPart.filterTime_sec:           %f\n", svt->infoPart.filterTime_sec);
     fprintf(stderr, "dbg5       svt->infoPart.soundVelocity_mPerSec_offset: %f\n", svt->infoPart.soundVelocity_mPerSec_offset);
 
-    for (int i = 0; i < (svt->infoPart.numSamplesArray); i++) {
+    for (i = 0; i < (svt->infoPart.numSamplesArray); i++) {
       fprintf(stderr, "dbg5       svt->sensorData[%3d].time_sec:                     %u\n", i, svt->sensorData[i].time_sec);
       fprintf(stderr, "dbg5       svt->sensorData[%3d].time_nanosec:                 %u\n", i, svt->sensorData[i].time_nanosec);
       fprintf(stderr, "dbg5       svt->sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svt->sensorData[i].soundVelocity_mPerSec);
@@ -4720,6 +5025,12 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -4731,6 +5042,7 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_scl *scl;
+  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -4750,10 +5062,11 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   scl = &(store->scl);
+  header = &store->scl.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       scl->header.numBytesDgm:                %u\n", scl->header.numBytesDgm);
     fprintf(stderr, "dbg5       scl->header.dgmType:                    %s\n", scl->header.dgmType);
     fprintf(stderr, "dbg5       scl->header.dgmVersion:                 %u\n", scl->header.dgmVersion);
@@ -4829,6 +5142,12 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -4840,6 +5159,7 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_sde *sde = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -4858,10 +5178,11 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   sde = &(store->sde);
+  header = &store->sde.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       sde->header.numBytesDgm:                %u\n", sde->header.numBytesDgm);
     fprintf(stderr, "dbg5       sde->header.dgmType:                    %s\n", sde->header.dgmType);
     fprintf(stderr, "dbg5       sde->header.dgmVersion:                 %u\n", sde->header.dgmVersion);
@@ -4946,6 +5267,12 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -4957,6 +5284,7 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_shi *shi = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -4975,10 +5303,11 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   shi = &(store->shi);
+  header = &store->shi.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       shi->header.numBytesDgm:                %u\n", shi->header.numBytesDgm);
     fprintf(stderr, "dbg5       shi->header.dgmType:                    %s\n", shi->header.dgmType);
     fprintf(stderr, "dbg5       shi->header.dgmVersion:                 %u\n", shi->header.dgmVersion);
@@ -5054,6 +5383,12 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -5065,6 +5400,7 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_sha *sha = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
   int i;
@@ -5083,10 +5419,11 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   sha = &(store->sha);
+  header = &store->sha.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       sha->header.numBytesDgm:                %u\n", sha->header.numBytesDgm);
     fprintf(stderr, "dbg5       sha->header.dgmType:                    %s\n", sha->header.dgmType);
     fprintf(stderr, "dbg5       sha->header.dgmVersion:                 %u\n", sha->header.dgmVersion);
@@ -5178,6 +5515,12 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -5189,6 +5532,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
   int i;
@@ -5208,6 +5552,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to the data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+  header = &store->mrz[imrz].header;
 
   /* size of output record */
   *size = (size_t) mrz->header.numBytesDgm;
@@ -5240,7 +5585,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
       fprintf(stderr, "dbg5       numOfDgms = %d\n", mrz->partition.numOfDgms);
       fprintf(stderr, "dbg5       dgmNum    = %d\n", mrz->partition.dgmNum);
     }
@@ -5268,7 +5613,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     index++;
 
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
       fprintf(stderr, "dbg5       numBytesCmnPart     = %d\n", mrz->cmnPart.numBytesCmnPart);
       fprintf(stderr, "dbg5       pingCnt             = %d\n", mrz->cmnPart.pingCnt);
       fprintf(stderr, "dbg5       rxFansPerPing       = %d\n", mrz->cmnPart.rxFansPerPing);
@@ -5393,7 +5738,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
       fprintf(stderr, "dbg5       numBytesInfoData            = %d\n", mrz->pingInfo.numBytesInfoData);
       fprintf(stderr, "dbg5       padding0                    = %d\n", mrz->pingInfo.padding0);
       fprintf(stderr, "dbg5       pingRate_Hz                 = %f\n", mrz->pingInfo.pingRate_Hz);
@@ -5475,7 +5820,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
       /* print debug statements */
       if (verbose >= 5) {
-        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
         fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mrz->pingInfo.numTxSectors);
         fprintf(stderr, "dbg5       txSectorNumb            = %d\n", mrz->sectorInfo[i].txSectorNumb);
         fprintf(stderr, "dbg5       txArrNumber             = %d\n", mrz->sectorInfo[i].txArrNumber);
@@ -5524,7 +5869,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
       fprintf(stderr, "dbg5       numBytesInfoData            = %d\n", mrz->rxInfo.numBytesRxInfo);
       fprintf(stderr, "dbg5       numSoundingsMaxMain         = %d\n", mrz->rxInfo.numSoundingsMaxMain);
       fprintf(stderr, "dbg5       numSoundingsValidMain       = %d\n", mrz->rxInfo.numSoundingsValidMain);
@@ -5550,7 +5895,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
       /* print debug statements */
       if (verbose >= 5) {
-        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
         fprintf(stderr, "dbg5       numExtraDetInClass  = %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
         fprintf(stderr, "dbg5       padding             = %d\n", mrz->extraDetClassInfo[i].padding);
         fprintf(stderr, "dbg5       alarmFlag           = %d\n", mrz->extraDetClassInfo[i].alarmFlag);
@@ -5665,7 +6010,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
       /* print debug statements */
       if (verbose >= 5) {
-        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
         fprintf(stderr, "dbg5       soundingIndex                   = %d\n", mrz->sounding[i].soundingIndex);
         fprintf(stderr, "dbg5       txSectorNumb                    = %d\n", mrz->sounding[i].txSectorNumb);
         fprintf(stderr, "dbg5       detectionType                   = %d\n", mrz->sounding[i].detectionType);
@@ -5730,6 +6075,12 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -5741,6 +6092,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
   int i, k;
@@ -5760,6 +6112,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   mwc = &(store->mwc[imwc]);
+  header = &store->mwc[imwc].header;
 
   /* size of output record */
   *size = (size_t) mwc->header.numBytesDgm;
@@ -5792,7 +6145,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
       fprintf(stderr, "dbg5       numOfDgms = %d\n", mwc->partition.numOfDgms);
       fprintf(stderr, "dbg5       dgmNum    = %d\n", mwc->partition.dgmNum);
     }
@@ -5821,7 +6174,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
       fprintf(stderr, "dbg5       numBytesCmnPart     = %d\n", mwc->cmnPart.numBytesCmnPart);
       fprintf(stderr, "dbg5       pingCnt             = %d\n", mwc->cmnPart.pingCnt);
       fprintf(stderr, "dbg5       rxFansPerPing       = %d\n", mwc->cmnPart.rxFansPerPing);
@@ -5848,7 +6201,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
       fprintf(stderr, "dbg5       numBytesTxInfo      = %d\n", mwc->txInfo.numBytesTxInfo);
       fprintf(stderr, "dbg5       numTxSectors        = %d\n", mwc->txInfo.numTxSectors);
       fprintf(stderr, "dbg5       numBytesPerTxSector = %d\n", mwc->txInfo.numBytesPerTxSector);
@@ -5871,7 +6224,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
       /* print debug statements */
       if (verbose >= 5) {
-        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
         fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mwc->txInfo.numTxSectors);
         fprintf(stderr, "dbg5       tiltAngleReTx_deg    = %f\n", mwc->sectorData[i].tiltAngleReTx_deg);
         fprintf(stderr, "dbg5       centreFreq_Hz        = %f\n", mwc->sectorData[i].centreFreq_Hz);
@@ -5901,7 +6254,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
       fprintf(stderr, "dbg5       numBytesRxInfo        = %d\n", mwc->rxInfo.numBytesRxInfo);
       fprintf(stderr, "dbg5       numBeams              = %d\n", mwc->rxInfo.numBeams);
       fprintf(stderr, "dbg5       numBytesPerBeamEntry  = %d\n", mwc->rxInfo.numBytesPerBeamEntry);
@@ -5951,7 +6304,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
       /* print debug statements */
       if (status == MB_SUCCESS && verbose >= 5) {
-        fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
         fprintf(stderr, "dbg5       #MWC receiver beam data %d/%d:\n", i, mwc->rxInfo.numBeams);
         fprintf(stderr, "dbg5       tiltAngleReTx_deg       = %f\n", mwc->beamData_p[i].beamPointAngReVertical_deg);
         fprintf(stderr, "dbg5       startRangeSampleNum     = %d\n", mwc->beamData_p[i].startRangeSampleNum);
@@ -5959,7 +6312,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
         fprintf(stderr, "dbg5       beamTxSectorNum         = %d\n", mwc->beamData_p[i].beamTxSectorNum);
         fprintf(stderr, "dbg5       numSampleData           = %d\n", mwc->beamData_p[i].numSampleData);
         fprintf(stderr, "dbg5       (amplitude phase)       = [\n");
-        for (int k = 0; k < (mwc->beamData_p[i].numSampleData); k++) {
+        for (k = 0; k < (mwc->beamData_p[i].numSampleData); k++) {
           if (k % 10 == 0)
             fprintf(stderr, "dbg5             ");
           if (mwc->rxInfo.phaseFlag == 1)
@@ -5988,6 +6341,12 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -5999,6 +6358,7 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_cpo *cpo = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6017,10 +6377,11 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   cpo = &(store->cpo);
+  header = &store->cpo.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       cpo->header.numBytesDgm:                %u\n", cpo->header.numBytesDgm);
     fprintf(stderr, "dbg5       cpo->header.dgmType:                    %s\n", cpo->header.dgmType);
     fprintf(stderr, "dbg5       cpo->header.dgmVersion:                 %u\n", cpo->header.dgmVersion);
@@ -6064,6 +6425,9 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* insert the header */
     mbr_kemkmall_wr_header(verbose, bufferptr, (void *)&cpo->header, error);
+
+    /* calc number of bytes for raw sensor data */
+    numBytesRawSensorData = cpo->header.numBytesDgm - MBSYS_KMBES_CPO_VAR_OFFSET;
 
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
@@ -6113,6 +6477,12 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -6124,6 +6494,7 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_che *che = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6142,10 +6513,11 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   che = &(store->che);
+  header = &store->che.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       che->header.numBytesDgm:                %u\n", che->header.numBytesDgm);
     fprintf(stderr, "dbg5       che->header.dgmType:                    %s\n", che->header.dgmType);
     fprintf(stderr, "dbg5       che->header.dgmVersion:                 %u\n", che->header.dgmVersion);
@@ -6212,6 +6584,12 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -6223,6 +6601,7 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_iip *iip = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6241,10 +6620,11 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   iip = &(store->iip);
+  header = &store->iip.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       iip->header.numBytesDgm:                %u\n", iip->header.numBytesDgm);
     fprintf(stderr, "dbg5       iip->header.dgmType:                    %s\n", iip->header.dgmType);
     fprintf(stderr, "dbg5       iip->header.dgmVersion:                 %u\n", iip->header.dgmVersion);
@@ -6308,6 +6688,12 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -6319,6 +6705,7 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_iop *iop = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6337,10 +6724,11 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   iop = &(store->iop);
+  header = &store->iop.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       iop->header.numBytesDgm:                %u\n", iop->header.numBytesDgm);
     fprintf(stderr, "dbg5       iop->header.dgmType:                    %s\n", iop->header.dgmType);
     fprintf(stderr, "dbg5       iop->header.dgmVersion:                 %u\n", iop->header.dgmVersion);
@@ -6403,6 +6791,12 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -6414,6 +6808,8 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xmb *xmb = NULL;
+  struct mbsys_kmbes_iip *iip = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesVersion = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6433,21 +6829,23 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   xmb = &(store->xmb);
+  iip = &(store->iip);
+  header = &store->xmb.header;
 
   /* have to construct this record now */
   strncpy(xmb->version, MB_VERSION, MB_COMMENT_MAXLINE-1);
   numBytesVersion = strlen(xmb->version) + (strlen(xmb->version) % 2);
   xmb->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + numBytesVersion + 36;
   strncpy((char *)xmb->header.dgmType, "#XMB", 4);
-  xmb->header.dgmVersion = 0;
-  xmb->header.systemID = 0;
-  xmb->header.echoSounderID = 0;
-  xmb->header.time_sec = 0;
-  xmb->header.time_nanosec = 0;
+  xmb->header.dgmVersion = iip->header.dgmVersion;
+  xmb->header.systemID = iip->header.systemID;
+  xmb->header.echoSounderID = iip->header.echoSounderID;
+  xmb->header.time_sec = iip->header.time_sec;
+  xmb->header.time_nanosec = iip->header.time_nanosec;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       xmb->header.numBytesDgm:                %u\n", xmb->header.numBytesDgm);
     fprintf(stderr, "dbg5       xmb->header.dgmType:                    %s\n", xmb->header.dgmType);
     fprintf(stderr, "dbg5       xmb->header.dgmVersion:                 %u\n", xmb->header.dgmVersion);
@@ -6485,7 +6883,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
 
-    mb_put_binary_int(MB_YES, xmb->pseudosidescan_enabled, &buffer[index]);
+    mb_put_binary_int(MB_YES, (int)MB_YES, &buffer[index]);
     index += 4;
     for (i=0;i<28;i++) {
       buffer[index] = xmb->unused[i];
@@ -6509,6 +6907,12 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -6520,6 +6924,7 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xmc *xmc = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesComment = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6539,20 +6944,16 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   xmc = &(store->xmc);
+  header = &store->xmc.header;
 
-  /* have to construct this record now */
-  numBytesComment = strlen(xmc->comment) + (strlen(xmc->comment) % 2);
-  xmc->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + numBytesComment + 36;
-  strncpy((char *)xmc->header.dgmType, "#XMC", 4);
-  xmc->header.dgmVersion = 0;
-  xmc->header.systemID = 0;
-  xmc->header.echoSounderID = 0;
-  xmc->header.time_sec = 0;
-  xmc->header.time_nanosec = 0;
+  /* size of output record */
+  numBytesComment = strlen(store->xmc.comment) + (strlen(store->xmc.comment) % 2);
+  store->xmc.header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + numBytesComment + 36;
+  *size = (size_t) xmc->header.numBytesDgm;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       xmc->header.numBytesDgm:                %u\n", xmc->header.numBytesDgm);
     fprintf(stderr, "dbg5       xmc->header.dgmType:                    %s\n", xmc->header.dgmType);
     fprintf(stderr, "dbg5       xmc->header.dgmVersion:                 %u\n", xmc->header.dgmVersion);
@@ -6565,9 +6966,6 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
       fprintf(stderr, "dbg5       xmc->unused[%2d]:                        %u\n", i, xmc->unused[i]);
     fprintf(stderr, "dbg5       xmc->comment:                           %s\n", xmc->comment);
   }
-
-  /* size of output record */
-  *size = (size_t) xmc->header.numBytesDgm;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -6611,6 +7009,12 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -6622,6 +7026,7 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xms *xms = NULL;
+  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesComment = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6641,10 +7046,11 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   xms = &(store->xms);
+  header = &store->xms.header;
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg5       xms->header.numBytesDgm:                %u\n", xms->header.numBytesDgm);
     fprintf(stderr, "dbg5       xms->header.dgmType:                    %s\n", xms->header.dgmType);
     fprintf(stderr, "dbg5       xms->header.dgmVersion:                 %u\n", xms->header.dgmVersion);
@@ -6653,6 +7059,8 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg5       xms->header.time_sec:                   %u\n", xms->header.time_sec);
     fprintf(stderr, "dbg5       xms->header.time_nanosec:               %u\n", xms->header.time_nanosec);
 
+    fprintf(stderr, "dbg5       xms->pingCnt:                           %u\n", xms->pingCnt);
+    fprintf(stderr, "dbg5       xms->spare:                             %d\n", xms->spare);
     fprintf(stderr, "dbg5       xms->pixel_size:                        %f\n", xms->pixel_size);
     fprintf(stderr, "dbg5       xms->pixels_ss:                         %d\n", xms->pixels_ss);
     for (i=0;i<32;i++)
@@ -6685,6 +7093,10 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
 
+    mb_put_binary_short(MB_YES, xms->pingCnt, &buffer[index]);
+    index += 2;
+    mb_put_binary_short(MB_YES, xms->spare, &buffer[index]);
+    index += 2;
     mb_put_binary_float(MB_YES, xms->pixel_size, &buffer[index]);
     index += 4;
     mb_put_binary_int(MB_YES, xms->pixels_ss, &buffer[index]);
@@ -6717,6 +7129,12 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
+  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
+  header->time_sec, header->time_nanosec, status, *error);
+#endif
+
   /* return status */
   return (status);
 };
@@ -6724,7 +7142,7 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_iop";
+  char *function_name = "mbr_kemkmall_wr_unknown";
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
 
@@ -6750,6 +7168,11 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type unknow written - status:%d error:%d\n",
+  status, *error);
+#endif
 
   /* return status */
   return (status);

@@ -2230,8 +2230,10 @@ int main(int argc, char **argv) {
 					                        &heading, &draft, &roll, &pitch, &heave, &error);
 
 				/* if survey data extract detects */
-				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && use_detects)
+				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && use_detects) {
+          nbeams = beams_bath;
 					status = mb_detects(verbose, mbio_ptr, store_ptr, &kind, &nbeams, detect, &error);
+        }
 
 				/* if survey data extract pingnumber */
 				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && use_pingnumber)
