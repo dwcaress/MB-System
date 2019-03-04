@@ -64,8 +64,12 @@
  *      SHA, // Sensor HeAding data
  *
  *      // M-datagrams
- *      MRZ, // multibeam data for raw range, depth, reflectivity, seabed image(SI) etc.
- *      MWC, // water column multibeam data
+ *      MRZ, // Multibeam data for raw range, depth, reflectivity, seabed image(SI) etc.
+ *      MWC, // Water column multibeam data
+ *
+ *      // C-datagrams
+ *      CHE, // Compatibility heave data - store raw sensor data without modification
+ *      CPO, // Compatibility position data - store raw sensor data without modification
  *
  *      // X-datagrams (extra - defined only for MB-System)
  *      XMB, // The presence of this datagram indicates this file/stream has been
@@ -1293,6 +1297,8 @@ struct mbsys_kmbes_xmc {
 struct mbsys_kmbes_xms {
     /* Definition of #XMS datagram containing multibeam pseudosidescan calculated by MB-System */
     struct mbsys_kmbes_header header;
+    unsigned short pingCnt;
+    unsigned short spare;
     float pixel_size;                                  /* Pseudosidescan pixel width (meters) */
     int pixels_ss;                                     /* Number of pseudosidescan pixels */
     mb_u_char unused[32];
@@ -1328,7 +1334,8 @@ struct mbsys_kmbes_unknown_struct {
 /* EM dgm index data structure */
 struct mbsys_kmbes_index
 {
-    double time_d;                     // MB-System time stamp of most recently read record
+    double time_d;                     // MB-System time stamp of datagram
+    double ping_time_d;                // MB-System time stamp of ping start
     mbsys_kmbes_emdgm_type emdgm_type; // EM datagram type enumeration
     struct mbsys_kmbes_header header;  // EM datagram header
     long file_pos;                     // EM datagram file pointer position
@@ -1340,9 +1347,9 @@ struct mbsys_kmbes_index
 
 /* EM dgm index data structure */
 struct mbsys_kmbes_index_table {
-    size_t dgm_count;   // count of indexed datagrams (dgmID)
-    size_t size;        // allocated capacity
-    struct mbsys_kmbes_index *indextable; // points to index table array head
+    size_t dgm_count;                       // count of indexed datagrams (dgmID)
+    size_t num_alloc;                       // allocated capacity
+    struct mbsys_kmbes_index *indextable;   // points to index table array head
 };
 
 
@@ -1447,7 +1454,7 @@ struct mbsys_kmbes_struct {
     struct mbsys_kmbes_xmc xmc;
 
     /* Unknown format */
-    struct mbsys_kmbes_unknown_struct unknown_struct;
+    struct mbsys_kmbes_unknown_struct unknown;
 
 };
 
@@ -1503,19 +1510,19 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 //                        double transducer_depth, double altitude,
 //                        int *error);
 int mbsys_kmbes_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth,
-                                     double *velocity, int *error);
+                          double *velocity, int *error);
 int mbsys_kmbes_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
-                                    int *error);
+                          int *error);
 int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes,
-                                double *angles, double *angles_forward, double *angles_null, double *heave,
-                                double *alongtrack_offset, double *draft, double *ssv, int *error);
-// int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr,
-//			int *kind, int *nbeams, int *detects, int *error);
-// int mbsys_kmbes_pulses(int verbose, void *mbio_ptr, void *store_ptr,
-//                        int *kind, int *nbeams, int *pulses, int *error);
-// int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr,
-//			int *kind, double *transmit_gain, double *pulse_length,
-//			double *receive_gain, int *error);
+                          double *angles, double *angles_forward, double *angles_null, double *heave,
+                          double *alongtrack_offset, double *draft, double *ssv, int *error);
+int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			                    int *kind, int *nbeams, int *detects, int *error);
+int mbsys_kmbes_pulses(int verbose, void *mbio_ptr, void *store_ptr,
+                          int *kind, int *nbeams, int *pulses, int *error);
+int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, double *transmit_gain, double *pulse_length,
+			double *receive_gain, int *error);
 // int mbsys_kmbes_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 //			int *kind, int *nrawss,
 //			double *rawss,

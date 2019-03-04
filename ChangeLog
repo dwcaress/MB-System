@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.7.5beta2     March 4, 2019
   Version 5.7.5beta1     February 26, 2019
   Version 5.7.5beta0     February 25, 2019
 * Version 5.7.4          February 12, 2019
@@ -300,6 +301,16 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.7.5beta2 (March 4, 2019)
+
+Format 261 (MBF_KEMKMALL): There is progress towards support for the new
+Kongsberg kmall format. Only EM2040 data supplied by Kongsberg is being
+used for testing with mbinfo, mbcopy, and mbprocess, so far. The memory
+management faults are fixed, but it isn't all working yet. 
+
+Mbcopy: Changed logic so that in a full copy all data records are passed on to the
+output even if they generate nonfatal errors (e.g. out of time or location bounds).
 
 -----> 5.7.5beta1 (February 27, 2019)
 

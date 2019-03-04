@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* mbio include files */
 #include "mb_status.h"
@@ -45,6 +46,7 @@ int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
   int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
   struct mbsys_kmbes_struct *store;
+  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -73,7 +75,7 @@ int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
   store->kind = MB_DATA_NONE;
 
   /* initialize data struct pointers to NULL */
-    for (int i=0; i<MBSYS_KMBES_MAX_NUM_MWC_DGMS; i++)
+    for (i=0; i<MBSYS_KMBES_MAX_NUM_MWC_DGMS; i++)
         store->mwc[i].beamData_p = NULL;
 
   /* print output debug statements */
@@ -94,6 +96,7 @@ int mbsys_kmbes_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
   char *function_name = "mbsys_kmbes_deall";
   int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store;
+  int i, k;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -109,9 +112,9 @@ int mbsys_kmbes_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
   store = (struct mbsys_kmbes_struct *)*store_ptr;
 
   /* deallocate any arrays or structures contained within the store data structure */
-  for (int i=0; i<MBSYS_KMBES_MAX_NUM_MWC_DGMS; i++) {
+  for (i=0; i<MBSYS_KMBES_MAX_NUM_MWC_DGMS; i++) {
     if (store->mwc[i].beamData_p != NULL && store->mwc[i].beamData_p_alloc_size > 0) {
-      for (int k=0; k<store->mwc[i].rxInfo.numBeams; k++) {
+      for (k=0; k<store->mwc[i].rxInfo.numBeams; k++) {
         if (store->mwc[i].beamData_p[k].sampleAmplitude05dB_p != NULL
           && store->mwc[i].beamData_p[k].sampleAmplitude05dB_p_alloc_size > 0) {
           status = mb_freed(verbose, __FILE__, __LINE__,
@@ -200,8 +203,8 @@ int mbsys_kmbes_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:       %d\n", *kind);
     fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-    fprintf(stderr, "dbg2        namp:      %d\n", *namp);
-    fprintf(stderr, "dbg2        nss:       %d\n", *nss);
+    fprintf(stderr, "dbg2       namp:       %d\n", *namp);
+    fprintf(stderr, "dbg2       nss:        %d\n", *nss);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:     %d\n", status);
@@ -341,10 +344,12 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_spo *spo = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
+  struct mbsys_kmbes_cpo *cpo = NULL;
   struct mbsys_kmbes_xmc *xmc = NULL;
   struct mbsys_kmbes_xms *xms = NULL;
   double pixel_size;
   int numSoundings = 0;
+  int imrz;
   int i;
 
   /* print input debug statements */
@@ -365,6 +370,7 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   spo = (struct mbsys_kmbes_spo *)&store->spo;
   skm = (struct mbsys_kmbes_skm *)&store->skm;
+  cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
   xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
   xms = (struct mbsys_kmbes_xms *)&store->xms;
 
@@ -395,22 +401,17 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     mb_io_ptr->beamwidth_xtrack = mrz->pingInfo.receiveArraySizeUsed_deg;
     mb_io_ptr->beamwidth_ltrack = mrz->pingInfo.transmitArraySizeUsed_deg;
 
-    /* count number of sub-pings and overall soundings */
-    int mrz_count = 0;
-    int soundings_count = 0;
-    for(i = 0; i < store->n_mrz_read; i++) {
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[i];
-      soundings_count += mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections;
-      mrz_count++;
-    }
-
     /* read distance and depth values from all sub-pings into storage arrays */
-    int numSoundings = 0;
-    for(int j = 0; j < mrz_count; j++) {
+    *nbath = 0;
+    *namp = 0;
+    *nss = 0;
+    numSoundings = 0;
+    for (imrz = 0; imrz < store->n_mrz_read; imrz++) {
+      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[j];
-
-      for (i = 0; i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections); i++) {
+      for (i = 0;
+            i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
+            i++) {
         bath[numSoundings] = mrz->sounding[i].z_reRefPoint_m + mrz->pingInfo.z_waterLevelReRefPoint_m;
         beamflag[numSoundings] = mrz->sounding[i].beamflag;
         bathacrosstrack[numSoundings] = mrz->sounding[i].y_reRefPoint_m;
@@ -422,8 +423,6 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     }
     *nbath = numSoundings;
     *namp = numSoundings;
-    store->num_soundings = *nbath;
-
     *nss = MIN(xms->pixels_ss, MBSYS_KMBES_MAX_PIXELS);
     store->num_pixels = *nss;
     pixel_size = xms->pixel_size;
@@ -483,6 +482,51 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     *time_d = store->time_d;
 
     /* get navigation */
+    *navlon = spo->sensorData.correctedLong_deg;
+    *navlat = spo->sensorData.correctedLat_deg;
+
+    /* get speed */
+    *speed = 3.6 * spo->sensorData.speedOverGround_mPerSec;
+
+    /* get heading */
+    *heading = spo->sensorData.courseOverGround_deg;
+
+    /* set beam and pixel numbers */
+    *nbath = 0;
+    *namp = 0;
+    *nss = 0;
+
+    /* print debug statements */
+    if (verbose >= 5) {
+      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
+      fprintf(stderr, "dbg4  Extracted values:\n");
+      fprintf(stderr, "dbg4       kind:       %d\n", *kind);
+      fprintf(stderr, "dbg4       error:      %d\n", *error);
+      fprintf(stderr, "dbg4       time_i[0]:  %d\n", time_i[0]);
+      fprintf(stderr, "dbg4       time_i[1]:  %d\n", time_i[1]);
+      fprintf(stderr, "dbg4       time_i[2]:  %d\n", time_i[2]);
+      fprintf(stderr, "dbg4       time_i[3]:  %d\n", time_i[3]);
+      fprintf(stderr, "dbg4       time_i[4]:  %d\n", time_i[4]);
+      fprintf(stderr, "dbg4       time_i[5]:  %d\n", time_i[5]);
+      fprintf(stderr, "dbg4       time_i[6]:  %d\n", time_i[6]);
+      fprintf(stderr, "dbg4       time_d:     %f\n", *time_d);
+      fprintf(stderr, "dbg4       longitude:  %f\n", *navlon);
+      fprintf(stderr, "dbg4       latitude:   %f\n", *navlat);
+      fprintf(stderr, "dbg4       speed:      %f\n", *speed);
+      fprintf(stderr, "dbg4       heading:    %f\n", *heading);
+    }
+
+    /* done translating values */
+  }
+
+  /* extract data from structure */
+  else if (*kind == MB_DATA_NAV1) {
+    /* get time */
+    for (i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    *time_d = store->time_d;
+
+    /* get navigation */
     *navlon = skm->sample[0].KMdefault.longitude_deg;
     *navlat = skm->sample[0].KMdefault.latitude_deg;
 
@@ -531,14 +575,14 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     *time_d = store->time_d;
 
     /* get navigation */
-    *navlon = spo->sensorData.correctedLong_deg;
-    *navlat = spo->sensorData.correctedLat_deg;
+    *navlon = cpo->sensorData.correctedLong_deg;
+    *navlat = cpo->sensorData.correctedLat_deg;
 
     /* get speed */
-    *speed = 3.6 * spo->sensorData.speedOverGround_mPerSec;
+    *speed = 3.6 * cpo->sensorData.speedOverGround_mPerSec;
 
     /* get heading */
-    *heading = spo->sensorData.courseOverGround_deg;
+    *heading = cpo->sensorData.courseOverGround_deg;
 
     /* set beam and pixel numbers */
     *nbath = 0;
@@ -685,10 +729,14 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_spo *spo = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
+  struct mbsys_kmbes_cpo *cpo = NULL;
   struct mbsys_kmbes_xmc *xmc = NULL;
   struct mbsys_kmbes_xms *xms = NULL;
   int numSoundings;
-  int i, isounding;
+  int imrz;
+  struct timespec right_now_nsec;
+  int numBytesComment;
+  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -745,6 +793,7 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
   mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   spo = (struct mbsys_kmbes_spo *)&store->spo;
   skm = (struct mbsys_kmbes_skm *)&store->skm;
+  cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
   xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
   xms = (struct mbsys_kmbes_xms *)&store->xms;
 
@@ -758,36 +807,26 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
       store->time_i[i] = time_i[i];
     store->time_d = time_d;
 
-    /* count number of sub-pings and overall soundings */
-    int mrz_count = 0;
-    int soundings_count = 0;
-    for(i = 0; i < store->n_mrz_read; i++) {
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[i];
-      soundings_count += mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections;
-      mrz_count++;
-    }
-
     /* loop over all sub-pings */
     /* read distance and depth values into storage arrays */
     numSoundings = 0;
-    mrz_count = 0;
-    for(i = 0; i < store->n_mrz_read; i++) {
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[i];
+    for(imrz = 0; imrz < store->n_mrz_read; imrz++) {
+      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+
       mrz->pingInfo.longitude_deg = navlon;
       mrz->pingInfo.latitude_deg = navlat;
       mrz->pingInfo.headingVessel_deg = heading;
       // speed?
-      for (isounding = 0;
-            isounding < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
-            isounding++) {
-        mrz->sounding[isounding].z_reRefPoint_m = bath[numSoundings] - mrz->pingInfo.z_waterLevelReRefPoint_m;
-        mrz->sounding[isounding].beamflag = beamflag[numSoundings];
-        mrz->sounding[isounding].x_reRefPoint_m = bathacrosstrack[numSoundings];
-        mrz->sounding[isounding].y_reRefPoint_m = bathalongtrack[numSoundings];
-        mrz->sounding[isounding].reflectivity1_dB = amp[numSoundings];
+      for (i = 0;
+            i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
+            i++) {
+        mrz->sounding[i].z_reRefPoint_m = bath[numSoundings] - mrz->pingInfo.z_waterLevelReRefPoint_m;
+        mrz->sounding[i].beamflag = beamflag[numSoundings];
+        mrz->sounding[i].x_reRefPoint_m = bathacrosstrack[numSoundings];
+        mrz->sounding[i].y_reRefPoint_m = bathalongtrack[numSoundings];
+        mrz->sounding[i].reflectivity1_dB = amp[numSoundings];
 
         numSoundings++;
-        mrz_count++;
       }
     }
 
@@ -813,6 +852,24 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
     store->time_d = time_d;
 
     /* get navigation */
+    spo->sensorData.correctedLong_deg = navlon;
+    spo->sensorData.correctedLat_deg = navlat;
+
+    /* get heading */
+    spo->sensorData.courseOverGround_deg = heading;
+
+    /* get speed  */
+    spo->sensorData.speedOverGround_mPerSec = speed / 3.6;
+  }
+
+  /* insert data in nav structure */
+  else if (store->kind == MB_DATA_NAV1) {
+    /* get time */
+    for (i = 0; i < 7; i++)
+      store->time_i[i] = time_i[i];
+    store->time_d = time_d;
+
+    /* get navigation */
     skm->sample[0].KMdefault.longitude_deg = navlon;
     skm->sample[0].KMdefault.latitude_deg = navlat;
 
@@ -830,19 +887,41 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
     store->time_d = time_d;
 
     /* get navigation */
-    spo->sensorData.correctedLong_deg = navlon;
-    spo->sensorData.correctedLat_deg = navlat;
+    cpo->sensorData.correctedLong_deg = navlon;
+    cpo->sensorData.correctedLat_deg = navlat;
 
     /* get heading */
-    spo->sensorData.courseOverGround_deg = heading;
+    cpo->sensorData.courseOverGround_deg = heading;
 
     /* get speed  */
-    spo->sensorData.speedOverGround_mPerSec = speed / 3.6;
+    cpo->sensorData.speedOverGround_mPerSec = speed / 3.6;
   }
 
   /* insert comment in structure */
   else if (store->kind == MB_DATA_COMMENT) {
-    strncpy(store->xmc.comment, comment, MB_COMMENT_MAXLINE);
+    /* copy comment */
+    strncpy(store->xmc.comment, comment, MB_COMMENT_MAXLINE-1);
+    store->xmc.comment[MB_COMMENT_MAXLINE-1] = '\0';
+
+    /* have to construct this record now */
+    numBytesComment = strlen(store->xmc.comment) + (strlen(store->xmc.comment) % 2);
+    store->xmc.header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + numBytesComment + 36;
+    strncpy((char *)store->xmc.header.dgmType, "#XMC", 4);
+    store->xmc.header.dgmVersion = 0;
+    store->xmc.header.systemID = 0;
+    store->xmc.header.echoSounderID = 0;
+
+    /* insert current time as timestamp if needed (time_d close to zero) */
+    if (fabs(time_d) < 1.0) {
+      clock_gettime(CLOCK_REALTIME, &right_now_nsec);
+      time_d = right_now_nsec.tv_sec + 0.000000001 * right_now_nsec.tv_nsec;
+      mb_get_date(verbose, time_d, time_i);
+    }
+    for (i = 0; i < 7; i++)
+      store->time_i[i] = time_i[i];
+    store->time_d = time_d;
+    store->xmc.header.time_sec = (int)time_d;
+    store->xmc.header.time_nanosec = (time_d - floor(time_d)) * 1.0e9;
   }
 
   /* print output debug statements */
@@ -870,8 +949,9 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   double heave_use, roll, pitch;
   double alpha, beta, theta, phi;
   int soundings_count;
-  int numSoundings;
-  int i, isounding;
+  int numSoundings = 0;
+  int imrz;
+  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -907,25 +987,17 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
     /* get draft */
     *draft = mrz->pingInfo.z_waterLevelReRefPoint_m;
 
-    /* count number of sub-pings and overall soundings */
-    soundings_count = 0;
-    for(i = 0; i < store->n_mrz_read; i++) {
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[i];
-      soundings_count += mrz->rxInfo.numSoundingsMaxMain
-                        + mrz->rxInfo.numExtraDetections;
-    }
-
     /* read distance and depth values from all sub-pings into storage arrays */
     numSoundings = 0;
-    for(int i = 0; i < store->n_mrz_read; i++) {
+    for (imrz = 0; imrz < store->n_mrz_read; imrz++) {
 
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[i];
+      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
-      for (isounding = 0;
-            isounding < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
-            isounding++) {
-        ttimes[numSoundings] = mrz->sounding[isounding].twoWayTravelTime_sec;
-        angles[numSoundings] = mrz->sounding[isounding].beamAngleReRx_deg;
+      for (i = 0;
+            i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
+            i++) {
+        ttimes[numSoundings] = mrz->sounding[i].twoWayTravelTime_sec;
+        angles[numSoundings] = mrz->sounding[i].beamAngleReRx_deg;
         angles_forward[numSoundings] = 0.0;
         angles_null[numSoundings] = 0.0;
         heave[numSoundings] = 0.0;
@@ -983,8 +1055,11 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
   char *function_name = "mbsys_kmbes_detects";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
-  struct mbsys_kmbes_struct *store;
+  struct mb_io_struct *mb_io_ptr = NULL;
+  struct mbsys_kmbes_struct *store = NULL;
+  struct mbsys_kmbes_mrz *mrz = NULL;
+  int numSoundings = 0;
+  int imrz;
   int i;
 
   /* print input debug statements */
@@ -1014,10 +1089,24 @@ int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
         MB_DETECT_AMPLITUDE
         MB_DETECT_PHASE
         MB_DETECT_UNKNOWN */
-    /**nbeams = bathymetry->number_beams;
-    for (i = 0; i < *nbeams; i++) {
-      detects[i] = MB_DETECT_UNKNOWN;
-    }*/
+    numSoundings = 0;
+    for (imrz = 0; imrz < store->n_mrz_read; imrz++) {
+      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+
+      for (i = 0;
+            i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
+            i++) {
+        if (mrz->sounding[i].detectionMethod == 1) {
+          detects[numSoundings] = MB_DETECT_AMPLITUDE;
+        } else if (mrz->sounding[i].detectionMethod == 2) {
+          detects[numSoundings] = MB_DETECT_PHASE;
+        } else {
+          detects[numSoundings] = MB_DETECT_UNKNOWN;
+        }
+        numSoundings++;
+      }
+    }
+    *nbeams = numSoundings;
 
     /* set status */
     *error = MB_ERROR_NO_ERROR;
@@ -1061,12 +1150,118 @@ int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_kmbes_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error) {
+  char *function_name = "mbsys_kmbes_pulses";
+  int status = MB_SUCCESS;
+  struct mb_io_struct *mb_io_ptr = NULL;
+  struct mbsys_kmbes_struct *store = NULL;
+  struct mbsys_kmbes_mrz *mrz = NULL;
+  int numSoundings = 0;
+  int imrz;
+  int i;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       pulses:     %p\n", (void *)pulses);
+  }
+
+  /* get mbio descriptor */
+  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get data structure pointer */
+  store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  /* get data kind */
+  *kind = store->kind;
+
+  /* extract data from structure */
+  if (*kind == MB_DATA_DATA) {
+    /* get transmit pulse type for each sounding - options include:
+          MB_PULSE_TYPE_NUM 5
+          MB_PULSE_UNKNOWN 0
+          MB_PULSE_CW 1
+          MB_PULSE_UPCHIRP 2
+          MB_PULSE_DOWNCHIRP 3
+          MB_PULSE_LIDAR 4 */
+    numSoundings = 0;
+    for (imrz = 0; imrz < store->n_mrz_read; imrz++) {
+      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+
+      for (i = 0;
+            i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
+            i++) {
+        if (mrz->sectorInfo[mrz->sounding[i].txSectorNumb].signalWaveForm == 0) {
+          pulses[numSoundings] = MB_PULSE_CW;
+        } else if (mrz->sounding[i].detectionMethod == 1) {
+          pulses[numSoundings] = MB_PULSE_UPCHIRP;
+        } else if (mrz->sounding[i].detectionMethod == 1) {
+          pulses[numSoundings] = MB_PULSE_DOWNCHIRP;
+        } else {
+          pulses[numSoundings] = MB_PULSE_UNKNOWN;
+        }
+        numSoundings++;
+      }
+    }
+    *nbeams = numSoundings;
+
+    /* set status */
+    *error = MB_ERROR_NO_ERROR;
+    status = MB_SUCCESS;
+
+    /* done translating values */
+  }
+
+  /* deal with comment */
+  else if (*kind == MB_DATA_COMMENT) {
+    /* set status */
+    *error = MB_ERROR_COMMENT;
+    status = MB_FAILURE;
+  }
+
+  /* deal with other record type */
+  else {
+    /* set status */
+    *error = MB_ERROR_OTHER;
+    status = MB_FAILURE;
+  }
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+  }
+  if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
+    fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
+    for (i = 0; i < *nbeams; i++)
+      fprintf(stderr, "dbg2       beam %d: pulses: %d\n", i, pulses[i]);
+  }
+  if (verbose >= 2) {
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  /* return status */
+  return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain,
                                double *pulse_length, double *receive_gain, int *error) {
   char *function_name = "mbsys_kmbes_gains";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
-  struct mbsys_kmbes_struct *store;
+  struct mb_io_struct *mb_io_ptr = NULL;
+  struct mbsys_kmbes_struct *store = NULL;
+  struct mbsys_kmbes_mrz *mrz = NULL;
+  int numSoundings = 0;
+  int imrz;
+  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -1089,14 +1284,16 @@ int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
 
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
+    mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+
     /* get transmit_gain (dB) */
-    //*transmit_gain = store->transmit_gain;
+    *transmit_gain = mrz->pingInfo.transmitPower_dB;
 
     /* get pulse_length (usec) */
-    //*pulse_length = store->pulse_width;
+    *transmit_gain = mrz->pingInfo.maxEffTxPulseLength_sec;
 
     /* get receive_gain (dB) */
-    //*receive_gain = store->receive_gain;
+    *receive_gain = 0.0;
 
     /* set status */
     *error = MB_ERROR_NO_ERROR;
@@ -1230,6 +1427,7 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_spo *spo = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
+  struct mbsys_kmbes_cpo *cpo = NULL;
   int i;
 
   /* print input debug statements */
@@ -1250,6 +1448,7 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
   mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   spo = (struct mbsys_kmbes_spo *)&store->spo;
   skm = (struct mbsys_kmbes_skm *)&store->skm;
+  cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
 
   /* get data kind */
   *kind = store->kind;
@@ -1260,9 +1459,6 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
     for (i = 0; i < 7; i++)
       time_i[i] = store->time_i[i];
     *time_d = store->time_d;
-
-    /* derive overall navigation from first sub-ping for this ping */
-    mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
 
     /* get navigation */
     *navlon = mrz->pingInfo.longitude_deg;
@@ -1285,15 +1481,40 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
     /* done translating values */
   }
 
-  /* extract data from nav record */
+  /* extract data from structure */
   else if (*kind == MB_DATA_NAV) {
     /* get time */
     for (i = 0; i < 7; i++)
       time_i[i] = store->time_i[i];
     *time_d = store->time_d;
 
-    /* derive overall navigation from first sub-ping for this ping */
-    mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+    /* get navigation */
+    *navlon = spo->sensorData.correctedLong_deg;
+    *navlat = spo->sensorData.correctedLat_deg;
+
+    /* get speed */
+    *speed = 3.6 * spo->sensorData.speedOverGround_mPerSec;
+
+    /* get heading */
+    *heading = spo->sensorData.courseOverGround_deg;
+
+      /* get draft  */
+      *draft = mrz->pingInfo.txTransducerDepth_m;
+
+      /* get attitude  */
+      *roll = 0.0;
+      *pitch = 0.0;
+      *heave = 0.0;
+
+    /* done translating values */
+}
+
+  /* extract data from nav record */
+  else if (*kind == MB_DATA_NAV1) {
+    /* get time */
+    for (i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    *time_d = store->time_d;
 
     /* get navigation */
     *navlon = skm->sample[0].KMdefault.longitude_deg;
@@ -1319,7 +1540,7 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
     /* done translating values */
   }
 
-  /* extract data from structure */
+  /* extract data from nav record */
   else if (*kind == MB_DATA_NAV2) {
     /* get time */
     for (i = 0; i < 7; i++)
@@ -1327,14 +1548,24 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
     *time_d = store->time_d;
 
     /* get navigation */
-    *navlon = spo->sensorData.correctedLong_deg;
-    *navlat = spo->sensorData.correctedLat_deg;
+    *navlon = cpo->sensorData.correctedLong_deg;
+    *navlat = cpo->sensorData.correctedLat_deg;
 
     /* get speed */
-    *speed = 3.6 * spo->sensorData.speedOverGround_mPerSec;
+    *speed = 3.6 * cpo->sensorData.speedOverGround_mPerSec;
 
     /* get heading */
-    *heading = spo->sensorData.courseOverGround_deg;
+    *heading = cpo->sensorData.courseOverGround_deg;
+
+    /* get draft  */
+    *draft = mrz->pingInfo.txTransducerDepth_m;
+
+    /* get attitude  */
+    *roll = 0.0;
+    *pitch = 0.0;
+    *heave = 0.0;
+
+    /* done translating values */
   }
 
   /* deal with comment */
@@ -1402,6 +1633,7 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_spo *spo = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
+  struct mbsys_kmbes_cpo *cpo = NULL;
   int i, inav;
 
   /* print input debug statements */
@@ -1423,6 +1655,7 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
   mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   spo = (struct mbsys_kmbes_spo *)&store->spo;
   skm = (struct mbsys_kmbes_skm *)&store->skm;
+  cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
 
   /* get data kind */
   *kind = store->kind;
@@ -1458,8 +1691,26 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
     /* done translating values */
   }
 
-  /* extract data from nav record */
+  /* extract data from structure */
   else if (*kind == MB_DATA_NAV) {
+    /* get time */
+    for (i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    *time_d = store->time_d;
+
+    /* get navigation */
+    *navlon = spo->sensorData.correctedLong_deg;
+    *navlat = spo->sensorData.correctedLat_deg;
+
+    /* get speed */
+    *speed = 3.6 * spo->sensorData.speedOverGround_mPerSec;
+
+    /* get heading */
+    *heading = spo->sensorData.courseOverGround_deg;
+  }
+
+  /* extract data from nav record */
+  else if (*kind == MB_DATA_NAV1) {
     /* just one navigation value - in some formats there
         are multiple values in nav records to loop over */
     *n = 1;
@@ -1468,9 +1719,6 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
     for (i = 0; i < 7; i++)
       time_i[i] = store->time_i[i];
     time_d[0] = store->time_d;
-
-    /* derive overall navigation from first sub-ping for this ping */
-    mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
 
     /* get navigation */
     navlon[0] = skm->sample[0].KMdefault.longitude_deg;
@@ -1496,22 +1744,36 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
     /* done translating values */
   }
 
-  /* extract data from structure */
+  /* extract data from nav record */
   else if (*kind == MB_DATA_NAV2) {
+    /* just one navigation value - in some formats there
+        are multiple values in nav records to loop over */
+    *n = 1;
+
     /* get time */
     for (i = 0; i < 7; i++)
       time_i[i] = store->time_i[i];
-    *time_d = store->time_d;
+    time_d[0] = store->time_d;
 
     /* get navigation */
-    *navlon = spo->sensorData.correctedLong_deg;
-    *navlat = spo->sensorData.correctedLat_deg;
+    navlon[0] = cpo->sensorData.correctedLong_deg;
+    navlat[0] = cpo->sensorData.correctedLat_deg;
 
     /* get speed */
-    *speed = 3.6 * spo->sensorData.speedOverGround_mPerSec;
+    speed[0] = 3.6 * cpo->sensorData.speedOverGround_mPerSec;
 
     /* get heading */
-    *heading = spo->sensorData.courseOverGround_deg;
+    heading[0] = cpo->sensorData.courseOverGround_deg;
+
+    /* get draft  */
+    draft[0] = mrz->pingInfo.txTransducerDepth_m;
+
+    /* get attitude  */
+    roll[0] = 0.0;
+    pitch[0] = 0.0;
+    heave[0] = 0.0;
+
+    /* done translating values */
   }
 
   /* deal with comment */
@@ -1573,6 +1835,12 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
   int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
   struct mbsys_kmbes_struct *store;
+  struct mbsys_kmbes_mwc *mwc = NULL;
+  struct mbsys_kmbes_mrz *mrz = NULL;
+  struct mbsys_kmbes_spo *spo = NULL;
+  struct mbsys_kmbes_skm *skm = NULL;
+  struct mbsys_kmbes_cpo *cpo = NULL;
+  int imrz;
   int i;
 
   /* print input debug statements */
@@ -1606,6 +1874,80 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
+  mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  spo = (struct mbsys_kmbes_spo *)&store->spo;
+  skm = (struct mbsys_kmbes_skm *)&store->skm;
+  cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
+
+  /* insert data in structure */
+  if (store->kind == MB_DATA_DATA) {
+    /* get time */
+    for (i = 0; i < 7; i++)
+      store->time_i[i] = time_i[i];
+    store->time_d = time_d;
+
+    /* loop over all sub-pings */
+    for(imrz = 0; imrz < store->n_mrz_read; imrz++) {
+      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+
+      mrz->pingInfo.longitude_deg = navlon;
+      mrz->pingInfo.latitude_deg = navlat;
+      mrz->pingInfo.headingVessel_deg = heading;
+    }
+  }
+
+  /* insert data in nav structure */
+  else if (store->kind == MB_DATA_NAV) {
+    /* get time */
+    for (i = 0; i < 7; i++)
+      store->time_i[i] = time_i[i];
+    store->time_d = time_d;
+
+    /* get navigation */
+    spo->sensorData.correctedLong_deg = navlon;
+    spo->sensorData.correctedLat_deg = navlat;
+
+    /* get heading */
+    spo->sensorData.courseOverGround_deg = heading;
+
+    /* get speed  */
+    spo->sensorData.speedOverGround_mPerSec = speed / 3.6;
+  }
+
+  /* insert data in nav structure */
+  else if (store->kind == MB_DATA_NAV1) {
+    /* get time */
+    for (i = 0; i < 7; i++)
+      store->time_i[i] = time_i[i];
+    store->time_d = time_d;
+
+    /* get navigation */
+    skm->sample[0].KMdefault.longitude_deg = navlon;
+    skm->sample[0].KMdefault.latitude_deg = navlat;
+
+    /* get heading */
+    skm->sample[0].KMdefault.heading_deg = heading;
+
+    /* get speed  */
+  }
+
+  /* insert data in nav structure */
+  else if (store->kind == MB_DATA_NAV2) {
+    /* get time */
+    for (i = 0; i < 7; i++)
+      store->time_i[i] = time_i[i];
+    store->time_d = time_d;
+
+    /* get navigation */
+    cpo->sensorData.correctedLong_deg = navlon;
+    cpo->sensorData.correctedLat_deg = navlat;
+
+    /* get heading */
+    cpo->sensorData.courseOverGround_deg = heading;
+
+    /* get speed  */
+    cpo->sensorData.speedOverGround_mPerSec = speed / 3.6;
+  }
 
   /* print output debug statements */
   if (verbose >= 2) {
@@ -1734,9 +2076,15 @@ int mbsys_kmbes_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
 int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
   char *function_name = "mbsys_kmbes_copy";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
-  struct mbsys_kmbes_struct *store;
-  struct mbsys_kmbes_struct *copy;
+  struct mb_io_struct *mb_io_ptr = NULL;
+  struct mbsys_kmbes_struct *store = NULL;
+  struct mbsys_kmbes_struct *copy = NULL;
+  struct mbsys_kmbes_mwc *copy_mwc = NULL;
+  struct mbsys_kmbes_mwc *store_mwc = NULL;
+  struct mbsys_kmbes_mwc_rx_beam_data *copy_beamData_p;
+  struct mbsys_kmbes_mwc_rx_beam_data *store_beamData_p;
+  size_t alloc_size;
+  int i, j;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -1758,7 +2106,136 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 
   /* copy the data - for many formats memory must be allocated and
       sub-structures copied separately */
-  *copy = *store;
+  //*copy = *store;
+  copy->kind = store->kind;
+  copy->time_d = store->time_d;
+  for (i=0;i<7;i++) {
+    copy->time_i[i] = store->time_i[i];
+  }
+  copy->num_soundings = store->num_soundings;
+  copy->num_backscatter_samples = store->num_backscatter_samples;
+  copy->num_pixels = store->num_pixels;
+  copy->spo = store->spo;
+  copy->skm = store->skm;
+  copy->svp = store->svp;
+  copy->svt = store->svt;
+  copy->scl = store->scl;
+  copy->sde = store->sde;
+  copy->shi = store->shi;
+  copy->sha = store->sha;
+  copy->n_mrz_read = store->n_mrz_read;
+  copy->n_mrz_needed = store->n_mrz_needed;
+  for (i=0;i<MBSYS_KMBES_MAX_NUM_MRZ_DGMS;i++) {
+    copy->mrz[i] = store->mrz[i];
+  }
+  copy->xms = store->xms;
+  copy->n_mwc_read = store->n_mwc_read;
+  copy->n_mwc_needed = store->n_mwc_needed;
+  for (i=0;i<MBSYS_KMBES_MAX_NUM_MWC_DGMS;i++) {
+    copy_mwc = &copy->mwc[i];
+    store_mwc = &store->mwc[i];
+
+    copy_mwc->header = store_mwc->header;
+    copy_mwc->partition = store_mwc->partition;
+    copy_mwc->cmnPart = store_mwc->cmnPart;
+    copy_mwc->txInfo = store_mwc->txInfo;
+    for (j=0;j<MBSYS_KMBES_MAX_NUM_TX_PULSES;j++) {
+      copy_mwc->sectorData[j] = store_mwc->sectorData[j];
+    }
+    copy_mwc->rxInfo = store_mwc->rxInfo;
+
+    alloc_size = (size_t)(store_mwc->rxInfo.numBeams * sizeof(struct mbsys_kmbes_mwc_rx_beam_data));
+    if (copy_mwc->beamData_p_alloc_size < alloc_size || copy_mwc->beamData_p == NULL) {
+      status = mb_reallocd(verbose, __FILE__, __LINE__, alloc_size,
+                            (void **)&(copy_mwc->beamData_p), error);
+      if (status == MB_SUCCESS) {
+        memset(&copy_mwc->beamData_p[copy_mwc->beamData_p_alloc_size],
+                0, alloc_size - copy_mwc->beamData_p_alloc_size);
+        copy_mwc->beamData_p_alloc_size = alloc_size;
+      } else {
+        copy_mwc->beamData_p_alloc_size = 0;
+      }
+    }
+    if (status == MB_SUCCESS) {
+      for (j=0;j<store_mwc->rxInfo.numBeams;j++) {
+        copy_beamData_p = &copy_mwc->beamData_p[j];
+        store_beamData_p = &store_mwc->beamData_p[j];
+
+        copy_beamData_p->beamPointAngReVertical_deg = store_beamData_p->beamPointAngReVertical_deg;
+        copy_beamData_p->startRangeSampleNum = store_beamData_p->startRangeSampleNum;
+        copy_beamData_p->detectedRangeInSamples = store_beamData_p->detectedRangeInSamples;
+        copy_beamData_p->beamTxSectorNum = store_beamData_p->beamTxSectorNum;
+        copy_beamData_p->numSampleData = store_beamData_p->numSampleData;
+
+        alloc_size = (size_t)(store_beamData_p->numSampleData);
+        if (copy_beamData_p->sampleAmplitude05dB_p_alloc_size < alloc_size) {
+          alloc_size = (1 + (int)(alloc_size / 1024)) * 1024;
+          status = mb_reallocd(verbose, __FILE__, __LINE__, alloc_size,
+                              (void **)&(copy_beamData_p->sampleAmplitude05dB_p), error);
+          if (status == MB_SUCCESS) {
+            copy_beamData_p->sampleAmplitude05dB_p_alloc_size = alloc_size;
+          } else {
+            copy_beamData_p->sampleAmplitude05dB_p_alloc_size = 0;
+          }
+        }
+        if (status == MB_SUCCESS) {
+          memcpy(copy_beamData_p->sampleAmplitude05dB_p, store_beamData_p->sampleAmplitude05dB_p,
+                  (size_t)(store_beamData_p->numSampleData));
+          memset(&copy_beamData_p->sampleAmplitude05dB_p[(size_t)(store_beamData_p->numSampleData)],
+                0, copy_beamData_p->sampleAmplitude05dB_p_alloc_size - (size_t)(store_beamData_p->numSampleData));
+        }
+
+        if (status == MB_SUCCESS && store_mwc->rxInfo.phaseFlag == 1) {
+          alloc_size = (size_t)(store_beamData_p->numSampleData);
+          if (copy_beamData_p->samplePhase8bit_alloc_size < alloc_size) {
+            alloc_size = (1 + (int)(alloc_size / 1024)) * 1024;
+            status = mb_reallocd(verbose, __FILE__, __LINE__, alloc_size,
+                                (void **)&(copy_beamData_p->samplePhase8bit), error);
+            if (status == MB_SUCCESS) {
+              copy_beamData_p->samplePhase8bit_alloc_size = alloc_size;
+            } else {
+              copy_beamData_p->samplePhase8bit_alloc_size = 0;
+            }
+          }
+          if (status == MB_SUCCESS) {
+            memcpy(copy_beamData_p->samplePhase8bit, store_beamData_p->samplePhase8bit,
+                    copy_beamData_p->numSampleData);
+            memset(&copy_beamData_p->samplePhase8bit[(size_t)(store_beamData_p->numSampleData)],
+                0, copy_beamData_p->samplePhase8bit_alloc_size - (size_t)(store_beamData_p->numSampleData));
+          }
+        }
+
+        if (status == MB_SUCCESS && store_mwc->rxInfo.phaseFlag == 2) {
+          alloc_size = (size_t)(2 * store_beamData_p->numSampleData);
+          if (copy_beamData_p->samplePhase16bit_alloc_size < alloc_size) {
+            alloc_size = (1 + (int)(alloc_size / 1024)) * 1024;
+            status = mb_reallocd(verbose, __FILE__, __LINE__, alloc_size,
+                                (void **)&(copy_beamData_p->samplePhase16bit), error);
+            if (status == MB_SUCCESS) {
+              copy_beamData_p->samplePhase16bit_alloc_size = alloc_size;
+            } else {
+              copy_beamData_p->samplePhase16bit_alloc_size = 0;
+            }
+          }
+          if (status == MB_SUCCESS) {
+            memcpy(copy_beamData_p->samplePhase16bit, store_beamData_p->samplePhase16bit,
+                    (size_t)(2 * store_beamData_p->numSampleData));
+            memset(&copy_beamData_p->samplePhase16bit[(size_t)(store_beamData_p->numSampleData)],
+                0, copy_beamData_p->samplePhase16bit_alloc_size - (size_t)(2 * store_beamData_p->numSampleData));
+          }
+        }
+      }
+    }
+  }
+
+  copy->cpo = store->cpo;
+  copy->che = store->che;
+  copy->iip = store->iip;
+  copy->iop = store->iop;
+  copy->ib = store->ib;
+  copy->xmb = store->xmb;
+  copy->xmc = store->xmc;
+  copy->unknown = store->unknown;
 
   /* print output debug statements */
   if (verbose >= 2) {
@@ -2019,11 +2496,14 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
 		}
 
     /* insert the pseudosidescan into the data structure for an XMS datagram */
+    store->num_pixels = MBSYS_KMBES_MAX_PIXELS;
     mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
     xms = (struct mbsys_kmbes_xms *)&store->xms;
     xms->header = mrz->header;
-    xms->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + 8 * MBSYS_KMBES_MAX_PIXELS + 44;
+    xms->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + 8 * MBSYS_KMBES_MAX_PIXELS + 48;
     strncpy((char *)xms->header.dgmType, "#XMS", 4);
+    xms->pingCnt = mrz->cmnPart.pingCnt;
+    xms->spare = 0;
     xms->pixel_size = *pixel_size;
     xms->pixels_ss = MBSYS_KMBES_MAX_PIXELS;
     memset((char *)xms->unused, 0, 32);
