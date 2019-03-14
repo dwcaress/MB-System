@@ -5,5 +5,5 @@ SUBDIRS = src
 distcleancheck:
         @:
 
-distclean:
+distclean-local:
         @:

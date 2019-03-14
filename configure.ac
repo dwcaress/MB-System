@@ -19,11 +19,11 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.5beta2],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.5beta3],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_DEFINE(VERSION_DATE, "4 March 2019", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "14 March 2019", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -123,6 +123,7 @@ AC_CONFIG_HEADERS([src/mbio/mb_config.h])
 dnl Check for programs
 AC_PROG_CC
 AM_PROG_CC_C_O
+AC_PROG_CXX
 AC_PROG_INSTALL
 AM_PROG_AS
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
@@ -862,6 +863,30 @@ else
 fi
 
 dnl--------------------------------------------------------------------
+dnl Point Cloud Library Section - optionally build ICP based feature matching
+dnl in mbnavadjust - uses ICP algorithm in Point Cloud Library (PCL)
+dnl--------------------------------------------------------------------
+
+dnl Check if programs using PCL should be built
+AS_ECHO(["Check if programs using PCL should be built"])
+AC_ARG_ENABLE(pcltools, [AS_HELP_STRING([--enable-pcltools],
+        [build tools using PCL])], [build_pcltools=yes], [build_mbpcltools=no])
+AM_CONDITIONAL([BUILD_PCLTOOLS], [test x$build_pcltools = xyes])
+if test "$build_pcltools" = "yes" ; then
+    dnl Build tools using PCL
+    AS_ECHO(["Build tools using PCL"])
+    AC_DEFINE(PCLTOOLS_ENABLED, 1, [Build tools using PCL])
+else
+    dnl Not building tools using PCL
+    AS_ECHO(["Not building tools using PCL"])
+fi
+
+dnl If tools using PCL are being built then look for PCL libraries and headers
+if test "$build_pcltools" = "yes" ; then
+    AC_CHECK_LIB([libpcl_common], [XSendEvent], [GOT_libpcl_common=yes], [GOT_libpcl_common=no])
+fi
+
+dnl--------------------------------------------------------------------
 dnl Generate Makefiles
 dnl--------------------------------------------------------------------
 
@@ -956,6 +981,11 @@ if test "$build_mbtrn" = "yes" ; then
     AS_ECHO(["Build mbtrn tools: Enabled"])
 else
     AS_ECHO(["Build mbtrn tools: Disabled"])
+fi
+if test "$build_pcltools" = "yes" ; then
+    AS_ECHO(["Build PCL tools: Enabled"])
+else
+    AS_ECHO(["Build PCL tools: Disabled"])
 fi
 
 AS_ECHO(["------------------------------------------------------------------------------"])
