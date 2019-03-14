@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id$
+#    $Id $
 #
 #    Copyright (c) 2004-2019 by
 #    D. W. Caress (caress@mbari.org)
@@ -36,7 +36,7 @@
 #      Moss Landing, CA
 #
 # Version:
-# $Id$
+# $Id $
 #
 #
 $program_name = "mbm_route2mission";
@@ -2685,7 +2685,7 @@ print "Behavior: delta_t (start, reset, logMode = 0)\r\n";
 		printf TFILE "%f %f\r\n", $mlons[$i], $mlats[$i];
 		}
 	close(TFILE);
-    
+
     # generate lon lat bounds box in various formats
 	for ($i = 0; $i < $npoints; $i++)
 		{
@@ -2770,7 +2770,7 @@ print "Behavior: delta_t (start, reset, logMode = 0)\r\n";
     $latmaxintminutes = int($latmaxminutes);
     $latmaxseconds = ($latmaxminutes - $latmaxintminutes) * 60.0;
     $latmaxintseconds = int($latmaxseconds);
-    
+
     print TFILE "AUV mission $missionfile position bounds:\n";
     printf TFILE "Decimal degrees:\n";
     printf TFILE "  Longitude: %11.6f %11.6f\n", $lonmin, $lonmax;

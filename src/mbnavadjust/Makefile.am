@@ -1,4 +1,8 @@
-bin_PROGRAMS = mbnavadjust mbnavadjustmerge mbnavadjusttest
+if BUILD_PCLTOOLS
+  MBNAVADJUSTFINE = mbnavadjustfine
+endif
+
+bin_PROGRAMS = mbnavadjust mbnavadjustmerge $(MBNAVADJUSTFINE)
 
 if BUILD_MBTRN
   MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
@@ -15,7 +19,7 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 		${libnetcdf_CPPFLAGS} \
 		${libmotif_CPPFLAGS} ${libopengl_CPPFLAGS}
 
-AM_LDFLAGS = 
+AM_LDFLAGS =
 
 LIBS = ${top_builddir}/src/mbio/libmbio.la \
         ${top_builddir}/src/mbaux/libmbaux.la \
@@ -31,4 +35,5 @@ mbnavadjust_SOURCES = mbnavadjust.c mbnavadjust_callbacks.c mbnavadjust_creation
 
 mbnavadjustmerge_SOURCES = mbnavadjustmerge.c mbnavadjust_io.c mbnavadjust_io.h
 
-mbnavadjusttest_SOURCES = mbnavadjusttest.c mbnavadjust_io.c mbnavadjust_io.h
+mbnavadjustfine_SOURCES = mbnavadjust_fine.cpp mbnavadjust_icp.cpp \
+	mbnavadjust_icp.hpp mbnavadjust_io.c mbnavadjust_io.h

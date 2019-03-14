@@ -1035,7 +1035,7 @@ int main(int argc, char **argv) {
     }
 
     /* write some data */
-    if ((kind != MB_DATA_COMMENT && error <= MB_ERROR_NO_ERROR && inbounds == MB_YES) ||
+    if ((kind != MB_DATA_COMMENT && error == MB_ERROR_NO_ERROR && inbounds == MB_YES) ||
         (kind == MB_DATA_COMMENT && stripmode == MBCOPY_STRIPMODE_NONE)) {
       error = MB_ERROR_NO_ERROR;
       status = mb_put_all(verbose, ombio_ptr, ostore_ptr, MB_NO, kind, time_i, time_d, navlon, navlat, speed, heading,
