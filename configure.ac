@@ -390,6 +390,9 @@ fi
 dnl Done checking for PROJ headers
 dnl Done checking for PROJ library libproj and PROJ headers
 
+dnl Add -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H to allow building with PROJ6
+libproj_CPPFLAGS="$libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
+
 dnl Substitute PROJ library and header arguments
 AC_SUBST([libproj_LIBS], [$libproj_LIBS])
 AC_SUBST([libproj_CPPFLAGS], [$libproj_CPPFLAGS])
