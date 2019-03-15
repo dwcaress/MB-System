@@ -2692,7 +2692,7 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *he
 	*index += 4;
 	mb_get_binary_int(MB_YES, &buffer[*index], &(header->DeviceId));
 	*index += 4;
-    
+
     if (header->Version == 2) {
         mb_get_binary_short(MB_YES, &buffer[*index], &(header->SystemEnumerator));
         *index += 2;
@@ -2717,7 +2717,7 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *he
         header->FragmentedTotal = 0;
         header->FragmentNumber = 0;
     }
-    
+
     else if (header->Version == 3) {
         mb_get_binary_short(MB_YES, &buffer[*index], &(header->Reserved2));
         *index += 2;
@@ -2737,7 +2737,7 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *he
         header->FragmentedTotal = 0;
         header->FragmentNumber = 0;
     }
-    
+
     else if (header->Version >= 4) {
         mb_get_binary_short(MB_YES, &buffer[*index], &(header->Reserved2));
         *index += 2;
@@ -10198,7 +10198,7 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			store->nrec_fileheader++;
 		}
 	}
-    
+
     /* if flag mb_io_ptr->save15 has been set, then only raw bathymetry,
      * navigation, heading, and attitude data records should be written */
     if (mb_io_ptr->save15 == MB_YES) {
@@ -10617,13 +10617,13 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
                 || store->type == R7KRECID_Heading
                 || store->type == R7KRECID_Navigation
                 || store->type == R7KRECID_Attitude) {
-                
+
             }
             else {
                 store->type = R7KRECID_None;
             }
         }
-        
+
 		if (store->type == R7KRECID_ReferencePoint) {
 			status = mbr_reson7kr_wr_reference(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		}

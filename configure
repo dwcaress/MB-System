@@ -18468,6 +18468,8 @@ fi
     fi
 fi
 
+libproj_CPPFLAGS="$libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
+
 libproj_LIBS=$libproj_LIBS
 
 libproj_CPPFLAGS=$libproj_CPPFLAGS
