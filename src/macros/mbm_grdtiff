@@ -856,18 +856,27 @@ if (!open(FCMD,">$cmdfile"))
 	die "Cannot open output file $cmdfile\nMacro $program_name aborted.\n";
 	}
 
+# get user info
+$user = `whoami`;
+$date = `date`;
+$host = `hostname -s`;
+chop $user;
+chop $date;
+chop $host;
+
 # write the shellscript header
-print FCMD "#! /bin/csh -f\n";
+print FCMD "#!/usr/bin/env bash\n";
 print FCMD "#\n# Shellscript to create TIFF image of data in grd file\n";
-print FCMD "# Created by macro $program_name\n";
-print FCMD "#\n# This shellscript created by following command line:\n";
-print FCMD "# $program_name $command_line\n";
+print FCMD "#\n# Created by macro $program_name\n";
+print FCMD "#   User $user\n#   Computer $host\n#   Time: $date\n#\n";
+print FCMD "# Command line:\n";
+print FCMD "#   $program_name $command_line\n";
 
 # Define shell variables
 print FCMD "#\n# Define shell variables used in this script:\n";
-print FCMD "set TIFF_FILE       = $tiffile\n";
-print FCMD "set CPT_FILE        = $cptfile\n";
-print FCMD "set MAP_REGION      = $bounds_plot\n";
+print FCMD "TIFF_FILE=$tiffile\n";
+print FCMD "CPT_FILE=$cptfile\n";
+print FCMD "MAP_REGION=$bounds_plot\n";
 
 # Reset GMT defaults, saving old defaults
 print FCMD "#\n# Save existing GMT defaults\n";
@@ -880,15 +889,17 @@ foreach $gmt_def (@gmt_macro_defs) {
 	print FCMD "gmtset $gmt_par $gmt_var\n";
 	}
 
-# Reset GMT defaults as per user commands
-if (@gmt_defs)
-	{
-	print FCMD "#\n# Set user defined GMT defaults\n";
-	print FCMD "echo Setting user defined GMT defaults...\n";
-	foreach $gmt_def (@gmt_defs) {
-		($gmt_par, $gmt_var) = $gmt_def =~ /^([^\/]+)\/(.+)/;
-		print FCMD "gmt gmtset $gmt_par $gmt_var\n";
-		}
+# Set temporary GMT defaults
+print FCMD "#\n# Delete any existing gmt.conf file\n";
+print FCMD "if [ -e gmt.conf ]; then\n";
+print FCMD "  echo Deleting gmt.conf...\n";
+print FCMD "  /bin/rm gmt.conf\n";
+print FCMD "fi\n";
+print FCMD "#\n# Set temporary GMT defaults\n";
+print FCMD "echo Setting temporary GMT defaults...\n";
+foreach $gmt_def (@gmt_defs) {
+	($gmt_par, $gmt_var) = $gmt_def =~ /^([^\/]+)\/(.+)/;
+	print FCMD "gmt gmtset $gmt_par $gmt_var\n";
 	}
 
 # generate color pallette table file if needed
@@ -1338,30 +1349,42 @@ if ($file_slope)
 	printf FCMD "/bin/rm -f $file_slope\n";
 	}
 
-# display image on screen if desired
-print FCMD "#\n# Run $img_viewer\n";
-if ($img_viewer eq "feh")
-	{
-	$img_viewer_flag = "--scale-down";
-	}
-else
-	{
-	$img_viewer_flag = " ";
-	}
-if ($no_view_tiff)
-	{
-    print FCMD "#if (!(\$#argv > 0 && (\"\$1\" == \"-N\" || \"\$1\" == \"-n\"))) then\n";
-	print FCMD "#echo Running $img_viewer in background...\n";
-	print FCMD "#$img_viewer $img_viewer_flag $tiffile &\n";
-    print FCMD "#endif\n";
-	}
-else
-	{
-    print FCMD "if (!(\$#argv > 0 && (\"\$1\" == \"-N\" || \"\$1\" == \"-n\"))) then\n";
-	print FCMD "echo Running $img_viewer in background...\n";
-	print FCMD "$img_viewer $img_viewer_flag $tiffile &\n";
-    print FCMD "endif\n";
-	}
+# check mbdefaults and environment variables for a user defined image viewer
+# - otherwise attempt to use the system default image display program
+if ($no_view_tiff) {
+  $hash = "#";
+} else {
+  $hash = "";
+}
+print FCMD "$hash"; print FCMD "#\n";
+print FCMD "$hash"; print FCMD "# Display image file\n";
+print FCMD "$hash"; print FCMD "if [[ ! ( \$# > 0  && ( \$1 == \"-N\" || \$1 == \"-n\" ) ) ]]; then\n";
+print FCMD "$hash"; print FCMD "  echo Attempting to display the image...\n\n";
+print FCMD "$hash"; print FCMD "  #\n";
+print FCMD "$hash"; print FCMD "  # Check for user defined image viewer\n";
+print FCMD "$hash"; print FCMD "  image_viewer=\`mbdefaults | grep \"img viewer:\" | cut -d \" \" -f 4\`\n";
+print FCMD "$hash"; print FCMD "  if [[ \$image_viewer == \"Default\" ]]; then\n";
+print FCMD "$hash"; print FCMD "    image_viewer=\"\"\n";
+print FCMD "$hash"; print FCMD "  fi\n";
+print FCMD "$hash"; print FCMD "  if [ -x \"\$(command -v \$image_viewer)\" ]; then\n";
+print FCMD "$hash"; print FCMD "    echo Displaying \$TIFF_FILE using user specified program \$image_viewer...\n";
+print FCMD "$hash"; print FCMD "    if [[ \$image_viewer == \"feh\" ]]; then\n";
+print FCMD "$hash"; print FCMD "      feh --scale-down \$TIFF_FILE &\n";
+print FCMD "$hash"; print FCMD "    else\n";
+print FCMD "$hash"; print FCMD "      \$image_viewer \$TIFF_FILE &\n";
+print FCMD "$hash"; print FCMD "    fi\n";
+print FCMD "$hash"; print FCMD "  elif [ -x \"\$(command -v xdg-open)\" ]; then\n";
+print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through xdg-open...\n";
+print FCMD "$hash"; print FCMD "    xdg-open \$TIFF_FILE\n";
+print FCMD "$hash"; print FCMD "  elif [ -x \"\$(command -v open)\" ]; then\n";
+print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through open...\n";
+print FCMD "$hash"; print FCMD "    open \$TIFF_FILE\n";
+print FCMD "$hash"; print FCMD "  elif [ -x \"\$(command -v cygstart)\" ]; then\n";
+print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through cygstart...\n";
+print FCMD "$hash"; print FCMD "    cygstart \$TIFF_FILE\n";
+print FCMD "$hash"; print FCMD "  fi\n";
+print FCMD "$hash"; print FCMD "fi\n";
+print FCMD "$hash"; print FCMD "#\n";
 
 # claim it's all over
 print FCMD "#\n# All done!\n";

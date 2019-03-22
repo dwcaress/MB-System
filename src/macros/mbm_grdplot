@@ -2030,12 +2030,21 @@ if (!open(FCMD,">$cmdfile"))
 	die "Cannot open output file $cmdfile\nMacro $program_name aborted.\n";
 	}
 
+# get user info
+$user = `whoami`;
+$date = `date`;
+$host = `hostname -s`;
+chop $user;
+chop $date;
+chop $host;
+
 # write the shellscript header
 print FCMD "#!/usr/bin/env bash\n";
 print FCMD "#\n# Shellscript to create Postscript plot of data in grd file\n";
-print FCMD "# Created by macro $program_name\n";
-print FCMD "#\n# This shellscript created by following command line:\n";
-print FCMD "# $program_name $command_line\n";
+print FCMD "#\n# Created by macro $program_name\n";
+print FCMD "#   User $user\n#   Computer $host\n#   Time: $date\n#\n";
+print FCMD "# Command line:\n";
+print FCMD "#   $program_name $command_line\n";
 
 # Define shell variables
 print FCMD "#\n# Define shell variables used in this script:\n";

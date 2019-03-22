@@ -178,7 +178,14 @@ else
 	while (@mbdatalist)
 		{
 		$line = shift @mbdatalist;
-		if ($line =~ /(\S+)\s+(\S+)/)
+		if ($line =~ /(\S+)\s+(\S+)\s+(\S+)/)
+			{
+			($file_mb,$format_mb,$weight_mb) =
+				$line =~ /(\S+)\s+(\S+)\s+(\S+)/;
+			push(@files_data, $file_mb);
+			push(@formats, $format_mb);
+			}
+		elsif ($line =~ /(\S+)\s+(\S+)/)
 			{
 			($file_mb,$format_mb) =
 				$line =~ /(\S+)\s+(\S+)/;
@@ -261,10 +268,12 @@ foreach $file_mb (@files_data)
 		$cnt++;
 		if (!$bounds)
 			{
+      print "mbinfo -F$formats[$cnt] -I$file_mb -G\n";
 			@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb -G`;
 			}
 		else
 			{
+			print "mbinfo -F$formats[$cnt] -I$file_mb -R$bounds -G\n";
 			@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb -R$bounds -G`;
 			}
 		}
@@ -341,6 +350,10 @@ foreach $file_mb (@files_data)
 	}
 
 # check that there is data
+if ($datatype < 1 || $datatype > 4)
+  {
+  die "Specified data type $datatype invalid - valid options include \n\t1: bathymetry\n\t2: topography\n\t3: amplitude\n\t4: sidescan\n";
+  }
 if ($xmin_data >= $xmax_data || $ymin_data >= $ymax_data)
 	{
 	die "$xmin_data $xmax_data $ymin_data $ymax_data \nDoes not appear to be any data in the input!\n$program_name aborted.\n";
@@ -446,32 +459,50 @@ if (!open(FCMD,">$cmdfile"))
 	die "Cannot open output file $cmdfile\nMacro $program_name aborted.\n";
 	}
 
+# get user info
+$user = `whoami`;
+$date = `date`;
+$host = `hostname -s`;
+chop $user;
+chop $date;
+chop $host;
+
 # write the shellscript header
-print FCMD "#! /bin/csh -f\n";
-if ($datatype < 3)
+print FCMD "#!/usr/bin/env bash\n";
+if ($datatype == 1)
 	{
-	print FCMD "#\n# Shellscript to grid or mosaic swath sonar data\n";
+	print FCMD "#\n# Shellscript to grid swath sonar bathymetry data as bathymetry\n";
+	}
+elsif ($datatype == 2)
+	{
+	print FCMD "#\n# Shellscript to grid swath sonar bathymetry data as topography\n";
+	}
+elsif ($datatype == 3)
+	{
+	print FCMD "#\n# Shellscript to grid swath sonar bathymetry data as topography\n";
 	}
 else
 	{
+	print FCMD "#\n# Shellscript to grid swath sonar bathymetry data as topography\n";
 	}
-print FCMD "# Created by macro $program_name\n";
-print FCMD "#\n# This shellscript created by following command line:\n";
-print FCMD "# $program_name $command_line\n";
+print FCMD "#\n# Created by macro $program_name\n";
+print FCMD "#   User $user\n#   Computer $host\n#   Time: $date\n#\n";
+print FCMD "# Command line:\n";
+print FCMD "#   $program_name $command_line\n";
 
 # Define shell variables
 print FCMD "#\n# Define shell variables used in this script:\n";
-print FCMD "set REGION          = $bounds_grid\n";
-print FCMD "set INPUT_FILE      = $file_data\n";
-print FCMD "set INPUT_FORMAT    = $format\n";
-print FCMD "set ROOT       	= $root\n";
+print FCMD "REGION=$bounds_grid\n";
+print FCMD "INPUT_FILE=$file_data\n";
+print FCMD "INPUT_FORMAT=$format\n";
+print FCMD "ROOT=$root\n";
 
 # generate datalist file if needed
 if ($format && $format != -1)
 	{
 	print FCMD "#\n# Make datalist file \n";
 	print FCMD "echo Making datalist file...\n";
-	print FCMD "echo \$INPUT_FILE \$INPUT_FORMAT >| $file_list\n";
+	print FCMD "echo \$INPUT_FILE \$INPUT_FORMAT > $file_list\n";
 	}
 
 # do mbgrid if bathymetry or topography needed
@@ -579,6 +610,14 @@ if ($verbose)
 else
 	{
 	printf FCMD "\n";
+	}
+
+# delete the temporary datalist file
+if ($format && $format != -1)
+	{
+	print FCMD "#\n# Delete datalist file \n";
+	print FCMD "echo Deleting datalist file...\n";
+	print FCMD "/bin/rm -f $file_list\n";
 	}
 
 # claim it's all over

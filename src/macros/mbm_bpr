@@ -166,7 +166,14 @@ elsif ($format == 1 || $format == 2) {
     while ($line=<FI>) {		# reading from the input
         @fields = split(",", $line);
         if ($fields[0] eq $tag && $fields[1] ne "Record Time") {
-            ($month,$day,$year,$hour,$minute) = $fields[1] =~ /(\S+)\/(\S+)\/(\S+)\s+(\S+):(\S+)/;
+            $numcolons = $fields[1] =~ tr/://;
+            if ($numcolons == 2) {
+                ($year,$month,$day,$hour,$minute,$second) = $fields[1] =~ /(\S+)\/(\S+)\/(\S+)\s+(\S+):(\S+):(\S+)/;
+              }
+            else {
+              ($month,$day,$year,$hour,$minute) = $fields[1] =~ /(\S+)\/(\S+)\/(\S+)\s+(\S+):(\S+)/;
+              $second = 0.0;
+            }
             if ($year < 2000) {
               if ($year < 50) {
                 $year += 2000;
@@ -174,7 +181,6 @@ elsif ($format == 1 || $format == 2) {
                 $year += 1900;
               }
             }
-            $second = 0.0;
             $time_d = `mbtime -T$year/$month/$day/$hour/$minute/$second`;
             chop($time_d);
             ($pressure) = $fields[4] =~ /(\S+)/;
@@ -216,7 +222,6 @@ elsif ($format == 1 || $format == 2) {
             $x = (sin($latitude * $PI / 180.0))**2;
             $g = 9.780318 * ( 1.0 + ( 5.2788e-3  + 2.36e-5  * $x) * $x ) + 1.092e-6  * $pressuredbar;
             $depth = ((((-1.82e-15  * $pressuredbar + 2.279e-10 ) * $pressuredbar - 2.2512e-5 ) * $pressuredbar + 9.72659) * $pressuredbar) / $g;
-
             if ($time_d != $time_d_save && $depthcount > 0) {
                 $depth_save = $depthsum / $depthcount;
                 push (@time_ds, $time_d_save);

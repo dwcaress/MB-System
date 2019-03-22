@@ -1,4 +1,4 @@
-.TH mbm_bpr 1 "26 February 2019" "MB\-System 5.0" "MB\-System 5.0"
+.TH mbm_bpr 1 "20 March 2019" "MB\-System 5.0" "MB\-System 5.0"
 .SH NAME
 \fBmbm_bpr\fP \- MB\-System macro to process data from a pressure
 sensor into a tidal model for use by mbprocess.
@@ -103,7 +103,14 @@ produced by Seabird software from sensors such as the Seabird SBE53.
 If \fIformat\fP=1 then input data are in a CSV file output by Sonardyne AMT units,
 and the pressure values used are in lines with the "PR2" tag.
 If \fIformat\fP=2 then input data are in a CSV file output by Sonardyne AMT units,
-and the pressure values used are in lines with the "PRS" tag.
+and the pressure values used are in lines with the "PRS" tag. Depending on Sonardyne
+software configurations, the specifics of the output are variable, particularly
+with regard to the representation of time. Both of the following variants are
+supported:
+.br
+    PRS,2019/03/15 04:15:00,2019/03/19 17:26:43,1,10943.021,0.00
+    PRS,5/20/2018 17:15,5/23/2018 21:48,1,7844.870605,0,,,
+.br
 If \fIformat\fP=3 then the input pressure data consist of epoch time (seconds
 since the start of 1970) followed by pressure values in dbar.
 Default: \fIformat\fP=0.
