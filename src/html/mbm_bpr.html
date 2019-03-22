@@ -11,13 +11,13 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_bpr</H1>
-Section:  MB\-System 5.0  (1)<BR>Updated:  6 May 2018 <BR><A HREF="#index">Index</A>
+Section:  MB\-System 5.0  (1)<BR>Updated:  20 March 2019 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbm_bpr</B> - MB-System macro to process data from a Seabird SBE53 pressure
+<B>mbm_bpr</B> - MB-System macro to process data from a pressure
 sensor into a tidal model for use by mbprocess.
 <P>
 <A NAME="lbAC">&nbsp;</A>
@@ -33,13 +33,18 @@ Version 5.0
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>mbm_bpr</B> is a perl shellscript used to translate pressure data from a Bottom Pressure Recorder (BPR) into tidal data that can be used to correct
-swath bathymetry data. The user specifies an input BPR data file and the output path for the resulting tidefile.
+<B>mbm_bpr</B> is a perl shellscript used to translate pressure data from a
+Bottom Pressure Recorder (BPR) into tidal data that can be used to correct
+swath bathymetry data. The user specifies an input BPR data file and the output
+path for the resulting tidefile.
 <P>
-The input data must be in either the *.tid format
-produced by Seabird sensors such as the Seabird SBE53 (specified using <B>-F</B><I>0</I>),
-or the CSV files output by Sonardyne AMT units (specified using <B>-F</B><I>1</I>). In the
-latter case it is the lines tagged with &quot;PR2&quot; that are parsed for the AMT pressure data.
+The input data must be in a supported format. The *.tid format produced by Seabird
+sensors such as the Seabird SBE53 is specified using <B>-F</B><I>0</I>).
+The CSV files output by Sonardyne AMT units are specified using <B>-F</B><I>1</I>
+if the AMT pressure data are in lines tagged with &quot;PR2&quot; and <B>-F</B><I>1</I>
+if the AMT pressure data are in lines tagged with &quot;PRS&quot;. Pressure data in the form
+of epoch time (seconds since the start of 1970) followed by pressure values in dbar
+can be processed by specifying <B>-F</B><I>3</I>.
 <P>
 <BR>
 
@@ -142,8 +147,21 @@ An offset to be added to the calculated tidal data, in meters. Default: <I>offse
 This option specifies the format of the input BPR data. If <I>format</I>=0 then
 input data are in the *.tid format
 produced by Seabird software from sensors such as the Seabird SBE53.
-If <I>format</I>=1 then input data are in a CSV file output by Sonardyne AMT units.
-The pressure values used are those in lines with the &quot;PR2&quot; tag.
+If <I>format</I>=1 then input data are in a CSV file output by Sonardyne AMT units,
+and the pressure values used are in lines with the &quot;PR2&quot; tag.
+If <I>format</I>=2 then input data are in a CSV file output by Sonardyne AMT units,
+and the pressure values used are in lines with the &quot;PRS&quot; tag. Depending on Sonardyne
+software configurations, the specifics of the output are variable, particularly
+with regard to the representation of time. Both of the following variants are
+supported:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;PRS,2019/03/15&nbsp;04:15:00,2019/03/19&nbsp;17:26:43,1,10943.021,0.00
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;PRS,5/20/2018&nbsp;17:15,5/23/2018&nbsp;21:48,1,7844.870605,0,,,
+<BR>
+
+If <I>format</I>=3 then the input pressure data consist of epoch time (seconds
+since the start of 1970) followed by pressure values in dbar.
 Default: <I>format</I>=0.
 <DT><B>-H</B>
 
@@ -337,7 +355,7 @@ Lobsters, really.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 6 May 2018</P></CENTER>
+Last Updated: 20 March 2019</P></CENTER>
 
 <HR>
 

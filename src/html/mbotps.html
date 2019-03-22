@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbotps</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  6 May 2018 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  26 February 2019 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -48,7 +48,7 @@ allows <B>MB-System</B> users to easily obtain tide models for specified locatio
 and times. <B>MBotps</B> is built during a normal installation of <B>MB-System</B>,
 but will work only if the OTPS package has been installed separately and
 the OTPS location has been specified. See the INSTALL file in the <B>MB-System</B>
-top directory for guidance on the build process. 
+top directory for guidance on the build process.
 <P>
 There are actually three variants of the OTPS package available for download and
 installation: OTPS, OTPSnc, and OTPS2. The three versions use different tide
@@ -121,7 +121,7 @@ locations at intervals specified with the <B>-D</B> option, and if the <B>-M</B>
 is specified, the swath file's processing parameter file is modified so that <B>mbprocess</B>
 applies the tidal model during processing.
 <P>
-The <B>-C</B><I>tidestationformat</I>, <B>-N</B><I>tidestationfile</I>, and 
+The <B>-C</B><I>tidestationformat</I>, <B>-N</B><I>tidestationfile</I>, and
 <B>-U</B><I>tidestationlon/tidestationlat</I> commands together allow users to input
 observations from a tide station; these observations can be used to calculate
 corrections to tidal model values in the vicinity of the tide station.
@@ -183,14 +183,21 @@ If <I>tideformat</I> = 1, then the output format is:
 <BR>
 
 where time_d is in seconds since January 1, 1970 and tide is in meters.
+<DT><B>-B</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the starting time for for the output tidal model.
 <DT><B>-C</B>
 
 <DD>
-<I>tidestationformat
+<I>tidestationformat</I>
 <BR>
 
 This option sets the format of the tide station data in the file specified using
-the </I><B>-N</B><I>tidestationfile</I> option. The tide station data may be in one of
+the <B>-N</B><I>tidestationfile</I> option. The tide station data may be in one of
 four ASCII, space delimited, table formats:
 <BR>&nbsp;&nbsp;<I>tidestationformat</I>=1:&nbsp;format&nbsp;is&nbsp;&lt;time_d&nbsp;tide&gt;
 <BR>&nbsp;&nbsp;<I>tidestationformat</I>=2:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;tide&gt;
@@ -200,13 +207,6 @@ four ASCII, space delimited, table formats:
 
 Note that in format 1 the value time_d = decimal seconds since 1/1/1970 and that
 format 4 the value daymin = decimal minutes since the start of day.
-<DT><B>-B</B>
-
-<DD>
-<I>yr/mo/da/hr/mn/sc</I>
-<BR>
-
-This option sets the starting time for for the output tidal model.
 <DT><B>-D</B>
 
 <DD>
@@ -524,7 +524,7 @@ easy.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 6 May 2018</P></CENTER>
+Last Updated: 26 February 2019</P></CENTER>
 
 <HR>
 

@@ -135,11 +135,10 @@ char help_message[] = "mbgrid is an utility used to grid bathymetry, amplitude, 
                       "sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, "
                       "minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe "
                       "swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
-char usage_message[] = "mbgrid -Ifilelist -Oroot \
-[-Rwest/east/south/north -Rfactor -Adatatype\n\
-          -Bborder -Cclip[/mode[/tension]] -Dxdim/ydim -Edx/dy/units[!] -F\n\
-          -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings -Sspeed\n\
-          -Utime -V -Wscale -Xextend]";
+char usage_message[] = "mbgrid   -Ifilelist -Oroot [-Adatatype -Bborder -Cclip[/mode] -Dxdim/ydim\n"
+                      "          -Edx/dy/units[!]  -Fmode[/threshold] -Ggridkind -Jprojection\n"
+                      "          -Kbackground -Llonflip -M -N -Ppings -Q  -Rwest/east/south/north\n"
+                      "          -Rfactor  -Sspeed  -Ttension  -Utime  -V -Wscale -Xextend]";
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {

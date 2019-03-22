@@ -15,8 +15,14 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
-  Version 5.7.3          February 8, 2019
-* Version 5.7.2          February 4, 2019
+  Version 5.7.5beta4     March 21, 2019
+  Version 5.7.5beta3     March 14, 2019
+  Version 5.7.5beta2     March 4, 2019
+  Version 5.7.5beta1     February 26, 2019
+  Version 5.7.5beta0     February 25, 2019
+* Version 5.7.4          February 12, 2019
+* Version 5.7.3          February 8, 2019
+  Version 5.7.2          February 4, 2019
 * Version 5.7.1          December 19, 2018
   Version 5.6.20181218   December 18, 2018
 * Version 5.6.20181217   December 17, 2018
@@ -297,6 +303,66 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.7.5beta4 (March 21, 2019)
+
+Mbm_grid: Fixed problem in which execution of mbm_grid left behind an orphaned
+datalist file. Also changed this macro to output a bash shellscript rather than
+a csh shellscript.
+
+Mbm_bpr: Added support for various variants of Sonardyne AMT pressure data.
+
+Mbm_grdtiff: Changed this macro to output a bash shellscript rather than
+a csh shellscript.
+
+Mbm_route2mission: Fixed handling of the user specified time to first waypoint
+in the output MBARI AUV mission script.
+
+Mbextractsegy: Recast output section plot generation script to call mbm_grdplot
+using the arguments -MIE300 -MITg that cause that macro to render the output
+postscript files into 300 dpi png image files.
+
+Mbm_grdplot, mbm_grd3dplot, mbm_grdtiff, mbm_histplot, mbm_plot, mbm_xyplot:
+These plot macros now embed the user, computer, and time of creation associated
+with the output plot generation shellscript.
+
+-----> 5.7.5beta3 (March 14, 2019)
+
+Mbcopy: Fixed problem with fbt file generation by mbcopy that was introduced with
+5.7.5beta2
+
+-----> 5.7.5beta2 (March 4, 2019)
+
+Format 261 (MBF_KEMKMALL): There is progress towards support for the new
+Kongsberg kmall format. Only EM2040 data supplied by Kongsberg is being
+used for testing with mbinfo, mbcopy, and mbprocess, so far. The memory
+management faults are fixed, but it isn't all working yet.
+
+Mbcopy: Changed logic so that in a full copy all data records are passed on to the
+output even if they generate nonfatal errors (e.g. out of time or location bounds).
+
+-----> 5.7.5beta1 (February 27, 2019)
+
+Mbm_bpr: Augmented to work with Sonardyne AMT pressure data using PRS data records
+in addition to PR2 records.
+
+Mbotps: Fixed some issues with applying a tide station correction to time
+models.
+
+-----> 5.7.5beta0 (February 25, 2019)
+
+Format 261 (MBF_KEMKMALL): Added support for new Kongsberg kmall format with
+MBIO id 261 and name MBF_KEMKMALL. At this point the support has memory management
+problems resulting in sporadic and inconsistent crashing.
+
+-----> 5.7.4 (February 12, 2019)
+
+Plotting macros (mbm_grdplot, mbm_grd3dplot, mbm_plot, mbm_xyplot, mbm_histplot):
+Fixed problem with plotting macro mbm_plot that caused failure of the plotting
+shellscript.
+
+-----> 5.7.3 (February 8, 2019)
+
 Plotting macros (mbm_grdplot, mbm_grd3dplot, mbm_plot, mbm_xyplot, mbm_histplot):
 This version changes how automatically displaying the Postscript plot is handled. Previously
 these plotting macros written in perl hard coded the user defined Postscript viewer program into
