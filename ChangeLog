@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.7.5beta5     March 22, 2019
   Version 5.7.5beta4     March 21, 2019
   Version 5.7.5beta3     March 14, 2019
   Version 5.7.5beta2     March 4, 2019
@@ -303,6 +304,13 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.7.5beta5 (March 22, 2019)
+
+Mbm_grdplot, mbm_grd3dplot, mbm_grdtiff, mbm_histplot, mbm_plot, mbm_xyplot:
+Set these plot macros to use "open" on Macs and on Linux to use "gio open" if
+available, "xdg-open" if "gio" is not available. Also got rid of another
+instance of orphan file creation by the plotting shellscripts (e.g. gmt.conf$$).
 
 -----> 5.7.5beta4 (March 21, 2019)
 
