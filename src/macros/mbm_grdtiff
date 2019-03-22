@@ -829,7 +829,6 @@ else
 	{
 	$cptfile = "$root.cpt";
 	}
-$gmtfile = "gmt.conf\$\$";
 
 # set macro gmt default settings
 if ($color_flip)
@@ -878,20 +877,9 @@ print FCMD "TIFF_FILE=$tiffile\n";
 print FCMD "CPT_FILE=$cptfile\n";
 print FCMD "MAP_REGION=$bounds_plot\n";
 
-# Reset GMT defaults, saving old defaults
-print FCMD "#\n# Save existing GMT defaults\n";
-print FCMD "echo Saving GMT defaults...\n";
-print FCMD "gmt gmtdefaults > $gmtfile\n";
-print FCMD "#\n# Set new GMT defaults\n";
-print FCMD "echo Setting new GMT defaults...\n";
-foreach $gmt_def (@gmt_macro_defs) {
-	($gmt_par, $gmt_var) = $gmt_def =~ /^([^\/]+)\/(.+)/;
-	print FCMD "gmtset $gmt_par $gmt_var\n";
-	}
-
 # Set temporary GMT defaults
 print FCMD "#\n# Delete any existing gmt.conf file\n";
-print FCMD "if [ -e gmt.conf ]; then\n";
+print FCMD "if [[ -e gmt.conf ]]; then\n";
 print FCMD "  echo Deleting gmt.conf...\n";
 print FCMD "  /bin/rm gmt.conf\n";
 print FCMD "fi\n";
@@ -1156,8 +1144,11 @@ if (@files_intensity)
 
 # Define shell variables
 print FCMD "#\n# Define data files to be plotted:\n";
-print FCMD "set DATA_FILE        = $file_grd\n";
-print FCMD "set INTENSITY_FILE   = $file_int\n";
+print FCMD "DATA_FILE=$file_grd\n";
+if ($file_int)
+  {
+  print FCMD "INTENSITY_FILE=$file_int\n";
+  }
 
 # scale data if needed
 $file_use = "\$DATA_FILE";
@@ -1359,8 +1350,9 @@ if ($no_view_tiff) {
 print FCMD "$hash"; print FCMD "#\n";
 print FCMD "$hash"; print FCMD "# Display image file\n";
 print FCMD "$hash"; print FCMD "if [[ ! ( \$# > 0  && ( \$1 == \"-N\" || \$1 == \"-n\" ) ) ]]; then\n";
-print FCMD "$hash"; print FCMD "  echo Attempting to display the image...\n\n";
-print FCMD "$hash"; print FCMD "  #\n";
+print FCMD "$hash"; print FCMD "  echo Attempting to display the image...\n  #\n";
+print FCMD "$hash"; print FCMD "  # Get operating system name\n";
+print FCMD "$hash"; print FCMD "  os_name=\`uname -s\`\n  #\n";
 print FCMD "$hash"; print FCMD "  # Check for user defined image viewer\n";
 print FCMD "$hash"; print FCMD "  image_viewer=\`mbdefaults | grep \"img viewer:\" | cut -d \" \" -f 4\`\n";
 print FCMD "$hash"; print FCMD "  if [[ \$image_viewer == \"Default\" ]]; then\n";
@@ -1373,15 +1365,21 @@ print FCMD "$hash"; print FCMD "      feh --scale-down \$TIFF_FILE &\n";
 print FCMD "$hash"; print FCMD "    else\n";
 print FCMD "$hash"; print FCMD "      \$image_viewer \$TIFF_FILE &\n";
 print FCMD "$hash"; print FCMD "    fi\n";
-print FCMD "$hash"; print FCMD "  elif [ -x \"\$(command -v xdg-open)\" ]; then\n";
-print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through xdg-open...\n";
-print FCMD "$hash"; print FCMD "    xdg-open \$TIFF_FILE\n";
-print FCMD "$hash"; print FCMD "  elif [ -x \"\$(command -v open)\" ]; then\n";
+print FCMD "$hash"; print FCMD "  elif [[ ( -x \"\$(command -v open)\" ) && ( \$os_name == \"Darwin\" ) ]]; then\n";
 print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through open...\n";
 print FCMD "$hash"; print FCMD "    open \$TIFF_FILE\n";
-print FCMD "$hash"; print FCMD "  elif [ -x \"\$(command -v cygstart)\" ]; then\n";
+print FCMD "$hash"; print FCMD "  elif [[ -x \"\$(command -v gio)\" ]]; then\n";
+print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through  gio open...\n";
+print FCMD "$hash"; print FCMD "    gio open \$TIFF_FILE\n";
+print FCMD "$hash"; print FCMD "  elif [[ -x \"\$(command -v xdg-open)\" ]]; then\n";
+print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through xdg-open...\n";
+print FCMD "$hash"; print FCMD "    xdg-open \$TIFF_FILE\n";
+print FCMD "$hash"; print FCMD "  elif [[ -x \"\$(command -v cygstart)\" ]]; then\n";
 print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through cygstart...\n";
 print FCMD "$hash"; print FCMD "    cygstart \$TIFF_FILE\n";
+print FCMD "$hash"; print FCMD "  elif [[ -x \"\$(command -v open)\" ]]; then\n";
+print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through open...\n";
+print FCMD "$hash"; print FCMD "    open \$TIFF_FILE\n";
 print FCMD "$hash"; print FCMD "  fi\n";
 print FCMD "$hash"; print FCMD "fi\n";
 print FCMD "$hash"; print FCMD "#\n";
