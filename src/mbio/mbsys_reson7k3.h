@@ -3177,7 +3177,7 @@ struct mbsys_reson7k_struct {
 	s7kr_calibratedbeam calibratedbeam;
 
 	/* Reson 7k System Events (part of Record 7050) */
-	s7kr_systemeventsdata systemeventsdata;
+	s7kr_systemevents systemevents;
 
 	/* Reson 7k system event (record 7051) */
 	s7kr_systemeventmessage systemeventmessage;
@@ -3293,6 +3293,7 @@ struct mbsys_reson7k_struct {
 	int nrec_compressedwatercolumn;
 	int nrec_segmentedrawdetection;
 	int nrec_calibratedbeam;
+	int nrec_systemevents;
 	int nrec_systemeventmessage;
 	int nrec_rdrrecordingstatus;
 	int nrec_subscriptions;
