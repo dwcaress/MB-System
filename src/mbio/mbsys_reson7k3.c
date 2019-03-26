@@ -974,6 +974,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	snippet->n = 0;
 	snippet->error_flag = 0;
 	snippet->control_flags = 0;
+	snippet->flags = 0;
 	for (i = 0; i < 6; i++)
 		snippet->reserved[i] = 0;
 	for (i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
@@ -991,9 +992,9 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	snippet->longitude = 0.0;
 	snippet->heading = 0.0;
 	for (i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
-		snippet->alongtrack[i] = 0.0;
-		snippet->acrosstrack[i] = 0.0;
-		snippet->sample[i] = 0.0;
+		snippet->beam_alongtrack[i] = 0.0;
+		snippet->beam_acrosstrack[i] = 0.0;
+		snippet->center_sample[i] = 0.0;
 	}
 	
 	/* Reson 7k vernier Processing Data Filtered (Record 7029) */
@@ -1396,12 +1397,12 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	/* Reson 7k File Header (Record 7200) */
 	fileheader = &store->fileheader;
 	mbsys_reson7k_zero7kheader(verbose, &fileheader->header, error);
-	for (i = 0; i < 16; i++)
-		fileheader->file_identifier[i] = '\0';
+	for (i = 0; i < 2; i++)
+		fileheader->file_identifier[i] = 0;
 	fileheader->version = 0;
 	fileheader->reserved = 0;
-	for (i = 0; i < 16; i++)
-		fileheader->session_identifier[i] = '\0';
+	for (i = 0; i < 2; i++)
+		fileheader->session_identifier[i] = 0;
 	fileheader->record_data_size = 0;
 	fileheader->number_subsystems = 0;
 	for (i = 0; i < 64; i++)
@@ -1431,7 +1432,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		filecatalogrecord->filecatalogrecorddata[i].record_type = 0;
 		filecatalogrecord->filecatalogrecorddata[i].device_id = 0;
 		filecatalogrecord->filecatalogrecorddata[i].system_enumerator = 0;
-		for (j = 0; j < 16; j++)
+		for (j = 0; j < 10; j++)
 			filecatalogrecord->filecatalogrecorddata[i].s7ktime[j] = 0;
 		filecatalogrecord->filecatalogrecorddata[j].record_count = 0;
 		for (j = 0; j < 8; j++)
@@ -1477,62 +1478,6 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	for (i = 0; i < 2; i++)
 		remotecontrolnotacknowledge->tracking_n[i] = 0;
 	remotecontrolnotacknowledge->error_code = 0;
-
-	/* Reson 7k Remote Control Sonar Settings (record 7503) */
-	remotecontrolsettings = &store->remotecontrolsettings;
-	mbsys_reson7k_zero7kheader(verbose, &remotecontrolsettings->header, error);
-	remotecontrolsettings->serial_number = 0;
-	remotecontrolsettings->ping_number = 0;
-	remotecontrolsettings->frequency = 0.0;
-	remotecontrolsettings->sample_rate = 0.0;
-	remotecontrolsettings->receiver_bandwidth = 0.0;
-	remotecontrolsettings->pulse_width = 0.0;
-	remotecontrolsettings->pulse_type = 0;
-	remotecontrolsettings->pulse_envelope = 0;
-	remotecontrolsettings->pulse_envelope_par = 0.0;
-	remotecontrolsettings->pulse_reserved = 0;
-	remotecontrolsettings->max_ping_rate = 0.0;
-	remotecontrolsettings->ping_period = 0.0;
-	remotecontrolsettings->range_selection = 0.0;
-	remotecontrolsettings->power_selection = 0.0;
-	remotecontrolsettings->gain_selection = 0.0;
-	remotecontrolsettings->control_flags = 0;
-	remotecontrolsettings->projector_magic_no = 0;
-	remotecontrolsettings->steering_vertical = 0.0;
-	remotecontrolsettings->steering_horizontal = 0.0;
-	remotecontrolsettings->beamwidth_vertical = 0.0;
-	remotecontrolsettings->beamwidth_horizontal = 0.0;
-	remotecontrolsettings->focal_point = 0.0;
-	remotecontrolsettings->projector_weighting = 0;
-	remotecontrolsettings->projector_weighting_par = 0.0;
-	remotecontrolsettings->transmit_flags = 0;
-	remotecontrolsettings->hydrophone_magic_no = 0;
-	remotecontrolsettings->receive_weighting = 0;
-	remotecontrolsettings->receive_weighting_par = 0.0;
-	remotecontrolsettings->receive_flags = 0;
-	remotecontrolsettings->range_minimum = 0.0;
-	remotecontrolsettings->range_maximum = 0.0;
-	remotecontrolsettings->depth_minimum = 0.0;
-	remotecontrolsettings->depth_maximum = 0.0;
-	remotecontrolsettings->absorption = 0.0;
-	remotecontrolsettings->sound_velocity = 0.0;
-	remotecontrolsettings->spreading = 0.0;
-	remotecontrolsettings->reserved = 0;
-	remotecontrolsettings->tx_offset_x = 0.0;
-	remotecontrolsettings->tx_offset_y = 0.0;
-	remotecontrolsettings->tx_offset_z = 0.0;
-	remotecontrolsettings->head_tilt_x = 0.0;
-	remotecontrolsettings->head_tilt_y = 0.0;
-	remotecontrolsettings->head_tilt_z = 0.0;
-	remotecontrolsettings->ping_on_off = 0;
-	remotecontrolsettings->data_sample_types = 0;
-	remotecontrolsettings->projector_orientation = 0;
-	remotecontrolsettings->beam_angle_mode = 0;
-	remotecontrolsettings->r7kcenter_mode = 0;
-	remotecontrolsettings->gate_depth_min = 0.0;
-	remotecontrolsettings->gate_depth_max = 0.0;
-	for (i = 0; i < 35; i++)
-		remotecontrolsettings->reserved2[i] = 0;
 	
 	/* Reson 7k remote control sonar settings (record 7503) */
 	remotecontrolsettings = &store->remotecontrolsettings;
@@ -1726,17 +1671,27 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	s7kr_ctd *ctd;
 	s7kr_surveyline *surveyline;
 	s7kr_attitude *attitude;
+	// s7kr_sonarpipeenvironment *sonarpipeenvironment;
 	s7kr_configuration *configuration;
 	s7kr_firmwarehardwareconfiguration *firmwarehardwareconfiguration;
 	s7kr_sidescan *sidescan;
+	s7kr_watercolumn *watercolumn;
 	s7kr_tvg *tvg;
 	s7kr_image *image;
 	s7kr_pingmotion *pingmotion;
+	// s7kr_adaptivegate *adaptivegate;
 	s7kr_beamformed *beamformed;
+	// s7kr_vernierprocessingdataraw *vernierprocessingdataraw;
 	s7kr_bite *bite;
 	s7kr_rawdetection *rawdetection;
 	s7kr_snippet *snippet;
+	// s7kr_compressedbeamformedmagnitude *compressedbeamformedmagnitude;
+	s7kr_compressedwatercolumn *compressedwatercolumn;
+	s7kr_segmentedrawdetection segmentedrawdetection;
+	// s7kr_calibratedbeam *calibratedbeam;
+	// s7kr_systemevents *systemevents;
 	s7kr_systemeventmessage *systemeventmessage;
+	// s7kr_rdrrecordingstatusdata *rdrrecordingstatusdata;
 	s7kr_calibratedsidescan *calibratedsidescan;
 	s7kr_snippetbackscatteringstrength *snippetbackscatteringstrength;
 	int i;
@@ -1871,7 +1826,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	firmwarehardwareconfiguration->info_length = 0;
 	firmwarehardwareconfiguration->info_alloc = 0;
 
-	/* Reson 7k backscatter imagery data (record 7007) */
+	/* Reson 7k Side Scan Data (record 7007) */
 	sidescan = &store->sidescan;
 	sidescan->number_samples = 0;
 	sidescan->nalloc = 0;
@@ -1913,6 +1868,9 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(pingmotion->heading), error);
 	if (pingmotion->heave != NULL)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(pingmotion->heave), error);
+		
+	/* Reson 7k Adaptive Gate (record 7014) */
+	
 
 	/* Reson 7k beamformed magnitude and phase data (record 7018) */
 	beamformed = &store->beamformed;
@@ -1925,6 +1883,9 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		if (amplitudephase->phase != NULL)
 			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(amplitudephase->phase), error);
 	}
+	
+	/* Reson 7k Vernier Processing Data Raw (record 7019) */
+	
 
 	/* Reson 7k BITE (record 7021) */
 	bite = &store->bite;
@@ -1932,20 +1893,46 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	bite->nalloc = 0;
 	if (bite->reports != NULL)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(bite->reports), error);
-
-	/* Reson 7k raw detection data (Record 7027) */
 	
-
 	/* Reson 7k snippet data (record 7028) */
+	snippet = &store->snippet;
+	snippet->number_beams = 0;
+	for (i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
+		snippetdataseries = &(snippet->snippetdataseries[i]);
+		snippetdataseries->beam_number = 0;
+		snippetdataseries->begin_sample = 0;
+		snippetdataseries->detect_sample = 0;
+		snippetdataseries->end_sample = 0;
+		snippetdataseries->nalloc = 0;
+		if (snippetdataseries->amplitude != NULL)
+			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(snippetdataseries->amplitude), error);
+	}
+	
+	/* Reson 7k Compressed Beamformed Magnitude Data (Record 7041) */
 	
 	
-	/* Reson 7k system event (record 7051) */
+	/* Reson 7k Compressed Water Column Data (Record 7042) */
+	
+	
+	/* Reson 7k Segmented Raw Detection Data (Record 7047) */
+	
+	
+	/* Reson 7k Calibrated Beam Data (Record 7048) */
+	
+	
+	/* Reson 7k System Events (Record 7050) */
+	
+	
+	/* Reson 7k System Event Message (record 7051) */
 	systemeventmessage = &store->systemeventmessage;
 	systemeventmessage->message_length = 0;
 	systemeventmessage->event_identifier = 0;
 	systemeventmessage->message_alloc = 0;
 	if (systemeventmessage->message != NULL)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(systemeventmessage->message), error);
+
+	/* Reson 7k RDR Recording Status (Record 7052) */
+	
 
 	/* Reson 7k Calibrated Sidescan Data (record 7057) */
 	
@@ -1957,11 +1944,13 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		snippetbackscatteringstrengthdata = &(snippetbackscatteringstrength->snippetbackscatteringstrengthdata[i]);
 		snippetbackscatteringstrengthdata->beam_number = 0;
 		snippetbackscatteringstrengthdata->begin_sample = 0;
-		snippetbackscatteringstrengthdata->detect_sample = 0;
+		snippetbackscatteringstrengthdata->bottom_sample = 0;
 		snippetbackscatteringstrengthdata->end_sample = 0;
 		snippetbackscatteringstrengthdata->nalloc = 0;
 		if (snippetbackscatteringstrengthdata->bs != NULL)
 			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(snippetbackscatteringstrengthdata->bs), error);
+		if (snippetbackscatteringstrengthdata->footprints != NULL)
+			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(snippetbackscatteringstrengthdata->footprints), error);
 	}
 
 	/* deallocate memory for data structure */
