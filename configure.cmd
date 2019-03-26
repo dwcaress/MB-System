@@ -382,8 +382,8 @@ autoreconf --force --install --warnings=all
 sudo CFLAGS="-g -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
 ./configure \
     --prefix=/usr/local \
-    --with-proj-include=/usr/local/include \
-    --with-proj-lib=/usr/local/lib \
+    --with-proj-include=/usr/local/opt/proj/include \
+    --with-proj-lib=/usr/local/opt/proj/lib \
     --with-fftw-include=/usr/local/include \
     --with-fftw-lib=/usr/local/lib \
     --with-motif-include=/usr/local/include \
