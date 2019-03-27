@@ -845,7 +845,7 @@ typedef struct s7kr_contactoutput_struct {
 	u8 description[128];       /* Optional textual description given by the operator */
 } s7kr_contactoutput;
 
-/* Reson 7k volatile sonar settings (record 7000) */
+/* Reson 7k Sonar Settings (record 7000) */
 typedef struct s7kr_sonarsettings_struct {
 	s7k_header header;
 	u64 serial_number;              /* Sonar serial number */
@@ -1395,8 +1395,8 @@ typedef struct s7kr_detectionsetup_struct {
 
 /* Reson 7k amplitude and phase data (part of record 7018) */
 typedef struct s7kr_amplitudephase_struct {
-	u16 beam_number;    /* Beam or element number */
-	u32 n;              /* Number of samples */
+	u16 beams_number;    /* Beam or element number */
+	u32 samples_number;              /* Number of samples */
 	u32 nalloc;         /* Number of samples allocated */
 	u16 *amplitude;     /* Amplitude time series  */
 	i16 *phase;         /* Phase time series (radians scaled by 10430) */
@@ -1411,7 +1411,7 @@ typedef struct s7kr_beamformed_struct {
 	                           0 = no multi-ping
 	                          >0 = sequence number of ping in the multi-ping sequence */
 	u16 beams_number;    /* Total number of beams or elements in record */
-	u32 n;               /* Number of samples in each beam in this record */
+	u32 samples_number;               /* Number of samples in each beam in this record */
 	u32 reserved[8];     /* Reserved for future use */
 	s7k_amplitudephase amplitudephase[MBSYS_RESON7K_MAX_BEAMS];
 	                     /* amplitude and phase data for each beam */
