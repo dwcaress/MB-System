@@ -974,7 +974,7 @@ typedef struct s7kr_sonarsettings_struct {
 } s7kr_sonarsettings;
 
 /* Reson 7k device configuration structure (part of record 7001)*/
-typedef struct s7k_device_struct {
+typedef struct s7kr_device_struct {
 	u32 magic_number;      /* Unique identifier number */
 	u8 description[60];    /* Device description string */
 	u32 alphadata_card;    /* Data card definition:
@@ -985,14 +985,14 @@ typedef struct s7k_device_struct {
 	u32 info_length;       /* Length of device specific data (bytes) */
 	u32 info_alloc;        /* Memory allocated for data (bytes) */
 	c8 *info;              /* Device specific data */
-} s7k_device;
+} s7kr_device;
 
 /* Reson 7k configuration (record 7001) */
 typedef struct s7kr_configuration_struct {
 	s7k_header header;
 	u64 serial_number;                           /* Sonar serial number */
 	u64 number_devices;                          /* Number of devices */
-	s7k_device device[MBSYS_RESON7K_MAX_DEVICE]; /* Device configuration information */
+	s7kr_device device[MBSYS_RESON7K_MAX_DEVICE]; /* Device configuration information */
 } s7kr_configuration;
 
 /* Reson 7k match filter (record 7002) */
@@ -1162,13 +1162,13 @@ typedef struct s7kr_sidescan_struct {
 } s7kr_sidescan;
 
 /* Reson 7k Generic Water Column data (part of record 7008)*/
-typedef struct s7k_wcd_struct {
+typedef struct s7kr_wcd_struct {
 	u32 n;                 /* Number of fields */
 	i32 nalloc;            /* Number of samples allocated */
 	u16 *descriptor;       /* Device specific data */
 	u32 *first_sample;     /* First sample number in beam from transmitter and outward */
 	u32 *last_sample;      /* Last sample number in beam from transmitter and outward */
-} s7k_wcd;
+} s7kr_wcd;
 
 /* Reson 7k Generic Water Column data (record 7008) */
 typedef struct s7kr_watercolumn_struct {
@@ -1216,7 +1216,7 @@ typedef struct s7kr_watercolumn_struct {
 	                        Bit 12-14: Beamforming flag
 	                        0 - Beam formed data
 	                        1 - Element data*/
-	s7k_wcd wcd[MBSYS_RESON7K_MAX_BEAMS]; /* Device configuration information */
+	s7kr_wcd wcd[MBSYS_RESON7K_MAX_BEAMS]; /* Device configuration information */
 	u32 optionaldata;    /* Optional data */
 	f32 frequency;       /* Ping frequency in Hz */
 	f64 latitude;        /* Latitude of vessel reference point in Radians -pi/2 to pi/2,
@@ -1228,6 +1228,32 @@ typedef struct s7kr_watercolumn_struct {
 	f32 beam_acrosstrack[MBSYS_RESON7K_MAX_BEAMS];  /* Across track distance in vessel grid in meters */
 	u32 center_sample[MBSYS_RESON7K_MAX_BEAMS];     /* Sample number at detection point of beam */
 } s7kr_watercolumn;
+
+/* Reson 7k vertical depth (record 7009) */
+typedef struct s7kr_verticaldepth_struct {
+	s7k_header header;
+	float frequency;           /* Sonar frequency in Hz */
+	unsigned int ping_number;  /* Sequential number */
+	unsigned short multi_ping; /* Flag to indicate multi-ping mode
+	                   0 = no multi-ping
+	                   >0 = sequence number of ping
+	                       in the multi-ping
+	                       sequence */
+	double latitude;           /* Latitude of vessel reference point
+	                       in radians, -pi/2 to +pi/2 */
+	double longitude;          /* Longitude of vessel reference point
+	                       in radians, -pi to +pi */
+	float heading;             /* Heading of vessel at transmit time
+	                       in radians */
+	float alongtrack;          /* Sonar alongtrack distance from
+	                       vessel reference point in meters */
+	float acrosstrack;         /* Sonar alongtrack distance from
+	                   vessel reference point in meters */
+	float vertical_depth;      /* Sonar vertical depth with respect
+	                   to chart datum or vessel if
+	                   tide data are unavailable in meters */
+} s7kr_verticaldepth;
+
 
 /* Reson 7k tvg data (record 7010) */
 typedef struct s7kr_tvg_struct {
@@ -1413,7 +1439,7 @@ typedef struct s7kr_beamformed_struct {
 	u16 beams_number;    /* Total number of beams or elements in record */
 	u32 samples_number;               /* Number of samples in each beam in this record */
 	u32 reserved[8];     /* Reserved for future use */
-	s7k_amplitudephase amplitudephase[MBSYS_RESON7K_MAX_BEAMS];
+	s7kr_amplitudephase amplitudephase[MBSYS_RESON7K_MAX_BEAMS];
 	                     /* amplitude and phase data for each beam */
 } s7kr_beamformed;
 
@@ -1466,7 +1492,7 @@ typedef struct s7kr_vernierprocessingdataraw_struct {
 	                            normally -45 degrees (in radians) */
 	f32 elevation_coverage;  /* Normally 90 degrees (in radians) */
 	u32 reserved3[4];         /* Reserved */
-	s7k_anglemagnitude anglemagnitude[MBSYS_RESON7K_MAX_BEAMS];
+	s7kr_anglemagnitude anglemagnitude[MBSYS_RESON7K_MAX_BEAMS];
 	                         /* Angle and magnitude data for each beam plus 
 	                            additional records */
 } s7kr_vernierprocessingdataraw;
@@ -1538,13 +1564,13 @@ typedef struct s7kr_bitereport_struct {
 	                                    Bit 1:
 	                                    0 = BITE field #255 within range
 	                                    1 = BITE field #255 out of range */
-	s7k_bitefield bitefield[256];    /* Array of BITE field data */
+	s7kr_bitefield bitefield[256];    /* Array of BITE field data */
 } s7kr_bitereport;
 
 /* Reson 7k BITE (record 7021) */
 typedef struct s7kr_bite_struct {
 	s7k_header header;
-	u16 n;       /* Number of Built In Test Environment reports */
+	u16 number_reports;       /* Number of Built In Test Environment reports */
 	u32 nalloc;
 	s7kr_bitereport *reports;
 } s7kr_bite;
@@ -1634,7 +1660,7 @@ typedef struct s7kr_rawdetection_struct {
 	f32 applied_roll;         /* Roll value (in radians) applied to gates; 
 	                             zero if roll stabilization is ON. */
 	u32 reserved[15];         /* Reserved */
-	s7k_rawdetectiondata rawdetectiondata[MBSYS_RESON7K_MAX_BEAMS];
+	s7kr_rawdetectiondata rawdetectiondata[MBSYS_RESON7K_MAX_BEAMS];
 	u32 optionaldata;                             /* Flag indicating if bathymetry calculated and
 	                                                 values below filled in
 	                                                    0 = No
@@ -1682,7 +1708,7 @@ typedef struct s7kr_snippet_struct {
 	u16 multi_ping;    /* Flag to indicate multi-ping mode
 	                         0 = no multi-ping
 	                        >0 = sequence number of ping in the multi-ping sequence */
-	u16 n;             /* Number of detection points */
+	u16 number_beams;             /* Number of detection points */
 	u8 error_flag;     /* If set, record will not contain any data
 	                         Flag itself will indicate an error:
 	                         0 = Ok
@@ -1699,7 +1725,7 @@ typedef struct s7kr_snippet_struct {
 	                         Bit 0: 0 = 16 bit snippets
 	                         1 = 32 bit snippets */
 	u32 reserved[6];    /* Reserved for future use */
-	s7k_snippettimeseries snippettimeseries[MBSYS_RESON7K_MAX_BEAMS];
+	s7kr_snippettimeseries snippettimeseries[MBSYS_RESON7K_MAX_BEAMS];
 	/* Snippet time series for each beam */
 	u32 optionaldata;    /* Optional data */
 	f32 frequency;       /* Ping frequency in Hz */
@@ -1736,7 +1762,7 @@ typedef struct s7kr_vernierprocessingdatafiltered_struct {
 	f32 min_angle;        /* Minimum elevation angle in all soundings (radians) */
 	f32 max_angle;        /* Maximum elevation angle in all soundings (radians) */
 	u16 repeat_size;      /* Size of sounding repeat blocks following (bytes) */
-	s7k_vernierprocessingdatasoundings vernierprocessingdatasoundings[MBSYS_RESON7K_MAX_BEAMS]
+	s7kr_vernierprocessingdatasoundings vernierprocessingdatasoundings[MBSYS_RESON7K_MAX_BEAMS]
 } s7kr_vernierprocessingdatafiltered;
 
 /* Reson 7k sonar installation parameters (record 7030) */
@@ -1835,7 +1861,7 @@ typedef struct s7kr_compressedbeamformedmagnitude_struct {
 	                         Bit 9-15: Reserved */
 	f32 sample_rate;   /* Sampling rate for the data */
 	u32 reserved;      /* Reserved */
-	s7k_beamformedmagnitude beamformedmagnitude[MBSYS_RESON7K_MAX_BEAMS];
+	s7kr_beamformedmagnitude beamformedmagnitude[MBSYS_RESON7K_MAX_BEAMS];
 } s7kr_compressedbeamformedmagnitude;
 
 /* Reson 7k Compressed Water Column Data (part of Record 7042) */
@@ -1906,7 +1932,7 @@ typedef struct s7kr_compressedwatercolumn_struct {
 	f32 sample_rate;         /* Effective sample rate after downsampling, if specified. */
 	f32 compression_factor;  /* Factor used in magnitude compression. */
 	u32 reserved;            /* Zero. Reserved for future use. */
-	s7k_compressedwatercolumndata compressedwatercolumndata[MBSYS_RESON7K_MAX_BEAMS];
+	s7kr_compressedwatercolumndata compressedwatercolumndata[MBSYS_RESON7K_MAX_BEAMS];
 } s7kr_compressedwatercolumn;
 
 /* Reson 7k Segmented Raw Detection Data (part of Record 7047) */
@@ -2133,7 +2159,7 @@ typedef struct s7kr_rdrrecordingstatus_struct {
 	                            Non-zero = write 10 sec of lead-in ping data */
 	u16 reserved;            /* Reserved */
 	u32 reserved2[4];         /* Reserved */
-	s7k_rdrrecordingstatusdata rdrrecordingstatusdata;
+	s7kr_rdrrecordingstatusdata rdrrecordingstatusdata;
 } s7kr_rdrrecordingstatus;
 
 /* Reson 7k Subscriptions (part of Record 7053) */
@@ -2260,7 +2286,7 @@ typedef struct s7kr_calibratedsidescan_struct {
 	                          8 = No gain (Gain is too low)
 	                          128-254 = Reserved for internal errors
 	                          255 = System cannot be calibrated (c7k file missing) */
-	s7k_calibratedsidescanseries calibratedsidescanseries;
+	s7kr_calibratedsidescanseries calibratedsidescanseries;
 	u32 optionaldata;    /* Optional data */
 	f32 frequency;       /* Ping frequency in Hz */
 	f64 latitude;        /* Latitude of vessel reference point in Radians -pi/2 to pi/2,
@@ -2320,7 +2346,7 @@ typedef struct s7kr_snippetbackscatteringstrength_struct {
 	f32 absorption;     /* Absorption value in dB/km. Only valid when 
 	                       control flag bit 8 is set */
 	u32 reserved[6];  /* Reserved for future use */
-	s7k_snippetbackscatteringstrengthdata 
+	s7kr_snippetbackscatteringstrengthdata 
 	                     snippetbackscatteringstrengthdata[MBSYS_RESON7K_MAX_BEAMS];
 	/* Snippet time series for each beam */
 	u32 optionaldata;    /* Optional data */
@@ -2500,7 +2526,7 @@ typedef struct s7kr_fileheader_struct {
 	c8 recording_version[16];  /* Recording program version number - null terminated string */
 	c8 user_defined_name[64];  /* User defined name - null terminated string */
 	c8 notes[128];             /* Notes - null terminated string */
-	s7k_subsystem subsystem[MBSYS_RESON7K_MAX_DEVICE];
+	s7kr_subsystem subsystem[MBSYS_RESON7K_MAX_DEVICE];
 } s7kr_fileheader;
 
 /* Reson 7k File Catalog Record (part of Record 7300) */
@@ -3017,6 +3043,7 @@ struct mbsys_reson7k_struct {
 	int read_remotecontrolsettings;
 	int read_bathymetry;
 	int read_sidescan;
+	int read_verticaldepth;
 	int read_tvg;
 	int read_image;
 	int read_pingmotion;
@@ -3118,6 +3145,9 @@ struct mbsys_reson7k_struct {
 	
 	/* Reson 7k Generic Water Column data (record 7008) */
 	s7kr_watercolumn s7kr_watercolumn;
+
+	/* Reson 7k vertical depth (record 7009) */
+	s7kr_verticaldepth verticaldepth;
 
 	/* Reson 7k tvg data (record 7011) */
 	s7kr_tvg tvg;
@@ -3274,6 +3304,7 @@ struct mbsys_reson7k_struct {
 	int nrec_bathymetry;
 	int nrec_sidescan;
 	int nrec_watercolumn;
+	int nrec_verticaldepth;
 	int nrec_tvg;
 	int nrec_image;
 	int nrec_pingmotion;
@@ -3404,7 +3435,7 @@ int mbsys_reson7k_print_sonarinstallationids(int verbose, s7kr_sonarinstallation
 int mbsys_reson7k_print_pantilt(int verbose, s7kr_sonarpipeenvironment *sonarpipeenvironment, int *error);
 int mbsys_reson7k_print_contactoutput(int verbose, s7kr_contactoutput *contactoutput, int *error);
 int mbsys_reson7k_print_sonarsettings(int verbose, s7kr_sonarsettings *sonarsettings, int *error);
-int mbsys_reson7k_print_device(int verbose, s7k_device *device, int *error);
+int mbsys_reson7k_print_device(int verbose, s7kr_device *device, int *error);
 int mbsys_reson7k_print_configuration(int verbose, s7kr_configuration *configuration, int *error);
 int mbsys_reson7k_print_matchfilter(int verbose, s7kr_matchfilter *matchfilter, int *error);
 int mbsys_reson7k_print_firmwarehardwareconfiguration(int verbose,
@@ -3414,6 +3445,7 @@ int mbsys_reson7k_print_beamgeometry(int verbose, s7kr_beamgeometry *beamgeometr
 int mbsys_reson7k_print_bathymetry(int verbose, s7kr_bathymetry *bathymetry, int *error);
 int mbsys_reson7k_print_sidescan(int verbose, s7kr_sidescan *sidescan, int *error);
 int mbsys_reson7k_print_watercolumn(int verbose, s7kr_watercolumn *watercolumn, int *error);
+int mbsys_reson7k_print_verticaldepth(int verbose, s7kr_verticaldepth *verticaldepth, int *error);
 int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error);
 int mbsys_reson7k_print_image(int verbose, s7kr_image *image, int *error);
 int mbsys_reson7k_print_pingmotion(int verbose, s7kr_pingmotion *pingmotion, int *error);
