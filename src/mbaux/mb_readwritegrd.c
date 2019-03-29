@@ -104,7 +104,11 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 		while (G == NULL && num_tries < 100) {
 			if ((G = GMT_Read_Data(API, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE, GMT_GRID_ALL, NULL, grdfile, NULL)) == NULL) {
 				num_tries++;
+#ifdef _WIN32
+				Sleep(1);		/* 1 milisec */
+#else
 				usleep(1000);
+#endif
 				//fprintf(stderr,"Failed to read grid with GMT_Read_Data(), attempt %d\n", num_tries);
 			} else {
 				if (num_tries > 0) {
