@@ -40,8 +40,12 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
+#ifdef _WIN32
+#include <stdint.h> /* To get INT32_MIN, INT32_MAX, etc ... */
+#else
+#	ifdef HAVE_STDINT_H
+#		include <stdint.h>
+#	endif
 #endif
 
 #include "mbbs_defines.h"

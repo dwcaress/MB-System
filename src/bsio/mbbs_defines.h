@@ -38,7 +38,7 @@
 #define __MBBS_DEFINES__
 
 #include <time.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <sys/time.h>
 #endif
 
@@ -89,7 +89,7 @@
 #include <rpc/types.h>
 #include <rpc/xdr.h>
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #include <rpc/rpc.h>
 #endif
 #ifdef OTHER
@@ -97,7 +97,7 @@
 #include <rpc/xdr.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <float.h>
 #define isnan _isnan
 #endif
