@@ -115,6 +115,9 @@
 #undef ftell
 #if (defined _WIN32) && (defined _MSC_VER)
 #define fseek(x, y, z) _fseeki64((x), (y), (z))
+#	ifndef F_OK
+#		define F_OK 00
+#   endif
 #define ftell(x)   _ftelli64((x))
 #else  // Linux, MingW, MacOS
 #undef fopen
