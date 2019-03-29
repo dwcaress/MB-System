@@ -46,7 +46,7 @@
 #include "mb_define.h"
 #include "proj_api.h"
 
-#ifndef WIN32
+#ifndef _WIN32
 #include "projections.h"
 #else
 char *GMT_runtime_bindir_win32(char *result);
@@ -62,9 +62,17 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 	projPJ pj;
 	struct stat file_status;
 	int fstat;
-
-#ifdef WIN32
-	char *pch, projectionfile[PATH_MAX + 1];
+#ifdef _WIN32
+	/* But on Windows get it from the bin dir */
+#	include <unistd.h>
+	char *pch, projectionfile[MB_PATH_MAXLINE + 1];
+	/* Find the path to the bin directory and from it, the location of the Projections.dat file */
+	GMT_runtime_bindir_win32 (projectionfile);
+	pch = strrchr(projectionfile, '\\');		/* Seek for the last '\' or '/'. One of them must exist. */
+	if (pch == NULL)
+		pch = strrchr(projectionfile, '/');
+	pch[0] = '\0';
+	strcat(projectionfile, "\\share\\mbsystem\\Projections.dat");
 #endif
 
 	/* print input debug statements */
@@ -81,7 +89,7 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 	use GMT constructs to find the path to the bin directory and from it,
 	the location of the Projections.dat file.
 	This construct has been defined by Joaquim Luis. */
-#ifdef WIN32
+#ifdef _WIN32
 	GMT_runtime_bindir_win32(projectionfile);
 	pch = strrchr(projectionfile, '\\'); /* Seek for the last '\' or '/'. One of them must exist. */
 	if (pch == NULL)

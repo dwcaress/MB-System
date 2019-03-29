@@ -33,6 +33,9 @@
 #include "mb_define.h"
 #include "mb_segy.h"
 #include "../surf/mb_sapi.h"
+#ifdef _WIN32
+#	include <rpc/xdr.h>			/* Don't understand whay this is now need. It wasn't till recently. 26 Juin 2018 (JL)*/
+#endif
 #include "gsf.h"
 #include "netcdf.h"
 
