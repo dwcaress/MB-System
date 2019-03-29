@@ -184,7 +184,11 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
 			project->smoothing = MBNA_SMOOTHING_DEFAULT;
 
 			/* create data directory */
+#ifdef _WIN32
+			if (mkdir(project->datadir) != 0) {
+#else
 			if (mkdir(project->datadir, 00775) != 0) {
+#endif
 				fprintf(stderr, "Error creating data directory %s\n", project->datadir);
 				*error = MB_ERROR_INIT_FAIL;
 				status = MB_FAILURE;

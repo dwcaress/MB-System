@@ -36,6 +36,11 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+/* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
+#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+#include <windows.h>
+#endif
 #include <X11/Intrinsic.h>
 
 /* MBIO include files */
@@ -625,7 +630,7 @@ int mbnavadjust_file_new(char *projectname) {
                 project.mbnavadjust_plot_string = &mbnavadjust_plot_string;
 
 /* create data directory */
-#ifdef WIN32
+#ifdef _WIN32
 				if (_mkdir(project.datadir) != 0)
 #else
 				if (mkdir(project.datadir, 00775) != 0)
