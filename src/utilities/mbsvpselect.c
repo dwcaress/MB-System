@@ -855,7 +855,8 @@ void fill_struct_svp(svp *svp_hold, char *holder) {
 } /* fill_struct_svp */
 /*---------------------------------------------------------------------*/
 int read_recursive2(char *fname) {
-	char original[strlen(fname)];
+	//char original[strlen(fname)];		This no valid C  JL
+	char original[1024] = {""};
 	my_strcpy(original, fname);
 	const char *result = fname;
 	char *ret;
@@ -875,7 +876,8 @@ int read_recursive2(char *fname) {
 	else {
 		ret = strchr(result, ' ');
 		if (ret == NULL) {
-			char file2[strlen(original)];
+			//char file2[strlen(original)];		NOT VALID C  JL
+			char file2[1024] = {""};
 			my_strcpy(file2, original);
 			// char *file2= original;
 			trim_newline(file2);
@@ -888,7 +890,8 @@ int read_recursive2(char *fname) {
 			else {
 				// char *result2;
 				while ((fgets(dBuffer, sizeof dBuffer, dataFile2)) != NULL) {
-					char strHolder[strlen(original)];
+					//char strHolder[strlen(original)];		INVALID JL
+					char strHolder[1024];
 					my_strcpy(strHolder, original);
 					while (strHolder[strlen(strHolder) - 1] != '/')
 						strHolder[strlen(strHolder) - 1] = 0;
@@ -903,7 +906,8 @@ int read_recursive2(char *fname) {
 			}
 		}
 		else {
-			char strHolder[strlen(original)];
+			//char strHolder[strlen(original)];		INVALID JL
+			char strHolder[1024];
 			my_strcpy(strHolder, original);
 			while (strHolder[strlen(strHolder) - 1] != ' ')
 				strHolder[strlen(strHolder) - 1] = 0;
@@ -1031,9 +1035,15 @@ void read_list(char *list, char *list_2) {
 		printf("no memory for the process end of process");
 		exit(1);
 	}
-	int hour_hold[size][size_2];
+#ifdef _WIN32
+	int hour_hold[100][100];	// Have no idea if it's enough JL
+	int min_hold[100][100];
+	int day_hold[100][100];
+#else
+	int hour_hold[size][size_2];	// INVALID STANDARD C
 	int min_hold[size][size_2];
 	int day_hold[size][size_2];
+#endif
 	for (i = 0; i < size_2; i++) {
 		fill_struct_svp(&svp_hold[i], svps[i]);
 		if (verbose == 1)
@@ -1066,8 +1076,13 @@ void read_list(char *list, char *list_2) {
 	geod_init(&g, A_, F_);
 	size = surveyLines_total;
 	for (i = 0; i < size; i++) {
+#ifdef _WIN32
+		double dist[100][100];				// Have no idea if it's enough JL
+		double time_hold[100][100];
+#else
 		double dist[size][size_2];
 		double time_hold[size][size_2];
+#endif
 		char all_in_sys[BUFSIZ] = "mbset";
 		if (p_flag == 0) {
 			switch (inf_hold[i].flag) {
