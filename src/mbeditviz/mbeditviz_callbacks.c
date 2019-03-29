@@ -37,6 +37,12 @@
  * Code Generator Xcessory 6.1.3 (08/19/04) CGX Scripts 6.1 Motif 2.1
  *
  */
+
+/* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
+#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+#include <windows.h>
+#endif
+
 #include <Xm/Xm.h>
 
 /*

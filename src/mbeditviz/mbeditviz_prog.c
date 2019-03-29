@@ -43,6 +43,12 @@
 #include "mbsys_singlebeam.h"
 
 /* mbview include file */
+
+/* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
+#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+#include <windows.h>
+#endif
+
 #include <X11/StringDefs.h>
 #include <Xm/Xm.h>
 #include "mbview.h"
@@ -50,6 +56,11 @@
 /* mbeditviz include file - define globals here */
 #define MBEDITVIZ_DECLARE_GLOBALS
 #include "mbeditviz.h"
+
+/* No isinf() os VS, so make one */
+#ifdef _MSC_VER
+#	define isinf(x) (!_finite(x))
+#endif
 
 /* id variables */
 static char rcs_id[] = "$Id$";
@@ -1258,7 +1269,7 @@ int mbeditviz_load_file(int ifile) {
 				file->n_async_sonardepth = file->n_async_sonardepth_alloc;
 
 				/* read the asynchronous sonardepth data */
-				if ((afp = fopen(asyncfile, "r")) != NULL) {
+				if ((afp = fopen(asyncfile, "rb")) != NULL) {
 					read_size = sizeof(double) + sizeof(float);
 					for (i = 0; i < file->n_async_sonardepth; i++) {
 						nread = fread(buffer, read_size, 1, afp);
@@ -1375,7 +1386,7 @@ int mbeditviz_load_file(int ifile) {
 				file->n_async_attitude = file->n_async_attitude_alloc;
 
 				/* read the asynchronous attitude data */
-				if ((afp = fopen(asyncfile, "r")) != NULL) {
+				if ((afp = fopen(asyncfile, "rb")) != NULL) {
 					read_size = sizeof(double) + 2 * sizeof(float);
 					for (i = 0; i < file->n_async_attitude; i++) {
 						if ((nread = fread(buffer, read_size, 1, afp)) == 1) {
@@ -1523,7 +1534,7 @@ int mbeditviz_load_file(int ifile) {
 				file->n_sync_attitude = file->n_sync_attitude_alloc;
 
 				/* read the synchronous attitude data */
-				if ((afp = fopen(asyncfile, "r")) != NULL) {
+				if ((afp = fopen(asyncfile, "rb")) != NULL) {
 					read_size = sizeof(double) + 2 * sizeof(float);
 					for (i = 0; i < file->n_sync_attitude; i++) {
 						if ((nread = fread(buffer, read_size, 1, afp)) == 1) {
