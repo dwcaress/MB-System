@@ -426,8 +426,8 @@ gsfDataID;
 /* MAC OSX is a different bird, and while doesn't have the structures defined */
 /* above, does have the timespec structure defined. __APPLE__ will be set when  */
 /* compiled with Apple's gcc on OSX and other third party compilers, so we use it to */
-/* insure the definition below does not conflict. */
- #ifndef __APPLE__
+/* insure the definition below does not conflict. The same now applyies to VS2015 and above. */
+ #if !defined(__APPLE__) && (!defined(_MSC_VER) || (_MSC_VER <= 1800))
 
     struct timespec
     {
