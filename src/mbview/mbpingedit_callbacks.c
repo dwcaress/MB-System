@@ -27,7 +27,6 @@
  * Code Generator Xcessory 6.1.3 (08/19/04) CGX Scripts 6.1 Motif 2.1
  *
  */
-#include <Xm/Xm.h>
 
 /*
  * Standard includes for builtins.
@@ -36,6 +35,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+
+/* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
+#if defined(_MSC_VER) && (_MSC_VER >= 1800)
+#include <windows.h>
+#endif
 
 /* Motif required Headers */
 #include <X11/StringDefs.h>
@@ -53,11 +57,6 @@
 #include "Mb3dsdg.h"
 
 /* OpenGL include files */
-#ifdef WIN32
-#undef BOOL /* It was defined by a chain of inclusions in the (patched) X11/Xmd.h */
-#include <windows.h>
-#endif
-
 #include <GL/gl.h>
 #include <GL/glu.h>
 #ifndef WIN32
