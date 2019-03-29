@@ -27,10 +27,14 @@
 #ifndef MB_DEFINE_DEF
 #define MB_DEFINE_DEF
 
-#ifdef HAVE_CONFIG_H
-#ifndef MBSYSTEM_CONFIG_DEFINED
-#include <mb_config.h>
-#endif
+#ifdef _WIN32
+#	include <mb_config.h>
+#else
+#	ifdef HAVE_CONFIG_H
+#		ifndef MBSYSTEM_CONFIG_DEFINED
+#			include <mb_config.h>
+#		endif
+#	endif
 #endif
 
 /* include for mb_s_char types */
@@ -66,11 +70,11 @@
 #define pclose _pclose
 #define ftello ftell
 #define fseeko fseek
-#ifndef isnan
-#define isnan(x) _isnan(x)
+#if !defined(isnan) && (_MSC_VER < 1900)
+#	define isnan(x) _isnan(x)
 #endif
-#ifndef inline
-#define inline __inline
+#if !defined(inline) && (_MSC_VER < 1900)
+#	define inline __inline
 #endif
 #endif
 

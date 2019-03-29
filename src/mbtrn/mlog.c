@@ -65,9 +65,14 @@ GNU General Public License for more details
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
-#include <dirent.h>
+#ifdef _WIN32
+#	include "mlog.h"
+#	include "windirent.h"
+#else
+#	include <dirent.h>
+#	include "mlog.h"
+#endif
 
-#include "mlog.h"
 #include "mdebug.h"
 
 /////////////////////////
@@ -535,7 +540,7 @@ static int s_log_set_seg(mlog_t *self, int16_t segno)
 		// for delimiter(s), NULL
         len += 2;
         // init buffer
-        char new_name[len];
+        char new_name[1024];		// char new_name[len];  is not valid C. JL 
         memset(new_name,0,len);
         char *bp = new_name;
 //        MDEBUG("path[%s] name[%s] ext[%s] len[%d]\n",self->path,self->name,self->ext,len);

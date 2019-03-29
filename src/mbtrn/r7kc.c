@@ -653,12 +653,17 @@ int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool
 {
     int retval=-1;
     int x=(sz<=0?16:sz);
-    byte buf[x];
+    //byte buf[x];			// Invalid C.	JL
+    byte *buf;
     int64_t test=0;
     int good=0,err=0,zero=0,tmout=0;
     int status = 0;
     bool forever=true;
     int count=0;
+    if (sz < 0)
+    	buf = (byte *)malloc(16);
+    else
+    	buf = (byte *)malloc(sz);
 
     if (cycles>0) {
         forever=false;
@@ -690,6 +695,7 @@ int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool
             }
         }
     }
+    free(buf);
     return retval;
 }
 // End function r7k_stream_show
@@ -1545,8 +1551,10 @@ int r7k_msg_receive(iow_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
         
         // read nf, drf headers
         int64_t header_len = sizeof(r7k_nf_headers_t);
-        byte headers[header_len];
         int64_t total_len=0;
+        //byte headers[header_len];	// Invalid C.	JL
+        byte *headers;
+        headers = (byte *)malloc(header_len+1);
         
         memset(headers,0,header_len);
         if ( (nbytes=iow_read_tmout(s,headers,header_len,timeout_msec)) == header_len) {
@@ -1565,7 +1573,9 @@ int r7k_msg_receive(iow_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
            MMDEBUG(R7K,"data_len[%u] read_len[%u]\n",data_len,read_len);
             // read rth/rd/od [if any], checksum
             if (read_len>0) {
-                byte data[read_len];
+                //byte data[read_len];		// INVALID C. JL
+                byte *data;
+                data = (byte *)malloc(read_len);
                 memset(data,0,read_len);
                 if ( (nbytes=iow_read_tmout(s,data,read_len,timeout_msec)) == read_len) {
                     total_len+=nbytes;
@@ -1587,12 +1597,14 @@ int r7k_msg_receive(iow_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
                 }else{
                    MMDEBUG(R7K,"incomplete data read nbytes[%"PRId64"] data_len[%u]\n",nbytes,data_len);
                 }
+                free(data);
             }else{
                MMDEBUG(R7K,"read_len <= 0 nbytes[%"PRId64"] read_len[%u]\n",nbytes,read_len);
             }
         }else{
            MMDEBUG(R7K,"incomplete header read? nbytes[%"PRId64"] header_len[%"PRId64"]\n",nbytes,header_len);
         }
+        free(headers);
     }else{
         MINFO("invalid socket or status s[%p]\n",s);
     }

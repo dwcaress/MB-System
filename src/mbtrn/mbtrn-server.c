@@ -90,6 +90,9 @@ GNU General Public License for more details
 #include <netinet/in.h>
 #include <string.h>
 #include <errno.h>
+#else
+#	include <winsock2.h>
+#	include <WS2tcpip.h>
 #endif
 
 #include <stdio.h>

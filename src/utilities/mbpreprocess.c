@@ -2540,7 +2540,7 @@ int main(int argc, char **argv) {
           sprintf(fnvfile, "sensor_%2.2d_%2.2d_%2.2d.fnv", isensor, ioffset, platform->sensors[isensor].type);
           if (verbose > 0)
             fprintf(stderr, "Outputting sensor %d offset %d in fnv file:%s\n", isensor, ioffset, fnvfile);
-          if ((platform->sensors[isensor].offsets[ioffset].ofp = fopen(fnvfile, "w")) == NULL) {
+          if ((platform->sensors[isensor].offsets[ioffset].ofp = fopen(fnvfile, "wb")) == NULL) {
             error = MB_ERROR_OPEN_FAIL;
             fprintf(stderr, "\nUnable to open sensor fnv data file <%s> for writing\n", fnvfile);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2741,7 +2741,7 @@ int main(int argc, char **argv) {
 
       /* open synchronous attitude file */
       sprintf(afile, "%s.bsa", ofile);
-      if ((afp = fopen(afile, "w")) == NULL) {
+      if ((afp = fopen(afile, "wb")) == NULL) {
         error = MB_ERROR_OPEN_FAIL;
         fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", afile);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3255,7 +3255,7 @@ int main(int argc, char **argv) {
             iend++;
           if (iend > istart) {
             sprintf(afile, "%s.bah", ofile);
-            if ((afp = fopen(afile, "w")) == NULL) {
+            if ((afp = fopen(afile, "wb")) == NULL) {
               error = MB_ERROR_OPEN_FAIL;
               fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3293,7 +3293,7 @@ int main(int argc, char **argv) {
             iend++;
           if (iend > istart) {
             sprintf(afile, "%s.bas", ofile);
-            if ((afp = fopen(afile, "w")) == NULL) {
+            if ((afp = fopen(afile, "wb")) == NULL) {
               error = MB_ERROR_OPEN_FAIL;
               fprintf(stderr, "\nUnable to open asynchronous sensordepth data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3332,7 +3332,7 @@ int main(int argc, char **argv) {
             iend++;
           if (iend > istart) {
             sprintf(afile, "%s.baa", ofile);
-            if ((afp = fopen(afile, "w")) == NULL) {
+            if ((afp = fopen(afile, "wb")) == NULL) {
               error = MB_ERROR_OPEN_FAIL;
               fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
