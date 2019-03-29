@@ -32,7 +32,6 @@
  * Code Generator Xcessory 2.0 (09/09/96)
  *
  */
-#include <Xm/Xm.h>
 
 /*
  * Standard includes for builtins.
@@ -42,6 +41,12 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#include <time.h>
+
+/* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
+#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+#include <windows.h>
+#endif
 
 /* X11 includes */
 #include <X11/StringDefs.h>
@@ -51,6 +56,7 @@
 #include <X11/Intrinsic.h>
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
+#include <Xm/Xm.h>
 #include <Xm/FileSB.h>
 #include <Xm/Text.h>
 #include <Xm/TextF.h>
@@ -59,8 +65,8 @@
 
 /* mbedit widget includes */
 #include "mbedit_creation.h"
-#include "mb_define.h"
 #include "mb_status.h"
+#include "mb_define.h"
 #include "mb_process.h"
 #include "mb_xgraphics.h"
 #include "mbedit.h"
@@ -2438,7 +2444,7 @@ void do_number_pings(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* set step to have same ratio with mplot_size as before
 	    also set slider maximum to the same as for mplot_size */
-	step = ratio * mplot_size;
+	step = (int)(ratio * mplot_size);
 	if (step < 1)
 		step = 1;
 	if (step > mplot_size)
