@@ -77,9 +77,19 @@ GNU General Public License for more details
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <sys/socket.h>
-#include <sys/poll.h>
-#include <netinet/in.h>
+#ifdef _WIN32
+#	include <winsock2.h>
+#	include <WS2tcpip.h>
+#	include <fcntl.h>
+#	if defined(_MSC_VER)
+#		include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#	endif
+#else
+#	include <sys/socket.h>
+#	include <sys/poll.h>
+#	include <netinet/in.h>
+#endif
 #include <errno.h>
 #include <string.h>
 #include <math.h>
@@ -200,6 +210,11 @@ int iow_thread_join(iow_thread_t *thread){
 int iow_set_blocking(iow_socket_t *s, bool enabled)
 {
     int retval=-1;
+#ifdef _WIN32
+	// https://stackoverflow.com/questions/5489562/in-win32-is-there-a-way-to-test-if-a-socket-is-non-blocking 
+	u_long flags = enabled ? 0 : 1;
+	retval = NO_ERROR == ioctlsocket(s->fd, FIONBIO, &flags);
+#else
     if (NULL != s) {
         int flags = fcntl(s->fd, F_GETFL, 0);
         if (flags != -1){
@@ -207,7 +222,8 @@ int iow_set_blocking(iow_socket_t *s, bool enabled)
             retval = fcntl(s->fd, F_SETFL, flags);
         }// else error
     }// else invalid arg
-    
+#endif
+
     return retval;
 }
 // End function iow_set_blocking
@@ -1276,7 +1292,11 @@ static int s_iow2posix_flags(int iflags)
     pflags |= ( (iflags&IOW_APPEND  )!=0 ? O_APPEND   : 0 );
     pflags |= ( (iflags&IOW_CREATE  )!=0 ? O_CREAT    : 0 );
     pflags |= ( (iflags&IOW_TRUNC   )!=0 ? O_TRUNC    : 0 );
+#ifdef _WIN32
+    pflags |= ( (iflags&IOW_NONBLOCK)!=0 ? FIONBIO : 0 );		// I'm really not sure about this. JL
+#else
     pflags |= ( (iflags&IOW_NONBLOCK)!=0 ? O_NONBLOCK : 0 );
+#endif
     pflags |= ( (iflags&IOW_DSYNC   )!=0 ? O_DSYNC    : 0 );
 #if defined(__APPLE__)
     pflags |= ( (iflags&IOW_RSYNC   )!=0 ? O_SYNC    : 0 );
