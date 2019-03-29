@@ -51,6 +51,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdint.h>		/* For the int64_t */
 
 /*
  * Include stdlib.h and malloc.h if code is C++, ANSI, or Extended ANSI.
@@ -1330,7 +1331,11 @@ XtPointer BX_CONVERT ARGLIST((w, from_string, to_type, to_size, success)) ARG(Wi
 			break;
 		case 8:
 		default:
-			val = (XTPOINTER)(*(long *)toVal.addr);
+#ifdef _WIN32
+			val = (XTPOINTER)(int64_t)(*(int64_t *)toVal.addr);
+#else
+			val = (XTPOINTER)(long)(*(long *)toVal.addr);
+#endif
 			break;
 		}
 	}

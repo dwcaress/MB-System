@@ -68,13 +68,14 @@
  *     jvz@cyberia.cfdrc.com
  *
  */
-#include <X11/IntrinsicP.h>
-#include <X11/StringDefs.h>
 
-#ifdef WIN32
-#undef BOOL /* It was defined by a chain of inclusions in the (patched) X11/Xmd.h */
+/* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
+#if defined(_MSC_VER) && (_MSC_VER >= 1800)
 #include <windows.h>
 #endif
+
+#include <X11/IntrinsicP.h>
+#include <X11/StringDefs.h>
 
 #ifndef WIN32
 #include <GL/glx.h>

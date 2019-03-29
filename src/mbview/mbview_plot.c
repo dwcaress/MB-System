@@ -31,6 +31,11 @@
 #include <ctype.h>
 #include <math.h>
 
+/* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
+#if defined(_MSC_VER) && (_MSC_VER >= 1800)
+#include <windows.h>
+#endif
+
 /* Motif required Headers */
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
@@ -50,10 +55,6 @@
 #include "MB3DNavList.h"
 
 /* OpenGL include files */
-#ifdef WIN32
-#undef BOOL /* It was defined by a chain of inclusions in the (patched) X11/Xmd.h */
-#include <windows.h>
-#endif
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -798,7 +799,7 @@ int mbview_plotlow(size_t instance) {
 		if (view->message_on == MB_YES && view->plot_recursion == 0)
 			do_mbview_status("Done.", instance);
 		if (mbv_verbose >= 2)
-			fprintf(stderr, "Done with mbview_plotlow %ld  recursion:%d\n\n", instance, view->plot_recursion);
+			fprintf(stderr, "Done with mbview_plotlow %zd  recursion:%d\n\n", instance, view->plot_recursion);
 	}
 
 	/* print output debug statements */
@@ -860,7 +861,7 @@ int mbview_plotlowhigh(size_t instance) {
 		if (view->message_on == MB_YES && view->plot_recursion == 0)
 			do_mbview_status("Done.", instance);
 		if (mbv_verbose >= 2)
-			fprintf(stderr, "Done with mbview_plotlowhigh %ld  recursion:%d\n\n", instance, view->plot_recursion);
+			fprintf(stderr, "Done with mbview_plotlowhigh %zd  recursion:%d\n\n", instance, view->plot_recursion);
 	}
 
 	/* print output debug statements */
@@ -919,7 +920,7 @@ int mbview_plothigh(size_t instance) {
 		if (view->message_on == MB_YES && view->plot_recursion == 0)
 			do_mbview_status("Done.", instance);
 		if (mbv_verbose >= 2)
-			fprintf(stderr, "Done with mbview_plothigh %ld  recursion:%d\n\n", instance, view->plot_recursion);
+			fprintf(stderr, "Done with mbview_plothigh %zd  recursion:%d\n\n", instance, view->plot_recursion);
 	}
 
 	/* print output debug statements */
@@ -978,7 +979,7 @@ int mbview_plotfull(size_t instance) {
 		if (view->message_on == MB_YES && view->plot_recursion == 0)
 			do_mbview_status("Done.", instance);
 		if (mbv_verbose >= 2)
-			fprintf(stderr, "Done with mbview_plotfull %ld  recursion:%d\n\n", instance, view->plot_recursion);
+			fprintf(stderr, "Done with mbview_plotfull %zd  recursion:%d\n\n", instance, view->plot_recursion);
 	}
 
 	/* print output debug statements */

@@ -99,7 +99,7 @@ struct mbpingedit_world_struct {
 	Window xid;
 	XVisualInfo *vi;
 	int glx_init;
-#ifdef WIN32
+#ifdef _WIN32
 	HGLRC glx_context;
 #else
 	GLXContext glx_context;
