@@ -1403,7 +1403,8 @@ int main(int argc, char **argv) {
 						/* check for good nav */
 						speed_apparent = 3600.0 * distance / (time_d - time_d_last);
 						if (good_nav_only == MB_YES) {
-							if (navlon == 0.0 || navlat == 0.0) {
+							//if (navlon == 0.0 || navlat == 0.0) {		// This still misses lots of trash JL
+							if ((navlon > -0.005 && navlon < 0.005) && (navlat > -0.005 && navlat < 0.005)) { 
 								good_nav = MB_NO;
 							}
 							else if (beginnav == MB_YES && speed_apparent >= speed_threshold) {
