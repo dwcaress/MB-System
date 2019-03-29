@@ -134,6 +134,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	s7kr_bathymetry *bathymetry;
 	s7kr_sidescan *sidescan;
 	s7kr_watercolumn *s7kr_watercolumn;
+	s7kr_verticaldepth *verticaldepth;
 	s7kr_tvg *tvg;
 	s7kr_image *image;
 	s7kr_pingmotion *pingmotion;
@@ -207,6 +208,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	store->read_beamgeometry = MB_NO;
 	store->read_bathymetry = MB_NO;
 	store->read_sidescan = MB_NO;
+	store->read_verticaldepth = MB_NO;
 	store->read_tvg = MB_NO;
 	store->read_image = MB_NO;
 	store->read_pingmotion = MB_NO;
@@ -718,6 +720,19 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		watercolumn->beam_acrosstrack[i] = 0.0;
 		watercolumn->center_sample[i] = 0;
 	}
+
+	/* Reson 7k vertical depth (record 7009) */
+	verticaldepth = &store->verticaldepth;
+	mbsys_reson7k_zero7kheader(verbose, &verticaldepth->header, error);
+	verticaldepth->frequency = 0.0;
+	verticaldepth->ping_number = 0;
+	verticaldepth->multi_ping = 0;
+	verticaldepth->latitude = 0.0;
+	verticaldepth->longitude = 0.0;
+	verticaldepth->heading = 0.0;
+	verticaldepth->alongtrack = 0.0;
+	verticaldepth->acrosstrack = 0.0;
+	verticaldepth->vertical_depth = 0;
 
 	/* Reson 7k tvg data (record 7010) */
 	tvg = &store->tvg;
@@ -3009,7 +3024,7 @@ int mbsys_reson7k_print_sonarsettings(int verbose, s7kr_sonarsettings *sonarsett
 }
 
 /*--------------------------------------------------------------------*/
-int mbsys_reson7k_print_device(int verbose, s7k_device *device, int *error) {
+int mbsys_reson7k_print_device(int verbose, s7kr_device *device, int *error) {
 	char *function_name = "mbsys_reson7k_print_device";
 	int status = MB_SUCCESS;
 	char *debug_str = "dbg2  ";
@@ -3404,6 +3419,56 @@ int mbsys_reson7k_print_sidescan(int verbose, s7kr_sidescan *sidescan, int *erro
 /* Reson 7k Generic Water Column data (record 7008) */
 
 /*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_verticaldepth(int verbose, s7kr_verticaldepth *verticaldepth, int *error) {
+	char *function_name = "mbsys_reson7k_print_verticaldepth";
+	int status = MB_SUCCESS;
+	char *debug_str = "dbg2  ";
+	char *nodebug_str = "  ";
+	char *first;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr, "dbg2       verticaldepth:     %p\n", (void *)verticaldepth);
+	}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &verticaldepth->header, error);
+
+	/* print Reson 7k vertical depth data (record 7009) */
+	if (verbose >= 2)
+		first = debug_str;
+	else {
+		first = nodebug_str;
+		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+	}
+	fprintf(stderr, "%sStructure Contents:\n", first);
+	fprintf(stderr, "%s     frequency:                  %f\n", first, verticaldepth->frequency);
+	fprintf(stderr, "%s     ping_number:                %u\n", first, verticaldepth->ping_number);
+	fprintf(stderr, "%s     multi_ping:                 %u\n", first, verticaldepth->multi_ping);
+	fprintf(stderr, "%s     latitude:                   %f\n", first, verticaldepth->latitude);
+	fprintf(stderr, "%s     longitude:                  %f\n", first, verticaldepth->longitude);
+	fprintf(stderr, "%s     heading:                    %f\n", first, verticaldepth->heading);
+	fprintf(stderr, "%s     alongtrack:                 %f\n", first, verticaldepth->alongtrack);
+	fprintf(stderr, "%s     acrosstrack:                %f\n", first, verticaldepth->acrosstrack);
+	fprintf(stderr, "%s     vertical_depth:             %f\n", first, verticaldepth->vertical_depth);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error) {
 	char *function_name = "mbsys_reson7k_print_tvg";
 	int status = MB_SUCCESS;
@@ -3718,6 +3783,406 @@ int mbsys_reson7k_print_beamformed(int verbose, s7kr_beamformed *beamformed, int
 	return (status);
 }
 
+/* Reson 7k Vernier Processing Data Raw (record 7019) */
+
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_bite(int verbose, s7kr_bite *bite, int *error) {
+	char *function_name = "mbsys_reson7k_print_bite";
+	int status = MB_SUCCESS;
+	s7kr_bitereport *bitereport;
+	s7kr_bitefield *bitefield;
+	s7k_time *s7ktime;
+	char *debug_str = "dbg2  ";
+	char *nodebug_str = "  ";
+	char *first;
+	int i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr, "dbg2       bite:      %p\n", (void *)bite);
+	}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &bite->header, error);
+
+	/* Reson 7k BITE (record 7021) */
+	if (verbose >= 2)
+		first = debug_str;
+	else {
+		first = nodebug_str;
+		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+	}
+	fprintf(stderr, "%sStructure Contents:\n", first);
+	fprintf(stderr, "%s     number_reports:             %u\n", first, bite->number_reports);
+	for (i = 0; i < bite->number_reports; i++) {
+		bitereport = &(bite->reports[i]);
+		fprintf(stderr, "%s     source_name:                %s\n", first, bitereport->source_name);
+		fprintf(stderr, "%s     source_address:             %u\n", first, bitereport->source_address);
+		fprintf(stderr, "%s     frequency:                  %f\n", first, bitereport->reserved);
+		fprintf(stderr, "%s     enumerator:                 %u\n", first, bitereport->reserved2);
+		s7ktime = &(bitereport->downlink_time);
+		fprintf(stderr, "%s     downlink_time:              %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n", first, s7ktime->Year, s7ktime->Day,
+		        s7ktime->Hours, s7ktime->Minutes, s7ktime->Seconds);
+		s7ktime = &(bitereport->uplink_time);
+		fprintf(stderr, "%s     uplink_time:                %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n", first, s7ktime->Year, s7ktime->Day,
+		        s7ktime->Hours, s7ktime->Minutes, s7ktime->Seconds);
+		s7ktime = &(bitereport->bite_time);
+		fprintf(stderr, "%s     bite_time:                  %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n", first, s7ktime->Year, s7ktime->Day,
+		        s7ktime->Hours, s7ktime->Minutes, s7ktime->Seconds);
+		fprintf(stderr, "%s     status:                     %u\n", first, bitereport->status);
+		fprintf(stderr, "%s     number_bite:                %u\n", first, bitereport->number_bite);
+		fprintf(stderr, "%s     bite_status:                ", first);
+		for (j = 0; j < 4; j++)
+			fprintf(stderr, "%u ", bitereport->bite_status[j]);
+		fprintf(stderr, "\n");
+		for (j = 0; j < bitereport->number_bite; j++) {
+			bitefield = &(bitereport->bitefield[j]);
+			fprintf(stderr, "%s     reserved[%2d]:               %u\n", first, j, bitefield->reserved);
+			fprintf(stderr, "%s     name[%2d]:                   %s\n", first, j, bitefield->name);
+			fprintf(stderr, "%s     device_type[%2d]:            %d\n", first, j, bitefield->device_type);
+			fprintf(stderr, "%s     minimum[%2d]:                %f\n", first, j, bitefield->minimum);
+			fprintf(stderr, "%s     maximum[%2d]:                %f\n", first, j, bitefield->maximum);
+			fprintf(stderr, "%s     value[%2d]:                  %f\n", first, j, bitefield->value);
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_v37ksonarsourceversion(int verbose, s7kr_v37ksonarsourceversion *v37ksonarsourceversion, int *error) {
+	char *function_name = "mbsys_reson7k_print_v37ksonarsourceversion";
+	int status = MB_SUCCESS;
+	char *debug_str = "dbg2  ";
+	char *nodebug_str = "  ";
+	char *first;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr, "dbg2       v37ksonarsourceversion: %p\n", (void *)v37ksonarsourceversion);
+	}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &v37ksonarsourceversion->header, error);
+
+	/* Reson 7k center version (record 7022) */
+	if (verbose >= 2)
+		first = debug_str;
+	else {
+		first = nodebug_str;
+		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+	}
+	fprintf(stderr, "%sStructure Contents:\n", first);
+	fprintf(stderr, "%s     version:                    %s\n", first, v37ksonarsourceversion->version);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_v38kwetendversion(int verbose, s7kr_v38kwetendversion *v38kwetendversion, int *error) {
+	char *function_name = "mbsys_reson7k_print_v38kwetendversion";
+	int status = MB_SUCCESS;
+	char *debug_str = "dbg2  ";
+	char *nodebug_str = "  ";
+	char *first;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr, "dbg2       v38kwetendversion:      %p\n", (void *)v38kwetendversion);
+	}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &v38kwetendversion->header, error);
+
+	/* Reson 7k 8k wet end version (record 7023) */
+	if (verbose >= 2)
+		first = debug_str;
+	else {
+		first = nodebug_str;
+		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+	}
+	fprintf(stderr, "%sStructure Contents:\n", first);
+	fprintf(stderr, "%s     version:                    %s\n", first, v38kwetendversion->version);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_rawdetection(int verbose, s7kr_rawdetection *rawdetection, int *error) {
+	char *function_name = "mbsys_reson7k_print_rawdetection";
+	int status = MB_SUCCESS;
+	char *debug_str = "dbg2  ";
+	char *nodebug_str = "  ";
+	char *first;
+	int i;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr, "dbg2       rawdetection:      %p\n", (void *)rawdetection);
+	}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &rawdetection->header, error);
+
+	/* print Reson 7k raw detection (record 7027) */
+	if (verbose >= 2)
+		first = debug_str;
+	else {
+		first = nodebug_str;
+		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+	}
+	fprintf(stderr, "%sStructure Contents:\n", first);
+	fprintf(stderr, "%s     serial_number:              %llu\n", first, rawdetection->serial_number);
+	fprintf(stderr, "%s     ping_number:                %u\n", first, rawdetection->ping_number);
+	fprintf(stderr, "%s     multi_ping:                 %u\n", first, rawdetection->multi_ping);
+	fprintf(stderr, "%s     number_beams:               %u\n", first, rawdetection->number_beams);
+	fprintf(stderr, "%s     data_field_size:            %d\n", first, rawdetection->data_field_size);
+	fprintf(stderr, "%s     detection_algorithm:        %d\n", first, rawdetection->detection_algorithm);
+	fprintf(stderr, "%s     detection_flags:            %d\n", first, rawdetection->flags);
+	fprintf(stderr, "%s     sampling_rate:              %f\n", first, rawdetection->sampling_rate);
+	fprintf(stderr, "%s     tx_angle:                   %f\n", first, rawdetection->tx_angle);
+	fprintf(stderr, "%s     applied_roll:                   %f\n", first, rawdetection->applied_roll);
+	fprintf(stderr, "%s     reserved:                   ", first);
+	for (i = 0; i < 15; i++)
+		fprintf(stderr, "%u ", rawdetection->reserved[i]);
+	fprintf(stderr, "\n%s     beam	beam_descriptor detection_point rx_angle flags quality uncertainty\n", first);
+	fprintf(stderr, "%s     ----------------------------------------------------------------------\n", first);
+	for (j = 0; j < rawdetection->number_beams; j++) {
+		fprintf(stderr, "%s     %3d %u %f %f %u %u %f\n", first, i, rawdetectiondata->beam_descriptor[i],
+		        rawdetectiondata->detection_point[i], rawdetectiondata->rx_angle[i], rawdetectiondata->flags[i],
+		        rawdetectiondata->quality[i], rawdetectiondata->uncertainty[i], , rawdetectiondata->signal_strength[i], 
+		        rawdetectiondata->min_limit[i], rawdetectiondata->max_limit[i]);
+	}
+	fprintf(stderr, "%s     frequency:                   %f\n", first, rawdetection->frequency);
+	fprintf(stderr, "%s     latitude:                   %f\n", first, rawdetection->latitude);
+	fprintf(stderr, "%s     longitude:                   %f\n", first, rawdetection->longitude);
+	fprintf(stderr, "%s     heading:                   %f\n", first, rawdetection->heading);
+	fprintf(stderr, "%s     height_source:                   %f\n", first, rawdetection->height_source);
+	fprintf(stderr, "%s     tide:                   %f\n", first, rawdetection->tide);
+	fprintf(stderr, "%s     roll:                   %f\n", first, rawdetection->roll);
+	fprintf(stderr, "%s     pitch:                   %f\n", first, rawdetection->pitch);
+	fprintf(stderr, "%s     heave:                   %f\n", first, rawdetection->heave);
+	fprintf(stderr, "%s     vehicle_depth:                   %f\n", first, rawdetection->vehicle_depth);
+	for (j = 0; j < rawdetection->number_beams; j++) {
+		fprintf(stderr, "%s     depth:                   %f\n", first, rawdetection->depth[k]);
+		fprintf(stderr, "%s     alongtrack:                   %f\n", first, rawdetection->alongtrack[k]);
+		fprintf(stderr, "%s     acrosstrack:                   %f\n", first, rawdetection->acrosstrack[k]);
+		fprintf(stderr, "%s     pointing_angle:                   %f\n", first, rawdetection->pointing_angle[k]);
+		fprintf(stderr, "%s     azimuth_angle:                   %f\n", first, rawdetection->azimuth_angle[k]);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_snippet(int verbose, s7kr_snippet *snippet, int *error) {
+	char *function_name = "mbsys_reson7k_print_snippet";
+	int status = MB_SUCCESS;
+	s7kr_snippettimeseries *snippettimeseries;
+	char *debug_str = "dbg2  ";
+	char *nodebug_str = "  ";
+	char *first;
+	int i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr, "dbg2       snippet:      %p\n", (void *)snippet);
+	}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &snippet->header, error);
+
+	/* print Reson 7k snippet (record 7028) */
+	if (verbose >= 2)
+		first = debug_str;
+	else {
+		first = nodebug_str;
+		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+	}
+	fprintf(stderr, "%sStructure Contents:\n", first);
+	fprintf(stderr, "%s     serial_number:              %llu\n", first, snippet->serial_number);
+	fprintf(stderr, "%s     ping_number:                %u\n", first, snippet->ping_number);
+	fprintf(stderr, "%s     multi_ping:                 %u\n", first, snippet->multi_ping);
+	fprintf(stderr, "%s     number_beams:               %u\n", first, snippet->number_beams);
+	fprintf(stderr, "%s     error_flag:                 %u\n", first, snippet->error_flag);
+	fprintf(stderr, "%s     control_flags:              %u\n", first, snippet->control_flags);
+	fprintf(stderr, "%s     flags:              %u\n", first, snippet->flags);
+	for (i = 0; i < 6; i++)
+		fprintf(stderr, "%u ", snippet->reserved[i]);
+	for (i = 0; i < snippet->number_beams; i++) {
+		snippetdataseries = &(snippet->snippetdataseries[i]);
+		fprintf(stderr, "%s     beam: %u begin:%u detect:%u end:%u\n", first, snippetdataseries->beam_number,
+		        snippetdataseries->begin_sample, snippetdataseries->detect_sample, snippetdataseries->end_sample);
+		for (j = 0; j < snippetdataseries->end_sample - snippetdataseries->begin_sample + 1; j++)
+			fprintf(stderr, "%s     amplitude[%d]:%d\n", first, snippetdataseries->begin_sample + j,
+			        snippetdataseries->amplitude[j]);
+	}
+	fprintf(stderr, "%s     frequency:              %f\n", first, snippet->frequency);
+	fprintf(stderr, "%s     latitude:              %f\n", first, snippet-latitude);
+	fprintf(stderr, "%s     longitude:              %f\n", first, snippet->longitude);
+	fprintf(stderr, "%s     heading:              %f\n", first, snippet->heading);
+	for (i = 0; i < snippet->number_beams; i++) {
+		fprintf(stderr, "%s     beam_alongtrack:              %f\n", first, snippet->beam_alongtrack);
+		fprintf(stderr, "%s     beam_acrosstrack:              %f\n", first, snippet->beam_acrosstrack);
+		fprintf(stderr, "%s     center_sample:              %f\n", first, snippet->center_sample);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+
+/* Reson 7k vernier Processing Data Filtered (Record 7029) */
+
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_installation(int verbose, s7kr_installation *installation, int *error) {
+	char *function_name = "mbsys_reson7k_print_installation";
+	int status = MB_SUCCESS;
+	char *debug_str = "dbg2  ";
+	char *nodebug_str = "  ";
+	char *first;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+		fprintf(stderr, "dbg2       installation:      %p\n", (void *)installation);
+	}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &installation->header, error);
+
+	/* print Reson 7k sonar installation parameters (record 7030) */
+	if (verbose >= 2)
+		first = debug_str;
+	else {
+		first = nodebug_str;
+		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+	}
+	fprintf(stderr, "%sStructure Contents:\n", first);
+	fprintf(stderr, "%s     frequency:                  %f\n", first, installation->frequency);
+	fprintf(stderr, "%s     firmware_version_len:       %d\n", first, installation->firmware_version_len);
+	fprintf(stderr, "%s     firmware_version:           %s\n", first, installation->firmware_version);
+	fprintf(stderr, "%s     software_version_len:       %d\n", first, installation->software_version_len);
+	fprintf(stderr, "%s     software_version:           %s\n", first, installation->software_version);
+	fprintf(stderr, "%s     s7k_version_len:            %d\n", first, installation->s7k_version_len);
+	fprintf(stderr, "%s     s7k_version:                %s\n", first, installation->s7k_version);
+	fprintf(stderr, "%s     protocal_version_len:       %d\n", first, installation->protocal_version_len);
+	fprintf(stderr, "%s     protocal_version:           %s\n", first, installation->protocal_version);
+	fprintf(stderr, "%s     transmit_x:                 %f\n", first, installation->transmit_x);
+	fprintf(stderr, "%s     transmit_y:                 %f\n", first, installation->transmit_y);
+	fprintf(stderr, "%s     transmit_z:                 %f\n", first, installation->transmit_z);
+	fprintf(stderr, "%s     transmit_roll:              %f\n", first, installation->transmit_roll);
+	fprintf(stderr, "%s     transmit_pitch:             %f\n", first, installation->transmit_pitch);
+	fprintf(stderr, "%s     transmit_heading:           %f\n", first, installation->transmit_heading);
+	fprintf(stderr, "%s     receive_x:                  %f\n", first, installation->receive_x);
+	fprintf(stderr, "%s     receive_y:                  %f\n", first, installation->receive_y);
+	fprintf(stderr, "%s     receive_z:                  %f\n", first, installation->receive_z);
+	fprintf(stderr, "%s     receive_roll:               %f\n", first, installation->receive_roll);
+	fprintf(stderr, "%s     receive_pitch:              %f\n", first, installation->receive_pitch);
+	fprintf(stderr, "%s     receive_heading:            %f\n", first, installation->receive_heading);
+	fprintf(stderr, "%s     motion_x:                   %f\n", first, installation->motion_x);
+	fprintf(stderr, "%s     motion_y:                   %f\n", first, installation->motion_y);
+	fprintf(stderr, "%s     motion_z:                   %f\n", first, installation->motion_z);
+	fprintf(stderr, "%s     motion_roll:                %f\n", first, installation->motion_roll);
+	fprintf(stderr, "%s     motion_pitch:               %f\n", first, installation->motion_pitch);
+	fprintf(stderr, "%s     motion_heading:             %f\n", first, installation->motion_heading);
+	fprintf(stderr, "%s     motion_time_delay:          %d\n", first, installation->motion_time_delay);
+	fprintf(stderr, "%s     position_x:                 %f\n", first, installation->position_x);
+	fprintf(stderr, "%s     position_y:                 %f\n", first, installation->position_y);
+	fprintf(stderr, "%s     position_z:                 %f\n", first, installation->position_z);
+	fprintf(stderr, "%s     position_time_delay:        %d\n", first, installation->position_time_delay);
+	fprintf(stderr, "%s     waterline_z:                %f\n", first, installation->waterline_z);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+
+/* Reson 7k BITE summary (Record 7031) */
+
+/* Reson 7k Compressed Beamformed Magnitude Data (Record 7041) */
+
+/* Reson 7k Compressed Water Column Data (Record 7042) */
+
+/* Reson 7k Segmented Raw Detection Data (Record 7047) */
+
+
+
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_beam(int verbose, s7kr_beam *beam, int *error) {
 	char *function_name = "mbsys_reson7k_print_beam";
@@ -3823,390 +4288,7 @@ int mbsys_reson7k_print_beam(int verbose, s7kr_beam *beam, int *error) {
 	return (status);
 }
 
-/*--------------------------------------------------------------------*/
-int mbsys_reson7k_print_verticaldepth(int verbose, s7kr_verticaldepth *verticaldepth, int *error) {
-	char *function_name = "mbsys_reson7k_print_verticaldepth";
-	int status = MB_SUCCESS;
-	char *debug_str = "dbg2  ";
-	char *nodebug_str = "  ";
-	char *first;
 
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       verticaldepth:     %p\n", (void *)verticaldepth);
-	}
-
-	/* print Reson 7k data record header information */
-	mbsys_reson7k_print_header(verbose, &verticaldepth->header, error);
-
-	/* print Reson 7k vertical depth data (record 7009) */
-	if (verbose >= 2)
-		first = debug_str;
-	else {
-		first = nodebug_str;
-		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
-	}
-	fprintf(stderr, "%sStructure Contents:\n", first);
-	fprintf(stderr, "%s     frequency:                  %f\n", first, verticaldepth->frequency);
-	fprintf(stderr, "%s     ping_number:                %u\n", first, verticaldepth->ping_number);
-	fprintf(stderr, "%s     multi_ping:                 %u\n", first, verticaldepth->multi_ping);
-	fprintf(stderr, "%s     latitude:                   %f\n", first, verticaldepth->latitude);
-	fprintf(stderr, "%s     longitude:                  %f\n", first, verticaldepth->longitude);
-	fprintf(stderr, "%s     heading:                    %f\n", first, verticaldepth->heading);
-	fprintf(stderr, "%s     alongtrack:                 %f\n", first, verticaldepth->alongtrack);
-	fprintf(stderr, "%s     acrosstrack:                %f\n", first, verticaldepth->acrosstrack);
-	fprintf(stderr, "%s     vertical_depth:             %f\n", first, verticaldepth->vertical_depth);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbsys_reson7k_print_v2bite(int verbose, s7kr_v2bite *v2bite, int *error) {
-	char *function_name = "mbsys_reson7k_print_v2bite";
-	int status = MB_SUCCESS;
-	s7kr_v2bitereport *v2bitereport;
-	s7kr_v2bitefield *v2bitefield;
-	s7k_time *s7ktime;
-	char *debug_str = "dbg2  ";
-	char *nodebug_str = "  ";
-	char *first;
-	int i, j;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       v2bite:      %p\n", (void *)v2bite);
-	}
-
-	/* print Reson 7k data record header information */
-	mbsys_reson7k_print_header(verbose, &v2bite->header, error);
-
-	/* Reson 7k BITE (record 7021) */
-	if (verbose >= 2)
-		first = debug_str;
-	else {
-		first = nodebug_str;
-		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
-	}
-	fprintf(stderr, "%sStructure Contents:\n", first);
-	fprintf(stderr, "%s     number_reports:             %u\n", first, v2bite->number_reports);
-	for (i = 0; i < v2bite->number_reports; i++) {
-		v2bitereport = &(v2bite->reports[i]);
-		fprintf(stderr, "%s     source_name:                %s\n", first, v2bitereport->source_name);
-		fprintf(stderr, "%s     source_address:             %u\n", first, v2bitereport->source_address);
-		fprintf(stderr, "%s     frequency:                  %f\n", first, v2bitereport->frequency);
-		fprintf(stderr, "%s     enumerator:                 %u\n", first, v2bitereport->enumerator);
-		s7ktime = &(v2bitereport->downlink_time);
-		fprintf(stderr, "%s     downlink_time:              %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n", first, s7ktime->Year, s7ktime->Day,
-		        s7ktime->Hours, s7ktime->Minutes, s7ktime->Seconds);
-		s7ktime = &(v2bitereport->uplink_time);
-		fprintf(stderr, "%s     uplink_time:                %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n", first, s7ktime->Year, s7ktime->Day,
-		        s7ktime->Hours, s7ktime->Minutes, s7ktime->Seconds);
-		s7ktime = &(v2bitereport->bite_time);
-		fprintf(stderr, "%s     bite_time:                  %4.4d/%3.3d %2.2d:%2.2d:%9.6f\n", first, s7ktime->Year, s7ktime->Day,
-		        s7ktime->Hours, s7ktime->Minutes, s7ktime->Seconds);
-		fprintf(stderr, "%s     status:                     %u\n", first, v2bitereport->status);
-		fprintf(stderr, "%s     number_bite:                %u\n", first, v2bitereport->number_bite);
-		fprintf(stderr, "%s     bite_status:                ", first);
-		for (j = 0; j < 32; j++)
-			fprintf(stderr, "%u ", v2bitereport->bite_status[j]);
-		fprintf(stderr, "\n");
-		for (j = 0; j < v2bitereport->number_bite; j++) {
-			v2bitefield = &(v2bitereport->bitefield[j]);
-			fprintf(stderr, "%s     reserved[%2d]:               %u\n", first, j, v2bitefield->reserved);
-			fprintf(stderr, "%s     name[%2d]:                   %s\n", first, j, v2bitefield->name);
-			fprintf(stderr, "%s     device_type[%2d]:            %d\n", first, j, v2bitefield->device_type);
-			fprintf(stderr, "%s     minimum[%2d]:                %f\n", first, j, v2bitefield->minimum);
-			fprintf(stderr, "%s     maximum[%2d]:                %f\n", first, j, v2bitefield->maximum);
-			fprintf(stderr, "%s     value[%2d]:                  %f\n", first, j, v2bitefield->value);
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbsys_reson7k_print_v27kcenterversion(int verbose, s7kr_v27kcenterversion *v27kcenterversion, int *error) {
-	char *function_name = "mbsys_reson7k_print_v27kcenterversion";
-	int status = MB_SUCCESS;
-	char *debug_str = "dbg2  ";
-	char *nodebug_str = "  ";
-	char *first;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       v27kcenterversion: %p\n", (void *)v27kcenterversion);
-	}
-
-	/* print Reson 7k data record header information */
-	mbsys_reson7k_print_header(verbose, &v27kcenterversion->header, error);
-
-	/* Reson 7k center version (record 7022) */
-	if (verbose >= 2)
-		first = debug_str;
-	else {
-		first = nodebug_str;
-		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
-	}
-	fprintf(stderr, "%sStructure Contents:\n", first);
-	fprintf(stderr, "%s     version:                    %s\n", first, v27kcenterversion->version);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbsys_reson7k_print_v28kwetendversion(int verbose, s7kr_v28kwetendversion *v28kwetendversion, int *error) {
-	char *function_name = "mbsys_reson7k_print_v28kwetendversion";
-	int status = MB_SUCCESS;
-	char *debug_str = "dbg2  ";
-	char *nodebug_str = "  ";
-	char *first;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       v28kwetendversion:      %p\n", (void *)v28kwetendversion);
-	}
-
-	/* print Reson 7k data record header information */
-	mbsys_reson7k_print_header(verbose, &v28kwetendversion->header, error);
-
-	/* Reson 7k 8k wet end version (record 7023) */
-	if (verbose >= 2)
-		first = debug_str;
-	else {
-		first = nodebug_str;
-		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
-	}
-	fprintf(stderr, "%sStructure Contents:\n", first);
-	fprintf(stderr, "%s     version:                    %s\n", first, v28kwetendversion->version);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbsys_reson7k_print_v2detection(int verbose, s7kr_v2detection *v2detection, int *error) {
-	char *function_name = "mbsys_reson7k_print_v2detection";
-	int status = MB_SUCCESS;
-	char *debug_str = "dbg2  ";
-	char *nodebug_str = "  ";
-	char *first;
-	int i;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       v2detection:      %p\n", (void *)v2detection);
-	}
-
-	/* print Reson 7k data record header information */
-	mbsys_reson7k_print_header(verbose, &v2detection->header, error);
-
-	/* print Reson 7k version 2 detection (record 7026) */
-	if (verbose >= 2)
-		first = debug_str;
-	else {
-		first = nodebug_str;
-		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
-	}
-	fprintf(stderr, "%sStructure Contents:\n", first);
-	fprintf(stderr, "%s     serial_number:              %llu\n", first, v2detection->serial_number);
-	fprintf(stderr, "%s     ping_number:                %u\n", first, v2detection->ping_number);
-	fprintf(stderr, "%s     multi_ping:                 %u\n", first, v2detection->multi_ping);
-	fprintf(stderr, "%s     number_beams:               %u\n", first, v2detection->number_beams);
-	fprintf(stderr, "%s     data_field_size:            %d\n", first, v2detection->data_field_size);
-	fprintf(stderr, "%s     corrections:                %llu\n", first, v2detection->corrections);
-	fprintf(stderr, "%s     detection_algorithm:        %d\n", first, v2detection->detection_algorithm);
-	fprintf(stderr, "%s     flags:                      %d\n", first, v2detection->flags);
-	for (i = 0; i < 64; i++)
-		fprintf(stderr, "%u ", v2detection->reserved[i]);
-	fprintf(stderr, "%s     beam	range angle_x angle_y range_error angle_x_error angle_y_error\n", first);
-	fprintf(stderr, "%s     ----------------------------------------------------------------------\n", first);
-	for (i = 0; i < v2detection->number_beams; i++) {
-		fprintf(stderr, "%s     %3d %f %f %f %f %f %f\n", first, i, v2detection->range[i], v2detection->angle_x[i],
-		        v2detection->angle_y[i], v2detection->range_error[i], v2detection->angle_x_error[i],
-		        v2detection->angle_y_error[i]);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbsys_reson7k_print_v2rawdetection(int verbose, s7kr_v2rawdetection *v2rawdetection, int *error) {
-	char *function_name = "mbsys_reson7k_print_v2rawdetection";
-	int status = MB_SUCCESS;
-	char *debug_str = "dbg2  ";
-	char *nodebug_str = "  ";
-	char *first;
-	int i;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       v2rawdetection:      %p\n", (void *)v2rawdetection);
-	}
-
-	/* print Reson 7k data record header information */
-	mbsys_reson7k_print_header(verbose, &v2rawdetection->header, error);
-
-	/* print Reson 7k version 2 raw detection (record 7027) */
-	if (verbose >= 2)
-		first = debug_str;
-	else {
-		first = nodebug_str;
-		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
-	}
-	fprintf(stderr, "%sStructure Contents:\n", first);
-	fprintf(stderr, "%s     serial_number:              %llu\n", first, v2rawdetection->serial_number);
-	fprintf(stderr, "%s     ping_number:                %u\n", first, v2rawdetection->ping_number);
-	fprintf(stderr, "%s     multi_ping:                 %u\n", first, v2rawdetection->multi_ping);
-	fprintf(stderr, "%s     number_beams:               %u\n", first, v2rawdetection->number_beams);
-	fprintf(stderr, "%s     data_field_size:            %d\n", first, v2rawdetection->data_field_size);
-	fprintf(stderr, "%s     detection_algorithm:        %d\n", first, v2rawdetection->detection_algorithm);
-	fprintf(stderr, "%s     detection_flags:            %d\n", first, v2rawdetection->detection_flags);
-	fprintf(stderr, "%s     sampling_rate:              %f\n", first, v2rawdetection->sampling_rate);
-	fprintf(stderr, "%s     tx_angle:                   %f\n", first, v2rawdetection->tx_angle);
-	fprintf(stderr, "%s     reserved:                   ", first);
-	for (i = 0; i < 64; i++)
-		fprintf(stderr, "%u ", v2rawdetection->reserved[i]);
-	fprintf(stderr, "\n%s     beam	beam_descriptor detection_point rx_angle flags quality uncertainty\n", first);
-	fprintf(stderr, "%s     ----------------------------------------------------------------------\n", first);
-	for (i = 0; i < v2rawdetection->number_beams; i++) {
-		fprintf(stderr, "%s     %3d %u %f %f %u %u %f\n", first, i, v2rawdetection->beam_descriptor[i],
-		        v2rawdetection->detection_point[i], v2rawdetection->rx_angle[i], v2rawdetection->flags[i],
-		        v2rawdetection->quality[i], v2rawdetection->uncertainty[i]);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbsys_reson7k_print_v2snippet(int verbose, s7kr_v2snippet *v2snippet, int *error) {
-	char *function_name = "mbsys_reson7k_print_v2snippet";
-	int status = MB_SUCCESS;
-	s7kr_v2snippettimeseries *v2snippettimeseries;
-	char *debug_str = "dbg2  ";
-	char *nodebug_str = "  ";
-	char *first;
-	int i, j;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       v2snippet:      %p\n", (void *)v2snippet);
-	}
-
-	/* print Reson 7k data record header information */
-	mbsys_reson7k_print_header(verbose, &v2snippet->header, error);
-
-	/* print Reson 7k version 2 snippet (record 7028) */
-	if (verbose >= 2)
-		first = debug_str;
-	else {
-		first = nodebug_str;
-		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
-	}
-	fprintf(stderr, "%sStructure Contents:\n", first);
-	fprintf(stderr, "%s     serial_number:              %llu\n", first, v2snippet->serial_number);
-	fprintf(stderr, "%s     ping_number:                %u\n", first, v2snippet->ping_number);
-	fprintf(stderr, "%s     multi_ping:                 %u\n", first, v2snippet->multi_ping);
-	fprintf(stderr, "%s     number_beams:               %u\n", first, v2snippet->number_beams);
-	fprintf(stderr, "%s     error_flag:                 %u\n", first, v2snippet->error_flag);
-	fprintf(stderr, "%s     control_flags:              %u\n", first, v2snippet->control_flags);
-	for (i = 0; i < 28; i++)
-		fprintf(stderr, "%u ", v2snippet->reserved[i]);
-	for (i = 0; i < v2snippet->number_beams; i++) {
-		v2snippettimeseries = &(v2snippet->snippettimeseries[i]);
-		fprintf(stderr, "%s     beam: %u begin:%u detect:%u end:%u\n", first, v2snippettimeseries->beam_number,
-		        v2snippettimeseries->begin_sample, v2snippettimeseries->detect_sample, v2snippettimeseries->end_sample);
-		for (j = 0; j < v2snippettimeseries->end_sample - v2snippettimeseries->begin_sample + 1; j++)
-			fprintf(stderr, "%s     amplitude[%d]:%d\n", first, v2snippettimeseries->begin_sample + j,
-			        v2snippettimeseries->amplitude[j]);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *calibratedsnippet, int *error) {
 	char *function_name = "mbsys_reson7k_print_calibratedsnippet";
@@ -4266,85 +4348,7 @@ int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *c
 
 	return (status);
 }
-/*--------------------------------------------------------------------*/
-int mbsys_reson7k_print_installation(int verbose, s7kr_installation *installation, int *error) {
-	char *function_name = "mbsys_reson7k_print_installation";
-	int status = MB_SUCCESS;
-	char *debug_str = "dbg2  ";
-	char *nodebug_str = "  ";
-	char *first;
 
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       installation:      %p\n", (void *)installation);
-	}
-
-	/* print Reson 7k data record header information */
-	mbsys_reson7k_print_header(verbose, &installation->header, error);
-
-	/* print Reson 7k sonar installation parameters (record 7051) */
-	if (verbose >= 2)
-		first = debug_str;
-	else {
-		first = nodebug_str;
-		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
-	}
-	fprintf(stderr, "%sStructure Contents:\n", first);
-	fprintf(stderr, "%s     frequency:                  %f\n", first, installation->frequency);
-	fprintf(stderr, "%s     firmware_version_len:       %d\n", first, installation->firmware_version_len);
-	fprintf(stderr, "%s     firmware_version:           %s\n", first, installation->firmware_version);
-	fprintf(stderr, "%s     software_version_len:       %d\n", first, installation->software_version_len);
-	fprintf(stderr, "%s     software_version:           %s\n", first, installation->software_version);
-	fprintf(stderr, "%s     s7k_version_len:            %d\n", first, installation->s7k_version_len);
-	fprintf(stderr, "%s     s7k_version:                %s\n", first, installation->s7k_version);
-	fprintf(stderr, "%s     protocal_version_len:       %d\n", first, installation->protocal_version_len);
-	fprintf(stderr, "%s     protocal_version:           %s\n", first, installation->protocal_version);
-	fprintf(stderr, "%s     transmit_x:                 %f\n", first, installation->transmit_x);
-	fprintf(stderr, "%s     transmit_y:                 %f\n", first, installation->transmit_y);
-	fprintf(stderr, "%s     transmit_z:                 %f\n", first, installation->transmit_z);
-	fprintf(stderr, "%s     transmit_roll:              %f\n", first, installation->transmit_roll);
-	fprintf(stderr, "%s     transmit_pitch:             %f\n", first, installation->transmit_pitch);
-	fprintf(stderr, "%s     transmit_heading:           %f\n", first, installation->transmit_heading);
-	fprintf(stderr, "%s     transmit_x:                 %f\n", first, installation->transmit_x);
-	fprintf(stderr, "%s     transmit_x:                 %f\n", first, installation->transmit_x);
-	fprintf(stderr, "%s     receive_x:                  %f\n", first, installation->receive_x);
-	fprintf(stderr, "%s     receive_y:                  %f\n", first, installation->receive_y);
-	fprintf(stderr, "%s     receive_z:                  %f\n", first, installation->receive_z);
-	fprintf(stderr, "%s     receive_roll:               %f\n", first, installation->receive_roll);
-	fprintf(stderr, "%s     receive_pitch:              %f\n", first, installation->receive_pitch);
-	fprintf(stderr, "%s     receive_heading:            %f\n", first, installation->receive_heading);
-	fprintf(stderr, "%s     receive_x:                  %f\n", first, installation->receive_x);
-	fprintf(stderr, "%s     receive_x:                  %f\n", first, installation->receive_x);
-	fprintf(stderr, "%s     motion_x:                   %f\n", first, installation->motion_x);
-	fprintf(stderr, "%s     motion_y:                   %f\n", first, installation->motion_y);
-	fprintf(stderr, "%s     motion_z:                   %f\n", first, installation->motion_z);
-	fprintf(stderr, "%s     motion_roll:                %f\n", first, installation->motion_roll);
-	fprintf(stderr, "%s     motion_pitch:               %f\n", first, installation->motion_pitch);
-	fprintf(stderr, "%s     motion_heading:             %f\n", first, installation->motion_heading);
-	fprintf(stderr, "%s     motion_x:                   %f\n", first, installation->motion_x);
-	fprintf(stderr, "%s     motion_x:                   %f\n", first, installation->motion_x);
-	fprintf(stderr, "%s     motion_time_delay:          %d\n", first, installation->motion_time_delay);
-	fprintf(stderr, "%s     position_x:                 %f\n", first, installation->position_x);
-	fprintf(stderr, "%s     position_y:                 %f\n", first, installation->position_y);
-	fprintf(stderr, "%s     position_z:                 %f\n", first, installation->position_z);
-	fprintf(stderr, "%s     position_time_delay:        %d\n", first, installation->position_time_delay);
-	fprintf(stderr, "%s     waterline_z:                %f\n", first, installation->waterline_z);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_systemeventmessage(int verbose, s7kr_systemeventmessage *systemeventmessage, int *error) {
 	char *function_name = "mbsys_reson7k_print_systemeventmessage";

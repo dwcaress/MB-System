@@ -39,11 +39,17 @@
 #include <mb_config.h>
 #endif
 
+/* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
+#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+#include <windows.h>
+#endif
+
 #include <Xm/Xm.h>
 #include <Xm/RowColumn.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdint.h>		/* For the int64_t */
 
 /*
  * Include stdlib.h and malloc.h if code is C++, ANSI, or Extended ANSI.
@@ -1272,7 +1278,11 @@ XtPointer BX_CONVERT ARGLIST((w, from_string, to_type, to_size, success)) ARG(Wi
 			break;
 		case 8:
 		default:
+#ifdef _WIN32
+			val = (XTPOINTER)(int64_t)(*(int64_t *)toVal.addr);
+#else
 			val = (XTPOINTER)(long)(*(long *)toVal.addr);
+#endif
 			break;
 		}
 	}

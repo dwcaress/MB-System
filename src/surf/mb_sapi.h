@@ -48,8 +48,10 @@
 #ifndef __SAPI__
 
 #ifndef _WIN32
-#include <rpc/types.h>
-#include <rpc/xdr.h>
+#	include <rpc/types.h>
+#	include <rpc/xdr.h>
+#else
+#	include "types_win32.h"
 #endif
 
 #ifdef __LP64__

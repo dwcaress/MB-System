@@ -37,6 +37,12 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+
+/* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
+#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+#include <windows.h>
+#endif
+
 #include <X11/Intrinsic.h>
 
 /* MBIO include files */
