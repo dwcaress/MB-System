@@ -56,12 +56,12 @@
 static char rcs_id[] = "$Id$";
 
 /* Windows header file */
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
 /* Windows implementation of GMT_runtime_bindir */
-#ifdef WIN32
+#ifdef _WIN32
 char *GMT_runtime_bindir_win32(char *result);
 #endif
 
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 /* input file set in include file */
-#ifndef WIN32
+#ifndef _WIN32
 #include "levitus.h"
 #else
 	/* But on Windows get it from the bin dir */
@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
 	else
 		outfp = stderr;
 
-#ifdef WIN32
+#ifdef _WIN32
 	/* Find the path to the bin directory and from it, the location of the Levitus file */
 	GMT_runtime_bindir_win32(levitusfile);
 	pch = strrchr(levitusfile, '\\');
@@ -401,7 +401,7 @@ int main(int argc, char **argv) {
 /*--------------------------------------------------------------------*/
 
 /* Windows implementation of GMT_runtime_bindir */
-#ifdef WIN32
+#ifdef _WIN32
 char *GMT_runtime_bindir_win32(char *result) {
 	TCHAR path[PATH_MAX + 1];
 	char *c;
