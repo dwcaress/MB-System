@@ -39,6 +39,12 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+
+/* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
+#if defined(_MSC_VER) && (_MSC_VER >= 1900)
+#include <windows.h>
+#endif
+
 #include <X11/Intrinsic.h>
 
 /* MBIO include files */
@@ -50,6 +56,7 @@
 #include "mb_process.h"
 #include "mb_xgraphics.h"
 #include "mbedit.h"
+#include "getopt.h"
 
 /* output mode defines */
 #define MBEDIT_OUTPUT_EDIT 1
@@ -4556,7 +4563,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, in
 
 	/* if autoscale on reset plot width */
 	if (autoscale == MB_YES && xtrack_max > 0.0) {
-		plot_width = 2.4 * xtrack_max;
+		plot_width = (int)(2.4 * xtrack_max);
 		ndec = MAX(1, (int)log10((double)plot_width));
 		maxx = 1;
 		for (i = 0; i < ndec; i++)
@@ -4736,8 +4743,8 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, in
 
 	/* plot scale bars */
 	dx_width = (xmax - xmin) / dxscale;
-	nx_int = 0.5 * dx_width / x_interval + 1;
-	x_int = x_interval * dxscale;
+	nx_int = (int)(0.5 * dx_width / x_interval + 1);
+	x_int = (int)(x_interval * dxscale);
 	xg_drawline(mbedit_xgid, xmin, ymax, xmax, ymax, pixel_values[BLACK], XG_SOLIDLINE);
 	xg_drawline(mbedit_xgid, xmin, ymin, xmax, ymin, pixel_values[BLACK], XG_SOLIDLINE);
 	for (i = 0; i < nx_int; i++) {
@@ -4751,8 +4758,8 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, in
 		xg_drawstring(mbedit_xgid, xcen - xx - swidth / 2, ymax + sascent + 5, string, pixel_values[BLACK], XG_SOLIDLINE);
 	}
 	dy_height = (ymax - ymin) / dyscale;
-	ny_int = dy_height / y_interval + 1;
-	y_int = y_interval * dyscale;
+	ny_int = (int)(dy_height / y_interval + 1);
+	y_int = (int)(y_interval * dyscale);
 	xg_drawline(mbedit_xgid, xmin, ymin, xmin, ymax, pixel_values[BLACK], XG_SOLIDLINE);
 	xg_drawline(mbedit_xgid, xmax, ymin, xmax, ymax, pixel_values[BLACK], XG_SOLIDLINE);
 	for (i = 0; i < ny_int; i++) {
@@ -4851,18 +4858,18 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, in
 		for (j = 0; j < ping[i].beams_bath; j++) {
 			if (!mb_beam_check_flag_unusable(ping[i].beamflag[j])) {
 				if (view_mode == MBEDIT_VIEW_WATERFALL) {
-					ping[i].bath_x[j] = xcen + dxscale * ping[i].bathacrosstrack[j];
-					ping[i].bath_y[j] = y + dyscale * ((double)ping[i].bath[j] - bathmedian);
+					ping[i].bath_x[j] = (int)(xcen + dxscale * ping[i].bathacrosstrack[j]);
+					ping[i].bath_y[j] = (int)(y + dyscale * ((double)ping[i].bath[j] - bathmedian));
 				}
 				else if (view_mode == MBEDIT_VIEW_ALONGTRACK) {
-					ping[i].bath_x[j] = xcen + dxscale * ping[i].bathacrosstrack[j];
-					ping[i].bath_y[j] = ycen + dyscale * ((double)ping[i].bath[j] - bathmedian);
+					ping[i].bath_x[j] = (int)(xcen + dxscale * ping[i].bathacrosstrack[j]);
+					ping[i].bath_y[j] = (int)(ycen + dyscale * ((double)ping[i].bath[j] - bathmedian));
 				}
 				else {
 					/* ping[i].bath_x[j] = x;*/
-					ping[i].bath_x[j] =
-					    xcen + dxscale * (ping[i].bathalongtrack[j] + ping[i].distance - ping[current_id + nplot / 2].distance);
-					ping[i].bath_y[j] = ycen + dyscale * ((double)ping[i].bath[j] - bathmedian);
+					ping[i].bath_x[j] = (int)(xcen + dxscale * (ping[i].bathalongtrack[j] +
+					                          ping[i].distance - ping[current_id + nplot / 2].distance));
+					ping[i].bath_y[j] = (int)(ycen + dyscale * ((double)ping[i].bath[j] - bathmedian));
 				}
 			}
 			else {
