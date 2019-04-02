@@ -128,7 +128,7 @@
 #define R7KRECID_7kBeamformed 7018
 #define R7KRECID_7kVernierProcessingDataRaw 7019
 #define R7KRECID_7kBITE 7021
-#define R7KRECID_7kV37KSonarSourceVersion 7022
+#define R7KRECID_7kV37kSonarSourceVersion 7022
 #define R7KRECID_7kV38kWetEndVersion 7023
 #define R7KRECID_7kRawDetection 7027
 #define R7KRECID_7kSnippet 7028
