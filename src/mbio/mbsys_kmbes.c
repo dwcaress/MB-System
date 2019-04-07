@@ -2000,8 +2000,9 @@ int mbsys_kmbes_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
                                      double *velocity, int *error) {
   char *function_name = "mbsys_kmbes_extract_svp";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
-  struct mbsys_kmbes_struct *store;
+  struct mb_io_struct *mb_io_ptr = NULL;
+  struct mbsys_kmbes_struct *store = NULL;
+  struct mbsys_kmbes_svp *svp = NULL;
   int i;
 
   /* print input debug statements */
@@ -2019,14 +2020,23 @@ int mbsys_kmbes_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
+  svp = (struct mbsys_kmbes_svp *)&store->svp;
 
   /* get data kind */
   *kind = store->kind;
 
   /* extract data from structure */
   if (*kind == MB_DATA_VELOCITY_PROFILE) {
+      /* get number of depth-velocity pairs */
+      *nsvp = svp->numSamples;
 
-    /* done translating values */
+      /* get sound velocity profile data */
+      for (i = 0; i < *nsvp; i++) {
+          depth[i] = svp->sensorData[i].depth_m;
+          velocity[i] = svp->sensorData[i].soundVelocity_mPerSec;
+      }
+
+      /* done translating values */
   }
 
   /* deal with comment */
@@ -2064,8 +2074,9 @@ int mbsys_kmbes_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
                                     int *error) {
   char *function_name = "mbsys_kmbes_insert_svp";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
-  struct mbsys_kmbes_struct *store;
+  struct mb_io_struct *mb_io_ptr = NULL;
+  struct mbsys_kmbes_struct *store = NULL;
+  struct mbsys_kmbes_svp *svp = NULL;
   int i;
 
   /* print input debug statements */
@@ -2086,12 +2097,19 @@ int mbsys_kmbes_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
+  svp = (struct mbsys_kmbes_svp *)&store->svp;
 
   /* insert data in structure */
   if (store->kind == MB_DATA_VELOCITY_PROFILE) {
-    /* get profile */
-    if (status == MB_SUCCESS) {
-    }
+
+      /* get number of depth-velocity pairs */
+      svp->numSamples = MIN(nsvp, MBSYS_KMBES_MAX_SVP_POINTS);
+
+      /* get sound velocity profile data */
+      for (i = 0; i < nsvp; i++) {
+          svp->sensorData[i].depth_m = depth[i];
+          svp->sensorData[i].soundVelocity_mPerSec = velocity[i];
+      }
   }
 
   /* print output debug statements */
