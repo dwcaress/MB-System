@@ -28,8 +28,8 @@ include_HEADERS = mb_config.h \
         mbsys_image83p.h mbsys_hysweep.h \
         mbsys_benthos.h mbsys_swathplus.h \
         mbsys_3datdepthlidar.h mbsys_3ddwissl.h \
-        mbsys_wassp.h  mbsys_stereopair.h \
-        mbsys_kmbes.h \
+        mbsys_wassp.h mbsys_stereopair.h \
+        mbsys_kmbes.h mbsys_reson7k3.h \
         mbf_sbsiomrg.h mbf_sbsiocen.h \
         mbf_sbsiolsi.h mbf_sburicen.h \
         mbf_sbifremr.h mbf_hsatlraw.h \
@@ -44,9 +44,9 @@ include_HEADERS = mb_config.h \
         mbf_hsmdaraw.h mbf_hsmdldih.h \
         mbf_dsl120pf.h mbf_dsl120sf.h \
         mbf_mstiffss.h mbf_oicgeoda.h \
-        mbf_oicmbari.h  mbf_omghdcsj.h \
-        mbf_mgd77dat.h  mbf_mbarirov.h \
-        mbf_mbarrov2.h  mbf_mbpronav.h \
+        mbf_oicmbari.h mbf_omghdcsj.h \
+        mbf_mgd77dat.h mbf_mbarirov.h \
+        mbf_mbarrov2.h mbf_mbpronav.h \
         mbf_xtfr8101.h
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
@@ -95,8 +95,8 @@ libmbio_la_SOURCES = \
                 mbsys_image83p.c mbsys_hysweep.c \
                 mbsys_benthos.c mbsys_swathplus.c \
                 mbsys_3datdepthlidar.c mbsys_3ddwissl.c \
-                mbsys_wassp.c  mbsys_stereopair.c \
-                mbsys_kmbes.c \
+                mbsys_wassp.c mbsys_stereopair.c \
+                mbsys_kmbes.c mbsys_reson7k3.c \
                 mbr_sbsiomrg.c mbr_sbsiocen.c \
                 mbr_sbsiolsi.c mbr_sburicen.c \
                 mbr_sburivax.c mbr_sbifremr.c \
@@ -134,7 +134,7 @@ libmbio_la_SOURCES = \
                 mbr_3dwisslr.c mbr_3dwisslp.c \
                 mbr_wasspenl.c mbr_mgd77txt.c \
                 mbr_mgd77tab.c mbr_photgram.c \
-                mbr_kemkmall.c
+                mbr_kemkmall.c mbr_reson7k3.c
 
 libmbio_la_LIBADD = $(top_builddir)/src/bsio/libmbbsio.la \
                 $(top_builddir)/src/surf/libmbsapi.la \

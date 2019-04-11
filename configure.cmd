@@ -390,7 +390,8 @@ sudo CFLAGS="-g -I/opt/X11/include" LDFLAGS="-L/opt/X11/lib" \
     --with-motif-lib=/usr/local/lib \
     --with-otps-dir=/usr/local/opt/otps \
     --enable-mbtrn \
-    --enable-hardening --enable-pcltools
+    --enable-hardening
+    #--enable-pcltools
 
 make
 

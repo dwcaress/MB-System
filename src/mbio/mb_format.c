@@ -225,6 +225,9 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 	else if (*format == MBF_RESON7KR) {
 		status = mbr_register_reson7kr(verbose, mbio_ptr, error);
 	}
+  else if (*format == MBF_RESON7K3) {
+    status = mbr_register_reson7k3(verbose, mbio_ptr, error);
+  }
 	else if (*format == MBF_BCHRTUNB) {
 		status = mbr_register_bchrtunb(verbose, mbio_ptr, error);
 	}
@@ -687,6 +690,12 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 	}
 	else if (*format == MBF_RESON7KR) {
 		status = mbr_info_reson7kr(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
+		                           format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
+		                           platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
+		                           beamwidth_xtrack, beamwidth_ltrack, error);
+	}
+	else if (*format == MBF_RESON7K3) {
+		status = mbr_info_reson7k3(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
 		                           format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
 		                           platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
 		                           beamwidth_xtrack, beamwidth_ltrack, error);
