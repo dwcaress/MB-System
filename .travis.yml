@@ -1,0 +1,17 @@
+language: cpp
+sudo: required
+services: docker
+env:
+  - IMAGE=ubuntu IMAGE_TAG=disco
+
+before_install:
+  - export CONTAINER=${IMAGE}-${IMAGE_TAG}
+  - docker run -d --name $CONTAINER -e LC_ALL="en_US.UTF-8" -e LANG="en_US.UTF-8" -v $(pwd):/travis -w /travis $IMAGE:$IMAGE_TAG tail -f /dev/null
+  - docker ps
+
+install:
+  - docker exec -e CC=$CC -e CXX=$CXX -t $CONTAINER bash travis/install-$IMAGE.sh
+  - docker exec -e CC=$CC -e CXX=$CXX -t $CONTAINER bash travis/install-post.sh
+
+script:
+  - docker exec -e CC=$CC -e CXX=$CXX -t $CONTAINER bash travis/script.sh
