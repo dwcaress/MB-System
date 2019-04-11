@@ -74,6 +74,7 @@
 #define MB_SYS_WASSP 37
 #define MB_SYS_STEREOPAIR 38
 #define MB_SYS_KMBES 39
+#define MB_SYS_RESON7K3 40
 
 /* Number of supported MBIO data formats */
 #define MB_FORMATS 80
@@ -291,11 +292,11 @@ Reson 7K series multibeam sonars, \
 bathymetry, amplitude, three channels sidescan, and subbottom  \
 up to 254 beams, variable pixels, binary, Reson. */
 
-#define MBF_RESON7KP 89
-/* MBARI processing format for Reson 7K multibeam data  \
-Reson 7K series multibeam sonars, \
+#define MBF_RESON7K3 89
+/* Teledyne 7k version 3 format  \
+Teledyne Reson and Teledyne Atlas multibeam sonars, \
 bathymetry, amplitude, three channels sidescan, and subbottom  \
-up to 254 beams, variable pixels, binary, Reson. */
+variable beams, variable pixels, binary, Teledyne. */
 
 #define MBF_BCHRTUNB 91
 /* Elac BottomChart multibeam, 56 beams \
@@ -560,6 +561,7 @@ int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error);
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error);
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error);
+int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error);
 int mbr_register_bchrtunb(int verbose, void *mbio_ptr, int *error);
 int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error);
 int mbr_register_bchrxunb(int verbose, void *mbio_ptr, int *error);
@@ -787,6 +789,11 @@ int mbr_info_hypc8101(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_info_xtfr8101(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sonardepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
