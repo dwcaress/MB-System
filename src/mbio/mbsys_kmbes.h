@@ -1174,7 +1174,7 @@ struct mbsys_kmbes_che_data
 struct mbsys_kmbes_che
 {
     struct mbsys_kmbes_header header;
-    struct mbsys_kmbes_s_common cmnPart;
+    struct mbsys_kmbes_m_body cmnPart;
     struct mbsys_kmbes_che_data data;
 };
 
