@@ -628,8 +628,8 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
               "available at https://listserver.mbari.org/sympa/arc/mbsystem \n"
               "and make a data sample available. \n"
               "Have a nice day...\n");
-      fprintf(stderr, "MBF_KEMKMALL skipped %d bytes before record %.4s\n",
-                      skip, header.dgmType);
+      fprintf(stderr, "MBF_KEMKMALL skipped %d bytes before record %.4s at file pos %ld\n",
+                      skip, header.dgmType, ftell(mb_io_ptr->mbfp));
     }
 
     /* now parse the header and index the datagram */
@@ -651,6 +651,12 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
         if (header.numBytesDgm != num_bytes_dgm_end) {
           /* No match. Assume packet header was really corrupt, so reset
             file pointer past corrupted packet header and set datagram type to unknown. */
+#ifdef MBR_KEMKMALL_DEBUG
+fprintf(stderr, "\nError in record %.4s at file pointer position %ld.\n"
+                "Expected a dgm with %u bytes, but dgm closing byte indicated %u.\n"
+                "Skipping past the corrupted packet header and setting datagram type to unknown.\n",
+        header.dgmType, mb_io_ptr->file_pos, header.numBytesDgm, num_bytes_dgm_end);
+#endif
           mb_io_ptr->file_pos += HEADER_SKIP;
           fseek(mb_io_ptr->mbfp, mb_io_ptr->file_pos, SEEK_SET);
           emdgm_type = UNKNOWN;
@@ -672,6 +678,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
             /* this is necessary to insure multi-TX/RX and dual-swath modes are handled correctly. */
 
             /* get ping info */
+            /* skip past the header and the 2 shorts that make up the dgm partition part */
             offset = (mb_io_ptr->file_pos + MBSYS_KMBES_HEADER_SIZE + sizeof(int));
             fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
 
@@ -714,11 +721,11 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
               dgm_index.swaths_per_ping = cmnPart.swathsPerPing;
 #ifdef MBR_KEMKMALL_DEBUG
 mb_get_date(verbose, dgm_index.time_d, time_i);
-fprintf(stderr,"%.4s:%d Cnt:%d rxFans:%d:%d swaths:%d along:%d tx:%d rx:%d numrx:%d alg:%d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-header.dgmType,emdgm_type, cmnPart.pingCnt, cmnPart.rxFansPerPing, cmnPart.rxFanIndex,
-cmnPart.swathsPerPing, cmnPart.swathAlongPosition, cmnPart.txTransducerInd,
-cmnPart.rxTransducerInd, cmnPart.numRxTransducers, cmnPart.algorithmType,
-time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
+fprintf(stderr,"%.4s:%d pos:%ld nbytes:%u Cnt:%d rxFans:%d:%d swaths:%d along:%d tx:%d rx:%d numrx:%d alg:%d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+        header.dgmType,emdgm_type,dgm_index.file_pos,header.numBytesDgm,cmnPart.pingCnt, cmnPart.rxFansPerPing, cmnPart.rxFanIndex,
+        cmnPart.swathsPerPing, cmnPart.swathAlongPosition, cmnPart.txTransducerInd,
+        cmnPart.rxTransducerInd, cmnPart.numRxTransducers, cmnPart.algorithmType,
+        time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
 #endif
 
               status = mbr_kemkmall_add_dgm_to_dgm_index_table(verbose, dgm_index_table, &dgm_index, error);
@@ -737,6 +744,7 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
             /* this is necessary to insure multi-TX/RX and dual-swath modes are handled correctly. */
 
             /* get ping info */
+            /* skip past the header and the 2 shorts that make up the dgm partition part */
             offset = (mb_io_ptr->file_pos + MBSYS_KMBES_HEADER_SIZE + sizeof(int));
             fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
 
@@ -760,11 +768,11 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
               dgm_index.swaths_per_ping = 0;
 #ifdef MBR_KEMKMALL_DEBUG
 mb_get_date(verbose, dgm_index.time_d, time_i);
-fprintf(stderr,"%.4s:%d Cnt:%d rxFans:%d:%d swaths:%d along:%d tx:%d rx:%d numrx:%d alg:%d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-header.dgmType,emdgm_type, cmnPart.pingCnt, cmnPart.rxFansPerPing, cmnPart.rxFanIndex,
-cmnPart.swathsPerPing, cmnPart.swathAlongPosition, cmnPart.txTransducerInd,
-cmnPart.rxTransducerInd, cmnPart.numRxTransducers, cmnPart.algorithmType,
-time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
+fprintf(stderr,"%.4s:%d pos:%ld nbytes:%u Cnt:%d rxFans:%d:%d swaths:%d along:%d tx:%d rx:%d numrx:%d alg:%d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+        header.dgmType,emdgm_type,dgm_index.file_pos,header.numBytesDgm,cmnPart.pingCnt, cmnPart.rxFansPerPing, cmnPart.rxFanIndex,
+        cmnPart.swathsPerPing, cmnPart.swathAlongPosition, cmnPart.txTransducerInd,
+        cmnPart.rxTransducerInd, cmnPart.numRxTransducers, cmnPart.algorithmType,
+        time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
 #endif
 
               status = mbr_kemkmall_add_dgm_to_dgm_index_table(verbose, dgm_index_table, &dgm_index, error);
@@ -796,8 +804,8 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
             dgm_index.swaths_per_ping = 0;
 #ifdef MBR_KEMKMALL_DEBUG
 mb_get_date(verbose, dgm_index.time_d, time_i);
-fprintf(stderr,"%.4s:%d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-header.dgmType,emdgm_type, time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
+fprintf(stderr,"%.4s:%d pos:%ld nbytes:%u %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+        header.dgmType,emdgm_type,dgm_index.file_pos,header.numBytesDgm,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
 #endif
 
             status = mbr_kemkmall_add_dgm_to_dgm_index_table(verbose, dgm_index_table, &dgm_index, error);
@@ -1722,13 +1730,13 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       header->numBytesDgm:                    %u\n", header->numBytesDgm);
-    fprintf(stderr, "dbg5       header->dgmType:                        %.4s\n", header->dgmType);
-    fprintf(stderr, "dbg5       header->dgmVersion:                     %u\n", header->dgmVersion);
-    fprintf(stderr, "dbg5       header->systemID:                       %u\n", header->systemID);
-    fprintf(stderr, "dbg5       header->echoSounderID:                  %u\n", header->echoSounderID);
-    fprintf(stderr, "dbg5       header->time_sec:                       %u\n", header->time_sec);
-    fprintf(stderr, "dbg5       header->time_nanosec:                   %u\n", header->time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:    %u\n", header->numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:        %.4s\n", header->dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:     %u\n", header->dgmVersion);
+    fprintf(stderr, "dbg5       systemID:       %u\n", header->systemID);
+    fprintf(stderr, "dbg5       echoSounderID:  %u\n", header->echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:       %u\n", header->time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:   %u\n", header->time_nanosec);
   }
 
   /* print output debug statements */
@@ -1813,28 +1821,28 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       spo->header.numBytesDgm:                %u\n", spo->header.numBytesDgm);
-    fprintf(stderr, "dbg5       spo->header.dgmType:                    %s\n", spo->header.dgmType);
-    fprintf(stderr, "dbg5       spo->header.dgmVersion:                 %u\n", spo->header.dgmVersion);
-    fprintf(stderr, "dbg5       spo->header.systemID:                   %u\n", spo->header.systemID);
-    fprintf(stderr, "dbg5       spo->header.echoSounderID:              %u\n", spo->header.echoSounderID);
-    fprintf(stderr, "dbg5       spo->header.time_sec:                   %u\n", spo->header.time_sec);
-    fprintf(stderr, "dbg5       spo->header.time_nanosec:               %u\n", spo->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spo->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                     %s\n", spo->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spo->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                    %u\n", spo->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:               %u\n", spo->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                    %u\n", spo->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:                %u\n", spo->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       spo->cmnPart.numBytesCmnPart:           %u\n", spo->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       spo->cmnPart.sensorSystem:              %u\n", spo->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       spo->cmnPart.sensorStatus:              %u\n", spo->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       spo->cmnPart.padding:                   %u\n", spo->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:             %u\n", spo->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:                %u\n", spo->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:                %u\n", spo->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:                     %u\n", spo->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       spo->sensorData.timeFromSensor_sec:     %u\n", spo->sensorData.timeFromSensor_sec);
-    fprintf(stderr, "dbg5       spo->sensorData.timeFromSensor_nanosec: %u\n", spo->sensorData.timeFromSensor_nanosec);
-    fprintf(stderr, "dbg5       spo->sensorData.posFixQuality_m:        %f\n", spo->sensorData.posFixQuality_m);
-    fprintf(stderr, "dbg5       spo->sensorData.correctedLat_deg:       %f\n", spo->sensorData.correctedLat_deg);
-    fprintf(stderr, "dbg5       spo->sensorData.correctedLong_deg:      %f\n", spo->sensorData.correctedLong_deg);
-    fprintf(stderr, "dbg5       spo->sensorData.speedOverGround_mPerSec:%f\n", spo->sensorData.speedOverGround_mPerSec);
-    fprintf(stderr, "dbg5       spo->sensorData.courseOverGround_deg:   %f\n", spo->sensorData.courseOverGround_deg);
-    fprintf(stderr, "dbg5       spo->sensorData.ellipsoidHeightReRefPoint_m:   %f\n", spo->sensorData.ellipsoidHeightReRefPoint_m);
-    fprintf(stderr, "dbg5       spo->sensorData.posDataFromSensor:      %s\n", spo->sensorData.posDataFromSensor);
+    fprintf(stderr, "dbg5       timeFromSensor_sec:          %u\n", spo->sensorData.timeFromSensor_sec);
+    fprintf(stderr, "dbg5       timeFromSensor_nanosec:      %u\n", spo->sensorData.timeFromSensor_nanosec);
+    fprintf(stderr, "dbg5       posFixQuality_m:             %f\n", spo->sensorData.posFixQuality_m);
+    fprintf(stderr, "dbg5       correctedLat_deg:            %f\n", spo->sensorData.correctedLat_deg);
+    fprintf(stderr, "dbg5       correctedLong_deg:           %f\n", spo->sensorData.correctedLong_deg);
+    fprintf(stderr, "dbg5       speedOverGround_mPerSec:     %f\n", spo->sensorData.speedOverGround_mPerSec);
+    fprintf(stderr, "dbg5       courseOverGround_deg:        %f\n", spo->sensorData.courseOverGround_deg);
+    fprintf(stderr, "dbg5       ellipsoidHeightReRefPoint_m: %f\n", spo->sensorData.ellipsoidHeightReRefPoint_m);
+    fprintf(stderr, "dbg5       posDataFromSensor:           %s\n", spo->sensorData.posDataFromSensor);
   }
 
   /* set kind */
@@ -1856,9 +1864,8 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType,header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -1988,63 +1995,63 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       skm->header.numBytesDgm:                %u\n", skm->header.numBytesDgm);
-    fprintf(stderr, "dbg5       skm->header.dgmType:                    %s\n", skm->header.dgmType);
-    fprintf(stderr, "dbg5       skm->header.dgmVersion:                 %u\n", skm->header.dgmVersion);
-    fprintf(stderr, "dbg5       skm->header.systemID:                   %u\n", skm->header.systemID);
-    fprintf(stderr, "dbg5       skm->header.echoSounderID:              %u\n", skm->header.echoSounderID);
-    fprintf(stderr, "dbg5       skm->header.time_sec:                   %u\n", skm->header.time_sec);
-    fprintf(stderr, "dbg5       skm->header.time_nanosec:               %u\n", skm->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:                %u\n", skm->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                    %s\n", skm->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:                 %u\n", skm->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                   %u\n", skm->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:              %u\n", skm->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                   %u\n", skm->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:               %u\n", skm->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       skm->infoPart.numBytesInfoPart:         %u\n", skm->infoPart.numBytesInfoPart);
-    fprintf(stderr, "dbg5       skm->infoPart.sensorSystem:             %u\n", skm->infoPart.sensorSystem);
-    fprintf(stderr, "dbg5       skm->infoPart.sensorStatus:             %u\n", skm->infoPart.sensorStatus);
-    fprintf(stderr, "dbg5       skm->infoPart.sensorInputFormat:        %u\n", skm->infoPart.sensorInputFormat);
-    fprintf(stderr, "dbg5       skm->infoPart.numSamplesArray:          %u\n", skm->infoPart.numSamplesArray);
-    fprintf(stderr, "dbg5       skm->infoPart.numBytesPerSample:        %u\n", skm->infoPart.numBytesPerSample);
-    fprintf(stderr, "dbg5       skm->infoPart.sensorDataContents:       %u\n", skm->infoPart.sensorDataContents);
+    fprintf(stderr, "dbg5       numBytesInfoPart:           %u\n", skm->infoPart.numBytesInfoPart);
+    fprintf(stderr, "dbg5       sensorSystem:               %u\n", skm->infoPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:               %u\n", skm->infoPart.sensorStatus);
+    fprintf(stderr, "dbg5       sensorInputFormat:          %u\n", skm->infoPart.sensorInputFormat);
+    fprintf(stderr, "dbg5       numSamplesArray:            %u\n", skm->infoPart.numSamplesArray);
+    fprintf(stderr, "dbg5       numBytesPerSample:          %u\n", skm->infoPart.numBytesPerSample);
+    fprintf(stderr, "dbg5       sensorDataContents:         %u\n", skm->infoPart.sensorDataContents);
 
     for (i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.dgmType:                %s\n", i, skm->sample[i].KMdefault.dgmType);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.numBytesDgm:            %u\n", i, skm->sample[i].KMdefault.numBytesDgm);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.dgmVersion:             %u\n", i, skm->sample[i].KMdefault.dgmVersion);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.time_sec:               %u\n", i, skm->sample[i].KMdefault.time_sec);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.time_nanosec:           %u\n", i, skm->sample[i].KMdefault.time_nanosec);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.status:                 %u\n", i, skm->sample[i].KMdefault.status);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.dgmType:                %s\n", i, skm->sample[i].KMdefault.dgmType);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.numBytesDgm:            %u\n", i, skm->sample[i].KMdefault.numBytesDgm);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.dgmVersion:             %u\n", i, skm->sample[i].KMdefault.dgmVersion);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.time_sec:               %u\n", i, skm->sample[i].KMdefault.time_sec);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.time_nanosec:           %u\n", i, skm->sample[i].KMdefault.time_nanosec);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.status:                 %u\n", i, skm->sample[i].KMdefault.status);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.latitude_deg:           %f\n", i, skm->sample[i].KMdefault.latitude_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.longitude_deg:          %f\n", i, skm->sample[i].KMdefault.longitude_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.ellipsoidHeight_m:      %f\n", i, skm->sample[i].KMdefault.ellipsoidHeight_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.latitude_deg:           %f\n", i, skm->sample[i].KMdefault.latitude_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.longitude_deg:          %f\n", i, skm->sample[i].KMdefault.longitude_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.ellipsoidHeight_m:      %f\n", i, skm->sample[i].KMdefault.ellipsoidHeight_m);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.roll_deg:               %f\n", i, skm->sample[i].KMdefault.roll_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.pitch_deg:              %f\n", i, skm->sample[i].KMdefault.pitch_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.heading_deg:            %f\n", i, skm->sample[i].KMdefault.heading_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.heave_m:                %f\n", i, skm->sample[i].KMdefault.heave_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.roll_deg:               %f\n", i, skm->sample[i].KMdefault.roll_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.pitch_deg:              %f\n", i, skm->sample[i].KMdefault.pitch_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.heading_deg:            %f\n", i, skm->sample[i].KMdefault.heading_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.heave_m:                %f\n", i, skm->sample[i].KMdefault.heave_m);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.rollRate:               %f\n", i, skm->sample[i].KMdefault.rollRate);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.pitchRate:              %f\n", i, skm->sample[i].KMdefault.pitchRate);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.yawRate:                %f\n", i, skm->sample[i].KMdefault.yawRate);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.rollRate:               %f\n", i, skm->sample[i].KMdefault.rollRate);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.pitchRate:              %f\n", i, skm->sample[i].KMdefault.pitchRate);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.yawRate:                %f\n", i, skm->sample[i].KMdefault.yawRate);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.velNorth:               %f\n", i, skm->sample[i].KMdefault.velNorth);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.velEast:                %f\n", i, skm->sample[i].KMdefault.velEast);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.velDown:                %f\n", i, skm->sample[i].KMdefault.velDown);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.velNorth:               %f\n", i, skm->sample[i].KMdefault.velNorth);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.velEast:                %f\n", i, skm->sample[i].KMdefault.velEast);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.velDown:                %f\n", i, skm->sample[i].KMdefault.velDown);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.latitudeError_m:        %f\n", i, skm->sample[i].KMdefault.latitudeError_m);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.longitudeError_m:       %f\n", i, skm->sample[i].KMdefault.longitudeError_m);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.ellipsoidHeightError_m: %f\n", i, skm->sample[i].KMdefault.ellipsoidHeightError_m);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.rollError_deg:          %f\n", i, skm->sample[i].KMdefault.rollError_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.pitchError_deg:         %f\n", i, skm->sample[i].KMdefault.pitchError_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.headingError_deg:       %f\n", i, skm->sample[i].KMdefault.headingError_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.heaveError_m:           %f\n", i, skm->sample[i].KMdefault.heaveError_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.latitudeError_m:        %f\n", i, skm->sample[i].KMdefault.latitudeError_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.longitudeError_m:       %f\n", i, skm->sample[i].KMdefault.longitudeError_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.ellipsoidHeightError_m: %f\n", i, skm->sample[i].KMdefault.ellipsoidHeightError_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.rollError_deg:          %f\n", i, skm->sample[i].KMdefault.rollError_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.pitchError_deg:         %f\n", i, skm->sample[i].KMdefault.pitchError_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.headingError_deg:       %f\n", i, skm->sample[i].KMdefault.headingError_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.heaveError_m:           %f\n", i, skm->sample[i].KMdefault.heaveError_m);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.northAcceleration:      %f\n", i, skm->sample[i].KMdefault.northAcceleration);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.eastAcceleration:       %f\n", i, skm->sample[i].KMdefault.eastAcceleration);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.downAcceleration:       %f\n", i, skm->sample[i].KMdefault.downAcceleration);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.northAcceleration:      %f\n", i, skm->sample[i].KMdefault.northAcceleration);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.eastAcceleration:       %f\n", i, skm->sample[i].KMdefault.eastAcceleration);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.downAcceleration:       %f\n", i, skm->sample[i].KMdefault.downAcceleration);
 
       //
-      fprintf(stderr, "dbg5       skm->sample[%3d].delayedHeave.time_sec:            %u\n", i, skm->sample[i].delayedHeave.time_sec);
-      fprintf(stderr, "dbg5       skm->sample[%3d].delayedHeave.time_nanosec:        %u\n", i, skm->sample[i].delayedHeave.time_nanosec);
-      fprintf(stderr, "dbg5       skm->sample[%3d].delayedHeave.delayedHeave_m:      %f\n", i, skm->sample[i].delayedHeave.delayedHeave_m);
+      fprintf(stderr, "dbg5       sample[%3d].delayedHeave.time_sec:            %u\n", i, skm->sample[i].delayedHeave.time_sec);
+      fprintf(stderr, "dbg5       sample[%3d].delayedHeave.time_nanosec:        %u\n", i, skm->sample[i].delayedHeave.time_nanosec);
+      fprintf(stderr, "dbg5       sample[%3d].delayedHeave.delayedHeave_m:      %f\n", i, skm->sample[i].delayedHeave.delayedHeave_m);
     }
 
   }
@@ -2068,9 +2075,8 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -2140,27 +2146,27 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       svp->header.numBytesDgm:                %u\n", svp->header.numBytesDgm);
-    fprintf(stderr, "dbg5       svp->header.dgmType:                    %s\n", svp->header.dgmType);
-    fprintf(stderr, "dbg5       svp->header.dgmVersion:                 %u\n", svp->header.dgmVersion);
-    fprintf(stderr, "dbg5       svp->header.systemID:                   %u\n", svp->header.systemID);
-    fprintf(stderr, "dbg5       svp->header.echoSounderID:              %u\n", svp->header.echoSounderID);
-    fprintf(stderr, "dbg5       svp->header.time_sec:                   %u\n", svp->header.time_sec);
-    fprintf(stderr, "dbg5       svp->header.time_nanosec:               %u\n", svp->header.time_nanosec);
+    fprintf(stderr, " dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
+    fprintf(stderr, " dbg5       dgmType:         %s\n", svp->header.dgmType);
+    fprintf(stderr, " dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
+    fprintf(stderr, " dbg5       systemID:        %u\n", svp->header.systemID);
+    fprintf(stderr, " dbg5       echoSounderID:   %u\n", svp->header.echoSounderID);
+    fprintf(stderr, " dbg5       time_sec:        %u\n", svp->header.time_sec);
+    fprintf(stderr, " dbg5       time_nanosec:    %u\n", svp->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       svp->numBytesCmnPart:            %u\n", svp->numBytesCmnPart);
-    fprintf(stderr, "dbg5       svp->numSamples:                 %u\n", svp->numSamples);
-    fprintf(stderr, "dbg5       svp->sensorFormat:               %s\n", svp->sensorFormat);
-    fprintf(stderr, "dbg5       svp->time_sec:                   %u\n", svp->time_sec);
-    fprintf(stderr, "dbg5       svp->latitude_deg:               %f\n", svp->latitude_deg);
-    fprintf(stderr, "dbg5       svp->longitude_deg:              %f\n", svp->longitude_deg);
+    fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", svp->numBytesCmnPart);
+    fprintf(stderr, "dbg5       numSamples:       %u\n", svp->numSamples);
+    fprintf(stderr, "dbg5       sensorFormat:     %s\n", svp->sensorFormat);
+    fprintf(stderr, "dbg5       time_sec:         %u\n", svp->time_sec);
+    fprintf(stderr, "dbg5       latitude_deg:     %f\n", svp->latitude_deg);
+    fprintf(stderr, "dbg5       longitude_deg:    %f\n", svp->longitude_deg);
 
     for (i = 0; i < (svp->numSamples); i++) {
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].depth_m:                      %f\n", i, svp->sensorData[i].depth_m);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svp->sensorData[i].soundVelocity_mPerSec);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].padding:                      %d\n", i, svp->sensorData[i].padding);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].temp_C:                       %f\n", i, svp->sensorData[i].temp_C);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].salinity:                     %f\n", i, svp->sensorData[i].salinity);
+      fprintf(stderr, "dbg5       sensorData[%3d].depth_m:                %f\n", i, svp->sensorData[i].depth_m);
+      fprintf(stderr, "dbg5       sensorData[%3d].soundVelocity_mPerSec:  %f\n", i, svp->sensorData[i].soundVelocity_mPerSec);
+      fprintf(stderr, "dbg5       sensorData[%3d].padding:                %d\n", i, svp->sensorData[i].padding);
+      fprintf(stderr, "dbg5       sensorData[%3d].temp_C:                 %f\n", i, svp->sensorData[i].temp_C);
+      fprintf(stderr, "dbg5       sensorData[%3d].salinity:               %f\n", i, svp->sensorData[i].salinity);
     }
   }
 
@@ -2183,9 +2189,8 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -2261,29 +2266,29 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       svt->header.numBytesDgm:                %u\n", svt->header.numBytesDgm);
-    fprintf(stderr, "dbg5       svt->header.dgmType:                    %s\n", svt->header.dgmType);
-    fprintf(stderr, "dbg5       svt->header.dgmVersion:                 %u\n", svt->header.dgmVersion);
-    fprintf(stderr, "dbg5       svt->header.systemID:                   %u\n", svt->header.systemID);
-    fprintf(stderr, "dbg5       svt->header.echoSounderID:              %u\n", svt->header.echoSounderID);
-    fprintf(stderr, "dbg5       svt->header.time_sec:                   %u\n", svt->header.time_sec);
-    fprintf(stderr, "dbg5       svt->header.time_nanosec:               %u\n", svt->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:             %u\n", svt->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                 %s\n", svt->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:              %u\n", svt->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                %u\n", svt->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:           %u\n", svt->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                %u\n", svt->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:            %u\n", svt->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       svt->infoPart.numBytesInfoPart:         %u\n", svt->infoPart.numBytesInfoPart);
-    fprintf(stderr, "dbg5       svt->infoPart.sensorStatus:             %u\n", svt->infoPart.sensorStatus);
-    fprintf(stderr, "dbg5       svt->infoPart.sensorInputFormat:        %u\n", svt->infoPart.sensorInputFormat);
-    fprintf(stderr, "dbg5       svt->infoPart.numSamplesArray:          %u\n", svt->infoPart.numSamplesArray);
-    fprintf(stderr, "dbg5       svt->infoPart.sensorDataContents:       %u\n", svt->infoPart.sensorDataContents);
-    fprintf(stderr, "dbg5       svt->infoPart.filterTime_sec:           %f\n", svt->infoPart.filterTime_sec);
-    fprintf(stderr, "dbg5       svt->infoPart.soundVelocity_mPerSec_offset: %f\n", svt->infoPart.soundVelocity_mPerSec_offset);
+    fprintf(stderr, "dbg5       numBytesInfoPart:         %u\n", svt->infoPart.numBytesInfoPart);
+    fprintf(stderr, "dbg5       sensorStatus:             %u\n", svt->infoPart.sensorStatus);
+    fprintf(stderr, "dbg5       sensorInputFormat:        %u\n", svt->infoPart.sensorInputFormat);
+    fprintf(stderr, "dbg5       numSamplesArray:          %u\n", svt->infoPart.numSamplesArray);
+    fprintf(stderr, "dbg5       sensorDataContents:       %u\n", svt->infoPart.sensorDataContents);
+    fprintf(stderr, "dbg5       filterTime_sec:           %f\n", svt->infoPart.filterTime_sec);
+    fprintf(stderr, "dbg5       soundVelocity_mPerSec_offset: %f\n", svt->infoPart.soundVelocity_mPerSec_offset);
 
     for (i = 0; i < (svt->infoPart.numSamplesArray); i++) {
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].time_sec:                     %u\n", i, svt->sensorData[i].time_sec);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].time_nanosec:                 %u\n", i, svt->sensorData[i].time_nanosec);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svt->sensorData[i].soundVelocity_mPerSec);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].temp_C:                       %f\n", i, svt->sensorData[i].temp_C);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].pressure_Pa:                  %f\n", i, svt->sensorData[i].pressure_Pa);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].salinity:                     %f\n", i, svt->sensorData[i].salinity);
+      fprintf(stderr, "dbg5       sensorData[%3d].time_sec:                     %u\n", i, svt->sensorData[i].time_sec);
+      fprintf(stderr, "dbg5       sensorData[%3d].time_nanosec:                 %u\n", i, svt->sensorData[i].time_nanosec);
+      fprintf(stderr, "dbg5       sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svt->sensorData[i].soundVelocity_mPerSec);
+      fprintf(stderr, "dbg5       sensorData[%3d].temp_C:                       %f\n", i, svt->sensorData[i].temp_C);
+      fprintf(stderr, "dbg5       sensorData[%3d].pressure_Pa:                  %f\n", i, svt->sensorData[i].pressure_Pa);
+      fprintf(stderr, "dbg5       sensorData[%3d].salinity:                     %f\n", i, svt->sensorData[i].salinity);
     }
   }
 
@@ -2306,9 +2311,8 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -2370,22 +2374,22 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       scl->header.numBytesDgm:                %u\n", scl->header.numBytesDgm);
-    fprintf(stderr, "dbg5       scl->header.dgmType:                    %s\n", scl->header.dgmType);
-    fprintf(stderr, "dbg5       scl->header.dgmVersion:                 %u\n", scl->header.dgmVersion);
-    fprintf(stderr, "dbg5       scl->header.systemID:                   %u\n", scl->header.systemID);
-    fprintf(stderr, "dbg5       scl->header.echoSounderID:              %u\n", scl->header.echoSounderID);
-    fprintf(stderr, "dbg5       scl->header.time_sec:                   %u\n", scl->header.time_sec);
-    fprintf(stderr, "dbg5       scl->header.time_nanosec:               %u\n", scl->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:         %u\n", scl->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:             %s\n", scl->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:          %u\n", scl->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:            %u\n", scl->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:       %u\n", scl->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:            %u\n", scl->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:        %u\n", scl->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       scl->cmnPart.numBytesCmnPart:           %u\n", scl->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       scl->cmnPart.sensorSystem:              %u\n", scl->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       scl->cmnPart.sensorStatus:              %u\n", scl->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       scl->cmnPart.padding:                   %u\n", scl->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:     %u\n", scl->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:        %u\n", scl->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:        %u\n", scl->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:             %u\n", scl->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       scl->sensorData.offset_sec:             %f\n", scl->sensorData.offset_sec);
-    fprintf(stderr, "dbg5       scl->sensorData.clockDevPU_nanosec:     %d\n", scl->sensorData.clockDevPU_nanosec);
-    fprintf(stderr, "dbg5       scl->sensorData.dataFromSensor:         %s\n", scl->sensorData.dataFromSensor);
+    fprintf(stderr, "dbg5       offset_sec:          %f\n", scl->sensorData.offset_sec);
+    fprintf(stderr, "dbg5       clockDevPU_nanosec:  %d\n", scl->sensorData.clockDevPU_nanosec);
+    fprintf(stderr, "dbg5       dataFromSensor:      %s\n", scl->sensorData.dataFromSensor);
   }
 
   /* set kind */
@@ -2407,9 +2411,8 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -2477,25 +2480,25 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       sde->header.numBytesDgm:                %u\n", sde->header.numBytesDgm);
-    fprintf(stderr, "dbg5       sde->header.dgmType:                    %s\n", sde->header.dgmType);
-    fprintf(stderr, "dbg5       sde->header.dgmVersion:                 %u\n", sde->header.dgmVersion);
-    fprintf(stderr, "dbg5       sde->header.systemID:                   %u\n", sde->header.systemID);
-    fprintf(stderr, "dbg5       sde->header.echoSounderID:              %u\n", sde->header.echoSounderID);
-    fprintf(stderr, "dbg5       sde->header.time_sec:                   %u\n", sde->header.time_sec);
-    fprintf(stderr, "dbg5       sde->header.time_nanosec:               %u\n", sde->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:      %u\n", sde->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:          %s\n", sde->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:       %u\n", sde->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:         %u\n", sde->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:    %u\n", sde->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:         %u\n", sde->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:     %u\n", sde->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       sde->cmnPart.numBytesCmnPart:           %u\n", sde->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       sde->cmnPart.sensorSystem:              %u\n", sde->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       sde->cmnPart.sensorStatus:              %u\n", sde->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       sde->cmnPart.padding:                   %u\n", sde->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", sde->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:     %u\n", sde->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:     %u\n", sde->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:          %u\n", sde->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       sde->sensorData.depthUsed_m:            %f\n", sde->sensorData.depthUsed_m);
-    fprintf(stderr, "dbg5       sde->sensorData.offset:                 %f\n", sde->sensorData.offset);
-    fprintf(stderr, "dbg5       sde->sensorData.scale:                  %f\n", sde->sensorData.scale);
-    fprintf(stderr, "dbg5       sde->sensorData.latitude_deg:           %f\n", sde->sensorData.latitude_deg);
-    fprintf(stderr, "dbg5       sde->sensorData.longitude_deg:          %f\n", sde->sensorData.longitude_deg);
-    fprintf(stderr, "dbg5       sde->sensorData.dataFromSensor:         %s\n", sde->sensorData.dataFromSensor);
+    fprintf(stderr, "dbg5       depthUsed_m:      %f\n", sde->sensorData.depthUsed_m);
+    fprintf(stderr, "dbg5       offset:           %f\n", sde->sensorData.offset);
+    fprintf(stderr, "dbg5       scale:            %f\n", sde->sensorData.scale);
+    fprintf(stderr, "dbg5       latitude_deg:     %f\n", sde->sensorData.latitude_deg);
+    fprintf(stderr, "dbg5       longitude_deg:    %f\n", sde->sensorData.longitude_deg);
+    fprintf(stderr, "dbg5       dataFromSensor:   %s\n", sde->sensorData.dataFromSensor);
   }
 
   /* set kind */
@@ -2581,22 +2584,22 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       shi->header.numBytesDgm:                %u\n", shi->header.numBytesDgm);
-    fprintf(stderr, "dbg5       shi->header.dgmType:                    %s\n", shi->header.dgmType);
-    fprintf(stderr, "dbg5       shi->header.dgmVersion:                 %u\n", shi->header.dgmVersion);
-    fprintf(stderr, "dbg5       shi->header.systemID:                   %u\n", shi->header.systemID);
-    fprintf(stderr, "dbg5       shi->header.echoSounderID:              %u\n", shi->header.echoSounderID);
-    fprintf(stderr, "dbg5       shi->header.time_sec:                   %u\n", shi->header.time_sec);
-    fprintf(stderr, "dbg5       shi->header.time_nanosec:               %u\n", shi->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:      %u\n", shi->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:          %s\n", shi->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:       %u\n", shi->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:         %u\n", shi->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:    %u\n", shi->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:         %u\n", shi->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:     %u\n", shi->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       shi->cmnPart.numBytesCmnPart:           %u\n", shi->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       shi->cmnPart.sensorSystem:              %u\n", shi->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       shi->cmnPart.sensorStatus:              %u\n", shi->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       shi->cmnPart.padding:                   %u\n", shi->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", shi->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:     %u\n", shi->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:     %u\n", shi->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:          %u\n", shi->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       shi->sensorData.sensorType:             %u\n", shi->sensorData.sensorType);
-    fprintf(stderr, "dbg5       shi->sensorData.heigthUsed_m:           %f\n", shi->sensorData.heigthUsed_m);
-    fprintf(stderr, "dbg5       shi->sensorData.dataFromSensor:         %s\n", shi->sensorData.dataFromSensor);
+    fprintf(stderr, "dbg5       sensorType:       %u\n", shi->sensorData.sensorType);
+    fprintf(stderr, "dbg5       heigthUsed_m:     %f\n", shi->sensorData.heigthUsed_m);
+    fprintf(stderr, "dbg5       dataFromSensor:   %s\n", shi->sensorData.dataFromSensor);
   }
 
   /* set kind */
@@ -2618,9 +2621,10 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
+#endif
 #endif
 
   /* return status */
@@ -2692,28 +2696,28 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       sha->header.numBytesDgm:                %u\n", sha->header.numBytesDgm);
-    fprintf(stderr, "dbg5       sha->header.dgmType:                    %s\n", sha->header.dgmType);
-    fprintf(stderr, "dbg5       sha->header.dgmVersion:                 %u\n", sha->header.dgmVersion);
-    fprintf(stderr, "dbg5       sha->header.systemID:                   %u\n", sha->header.systemID);
-    fprintf(stderr, "dbg5       sha->header.echoSounderID:              %u\n", sha->header.echoSounderID);
-    fprintf(stderr, "dbg5       sha->header.time_sec:                   %u\n", sha->header.time_sec);
-    fprintf(stderr, "dbg5       sha->header.time_nanosec:               %u\n", sha->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:            %u\n", sha->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                %s\n", sha->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:             %u\n", sha->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:               %u\n", sha->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:          %u\n", sha->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:               %u\n", sha->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:           %u\n", sha->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       sha->cmnPart.numBytesCmnPart:           %u\n", sha->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       sha->cmnPart.sensorSystem:              %u\n", sha->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       sha->cmnPart.sensorStatus:              %u\n", sha->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       sha->cmnPart.padding:                   %u\n", sha->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:        %u\n", sha->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:           %u\n", sha->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:           %u\n", sha->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:                %u\n", sha->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       sha->dataInfo.numBytesInfoPart:         %u\n", sha->dataInfo.numBytesInfoPart);
-    fprintf(stderr, "dbg5       sha->dataInfo.numSamplesArray:          %u\n", sha->dataInfo.numSamplesArray);
-    fprintf(stderr, "dbg5       sha->dataInfo.numBytesPerSample:        %u\n", sha->dataInfo.numBytesPerSample);
-    fprintf(stderr, "dbg5       sha->dataInfo.numBytesRawSensorData:    %u\n", sha->dataInfo.numBytesRawSensorData);
+    fprintf(stderr, "dbg5       numBytesInfoPart:       %u\n", sha->dataInfo.numBytesInfoPart);
+    fprintf(stderr, "dbg5       numSamplesArray:        %u\n", sha->dataInfo.numSamplesArray);
+    fprintf(stderr, "dbg5       numBytesPerSample:      %u\n", sha->dataInfo.numBytesPerSample);
+    fprintf(stderr, "dbg5       numBytesRawSensorData:  %u\n", sha->dataInfo.numBytesRawSensorData);
 
     for (i = 0; i<(sha->dataInfo.numSamplesArray); i++) {
-      fprintf(stderr, "dbg5       sha->sensorData[%3d].timeSinceRecStart_nanosec: %u\n", i, sha->sensorData[i].timeSinceRecStart_nanosec);
-      fprintf(stderr, "dbg5       sha->sensorData[%3d].headingCorrected_deg:      %f\n", i, sha->sensorData[i].headingCorrected_deg);
-      fprintf(stderr, "dbg5       sha->sensorData[%3d].dataFromSensor:            %s\n", i, sha->sensorData[i].dataFromSensor);
+      fprintf(stderr, "dbg5       sensorData[%3d].timeSinceRecStart_nanosec: %u\n", i, sha->sensorData[i].timeSinceRecStart_nanosec);
+      fprintf(stderr, "dbg5       sensorData[%3d].headingCorrected_deg:      %f\n", i, sha->sensorData[i].headingCorrected_deg);
+      fprintf(stderr, "dbg5       sensorData[%3d].dataFromSensor:            %s\n", i, sha->sensorData[i].dataFromSensor);
     }
   }
 
@@ -2736,9 +2740,8 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -2812,16 +2815,16 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr,"dbg5       numBytesCmnPart     = %d\n", cmnPart.numBytesCmnPart);
-    fprintf(stderr,"dbg5       pingCnt             = %d\n", cmnPart.pingCnt);
-    fprintf(stderr,"dbg5       rxFansPerPing       = %d\n", cmnPart.rxFansPerPing);
-    fprintf(stderr,"dbg5       rxFanIndex          = %d\n", cmnPart.rxFanIndex);
-    fprintf(stderr,"dbg5       swathsPerPing       = %d\n", cmnPart.swathsPerPing);
-    fprintf(stderr,"dbg5       swathAlongPosition  = %d\n", cmnPart.swathAlongPosition);
-    fprintf(stderr,"dbg5       txTransducerInd     = %d\n", cmnPart.txTransducerInd);
-    fprintf(stderr,"dbg5       rxTransducerInd     = %d\n", cmnPart.rxTransducerInd);
-    fprintf(stderr,"dbg5       numRxTransducers    = %d\n", cmnPart.numRxTransducers);
-    fprintf(stderr,"dbg5       algorithmType       = %d\n", cmnPart.algorithmType);
+    fprintf(stderr,"dbg5       numBytesCmnPart:     %d\n", cmnPart.numBytesCmnPart);
+    fprintf(stderr,"dbg5       pingCnt:             %d\n", cmnPart.pingCnt);
+    fprintf(stderr,"dbg5       rxFansPerPing:       %d\n", cmnPart.rxFansPerPing);
+    fprintf(stderr,"dbg5       rxFanIndex:          %d\n", cmnPart.rxFanIndex);
+    fprintf(stderr,"dbg5       swathsPerPing:       %d\n", cmnPart.swathsPerPing);
+    fprintf(stderr,"dbg5       swathAlongPosition:  %d\n", cmnPart.swathAlongPosition);
+    fprintf(stderr,"dbg5       txTransducerInd:     %d\n", cmnPart.txTransducerInd);
+    fprintf(stderr,"dbg5       rxTransducerInd:     %d\n", cmnPart.rxTransducerInd);
+    fprintf(stderr,"dbg5       numRxTransducers:    %d\n", cmnPart.numRxTransducers);
+    fprintf(stderr,"dbg5       algorithmType:       %d\n", cmnPart.algorithmType);
   }
 
   /* now figure out which of the MRZ datagrams for this ping we are reading
@@ -2945,52 +2948,52 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr,"dbg5       numBytesInfoData            = %d\n", mrz->pingInfo.numBytesInfoData);
-    fprintf(stderr,"dbg5       padding0                    = %d\n", mrz->pingInfo.padding0);
-    fprintf(stderr,"dbg5       pingRate_Hz                 = %f\n", mrz->pingInfo.pingRate_Hz);
-    fprintf(stderr,"dbg5       beamSpacing                 = %d\n", mrz->pingInfo.beamSpacing);
-    fprintf(stderr,"dbg5       depthMode                   = %d\n", mrz->pingInfo.depthMode);
-    fprintf(stderr,"dbg5       subDepthMode                = %d\n", mrz->pingInfo.subDepthMode);
-    fprintf(stderr,"dbg5       distanceBtwSwath            = %d\n", mrz->pingInfo.distanceBtwSwath);
-    fprintf(stderr,"dbg5       detectionMode               = %d\n", mrz->pingInfo.detectionMode);
-    fprintf(stderr,"dbg5       pulseForm                   = %d\n", mrz->pingInfo.pulseForm);
-    fprintf(stderr,"dbg5       padding1                    = %d\n", mrz->pingInfo.padding1);
-    fprintf(stderr,"dbg5       frequencyMode_Hz            = %f\n", mrz->pingInfo.frequencyMode_Hz);
-    fprintf(stderr,"dbg5       freqRangeLowLim_Hz          = %f\n", mrz->pingInfo.freqRangeLowLim_Hz);
-    fprintf(stderr,"dbg5       freqRangeHighLim_Hz         = %f\n", mrz->pingInfo.freqRangeHighLim_Hz);
-    fprintf(stderr,"dbg5       maxEffTxPulseLength_sec     = %f\n", mrz->pingInfo.maxEffTxPulseLength_sec);
-    fprintf(stderr,"dbg5       maxTotalTxPulseLength_sec   = %f\n", mrz->pingInfo.maxTotalTxPulseLength_sec);
-    fprintf(stderr,"dbg5       maxEffTxBandWidth_Hz        = %f\n", mrz->pingInfo.maxEffTxBandWidth_Hz);
-    fprintf(stderr,"dbg5       absCoeff_dBPerkm            = %f\n", mrz->pingInfo.absCoeff_dBPerkm);
-    fprintf(stderr,"dbg5       portSectorEdge_deg          = %f\n", mrz->pingInfo.portSectorEdge_deg);
-    fprintf(stderr,"dbg5       starbSectorEdge_deg         = %f\n", mrz->pingInfo.starbSectorEdge_deg);
-    fprintf(stderr,"dbg5       portMeanCov_m               = %d\n", mrz->pingInfo.portMeanCov_m);
-    fprintf(stderr,"dbg5       starbMeanCov_m              = %d\n", mrz->pingInfo.starbMeanCov_m);
-    fprintf(stderr,"dbg5       modeAndStabilisation        = %d\n", mrz->pingInfo.modeAndStabilisation);
-    fprintf(stderr,"dbg5       runtimeFilter1              = %d\n", mrz->pingInfo.runtimeFilter1);
-    fprintf(stderr,"dbg5       runtimeFilter2              = %d\n", mrz->pingInfo.runtimeFilter2);
-    fprintf(stderr,"dbg5       pipeTrackingStatus          = %d\n", mrz->pingInfo.pipeTrackingStatus);
-    fprintf(stderr,"dbg5       transmitArraySizeUsed_deg   = %f\n", mrz->pingInfo.transmitArraySizeUsed_deg);
-    fprintf(stderr,"dbg5       receiveArraySizeUsed_deg    = %f\n", mrz->pingInfo.receiveArraySizeUsed_deg);
-    fprintf(stderr,"dbg5       transmitPower_dB            = %f\n", mrz->pingInfo.transmitPower_dB);
-    fprintf(stderr,"dbg5       SLrampUpTimeRemaining       = %d\n", mrz->pingInfo.SLrampUpTimeRemaining);
-    fprintf(stderr,"dbg5       padding2                    = %d\n", mrz->pingInfo.padding2);
-    fprintf(stderr,"dbg5       yawAngle_deg                = %f\n", mrz->pingInfo.yawAngle_deg);
-    fprintf(stderr,"dbg5       numTxSectors                = %d\n", mrz->pingInfo.numTxSectors);
-    fprintf(stderr,"dbg5       numBytesPerTxSector         = %d\n", mrz->pingInfo.numBytesPerTxSector);
-    fprintf(stderr,"dbg5       headingVessel_deg           = %f\n", mrz->pingInfo.headingVessel_deg);
-    fprintf(stderr,"dbg5       soundSpeedAtTxDepth_mPerSec = %f\n", mrz->pingInfo.soundSpeedAtTxDepth_mPerSec);
-    fprintf(stderr,"dbg5       txTransducerDepth_m         = %f\n", mrz->pingInfo.txTransducerDepth_m);
-    fprintf(stderr,"dbg5       z_waterLevelReRefPoint_m    = %f\n", mrz->pingInfo.z_waterLevelReRefPoint_m);
-    fprintf(stderr,"dbg5       x_kmallToall_m              = %f\n", mrz->pingInfo.x_kmallToall_m);
-    fprintf(stderr,"dbg5       y_kmallToall_m              = %f\n", mrz->pingInfo.y_kmallToall_m);
-    fprintf(stderr,"dbg5       latLongInfo                 = %d\n", mrz->pingInfo.latLongInfo);
-    fprintf(stderr,"dbg5       posSensorStatus             = %d\n", mrz->pingInfo.posSensorStatus);
-    fprintf(stderr,"dbg5       attitudeSensorStatus        = %d\n", mrz->pingInfo.attitudeSensorStatus);
-    fprintf(stderr,"dbg5       padding3                    = %d\n", mrz->pingInfo.padding3);
-    fprintf(stderr,"dbg5       latitude_deg                = %f\n", mrz->pingInfo.latitude_deg);
-    fprintf(stderr,"dbg5       longitude_deg               = %f\n", mrz->pingInfo.longitude_deg);
-    fprintf(stderr,"dbg5       ellipsoidHeightReRefPoint_m = %f\n", mrz->pingInfo.ellipsoidHeightReRefPoint_m);
+    fprintf(stderr,"dbg5       numBytesInfoData:             %d\n", mrz->pingInfo.numBytesInfoData);
+    fprintf(stderr,"dbg5       padding0:                     %d\n", mrz->pingInfo.padding0);
+    fprintf(stderr,"dbg5       pingRate_Hz:                  %f\n", mrz->pingInfo.pingRate_Hz);
+    fprintf(stderr,"dbg5       beamSpacing:                  %d\n", mrz->pingInfo.beamSpacing);
+    fprintf(stderr,"dbg5       depthMode:                    %d\n", mrz->pingInfo.depthMode);
+    fprintf(stderr,"dbg5       subDepthMode:                 %d\n", mrz->pingInfo.subDepthMode);
+    fprintf(stderr,"dbg5       distanceBtwSwath:             %d\n", mrz->pingInfo.distanceBtwSwath);
+    fprintf(stderr,"dbg5       detectionMode:                %d\n", mrz->pingInfo.detectionMode);
+    fprintf(stderr,"dbg5       pulseForm:                    %d\n", mrz->pingInfo.pulseForm);
+    fprintf(stderr,"dbg5       padding1:                     %d\n", mrz->pingInfo.padding1);
+    fprintf(stderr,"dbg5       frequencyMode_Hz:             %f\n", mrz->pingInfo.frequencyMode_Hz);
+    fprintf(stderr,"dbg5       freqRangeLowLim_Hz:           %f\n", mrz->pingInfo.freqRangeLowLim_Hz);
+    fprintf(stderr,"dbg5       freqRangeHighLim_Hz:          %f\n", mrz->pingInfo.freqRangeHighLim_Hz);
+    fprintf(stderr,"dbg5       maxEffTxPulseLength_sec:      %f\n", mrz->pingInfo.maxEffTxPulseLength_sec);
+    fprintf(stderr,"dbg5       maxTotalTxPulseLength_sec:    %f\n", mrz->pingInfo.maxTotalTxPulseLength_sec);
+    fprintf(stderr,"dbg5       maxEffTxBandWidth_Hz:         %f\n", mrz->pingInfo.maxEffTxBandWidth_Hz);
+    fprintf(stderr,"dbg5       absCoeff_dBPerkm:             %f\n", mrz->pingInfo.absCoeff_dBPerkm);
+    fprintf(stderr,"dbg5       portSectorEdge_deg:           %f\n", mrz->pingInfo.portSectorEdge_deg);
+    fprintf(stderr,"dbg5       starbSectorEdge_deg:          %f\n", mrz->pingInfo.starbSectorEdge_deg);
+    fprintf(stderr,"dbg5       portMeanCov_m:                %d\n", mrz->pingInfo.portMeanCov_m);
+    fprintf(stderr,"dbg5       starbMeanCov_m:               %d\n", mrz->pingInfo.starbMeanCov_m);
+    fprintf(stderr,"dbg5       modeAndStabilisation:         %d\n", mrz->pingInfo.modeAndStabilisation);
+    fprintf(stderr,"dbg5       runtimeFilter1:               %d\n", mrz->pingInfo.runtimeFilter1);
+    fprintf(stderr,"dbg5       runtimeFilter2:               %d\n", mrz->pingInfo.runtimeFilter2);
+    fprintf(stderr,"dbg5       pipeTrackingStatus:           %d\n", mrz->pingInfo.pipeTrackingStatus);
+    fprintf(stderr,"dbg5       transmitArraySizeUsed_deg:    %f\n", mrz->pingInfo.transmitArraySizeUsed_deg);
+    fprintf(stderr,"dbg5       receiveArraySizeUsed_deg:     %f\n", mrz->pingInfo.receiveArraySizeUsed_deg);
+    fprintf(stderr,"dbg5       transmitPower_dB:             %f\n", mrz->pingInfo.transmitPower_dB);
+    fprintf(stderr,"dbg5       SLrampUpTimeRemaining:        %d\n", mrz->pingInfo.SLrampUpTimeRemaining);
+    fprintf(stderr,"dbg5       padding2:                     %d\n", mrz->pingInfo.padding2);
+    fprintf(stderr,"dbg5       yawAngle_deg:                 %f\n", mrz->pingInfo.yawAngle_deg);
+    fprintf(stderr,"dbg5       numTxSectors:                 %d\n", mrz->pingInfo.numTxSectors);
+    fprintf(stderr,"dbg5       numBytesPerTxSector:          %d\n", mrz->pingInfo.numBytesPerTxSector);
+    fprintf(stderr,"dbg5       headingVessel_deg:            %f\n", mrz->pingInfo.headingVessel_deg);
+    fprintf(stderr,"dbg5       soundSpeedAtTxDepth_mPerSec:  %f\n", mrz->pingInfo.soundSpeedAtTxDepth_mPerSec);
+    fprintf(stderr,"dbg5       txTransducerDepth_m:          %f\n", mrz->pingInfo.txTransducerDepth_m);
+    fprintf(stderr,"dbg5       z_waterLevelReRefPoint_m:     %f\n", mrz->pingInfo.z_waterLevelReRefPoint_m);
+    fprintf(stderr,"dbg5       x_kmallToall_m:               %f\n", mrz->pingInfo.x_kmallToall_m);
+    fprintf(stderr,"dbg5       y_kmallToall_m:               %f\n", mrz->pingInfo.y_kmallToall_m);
+    fprintf(stderr,"dbg5       latLongInfo:                  %d\n", mrz->pingInfo.latLongInfo);
+    fprintf(stderr,"dbg5       posSensorStatus:              %d\n", mrz->pingInfo.posSensorStatus);
+    fprintf(stderr,"dbg5       attitudeSensorStatus:         %d\n", mrz->pingInfo.attitudeSensorStatus);
+    fprintf(stderr,"dbg5       padding3:                     %d\n", mrz->pingInfo.padding3);
+    fprintf(stderr,"dbg5       latitude_deg:                 %f\n", mrz->pingInfo.latitude_deg);
+    fprintf(stderr,"dbg5       longitude_deg:                %f\n", mrz->pingInfo.longitude_deg);
+    fprintf(stderr,"dbg5       ellipsoidHeightReRefPoint_m:  %f\n", mrz->pingInfo.ellipsoidHeightReRefPoint_m);
   }
 
   /* EMdgmMRZ_txSectorInfo - sector information */
@@ -3029,20 +3032,20 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
       fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mrz->pingInfo.numTxSectors);
-      fprintf(stderr, "dbg5       txSectorNumb            = %d\n", mrz->sectorInfo[i].txSectorNumb);
-      fprintf(stderr, "dbg5       txArrNumber             = %d\n", mrz->sectorInfo[i].txArrNumber);
-      fprintf(stderr, "dbg5       txSubArray              = %d\n", mrz->sectorInfo[i].txSubArray);
-      fprintf(stderr, "dbg5       padding0                = %d\n", mrz->sectorInfo[i].padding0);
-      fprintf(stderr, "dbg5       sectorTransmitDelay_sec = %f\n", mrz->sectorInfo[i].sectorTransmitDelay_sec);
-      fprintf(stderr, "dbg5       tiltAngleReTx_deg       = %f\n", mrz->sectorInfo[i].tiltAngleReTx_deg);
-      fprintf(stderr, "dbg5       txNominalSourceLevel_dB = %f\n", mrz->sectorInfo[i].txNominalSourceLevel_dB);
-      fprintf(stderr, "dbg5       txFocusRange_m          = %f\n", mrz->sectorInfo[i].txFocusRange_m);
-      fprintf(stderr, "dbg5       centreFreq_Hz           = %f\n", mrz->sectorInfo[i].centreFreq_Hz);
-      fprintf(stderr, "dbg5       signalBandWidth_Hz      = %f\n", mrz->sectorInfo[i].signalBandWidth_Hz);
-      fprintf(stderr, "dbg5       totalSignalLength_sec   = %f\n", mrz->sectorInfo[i].totalSignalLength_sec);
-      fprintf(stderr, "dbg5       pulseShading            = %d\n", mrz->sectorInfo[i].pulseShading);
-      fprintf(stderr, "dbg5       signalWaveForm          = %d\n", mrz->sectorInfo[i].signalWaveForm);
-      fprintf(stderr, "dbg5       padding1                = %d\n", mrz->sectorInfo[i].padding1);
+      fprintf(stderr, "dbg5       txSectorNumb:             %d\n", mrz->sectorInfo[i].txSectorNumb);
+      fprintf(stderr, "dbg5       txArrNumber:              %d\n", mrz->sectorInfo[i].txArrNumber);
+      fprintf(stderr, "dbg5       txSubArray:               %d\n", mrz->sectorInfo[i].txSubArray);
+      fprintf(stderr, "dbg5       padding0:                 %d\n", mrz->sectorInfo[i].padding0);
+      fprintf(stderr, "dbg5       sectorTransmitDelay_sec:  %f\n", mrz->sectorInfo[i].sectorTransmitDelay_sec);
+      fprintf(stderr, "dbg5       tiltAngleReTx_deg:        %f\n", mrz->sectorInfo[i].tiltAngleReTx_deg);
+      fprintf(stderr, "dbg5       txNominalSourceLevel_dB:  %f\n", mrz->sectorInfo[i].txNominalSourceLevel_dB);
+      fprintf(stderr, "dbg5       txFocusRange_m:           %f\n", mrz->sectorInfo[i].txFocusRange_m);
+      fprintf(stderr, "dbg5       centreFreq_Hz:            %f\n", mrz->sectorInfo[i].centreFreq_Hz);
+      fprintf(stderr, "dbg5       signalBandWidth_Hz:       %f\n", mrz->sectorInfo[i].signalBandWidth_Hz);
+      fprintf(stderr, "dbg5       totalSignalLength_sec:    %f\n", mrz->sectorInfo[i].totalSignalLength_sec);
+      fprintf(stderr, "dbg5       pulseShading:             %d\n", mrz->sectorInfo[i].pulseShading);
+      fprintf(stderr, "dbg5       signalWaveForm:           %d\n", mrz->sectorInfo[i].signalWaveForm);
+      fprintf(stderr, "dbg5       padding1:                 %d\n", mrz->sectorInfo[i].padding1);
     }
   }
 
@@ -3077,18 +3080,18 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       numBytesInfoData            = %d\n", mrz->rxInfo.numBytesRxInfo);
-    fprintf(stderr, "dbg5       numSoundingsMaxMain         = %d\n", mrz->rxInfo.numSoundingsMaxMain);
-    fprintf(stderr, "dbg5       numSoundingsValidMain       = %d\n", mrz->rxInfo.numSoundingsValidMain);
-    fprintf(stderr, "dbg5       numBytesPerSounding         = %d\n", mrz->rxInfo.numBytesPerSounding);
-    fprintf(stderr, "dbg5       WCSampleRate                = %f\n", mrz->rxInfo.WCSampleRate);
-    fprintf(stderr, "dbg5       seabedImageSampleRate       = %f\n", mrz->rxInfo.seabedImageSampleRate);
-    fprintf(stderr, "dbg5       BSnormal_dB                 = %f\n", mrz->rxInfo.BSnormal_dB);
-    fprintf(stderr, "dbg5       BSoblique_dB                = %f\n", mrz->rxInfo.BSoblique_dB);
-    fprintf(stderr, "dbg5       extraDetectionAlarmFlag     = %d\n", mrz->rxInfo.extraDetectionAlarmFlag);
-    fprintf(stderr, "dbg5       numExtraDetections          = %d\n", mrz->rxInfo.numExtraDetections);
-    fprintf(stderr, "dbg5       numExtraDetectionClasses    = %d\n", mrz->rxInfo.numExtraDetectionClasses);
-    fprintf(stderr, "dbg5       numBytesPerClass            = %d\n", mrz->rxInfo.numBytesPerClass);
+    fprintf(stderr, "dbg5       numBytesInfoData:           %d\n", mrz->rxInfo.numBytesRxInfo);
+    fprintf(stderr, "dbg5       numSoundingsMaxMain:        %d\n", mrz->rxInfo.numSoundingsMaxMain);
+    fprintf(stderr, "dbg5       numSoundingsValidMain:      %d\n", mrz->rxInfo.numSoundingsValidMain);
+    fprintf(stderr, "dbg5       numBytesPerSounding:        %d\n", mrz->rxInfo.numBytesPerSounding);
+    fprintf(stderr, "dbg5       WCSampleRate:               %f\n", mrz->rxInfo.WCSampleRate);
+    fprintf(stderr, "dbg5       seabedImageSampleRate:      %f\n", mrz->rxInfo.seabedImageSampleRate);
+    fprintf(stderr, "dbg5       BSnormal_dB:                %f\n", mrz->rxInfo.BSnormal_dB);
+    fprintf(stderr, "dbg5       BSoblique_dB:               %f\n", mrz->rxInfo.BSoblique_dB);
+    fprintf(stderr, "dbg5       extraDetectionAlarmFlag:    %d\n", mrz->rxInfo.extraDetectionAlarmFlag);
+    fprintf(stderr, "dbg5       numExtraDetections:         %d\n", mrz->rxInfo.numExtraDetections);
+    fprintf(stderr, "dbg5       numExtraDetectionClasses:   %d\n", mrz->rxInfo.numExtraDetectionClasses);
+    fprintf(stderr, "dbg5       numBytesPerClass:           %d\n", mrz->rxInfo.numBytesPerClass);
   }
 
   /* EMdgmMRZ_extraDetClassInfo -  Extra detection class info */
@@ -3104,9 +3107,9 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-      fprintf(stderr, "dbg5       numExtraDetInClass  = %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
-      fprintf(stderr, "dbg5       padding             = %d\n", mrz->extraDetClassInfo[i].padding);
-      fprintf(stderr, "dbg5       alarmFlag           = %d\n", mrz->extraDetClassInfo[i].alarmFlag);
+      fprintf(stderr, "dbg5       numExtraDetInClass:  %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
+      fprintf(stderr, "dbg5       padding:             %d\n", mrz->extraDetClassInfo[i].padding);
+      fprintf(stderr, "dbg5       alarmFlag:           %d\n", mrz->extraDetClassInfo[i].alarmFlag);
     }
   }
 
@@ -3238,49 +3241,55 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-      fprintf(stderr, "dbg5       soundingIndex                   = %d\n", mrz->sounding[i].soundingIndex);
-      fprintf(stderr, "dbg5       txSectorNumb                    = %d\n", mrz->sounding[i].txSectorNumb);
-      fprintf(stderr, "dbg5       detectionType                   = %d\n", mrz->sounding[i].detectionType);
-      fprintf(stderr, "dbg5       detectionMethod                 = %d\n", mrz->sounding[i].detectionMethod);
-      fprintf(stderr, "dbg5       rejectionInfo1                  = %d\n", mrz->sounding[i].rejectionInfo1);
-      fprintf(stderr, "dbg5       rejectionInfo2                  = %d\n", mrz->sounding[i].rejectionInfo2);
-      fprintf(stderr, "dbg5       postProcessingInfo              = %d\n", mrz->sounding[i].postProcessingInfo);
-      fprintf(stderr, "dbg5       detectionClass                  = %d\n", mrz->sounding[i].detectionClass);
-      fprintf(stderr, "dbg5       detectionConfidenceLevel        = %d\n", mrz->sounding[i].detectionConfidenceLevel);
-      // fprintf(stderr, "dbg5       padding                         = %d\n", mrz->sounding[i].padding);
-      fprintf(stderr, "dbg5       beamflag_enabled                = %d\n", mrz->sounding[i].beamflag_enabled);
-      fprintf(stderr, "dbg5       beamflag                        = %d\n", mrz->sounding[i].beamflag);
-      fprintf(stderr, "dbg5       rangeFactor                     = %f\n", mrz->sounding[i].rangeFactor);
-      fprintf(stderr, "dbg5       qualityFactor                   = %f\n", mrz->sounding[i].qualityFactor);
-      fprintf(stderr, "dbg5       detectionUncertaintyVer_m       = %f\n", mrz->sounding[i].detectionUncertaintyVer_m);
-      fprintf(stderr, "dbg5       detectionUncertaintyHor_m       = %f\n", mrz->sounding[i].detectionUncertaintyHor_m);
-      fprintf(stderr, "dbg5       detectionWindowLength_sec       = %f\n", mrz->sounding[i].detectionWindowLength_sec);
-      fprintf(stderr, "dbg5       echoLength_sec                  = %f\n", mrz->sounding[i].echoLength_sec);
-      fprintf(stderr, "dbg5       WCBeamNumb                      = %d\n", mrz->sounding[i].WCBeamNumb);
-      fprintf(stderr, "dbg5       WCrange_samples                 = %d\n", mrz->sounding[i].WCrange_samples);
-      fprintf(stderr, "dbg5       WCNomBeamAngleAcross_deg        = %f\n", mrz->sounding[i].WCNomBeamAngleAcross_deg);
-      fprintf(stderr, "dbg5       meanAbsCoeff_dBPerkm            = %f\n", mrz->sounding[i].meanAbsCoeff_dBPerkm);
-      fprintf(stderr, "dbg5       reflectivity1_dB                = %f\n", mrz->sounding[i].reflectivity1_dB);
-      fprintf(stderr, "dbg5       reflectivity2_dB                = %f\n", mrz->sounding[i].reflectivity2_dB);
-      fprintf(stderr, "dbg5       receiverSensitivityApplied_dB   = %f\n", mrz->sounding[i].receiverSensitivityApplied_dB);
-      fprintf(stderr, "dbg5       sourceLevelApplied_dB           = %f\n", mrz->sounding[i].sourceLevelApplied_dB);
-      fprintf(stderr, "dbg5       BScalibration_dB                = %f\n", mrz->sounding[i].BScalibration_dB);
-      fprintf(stderr, "dbg5       TVG_dB                          = %f\n", mrz->sounding[i].TVG_dB);
-      fprintf(stderr, "dbg5       beamAngleReRx_deg               = %f\n", mrz->sounding[i].beamAngleReRx_deg);
-      fprintf(stderr, "dbg5       beamAngleCorrection_deg         = %f\n", mrz->sounding[i].beamAngleCorrection_deg);
-      fprintf(stderr, "dbg5       twoWayTravelTime_sec            = %f\n", mrz->sounding[i].twoWayTravelTime_sec);
-      fprintf(stderr, "dbg5       twoWayTravelTimeCorrection_sec  = %f\n", mrz->sounding[i].twoWayTravelTimeCorrection_sec);
-      fprintf(stderr, "dbg5       deltaLatitude_deg               = %f\n", mrz->sounding[i].deltaLatitude_deg);
-      fprintf(stderr, "dbg5       deltaLongitude_deg              = %f\n", mrz->sounding[i].deltaLongitude_deg);
-      fprintf(stderr, "dbg5       z_reRefPoint_m                  = %f\n", mrz->sounding[i].z_reRefPoint_m);
-      fprintf(stderr, "dbg5       y_reRefPoint_m                  = %f\n", mrz->sounding[i].y_reRefPoint_m);
-      fprintf(stderr, "dbg5       x_reRefPoint_m                  = %f\n", mrz->sounding[i].x_reRefPoint_m);
-      fprintf(stderr, "dbg5       beamIncAngleAdj_deg             = %f\n", mrz->sounding[i].beamIncAngleAdj_deg);
-      fprintf(stderr, "dbg5       realTimeCleanInfo               = %d\n", mrz->sounding[i].realTimeCleanInfo);
-      fprintf(stderr, "dbg5       SIstartRange_samples            = %d\n", mrz->sounding[i].SIstartRange_samples);
-      fprintf(stderr, "dbg5       SIcentreSample                  = %d\n", mrz->sounding[i].SIcentreSample);
-      fprintf(stderr, "dbg5       SInumSamples                    = %d\n", mrz->sounding[i].SInumSamples);
+      fprintf(stderr, "dbg5       soundingIndex:                   %d\n", mrz->sounding[i].soundingIndex);
+      fprintf(stderr, "dbg5       txSectorNumb:                    %d\n", mrz->sounding[i].txSectorNumb);
+      fprintf(stderr, "dbg5       detectionType:                   %d\n", mrz->sounding[i].detectionType);
+      fprintf(stderr, "dbg5       detectionMethod:                 %d\n", mrz->sounding[i].detectionMethod);
+      fprintf(stderr, "dbg5       rejectionInfo1:                  %d\n", mrz->sounding[i].rejectionInfo1);
+      fprintf(stderr, "dbg5       rejectionInfo2:                  %d\n", mrz->sounding[i].rejectionInfo2);
+      fprintf(stderr, "dbg5       postProcessingInfo:              %d\n", mrz->sounding[i].postProcessingInfo);
+      fprintf(stderr, "dbg5       detectionClass:                  %d\n", mrz->sounding[i].detectionClass);
+      fprintf(stderr, "dbg5       detectionConfidenceLevel:        %d\n", mrz->sounding[i].detectionConfidenceLevel);
+      // fprintf(stderr, "dbg5       padding:                        %d\n", mrz->sounding[i].padding);
+      fprintf(stderr, "dbg5       beamflag_enabled:                %d\n", mrz->sounding[i].beamflag_enabled);
+      fprintf(stderr, "dbg5       beamflag:                        %d\n", mrz->sounding[i].beamflag);
+      fprintf(stderr, "dbg5       rangeFactor:                     %f\n", mrz->sounding[i].rangeFactor);
+      fprintf(stderr, "dbg5       qualityFactor:                   %f\n", mrz->sounding[i].qualityFactor);
+      fprintf(stderr, "dbg5       detectionUncertaintyVer_m:       %f\n", mrz->sounding[i].detectionUncertaintyVer_m);
+      fprintf(stderr, "dbg5       detectionUncertaintyHor_m:       %f\n", mrz->sounding[i].detectionUncertaintyHor_m);
+      fprintf(stderr, "dbg5       detectionWindowLength_sec:       %f\n", mrz->sounding[i].detectionWindowLength_sec);
+      fprintf(stderr, "dbg5       echoLength_sec:                  %f\n", mrz->sounding[i].echoLength_sec);
+      fprintf(stderr, "dbg5       WCBeamNumb:                      %d\n", mrz->sounding[i].WCBeamNumb);
+      fprintf(stderr, "dbg5       WCrange_samples:                 %d\n", mrz->sounding[i].WCrange_samples);
+      fprintf(stderr, "dbg5       WCNomBeamAngleAcross_deg:        %f\n", mrz->sounding[i].WCNomBeamAngleAcross_deg);
+      fprintf(stderr, "dbg5       meanAbsCoeff_dBPerkm:            %f\n", mrz->sounding[i].meanAbsCoeff_dBPerkm);
+      fprintf(stderr, "dbg5       reflectivity1_dB:                %f\n", mrz->sounding[i].reflectivity1_dB);
+      fprintf(stderr, "dbg5       reflectivity2_dB:                %f\n", mrz->sounding[i].reflectivity2_dB);
+      fprintf(stderr, "dbg5       receiverSensitivityApplied_dB:   %f\n", mrz->sounding[i].receiverSensitivityApplied_dB);
+      fprintf(stderr, "dbg5       sourceLevelApplied_dB:           %f\n", mrz->sounding[i].sourceLevelApplied_dB);
+      fprintf(stderr, "dbg5       BScalibration_dB:                %f\n", mrz->sounding[i].BScalibration_dB);
+      fprintf(stderr, "dbg5       TVG_dB:                          %f\n", mrz->sounding[i].TVG_dB);
+      fprintf(stderr, "dbg5       beamAngleReRx_deg:               %f\n", mrz->sounding[i].beamAngleReRx_deg);
+      fprintf(stderr, "dbg5       beamAngleCorrection_deg:         %f\n", mrz->sounding[i].beamAngleCorrection_deg);
+      fprintf(stderr, "dbg5       twoWayTravelTime_sec:            %f\n", mrz->sounding[i].twoWayTravelTime_sec);
+      fprintf(stderr, "dbg5       twoWayTravelTimeCorrection_sec:  %f\n", mrz->sounding[i].twoWayTravelTimeCorrection_sec);
+      fprintf(stderr, "dbg5       deltaLatitude_deg:               %f\n", mrz->sounding[i].deltaLatitude_deg);
+      fprintf(stderr, "dbg5       deltaLongitude_deg:              %f\n", mrz->sounding[i].deltaLongitude_deg);
+      fprintf(stderr, "dbg5       z_reRefPoint_m:                  %f\n", mrz->sounding[i].z_reRefPoint_m);
+      fprintf(stderr, "dbg5       y_reRefPoint_m:                  %f\n", mrz->sounding[i].y_reRefPoint_m);
+      fprintf(stderr, "dbg5       x_reRefPoint_m:                  %f\n", mrz->sounding[i].x_reRefPoint_m);
+      fprintf(stderr, "dbg5       beamIncAngleAdj_deg:             %f\n", mrz->sounding[i].beamIncAngleAdj_deg);
+      fprintf(stderr, "dbg5       realTimeCleanInfo:               %d\n", mrz->sounding[i].realTimeCleanInfo);
+      fprintf(stderr, "dbg5       SIstartRange_samples:            %d\n", mrz->sounding[i].SIstartRange_samples);
+      fprintf(stderr, "dbg5       SIcentreSample:                  %d\n", mrz->sounding[i].SIcentreSample);
+      fprintf(stderr, "dbg5       SInumSamples:                    %d\n", mrz->sounding[i].SInumSamples);
     }
+  }
+
+  /* print debug statements */
+  if (verbose >= 5) {
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "dbg5       numSidescanSamples:  %d\n", numSidescanSamples);
   }
 
   for (i = 0; i<numSidescanSamples; i++)
@@ -3308,12 +3317,9 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d ping:%d rx:%d/%d xms expected:%d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec,
-  cmnPart.pingCnt, cmnPart.rxFanIndex, cmnPart.rxFansPerPing,
-  store->xmb.pseudosidescan_enabled,
-  status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d ping:%d rx:%d/%d xms expected:%d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, cmnPart.pingCnt, cmnPart.rxFanIndex, cmnPart.rxFansPerPing,
+          store->xmb.pseudosidescan_enabled, status, *error);
 #endif
 
   /* return status */
@@ -3360,8 +3366,8 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       numOfDgms = %d\n", partition.numOfDgms);
-    fprintf(stderr, "dbg5       dgmNum    = %d\n", partition.dgmNum);
+    fprintf(stderr, "dbg5       numOfDgms:  %d\n", partition.numOfDgms);
+    fprintf(stderr, "dbg5       dgmNum:     %d\n", partition.dgmNum);
   }
 
   /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
@@ -3389,16 +3395,16 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       numBytesCmnPart     = %d\n", cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       pingCnt             = %d\n", cmnPart.pingCnt);
-    fprintf(stderr, "dbg5       rxFansPerPing       = %d\n", cmnPart.rxFansPerPing);
-    fprintf(stderr, "dbg5       rxFanIndex          = %d\n", cmnPart.rxFanIndex);
-    fprintf(stderr, "dbg5       swathsPerPing       = %d\n", cmnPart.swathsPerPing);
-    fprintf(stderr, "dbg5       swathAlongPosition  = %d\n", cmnPart.swathAlongPosition);
-    fprintf(stderr, "dbg5       txTransducerInd     = %d\n", cmnPart.txTransducerInd);
-    fprintf(stderr, "dbg5       rxTransducerInd     = %d\n", cmnPart.rxTransducerInd);
-    fprintf(stderr, "dbg5       numRxTransducers    = %d\n", cmnPart.numRxTransducers);
-    fprintf(stderr, "dbg5       algorithmType       = %d\n", cmnPart.algorithmType);
+    fprintf(stderr, "dbg5       numBytesCmnPart:     %d\n", cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       pingCnt:             %d\n", cmnPart.pingCnt);
+    fprintf(stderr, "dbg5       rxFansPerPing:       %d\n", cmnPart.rxFansPerPing);
+    fprintf(stderr, "dbg5       rxFanIndex:          %d\n", cmnPart.rxFanIndex);
+    fprintf(stderr, "dbg5       swathsPerPing:       %d\n", cmnPart.swathsPerPing);
+    fprintf(stderr, "dbg5       swathAlongPosition:  %d\n", cmnPart.swathAlongPosition);
+    fprintf(stderr, "dbg5       txTransducerInd:     %d\n", cmnPart.txTransducerInd);
+    fprintf(stderr, "dbg5       rxTransducerInd:     %d\n", cmnPart.rxTransducerInd);
+    fprintf(stderr, "dbg5       numRxTransducers:    %d\n", cmnPart.numRxTransducers);
+    fprintf(stderr, "dbg5       algorithmType:       %d\n", cmnPart.algorithmType);
   }
 
   /* now figure out which of the MWC datagrams for this ping we are reading
@@ -3423,11 +3429,11 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       numBytesTxInfo      = %d\n", mwc->txInfo.numBytesTxInfo);
-    fprintf(stderr, "dbg5       numTxSectors        = %d\n", mwc->txInfo.numTxSectors);
-    fprintf(stderr, "dbg5       numBytesPerTxSector = %d\n", mwc->txInfo.numBytesPerTxSector);
-    fprintf(stderr, "dbg5       padding             = %d\n", mwc->txInfo.padding);
-    fprintf(stderr, "dbg5       heave_m             = %f\n", mwc->txInfo.heave_m);
+    fprintf(stderr, "dbg5       numBytesTxInfo:       %d\n", mwc->txInfo.numBytesTxInfo);
+    fprintf(stderr, "dbg5       numTxSectors:         %d\n", mwc->txInfo.numTxSectors);
+    fprintf(stderr, "dbg5       numBytesPerTxSector:  %d\n", mwc->txInfo.numBytesPerTxSector);
+    fprintf(stderr, "dbg5       padding:              %d\n", mwc->txInfo.padding);
+    fprintf(stderr, "dbg5       heave_m:              %f\n", mwc->txInfo.heave_m);
   }
 
   /* EMdgmMWCtxSectorData - transmit sector data, loop for all i = numTxSectors */
@@ -3447,11 +3453,11 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
       fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mwc->txInfo.numTxSectors);
-      fprintf(stderr, "dbg5       tiltAngleReTx_deg    = %f\n", mwc->sectorData[i].tiltAngleReTx_deg);
-      fprintf(stderr, "dbg5       centreFreq_Hz        = %f\n", mwc->sectorData[i].centreFreq_Hz);
-      fprintf(stderr, "dbg5       txBeamWidthAlong_deg = %f\n", mwc->sectorData[i].txBeamWidthAlong_deg);
-      fprintf(stderr, "dbg5       txSectorNum          = %d\n", mwc->sectorData[i].txSectorNum);
-      fprintf(stderr, "dbg5       padding              = %d\n", mwc->sectorData[i].padding);
+      fprintf(stderr, "dbg5       tiltAngleReTx_deg:     %f\n", mwc->sectorData[i].tiltAngleReTx_deg);
+      fprintf(stderr, "dbg5       centreFreq_Hz:         %f\n", mwc->sectorData[i].centreFreq_Hz);
+      fprintf(stderr, "dbg5       txBeamWidthAlong_deg:  %f\n", mwc->sectorData[i].txBeamWidthAlong_deg);
+      fprintf(stderr, "dbg5       txSectorNum:           %d\n", mwc->sectorData[i].txSectorNum);
+      fprintf(stderr, "dbg5       padding:               %d\n", mwc->sectorData[i].padding);
     }
   }
 
@@ -3476,14 +3482,14 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       numBytesRxInfo        = %d\n", mwc->rxInfo.numBytesRxInfo);
-    fprintf(stderr, "dbg5       numBeams              = %d\n", mwc->rxInfo.numBeams);
-    fprintf(stderr, "dbg5       numBytesPerBeamEntry  = %d\n", mwc->rxInfo.numBytesPerBeamEntry);
-    fprintf(stderr, "dbg5       phaseFlag             = %d\n", mwc->rxInfo.phaseFlag);
-    fprintf(stderr, "dbg5       TVGfunctionApplied    = %d\n", mwc->rxInfo.TVGfunctionApplied);
-    fprintf(stderr, "dbg5       TVGoffset_dB          = %d\n", mwc->rxInfo.TVGoffset_dB);
-    fprintf(stderr, "dbg5       sampleFreq_Hz         = %f\n", mwc->rxInfo.sampleFreq_Hz);
-    fprintf(stderr, "dbg5       soundVelocity_mPerSec = %f\n", mwc->rxInfo.soundVelocity_mPerSec);
+    fprintf(stderr, "dbg5       numBytesRxInfo:         %d\n", mwc->rxInfo.numBytesRxInfo);
+    fprintf(stderr, "dbg5       numBeams:               %d\n", mwc->rxInfo.numBeams);
+    fprintf(stderr, "dbg5       numBytesPerBeamEntry:   %d\n", mwc->rxInfo.numBytesPerBeamEntry);
+    fprintf(stderr, "dbg5       phaseFlag:              %d\n", mwc->rxInfo.phaseFlag);
+    fprintf(stderr, "dbg5       TVGfunctionApplied:     %d\n", mwc->rxInfo.TVGfunctionApplied);
+    fprintf(stderr, "dbg5       TVGoffset_dB:           %d\n", mwc->rxInfo.TVGoffset_dB);
+    fprintf(stderr, "dbg5       sampleFreq_Hz:          %f\n", mwc->rxInfo.sampleFreq_Hz);
+    fprintf(stderr, "dbg5       soundVelocity_mPerSec:  %f\n", mwc->rxInfo.soundVelocity_mPerSec);
   }
 
   /* EMdgmMWCrxBeamData - receiver, specific info for each beam */
@@ -3580,12 +3586,12 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
         if (status == MB_SUCCESS && verbose >= 5) {
           fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
           fprintf(stderr, "dbg5       #MWC receiver beam data %d/%d:\n", i, mwc->rxInfo.numBeams);
-          fprintf(stderr, "dbg5       tiltAngleReTx_deg       = %f\n", mwc->beamData_p[i].beamPointAngReVertical_deg);
-          fprintf(stderr, "dbg5       startRangeSampleNum     = %d\n", mwc->beamData_p[i].startRangeSampleNum);
-          fprintf(stderr, "dbg5       detectedRangeInSamples  = %d\n", mwc->beamData_p[i].detectedRangeInSamples);
-          fprintf(stderr, "dbg5       beamTxSectorNum         = %d\n", mwc->beamData_p[i].beamTxSectorNum);
-          fprintf(stderr, "dbg5       numSampleData           = %d\n", mwc->beamData_p[i].numSampleData);
-          fprintf(stderr, "dbg5       (amplitude phase)       = [\n");
+          fprintf(stderr, "dbg5       tiltAngleReTx_deg:       %f\n", mwc->beamData_p[i].beamPointAngReVertical_deg);
+          fprintf(stderr, "dbg5       startRangeSampleNum:     %d\n", mwc->beamData_p[i].startRangeSampleNum);
+          fprintf(stderr, "dbg5       detectedRangeInSamples:  %d\n", mwc->beamData_p[i].detectedRangeInSamples);
+          fprintf(stderr, "dbg5       beamTxSectorNum:         %d\n", mwc->beamData_p[i].beamTxSectorNum);
+          fprintf(stderr, "dbg5       numSampleData:           %d\n", mwc->beamData_p[i].numSampleData);
+          fprintf(stderr, "dbg5       (amplitude phase):       [\n");
           for (k = 0; k < (mwc->beamData_p[i].numSampleData); k++) {
             if (k % 10 == 0)
               fprintf(stderr, "dbg5             ");
@@ -3622,9 +3628,8 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -3701,28 +3706,28 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       cpo->header.numBytesDgm:                %u\n", cpo->header.numBytesDgm);
-    fprintf(stderr, "dbg5       cpo->header.dgmType:                    %s\n", cpo->header.dgmType);
-    fprintf(stderr, "dbg5       cpo->header.dgmVersion:                 %u\n", cpo->header.dgmVersion);
-    fprintf(stderr, "dbg5       cpo->header.systemID:                   %u\n", cpo->header.systemID);
-    fprintf(stderr, "dbg5       cpo->header.echoSounderID:              %u\n", cpo->header.echoSounderID);
-    fprintf(stderr, "dbg5       cpo->header.time_sec:                   %u\n", cpo->header.time_sec);
-    fprintf(stderr, "dbg5       cpo->header.time_nanosec:               %u\n", cpo->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:                  %u\n", cpo->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                      %s\n", cpo->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:                   %u\n", cpo->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                     %u\n", cpo->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:                %u\n", cpo->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                     %u\n", cpo->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:                 %u\n", cpo->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       cpo->cmnPart.numBytesCmnPart:           %u\n", cpo->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       cpo->cmnPart.sensorSystem:              %u\n", cpo->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       cpo->cmnPart.sensorStatus:              %u\n", cpo->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       cpo->cmnPart.padding:                   %u\n", cpo->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:              %u\n", cpo->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:                 %u\n", cpo->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:                 %u\n", cpo->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:                      %u\n", cpo->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       cpo->sensorData.timeFromSensor_sec:     %u\n", cpo->sensorData.timeFromSensor_sec);
-    fprintf(stderr, "dbg5       cpo->sensorData.timeFromSensor_nanosec: %u\n", cpo->sensorData.timeFromSensor_nanosec);
-    fprintf(stderr, "dbg5       cpo->sensorData.posFixQuality_m:        %f\n", cpo->sensorData.posFixQuality_m);
-    fprintf(stderr, "dbg5       cpo->sensorData.correctedLat_deg:       %f\n", cpo->sensorData.correctedLat_deg);
-    fprintf(stderr, "dbg5       cpo->sensorData.correctedLong_deg:      %f\n", cpo->sensorData.correctedLong_deg);
-    fprintf(stderr, "dbg5       cpo->sensorData.speedOverGround_mPerSec:%f\n", cpo->sensorData.speedOverGround_mPerSec);
-    fprintf(stderr, "dbg5       cpo->sensorData.correctedLat_deg:       %f\n", cpo->sensorData.courseOverGround_deg);
-    fprintf(stderr, "dbg5       cpo->sensorData.correctedLong_deg:      %f\n", cpo->sensorData.ellipsoidHeightReRefPoint_m);
-    fprintf(stderr, "dbg5       cpo->sensorData.speedOverGround_mPerSec:%s\n", cpo->sensorData.posDataFromSensor);
+    fprintf(stderr, "dbg5       timeFromSensor_sec:           %u\n", cpo->sensorData.timeFromSensor_sec);
+    fprintf(stderr, "dbg5       timeFromSensor_nanosec:       %u\n", cpo->sensorData.timeFromSensor_nanosec);
+    fprintf(stderr, "dbg5       posFixQuality_m:              %f\n", cpo->sensorData.posFixQuality_m);
+    fprintf(stderr, "dbg5       correctedLat_deg:             %f\n", cpo->sensorData.correctedLat_deg);
+    fprintf(stderr, "dbg5       correctedLong_deg:            %f\n", cpo->sensorData.correctedLong_deg);
+    fprintf(stderr, "dbg5       speedOverGround_mPerSec:      %f\n", cpo->sensorData.speedOverGround_mPerSec);
+    fprintf(stderr, "dbg5       courseOverGround_deg:         %f\n", cpo->sensorData.courseOverGround_deg);
+    fprintf(stderr, "dbg5       ellipsoidHeightReRefPoint_m:  %f\n", cpo->sensorData.ellipsoidHeightReRefPoint_m);
+    fprintf(stderr, "dbg5       posDataFromSensor:            %s\n", cpo->sensorData.posDataFromSensor);
   }
 
   /* set kind */
@@ -3744,9 +3749,8 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -3761,7 +3765,6 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_che *che = NULL;
-  size_t numBytesRawSensorData = 0;
   int index = 0;
 
 
@@ -3786,15 +3789,55 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
   /* extract the data */
   index = MBSYS_KMBES_HEADER_SIZE;
 
-  // common part
+
+  /* print debug statements */
+  if (verbose >= 5) {
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "dbg5       numBytesDgm:    %u\n", che->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:        %s\n", che->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:     %u\n", che->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:       %u\n", che->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:  %u\n", che->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:       %u\n", che->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:   %u\n", che->header.time_nanosec);
+  }
+
+  /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
   mb_get_binary_short(MB_YES, &buffer[index], &(che->cmnPart.numBytesCmnPart));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(che->cmnPart.sensorSystem));
+  mb_get_binary_short(MB_YES, &buffer[index], &(che->cmnPart.pingCnt));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(che->cmnPart.sensorStatus));
-  index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(che->cmnPart.padding));
-  index += 2;
+  che->cmnPart.rxFansPerPing = buffer[index];
+  index++;
+  che->cmnPart.rxFanIndex = buffer[index];
+  index++;
+  che->cmnPart.swathsPerPing = buffer[index];
+  index++;
+  che->cmnPart.swathAlongPosition = buffer[index];
+  index++;
+  che->cmnPart.txTransducerInd = buffer[index];
+  index++;
+  che->cmnPart.rxTransducerInd = buffer[index];
+  index++;
+  che->cmnPart.numRxTransducers = buffer[index];
+  index++;
+  che->cmnPart.algorithmType = buffer[index];
+  index++;
+
+  /* print debug statements */
+  if (verbose >= 5) {
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "dbg5       numBytesCmnPart:      %d\n", che->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       pingCnt:              %d\n", che->cmnPart.pingCnt);
+    fprintf(stderr, "dbg5       rxFansPerPing:        %d\n", che->cmnPart.rxFansPerPing);
+    fprintf(stderr, "dbg5       rxFanIndex:           %d\n", che->cmnPart.rxFanIndex);
+    fprintf(stderr, "dbg5       swathsPerPing:        %d\n", che->cmnPart.swathsPerPing);
+    fprintf(stderr, "dbg5       swathAlongPosition:   %d\n", che->cmnPart.swathAlongPosition);
+    fprintf(stderr, "dbg5       txTransducerInd:      %d\n", che->cmnPart.txTransducerInd);
+    fprintf(stderr, "dbg5       rxTransducerInd:      %d\n", che->cmnPart.rxTransducerInd);
+    fprintf(stderr, "dbg5       numRxTransducers:     %d\n", che->cmnPart.numRxTransducers);
+    fprintf(stderr, "dbg5       algorithmType:        %d\n", che->cmnPart.algorithmType);
+  }
 
   mb_get_binary_float(MB_YES, &buffer[index], &che->data.heave_m);
   index += 4;
@@ -3802,21 +3845,9 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       che->header.numBytesDgm:                %u\n", che->header.numBytesDgm);
-    fprintf(stderr, "dbg5       che->header.dgmType:                    %s\n", che->header.dgmType);
-    fprintf(stderr, "dbg5       che->header.dgmVersion:                 %u\n", che->header.dgmVersion);
-    fprintf(stderr, "dbg5       che->header.systemID:                   %u\n", che->header.systemID);
-    fprintf(stderr, "dbg5       che->header.echoSounderID:              %u\n", che->header.echoSounderID);
-    fprintf(stderr, "dbg5       che->header.time_sec:                   %u\n", che->header.time_sec);
-    fprintf(stderr, "dbg5       che->header.time_nanosec:               %u\n", che->header.time_nanosec);
-
-    fprintf(stderr, "dbg5       che->cmnPart.numBytesCmnPart:           %u\n", che->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       che->cmnPart.sensorSystem:              %u\n", che->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       che->cmnPart.sensorStatus:              %u\n", che->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       che->cmnPart.padding:                   %u\n", che->cmnPart.padding);
-
-    fprintf(stderr, "dbg5       che->data.heave_m:                      %f\n", che->data.heave_m);
+    fprintf(stderr, "dbg5       heave_m                         = %f\n", che->data.heave_m);
   }
+
 
   /* set kind */
   if (status == MB_SUCCESS) {
@@ -3837,9 +3868,8 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -3891,18 +3921,18 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       iip->header.numBytesDgm:                %u\n", iip->header.numBytesDgm);
-    fprintf(stderr, "dbg5       iip->header.dgmType:                    %s\n", iip->header.dgmType);
-    fprintf(stderr, "dbg5       iip->header.dgmVersion:                 %u\n", iip->header.dgmVersion);
-    fprintf(stderr, "dbg5       iip->header.systemID:                   %u\n", iip->header.systemID);
-    fprintf(stderr, "dbg5       iip->header.echoSounderID:              %u\n", iip->header.echoSounderID);
-    fprintf(stderr, "dbg5       iip->header.time_sec:                   %u\n", iip->header.time_sec);
-    fprintf(stderr, "dbg5       iip->header.time_nanosec:               %u\n", iip->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iip->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:          %s\n", iip->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:       %u\n", iip->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:         %u\n", iip->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:    %u\n", iip->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:         %u\n", iip->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:     %u\n", iip->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       iip->numBytesCmnPart:                   %u\n", iip->numBytesCmnPart);
-    fprintf(stderr, "dbg5       iip->info:                              %u\n", iip->info);
-    fprintf(stderr, "dbg5       iip->status:                            %u\n", iip->status);
-    fprintf(stderr, "dbg5       iip->install_txt:                       %s\n", iip->install_txt);
+    fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", iip->numBytesCmnPart);
+    fprintf(stderr, "dbg5       info:             %u\n", iip->info);
+    fprintf(stderr, "dbg5       status:           %u\n", iip->status);
+    fprintf(stderr, "dbg5       install_txt:      %s\n", iip->install_txt);
   }
 
   /* set kind */
@@ -3924,9 +3954,8 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -3978,18 +4007,18 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       iop->header.numBytesDgm:                %u\n", iop->header.numBytesDgm);
-    fprintf(stderr, "dbg5       iop->header.dgmType:                    %s\n", iop->header.dgmType);
-    fprintf(stderr, "dbg5       iop->header.dgmVersion:                 %u\n", iop->header.dgmVersion);
-    fprintf(stderr, "dbg5       iop->header.systemID:                   %u\n", iop->header.systemID);
-    fprintf(stderr, "dbg5       iop->header.echoSounderID:              %u\n", iop->header.echoSounderID);
-    fprintf(stderr, "dbg5       iop->header.time_sec:                   %u\n", iop->header.time_sec);
-    fprintf(stderr, "dbg5       iop->header.time_nanosec:               %u\n", iop->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:                %u\n", iop->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                    %s\n", iop->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:                 %u\n", iop->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                   %u\n", iop->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:              %u\n", iop->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                   %u\n", iop->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:               %u\n", iop->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       iop->iop->numBytesCmnPart:              %u\n", iop->numBytesCmnPart);
-    fprintf(stderr, "dbg5       iop->info:                              %u\n", iop->info);
-    fprintf(stderr, "dbg5       iop->status:                            %u\n", iop->status);
-    fprintf(stderr, "dbg5       iop->runtime_txt:                       %s\n", iop->runtime_txt);
+    fprintf(stderr, "dbg5       iop->iop->numBytesCmnPart:  %u\n", iop->numBytesCmnPart);
+    fprintf(stderr, "dbg5       iop->info:                  %u\n", iop->info);
+    fprintf(stderr, "dbg5       iop->status:                %u\n", iop->status);
+    fprintf(stderr, "dbg5       iop->runtime_txt:           %s\n", iop->runtime_txt);
   }
 
   /* set kind */
@@ -4011,9 +4040,8 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -4067,18 +4095,18 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       xmb->header.numBytesDgm:                %u\n", xmb->header.numBytesDgm);
-    fprintf(stderr, "dbg5       xmb->header.dgmType:                    %s\n", xmb->header.dgmType);
-    fprintf(stderr, "dbg5       xmb->header.dgmVersion:                 %u\n", xmb->header.dgmVersion);
-    fprintf(stderr, "dbg5       xmb->header.systemID:                   %u\n", xmb->header.systemID);
-    fprintf(stderr, "dbg5       xmb->header.echoSounderID:              %u\n", xmb->header.echoSounderID);
-    fprintf(stderr, "dbg5       xmb->header.time_sec:                   %u\n", xmb->header.time_sec);
-    fprintf(stderr, "dbg5       xmb->header.time_nanosec:               %u\n", xmb->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmb->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:        %s\n", xmb->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:     %u\n", xmb->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:       %u\n", xmb->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:  %u\n", xmb->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:       %u\n", xmb->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:   %u\n", xmb->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       xmb->pseudosidescan_enabled:            %d\n", xmb->pseudosidescan_enabled);
+    fprintf(stderr, "dbg5       pseudosidescan_enabled:  %d\n", xmb->pseudosidescan_enabled);
     for (i=0;i<28;i++)
-      fprintf(stderr, "dbg5       xmb->unused[%2d]:                        %u\n", i, xmb->unused[i]);
-    fprintf(stderr, "dbg5       xmb->version:                           %s\n", xmb->version);
+      fprintf(stderr, "dbg5       unused[%2d]:    %u\n", i, xmb->unused[i]);
+    fprintf(stderr, "dbg5       version:        %s\n", xmb->version);
   }
 
   /* set kind */
@@ -4100,9 +4128,8 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -4154,13 +4181,13 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       xmc->header.numBytesDgm:                %u\n", xmc->header.numBytesDgm);
-    fprintf(stderr, "dbg5       xmc->header.dgmType:                    %s\n", xmc->header.dgmType);
-    fprintf(stderr, "dbg5       xmc->header.dgmVersion:                 %u\n", xmc->header.dgmVersion);
-    fprintf(stderr, "dbg5       xmc->header.systemID:                   %u\n", xmc->header.systemID);
-    fprintf(stderr, "dbg5       xmc->header.echoSounderID:              %u\n", xmc->header.echoSounderID);
-    fprintf(stderr, "dbg5       xmc->header.time_sec:                   %u\n", xmc->header.time_sec);
-    fprintf(stderr, "dbg5       xmc->header.time_nanosec:               %u\n", xmc->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmc->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:        %s\n", xmc->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:     %u\n", xmc->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:       %u\n", xmc->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:  %u\n", xmc->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:       %u\n", xmc->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:   %u\n", xmc->header.time_nanosec);
 
     for (i=0;i<32;i++)
       fprintf(stderr, "dbg5       xmc->unused[%2d]:                        %u\n", i, xmc->unused[i]);
@@ -4186,9 +4213,8 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -4252,22 +4278,22 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       xms->header.numBytesDgm:                %u\n", xms->header.numBytesDgm);
-    fprintf(stderr, "dbg5       xms->header.dgmType:                    %s\n", xms->header.dgmType);
-    fprintf(stderr, "dbg5       xms->header.dgmVersion:                 %u\n", xms->header.dgmVersion);
-    fprintf(stderr, "dbg5       xms->header.systemID:                   %u\n", xms->header.systemID);
-    fprintf(stderr, "dbg5       xms->header.echoSounderID:              %u\n", xms->header.echoSounderID);
-    fprintf(stderr, "dbg5       xms->header.time_sec:                   %u\n", xms->header.time_sec);
-    fprintf(stderr, "dbg5       xms->header.time_nanosec:               %u\n", xms->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xms->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:        %s\n", xms->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:     %u\n", xms->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:       %u\n", xms->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:  %u\n", xms->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:       %u\n", xms->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:   %u\n", xms->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       xms->pingCnt:                           %u\n", xms->pingCnt);
-    fprintf(stderr, "dbg5       xms->spare:                             %d\n", xms->spare);
-    fprintf(stderr, "dbg5       xms->pixel_size:                        %f\n", xms->pixel_size);
-    fprintf(stderr, "dbg5       xms->pixels_ss:                         %d\n", xms->pixels_ss);
+    fprintf(stderr, "dbg5       pingCnt:        %u\n", xms->pingCnt);
+    fprintf(stderr, "dbg5       spare:          %d\n", xms->spare);
+    fprintf(stderr, "dbg5       pixel_size:     %f\n", xms->pixel_size);
+    fprintf(stderr, "dbg5       pixels_ss:      %d\n", xms->pixels_ss);
     for (i=0;i<32;i++)
-      fprintf(stderr, "dbg5       xms->unused[%2d]:                        %u\n", i, xms->unused[i]);
+      fprintf(stderr, "dbg5       unused[%2d]:    %u\n", i, xms->unused[i]);
     for (i=0;i<xms->pixels_ss;i++)
-      fprintf(stderr, "dbg5       xms->ss[%2d]:                            %f %f\n",
+      fprintf(stderr, "dbg5       ss[%2d]:        %f %f\n",
                       i, xms->ss[i], xms->ss_alongtrack[i]);
   }
 
@@ -4290,9 +4316,8 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -4331,9 +4356,8 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c read - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -4364,13 +4388,13 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       header->numBytesDgm:                    %u\n", header->numBytesDgm);
-    fprintf(stderr, "dbg5       header->dgmType:                        %s\n", header->dgmType);
-    fprintf(stderr, "dbg5       header->dgmVersion:                     %u\n", header->dgmVersion);
-    fprintf(stderr, "dbg5       header->systemID:                       %u\n", header->systemID);
-    fprintf(stderr, "dbg5       header->echoSounderID:                  %u\n", header->echoSounderID);
-    fprintf(stderr, "dbg5       header->time_sec:                       %u\n", header->time_sec);
-    fprintf(stderr, "dbg5       header->time_nanosec:                   %u\n", header->time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:    %u\n", header->numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:        %s\n", header->dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:     %u\n", header->dgmVersion);
+    fprintf(stderr, "dbg5       systemID:       %u\n", header->systemID);
+    fprintf(stderr, "dbg5       echoSounderID:  %u\n", header->echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:       %u\n", header->time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:   %u\n", header->time_nanosec);
   }
 
   /* proceed to write if buffer allocated */
@@ -4440,28 +4464,28 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       spo->header.numBytesDgm:                %u\n", spo->header.numBytesDgm);
-    fprintf(stderr, "dbg5       spo->header.dgmType:                    %s\n", spo->header.dgmType);
-    fprintf(stderr, "dbg5       spo->header.dgmVersion:                 %u\n", spo->header.dgmVersion);
-    fprintf(stderr, "dbg5       spo->header.systemID:                   %u\n", spo->header.systemID);
-    fprintf(stderr, "dbg5       spo->header.echoSounderID:              %u\n", spo->header.echoSounderID);
-    fprintf(stderr, "dbg5       spo->header.time_sec:                   %u\n", spo->header.time_sec);
-    fprintf(stderr, "dbg5       spo->header.time_nanosec:               %u\n", spo->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spo->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                     %s\n", spo->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spo->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                    %u\n", spo->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:               %u\n", spo->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                    %u\n", spo->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:                %u\n", spo->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       spo->cmnPart.numBytesCmnPart:           %u\n", spo->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       spo->cmnPart.sensorSystem:              %u\n", spo->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       spo->cmnPart.sensorStatus:              %u\n", spo->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       spo->cmnPart.padding:                   %u\n", spo->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:             %u\n", spo->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:                %u\n", spo->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:                %u\n", spo->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:                     %u\n", spo->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       spo->sensorData.timeFromSensor_sec:     %u\n", spo->sensorData.timeFromSensor_sec);
-    fprintf(stderr, "dbg5       spo->sensorData.timeFromSensor_nanosec: %u\n", spo->sensorData.timeFromSensor_nanosec);
-    fprintf(stderr, "dbg5       spo->sensorData.posFixQuality_m:        %f\n", spo->sensorData.posFixQuality_m);
-    fprintf(stderr, "dbg5       spo->sensorData.correctedLat_deg:       %f\n", spo->sensorData.correctedLat_deg);
-    fprintf(stderr, "dbg5       spo->sensorData.correctedLong_deg:      %f\n", spo->sensorData.correctedLong_deg);
-    fprintf(stderr, "dbg5       spo->sensorData.speedOverGround_mPerSec:%f\n", spo->sensorData.speedOverGround_mPerSec);
-    fprintf(stderr, "dbg5       spo->sensorData.courseOverGround_deg:   %f\n", spo->sensorData.courseOverGround_deg);
-    fprintf(stderr, "dbg5       spo->sensorData.ellipsoidHeightReRefPoint_m:   %f\n", spo->sensorData.ellipsoidHeightReRefPoint_m);
-    fprintf(stderr, "dbg5       spo->sensorData.posDataFromSensor:      %s\n", spo->sensorData.posDataFromSensor);
+    fprintf(stderr, "dbg5       timeFromSensor_sec:          %u\n", spo->sensorData.timeFromSensor_sec);
+    fprintf(stderr, "dbg5       timeFromSensor_nanosec:      %u\n", spo->sensorData.timeFromSensor_nanosec);
+    fprintf(stderr, "dbg5       posFixQuality_m:             %f\n", spo->sensorData.posFixQuality_m);
+    fprintf(stderr, "dbg5       correctedLat_deg:            %f\n", spo->sensorData.correctedLat_deg);
+    fprintf(stderr, "dbg5       correctedLong_deg:           %f\n", spo->sensorData.correctedLong_deg);
+    fprintf(stderr, "dbg5       speedOverGround_mPerSec:     %f\n", spo->sensorData.speedOverGround_mPerSec);
+    fprintf(stderr, "dbg5       courseOverGround_deg:        %f\n", spo->sensorData.courseOverGround_deg);
+    fprintf(stderr, "dbg5       ellipsoidHeightReRefPoint_m: %f\n", spo->sensorData.ellipsoidHeightReRefPoint_m);
+    fprintf(stderr, "dbg5       posDataFromSensor:           %s\n", spo->sensorData.posDataFromSensor);
   }
 
   /* size of output record */
@@ -4536,9 +4560,8 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -4576,63 +4599,63 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       skm->header.numBytesDgm:                %u\n", skm->header.numBytesDgm);
-    fprintf(stderr, "dbg5       skm->header.dgmType:                    %s\n", skm->header.dgmType);
-    fprintf(stderr, "dbg5       skm->header.dgmVersion:                 %u\n", skm->header.dgmVersion);
-    fprintf(stderr, "dbg5       skm->header.systemID:                   %u\n", skm->header.systemID);
-    fprintf(stderr, "dbg5       skm->header.echoSounderID:              %u\n", skm->header.echoSounderID);
-    fprintf(stderr, "dbg5       skm->header.time_sec:                   %u\n", skm->header.time_sec);
-    fprintf(stderr, "dbg5       skm->header.time_nanosec:               %u\n", skm->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:                %u\n", skm->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                    %s\n", skm->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:                 %u\n", skm->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                   %u\n", skm->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:              %u\n", skm->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                   %u\n", skm->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:               %u\n", skm->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       skm->infoPart.numBytesInfoPart:         %u\n", skm->infoPart.numBytesInfoPart);
-    fprintf(stderr, "dbg5       skm->infoPart.sensorSystem:             %u\n", skm->infoPart.sensorSystem);
-    fprintf(stderr, "dbg5       skm->infoPart.sensorStatus:             %u\n", skm->infoPart.sensorStatus);
-    fprintf(stderr, "dbg5       skm->infoPart.sensorInputFormat:        %u\n", skm->infoPart.sensorInputFormat);
-    fprintf(stderr, "dbg5       skm->infoPart.numSamplesArray:          %u\n", skm->infoPart.numSamplesArray);
-    fprintf(stderr, "dbg5       skm->infoPart.numBytesPerSample:        %u\n", skm->infoPart.numBytesPerSample);
-    fprintf(stderr, "dbg5       skm->infoPart.sensorDataContents:       %u\n", skm->infoPart.sensorDataContents);
+    fprintf(stderr, "dbg5       numBytesInfoPart:           %u\n", skm->infoPart.numBytesInfoPart);
+    fprintf(stderr, "dbg5       sensorSystem:               %u\n", skm->infoPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:               %u\n", skm->infoPart.sensorStatus);
+    fprintf(stderr, "dbg5       sensorInputFormat:          %u\n", skm->infoPart.sensorInputFormat);
+    fprintf(stderr, "dbg5       numSamplesArray:            %u\n", skm->infoPart.numSamplesArray);
+    fprintf(stderr, "dbg5       numBytesPerSample:          %u\n", skm->infoPart.numBytesPerSample);
+    fprintf(stderr, "dbg5       sensorDataContents:         %u\n", skm->infoPart.sensorDataContents);
 
     for (i=0; i<(skm->infoPart.numSamplesArray); i++ ) {
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.dgmType:                %s\n", i, skm->sample[i].KMdefault.dgmType);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.numBytesDgm:            %u\n", i, skm->sample[i].KMdefault.numBytesDgm);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.dgmVersion:             %u\n", i, skm->sample[i].KMdefault.dgmVersion);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.time_sec:               %u\n", i, skm->sample[i].KMdefault.time_sec);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.time_nanosec:           %u\n", i, skm->sample[i].KMdefault.time_nanosec);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.status:                 %u\n", i, skm->sample[i].KMdefault.status);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.dgmType:                %s\n", i, skm->sample[i].KMdefault.dgmType);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.numBytesDgm:            %u\n", i, skm->sample[i].KMdefault.numBytesDgm);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.dgmVersion:             %u\n", i, skm->sample[i].KMdefault.dgmVersion);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.time_sec:               %u\n", i, skm->sample[i].KMdefault.time_sec);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.time_nanosec:           %u\n", i, skm->sample[i].KMdefault.time_nanosec);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.status:                 %u\n", i, skm->sample[i].KMdefault.status);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.latitude_deg:           %f\n", i, skm->sample[i].KMdefault.latitude_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.longitude_deg:          %f\n", i, skm->sample[i].KMdefault.longitude_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.ellipsoidHeight_m:      %f\n", i, skm->sample[i].KMdefault.ellipsoidHeight_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.latitude_deg:           %f\n", i, skm->sample[i].KMdefault.latitude_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.longitude_deg:          %f\n", i, skm->sample[i].KMdefault.longitude_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.ellipsoidHeight_m:      %f\n", i, skm->sample[i].KMdefault.ellipsoidHeight_m);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.roll_deg:               %f\n", i, skm->sample[i].KMdefault.roll_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.pitch_deg:              %f\n", i, skm->sample[i].KMdefault.pitch_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.heading_deg:            %f\n", i, skm->sample[i].KMdefault.heading_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.heave_m:                %f\n", i, skm->sample[i].KMdefault.heave_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.roll_deg:               %f\n", i, skm->sample[i].KMdefault.roll_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.pitch_deg:              %f\n", i, skm->sample[i].KMdefault.pitch_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.heading_deg:            %f\n", i, skm->sample[i].KMdefault.heading_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.heave_m:                %f\n", i, skm->sample[i].KMdefault.heave_m);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.rollRate:               %f\n", i, skm->sample[i].KMdefault.rollRate);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.pitchRate:              %f\n", i, skm->sample[i].KMdefault.pitchRate);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.yawRate:                %f\n", i, skm->sample[i].KMdefault.yawRate);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.rollRate:               %f\n", i, skm->sample[i].KMdefault.rollRate);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.pitchRate:              %f\n", i, skm->sample[i].KMdefault.pitchRate);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.yawRate:                %f\n", i, skm->sample[i].KMdefault.yawRate);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.velNorth:               %f\n", i, skm->sample[i].KMdefault.velNorth);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.velEast:                %f\n", i, skm->sample[i].KMdefault.velEast);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.velDown:                %f\n", i, skm->sample[i].KMdefault.velDown);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.velNorth:               %f\n", i, skm->sample[i].KMdefault.velNorth);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.velEast:                %f\n", i, skm->sample[i].KMdefault.velEast);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.velDown:                %f\n", i, skm->sample[i].KMdefault.velDown);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.latitudeError_m:        %f\n", i, skm->sample[i].KMdefault.latitudeError_m);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.longitudeError_m:       %f\n", i, skm->sample[i].KMdefault.longitudeError_m);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.ellipsoidHeightError_m: %f\n", i, skm->sample[i].KMdefault.ellipsoidHeightError_m);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.rollError_deg:          %f\n", i, skm->sample[i].KMdefault.rollError_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.pitchError_deg:         %f\n", i, skm->sample[i].KMdefault.pitchError_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.headingError_deg:       %f\n", i, skm->sample[i].KMdefault.headingError_deg);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.heaveError_m:           %f\n", i, skm->sample[i].KMdefault.heaveError_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.latitudeError_m:        %f\n", i, skm->sample[i].KMdefault.latitudeError_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.longitudeError_m:       %f\n", i, skm->sample[i].KMdefault.longitudeError_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.ellipsoidHeightError_m: %f\n", i, skm->sample[i].KMdefault.ellipsoidHeightError_m);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.rollError_deg:          %f\n", i, skm->sample[i].KMdefault.rollError_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.pitchError_deg:         %f\n", i, skm->sample[i].KMdefault.pitchError_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.headingError_deg:       %f\n", i, skm->sample[i].KMdefault.headingError_deg);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.heaveError_m:           %f\n", i, skm->sample[i].KMdefault.heaveError_m);
 
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.northAcceleration:      %f\n", i, skm->sample[i].KMdefault.northAcceleration);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.eastAcceleration:       %f\n", i, skm->sample[i].KMdefault.eastAcceleration);
-      fprintf(stderr, "dbg5       skm->sample[%3d].KMdefault.downAcceleration:       %f\n", i, skm->sample[i].KMdefault.downAcceleration);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.northAcceleration:      %f\n", i, skm->sample[i].KMdefault.northAcceleration);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.eastAcceleration:       %f\n", i, skm->sample[i].KMdefault.eastAcceleration);
+      fprintf(stderr, "dbg5       sample[%3d].KMdefault.downAcceleration:       %f\n", i, skm->sample[i].KMdefault.downAcceleration);
 
       //
-      fprintf(stderr, "dbg5       skm->sample[%3d].delayedHeave.time_sec:            %u\n", i, skm->sample[i].delayedHeave.time_sec);
-      fprintf(stderr, "dbg5       skm->sample[%3d].delayedHeave.time_nanosec:        %u\n", i, skm->sample[i].delayedHeave.time_nanosec);
-      fprintf(stderr, "dbg5       skm->sample[%3d].delayedHeave.delayedHeave_m:      %f\n", i, skm->sample[i].delayedHeave.delayedHeave_m);
+      fprintf(stderr, "dbg5       sample[%3d].delayedHeave.time_sec:            %u\n", i, skm->sample[i].delayedHeave.time_sec);
+      fprintf(stderr, "dbg5       sample[%3d].delayedHeave.time_nanosec:        %u\n", i, skm->sample[i].delayedHeave.time_nanosec);
+      fprintf(stderr, "dbg5       sample[%3d].delayedHeave.delayedHeave_m:      %f\n", i, skm->sample[i].delayedHeave.delayedHeave_m);
     }
 
   }
@@ -4761,9 +4784,8 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -4801,27 +4823,27 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       svp->header.numBytesDgm:                %u\n", svp->header.numBytesDgm);
-    fprintf(stderr, "dbg5       svp->header.dgmType:                    %s\n", svp->header.dgmType);
-    fprintf(stderr, "dbg5       svp->header.dgmVersion:                 %u\n", svp->header.dgmVersion);
-    fprintf(stderr, "dbg5       svp->header.systemID:                   %u\n", svp->header.systemID);
-    fprintf(stderr, "dbg5       svp->header.echoSounderID:              %u\n", svp->header.echoSounderID);
-    fprintf(stderr, "dbg5       svp->header.time_sec:                   %u\n", svp->header.time_sec);
-    fprintf(stderr, "dbg5       svp->header.time_nanosec:               %u\n", svp->header.time_nanosec);
+    fprintf(stderr, " dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
+    fprintf(stderr, " dbg5       dgmType:         %s\n", svp->header.dgmType);
+    fprintf(stderr, " dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
+    fprintf(stderr, " dbg5       systemID:        %u\n", svp->header.systemID);
+    fprintf(stderr, " dbg5       echoSounderID:   %u\n", svp->header.echoSounderID);
+    fprintf(stderr, " dbg5       time_sec:        %u\n", svp->header.time_sec);
+    fprintf(stderr, " dbg5       time_nanosec:    %u\n", svp->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       svp->numBytesCmnPart:                   %u\n", svp->numBytesCmnPart);
-    fprintf(stderr, "dbg5       svp->numSamples:                        %u\n", svp->numSamples);
-    fprintf(stderr, "dbg5       svp->sensorFormat:                      %s\n", svp->sensorFormat);
-    fprintf(stderr, "dbg5       svp->time_sec:                          %u\n", svp->time_sec);
-    fprintf(stderr, "dbg5       svp->latitude_deg:                      %f\n", svp->latitude_deg);
-    fprintf(stderr, "dbg5       svp->longitude_deg:                     %f\n", svp->longitude_deg);
+    fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", svp->numBytesCmnPart);
+    fprintf(stderr, "dbg5       numSamples:       %u\n", svp->numSamples);
+    fprintf(stderr, "dbg5       sensorFormat:     %s\n", svp->sensorFormat);
+    fprintf(stderr, "dbg5       time_sec:         %u\n", svp->time_sec);
+    fprintf(stderr, "dbg5       latitude_deg:     %f\n", svp->latitude_deg);
+    fprintf(stderr, "dbg5       longitude_deg:    %f\n", svp->longitude_deg);
 
     for (i = 0; i < (svp->numSamples); i++) {
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].depth_m:                      %f\n", i, svp->sensorData[i].depth_m);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svp->sensorData[i].soundVelocity_mPerSec);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].padding:                      %d\n", i, svp->sensorData[i].padding);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].temp_C:                       %f\n", i, svp->sensorData[i].temp_C);
-      fprintf(stderr, "dbg5       svp->sensorData[%3d].salinity:                     %f\n", i, svp->sensorData[i].salinity);
+      fprintf(stderr, "dbg5       sensorData[%3d].depth_m:                %f\n", i, svp->sensorData[i].depth_m);
+      fprintf(stderr, "dbg5       sensorData[%3d].soundVelocity_mPerSec:  %f\n", i, svp->sensorData[i].soundVelocity_mPerSec);
+      fprintf(stderr, "dbg5       sensorData[%3d].padding:                %d\n", i, svp->sensorData[i].padding);
+      fprintf(stderr, "dbg5       sensorData[%3d].temp_C:                 %f\n", i, svp->sensorData[i].temp_C);
+      fprintf(stderr, "dbg5       sensorData[%3d].salinity:               %f\n", i, svp->sensorData[i].salinity);
     }
   }
 
@@ -4890,9 +4912,8 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -4930,29 +4951,29 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       svt->header.numBytesDgm:                %u\n", svt->header.numBytesDgm);
-    fprintf(stderr, "dbg5       svt->header.dgmType:                    %s\n", svt->header.dgmType);
-    fprintf(stderr, "dbg5       svt->header.dgmVersion:                 %u\n", svt->header.dgmVersion);
-    fprintf(stderr, "dbg5       svt->header.systemID:                   %u\n", svt->header.systemID);
-    fprintf(stderr, "dbg5       svt->header.echoSounderID:              %u\n", svt->header.echoSounderID);
-    fprintf(stderr, "dbg5       svt->header.time_sec:                   %u\n", svt->header.time_sec);
-    fprintf(stderr, "dbg5       svt->header.time_nanosec:               %u\n", svt->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:              %u\n", svt->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                  %s\n", svt->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:               %u\n", svt->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                 %u\n", svt->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:            %u\n", svt->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                 %u\n", svt->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:             %u\n", svt->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       svt->infoPart.numBytesInfoPart:         %u\n", svt->infoPart.numBytesInfoPart);
-    fprintf(stderr, "dbg5       svt->infoPart.sensorStatus:             %u\n", svt->infoPart.sensorStatus);
-    fprintf(stderr, "dbg5       svt->infoPart.sensorInputFormat:        %u\n", svt->infoPart.sensorInputFormat);
-    fprintf(stderr, "dbg5       svt->infoPart.numSamplesArray:          %u\n", svt->infoPart.numSamplesArray);
-    fprintf(stderr, "dbg5       svt->infoPart.sensorDataContents:       %u\n", svt->infoPart.sensorDataContents);
-    fprintf(stderr, "dbg5       svt->infoPart.filterTime_sec:           %f\n", svt->infoPart.filterTime_sec);
-    fprintf(stderr, "dbg5       svt->infoPart.soundVelocity_mPerSec_offset: %f\n", svt->infoPart.soundVelocity_mPerSec_offset);
+    fprintf(stderr, "dbg5       numBytesInfoPart:         %u\n", svt->infoPart.numBytesInfoPart);
+    fprintf(stderr, "dbg5       sensorStatus:             %u\n", svt->infoPart.sensorStatus);
+    fprintf(stderr, "dbg5       sensorInputFormat:        %u\n", svt->infoPart.sensorInputFormat);
+    fprintf(stderr, "dbg5       numSamplesArray:          %u\n", svt->infoPart.numSamplesArray);
+    fprintf(stderr, "dbg5       sensorDataContents:       %u\n", svt->infoPart.sensorDataContents);
+    fprintf(stderr, "dbg5       filterTime_sec:           %f\n", svt->infoPart.filterTime_sec);
+    fprintf(stderr, "dbg5       soundVelocity_mPerSec_offset: %f\n", svt->infoPart.soundVelocity_mPerSec_offset);
 
     for (i = 0; i < (svt->infoPart.numSamplesArray); i++) {
-      fprintf(stderr, "dbg5       svt->sensorData[%3d].time_sec:                     %u\n", i, svt->sensorData[i].time_sec);
-      fprintf(stderr, "dbg5       svt->sensorData[%3d].time_nanosec:                 %u\n", i, svt->sensorData[i].time_nanosec);
-      fprintf(stderr, "dbg5       svt->sensorData[%3d].soundVelocity_mPerSec:        %f\n", i, svt->sensorData[i].soundVelocity_mPerSec);
-      fprintf(stderr, "dbg5       svt->sensorData[%3d].temp_C:                       %f\n", i, svt->sensorData[i].temp_C);
-      fprintf(stderr, "dbg5       svt->sensorData[%3d].pressure_Pa:                  %f\n", i, svt->sensorData[i].pressure_Pa);
-      fprintf(stderr, "dbg5       svt->sensorData[%3d].salinity:                     %f\n", i, svt->sensorData[i].salinity);
+      fprintf(stderr, "dbg5       sensorData[%3d].time_sec:               %u\n", i, svt->sensorData[i].time_sec);
+      fprintf(stderr, "dbg5       sensorData[%3d].time_nanosec:           %u\n", i, svt->sensorData[i].time_nanosec);
+      fprintf(stderr, "dbg5       sensorData[%3d].soundVelocity_mPerSec:  %f\n", i, svt->sensorData[i].soundVelocity_mPerSec);
+      fprintf(stderr, "dbg5       sensorData[%3d].temp_C:                 %f\n", i, svt->sensorData[i].temp_C);
+      fprintf(stderr, "dbg5       sensorData[%3d].pressure_Pa:            %f\n", i, svt->sensorData[i].pressure_Pa);
+      fprintf(stderr, "dbg5       sensorData[%3d].salinity:               %f\n", i, svt->sensorData[i].salinity);
     }
   }
 
@@ -5026,9 +5047,8 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -5067,22 +5087,22 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       scl->header.numBytesDgm:                %u\n", scl->header.numBytesDgm);
-    fprintf(stderr, "dbg5       scl->header.dgmType:                    %s\n", scl->header.dgmType);
-    fprintf(stderr, "dbg5       scl->header.dgmVersion:                 %u\n", scl->header.dgmVersion);
-    fprintf(stderr, "dbg5       scl->header.systemID:                   %u\n", scl->header.systemID);
-    fprintf(stderr, "dbg5       scl->header.echoSounderID:              %u\n", scl->header.echoSounderID);
-    fprintf(stderr, "dbg5       scl->header.time_sec:                   %u\n", scl->header.time_sec);
-    fprintf(stderr, "dbg5       scl->header.time_nanosec:               %u\n", scl->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:         %u\n", scl->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:             %s\n", scl->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:          %u\n", scl->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:            %u\n", scl->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:       %u\n", scl->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:            %u\n", scl->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:        %u\n", scl->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       scl->cmnPart.numBytesCmnPart:           %u\n", scl->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       scl->cmnPart.sensorSystem:              %u\n", scl->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       scl->cmnPart.sensorStatus:              %u\n", scl->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       scl->cmnPart.padding:                   %u\n", scl->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:     %u\n", scl->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:        %u\n", scl->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:        %u\n", scl->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:             %u\n", scl->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       scl->sensorData.offset_sec:             %f\n", scl->sensorData.offset_sec);
-    fprintf(stderr, "dbg5       scl->sensorData.clockDevPU_nanosec:     %d\n", scl->sensorData.clockDevPU_nanosec);
-    fprintf(stderr, "dbg5       scl->sensorData.dataFromSensor:         %s\n", scl->sensorData.dataFromSensor);
+    fprintf(stderr, "dbg5       offset_sec:          %f\n", scl->sensorData.offset_sec);
+    fprintf(stderr, "dbg5       clockDevPU_nanosec:  %d\n", scl->sensorData.clockDevPU_nanosec);
+    fprintf(stderr, "dbg5       dataFromSensor:      %s\n", scl->sensorData.dataFromSensor);
   }
 
   /* size of output record */
@@ -5143,9 +5163,8 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -5183,25 +5202,25 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       sde->header.numBytesDgm:                %u\n", sde->header.numBytesDgm);
-    fprintf(stderr, "dbg5       sde->header.dgmType:                    %s\n", sde->header.dgmType);
-    fprintf(stderr, "dbg5       sde->header.dgmVersion:                 %u\n", sde->header.dgmVersion);
-    fprintf(stderr, "dbg5       sde->header.systemID:                   %u\n", sde->header.systemID);
-    fprintf(stderr, "dbg5       sde->header.echoSounderID:              %u\n", sde->header.echoSounderID);
-    fprintf(stderr, "dbg5       sde->header.time_sec:                   %u\n", sde->header.time_sec);
-    fprintf(stderr, "dbg5       sde->header.time_nanosec:               %u\n", sde->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:      %u\n", sde->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:          %s\n", sde->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:       %u\n", sde->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:         %u\n", sde->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:    %u\n", sde->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:         %u\n", sde->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:     %u\n", sde->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       sde->cmnPart.numBytesCmnPart:           %u\n", sde->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       sde->cmnPart.sensorSystem:              %u\n", sde->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       sde->cmnPart.sensorStatus:              %u\n", sde->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       sde->cmnPart.padding:                   %u\n", sde->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", sde->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:     %u\n", sde->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:     %u\n", sde->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:          %u\n", sde->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       sde->sensorData.depthUsed_m:            %f\n", sde->sensorData.depthUsed_m);
-    fprintf(stderr, "dbg5       sde->sensorData.offset:                 %f\n", sde->sensorData.offset);
-    fprintf(stderr, "dbg5       sde->sensorData.scale:                  %f\n", sde->sensorData.scale);
-    fprintf(stderr, "dbg5       sde->sensorData.latitude_deg:           %f\n", sde->sensorData.latitude_deg);
-    fprintf(stderr, "dbg5       sde->sensorData.longitude_deg:          %f\n", sde->sensorData.longitude_deg);
-    fprintf(stderr, "dbg5       sde->sensorData.dataFromSensor:         %s\n", sde->sensorData.dataFromSensor);
+    fprintf(stderr, "dbg5       depthUsed_m:      %f\n", sde->sensorData.depthUsed_m);
+    fprintf(stderr, "dbg5       offset:           %f\n", sde->sensorData.offset);
+    fprintf(stderr, "dbg5       scale:            %f\n", sde->sensorData.scale);
+    fprintf(stderr, "dbg5       latitude_deg:     %f\n", sde->sensorData.latitude_deg);
+    fprintf(stderr, "dbg5       longitude_deg:    %f\n", sde->sensorData.longitude_deg);
+    fprintf(stderr, "dbg5       dataFromSensor:   %s\n", sde->sensorData.dataFromSensor);
   }
 
   /* size of output record */
@@ -5268,9 +5287,8 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -5308,22 +5326,22 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       shi->header.numBytesDgm:                %u\n", shi->header.numBytesDgm);
-    fprintf(stderr, "dbg5       shi->header.dgmType:                    %s\n", shi->header.dgmType);
-    fprintf(stderr, "dbg5       shi->header.dgmVersion:                 %u\n", shi->header.dgmVersion);
-    fprintf(stderr, "dbg5       shi->header.systemID:                   %u\n", shi->header.systemID);
-    fprintf(stderr, "dbg5       shi->header.echoSounderID:              %u\n", shi->header.echoSounderID);
-    fprintf(stderr, "dbg5       shi->header.time_sec:                   %u\n", shi->header.time_sec);
-    fprintf(stderr, "dbg5       shi->header.time_nanosec:               %u\n", shi->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:      %u\n", shi->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:          %s\n", shi->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:       %u\n", shi->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:         %u\n", shi->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:    %u\n", shi->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:         %u\n", shi->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:     %u\n", shi->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       shi->cmnPart.numBytesCmnPart:           %u\n", shi->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       shi->cmnPart.sensorSystem:              %u\n", shi->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       shi->cmnPart.sensorStatus:              %u\n", shi->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       shi->cmnPart.padding:                   %u\n", shi->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", shi->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:     %u\n", shi->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:     %u\n", shi->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:          %u\n", shi->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       shi->sensorData.sensorType:             %u\n", shi->sensorData.sensorType);
-    fprintf(stderr, "dbg5       shi->sensorData.heigthUsed_m:           %f\n", shi->sensorData.heigthUsed_m);
-    fprintf(stderr, "dbg5       shi->sensorData.dataFromSensor:         %s\n", shi->sensorData.dataFromSensor);
+    fprintf(stderr, "dbg5       sensorType:       %u\n", shi->sensorData.sensorType);
+    fprintf(stderr, "dbg5       heigthUsed_m:     %f\n", shi->sensorData.heigthUsed_m);
+    fprintf(stderr, "dbg5       dataFromSensor:   %s\n", shi->sensorData.dataFromSensor);
   }
 
   /* size of output record */
@@ -5384,9 +5402,8 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -5424,28 +5441,28 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       sha->header.numBytesDgm:                %u\n", sha->header.numBytesDgm);
-    fprintf(stderr, "dbg5       sha->header.dgmType:                    %s\n", sha->header.dgmType);
-    fprintf(stderr, "dbg5       sha->header.dgmVersion:                 %u\n", sha->header.dgmVersion);
-    fprintf(stderr, "dbg5       sha->header.systemID:                   %u\n", sha->header.systemID);
-    fprintf(stderr, "dbg5       sha->header.echoSounderID:              %u\n", sha->header.echoSounderID);
-    fprintf(stderr, "dbg5       sha->header.time_sec:                   %u\n", sha->header.time_sec);
-    fprintf(stderr, "dbg5       sha->header.time_nanosec:               %u\n", sha->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:            %u\n", sha->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                %s\n", sha->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:             %u\n", sha->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:               %u\n", sha->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:          %u\n", sha->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:               %u\n", sha->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:           %u\n", sha->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       sha->cmnPart.numBytesCmnPart:           %u\n", sha->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       sha->cmnPart.sensorSystem:              %u\n", sha->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       sha->cmnPart.sensorStatus:              %u\n", sha->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       sha->cmnPart.padding:                   %u\n", sha->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:        %u\n", sha->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:           %u\n", sha->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:           %u\n", sha->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:                %u\n", sha->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       sha->dataInfo.numBytesInfoPart:         %u\n", sha->dataInfo.numBytesInfoPart);
-    fprintf(stderr, "dbg5       sha->dataInfo.numSamplesArray:          %u\n", sha->dataInfo.numSamplesArray);
-    fprintf(stderr, "dbg5       sha->dataInfo.numBytesPerSample:        %u\n", sha->dataInfo.numBytesPerSample);
-    fprintf(stderr, "dbg5       sha->dataInfo.numBytesRawSensorData:    %u\n", sha->dataInfo.numBytesRawSensorData);
+    fprintf(stderr, "dbg5       numBytesInfoPart:       %u\n", sha->dataInfo.numBytesInfoPart);
+    fprintf(stderr, "dbg5       numSamplesArray:        %u\n", sha->dataInfo.numSamplesArray);
+    fprintf(stderr, "dbg5       numBytesPerSample:      %u\n", sha->dataInfo.numBytesPerSample);
+    fprintf(stderr, "dbg5       numBytesRawSensorData:  %u\n", sha->dataInfo.numBytesRawSensorData);
 
     for (i = 0; i < (sha->dataInfo.numSamplesArray); i++) {
-      fprintf(stderr, "dbg5       sha->sensorData[%3d].timeSinceRecStart_nanosec: %u\n", i, sha->sensorData[i].timeSinceRecStart_nanosec);
-      fprintf(stderr, "dbg5       sha->sensorData[%3d].headingCorrected_deg:      %f\n", i, sha->sensorData[i].headingCorrected_deg);
-      fprintf(stderr, "dbg5       sha->sensorData[%3d].dataFromSensor:            %s\n", i, sha->sensorData[i].dataFromSensor);
+      fprintf(stderr, "dbg5       sensorData[%3d].timeSinceRecStart_nanosec: %u\n", i, sha->sensorData[i].timeSinceRecStart_nanosec);
+      fprintf(stderr, "dbg5       sensorData[%3d].headingCorrected_deg:      %f\n", i, sha->sensorData[i].headingCorrected_deg);
+      fprintf(stderr, "dbg5       sensorData[%3d].dataFromSensor:            %s\n", i, sha->sensorData[i].dataFromSensor);
     }
   }
 
@@ -5516,9 +5533,8 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -5586,8 +5602,8 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-      fprintf(stderr, "dbg5       numOfDgms = %d\n", mrz->partition.numOfDgms);
-      fprintf(stderr, "dbg5       dgmNum    = %d\n", mrz->partition.dgmNum);
+      fprintf(stderr, "dbg5       numOfDgms:  %d\n", mrz->partition.numOfDgms);
+      fprintf(stderr, "dbg5       dgmNum:     %d\n", mrz->partition.dgmNum);
     }
 
     /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
@@ -5614,16 +5630,16 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-      fprintf(stderr, "dbg5       numBytesCmnPart     = %d\n", mrz->cmnPart.numBytesCmnPart);
-      fprintf(stderr, "dbg5       pingCnt             = %d\n", mrz->cmnPart.pingCnt);
-      fprintf(stderr, "dbg5       rxFansPerPing       = %d\n", mrz->cmnPart.rxFansPerPing);
-      fprintf(stderr, "dbg5       rxFanIndex          = %d\n", mrz->cmnPart.rxFanIndex);
-      fprintf(stderr, "dbg5       swathsPerPing       = %d\n", mrz->cmnPart.swathsPerPing);
-      fprintf(stderr, "dbg5       swathAlongPosition  = %d\n", mrz->cmnPart.swathAlongPosition);
-      fprintf(stderr, "dbg5       txTransducerInd     = %d\n", mrz->cmnPart.txTransducerInd);
-      fprintf(stderr, "dbg5       rxTransducerInd     = %d\n", mrz->cmnPart.rxTransducerInd);
-      fprintf(stderr, "dbg5       numRxTransducers    = %d\n", mrz->cmnPart.numRxTransducers);
-      fprintf(stderr, "dbg5       algorithmType       = %d\n", mrz->cmnPart.algorithmType);
+      fprintf(stderr, "dbg5       numBytesCmnPart:     %d\n", mrz->cmnPart.numBytesCmnPart);
+      fprintf(stderr, "dbg5       pingCnt:             %d\n", mrz->cmnPart.pingCnt);
+      fprintf(stderr, "dbg5       rxFansPerPing:       %d\n", mrz->cmnPart.rxFansPerPing);
+      fprintf(stderr, "dbg5       rxFanIndex:          %d\n", mrz->cmnPart.rxFanIndex);
+      fprintf(stderr, "dbg5       swathsPerPing:       %d\n", mrz->cmnPart.swathsPerPing);
+      fprintf(stderr, "dbg5       swathAlongPosition:  %d\n", mrz->cmnPart.swathAlongPosition);
+      fprintf(stderr, "dbg5       txTransducerInd:     %d\n", mrz->cmnPart.txTransducerInd);
+      fprintf(stderr, "dbg5       rxTransducerInd:     %d\n", mrz->cmnPart.rxTransducerInd);
+      fprintf(stderr, "dbg5       numRxTransducers:    %d\n", mrz->cmnPart.numRxTransducers);
+      fprintf(stderr, "dbg5       algorithmType:       %d\n", mrz->cmnPart.algorithmType);
     }
 
     /* EMdgmMRZ_pingInfo - ping info */
@@ -5739,52 +5755,52 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-      fprintf(stderr, "dbg5       numBytesInfoData            = %d\n", mrz->pingInfo.numBytesInfoData);
-      fprintf(stderr, "dbg5       padding0                    = %d\n", mrz->pingInfo.padding0);
-      fprintf(stderr, "dbg5       pingRate_Hz                 = %f\n", mrz->pingInfo.pingRate_Hz);
-      fprintf(stderr, "dbg5       beamSpacing                 = %d\n", mrz->pingInfo.beamSpacing);
-      fprintf(stderr, "dbg5       depthMode                   = %d\n", mrz->pingInfo.depthMode);
-      fprintf(stderr, "dbg5       subDepthMode                = %d\n", mrz->pingInfo.subDepthMode);
-      fprintf(stderr, "dbg5       distanceBtwSwath            = %d\n", mrz->pingInfo.distanceBtwSwath);
-      fprintf(stderr, "dbg5       detectionMode               = %d\n", mrz->pingInfo.detectionMode);
-      fprintf(stderr, "dbg5       pulseForm                   = %d\n", mrz->pingInfo.pulseForm);
-      fprintf(stderr, "dbg5       padding1                    = %d\n", mrz->pingInfo.padding1);
-      fprintf(stderr, "dbg5       frequencyMode_Hz            = %f\n", mrz->pingInfo.frequencyMode_Hz);
-      fprintf(stderr, "dbg5       freqRangeLowLim_Hz          = %f\n", mrz->pingInfo.freqRangeLowLim_Hz);
-      fprintf(stderr, "dbg5       freqRangeHighLim_Hz         = %f\n", mrz->pingInfo.freqRangeHighLim_Hz);
-      fprintf(stderr, "dbg5       maxEffTxPulseLength_sec     = %f\n", mrz->pingInfo.maxEffTxPulseLength_sec);
-      fprintf(stderr, "dbg5       maxTotalTxPulseLength_sec   = %f\n", mrz->pingInfo.maxTotalTxPulseLength_sec);
-      fprintf(stderr, "dbg5       maxEffTxBandWidth_Hz        = %f\n", mrz->pingInfo.maxEffTxBandWidth_Hz);
-      fprintf(stderr, "dbg5       absCoeff_dBPerkm            = %f\n", mrz->pingInfo.absCoeff_dBPerkm);
-      fprintf(stderr, "dbg5       portSectorEdge_deg          = %f\n", mrz->pingInfo.portSectorEdge_deg);
-      fprintf(stderr, "dbg5       starbSectorEdge_deg         = %f\n", mrz->pingInfo.starbSectorEdge_deg);
-      fprintf(stderr, "dbg5       portMeanCov_m               = %d\n", mrz->pingInfo.portMeanCov_m);
-      fprintf(stderr, "dbg5       starbMeanCov_m              = %d\n", mrz->pingInfo.starbMeanCov_m);
-      fprintf(stderr, "dbg5       modeAndStabilisation        = %d\n", mrz->pingInfo.modeAndStabilisation);
-      fprintf(stderr, "dbg5       runtimeFilter1              = %d\n", mrz->pingInfo.runtimeFilter1);
-      fprintf(stderr, "dbg5       runtimeFilter2              = %d\n", mrz->pingInfo.runtimeFilter2);
-      fprintf(stderr, "dbg5       pipeTrackingStatus          = %d\n", mrz->pingInfo.pipeTrackingStatus);
-      fprintf(stderr, "dbg5       transmitArraySizeUsed_deg   = %f\n", mrz->pingInfo.transmitArraySizeUsed_deg);
-      fprintf(stderr, "dbg5       receiveArraySizeUsed_deg    = %f\n", mrz->pingInfo.receiveArraySizeUsed_deg);
-      fprintf(stderr, "dbg5       transmitPower_dB            = %f\n", mrz->pingInfo.transmitPower_dB);
-      fprintf(stderr, "dbg5       SLrampUpTimeRemaining       = %d\n", mrz->pingInfo.SLrampUpTimeRemaining);
-      fprintf(stderr, "dbg5       padding2                    = %d\n", mrz->pingInfo.padding2);
-      fprintf(stderr, "dbg5       yawAngle_deg                = %f\n", mrz->pingInfo.yawAngle_deg);
-      fprintf(stderr, "dbg5       numTxSectors                = %d\n", mrz->pingInfo.numTxSectors);
-      fprintf(stderr, "dbg5       numBytesPerTxSector         = %d\n", mrz->pingInfo.numBytesPerTxSector);
-      fprintf(stderr, "dbg5       headingVessel_deg           = %f\n", mrz->pingInfo.headingVessel_deg);
-      fprintf(stderr, "dbg5       soundSpeedAtTxDepth_mPerSec = %f\n", mrz->pingInfo.soundSpeedAtTxDepth_mPerSec);
-      fprintf(stderr, "dbg5       txTransducerDepth_m         = %f\n", mrz->pingInfo.txTransducerDepth_m);
-      fprintf(stderr, "dbg5       z_waterLevelReRefPoint_m    = %f\n", mrz->pingInfo.z_waterLevelReRefPoint_m);
-      fprintf(stderr, "dbg5       x_kmallToall_m              = %f\n", mrz->pingInfo.x_kmallToall_m);
-      fprintf(stderr, "dbg5       y_kmallToall_m              = %f\n", mrz->pingInfo.y_kmallToall_m);
-      fprintf(stderr, "dbg5       latLongInfo                 = %d\n", mrz->pingInfo.latLongInfo);
-      fprintf(stderr, "dbg5       posSensorStatus             = %d\n", mrz->pingInfo.posSensorStatus);
-      fprintf(stderr, "dbg5       attitudeSensorStatus        = %d\n", mrz->pingInfo.attitudeSensorStatus);
-      fprintf(stderr, "dbg5       padding3                    = %d\n", mrz->pingInfo.padding3);
-      fprintf(stderr, "dbg5       latitude_deg                = %f\n", mrz->pingInfo.latitude_deg);
-      fprintf(stderr, "dbg5       longitude_deg               = %f\n", mrz->pingInfo.longitude_deg);
-      fprintf(stderr, "dbg5       ellipsoidHeightReRefPoint_m = %f\n", mrz->pingInfo.ellipsoidHeightReRefPoint_m);
+      fprintf(stderr, "dbg5       numBytesInfoData:            %d\n", mrz->pingInfo.numBytesInfoData);
+      fprintf(stderr, "dbg5       padding0:                    %d\n", mrz->pingInfo.padding0);
+      fprintf(stderr, "dbg5       pingRate_Hz:                 %f\n", mrz->pingInfo.pingRate_Hz);
+      fprintf(stderr, "dbg5       beamSpacing:                 %d\n", mrz->pingInfo.beamSpacing);
+      fprintf(stderr, "dbg5       depthMode:                   %d\n", mrz->pingInfo.depthMode);
+      fprintf(stderr, "dbg5       subDepthMode:                %d\n", mrz->pingInfo.subDepthMode);
+      fprintf(stderr, "dbg5       distanceBtwSwath:            %d\n", mrz->pingInfo.distanceBtwSwath);
+      fprintf(stderr, "dbg5       detectionMode:               %d\n", mrz->pingInfo.detectionMode);
+      fprintf(stderr, "dbg5       pulseForm:                   %d\n", mrz->pingInfo.pulseForm);
+      fprintf(stderr, "dbg5       padding1:                    %d\n", mrz->pingInfo.padding1);
+      fprintf(stderr, "dbg5       frequencyMode_Hz:            %f\n", mrz->pingInfo.frequencyMode_Hz);
+      fprintf(stderr, "dbg5       freqRangeLowLim_Hz:          %f\n", mrz->pingInfo.freqRangeLowLim_Hz);
+      fprintf(stderr, "dbg5       freqRangeHighLim_Hz:         %f\n", mrz->pingInfo.freqRangeHighLim_Hz);
+      fprintf(stderr, "dbg5       maxEffTxPulseLength_sec:     %f\n", mrz->pingInfo.maxEffTxPulseLength_sec);
+      fprintf(stderr, "dbg5       maxTotalTxPulseLength_sec:   %f\n", mrz->pingInfo.maxTotalTxPulseLength_sec);
+      fprintf(stderr, "dbg5       maxEffTxBandWidth_Hz:        %f\n", mrz->pingInfo.maxEffTxBandWidth_Hz);
+      fprintf(stderr, "dbg5       absCoeff_dBPerkm:            %f\n", mrz->pingInfo.absCoeff_dBPerkm);
+      fprintf(stderr, "dbg5       portSectorEdge_deg:          %f\n", mrz->pingInfo.portSectorEdge_deg);
+      fprintf(stderr, "dbg5       starbSectorEdge_deg:         %f\n", mrz->pingInfo.starbSectorEdge_deg);
+      fprintf(stderr, "dbg5       portMeanCov_m:               %d\n", mrz->pingInfo.portMeanCov_m);
+      fprintf(stderr, "dbg5       starbMeanCov_m:              %d\n", mrz->pingInfo.starbMeanCov_m);
+      fprintf(stderr, "dbg5       modeAndStabilisation:        %d\n", mrz->pingInfo.modeAndStabilisation);
+      fprintf(stderr, "dbg5       runtimeFilter1:              %d\n", mrz->pingInfo.runtimeFilter1);
+      fprintf(stderr, "dbg5       runtimeFilter2:              %d\n", mrz->pingInfo.runtimeFilter2);
+      fprintf(stderr, "dbg5       pipeTrackingStatus:          %d\n", mrz->pingInfo.pipeTrackingStatus);
+      fprintf(stderr, "dbg5       transmitArraySizeUsed_deg:   %f\n", mrz->pingInfo.transmitArraySizeUsed_deg);
+      fprintf(stderr, "dbg5       receiveArraySizeUsed_deg:    %f\n", mrz->pingInfo.receiveArraySizeUsed_deg);
+      fprintf(stderr, "dbg5       transmitPower_dB:            %f\n", mrz->pingInfo.transmitPower_dB);
+      fprintf(stderr, "dbg5       SLrampUpTimeRemaining:       %d\n", mrz->pingInfo.SLrampUpTimeRemaining);
+      fprintf(stderr, "dbg5       padding2:                    %d\n", mrz->pingInfo.padding2);
+      fprintf(stderr, "dbg5       yawAngle_deg:                %f\n", mrz->pingInfo.yawAngle_deg);
+      fprintf(stderr, "dbg5       numTxSectors:                %d\n", mrz->pingInfo.numTxSectors);
+      fprintf(stderr, "dbg5       numBytesPerTxSector:         %d\n", mrz->pingInfo.numBytesPerTxSector);
+      fprintf(stderr, "dbg5       headingVessel_deg:           %f\n", mrz->pingInfo.headingVessel_deg);
+      fprintf(stderr, "dbg5       soundSpeedAtTxDepth_mPerSec: %f\n", mrz->pingInfo.soundSpeedAtTxDepth_mPerSec);
+      fprintf(stderr, "dbg5       txTransducerDepth_m:         %f\n", mrz->pingInfo.txTransducerDepth_m);
+      fprintf(stderr, "dbg5       z_waterLevelReRefPoint_m:    %f\n", mrz->pingInfo.z_waterLevelReRefPoint_m);
+      fprintf(stderr, "dbg5       x_kmallToall_m:              %f\n", mrz->pingInfo.x_kmallToall_m);
+      fprintf(stderr, "dbg5       y_kmallToall_m:              %f\n", mrz->pingInfo.y_kmallToall_m);
+      fprintf(stderr, "dbg5       latLongInfo:                 %d\n", mrz->pingInfo.latLongInfo);
+      fprintf(stderr, "dbg5       posSensorStatus:             %d\n", mrz->pingInfo.posSensorStatus);
+      fprintf(stderr, "dbg5       attitudeSensorStatus:        %d\n", mrz->pingInfo.attitudeSensorStatus);
+      fprintf(stderr, "dbg5       padding3:                    %d\n", mrz->pingInfo.padding3);
+      fprintf(stderr, "dbg5       latitude_deg:                %f\n", mrz->pingInfo.latitude_deg);
+      fprintf(stderr, "dbg5       longitude_deg:               %f\n", mrz->pingInfo.longitude_deg);
+      fprintf(stderr, "dbg5       ellipsoidHeightReRefPoint_m: %f\n", mrz->pingInfo.ellipsoidHeightReRefPoint_m);
     }
 
     /* EMdgmMRZ_txSectorInfo - sector information */
@@ -5822,20 +5838,20 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
       if (verbose >= 5) {
         fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
         fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mrz->pingInfo.numTxSectors);
-        fprintf(stderr, "dbg5       txSectorNumb            = %d\n", mrz->sectorInfo[i].txSectorNumb);
-        fprintf(stderr, "dbg5       txArrNumber             = %d\n", mrz->sectorInfo[i].txArrNumber);
-        fprintf(stderr, "dbg5       txSubArray              = %d\n", mrz->sectorInfo[i].txSubArray);
-        fprintf(stderr, "dbg5       padding0                = %d\n", mrz->sectorInfo[i].padding0);
-        fprintf(stderr, "dbg5       sectorTransmitDelay_sec = %f\n", mrz->sectorInfo[i].sectorTransmitDelay_sec);
-        fprintf(stderr, "dbg5       tiltAngleReTx_deg       = %f\n", mrz->sectorInfo[i].tiltAngleReTx_deg);
-        fprintf(stderr, "dbg5       txNominalSourceLevel_dB = %f\n", mrz->sectorInfo[i].txNominalSourceLevel_dB);
-        fprintf(stderr, "dbg5       txFocusRange_m          = %f\n", mrz->sectorInfo[i].txFocusRange_m);
-        fprintf(stderr, "dbg5       centreFreq_Hz           = %f\n", mrz->sectorInfo[i].centreFreq_Hz);
-        fprintf(stderr, "dbg5       signalBandWidth_Hz      = %f\n", mrz->sectorInfo[i].signalBandWidth_Hz);
-        fprintf(stderr, "dbg5       totalSignalLength_sec   = %f\n", mrz->sectorInfo[i].totalSignalLength_sec);
-        fprintf(stderr, "dbg5       pulseShading            = %d\n", mrz->sectorInfo[i].pulseShading);
-        fprintf(stderr, "dbg5       signalWaveForm          = %d\n", mrz->sectorInfo[i].signalWaveForm);
-        fprintf(stderr, "dbg5       padding1                = %d\n", mrz->sectorInfo[i].padding1);
+        fprintf(stderr, "dbg5       txSectorNumb:             %d\n", mrz->sectorInfo[i].txSectorNumb);
+        fprintf(stderr, "dbg5       txArrNumber:              %d\n", mrz->sectorInfo[i].txArrNumber);
+        fprintf(stderr, "dbg5       txSubArray:               %d\n", mrz->sectorInfo[i].txSubArray);
+        fprintf(stderr, "dbg5       padding0:                 %d\n", mrz->sectorInfo[i].padding0);
+        fprintf(stderr, "dbg5       sectorTransmitDelay_sec:  %f\n", mrz->sectorInfo[i].sectorTransmitDelay_sec);
+        fprintf(stderr, "dbg5       tiltAngleReTx_deg:        %f\n", mrz->sectorInfo[i].tiltAngleReTx_deg);
+        fprintf(stderr, "dbg5       txNominalSourceLevel_dB:  %f\n", mrz->sectorInfo[i].txNominalSourceLevel_dB);
+        fprintf(stderr, "dbg5       txFocusRange_m:           %f\n", mrz->sectorInfo[i].txFocusRange_m);
+        fprintf(stderr, "dbg5       centreFreq_Hz:            %f\n", mrz->sectorInfo[i].centreFreq_Hz);
+        fprintf(stderr, "dbg5       signalBandWidth_Hz:       %f\n", mrz->sectorInfo[i].signalBandWidth_Hz);
+        fprintf(stderr, "dbg5       totalSignalLength_sec:    %f\n", mrz->sectorInfo[i].totalSignalLength_sec);
+        fprintf(stderr, "dbg5       pulseShading:             %d\n", mrz->sectorInfo[i].pulseShading);
+        fprintf(stderr, "dbg5       signalWaveForm:           %d\n", mrz->sectorInfo[i].signalWaveForm);
+        fprintf(stderr, "dbg5       padding1:                 %d\n", mrz->sectorInfo[i].padding1);
       }
     }
 
@@ -5870,18 +5886,18 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-      fprintf(stderr, "dbg5       numBytesInfoData            = %d\n", mrz->rxInfo.numBytesRxInfo);
-      fprintf(stderr, "dbg5       numSoundingsMaxMain         = %d\n", mrz->rxInfo.numSoundingsMaxMain);
-      fprintf(stderr, "dbg5       numSoundingsValidMain       = %d\n", mrz->rxInfo.numSoundingsValidMain);
-      fprintf(stderr, "dbg5       numBytesPerSounding         = %d\n", mrz->rxInfo.numBytesPerSounding);
-      fprintf(stderr, "dbg5       WCSampleRate                = %f\n", mrz->rxInfo.WCSampleRate);
-      fprintf(stderr, "dbg5       seabedImageSampleRate       = %f\n", mrz->rxInfo.seabedImageSampleRate);
-      fprintf(stderr, "dbg5       BSnormal_dB                 = %f\n", mrz->rxInfo.BSnormal_dB);
-      fprintf(stderr, "dbg5       BSoblique_dB                = %f\n", mrz->rxInfo.BSoblique_dB);
-      fprintf(stderr, "dbg5       extraDetectionAlarmFlag     = %d\n", mrz->rxInfo.extraDetectionAlarmFlag);
-      fprintf(stderr, "dbg5       numExtraDetections          = %d\n", mrz->rxInfo.numExtraDetections);
-      fprintf(stderr, "dbg5       numExtraDetectionClasses    = %d\n", mrz->rxInfo.numExtraDetectionClasses);
-      fprintf(stderr, "dbg5       numBytesPerClass            = %d\n", mrz->rxInfo.numBytesPerClass);
+      fprintf(stderr, "dbg5       numBytesInfoData:          %d\n", mrz->rxInfo.numBytesRxInfo);
+      fprintf(stderr, "dbg5       numSoundingsMaxMain:       %d\n", mrz->rxInfo.numSoundingsMaxMain);
+      fprintf(stderr, "dbg5       numSoundingsValidMain:     %d\n", mrz->rxInfo.numSoundingsValidMain);
+      fprintf(stderr, "dbg5       numBytesPerSounding:       %d\n", mrz->rxInfo.numBytesPerSounding);
+      fprintf(stderr, "dbg5       WCSampleRate:              %f\n", mrz->rxInfo.WCSampleRate);
+      fprintf(stderr, "dbg5       seabedImageSampleRate:     %f\n", mrz->rxInfo.seabedImageSampleRate);
+      fprintf(stderr, "dbg5       BSnormal_dB:               %f\n", mrz->rxInfo.BSnormal_dB);
+      fprintf(stderr, "dbg5       BSoblique_dB:              %f\n", mrz->rxInfo.BSoblique_dB);
+      fprintf(stderr, "dbg5       extraDetectionAlarmFlag:   %d\n", mrz->rxInfo.extraDetectionAlarmFlag);
+      fprintf(stderr, "dbg5       numExtraDetections:        %d\n", mrz->rxInfo.numExtraDetections);
+      fprintf(stderr, "dbg5       numExtraDetectionClasses:  %d\n", mrz->rxInfo.numExtraDetectionClasses);
+      fprintf(stderr, "dbg5       numBytesPerClass:          %d\n", mrz->rxInfo.numBytesPerClass);
     }
 
     /* EMdgmMRZ_extraDetClassInfo -  Extra detection class info */
@@ -5896,9 +5912,9 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
       /* print debug statements */
       if (verbose >= 5) {
         fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-        fprintf(stderr, "dbg5       numExtraDetInClass  = %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
-        fprintf(stderr, "dbg5       padding             = %d\n", mrz->extraDetClassInfo[i].padding);
-        fprintf(stderr, "dbg5       alarmFlag           = %d\n", mrz->extraDetClassInfo[i].alarmFlag);
+        fprintf(stderr, "dbg5       numExtraDetInClass:  %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
+        fprintf(stderr, "dbg5       padding:             %d\n", mrz->extraDetClassInfo[i].padding);
+        fprintf(stderr, "dbg5       alarmFlag:           %d\n", mrz->extraDetClassInfo[i].alarmFlag);
       }
     }
 
@@ -6011,48 +6027,48 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
       /* print debug statements */
       if (verbose >= 5) {
         fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-        fprintf(stderr, "dbg5       soundingIndex                   = %d\n", mrz->sounding[i].soundingIndex);
-        fprintf(stderr, "dbg5       txSectorNumb                    = %d\n", mrz->sounding[i].txSectorNumb);
-        fprintf(stderr, "dbg5       detectionType                   = %d\n", mrz->sounding[i].detectionType);
-        fprintf(stderr, "dbg5       detectionMethod                 = %d\n", mrz->sounding[i].detectionMethod);
-        fprintf(stderr, "dbg5       rejectionInfo1                  = %d\n", mrz->sounding[i].rejectionInfo1);
-        fprintf(stderr, "dbg5       rejectionInfo2                  = %d\n", mrz->sounding[i].rejectionInfo2);
-        fprintf(stderr, "dbg5       postProcessingInfo              = %d\n", mrz->sounding[i].postProcessingInfo);
-        fprintf(stderr, "dbg5       detectionClass                  = %d\n", mrz->sounding[i].detectionClass);
-        fprintf(stderr, "dbg5       detectionConfidenceLevel        = %d\n", mrz->sounding[i].detectionConfidenceLevel);
-        // fprintf(stderr, "dbg5       padding                         = %d\n", mrz->sounding[i].padding);
-        fprintf(stderr, "dbg5       beamflag_enabled                = %d\n", mrz->sounding[i].beamflag_enabled);
-        fprintf(stderr, "dbg5       beamflag                        = %d\n", mrz->sounding[i].beamflag);
-        fprintf(stderr, "dbg5       rangeFactor                     = %f\n", mrz->sounding[i].rangeFactor);
-        fprintf(stderr, "dbg5       qualityFactor                   = %f\n", mrz->sounding[i].qualityFactor);
-        fprintf(stderr, "dbg5       detectionUncertaintyVer_m       = %f\n", mrz->sounding[i].detectionUncertaintyVer_m);
-        fprintf(stderr, "dbg5       detectionUncertaintyHor_m       = %f\n", mrz->sounding[i].detectionUncertaintyHor_m);
-        fprintf(stderr, "dbg5       detectionWindowLength_sec       = %f\n", mrz->sounding[i].detectionWindowLength_sec);
-        fprintf(stderr, "dbg5       echoLength_sec                  = %f\n", mrz->sounding[i].echoLength_sec);
-        fprintf(stderr, "dbg5       WCBeamNumb                      = %d\n", mrz->sounding[i].WCBeamNumb);
-        fprintf(stderr, "dbg5       WCrange_samples                 = %d\n", mrz->sounding[i].WCrange_samples);
-        fprintf(stderr, "dbg5       WCNomBeamAngleAcross_deg        = %f\n", mrz->sounding[i].WCNomBeamAngleAcross_deg);
-        fprintf(stderr, "dbg5       meanAbsCoeff_dBPerkm            = %f\n", mrz->sounding[i].meanAbsCoeff_dBPerkm);
-        fprintf(stderr, "dbg5       reflectivity1_dB                = %f\n", mrz->sounding[i].reflectivity1_dB);
-        fprintf(stderr, "dbg5       reflectivity2_dB                = %f\n", mrz->sounding[i].reflectivity2_dB);
-        fprintf(stderr, "dbg5       receiverSensitivityApplied_dB   = %f\n", mrz->sounding[i].receiverSensitivityApplied_dB);
-        fprintf(stderr, "dbg5       sourceLevelApplied_dB           = %f\n", mrz->sounding[i].sourceLevelApplied_dB);
-        fprintf(stderr, "dbg5       BScalibration_dB                = %f\n", mrz->sounding[i].BScalibration_dB);
-        fprintf(stderr, "dbg5       TVG_dB                          = %f\n", mrz->sounding[i].TVG_dB);
-        fprintf(stderr, "dbg5       beamAngleReRx_deg               = %f\n", mrz->sounding[i].beamAngleReRx_deg);
-        fprintf(stderr, "dbg5       beamAngleCorrection_deg         = %f\n", mrz->sounding[i].beamAngleCorrection_deg);
-        fprintf(stderr, "dbg5       twoWayTravelTime_sec            = %f\n", mrz->sounding[i].twoWayTravelTime_sec);
-        fprintf(stderr, "dbg5       twoWayTravelTimeCorrection_sec  = %f\n", mrz->sounding[i].twoWayTravelTimeCorrection_sec);
-        fprintf(stderr, "dbg5       deltaLatitude_deg               = %f\n", mrz->sounding[i].deltaLatitude_deg);
-        fprintf(stderr, "dbg5       deltaLongitude_deg              = %f\n", mrz->sounding[i].deltaLongitude_deg);
-        fprintf(stderr, "dbg5       z_reRefPoint_m                  = %f\n", mrz->sounding[i].z_reRefPoint_m);
-        fprintf(stderr, "dbg5       y_reRefPoint_m                  = %f\n", mrz->sounding[i].y_reRefPoint_m);
-        fprintf(stderr, "dbg5       x_reRefPoint_m                  = %f\n", mrz->sounding[i].x_reRefPoint_m);
-        fprintf(stderr, "dbg5       beamIncAngleAdj_deg             = %f\n", mrz->sounding[i].beamIncAngleAdj_deg);
-        fprintf(stderr, "dbg5       realTimeCleanInfo               = %d\n", mrz->sounding[i].realTimeCleanInfo);
-        fprintf(stderr, "dbg5       SIstartRange_samples            = %d\n", mrz->sounding[i].SIstartRange_samples);
-        fprintf(stderr, "dbg5       SIcentreSample                  = %d\n", mrz->sounding[i].SIcentreSample);
-        fprintf(stderr, "dbg5       SInumSamples                    = %d\n", mrz->sounding[i].SInumSamples);
+        fprintf(stderr, "dbg5       soundingIndex:                  %d\n", mrz->sounding[i].soundingIndex);
+        fprintf(stderr, "dbg5       txSectorNumb:                   %d\n", mrz->sounding[i].txSectorNumb);
+        fprintf(stderr, "dbg5       detectionType:                  %d\n", mrz->sounding[i].detectionType);
+        fprintf(stderr, "dbg5       detectionMethod:                %d\n", mrz->sounding[i].detectionMethod);
+        fprintf(stderr, "dbg5       rejectionInfo1:                 %d\n", mrz->sounding[i].rejectionInfo1);
+        fprintf(stderr, "dbg5       rejectionInfo2:                 %d\n", mrz->sounding[i].rejectionInfo2);
+        fprintf(stderr, "dbg5       postProcessingInfo:             %d\n", mrz->sounding[i].postProcessingInfo);
+        fprintf(stderr, "dbg5       detectionClass:                 %d\n", mrz->sounding[i].detectionClass);
+        fprintf(stderr, "dbg5       detectionConfidenceLevel        %d\n", mrz->sounding[i].detectionConfidenceLevel);
+        // fprintf(stderr, "dbg5       padding:                       %d\n", mrz->sounding[i].padding);
+        fprintf(stderr, "dbg5       beamflag_enabled:               %d\n", mrz->sounding[i].beamflag_enabled);
+        fprintf(stderr, "dbg5       beamflag:                       %d\n", mrz->sounding[i].beamflag);
+        fprintf(stderr, "dbg5       rangeFactor:                    %f\n", mrz->sounding[i].rangeFactor);
+        fprintf(stderr, "dbg5       qualityFactor:                  %f\n", mrz->sounding[i].qualityFactor);
+        fprintf(stderr, "dbg5       detectionUncertaintyVer_m:      %f\n", mrz->sounding[i].detectionUncertaintyVer_m);
+        fprintf(stderr, "dbg5       detectionUncertaintyHor_m:      %f\n", mrz->sounding[i].detectionUncertaintyHor_m);
+        fprintf(stderr, "dbg5       detectionWindowLength_sec:      %f\n", mrz->sounding[i].detectionWindowLength_sec);
+        fprintf(stderr, "dbg5       echoLength_sec:                 %f\n", mrz->sounding[i].echoLength_sec);
+        fprintf(stderr, "dbg5       WCBeamNumb:                     %d\n", mrz->sounding[i].WCBeamNumb);
+        fprintf(stderr, "dbg5       WCrange_samples:                %d\n", mrz->sounding[i].WCrange_samples);
+        fprintf(stderr, "dbg5       WCNomBeamAngleAcross_deg:       %f\n", mrz->sounding[i].WCNomBeamAngleAcross_deg);
+        fprintf(stderr, "dbg5       meanAbsCoeff_dBPerkm:           %f\n", mrz->sounding[i].meanAbsCoeff_dBPerkm);
+        fprintf(stderr, "dbg5       reflectivity1_dB:               %f\n", mrz->sounding[i].reflectivity1_dB);
+        fprintf(stderr, "dbg5       reflectivity2_dB:               %f\n", mrz->sounding[i].reflectivity2_dB);
+        fprintf(stderr, "dbg5       receiverSensitivityApplied_dB:  %f\n", mrz->sounding[i].receiverSensitivityApplied_dB);
+        fprintf(stderr, "dbg5       sourceLevelApplied_dB:          %f\n", mrz->sounding[i].sourceLevelApplied_dB);
+        fprintf(stderr, "dbg5       BScalibration_dB:               %f\n", mrz->sounding[i].BScalibration_dB);
+        fprintf(stderr, "dbg5       TVG_dB:                         %f\n", mrz->sounding[i].TVG_dB);
+        fprintf(stderr, "dbg5       beamAngleReRx_deg:              %f\n", mrz->sounding[i].beamAngleReRx_deg);
+        fprintf(stderr, "dbg5       beamAngleCorrection_deg:        %f\n", mrz->sounding[i].beamAngleCorrection_deg);
+        fprintf(stderr, "dbg5       twoWayTravelTime_sec            %f\n", mrz->sounding[i].twoWayTravelTime_sec);
+        fprintf(stderr, "dbg5       twoWayTravelTimeCorrection_sec  %f\n", mrz->sounding[i].twoWayTravelTimeCorrection_sec);
+        fprintf(stderr, "dbg5       deltaLatitude_deg:              %f\n", mrz->sounding[i].deltaLatitude_deg);
+        fprintf(stderr, "dbg5       deltaLongitude_deg:             %f\n", mrz->sounding[i].deltaLongitude_deg);
+        fprintf(stderr, "dbg5       z_reRefPoint_m:                 %f\n", mrz->sounding[i].z_reRefPoint_m);
+        fprintf(stderr, "dbg5       y_reRefPoint_m:                 %f\n", mrz->sounding[i].y_reRefPoint_m);
+        fprintf(stderr, "dbg5       x_reRefPoint_m:                 %f\n", mrz->sounding[i].x_reRefPoint_m);
+        fprintf(stderr, "dbg5       beamIncAngleAdj_deg:            %f\n", mrz->sounding[i].beamIncAngleAdj_deg);
+        fprintf(stderr, "dbg5       realTimeCleanInfo:              %d\n", mrz->sounding[i].realTimeCleanInfo);
+        fprintf(stderr, "dbg5       SIstartRange_samples:           %d\n", mrz->sounding[i].SIstartRange_samples);
+        fprintf(stderr, "dbg5       SIcentreSample:                 %d\n", mrz->sounding[i].SIcentreSample);
+        fprintf(stderr, "dbg5       SInumSamples:                   %d\n", mrz->sounding[i].SInumSamples);
       }
     }
 
@@ -6076,9 +6092,8 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -6146,8 +6161,8 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-      fprintf(stderr, "dbg5       numOfDgms = %d\n", mwc->partition.numOfDgms);
-      fprintf(stderr, "dbg5       dgmNum    = %d\n", mwc->partition.dgmNum);
+      fprintf(stderr, "dbg5       numOfDgms:  %d\n", mwc->partition.numOfDgms);
+      fprintf(stderr, "dbg5       dgmNum:     %d\n", mwc->partition.dgmNum);
     }
 
     /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
@@ -6175,16 +6190,16 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-      fprintf(stderr, "dbg5       numBytesCmnPart     = %d\n", mwc->cmnPart.numBytesCmnPart);
-      fprintf(stderr, "dbg5       pingCnt             = %d\n", mwc->cmnPart.pingCnt);
-      fprintf(stderr, "dbg5       rxFansPerPing       = %d\n", mwc->cmnPart.rxFansPerPing);
-      fprintf(stderr, "dbg5       rxFanIndex          = %d\n", mwc->cmnPart.rxFanIndex);
-      fprintf(stderr, "dbg5       swathsPerPing       = %d\n", mwc->cmnPart.swathsPerPing);
-      fprintf(stderr, "dbg5       swathAlongPosition  = %d\n", mwc->cmnPart.swathAlongPosition);
-      fprintf(stderr, "dbg5       txTransducerInd     = %d\n", mwc->cmnPart.txTransducerInd);
-      fprintf(stderr, "dbg5       rxTransducerInd     = %d\n", mwc->cmnPart.rxTransducerInd);
-      fprintf(stderr, "dbg5       numRxTransducers    = %d\n", mwc->cmnPart.numRxTransducers);
-      fprintf(stderr, "dbg5       algorithmType       = %d\n", mwc->cmnPart.algorithmType);
+      fprintf(stderr, "dbg5       numBytesCmnPart:     %d\n", mwc->cmnPart.numBytesCmnPart);
+      fprintf(stderr, "dbg5       pingCnt:             %d\n", mwc->cmnPart.pingCnt);
+      fprintf(stderr, "dbg5       rxFansPerPing:       %d\n", mwc->cmnPart.rxFansPerPing);
+      fprintf(stderr, "dbg5       rxFanIndex:          %d\n", mwc->cmnPart.rxFanIndex);
+      fprintf(stderr, "dbg5       swathsPerPing:       %d\n", mwc->cmnPart.swathsPerPing);
+      fprintf(stderr, "dbg5       swathAlongPosition:  %d\n", mwc->cmnPart.swathAlongPosition);
+      fprintf(stderr, "dbg5       txTransducerInd:     %d\n", mwc->cmnPart.txTransducerInd);
+      fprintf(stderr, "dbg5       rxTransducerInd:     %d\n", mwc->cmnPart.rxTransducerInd);
+      fprintf(stderr, "dbg5       numRxTransducers:    %d\n", mwc->cmnPart.numRxTransducers);
+      fprintf(stderr, "dbg5       algorithmType:       %d\n", mwc->cmnPart.algorithmType);
     }
 
     /* EMdgmMWCtxInfo - transmit sectors, general info for all sectors */
@@ -6202,11 +6217,11 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-      fprintf(stderr, "dbg5       numBytesTxInfo      = %d\n", mwc->txInfo.numBytesTxInfo);
-      fprintf(stderr, "dbg5       numTxSectors        = %d\n", mwc->txInfo.numTxSectors);
-      fprintf(stderr, "dbg5       numBytesPerTxSector = %d\n", mwc->txInfo.numBytesPerTxSector);
-      fprintf(stderr, "dbg5       padding             = %d\n", mwc->txInfo.padding);
-      fprintf(stderr, "dbg5       heave_m             = %f\n", mwc->txInfo.heave_m);
+      fprintf(stderr, "dbg5       numBytesTxInfo:       %d\n", mwc->txInfo.numBytesTxInfo);
+      fprintf(stderr, "dbg5       numTxSectors:         %d\n", mwc->txInfo.numTxSectors);
+      fprintf(stderr, "dbg5       numBytesPerTxSector:  %d\n", mwc->txInfo.numBytesPerTxSector);
+      fprintf(stderr, "dbg5       padding:              %d\n", mwc->txInfo.padding);
+      fprintf(stderr, "dbg5       heave_m:              %f\n", mwc->txInfo.heave_m);
     }
 
     /* EMdgmMWCtxSectorData - transmit sector data, loop for all i = numTxSectors */
@@ -6226,11 +6241,11 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
       if (verbose >= 5) {
         fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
         fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mwc->txInfo.numTxSectors);
-        fprintf(stderr, "dbg5       tiltAngleReTx_deg    = %f\n", mwc->sectorData[i].tiltAngleReTx_deg);
-        fprintf(stderr, "dbg5       centreFreq_Hz        = %f\n", mwc->sectorData[i].centreFreq_Hz);
-        fprintf(stderr, "dbg5       txBeamWidthAlong_deg = %f\n", mwc->sectorData[i].txBeamWidthAlong_deg);
-        fprintf(stderr, "dbg5       txSectorNum          = %d\n", mwc->sectorData[i].txSectorNum);
-        fprintf(stderr, "dbg5       padding              = %d\n", mwc->sectorData[i].padding);
+        fprintf(stderr, "dbg5       tiltAngleReTx_deg:     %f\n", mwc->sectorData[i].tiltAngleReTx_deg);
+        fprintf(stderr, "dbg5       centreFreq_Hz:         %f\n", mwc->sectorData[i].centreFreq_Hz);
+        fprintf(stderr, "dbg5       txBeamWidthAlong_deg:  %f\n", mwc->sectorData[i].txBeamWidthAlong_deg);
+        fprintf(stderr, "dbg5       txSectorNum:           %d\n", mwc->sectorData[i].txSectorNum);
+        fprintf(stderr, "dbg5       padding:               %d\n", mwc->sectorData[i].padding);
       }
     }
 
@@ -6255,14 +6270,14 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-      fprintf(stderr, "dbg5       numBytesRxInfo        = %d\n", mwc->rxInfo.numBytesRxInfo);
-      fprintf(stderr, "dbg5       numBeams              = %d\n", mwc->rxInfo.numBeams);
-      fprintf(stderr, "dbg5       numBytesPerBeamEntry  = %d\n", mwc->rxInfo.numBytesPerBeamEntry);
-      fprintf(stderr, "dbg5       phaseFlag             = %d\n", mwc->rxInfo.phaseFlag);
-      fprintf(stderr, "dbg5       TVGfunctionApplied    = %d\n", mwc->rxInfo.TVGfunctionApplied);
-      fprintf(stderr, "dbg5       TVGoffset_dB          = %d\n", mwc->rxInfo.TVGoffset_dB);
-      fprintf(stderr, "dbg5       sampleFreq_Hz         = %f\n", mwc->rxInfo.sampleFreq_Hz);
-      fprintf(stderr, "dbg5       soundVelocity_mPerSec = %f\n", mwc->rxInfo.soundVelocity_mPerSec);
+      fprintf(stderr, "dbg5       numBytesRxInfo:         %d\n", mwc->rxInfo.numBytesRxInfo);
+      fprintf(stderr, "dbg5       numBeams:               %d\n", mwc->rxInfo.numBeams);
+      fprintf(stderr, "dbg5       numBytesPerBeamEntry:   %d\n", mwc->rxInfo.numBytesPerBeamEntry);
+      fprintf(stderr, "dbg5       phaseFlag               %d\n", mwc->rxInfo.phaseFlag);
+      fprintf(stderr, "dbg5       TVGfunctionApplied:     %d\n", mwc->rxInfo.TVGfunctionApplied);
+      fprintf(stderr, "dbg5       TVGoffset_dB:           %d\n", mwc->rxInfo.TVGoffset_dB);
+      fprintf(stderr, "dbg5       sampleFreq_Hz:          %f\n", mwc->rxInfo.sampleFreq_Hz);
+      fprintf(stderr, "dbg5       soundVelocity_mPerSec:  %f\n", mwc->rxInfo.soundVelocity_mPerSec);
     }
 
     /* EMdgmMWCrxBeamData - receiver, specific info for each beam */
@@ -6306,12 +6321,12 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
       if (status == MB_SUCCESS && verbose >= 5) {
         fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
         fprintf(stderr, "dbg5       #MWC receiver beam data %d/%d:\n", i, mwc->rxInfo.numBeams);
-        fprintf(stderr, "dbg5       tiltAngleReTx_deg       = %f\n", mwc->beamData_p[i].beamPointAngReVertical_deg);
-        fprintf(stderr, "dbg5       startRangeSampleNum     = %d\n", mwc->beamData_p[i].startRangeSampleNum);
-        fprintf(stderr, "dbg5       detectedRangeInSamples  = %d\n", mwc->beamData_p[i].detectedRangeInSamples);
-        fprintf(stderr, "dbg5       beamTxSectorNum         = %d\n", mwc->beamData_p[i].beamTxSectorNum);
-        fprintf(stderr, "dbg5       numSampleData           = %d\n", mwc->beamData_p[i].numSampleData);
-        fprintf(stderr, "dbg5       (amplitude phase)       = [\n");
+        fprintf(stderr, "dbg5       tiltAngleReTx_deg:       %f\n", mwc->beamData_p[i].beamPointAngReVertical_deg);
+        fprintf(stderr, "dbg5       startRangeSampleNum:     %d\n", mwc->beamData_p[i].startRangeSampleNum);
+        fprintf(stderr, "dbg5       detectedRangeInSamples:  %d\n", mwc->beamData_p[i].detectedRangeInSamples);
+        fprintf(stderr, "dbg5       beamTxSectorNum:         %d\n", mwc->beamData_p[i].beamTxSectorNum);
+        fprintf(stderr, "dbg5       numSampleData:           %d\n", mwc->beamData_p[i].numSampleData);
+        fprintf(stderr, "dbg5       (amplitude phase)       [\n");
         for (k = 0; k < (mwc->beamData_p[i].numSampleData); k++) {
           if (k % 10 == 0)
             fprintf(stderr, "dbg5             ");
@@ -6342,9 +6357,8 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -6382,28 +6396,28 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       cpo->header.numBytesDgm:                %u\n", cpo->header.numBytesDgm);
-    fprintf(stderr, "dbg5       cpo->header.dgmType:                    %s\n", cpo->header.dgmType);
-    fprintf(stderr, "dbg5       cpo->header.dgmVersion:                 %u\n", cpo->header.dgmVersion);
-    fprintf(stderr, "dbg5       cpo->header.systemID:                   %u\n", cpo->header.systemID);
-    fprintf(stderr, "dbg5       cpo->header.echoSounderID:              %u\n", cpo->header.echoSounderID);
-    fprintf(stderr, "dbg5       cpo->header.time_sec:                   %u\n", cpo->header.time_sec);
-    fprintf(stderr, "dbg5       cpo->header.time_nanosec:               %u\n", cpo->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:                  %u\n", cpo->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                      %s\n", cpo->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:                   %u\n", cpo->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                     %u\n", cpo->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:                %u\n", cpo->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                     %u\n", cpo->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:                 %u\n", cpo->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       cpo->cmnPart.numBytesCmnPart:           %u\n", cpo->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       cpo->cmnPart.sensorSystem:              %u\n", cpo->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       cpo->cmnPart.sensorStatus:              %u\n", cpo->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       cpo->cmnPart.padding:                   %u\n", cpo->cmnPart.padding);
+    fprintf(stderr, "dbg5       numBytesCmnPart:              %u\n", cpo->cmnPart.numBytesCmnPart);
+    fprintf(stderr, "dbg5       sensorSystem:                 %u\n", cpo->cmnPart.sensorSystem);
+    fprintf(stderr, "dbg5       sensorStatus:                 %u\n", cpo->cmnPart.sensorStatus);
+    fprintf(stderr, "dbg5       padding:                      %u\n", cpo->cmnPart.padding);
 
-    fprintf(stderr, "dbg5       cpo->sensorData.timeFromSensor_sec:     %u\n", cpo->sensorData.timeFromSensor_sec);
-    fprintf(stderr, "dbg5       cpo->sensorData.timeFromSensor_nanosec: %u\n", cpo->sensorData.timeFromSensor_nanosec);
-    fprintf(stderr, "dbg5       cpo->sensorData.posFixQuality_m:        %f\n", cpo->sensorData.posFixQuality_m);
-    fprintf(stderr, "dbg5       cpo->sensorData.correctedLat_deg:       %f\n", cpo->sensorData.correctedLat_deg);
-    fprintf(stderr, "dbg5       cpo->sensorData.correctedLong_deg:      %f\n", cpo->sensorData.correctedLong_deg);
-    fprintf(stderr, "dbg5       cpo->sensorData.speedOverGround_mPerSec:%f\n", cpo->sensorData.speedOverGround_mPerSec);
-    fprintf(stderr, "dbg5       cpo->sensorData.correctedLat_deg:       %f\n", cpo->sensorData.courseOverGround_deg);
-    fprintf(stderr, "dbg5       cpo->sensorData.correctedLong_deg:      %f\n", cpo->sensorData.ellipsoidHeightReRefPoint_m);
-    fprintf(stderr, "dbg5       cpo->sensorData.speedOverGround_mPerSec:%s\n", cpo->sensorData.posDataFromSensor);
+    fprintf(stderr, "dbg5       timeFromSensor_sec:           %u\n", cpo->sensorData.timeFromSensor_sec);
+    fprintf(stderr, "dbg5       timeFromSensor_nanosec:       %u\n", cpo->sensorData.timeFromSensor_nanosec);
+    fprintf(stderr, "dbg5       posFixQuality_m:              %f\n", cpo->sensorData.posFixQuality_m);
+    fprintf(stderr, "dbg5       correctedLat_deg:             %f\n", cpo->sensorData.correctedLat_deg);
+    fprintf(stderr, "dbg5       correctedLong_deg:            %f\n", cpo->sensorData.correctedLong_deg);
+    fprintf(stderr, "dbg5       speedOverGround_mPerSec:      %f\n", cpo->sensorData.speedOverGround_mPerSec);
+    fprintf(stderr, "dbg5       courseOverGround_deg:         %f\n", cpo->sensorData.courseOverGround_deg);
+    fprintf(stderr, "dbg5       ellipsoidHeightReRefPoint_m:  %f\n", cpo->sensorData.ellipsoidHeightReRefPoint_m);
+    fprintf(stderr, "dbg5       posDataFromSensor:            %s\n", cpo->sensorData.posDataFromSensor);
   }
 
   /* size of output record */
@@ -6478,9 +6492,8 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s written - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType,header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -6515,25 +6528,6 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
   che = &(store->che);
   header = &store->che.header;
 
-  /* print debug statements */
-  if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       che->header.numBytesDgm:                %u\n", che->header.numBytesDgm);
-    fprintf(stderr, "dbg5       che->header.dgmType:                    %s\n", che->header.dgmType);
-    fprintf(stderr, "dbg5       che->header.dgmVersion:                 %u\n", che->header.dgmVersion);
-    fprintf(stderr, "dbg5       che->header.systemID:                   %u\n", che->header.systemID);
-    fprintf(stderr, "dbg5       che->header.echoSounderID:              %u\n", che->header.echoSounderID);
-    fprintf(stderr, "dbg5       che->header.time_sec:                   %u\n", che->header.time_sec);
-    fprintf(stderr, "dbg5       che->header.time_nanosec:               %u\n", che->header.time_nanosec);
-
-    fprintf(stderr, "dbg5       che->cmnPart.numBytesCmnPart:           %u\n", che->cmnPart.numBytesCmnPart);
-    fprintf(stderr, "dbg5       che->cmnPart.sensorSystem:              %u\n", che->cmnPart.sensorSystem);
-    fprintf(stderr, "dbg5       che->cmnPart.sensorStatus:              %u\n", che->cmnPart.sensorStatus);
-    fprintf(stderr, "dbg5       che->cmnPart.padding:                   %u\n", che->cmnPart.padding);
-
-    fprintf(stderr, "dbg5       che->data.data.heave_m:                 %f\n", che->data.heave_m);
-  }
-
   /* size of output record */
   *size = (size_t) che->header.numBytesDgm;
 
@@ -6557,19 +6551,62 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
 
-    /* common part */
+    /* print debug statements */
+    if (verbose >= 5) {
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "dbg5       numBytesDgm:    %u\n", che->header.numBytesDgm);
+      fprintf(stderr, "dbg5       dgmType:        %s\n", che->header.dgmType);
+      fprintf(stderr, "dbg5       dgmVersion:     %u\n", che->header.dgmVersion);
+      fprintf(stderr, "dbg5       systemID:       %u\n", che->header.systemID);
+      fprintf(stderr, "dbg5       echoSounderID:  %u\n", che->header.echoSounderID);
+      fprintf(stderr, "dbg5       time_sec:       %u\n", che->header.time_sec);
+      fprintf(stderr, "dbg5       time_nanosec:   %u\n", che->header.time_nanosec);
+    }
+
+    /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
     mb_put_binary_short(MB_YES, che->cmnPart.numBytesCmnPart, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, che->cmnPart.sensorSystem, &buffer[index]);
+    mb_put_binary_short(MB_YES, che->cmnPart.pingCnt, &buffer[index]);
     index += 2;
-    mb_put_binary_short(MB_YES, che->cmnPart.sensorStatus, &buffer[index]);
-    index += 2;
-    mb_put_binary_short(MB_YES, che->cmnPart.padding, &buffer[index]);
-    index += 2;
+    buffer[index] = che->cmnPart.rxFansPerPing;
+    index++;
+    buffer[index] = che->cmnPart.rxFanIndex;
+    index++;
+    buffer[index] = che->cmnPart.swathsPerPing;
+    index++;
+    buffer[index] = che->cmnPart.swathAlongPosition;
+    index++;
+    buffer[index] = che->cmnPart.txTransducerInd;
+    index++;
+    buffer[index] = che->cmnPart.rxTransducerInd;
+    index++;
+    buffer[index] = che->cmnPart.numRxTransducers;
+    index++;
+    buffer[index] = che->cmnPart.algorithmType;
+    index++;
+
+    if (verbose >= 5) {
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "dbg5       numBytesCmnPart:     %d\n", che->cmnPart.numBytesCmnPart);
+      fprintf(stderr, "dbg5       pingCnt:             %d\n", che->cmnPart.pingCnt);
+      fprintf(stderr, "dbg5       rxFansPerPing:       %d\n", che->cmnPart.rxFansPerPing);
+      fprintf(stderr, "dbg5       rxFanIndex:          %d\n", che->cmnPart.rxFanIndex);
+      fprintf(stderr, "dbg5       swathsPerPing:       %d\n", che->cmnPart.swathsPerPing);
+      fprintf(stderr, "dbg5       swathAlongPosition:  %d\n", che->cmnPart.swathAlongPosition);
+      fprintf(stderr, "dbg5       txTransducerInd:     %d\n", che->cmnPart.txTransducerInd);
+      fprintf(stderr, "dbg5       rxTransducerInd:     %d\n", che->cmnPart.rxTransducerInd);
+      fprintf(stderr, "dbg5       numRxTransducers:    %d\n", che->cmnPart.numRxTransducers);
+      fprintf(stderr, "dbg5       algorithmType:       %d\n", che->cmnPart.algorithmType);
+    }
 
     /* sensor data block */
     mb_put_binary_float(MB_YES, che->data.heave_m, &buffer[index]);
     index += 4;
+
+    if (verbose >= 5) {
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "dbg5       heave_m:             %f\n", che->data.heave_m);
+    }
 
     /* insert closing byte count */
     mb_put_binary_int(MB_YES, che->header.numBytesDgm, &buffer[index]);
@@ -6585,9 +6622,8 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -6625,18 +6661,18 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       iip->header.numBytesDgm:                %u\n", iip->header.numBytesDgm);
-    fprintf(stderr, "dbg5       iip->header.dgmType:                    %s\n", iip->header.dgmType);
-    fprintf(stderr, "dbg5       iip->header.dgmVersion:                 %u\n", iip->header.dgmVersion);
-    fprintf(stderr, "dbg5       iip->header.systemID:                   %u\n", iip->header.systemID);
-    fprintf(stderr, "dbg5       iip->header.echoSounderID:              %u\n", iip->header.echoSounderID);
-    fprintf(stderr, "dbg5       iip->header.time_sec:                   %u\n", iip->header.time_sec);
-    fprintf(stderr, "dbg5       iip->header.time_nanosec:               %u\n", iip->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iip->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:          %s\n", iip->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:       %u\n", iip->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:         %u\n", iip->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:    %u\n", iip->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:         %u\n", iip->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:     %u\n", iip->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       iip->iip->numBytesCmnPart:              %u\n", iip->numBytesCmnPart);
-    fprintf(stderr, "dbg5       iip->info:                              %u\n", iip->info);
-    fprintf(stderr, "dbg5       iip->status:                            %u\n", iip->status);
-    fprintf(stderr, "dbg5       iip->install_txt:                       %s\n", iip->install_txt);
+    fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", iip->numBytesCmnPart);
+    fprintf(stderr, "dbg5       info:             %u\n", iip->info);
+    fprintf(stderr, "dbg5       status:           %u\n", iip->status);
+    fprintf(stderr, "dbg5       install_txt:      %s\n", iip->install_txt);
   }
 
   /* size of output record */
@@ -6689,9 +6725,8 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -6729,18 +6764,18 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       iop->header.numBytesDgm:                %u\n", iop->header.numBytesDgm);
-    fprintf(stderr, "dbg5       iop->header.dgmType:                    %s\n", iop->header.dgmType);
-    fprintf(stderr, "dbg5       iop->header.dgmVersion:                 %u\n", iop->header.dgmVersion);
-    fprintf(stderr, "dbg5       iop->header.systemID:                   %u\n", iop->header.systemID);
-    fprintf(stderr, "dbg5       iop->header.echoSounderID:              %u\n", iop->header.echoSounderID);
-    fprintf(stderr, "dbg5       iop->header.time_sec:                   %u\n", iop->header.time_sec);
-    fprintf(stderr, "dbg5       iop->header.time_nanosec:               %u\n", iop->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iop->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:          %s\n", iop->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:       %u\n", iop->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:         %u\n", iop->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:    %u\n", iop->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:         %u\n", iop->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:     %u\n", iop->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       iop->iop->numBytesCmnPart:              %u\n", iop->numBytesCmnPart);
-    fprintf(stderr, "dbg5       iop->info:                              %u\n", iop->info);
-    fprintf(stderr, "dbg5       iop->status:                            %u\n", iop->status);
-    fprintf(stderr, "dbg5       iop->runtime_txt:                       %s\n", iop->runtime_txt);
+    fprintf(stderr, "dbg5       numBytesCmnPart:  %u\n", iop->numBytesCmnPart);
+    fprintf(stderr, "dbg5       info:             %u\n", iop->info);
+    fprintf(stderr, "dbg5       status:           %u\n", iop->status);
+    fprintf(stderr, "dbg5       runtime_txt:      %s\n", iop->runtime_txt);
   }
 
   /* size of output record */
@@ -6792,9 +6827,8 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -6846,18 +6880,18 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       xmb->header.numBytesDgm:                %u\n", xmb->header.numBytesDgm);
-    fprintf(stderr, "dbg5       xmb->header.dgmType:                    %s\n", xmb->header.dgmType);
-    fprintf(stderr, "dbg5       xmb->header.dgmVersion:                 %u\n", xmb->header.dgmVersion);
-    fprintf(stderr, "dbg5       xmb->header.systemID:                   %u\n", xmb->header.systemID);
-    fprintf(stderr, "dbg5       xmb->header.echoSounderID:              %u\n", xmb->header.echoSounderID);
-    fprintf(stderr, "dbg5       xmb->header.time_sec:                   %u\n", xmb->header.time_sec);
-    fprintf(stderr, "dbg5       xmb->header.time_nanosec:               %u\n", xmb->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:             %u\n", xmb->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:                 %s\n", xmb->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:              %u\n", xmb->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:                %u\n", xmb->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:           %u\n", xmb->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:                %u\n", xmb->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:            %u\n", xmb->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       xmb->pseudosidescan_enabled:            %d\n", xmb->pseudosidescan_enabled);
+    fprintf(stderr, "dbg5       pseudosidescan_enabled:  %d\n", xmb->pseudosidescan_enabled);
     for (i=0;i<28;i++)
-      fprintf(stderr, "dbg5       xmb->unused[%2d]:                        %u\n", i, xmb->unused[i]);
-    fprintf(stderr, "dbg5       xmb->version:                           %s\n", xmb->version);
+      fprintf(stderr, "dbg5       unused[%2d]:              %u\n", i, xmb->unused[i]);
+    fprintf(stderr, "dbg5       version:                   %s\n", xmb->version);
   }
 
   /* size of output record */
@@ -6908,9 +6942,8 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -6954,17 +6987,17 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       xmc->header.numBytesDgm:                %u\n", xmc->header.numBytesDgm);
-    fprintf(stderr, "dbg5       xmc->header.dgmType:                    %s\n", xmc->header.dgmType);
-    fprintf(stderr, "dbg5       xmc->header.dgmVersion:                 %u\n", xmc->header.dgmVersion);
-    fprintf(stderr, "dbg5       xmc->header.systemID:                   %u\n", xmc->header.systemID);
-    fprintf(stderr, "dbg5       xmc->header.echoSounderID:              %u\n", xmc->header.echoSounderID);
-    fprintf(stderr, "dbg5       xmc->header.time_sec:                   %u\n", xmc->header.time_sec);
-    fprintf(stderr, "dbg5       xmc->header.time_nanosec:               %u\n", xmc->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmc->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:        %s\n", xmc->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:     %u\n", xmc->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:       %u\n", xmc->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:  %u\n", xmc->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:       %u\n", xmc->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:   %u\n", xmc->header.time_nanosec);
 
     for (i=0;i<32;i++)
-      fprintf(stderr, "dbg5       xmc->unused[%2d]:                        %u\n", i, xmc->unused[i]);
-    fprintf(stderr, "dbg5       xmc->comment:                           %s\n", xmc->comment);
+      fprintf(stderr, "dbg5       unused[%2d]:    %u\n", i, xmc->unused[i]);
+    fprintf(stderr, "dbg5       comment:        %s\n", xmc->comment);
   }
 
   /* allocate memory to write rest of record if necessary */
@@ -7010,9 +7043,8 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
@@ -7051,22 +7083,22 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
   /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-    fprintf(stderr, "dbg5       xms->header.numBytesDgm:                %u\n", xms->header.numBytesDgm);
-    fprintf(stderr, "dbg5       xms->header.dgmType:                    %s\n", xms->header.dgmType);
-    fprintf(stderr, "dbg5       xms->header.dgmVersion:                 %u\n", xms->header.dgmVersion);
-    fprintf(stderr, "dbg5       xms->header.systemID:                   %u\n", xms->header.systemID);
-    fprintf(stderr, "dbg5       xms->header.echoSounderID:              %u\n", xms->header.echoSounderID);
-    fprintf(stderr, "dbg5       xms->header.time_sec:                   %u\n", xms->header.time_sec);
-    fprintf(stderr, "dbg5       xms->header.time_nanosec:               %u\n", xms->header.time_nanosec);
+    fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xms->header.numBytesDgm);
+    fprintf(stderr, "dbg5       dgmType:        %s\n", xms->header.dgmType);
+    fprintf(stderr, "dbg5       dgmVersion:     %u\n", xms->header.dgmVersion);
+    fprintf(stderr, "dbg5       systemID:       %u\n", xms->header.systemID);
+    fprintf(stderr, "dbg5       echoSounderID:  %u\n", xms->header.echoSounderID);
+    fprintf(stderr, "dbg5       time_sec:       %u\n", xms->header.time_sec);
+    fprintf(stderr, "dbg5       time_nanosec:   %u\n", xms->header.time_nanosec);
 
-    fprintf(stderr, "dbg5       xms->pingCnt:                           %u\n", xms->pingCnt);
-    fprintf(stderr, "dbg5       xms->spare:                             %d\n", xms->spare);
-    fprintf(stderr, "dbg5       xms->pixel_size:                        %f\n", xms->pixel_size);
-    fprintf(stderr, "dbg5       xms->pixels_ss:                         %d\n", xms->pixels_ss);
+    fprintf(stderr, "dbg5       pingCnt:        %u\n", xms->pingCnt);
+    fprintf(stderr, "dbg5       spare:          %d\n", xms->spare);
+    fprintf(stderr, "dbg5       pixel_size:     %f\n", xms->pixel_size);
+    fprintf(stderr, "dbg5       pixels_ss:      %d\n", xms->pixels_ss);
     for (i=0;i<32;i++)
-      fprintf(stderr, "dbg5       xms->unused[%2d]:                        %u\n", i, xms->unused[i]);
+      fprintf(stderr, "dbg5       unused[%2d]:    %u\n", i, xms->unused[i]);
     for (i=0;i<xms->pixels_ss;i++)
-      fprintf(stderr, "dbg5       xms->ss[%2d]:                            %f %f\n",
+      fprintf(stderr, "dbg5       ss[%2d]:        %f %f\n",
                       i, xms->ss[i], xms->ss_alongtrack[i]);
   }
 
@@ -7130,9 +7162,8 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
 #ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "KEMKMALL datagram type %c%c%c%c written - time: %d.%9.9d status:%d error:%d\n",
-  header->dgmType[0], header->dgmType[1], header->dgmType[2], header->dgmType[3],
-  header->time_sec, header->time_nanosec, status, *error);
+  fprintf(stderr, "KEMKMALL datagram type %.4s read - time: %d.%9.9d status:%d error:%d\n",
+          header->dgmType, header->time_sec, header->time_nanosec, status, *error);
 #endif
 
   /* return status */
