@@ -1,4 +1,5 @@
 #!/bin/bash
 
 ./configure
-make -j 2
+make -j 3
+make check

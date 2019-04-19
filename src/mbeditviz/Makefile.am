@@ -15,7 +15,7 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
         ${libnetcdf_CPPFLAGS} \
         ${libmotif_CPPFLAGS} ${libopengl_CPPFLAGS}
 
-AM_LDFLAGS = 
+AM_LDFLAGS =
 
 mbeditviz_SOURCES = mbeditviz_main.c mbeditviz_callbacks.c mbeditviz_prog.c mbeditviz_creation.c
 mbeditviz_LDADD = ${top_builddir}/src/mbio/libmbio.la \

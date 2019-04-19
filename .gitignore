@@ -3,7 +3,6 @@
 /config.log
 /config.status
 autom4te.cache/*
-<<<<<<< HEAD
 src/**/*.o
 src/**/*.lo
 src/**/*.la
@@ -85,3 +84,23 @@ src/utilities/mbswplspreprocess
 src/utilities/mbtime
 src/utilities/mbtrnpreprocess
 src/utilities/mbvoxelclean
+test/**/*.o
+test/**/*.lo
+test/**/*.la
+test/**/.deps
+test/**/.libs
+test/**/Makefile
+test/**/*.exe
+test/mbio/mb_time_test
+test/mbio/mb_time_test.log
+test/mbio/mb_time_test.trs
+test-suite.log
+third_party/**/*.o
+third_party/**/*.lo
+third_party/**/*.la
+third_party/**/.deps
+third_party/**/.libs
+third_party/**/Makefile
+third_party/**/*.exe
+.dirstamp
+lib

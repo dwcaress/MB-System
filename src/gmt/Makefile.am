@@ -5,7 +5,7 @@ if BUILD_MBTRN
   MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 endif
 
-include_HEADERS = 
+include_HEADERS =
 
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
         -I${top_srcdir}/src/mbaux \
@@ -20,4 +20,4 @@ mbsystem_la_SOURCES = mbswath.c mbcontour.c mbgrdtiff.c
 mbsystem_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
         ${top_builddir}/src/mbaux/libmbaux.la \
         ${libgmt_LIBS} ${libgdal_LIBS} ${libnetcdf_LIBS} \
-        $(MBTRNLIB) 
+        $(MBTRNLIB)
