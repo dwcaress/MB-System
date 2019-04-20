@@ -13,8 +13,8 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
         $(MBTRNINCDIR) \
         ${libnetcdf_CPPFLAGS} \
         ${libmotif_CPPFLAGS}
-        
-AM_LDFLAGS = 
+
+AM_LDFLAGS =
 
 LIBS = ${top_builddir}/src/mbio/libmbio.la \
         ${top_builddir}/src/mbaux/libmbaux.la \

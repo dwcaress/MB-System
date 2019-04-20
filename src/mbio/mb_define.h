@@ -27,6 +27,10 @@
 #ifndef MB_DEFINE_DEF
 #define MB_DEFINE_DEF
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef _WIN32
 #	include <mb_config.h>
 #else
@@ -286,7 +290,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
                 int *beams_amp, int *pixels_ss, int *error);
 int mb_input_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
                 double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
-                int *beams_amp, int *pixels_ss, 
+                int *beams_amp, int *pixels_ss,
                 int (*input_open)(int verbose, void *mbio_ptr, char *path, int *error),
                 int (*input_read)(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error),
                 int (*input_close)(int verbose, void *mbio_ptr, int *error),
@@ -615,6 +619,10 @@ int mb_rt_deall(int verbose, void **modelptr, int *error);
 int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle, double end_time, int ssv_mode,
           double surface_vel, double null_angle, int nplot_max, int *nplot, double *xplot, double *zplot, double *x, double *z,
           double *travel_time, int *ray_stat, int *error);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 /* end conditional include */
 #endif
