@@ -23,6 +23,7 @@ AC_INIT([mbsystem],[5.7.5beta8],[http://listserver.mbari.org/sympa/arc/mbsystem]
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
+AC_LANG([C++])
 AC_DEFINE(VERSION_DATE, "11 April 2019", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
@@ -116,7 +117,7 @@ AS_ECHO(["MB-System Version $PACKAGE_VERSION"])
 AS_ECHO(["HOST System Type: ${host}"])
 AS_ECHO([" "])
 
-AM_INIT_AUTOMAKE([no-dist])
+AM_INIT_AUTOMAKE([no-dist subdir-objects])
 AM_MAINTAINER_MODE
 AC_CONFIG_HEADERS([src/mbio/mb_config.h])
 
@@ -889,6 +890,12 @@ if test "$build_pcltools" = "yes" ; then
     AC_CHECK_LIB([libpcl_common], [XSendEvent], [GOT_libpcl_common=yes], [GOT_libpcl_common=no])
 fi
 
+# Configure pthreads.
+# Force to yes.
+AM_CONDITIONAL([HAVE_PTHREADS],[test "xyes" = "xyes"])
+AC_SUBST(PTHREAD_CFLAGS)
+AC_SUBST(PTHREAD_LIBS)
+
 dnl--------------------------------------------------------------------
 dnl Generate Makefiles
 dnl--------------------------------------------------------------------
@@ -917,7 +924,13 @@ AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
       src/man/man3/Makefile \
       src/html/Makefile \
       src/ps/Makefile \
-      src/share/Makefile])
+      src/share/Makefile \
+      third_party/Makefile \
+      third_party/googletest/Makefile \
+      third_party/googlemock/Makefile \
+      test/Makefile \
+      test/mbio/Makefile \
+      ])
 AC_OUTPUT
 
 dnl--------------------------------------------------------------------

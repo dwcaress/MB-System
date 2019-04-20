@@ -21,4 +21,4 @@ bin_SCRIPTS = mbm_xbt \
 	mbm_multicopy \
 	mbm_bpr \
 	mbm_makesvp
-	
+

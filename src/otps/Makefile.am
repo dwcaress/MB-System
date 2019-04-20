@@ -12,7 +12,7 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
         $(MBTRNINCDIR) \
         ${libnetcdf_CPPFLAGS}
 
-AM_LDFLAGS = 
+AM_LDFLAGS =
 
 LIBS = ${top_builddir}/src/mbio/libmbio.la \
 	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
