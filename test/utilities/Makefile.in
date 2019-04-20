@@ -87,7 +87,6 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@HAVE_PYTHON_TRUE@am__append_1 = mbinfo_test.py
 subdir = test/utilities
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -499,8 +498,10 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 TEST_EXTENSIONS = .py
-TESTS = $(am__append_1)
-@HAVE_PYTHON_TRUE@check_SCRIPTS = mbinfo_test.py
+
+# if HAVE_PYTHON
+TESTS = mbinfo_test.py
+check_SCRIPTS = mbinfo_test.py
 all: all-am
 
 .SUFFIXES:
@@ -823,6 +824,7 @@ uninstall-am:
 
 .PRECIOUS: Makefile
 
+# endif
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -6,3 +6,4 @@ cat /etc/lsb-release
 
 clang++ --version
 gmt-config --version
+python3 --version
