@@ -936,7 +936,6 @@ AC_CONFIG_FILES([\
       test/Makefile \
       test/mbio/Makefile \
       test/utilities/Makefile \
-      test/utilities/mbinfo_test.py \
       ])
 AC_OUTPUT
 
