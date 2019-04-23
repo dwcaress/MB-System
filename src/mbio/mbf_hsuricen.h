@@ -44,6 +44,9 @@
  * of the binary data structure used in the MBF_HSURICEN format.
  */
 
+#ifndef MBF_HSURICE_H_
+#define MBF_HSURICE_H_
+
 struct mbf_hsuricen_data_struct {
 	short sec;           /* seconds x 100 */
 	short min;           /* minute of the day */
@@ -68,3 +71,5 @@ struct mbf_hsuricen_struct {
 	int kind;
 	struct mbf_hsuricen_data_struct data;
 };
+
+#endif  /* MBF_HSURICE_H_ */

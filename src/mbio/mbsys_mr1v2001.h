@@ -45,10 +45,10 @@
  *      data from the MR1, SCAMP, and WHOI DSL 120.
  */
 
-/* get MBBS library header file */
-#ifndef __MBBS__
+#ifndef MBSYS_MR1V2001_H_
+#define MBSYS_MR1V2001_H_
+
 #include "mbbs.h"
-#endif
 
 /* maximum number of bathymetry beams per side for MR1 */
 #define MBSYS_MR1V2001_BEAMS_SIDE 1500
@@ -115,3 +115,5 @@ int mbsys_mr1v2001_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
                               double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                               int *error);
 int mbsys_mr1v2001_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_MR1V2001_H_ */

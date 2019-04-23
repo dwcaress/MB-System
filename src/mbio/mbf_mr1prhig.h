@@ -36,6 +36,9 @@
  *      which are passed in the MR1 post processing format.
  */
 
+#ifndef MBF_MR1PRHIG_H_
+#define MBF_MR1PRHIG_H_
+
 /* maximum number of bathymetry beams per side for MR1 */
 #define MBF_MR1PRHIG_BEAMS_SIDE 1500
 
@@ -110,3 +113,5 @@ struct mbf_mr1prhig_struct {
 	/* comment */
 	char comment[MBF_MR1PRHIG_MAXLINE];
 };
+
+#endif  /* MBF_MR1PRHIG_H_ */

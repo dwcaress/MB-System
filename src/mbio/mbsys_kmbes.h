@@ -80,10 +80,10 @@
  *      XMS, // MB-System multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
  */
 
-/* include mb_define.h */
-#ifndef MB_DEFINE_DEF
+#ifndef MBSYS_KMBES_H_
+#define MBSYS_KMBES_H_
+
 #include "mb_define.h"
-#endif
 
 /*---------------------------------------------------------------*/
 /* Datagram ID definitions */
@@ -1562,4 +1562,5 @@ int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
-/*---------------------------------------------------------------*/
+
+#endif  /* MBSYS_KMBES_H_ */

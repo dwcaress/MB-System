@@ -26,17 +26,12 @@
  *
  */
 
-/*--------------------------------------------------------------------*/
-
-/* include this code only once */
-#ifndef MB_SWAP_DEF
-#define MB_SWAP_DEF
+#ifndef MB_SWAP_H_
+#define MB_SWAP_H_
 
 #define mb_swap_short(a) (((a & 0xff) << 8) | ((unsigned short)(a) >> 8))
 
 #define mb_swap_int(a) (((a) << 24) | (((a) << 8) & 0x00ff0000) | (((a) >> 8) & 0x0000ff00) | ((unsigned int)(a) >> 24))
 
-/* end conditional include */
-#endif
+#endif  /* MB_SWAP_H_ */
 
-/*--------------------------------------------------------------------*/

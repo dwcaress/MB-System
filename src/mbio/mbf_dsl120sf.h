@@ -82,6 +82,9 @@
  *
  */
 
+#ifndef MBF_DSL120SF_H_
+#define MBF_DSL120SF_H_
+
 /* maximum number of beams and pixels */
 #define MBF_DSL120SF_MAXBEAMS_SIDE 1024
 #define MBF_DSL120SF_MAXBEAMS 2 * MBF_DSL120SF_MAXBEAMS_SIDE
@@ -152,3 +155,5 @@ struct mbf_dsl120sf_struct {
 	/* comment */
 	char comment[MBF_DSL120SF_COMMENT_LENGTH];
 };
+
+#endif  /* MBF_DSL120SF_H_ */

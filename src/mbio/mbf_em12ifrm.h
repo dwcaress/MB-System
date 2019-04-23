@@ -67,6 +67,9 @@
  *
  */
 
+#ifndef MBF_EM12IFRM_H_
+#define MBF_EM12IFRM_H_
+
 /* maximum number of beams and pixels */
 #define MBF_EM12IFRM_MAXBEAMS 81
 #define MBF_EM12IFRM_MAXRAWPIXELS 50 * MBF_EM12IFRM_MAXBEAMS
@@ -244,3 +247,5 @@ struct mbf_em12ifrm_struct {
 	/* the processed sidescan alongtrack distances
 	    in distance resolution units */
 };
+
+#endif  /* MBF_EM12IFRM_H_ */

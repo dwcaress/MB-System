@@ -53,6 +53,9 @@
  *
  */
 
+#ifndef MBF_OMGHDCSJ_H_
+#define MBF_OMGHDCSJ_H_
+
 /* defines sizes and maximums */
 #define MBF_OMGHDCSJ_SUMMARY_SIZE 96
 #define MBF_OMGHDCSJ_SUMMARY_V4EXTRA_SIZE 168
@@ -721,3 +724,5 @@ struct mbf_omghdcsj_struct {
 #define PROF_us_bs_current_beam_number 0x00000100
 #define PROF_uc_bs_sample_descriptor 0x00000200
 #define PROF_ui_snippet_sample_descriptor 0x00000400
+
+#endif /* MBF_OMGHDCSJ_H_ */

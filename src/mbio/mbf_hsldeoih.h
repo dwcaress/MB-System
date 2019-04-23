@@ -88,6 +88,9 @@
  *      using the record size values to check for bad kind values.
  */
 
+#ifndef MBF_HSLDEOIH_H_
+#define MBF_HSLDEOIH_H_
+
 /* maximum number of depth-velocity pairs */
 #define MBF_HSLDEOIH_MAXVEL 30
 
@@ -447,3 +450,5 @@ struct mbf_hsldeoih_comment_struct {
 	/* comment */
 	char comment[MBF_HSLDEOIH_MAXLINE];
 };
+
+#endif  /* MBF_HSLDEOIH_H_ */

@@ -79,6 +79,9 @@
  *
  */
 
+#ifndef MBF_CBAT9001_H_
+#define MBF_CBAT9001_H_
+
 /* maximum number of beams and pixels */
 #define MBF_CBAT9001_MAXBEAMS 60
 #define MBF_CBAT9001_COMMENT_LENGTH 200
@@ -194,3 +197,5 @@ struct mbf_cbat9001_struct {
 	short int amp[MBSYS_RESON_MAXBEAMS];
 	/* ??? */
 };
+
+#endif  /* MBF_CBAT9001_H_ */

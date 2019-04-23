@@ -22,9 +22,8 @@
  *
  */
 
-/* include this code only once */
-#ifndef MB_IO_DEF
-#define MB_IO_DEF
+#ifndef MB_IO_H_
+#define MB_IO_H_
 
 #include "mb_define.h"
 #include "mb_status.h"
@@ -794,5 +793,4 @@ struct mb_imagelist_struct {
 	struct mb_imagelist_struct *imagelist;
 };
 
-/* end conditional include */
-#endif
+#endif  /* MB_IO_H_ */

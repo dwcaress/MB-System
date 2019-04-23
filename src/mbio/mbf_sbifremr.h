@@ -55,6 +55,9 @@
  * ascii comment record (kind = 2).
  */
 
+#ifndef MBF_SBIFREMR_H_
+#define MBF_SBIFREMR_H_
+
 /* maximum comment length in characters */
 #define MBF_SBIFREMR_MAXLINE 200
 
@@ -92,3 +95,5 @@ struct mbf_sbifremr_struct {
 	/* latitudes of beam values */
 	char comment[MBF_SBIFREMR_MAXLINE];
 };
+
+#endif  /* MBF_SBIFREMR_H_ */

@@ -53,6 +53,9 @@
  *
  */
 
+#ifndef MBSYS_ELACMK2_H_
+#define MBSYS_ELACMK2_H_
+
 /* sonar types */
 #define MBSYS_ELACMK2_UNKNOWN 0
 #define MBSYS_ELACMK2_BOTTOMCHART_MARKII 3
@@ -230,3 +233,5 @@ int mbsys_elacmk2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
                               int *error);
 int mbsys_elacmk2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
 int mbsys_elacmk2_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_ELACMK2_H_ */

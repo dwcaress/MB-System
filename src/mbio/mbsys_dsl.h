@@ -82,6 +82,9 @@
  *
  */
 
+#ifndef MBSYS_DSL_H_
+#define MBSYS_DSL_H_
+
 /* maximum number of beams and pixels */
 #define MBSYS_DSL_MAXBEAMS_SIDE 1024
 #define MBSYS_DSL_MAXBEAMS 2 * MBSYS_DSL_MAXBEAMS_SIDE
@@ -184,3 +187,5 @@ int mbsys_dsl_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 int mbsys_dsl_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
                          double speed, double heading, double draft, double roll, double pitch, double heave, int *error);
 int mbsys_dsl_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_DSL_H_ */

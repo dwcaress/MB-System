@@ -67,10 +67,10 @@
  *      records.
  */
 
-/* include mb_define.h */
-#ifndef MB_DEFINE_DEF
+#ifndef MBSYS_RESON7K_H_
+#define MBSYS_RESON7K_H_
+
 #include "mb_define.h"
-#endif
 
 /*---------------------------------------------------------------*/
 /* Record ID definitions */
@@ -2478,3 +2478,5 @@ int mbsys_reson7k_print_pitch(int verbose, s7kr_pitch *pitch, int *error);
 int mbsys_reson7k_print_soundvelocity(int verbose, s7kr_soundvelocity *soundvelocity, int *error);
 int mbsys_reson7k_print_absorptionloss(int verbose, s7kr_absorptionloss *absorptionloss, int *error);
 int mbsys_reson7k_print_spreadingloss(int verbose, s7kr_spreadingloss *spreadingloss, int *error);
+
+#endif  /* MBSYS_RESON7K_H_ */

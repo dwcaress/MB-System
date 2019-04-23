@@ -39,6 +39,9 @@
  *      addition to the HIG MR1 post processing format.
  */
 
+#ifndef MBF_MR1ALDEO_H_
+#define MBF_MR1ALDEO_H_
+
 /* maximum number of bathymetry beams per side for MR1 */
 #define MBF_MR1ALDEO_BEAMS_SIDE 1500
 
@@ -118,3 +121,5 @@ struct mbf_mr1aldeo_struct {
 	/* comment */
 	char comment[MBF_MR1ALDEO_MAXLINE];
 };
+
+#endif  /* MBF_MR1ALDEO_H_ */

@@ -177,10 +177,10 @@
  *
  */
 
-/* include mb_define.h */
-#ifndef MB_DEFINE_DEF
+#ifndef MBSYS_3DATDEPTHLIDAR_H_
+#define MBSYS_3DATDEPTHLIDAR_H_
+
 #include "mb_define.h"
-#endif
 
 /* defines */
 #define MBF_3DDEPTHP_MAGICNUMBER 0x3D46        /* '=''F' */
@@ -356,3 +356,5 @@ int mbsys_3datdepthlidar_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 int mbsys_3datdepthlidar_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_3datdepthlidar_print_store(int verbose, void *store_ptr, int *error);
 int mbsys_3datdepthlidar_calculatebathymetry(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+
+#endif  /* MBSYS_3DATDEPTHLIDAR_H_ */

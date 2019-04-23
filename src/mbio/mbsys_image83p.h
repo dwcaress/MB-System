@@ -36,6 +36,9 @@
  *   4. Support for comment records is specific to MB-System.
  */
 
+#ifndef MBSYS_IMAGE83P_H_
+#define MBSYS_IMAGE83P_H_
+
 /* number of beams for imagex multibeam */
 #define MBSYS_IMAGE83P_BEAMS 480
 #define MBSYS_IMAGE83P_COMMENTLEN 248
@@ -114,3 +117,5 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
                               double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                               int *error);
 int mbsys_image83p_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_IMAGE83P_H_ */

@@ -96,6 +96,9 @@
  *
  */
 
+#ifndef MBSYS_HYSWEEP_H_
+#define MBSYS_HYSWEEP_H_
+
 /* HYSWEEP record type */
 #define MBSYS_HYSWEEP_RECORDTYPE_NONE 0 /* No record */
 #define MBSYS_HYSWEEP_RECORDTYPE_DEV 1
@@ -881,3 +884,5 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
+
+#endif  /* MBSYS_HYSWEEP_H_ */

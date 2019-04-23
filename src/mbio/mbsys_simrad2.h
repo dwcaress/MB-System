@@ -224,10 +224,10 @@
  *
  */
 
-/* include mb_define.h */
-#ifndef MB_DEFINE_DEF
+#ifndef MBSYS_SIMRAD2_H_
+#define MBSYS_SIMRAD2_H_
+
 #include "mb_define.h"
-#endif
 
 /* sonar models */
 #define MBSYS_SIMRAD2_UNKNOWN 0
@@ -1135,3 +1135,5 @@ int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 int mbsys_simrad2_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
+
+#endif  /* MBSYS_SIMRAD2_H_ */

@@ -22,9 +22,8 @@
  *
  */
 
-/* include this code only once */
-#ifndef MB_STATUS_DEF
-#define MB_STATUS_DEF
+#ifndef MB_STATUS_H_
+#define MB_STATUS_H_
 
 /* MBIO function boolean convention */
 #define MB_YES 1
@@ -461,5 +460,4 @@ static char *unknown_notice_msg[] = {"Unknown notice identifier detritus"};
 #define MB_PULSE_DOWNCHIRP 3
 #define MB_PULSE_LIDAR 4
 
-/* end conditional include */
-#endif
+#endif  /* MB_STATUS_H_ */

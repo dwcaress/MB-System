@@ -87,6 +87,9 @@
  *
  */
 
+#ifndef MBF_SB2120XS_H_
+#define MBF_SB2120XS_H_
+
 /* maximum number of beams and pixels */
 #define MBF_SB2120XS_MAXBEAMS 151
 #define MBF_SB2120XS_MAXPIXELS 2000
@@ -300,3 +303,5 @@ struct mbf_sb2120xs_struct {
 	int rawsize; /* size of unknown frame in bytes */
 	char raw[MBF_SB2120XS_BUFFER_SIZE];
 };
+
+#endif  /* MBF_SB2120XS_H_ */
