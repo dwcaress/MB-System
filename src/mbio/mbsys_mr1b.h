@@ -44,6 +44,9 @@
  *      addition to the HIG MR1 post processing format.
  */
 
+#ifndef MBSYS_MR1B_H_
+#define MBSYS_MR1B_H_
+
 /* maximum number of bathymetry beams per side for MR1 */
 #define MBSYS_MR1B_BEAMS_SIDE 75
 
@@ -152,3 +155,5 @@ int mbsys_mr1b_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
                           double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                           int *error);
 int mbsys_mr1b_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_MR1B_H_ */

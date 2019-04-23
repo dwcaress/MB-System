@@ -47,6 +47,9 @@
  * of the binary data structure used in the MBF_SBSIOMRG format.
  */
 
+#ifndef MBF_SBSIOMRG_H_
+#define MBF_SBSIOMRG_H_
+
 /* size of data records */
 #define MBF_SBSIOMRG_RECORD_SIZE 100
 
@@ -83,3 +86,5 @@ struct mbf_sbsiomrg_struct {
 	int kind;
 	struct mbf_sbsiomrg_data_struct data;
 };
+
+#endif  /* MBF_SBSIOMRG_H_ */

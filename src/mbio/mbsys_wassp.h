@@ -91,10 +91,10 @@
  *
  */
 
-/* include mb_define.h */
-#ifndef MB_DEFINE_DEF
+#ifndef MBSYS_WASSP_H_
+#define MBSYS_WASSP_H_
+
 #include "mb_define.h"
-#endif
 
 /*---------------------------------------------------------------*/
 /* Record ID definitions (if needed for use in data reading and writing) */
@@ -722,4 +722,5 @@ int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
 //			double *sensor4, double *sensor5, double *sensor6,
 //			double *sensor7, double *sensor8, int *error);
 int mbsys_wassp_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
-/*---------------------------------------------------------------*/
+
+#endif  /* MBSYS_WASSP_H_ */

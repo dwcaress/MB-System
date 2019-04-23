@@ -88,6 +88,9 @@
  *
  */
 
+#ifndef MBSYS_SIMRAD_H_
+#define MBSYS_SIMRAD_H_
+
 /* sonar types */
 #define MBSYS_SIMRAD_UNKNOWN 0
 #define MBSYS_SIMRAD_EM12S 1
@@ -751,3 +754,5 @@ int mbsys_simrad_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 int mbsys_simrad_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size, int swath_width_set,
                         double *swath_width, int pixel_int, int *error);
+
+#endif  /* MBSYS_SIMRAD_H_ */

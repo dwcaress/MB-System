@@ -31,6 +31,9 @@
  *
  */
 
+#ifndef MBSYS_RESON8K_H_
+#define MBSYS_RESON8K_H_
+
 /* sonar types */
 #define MBSYS_RESON8K_UNKNOWN 0
 #define MBSYS_RESON8K_SEABAT9001 9001
@@ -224,3 +227,5 @@ int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 int mbsys_reson8k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int *error);
+
+#endif  /* MBSYS_RESON8K_H_ */

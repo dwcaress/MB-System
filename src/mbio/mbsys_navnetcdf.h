@@ -32,6 +32,9 @@
  *
  */
 
+#ifndef MBSYS_NAVNETCDF_H_
+#define MBSYS_NAVNETCDF_H_
+
 /* dimension lengths */
 #define MBSYS_NAVNETCDF_COMMENTLEN 256
 #define MBSYS_NAVNETCDF_ATTRIBUTELEN 64
@@ -362,3 +365,5 @@ int mbsys_navnetcdf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, in
 int mbsys_navnetcdf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                                int *error);
 int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_NAVNETCDF_H_ */

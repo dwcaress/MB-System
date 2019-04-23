@@ -47,6 +47,9 @@
  * of the binary data structure used in the MBF_SBSIOLSI format.
  */
 
+#ifndef MBF_SBSIOLSI_H_
+#define MBF_SBSIOLSI_H_
+
 struct mbf_sbsiolsi_data_struct {
 	short deph[19];       /* 16 depths from Sea Beam in meters
 	                  assuming 1500 m/s water velocity */
@@ -75,3 +78,5 @@ struct mbf_sbsiolsi_struct {
 	int kind;
 	struct mbf_sbsiolsi_data_struct data;
 };
+
+#endif  /* MBF_SBSIOLSI_H_ */

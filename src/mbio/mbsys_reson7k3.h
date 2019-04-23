@@ -69,11 +69,11 @@
  *          Heading records?
  */
 
-/* include mb_define.h */
-#ifndef MB_DEFINE_DEF
+#ifndef MBSYS_RESON7K3_H_
+#define MBSYS_RESON7K3_H_
+
+#include <stdint.h>
 #include "mb_define.h"
-#include stdint.h
-#endif
 
 /*---------------------------------------------------------------*/
 /* Record ID definitions */
@@ -3533,3 +3533,5 @@ int mbsys_reson7k3_print_SystemLockStatus(int verbosee, s7k3_SystemLockStatus *S
 int mbsys_reson7k3_print_SoundVelocity(int verbosee, s7k3_SoundVelocity *SoundVelocity, int *error);
 int mbsys_reson7k3_print_AbsorptionLoss(int verbosee, s7k3_AbsorptionLoss *AbsorptionLoss, int *error);
 int mbsys_reson7k3_print_SpreadingLoss(int verbosee, s7k3_SpreadingLoss *SpreadingLoss, int *error);
+
+#endif  /*  MBSYS_RESON7K3_H_ */

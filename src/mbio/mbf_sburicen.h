@@ -46,6 +46,9 @@
  * of the binary data structure used in the MBF_SBURICEN format.
  */
 
+#ifndef MBF_SBURICEN_H_
+#define MBF_SBURICEN_H_
+
 struct mbf_sburicen_data_struct {
 	short deph[19];       /* 16 depths from Sea Beam in meters
 	                  assuming 1500 m/s water velocity */
@@ -76,3 +79,5 @@ struct mbf_sburicen_struct {
 	int kind;
 	struct mbf_sburicen_data_struct data;
 };
+
+#endif  /* MBF_SBURICEN_H_ */

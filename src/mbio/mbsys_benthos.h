@@ -31,6 +31,9 @@
  *
  */
 
+#ifndef MBSYS_BENTHOS_H_
+#define MBSYS_BENTHOS_H_
+
 /* sonar types */
 #define MBSYS_BENTHOS_UNKNOWN 0
 #define MBSYS_BENTHOS_SIS1624 1624
@@ -158,3 +161,5 @@ int mbsys_benthos_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 int mbsys_benthos_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int *error);
+
+#endif  /* MBSYS_BENTHOS_H_ */

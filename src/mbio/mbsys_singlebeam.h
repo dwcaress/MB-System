@@ -46,6 +46,9 @@
  *      mbsys_singlebeam_swathbounds().
  */
 
+#ifndef MBSYS_SINGLEBEAM_H_
+#define MBSYS_SINGLEBEAM_H_
+
 struct mbsys_singlebeam_struct {
 	/* type of data record */
 	int kind;
@@ -259,3 +262,5 @@ int mbsys_singlebeam_swathbounds(int verbose, void *mbio_ptr, void *store_ptr, i
                                  double *stbdlon, double *stbdlat, int *error);
 int mbsys_singlebeam_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_singlebeam_pressuredepth(int verbose, double pressure, double latitude, double *depth, int *error);
+
+#endif  /* MBSYS_SINGLEBEAM_H_ */

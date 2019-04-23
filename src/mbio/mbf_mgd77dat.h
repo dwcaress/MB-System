@@ -43,6 +43,9 @@
  *
  */
 
+#ifndef MBF_MGD77DAT_H_
+#define MBF_MGD77DAT_H_
+
 /* header and data record in bytes */
 #define MBF_MGD77DAT_HEADER_NUM 16
 #define MBF_MGD77DAT_DATA_LEN 120
@@ -165,3 +168,5 @@ struct mbf_mgd77dat_struct {
 	/* comment */
 	char comment[MBF_MGD77DAT_DATA_LEN];
 };
+
+#endif  /* MBF_MGD77DAT_H_ */

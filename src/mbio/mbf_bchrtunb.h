@@ -51,6 +51,9 @@
  *
  */
 
+#ifndef MB_BCHRTUNB_H_
+#define MB_BCHRTUNB_H_
+
 /* maximum number of beams and pixels */
 #define MBF_BCHRTUNB_MAXBEAMS 56
 #define MBF_BCHRTUNB_COMMENT_LENGTH 200
@@ -174,3 +177,5 @@ struct mbf_bchrtunb_struct {
 	int beams_bath;  /* number of beams stored */
 	struct mbf_bchrtunb_profile_struct profile[7];
 };
+
+#endif  /* MB_BCHRTUNB_H_ */

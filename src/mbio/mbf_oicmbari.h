@@ -54,6 +54,9 @@
  *
  */
 
+#ifndef MBF_OICMBARI_H_
+#define MBF_OICMBARI_H_
+
 /* defines sizes of things */
 #define MBF_OICMBARI_HEADER_SIZE 276
 #define MBF_OICMBARI_MAX_CLIENT 252
@@ -186,3 +189,5 @@ struct mbf_oicmbari_struct {
 	char client[MBF_OICMBARI_MAX_CLIENT];
 	struct mbf_oicmbari_data_struct data;
 };
+
+#endif /* MBF_OICMBARI_H_ */

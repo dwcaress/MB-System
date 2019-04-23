@@ -53,6 +53,9 @@
  *
  */
 
+#ifndef MBSYS_HDCS_H_
+#define MBSYS_HDCS_H_
+
 /* defines sizes and maximums */
 #define MBSYS_HDCS_SUMMARY_SIZE 96
 #define MBSYS_HDCS_MAX_COMMENT 252
@@ -446,3 +449,5 @@ int mbsys_hdcs_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
                           double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                           int *error);
 int mbsys_hdcs_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_HDCS_H_ */

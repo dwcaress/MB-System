@@ -50,6 +50,9 @@
  *
  */
 
+#ifndef MBF_OICGEODA_H_
+#define MBF_OICGEODA_H_
+
 /* defines sizes of things */
 #define MBF_OICGEODA_HEADER_SIZE 248
 #define MBF_OICGEODA_MAX_CLIENT 252
@@ -181,3 +184,5 @@ struct mbf_oicgeoda_struct {
 	char client[MBF_OICGEODA_MAX_CLIENT];
 	struct mbf_oicgeoda_data_struct data;
 };
+
+#endif  /* MBF_OICGEODA_H_ */

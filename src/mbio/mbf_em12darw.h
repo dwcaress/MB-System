@@ -45,6 +45,9 @@
  *
  */
 
+#ifndef MBF_EM12DARW_H_
+#define MBF_EM12DARW_H_
+
 /* record length in bytes */
 #define MBF_EM12DARW_RECORD_LENGTH 1056
 
@@ -86,3 +89,5 @@ struct mbf_em12darw_struct {
 	short beamq[MBF_EM12DARW_BEAMS];
 	/* Beam Quality, unscaled */
 };
+
+#endif  /* MBF_EM12DARW_H_ */

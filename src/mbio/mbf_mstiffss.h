@@ -106,6 +106,9 @@
  *          285        Y2KTimeCorrelation#
  */
 
+#ifndef MBF_MSTIFFSS_H_
+#define MBF_MSTIFFSS_H_
+
 /* size of MSTIFFSS reading buffer */
 #define MBF_MSTIFFSS_BUFFERSIZE 1024
 
@@ -203,3 +206,5 @@ struct mbf_mstiffss_struct {
 	unsigned char ss[MBF_MSTIFFSS_PIXELS];
 	double ssacrosstrack[MBF_MSTIFFSS_PIXELS];
 };
+
+#endif /* MBF_MSTIFFSS_H_ */

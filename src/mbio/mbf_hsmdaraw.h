@@ -79,6 +79,9 @@
 
 /* HSMD defines */
 
+#ifndef MBF_HSMDARAW_H_
+#define MBF_HSMDARAW_H_
+
 /* maximum number of depth/sound speed data pairs allowed */
 #define MBF_HSMDARAW_MAXVEL 20
 
@@ -221,3 +224,5 @@ double mbf_hsmdaraw_beamangle[] = {0.000,  4.395,  8.740,  12.991, 17.095, 21.02
                                    37.562, 40.226, 42.698, 44.989, 47.115, 49.076, 50.900, 52.586, 54.152, 55.613,
                                    56.970, 58.233, 59.414, 60.518, 61.551, 62.518, 63.430, 65.028, 66.462, 67.742,
                                    68.901, 69.950, 70.900, 71.768, 72.565, 73.295, 73.965, 74.592, 75.168, 75.701};
+
+#endif  /* MBF_HSMDARAW_H_ */

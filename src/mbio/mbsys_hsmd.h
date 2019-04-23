@@ -83,6 +83,9 @@
  *      the data compatible with Atlas software.
  */
 
+#ifndef MBSYS_HSMD_H_
+#define MBSYS_HSMD_H_
+
 /* maximum number of depth-velocity pairs */
 #define MBSYS_HSMD_MAXVEL 20 /* As dimensioned in the Atlas code */
 
@@ -192,3 +195,5 @@ int mbsys_hsmd_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
                           double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                           int *error);
 int mbsys_hsmd_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_HSMD_H_ */

@@ -30,6 +30,9 @@
  *
  */
 
+#ifndef MBF_MBARROV2_H_
+#define MBF_MBARROV2_H_
+
 #define MBF_MBARROV2_MAXLINE 1024
 
 struct mbf_mbarrov2_struct {
@@ -63,3 +66,5 @@ struct mbf_mbarrov2_struct {
 	/* comment */
 	char comment[MBF_MBARROV2_MAXLINE];
 };
+
+#endif  /* MBF_MBARROV2_H_ */

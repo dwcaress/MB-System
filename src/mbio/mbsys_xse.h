@@ -169,6 +169,9 @@
  *
  */
 
+#ifndef MBSYS_XSE_H_
+#define MBSYS_XSE_H_
+
 /* maximum number of beams and pixels */
 #define MBSYS_XSE_MAXBEAMS 630
 #define MBSYS_XSE_MAXPIXELS 32768
@@ -718,3 +721,5 @@ int mbsys_xse_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           int *error);
 int mbsys_xse_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
 int mbsys_xse_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_XSE_H_ */

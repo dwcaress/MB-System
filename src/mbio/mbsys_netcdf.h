@@ -31,6 +31,9 @@
  *
  */
 
+#ifndef MBSYS_NETCDF_H_
+#define MBSYS_NETCDF_H_
+
 /* dimension lengths */
 #define MBSYS_NETCDF_COMMENTLEN 256
 #define MBSYS_NETCDF_ATTRIBUTELEN 64
@@ -1050,3 +1053,5 @@ int mbsys_netcdf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
                              int *error);
 int mbsys_netcdf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
 int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_NETCDF_H_ */

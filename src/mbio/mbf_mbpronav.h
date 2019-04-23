@@ -32,6 +32,9 @@
  *
  */
 
+#ifndef MBF_MBPRONAV_H_
+#define MBF_MBPRONAV_H_
+
 #define MBF_MBPRONAV_MAXLINE 256
 
 struct mbf_mbpronav_struct {
@@ -61,3 +64,5 @@ struct mbf_mbpronav_struct {
 	/* comment */
 	char comment[MBF_MBPRONAV_MAXLINE];
 };
+
+#endif  /* MBF_MBPRONAV_H_ */

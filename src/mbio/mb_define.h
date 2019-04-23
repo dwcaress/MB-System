@@ -23,9 +23,8 @@
  *
  */
 
-/* include this code only once */
-#ifndef MB_DEFINE_DEF
-#define MB_DEFINE_DEF
+#ifndef MB_DEFINE_H_
+#define MB_DEFINE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -624,5 +623,4 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 } /* extern "C" */
 #endif
 
-/* end conditional include */
-#endif
+#endif  /* MB_DEFINE_H_ */

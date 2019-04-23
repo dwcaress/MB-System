@@ -44,6 +44,9 @@
  * the binary data structure used in the MBF_SBSIOCEN format.
  */
 
+#ifndef MBF_SBSIOCEN_H_
+#define MBF_SBSIOCEN_H_
+
 struct mbf_sbsiocen_data_struct {
 	char flag[4];         /* comment flag (## flags comment record) */
 	short year;           /* year (4 digits) */
@@ -76,3 +79,5 @@ struct mbf_sbsiocen_struct {
 	int kind;
 	struct mbf_sbsiocen_data_struct data;
 };
+
+#endif  /* MBF_SBSIOCEN_H_ */

@@ -36,6 +36,9 @@
  *            3. Trace data (2 bytes per sample)
  */
 
+#ifndef MBSYS_JSTAR2_H_
+#define MBSYS_JSTAR2_H_
+
 /* specify the maximum number of sidescan pixels that can be returned
     by mbsys_jstar_extract() */
 #define MBSYS_JSTAR_MESSAGE_SIZE 16
@@ -945,3 +948,5 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, double *time_d, double *conductivity,
                     double *temperature, double *depth, double *salinity, double *soundspeed, int *error);
 int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_JSTAR2_H_ */

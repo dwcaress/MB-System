@@ -71,6 +71,9 @@
  *      which are passed in Hydrosweep records.
  */
 
+#ifndef MBSYS_HSDS_H_
+#define MBSYS_HSDS_H_
+
 /* maximum number of depth-velocity pairs */
 #define MBSYS_HSDS_MAXVEL 30
 
@@ -204,3 +207,5 @@ int mbsys_hsds_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
                            int *error);
 int mbsys_hsds_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
 int mbsys_hsds_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_HSDS_H_ */

@@ -36,6 +36,9 @@
  *      reading and writing.
  */
 
+#ifndef MBF_GSFGENMB_H_
+#define MBF_GSFGENMB_H_
+
 #include "gsf.h"
 
 struct mbf_gsfgenmb_struct {
@@ -43,3 +46,5 @@ struct mbf_gsfgenmb_struct {
 	gsfDataID dataID;
 	gsfRecords records;
 };
+
+#endif  /* MBF_GSFGENMB_H_ */

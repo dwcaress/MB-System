@@ -263,10 +263,10 @@
  *
  */
 
-/* include mb_define.h */
-#ifndef MB_DEFINE_DEF
+#ifndef MBSYS_3DDWISSL_H_
+#define MBSYS_3DDWISSL_H_
+
 #include "mb_define.h"
-#endif
 
 /* defines */
 #define MBF_3DWISSLR_MAGICNUMBER 0x3D08        /* '=', backspace */
@@ -613,3 +613,5 @@ int mbsys_3ddwissl_indextablefix(int verbose, void *mbio_ptr, int num_indextable
                                  void *indextable_ptr, int *error);
 int mbsys_3ddwissl_indextableapply(int verbose, void *mbio_ptr, int num_indextable,
                                    void *indextable_ptr, int n_file, int *error);
+
+#endif  /* MBSYS_3DDWISSL_H_ */
