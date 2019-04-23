@@ -1,4 +1,4 @@
-SUBDIRS = mbio
+SUBDIRS = mbio utilities
 
 CLEANFILES =
 DISTCLEANFILES =
