@@ -104,3 +104,6 @@ third_party/**/Makefile
 third_party/**/*.exe
 .dirstamp
 lib
+*.log
+*.trs
+*~

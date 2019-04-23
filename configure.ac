@@ -133,6 +133,8 @@ AC_PROG_MAKE_SET
 LT_INIT
 AC_SUBST([LIBTOOL_DEPS])
 LT_LIB_M
+AM_PATH_PYTHON([3.6],, [:])
+AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
 
 dnl Check Endian size
 BYTESWAP=no
@@ -902,7 +904,10 @@ dnl--------------------------------------------------------------------
 
 AS_ECHO([" "])
 AS_ECHO(["About to create Makefiles..."])
-AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
+AC_CONFIG_FILES([\
+      Makefile \
+      src/Makefile \
+      src/mbio/Makefile \
       src/surf/Makefile \
       src/bsio/Makefile \
       src/gsf/Makefile \
@@ -930,6 +935,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/mbio/Makefile \
       third_party/googlemock/Makefile \
       test/Makefile \
       test/mbio/Makefile \
+      test/utilities/Makefile \
       ])
 AC_OUTPUT
 
