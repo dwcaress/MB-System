@@ -168,6 +168,9 @@
  *
  */
 
+#ifndef MBSYS_SB2100_H_
+#define MBSYS_SB2100_H_
+
 /* maximum number of depth-velocity pairs */
 #define MBSYS_SB2100_MAXVEL 30
 
@@ -314,3 +317,5 @@ int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
                              int *error);
 int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
 int mbsys_sb2100_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_SB2100_H_ */

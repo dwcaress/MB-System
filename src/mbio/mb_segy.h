@@ -27,6 +27,9 @@
  *
  */
 
+#ifndef MB_SEGY_H_
+#define MB_SEGY_H_
+
 /* Standard SEGY format sizes */
 #define MB_SEGY_ASCIIHEADER_LENGTH 3200
 #define MB_SEGY_FILEHEADER_LENGTH 400
@@ -190,3 +193,5 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheader_struct *traceheader, float *trace, int *error);
 void hilbert(int n, double delta[], double kappa[]);
 void hilbert2(int n, double data[]);
+
+#endif  /* MB_SEGY_H_ */

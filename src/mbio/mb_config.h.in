@@ -1,5 +1,8 @@
 /* src/mbio/mb_config.h.in.  Generated from configure.ac by autoheader.  */
 
+#ifndef MB_CONFIG_H_
+#define MB_CONFIG_H_
+
 /* Machine is littleendian, (Byteswapping on) */
 #undef BYTESWAPPED
 
@@ -120,3 +123,5 @@
 /* Define to the type of a signed integer type of width exactly 8 bits if such
    a type exists and the standard includes do not define it. */
 #undef int8_t
+
+#endif  /* MB_CONFIG_H_ */

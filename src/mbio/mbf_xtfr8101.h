@@ -28,6 +28,9 @@
  *
  */
 
+#ifndef MBF_XTFR8101_H_
+#define MBF_XTFR8101_H_
+
 /* maximum number of beams and pixels */
 #define MBF_XTFR8101_MAXBEAMS 240
 #define MBF_XTFR8101_MAXRAWPIXELS 8192
@@ -586,3 +589,5 @@ struct mbf_xtfr8101_struct {
 	/* comment */
 	char comment[MBF_XTFR8101_COMMENT_LENGTH];
 };
+
+#endif  /* MBF_XTFR8101_H_ */

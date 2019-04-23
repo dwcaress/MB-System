@@ -74,10 +74,10 @@
  * 5) Time values are in Unix seconds (seconds since 1/1/1970 00:00:00
  */
 
-/* include mb_define.h */
-#ifndef MB_DEFINE_DEF
+#ifndef MBSYS_ATLAS_H_
+#define MBSYS_ATLAS_H_
+
 #include "mb_define.h"
-#endif
 
 /* sonar models */
 #define MBSYS_ATLAS_UNKNOWN 0
@@ -460,3 +460,5 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
                            int *error);
 int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+
+#endif  /* MBSYS_ATLAS_H_ */

@@ -563,16 +563,10 @@
  *
  */
 
-/* start this include */
-#ifndef MB_PROCESS_DEF
+#ifndef MB_PROCESS_H_
+#define MB_PROCESS_H_
 
-/* header file flag */
-#define MB_PROCESS_DEF 1
-
-/* include mb_io.h if needed */
-#ifndef MB_IO_DEF
 #include "mb_io.h"
-#endif
 
 /* mbprocess value defines */
 #define MBP_FILENAMESIZE MB_PATH_MAXLINE
@@ -1089,5 +1083,4 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, i
 int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *program, char *user, char *cpu, char *date,
                    int *error);
 
-/* end this include */
-#endif
+#endif  /* MB_PROCESS_H_ */

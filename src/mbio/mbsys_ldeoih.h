@@ -36,6 +36,9 @@
  *      ascii comment record (kind = 0).
  */
 
+#ifndef MBSYS_LDEOIH_H_
+#define MBSYS_LDEOIH_H_
+
 /* maximum line length in characters */
 #define MBSYS_LDEOIH_MAXLINE 200
 
@@ -233,3 +236,5 @@ int mbsys_ldeoih_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
                             double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                             int *error);
 int mbsys_ldeoih_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_LDEOIH_H_ */

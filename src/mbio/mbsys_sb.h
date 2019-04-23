@@ -40,6 +40,9 @@
  *      which are passed in SeaBeam records.
  */
 
+#ifndef MBSYS_SB_H_
+#define MBSYS_SB_H_
+
 /* maximum line length in characters */
 #define MBSYS_SB_MAXLINE 200
 
@@ -110,3 +113,5 @@ int mbsys_sb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 int mbsys_sb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
                         double speed, double heading, double draft, double roll, double pitch, double heave, int *error);
 int mbsys_sb_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
+
+#endif  /* MBSYS_SB_H_ */

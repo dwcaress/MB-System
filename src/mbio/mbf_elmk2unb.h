@@ -51,6 +51,10 @@
  *
  */
 
+
+#ifndef MBF_ELMK2UNB_H_
+#define MBF_ELMK2UNB_H_
+
 /* maximum number of beams and pixels */
 #define MBF_ELMK2UNB_MAXBEAMS 126
 #define MBF_ELMK2UNB_COMMENT_LENGTH 200
@@ -171,3 +175,5 @@ struct mbf_elmk2unb_struct {
 	int beams_bath; /* number of beams stored */
 	struct mbf_elmk2unb_beam_struct beams[MBF_ELMK2UNB_MAXBEAMS];
 };
+
+#endif  /* MBF_ELMK2UNB_H_ */

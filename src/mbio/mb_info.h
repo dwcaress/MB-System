@@ -22,9 +22,8 @@
  *
  */
 
-/* include this code only once */
-#ifndef MB_INFO_DEF
-#define MB_INFO_DEF
+#ifndef MB_INFO_H_
+#define MB_INFO_H_
 
 #define MB_INFO_MASK_DIM 20
 
@@ -110,4 +109,4 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error);
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip, int *error);
 int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_info_struct *mb_info, int lonflip, int *error);
 
-#endif
+#endif  /* MB_INFO_H_ */

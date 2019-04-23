@@ -21,14 +21,10 @@
  *
  */
 
-/* make sure mb_status.h has been included */
-#ifndef MB_STATUS_DEF
-#include "mb_status.h"
-#endif
+#ifndef MB_FORMAT_H_
+#define MB_FORMAT_H_
 
-/* include this code only once */
-#ifndef MB_FORMAT_DEF
-#define MB_FORMAT_DEF
+#include "mb_status.h"
 
 /* define date of last format update */
 #define MB_FORMAT_UPDATEDATE "$Id$ $Revision: $"
@@ -1033,5 +1029,5 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                      double *beamwidth_ltrack, int *error);
-/* end conditional include */
-#endif
+
+#endif  /* MB_FORTMAT_H_ */

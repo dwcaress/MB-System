@@ -81,10 +81,11 @@
  *
  */
 
-/* include mb_define.h */
-#ifndef MB_DEFINE_DEF
+#ifndef MBSYS_SWATHPLUS_H_
+#define MBSYS_SWATHPLUS_H_
+
 #include "mb_define.h"
-#endif
+
 
 /*---------------------------------------------------------------
    Record ID definitions (if needed for use in data reading and writing) */
@@ -650,3 +651,5 @@ int swpls_pr_pos_offset(int verbose, FILE *fout, swpls_pos_offset *pos_offset, i
 int swpls_pr_imu_offset(int verbose, FILE *fout, swpls_imu_offset *imu_offset, int *error);
 int swpls_pr_txer_offset(int verbose, FILE *fout, swpls_txer_offset *txer_offset, int *error);
 int swpls_pr_wl_offset(int verbose, FILE *fout, swpls_wl_offset *wl_offset, int *error);
+
+#endif  /* MBSYS_SWATHPLUS_H_ */

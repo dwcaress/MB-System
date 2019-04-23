@@ -65,6 +65,9 @@
  *      which are passed in Hydrosweep records.
  */
 
+#ifndef MBF_HSATLRAW_H_
+#define MBF_HSATLRAW_H_
+
 /* maximum number of depth-velocity pairs */
 #define MBF_HSATLRAW_MAXVEL 30
 
@@ -176,3 +179,5 @@ struct mbf_hsatlraw_struct {
 	/* comment (LDEOCMNT) */
 	char comment[MBF_HSATLRAW_MAXLINE];
 };
+
+#endif  /* MBF_HSATLRAW_H_ */
