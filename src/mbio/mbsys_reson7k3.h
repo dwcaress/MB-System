@@ -85,20 +85,20 @@
 #define R7KRECID_ReferencePoint 1000
 #define R7KRECID_UncalibratedSensorOffset 1001
 #define R7KRECID_CalibratedSensorOffset 1002
-#define R7KRECID_Position 1003
-#define R7KRECID_CustomAttitude 1004
+#define R7KRECID_Position 1003                    // MB_DATA_NAV1
+#define R7KRECID_CustomAttitude 1004              // MB_DATA_ATTITUDE2
 #define R7KRECID_Tide 1005
-#define R7KRECID_Altitude 1006
+#define R7KRECID_Altitude 1006                    // MB_DATA_ALTITUDE
 #define R7KRECID_MotionOverGround 1007
-#define R7KRECID_Depth 1008
+#define R7KRECID_Depth 1008                       // MB_DATA_SONARDEPTH
 #define R7KRECID_SoundVelocityProfile 1009
 #define R7KRECID_CTD 1010
 #define R7KRECID_Geodesy 1011
-#define R7KRECID_RollPitchHeave 1012
-#define R7KRECID_Heading 1013
-#define R7KRECID_SurveyLine 1014
-#define R7KRECID_Navigation 1015
-#define R7KRECID_Attitude 1016
+#define R7KRECID_RollPitchHeave 1012              // MB_DATA_ATTITUDE1
+#define R7KRECID_Heading 1013                     // MB_DATA_HEADING
+#define R7KRECID_SurveyLine 1014                  // MB_DATA_SURVEY_LINE
+#define R7KRECID_Navigation 1015                  // MB_DATA_NAV
+#define R7KRECID_Attitude 1016                    // MB_DATA_ATTITUDE
 #define R7KRECID_PanTilt 1017
 #define R7KRECID_SonarInstallationIDs 1020
 #define R7KRECID_Mystery 1022
@@ -231,6 +231,8 @@
 #define R7KHDRSIZE_WetEndVersion8k 32
 #define R7KHDRSIZE_RawDetection 99
 #define R7KRDTSIZE_RawDetection 34
+#define R7KOPTHDRSIZE_RawDetection 45
+#define R7KOPTDATSIZE_RawDetection 20
 #define R7KHDRSIZE_Snippet 46
 #define R7KRDTSIZE_snippetdata 14
 #define R7KHDRSIZE_VernierProcessingDataFiltered 26
@@ -241,6 +243,8 @@
 #define R7KHDRSIZE_CompressedWaterColumn 44
 #define R7KHDRSIZE_SegmentedRawDetection 36
 #define R7KRDTSIZE_SegmentedRawDetection 100
+#define R7KOPTHDRSIZE_SegmentedRawDetection 45
+#define R7KOPTDATSIZE_SegmentedRawDetection 20
 #define R7KHDRSIZE_CalibratedBeam 56
 #define R7KHDRSIZE_SystemEvents 12
 #define R7KHDRSIZE_SystemEventMessage 14
@@ -353,6 +357,8 @@
 #define MBSYS_RESON7K_MAX_RECEIVERS 1024
 #define MBSYS_RESON7K_MAX_BEAMS 1024
 #define MBSYS_RESON7K_MAX_PIXELS 4096
+#define MBSYS_RESON7K_MAX_SOUNDINGS 960
+#define MBSYS_RESON7K_MAX_SEGMENTS 320
 
 /*---------------------------------------------------------------*/
 
@@ -1622,6 +1628,16 @@ typedef struct s7k3_WetEndVersion8k_struct {
   c8 version[32]; /* Null terminated ASCII string */
 } s7k3_WetEndVersion8k;
 
+/* Reson 7k raw detection data (part of Records 7027 and 7047) */
+typedef struct s7k3_bathydata_struct {
+  f32 depth;                        /* Depth relative chart datum (or relative to
+                                       waterline if Height source = 0) (in meters) */
+  f32 alongtrack;                   /* Alongtrack distance in vessel grid in meters */
+  f32 acrosstrack;                  /* Acrosstrack distance in meters */
+  f32 pointing_angle;               /* Pointing angle from vertical in radians */
+  f32 azimuth_angle;                /* Azimuth angle in radians */
+} s7k3_bathydata;
+
 /* Reson 7k raw detection data (part of Record 7027) */
 typedef struct s7k3_rawdetectiondata_struct {
   u16 beam_descriptor;             /* Beam number the detection is taken from */
@@ -1717,11 +1733,7 @@ typedef struct s7k3_RawDetection_struct {
   f32 pitch;                                /* Pitch at transmit time */
   f32 heave;                                /* Heave at transmit time in m*/
   f32 vehicle_depth;                       /* Vehicle depth at transmit time in m */
-  f32 depth[MBSYS_RESON7K_MAX_BEAMS];       /* Depth releative to chart datum in meters */
-  f32 alongtrack[MBSYS_RESON7K_MAX_BEAMS];  /* Alongtrack distance in meters */
-  f32 acrosstrack[MBSYS_RESON7K_MAX_BEAMS];    /* Acrosstrack distance in meters */
-  f32 pointing_angle[MBSYS_RESON7K_MAX_BEAMS]; /* Pointing angle from vertical in radians */
-  f32 azimuth_angle[MBSYS_RESON7K_MAX_BEAMS];  /* Azimuth angle in radians */
+  s7k3_bathydata bathydata[MBSYS_RESON7K_MAX_BEAMS];  /* Bathymetry calculated from raw detections */
 } s7k3_RawDetection;
 
 /* Reson 7k snippet data (part of record 7028) */
@@ -1900,18 +1912,18 @@ typedef struct s7k3_CompressedBeamformedMagnitude_struct {
 
 /* Reson 7k Compressed Water Column Data (part of Record 7042) */
 typedef struct s7k3_compressedwatercolumndata_struct {
-  s7k3_header header;
   u16 beam_number;    /* Beam Number for this data. */
   u8 segment_number;  /* Segment number for this beam. Optional field, see ‘Bit 14’ of Flags. */
   u32 samples;        /* Number of samples included for this beam. */
-  u32 nalloc;         /* Bytes allocated to hold the time series */
-  u64 *sample;        /* Each “Sample” may be one of the following, depending on the Flags bits:
-                         A) 16 bit Mag & 16bit Phase (32 bits total)
-                         B) 16 bit Mag (16 bits total, no phase)
-                         C) 8 bit Mag & 8 bit Phase (16 bits total)
-                         D) 8 bit Mag (8 bits total, no phase)
-                         E) 32 bit Mag & 8 bit Phase(40 bits total)
-                         F) 32 bit Mag(32 bits total, no phase) */
+  size_t nalloc;      /* Bytes allocated to hold the time series */
+  u8 *data;         /* Pointer to time series. Each “Sample” may be one of the
+                         following, depending on the Flags bits:
+                            A) 16 bit Mag & 16bit Phase (32 bits total)
+                            B) 16 bit Mag (16 bits total, no phase)
+                            C) 8 bit Mag & 8 bit Phase (16 bits total)
+                            D) 8 bit Mag (8 bits total, no phase)
+                            E) 32 bit Mag & 8 bit Phase(40 bits total)
+                            F) 32 bit Mag(32 bits total, no phase) */
 } s7k3_compressedwatercolumndata;
 
 /* Reson 7k Compressed Water Column Data (Record 7042) */
@@ -1951,7 +1963,7 @@ typedef struct s7k3_CompressedWaterColumn_struct {
                               Bit 8-11 : Downsampling type:
                                 0x000 = None
                                 0x100 = Middle value
-                                0x200 = Peal value
+                                0x200 = Peak value
                                 0x300 = Average value
                               Bit 12 : 32 Bits data
                               Bit 13 : Compression factor available
@@ -1966,15 +1978,54 @@ typedef struct s7k3_CompressedWaterColumn_struct {
   f32 sample_rate;         /* Effective sample rate after downsampling, if specified. */
   f32 compression_factor;  /* Factor used in magnitude compression. */
   u32 reserved;            /* Zero. Reserved for future use. */
+  size_t magsamplesize;    /* calculated bytes per sample for magnitude (not stored in file) */
+  size_t phasesamplesize;  /* calculated bytes per sample for phase (not stored in file) */
   s7k3_compressedwatercolumndata compressedwatercolumndata[MBSYS_RESON7K_MAX_BEAMS];
 } s7k3_CompressedWaterColumn;
 
 /* Reson 7k Segmented Raw Detection Data (part of Record 7047) */
-typedef struct s7k3_segmentedrawdetectiondata_struct {
-  s7k3_header header;    /* Number of the Segment descriptor */
-  u16 segment_number;   /* Applied transmitter along steering angle, in radians */
-  f32 tx_angle_along;   /* Applied transmitter across steering angle, in radians */
-  f32 tx_angle_across;  /* Transmit delay in seconds */
+typedef struct s7k3_segmentedrawdetectionrxdata_struct {
+  u16 beam_number;      /* Beam number the detection is taken from */
+  u16 used_segment;     /* Number of Segment descriptor. */
+  f32 detection_point;  /* Non-corrected fractional sample number with reference
+                           to receiver’s acoustic center with the zero sample at the
+                           transmit time */
+  f32 rx_angle_cross;   /* Beam steering angle with reference to receiver’s
+                           acoustic center in the sonar reference frame,
+                           at the detection point; in radians */
+  u32 flags2;            /* BIT FIELD:
+                           Bit 0:
+                           1 – Magnitude based detection
+                           Bit 1:
+                           1 – Phase based detection
+                           Bit 2-8:
+                           Quality type, defines the type of the quality field below
+                           Bits 9-12:
+                           Detection priority number for detections within the same beam
+                           (Multi-detect only). Value zero is highest priority.
+                           Bit 13:
+                           Interferometry between beam point.
+                           Bit 14:
+                           Snippet detection point flag
+                           0 – Detection used in snippets
+                           1 – Not used in snippets
+                           Bits 15-31: Reserved for future use */
+  u32 quality;          /* 0 - Quality is not available / Not used
+                           1 - Bit field:
+                           Bit 0: 1 = Brightness filter passed
+                           Bit 1: 1 = Co-linearity filter passed
+                           3-31 - Reserved for future use */
+  f32 uncertainty;      /* Detection uncertainty represented as an error normalized
+                           to the detection point */
+  f32 signal_strength;  /* Signal strength of detection point */
+  f32 sn_ratio;         /* S/N ratio in dB */
+} s7k3_segmentedrawdetectionrxdata;
+
+/* Reson 7k Segmented Raw Detection Data (part of Record 7047) */
+typedef struct s7k3_segmentedrawdetectiontxdata_struct {
+  u16 segment_number;   /* Number of the Segment descriptor */
+  f32 tx_angle_along;   /* Applied transmitter along steering angle, in radians */
+  f32 tx_angle_across;  /* Applied transmitter across steering angle, in radians */
   f32 tx_delay;         /* Transmit delay in seconds */
   f32 frequency;        /* Hz */
   u32 pulse_type;       /* BIT FIELD
@@ -2021,41 +2072,7 @@ typedef struct s7k3_segmentedrawdetectiondata_struct {
   f32 sampling_rate;    /* Sonar’s sampling frequency in Hz */
   u8 tvg;               /* Applied TVG value */
   f32 rx_bandwidth;     /* In Hz */
-  u16 beam_number;      /* Beam number the detection is taken from */
-  u16 used_segment;     /* Number of Segment descriptor. */
-  f32 detection_point;  /* Non-corrected fractional sample number with reference
-                           to receiver’s acoustic center with the zero sample at the
-                           transmit time */
-  f32 rx_angle_cross;   /* Beam steering angle with reference to receiver’s
-                           acoustic center in the sonar reference frame,
-                           at the detection point; in radians */
-  u32 flags2;            /* BIT FIELD:
-                           Bit 0:
-                           1 – Magnitude based detection
-                           Bit 1:
-                           1 – Phase based detection
-                           Bit 2-8:
-                           Quality type, defines the type of the quality field below
-                           Bits 9-12:
-                           Detection priority number for detections within the same beam
-                           (Multi-detect only). Value zero is highest priority.
-                           Bit 13:
-                           Interferometry between beam point.
-                           Bit 14:
-                           Snippet detection point flag
-                           0 – Detection used in snippets
-                           1 – Not used in snippets
-                           Bits 15-31: Reserved for future use */
-  u32 quality;          /* 0 - Quality is not available / Not used
-                           1 - Bit field:
-                           Bit 0: 1 = Brightness filter passed
-                           Bit 1: 1 = Co-linearity filter passed
-                           3-31 - Reserved for future use */
-  f32 uncertainty;      /* Detection uncertainty represented as an error normalized
-                           to the detection point */
-  f32 signal_strength;  /* Signal strength of detection point */
-  f32 sn_ratio;         /* S/N ratio in dB */
-} s7k3_segmentedrawdetectiondata;
+} s7k3_segmentedrawdetectiontxdata;
 
 /* Reson 7k Segmented Raw Detection Data (Record 7047) */
 typedef struct s7k3_SegmentedRawDetection_struct {
@@ -2073,7 +2090,31 @@ typedef struct s7k3_SegmentedRawDetection_struct {
   f32 sound_velocity;      /* Sound velocity at the transducer in meters/second */
   f32 rx_delay;            /* Delay between start of first Tx pulse and start of sample
                               data recoding in fractional samples. */
-  s7k3_segmentedrawdetectiondata *segmentedrawdetectiondata;
+  s7k3_segmentedrawdetectiontxdata segmentedrawdetectiontxdata[MBSYS_RESON7K_MAX_SEGMENTS];
+  s7k3_segmentedrawdetectionrxdata segmentedrawdetectionrxdata[MBSYS_RESON7K_MAX_SOUNDINGS];
+  u32 optionaldata;                             /* Flag indicating if bathymetry calculated and
+                                                   values below filled in
+                                                      0 = No
+                                                      1 = Yes
+                                                   This is an internal MB-System flag, not
+                                                   a value in the data format */
+  f32 frequency;                            /* Ping frequency in Hz */
+  f64 latitude;                             /* Latitude of vessel reference point
+                                                 in radians, -pi/2 to +pi/2, south negative */
+  f64 longitude;                            /* Longitude of vessel reference point
+                                                 in radians, -pi to +pi, west negative */
+  f32 heading;                              /* Heading of vessel at transmit time
+                                                 in radians */
+  u8 height_source;                         /* Method used to correct to chart datum.
+                                                 0 = None
+                                                 1 = RTK (implies tide = 0.0)
+                                                 2 = Tide */
+  f32 tide;                                 /* Tide in meters */
+  f32 roll;                                 /* Roll at transmit time */
+  f32 pitch;                                /* Pitch at transmit time */
+  f32 heave;                                /* Heave at transmit time in m*/
+  f32 vehicle_depth;                       /* Vehicle depth at transmit time in m */
+  s7k3_bathydata bathydata[MBSYS_RESON7K_MAX_BEAMS];  /* Bathymetry calculated from raw detections */
 } s7k3_SegmentedRawDetection;
 
 /* Reson 7k Calibrated Beam Data (Record 7048) */
@@ -2561,11 +2602,13 @@ typedef struct s7k3_FileHeader_struct {
   c8 user_defined_name[64];  /* User defined name - null terminated string */
   c8 notes[128];             /* Notes - null terminated string */
   s7k3_subsystem subsystem[MBSYS_RESON7K_MAX_DEVICE];
+  u32 optionaldata;          /* Optional data */
+  u32 file_catalog_size;     /* File catalog record size in bytes */
+  u64 file_catalog_offset;   /* File catalog record offset in bytes from the file beginning */
 } s7k3_FileHeader;
 
 /* Reson 7k File Catalog Record (part of Record 7300) */
 typedef struct s7k3_filecatalogrecorddata_struct {
-  s7k3_header header;
   u32 size;                   /* Record size in bytes */
   u64 offset;                 /* File offset */
   u16 record_type;            /* Record type identifier */
@@ -2585,7 +2628,7 @@ typedef struct s7k3_FileCatalogRecord_struct {
   u32 n;       /* Number of records in the file */
   u32 nalloc;
   u32 reserved;        /* Reserved */
-  s7k3_filecatalogrecorddata filecatalogrecorddata;
+  s7k3_filecatalogrecorddata *filecatalogrecorddata;
 } s7k3_FileCatalogRecord;
 
 /* Reson 7k Time Message (Record 7400) */

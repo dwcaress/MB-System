@@ -482,8 +482,10 @@ void do_parse_datalist(char *file, int form) {
 	int verbose = 0;
 
 	/* try to resolve format if necessary */
-	format = form;
-	mbedit_get_format(file, &format);
+  if (form == 0)
+	   mbedit_get_format(file, &format);
+	else
+    format = form;
 
 	/* read in a single file */
 	if (format > 0 && numfiles < NUM_FILES_MAX) {

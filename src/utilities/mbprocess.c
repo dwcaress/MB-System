@@ -5431,7 +5431,7 @@ and mbedit edit save files.\n";
 									r[2] /= rr;
 
 									/* get normal vector to grid surface */
-									if (process.mbp_ampcorr_slope == MB_YES) {
+									if (process.mbp_ampcorr_slope == MBP_SSCORR_USETOPOSLOPE) {
 										v1[0] = 2.0 * grid.dx / mtodeglon;
 										v1[1] = 2.0 * grid.dy / mtodeglat;
 										v1[2] = grid.data[kgrid11] - grid.data[kgrid00];
@@ -5534,7 +5534,7 @@ and mbedit edit save files.\n";
 									r[2] /= rr;
 
 									/* get normal vector to grid surface */
-									if (process.mbp_sscorr_slope == MB_YES) {
+									if (process.mbp_sscorr_slope == MBP_SSCORR_USETOPOSLOPE) {
 										v1[0] = 2.0 * grid.dx / mtodeglon;
 										v1[1] = 2.0 * grid.dy / mtodeglat;
 										v1[2] = grid.data[kgrid11] - grid.data[kgrid00];
@@ -5562,11 +5562,12 @@ and mbedit edit save files.\n";
 										angle = -angle;
 
 									/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
-									i,ssacrosstrack[i],ssalongtrack[i],ss[i],sonardepth,RTD * atan(ssacrosstrack[i] / (sonardepth
-									+ grid.data[kgrid]))); fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
-									ix,grid.n_columns,jy,grid.n_rows,grid.data[kgrid]);
+									              i,ssacrosstrack[i],ssalongtrack[i],ss[i],sonardepth,
+                                RTD * atan(ssacrosstrack[i] / (sonardepth + grid.data[kgrid])));
+                  fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
+									               ix,grid.n_columns,jy,grid.n_rows,grid.data[kgrid]);
 									fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
-									r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
+									               r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle); */
 								}
 								else {
 									if (ix >= 0 && ix < grid.n_columns && jy >= 0 && jy < grid.n_rows && grid.data[kgrid] > grid.nodatavalue)

@@ -2610,7 +2610,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 				strncpy(fileroot, filename, strlen(filename) - suffix_len);
 				fileroot[strlen(filename) - suffix_len] = '\0';
 			}
-			*format = MBF_RESON7KR;
+			*format = MBF_RESON7K3;
 			found = MB_YES;
 		}
 	}

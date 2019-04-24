@@ -19,12 +19,12 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.5beta8],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.5beta9],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
-AC_LANG([C++])
-AC_DEFINE(VERSION_DATE, "11 April 2019", [Set VERSION_DATE define in mb_config.h])
+# AC_LANG([C++])
+AC_DEFINE(VERSION_DATE, "23 April 2019", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -101,6 +101,7 @@ AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
+AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
 AS_ECHO(["        make"])
@@ -381,7 +382,13 @@ if test "$GOT_PROJ" = "yes" ; then
 else
     dnl Looking for PROJ headers in the usual places...
     AS_ECHO(["Looking for PROJ headers in the usual places..."])
+    save_CPPFLAGS=$CPPFLAGS
+    save_CFLAGS=$CFLAGS
+    CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
+    CFLAGS="$CFLAGS $libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
     AC_CHECK_HEADER(proj_api.h, [PROJ_SETTING=yes], [PROJ_SETTING=no])
+    CPPFLAGS=$save_CPPFLAGS
+    CFLAGS=$save_CFLAGS
     if test "$PROJ_SETTING" = "yes" ; then
         GOT_PROJ=yes
         AS_ECHO(["Found PROJ headers..."])
@@ -892,8 +899,29 @@ if test "$build_pcltools" = "yes" ; then
     AC_CHECK_LIB([libpcl_common], [XSendEvent], [GOT_libpcl_common=yes], [GOT_libpcl_common=no])
 fi
 
-# Configure pthreads.
-# Force to yes.
+dnl--------------------------------------------------------------------
+dnl Test Section - optionally build unit tests in mbsystem/test and mbsystem/third-party
+dnl--------------------------------------------------------------------
+
+dnl Check if the testing tools should be built
+AS_ECHO(["Check if the unit tests should be built"])
+AC_ARG_ENABLE(test, [AS_HELP_STRING([--enable-test], [build test tools])],
+        [build_test=yes], [build_test=no])
+AM_CONDITIONAL([BUILD_TEST], [test x$build_test = xyes])
+if test "$build_test" = "yes" ; then
+    dnl Building unit tests
+    AS_ECHO(["Building unit tests"])
+    AC_DEFINE(TEST_ENABLED, 1, [Build unit tests])
+else
+    dnl Not building unit tests
+    AS_ECHO(["Not building unit tests"])
+fi
+
+dnl--------------------------------------------------------------------
+dnl Configure pthreads.
+dnl Force to yes.
+dnl--------------------------------------------------------------------
+
 AM_CONDITIONAL([HAVE_PTHREADS],[test "xyes" = "xyes"])
 AC_SUBST(PTHREAD_CFLAGS)
 AC_SUBST(PTHREAD_LIBS)
@@ -1008,6 +1036,11 @@ if test "$build_pcltools" = "yes" ; then
     AS_ECHO(["Build PCL tools: Enabled"])
 else
     AS_ECHO(["Build PCL tools: Disabled"])
+fi
+if test "$build_test" = "yes" ; then
+    AS_ECHO(["Build unit tests: Enabled"])
+else
+    AS_ECHO(["Build unit tests: Disabled"])
 fi
 
 AS_ECHO(["------------------------------------------------------------------------------"])
