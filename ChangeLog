@@ -316,6 +316,16 @@ Format 89 (MBF_RESON7K3): More progress towards support of Teledyne 7k version 3
 Mbprocess: Fixed problem with backscatter correction of sidescan and amplitude
 data
 
+General: Incorporates a number of changes by Kurt Schwehr that nudge this codebase
+towards some level of compliance with software development best practices.
+
+Unit testing: Incorporates code contributed by Kurt Schwehr in the directories
+mbsystem/test, mbsystem/third-party, and mbsystem/travis that will achieve
+automated build testing and unit testing.
+
+Build system: Added enable-test option to configure.ac so that the default
+configure command does not try to compile the unit test code contributed by Kurt.
+
 -----> 5.7.5beta8 (April 11, 2019)
 
 Format 89 (MBF_RESON7K3): Progress towards support of Teledyne 7k version 3 format.
