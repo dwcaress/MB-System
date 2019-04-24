@@ -1,5 +1,5 @@
 #!/bin/bash
 
-./configure
+./configure --enable-test
 make -j 3
 make check
