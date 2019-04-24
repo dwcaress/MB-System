@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.7.5beta9     April 23, 2019
   Version 5.7.5beta8     April 11, 2019
   Version 5.7.5beta7     March 28, 2019
   Version 5.7.5beta6     March 26, 2019
@@ -307,6 +308,23 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.7.5beta9 (April 23, 2019)
+
+Format 89 (MBF_RESON7K3): More progress towards support of Teledyne 7k version 3 format.
+
+Mbprocess: Fixed problem with backscatter correction of sidescan and amplitude
+data
+
+General: Incorporates a number of changes by Kurt Schwehr that nudge this codebase
+towards some level of compliance with software development best practices.
+
+Unit testing: Incorporates code contributed by Kurt Schwehr in the directories
+mbsystem/test, mbsystem/third-party, and mbsystem/travis that will achieve
+automated build testing and unit testing.
+
+Build system: Added enable-test option to configure.ac so that the default
+configure command does not try to compile the unit test code contributed by Kurt.
 
 -----> 5.7.5beta8 (April 11, 2019)
 

@@ -1,6 +1,10 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src third_party test
+if BUILD_TEST
+  XBUILD_SUB_TEST = third_party test
+endif
+
+SUBDIRS = src $(XBUILD_SUB_TEST)
 
 distcleancheck:
         @:

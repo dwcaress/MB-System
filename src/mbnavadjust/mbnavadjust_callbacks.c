@@ -1520,10 +1520,10 @@ void do_update_status() {
 
 			/* allocate strings for list */
 			xstr = (XmString *)malloc(num_ties * sizeof(XmString));
-            
+
             /* allocate array of tie pointers for list to be sorted */
             tie_list = (int *) malloc(num_ties * sizeof(int));
-            
+
             /* get list of tie pointers */
             num_ties = 0;
 			for (i = 0; i < project.num_crossings; i++) {
@@ -1535,10 +1535,10 @@ void do_update_status() {
                     }
                 }
             }
-            
+
             /* sort the ties from smallest to largest model misfit */
             qsort((void *)tie_list, (size_t) num_ties, sizeof(int), mbnavadjust_tie_compare);
-            
+
 			/* generate list */
 			iselect = MBNA_SELECT_NONE;
             kk = 0;
@@ -1597,7 +1597,7 @@ void do_update_status() {
 				XmStringFree(xstr[kk]);
 			}
 			free(xstr);
-            
+
             free(tie_list);
 		}
 		if (iselect != MBNA_SELECT_NONE) {
@@ -2415,7 +2415,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 	int found;
     int nscan;
 	int i, j;
-    
+
 	if (XmListGetSelectedPos(list_data, &position_list, &position_count)) {
 		if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
 			mbna_section_select = 0;
@@ -4749,16 +4749,16 @@ void do_modelplot_input(Widget w, XtPointer client_data, XtPointer call_data) {
                 if (project.modelplot_uptodate == MB_NO) {
                     /* update model status */
                     do_update_modelplot_status();
-    
+
                     /* update status */
                     do_update_status();
-    
+
                     /* update model status */
                     do_update_modelplot_status();
-    
+
                     /* replot model */
                     mbnavadjust_modelplot_plot(__FILE__, __LINE__);
-    
+
                     /* update visualization */
                     if (project.visualization_status == MB_YES)
                         do_update_visualization_status();
@@ -4776,16 +4776,16 @@ void do_modelplot_input(Widget w, XtPointer client_data, XtPointer call_data) {
                 if (project.modelplot_uptodate == MB_NO) {
                     /* update model status */
                     do_update_modelplot_status();
-    
+
                     /* update status */
                     do_update_status();
-    
+
                     /* update model status */
                     do_update_modelplot_status();
-    
+
                     /* replot model */
                     mbnavadjust_modelplot_plot(__FILE__, __LINE__);
-    
+
                     /* update visualization */
                     if (project.visualization_status == MB_YES)
                         do_update_visualization_status();

@@ -79,7 +79,7 @@
 #define MBFILTER_A_CONTRAST_GRADIENT 9
 
 /* MBIO buffer size default */
-#define MBFILTER_BUFFER_DEFAULT 2000
+#define MBFILTER_BUFFER_DEFAULT 5000
 
 /* ping structure definition */
 struct mbfilter_ping_struct {
