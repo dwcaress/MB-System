@@ -99,6 +99,8 @@
 #ifndef MBSYS_HYSWEEP_H_
 #define MBSYS_HYSWEEP_H_
 
+#include "mb_define.h"
+
 /* HYSWEEP record type */
 #define MBSYS_HYSWEEP_RECORDTYPE_NONE 0 /* No record */
 #define MBSYS_HYSWEEP_RECORDTYPE_DEV 1
