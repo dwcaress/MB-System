@@ -99,6 +99,8 @@
 #ifndef MBSYS_HYSWEEP_H_
 #define MBSYS_HYSWEEP_H_
 
+#include "mb_define.h"
+
 /* HYSWEEP record type */
 #define MBSYS_HYSWEEP_RECORDTYPE_NONE 0 /* No record */
 #define MBSYS_HYSWEEP_RECORDTYPE_DEV 1
@@ -850,6 +852,10 @@ struct mbsys_hysweep_struct {
 	char COM_comment[MB_COMMENT_MAXLINE]; /* comment string */
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* system specific function prototypes */
 int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
@@ -884,5 +890,10 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
+
 
 #endif  /* MBSYS_HYSWEEP_H_ */

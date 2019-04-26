@@ -27,19 +27,16 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_io.h"
-#include "mb_define.h"
 #include "mbsys_hysweep.h"
 
-/* include for byte swapping */
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_status.h"
 #include "mb_swap.h"
 
 /* local defines */

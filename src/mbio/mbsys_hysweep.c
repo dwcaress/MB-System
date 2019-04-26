@@ -23,18 +23,17 @@
  *
  */
 
-/* standard include files */
+#include "mbsys_hysweep.h"
+
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
-#include "mbsys_hysweep.h"
+#include "mb_status.h"
 
 /* turn on debug statements here */
 /* #define MSYS_HYSWEEP_DEBUG 1 */
