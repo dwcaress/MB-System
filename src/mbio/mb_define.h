@@ -620,7 +620,7 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
           double *travel_time, int *ray_stat, int *error);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  /* extern "C" */
 #endif
 
 #endif  /* MB_DEFINE_H_ */
