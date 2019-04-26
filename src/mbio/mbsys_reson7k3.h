@@ -42,16 +42,38 @@
  *      the MBF_RESON7KR (88) i/o module. The data supported by this
  *      MBF_RESON7K3 (89) i/o module is expected to use the following
  *      data records for each ping:
- *        7503 – Remote Control Sonar Settings
- *        7004 – Beam Geometry
- *        7007 – Side-scan data
- *        7018 – Beamformed data
- *        7027 – Raw Bathymetry
- *        7028 – Snippet
- *   6. MB-System stores beamflags used for bathymetry editing in the
+ *        Sonar Settings
+ *          7000 – Sonar Settings
+ *        Receiver Beam Geometry
+ *          7004 – Beam Geometry
+ *        Bathymetry
+ *          7027 – Raw Detections (+ optional calculated bathymetry)
+ *          7047 – Segmented Raw Detections (+ optional calculated bathymetry)
+ *        Sidescan time series
+ *          7007 – Side-scan data
+ *        Backscatter samples (snippets)
+ *          7028 – Snippet
+ *        Water column beamformed time series
+ *          7018 – Beamformed data
+ *          7041 – Compressed beamformed intensity data
+ *          7042 – Compressed Water Column data
+  *   6. MB-System stores beamflags used for bathymetry editing in the
  *      RawDetection quality values for each beam. The 7k 3.10 DFD
  *      defines use of only the first two bits of these 32 bit
  *      values. MB-System embeds the 8-bit beamflag values in bits 24-31.
+ *   7. The maximum dimensions defined below
+ *          #define MBSYS_RESON7K_MAX_BEAMS 512
+ *          #define MBSYS_RESON7K_MAX_SOUNDINGS 2560
+ *          #define MBSYS_RESON7K_MAX_SEGMENTS 3
+ *          #define MBSYS_RESON7K_MAX_PIXELS 4096
+ *      reflect the various Teledyne mapping sonars.
+ *      The Reson SeaBat T50 multibeams have a maximum of 512 formed beams
+ *      and can produce up to five multi-pick soundings per beam, resulting
+ *      in the maximum soundings of 2560. These are reported in 7027 Raw Detections
+ *      records. The Hydrosweep MD/30 multibeam produces 320 formed beams with
+ *      three soundings per beam produced by split beam processing for 960
+ *      soundings. These are reported in the 7047 Segmented Raw Detections
+ *      records.
  *   ?. Questions/decisions to be resolved before this i/o module is
  *      finalized:
  *        - The beamflag can be embedded in either the quality value or the
@@ -354,11 +376,10 @@
 /* Structure size definitions */
 #define MBSYS_RESON7K_BUFFER_STARTSIZE 32768
 #define MBSYS_RESON7K_MAX_DEVICE 73
-#define MBSYS_RESON7K_MAX_RECEIVERS 1024
-#define MBSYS_RESON7K_MAX_BEAMS 1024
-#define MBSYS_RESON7K_MAX_PIXELS 4096
-#define MBSYS_RESON7K_MAX_SOUNDINGS 960
+#define MBSYS_RESON7K_MAX_BEAMS 512
+#define MBSYS_RESON7K_MAX_SOUNDINGS 2560
 #define MBSYS_RESON7K_MAX_SEGMENTS 320
+#define MBSYS_RESON7K_MAX_PIXELS 4096
 
 /*---------------------------------------------------------------*/
 
@@ -864,15 +885,15 @@ typedef struct s7k3_ContactOutput_struct {
 typedef struct s7k3_ProcessedSideScan_struct {
   s7k3_header header;
   mb_u_long serial_number;                    /* Sonar serial number */
-  unsigned int ping_number;                   /* Sequential number */
-  unsigned short multi_ping;                  /* Flag to indicate multi-ping mode
+  u32 ping_number;                   /* Sequential number */
+  u16 multi_ping;                  /* Flag to indicate multi-ping mode
                                       0 = no multi-ping
                                       >0 = sequence number of ping
                                           in the multi-ping
                                           sequence */
-  unsigned short recordversion;               /* allows for progression of versions of this data record
+  u16 recordversion;               /* allows for progression of versions of this data record
                                                   version = 1: initial version as of 8 October 2012 */
-  unsigned int ss_source;                     /* Source of raw backscatter for this sidescan that has
+  u32 ss_source;                     /* Source of raw backscatter for this sidescan that has
                                                   been laid out on the seafloor:
                                                       ss_source = 0:     None
                                                       ss_source = 1:     Non-Reson sidescan
@@ -880,19 +901,19 @@ typedef struct s7k3_ProcessedSideScan_struct {
                                                       ss_source = 7008:  7kBeamData
                                                       ss_source = 7028:  7kV2SnippetData
                                                       ss_source = 7058:  7kCalibratedSnippetData */
-  unsigned int number_pixels;                 /* Number of sidescan pixels across the entire swath */
-  unsigned int ss_type;                       /* indicates if sidescan values are logarithmic or linear
+  u32 number_pixels;                 /* Number of sidescan pixels across the entire swath */
+  u32 ss_type;                       /* indicates if sidescan values are logarithmic or linear
                                                               ss_type = 0: logarithmic (dB)
                                                               ss_type = 1: linear (voltage) */
-  float pixelwidth;                           /* Pixel acrosstrack width in m
+  f32 pixelwidth;                           /* Pixel acrosstrack width in m
                                                                   Acrosstrack distance of each pixel given by
                                                                       acrosstrack = (ipixel - number_pixels / 2) * pixelwidth
                                                                   where i = pixel number and N is the total number
                                                                   of pixels, counting from port to starboard starting at 0 */
-  double sonardepth;                          /* Sonar depth in m */
-  double altitude;                            /* Sonar nadir altitude in m */
-  float sidescan[MBSYS_RESON7K_MAX_PIXELS];   /* Depth releative to chart datum in meters */
-  float alongtrack[MBSYS_RESON7K_MAX_PIXELS]; /* Alongtrack distance in meters */
+  f64 sonardepth;                          /* Sonar depth in m */
+  f64 altitude;                            /* Sonar nadir altitude in m */
+  f32 sidescan[MBSYS_RESON7K_MAX_PIXELS];   /* Depth releative to chart datum in meters */
+  f32 alongtrack[MBSYS_RESON7K_MAX_PIXELS]; /* Alongtrack distance in meters */
 } s7k3_ProcessedSideScan;
 
 /* Reson 7k Sonar Settings (record 7000) */
@@ -1115,8 +1136,8 @@ typedef struct s7k3_Bathymetry_struct {
                              0 = measured
                              1 = manually entered */
   f32 sound_velocity;  /* Sound veocity at the sonar (m/sec) */
-  f32 range[MBSYS_RESON7K_MAX_BEAMS];  /* Two way travel time (seconds) */
-  u8 quality[MBSYS_RESON7K_MAX_BEAMS]; /* Beam quality bitfield:
+  f32 range[MBSYS_RESON7K_MAX_SOUNDINGS];  /* Two way travel time (seconds) */
+  u8 quality[MBSYS_RESON7K_MAX_SOUNDINGS]; /* Beam quality bitfield:
                                              Bit 0: Brightness test
                                              1 - Pass
                                              0 - Fail
@@ -1134,11 +1155,11 @@ typedef struct s7k3_Bathymetry_struct {
                                              1 - Fail
                                              0 - Pass
                                              Bit 6-7: Reserved */
-  f32 intensity[MBSYS_RESON7K_MAX_BEAMS];       /* Intensity: Bottom reflectivity. This is a relative
+  f32 intensity[MBSYS_RESON7K_MAX_SOUNDINGS];       /* Intensity: Bottom reflectivity. This is a relative
                                                    value (not calibrated) */
-  f32 min_depth_gate[MBSYS_RESON7K_MAX_BEAMS];  /* Minimum two-way travel time to filter point
+  f32 min_depth_gate[MBSYS_RESON7K_MAX_SOUNDINGS];  /* Minimum two-way travel time to filter point
                                                    for each beam (minimum depth gate) */
-  f32 max_depth_gate[MBSYS_RESON7K_MAX_BEAMS];  /* Maximum two-way travel time to filter point
+  f32 max_depth_gate[MBSYS_RESON7K_MAX_SOUNDINGS];  /* Maximum two-way travel time to filter point
                                                    for each beam (maximum depth gate) */
   u32 optionaldata;                             /* Flag indicating if bathymetry calculated and
                                                    values below filled in
@@ -1162,11 +1183,11 @@ typedef struct s7k3_Bathymetry_struct {
   f32 pitch;                                /* Pitch at transmit time */
   f32 heave;                                /* Heave at transmit time in m*/
   f32 vehicle_depth;                       /* Vehicle depth at transmit time in m */
-  f32 depth[MBSYS_RESON7K_MAX_BEAMS];       /* Depth releative to chart datum in meters */
-  f32 alongtrack[MBSYS_RESON7K_MAX_BEAMS];  /* Alongtrack distance in meters */
-  f32 acrosstrack[MBSYS_RESON7K_MAX_BEAMS];    /* Acrosstrack distance in meters */
-  f32 pointing_angle[MBSYS_RESON7K_MAX_BEAMS]; /* Pointing angle from vertical in radians */
-  f32 azimuth_angle[MBSYS_RESON7K_MAX_BEAMS];  /* Azimuth angle in radians */
+  f32 depth[MBSYS_RESON7K_MAX_SOUNDINGS];       /* Depth releative to chart datum in meters */
+  f32 alongtrack[MBSYS_RESON7K_MAX_SOUNDINGS];  /* Alongtrack distance in meters */
+  f32 acrosstrack[MBSYS_RESON7K_MAX_SOUNDINGS];    /* Acrosstrack distance in meters */
+  f32 pointing_angle[MBSYS_RESON7K_MAX_SOUNDINGS]; /* Pointing angle from vertical in radians */
+  f32 azimuth_angle[MBSYS_RESON7K_MAX_SOUNDINGS];  /* Azimuth angle in radians */
 } s7k3_Bathymetry;
 
 /* Reson 7k Side Scan Data (record 7007) */
@@ -1213,11 +1234,11 @@ typedef struct s7k3_SideScan_struct {
 
 /* Reson 7k Generic Water Column data (part of record 7008)*/
 typedef struct s7k3_wcd_struct {
-  unsigned short beam_number; /* Beam or element number */
-  unsigned int begin_sample;  /* First sample number in beam from transmitter and outward. */
-  unsigned int end_sample;    /* Last sample number in beam from transmitter and outward. */
-  unsigned int nalloc_amp;    /* Bytes allocated to hold amplitude time series */
-  unsigned int nalloc_phase;  /* Bytes allocated to hold phase time series */
+  u16 beam_number; /* Beam or element number */
+  u32 begin_sample;  /* First sample number in beam from transmitter and outward. */
+  u32 end_sample;    /* Last sample number in beam from transmitter and outward. */
+  u32 nalloc_amp;    /* Bytes allocated to hold amplitude time series */
+  u32 nalloc_phase;  /* Bytes allocated to hold phase time series */
   void *amplitude;            /* Amplitude or I time series as defined by sample_type */
   void *phase;                /* Phase or Q time series as defined by sample_type */
 } s7k3_wcd;
@@ -1274,24 +1295,24 @@ typedef struct s7k3_WaterColumn_struct {
 /* Reson 7k Vertical Depth (record 7009) */
 typedef struct s7k3_VerticalDepth_struct {
 	s7k3_header header;
-	float frequency;           /* Sonar frequency in Hz */
-	unsigned int ping_number;  /* Sequential number */
-	unsigned short multi_ping; /* Flag to indicate multi-ping mode
+	f32 frequency;           /* Sonar frequency in Hz */
+	u32 ping_number;  /* Sequential number */
+	u16 multi_ping; /* Flag to indicate multi-ping mode
 	                   0 = no multi-ping
 	                   >0 = sequence number of ping
 	                       in the multi-ping
 	                       sequence */
-	double latitude;           /* Latitude of vessel reference point
+	f64 latitude;           /* Latitude of vessel reference point
 	                       in radians, -pi/2 to +pi/2 */
-	double longitude;          /* Longitude of vessel reference point
+	f64 longitude;          /* Longitude of vessel reference point
 	                       in radians, -pi to +pi */
-	float heading;             /* Heading of vessel at transmit time
+	f32 heading;             /* Heading of vessel at transmit time
 	                       in radians */
-	float alongtrack;          /* Sonar alongtrack distance from
+	f32 alongtrack;          /* Sonar alongtrack distance from
 	                       vessel reference point in meters */
-	float acrosstrack;         /* Sonar alongtrack distance from
+	f32 acrosstrack;         /* Sonar alongtrack distance from
 	                   vessel reference point in meters */
-	float vertical_depth;      /* Sonar vertical depth with respect
+	f32 vertical_depth;      /* Sonar vertical depth with respect
 	                   to chart datum or vessel if
 	                   tide data are unavailable in meters */
 } s7k3_VerticalDepth;
@@ -1710,7 +1731,7 @@ typedef struct s7k3_RawDetection_struct {
   f32 applied_roll;         /* Roll value (in radians) applied to gates;
                                zero if roll stabilization is ON. */
   u32 reserved[15];         /* Reserved */
-  s7k3_rawdetectiondata rawdetectiondata[MBSYS_RESON7K_MAX_BEAMS];
+  s7k3_rawdetectiondata rawdetectiondata[MBSYS_RESON7K_MAX_SOUNDINGS];
   u32 optionaldata;                             /* Flag indicating if bathymetry calculated and
                                                    values below filled in
                                                       0 = No
@@ -1733,7 +1754,7 @@ typedef struct s7k3_RawDetection_struct {
   f32 pitch;                                /* Pitch at transmit time */
   f32 heave;                                /* Heave at transmit time in m*/
   f32 vehicle_depth;                       /* Vehicle depth at transmit time in m */
-  s7k3_bathydata bathydata[MBSYS_RESON7K_MAX_BEAMS];  /* Bathymetry calculated from raw detections */
+  s7k3_bathydata bathydata[MBSYS_RESON7K_MAX_SOUNDINGS];  /* Bathymetry calculated from raw detections */
 } s7k3_RawDetection;
 
 /* Reson 7k snippet data (part of record 7028) */
@@ -1743,7 +1764,8 @@ typedef struct s7k3_snippetdata_struct {
   u32 detect_sample; /* Detection point */
   u32 end_sample;    /* Last sample included in snippet */
   u32 nalloc;        /* Bytes allocated to hold amplitude time series */
-  u16 *amplitude;    /* Amplitude time series */
+  u8 *amplitude;     /* Pointer to Amplitude time series, which may be 16 bit
+                        or 32 bit values depending on the flags parameter */
 } s7k3_snippetdata;
 
 /* Reson 7k snippet data (record 7028) */
@@ -1808,7 +1830,7 @@ typedef struct s7k3_VernierProcessingDataFiltered_struct {
   f32 min_angle;        /* Minimum elevation angle in all soundings (radians) */
   f32 max_angle;        /* Maximum elevation angle in all soundings (radians) */
   u16 repeat_size;      /* Size of sounding repeat blocks following (bytes) */
-  s7k3_vernierprocessingdatasoundings vernierprocessingdatasoundings[MBSYS_RESON7K_MAX_BEAMS];
+  s7k3_vernierprocessingdatasoundings vernierprocessingdatasoundings[MBSYS_RESON7K_MAX_SOUNDINGS];
 } s7k3_VernierProcessingDataFiltered;
 
 /* Reson 7k sonar installation parameters (record 7030) */
@@ -1915,7 +1937,7 @@ typedef struct s7k3_compressedwatercolumndata_struct {
   u16 beam_number;    /* Beam Number for this data. */
   u8 segment_number;  /* Segment number for this beam. Optional field, see ‘Bit 14’ of Flags. */
   u32 samples;        /* Number of samples included for this beam. */
-  size_t nalloc;      /* Bytes allocated to hold the time series */
+  u32 nalloc;      /* Bytes allocated to hold the time series */
   u8 *data;         /* Pointer to time series. Each “Sample” may be one of the
                          following, depending on the Flags bits:
                             A) 16 bit Mag & 16bit Phase (32 bits total)
@@ -2114,7 +2136,7 @@ typedef struct s7k3_SegmentedRawDetection_struct {
   f32 pitch;                                /* Pitch at transmit time */
   f32 heave;                                /* Heave at transmit time in m*/
   f32 vehicle_depth;                       /* Vehicle depth at transmit time in m */
-  s7k3_bathydata bathydata[MBSYS_RESON7K_MAX_BEAMS];  /* Bathymetry calculated from raw detections */
+  s7k3_bathydata bathydata[MBSYS_RESON7K_MAX_SOUNDINGS];  /* Bathymetry calculated from raw detections */
 } s7k3_SegmentedRawDetection;
 
 /* Reson 7k Calibrated Beam Data (Record 7048) */
@@ -3136,7 +3158,7 @@ struct mbsys_reson7k3_struct {
   int read_SnippetBackscatteringStrength;
 
   /* MB-System time stamp */
-  double time_d;
+  f64 time_d;
   int time_i[7];
 
   /* Reference point information (record 1000) */
