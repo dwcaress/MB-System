@@ -42,7 +42,7 @@
 #include "mb_swap.h"
 
 /* turn on debug statements here */
-#define MBR_RESON7K3_DEBUG 1
+//#define MBR_RESON7K3_DEBUG 1
 //#define MBR_RESON7K3_DEBUG2 1
 //#define MBR_RESON7K3_DEBUG3 1
 
@@ -1568,7 +1568,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         }
       }
       else if (*recordid == R7KRECID_Snippet) {
-      status = mbr_reson7k3_rd_Snippet(verbose, buffer, store_ptr, error);
+        status = mbr_reson7k3_rd_Snippet(verbose, buffer, store_ptr, error);
         if (status == MB_SUCCESS) {
           store->nrec_Snippet++;
           store->read_Snippet = MB_YES;
@@ -5410,7 +5410,7 @@ int mbr_reson7k3_rd_SideScan(int verbose, char *buffer, void *store_ptr, int *er
 /* print out the results */
 #ifdef MBR_RESON7K3_DEBUG
   fprintf(stderr,
-          "R7KRECID_SideScan:           --7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d "
+          "R7KRECID_SideScan:                    --7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) ping:%d size:%d "
           "index:%d\n",
           store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
           store->time_i[6], SideScan->ping_number, header->Size, index);
@@ -6998,6 +6998,10 @@ int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *err
   s7k3_snippetdata *snippetdata;
   int index;
   int time_j[5];
+  int nsample;
+  u32 nalloc;
+  u16 *u16_ptr;
+  u32 *u32_ptr;
   int i, j;
 
   /* print input debug statements */
@@ -7054,27 +7058,75 @@ int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *err
     index += 4;
 
     /* allocate memory for snippet data if needed */
+    nsample = snippetdata->end_sample - snippetdata->begin_sample + 1;
+    if ((Snippet->flags & 0x01) != 0) {
+      nalloc = 4 * nsample;
+    } else {
+      nalloc = 2 * nsample;
+    }
     if (status == MB_SUCCESS &&
-        snippetdata->nalloc < 2 * (snippetdata->end_sample - snippetdata->begin_sample + 1)) {
-      snippetdata->nalloc = 2 * (snippetdata->end_sample - snippetdata->begin_sample + 1);
-      if (status == MB_SUCCESS)
-        status = mb_reallocd(verbose, __FILE__, __LINE__, snippetdata->nalloc,
+        snippetdata->nalloc < nalloc) {
+      status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc,
                              (void **)&(snippetdata->amplitude), error);
-      if (status != MB_SUCCESS) {
+      if (status == MB_SUCCESS) {
+        snippetdata->nalloc = nalloc;
+      } else {
         snippetdata->nalloc = 0;
       }
     }
   }
 
   /* loop over all beams to get Snippet data */
-  if (status == MB_SUCCESS)
-    for (i = 0; i < Snippet->number_beams; i++) {
-      snippetdata = (s7k3_snippetdata *)&(Snippet->snippetdata[i]);
-      for (j = 0; j < (snippetdata->end_sample - snippetdata->begin_sample + 1); j++) {
-        mb_get_binary_short(MB_YES, &buffer[index], &(snippetdata->amplitude[j]));
-        index += 2;
+  if (status == MB_SUCCESS) {
+    if ((Snippet->flags & 0x01) != 0) {
+      for (i = 0; i < Snippet->number_beams; i++) {
+        snippetdata = (s7k3_snippetdata *)&(Snippet->snippetdata[i]);
+        u32_ptr = (u32 *)snippetdata->amplitude;
+        nsample = snippetdata->end_sample - snippetdata->begin_sample + 1;
+        for (j = 0; j < nsample; j++) {
+          mb_get_binary_int(MB_YES, &buffer[index], &(u32_ptr[j]));
+          index += 4;
+        }
       }
     }
+    else {
+      for (i = 0; i < Snippet->number_beams; i++) {
+        snippetdata = (s7k3_snippetdata *)&(Snippet->snippetdata[i]);
+        u16_ptr = (u16 *)snippetdata->amplitude;
+        nsample = snippetdata->end_sample - snippetdata->begin_sample + 1;
+        for (j = 0; j < nsample; j++) {
+          mb_get_binary_short(MB_YES, &buffer[index], &(u16_ptr[j]));
+          index += 2;
+        }
+      }
+    }
+  }
+
+  /* get optional data - calculated bathymetry */
+  if (header->OptionalDataOffset != 0) {
+    Snippet->optionaldata = MB_YES;
+    index = header->OptionalDataOffset + 4;
+
+    mb_get_binary_float(MB_YES, &buffer[index], &(Snippet->frequency));
+    index += 4;
+    mb_get_binary_double(MB_YES, &buffer[index], &(Snippet->latitude));
+    index += 8;
+    mb_get_binary_double(MB_YES, &buffer[index], &(Snippet->longitude));
+    index += 8;
+    mb_get_binary_float(MB_YES, &buffer[index], &(Snippet->heading));
+    index += 4;
+    for (i = 0; i < Snippet->number_beams; i++) {
+      mb_get_binary_float(MB_YES, &buffer[index], &(Snippet->beam_alongtrack[i]));
+      index += 4;
+      mb_get_binary_float(MB_YES, &buffer[index], &(Snippet->beam_acrosstrack[i]));
+      index += 4;
+      mb_get_binary_int(MB_YES, &buffer[index], &(Snippet->center_sample[i]));
+      index += 4;
+    }
+  }
+  else {
+    Snippet->optionaldata = MB_NO;
+  }
 
   /* set kind */
   if (status == MB_SUCCESS) {
@@ -9552,12 +9604,12 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     if (status == MB_SUCCESS && store->read_Snippet == MB_YES) {
       store->type = R7KRECID_Snippet;
 #ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_Snippet:                           %4.4X | %d\n", store->type, store->type);
+//      fprintf(stderr, "**>R7KRECID_Snippet:                           %4.4X | %d\n", store->type, store->type);
 #endif
-      status = mbr_reson7k3_wr_Snippet(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+      //status = mbr_reson7k3_wr_Snippet(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      //buffer = (char *)*bufferptr;
+      //write_len = (size_t)size;
+      //status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
     }
 
     /* Reson 7k Compressed Beamformed Magnitude Data (Record 7041) */
@@ -13458,8 +13510,9 @@ int mbr_reson7k3_wr_SideScan(int verbose, int *bufferalloc, char **bufferptr, vo
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_SideScan;
   *size += 2 * SideScan->number_samples * SideScan->sample_size;
-  if (header->OptionalDataOffset > 0) {
-    *size += 28;
+  if (SideScan->optionaldata == MB_YES) {
+    header->OptionalDataOffset = *size - MBSYS_RESON7K_RECORDTAIL_SIZE;
+    *size += 32;
   }
 
   /* allocate memory to write rest of record if necessary */
@@ -15209,11 +15262,9 @@ int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr
   *size += R7KHDRSIZE_RawDetection;
   *size += RawDetection->number_beams * RawDetection->data_field_size;
   if (RawDetection->optionaldata == MB_YES) {
+    header->OptionalDataOffset = *size - MBSYS_RESON7K_RECORDTAIL_SIZE;
     *size += R7KOPTHDRSIZE_RawDetection
               + RawDetection->number_beams * R7KOPTDATSIZE_RawDetection;
-    header->OptionalDataOffset = MBSYS_RESON7K_RECORDHEADER_SIZE
-              + R7KHDRSIZE_RawDetection
-              + RawDetection->number_beams * RawDetection->data_field_size;
   } else {
     header->OptionalDataOffset = 0;
   }
@@ -15380,6 +15431,9 @@ int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, voi
   unsigned int checksum;
   int index;
   char *buffer;
+  int nsample;
+  u16 *u16_ptr;
+  u32 *u32_ptr;
   int i, j;
 
   /* print input debug statements */
@@ -15402,11 +15456,19 @@ int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, voi
   *size += R7KHDRSIZE_Snippet;
   for (i = 0; i < Snippet->number_beams; i++) {
     snippetdata = &(Snippet->snippetdata[i]);
-
-    *size += R7KRDTSIZE_snippetdata +
-             sizeof(short) * (snippetdata->end_sample - snippetdata->begin_sample + 1);
+    *size += R7KRDTSIZE_snippetdata;
+    nsample = snippetdata->end_sample - snippetdata->begin_sample + 1;
+    if ((Snippet->flags & 0x01) != 0)
+      *size += sizeof(int) * nsample;
+    else
+      *size += sizeof(short) * nsample;
   }
-  header->OptionalDataOffset = 0;
+  if (Snippet->optionaldata == MB_YES) {
+    header->OptionalDataOffset = *size - MBSYS_RESON7K_RECORDTAIL_SIZE;
+    *size += 16 + 12 * Snippet->number_beams;
+  } else {
+    header->OptionalDataOffset = 0;
+  }
   header->Size = *size;
 
 /* print out the data to be output */
@@ -15474,11 +15536,26 @@ int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, voi
     }
 
     /* loop over all beams to insert Snippet data */
-    for (i = 0; i < Snippet->number_beams; i++) {
-      snippetdata = &(Snippet->snippetdata[i]);
-      for (j = 0; j < (snippetdata->end_sample - snippetdata->begin_sample + 1); j++) {
-        mb_put_binary_short(MB_YES, snippetdata->amplitude[j], &buffer[index]);
-        index += 2;
+    if ((Snippet->flags & 0x01) != 0) {
+      for (i = 0; i < Snippet->number_beams; i++) {
+        snippetdata = (s7k3_snippetdata *)&(Snippet->snippetdata[i]);
+        nsample = snippetdata->end_sample - snippetdata->begin_sample + 1;
+        u32_ptr = (u32 *)snippetdata->amplitude;
+        for (j = 0; j < nsample; j++) {
+          mb_put_binary_int(MB_YES, u32_ptr[j], &buffer[index]);
+          index += 4;
+        }
+      }
+    }
+    else {
+      for (i = 0; i < Snippet->number_beams; i++) {
+        snippetdata = (s7k3_snippetdata *)&(Snippet->snippetdata[i]);
+        nsample = snippetdata->end_sample - snippetdata->begin_sample + 1;
+        u16_ptr = (u16 *)snippetdata->amplitude;
+        for (j = 0; j < nsample; j++) {
+          mb_put_binary_short(MB_YES, u16_ptr[j], &buffer[index]);
+          index += 2;
+        }
       }
     }
 
@@ -16153,7 +16230,7 @@ int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **
   *size += SegmentedRawDetection->n_segments * SegmentedRawDetection->segment_field_size;
   *size += SegmentedRawDetection->n_rx * SegmentedRawDetection->rx_field_size;
   if (SegmentedRawDetection->optionaldata == MB_YES) {
-    header->OptionalDataOffset = *size - 4;
+    header->OptionalDataOffset = *size - MBSYS_RESON7K_RECORDTAIL_SIZE;
     *size += R7KOPTHDRSIZE_SegmentedRawDetection
               + SegmentedRawDetection->n_rx * R7KOPTDATSIZE_SegmentedRawDetection;
   } else {
