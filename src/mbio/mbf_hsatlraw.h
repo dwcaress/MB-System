@@ -68,6 +68,8 @@
 #ifndef MBF_HSATLRAW_H_
 #define MBF_HSATLRAW_H_
 
+#include <stdio.h>
+
 /* maximum number of depth-velocity pairs */
 #define MBF_HSATLRAW_MAXVEL 30
 
@@ -179,5 +181,52 @@ struct mbf_hsatlraw_struct {
 	/* comment (LDEOCMNT) */
 	char comment[MBF_HSATLRAW_MAXLINE];
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error);
+int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
+                      int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error);
+int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error);
+int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error);
+int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+
+int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *shift, int *error);
+int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line, int *error);
+int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error);
+
+int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error);
+int mbr_hsatlraw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);
+int mbr_hsatlraw_wr_label(int verbose, FILE *mbfp, char type, int *error);
+int mbr_hsatlraw_write_line(int verbose, FILE *mbfp, char *line, int *error);
+int mbr_hsatlraw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error);
+int mbr_hsatlraw_wr_ergnhydi(int verbose, FILE *mbfp, void *data_ptr, int *error);
+int mbr_hsatlraw_wr_ergnpara(int verbose, FILE *mbfp, void *data_ptr, int *error);
+int mbr_hsatlraw_wr_ergnposi(int verbose, FILE *mbfp, void *data_ptr, int *error);
+int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error);
+int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error);
+int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error);
+int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error);
+int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error);
+int mbr_hsatlraw_wr_ldeocmnt(int verbose, FILE *mbfp, void *data_ptr, int *error);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif  /* MBF_HSATLRAW_H_ */
