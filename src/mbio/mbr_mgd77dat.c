@@ -868,7 +868,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* get nav quality */
 		mb_get_int(&data->nav_quality, &line[shift], 1);
-		shift += 1;
+		/* shift += 1; */
 	}
 
 	/* print output debug statements */
@@ -1032,7 +1032,7 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 
 		/* get nav quality */
 		sprintf(&line[shift], "%1.1d", data->nav_quality);
-		shift += 1;
+		/* shift += 1; */
 	}
 
 	write_len = fwrite(line, 1, MBF_MGD77DAT_DATA_LEN, mb_io_ptr->mbfp);
