@@ -440,13 +440,11 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   size_t read_len;
   size_t index;
   unsigned short magic_number = 0;
-  unsigned int *newscancheck, newscancheckvalue;
-  int time_i[7];
   int done;
-  int i, ipulse, isounding, ivalidpulse, ivalidsounding;
+  int ipulse, isounding, ivalidpulse, ivalidsounding;
   int skip;
   int valid_id;
-    unsigned short ushort_val;
+  unsigned short ushort_val;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -879,11 +877,10 @@ int mbr_3dwisslp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_calibration_struct *calibration;
   int *file_header_readwritten;
-    char *buffer;
+  char *buffer;
   size_t write_len;
   size_t index;
-    long file_pos;
-  int i, ipulse, isounding;
+  int ipulse, isounding;
 
   /* print input debug statements */
   if (verbose >= 2) {

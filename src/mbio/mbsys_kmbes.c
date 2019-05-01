@@ -980,9 +980,6 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
-  double heave_use, roll, pitch;
-  double alpha, beta, theta, phi;
-  int soundings_count;
   int numSoundings = 0;
   int imrz;
   int i;
@@ -1294,8 +1291,6 @@ int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
   int numSoundings = 0;
-  int imrz;
-  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -1379,10 +1374,7 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
-  double heave, roll, pitch;
-  double xtrackmin;
-  int altitude_found;
-  int i;
+
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -2314,22 +2306,13 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
   int ss_cnt[MBSYS_KMBES_MAX_PIXELS];
   double ssacrosstrack[MBSYS_KMBES_MAX_PIXELS];
   double ssalongtrack[MBSYS_KMBES_MAX_PIXELS];
-  short *beam_ss;
   int nbathsort;
   double bathsort[MBSYS_KMBES_MAX_PIXELS];
   int nsoundings, nsamples;
   double median_altitude;
-  double depthoffset;
-  double reflscale;
   double pixel_size_calc;
-  double pixel_size_max_swath;
-  double sample_size_m, sample_size_m_use;
+  double sample_size_m;
   int pixel_int_use;
-  double angle, xtrackss;
-  double range, beam_foot, beamwidth, sint;
-  int time_i[7];
-  double bath_time_d, ss_time_d;
-  int ss_ok;
   int first, last, k1, kc, k2;
   double dx1, dx2, dx, xx;
   int imrz;

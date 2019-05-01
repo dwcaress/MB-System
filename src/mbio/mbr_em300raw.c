@@ -2703,8 +2703,6 @@ int mbr_em300raw_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 	char line[EM2_EXTRAPARAMETERS_HEADER_SIZE];
 	short short_val;
 	size_t read_len;
-	int index;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -6376,8 +6374,7 @@ int mbr_em300raw_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-  int index;
-	int i, j;
+	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {

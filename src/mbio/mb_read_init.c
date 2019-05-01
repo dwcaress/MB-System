@@ -676,15 +676,11 @@ int mb_input_init(int verbose, char *file, int format,
 	struct mb_io_struct *mb_io_ptr;
 	int status_save;
 	int error_save;
-	int sapi_status;
-	char *lastslash;
-	char path[MB_PATH_MAXLINE], name[MB_PATH_MAXLINE];
+	char path[MB_PATH_MAXLINE];
 	char prjfile[MB_PATH_MAXLINE];
 	char projection_id[MB_NAME_LENGTH];
 	int proj_status;
 	FILE *pfp;
-	struct stat file_status;
-	int fstat;
 	int nscan;
 	int i;
 	char *stdin_string = "stdin";
