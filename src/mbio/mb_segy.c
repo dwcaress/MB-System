@@ -48,7 +48,6 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 	struct mb_segyfileheader_struct *fileheader;
 	char *buffer;
 	int index;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -176,7 +175,7 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 			index += 2;
 			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->domain));
 			index += 2;
-			for (i = 0; i < 238; i++) {
+			for (int i = 0; i < 238; i++) {
 				fileheader->extra[i] = buffer[index];
 				index++;
 			}
@@ -186,7 +185,7 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 			index += 2;
 			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(fileheader->num_ext_headers));
 			index += 2;
-			for (i = 0; i < 94; i++) {
+			for (int i = 0; i < 94; i++) {
 				fileheader->extra[i] = buffer[index];
 				index++;
 			}
@@ -206,9 +205,9 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       asciiheader:         %p\n", (void *)asciiheader);
 		fprintf(stderr, "dbg2       fileheader:          %p\n", (void *)fileheader);
-		for (j = 0; j < 40; j++) {
+		for (int j = 0; j < 40; j++) {
 			fprintf(stderr, "dbg2       asciiheader[%d]:", j);
-			for (i = 0; i < 80; i++)
+			for (int i = 0; i < 80; i++)
 				fprintf(stderr, "%c", asciiheader->line[j][i]);
 			fprintf(stderr, "\n");
 		}
@@ -240,12 +239,12 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 		fprintf(stderr, "dbg2       impulse_polarity:    %d\n", fileheader->impulse_polarity);
 		fprintf(stderr, "dbg2       vibrate_polarity:    %d\n", fileheader->vibrate_polarity);
 		fprintf(stderr, "dbg2       domain:              %d\n", fileheader->domain);
-		for (i = 0; i < 238; i++)
+		for (int i = 0; i < 238; i++)
 			fprintf(stderr, "dbg2       extra[%d]:          %d\n", i, fileheader->extra[i]);
 		fprintf(stderr, "dbg2       SEG Y format rev:     %d\n", fileheader->rev);
 		fprintf(stderr, "dbg2       fixed_length flag:    %d\n", fileheader->fixed_length);
 		fprintf(stderr, "dbg2       num extended headers: %d\n", fileheader->num_ext_headers);
-		for (i = 238; i < 238 + 94; i++)
+		for (int i = 238; i < 238 + 94; i++)
 			fprintf(stderr, "dbg2       extra[%d]:          %d\n", i, fileheader->extra[i]);
 		fprintf(stderr, "dbg2       fp:            %p\n", (void *)mb_segyio_ptr->fp);
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
@@ -267,7 +266,6 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 	struct mb_segyio_struct *mb_segyio_ptr;
 	char *buffer;
 	int index;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -279,9 +277,9 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 		fprintf(stderr, "dbg2       asciiheader:         %p\n", (void *)asciiheader);
 		fprintf(stderr, "dbg2       fileheader:          %p\n", (void *)fileheader);
 		if (asciiheader != NULL)
-			for (j = 0; j < 40; j++) {
+			for (int j = 0; j < 40; j++) {
 				fprintf(stderr, "dbg2       asciiheader[%d]:", j);
-				for (i = 0; i < 80; j++)
+				for (int i = 0; i < 80; j++)
 					fprintf(stderr, "%c", asciiheader->line[j][i]);
 				fprintf(stderr, "\n");
 			}
@@ -314,7 +312,7 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 			fprintf(stderr, "dbg2       impulse_polarity:    %d\n", fileheader->impulse_polarity);
 			fprintf(stderr, "dbg2       vibrate_polarity:    %d\n", fileheader->vibrate_polarity);
 			fprintf(stderr, "dbg2       domain:              %d\n", fileheader->domain);
-			for (i = 0; i < 338; i++)
+			for (int i = 0; i < 338; i++)
 				fprintf(stderr, "dbg2       extra[%d]::          %d", i, fileheader->extra[i]);
 		}
 		fprintf(stderr, "dbg2       mbsegyio_ptr:        %p\n", (void *)mbsegyio_ptr);
@@ -430,7 +428,7 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 		index += 2;
 		mb_put_binary_short(MB_NO, fileheader->domain, (void *)&(buffer[index]));
 		index += 2;
-		for (i = 0; i < 338; i++) {
+		for (int i = 0; i < 338; i++) {
 			buffer[index] = fileheader->extra[i];
 			index++;
 		}
@@ -641,7 +639,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		index += 2;
 		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->si_micros));
 		index += 2;
-		for (i = 0; i < 19; i++) {
+		for (int i = 0; i < 19; i++) {
 			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->other_1[i]));
 			index += 2;
 		}
@@ -659,7 +657,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		index += 2;
 		mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->tr_weight));
 		index += 2;
-		for (i = 0; i < 5; i++) {
+		for (int i = 0; i < 5; i++) {
 			mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(traceheader->other_2[i]));
 			index += 2;
 		}
@@ -751,7 +749,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 	if (status == MB_SUCCESS) {
 		trace = (float *)mb_segyio_ptr->trace;
 		index = 0;
-		for (i = 0; i < traceheader->nsamps; i++) {
+		for (int i = 0; i < traceheader->nsamps; i++) {
 			if (fileheader->format == 5 || fileheader->format == 6 || fileheader->format == 1) {
 				mb_get_binary_float(MB_NO, (void *)&(buffer[index]), &(trace[i]));
 				index += bytes_per_sample;
@@ -827,7 +825,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		fprintf(stderr, "dbg2       emute_mils:    %d\n", traceheader->emute_mils);
 		fprintf(stderr, "dbg2       nsamps:        %d\n", traceheader->nsamps);
 		fprintf(stderr, "dbg2       si_micros:     %d\n", traceheader->si_micros);
-		for (i = 0; i < 19; i++) {
+		for (int i = 0; i < 19; i++) {
 			fprintf(stderr, "dbg2       other_1[%d]:   %d\n", i, traceheader->other_1[i]);
 		}
 		fprintf(stderr, "dbg2       year:          %d\n", traceheader->year);
@@ -837,7 +835,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		fprintf(stderr, "dbg2       sec:           %d\n", traceheader->sec);
 		fprintf(stderr, "dbg2       mils:          %d\n", traceheader->mils);
 		fprintf(stderr, "dbg2       tr_weight:     %d\n", traceheader->tr_weight);
-		for (i = 0; i < 5; i++) {
+		for (int i = 0; i < 5; i++) {
 			fprintf(stderr, "dbg2       other_2[%d]:    %d\n", i, traceheader->other_2[i]);
 		}
 		fprintf(stderr, "dbg2       delay:         %f\n", traceheader->delay);
@@ -855,7 +853,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		fprintf(stderr, "dbg2       roll:          %f\n", traceheader->roll);
 		fprintf(stderr, "dbg2       pitch:         %f\n", traceheader->pitch);
 		fprintf(stderr, "dbg2       heading:       %f\n", traceheader->heading);
-		for (i = 0; i < traceheader->nsamps; i++)
+		for (int i = 0; i < traceheader->nsamps; i++)
 			fprintf(stderr, "dbg2       trace[%d]:%f\n", i, trace[i]);
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -881,7 +879,6 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 	int bytes_per_sample;
 	int intval;
 	short shortval;
-	int i;
 
 	/* get segyio pointer */
 	mb_segyio_ptr = (struct mb_segyio_struct *)mbsegyio_ptr;
@@ -935,7 +932,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 		fprintf(stderr, "dbg2       emute_mils:    %d\n", traceheader->emute_mils);
 		fprintf(stderr, "dbg2       nsamps:        %d\n", traceheader->nsamps);
 		fprintf(stderr, "dbg2       si_micros:     %d\n", traceheader->si_micros);
-		for (i = 0; i < 19; i++) {
+		for (int i = 0; i < 19; i++) {
 			fprintf(stderr, "dbg2       other_1[%d]:   %d\n", i, traceheader->other_1[i]);
 		}
 		fprintf(stderr, "dbg2       year:          %d\n", traceheader->year);
@@ -945,7 +942,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 		fprintf(stderr, "dbg2       sec:           %d\n", traceheader->sec);
 		fprintf(stderr, "dbg2       mils:          %d\n", traceheader->mils);
 		fprintf(stderr, "dbg2       tr_weight:     %d\n", traceheader->tr_weight);
-		for (i = 0; i < 5; i++) {
+		for (int i = 0; i < 5; i++) {
 			fprintf(stderr, "dbg2       other_2[%d]:   %d\n", i, traceheader->other_2[i]);
 		}
 		fprintf(stderr, "dbg2       delay:         %f\n", traceheader->delay);
@@ -963,7 +960,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 		fprintf(stderr, "dbg2       roll:          %f\n", traceheader->roll);
 		fprintf(stderr, "dbg2       pitch:         %f\n", traceheader->pitch);
 		fprintf(stderr, "dbg2       heading:       %f\n", traceheader->heading);
-		for (i = 0; i < traceheader->nsamps; i++)
+		for (int i = 0; i < traceheader->nsamps; i++)
 			fprintf(stderr, "dbg2       trace[%d]:%f\n", i, trace[i]);
 	}
 
@@ -1048,7 +1045,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 		index += 2;
 		mb_put_binary_short(MB_NO, fileheader->domain, (void *)&(buffer[index]));
 		index += 2;
-		for (i = 0; i < 338; i++) {
+		for (int i = 0; i < 338; i++) {
 			buffer[index] = fileheader->extra[i];
 			index++;
 		}
@@ -1180,7 +1177,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 		index += 2;
 		mb_put_binary_short(MB_NO, traceheader->si_micros, (void *)&buffer[index]);
 		index += 2;
-		for (i = 0; i < 19; i++) {
+		for (int i = 0; i < 19; i++) {
 			mb_put_binary_short(MB_NO, traceheader->other_1[i], (void *)&buffer[index]);
 			index += 2;
 		}
@@ -1198,7 +1195,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 		index += 2;
 		mb_put_binary_short(MB_NO, traceheader->tr_weight, (void *)&buffer[index]);
 		index += 2;
-		for (i = 0; i < 5; i++) {
+		for (int i = 0; i < 5; i++) {
 			mb_put_binary_short(MB_NO, traceheader->other_2[i], (void *)&buffer[index]);
 			index += 2;
 		}
@@ -1244,7 +1241,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 	if (status == MB_SUCCESS) {
 		index = 0;
 		buffer = mb_segyio_ptr->buffer;
-		for (i = 0; i < traceheader->nsamps; i++) {
+		for (int i = 0; i < traceheader->nsamps; i++) {
 			if (fileheader->format == 5 || fileheader->format == 6) {
 				mb_put_binary_float(MB_NO, trace[i], (void *)&buffer[index]);
 				index += bytes_per_sample;
@@ -1301,11 +1298,10 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
     kappa. The values of n and delta are not modified.*/
 void hilbert(int n, double delta[], double kappa[]) {
 	double d1, d2, d3, d4;
-	int i1, i2;
 
-	for (i1 = 0; i1 < n; i1++) {
+	for (int i1 = 0; i1 < n; i1++) {
 		kappa[i1] = 0.;
-		for (i2 = 1; i2 < n; i2++) {
+		for (int i2 = 1; i2 < n; i2++) {
 			d1 = (i1 + i2 < n) ? delta[i1 + i2] : 0.;
 			d2 = (i1 - i2 >= 0) ? delta[i1 - i2] : 0.;
 			d3 = (i1 + i2 + 1 < n) ? delta[i1 + i2 + 1] : 0.;
@@ -1332,11 +1328,10 @@ void hilbert(int n, double delta[], double kappa[]) {
     The values of n and even elements of data are not modified.*/
 void hilbert2(int n, double data[]) {
 	double d1, d2, d3, d4;
-	int i1, i2;
 
-	for (i1 = 0; i1 < n; i1++) {
+	for (int i1 = 0; i1 < n; i1++) {
 		data[2 * i1 + 1] = 0.;
-		for (i2 = 1; i2 < n; i2++) {
+		for (int i2 = 1; i2 < n; i2++) {
 			d1 = (i1 + i2 < n) ? data[2 * (i1 + i2)] : 0.;
 			d2 = (i1 - i2 >= 0) ? data[2 * (i1 - i2)] : 0.;
 			d3 = (i1 + i2 + 1 < n) ? data[2 * (i1 + i2 + 1)] : 0.;

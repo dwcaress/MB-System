@@ -43,7 +43,6 @@ static char rcs_id[] = "$Id$";
 int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double ypn, double *y2, int *error) {
 	char *function_name = "mb_spline_init";
 	int status = MB_SUCCESS;
-	int i, k;
 	double p, qn, sig, un, *u;
 
 	/* print input debug statements */
@@ -78,7 +77,7 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 			y2[1] = -0.5;
 			u[1] = (3.0 / (x[2] - x[1])) * ((y[2] - y[1]) / (x[2] - x[1]) - yp1);
 		}
-		for (i = 2; i <= n - 1; i++) {
+		for (int i = 2; i <= n - 1; i++) {
 			sig = (x[i] - x[i - 1]) / (x[i + 1] - x[i - 1]);
 			p = sig * y2[i - 1] + 2.0;
 			y2[i] = (sig - 1.0) / p;
@@ -92,7 +91,7 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 			un = (3.0 / (x[n] - x[n - 1])) * (ypn - (y[n] - y[n - 1]) / (x[n] - x[n - 1]));
 		}
 		y2[n] = (un - qn * u[n - 1]) / (qn * y2[n - 1] + 1.0);
-		for (k = n - 1; k >= 1; k--)
+		for (int k = n - 1; k >= 1; k--)
 			y2[k] = y2[k] * y2[k + 1] + u[k];
 
 		/* deallocate memory for vector */
@@ -114,7 +113,7 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, double x, double *y, int *i, int *error) {
 	char *function_name = "mb_spline_interp";
 	int status = MB_SUCCESS;
-	int klo, khi, k;
+	int klo, khi;
 	double h, b, a;
 
 	/* print input debug statements */
@@ -141,7 +140,7 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 		klo = 1;
 		khi = n;
 		while (khi - klo > 1) {
-			k = (khi + klo) >> 1;
+			const int k = (khi + klo) >> 1;
 			if (xa[k] > x)
 				khi = k;
 			else
@@ -175,7 +174,7 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
 	char *function_name = "mb_linear_interp";
 	int status = MB_SUCCESS;
-	int klo, khi, k;
+	int klo, khi;
 	double h, b;
 
 	/* print input debug statements */
@@ -215,7 +214,7 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 			klo = 1;
 			khi = n;
 			while (khi - klo > 1) {
-				k = (khi + klo) >> 1;
+				const int k = (khi + klo) >> 1;
 				if (xa[k] > x)
 					khi = k;
 				else
@@ -249,7 +248,7 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
 	char *function_name = "mb_linear_interp_longitude";
 	int status = MB_SUCCESS;
-	int klo, khi, k;
+	int klo, khi;
 	double h, b;
 	double yahi, yalo;
 
@@ -288,7 +287,7 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 			klo = 1;
 			khi = n;
 			while (khi - klo > 1) {
-				k = (khi + klo) >> 1;
+				const int k = (khi + klo) >> 1;
 				if (xa[k] > x)
 					khi = k;
 				else
@@ -332,7 +331,7 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
 	char *function_name = "mb_linear_interp_latitude";
 	int status = MB_SUCCESS;
-	int klo, khi, k;
+	int klo, khi;
 	double h, b;
 	double yahi, yalo;
 
@@ -371,7 +370,7 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 			klo = 1;
 			khi = n;
 			while (khi - klo > 1) {
-				k = (khi + klo) >> 1;
+				const int k = (khi + klo) >> 1;
 				if (xa[k] > x)
 					khi = k;
 				else
@@ -411,7 +410,7 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
 	char *function_name = "mb_linear_interp_heading";
 	int status = MB_SUCCESS;
-	int klo, khi, k;
+	int klo, khi;
 	double h, b;
 	double yahi, yalo;
 
@@ -450,7 +449,7 @@ int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double 
 			klo = 1;
 			khi = n;
 			while (khi - klo > 1) {
-				k = (khi + klo) >> 1;
+				const int k = (khi + klo) >> 1;
 				if (xa[k] > x)
 					khi = k;
 				else

@@ -800,7 +800,6 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 	char svalue[MB_PATH_MAXLINE];
 	int len;
 	int isensor, ioffset;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1077,7 +1076,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 							}
 
 							/* read the time latency model */
-							for (i = 0; i < platform->sensors[isensor].num_time_latency; i++) {
+							for (int i = 0; i < platform->sensors[isensor].num_time_latency; i++) {
 								if ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
 									sscanf(buffer, "%lf %lf", &platform->sensors[isensor].time_latency_time_d[i],
 									       &platform->sensors[isensor].time_latency_value[i]);
@@ -1141,7 +1140,6 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 	FILE *fp;
 	int isensor, ioffset;
 	mb_path type_string;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1330,7 +1328,7 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 			for (isensor = 0; isensor < platform->num_sensors; isensor++) {
 				fprintf(fp, "##\n");
 				strcpy(type_string, mb_sensor_type_string[0]);
-				for (i = 0; i < NUM_MB_SENSOR_TYPES; i++) {
+				for (int i = 0; i < NUM_MB_SENSOR_TYPES; i++) {
 					if (platform->sensors[isensor].type == mb_sensor_type_id[i])
 						strcpy(type_string, mb_sensor_type_string[i]);
 				}
@@ -1497,7 +1495,7 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 				else if (platform->sensors[isensor].time_latency_mode == MB_SENSOR_TIME_LATENCY_MODEL) {
 					fprintf(fp, "SENSOR_TIME_LATENCY_MODEL   %2d      %2d\n", isensor,
 					        platform->sensors[isensor].num_time_latency);
-					for (i = 0; i < platform->sensors[isensor].num_time_latency; i++) {
+					for (int i = 0; i < platform->sensors[isensor].num_time_latency; i++) {
 						fprintf(fp, "                                     %10.6lf  %10.6lf  ## Seconds, Seconds",
 						        platform->sensors[isensor].time_latency_time_d[i],
 						        platform->sensors[isensor].time_latency_value[i]);
@@ -2001,7 +1999,6 @@ int mb_platform_print(int verbose, void *platform_ptr, int *error) {
 	char *function_name = "mb_platform_print";
 	int status = MB_SUCCESS;
 	struct mb_platform_struct *platform;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2058,7 +2055,7 @@ int mb_platform_print(int verbose, void *platform_ptr, int *error) {
 			fprintf(stderr, "dbg2       platform->source_heave2:  		%d\n", platform->source_heave2);
 			fprintf(stderr, "dbg2       platform->source_heave3:  		%d\n", platform->source_heave3);
 			fprintf(stderr, "dbg2       platform->num_sensors:	     	%d\n", platform->num_sensors);
-			for (i = 0; i < platform->num_sensors; i++) {
+			for (int i = 0; i < platform->num_sensors; i++) {
 				fprintf(stderr, "dbg2       platform->sensors[%2d].type:                 %d\n", i, platform->sensors[i].type);
 				fprintf(stderr, "dbg2       platform->sensors[%2d].model:                %s\n", i, platform->sensors[i].model);
 				fprintf(stderr, "dbg2       platform->sensors[%2d].manufacturer:         %s\n", i,
@@ -2071,7 +2068,7 @@ int mb_platform_print(int verbose, void *platform_ptr, int *error) {
 				        platform->sensors[i].capability2);
 				fprintf(stderr, "dbg2       platform->sensors[%2d].num_offsets:          %d\n", i,
 				        platform->sensors[i].num_offsets);
-				for (j = 0; j < platform->sensors[i].num_offsets; j++) {
+				for (int j = 0; j < platform->sensors[i].num_offsets; j++) {
 					fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_mode:	        %d\n", i, j,
 					        platform->sensors[i].offsets[j].position_offset_mode);
 					fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_x:	        %f\n", i, j,
@@ -2095,7 +2092,7 @@ int mb_platform_print(int verbose, void *platform_ptr, int *error) {
 				        platform->sensors[i].time_latency_static);
 				fprintf(stderr, "dbg2       platform->sensors[%2d].num_time_latency:		%d\n", i,
 				        platform->sensors[i].num_time_latency);
-				for (j = 0; j < platform->sensors[i].num_time_latency; j++) {
+				for (int j = 0; j < platform->sensors[i].num_time_latency; j++) {
 					fprintf(stderr, "dbg2       platform->sensors[%2d].time_latency[%2d]:		%16.6f %8.6f\n", i, j,
 					        platform->sensors[i].time_latency_time_d[j], platform->sensors[i].time_latency_value[j]);
 				}

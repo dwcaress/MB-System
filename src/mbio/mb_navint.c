@@ -143,7 +143,6 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
 	double speed_mps;
 	int ifix = 0;
 	int ifix0, ifix1;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -164,7 +163,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Current nav fix values:\n");
-		for (i = 0; i < mb_io_ptr->nfix; i++)
+		for (int i = 0; i < mb_io_ptr->nfix; i++)
 			fprintf(stderr, "dbg2       nav fix[%2d]:   %f %f %f\n", i, mb_io_ptr->fix_time_d[i], mb_io_ptr->fix_lon[i],
 			        mb_io_ptr->fix_lat[i]);
 	}
@@ -303,7 +302,6 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
 	double speed_mps;
 	int ifix = 0;
 	int ifix0, ifix1;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -324,7 +322,7 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Current nav fix values:\n");
-		for (i = 0; i < mb_io_ptr->nfix; i++)
+		for (int i = 0; i < mb_io_ptr->nfix; i++)
 			fprintf(stderr, "dbg2       nav fix[%2d]:   %f %f %f\n", i, mb_io_ptr->fix_time_d[i], mb_io_ptr->fix_lon[i],
 			        mb_io_ptr->fix_lat[i]);
 	}
@@ -450,7 +448,6 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 	char *function_name = "mb_attint_add";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -474,7 +471,7 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 		/* if list if full make room for another attitude fix */
 		if (mb_io_ptr->nattitude >= MB_ASYNCH_SAVE_MAX) {
 			mb_io_ptr->nattitude = MB_ASYNCH_SAVE_MAX - 1;
-			for (i = 0; i < mb_io_ptr->nattitude; i++) {
+			for (int i = 0; i < mb_io_ptr->nattitude; i++) {
 				mb_io_ptr->attitude_time_d[i] = mb_io_ptr->attitude_time_d[i + 1];
 				mb_io_ptr->attitude_heave[i] = mb_io_ptr->attitude_heave[i + 1];
 				mb_io_ptr->attitude_roll[i] = mb_io_ptr->attitude_roll[i + 1];
@@ -713,7 +710,6 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 	char *function_name = "mb_hedint_add";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -735,7 +731,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 		/* if list if full make room for another heading fix */
 		if (mb_io_ptr->nheading >= MB_ASYNCH_SAVE_MAX) {
 			mb_io_ptr->nheading = MB_ASYNCH_SAVE_MAX - 1;
-			for (i = 0; i < mb_io_ptr->nheading; i++) {
+			for (int i = 0; i < mb_io_ptr->nheading; i++) {
 				mb_io_ptr->heading_time_d[i] = mb_io_ptr->heading_time_d[i + 1];
 				mb_io_ptr->heading_heading[i] = mb_io_ptr->heading_heading[i + 1];
 			}
@@ -954,7 +950,6 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 	char *function_name = "mb_depint_add";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -976,7 +971,7 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 		/* if list if full make room for another sonardepth fix */
 		if (mb_io_ptr->nsonardepth >= MB_ASYNCH_SAVE_MAX) {
 			mb_io_ptr->nsonardepth = MB_ASYNCH_SAVE_MAX - 1;
-			for (i = 0; i < mb_io_ptr->nsonardepth; i++) {
+			for (int i = 0; i < mb_io_ptr->nsonardepth; i++) {
 				mb_io_ptr->sonardepth_time_d[i] = mb_io_ptr->sonardepth_time_d[i + 1];
 				mb_io_ptr->sonardepth_sonardepth[i] = mb_io_ptr->sonardepth_sonardepth[i + 1];
 			}
@@ -1115,7 +1110,6 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 	char *function_name = "mb_altint_add";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1137,7 +1131,7 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 		/* if list if full make room for another altitude fix */
 		if (mb_io_ptr->naltitude >= MB_ASYNCH_SAVE_MAX) {
 			mb_io_ptr->naltitude = MB_ASYNCH_SAVE_MAX - 1;
-			for (i = 0; i < mb_io_ptr->naltitude; i++) {
+			for (int i = 0; i < mb_io_ptr->naltitude; i++) {
 				mb_io_ptr->altitude_time_d[i] = mb_io_ptr->altitude_time_d[i + 1];
 				mb_io_ptr->altitude_altitude[i] = mb_io_ptr->altitude_altitude[i + 1];
 			}
@@ -2876,8 +2870,6 @@ int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double 
 	double *data_value_filtered = NULL;
 	double dtime, dtol, filterweight, weight;
 	int nhalffilter;
-	size_t size;
-	int i, j, j1, j2;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2893,17 +2885,17 @@ int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double 
 	}
 
 	/* apply a Gaussian time domain filter to the time series provided */
-	size = data_num * sizeof(double);
+	const size_t size = data_num * sizeof(double);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&data_value_filtered, error);
 	if (status == MB_SUCCESS) {
 		dtime = (data_time_d[data_num - 1] - data_time_d[0]) / data_num;
 		nhalffilter = (int)(4.0 * filter_length / dtime);
-		for (i = 0; i < data_num; i++) {
+		for (int i = 0; i < data_num; i++) {
 			data_value_filtered[i] = 0.0;
 			filterweight = 0.0;
-			j1 = MAX(i - nhalffilter, 0);
-			j2 = MIN(i + nhalffilter, data_num - 1);
-			for (j = j1; j <= j2; j++) {
+			const int j1 = MAX(i - nhalffilter, 0);
+			const int j2 = MIN(i + nhalffilter, data_num - 1);
+			for (int j = j1; j <= j2; j++) {
 				dtol = (data_time_d[j] - data_time_d[i]) / filter_length;
 				weight = exp(-dtol * dtol);
 				data_value_filtered[i] += weight * data_value[j];
@@ -2912,7 +2904,7 @@ int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double 
 			if (filterweight > 0.0)
 				data_value_filtered[i] /= filterweight;
 		}
-		for (i = 0; i < data_num; i++) {
+		for (int i = 0; i < data_num; i++) {
 			data_value[i] = data_value_filtered[i];
 		}
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&data_value_filtered, error);
