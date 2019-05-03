@@ -108,7 +108,6 @@ int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int 
 	char *function_name = "mb_esf_load";
 	int status = MB_SUCCESS;
 	int found;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -152,7 +151,7 @@ int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int 
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       esfile:      %s\n", esffile);
 		fprintf(stderr, "dbg2       nedit:       %d\n", esf->nedit);
-		for (i = 0; i < esf->nedit; i++)
+		for (int i = 0; i < esf->nedit; i++)
 			fprintf(stderr, "dbg2       edit event:  %d %.6f %5d %3d %3d\n", i, esf->edit[i].time_d, esf->edit[i].beam,
 			        esf->edit[i].action, esf->edit[i].use);
 		fprintf(stderr, "dbg2       esf->esffp:  %p\n", (void *)esf->esffp);
@@ -194,7 +193,6 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 	mb_path esf_header;
 
 	int nedit;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -423,7 +421,7 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       nedit:       %d\n", esf->nedit);
 		fprintf(stderr, "dbg2       mode:        %d\n", esf->mode);
-		for (i = 0; i < esf->nedit; i++)
+		for (int i = 0; i < esf->nedit; i++)
 			fprintf(stderr, "dbg2       edit event:  %d %.6f %5d %3d %3d\n", i, esf->edit[i].time_d, esf->edit[i].beam,
 			        esf->edit[i].action, esf->edit[i].use);
 		fprintf(stderr, "dbg2       esf->esffile:          %s\n", esf->esffile);
@@ -452,7 +450,6 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, double tolerance, int *error) {
 	char *function_name = "mb_esf_fixtimestamps";
 	int status = MB_SUCCESS;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -461,7 +458,7 @@ int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, 
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       nedit:            %d\n", esf->nedit);
-		for (i = 0; i < esf->nedit; i++)
+		for (int i = 0; i < esf->nedit; i++)
 			fprintf(stderr, "dbg2       edit event: %d %.6f %5d %3d %3d\n", i, esf->edit[i].time_d, esf->edit[i].beam,
 			        esf->edit[i].action, esf->edit[i].use);
 		fprintf(stderr, "dbg2       time_d:           %f\n", time_d);
@@ -470,7 +467,7 @@ int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, 
 
 	/* all edits that have timestamps within tolerance of time_d will have
 	their timestamps set to time_d */
-	for (j = 0; j < esf->nedit; j++) {
+	for (int j = 0; j < esf->nedit; j++) {
 		if (fabs(esf->edit[j].time_d - time_d) < tolerance) {
 			esf->edit[j].time_d = time_d;
 		}
@@ -481,7 +478,7 @@ int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, 
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
 		fprintf(stderr, "dbg2  Return value:\n");
-		for (i = 0; i < esf->nedit; i++)
+		for (int i = 0; i < esf->nedit; i++)
 			fprintf(stderr, "dbg2       edit event: %d %.6f %5d %3d %3d\n", i, esf->edit[i].time_d, esf->edit[i].beam,
 			        esf->edit[i].action, esf->edit[i].use);
 		fprintf(stderr, "dbg2       error:  %d\n", *error);

@@ -61,7 +61,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 	FILE *fp;
 	char *stdin_string = "stdin";
 	int nscan;
-	int i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -118,11 +117,11 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 				else if (strncmp(line, "CM dimensions:", 14) == 0) {
 					sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
 					status = mb_mallocd(verbose, __FILE__, __LINE__, mask_nx * mask_ny * sizeof(int), (void **)&mask, error);
-					for (j = mask_ny - 1; j >= 0; j--) {
+					for (int j = mask_ny - 1; j >= 0; j--) {
 						if ((startptr = fgets(line, 128, fp)) != NULL) {
 							startptr = &line[6];
-							for (i = 0; i < mask_nx; i++) {
-								k = i + j * mask_nx;
+							for (int i = 0; i < mask_nx; i++) {
+								int k = i + j * mask_nx;
 								mask[k] = strtol(startptr, &endptr, 0);
 								startptr = endptr;
 							}
@@ -160,9 +159,9 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 					*file_in_bounds = MB_NO;
 					mask_dx = (lon_max - lon_min) / mask_nx;
 					mask_dy = (lat_max - lat_min) / mask_ny;
-					for (i = 0; i < mask_nx && *file_in_bounds == MB_NO; i++)
-						for (j = 0; j < mask_ny && *file_in_bounds == MB_NO; j++) {
-							k = i + j * mask_nx;
+					for (int i = 0; i < mask_nx && *file_in_bounds == MB_NO; i++)
+						for (int j = 0; j < mask_ny && *file_in_bounds == MB_NO; j++) {
+							int k = i + j * mask_nx;
 							lonwest = lon_min + i * mask_dx;
 							loneast = lonwest + mask_dx;
 							latsouth = lat_min + j * mask_dy;
@@ -256,8 +255,6 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 	double speedkts;
 	int nscan, nproblem, problemid;
 	int mask_nx, mask_ny;
-	// int	i, j, k;
-	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -439,7 +436,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 
 			else if (strncmp(line, "CM dimensions:", 14) == 0) {
 				sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
-				for (j = 0; j < mask_ny; j++)
+				for (int j = 0; j < mask_ny; j++)
 					fgets(line, 128, fp);
 				// sscanf(line, "CM dimensions: %d %d", &mb_info->mask_nx, &mb_info->mask_ny);
 				// status = mb_mallocd(verbose,__FILE__, __LINE__,mb_info->mask_nx*mb_info->mask_ny*sizeof(int),

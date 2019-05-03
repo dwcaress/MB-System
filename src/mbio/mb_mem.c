@@ -53,7 +53,6 @@ static char svn_id[] = "$Id$";
 int mb_mem_debug_on(int verbose, int *error) {
 	char *function_name = "mb_mem_debug_on";
 	int status = MB_SUCCESS;
-	int i;
 
 	/* turn debug output on */
 	mb_mem_debug = MB_YES;
@@ -69,7 +68,7 @@ int mb_mem_debug_on(int verbose, int *error) {
 	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", function_name);
-		for (i = 0; i < n_mb_alloc; i++)
+		for (int i = 0; i < n_mb_alloc; i++)
 			fprintf(stderr, "dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n", i, (void *)mb_alloc_ptr[i], mb_alloc_size[i],
 			        mb_alloc_sourcefile[i], mb_alloc_sourceline[i]);
 	}
@@ -91,7 +90,6 @@ int mb_mem_debug_on(int verbose, int *error) {
 int mb_mem_debug_off(int verbose, int *error) {
 	char *function_name = "mb_mem_debug_off";
 	int status = MB_SUCCESS;
-	int i;
 
 	/* turn debug output off */
 	mb_mem_debug = MB_NO;
@@ -107,7 +105,7 @@ int mb_mem_debug_off(int verbose, int *error) {
 	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", function_name);
-		for (i = 0; i < n_mb_alloc; i++)
+		for (int i = 0; i < n_mb_alloc; i++)
 			fprintf(stderr, "dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n", i, (void *)mb_alloc_ptr[i], mb_alloc_size[i],
 			        mb_alloc_sourcefile[i], mb_alloc_sourceline[i]);
 	}
@@ -129,7 +127,6 @@ int mb_mem_debug_off(int verbose, int *error) {
 int mb_malloc(int verbose, size_t size, void **ptr, int *error) {
 	char *function_name = "mb_malloc";
 	int status = MB_SUCCESS;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2 || mb_mem_debug) {
@@ -184,7 +181,7 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error) {
 	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", function_name);
-		for (i = 0; i < n_mb_alloc; i++)
+		for (int i = 0; i < n_mb_alloc; i++)
 			fprintf(stderr, "dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n", i, (void *)mb_alloc_ptr[i], mb_alloc_size[i],
 			        mb_alloc_sourcefile[i], mb_alloc_sourceline[i]);
 	}
@@ -206,7 +203,6 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error) {
 int mb_mallocd(int verbose, const char *sourcefile, int sourceline, size_t size, void **ptr, int *error) {
 	char *function_name = "mb_mallocd";
 	int status = MB_SUCCESS;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2 || mb_mem_debug) {
@@ -265,7 +261,7 @@ int mb_mallocd(int verbose, const char *sourcefile, int sourceline, size_t size,
 	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", function_name);
-		for (i = 0; i < n_mb_alloc; i++)
+		for (int i = 0; i < n_mb_alloc; i++)
 			fprintf(stderr, "dbg6       i:%d  ptr:%p  size:%zu source:%s line:%d\n", i, (void *)mb_alloc_ptr[i], mb_alloc_size[i],
 			        mb_alloc_sourcefile[i], mb_alloc_sourceline[i]);
 	}
@@ -821,7 +817,6 @@ int mb_register_array(int verbose, void *mbio_ptr, int type, size_t size, void *
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	int nalloc;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2 || mb_mem_debug) {
@@ -855,7 +850,7 @@ int mb_register_array(int verbose, void *mbio_ptr, int type, size_t size, void *
 		if (status == MB_SUCCESS)
 			status = mb_reallocd(verbose, __FILE__, __LINE__, mb_io_ptr->n_regarray_alloc * sizeof(size_t),
 			                     (void **)&(mb_io_ptr->regarray_size), error);
-		for (i = mb_io_ptr->n_regarray; i < mb_io_ptr->n_regarray_alloc; i++) {
+		for (int i = mb_io_ptr->n_regarray; i < mb_io_ptr->n_regarray_alloc; i++) {
 			mb_io_ptr->regarray_handle[i] = NULL;
 			mb_io_ptr->regarray_ptr[i] = NULL;
 			mb_io_ptr->regarray_oldptr[i] = NULL;
@@ -997,7 +992,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 		if (status == MB_SUCCESS)
 			status = mb_reallocd(verbose, __FILE__, __LINE__, mb_io_ptr->beams_bath_alloc * sizeof(double),
 			                     (void **)&mb_io_ptr->new_bath_alongtrack, error);
-		for (i = mb_io_ptr->beams_bath_max; i < mb_io_ptr->beams_bath_alloc; i++) {
+		for (int i = mb_io_ptr->beams_bath_max; i < mb_io_ptr->beams_bath_alloc; i++) {
 			mb_io_ptr->beamflag[i] = 0;
 			mb_io_ptr->bath[i] = 0.0;
 			mb_io_ptr->bath_acrosstrack[i] = 0.0;
@@ -1025,7 +1020,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 		//}
 
 		/* allocate registered arrays */
-		for (i = 0; i < mb_io_ptr->n_regarray; i++) {
+		for (int i = 0; i < mb_io_ptr->n_regarray; i++) {
 			/* allocate the bathymetry dimensioned arrays */
 			if (mb_io_ptr->regarray_type[i] == MB_MEM_TYPE_BATHYMETRY && mb_io_ptr->beams_bath_alloc > 0) {
 				mb_io_ptr->regarray_oldptr[i] = mb_io_ptr->regarray_ptr[i];
@@ -1061,7 +1056,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 		if (status == MB_SUCCESS)
 			status = mb_reallocd(verbose, __FILE__, __LINE__, mb_io_ptr->beams_amp_alloc * sizeof(double),
 			                     (void **)&mb_io_ptr->new_amp, error);
-		for (i = mb_io_ptr->beams_amp_max; i < mb_io_ptr->beams_amp_alloc; i++) {
+		for (int i = mb_io_ptr->beams_amp_max; i < mb_io_ptr->beams_amp_alloc; i++) {
 			mb_io_ptr->amp[i] = 0.0;
 			mb_io_ptr->amp_num[i] = 0;
 			mb_io_ptr->new_amp[i] = 0.0;
@@ -1069,7 +1064,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 		mb_io_ptr->beams_amp_max = namp;
 
 		/* allocate registered arrays */
-		for (i = 0; i < mb_io_ptr->n_regarray; i++) {
+		for (int i = 0; i < mb_io_ptr->n_regarray; i++) {
 			/* allocate the amplitude dimensioned arrays */
 			if (mb_io_ptr->regarray_type[i] == MB_MEM_TYPE_AMPLITUDE && mb_io_ptr->beams_amp_alloc > 0) {
 				mb_io_ptr->regarray_oldptr[i] = mb_io_ptr->regarray_ptr[i];
@@ -1117,7 +1112,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 		if (status == MB_SUCCESS)
 			status = mb_reallocd(verbose, __FILE__, __LINE__, mb_io_ptr->pixels_ss_alloc * sizeof(double),
 			                     (void **)&mb_io_ptr->new_ss_alongtrack, error);
-		for (i = mb_io_ptr->pixels_ss_max; i < mb_io_ptr->pixels_ss_alloc; i++) {
+		for (int i = mb_io_ptr->pixels_ss_max; i < mb_io_ptr->pixels_ss_alloc; i++) {
 			mb_io_ptr->ss[i] = 0.0;
 			mb_io_ptr->ss_acrosstrack[i] = 0.0;
 			mb_io_ptr->ss_alongtrack[i] = 0.0;
@@ -1129,7 +1124,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 		mb_io_ptr->pixels_ss_max = nss;
 
 		/* allocate registered arrays */
-		for (i = 0; i < mb_io_ptr->n_regarray; i++) {
+		for (int i = 0; i < mb_io_ptr->n_regarray; i++) {
 			/* allocate the sidescan dimensioned arrays */
 			if (mb_io_ptr->regarray_type[i] == MB_MEM_TYPE_SIDESCAN && mb_io_ptr->pixels_ss_alloc > 0) {
 				mb_io_ptr->regarray_oldptr[i] = mb_io_ptr->regarray_ptr[i];
@@ -1147,7 +1142,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE) {
 		/* free the registered arrays */
-		for (i = 0; i < mb_io_ptr->n_regarray; i++) {
+		for (int i = 0; i < mb_io_ptr->n_regarray; i++) {
 			/* free all arrays */
 			if (mb_io_ptr->regarray_handle[i] != NULL) {
 				status = mb_free(verbose, (void **)(mb_io_ptr->regarray_handle[i]), error);
@@ -1217,7 +1212,6 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error) {
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	int found;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2 || mb_mem_debug) {
@@ -1234,7 +1228,7 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error) {
 
 	/* look for handle in registered arrays */
 	found = MB_NO;
-	for (i = 0; i < mb_io_ptr->n_regarray && found == MB_NO; i++) {
+	for (int i = 0; i < mb_io_ptr->n_regarray && found == MB_NO; i++) {
 		if (*handle == mb_io_ptr->regarray_oldptr[i]) {
 			*handle = mb_io_ptr->regarray_ptr[i];
 			/*fprintf(stderr,"check handle:%x old ptrs:%x %x",handle,*handle,mb_io_ptr->regarray_oldptr[i]);

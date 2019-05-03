@@ -47,7 +47,6 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int 
 	char *function_name = "mb_put_all";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -78,20 +77,20 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int 
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3 && nbath > 0) {
 			fprintf(stderr, "dbg3       beam  flag  bath  crosstrack alongtrack\n");
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       %4d   %3d   %f    %f     %f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3 && namp > 0) {
 			fprintf(stderr, "dbg3       beam    amp  crosstrack alongtrack\n");
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3       %4d   %f    %f     %f\n", i, amp[i], bathacrosstrack[i], bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg2       nss:        %d\n", nss);
 		if (verbose >= 3 && nss > 0) {
 			fprintf(stderr, "dbg3       pixel sidescan crosstrack alongtrack\n");
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3       %4d   %f    %f     %f\n", i, ss[i], ssacrosstrack[i], ssalongtrack[i]);
 		}
 	}

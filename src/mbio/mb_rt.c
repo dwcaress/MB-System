@@ -871,7 +871,6 @@ int mb_rt_plot_circular(int verbose, int *error) {
 	double af;
 	double dang;
 	double angle;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -889,7 +888,7 @@ int mb_rt_plot_circular(int verbose, int *error) {
 		dang = (af - ai) / MB_RT_NUMBER_SEGMENTS;
 
 		/* add points to plotting arrays */
-		for (i = 0; i < MB_RT_NUMBER_SEGMENTS; i++) {
+		for (int i = 0; i < MB_RT_NUMBER_SEGMENTS; i++) {
 			angle = ai + (i + 1) * dang;
 			if (model->number_plot < model->number_plot_max) {
 				model->xx_plot[model->number_plot] = model->sign_x * (model->xc + model->radius * sin(angle));
