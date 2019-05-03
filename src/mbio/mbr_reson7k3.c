@@ -548,7 +548,6 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_rt_reson7k3";
   int status = MB_SUCCESS;
-  int interp_status;
   int interp_error = MB_ERROR_NO_ERROR;
   struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k3_struct *store;
@@ -796,9 +795,7 @@ int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   int *nbadrec;
   int skip;
   int ping_record;
-  int time_j[5], time_i[7];
-  double time_d;
-  int nscan;
+  int time_j[5];
   int done;
   size_t read_len;
   int i;
@@ -2302,7 +2299,6 @@ int mbr_reson7k3_chk_pingnumber(int verbose, int recordid, char *buffer, int *pi
 int mbr_reson7k3_rd_header(int verbose, char *buffer, int *index, s7k3_header *header, int *error) {
   char *function_name = "mbr_reson7k3_rd_header";
   int status = MB_SUCCESS;
-  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -5072,7 +5068,6 @@ int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *
   s7k3_Bathymetry *Bathymetry;
   int index;
   int time_j[5];
-  double acrosstrackmax, alongtrackmax;
   int i;
 
   /* print input debug statements */
@@ -10037,7 +10032,6 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_reson7k3_wr_header(int verbose, char *buffer, int *index, s7k3_header *header, int *error) {
   char *function_name = "mbr_reson7k3_wr_header";
   int status = MB_SUCCESS;
-  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -15240,7 +15234,7 @@ int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr
   unsigned int checksum;
   int index;
   char *buffer;
-  int i, j;
+  int i;
 
   /* print input debug statements */
   if (verbose >= 2) {

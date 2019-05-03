@@ -96,7 +96,6 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 	char *function_name = "mb_buffer_close";
 	int status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -115,10 +114,10 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 	if (buff->nbuffer > 0) {
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Remaining records in buffer: %d\n", buff->nbuffer);
-			for (i = 0; i < buff->nbuffer; i++)
+			for (int i = 0; i < buff->nbuffer; i++)
 				fprintf(stderr, "dbg4       Record[%d] pointer: %p\n", i, (void *)(buff->buffer[i]));
 		}
-		for (i = 0; i < buff->nbuffer; i++)
+		for (int i = 0; i < buff->nbuffer; i++)
 			status = mb_deall(verbose, mbio_ptr, &buff->buffer[i], error);
 	}
 
@@ -729,7 +728,6 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
 	char *store_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -794,20 +792,20 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
 		fprintf(stderr, "dbg4       nbath:         %d\n", *nbath);
 		if (*nbath > 0) {
 			fprintf(stderr, "dbg4       beam    flag   bath  crosstrack alongtrack\n");
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       %4d   %3d   %f    %f     %f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg4       namp:          %d\n", *namp);
 		if (*namp > 0) {
 			fprintf(stderr, "dbg4       beam    amp  crosstrack alongtrack\n");
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       %4d   %f    %f     %f\n", i, amp[i], bathacrosstrack[i], bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg4       nss:           %d\n", *nss);
 		if (*nss > 0) {
 			fprintf(stderr, "dbg4       pixel sidescan crosstrack alongtrack\n");
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4       %4d   %f    %f     %f\n", i, ss[i], ssacrosstrack[i], ssalongtrack[i]);
 		}
 	}
@@ -906,7 +904,6 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
 	char *store_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -931,20 +928,20 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
 		fprintf(stderr, "dbg4       nbath:      %d\n", nbath);
 		if (nbath > 0) {
 			fprintf(stderr, "dbg4       beam   flag   bath  crosstrack alongtrack\n");
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg4       %4d   %3d   %f    %f     %f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg4       namp:          %d\n", namp);
 		if (namp > 0) {
 			fprintf(stderr, "dbg4       beam    amp  crosstrack alongtrack\n");
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg4       %4d   %f    %f     %f\n", i, amp[i], bathacrosstrack[i], bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg4       nss:           %d\n", nss);
 		if (nss > 0) {
 			fprintf(stderr, "dbg4       pixel sidescan crosstrack alongtrack\n");
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg4       %4d   %f    %f     %f\n", i, ss[i], ssacrosstrack[i], ssalongtrack[i]);
 		}
 		fprintf(stderr, "dbg2       comment:    %s\n", comment);

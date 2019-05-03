@@ -414,12 +414,11 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_rt_kemkmall";
   int status = MB_SUCCESS;
-  int interp_status;
   int interp_error = MB_ERROR_NO_ERROR;
   struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   int *file_indexed = NULL;
-	double *pixel_size, *swath_width;
+  double *pixel_size, *swath_width;
 
   /* print input debug statements */
   if (verbose >= 2) {

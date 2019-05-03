@@ -4709,7 +4709,6 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 	int status = MB_SUCCESS;
 	int found_depth, found_slope;
 	int idepth, islope;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4719,11 +4718,11 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       ndepths:         %d\n", ndepths);
 		fprintf(stderr, "dbg2       depths:\n");
-		for (i = 0; i < ndepths; i++)
+		for (int i = 0; i < ndepths; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, depths[i], depthacrosstrack[i]);
 		fprintf(stderr, "dbg2       nslopes:         %d\n", nslopes);
 		fprintf(stderr, "dbg2       slopes:\n");
-		for (i = 0; i < nslopes; i++)
+		for (int i = 0; i < nslopes; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, slopes[i], slopeacrosstrack[i]);
 		fprintf(stderr, "dbg2       acrosstrack:     %f\n", acrosstrack);
 	}

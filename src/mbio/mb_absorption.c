@@ -417,7 +417,6 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
 	double RT = 0.0;
 	double RP = 0.0;
 	double temp, sum1, sum2, result, val;
-	int i;
 	
 	/* constants for salinity calculation */
 	double A1 = 2.070e-5, A2 = -6.370e-10, A3 = 3.989e-15;
@@ -450,7 +449,7 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
         if (RT <= 0.0)
 			RT = 0.000001;
         sum1 = sum2 = 0.0;
-        for (i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) {
             temp = pow(RT, (double)i / 2.0);
 			sum1 += a[i] * temp;
 			sum2 += b[i] * temp;
@@ -487,8 +486,6 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 						  double *soundspeed, int *error) {
 	char *function_name = "mb_seabird_soundspeed";
 	int status = MB_SUCCESS;
-	double R, RT, RP, temp, sum1, sum2, result, val;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {

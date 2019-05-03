@@ -91,9 +91,9 @@ test/**/.deps
 test/**/.libs
 test/**/Makefile
 test/**/*.exe
-test/mbio/mb_time_test
-test/mbio/mb_time_test.log
-test/mbio/mb_time_test.trs
+test/**/*_test
+test/**/*_test.log
+test/**/*_test.trs
 test-suite.log
 third_party/**/*.o
 third_party/**/*.lo

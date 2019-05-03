@@ -506,7 +506,6 @@ int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	int status;
 	struct mb_io_struct *mb_io_ptr;
 	struct mb_platform_struct *platform;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -572,7 +571,7 @@ int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       platform->source_heave2:  		%d\n", platform->source_heave2);
 		fprintf(stderr, "dbg2       platform->source_heave3:  		%d\n", platform->source_heave3);
 		fprintf(stderr, "dbg2       platform->num_sensors:	     	%d\n", platform->num_sensors);
-		for (i = 0; i < platform->num_sensors; i++) {
+		for (int i = 0; i < platform->num_sensors; i++) {
 			fprintf(stderr, "dbg2       platform->sensors[%2d].type:                 %d\n", i, platform->sensors[i].type);
 			fprintf(stderr, "dbg2       platform->sensors[%2d].model:                %s\n", i, platform->sensors[i].model);
 			fprintf(stderr, "dbg2       platform->sensors[%2d].manufacturer:         %s\n", i, platform->sensors[i].manufacturer);
@@ -580,7 +579,7 @@ int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			fprintf(stderr, "dbg2       platform->sensors[%2d].capability1:          %d\n", i, platform->sensors[i].capability1);
 			fprintf(stderr, "dbg2       platform->sensors[%2d].capability2:          %d\n", i, platform->sensors[i].capability2);
 			fprintf(stderr, "dbg2       platform->sensors[%2d].num_offsets:          %d\n", i, platform->sensors[i].num_offsets);
-			for (j = 0; j < platform->sensors[i].num_offsets; j++) {
+			for (int j = 0; j < platform->sensors[i].num_offsets; j++) {
 				fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_mode:	        %d\n", i, j,
 				        platform->sensors[i].offsets[j].position_offset_mode);
 				fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_x:	        %f\n", i, j,
@@ -604,7 +603,7 @@ int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			        platform->sensors[i].time_latency_static);
 			fprintf(stderr, "dbg2       platform->sensors[%2d].num_time_latency:		%d\n", i,
 			        platform->sensors[i].num_time_latency);
-			for (j = 0; j < platform->sensors[i].num_time_latency; j++) {
+			for (int j = 0; j < platform->sensors[i].num_time_latency; j++) {
 				fprintf(stderr, "dbg2       platform->sensors[%2d].time_latency[%2d]:		%16.6f %8.6f\n", i, j,
 				        platform->sensors[i].time_latency_time_d[j], platform->sensors[i].time_latency_value[j]);
 			}
@@ -683,7 +682,6 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time
 	int status;
 	struct mb_io_struct *mb_io_ptr;
 	double easting, northing;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -765,15 +763,15 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -794,7 +792,6 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
 	int status;
 	struct mb_io_struct *mb_io_ptr;
 	double easting, northing;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -823,17 +820,17 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -981,7 +978,7 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int 
 	int status;
 	struct mb_io_struct *mb_io_ptr;
 	double easting, northing;
-	int i, inav;
+	int inav;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1049,7 +1046,7 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int 
 
 	/* apply projection and lonflip if necessary */
 	if (status == MB_SUCCESS) {
-		for (inav = 0; inav < *n; inav++) {
+		for (int inav = 0; inav < *n; inav++) {
 			/* apply inverse projection if required */
 			if (mb_io_ptr->projection_initialized == MB_YES) {
 				easting = navlon[inav];
@@ -1086,8 +1083,8 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int 
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       n:          %d\n", *n);
-		for (inav = 0; inav < *n; inav++) {
-			for (i = 0; i < 7; i++)
+		for (int inav = 0; inav < *n; inav++) {
+			for (int i = 0; i < 7; i++)
 				fprintf(stderr, "dbg2       %d time_i[%d]:     %d\n", inav, i, time_i[inav * 7 + i]);
 			fprintf(stderr, "dbg2       %d time_d:        %f\n", inav, time_d[inav]);
 			fprintf(stderr, "dbg2       %d longitude:     %f\n", inav, navlon[inav]);
@@ -1264,7 +1261,6 @@ int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int 
 	char *function_name = "mb_extract_svp";
 	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1295,7 +1291,7 @@ int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int 
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
-		for (i = 0; i < *nsvp; i++)
+		for (int i = 0; i < *nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1309,7 +1305,6 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double
 	char *function_name = "mb_insert_svp";
 	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1320,7 +1315,7 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double
 		fprintf(stderr, "dbg2       mb_ptr:            %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:         %p\n", (void *)store_ptr);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", nsvp);
-		for (i = 0; i < nsvp; i++)
+		for (int i = 0; i < nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 	}
 
@@ -1524,7 +1519,6 @@ int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbea
 	char *function_name = "mb_ttimes";
 	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1560,7 +1554,7 @@ int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbea
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  heave:%f  ltrk_off:%f\n", i,
 			        ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -1626,7 +1620,6 @@ int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbea
 	char *function_name = "mb_pulses";
 	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1659,7 +1652,7 @@ int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbea
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: pulses:%d\n", i, pulses[i]);
 	}
 	if (verbose >= 2) {
@@ -1772,7 +1765,6 @@ int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	char *function_name = "mb_extract_rawss";
 	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1809,10 +1801,10 @@ int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 		fprintf(stderr, "dbg2       beamwidth_xtrack:  %lf\n", *beamwidth_xtrack);
 		fprintf(stderr, "dbg2       beamwidth_ltrack:  %lf\n", *beamwidth_ltrack);
 		fprintf(stderr, "dbg2       num_samples_port:  %d\n", *num_samples_port);
-		for (i = 0; i < *num_samples_port; i++)
+		for (int i = 0; i < *num_samples_port; i++)
 			fprintf(stderr, "dbg2       sample: %d  rawss_port:%f\n", i, rawss_port[i]);
 		fprintf(stderr, "dbg2       num_samples_stbd:  %d\n", *num_samples_stbd);
-		for (i = 0; i < *num_samples_stbd; i++)
+		for (int i = 0; i < *num_samples_stbd; i++)
 			fprintf(stderr, "dbg2       sample: %d  rawss_stbd:%f\n", i, rawss_stbd[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1828,7 +1820,6 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
 	char *function_name = "mb_insert_rawss";
 	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1844,10 +1835,10 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
 		fprintf(stderr, "dbg2       beamwidth_xtrack:  %lf\n", beamwidth_xtrack);
 		fprintf(stderr, "dbg2       beamwidth_ltrack:  %lf\n", beamwidth_ltrack);
 		fprintf(stderr, "dbg2       num_samples_port:  %d\n", num_samples_port);
-		for (i = 0; i < num_samples_port; i++)
+		for (int i = 0; i < num_samples_port; i++)
 			fprintf(stderr, "dbg2       sample: %d  rawss_port:%f\n", i, rawss_port[i]);
 		fprintf(stderr, "dbg2       num_samples_stbd:  %d\n", num_samples_stbd);
-		for (i = 0; i < num_samples_stbd; i++)
+		for (int i = 0; i < num_samples_stbd; i++)
 			fprintf(stderr, "dbg2       sample: %d  rawss_stbd:%f\n", i, rawss_stbd[i]);
 	}
 
@@ -1883,7 +1874,6 @@ int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int
 	int status;
 	struct mb_io_struct *mb_io_ptr;
 	struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1955,7 +1945,7 @@ int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int
 		fprintf(stderr, "dbg2       emute_mils:        %d\n", mb_segytraceheader_ptr->emute_mils);
 		fprintf(stderr, "dbg2       nsamps:            %d\n", mb_segytraceheader_ptr->nsamps);
 		fprintf(stderr, "dbg2       si_micros:         %d\n", mb_segytraceheader_ptr->si_micros);
-		for (i = 0; i < 19; i++)
+		for (int i = 0; i < 19; i++)
 			fprintf(stderr, "dbg2       other_1[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_1[i]);
 		fprintf(stderr, "dbg2       year:              %d\n", mb_segytraceheader_ptr->year);
 		fprintf(stderr, "dbg2       day_of_yr:         %d\n", mb_segytraceheader_ptr->day_of_yr);
@@ -1964,7 +1954,7 @@ int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int
 		fprintf(stderr, "dbg2       sec:               %d\n", mb_segytraceheader_ptr->sec);
 		fprintf(stderr, "dbg2       mils:              %d\n", mb_segytraceheader_ptr->mils);
 		fprintf(stderr, "dbg2       tr_weight:         %d\n", mb_segytraceheader_ptr->tr_weight);
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			fprintf(stderr, "dbg2       other_2[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_2[i]);
 		fprintf(stderr, "dbg2       delay:             %f\n", mb_segytraceheader_ptr->delay);
 		fprintf(stderr, "dbg2       smute_sec:         %f\n", mb_segytraceheader_ptr->smute_sec);
@@ -1995,7 +1985,6 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *samplefor
 	int status;
 	struct mb_io_struct *mb_io_ptr;
 	struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2070,7 +2059,7 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *samplefor
 		fprintf(stderr, "dbg2       emute_mils:     %d\n", mb_segytraceheader_ptr->emute_mils);
 		fprintf(stderr, "dbg2       nsamps:         %d\n", mb_segytraceheader_ptr->nsamps);
 		fprintf(stderr, "dbg2       si_micros:      %d\n", mb_segytraceheader_ptr->si_micros);
-		for (i = 0; i < 19; i++)
+		for (int i = 0; i < 19; i++)
 			fprintf(stderr, "dbg2       other_1[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_1[i]);
 		fprintf(stderr, "dbg2       year:           %d\n", mb_segytraceheader_ptr->year);
 		fprintf(stderr, "dbg2       day_of_yr:      %d\n", mb_segytraceheader_ptr->day_of_yr);
@@ -2079,7 +2068,7 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *samplefor
 		fprintf(stderr, "dbg2       sec:            %d\n", mb_segytraceheader_ptr->sec);
 		fprintf(stderr, "dbg2       mils:           %d\n", mb_segytraceheader_ptr->mils);
 		fprintf(stderr, "dbg2       tr_weight:      %d\n", mb_segytraceheader_ptr->tr_weight);
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			fprintf(stderr, "dbg2       other_2[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_2[i]);
 		fprintf(stderr, "dbg2       delay:          %f\n", mb_segytraceheader_ptr->delay);
 		fprintf(stderr, "dbg2       smute_sec:      %f\n", mb_segytraceheader_ptr->smute_sec);
@@ -2096,7 +2085,7 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *samplefor
 		fprintf(stderr, "dbg2       dummy7:         %f\n", mb_segytraceheader_ptr->roll);
 		fprintf(stderr, "dbg2       dummy8:         %f\n", mb_segytraceheader_ptr->pitch);
 		fprintf(stderr, "dbg2       heading:        %f\n", mb_segytraceheader_ptr->heading);
-		for (i = 0; i < mb_segytraceheader_ptr->nsamps; i++)
+		for (int i = 0; i < mb_segytraceheader_ptr->nsamps; i++)
 			fprintf(stderr, "dbg2       sample:%d  data:%f\n", i, segydata[i]);
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2112,7 +2101,6 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void 
 	int status;
 	struct mb_io_struct *mb_io_ptr;
 	struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
-	int i;
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -2168,7 +2156,7 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void 
 		fprintf(stderr, "dbg2       emute_mils:     %d\n", mb_segytraceheader_ptr->emute_mils);
 		fprintf(stderr, "dbg2       nsamps:         %d\n", mb_segytraceheader_ptr->nsamps);
 		fprintf(stderr, "dbg2       si_micros:      %d\n", mb_segytraceheader_ptr->si_micros);
-		for (i = 0; i < 19; i++)
+		for (int i = 0; i < 19; i++)
 			fprintf(stderr, "dbg2       other_1[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_1[i]);
 		fprintf(stderr, "dbg2       year:           %d\n", mb_segytraceheader_ptr->year);
 		fprintf(stderr, "dbg2       day_of_yr:      %d\n", mb_segytraceheader_ptr->day_of_yr);
@@ -2177,7 +2165,7 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void 
 		fprintf(stderr, "dbg2       sec:            %d\n", mb_segytraceheader_ptr->sec);
 		fprintf(stderr, "dbg2       mils:           %d\n", mb_segytraceheader_ptr->mils);
 		fprintf(stderr, "dbg2       tr_weight:      %d\n", mb_segytraceheader_ptr->tr_weight);
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			fprintf(stderr, "dbg2       other_2[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_2[i]);
 		fprintf(stderr, "dbg2       delay:          %f\n", mb_segytraceheader_ptr->delay);
 		fprintf(stderr, "dbg2       smute_sec:      %f\n", mb_segytraceheader_ptr->smute_sec);
@@ -2194,7 +2182,7 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void 
 		fprintf(stderr, "dbg2       roll:           %f\n", mb_segytraceheader_ptr->roll);
 		fprintf(stderr, "dbg2       pitch:          %f\n", mb_segytraceheader_ptr->pitch);
 		fprintf(stderr, "dbg2       heading:        %f\n", mb_segytraceheader_ptr->heading);
-		for (i = 0; i < mb_segytraceheader_ptr->nsamps; i++)
+		for (int i = 0; i < mb_segytraceheader_ptr->nsamps; i++)
 			fprintf(stderr, "dbg2       sample:%d  data:%f\n", i, segydata[i]);
 	}
 
@@ -2225,7 +2213,6 @@ int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, d
 	char *function_name = "mb_ctd";
 	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2260,7 +2247,7 @@ int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, d
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nctd:          %d\n", *nctd);
-		for (i = 0; i < *nctd; i++) {
+		for (int i = 0; i < *nctd; i++) {
 			fprintf(stderr, "dbg2       time_d:        %f\n", time_d[i]);
 			fprintf(stderr, "dbg2       conductivity:  %f\n", conductivity[i]);
 			fprintf(stderr, "dbg2       temperature:   %f\n", temperature[i]);
@@ -2284,7 +2271,6 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	char *function_name = "mb_ancilliarysensor";
 	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2318,7 +2304,7 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nsensor:       %d\n", *nsensor);
-		for (i = 0; i < *nsensor; i++) {
+		for (int i = 0; i < *nsensor; i++) {
 			fprintf(stderr, "dbg2       time_d:        %f\n", time_d[i]);
 			fprintf(stderr, "dbg2       sensor1:       %f\n", sensor1[i]);
 			fprintf(stderr, "dbg2       sensor2:       %f\n", sensor2[i]);

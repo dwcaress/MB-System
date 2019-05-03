@@ -122,7 +122,7 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -216,7 +216,7 @@ int mb_rt_deall(int verbose, void **modelptr, int *error) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -258,7 +258,7 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -465,7 +465,7 @@ int mb_rt_circular(int verbose, int *error) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -508,7 +508,7 @@ int mb_rt_quad1(int verbose, int *error) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -614,7 +614,7 @@ int mb_rt_quad2(int verbose, int *error) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -674,7 +674,7 @@ int mb_rt_quad3(int verbose, int *error) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -733,7 +733,7 @@ int mb_rt_quad4(int verbose, int *error) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -836,7 +836,7 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, doubl
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -871,11 +871,10 @@ int mb_rt_plot_circular(int verbose, int *error) {
 	double af;
 	double dang;
 	double angle;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -889,7 +888,7 @@ int mb_rt_plot_circular(int verbose, int *error) {
 		dang = (af - ai) / MB_RT_NUMBER_SEGMENTS;
 
 		/* add points to plotting arrays */
-		for (i = 0; i < MB_RT_NUMBER_SEGMENTS; i++) {
+		for (int i = 0; i < MB_RT_NUMBER_SEGMENTS; i++) {
 			angle = ai + (i + 1) * dang;
 			if (model->number_plot < model->number_plot_max) {
 				model->xx_plot[model->number_plot] = model->sign_x * (model->xc + model->radius * sin(angle));
@@ -927,7 +926,7 @@ int mb_rt_line(int verbose, int *error) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
@@ -1023,7 +1022,7 @@ int mb_rt_vertical(int verbose, int *error) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);

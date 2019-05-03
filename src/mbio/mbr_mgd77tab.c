@@ -900,14 +900,11 @@ int mbr_alm_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_mgd77tab_struct);
 	mb_io_ptr->data_structure_size = 0;
 	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), &mb_io_ptr->store_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), &mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -951,7 +948,7 @@ int mbr_dem_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2028,7 +2025,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		line[shift] = '\n';
 		shift++;
 		line[shift] = '\0';
-		shift++;
+		/* shift++; */
 	}
 
 	if ((write_status = fputs(line, mb_io_ptr->mbfp)) > 0) {

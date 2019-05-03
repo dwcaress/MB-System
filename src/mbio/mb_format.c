@@ -55,7 +55,9 @@ static int format_alias_table[] = {
 };
 
 /* local prototypes not found in mb_define.h */
-int cvt_to_nix_path(char *path);
+#ifdef WIN32
+void cvt_to_nix_path(char *path);
+#endif  /* WIN32 */
 
 static char svn_id[] = "$Id$";
 
@@ -3577,7 +3579,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 	int len;
 	int nscan, done, rdone;
 	struct stat file_status;
-	int fstat, file_ok;
+	int fstat;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3834,12 +3836,13 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 }
 
 /*--------------------------------------------------------------------*/
-int cvt_to_nix_path(char *path) {
+#ifdef WIN32
+void cvt_to_nix_path(char *path) {
 	/* Replace back slashes by slashes and trim first two chars in paths like "C:/path" */
 	size_t k, len = strlen(path);
 
 	if (len == 0)
-		return (0);
+		return;
 	for (k = 0; k < len; k++)
 		if (path[k] == '\\')
 			path[k] = '/';
@@ -3850,8 +3853,10 @@ int cvt_to_nix_path(char *path) {
 		path[len - 2] = '\0'; /* Make sure it's null terminated */
 	}
 
-	return (0);
+	return;
 }
+#endif  /* WIN32 */
+
 /*--------------------------------------------------------------------*/
 int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 	/* local variables */
