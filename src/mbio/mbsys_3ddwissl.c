@@ -452,7 +452,7 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	double headingx, headingy;
 	int interp_status = MB_SUCCESS;
 	int interp_error = MB_ERROR_NO_ERROR;
-	int i, ipulse, isounding;
+	int i, ipulse;
 	int jnav = 0;
 	int jsensordepth = 0;
 	int jheading = 0;
@@ -1411,7 +1411,7 @@ int mbsys_3ddwissl_extract_altitude(
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_pulse_struct *pulse;
 	struct mbsys_3ddwissl_sounding_struct *sounding;
-	int i, ipulse, isounding;
+	int ipulse, isounding;
 	double rmin, r;
 
 	/* check for non-null data */
@@ -1725,9 +1725,7 @@ int mbsys_3ddwissl_insert_nav(int verbose, void *mbio_ptr, /* in: verbosity leve
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
-	struct mbsys_3ddwissl_pulse_struct *pulse;
 	double dlon, dlat, dheading, dsensordepth, droll, dpitch;
-	int ipulse, isounding;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -2017,8 +2015,7 @@ int mbsys_3ddwissl_print_store(int verbose,     /* in: verbosity level set on co
 	char *debug_str = "dbg2  ";
 	char *nodebug_str = "  ";
 	char *first;
-	int npulses;
-	int i, ipulse, isounding;
+	int ipulse, isounding;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2801,14 +2798,11 @@ int mbsys_3ddwissl_indextableapply(int verbose, void *mbio_ptr, int num_indextab
 	char *function_name = "mbsys_3ddwissl_indextableapply";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-    struct mb_io_indextable_struct *indextable;
-    double time_d;
-    double nearest_minute_time_d;
-	int time_i[7], time_j[5];
-    int giindex, iindex;
-    int giindex_a_begin, giindex_a_end;
-    int giindex_b_begin, giindex_b_end;
-    int i;
+        struct mb_io_indextable_struct *indextable;
+        int giindex, iindex;
+        int giindex_a_begin, giindex_a_end;
+        int giindex_b_begin, giindex_b_end;
+        int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {

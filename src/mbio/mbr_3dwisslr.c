@@ -257,7 +257,7 @@ int mbr_alm_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
   int *file_header_readwritten;
-    int *file_indexed;
+  int *file_indexed;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -358,7 +358,7 @@ int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
   struct mbsys_3ddwissl_struct *store;
-    int *file_indexed;
+  int *file_indexed;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -460,22 +460,20 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
   struct mbsys_3ddwissl_struct *store;
-    int *file_indexed;
-  int *file_header_readwritten;
+  int *file_indexed;
   char *buffer = NULL;
   size_t read_len;
   size_t index;
   unsigned short magic_number = 0;
   int time_i[7];
-    double time_d;
+  double time_d;
   int done;
   int i;
-    int record_num_heada = 0;
-    int record_num_headb = 0;
-    int record_num_comment = 0;
+  int record_num_heada = 0;
+  int record_num_headb = 0;
+  int record_num_comment = 0;
   int skip;
   int valid_id;
-    double A_dt, B_dt, last_A_time_d, last_B_time_d;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -603,7 +601,7 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
     while (done == MB_NO) {
     /* read and check two bytes until a valid record_id is found */
     read_len = (size_t)sizeof(short);
-        buffer = mb_io_ptr->raw_data;
+    buffer = mb_io_ptr->raw_data;
     valid_id = MB_NO;
     skip = 0;
     status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -836,7 +834,7 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   size_t read_len;
   size_t index;
   int time_i[7];
-    int time_j[5];
+  int time_j[5];
   int found;
   int i, ipulse, isounding;
   int irecord;
@@ -1215,8 +1213,7 @@ int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   char *buffer = NULL;
   size_t write_len;
   size_t index;
-    long file_pos;
-  int i, ipulse, isounding;
+  int ipulse, isounding;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -1574,8 +1571,6 @@ int mbr_3dwisslr_fixtimestamps(int verbose, void *mbio_ptr,
   int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
   struct mbsys_3ddwissl_struct *store;
-    double time_d;
-  int time_i[7], time_j[5];
 
   /* print input debug statements */
   if (verbose >= 2) {

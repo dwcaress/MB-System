@@ -487,8 +487,6 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 						  double *soundspeed, int *error) {
 	char *function_name = "mb_seabird_soundspeed";
 	int status = MB_SUCCESS;
-	double R, RT, RP, temp, sum1, sum2, result, val;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
