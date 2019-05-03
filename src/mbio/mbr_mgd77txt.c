@@ -973,7 +973,7 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* get nav quality */
 		mb_get_int(&data->nav_quality, &line[shift], 1);
-		shift += 1;
+		/* shift += 1; */
 	}
 
 	/* print output debug statements */

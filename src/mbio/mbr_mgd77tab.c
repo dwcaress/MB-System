@@ -2028,7 +2028,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		line[shift] = '\n';
 		shift++;
 		line[shift] = '\0';
-		shift++;
+		/* shift++; */
 	}
 
 	if ((write_status = fputs(line, mb_io_ptr->mbfp)) > 0) {
