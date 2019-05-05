@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -107,7 +106,6 @@ WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
 /*--------------------------------------------------------------------*/
 
 /* id variables */
-static char svn_id[] = "$Id$";
 static char program_name[] = "MBedit";
 
 /* additional widgets */
@@ -392,7 +390,7 @@ void do_mbedit_init(int argc, char **argv) {
 	fontStruct = XLoadQueryFont(theDisplay, xgfont);
 	if (fontStruct == NULL) {
 		fprintf(stderr, "\nFailure to load font using XLoadQueryFont: %s\n", xgfont);
-		fprintf(stderr, "\tSource file: %s\n\tSource line: %d\n\tSource version: %s", __FILE__, __LINE__, svn_id);
+		fprintf(stderr, "\tSource file: %s\n\tSource line: %d\n", __FILE__, __LINE__);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(-1);
 	}

@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbpreprocess.c	1/8/2014
- *    $Id$
  *
  *    Copyright (c) 2014-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +23,6 @@
  */
 
 /* source file version string */
-static char svn_id[] = "$Id$";
 
 /* standard include files */
 #include <stdio.h>
@@ -224,7 +222,6 @@ int main(int argc, char **argv) {
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", svn_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", version_string);
 		fprintf(stderr, "dbg2  Default MB-System Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);

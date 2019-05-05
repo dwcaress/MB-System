@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
- *    $Id$
  *
  *    Copyright (c) 1994-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -111,7 +110,6 @@
 /* some defines */
 #define LARGE 1.0e10
 
-static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_delaun creates a network of triangles connecting an
@@ -140,7 +138,6 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       npts:             %d\n", npts);

@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_3datdepthlidar.c	3.00	5/7/2013
- *	$Id$
  *
  *    Copyright (c) 2013-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -186,7 +185,6 @@
 
 #define MBF_3DDEPTHP_DEBUG 1
 
-static char rcs_id[] = "$Id$";
 
 /*-------------------------------------------------------------------- */
 int mbsys_3datdepthlidar_alloc(int verbose,      /* in: verbosity level set on command line 0..N */
@@ -206,7 +204,6 @@ int mbsys_3datdepthlidar_alloc(int verbose,      /* in: verbosity level set on c
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -325,7 +322,6 @@ int mbsys_3datdepthlidar_deall(int verbose,      /* in: verbosity level set on c
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -494,7 +490,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
@@ -701,7 +696,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -749,7 +743,6 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -873,7 +866,6 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -993,7 +985,6 @@ int mbsys_3datdepthlidar_ttimes(int verbose,            /* in: verbosity level s
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1085,7 +1076,6 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1174,7 +1164,6 @@ int mbsys_3datdepthlidar_pulses(int verbose,     /* in: verbosity level set on c
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1352,7 +1341,6 @@ int mbsys_3datdepthlidar_extract_altitude(
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1448,7 +1436,6 @@ int mbsys_3datdepthlidar_extract_nnav(int verbose,     /* in: verbosity level se
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1559,7 +1546,6 @@ int mbsys_3datdepthlidar_extract_nav(int verbose, void *mbio_ptr, /* in: verbosi
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1663,7 +1649,6 @@ int mbsys_3datdepthlidar_insert_nav(int verbose, void *mbio_ptr, /* in: verbosit
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -1764,7 +1749,6 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1832,7 +1816,6 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -1894,7 +1877,6 @@ int mbsys_3datdepthlidar_copy(int verbose,     /* in: verbosity level set on com
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -1960,7 +1942,6 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2         store:    %p\n", store_ptr);
@@ -2087,7 +2068,6 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2         store:    %p\n", store_ptr);

@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id$
  *
  *    Copyright (c) 1994-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -56,7 +55,6 @@ int get_pos_old(struct swath *data, double eps, double *x, double *y, int k, int
 int get_hand_old(struct swath *data, int *hand, int k, int i, int j, int d);
 int get_azimuth_old(struct swath *data, int iping, double *angle);
 
-static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour_init initializes the memory required to
@@ -83,7 +81,6 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                 %p\n", data);
@@ -314,7 +311,6 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                    %p\n", data);
@@ -395,7 +391,6 @@ int mb_contour(int verbose, struct swath *data, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                    %p\n", data);
@@ -448,7 +443,6 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                    %p\n", data);
@@ -1086,7 +1080,6 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                    %p\n", data);

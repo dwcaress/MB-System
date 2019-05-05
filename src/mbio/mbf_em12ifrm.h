@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em12ifrm.h	12/5/00
- *	$Id$
  *
  *    Copyright (c) 2000-2019 by
  *    David W. Caress (caress@mbari.org)

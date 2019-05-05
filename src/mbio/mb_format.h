@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -25,9 +24,6 @@
 #define MB_FORMAT_H_
 
 #include "mb_status.h"
-
-/* define date of last format update */
-#define MB_FORMAT_UPDATEDATE "$Id$ $Revision: $"
 
 /* Supported swath sonar systems */
 #define MB_SYS_NONE 0

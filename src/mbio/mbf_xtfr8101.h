@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_xtfr8101.h	8/24/01
- *	$Id$
  *
  *    Copyright (c) 2001-2019 by
  *    David W. Caress (caress@mbari.org)

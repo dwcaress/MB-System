@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id$
  *
  *    Copyright (c) 2003-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -111,7 +110,6 @@ struct mbareaclean_sndg_struct *sndg = NULL;
 int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct **sndgptr, int *error);
 int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct mbareaclean_sndg_struct *sndg, int *error);
 
-static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
@@ -406,14 +404,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);

@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_zgrid.c	    4/25/95
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)

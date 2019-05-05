@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)

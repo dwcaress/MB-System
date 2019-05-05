@@ -1,7 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id$
- *
+  *
  *    Copyright (c) 2000-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -18,9 +17,6 @@
  *
  * Author:	D. W. Caress
  * Date:	October 30, 2000
- *
- * $Log: mb_navint.c,v $
- *
  */
 
 /* standard include files */
@@ -41,8 +37,6 @@
 //    #define MB_DEPINT_DEBUG 1
 //    #define MB_ALTINT_DEBUG 1
 
-static char rcs_id[] = "$Id$";
-
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal
         list used for interpolation/extrapolation. */
@@ -55,9 +49,7 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:       %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:     %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:       %f\n", time_d);
@@ -114,7 +106,6 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -147,9 +138,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
@@ -274,7 +263,6 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       lon:        %f\n", *lon);
 		fprintf(stderr, "dbg2       lat:        %f\n", *lat);
@@ -306,9 +294,7 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
@@ -428,7 +414,6 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       easting:    %f\n", *easting);
 		fprintf(stderr, "dbg2       northing:   %f\n", *northing);
@@ -452,9 +437,7 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
@@ -508,7 +491,6 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -532,9 +514,7 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       nsamples:   %d\n", nsamples);
@@ -589,7 +569,6 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -612,9 +591,7 @@ int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
@@ -690,7 +667,6 @@ int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, 
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       heave:        %f\n", *heave);
 		fprintf(stderr, "dbg2       roll:         %f\n", *roll);
@@ -714,9 +690,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
@@ -761,7 +735,6 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -784,9 +757,7 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       nsamples:   %d\n", nsamples);
@@ -834,7 +805,6 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -858,9 +828,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
@@ -932,7 +900,6 @@ int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       heading:      %f\n", *heading);
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
@@ -954,9 +921,7 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
@@ -1002,7 +967,6 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1025,9 +989,7 @@ int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonarde
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
@@ -1092,7 +1054,6 @@ int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonarde
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       sonardepth:   %f\n", *sonardepth);
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
@@ -1114,9 +1075,7 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
@@ -1161,7 +1120,6 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1184,9 +1142,7 @@ int mb_altint_interp(int verbose, void *mbio_ptr, double time_d, double *altitud
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:     %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       time_d:     %f\n", time_d);
@@ -1249,7 +1205,6 @@ int mb_altint_interp(int verbose, void *mbio_ptr, double time_d, double *altitud
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       altitude:     %f\n", *altitude);
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
@@ -1290,9 +1245,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:                 %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:                %d\n", verbose);
 		fprintf(stderr, "dbg2       merge_nav_file:         %s\n", merge_nav_file);
 		fprintf(stderr, "dbg2       merge_nav_format:       %d\n", merge_nav_format);
@@ -1662,7 +1615,6 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       merge_nav_num:          %d\n", *merge_nav_num);
 		fprintf(stderr, "dbg2       merge_nav_alloc:        %d\n", *merge_nav_alloc);
@@ -1701,9 +1653,7 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:                           %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:                          %d\n", verbose);
 		fprintf(stderr, "dbg2       merge_sensordepth_file:           %s\n", merge_sensordepth_file);
 		fprintf(stderr, "dbg2       merge_sensordepth_format:         %d\n", merge_sensordepth_format);
@@ -1855,7 +1805,6 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       merge_sensordepth_num:            %d\n", *merge_sensordepth_num);
 		fprintf(stderr, "dbg2       merge_sensordepth_alloc:          %d\n", *merge_sensordepth_alloc);
@@ -1891,9 +1840,7 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:                           %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:                          %d\n", verbose);
 		fprintf(stderr, "dbg2       merge_altitude_file:              %s\n", merge_altitude_file);
 		fprintf(stderr, "dbg2       merge_altitude_format:            %d\n", merge_altitude_format);
@@ -2033,7 +1980,6 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       merge_altitude_num:               %d\n", *merge_altitude_num);
 		fprintf(stderr, "dbg2       merge_altitude_alloc:             %d\n", *merge_altitude_alloc);
@@ -2069,9 +2015,7 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:                           %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:                          %d\n", verbose);
 		fprintf(stderr, "dbg2       merge_heading_file:               %s\n", merge_heading_file);
 		fprintf(stderr, "dbg2       merge_heading_format:             %d\n", merge_heading_format);
@@ -2222,7 +2166,6 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       merge_heading_num:                %d\n", *merge_heading_num);
 		fprintf(stderr, "dbg2       merge_heading_alloc:              %d\n", *merge_heading_alloc);
@@ -2261,9 +2204,7 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:                           %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:                          %d\n", verbose);
 		fprintf(stderr, "dbg2       merge_attitude_file:              %s\n", merge_attitude_file);
 		fprintf(stderr, "dbg2       merge_attitude_format:            %d\n", merge_attitude_format);
@@ -2429,7 +2370,6 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       merge_attitude_num:               %d\n", *merge_attitude_num);
 		fprintf(stderr, "dbg2       merge_attitude_alloc:             %d\n", *merge_attitude_alloc);
@@ -2467,9 +2407,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:                           %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:                          %d\n", verbose);
 		fprintf(stderr, "dbg2       merge_soundspeed_file:            %s\n", merge_soundspeed_file);
 		fprintf(stderr, "dbg2       merge_soundspeed_format:          %d\n", merge_soundspeed_format);
@@ -2609,7 +2547,6 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       merge_soundspeed_num:             %d\n", *merge_soundspeed_num);
 		fprintf(stderr, "dbg2       merge_soundspeed_alloc:           %d\n", *merge_soundspeed_alloc);
@@ -2646,9 +2583,7 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:                           %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:                          %d\n", verbose);
 		fprintf(stderr, "dbg2       merge_timeshift_file:             %s\n", merge_timeshift_file);
 		fprintf(stderr, "dbg2       merge_timeshift_format:           %d\n", merge_timeshift_format);
@@ -2788,7 +2723,6 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       merge_timeshift_num:              %d\n", *merge_timeshift_num);
 		fprintf(stderr, "dbg2       merge_timeshift_alloc:            %d\n", *merge_timeshift_alloc);
@@ -2817,9 +2751,7 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:                           %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:                          %d\n", verbose);
 		fprintf(stderr, "dbg2       data_num:                         %d\n", data_num);
 		fprintf(stderr, "dbg2       data_time_d:                      %p\n", data_time_d);
@@ -2851,7 +2783,6 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:                            %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2874,9 +2805,7 @@ int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       rcs_id:                           %s\n", rcs_id);
 		fprintf(stderr, "dbg2       verbose:                          %d\n", verbose);
 		fprintf(stderr, "dbg2       data_num:                         %d\n", data_num);
 		fprintf(stderr, "dbg2       data_time_d:                      %p\n", data_time_d);
@@ -2913,7 +2842,6 @@ int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double 
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:                            %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

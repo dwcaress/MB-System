@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_oic.h	3/1/99
- *	$Id$
  *
  *    Copyright (c) 1999-2019 by
  *    David W. Caress (caress@mbari.org)

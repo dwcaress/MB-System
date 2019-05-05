@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id$
  *
  *    Copyright (c) 2004-2019 by
  *    David W. Caress (caress@mbari.org)

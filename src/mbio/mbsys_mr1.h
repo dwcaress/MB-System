@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.h	7/19/94
- *	$Id$
  *
  *    Copyright (c) 1994-2019 by
  *    David W. Caress (caress@mbari.org)

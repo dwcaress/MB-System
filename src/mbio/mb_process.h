@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mb_process.h  9/11/00
- *    $Id$
  *
  *    Copyright (c) 2000-2019 by
  *    David W. Caress (caress@mbari.org)

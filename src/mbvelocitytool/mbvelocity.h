@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity.h	10/15/2009
- *    $Id$
  *
  *    Copyright (c); 2009-2019 by
  *    David W. Caress (caress@mbari.org);

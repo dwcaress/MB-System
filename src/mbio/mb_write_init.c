@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -39,7 +38,6 @@
 #include "gsf.h"
 #include "netcdf.h"
 
-static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *beams_bath, int *beams_amp, int *pixels_ss,
@@ -58,7 +56,6 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       file:       %s\n", file);
@@ -572,7 +569,6 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)*mbio_ptr);
 		fprintf(stderr, "dbg2       beams_bath: %d\n", *beams_bath);

@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mbarirov.h	5/20/99
- *	$Id$
  *
  *    Copyright (c) 1999-2019 by
  *    David W. Caress (caress@mbari.org)

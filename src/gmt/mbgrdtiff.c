@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id$
  *
  *    Copyright (c) 1999-2019 by
  *    David W. Caress (caress@mbari.org)

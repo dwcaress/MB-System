@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.h	8/5/94
- *	$Id$
  *
  *    Copyright (c) 1996-2019 by
  *    David W. Caress (caress@mbari.org)

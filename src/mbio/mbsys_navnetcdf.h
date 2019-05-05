@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_navnetcdf.h	5/4/2002
- *	$Id$
  *
  *    Copyright (c) 2002-2019 by
  *    David W. Caress (caress@mbari.org)

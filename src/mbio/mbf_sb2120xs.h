@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_sb2120xs.h	3/20/2000
- *	$Id$
  *
  *    Copyright (c) 2000-2019 by
  *    D. W. Caress (caress@mbari.org)

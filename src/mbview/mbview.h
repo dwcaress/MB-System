@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id$
  *
  *    Copyright (c); 2002-2019 by
  *    David W. Caress (caress@mbari.org);

@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -40,8 +39,6 @@
 #include "gsf.h"
 #include "netcdf.h"
 
-static char rcs_id[] = "$Id$";
-
 /*--------------------------------------------------------------------*/
 int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
                  double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
@@ -67,7 +64,6 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       file:       %s\n", file);
@@ -634,7 +630,6 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)*mbio_ptr);
 		fprintf(stderr, "dbg2       ->numfile:  %d\n", mb_io_ptr->numfile);
@@ -688,7 +683,6 @@ int mb_input_init(int verbose, char *file, int format,
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       file:            %s\n", file);
@@ -1098,7 +1092,6 @@ int mb_input_init(int verbose, char *file, int format,
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)*mbio_ptr);
 		fprintf(stderr, "dbg2       ->numfile:  %d\n", mb_io_ptr->numfile);

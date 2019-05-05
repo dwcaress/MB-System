@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_info.h			8/21/2006
- *    $Id$
  *
  *    Copyright (c) 2006-2019 by
  *    David W. Caress (caress@mbari.org)

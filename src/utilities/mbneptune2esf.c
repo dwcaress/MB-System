@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbneptune2esf.c	2004/11/11
- *    $Id$
  *
  *    Copyright (c) 2004-2019 by
  *    Gordon Keith
@@ -122,7 +121,6 @@ int line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array
 int print_pings(FILE *output, struct neptune_ping_tree *node);
 int free_pings(int verbose, struct neptune_ping_tree **node, int *error);
 
-static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
@@ -329,14 +327,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);

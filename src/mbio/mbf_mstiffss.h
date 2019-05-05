@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mstiffss.h	10/14/94
- *	$Id$
  *
  *    Copyright (c) 1998-2019 by
  *    David W. Caress (caress@mbari.org)

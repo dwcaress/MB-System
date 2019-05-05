@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id$
  *
  *    Copyright (c) 1998-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -190,8 +189,6 @@
 #include "mb_status.h"
 #include "mb_define.h"
 
-static char rcs_id[] = "$Id$";
-
 /*--------------------------------------------------------------------*/
 int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch, double *roll, int *error) {
 	char *function_name = "mb_takeoff_to_rollpitch";
@@ -201,7 +198,6 @@ int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       theta:      %f\n", theta);
@@ -226,7 +222,6 @@ int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       pitch:           %f\n", *pitch);
 		fprintf(stderr, "dbg2       roll:            %f\n", *roll);
@@ -247,7 +242,6 @@ int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *thet
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       pitch:      %f\n", pitch);
@@ -278,7 +272,6 @@ int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *thet
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       theta:           %f\n", *theta);
 		fprintf(stderr, "dbg2       phi:             %f\n", *phi);
@@ -298,7 +291,6 @@ int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       x:          %f\n", x);
@@ -336,7 +328,6 @@ int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, 
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       theta:           %f\n", *theta);
 		fprintf(stderr, "dbg2       phi:             %f\n", *phi);
@@ -360,7 +351,6 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       sonar_offset_x: %f\n", sonar_offset_x);
@@ -459,7 +449,6 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       lever_x:         %f\n", *lever_x);
 		fprintf(stderr, "dbg2       lever_y:         %f\n", *lever_y);
@@ -529,7 +518,6 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       tx_align.roll:           %f\n", tx_align.roll);
@@ -678,7 +666,6 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       beamAzimuth:     %f\n", *beamAzimuth);
 		fprintf(stderr, "dbg2       beamDepression:  %f\n", *beamDepression);
@@ -701,7 +688,6 @@ int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotat
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       orig.x:          %f\n", orig.x);
@@ -732,7 +718,6 @@ int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotat
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       final->x:        %f\n", final->x);
 		fprintf(stderr, "dbg2       final->y:        %f\n", final->y);

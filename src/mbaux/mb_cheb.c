@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_cheb.c			3/23/00
- *    $Id$
  *
  *    Copyright (c) 2000-2019 by
  *    David W. Caress (caress@mbari.org)

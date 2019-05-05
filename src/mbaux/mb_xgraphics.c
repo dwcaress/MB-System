@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -38,7 +37,6 @@
 #include "mb_xgraphics.h"
 
 /* id variable */
-static char svn_id[] = "$Id$";
 
 /**********************************************************************
  *	XG_INIT
@@ -121,7 +119,7 @@ void xg_init(Display *display, Window can_xid, int *can_bounds, char *fontname, 
 	/* load font */
 	if ((graphic->font_info = XLoadQueryFont(graphic->dpy, fontname)) == NULL) {
 		fprintf(stderr, "\nFailure to load font using XLoadQueryFont: %s\n", fontname);
-		fprintf(stderr, "\tSource file: %s\n\tSource line: %d\n\tSource version: %s", __FILE__, __LINE__, svn_id);
+		fprintf(stderr, "\tSource file: %s\n\tSource line: %d", __FILE__, __LINE__);
 		fprintf(stderr, "Program Terminated\n");
 		exit(-1);
 	}

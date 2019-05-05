@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_stereopair.h	11/22/2014
- *	$Id$
  *
  *    Copyright (c) 2014-2019 by
  *    David W. Caress (caress@mbari.org)
