@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_intersectgrid.c	10/20/2012
- *    $Id:  $
  *
  *    Copyright (c) 2012-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -22,9 +21,6 @@
  *
  * Author:	D. W. Caress
  * Date:	October 20, 2012
- *
- * $Log: mb_intersectgrid.c,v $
- *
  */
 
 /* standard include files */
@@ -38,7 +34,6 @@
 #include "mb_define.h"
 #include "mb_aux.h"
 
-static char rcs_id[] = "$Id: mb_intersectgrid.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **topogrid_ptr, int *error) {
@@ -49,7 +44,6 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **top
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       topogridfile:              %s\n", topogridfile);
@@ -151,7 +145,6 @@ int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       topogrid_ptr:              %p\n", topogrid_ptr);
@@ -190,7 +183,6 @@ int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navl
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       navlon:                    %f\n", navlon);
@@ -263,7 +255,6 @@ int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *e
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       topogrid:                  %p\n", topogrid);
@@ -331,7 +322,6 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       navlon:                    %f\n", navlon);
@@ -515,7 +505,6 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       nangle:                    %d\n", nangle);

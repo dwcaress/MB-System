@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -33,7 +32,6 @@
 
 /* year-day conversion */
 int yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from
@@ -47,7 +45,6 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 		fprintf(stderr, "dbg2       year:    %d\n", time_i[0]);
@@ -75,7 +72,6 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       time_d:  %f\n", *time_d);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -100,7 +96,6 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 		fprintf(stderr, "dbg2       time_d:  %f\n", time_d);
@@ -135,7 +130,6 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\nMBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       year:    %d\n", time_i[0]);
 		fprintf(stderr, "dbg2       month:   %d\n", time_i[1]);
@@ -164,7 +158,6 @@ int mb_get_date_string(int verbose, double time_d, char *string) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 		fprintf(stderr, "dbg2       time_d:  %f\n", time_d);
@@ -181,7 +174,6 @@ int mb_get_date_string(int verbose, double time_d, char *string) {
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\nMBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       string: %s\n", string);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -201,7 +193,6 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       year:       %d\n", time_i[0]);
@@ -228,7 +219,6 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       year:       %d\n", time_j[0]);
 		fprintf(stderr, "dbg2       day of year:%d\n", time_j[1]);
@@ -256,7 +246,6 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       year:       %d\n", time_j[0]);
@@ -290,7 +279,6 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       year:       %d\n", time_i[0]);
 		fprintf(stderr, "dbg2       month:      %d\n", time_i[1]);
@@ -324,7 +312,6 @@ int mb_fix_y2k(int verbose, int year_short, int *year_long) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       year_short: %d\n", year_short);
@@ -342,7 +329,6 @@ int mb_fix_y2k(int verbose, int year_short, int *year_long) {
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       year_long:  %d\n", *year_long);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -374,7 +360,6 @@ int mb_unfix_y2k(int verbose, int year_long, int *year_short) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       year_long:  %d\n", year_long);
@@ -389,7 +374,6 @@ int mb_unfix_y2k(int verbose, int year_long, int *year_short) {
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       year_short: %d\n", *year_short);
 		fprintf(stderr, "dbg2  Return status:\n");

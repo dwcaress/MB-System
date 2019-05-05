@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_aux.h	5/16/94
- *    $Id$
  *
  *    Copyright (c); 1993-2019 by
  *    David W. Caress (caress@mbari.org);
@@ -232,9 +231,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
                               double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
                               double *table_range, int *error);
 
-/* lsqr.h
-   $Revision: 229 $ $Date: 2006-04-15 18:40:08 -0700 (Sat, 15 Apr 2006) $
-*/
+/* lsqr.h */
 /*!
    \file
    Header file for ISO C version of LSQR.

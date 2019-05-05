@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_readwritegrd.c	12/10/2007
- *    $Id$
  *
  *    Copyright (c) 2007-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -42,7 +41,6 @@
 #define ModelTypeGeographic 2
 #define GCS_WGS_84 4326
 
-static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------------*/
 int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue, int *nxy,
@@ -70,7 +68,6 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       grdfile:         %s\n", grdfile);

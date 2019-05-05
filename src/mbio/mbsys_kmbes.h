@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_kmbes.h	5/25/2018
- *	$Id:  $
  *
  *    Copyright (c) 2018-2019 by
  *    David W. Caress (caress@mbari.org)

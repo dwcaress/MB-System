@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz.h		4/27/2007
- *    $Id$
  *
  *    Copyright (c) 2007-2019 by
  *    David W. Caress (caress@mbari.org)

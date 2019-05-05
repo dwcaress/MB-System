@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_gsfgenmb.h	2/27/98
- *	$Id$
  *
  *    Copyright (c) 1998-2019 by
  *    David W. Caress (caress@mbari.org)

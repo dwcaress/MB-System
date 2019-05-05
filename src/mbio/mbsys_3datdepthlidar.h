@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_3datdepthlidar.h	11/29/2013
- *	$Id$
  *
  *    Copyright (c) 2013-2019 by
  *    David W. Caress (caress@mbari.org)

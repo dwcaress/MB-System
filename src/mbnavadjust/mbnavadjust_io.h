@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_io.h	4/18/2014
- *    $Id$
 
  *    Copyright (c) 2014-2019 by
  *    David W. Caress (caress@mbari.org)

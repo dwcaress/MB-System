@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundingsprivate.h	9/24/2003
- *    $Id$
  *
  *    Copyright (c) 2007-2019 by
  *    David W. Caress (caress@mbari.org)

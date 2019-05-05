@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbkongsbergpreprocess.c	1/1/2012
- *    $Id: mbkongsbergpreprocess.c 1938 2012-02-22 20:58:08Z caress $
  *
  *    Copyright (c) 2012-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -21,9 +20,6 @@
  *
  * Author:	D. W. Caress
  * Date:	June 1, 2012
- *
- * $Log: mbkongsbergpreprocess.c,v $
- *
  */
 
 /* standard include files */
@@ -77,7 +73,6 @@
 #define MBKONSBERGPREPROCESS_FILTER_MEAN 1
 #define MBKONSBERGPREPROCESS_FILTER_MEDIAN 2
 
-static char rcs_id[] = "$Id: mbkongsbergpreprocess.c 1938 2012-02-22 20:58:08Z caress $";
 
 /*--------------------------------------------------------------------*/
 
@@ -543,14 +538,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);

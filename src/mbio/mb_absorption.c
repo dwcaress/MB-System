@@ -1,7 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_absorption.c		2/10/2008
- *    $Id$
- *
+  *
  *    Copyright (c) 2008-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute

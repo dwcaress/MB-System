@@ -1,6 +1,5 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_primary.c	9/25/2003
- *    $Id$
  *
  *    Copyright (c) 2003-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -72,7 +71,6 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-static char rcs_id[] = "$Id$";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_projection_mode, char *primary_grid_projection_id,
@@ -90,7 +88,6 @@ int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_project
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
@@ -206,7 +203,6 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
@@ -281,7 +277,6 @@ int mbview_updateprimarygridcell(int verbose, size_t instance, int primary_ix, i
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
@@ -339,7 +334,6 @@ int mbview_setprimarycolortable(int verbose, size_t instance, int primary_colort
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
@@ -387,7 +381,6 @@ int mbview_setslopecolortable(int verbose, size_t instance, int slope_colortable
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);

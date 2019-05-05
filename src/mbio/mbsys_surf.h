@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.h	6/13/02
- *	$Id$
  *
  *    Copyright (c) 2002-2019 by
  *    David W. Caress (caress@mbari.org)

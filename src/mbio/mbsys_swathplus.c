@@ -1,6 +1,5 @@
 /*-------------------------------------------------------------------
  *    The MB-system:	mbsys_swathplus.c	3.00	1/27/2014
- *	$Id$
  *
  *    Copyright (c) 2014-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -47,7 +46,6 @@ int swpls_quat_to_angles(int verbose, const swpls_quaternion *q, swpls_angles *o
 int swpls_slerp(int verbose, const swpls_quaternion *q0, const swpls_quaternion *q1, double t, swpls_quaternion *q, int *error);
 static double wrap_pi(double theta);
 
-static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
@@ -60,7 +58,6 @@ int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -139,7 +136,6 @@ int mbsys_swathplus_deall(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -203,7 +199,6 @@ int mbsys_swathplus_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -270,7 +265,6 @@ int mbsys_swathplus_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnu
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -321,7 +315,6 @@ int mbsys_swathplus_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -359,7 +352,6 @@ int mbsys_swathplus_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, i
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -406,7 +398,6 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -662,7 +653,6 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -861,7 +851,6 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -988,7 +977,6 @@ int mbsys_swathplus_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -1071,7 +1059,6 @@ int mbsys_swathplus_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -1154,7 +1141,6 @@ int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -1245,7 +1231,6 @@ int mbsys_swathplus_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -1369,7 +1354,6 @@ int mbsys_swathplus_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1520,7 +1504,6 @@ int mbsys_swathplus_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1704,7 +1687,6 @@ int swpls_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid, i
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:      %p\n", (void *)mbio_ptr);
@@ -1761,7 +1743,6 @@ int swpls_rd_sxpheader(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1816,7 +1797,6 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1999,7 +1979,6 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2081,7 +2060,6 @@ int swpls_rd_comment(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2152,7 +2130,6 @@ int swpls_rd_sxiheader(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2207,7 +2184,6 @@ int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2327,7 +2303,6 @@ int swpls_rd_attitude(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2390,7 +2365,6 @@ int swpls_rd_posll(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2449,7 +2423,6 @@ int swpls_rd_posen(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2508,7 +2481,6 @@ int swpls_rd_ssv(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2565,7 +2537,6 @@ int swpls_rd_tide(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2622,7 +2593,6 @@ int swpls_rd_echosounder(int verbose, char *buffer, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2679,7 +2649,6 @@ int swpls_rd_agds(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2738,7 +2707,6 @@ int swpls_rd_pos_offset(int verbose, char *buffer, void *store_ptr, int *error) 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2801,7 +2769,6 @@ int swpls_rd_imu_offset(int verbose, char *buffer, void *store_ptr, int *error) 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2864,7 +2831,6 @@ int swpls_rd_txer_offset(int verbose, char *buffer, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2935,7 +2901,6 @@ int swpls_rd_wl_offset(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n:");
 		fprintf(stderr, "dbg2     verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2     buffer:           %p\n", (void *)buffer);
@@ -2997,7 +2962,6 @@ int swpls_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2 MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2      mbio_ptr:    %p\n", mbio_ptr);
@@ -3155,7 +3119,6 @@ int swpls_wr_sxpheader(int verbose, int *bufferalloc, char **bufferptr, void *st
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -3230,7 +3193,6 @@ int swpls_wr_sxpping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2      verbose:     %d\n", verbose);
 		fprintf(stderr, "dbg2      bufferalloc: %d\n", *bufferalloc);
@@ -3404,7 +3366,6 @@ int swpls_wr_projection(int verbose, int *bufferalloc, char **bufferptr, void *s
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2      bufferalloc: %d\n", *bufferalloc);
@@ -3487,7 +3448,6 @@ int swpls_wr_comment(int verbose, int *bufferalloc, char **bufferptr, void *stor
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2      bufferalloc: %d\n", *bufferalloc);
@@ -3569,7 +3529,6 @@ int swpls_wr_sxiheader(int verbose, int *bufferalloc, char **bufferptr, void *st
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -3644,7 +3603,6 @@ int swpls_wr_sxiping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -3750,7 +3708,6 @@ int swpls_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, void *sto
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -3834,7 +3791,6 @@ int swpls_wr_posll(int verbose, int *bufferalloc, char **bufferptr, void *store_
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -3914,7 +3870,6 @@ int swpls_wr_posen(int verbose, int *bufferalloc, char **bufferptr, void *store_
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -3994,7 +3949,6 @@ int swpls_wr_ssv(int verbose, int *bufferalloc, char **bufferptr, void *store_pt
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -4072,7 +4026,6 @@ int swpls_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *store_p
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -4226,7 +4179,6 @@ int swpls_wr_agds(int verbose, int *bufferalloc, char **bufferptr, void *store_p
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -4306,7 +4258,6 @@ int swpls_wr_pos_offset(int verbose, int *bufferalloc, char **bufferptr, void *s
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -4390,7 +4341,6 @@ int swpls_wr_imu_offset(int verbose, int *bufferalloc, char **bufferptr, void *s
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -4474,7 +4424,6 @@ int swpls_wr_txer_offset(int verbose, int *bufferalloc, char **bufferptr, void *
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -4566,7 +4515,6 @@ int swpls_wr_wl_offset(int verbose, int *bufferalloc, char **bufferptr, void *st
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       bufferalloc:  %d\n", *bufferalloc);
@@ -4641,7 +4589,6 @@ int swpls_pr_sxpheader(int verbose, FILE *fout, swpls_header *header, int *error
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       header:       %p\n", (void *)header);
@@ -4682,7 +4629,6 @@ int swpls_pr_sxpping(int verbose, FILE *fout, swpls_sxpping *ping, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       ping:         %p\n", (void *)ping);
@@ -4767,7 +4713,6 @@ int swpls_pr_projection(int verbose, FILE *fout, swpls_projection *projection, i
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       projection:      %p\n", (void *)projection);
@@ -4810,7 +4755,6 @@ int swpls_pr_comment(int verbose, FILE *fout, swpls_comment *comment, int *error
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       comment:      %p\n", (void *)comment);
@@ -4852,7 +4796,6 @@ int swpls_pr_sxiheader(int verbose, FILE *fout, swpls_header *header, int *error
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       header:       %p\n", (void *)header);
@@ -4892,7 +4835,6 @@ int swpls_pr_sxiping(int verbose, FILE *fout, swpls_sxiping *ping, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       ping:       %p\n", (void *)ping);
@@ -4949,7 +4891,6 @@ int swpls_pr_attitude(int verbose, FILE *fout, swpls_attitude *attitude, int *er
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       attitude:     %p\n", (void *)attitude);
@@ -4993,7 +4934,6 @@ int swpls_pr_posll(int verbose, FILE *fout, swpls_posll *posll, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       posll:        %p\n", (void *)posll);
@@ -5036,7 +4976,6 @@ int swpls_pr_posen(int verbose, FILE *fout, swpls_posen *posen, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       posen:        %p\n", (void *)posen);
@@ -5080,7 +5019,6 @@ int swpls_pr_ssv(int verbose, FILE *fout, swpls_ssv *ssv, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       ssv:          %p\n", (void *)ssv);
@@ -5122,7 +5060,6 @@ int swpls_pr_tide(int verbose, FILE *fout, swpls_tide *tide, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       tide:         %p\n", (void *)tide);
@@ -5164,7 +5101,6 @@ int swpls_pr_echosounder(int verbose, FILE *fout, swpls_echosounder *echosounder
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       echosounder:  %p\n", (void *)echosounder);
@@ -5207,7 +5143,6 @@ int swpls_pr_agds(int verbose, FILE *fout, swpls_agds *agds, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       agds:  %p\n", (void *)agds);
@@ -5250,7 +5185,6 @@ int swpls_pr_pos_offset(int verbose, FILE *fout, swpls_pos_offset *pos_offset, i
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       pos_offset:  %p\n", (void *)pos_offset);
@@ -5295,7 +5229,6 @@ int swpls_pr_imu_offset(int verbose, FILE *fout, swpls_imu_offset *imu_offset, i
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       imu_offset:  %p\n", (void *)imu_offset);
@@ -5340,7 +5273,6 @@ int swpls_pr_txer_offset(int verbose, FILE *fout, swpls_txer_offset *txer_offset
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       txer_offset:  %p\n", (void *)txer_offset);
@@ -5389,7 +5321,6 @@ int swpls_pr_wl_offset(int verbose, FILE *fout, swpls_wl_offset *wl_offset, int 
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       wl_offset:  %p\n", (void *)wl_offset);
@@ -5435,7 +5366,6 @@ static int get_sxp_heave(int verbose, swpls_sxpping *sxp_ping, double *heave, in
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       sxp_ping:    %p\n", (void *)sxp_ping);
@@ -5481,7 +5411,6 @@ static int set_sxp_height(int verbose, double heave, swpls_sxpping *sxp_ping, in
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       heave:        %f\n", heave);
@@ -5558,7 +5487,6 @@ int swpls_init_transform(int verbose, swpls_matrix *m, int *error) {
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       m:            %p\n", (void *)m);
@@ -5591,7 +5519,6 @@ int swpls_concat_translate(int verbose, swpls_matrix *m, double dx, double dy, d
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       m:            %p\n", (void *)m);
@@ -5635,7 +5562,6 @@ int swpls_concat_rotate_x(int verbose, swpls_matrix *m, double pitch, int *error
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       m:            %p\n", (void *)m);
@@ -5678,7 +5604,6 @@ int swpls_concat_rotate_y(int verbose, swpls_matrix *m, double heading, int *err
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       m:            %p\n", (void *)m);
@@ -5721,7 +5646,6 @@ int swpls_concat_rotate_z(int verbose, swpls_matrix *m, double bank, int *error)
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       m:            %p\n", (void *)m);
@@ -5764,7 +5688,6 @@ int swpls_transform(int verbose, const swpls_matrix *m, swpls_vector *p, int *er
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       m:            %p\n", (void *)m);
@@ -5810,7 +5733,6 @@ int swpls_angles_to_quat(int verbose, const swpls_angles *orientation, swpls_qua
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       orientation:  %p\n", (void *)orientation);
@@ -5854,7 +5776,6 @@ int swpls_quat_to_angles(int verbose, const swpls_quaternion *q, swpls_angles *o
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       q:            %p\n", (void *)q);
@@ -5903,7 +5824,6 @@ int swpls_slerp(int verbose, const swpls_quaternion *q0, const swpls_quaternion 
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       q0:           %p\n", (void *)q0);
@@ -5995,7 +5915,6 @@ static int set_identity(int verbose, swpls_matrix *m, int *error) {
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       m:            %p\n", (void *)m);
@@ -6042,7 +5961,6 @@ static int concat_transform(int verbose, swpls_matrix *a, swpls_matrix *b, int *
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called.\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       a:            %p\n", (void *)a);

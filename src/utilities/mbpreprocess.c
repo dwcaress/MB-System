@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbpreprocess.c  1/8/2014
- *    $Id$
  *
  *    Copyright (c) 2014-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -26,7 +25,6 @@
  */
 
 /* source file version string */
-static char version_id[] = "$Id$";
 
 /* standard include files */
 #include <stdio.h>
@@ -1145,14 +1143,12 @@ int main(int argc, char **argv) {
   /* print starting message */
   if (verbose == 1 || help) {
     fprintf(stderr, "\nProgram %s\n", program_name);
-    fprintf(stderr, "Source File Version %s\n", version_id);
     fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
   }
 
   /* print starting debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-    fprintf(stderr, "dbg2  Version %s\n", version_id);
     fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
     fprintf(stderr, "dbg2  Default MB-System Parameters:\n");
     fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
@@ -1278,7 +1274,6 @@ int main(int argc, char **argv) {
   /* print starting verbose */
   else if (verbose > 0) {
     fprintf(stderr, "\nProgram <  %s>\n", program_name);
-    fprintf(stderr, "Version   %s\n", version_id);
     fprintf(stderr, "MB-system Version   %s\n", MB_VERSION);
     fprintf(stderr, "Input survey data to be preprocessed:\n");
     fprintf(stderr, "     read_file:                    %s\n", read_file);

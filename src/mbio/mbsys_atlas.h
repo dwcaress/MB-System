@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_atlas.h	6/22/01
- *	$Id$
  *
  *    Copyright (c) 2001-2019 by
  *    David W. Caress (caress@mbari.org)

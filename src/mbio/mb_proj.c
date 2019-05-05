@@ -1,7 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_proj.c	7/16/2002
- *    $Id$
- *
+  *
  *    Copyright (c) 2002-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -52,8 +51,6 @@
 char *GMT_runtime_bindir_win32(char *result);
 #endif
 
-static char rcs_id[] = "$Id$";
-
 /*--------------------------------------------------------------------*/
 int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 	char *function_name = "mb_proj_init";
@@ -78,7 +75,6 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       projection: %s\n", projection);
@@ -127,7 +123,6 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       pjptr:           %p\n", (void *)*pjptr);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -146,7 +141,6 @@ int mb_proj_free(int verbose, void **pjptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       pjptr:      %p\n", (void *)*pjptr);
@@ -166,7 +160,6 @@ int mb_proj_free(int verbose, void **pjptr, int *error) {
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       pjptr:           %p\n", (void *)*pjptr);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -187,7 +180,6 @@ int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *ea
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       pjptr:      %p\n", (void *)pjptr);
@@ -212,7 +204,6 @@ int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *ea
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       easting:         %f\n", *easting);
 		fprintf(stderr, "dbg2       northing:        %f\n", *northing);
@@ -234,7 +225,6 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       pjptr:      %p\n", (void *)pjptr);
@@ -259,7 +249,6 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       lon:             %f\n", *lon);
 		fprintf(stderr, "dbg2       lat:             %f\n", *lat);
@@ -279,7 +268,6 @@ int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, d
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       pjptr:      %p\n", (void *)pjsrcptr);
@@ -301,7 +289,6 @@ int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, d
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       npoint:     %d\n", npoint);
 		for (i = 0; i < npoint; i++)

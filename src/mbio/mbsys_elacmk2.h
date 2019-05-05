@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elacmk2.h	6/10/97
- *	$Id$
  *
  *    Copyright (c) 1997-2019 by
  *    David W. Caress (caress@mbari.org)

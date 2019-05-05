@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id$
  *
  *    Copyright (c) 1995-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -100,7 +99,6 @@ WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
 /*--------------------------------------------------------------------*/
 
 /* id variables */
-static char svn_id[] = "$Id$";
 static char program_name[] = "MBnavedit";
 
 #define xgfont "-*-" FIXED "-bold-r-normal-*-13-*-75-75-c-70-iso8859-1"
@@ -458,7 +456,7 @@ void do_mbnavedit_init(int argc, char **argv) {
 	fontStruct = XLoadQueryFont(display, xgfont);
 	if (fontStruct == NULL) {
 		fprintf(stderr, "\nFailure to load font using XLoadQueryFont: %s\n", xgfont);
-		fprintf(stderr, "\tSource file: %s\n\tSource line: %d\n\tSource version: %s", __FILE__, __LINE__, svn_id);
+		fprintf(stderr, "\tSource file: %s\n\tSource line: %d", __FILE__, __LINE__);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(-1);
 	}

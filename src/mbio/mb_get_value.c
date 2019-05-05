@@ -1,7 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
- *    $Id$
- *
+  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -37,7 +36,6 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-/* static char rcs_id[]="$Id$"; */
 char tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/

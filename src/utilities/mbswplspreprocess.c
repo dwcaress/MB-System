@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsxppreprocess.c	09/12/2013
- *    $Id$
  *
  *    Copyright (c) 2005-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -170,7 +169,6 @@ static char help_message[] = "Preprocess SWATHplus SXP formatted files\n"
 
 static char usage_message[] = "mbswplspreprocess [-ABGHNRSV -Fformat -Jproj4command-Obasename] -Ifile";
 
-static char rcs_id[] = "$Id: mbswplspreprocess.c";
 static char program_name[] = "mbswplspreprocess";
 
 /*----------------------------------------------------------------------*/
@@ -226,7 +224,6 @@ int main(int argc, char **argv) {
 	/* if help desired then print it and exit */
 	if (opts.help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "\nusage: %s\n", usage_message);
 		fprintf(stderr, "\n%s\n", help_message);
@@ -357,7 +354,6 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       argc:       %d\n", argc);
@@ -446,7 +442,6 @@ static int print_mbdefaults(int verbose, options *opts, mbdefaults *dflts, int *
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       options:    %p\n", (void *)opts);
@@ -458,7 +453,6 @@ static int print_mbdefaults(int verbose, options *opts, mbdefaults *dflts, int *
 		tag = tagdebug0;
 
 	fprintf(stderr, "\n%sProgram <%s>\n", tag, program_name);
-	fprintf(stderr, "%sVersion %s\n", tag, rcs_id);
 	fprintf(stderr, "%sMB-system Version %s\n", tag, MB_VERSION);
 	fprintf(stderr, "\n%sControl Parameters:\n", tag);
 	fprintf(stderr, "%sverbose:                  %d\n", tag, opts->verbose);
@@ -534,7 +528,6 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       options:    %p\n", (void *)opts);
@@ -689,7 +682,6 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       ofile:      %p\n", (void *)ofile);
@@ -782,7 +774,6 @@ static int ping_txno(int verbose, struct mbsys_swathplus_struct *store, int *txn
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
@@ -820,7 +811,6 @@ static int copy_rawamp(int verbose, swpls_sxpping *ping, int *error) {
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
 		fprintf(stderr, "dbg2       ping:        %p\n", (void *)ping);
@@ -849,7 +839,6 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
 		fprintf(stderr, "dbg2       ping:        %p\n", (void *)ping);
@@ -907,7 +896,6 @@ static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
 		fprintf(stderr, "dbg2       ping:        %p\n", (void *)ping);
@@ -940,7 +928,6 @@ static int ping_mode(int verbose, struct mbsys_swathplus_struct *store, int *mod
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
@@ -988,7 +975,6 @@ static int zero_counts(int verbose, counts *recs, int *error) {
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       recs:       %p\n", (void *)recs);
@@ -1039,7 +1025,6 @@ static int count_record(int verbose, counts *recs, struct mbsys_swathplus_struct
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       recs:       %p\n", (void *)recs);
@@ -1145,7 +1130,6 @@ static int add_counts(int verbose, counts *to, counts *from, int *error) {
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       to:         %p\n", (void *)to);
@@ -1197,7 +1181,6 @@ static int print_counts(int verbose, counts *recs, int *error) {
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       recs:       %p\n", (void *)recs);
@@ -1251,7 +1234,6 @@ static int print_latest_record(int verbose, struct mbsys_swathplus_struct *store
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", rcs_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);

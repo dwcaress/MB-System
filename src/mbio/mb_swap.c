@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -38,8 +37,6 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 #include "mb_define.h"
-
-/* static	char	rcs_id[]="$Id$"; */
 
 /*--------------------------------------------------------------------*/
 /* function mb_swap_check determines if the cpu is byteswapped */

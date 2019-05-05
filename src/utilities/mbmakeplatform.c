@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmakeplatform.c	9/5/2015
- *    $Id$
  *
  *    Copyright (c) 2015-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +21,6 @@
  */
 
 /* source file version string */
-static char version_id[] = "$Id$";
 
 /* standard include files */
 #include <stdio.h>
@@ -642,7 +640,6 @@ int main(int argc, char **argv) {
 
 				if (verbose == 1) {
 					fprintf(stderr, "\nProgram %s\n", program_name);
-					fprintf(stderr, "Version %s\n", version_id);
 					fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 				}
 			}

@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -57,7 +56,6 @@
 #include "mbvelocity.h"
 
 /* id variables */
-static char rcs_id[] = "$Id$";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water "
                              "velocity profiles and to create  \nnew water velocity profiles which can be used for the "
@@ -305,14 +303,12 @@ int mbvt_init(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
@@ -799,7 +795,6 @@ int mbvt_save_edit_profile(char *file) {
 	/* write the svp */
 	fprintf(fp, "## Water Sound Velocity Profile (SVP)\n");
 	fprintf(fp, "## Output by Program %s\n", program_name);
-	fprintf(fp, "## Program Version %s\n", rcs_id);
 	fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
 	right_now = time((time_t *)0);
 	strcpy(date, ctime(&right_now));
@@ -884,7 +879,6 @@ int mbvt_save_swath_profile(char *file) {
 		/* write the svp */
 		fprintf(fp, "## Water Sound Velocity Profile (SVP)\n");
 		fprintf(fp, "## Output by Program %s\n", program_name);
-		fprintf(fp, "## Program Version %s\n", rcs_id);
 		fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
 		right_now = time((time_t *)0);
 		strcpy(date, ctime(&right_now));
@@ -971,7 +965,6 @@ int mbvt_save_residuals(char *file) {
 		/* write the sbo file */
 		fprintf(fp, "## Static Beam Offset (SBO)\n");
 		fprintf(fp, "## Output by Program %s\n", program_name);
-		fprintf(fp, "## Program Version %s\n", rcs_id);
 		fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
 		right_now = time((time_t *)0);
 		strcpy(date, ctime(&right_now));
@@ -1012,7 +1005,6 @@ int mbvt_save_residuals(char *file) {
 		/* write the sbo file */
 		fprintf(fp, "## Static Beam Angle Offset (SBAO)\n");
 		fprintf(fp, "## Output by Program %s\n", program_name);
-		fprintf(fp, "## Program Version %s\n", rcs_id);
 		fprintf(fp, "## MB-System Version %s\n", MB_VERSION);
 		right_now = time((time_t *)0);
 		strcpy(date, ctime(&right_now));

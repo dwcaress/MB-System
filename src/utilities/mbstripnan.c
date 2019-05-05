@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbstripNaN.c        8/8/02
- *    $Id$
  *
  *    Copyright (c) 2002-2019 by
  *    Mike McCann (mccann@mbari.org)

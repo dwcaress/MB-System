@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id$
  *
  *    Copyright (c) 2000-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -84,7 +83,6 @@ struct swathraw {
 };
 
 /* id variables */
-static char rcs_id[] = "$Id$";
 static char program_name[] = "mbnavadjust";
 static char help_message[] = "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -390,14 +388,12 @@ int mbnavadjust_init(int argc, char **argv) {
 	/* print starting message */
 	if (mbna_verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (mbna_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       mbna_verbose:         %d\n", mbna_verbose);
@@ -10738,8 +10734,6 @@ int mbnavadjust_updategrid() {
 					fprintf(afp, "%s", ostring);
 					sprintf(ostring, "# MB-System build data:     %s\n", MB_BUILD_DATE);
 					fprintf(afp, "%s", ostring);
-					sprintf(ostring, "# MBnavadjust version:      %s\n", rcs_id);
-					fprintf(afp, "%s", ostring);
 					sprintf(ostring, "# MBnavadjust project name: %s\n", project.name);
 					fprintf(afp, "%s", ostring);
 					sprintf(ostring, "# MBnavadjust project path: %s\n", project.path);
@@ -11008,9 +11002,6 @@ int mbnavadjust_applynav() {
 				fprintf(ofp, "%s", ostring);
 				fprintf(afp, "%s", ostring);
 				sprintf(ostring, "# MB-System build data:     %s\n", MB_BUILD_DATE);
-				fprintf(ofp, "%s", ostring);
-				fprintf(afp, "%s", ostring);
-				sprintf(ostring, "# MBnavadjust version:      %s\n", rcs_id);
 				fprintf(ofp, "%s", ostring);
 				fprintf(afp, "%s", ostring);
 				sprintf(ostring, "# MBnavadjust project name: %s\n", project.name);

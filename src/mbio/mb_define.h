@@ -1,7 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_define.h	4/21/96
- *    $Id$
- *
+  *
  *    Copyright (c) 1996-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -18,9 +17,6 @@
  *
  * Author:	D. W. Caress
  * Date:	April 21, 1996
- *
- * $Log: mb_define.h,v $
- *
  */
 
 #ifndef MB_DEFINE_H_
@@ -84,7 +80,6 @@ extern "C" {
 /* MB-system version id */
 #define MB_VERSION VERSION
 #define MB_BUILD_DATE VERSION_DATE
-#define MB_SVN "$Id$"
 
 /* type definitions of signed and unsigned char */
 typedef unsigned char mb_u_char;

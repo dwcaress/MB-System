@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_platform_math.c	11/1/00
- *    $Id$
  *
  *    Copyright (c) 2015-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -31,8 +30,6 @@
 /* mbio include files */
 #include <mb_status.h>
 #include <mb_define.h>
-
-static char svn_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 void mb_platform_math_matrix_times_vector_3x1(double *A, double *b, double *Ab) {
@@ -131,7 +128,6 @@ int mb_platform_math_attitude_offset(int verbose, double target_offset_roll, dou
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       target_offset_roll:      %f\n", target_offset_roll);
@@ -172,7 +168,6 @@ int mb_platform_math_attitude_offset(int verbose, double target_offset_roll, dou
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       target2source_offset_roll:      %f\n", *target2source_offset_roll);
 		fprintf(stderr, "dbg2       target2source_offset_pitch:     %f\n", *target2source_offset_pitch);
@@ -203,7 +198,6 @@ int mb_platform_math_attitude_platform(int verbose, double nav_attitude_roll, do
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       nav_attitude_roll:       %f\n", nav_attitude_roll);
@@ -240,7 +234,6 @@ int mb_platform_math_attitude_platform(int verbose, double nav_attitude_roll, do
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       platform_roll:      %f\n", *platform_roll);
 		fprintf(stderr, "dbg2       platform_pitch:     %f\n", *platform_pitch);
@@ -270,7 +263,6 @@ int mb_platform_math_attitude_target(int verbose, double source_attitude_roll, d
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                           %d\n", verbose);
 		fprintf(stderr, "dbg2       source_attitude_roll:              %f\n", source_attitude_roll);
@@ -306,7 +298,6 @@ int mb_platform_math_attitude_target(int verbose, double source_attitude_roll, d
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       target_roll:      %f\n", *target_roll);
 		fprintf(stderr, "dbg2       target_pitch:     %f\n", *target_pitch);
@@ -343,7 +334,6 @@ int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_a
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                           %d\n", verbose);
 		fprintf(stderr, "dbg2       prev_attitude_roll:                %f\n", prev_attitude_roll);
@@ -389,7 +379,6 @@ int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_a
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       corrected_offset_roll:      %f\n", *corrected_offset_roll);
 		fprintf(stderr, "dbg2       corrected_offset_pitch:     %f\n", *corrected_offset_pitch);
@@ -416,7 +405,6 @@ int mb_platform_math_attitude_rotate_beam(int verbose, double beam_acrosstrack, 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                           %d\n", verbose);
 		fprintf(stderr, "dbg2       beam_acrosstrack:                  %f\n", beam_acrosstrack);
@@ -445,7 +433,6 @@ int mb_platform_math_attitude_rotate_beam(int verbose, double beam_acrosstrack, 
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", svn_id);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       newbeam_easting:  %f\n", *newbeam_easting);
 		fprintf(stderr, "dbg2       newbeam_northing: %f\n", *newbeam_northing);
