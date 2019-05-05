@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	5/30/93
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -226,7 +225,6 @@ void mbcontour_newpen(int ipen);
 void mbcontour_justify_string(double height, char *string, double *s);
 void mbcontour_plot_string(double x, double y, double hgt, double angle, char *label);
 
-static char svn_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
@@ -809,7 +807,6 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 	/* print starting message */
 	if (verbose == 1) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", svn_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 

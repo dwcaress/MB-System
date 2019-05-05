@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsvplist.c	1/3/2001
- *    $Id$
  *
  *    Copyright (c) 2001-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -73,7 +72,6 @@ struct mbsvplist_svp_struct {
 	double velocity[MB_SVP_MAX];
 };
 
-static char svn_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
@@ -316,14 +314,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", svn_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", svn_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
@@ -688,7 +684,6 @@ int main(int argc, char **argv) {
 						        svp_save[isvp].longitude, svp_save[isvp].latitude);
 						fprintf(svp_fp, "## Water Sound Velocity Profile (SVP)\n");
 						fprintf(svp_fp, "## Output by Program %s\n", program_name);
-						fprintf(svp_fp, "## Program Version %s\n", svn_id);
 						fprintf(svp_fp, "## MB-System Version %s\n", MB_VERSION);
 						right_now = time((time_t *)0);
 						strcpy(date, ctime(&right_now));

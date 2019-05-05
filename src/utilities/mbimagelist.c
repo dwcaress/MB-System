@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbimagelist.c	10/10/2001
- *    $Id$
  *
  *    Copyright (c) 2001-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -43,7 +42,6 @@
 #include "mb_status.h"
 #include "mb_process.h"
 
-static char version_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrollbias.c	5/16/93
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -66,7 +65,6 @@ struct bathptr {
 void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, int itriag);
 
 /* program identifiers */
-static char rcs_id[] = "$Id$";
 char program_name[] = "MBROLLBIAS";
 char help_message[] = "MBROLLBIAS is an utility used to assess roll bias of swath \nsonar systems using bathymetry data from two "
                       "swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and "
@@ -266,14 +264,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(outfp, "\nProgram %s\n", program_name);
-		fprintf(outfp, "Version %s\n", rcs_id);
 		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(outfp, "dbg2  Version %s\n", rcs_id);
 		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(outfp, "dbg2  Control Parameters:\n");
 		fprintf(outfp, "dbg2       verbose:          %d\n", verbose);

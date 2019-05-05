@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id$
  *
  *    Copyright (c) 2000-2019 by
  *    D. W. Caress (caress@mbari.org)

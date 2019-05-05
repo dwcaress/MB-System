@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -129,7 +128,6 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 FILE *outfp = NULL;
 
 /* program identifiers */
-static char rcs_id[] = "$Id$";
 char program_name[] = "mbgrid";
 char help_message[] = "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath "
                       "sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, "
@@ -585,14 +583,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(outfp, "\nProgram %s\n", program_name);
-		fprintf(outfp, "Version %s\n", rcs_id);
 		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(outfp, "dbg2  Version %s\n", rcs_id);
 		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(outfp, "dbg2  Control Parameters:\n");
 		fprintf(outfp, "dbg2       verbose:              %d\n", verbose);

@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id$
  *
  *    Copyright (c) 2000-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -100,7 +99,6 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double angle, double *corr, int *error);
 int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int action, int *error);
 
-static char svn_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
@@ -537,7 +535,6 @@ and mbedit edit save files.\n";
 	/* if help desired then print it and exit */
 	if (help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", svn_id);
 		fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
 		fprintf(stderr, "\n%s\n", help_message);
 		fprintf(stderr, "\nusage: %s\n", usage_message);
@@ -593,7 +590,6 @@ and mbedit edit save files.\n";
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", svn_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "\ndbg2  MB-System Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
@@ -632,7 +628,6 @@ and mbedit edit save files.\n";
 	/* print starting info statements */
 	else if (verbose > 0) {
 		fprintf(stderr, "\nProgram <%s>\n", program_name);
-		fprintf(stderr, "Version %s\n", svn_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "\nProgram Operation:\n");
 		fprintf(stderr, "  Input file:      %s\n", read_file);
@@ -3169,8 +3164,8 @@ and mbedit edit save files.\n";
 				gethostname(host, MBP_FILENAMESIZE);
 				resf_mode = MB_ESF_MODE_EXPLICIT;
 				sprintf(resf_header,
-						"ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nSource Version: %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
-						resf_mode, MB_VERSION, svn_id, program_name, user, host, date);
+						"ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
+						resf_mode, MB_VERSION, program_name, user, host, date);
 				if (fwrite(resf_header, MB_PATH_MAXLINE, 1, resf_fp) != 1) {
 					status = MB_FAILURE;
 					error = MB_ERROR_WRITE_FAIL;
@@ -3321,8 +3316,6 @@ and mbedit edit save files.\n";
 				if (error == MB_ERROR_NO_ERROR)
 					ocomment++;
 				strncpy(comment, "\0", MBP_FILENAMESIZE);
-				sprintf(comment, "Version %s", svn_id);
-				status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 				if (error == MB_ERROR_NO_ERROR)
 					ocomment++;
 				strncpy(comment, "\0", MBP_FILENAMESIZE);

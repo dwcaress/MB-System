@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -93,7 +92,6 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 /* NaN value */
 double NaN;
 
-static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
@@ -541,14 +539,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
@@ -691,7 +687,7 @@ int main(int argc, char **argv) {
 		fprintf(outfile, "netcdf mlist {\n\n\t// ");
 		for (i = 0; i < argc; i++)
 			fprintf(outfile, "%s ", argv[i]);
-		fprintf(outfile, "\n\t// %s\n\n", rcs_id);
+		fprintf(outfile, "\n");
 		fprintf(outfile, "dimensions:\n\ttimestring = 26, timestring_J = 24, timestring_j = 23, \n\t");
 		fprintf(outfile, "timefields_J = 6,  timefields_j = 5, timefields_t = 7, latm = 13, \n\t");
 
@@ -720,7 +716,7 @@ int main(int argc, char **argv) {
 		fprintf(outfile, ":command_line = \"");
 		for (i = 0; i < argc; i++)
 			fprintf(outfile, "%s ", argv[i]);
-		fprintf(outfile, "\";\n\t:program_version = \"%s\";\n", rcs_id);
+		fprintf(outfile, "\n");
 		fprintf(outfile, "\t:mbsystem_version = \"%s\";\n", MB_VERSION);
 
 		right_now = time((time_t *)0);

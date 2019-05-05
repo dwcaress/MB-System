@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbsys_reson7k.c  3.00  1/8/2019
- *  $Id$
  *
  *    Copyright (c) 2019-2019 by
  *    David W. Caress (caress@mbari.org)

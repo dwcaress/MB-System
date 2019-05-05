@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.h	6/10/97
- *	$Id$
  *
  *    Copyright (c) 1998-2019 by
  *    David W. Caress (caress@mbari.org)

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
 ** This program was written by Richard Verhoeven (NL:5482ZX35)
 ** at the Eindhoven University of Technology. Email: rcb5@win.tue.nl

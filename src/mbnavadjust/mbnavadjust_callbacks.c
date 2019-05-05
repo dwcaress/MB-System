@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id$
  *
  *    Copyright (c) 2000-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -109,7 +108,6 @@ WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
 /*--------------------------------------------------------------------*/
 
 /* id variables */
-static char svn_id[] = "$Id$";
 static char program_name[] = "MBnavadjust";
 
 /* XG variable declarations */
@@ -2181,7 +2179,7 @@ void do_naverr_init() {
 	fontStruct = XLoadQueryFont(display, xgfont);
 	if (fontStruct == NULL) {
 		fprintf(stderr, "\nFailure to load font using XLoadQueryFont: %s\n", xgfont);
-		fprintf(stderr, "\tSource file: %s\n\tSource line: %d\n\tSource version: %s", __FILE__, __LINE__, svn_id);
+		fprintf(stderr, "\tSource file: %s\n\tSource line: %d", __FILE__, __LINE__);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(-1);
 	}
@@ -4552,7 +4550,7 @@ void do_modelplot_show(Widget w, XtPointer client_data, XtPointer call_data) {
 	fontStruct = XLoadQueryFont(display, xgfont);
 	if (fontStruct == NULL) {
 		fprintf(stderr, "\nFailure to load font using XLoadQueryFont: %s\n", xgfont);
-		fprintf(stderr, "\tSource file: %s\n\tSource line: %d\n\tSource version: %s", __FILE__, __LINE__, svn_id);
+		fprintf(stderr, "\tSource file: %s\n\tSource line: %d", __FILE__, __LINE__);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(-1);
 	}
@@ -4646,7 +4644,7 @@ void do_modelplot_resize(Widget w, XtPointer client_data, XEvent *event, Boolean
 			fontStruct = XLoadQueryFont(display, xgfont);
 			if (fontStruct == NULL) {
 				fprintf(stderr, "\nFailure to load font using XLoadQueryFont: %s\n", xgfont);
-				fprintf(stderr, "\tSource file: %s\n\tSource line: %d\n\tSource version: %s", __FILE__, __LINE__, svn_id);
+				fprintf(stderr, "\tSource file: %s\n\tSource line: %d", __FILE__, __LINE__);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(-1);
 			}

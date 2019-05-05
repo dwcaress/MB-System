@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2ss.c		8/15/2007
- *    $Id$
  *
  *    Copyright (c) 2007-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -74,7 +73,6 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
                                  double altitude, double pitch, double *table_angle, double *table_xtrack, double *table_ltrack,
                                  double *table_altitude, double *table_range, int *error);
 
-static char rcs_id[] = "$Id$";
 char program_name[] = "mb7k2ss";
 
 /*--------------------------------------------------------------------*/
@@ -474,14 +472,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", rcs_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
@@ -541,7 +537,6 @@ int main(int argc, char **argv) {
 	/* print starting debug statements */
 	if (verbose == 1) {
 		fprintf(stderr, "\nProgram <%s>\n", program_name);
-		fprintf(stderr, "Version %s\n", rcs_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "Control Parameters:\n");
 		if (bottompickmode == MB7K2SS_BOTTOMPICK_BATHYMETRY)

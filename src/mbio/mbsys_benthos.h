@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_benthos.h	3/29/2011
- *	$Id$
  *
  *    Copyright (c) 2012-2019 by
  *    David W. Caress (caress@mbari.org)

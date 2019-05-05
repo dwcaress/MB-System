@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -58,7 +57,6 @@ struct ping {
 #define XML 2
 #define MAX_OUTPUT_FORMAT 2
 
-static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
@@ -455,14 +453,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stream, "\nProgram %s\n", program_name);
-		fprintf(stream, "Version %s\n", rcs_id);
 		fprintf(stream, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stream, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stream, "dbg2  Version %s\n", rcs_id);
 		fprintf(stream, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stream, "dbg2  Control Parameters:\n");
 		fprintf(stream, "dbg2       verbose:    %d\n", verbose);

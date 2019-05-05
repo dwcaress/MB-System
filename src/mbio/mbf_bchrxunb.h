@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_bchrxunb.h	8/29/97
- *	$Id$
  *
  *    Copyright (c) 1997-2019 by
  *    David W. Caress (caress@mbari.org)

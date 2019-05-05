@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbgrdviz_callbacks.c    10/9/2002
- *    $Id$
  *
  *    Copyright (c) 2002-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -128,7 +127,6 @@ static int survey_color = MBV_COLOR_BLACK;
 static char survey_name[MB_PATH_MAXLINE];
 
 /* id variables */
-static char rcs_id[] = "$Id$";
 static char program_name[] = "MBgrdviz";
 
 /* status variables */
@@ -2377,7 +2375,6 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
         /* write the site file header */
         fprintf(sfp, "## Site File Version %s\n", MBGRDVIZ_SITE_VERSION);
         fprintf(sfp, "## Output by Program %s\n", program_name);
-        fprintf(sfp, "## Program Version %s\n", rcs_id);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         right_now = time((time_t *)0);
         strcpy(date, ctime(&right_now));
@@ -2490,7 +2487,6 @@ int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr) {
         /* write the site file header */
         fprintf(sfp, "## Site File Version %s\n", MBGRDVIZ_SITE_VERSION);
         fprintf(sfp, "## Output by Program %s\n", program_name);
-        fprintf(sfp, "## Program Version %s\n", rcs_id);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         right_now = time((time_t *)0);
         strcpy(date, ctime(&right_now));
@@ -2737,7 +2733,6 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
         /* write the route file header */
         fprintf(sfp, "## Route File Version %s\n", MBGRDVIZ_ROUTE_VERSION);
         fprintf(sfp, "## Output by Program %s\n", program_name);
-        fprintf(sfp, "## Program Version %s\n", rcs_id);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         right_now = time((time_t *)0);
         strcpy(date, ctime(&right_now));
@@ -2934,7 +2929,6 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
         /* write the route file header */
         fprintf(sfp, "## Risi Script Version %s\r\n", MBGRDVIZ_RISISCRIPT_VERSION);
         fprintf(sfp, "## Output by Program %s\r\n", program_name);
-        fprintf(sfp, "## Program Version %s\r\n", rcs_id);
         fprintf(sfp, "## MB-System Version %s\r\n", MB_VERSION);
         right_now = time((time_t *)0);
         strcpy(date, ctime(&right_now));
@@ -3995,7 +3989,6 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
         /* write the profile file header */
         fprintf(sfp, "## Profile File Version %s\n", MBGRDVIZ_PROFILE_VERSION);
         fprintf(sfp, "## Output by Program %s\n", program_name);
-        fprintf(sfp, "## Program Version %s\n", rcs_id);
         fprintf(sfp, "## MB-System Version %s\n", MB_VERSION);
         right_now = time((time_t *)0);
         strcpy(date, ctime(&right_now));

@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetesf.c	6/15/93
- *    $Id$
  *
  *    Copyright (c) 2001-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -50,7 +49,6 @@
 
 int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error);
 
-static char svn_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
@@ -235,14 +233,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Version %s\n", svn_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", svn_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
@@ -365,8 +361,8 @@ int main(int argc, char **argv) {
 		else
 			esf_mode = MB_ESF_MODE_EXPLICIT;
 		sprintf(esf_header,
-				"ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nSource Version: %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
-				esf_mode, MB_VERSION, svn_id, program_name, user, host, date);
+				"ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n",
+				esf_mode, MB_VERSION, program_name, user, host, date);
 		if (fwrite(esf_header, MB_PATH_MAXLINE, 1, sofp) != 1) {
 			status = MB_FAILURE;
 			error = MB_ERROR_WRITE_FAIL;

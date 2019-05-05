@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_cbat8101.h	8/21/94
- *	$Id$
  *
  *    Copyright (c) 1998-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -18,7 +17,6 @@
  *
  * Author:	D. W. Caress
  * Date:	December 10, 1998
- *
  *
  */
 /*

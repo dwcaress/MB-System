@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbtrnpreprocess.c	2/19/2018
- *    $Id:  $
  *
  *    Copyright (c) 2018-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -17,8 +16,6 @@
  *
  * Author:	D. W. Caress
  * Date:	February 18, 1995
- *
- *
  */
 
 /* standard include files */
@@ -129,7 +126,6 @@ int mbtrnpreprocess_input_read(int verbose, void *mbio_ptr, size_t size, char *b
 int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error);
 int mbtrnpreprocess_init_debug(int verbose);
 
-static char version_id[] = "$Id: mbtrnpreprocess.c 2308 2017-06-04 19:55:48Z caress $";
 static char program_name[] = "mbtrnpreprocess";
 
 // mbtrn_reader test configuration
@@ -783,14 +779,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "Source File Version %s\n", version_id);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  Version %s\n", version_id);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
@@ -2478,7 +2472,6 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p,%p\n", mbio_ptr,&mbio_ptr);
@@ -2556,7 +2549,6 @@ int mbtrnpreprocess_input_read(int verbose, void *mbio_ptr, size_t size, char *b
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -2602,7 +2594,6 @@ int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error) {
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Revision id: %s\n", version_id);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);

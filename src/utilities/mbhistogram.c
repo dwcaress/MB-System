@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id$
  *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -44,7 +43,6 @@
 
 double qsnorm(double p);
 
-static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
@@ -255,7 +253,6 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(output, "\nProgram %s\n", program_name);
-		fprintf(output, "Version %s\n", rcs_id);
 		fprintf(output, "MB-system Version %s\n", MB_VERSION);
 	}
 
@@ -272,7 +269,6 @@ int main(int argc, char **argv) {
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(output, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(output, "dbg2  Version %s\n", rcs_id);
 		fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(output, "dbg2  Control Parameters:\n");
 		fprintf(output, "dbg2       verbose:    %d\n", verbose);

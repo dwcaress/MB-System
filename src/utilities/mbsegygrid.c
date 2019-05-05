@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id$
  *
  *    Copyright (c) 2004-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -73,7 +72,6 @@ int four1(float *data, int *n, int *isign);
     stderr if verbose > 1) */
 FILE *outfp;
 
-static char rcs_id[] = "$Id$";
 char program_name[] = "MBsegygrid";
 char help_message[] = "MBsegygrid grids trace data from segy data files.";
 char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -347,14 +345,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(outfp, "\nProgram %s\n", program_name);
-		fprintf(outfp, "Version %s\n", rcs_id);
 		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(outfp, "dbg2  Version %s\n", rcs_id);
 		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(outfp, "dbg2  Control Parameters:\n");
 		fprintf(outfp, "dbg2       verbose:        %d\n", verbose);

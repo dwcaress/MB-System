@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id$
  *
  *    Copyright (c) 1997-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -154,7 +153,6 @@ int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, doubl
 int double_compare(double *a, double *b);
 
 /* program identifiers */
-static char rcs_id[] = "$Id$";
 char program_name[] = "mbmosaic";
 char help_message[] = "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data "
                       "files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum "
@@ -659,14 +657,12 @@ int main(int argc, char **argv) {
 	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(outfp, "\nProgram %s\n", program_name);
-		fprintf(outfp, "Version %s\n", rcs_id);
 		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
 	}
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(outfp, "dbg2  Version %s\n", rcs_id);
 		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(outfp, "dbg2  Control Parameters:\n");
 		fprintf(outfp, "dbg2       verbose:              %d\n", verbose);

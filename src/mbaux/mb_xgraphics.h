@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_aux.h	10/13/2009
- *    $Id$
  *
  *    Copyright (c) 2009-2019 by
  *    David W. Caress (caress@mbari.org)
@@ -17,9 +16,6 @@
  *
  * Author:	D. W. Caress
  * Date:	October 13, 2009
- *
- * $Log: $
- *
  */
 
 /* xgraphics defines */
