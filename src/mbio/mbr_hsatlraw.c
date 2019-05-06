@@ -295,7 +295,6 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
 	char *function_name = "mbr_zero_hsatlraw";
 	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -338,7 +337,7 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
 		data->depth_center = 0.0;
 		data->depth_scale = 0.0;
 		data->spare = 0;
-		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++) {
 			data->distance[i] = 0;
 			data->depth[i] = 0;
 		}
@@ -350,9 +349,9 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
 		data->roll = 0.0;
 		data->time_center = 0.0;
 		data->time_scale = 0.0;
-		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+		for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 			data->time[i] = 0;
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			data->gyro[i] = 0.0;
 
 		/* amplitude data (ERGNAMPL) */
@@ -376,11 +375,11 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
 		data->amplitude_center = 0;
 		data->echo_duration_center = 0;
 		data->echo_scale_center = 0;
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			data->gain[i] = 0;
 			data->echo_scale[i] = 0;
 		}
-		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++) {
 			data->amplitude[i] = 0;
 			data->echo_duration[i] = 0;
 		}
@@ -399,7 +398,7 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
 
 			/* water velocity profile */
 			data->num_vel = 0;
-			for (i = 0; i < MBF_HSATLRAW_MAXVEL; i++) {
+			for (int i = 0; i < MBF_HSATLRAW_MAXVEL; i++) {
 				data->depth[i] = 0;
 				data->velocity[i] = 0;
 			}
@@ -437,7 +436,6 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_hsatlraw_struct *data;
 	struct mbsys_hsds_struct *store;
 	double xx, rr, zz, tt;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -489,7 +487,7 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->depth_center = data->depth_center;
 		store->depth_scale = data->depth_scale;
 		store->spare = data->spare;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->distance[i] = data->distance[i];
 			store->depth[i] = data->depth[i];
 		}
@@ -501,9 +499,9 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->roll = data->roll;
 		store->time_center = data->time_center;
 		store->time_scale = data->time_scale;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 			store->time[i] = data->time[i];
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			store->gyro[i] = data->gyro[i];
 
 		/* amplitude data (ERGNAMPL) */
@@ -527,11 +525,11 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->amplitude_center = data->amplitude_center;
 		store->echo_duration_center = data->echo_duration_center;
 		store->echo_scale_center = data->echo_scale_center;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->amplitude[i] = data->amplitude[i];
 			store->echo_duration[i] = data->echo_duration[i];
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			store->gain[i] = data->gain[i];
 			store->echo_scale[i] = data->echo_scale[i];
 		}
@@ -544,7 +542,7 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* water velocity profile (HS_ERGNCTDS) */
 		store->num_vel = data->num_vel;
-		for (i = 0; i < data->num_vel; i++) {
+		for (int i = 0; i < data->num_vel; i++) {
 			store->vdepth[i] = data->vdepth[i];
 			store->velocity[i] = data->velocity[i];
 		}
@@ -559,7 +557,7 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* processed backscatter */
 		store->back_scale = 1.0;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->back[i] = mb_io_ptr->new_amp[i];
 		}
 
@@ -575,7 +573,7 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				rr = fabs(store->depth_center) + store->draught + store->heave;
 				store->time_center = rr / store->vel_mean;
 			}
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 				if (data->time[i] <= 0 && store->depth[i] != 0) {
 					zz = store->depth_scale * (fabs((double)store->depth[i]) + store->draught + store->heave);
 					xx = store->depth_scale * store->distance[i];
@@ -606,7 +604,6 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_hsatlraw_struct *data;
 	char *data_ptr;
 	struct mbsys_hsds_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -654,7 +651,7 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->depth_center = store->depth_center;
 		data->depth_scale = store->depth_scale;
 		data->spare = store->spare;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			data->distance[i] = store->distance[i];
 			data->depth[i] = store->depth[i];
 		}
@@ -666,9 +663,9 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->roll = store->roll;
 		data->time_center = store->time_center;
 		data->time_scale = store->time_scale;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 			data->time[i] = store->time[i];
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			data->gyro[i] = store->gyro[i];
 
 		/* amplitude data (ERGNAMPL) */
@@ -692,11 +689,11 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->amplitude_center = store->amplitude_center;
 		data->echo_duration_center = store->echo_duration_center;
 		data->echo_scale_center = store->echo_scale_center;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			data->amplitude[i] = store->amplitude[i];
 			data->echo_duration[i] = store->echo_duration[i];
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			data->gain[i] = store->gain[i];
 			data->echo_scale[i] = store->echo_scale[i];
 		}
@@ -709,7 +706,7 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* water velocity profile (HS_ERGNCTDS) */
 		data->num_vel = store->num_vel;
-		for (i = 0; i < store->num_vel; i++) {
+		for (int i = 0; i < store->num_vel; i++) {
 			data->vdepth[i] = store->vdepth[i];
 			data->velocity[i] = store->velocity[i];
 		}
@@ -724,7 +721,7 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* check that no bathymetry values are negative */
-	for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+	for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 		if (data->depth[i] < 0)
 			data->depth[i] = 0;
 	}
@@ -924,7 +921,6 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *shift, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_label";
 	int status = MB_SUCCESS;
-	int i;
 	int icmp;
 
 	/* print input debug statements */
@@ -942,7 +938,7 @@ int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *s
 	if (status == MB_SUCCESS) {
 		*type = MBF_HSATLRAW_RAW_LINE;
 		*shift = 0;
-		for (i = 1; i < MBF_HSATLRAW_RECORDS; i++) {
+		for (int i = 1; i < MBF_HSATLRAW_RECORDS; i++) {
 			icmp = strncmp(line, mbf_hsatlraw_labels[i], 8);
 			if (icmp == 0)
 				*type = i;
@@ -953,7 +949,7 @@ int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *s
 	    is tape data */
 	if (status == MB_SUCCESS && *type == MBF_HSATLRAW_RAW_LINE) {
 		*shift = 4;
-		for (i = 1; i < MBF_HSATLRAW_RECORDS; i++) {
+		for (int i = 1; i < MBF_HSATLRAW_RECORDS; i++) {
 			icmp = strncmp(line + 4, mbf_hsatlraw_labels[i], 8);
 			if (icmp == 0)
 				*type = i;
@@ -984,7 +980,6 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 	int done;
 	char *result;
 	int blank;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1010,7 +1005,7 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 
 				/* trim trailing blank characters */
 				blank = MB_YES;
-				for (i = (nchars - 1); i >= 0 && blank == MB_YES; i--) {
+				for (int i = (nchars - 1); i >= 0 && blank == MB_YES; i--) {
 					if (line[i] == ' ' || line[i] == '\r' || line[i] == '\n')
 						line[i] = '\0';
 					else
@@ -1277,7 +1272,6 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	char *function_name = "mbr_hsatlraw_rd_ergneich";
 	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
-	int i;
 	int numvals;
 
 	/* print input debug statements */
@@ -1331,7 +1325,7 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++)
+			for (int i = 0; i < numvals; i++)
 				mb_get_int(&(data->distance[i + 30]), line + i * 4 + 2 + shift, 4);
 		else {
 			status = MB_FAILURE;
@@ -1343,7 +1337,7 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++)
+			for (int i = 0; i < numvals; i++)
 				mb_get_int(&(data->depth[i + 30]), line + i * 4 + 2 + shift, 4);
 		else {
 			status = MB_FAILURE;
@@ -1355,7 +1349,7 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++) {
+			for (int i = 0; i < numvals; i++) {
 				mb_get_int(&(data->distance[28 - i]), line + i * 4 + 2 + shift, 4);
 				data->distance[28 - i] = -data->distance[28 - i];
 			}
@@ -1369,7 +1363,7 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++)
+			for (int i = 0; i < numvals; i++)
 				mb_get_int(&(data->depth[28 - i]), line + i * 4 + 2 + shift, 4);
 		else {
 			status = MB_FAILURE;
@@ -1400,7 +1394,7 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
 		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
 		fprintf(stderr, "dbg5       distances and depths:\n");
-		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+		for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
 	}
 
@@ -1421,7 +1415,6 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1474,7 +1467,7 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	if (status == MB_SUCCESS && (status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++)
+			for (int i = 0; i < numvals; i++)
 				mb_get_int(&(data->distance[i + 30]), line + i * 4 + 2 + shift, 4);
 		else {
 			status = MB_FAILURE;
@@ -1486,7 +1479,7 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	if (status == MB_SUCCESS && (status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++) {
+			for (int i = 0; i < numvals; i++) {
 				mb_get_int(&(data->depth[i + 30]), line + i * 4 + 2 + shift, 4);
 			}
 		else {
@@ -1499,7 +1492,7 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	if (status == MB_SUCCESS && (status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++) {
+			for (int i = 0; i < numvals; i++) {
 				mb_get_int(&(data->distance[28 - i]), line + i * 4 + 2 + shift, 4);
 				data->distance[28 - i] = -data->distance[28 - i];
 			}
@@ -1513,7 +1506,7 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	if (status == MB_SUCCESS && (status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++) {
+			for (int i = 0; i < numvals; i++) {
 				mb_get_int(&(data->depth[28 - i]), line + i * 4 + 2 + shift, 4);
 			}
 		else {
@@ -1545,7 +1538,7 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
 		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
 		fprintf(stderr, "dbg5       distances and depths:\n");
-		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+		for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
 	}
 
@@ -1565,7 +1558,6 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	char *function_name = "mbr_hsatlraw_rd_ergnslzt";
 	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
-	int i;
 	int numvals;
 
 	/* print input debug statements */
@@ -1612,7 +1604,7 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++)
+			for (int i = 0; i < numvals; i++)
 				mb_get_int(&(data->time[i + 30]), line + i * 4 + 2 + shift, 4);
 		else {
 			status = MB_FAILURE;
@@ -1624,7 +1616,7 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 		mb_get_int(&numvals, line + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++)
+			for (int i = 0; i < numvals; i++)
 				mb_get_int(&(data->time[28 - i]), line + i * 4 + 2 + shift, 4);
 		else {
 			status = MB_FAILURE;
@@ -1634,7 +1626,7 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 
 	/* read and parse data from third data record */
 	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			mb_get_double(&(data->gyro[i]), line + i * 5 + shift, 5);
 	}
 
@@ -1658,10 +1650,10 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg5       time_center:      %f\n", data->depth_center);
 		fprintf(stderr, "dbg5       time_scale:       %f\n", data->time_scale);
 		fprintf(stderr, "dbg5       travel times:\n");
-		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+		for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->time[i]);
 		fprintf(stderr, "dbg5       gyro headings:\n");
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			fprintf(stderr, "dbg5         %d  %f\n", i, data->gyro[i]);
 	}
 
@@ -1728,7 +1720,7 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	}
 
 	/* read and parse data records from file */
-	for (i = 0; i < nlines; i++) {
+	for (int i = 0; i < nlines; i++) {
 		if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
 			numvals = 10;
 			if (i == nlines - 1)
@@ -1754,7 +1746,7 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg5       second:           %d\n", data->second);
 		fprintf(stderr, "dbg5       num_vel:          %d\n", data->num_vel);
 		fprintf(stderr, "dbg5       water depths and velocities:\n");
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			fprintf(stderr, "dbg5         %d  %f  %f\n", i, data->vdepth[i], data->velocity[i]);
 	}
 
@@ -1774,7 +1766,6 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	char *function_name = "mbr_hsatlraw_rd_ergnampl";
 	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
-	int i;
 	int numvals;
 
 	/* print input debug statements */
@@ -1832,11 +1823,11 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 
 	/* read and parse data from first data record */
 	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			mb_get_int(&(data->gain[i + 8]), line + i + shift, 1);
 		mb_get_int(&numvals, line + 8 + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++)
+			for (int i = 0; i < numvals; i++)
 				mb_get_int(&(data->amplitude[i + 30]), line + i * 3 + 10 + shift, 3);
 		else {
 			status = MB_FAILURE;
@@ -1846,11 +1837,11 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 
 	/* read and parse data from second data record */
 	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			mb_get_int(&(data->gain[i]), line + i + shift, 1);
 		mb_get_int(&numvals, line + 8 + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++)
+			for (int i = 0; i < numvals; i++)
 				mb_get_int(&(data->amplitude[28 - i]), line + i * 3 + 10 + shift, 3);
 		else {
 			status = MB_FAILURE;
@@ -1860,11 +1851,11 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 
 	/* read and parse data from third data record */
 	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			mb_get_int(&(data->echo_scale[i + 8]), line + 1 + shift, 1);
 		mb_get_int(&numvals, line + 8 + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++)
+			for (int i = 0; i < numvals; i++)
 				mb_get_int(&(data->echo_duration[i + 30]), line + i * 3 + 10 + shift, 3);
 		else {
 			status = MB_FAILURE;
@@ -1874,11 +1865,11 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 
 	/* read and parse data from fourth data record */
 	if ((status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error)) == MB_SUCCESS) {
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			mb_get_int(&(data->echo_scale[i]), line + 1 + shift, 1);
 		mb_get_int(&numvals, line + 8 + shift, 2);
 		if (numvals == 29)
-			for (i = 0; i < numvals; i++)
+			for (int i = 0; i < numvals; i++)
 				mb_get_int(&(data->echo_duration[28 - i]), line + i * 3 + 10 + shift, 3);
 		else {
 			status = MB_FAILURE;
@@ -1919,10 +1910,10 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		fprintf(stderr, "dbg5       echo_dur_center:  %d\n", data->echo_duration_center);
 		fprintf(stderr, "dbg5       echo_scal_center: %d\n", data->echo_scale_center);
 		fprintf(stderr, "dbg5       amplitudes and echo durations:\n");
-		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+		for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->amplitude[i], data->echo_duration[i]);
 		fprintf(stderr, "dbg5       gains and echo scales:\n");
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->gain[i], data->echo_scale[i]);
 	}
 
@@ -2420,7 +2411,6 @@ int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error
 	char *function_name = "mbr_hsatlraw_wr_ergneich";
 	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2457,7 +2447,7 @@ int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error
 		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
 		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
 		fprintf(stderr, "dbg5       distances and depths:\n");
-		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+		for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
 	}
 
@@ -2489,25 +2479,25 @@ int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error
 
 		/* output forward distances */
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%4.4d", data->distance[i + 30]);
 		status = fprintf(mbfp, "\n");
 
 		/* output forward depths */
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%4.4d", data->depth[i + 30]);
 		status = fprintf(mbfp, "\n");
 
 		/* output aft distances */
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%4.4d", (-data->distance[28 - i]));
 		status = fprintf(mbfp, "\n");
 
 		/* output aft depths */
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%4.4d", data->depth[28 - i]);
 		status = fprintf(mbfp, "\n");
 
@@ -2538,7 +2528,6 @@ int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error
 	char *function_name = "mbr_hsatlraw_wr_ergnmess";
 	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2575,7 +2564,7 @@ int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error
 		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
 		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
 		fprintf(stderr, "dbg5       distances and depths:\n");
-		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+		for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
 	}
 
@@ -2607,25 +2596,25 @@ int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error
 
 		/* output starboard crosstrack distances */
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%4.4d", data->distance[i + 30]);
 		status = fprintf(mbfp, "\n");
 
 		/* output starboard crosstrack depths */
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%4.4d", data->depth[i + 30]);
 		status = fprintf(mbfp, "\n");
 
 		/* output port crosstrack distances */
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%4.4d", (-data->distance[28 - i]));
 		status = fprintf(mbfp, "\n");
 
 		/* output port crosstrack depths */
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%4.4d", data->depth[28 - i]);
 		status = fprintf(mbfp, "\n");
 
@@ -2657,7 +2646,6 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 	int datacheck;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2673,7 +2661,7 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 
 	/* check if there are data to output */
 	datacheck = MB_NO;
-	for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+	for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 		if (data->time[i] > 0)
 			datacheck = MB_YES;
 
@@ -2702,10 +2690,10 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 		fprintf(stderr, "dbg5       time_center:      %f\n", data->depth_center);
 		fprintf(stderr, "dbg5       time_scale:       %f\n", data->time_scale);
 		fprintf(stderr, "dbg5       travel times:\n");
-		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+		for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->time[i]);
 		fprintf(stderr, "dbg5       gyro headings:\n");
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			fprintf(stderr, "dbg5         %d  %f\n", i, data->gyro[i]);
 	}
 
@@ -2735,18 +2723,18 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 
 		/* output starboard crosstrack travel times */
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%4.4d", data->time[i + 30]);
 		status = fprintf(mbfp, "\n");
 
 		/* output port crosstrack travel times */
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%4.4d", data->time[28 - i]);
 		status = fprintf(mbfp, "\n");
 
 		/* output gyro headings */
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			status = fprintf(mbfp, "%05.1f", data->gyro[i]);
 		status = fprintf(mbfp, "\n");
 
@@ -2777,7 +2765,6 @@ int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error
 	char *function_name = "mbr_hsatlraw_wr_ergnctds";
 	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
-	int i;
 	int nline, nrem;
 
 	/* print input debug statements */
@@ -2805,7 +2792,7 @@ int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error
 		fprintf(stderr, "dbg5       second:           %d\n", data->second);
 		fprintf(stderr, "dbg5       num_vel:          %d\n", data->num_vel);
 		fprintf(stderr, "dbg5       water depths and velocities:\n");
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			fprintf(stderr, "dbg5         %d  %f  %f\n", i, data->vdepth[i], data->velocity[i]);
 	}
 
@@ -2830,17 +2817,17 @@ int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error
 		nrem = data->num_vel % 10;
 
 		/* write all of the full lines */
-		for (i = 0; i < nline; i++) {
-			for (i = 0; i < 10; i++)
+		for (int i = 0; i < nline; i++) {
+			for (int i = 0; i < 10; i++)
 				status = fprintf(mbfp, "%5.0f%6.1f", data->vdepth[i], data->velocity[i]);
 			status = fprintf(mbfp, "\n");
 		}
 
 		/* write the last line as needed */
 		if (nrem > 0) {
-			for (i = 0; i < nrem; i++)
+			for (int i = 0; i < nrem; i++)
 				status = fprintf(mbfp, "%5.0f%6.1f", data->vdepth[i], data->velocity[i]);
-			for (i = 0; i < (10 - nrem); i++)
+			for (int i = 0; i < (10 - nrem); i++)
 				status = fprintf(mbfp, "           ");
 			status = fprintf(mbfp, "\n");
 		}
@@ -2873,7 +2860,6 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 	int datacheck;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2889,7 +2875,7 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 
 	/* check if there are data to output */
 	datacheck = MB_NO;
-	for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+	for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 		if (data->amplitude[i] > 0)
 			datacheck = MB_YES;
 
@@ -2931,10 +2917,10 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 		fprintf(stderr, "dbg5       echo_dur_center:  %d\n", data->echo_duration_center);
 		fprintf(stderr, "dbg5       echo_scal_center: %d\n", data->echo_scale_center);
 		fprintf(stderr, "dbg5       amplitudes and echo durations:\n");
-		for (i = 0; i < MBF_HSATLRAW_BEAMS; i++)
+		for (int i = 0; i < MBF_HSATLRAW_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->amplitude[i], data->echo_duration[i]);
 		fprintf(stderr, "dbg5       gains and echo scales:\n");
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->gain[i], data->echo_scale[i]);
 	}
 
@@ -2975,34 +2961,34 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 		status = fprintf(mbfp, "%1d\n", data->echo_scale_center);
 
 		/* output starboard amplitudes */
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			status = fprintf(mbfp, "%1.1d", data->gain[i + 8]);
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%3.3d", data->amplitude[i + 30]);
 		status = fprintf(mbfp, "\n");
 
 		/* output port amplitudes */
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			status = fprintf(mbfp, "%1.1d", data->gain[i]);
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%3.3d", data->amplitude[28 - i]);
 		status = fprintf(mbfp, "\n");
 
 		/* output starboard echo durations */
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			status = fprintf(mbfp, "%1.1d", data->echo_scale[i + 8]);
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%3.3d", data->echo_duration[i + 30]);
 		status = fprintf(mbfp, "\n");
 
 		/* output port echo durations */
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			status = fprintf(mbfp, "%1.1d", data->echo_scale[i]);
 		status = fprintf(mbfp, "29");
-		for (i = 0; i < 29; i++)
+		for (int i = 0; i < 29; i++)
 			status = fprintf(mbfp, "%3.3d", data->echo_duration[28 - i]);
 		status = fprintf(mbfp, "\n");
 
