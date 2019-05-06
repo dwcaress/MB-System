@@ -308,17 +308,17 @@ int main(int argc, char **argv) {
 	int val_int;
 	double val_double;
 	int ix, iy;
-	int i, j, k;
+	int j, k;
 	double sigma;
 
 	char *getenv();
 
 	/* initialize some variables */
-	for (i = 0; i < 7; i++) {
+	for (int i = 0; i < 7; i++) {
 		timbeg_i[i] = 0;
 		timend_i[i] = 0;
 	}
-	for (i = 0; i < MB_NOTICE_MAX; i++) {
+	for (int i = 0; i < MB_NOTICE_MAX; i++) {
 		notice_list[i] = 0;
 		notice_list_tot[i] = 0;
 	}
@@ -599,7 +599,7 @@ int main(int argc, char **argv) {
 
 			/* allocate memory for data arrays */
 			memset(data, 0, MBINFO_MAXPINGS * sizeof(struct ping));
-			for (i = 0; i < pings_read; i++) {
+			for (int i = 0; i < pings_read; i++) {
 				datacur = &data[i];
 				if (error == MB_ERROR_NO_ERROR)
 					status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
@@ -690,24 +690,24 @@ int main(int argc, char **argv) {
 			timtotfile = 0.0;
 			spdavgfile = 0.0;
 			if (pass == 0 && pings_read > 1) {
-				for (i = 0; i < beams_bath_alloc; i++) {
+				for (int i = 0; i < beams_bath_alloc; i++) {
 					bathmean[i] = 0.0;
 					bathvar[i] = 0.0;
 					nbathvar[i] = 0;
 				}
-				for (i = 0; i < beams_amp_alloc; i++) {
+				for (int i = 0; i < beams_amp_alloc; i++) {
 					ampmean[i] = 0.0;
 					ampvar[i] = 0.0;
 					nampvar[i] = 0;
 				}
-				for (i = 0; i < pixels_ss_alloc; i++) {
+				for (int i = 0; i < pixels_ss_alloc; i++) {
 					ssmean[i] = 0.0;
 					ssvar[i] = 0.0;
 					nssvar[i] = 0;
 				}
 			}
 			if (pass == 1 && coverage_mask == MB_YES) {
-				for (i = 0; i < mask_nx * mask_ny; i++)
+				for (int i = 0; i < mask_nx * mask_ny; i++)
 					mask[i] = MB_NO;
 			}
 
@@ -1296,11 +1296,11 @@ int main(int argc, char **argv) {
 								if (lonflip_use == -1) {
 									if (navlon > 0.0)
 										navlon -= 360.0;
-									for (i = 0; i < beams_bath; i++) {
+									for (int i = 0; i < beams_bath; i++) {
 										if (bathlon[i] > 0.0)
 											bathlon[i] -= 360.0;
 									}
-									for (i = 0; i < pixels_ss; i++) {
+									for (int i = 0; i < pixels_ss; i++) {
 										if (sslon[i] > 0.0)
 											sslon[i] -= 360.0;
 									}
@@ -1308,11 +1308,11 @@ int main(int argc, char **argv) {
 								else if (lonflip_use == 1) {
 									if (navlon < 0.0)
 										navlon += 360.0;
-									for (i = 0; i < beams_bath; i++) {
+									for (int i = 0; i < beams_bath; i++) {
 										if (bathlon[i] < 0.0)
 											bathlon[i] += 360.0;
 									}
-									for (i = 0; i < pixels_ss; i++) {
+									for (int i = 0; i < pixels_ss; i++) {
 										if (sslon[i] < 0.0)
 											sslon[i] += 360.0;
 									}
@@ -1322,13 +1322,13 @@ int main(int argc, char **argv) {
 										navlon += 360.0;
 									if (navlon > 180.0)
 										navlon -= 360.0;
-									for (i = 0; i < beams_bath; i++) {
+									for (int i = 0; i < beams_bath; i++) {
 										if (bathlon[i] < -180.0)
 											bathlon[i] += 360.0;
 										if (bathlon[i] > 180.0)
 											bathlon[i] -= 360.0;
 									}
-									for (i = 0; i < pixels_ss; i++) {
+									for (int i = 0; i < pixels_ss; i++) {
 										if (sslon[i] < -180.0)
 											sslon[i] += 360.0;
 										if (sslon[i] > 180.0)
@@ -1350,7 +1350,7 @@ int main(int argc, char **argv) {
 							latbeg = navlat;
 							timbeg = time_d;
 							timbegfile = time_d;
-							for (i = 0; i < 7; i++)
+							for (int i = 0; i < 7; i++)
 								timbeg_i[i] = time_i[i];
 							spdbeg = speed;
 							hdgbeg = heading;
@@ -1393,7 +1393,7 @@ int main(int argc, char **argv) {
 						altend = altitude;
 						timend = time_d;
 						timendfile = time_d;
-						for (i = 0; i < 7; i++)
+						for (int i = 0; i < 7; i++)
 							timend_i[i] = time_i[i];
 
 						/* check for good nav */
@@ -1438,21 +1438,21 @@ int main(int argc, char **argv) {
 							beginalt = MB_YES;
 						}
 						if (beginbath == MB_NO && beams_bath > 0)
-							for (i = 0; i < beams_bath; i++)
+							for (int i = 0; i < beams_bath; i++)
 								if (mb_beam_ok(beamflag[i])) {
 									bathmin = bath[i];
 									bathmax = bath[i];
 									beginbath = MB_YES;
 								}
 						if (beginamp == MB_NO && beams_amp > 0)
-							for (i = 0; i < beams_amp; i++)
+							for (int i = 0; i < beams_amp; i++)
 								if (mb_beam_ok(beamflag[i])) {
 									ampmin = amp[i];
 									ampmax = amp[i];
 									beginamp = MB_YES;
 								}
 						if (beginss == MB_NO && pixels_ss > 0)
-							for (i = 0; i < pixels_ss; i++)
+							for (int i = 0; i < pixels_ss; i++)
 								if (ss[i] > MB_SIDESCAN_NULL) {
 									ssmin = ss[i];
 									ssmax = ss[i];
@@ -1474,7 +1474,7 @@ int main(int argc, char **argv) {
 							altmin = MIN(altmin, altitude);
 							altmax = MAX(altmax, altitude);
 						}
-						for (i = 0; i < beams_bath; i++) {
+						for (int i = 0; i < beams_bath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
 								if (good_nav == MB_YES && beginnav == MB_YES) {
 									lonmin = MIN(lonmin, bathlon[i]);
@@ -1491,7 +1491,7 @@ int main(int argc, char **argv) {
 							else
 								nfdbeams++;
 						}
-						for (i = 0; i < beams_amp; i++) {
+						for (int i = 0; i < beams_amp; i++) {
 							if (mb_beam_ok(beamflag[i])) {
 								ampmin = MIN(ampmin, amp[i]);
 								ampmax = MAX(ampmax, amp[i]);
@@ -1502,7 +1502,7 @@ int main(int argc, char **argv) {
 							else
 								nfabeams++;
 						}
-						for (i = 0; i < pixels_ss; i++) {
+						for (int i = 0; i < pixels_ss; i++) {
 							if (ss[i] > MB_SIDESCAN_NULL) {
 								if (good_nav == MB_YES && beginnav == MB_YES) {
 									lonmin = MIN(lonmin, sslon[i]);
@@ -1531,7 +1531,7 @@ int main(int argc, char **argv) {
 						if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
 							mask[ix + iy * mask_nx] = MB_YES;
 						}
-						for (i = 0; i < beams_bath; i++) {
+						for (int i = 0; i < beams_bath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
 								ix = (int)((bathlon[i] - lonmin) / mask_dx);
 								iy = (int)((bathlat[i] - latmin) / mask_dy);
@@ -1540,7 +1540,7 @@ int main(int argc, char **argv) {
 								}
 							}
 						}
-						for (i = 0; i < pixels_ss; i++) {
+						for (int i = 0; i < pixels_ss; i++) {
 							if (ss[i] > MB_SIDESCAN_NULL) {
 								ix = (int)((sslon[i] - lonmin) / mask_dx);
 								iy = (int)((sslat[i] - latmin) / mask_dy);
@@ -1557,7 +1557,7 @@ int main(int argc, char **argv) {
 							mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_ZERO_NAV);
 						else if (beginnav == MB_YES && speed_apparent >= speed_threshold)
 							mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_TOO_FAST);
-						for (i = 0; i < beams_bath; i++) {
+						for (int i = 0; i < beams_bath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
 								if (bath[i] > 11000.0)
 									mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_TOO_DEEP);
@@ -1580,7 +1580,7 @@ int main(int argc, char **argv) {
 				    (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
 
 					/* do the bathymetry */
-					for (i = 0; i < beams_bath; i++) {
+					for (int i = 0; i < beams_bath; i++) {
 
 						/* fit line to depths */
 						nbath = 0;
@@ -1621,7 +1621,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* do the amplitude */
-					for (i = 0; i < beams_amp; i++) {
+					for (int i = 0; i < beams_amp; i++) {
 
 						/* get mean amplitude */
 						namp = 0;
@@ -1653,7 +1653,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* do the sidescan */
-					for (i = 0; i < pixels_ss; i++) {
+					for (int i = 0; i < pixels_ss; i++) {
 
 						/* get mean sidescan */
 						nss = 0;
@@ -1706,7 +1706,7 @@ int main(int argc, char **argv) {
 			/* get notices if desired */
 			if (print_notices == MB_YES && pass == 0) {
 				status = mb_notice_get_list(verbose, mbio_ptr, notice_list);
-				for (i = 0; i < MB_NOTICE_MAX; i++)
+				for (int i = 0; i < MB_NOTICE_MAX; i++)
 					notice_list_tot[i] += notice_list[i];
 			}
 
@@ -1727,7 +1727,7 @@ int main(int argc, char **argv) {
 						exit(error);
 					}
 					else {
-						for (i = nbathtot_alloc; i < beams_bath_max; i++) {
+						for (int i = nbathtot_alloc; i < beams_bath_max; i++) {
 							bathmeantot[i] = 0.0;
 							bathvartot[i] = 0.0;
 							nbathvartot[i] = 0;
@@ -1748,7 +1748,7 @@ int main(int argc, char **argv) {
 						exit(error);
 					}
 					else {
-						for (i = namptot_alloc; i < beams_amp_max; i++) {
+						for (int i = namptot_alloc; i < beams_amp_max; i++) {
 							ampmeantot[i] = 0.0;
 							ampvartot[i] = 0.0;
 							nampvartot[i] = 0;
@@ -1768,7 +1768,7 @@ int main(int argc, char **argv) {
 						exit(error);
 					}
 					else {
-						for (i = nsstot_alloc; i < pixels_ss_max; i++) {
+						for (int i = nsstot_alloc; i < pixels_ss_max; i++) {
 							ssmeantot[i] = 0.0;
 							ssvartot[i] = 0.0;
 							nssvartot[i] = 0;
@@ -1778,17 +1778,17 @@ int main(int argc, char **argv) {
 				}
 
 				/* copy statistics to total statistics */
-				for (i = 0; i < beams_bath; i++) {
+				for (int i = 0; i < beams_bath; i++) {
 					bathmeantot[i] += bathmean[i];
 					bathvartot[i] += bathvar[i];
 					nbathvartot[i] += nbathvar[i];
 				}
-				for (i = 0; i < beams_amp; i++) {
+				for (int i = 0; i < beams_amp; i++) {
 					ampmeantot[i] += ampmean[i];
 					ampvartot[i] += ampvar[i];
 					nampvartot[i] += nampvar[i];
 				}
-				for (i = 0; i < pixels_ss; i++) {
+				for (int i = 0; i < pixels_ss; i++) {
 					ssmeantot[i] += ssmean[i];
 					ssvartot[i] += ssvar[i];
 					nssvartot[i] += nssvar[i];
@@ -1824,17 +1824,17 @@ int main(int argc, char **argv) {
 
 	/* calculate final variances */
 	if (pings_read > 2) {
-		for (i = 0; i < nbathtot_alloc; i++)
+		for (int i = 0; i < nbathtot_alloc; i++)
 			if (nbathvartot[i] > 0) {
 				bathmeantot[i] = bathmeantot[i] / nbathvartot[i];
 				bathvartot[i] = bathvartot[i] / nbathvartot[i];
 			}
-		for (i = 0; i < namptot_alloc; i++)
+		for (int i = 0; i < namptot_alloc; i++)
 			if (nampvartot[i] > 0) {
 				ampmeantot[i] = ampmeantot[i] / nampvartot[i];
 				ampvartot[i] = ampvartot[i] / nampvartot[i];
 			}
-		for (i = 0; i < nsstot_alloc; i++)
+		for (int i = 0; i < nsstot_alloc; i++)
 			if (nssvartot[i] > 0) {
 				ssmeantot[i] = ssmeantot[i] / nssvartot[i];
 				ssvartot[i] = ssvartot[i] / nssvartot[i];
@@ -2168,7 +2168,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "Pings Averaged: %d\n", pings_read);
 			fprintf(output, " Beam     N      Mean     Variance    Sigma\n");
 			fprintf(output, " ----     -      ----     --------    -----\n");
-			for (i = 0; i < beams_bath_max; i++)
+			for (int i = 0; i < beams_bath_max; i++)
 				fprintf(output, "%4d  %5d   %8.2f   %8.2f  %8.2f\n", i, nbathvartot[i], bathy_scale * bathmeantot[i],
 				        bathy_scale * bathy_scale * bathvartot[i], bathy_scale * sqrt(bathvartot[i]));
 			fprintf(output, "\n");
@@ -2178,7 +2178,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\"pings_averaged\": \"%d\",\n", pings_read);
 			fprintf(output, "\"columns\" : \"#beam,N,mean,variance,sigma\",\n");
 			fprintf(output, "\"values\": [\n");
-			for (i = 0; i < beams_bath_max; i++) {
+			for (int i = 0; i < beams_bath_max; i++) {
 				if (i > 0)
 					fprintf(output, ",\n");
 				sigma = bathy_scale * sqrt(bathvartot[i]);
@@ -2194,7 +2194,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t<pings_averaged>%d</pings_averaged>\n", pings_read);
 			fprintf(output, "\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
 			fprintf(output, "\t\t<values>\n");
-			for (i = 0; i < beams_bath_max; i++) {
+			for (int i = 0; i < beams_bath_max; i++) {
 				if (i > 0)
 					sigma = bathy_scale * sqrt(bathvartot[i]);
 				if (isnan(sigma))
@@ -2216,7 +2216,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "Pings Averaged: %d\n", pings_read);
 			fprintf(output, " Beam     N      Mean     Variance    Sigma\n");
 			fprintf(output, " ----     -      ----     --------    -----\n");
-			for (i = 0; i < beams_amp_max; i++)
+			for (int i = 0; i < beams_amp_max; i++)
 				fprintf(output, "%4d  %5d   %8.2f   %8.2f  %8.2f\n", i, nampvartot[i], ampmeantot[i], ampvartot[i],
 				        sqrt(ampvartot[i]));
 			fprintf(output, "\n");
@@ -2226,7 +2226,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\"pings_averaged\": \"%d\",\n", pings_read);
 			fprintf(output, "\"columns\":\"beam,N,mean,variance,sigma\",\n");
 			fprintf(output, "\"values\": [\n");
-			for (i = 0; i < beams_amp_max; i++) {
+			for (int i = 0; i < beams_amp_max; i++) {
 				if (i > 0)
 					fprintf(output, ",\n");
 				sigma = sqrt(ampvartot[i]);
@@ -2241,7 +2241,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t<pings_averaged>%d</pings_averaged>\n", pings_read);
 			fprintf(output, "\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
 			fprintf(output, "\t\t<values>\n");
-			for (i = 0; i < beams_amp_max; i++) {
+			for (int i = 0; i < beams_amp_max; i++) {
 				if (i > 0)
 					sigma = sqrt(ampvartot[i]);
 				if (isnan(sigma))
@@ -2262,7 +2262,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "Pings Averaged: %d\n", pings_read);
 			fprintf(output, " Beam     N      Mean     Variance    Sigma\n");
 			fprintf(output, " ----     -      ----     --------    -----\n");
-			for (i = 0; i < pixels_ss_max; i++)
+			for (int i = 0; i < pixels_ss_max; i++)
 				fprintf(output, "%4d  %5d   %8.2f   %8.2f  %8.2f\n", i, nssvartot[i], ssmeantot[i], ssvartot[i],
 				        sqrt(ssvartot[i]));
 			fprintf(output, "\n");
@@ -2272,7 +2272,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\"pings_averaged\": \"%d\",\n", pings_read);
 			fprintf(output, "\"columns\":\"pixel,N,mean,variance,sigma\",\n");
 			fprintf(output, "\"values\": [\n");
-			for (i = 0; i < pixels_ss_max; i++) {
+			for (int i = 0; i < pixels_ss_max; i++) {
 				if (i > 0)
 					fprintf(output, ",\n");
 				sigma = sqrt(ssvartot[i]);
@@ -2287,7 +2287,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t<pings_averaged>%d</pings_averaged>\n", pings_read);
 			fprintf(output, "\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
 			fprintf(output, "\t\t<values>\n");
-			for (i = 0; i < pixels_ss_max; i++) {
+			for (int i = 0; i < pixels_ss_max; i++) {
 				if (i > 0)
 					sigma = sqrt(ssvartot[i]);
 				if (isnan(sigma))
@@ -2305,21 +2305,21 @@ int main(int argc, char **argv) {
 		switch (output_format) {
 		case FREE_TEXT:
 			fprintf(output, "\nData Record Type Notices:\n");
-			for (i = 0; i <= MB_DATA_KINDS; i++) {
+			for (int i = 0; i <= MB_DATA_KINDS; i++) {
 				if (notice_list_tot[i] > 0) {
 					mb_notice_message(verbose, i, &notice_msg);
 					fprintf(output, "DN: %d %s\n", notice_list_tot[i], notice_msg);
 				}
 			}
 			fprintf(output, "\nNonfatal Error Notices:\n");
-			for (i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
+			for (int i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
 				if (notice_list_tot[i] > 0) {
 					mb_notice_message(verbose, i, &notice_msg);
 					fprintf(output, "EN: %d %s\n", notice_list_tot[i], notice_msg);
 				}
 			}
 			fprintf(output, "\nProblem Notices:\n");
-			for (i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
+			for (int i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
 				if (notice_list_tot[i] > 0) {
 					mb_notice_message(verbose, i, &notice_msg);
 					fprintf(output, "PN: %d %s\n", notice_list_tot[i], notice_msg);
@@ -2330,7 +2330,7 @@ int main(int argc, char **argv) {
 			fprintf(output, ",\n\"notices\": {\n");
 			notice_total = 0;
 			fprintf(output, "\"data_record_type_notices\": [\n");
-			for (i = 0; i <= MB_DATA_KINDS; i++) {
+			for (int i = 0; i <= MB_DATA_KINDS; i++) {
 				if (notice_list_tot[i] > 0) {
 					mb_notice_message(verbose, i, &notice_msg);
 					if (notice_total > 0)
@@ -2345,7 +2345,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "]");
 			notice_total = 0;
 			fprintf(output, ",\n\"nonfatal_error_notices\": [\n");
-			for (i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
+			for (int i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
 				if (notice_list_tot[i] > 0) {
 					mb_notice_message(verbose, i, &notice_msg);
 					if (notice_total > 0)
@@ -2360,7 +2360,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "]");
 			notice_total = 0;
 			fprintf(output, ",\n\"problem_notices\": [\n");
-			for (i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
+			for (int i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
 				if (notice_list_tot[i] > 0) {
 					mb_notice_message(verbose, i, &notice_msg);
 					if (notice_total > 0)
@@ -2377,7 +2377,7 @@ int main(int argc, char **argv) {
 			break;
 		case XML:
 			fprintf(output, "\t<data_record_type_notices>\n");
-			for (i = 0; i <= MB_DATA_KINDS; i++) {
+			for (int i = 0; i <= MB_DATA_KINDS; i++) {
 				if (notice_list_tot[i] > 0) {
 					mb_notice_message(verbose, i, &notice_msg);
 					fprintf(output, "\t\t<notice_number>%d</notice_number>\n", notice_list_tot[i]);
@@ -2386,7 +2386,7 @@ int main(int argc, char **argv) {
 			}
 			fprintf(output, "\t</data_record_type_notices>\n");
 			fprintf(output, "\t<nonfatal_error_notices>\n");
-			for (i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
+			for (int i = MB_DATA_KINDS + 1; i <= MB_DATA_KINDS - (MB_ERROR_MIN); i++) {
 				if (notice_list_tot[i] > 0) {
 					mb_notice_message(verbose, i, &notice_msg);
 					fprintf(output, "\t\t<notice_number>%d</notice_number>\n", notice_list_tot[i]);
@@ -2395,7 +2395,7 @@ int main(int argc, char **argv) {
 			}
 			fprintf(output, "\t</nonfatal_error_notices>\n");
 			fprintf(output, "\t<problem_notices>\n");
-			for (i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
+			for (int i = MB_DATA_KINDS - (MB_ERROR_MIN) + 1; i < MB_NOTICE_MAX; i++) {
 				if (notice_list_tot[i] > 0) {
 					mb_notice_message(verbose, i, &notice_msg);
 					fprintf(output, "\t\t<notice_number>%d</notice_number>\n", notice_list_tot[i]);
@@ -2414,7 +2414,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\nCoverage Mask:\nCM dimensions: %d %d\n", mask_nx, mask_ny);
 			for (j = mask_ny - 1; j >= 0; j--) {
 				fprintf(output, "CM:  ");
-				for (i = 0; i < mask_nx; i++) {
+				for (int i = 0; i < mask_nx; i++) {
 					k = i + j * mask_nx;
 					fprintf(output, " %1d", mask[k]);
 				}
@@ -2426,7 +2426,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\"dimensions_nx\": \"%d\",\n\"dimensions_ny\": \"%d\",\n", mask_nx, mask_ny);
 			fprintf(output, "\"mask\": \" ");
 			for (j = mask_ny - 1; j >= 0; j--) {
-				for (i = 0; i < mask_nx; i++) {
+				for (int i = 0; i < mask_nx; i++) {
 					k = i + j * mask_nx;
 					if (i > 0)
 						fprintf(output, ",");
