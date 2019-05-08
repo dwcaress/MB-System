@@ -309,7 +309,6 @@ int main(int argc, char **argv) {
 	double val_double;
 	int ix, iy;
 	int j, k;
-	double sigma;
 
 	char *getenv();
 
@@ -2181,9 +2180,9 @@ int main(int argc, char **argv) {
 			for (int i = 0; i < beams_bath_max; i++) {
 				if (i > 0)
 					fprintf(output, ",\n");
-				sigma = bathy_scale * sqrt(bathvartot[i]);
+				double sigma = bathy_scale * sqrt(bathvartot[i]);
 				if (isnan(sigma))
-					sigma = 0;
+					sigma = 0.0;
 				fprintf(output, "{\"row\":\"%d,%d,%.2f,%.2f,%.2f\"}", i, nbathvartot[i], bathy_scale * bathmeantot[i],
 				        bathy_scale * bathy_scale * bathvartot[i], sigma);
 			}
@@ -2195,10 +2194,9 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
 			fprintf(output, "\t\t<values>\n");
 			for (int i = 0; i < beams_bath_max; i++) {
-				if (i > 0)
-					sigma = bathy_scale * sqrt(bathvartot[i]);
+				double sigma = bathy_scale * sqrt(bathvartot[i]);
 				if (isnan(sigma))
-					sigma = 0;
+					sigma = 0.0;
 				fprintf(output, "\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n", i, nbathvartot[i], bathy_scale * bathmeantot[i],
 				        bathy_scale * bathy_scale * bathvartot[i], sigma);
 			}
@@ -2229,7 +2227,7 @@ int main(int argc, char **argv) {
 			for (int i = 0; i < beams_amp_max; i++) {
 				if (i > 0)
 					fprintf(output, ",\n");
-				sigma = sqrt(ampvartot[i]);
+				double sigma = sqrt(ampvartot[i]);
 				if (isnan(sigma))
 					sigma = 0;
 				fprintf(output, "{\"row\" : \"%d,%d,%.2f,%.2f,%.2f\"}", i, nampvartot[i], ampmeantot[i], ampvartot[i], sigma);
@@ -2242,10 +2240,9 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
 			fprintf(output, "\t\t<values>\n");
 			for (int i = 0; i < beams_amp_max; i++) {
-				if (i > 0)
-					sigma = sqrt(ampvartot[i]);
+				double sigma = sqrt(ampvartot[i]);
 				if (isnan(sigma))
-					sigma = 0;
+					sigma = 0.0;
 				fprintf(output, "\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n", i, nampvartot[i], ampmeantot[i], ampvartot[i], sigma);
 			}
 			fprintf(output, "\t\t</values>\n");
@@ -2275,9 +2272,9 @@ int main(int argc, char **argv) {
 			for (int i = 0; i < pixels_ss_max; i++) {
 				if (i > 0)
 					fprintf(output, ",\n");
-				sigma = sqrt(ssvartot[i]);
+				double sigma = sqrt(ssvartot[i]);
 				if (isnan(sigma))
-					sigma = 0;
+					sigma = 0.0;
 				fprintf(output, "{\"row\":\"%d,%d,%.2f,%.2f,%.2f\"}", i, nssvartot[i], ssmeantot[i], ssvartot[i], sigma);
 			}
 			fprintf(output, "\n]\n}");
@@ -2288,10 +2285,9 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
 			fprintf(output, "\t\t<values>\n");
 			for (int i = 0; i < pixels_ss_max; i++) {
-				if (i > 0)
-					sigma = sqrt(ssvartot[i]);
+				double sigma = sqrt(ssvartot[i]);
 				if (isnan(sigma))
-					sigma = 0;
+					sigma = 0.0;
 				fprintf(output, "\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n", i, nssvartot[i], ssmeantot[i], ssvartot[i], sigma);
 			}
 			fprintf(output, "\t\t</values>\n");
