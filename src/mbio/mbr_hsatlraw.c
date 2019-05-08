@@ -215,7 +215,6 @@ int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hsatlraw";
-	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsatlraw_struct *data;
 	char *data_ptr;
@@ -232,13 +231,13 @@ int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_hsatlraw_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mbsys_hsds_alloc(verbose, mbio_ptr, (void **)(&mb_io_ptr->store_data), error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mbsys_hsds_alloc(verbose, mbio_ptr, (void **)(&mb_io_ptr->store_data), error);
 
 	/* get pointer to mbio descriptor */
 	data = (struct mbf_hsatlraw_struct *)mb_io_ptr->raw_data;
@@ -261,7 +260,6 @@ int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hsatlraw";
-	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
@@ -276,8 +274,8 @@ int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2002,13 +2000,13 @@ int mbr_hsatlraw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		status = mbr_hsatlraw_wr_rawline(verbose, mbfp, data, error);
 	}
 	else if (data->kind == MB_DATA_DATA) {
-		status = mbr_hsatlraw_wr_ergnmess(verbose, mbfp, data_ptr, error);
-		status = mbr_hsatlraw_wr_ergnslzt(verbose, mbfp, data_ptr, error);
+		/* status = */ mbr_hsatlraw_wr_ergnmess(verbose, mbfp, data_ptr, error);
+		/* status = */ mbr_hsatlraw_wr_ergnslzt(verbose, mbfp, data_ptr, error);
 		status = mbr_hsatlraw_wr_ergnampl(verbose, mbfp, data_ptr, error);
 	}
 	else if (data->kind == MB_DATA_CALIBRATE) {
-		status = mbr_hsatlraw_wr_ergneich(verbose, mbfp, data_ptr, error);
-		status = mbr_hsatlraw_wr_ergnslzt(verbose, mbfp, data_ptr, error);
+		/* status = */ mbr_hsatlraw_wr_ergneich(verbose, mbfp, data_ptr, error);
+		/* status = */ mbr_hsatlraw_wr_ergnslzt(verbose, mbfp, data_ptr, error);
 		status = mbr_hsatlraw_wr_ergnampl(verbose, mbfp, data_ptr, error);
 	}
 	else if (data->kind == MB_DATA_MEAN_VELOCITY) {
@@ -2140,8 +2138,8 @@ int mbr_hsatlraw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error)
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		/* output the line */
-		status = fprintf(mbfp, "%s\n", data->comment);
-		if (status >= 0) {
+		const int count = fprintf(mbfp, "%s\n", data->comment);
+		if (count >= 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
@@ -2205,23 +2203,23 @@ int mbr_hsatlraw_wr_ergnhydi(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp, "%+12.7f", data->lon);
-		status = fprintf(mbfp, "%+12.7f", data->lat);
-		status = fprintf(mbfp, "%4.4d", data->year);
-		status = fprintf(mbfp, "%2.2d", data->month);
-		status = fprintf(mbfp, "%2.2d", data->day);
-		status = fprintf(mbfp, "%2.2d", data->hour);
-		status = fprintf(mbfp, "%2.2d", data->minute);
-		status = fprintf(mbfp, "%2.2d", data->second);
-		status = fprintf(mbfp, "%5d", data->alt_minute);
-		status = fprintf(mbfp, "%2d", data->alt_second);
-		status = fprintf(mbfp, "%4.1f", data->draught);
-		status = fprintf(mbfp, "%7.2f", data->vel_mean);
-		status = fprintf(mbfp, "%7.2f", data->vel_keel);
-		status = fprintf(mbfp, "%+06.2f\n", data->tide);
+		fprintf(mbfp, "%+12.7f", data->lon);
+		fprintf(mbfp, "%+12.7f", data->lat);
+		fprintf(mbfp, "%4.4d", data->year);
+		fprintf(mbfp, "%2.2d", data->month);
+		fprintf(mbfp, "%2.2d", data->day);
+		fprintf(mbfp, "%2.2d", data->hour);
+		fprintf(mbfp, "%2.2d", data->minute);
+		fprintf(mbfp, "%2.2d", data->second);
+		fprintf(mbfp, "%5d", data->alt_minute);
+		fprintf(mbfp, "%2d", data->alt_second);
+		fprintf(mbfp, "%4.1f", data->draught);
+		fprintf(mbfp, "%7.2f", data->vel_mean);
+		fprintf(mbfp, "%7.2f", data->vel_keel);
+		const int count = fprintf(mbfp, "%+06.2f\n", data->tide);
 
 		/* check for an error */
-		if (status > 0) {
+		if (count > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
@@ -2288,26 +2286,26 @@ int mbr_hsatlraw_wr_ergnpara(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp, "%+12.7f", data->lon);
-		status = fprintf(mbfp, "%+12.7f", data->lat);
-		status = fprintf(mbfp, "%4.4d", data->year);
-		status = fprintf(mbfp, "%2.2d", data->month);
-		status = fprintf(mbfp, "%2.2d", data->day);
-		status = fprintf(mbfp, "%2.2d", data->hour);
-		status = fprintf(mbfp, "%2.2d", data->minute);
-		status = fprintf(mbfp, "%2.2d", data->second);
-		status = fprintf(mbfp, "%5d", data->alt_minute);
-		status = fprintf(mbfp, "%2d", data->alt_second);
-		status = fprintf(mbfp, "%5.1f", data->course_true);
-		status = fprintf(mbfp, "%+9.1f", data->speed_transverse);
-		status = fprintf(mbfp, "%+9.1f", data->speed);
-		status = fprintf(mbfp, "%c", data->speed_reference[0]);
-		status = fprintf(mbfp, "%+4.1f", data->pitch);
-		status = fprintf(mbfp, "%4.4d", data->track);
-		status = fprintf(mbfp, "%7.1f\n", data->depth_center);
+		fprintf(mbfp, "%+12.7f", data->lon);
+		fprintf(mbfp, "%+12.7f", data->lat);
+		fprintf(mbfp, "%4.4d", data->year);
+		fprintf(mbfp, "%2.2d", data->month);
+		fprintf(mbfp, "%2.2d", data->day);
+		fprintf(mbfp, "%2.2d", data->hour);
+		fprintf(mbfp, "%2.2d", data->minute);
+		fprintf(mbfp, "%2.2d", data->second);
+		fprintf(mbfp, "%5d", data->alt_minute);
+		fprintf(mbfp, "%2d", data->alt_second);
+		fprintf(mbfp, "%5.1f", data->course_true);
+		fprintf(mbfp, "%+9.1f", data->speed_transverse);
+		fprintf(mbfp, "%+9.1f", data->speed);
+		fprintf(mbfp, "%c", data->speed_reference[0]);
+		fprintf(mbfp, "%+4.1f", data->pitch);
+		fprintf(mbfp, "%4.4d", data->track);
+		const int count = fprintf(mbfp, "%7.1f\n", data->depth_center);
 
 		/* check for an error */
-		if (status > 0) {
+		if (count > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
@@ -2370,22 +2368,22 @@ int mbr_hsatlraw_wr_ergnposi(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp, "%+12.7f", data->lon);
-		status = fprintf(mbfp, "%+12.7f", data->lat);
-		status = fprintf(mbfp, "%4.4d", data->year);
-		status = fprintf(mbfp, "%2.2d", data->month);
-		status = fprintf(mbfp, "%2.2d", data->day);
-		status = fprintf(mbfp, "%2.2d", data->hour);
-		status = fprintf(mbfp, "%2.2d", data->minute);
-		status = fprintf(mbfp, "%2.2d", data->second);
-		status = fprintf(mbfp, "%5d", data->alt_minute);
-		status = fprintf(mbfp, "%2d", data->alt_second);
-		status = fprintf(mbfp, "%7.0f", data->pos_corr_x);
-		status = fprintf(mbfp, "%7.0f", data->pos_corr_y);
-		status = fprintf(mbfp, "%8s\n", data->sensors);
+		fprintf(mbfp, "%+12.7f", data->lon);
+		fprintf(mbfp, "%+12.7f", data->lat);
+		fprintf(mbfp, "%4.4d", data->year);
+		fprintf(mbfp, "%2.2d", data->month);
+		fprintf(mbfp, "%2.2d", data->day);
+		fprintf(mbfp, "%2.2d", data->hour);
+		fprintf(mbfp, "%2.2d", data->minute);
+		fprintf(mbfp, "%2.2d", data->second);
+		fprintf(mbfp, "%5d", data->alt_minute);
+		fprintf(mbfp, "%2d", data->alt_second);
+		fprintf(mbfp, "%7.0f", data->pos_corr_x);
+		fprintf(mbfp, "%7.0f", data->pos_corr_y);
+		const int count = fprintf(mbfp, "%8s\n", data->sensors);
 
 		/* check for an error */
-		if (status > 0) {
+		if (count > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
@@ -2457,52 +2455,52 @@ int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp, "%+12.7f", data->lon);
-		status = fprintf(mbfp, "%+12.7f", data->lat);
-		status = fprintf(mbfp, "%4.4d", data->year);
-		status = fprintf(mbfp, "%2.2d", data->month);
-		status = fprintf(mbfp, "%2.2d", data->day);
-		status = fprintf(mbfp, "%2.2d", data->hour);
-		status = fprintf(mbfp, "%2.2d", data->minute);
-		status = fprintf(mbfp, "%2.2d", data->second);
-		status = fprintf(mbfp, "%5d", data->alt_minute);
-		status = fprintf(mbfp, "%2d", data->alt_second);
-		status = fprintf(mbfp, "%5.1f", data->course_true);
-		status = fprintf(mbfp, "%+9.1f", data->speed_transverse);
-		status = fprintf(mbfp, "%+9.1f", data->speed);
-		status = fprintf(mbfp, "%c", data->speed_reference[0]);
-		status = fprintf(mbfp, "%+4.1f", data->pitch);
-		status = fprintf(mbfp, "%4.4d", data->track);
-		status = fprintf(mbfp, "%7.1f", data->depth_center);
-		status = fprintf(mbfp, "%4.2f", data->depth_scale);
-		status = fprintf(mbfp, "%2d\n", data->spare);
+		fprintf(mbfp, "%+12.7f", data->lon);
+		fprintf(mbfp, "%+12.7f", data->lat);
+		fprintf(mbfp, "%4.4d", data->year);
+		fprintf(mbfp, "%2.2d", data->month);
+		fprintf(mbfp, "%2.2d", data->day);
+		fprintf(mbfp, "%2.2d", data->hour);
+		fprintf(mbfp, "%2.2d", data->minute);
+		fprintf(mbfp, "%2.2d", data->second);
+		fprintf(mbfp, "%5d", data->alt_minute);
+		fprintf(mbfp, "%2d", data->alt_second);
+		fprintf(mbfp, "%5.1f", data->course_true);
+		fprintf(mbfp, "%+9.1f", data->speed_transverse);
+		fprintf(mbfp, "%+9.1f", data->speed);
+		fprintf(mbfp, "%c", data->speed_reference[0]);
+		fprintf(mbfp, "%+4.1f", data->pitch);
+		fprintf(mbfp, "%4.4d", data->track);
+		fprintf(mbfp, "%7.1f", data->depth_center);
+		fprintf(mbfp, "%4.2f", data->depth_scale);
+		fprintf(mbfp, "%2d\n", data->spare);
 
 		/* output forward distances */
-		status = fprintf(mbfp, "29");
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%4.4d", data->distance[i + 30]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%4.4d", data->distance[i + 30]);
+		fprintf(mbfp, "\n");
 
 		/* output forward depths */
-		status = fprintf(mbfp, "29");
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%4.4d", data->depth[i + 30]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%4.4d", data->depth[i + 30]);
+		fprintf(mbfp, "\n");
 
 		/* output aft distances */
-		status = fprintf(mbfp, "29");
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%4.4d", (-data->distance[28 - i]));
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%4.4d", (-data->distance[28 - i]));
+		fprintf(mbfp, "\n");
 
 		/* output aft depths */
-		status = fprintf(mbfp, "29");
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%4.4d", data->depth[28 - i]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%4.4d", data->depth[28 - i]);
+		const int count = fprintf(mbfp, "\n");
 
 		/* check for an error */
-		if (status > 0) {
+		if (count > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
@@ -2574,52 +2572,52 @@ int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp, "%+12.7f", data->lon);
-		status = fprintf(mbfp, "%+12.7f", data->lat);
-		status = fprintf(mbfp, "%4.4d", data->year);
-		status = fprintf(mbfp, "%2.2d", data->month);
-		status = fprintf(mbfp, "%2.2d", data->day);
-		status = fprintf(mbfp, "%2.2d", data->hour);
-		status = fprintf(mbfp, "%2.2d", data->minute);
-		status = fprintf(mbfp, "%2.2d", data->second);
-		status = fprintf(mbfp, "%5d", data->alt_minute);
-		status = fprintf(mbfp, "%2d", data->alt_second);
-		status = fprintf(mbfp, "%5.1f", data->course_true);
-		status = fprintf(mbfp, "%+9.1f", data->speed_transverse);
-		status = fprintf(mbfp, "%+9.1f", data->speed);
-		status = fprintf(mbfp, "%c", data->speed_reference[0]);
-		status = fprintf(mbfp, "%+4.1f", data->pitch);
-		status = fprintf(mbfp, "%4.4d", data->track);
-		status = fprintf(mbfp, "%7.1f", data->depth_center);
-		status = fprintf(mbfp, "%4.2f", data->depth_scale);
-		status = fprintf(mbfp, "%2d\n", data->spare);
+		fprintf(mbfp, "%+12.7f", data->lon);
+		fprintf(mbfp, "%+12.7f", data->lat);
+		fprintf(mbfp, "%4.4d", data->year);
+		fprintf(mbfp, "%2.2d", data->month);
+		fprintf(mbfp, "%2.2d", data->day);
+		fprintf(mbfp, "%2.2d", data->hour);
+		fprintf(mbfp, "%2.2d", data->minute);
+		fprintf(mbfp, "%2.2d", data->second);
+		fprintf(mbfp, "%5d", data->alt_minute);
+		fprintf(mbfp, "%2d", data->alt_second);
+		fprintf(mbfp, "%5.1f", data->course_true);
+		fprintf(mbfp, "%+9.1f", data->speed_transverse);
+		fprintf(mbfp, "%+9.1f", data->speed);
+		fprintf(mbfp, "%c", data->speed_reference[0]);
+		fprintf(mbfp, "%+4.1f", data->pitch);
+		fprintf(mbfp, "%4.4d", data->track);
+		fprintf(mbfp, "%7.1f", data->depth_center);
+		fprintf(mbfp, "%4.2f", data->depth_scale);
+		fprintf(mbfp, "%2d\n", data->spare);
 
 		/* output starboard crosstrack distances */
-		status = fprintf(mbfp, "29");
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%4.4d", data->distance[i + 30]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%4.4d", data->distance[i + 30]);
+		fprintf(mbfp, "\n");
 
 		/* output starboard crosstrack depths */
-		status = fprintf(mbfp, "29");
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%4.4d", data->depth[i + 30]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%4.4d", data->depth[i + 30]);
+		fprintf(mbfp, "\n");
 
 		/* output port crosstrack distances */
-		status = fprintf(mbfp, "29");
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%4.4d", (-data->distance[28 - i]));
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%4.4d", (-data->distance[28 - i]));
+		fprintf(mbfp, "\n");
 
 		/* output port crosstrack depths */
-		status = fprintf(mbfp, "29");
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%4.4d", data->depth[28 - i]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%4.4d", data->depth[28 - i]);
+		const int count = fprintf(mbfp, "\n");
 
 		/* check for an error */
-		if (status > 0) {
+		if (count > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
@@ -2704,42 +2702,42 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* write out the data */
 	if (status == MB_SUCCESS && datacheck == MB_YES) {
 		/* output the event line */
-		status = fprintf(mbfp, "%+12.7f", data->lon);
-		status = fprintf(mbfp, "%+12.7f", data->lat);
-		status = fprintf(mbfp, "%4.4d", data->year);
-		status = fprintf(mbfp, "%2.2d", data->month);
-		status = fprintf(mbfp, "%2.2d", data->day);
-		status = fprintf(mbfp, "%2.2d", data->hour);
-		status = fprintf(mbfp, "%2.2d", data->minute);
-		status = fprintf(mbfp, "%2.2d", data->second);
-		status = fprintf(mbfp, "%5.1f", data->course_true);
-		status = fprintf(mbfp, "%5.1f", data->course_ground);
-		status = fprintf(mbfp, "%+9.1f", data->speed_ground);
-		status = fprintf(mbfp, "%+6.2f", data->heave);
-		status = fprintf(mbfp, "%+4.1f", data->pitch);
-		status = fprintf(mbfp, "%+5.1f", data->roll);
-		status = fprintf(mbfp, "%06.0f", data->time_center);
-		status = fprintf(mbfp, "%6.4f\n", data->time_scale);
+		fprintf(mbfp, "%+12.7f", data->lon);
+		fprintf(mbfp, "%+12.7f", data->lat);
+		fprintf(mbfp, "%4.4d", data->year);
+		fprintf(mbfp, "%2.2d", data->month);
+		fprintf(mbfp, "%2.2d", data->day);
+		fprintf(mbfp, "%2.2d", data->hour);
+		fprintf(mbfp, "%2.2d", data->minute);
+		fprintf(mbfp, "%2.2d", data->second);
+		fprintf(mbfp, "%5.1f", data->course_true);
+		fprintf(mbfp, "%5.1f", data->course_ground);
+		fprintf(mbfp, "%+9.1f", data->speed_ground);
+		fprintf(mbfp, "%+6.2f", data->heave);
+		fprintf(mbfp, "%+4.1f", data->pitch);
+		fprintf(mbfp, "%+5.1f", data->roll);
+		fprintf(mbfp, "%06.0f", data->time_center);
+		fprintf(mbfp, "%6.4f\n", data->time_scale);
 
 		/* output starboard crosstrack travel times */
-		status = fprintf(mbfp, "29");
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%4.4d", data->time[i + 30]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%4.4d", data->time[i + 30]);
+		fprintf(mbfp, "\n");
 
 		/* output port crosstrack travel times */
-		status = fprintf(mbfp, "29");
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%4.4d", data->time[28 - i]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%4.4d", data->time[28 - i]);
+		fprintf(mbfp, "\n");
 
 		/* output gyro headings */
 		for (int i = 0; i < 11; i++)
-			status = fprintf(mbfp, "%05.1f", data->gyro[i]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%05.1f", data->gyro[i]);
+		const int count = fprintf(mbfp, "\n");
 
 		/* check for an error */
-		if (status > 0) {
+		if (count > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
@@ -2802,15 +2800,15 @@ int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp, "%+12.7f", data->lon);
-		status = fprintf(mbfp, "%+12.7f", data->lat);
-		status = fprintf(mbfp, "%4.4d", data->year);
-		status = fprintf(mbfp, "%2.2d", data->month);
-		status = fprintf(mbfp, "%2.2d", data->day);
-		status = fprintf(mbfp, "%2.2d", data->hour);
-		status = fprintf(mbfp, "%2.2d", data->minute);
-		status = fprintf(mbfp, "%2.2d", data->second);
-		status = fprintf(mbfp, "%2d\n", data->num_vel);
+		fprintf(mbfp, "%+12.7f", data->lon);
+		fprintf(mbfp, "%+12.7f", data->lat);
+		fprintf(mbfp, "%4.4d", data->year);
+		fprintf(mbfp, "%2.2d", data->month);
+		fprintf(mbfp, "%2.2d", data->day);
+		fprintf(mbfp, "%2.2d", data->hour);
+		fprintf(mbfp, "%2.2d", data->minute);
+		fprintf(mbfp, "%2.2d", data->second);
+		int count = fprintf(mbfp, "%2d\n", data->num_vel);
 
 		/* figure number of velocity lines to write */
 		nline = data->num_vel / 10;
@@ -2819,21 +2817,21 @@ int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error
 		/* write all of the full lines */
 		for (int i = 0; i < nline; i++) {
 			for (int i = 0; i < 10; i++)
-				status = fprintf(mbfp, "%5.0f%6.1f", data->vdepth[i], data->velocity[i]);
-			status = fprintf(mbfp, "\n");
+				fprintf(mbfp, "%5.0f%6.1f", data->vdepth[i], data->velocity[i]);
+			count = fprintf(mbfp, "\n");
 		}
 
 		/* write the last line as needed */
 		if (nrem > 0) {
 			for (int i = 0; i < nrem; i++)
-				status = fprintf(mbfp, "%5.0f%6.1f", data->vdepth[i], data->velocity[i]);
+				fprintf(mbfp, "%5.0f%6.1f", data->vdepth[i], data->velocity[i]);
 			for (int i = 0; i < (10 - nrem); i++)
-				status = fprintf(mbfp, "           ");
-			status = fprintf(mbfp, "\n");
+				fprintf(mbfp, "           ");
+			count = fprintf(mbfp, "\n");
 		}
 
 		/* check for an error */
-		if (status > 0) {
+		if (count > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
@@ -2931,69 +2929,69 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* write out the data */
 	if (status == MB_SUCCESS && datacheck == MB_YES) {
 		/* output the event line */
-		status = fprintf(mbfp, "%+12.7f", data->lon);
-		status = fprintf(mbfp, "%+12.7f", data->lat);
-		status = fprintf(mbfp, "%4.4d", data->year);
-		status = fprintf(mbfp, "%2.2d", data->month);
-		status = fprintf(mbfp, "%2.2d", data->day);
-		status = fprintf(mbfp, "%2.2d", data->hour);
-		status = fprintf(mbfp, "%2.2d", data->minute);
-		status = fprintf(mbfp, "%2.2d", data->second);
-		status = fprintf(mbfp, "%c", data->mode[0]);
-		status = fprintf(mbfp, "%3.3d", data->trans_strbd);
-		status = fprintf(mbfp, "%3.3d", data->trans_vert);
-		status = fprintf(mbfp, "%3.3d", data->trans_port);
-		status = fprintf(mbfp, "%2.2d", data->pulse_len_strbd);
-		status = fprintf(mbfp, "%2.2d", data->pulse_len_vert);
-		status = fprintf(mbfp, "%2.2d", data->pulse_len_port);
-		status = fprintf(mbfp, "%2.2d", data->gain_start);
-		status = fprintf(mbfp, "%2.2d", data->r_compensation_factor);
-		status = fprintf(mbfp, "%4.4d", data->compensation_start);
-		status = fprintf(mbfp, "%5.5d", data->increase_start);
-		status = fprintf(mbfp, "%2.2d", data->tvc_near);
-		status = fprintf(mbfp, "%2.2d", data->tvc_far);
-		status = fprintf(mbfp, "%3.3d", data->increase_int_near);
-		status = fprintf(mbfp, "%3.3d", data->increase_int_far);
-		status = fprintf(mbfp, "%1d", data->gain_center);
-		status = fprintf(mbfp, "%+5.1f", data->filter_gain);
-		status = fprintf(mbfp, "%3.3d", data->amplitude_center);
-		status = fprintf(mbfp, "%3.3d", data->echo_duration_center);
-		status = fprintf(mbfp, "%1d\n", data->echo_scale_center);
+		fprintf(mbfp, "%+12.7f", data->lon);
+		fprintf(mbfp, "%+12.7f", data->lat);
+		fprintf(mbfp, "%4.4d", data->year);
+		fprintf(mbfp, "%2.2d", data->month);
+		fprintf(mbfp, "%2.2d", data->day);
+		fprintf(mbfp, "%2.2d", data->hour);
+		fprintf(mbfp, "%2.2d", data->minute);
+		fprintf(mbfp, "%2.2d", data->second);
+		fprintf(mbfp, "%c", data->mode[0]);
+		fprintf(mbfp, "%3.3d", data->trans_strbd);
+		fprintf(mbfp, "%3.3d", data->trans_vert);
+		fprintf(mbfp, "%3.3d", data->trans_port);
+		fprintf(mbfp, "%2.2d", data->pulse_len_strbd);
+		fprintf(mbfp, "%2.2d", data->pulse_len_vert);
+		fprintf(mbfp, "%2.2d", data->pulse_len_port);
+		fprintf(mbfp, "%2.2d", data->gain_start);
+		fprintf(mbfp, "%2.2d", data->r_compensation_factor);
+		fprintf(mbfp, "%4.4d", data->compensation_start);
+		fprintf(mbfp, "%5.5d", data->increase_start);
+		fprintf(mbfp, "%2.2d", data->tvc_near);
+		fprintf(mbfp, "%2.2d", data->tvc_far);
+		fprintf(mbfp, "%3.3d", data->increase_int_near);
+		fprintf(mbfp, "%3.3d", data->increase_int_far);
+		fprintf(mbfp, "%1d", data->gain_center);
+		fprintf(mbfp, "%+5.1f", data->filter_gain);
+		fprintf(mbfp, "%3.3d", data->amplitude_center);
+		fprintf(mbfp, "%3.3d", data->echo_duration_center);
+		fprintf(mbfp, "%1d\n", data->echo_scale_center);
 
 		/* output starboard amplitudes */
 		for (int i = 0; i < 8; i++)
-			status = fprintf(mbfp, "%1.1d", data->gain[i + 8]);
-		status = fprintf(mbfp, "29");
+			fprintf(mbfp, "%1.1d", data->gain[i + 8]);
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%3.3d", data->amplitude[i + 30]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%3.3d", data->amplitude[i + 30]);
+		fprintf(mbfp, "\n");
 
 		/* output port amplitudes */
 		for (int i = 0; i < 8; i++)
-			status = fprintf(mbfp, "%1.1d", data->gain[i]);
-		status = fprintf(mbfp, "29");
+			fprintf(mbfp, "%1.1d", data->gain[i]);
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%3.3d", data->amplitude[28 - i]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%3.3d", data->amplitude[28 - i]);
+		fprintf(mbfp, "\n");
 
 		/* output starboard echo durations */
 		for (int i = 0; i < 8; i++)
-			status = fprintf(mbfp, "%1.1d", data->echo_scale[i + 8]);
-		status = fprintf(mbfp, "29");
+			fprintf(mbfp, "%1.1d", data->echo_scale[i + 8]);
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%3.3d", data->echo_duration[i + 30]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%3.3d", data->echo_duration[i + 30]);
+		fprintf(mbfp, "\n");
 
 		/* output port echo durations */
 		for (int i = 0; i < 8; i++)
-			status = fprintf(mbfp, "%1.1d", data->echo_scale[i]);
-		status = fprintf(mbfp, "29");
+			fprintf(mbfp, "%1.1d", data->echo_scale[i]);
+		fprintf(mbfp, "29");
 		for (int i = 0; i < 29; i++)
-			status = fprintf(mbfp, "%3.3d", data->echo_duration[28 - i]);
-		status = fprintf(mbfp, "\n");
+			fprintf(mbfp, "%3.3d", data->echo_duration[28 - i]);
+		int count = fprintf(mbfp, "\n");
 
 		/* check for an error */
-		if (status > 0) {
+		if (count > 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
@@ -3044,10 +3042,10 @@ int mbr_hsatlraw_wr_ldeocmnt(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		/* output the event line */
-		status = fprintf(mbfp, "%s\n", data->comment);
+		int count = fprintf(mbfp, "%s\n", data->comment);
 
 		/* check for an error */
-		if (status >= 0) {
+		if (count >= 0) {
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 		}
