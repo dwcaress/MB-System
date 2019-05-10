@@ -20,14 +20,13 @@
  *
  * Mike McCann   8 August 2002
  * MBARI
- *
- *
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <math.h>
+
 #if defined(_WIN32) && !defined(isnan)
 #define isnan(x) _isnan(x)
 #endif

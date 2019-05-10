@@ -21,31 +21,27 @@
  *
  * Author:  D. W. Caress
  * Date:  February 4, 1993
- *
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_io.h"
-#include "mbsys_xse.h"
+#include "mb_status.h"
 #include "mbsys_elacmk2.h"
-#include "mbsys_simrad.h"
-#include "mbsys_simrad2.h"
-#include "mbsys_ldeoih.h"
 #include "mbsys_gsf.h"
 #include "mbsys_hsds.h"
+#include "mbsys_ldeoih.h"
 #include "mbsys_reson8k.h"
+#include "mbsys_simrad.h"
+#include "mbsys_simrad2.h"
+#include "mbsys_xse.h"
 
 /* defines for special copying routines */
 #define MBCOPY_PARTIAL 0

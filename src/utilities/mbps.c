@@ -23,7 +23,6 @@
  *
  */
 
-/* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -34,7 +33,6 @@
 #include "gmt.h"
 #include "pslib.h"
 
-/* MBIO include files */
 #include "mb_status.h"
 #include "mb_define.h"
 

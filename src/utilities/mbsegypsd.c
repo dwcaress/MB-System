@@ -20,27 +20,22 @@
  * Date:	November 2, 2009
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
-#include <time.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
-/* FFTW include files */
 #include "fftw3.h"
-
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
-#include "mb_segy.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_segy.h"
+#include "mb_status.h"
 
-/* local options */
 #define MBSEGYPSD_USESHOT 0
 #define MBSEGYPSD_USECMP 1
 #define MBSEGYPSD_WINDOW_OFF 0

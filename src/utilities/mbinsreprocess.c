@@ -31,22 +31,19 @@
  * 		--output=filename
  */
 
-/* standard include files */
+#include <getopt.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_status.h"
 
-/* local defines */
 #define NFIELDSMAX 50
 #define MAX_OPTIONS 50
 #define TYPE_UNKNOWN 0
@@ -62,7 +59,6 @@
 #define KEARFOTT_MONITOR_GPS_REJECTED 0x20
 #define KEARFOTT_MONITOR_GPS_PROCESSED 0x40
 #define KEARFOTT_MONITOR_DEPTH_LOOP_OPEN 0x80
-
 
 /*--------------------------------------------------------------------*/
 

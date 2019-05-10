@@ -18,25 +18,21 @@
  * Author:	D. W. Caress
  * Date:	May 19, 2005
  *
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_io.h"
-#include "mbsys_reson7k.h"
+#include "mb_status.h"
 #include "mbsys_jstar.h"
+#include "mbsys_reson7k.h"
 
-/* local defines */
 #define MB7K2JSTAR_SSLOW 1
 #define MB7K2JSTAR_SSHIGH 2
 #define MB7K2JSTAR_SBP 3

@@ -19,19 +19,16 @@
  *
  * Author:	D. W. Caress
  * Date:	January 23, 1993
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
+#include "mb_status.h"
 
 /* colortable view mode defines */
 #define MBV_COLORTABLE_HAXBY 0

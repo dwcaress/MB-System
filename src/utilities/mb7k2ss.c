@@ -23,23 +23,20 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
-#include "mb_io.h"
 #include "mb_aux.h"
-#include "mbsys_reson7k.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_status.h"
 #include "mbsys_ldeoih.h"
+#include "mbsys_reson7k.h"
 
-/* local defines */
 #define MB7K2SS_SS_FLAT_BOTTOM 0
 #define MB7K2SS_SS_3D_BOTTOM 1
 #define MB7K2SS_SSDIMENSION 4001

@@ -18,26 +18,19 @@
  *
  * Author:	D. W. Caress
  * Date:	October 10, 2001
- *
- *
- *
  */
 
-/* standard include files */
+#include <getopt.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
 #include "mb_define.h"
 #include "mb_format.h"
-#include "mb_status.h"
 #include "mb_process.h"
-
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 

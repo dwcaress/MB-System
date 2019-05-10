@@ -46,27 +46,24 @@
  * Date:	May 29, 2018
  */
 
-/* standard include files */
+#include <getopt.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <getopt.h>
 #include <unistd.h>
 
-/* MBIO include files */
 #include "mb_define.h"
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_process.h"
 
+#include "mbsys_gsf.h"
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
-#include "mbsys_gsf.h"
 
-/* local defines */
 
 /* system function declarations */
 char *ctime();

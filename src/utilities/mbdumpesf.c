@@ -18,27 +18,23 @@
  *
  * Author:	D. W. Caress
  * Date:	March 20, 2008
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_process.h"
+#include "mb_status.h"
 #include "mb_swap.h"
-
 
 #define OUTPUT_TEXT 0
 #define OUTPUT_ESF 1

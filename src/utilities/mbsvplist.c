@@ -29,29 +29,20 @@
  *
  * Author:	D. W. Caress
  * Date:	January 3,  2001
- *
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* MBIO include files */
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_define.h"
 #include "mb_process.h"
 
-/* system function declarations */
-char *ctime();
-char *getenv();
-
-/* local defines */
 #define MBSVPLIST_SVP_NUM_ALLOC 24
 #define MBSVPLIST_PRINTMODE_CHANGE 0
 #define MBSVPLIST_PRINTMODE_UNIQUE 1

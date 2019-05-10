@@ -20,32 +20,25 @@
  *
  * Author:  D. W. Caress
  * Date:  January 8, 2014
- *
- *
  */
 
-/* source file version string */
-
-/* standard include files */
+#include <assert.h>
+#include <getopt.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
-#include <assert.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
-#include "mb_process.h"
-#include "mb_io.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_process.h"
+#include "mb_status.h"
 
-/* local defines */
 #define MBPREPROCESS_ALLOC_CHUNK 1000
 
 #define MBPREPROCESS_MERGE_OFF 0

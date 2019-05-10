@@ -19,21 +19,18 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_segy.h"
+#include "mb_status.h"
 
-/* local options */
 #define MAX_OPTIONS 25
 #define MBLIST_CHECK_ON 0
 #define MBLIST_CHECK_ON_NULL 1
@@ -43,7 +40,6 @@
 #define MBLIST_SET_OFF 0
 #define MBLIST_SET_ON 1
 #define MBLIST_SET_ALL 2
-
 
 /*--------------------------------------------------------------------*/
 

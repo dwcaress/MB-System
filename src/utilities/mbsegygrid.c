@@ -18,27 +18,23 @@
  *
  * Author:	D. W. Caress
  * Date:	June 12, 2004
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
-#include <time.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
-#include "mb_segy.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_segy.h"
+#include "mb_status.h"
 
-/* local options */
 #define MBSEGYGRID_USESHOT 0
 #define MBSEGYGRID_USECMP 1
 #define MBSEGYGRID_USESHOTONLY 2

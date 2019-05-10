@@ -51,10 +51,8 @@
  * by Alberto Malinverno (formerly at L-DEO, now at Schlumberger),
  * which was in turn based on the original program mbclean (v. 1.0)
  * by David Caress.
- *
  */
 
-/* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -63,15 +61,13 @@
 #include <sys/stat.h>
 #include <time.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_io.h"
-#include "mb_swap.h"
 #include "mb_process.h"
+#include "mb_status.h"
+#include "mb_swap.h"
 
-/* local defines */
 #define MBCLEAN_FLAG_ONE 1
 #define MBCLEAN_FLAG_BOTH 2
 #define MBCLEAN_DISTANCE_MODE_FLAG 1

@@ -93,16 +93,13 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <math.h>
 
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
-
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 

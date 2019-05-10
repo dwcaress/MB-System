@@ -28,23 +28,20 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_io.h"
+#include "mb_status.h"
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
 
-/* local options */
 #define MAX_OPTIONS 25
 #define DUMP_MODE_LIST 1
 #define DUMP_MODE_BATH 2
@@ -65,7 +62,6 @@
 #define MBLIST_SEGMENT_MODE_SWATHFILE 2
 #define MBLIST_SEGMENT_MODE_DATALIST 3
 
-/* function prototypes */
 int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int use_bath, int use_amp, int use_ss, int dump_mode,
                int beam_set, int pixel_set, int beam_vertical, int pixel_vertical, int *beam_start, int *beam_end,
                int *beam_exclude_percent, int *pixel_start, int *pixel_end, int *n_list, char *list, int *error);
