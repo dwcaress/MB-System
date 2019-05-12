@@ -104,8 +104,8 @@ check_SCRIPTS += mbinfo_test.py
 # TESTS += mbmosaic_test.py
 # check_SCRIPTS += mbmosaic_test.py
 
-# TESTS += mbnavlist_test.py
-# check_SCRIPTS += mbnavlist_test.py
+TESTS += mbnavlist_test.py
+check_SCRIPTS += mbnavlist_test.py
 
 # TESTS += mbneptune2esf_test.py
 # check_SCRIPTS += mbneptune2esf_test.py
