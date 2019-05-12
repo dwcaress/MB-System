@@ -307,8 +307,6 @@ int main(int argc, char **argv) {
 	double time_d_last = 0.0;
 	int val_int;
 	double val_double;
-	int ix, iy;
-	int j, k;
 
 	char *getenv();
 
@@ -1525,8 +1523,8 @@ int main(int argc, char **argv) {
 
 					/* update coverage mask */
 					if (pass == 1 && coverage_mask == MB_YES && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
-						ix = (int)((navlon - lonmin) / mask_dx);
-						iy = (int)((navlat - latmin) / mask_dy);
+						int ix = (int)((navlon - lonmin) / mask_dx);
+						int iy = (int)((navlat - latmin) / mask_dy);
 						if (ix >= 0 && ix < mask_nx && iy >= 0 && iy < mask_ny) {
 							mask[ix + iy * mask_nx] = MB_YES;
 						}
@@ -1588,7 +1586,7 @@ int main(int argc, char **argv) {
 						sumy = 0.0;
 						sumxy = 0.0;
 						variance = 0.0;
-						for (j = 0; j < nread; j++) {
+						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							bath = datacur->bath;
 							beamflag = datacur->beamflag;
@@ -1604,7 +1602,7 @@ int main(int argc, char **argv) {
 							delta = nbath * sumxx - sumx * sumx;
 							a = (sumxx * sumy - sumx * sumxy) / delta;
 							b = (nbath * sumxy - sumx * sumy) / delta;
-							for (j = 0; j < nread; j++) {
+							for (int j = 0; j < nread; j++) {
 								datacur = &data[j];
 								bath = datacur->bath;
 								beamflag = datacur->beamflag;
@@ -1626,7 +1624,7 @@ int main(int argc, char **argv) {
 						namp = 0;
 						mean = 0.0;
 						variance = 0.0;
-						for (j = 0; j < nread; j++) {
+						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							amp = datacur->amp;
 							beamflag = datacur->beamflag;
@@ -1637,7 +1635,7 @@ int main(int argc, char **argv) {
 						}
 						if (namp == pings_read) {
 							mean = mean / namp;
-							for (j = 0; j < nread; j++) {
+							for (int j = 0; j < nread; j++) {
 								datacur = &data[j];
 								amp = datacur->amp;
 								if (mb_beam_ok(beamflag[i])) {
@@ -1658,7 +1656,7 @@ int main(int argc, char **argv) {
 						nss = 0;
 						mean = 0.0;
 						variance = 0.0;
-						for (j = 0; j < nread; j++) {
+						for (int j = 0; j < nread; j++) {
 							datacur = &data[j];
 							ss = datacur->ss;
 							if (ss[i] > MB_SIDESCAN_NULL) {
@@ -1668,7 +1666,7 @@ int main(int argc, char **argv) {
 						}
 						if (nss == pings_read) {
 							mean = mean / nss;
-							for (j = 0; j < nread; j++) {
+							for (int j = 0; j < nread; j++) {
 								datacur = &data[j];
 								ss = datacur->ss;
 								if (ss[i] > MB_SIDESCAN_NULL) {
@@ -2408,10 +2406,10 @@ int main(int argc, char **argv) {
 		switch (output_format) {
 		case FREE_TEXT:
 			fprintf(output, "\nCoverage Mask:\nCM dimensions: %d %d\n", mask_nx, mask_ny);
-			for (j = mask_ny - 1; j >= 0; j--) {
+			for (int j = mask_ny - 1; j >= 0; j--) {
 				fprintf(output, "CM:  ");
 				for (int i = 0; i < mask_nx; i++) {
-					k = i + j * mask_nx;
+					const int k = i + j * mask_nx;
 					fprintf(output, " %1d", mask[k]);
 				}
 				fprintf(output, "\n");
@@ -2421,9 +2419,9 @@ int main(int argc, char **argv) {
 			fprintf(output, ",\n\"coverage_mask\": {\n");
 			fprintf(output, "\"dimensions_nx\": \"%d\",\n\"dimensions_ny\": \"%d\",\n", mask_nx, mask_ny);
 			fprintf(output, "\"mask\": \" ");
-			for (j = mask_ny - 1; j >= 0; j--) {
+			for (int j = mask_ny - 1; j >= 0; j--) {
 				for (int i = 0; i < mask_nx; i++) {
-					k = i + j * mask_nx;
+					const int k = i + j * mask_nx;
 					if (i > 0)
 						fprintf(output, ",");
 					fprintf(output, "%1d", mask[k]);
