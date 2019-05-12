@@ -24,8 +24,6 @@
  *
  */
 
-/* source file version string */
-
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
