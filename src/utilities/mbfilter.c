@@ -33,22 +33,19 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_io.h"
+#include "mb_status.h"
 #include "mbsys_ldeoih.h"
 
-/* mode defines */
 #define MBFILTER_BATH 0
 #define MBFILTER_AMP 1
 #define MBFILTER_SS 2

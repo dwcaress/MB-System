@@ -32,28 +32,21 @@
  *
  * Author:	D. W. Caress
  * Date:	February 22, 1993
- * Rewrite:	May 2, 1994
- * Rerewrite:	April 25, 1995
- * Rererewrite:	January 2, 1996
- *
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
-#include "mb_io.h"
-#include "mb_info.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_info.h"
+#include "mb_io.h"
+#include "mb_status.h"
 
 /* gridding algorithms */
 #define MBGRID_WEIGHTED_MEAN 1

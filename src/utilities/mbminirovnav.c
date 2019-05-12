@@ -21,33 +21,23 @@
  *
  * Author:	D. W. Caress
  * Date:	7 September, 2017
- * Where:   KOPRI Icebreaker Araon
- *          Beaufort Sea, Arctic Ocean
- *          139d30.2732'W 70d33.1767'N
- *          Wind speed down to 35 knots sustained from 40+
- *
- *
  */
 
-/* standard include files */
+#include <getopt.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
-#include "mb_process.h"
-#include "mb_io.h"
 #include "mb_aux.h"
-
-/* local defines */
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_process.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 

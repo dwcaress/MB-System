@@ -23,27 +23,23 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
+#include "mb_format.h"
+#include "mb_status.h"
 
-/* local options */
 #define MAX_OPTIONS 25
 #define MBNAVLIST_SEGMENT_MODE_NONE 0
 #define MBNAVLIST_SEGMENT_MODE_TAG 1
 #define MBNAVLIST_SEGMENT_MODE_SWATHFILE 2
 #define MBNAVLIST_SEGMENT_MODE_DATALIST 3
 
-/* function prototypes */
 int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error);
 int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 

@@ -22,24 +22,21 @@
  *
  * Author:	D. W. Caress
  * Date:	February 10, 1997
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
+#include "mb_aux.h"
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_info.h"
 #include "mb_process.h"
-#include "mb_aux.h"
+#include "mb_status.h"
 
 /* gridding algorithms */
 #define MBMOSAIC_SINGLE_BEST 1

@@ -42,27 +42,22 @@
  *
  * Acknowledgments:
  * This program is based on a skeleton derived from mbclean.
- *
- *
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <time.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_io.h"
-#include "mb_swap.h"
 #include "mb_process.h"
+#include "mb_status.h"
+#include "mb_swap.h"
 #include "mbsys_simrad2.h"
 
 /* length of line name nnnn_yyyymmdd_hhmmss = 20 */

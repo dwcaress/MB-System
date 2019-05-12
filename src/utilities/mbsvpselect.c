@@ -182,20 +182,16 @@
  *
  */
 
-/* ---------------------------------------------------------------- */
-
-/* include files */
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #include <unistd.h>
 
+#include "geodesic.h"
 #include "mb_define.h"
 #include "mb_status.h"
-
-#include "geodesic.h"
 
 /* struct info_holder (shortly inf) hold the information from auxiliary files .inf
  * that are created from mbdatalist command */

@@ -22,21 +22,19 @@
  * Date:	January 1, 2012
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
-#include "mb_io.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_status.h"
 #include "mbsys_hysweep.h"
 
 #define MBHYSWEEPPREPROCESS_ALLOC_CHUNK 1000

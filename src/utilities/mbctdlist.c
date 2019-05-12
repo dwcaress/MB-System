@@ -25,29 +25,24 @@
  *
  * Author:	D. W. Caress
  * Date:	September 14,  2008
- *
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
-#include "mb_process.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_process.h"
+#include "mb_status.h"
 
-/* local options */
 #define MAX_OPTIONS 25
 #define MBCTDLIST_ALLOC_CHUNK 1024
-/* function prototypes */
+
 int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error);
 int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 

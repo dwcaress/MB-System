@@ -22,27 +22,21 @@
  *
  * Author:	D. W. Caress
  * Date:	November 21, 2004
- *
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_status.h"
 
-/* local defines */
 #define NCHARMAX 256
-
 
 /*--------------------------------------------------------------------*/
 

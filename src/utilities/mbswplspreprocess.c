@@ -54,20 +54,17 @@
  * Author:	D. P. Finlayson
  * Email:   dfinlayson@usgs.gov
  * Date:	Feb 28, 2013
- *
  */
 
-/* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
+#include "mb_status.h"
 #include "mbsys_swathplus.h"
 
 #define MAX_ERROR_STRING 1024

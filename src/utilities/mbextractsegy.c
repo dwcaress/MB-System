@@ -18,24 +18,19 @@
  *
  * Author:	D. W. Caress
  * Date:	April 18, 2004
- *
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
+#include "mb_format.h"
 #include "mb_segy.h"
+#include "mb_status.h"
 
-/* defines */
 #define MBES_ALLOC_NUM 128
 #define MBES_ROUTE_WAYPOINT_NONE 0
 #define MBES_ROUTE_WAYPOINT_SIMPLE 1

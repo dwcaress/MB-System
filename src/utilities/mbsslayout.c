@@ -18,28 +18,24 @@
  *
  * Author:	D. W. Caress
  * Date:	April 21, 2014
- *
  */
 
-/* standard include files */
+#include <getopt.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
-#include "mb_io.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_io.h"
+#include "mb_status.h"
 #include "mbsys_ldeoih.h"
 
-/* local defines */
 #define MBSSLAYOUT_ALLOC_CHUNK 1024
 #define MBSSLAYOUT_ALLOC_NUM 128
 
