@@ -19,8 +19,6 @@
  * Date:	May 5, 2017
  */
 
-/* source file version string */
-
 #include <getopt.h>
 #include <math.h>
 #include <stdio.h>
