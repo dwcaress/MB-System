@@ -570,10 +570,31 @@ TEST_EXTENSIONS = .py
 
 # TESTS += mbimagelist_test.py
 # check_SCRIPTS += mbimagelist_test.py
-TESTS = mbconfig_test.py mbinfo_test.py
+
+# TESTS += mbinsreprocess_test.py
+# check_SCRIPTS += mbinsreprocess_test.py
+
+# TESTS += mbkongsbergpreprocess_test.py
+# check_SCRIPTS += mbkongsbergpreprocess_test.py
+
+# TESTS += mblevitus_test.py
+# check_SCRIPTS += mblevitus_test.py
+
+# TESTS += mblist_test.py
+# check_SCRIPTS += mblist_test.py
+
+# TESTS += mbmakeplatform_test.py
+# check_SCRIPTS += mbmakeplatform_test.py
+
+# TESTS += mbminirovnav_test.py
+# check_SCRIPTS += mbminirovnav_test.py
+
+# TESTS += mbmosaic_test.py
+# check_SCRIPTS += mbmosaic_test.py
+TESTS = mbconfig_test.py mbinfo_test.py mbnavlist_test.py
 
 # if HAVE_PYTHON
-check_SCRIPTS = mbconfig_test.py mbinfo_test.py
+check_SCRIPTS = mbconfig_test.py mbinfo_test.py mbnavlist_test.py
 all: all-am
 
 .SUFFIXES:
@@ -896,30 +917,6 @@ uninstall-am:
 
 .PRECIOUS: Makefile
 
-
-# TESTS += mbinsreprocess_test.py
-# check_SCRIPTS += mbinsreprocess_test.py
-
-# TESTS += mbkongsbergpreprocess_test.py
-# check_SCRIPTS += mbkongsbergpreprocess_test.py
-
-# TESTS += mblevitus_test.py
-# check_SCRIPTS += mblevitus_test.py
-
-# TESTS += mblist_test.py
-# check_SCRIPTS += mblist_test.py
-
-# TESTS += mbmakeplatform_test.py
-# check_SCRIPTS += mbmakeplatform_test.py
-
-# TESTS += mbminirovnav_test.py
-# check_SCRIPTS += mbminirovnav_test.py
-
-# TESTS += mbmosaic_test.py
-# check_SCRIPTS += mbmosaic_test.py
-
-# TESTS += mbnavlist_test.py
-# check_SCRIPTS += mbnavlist_test.py
 
 # TESTS += mbneptune2esf_test.py
 # check_SCRIPTS += mbneptune2esf_test.py
