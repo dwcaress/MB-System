@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 	char program_name[] = "MBFORMAT";
 	char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  "
 	                      "If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
-	char usage_message[] = "mbformat [-Fformat -Ifile -L -W -V -H]";
+	char usage_message[] = "mbformat [-Fformat -Ifile -L -K -V -W -H]";
 
 	/* parsing variables */
 	extern char *optarg;
