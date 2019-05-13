@@ -22,19 +22,16 @@
  *
  * Author:	D. W. Caress
  * Date:	February 25, 2014
- *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
+#include "mb_status.h"
 #include "mbsys_singlebeam.h"
 
 /*
@@ -201,7 +198,6 @@ int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 int mbr_register_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mgd77txt";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -211,7 +207,7 @@ int mbr_register_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_mgd77txt(
@@ -373,9 +369,6 @@ int mbr_info_mgd77txt(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_mgd77txt";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbf_mgd77txt_struct *data;
-	char *data_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -386,7 +379,7 @@ int mbr_alm_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_mgd77txt_struct);
@@ -396,8 +389,8 @@ int mbr_alm_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mgd77txt_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_mgd77txt_struct *data = (struct mbf_mgd77txt_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* set number of header records read to zero */
 	mb_io_ptr->save1 = 0;
@@ -420,7 +413,6 @@ int mbr_alm_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mgd77txt";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -431,7 +423,7 @@ int mbr_dem_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
@@ -452,7 +444,6 @@ int mbr_dem_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 int mbr_zero_mgd77txt(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_mgd77txt";
 	int status = MB_SUCCESS;
-	struct mbf_mgd77txt_struct *data;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -463,7 +454,7 @@ int mbr_zero_mgd77txt(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_mgd77txt_struct *)data_ptr;
+	struct mbf_mgd77txt_struct *data = (struct mbf_mgd77txt_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -522,9 +513,6 @@ int mbr_zero_mgd77txt(int verbose, char *data_ptr, int *error) {
 int mbr_rt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_mgd77txt";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbf_mgd77txt_struct *data;
-	struct mbsys_singlebeam_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -536,9 +524,9 @@ int mbr_rt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mgd77txt_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mbf_mgd77txt_struct *data = (struct mbf_mgd77txt_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* read next data from file */
 	status = mbr_mgd77txt_rd_data(verbose, mbio_ptr, error);
@@ -600,9 +588,6 @@ int mbr_rt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_mgd77txt";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbf_mgd77txt_struct *data;
-	struct mbsys_singlebeam_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -614,11 +599,11 @@ int mbr_wt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mgd77txt_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbf_mgd77txt_struct *data = (struct mbf_mgd77txt_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {
@@ -676,15 +661,6 @@ int mbr_wt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_mgd77txt_rd_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbf_mgd77txt_struct *data;
-	int *header_read;
-	char line[MB_COMMENT_MAXLINE] = "";
-	char *read_ptr;
-	int shift;
-	int neg_unit;
-	int itmp;
-	double dtmp;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -695,11 +671,11 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mgd77txt_struct *)mb_io_ptr->raw_data;
-	header_read = (int *)&mb_io_ptr->save1;
+	struct mbf_mgd77txt_struct *data = (struct mbf_mgd77txt_struct *)mb_io_ptr->raw_data;
+	int *header_read = (int *)&mb_io_ptr->save1;
 
 	/* initialize everything to zeros */
 	mbr_zero_mgd77txt(verbose, mb_io_ptr->raw_data, error);
@@ -709,6 +685,8 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next record */
+	char line[MB_COMMENT_MAXLINE] = "";
+	char *read_ptr = NULL;
 	if ((read_ptr = fgets(line, MB_PATH_MAXLINE, mb_io_ptr->mbfp)) != NULL) {
 		mb_io_ptr->file_bytes += strlen(line);
 		status = MB_SUCCESS;
@@ -739,7 +717,7 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 		data->kind = MB_DATA_DATA;
 
 		/* get survey id */
-		shift = 1;
+		int shift = 1;
 		for (int i = 0; i < 8; i++)
 			data->survey_id[i] = line[i + shift];
 
@@ -748,6 +726,7 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 		mb_get_int(&data->timezone, &line[shift], 5);
 		shift += 5;
 		data->timezone = data->timezone / 100;
+		int itmp;
 		mb_get_int(&itmp, &line[shift], 2);
 		shift += 2;
 		mb_fix_y2k(verbose, itmp, &data->time_i[0]);
@@ -760,13 +739,13 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 		mb_get_int(&itmp, &line[shift], 5);
 		shift += 5;
 		data->time_i[4] = 0.001 * itmp;
-		dtmp = (itmp - 1000 * data->time_i[4]) * 0.06;
+		const double dtmp = (itmp - 1000 * data->time_i[4]) * 0.06;
 		data->time_i[5] = (int)dtmp;
 		data->time_i[6] = 1000000 * (dtmp - data->time_i[5]);
 		mb_get_time(verbose, data->time_i, &data->time_d);
 
 		/* get nav */
-		neg_unit = 8;
+		int neg_unit = 8;
 		if (line[shift] == '-') {
 			shift += 1;
 			neg_unit = 7;
@@ -844,13 +823,13 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* get nav quality */
 		mb_get_int(&data->nav_quality, &line[shift], 1);
-		shift += 1;
+		/* shift += 1; */
 	}
 	else if (status == MB_SUCCESS && line[0] == '5') {
 		data->kind = MB_DATA_DATA;
 
 		/* get survey id */
-		shift = 1;
+		int shift = 1;
 		for (int i = 0; i < 8; i++)
 			data->survey_id[i] = line[i + shift];
 
@@ -866,17 +845,18 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 		shift += 2;
 		mb_get_int(&data->time_i[3], &line[shift], 2);
 		shift += 2;
+                int itmp;
 		mb_get_int(&itmp, &line[shift], 5);
 		shift += 5;
 		data->time_i[4] = 0.001 * itmp;
-		dtmp = (itmp - 1000 * data->time_i[4]) * 0.06;
+		const double dtmp = (itmp - 1000 * data->time_i[4]) * 0.06;
 		data->time_i[5] = (int)dtmp;
 		data->time_i[6] = 1000000 * (dtmp - data->time_i[5]);
 
 		mb_get_time(verbose, data->time_i, &data->time_d);
 
 		/* get nav */
-		neg_unit = 8;
+		int neg_unit = 8;
 		if (line[shift] == '-') {
 			shift += 1;
 			neg_unit = 7;
@@ -973,12 +953,6 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_mgd77txt_wr_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbf_mgd77txt_struct *data;
-	char line[MB_COMMENT_MAXLINE] = "";
-	int itmp;
-	int write_status;
-	int shift;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -990,12 +964,13 @@ int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mgd77txt_struct *)data_ptr;
+	struct mbf_mgd77txt_struct *data = (struct mbf_mgd77txt_struct *)data_ptr;
 
 	/* handle the data */
+	char line[MB_COMMENT_MAXLINE] = "";
 	if (data->kind == MB_DATA_HEADER) {
 		sprintf(line, "%s\r\n", data->comment);
 	}
@@ -1004,7 +979,7 @@ int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	}
 	else if (data->kind == MB_DATA_DATA) {
 		/* set data record id */
-		shift = 0;
+		int shift = 0;
 		line[0] = '5';
 		shift += 1;
 
@@ -1024,7 +999,7 @@ int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		shift += 2;
 		sprintf(&line[shift], "%2.2d", data->time_i[3]);
 		shift += 2;
-		itmp =
+		int itmp =
 		    (1000.0 * data->time_i[4]) + (1000.0 * (data->time_i[5] / 60.0)) + (1000.0 * ((data->time_i[6] / 1000000.0) / 60.0));
 		sprintf(&line[shift], "%5.5d", itmp);
 		shift += 5;
@@ -1120,6 +1095,7 @@ int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		line[shift] = '\0';
 	}
 
+	int write_status;
 	if ((write_status = fputs(line, mb_io_ptr->mbfp)) > 0) {
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;

@@ -19,25 +19,19 @@
  *
  * Author:	D. W. Caress
  * Date:	August 14, 2006
- * Location:	R/V Western Flyer hove to in a gale offshore British Columbia
- *
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_define.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_status.h"
 
-/* local defines */
 #define NFIELDSMAX 512
 #define MAX_OPTIONS 512
 #define TYPE_UNKNOWN 0

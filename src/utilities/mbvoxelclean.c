@@ -39,27 +39,24 @@
  *
  * Author:	D. W. Caress
  * Date:	August 3, 2018
- *
  */
 
-/* standard include files */
+#include <getopt.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
 
-/* mbio include files */
 #include "mb_define.h"
-#include "mb_status.h"
 #include "mb_format.h"
-#include "mb_io.h"
-#include "mb_swap.h"
-#include "mb_process.h"
 #include "mb_info.h"
+#include "mb_io.h"
+#include "mb_process.h"
+#include "mb_status.h"
+#include "mb_swap.h"
 
 /* ping structure definition */
 struct mbvoxelclean_ping_struct {

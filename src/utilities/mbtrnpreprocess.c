@@ -18,7 +18,6 @@
  * Date:	February 18, 1995
  */
 
-/* standard include files */
 #if defined(__CYGWIN__)
 #include <Windows.h>
 #endif
@@ -36,7 +35,6 @@
 #include <float.h>
 #include <arpa/inet.h>
 
-/* mbio include files */
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_define.h"

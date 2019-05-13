@@ -21,24 +21,19 @@
  *
  * Author:	D. W. Caress
  * Date:	June 5, 2008
- *
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
 #include "mb_define.h"
+#include "mb_status.h"
 
 #define MBTIME_INPUT_EPOCH 0
 #define MBTIME_INPUT_CALENDAR 1
-
 
 /*--------------------------------------------------------------------*/
 

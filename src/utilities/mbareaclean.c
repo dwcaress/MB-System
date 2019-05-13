@@ -33,13 +33,8 @@
  *
  * Author:	D. W. Caress
  * Date:	February 27, 2003
- *		Amsterdam Airport
- *
- *
- *
  */
 
-/* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -48,14 +43,13 @@
 #include <sys/stat.h>
 #include <time.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
-#include "mb_io.h"
-#include "mb_swap.h"
-#include "mb_process.h"
+#include "mb_format.h"
 #include "mb_info.h"
+#include "mb_io.h"
+#include "mb_process.h"
+#include "mb_status.h"
+#include "mb_swap.h"
 
 /* allocation */
 #define FILEALLOCNUM 16

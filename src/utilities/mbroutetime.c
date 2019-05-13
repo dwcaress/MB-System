@@ -23,19 +23,16 @@
  * Location:	R/V Thompson, at the dock in Apia, Samoa
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
+#include "mb_format.h"
+#include "mb_status.h"
 
-/* defines */
 #define MBES_ALLOC_NUM 128
 #define MBES_ROUTE_WAYPOINT_NONE 0
 #define MBES_ROUTE_WAYPOINT_SIMPLE 1
@@ -44,7 +41,6 @@
 #define MBES_ROUTE_WAYPOINT_ENDLINE 4
 #define MBES_ONLINE_THRESHOLD 15.0
 #define MBES_ONLINE_COUNT 30
-
 
 /*--------------------------------------------------------------------*/
 

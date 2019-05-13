@@ -19,29 +19,23 @@
  * variance of unflagged soundings in the input bathymetry data.
  *
  * Author:	D. W. Caress
- * Date:	September 29, 2013
- *		CCGS Sir Wilfrid Laurier
- *		136d00.6832'W 70d45.3653'W
- *		Beaufort Sea, Arctic Ocean
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_format.h"
 #include "mb_define.h"
-#include "mb_io.h"
-#include "mb_swap.h"
-#include "mb_process.h"
+#include "mb_format.h"
 #include "mb_info.h"
+#include "mb_io.h"
+#include "mb_process.h"
+#include "mb_status.h"
+#include "mb_swap.h"
 
 /* allocation */
 #define FILEALLOCNUM 16

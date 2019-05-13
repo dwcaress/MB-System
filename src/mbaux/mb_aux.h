@@ -25,6 +25,8 @@
  *
  */
 
+#include "mb_io.h"
+
 /* contour algorithm defines */
 #define MB_CONTOUR_OLD 0
 #define MB_CONTOUR_TRIANGLES 1

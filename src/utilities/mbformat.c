@@ -23,19 +23,16 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
+#include <unistd.h>
 
-/* mbio include files */
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_status.h"
-#include "mb_define.h"
 
-/* local defines */
 #define MBFORMAT_LIST_LONG 0
 #define MBFORMAT_LIST_SIMPLE 1
 #define MBFORMAT_LIST_ROOT 2

@@ -30,28 +30,21 @@
  *
  * Author:	D. W. Caress
  * Date:	April 15, 1993
- * Rewrite:	March 26, 1997
- *
- *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
+#include "mb_status.h"
 
-/* global defines */
 #define MBLEVITUS_NO_DATA -1000000000.0
 #define NDEPTH_MAX 46
 #define NLEVITUS_MAX 33
-
 
 /* Windows header file */
 #ifdef _WIN32

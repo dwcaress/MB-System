@@ -17,28 +17,21 @@
  *
  * Author:	D. W. Caress
  * Date:	May 5, 2017
- * Where:   In port Kaohsiung Taiwan, mobilizing Mapping AUV and MiniROV
- *          onto R/V Ocean Research 1, operated by Taiwan National University
- *
  */
 
-/* source file version string */
-
-/* standard include files */
+#include <getopt.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_format.h"
-#include "mb_define.h"
 #include "levitus.h"
+#include "mb_define.h"
+#include "mb_format.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 
