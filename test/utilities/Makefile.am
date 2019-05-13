@@ -56,8 +56,8 @@ check_SCRIPTS += mbconfig_test.py
 # TESTS += mbfilter_test.py
 # check_SCRIPTS += mbfilter_test.py
 
-# TESTS += mbformat_test.py
-# check_SCRIPTS += mbformat_test.py
+TESTS += mbformat_test.py
+check_SCRIPTS += mbformat_test.py
 
 # TESTS += mbgetesf_test.py
 # check_SCRIPTS += mbgetesf_test.py
