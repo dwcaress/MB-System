@@ -6,7 +6,8 @@ supported by the \fBMBIO\fP library.
 .SH VERSION
 Version 5.0
 
-.SH SYNOPSIS\fBmbformat\fP [\fB \-F\fP\fIformat\fP \fB\-I\fP\fIfile\fP \fB\-L \-K \-V \-H\fP]
+.SH SYNOPSIS
+\fBmbformat\fP [\fB \-F\fP\fIformat\fP \fB\-I\fP\fIfile\fP \fB\-L \-K \-V \-W \-H\fP]
 
 .SH DESCRIPTION
 \fBmbformat\fP is a utility which identifies the swath sonar data formats
@@ -77,6 +78,9 @@ so that only the \fBMBIO\fP format id numbers are listed.
 Normally, \fBmbformat\fP only prints out format descriptions.  If the
 \fB\-V\fP flag is given, then \fBmbformat\fP works in a "verbose" mode and
 also outputs the program version being used.
+.TP
+.B \-W
+Output the list of formats as HTML.
 
 .SH EXAMPLES
 Suppose one wishes to identify the swath sonar data format associated
