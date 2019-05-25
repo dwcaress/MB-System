@@ -20,7 +20,7 @@ Datalist files are text lists of swath data files and their format ids with each
 file entry taking up a single line. These lists may contain references to other
 datalists, making them recursive. Datalists may also contain comments and parsing
 directives that, for example, determine whether parsing returns references to
-raw or processed data files. See the \fBMB-System\fP  manual page for details
+raw or processed data files. See the \fBMB-System\fP manual page for details
 on the format and structure of datalists.  
 
 This macro is used to easily construct a datalist referencing swath files in a
@@ -36,7 +36,7 @@ multibeam data, respectively. The suffix of the files to be considered can be
 specified with the \fB-S\fP\fIsuffix\fP option; under most circumstances this is
 the best approach as it prevents \fBmbm_makedatalist\fP from including files that
 are not intended for inclusion by the user yet satisfy one of the many recognized
-naming conventions. By default, \fBmbm_makedatalist\fP  infers the format id
+naming conventions. By default, \fBmbm_makedatalist\fP infers the format id
 of included files using the naming conventions. The format id can be specified
 using the \fB-F\fP\fIformat\fP option.
 
@@ -91,7 +91,7 @@ Christian do Santos Ferreira
 .B \-F
 \fIformat\fP
 .br
-By default, \fBmbm_makedatalist\fP  infers the format id
+By default, \fBmbm_makedatalist\fP infers the format id
 of included files using the naming conventions. This option specifies the
 format id that is assigned.
 .TP
@@ -133,7 +133,7 @@ disabled by the \fB-T\fP option.
 .B \-T
 .br
 By default, when the \fB-S\fP option is used to specify a file suffix corresponding
-to Kongsberg multibeam data, \fBmbm_makedatalist\fP  attempts to sort the data files
+to Kongsberg multibeam data, \fBmbm_makedatalist\fP attempts to sort the data files
 into time order before outputting the datalist. This option disables that behavior.
 .TP
 .B \-V
