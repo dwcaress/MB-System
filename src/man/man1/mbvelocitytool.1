@@ -28,7 +28,7 @@ a single editable SVP and then interactively modify this profile.
 
 When users load swath bathymetry data containing raw travel time and
 angle data (many but not all swath data format include this information),
-\fBMBvelocitytool\fP  recalculates the bathymetry by raytracing through
+\fBMBvelocitytool\fP recalculates the bathymetry by raytracing through
 the current SVP model. If the bathymetry in the input swath file has
 been edited (e.g. with \fBmbedit\fP), then the associated edit save
 file (*.esf file) will be loaded as well, and the beams flagged as
@@ -37,7 +37,7 @@ The bathymetry of each ping is fit with a line,
 and bathymetry residuals are calculated for each good beam relative
 to the linear fit.  The average of the bathymetry residuals is displayed
 along with "error bars" indicating the standard deviations of the
-residuals. Anomalously shallow  bathymetry maps into negative residuals
+residuals. Anomalously shallow bathymetry maps into negative residuals
 and deep bathymetry into positive residuals; the residuals are displayed
 so that shallow is up and deep is down. If the seafloor is reasonably
 smooth so that a linear fit is appropriate, then the residuals will
@@ -62,7 +62,7 @@ sound velocity different than the surface sound velocity (SSV) used by
 the mapping sonar for the original beamforming. The usual approach is to
 use Snell's law to adjust the starting angle for this change in sound
 velocity. This amounts to an assumption that the original SSV was correct
-and that  the rays pass through an insignificantly thick layer in which the
+and that the rays pass through an insignificantly thick layer in which the
 sound speed equals the SSV before transitioning to the sound speed implied
 by the SVP. This is the default setting for raytracing in \fBMB-System\fP.
 Alternatively, one can proceed with raytracing using the original angle
@@ -311,7 +311,7 @@ This button sets the angle mode so that the starting beam angles are
 corrected before raytracing, using Snell's Law, for the difference between the
 surface sound velocity (SSV) and the sound velocity of the starting depth in
 the SVP. This amounts to an assumption that the original SSV was correct
-and that  the rays pass through an insignificantly thick layer in which the
+and that the rays pass through an insignificantly thick layer in which the
 sound speed equals the SSV before transitioning to the sound speed implied
 by the SVP. This is the default setting for raytracing in \fBmbvelocitytool\fP
 and in \fBMB-System\fP in general.
