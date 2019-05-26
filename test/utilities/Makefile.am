@@ -17,8 +17,8 @@ check_SCRIPTS += mb7kpreprocess_test.py
 TESTS += mbabsorption_test.py
 check_SCRIPTS += mbabsorption_test.py
 
-# TESTS += mbareaclean_test.py
-# check_SCRIPTS += mbareaclean_test.py
+TESTS += mbareaclean_test.py
+check_SCRIPTS += mbareaclean_test.py
 
 # TESTS += mbauvloglist_test.py
 # check_SCRIPTS += mbauvloglist_test.py
