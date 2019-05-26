@@ -499,12 +499,6 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 TEST_EXTENSIONS = .py
 
-# TESTS += mbauvloglist_test.py
-# check_SCRIPTS += mbauvloglist_test.py
-
-# TESTS += mbauvnavusbl_test.py
-# check_SCRIPTS += mbauvnavusbl_test.py
-
 # TESTS += mbbackangle_test.py
 # check_SCRIPTS += mbbackangle_test.py
 
@@ -574,14 +568,16 @@ TEST_EXTENSIONS = .py
 # TESTS += mbmosaic_test.py
 # check_SCRIPTS += mbmosaic_test.py
 TESTS = mb7k2jstar_test.py mb7k2ss_test.py mb7kpreprocess_test.py \
-	mbabsorption_test.py mbareaclean_test.py mbconfig_test.py \
-	mbformat_test.py mbinfo_test.py mbnavlist_test.py
+	mbabsorption_test.py mbareaclean_test.py mbauvloglist_test.py \
+	mbauvnavusbl_test.py mbconfig_test.py mbformat_test.py \
+	mbinfo_test.py mbnavlist_test.py
 
 # if HAVE_PYTHON
 check_SCRIPTS = mb7k2jstar_test.py mb7k2ss_test.py \
 	mb7kpreprocess_test.py mbabsorption_test.py \
-	mbareaclean_test.py mbconfig_test.py mbformat_test.py \
-	mbinfo_test.py mbnavlist_test.py
+	mbareaclean_test.py mbauvloglist_test.py mbauvnavusbl_test.py \
+	mbconfig_test.py mbformat_test.py mbinfo_test.py \
+	mbnavlist_test.py
 all: all-am
 
 .SUFFIXES:
