@@ -7,7 +7,6 @@
 """Tests for mb7k2ss command line app."""
 
 import os
-import re
 import subprocess
 import unittest
 
