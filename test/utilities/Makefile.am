@@ -11,8 +11,8 @@ check_SCRIPTS += mb7k2jstar_test.py
 TESTS += mb7k2ss_test.py
 check_SCRIPTS += mb7k2ss_test.py
 
-# TESTS += mb7kpreprocess_test.py
-# check_SCRIPTS += mb7kpreprocess_test.py
+TESTS += mb7kpreprocess_test.py
+check_SCRIPTS += mb7kpreprocess_test.py
 
 TESTS += mbabsorption_test.py
 check_SCRIPTS += mbabsorption_test.py
