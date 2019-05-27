@@ -499,21 +499,6 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 TEST_EXTENSIONS = .py
 
-# TESTS += mbbackangle_test.py
-# check_SCRIPTS += mbbackangle_test.py
-
-# TESTS += mbclean_test.py
-# check_SCRIPTS += mbclean_test.py
-
-# TESTS += mbcopy_test.py
-# check_SCRIPTS += mbcopy_test.py
-
-# TESTS += mbctdlist_test.py
-# check_SCRIPTS += mbctdlist_test.py
-
-# TESTS += mbdatalist_test.py
-# check_SCRIPTS += mbdatalist_test.py
-
 # TESTS += mbdefaults_test.py
 # check_SCRIPTS += mbdefaults_test.py
 
@@ -569,15 +554,18 @@ TEST_EXTENSIONS = .py
 # check_SCRIPTS += mbmosaic_test.py
 TESTS = mb7k2jstar_test.py mb7k2ss_test.py mb7kpreprocess_test.py \
 	mbabsorption_test.py mbareaclean_test.py mbauvloglist_test.py \
-	mbauvnavusbl_test.py mbconfig_test.py mbformat_test.py \
-	mbinfo_test.py mbnavlist_test.py
+	mbauvnavusbl_test.py mbbackangle_test.py mbclean_test.py \
+	mbconfig_test.py mbcopy_test.py mbctdlist_test.py \
+	mbdatalist_test.py mbformat_test.py mbinfo_test.py \
+	mbnavlist_test.py
 
 # if HAVE_PYTHON
 check_SCRIPTS = mb7k2jstar_test.py mb7k2ss_test.py \
 	mb7kpreprocess_test.py mbabsorption_test.py \
 	mbareaclean_test.py mbauvloglist_test.py mbauvnavusbl_test.py \
-	mbconfig_test.py mbformat_test.py mbinfo_test.py \
-	mbnavlist_test.py
+	mbbackangle_test.py mbclean_test.py mbconfig_test.py \
+	mbcopy_test.py mbctdlist_test.py mbdatalist_test.py \
+	mbformat_test.py mbinfo_test.py mbnavlist_test.py
 all: all-am
 
 .SUFFIXES:

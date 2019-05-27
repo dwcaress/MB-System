@@ -114,12 +114,13 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
 
 int main(int argc, char **argv) {
 	char program_name[] = "mbclean";
-	char help_message[] = "Mbclean  identifies  and  flags  artifacts in swath sonar bathymetry data.\n"
-                            "Several algorithms are available for identifying  artifacts;  \n"
-                            "multiple  algorithms  can  be applied in a single pass.\n";
-	char usage_message[] = "mbclean [-Amax -Blow/high -Cslope/unit -Dmin/max \n"
-	                       "\t-Fformat -Gfraction_low/fraction_high -Iinfile -Krange_min \n"
-	                       "\t-Llonflip -Mmode Ntolerance -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate \n"
+	char help_message[] =
+            "Mbclean identifies and flags artifacts in swath sonar bathymetry data.\n"
+            "Several algorithms are available for identifying artifacts;\n"
+            "multiple algorithms can be applied in a single pass.\n";
+	char usage_message[] = "mbclean [-Amax -Blow/high -Cslope/unit -Dmin/max\n"
+	                       "\t-Fformat -Gfraction_low/fraction_high -Iinfile -Krange_min\n"
+	                       "\t-Llonflip -Mmode Ntolerance -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate\n"
 	                       "\t-Sspike_slope/mode/format -Ttolerance -Wwest/east/south/north \n"
 	                       "\t-Xbeamsleft/beamsright -Ydistanceleft/distanceright[/mode] -Z\n\t-V -H]\n\n";
 	extern char *optarg;

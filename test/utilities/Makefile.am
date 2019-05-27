@@ -26,23 +26,23 @@ check_SCRIPTS += mbauvloglist_test.py
 TESTS += mbauvnavusbl_test.py
 check_SCRIPTS += mbauvnavusbl_test.py
 
-# TESTS += mbbackangle_test.py
-# check_SCRIPTS += mbbackangle_test.py
+TESTS += mbbackangle_test.py
+check_SCRIPTS += mbbackangle_test.py
 
-# TESTS += mbclean_test.py
-# check_SCRIPTS += mbclean_test.py
+TESTS += mbclean_test.py
+check_SCRIPTS += mbclean_test.py
 
 TESTS += mbconfig_test.py
 check_SCRIPTS += mbconfig_test.py
 
-# TESTS += mbcopy_test.py
-# check_SCRIPTS += mbcopy_test.py
+TESTS += mbcopy_test.py
+check_SCRIPTS += mbcopy_test.py
 
-# TESTS += mbctdlist_test.py
-# check_SCRIPTS += mbctdlist_test.py
+TESTS += mbctdlist_test.py
+check_SCRIPTS += mbctdlist_test.py
 
-# TESTS += mbdatalist_test.py
-# check_SCRIPTS += mbdatalist_test.py
+TESTS += mbdatalist_test.py
+check_SCRIPTS += mbdatalist_test.py
 
 # TESTS += mbdefaults_test.py
 # check_SCRIPTS += mbdefaults_test.py
