@@ -129,9 +129,8 @@ check_SCRIPTS += mbroutetime_test.py
 TESTS += mbrphsbias_test.py
 check_SCRIPTS += mbrphsbias_test.py
 
-# TODO(schwehr): Why does this fail on travis-ci?
-# TESTS += mbsegygrid_test.py
-# check_SCRIPTS += mbsegygrid_test.py
+TESTS += mbsegygrid_test.py
+check_SCRIPTS += mbsegygrid_test.py
 
 TESTS += mbsegyinfo_test.py
 check_SCRIPTS += mbsegyinfo_test.py

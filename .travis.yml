@@ -15,3 +15,6 @@ install:
 
 script:
   - docker exec -e CC=$CC -e CXX=$CXX -t $CONTAINER bash travis/script.sh
+
+after_failure:
+  - if [ -e test/utilities/test-suite.log ]; then cat test/utilities/test-suite.log; fi
