@@ -67,10 +67,10 @@ int main(int argc, char **argv) {
 	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
+	char *message = NULL;
 
 	/* MBIO read control parameters */
-	char file[MB_PATH_MAXLINE];
+	char file[MB_PATH_MAXLINE] = "";
 	int pings;
 	int decimate;
 	int lonflip;
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 	float *trace;
 
 	/* output format list controls */
-	char list[MAX_OPTIONS];
+	char list[MAX_OPTIONS] = "";
 	int n_list;
 	int nread;
 	int invert_next_value = MB_NO;
@@ -96,8 +96,8 @@ int main(int argc, char **argv) {
 	int first = MB_YES;
 	int ascii = MB_YES;
 	int segment = MB_NO;
-	char segment_tag[MB_PATH_MAXLINE];
-	char delimiter[MB_PATH_MAXLINE];
+	char segment_tag[MB_PATH_MAXLINE] = "";
+	char delimiter[MB_PATH_MAXLINE] = "";
 
 	/* additional time variables */
 	int first_m = MB_YES;
@@ -696,7 +696,7 @@ int main(int argc, char **argv) {
 int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error) {
 	char *function_name = "printsimplevalue";
 	int status = MB_SUCCESS;
-	char format[24];
+	char format[24] = "";
 
 	/* print input debug statements */
 	if (verbose >= 2) {

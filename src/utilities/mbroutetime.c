@@ -64,8 +64,8 @@ int main(int argc, char **argv) {
 
 	/* MBIO read control parameters */
 	int read_datalist = MB_NO;
-	char read_file[MB_PATH_MAXLINE];
-	char output_file[MB_PATH_MAXLINE];
+	char read_file[MB_PATH_MAXLINE] = "";
+	char output_file[MB_PATH_MAXLINE] = "";
 	int output_file_set = MB_NO;
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -80,8 +80,8 @@ int main(int argc, char **argv) {
 	double etime_d;
 	double speedmin;
 	double timegap;
-	char file[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
+	char file[MB_PATH_MAXLINE] = "";
+	char dfile[MB_PATH_MAXLINE] = "";
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
@@ -107,10 +107,10 @@ int main(int argc, char **argv) {
 	double *ss = NULL;
 	double *ssacrosstrack = NULL;
 	double *ssalongtrack = NULL;
-	char comment[MB_COMMENT_MAXLINE];
+	char comment[MB_COMMENT_MAXLINE] = "";
 
 	/* route and auto-line data */
-	char route_file[MB_PATH_MAXLINE];
+	char route_file[MB_PATH_MAXLINE] = "";
 	int rawroutefile = MB_NO;
 	int nroutepoint = 0;
 	int nroutepointfound = 0;

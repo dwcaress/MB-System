@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 	double timegap;
 
 	/* segy data */
-	char segyfile[MB_PATH_MAXLINE];
+	char segyfile[MB_PATH_MAXLINE] = "";
 	void *mbsegyioptr;
 	struct mb_segyasciiheader_struct asciiheader;
 	struct mb_segyfileheader_struct fileheader;
@@ -111,8 +111,8 @@ int main(int argc, char **argv) {
 	float *filtertrace = NULL;
 
 	/* grid controls */
-	char fileroot[MB_PATH_MAXLINE];
-	char gridfile[MB_PATH_MAXLINE];
+	char fileroot[MB_PATH_MAXLINE] = "";
+	char gridfile[MB_PATH_MAXLINE] = "";
 	int decimatex = 1;
 	int decimatey = 1;
 	int plotmode = MBSEGYGRID_PLOTBYTRACENUMBER;
@@ -156,12 +156,12 @@ int main(int argc, char **argv) {
 	double dy;
 	double gridmintot = 0.0;
 	double gridmaxtot = 0.0;
-	char projection[MB_PATH_MAXLINE];
-	char xlabel[MB_PATH_MAXLINE];
-	char ylabel[MB_PATH_MAXLINE];
-	char zlabel[MB_PATH_MAXLINE];
-	char title[MB_PATH_MAXLINE];
-	char plot_cmd[MB_PATH_MAXLINE];
+	char projection[MB_PATH_MAXLINE] = "";
+	char xlabel[MB_PATH_MAXLINE] = "";
+	char ylabel[MB_PATH_MAXLINE] = "";
+	char zlabel[MB_PATH_MAXLINE] = "";
+	char title[MB_PATH_MAXLINE] = "";
+	char plot_cmd[MB_PATH_MAXLINE] = "";
 	int scale2distance = MB_NO;
 	double shotscale = 1.0;
 	double timescale = 1.0;
@@ -970,9 +970,9 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
                     int *error) {
 	char *function_name = "get_segy_limits";
 	int status = MB_SUCCESS;
-	char sinffile[MB_PATH_MAXLINE];
-	char command[MB_PATH_MAXLINE];
-	char line[MB_PATH_MAXLINE];
+	char sinffile[MB_PATH_MAXLINE] = "";
+	char command[MB_PATH_MAXLINE] = "";
+	char line[MB_PATH_MAXLINE] = "";
 	FILE *sfp;
 	int datmodtime = 0;
 	int sinfmodtime = 0;
