@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 
 	/* MBIO read control parameters */
 	int read_datalist = MB_NO;
-	char read_file[MB_PATH_MAXLINE];
+	char read_file[MB_PATH_MAXLINE] = "";
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
@@ -110,11 +110,11 @@ int main(int argc, char **argv) {
 	double etime_d;
 	double speedmin;
 	double timegap;
-	char ifile[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	char ofile[MB_PATH_MAXLINE];
+	char ifile[MB_PATH_MAXLINE] = "";
+	char dfile[MB_PATH_MAXLINE] = "";
+	char ofile[MB_PATH_MAXLINE] = "";
 	int ofile_set = MB_NO;
-	char odir[MB_PATH_MAXLINE];
+	char odir[MB_PATH_MAXLINE] = "";
 	int odir_set = MB_NO;
 	int beams_bath;
 	int beams_amp;
@@ -245,7 +245,7 @@ int main(int argc, char **argv) {
 	int nrec_0xE5_bathymetry_mbari59_tot = 0;
 
 	/* merge sonardepth from separate parosci pressure sensor data file */
-	char sonardepthfile[MB_PATH_MAXLINE];
+	char sonardepthfile[MB_PATH_MAXLINE] = "";
 	int sonardepthdata = MB_NO;
 	int nsonardepth = 0;
 	double *sonardepth_time_d = NULL;
@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
 	int timelagmode = MBKONSBERGPREPROCESS_TIMELAG_OFF;
 	double timelag = 0.0;
 	double timelagconstant = 0.0;
-	char timelagfile[MB_PATH_MAXLINE];
+	char timelagfile[MB_PATH_MAXLINE] = "";
 	int ntimelag = 0;
 	double *timelag_time_d = NULL;
 	double *timelag_model = NULL;
@@ -299,10 +299,10 @@ int main(int argc, char **argv) {
 	double depthsensoroffz = 0.0;
 
 	/* output asynchronous and synchronous time series ancillary files */
-	char athfile[MB_PATH_MAXLINE];
-	char atsfile[MB_PATH_MAXLINE];
-	char atafile[MB_PATH_MAXLINE];
-	char stafile[MB_PATH_MAXLINE];
+	char athfile[MB_PATH_MAXLINE] = "";
+	char atsfile[MB_PATH_MAXLINE] = "";
+	char atafile[MB_PATH_MAXLINE] = "";
+	char stafile[MB_PATH_MAXLINE] = "";
 	FILE *athfp;
 	FILE *atsfp;
 	FILE *atafp;
@@ -318,10 +318,10 @@ int main(int argc, char **argv) {
 	FILE *tfp = NULL;
 	struct stat file_status;
 	int fstat;
-	char buffer[MB_PATH_MAXLINE];
+	char buffer[MB_PATH_MAXLINE] = "";
 	char *result;
 	int read_data;
-	char fileroot[MB_PATH_MAXLINE];
+	char fileroot[MB_PATH_MAXLINE] = "";
 	char *filenameptr;
 	int testformat;
 	int type, source;
