@@ -19,7 +19,8 @@ class MbsegygridTest(unittest.TestCase):
   def testNoArgs(self):
     cmd = [self.cmd]
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertIn('Bad trace numbers: 0 0 specified', output)
+    self.assertIn('Bad ', output)
+    self.assertIn(' specified', output)
     self.assertIn('Terminated', output)
 
   def testHelp(self):
