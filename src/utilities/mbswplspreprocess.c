@@ -164,7 +164,7 @@ static char help_message[] = "Preprocess SWATHplus SXP formatted files\n"
                              "\n"
                              "Report bugs to the MB System development team\n";
 
-static char usage_message[] = "mbswplspreprocess [-ABGHNRSV -Fformat -Jproj4command-Obasename] -Ifile";
+static char usage_message[] = "mbswplspreprocess [-ABGHNRSV -Fformat -Jproj4command -Obasename] -Ifile";
 
 static char program_name[] = "mbswplspreprocess";
 
@@ -502,7 +502,7 @@ static void error_exit(int verbose, int error, char *funcname, char *message) {
 	char *errmsg;
 
 	mb_error(verbose, error, &errmsg);
-	fprintf(stderr, "\nMBIO Error returned from function %s>:\n%s\n", funcname, errmsg);
+	fprintf(stderr, "\nMBIO Error returned from function <%s>:\n%s\n", funcname, errmsg);
 	fprintf(stderr, "\n%s\n", message);
 	fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 	exit(error);

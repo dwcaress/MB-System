@@ -7,6 +7,8 @@ if BUILD_MBTRN
   MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 endif
 
+# TODO(schwehr): What happened to mbps?
+
 bin_PROGRAMS = mbconfig \
 		mb7k2jstar \
         mb7k2ss \

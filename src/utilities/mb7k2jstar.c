@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 	/* MBIO read control parameters */
 	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
-	char output_file[MB_PATH_MAXLINE];
+	char output_file[MB_PATH_MAXLINE] = "";
 	char current_output_file[MB_PATH_MAXLINE];
 	int new_output_file = MB_YES;
 	int output_file_set = MB_NO;
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
 	double etime_d;
 	double speedmin;
 	double timegap;
-	char file[MB_PATH_MAXLINE];
+	char file[MB_PATH_MAXLINE] = "";
 	char dfile[MB_PATH_MAXLINE];
 	int beams_bath;
 	int beams_amp;

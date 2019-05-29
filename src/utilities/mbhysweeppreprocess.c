@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 
 	/* MBIO read control parameters */
 	int read_datalist = MB_NO;
-	char read_file[MB_PATH_MAXLINE];
+	char read_file[MB_PATH_MAXLINE] = "";
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
@@ -92,9 +92,9 @@ int main(int argc, char **argv) {
 	double etime_d;
 	double speedmin;
 	double timegap;
-	char ifile[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	char ofile[MB_PATH_MAXLINE];
+	char ifile[MB_PATH_MAXLINE] = "";
+	char dfile[MB_PATH_MAXLINE] = "";
+	char ofile[MB_PATH_MAXLINE] = "";
 	int ofile_set = MB_NO;
 	int beams_bath;
 	int beams_amp;
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
 	int svp_source;
 
 	/* platform definition file */
-	char platform_file[MB_PATH_MAXLINE];
+	char platform_file[MB_PATH_MAXLINE] = "";
 	int use_platform_file = MB_NO;
 	struct mb_platform_struct *platform = NULL;
 
@@ -169,11 +169,11 @@ int main(int argc, char **argv) {
 
 	/* projection */
 	int projection_set = MB_NO;
-	mb_path proj4command;
+	mb_path proj4command = "";
 	void *pjptr = NULL;
 
 	/* merge navigation data file */
-	char navfile[MB_PATH_MAXLINE];
+	char navfile[MB_PATH_MAXLINE] = "";
 	int navdata = MB_NO;
 	int navformat = MBHYSWEEPPREPROCESS_NAVFORMAT_OFG;
 	int nnav = 0;
@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
 	double *nav_altitude = NULL;
 
 	/* merge sonardepth from separate data file */
-	char sonardepthfile[MB_PATH_MAXLINE];
+	char sonardepthfile[MB_PATH_MAXLINE] = "";
 	int sonardepthdata = MB_NO;
 	int nsonardepth = 0;
 	double *sonardepth_time_d = NULL;
@@ -225,7 +225,7 @@ int main(int argc, char **argv) {
 	double timelag = 0.0;
 	double timelagm = 0.0;
 	double timelagconstant = 0.0;
-	char timelagfile[MB_PATH_MAXLINE];
+	char timelagfile[MB_PATH_MAXLINE] = "";
 	int ntimelag = 0;
 	double *timelag_time_d = NULL;
 	double *timelag_model = NULL;
@@ -272,10 +272,10 @@ int main(int argc, char **argv) {
 	FILE *tfp = NULL;
 	struct stat file_status;
 	int fstat;
-	char buffer[MB_PATH_MAXLINE];
+	char buffer[MB_PATH_MAXLINE] = "";
 	char *result;
 	int read_data;
-	char fileroot[MB_PATH_MAXLINE];
+	char fileroot[MB_PATH_MAXLINE] = "";
 	int nscan;
 	int year, month, day, hour, minute;
 	double second, yearsecond;

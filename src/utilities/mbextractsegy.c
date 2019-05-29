@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
 	char *buffer = NULL;
 
 	/* route and auto-line data */
-	mb_path timelist_file;
+	mb_path timelist_file = "";
 	int timelist_file_set = MB_NO;
 	int ntimepoint = 0;
 	int ntimepointalloc = 0;
