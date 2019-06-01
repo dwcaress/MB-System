@@ -18,6 +18,9 @@
  * Date:	October 13, 2009
  */
 
+#ifndef MB_XGRAPHICS_H_
+#define MB_XGRAPHICS_H_
+
 /* xgraphics defines */
 #define XG_SOLIDLINE 0
 #define XG_DASHLINE 1
@@ -50,3 +53,5 @@ void xg_filltriangle(void *xgid, int x1, int y1, int x2, int y2, int x3, int y3,
 void xg_drawstring(void *xgid, int x, int y, char *string, unsigned int pixel, int style);
 void xg_justify(void *xgid, char *string, int *width, int *ascent, int *descent);
 void xg_setclip(void *xgid, int x, int y, int width, int height);
+
+#endif  /* MB_XGRAPHICS_H_ */
