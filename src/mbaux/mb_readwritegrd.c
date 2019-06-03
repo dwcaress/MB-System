@@ -20,21 +20,17 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
-#include <unistd.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>
 
-/* GMT include files */
 #include "gmt.h"
-
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_define.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_status.h"
 
 /* Projection defines */
 #define ModelTypeProjected 1

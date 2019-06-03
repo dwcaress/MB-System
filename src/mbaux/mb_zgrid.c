@@ -107,16 +107,14 @@
  *
  *--------------------------------------------------------------------*/
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 
-/* MBIO include files */
+#include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_status.h"
-#include "mb_aux.h"
 
 #define ITERMIN 50
 #define ITERMAX 1000

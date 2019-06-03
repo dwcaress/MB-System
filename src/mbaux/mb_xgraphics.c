@@ -26,17 +26,13 @@
  */
 /*--------------------------------------------------------------------*/
 
-/* standard includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-/* mbaux includes */
 #include "mb_xgraphics.h"
-
-/* id variable */
 
 /**********************************************************************
  *	XG_INIT
