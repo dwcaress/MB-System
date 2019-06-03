@@ -495,7 +495,6 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 	double vx, vy, vz;
 	double lon, lat, topo;
 	int nset, first, last;
-	int i;
 
 	/* get pointer to topogrid structure */
 	topogrid = (struct mb_topogrid_struct *)topogrid_ptr;
@@ -537,7 +536,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 	dangle = (angle_max - angle_min) / (nangle - 1);
 	alpha = pitch;
 	nset = 0;
-	for (i = 0; i < nangle; i++) {
+	for (int i = 0; i < nangle; i++) {
 		/* get angles in takeoff coordinates */
 		table_angle[i] = angle_min + dangle * i;
 		beta = 90.0 - table_angle[i];
@@ -579,7 +578,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 		if (nset > 0) {
 			first = nangle;
 			last = -1;
-			for (i = 0; i < nangle; i++) {
+			for (int i = 0; i < nangle; i++) {
 				if (table_range[i] > 0.0) {
 					first = MIN(i, first);
 					last = MAX(i, last);
@@ -587,7 +586,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 			}
 
 			/* apply flat bottom calculation to unset entries */
-			for (i = 0; i < nangle; i++) {
+			for (int i = 0; i < nangle; i++) {
 				if (table_range[i] <= 0.0) {
 					/* get angles in takeoff coordinates */
 					table_angle[i] = angle_min + dangle * i;
@@ -628,7 +627,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       Lookup tables:\n");
-		for (i = 0; i < nangle; i++)
+		for (int i = 0; i < nangle; i++)
 			fprintf(stderr, "dbg2         %d %f %f %f %f %f\n", i, table_angle[i], table_xtrack[i], table_ltrack[i],
 			        table_altitude[i], table_range[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
