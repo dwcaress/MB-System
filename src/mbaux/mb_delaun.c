@@ -127,7 +127,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	double denom, s;
 	double xproduct;
 	int notfound;
-	int i, j, k;
+	int k;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -156,7 +156,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		fprintf(stderr, "dbg2       error:            %d\n", *error);
 		if (verbose >= 5) {
 			fprintf(stderr, "dbg5       Input data:\n");
-			for (i = 0; i < npts; i++)
+			for (int i = 0; i < npts; i++)
 				fprintf(stderr, "dbg5       %d %f %f\n", i, p1[i], p2[i]);
 		}
 	}
@@ -171,7 +171,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 
 	/* initialize the triangle stack */
 	n1 = 2 * npts + 3;
-	for (i = 0; i < n1; i++)
+	for (int i = 0; i < n1; i++)
 		istack[i] = i;
 
 	/* determine the extremes of the data */
@@ -179,7 +179,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	xmax = p1[0];
 	ymin = p2[0];
 	ymax = p2[0];
-	for (i = 0; i < npts; i++) {
+	for (int i = 0; i < npts; i++) {
 		xmin = MIN(xmin, p1[i]);
 		xmax = MAX(xmax, p1[i]);
 		ymin = MIN(ymin, p2[i]);
@@ -200,7 +200,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	/* put vertex coordinates in the end of the p array */
 	rad = sqrt(v3[0]);
 	maxn = npts + 3;
-	for (i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) {
 		p1[npts + 2 - i] = v1[0] + rad * cos(2.0944 * (i + 1));
 		p2[npts + 2 - i] = v2[0] + rad * sin(2.0944 * (i + 1));
 	}
@@ -246,7 +246,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 				/*fprintf(stderr,"delete triangle jt:%d\n",jt);*/
 
 				/* add edges to kv but delete if already present */
-				for (i = 0; i < 3; i++) {
+				for (int i = 0; i < 3; i++) {
 					/* cycle through the edges of the triangle */
 					l1 = itemp[0][i];
 					l2 = itemp[1][i];
@@ -267,7 +267,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 					/* Check if the side is already stored in kv. If it
 					    is then Side common to more than one of the
 					    current triangles. So remove it from list. */
-					j = 0;
+					int j = 0;
 					while ((j < km) && addside) {
 						if (ivs1[jt] == kv1[j] && ivs2[jt] == kv2[j]) {
 							addside = MB_NO;
@@ -298,7 +298,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		} /* end: for (jt=0;jt<isp;jt++) */
 
 		/* form new 3-tuples */
-		for (i = 0; i < km; i++) {
+		for (int i = 0; i < km; i++) {
 			/* pop the triangle index from the stack */
 			kt = istack[id];
 			id++;
@@ -346,9 +346,9 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 
 	/* remove triangles using added points and triangles made
 	    up of three flagged edge points */
-	for (i = *ntri - 1; i > -1; i--) {
+	for (int i = *ntri - 1; i > -1; i--) {
 		if (iv1[i] >= npts || iv2[i] >= npts || iv3[i] >= npts) {
-			for (j = i; j < isp - 1; j++) {
+			for (int j = i; j < isp - 1; j++) {
 				iv1[j] = iv1[j + 1];
 				iv2[j] = iv2[j + 1];
 				iv3[j] = iv3[j + 1];
@@ -356,7 +356,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 			isp--;
 		}
 		else if (ed[iv1[i]] != 0 && ed[iv2[i]] != 0 && ed[iv3[i]] != 0) {
-			for (j = i; j < isp - 1; j++) {
+			for (int j = i; j < isp - 1; j++) {
 				iv1[j] = iv1[j + 1];
 				iv2[j] = iv2[j + 1];
 				iv3[j] = iv3[j + 1];
@@ -367,17 +367,17 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	*ntri = isp;
 
 	/* make sure all triangles are defined clockwise */
-	for (i = 0; i < *ntri; i++) {
+	for (int i = 0; i < *ntri; i++) {
 		xproduct = -(p1[iv2[i]] - p1[iv1[i]]) * (p2[iv3[i]] - p2[iv2[i]]) + (p1[iv3[i]] - p1[iv2[i]]) * (p2[iv2[i]] - p2[iv1[i]]);
 		if (xproduct < 0.0) {
-			j = iv2[i];
+			int j = iv2[i];
 			iv2[i] = iv3[i];
 			iv3[i] = j;
 		}
 	}
 
 	/* now get connectivity */
-	for (i = 0; i < *ntri; i++) {
+	for (int i = 0; i < *ntri; i++) {
 		ct1[i] = -1;
 		ct2[i] = -1;
 		ct3[i] = -1;
@@ -385,11 +385,11 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		cs2[i] = -1;
 		cs3[i] = -1;
 	}
-	for (i = 0; i < *ntri; i++) {
+	for (int i = 0; i < *ntri; i++) {
 		/* check side 1 of triangle i */
 		if (ct1[i] == -1) {
 			notfound = MB_YES;
-			for (j = 0; notfound && j < *ntri; j++) {
+			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv1[i] == iv2[j] && iv2[i] == iv1[j]) {
 					ct1[i] = j;
 					cs1[i] = 0;
@@ -416,7 +416,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		/* check side 2 of triangle i */
 		if (ct2[i] == -1) {
 			notfound = MB_YES;
-			for (j = 0; notfound && j < *ntri; j++) {
+			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv2[i] == iv2[j] && iv3[i] == iv1[j]) {
 					ct2[i] = j;
 					cs2[i] = 0;
@@ -443,7 +443,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		/* check side 3 of triangle i */
 		if (ct3[i] == -1) {
 			notfound = MB_YES;
-			for (j = 0; notfound && j < *ntri; j++) {
+			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv3[i] == iv2[j] && iv1[i] == iv1[j]) {
 					ct3[i] = j;
 					cs3[i] = 0;
@@ -476,10 +476,10 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		fprintf(stderr, "dbg2       ntri:             %d\n", *ntri);
 		if (verbose >= 5) {
 			fprintf(stderr, "dbg5       Output vertices:\n");
-			for (i = 0; i < *ntri; i++)
+			for (int i = 0; i < *ntri; i++)
 				fprintf(stderr, "dbg5       %3d  %3d %3d %3d\n", i, iv1[i], iv2[i], iv3[i]);
 			fprintf(stderr, "dbg5       Output connectivity:\n");
-			for (i = 0; i < *ntri; i++)
+			for (int i = 0; i < *ntri; i++)
 				fprintf(stderr, "dbg5       %3d   %3d %3d   %3d %3d   %3d %3d\n", i, ct1[i], cs1[i], ct2[i], cs2[i], ct3[i],
 				        cs3[i]);
 		}

@@ -48,7 +48,6 @@ void mb_track(int verbose, struct swath *data, int *error) {
 	double dx, dy;
 	double angle;
 	char label[25];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -61,7 +60,7 @@ void mb_track(int verbose, struct swath *data, int *error) {
 		fprintf(stderr, "dbg2       date interval:        %f\n", data->date_annot_int);
 		fprintf(stderr, "dbg2       time tick length:     %f\n", data->time_tick_len);
 		fprintf(stderr, "dbg2       data->npings:         %d\n", data->npings);
-		for (i = 0; i < data->npings; i++) {
+		for (int i = 0; i < data->npings; i++) {
 			fprintf(stderr, "dbg2       i:%d time:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d position: %.9f %.9f\n", i,
 			        data->pings[i].time_i[0], data->pings[i].time_i[1], data->pings[i].time_i[2], data->pings[i].time_i[3],
 			        data->pings[i].time_i[4], data->pings[i].time_i[5], data->pings[i].time_i[6], data->pings[i].navlon,
@@ -74,7 +73,7 @@ void mb_track(int verbose, struct swath *data, int *error) {
 	data->contour_newpen(0);
 
 	/* draw the time ticks */
-	for (i = 1; i < data->npings; i++) {
+	for (int i = 1; i < data->npings; i++) {
 		/* get time of day */
 		hour0 = data->pings[i - 1].time_i[3] + data->pings[i - 1].time_i[4] / 60.0 + data->pings[i - 1].time_i[5] / 3600.0;
 		hour1 = data->pings[i].time_i[3] + data->pings[i].time_i[4] / 60.0 + data->pings[i].time_i[5] / 3600.0;
@@ -163,7 +162,7 @@ void mb_track(int verbose, struct swath *data, int *error) {
 	}
 
 	/* draw the shiptrack */
-	for (i = 0; i < data->npings; i++) {
+	for (int i = 0; i < data->npings; i++) {
 		if (i == 0)
 			data->contour_plot(data->pings[i].navlon, data->pings[i].navlat, IMOVE);
 		else if (i < data->npings - 1)
@@ -198,7 +197,6 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 	double angle;
 	char label[25];
 	double justify[4];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -216,7 +214,7 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 	data->contour_newpen(0);
 
 	/* draw the pingnumber ticks and annotations */
-	for (i = 0; i < data->npings; i++) {
+	for (int i = 0; i < data->npings; i++) {
 		/* check for pingnumber tick */
 		pingnumber_tick = MB_NO;
 		if (data->pings[i].pingnumber % data->pingnumber_tick_int == 0)

@@ -134,7 +134,7 @@ int mb_zgrid2(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float
 	double dx_d, dy_d, sfactor, sdx_d, sdy_d;
 	double sx0, sx1, sy0, sy1;
 	int snx, sny, snrng;
-	int i, j, k, si, sj, sk00, sk01, sk10, sk11;
+	int j, k, si, sj, sk00, sk01, sk10, sk11;
 
 	/* if nx and ny < ZGRID_DIMENSION_MAX just call zgrid() */
 	if (*nx < ZGRID_DIMENSION_MAX && *ny < ZGRID_DIMENSION_MAX) {
@@ -168,7 +168,7 @@ int mb_zgrid2(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float
 
 		/* now fill in the full resolution grid by bilinear interpolation */
 		fprintf(stderr, "Smooth surface mapped onto full resolution grid using bilinear interpolation\n");
-		for (i = 0; i < *nx; i++)
+		for (int i = 0; i < *nx; i++)
 			for (j = 0; j < *ny; j++) {
 				k = i + j * (*nx);
 

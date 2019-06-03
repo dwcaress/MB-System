@@ -174,7 +174,7 @@ int gcd_euclid(int a, int b);
 int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, double xxmin, double xxmax, double yymin,
                double yymax, double xxinc, double yyinc, double ttension, float *sgrid) {
 
-	int i, serror = FALSE;
+	int serror = FALSE;
 	char low[100], high[100];
 	char *function_name = "mb_surface";
 
@@ -191,7 +191,7 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 		fprintf(stderr, "dbg2       xxinc:      %f\n", xxinc);
 		fprintf(stderr, "dbg2       ttension:   %f\n", ttension);
 		fprintf(stderr, "dbg2       ndat:       %d\n", ndat);
-		for (i = 0; i < ndat; i++)
+		for (int i = 0; i < ndat; i++)
 			fprintf(stderr, "dbg2       data:       %f %f %f\n", xdat[i], ydat[i], zdat[i]);
 	}
 
@@ -321,7 +321,7 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", local_error);
-		for (i = 0; i < m_columns * m_rows; i++)
+		for (int i = 0; i < m_columns * m_rows; i++)
 			fprintf(stderr, "dbg2       grid:       %d %f\n", i, sgrid[i]);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
@@ -332,11 +332,9 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 }
 
 void set_coefficients() {
-	double e_4, loose, a0;
-
-	loose = 1.0 - interior_tension;
+	const double loose = 1.0 - interior_tension;
 	e_2 = epsilon * epsilon;
-	e_4 = e_2 * e_2;
+	const double e_4 = e_2 * e_2;
 	eps_p2 = e_2;
 	eps_m2 = 1.0 / e_2;
 	one_plus_e2 = 1.0 + e_2;
@@ -347,7 +345,7 @@ void set_coefficients() {
 	e_m2 = 1.0 / e_2;
 	y_edge_const = 4 * (1.0 + e_m2) - 2 * (interior_tension * e_m2 / loose);
 
-	a0 = 1.0 / ((6 * e_4 * loose + 10 * e_2 * loose + 8 * loose - 2 * one_plus_e2) + 4 * interior_tension * one_plus_e2);
+	const double a0 = 1.0 / ((6 * e_4 * loose + 10 * e_2 * loose + 8 * loose - 2 * one_plus_e2) + 4 * interior_tension * one_plus_e2);
 	a0_const_1 = 2 * loose * (1.0 + e_4);
 	a0_const_2 = 2.0 - interior_tension + 2 * loose * e_2;
 
@@ -373,7 +371,7 @@ void set_coefficients() {
 
 void set_offset() {
 	int add_w[5], add_e[5], add_s[5], add_n[5], add_w2[5], add_e2[5], add_s2[5], add_n2[5];
-	int i, j, kase;
+	int kase;
 
 	add_w[0] = -m_rows;
 	add_w[1] = add_w[2] = add_w[3] = add_w[4] = -grid_east;
@@ -397,8 +395,8 @@ void set_offset() {
 	add_s2[1] = -grid - 1;
 	add_s2[2] = add_s2[3] = add_s2[4] = -2 * grid;
 
-	for (i = 0, kase = 0; i < 5; i++) {
-		for (j = 0; j < 5; j++, kase++) {
+	for (int i = 0, kase = 0; i < 5; i++) {
+		for (int j = 0; j < 5; j++, kase++) {
 			offset[kase][0] = add_n2[j];
 			offset[kase][1] = add_n[j] + add_w[i];
 			offset[kase][2] = add_n[j];
@@ -421,7 +419,7 @@ void fill_in_forecast() {
 	   after grid is divided.
 	 */
 
-	int i, j, ii, jj, index_0, index_1, index_2, index_3;
+	int ii, jj, index_0, index_1, index_2, index_3;
 	int index_new;
 	double delta_x, delta_y, a0, a1, a2, a3;
 	double old_size;
@@ -430,9 +428,9 @@ void fill_in_forecast() {
 
 	/* first do from southwest corner */
 
-	for (i = 0; i < n_columns - 1; i += old_grid) {
+	for (int i = 0; i < n_columns - 1; i += old_grid) {
 
-		for (j = 0; j < n_rows - 1; j += old_grid) {
+		for (int j = 0; j < n_rows - 1; j += old_grid) {
 
 			/* get indices of bilinear square */
 			index_0 = ij_sw_corner + i * m_rows + j;
@@ -465,7 +463,7 @@ void fill_in_forecast() {
 
 	/* now do linear guess along east edge */
 
-	for (j = 0; j < (n_rows - 1); j += old_grid) {
+	for (int j = 0; j < (n_rows - 1); j += old_grid) {
 		index_0 = ij_se_corner + j;
 		index_3 = index_0 + old_grid;
 		for (jj = j; jj < j + old_grid; jj += grid) {
@@ -477,7 +475,7 @@ void fill_in_forecast() {
 		iu[index_0] = 5;
 	}
 	/* now do linear guess along north edge */
-	for (i = 0; i < (n_columns - 1); i += old_grid) {
+	for (int i = 0; i < (n_columns - 1); i += old_grid) {
 		index_0 = ij_nw_corner + i * m_rows;
 		index_1 = index_0 + old_grid * m_rows;
 		for (ii = i; ii < i + old_grid; ii += grid) {
@@ -553,19 +551,19 @@ void set_index() {
 }
 
 void find_nearest_point() {
-	int i, j, k, last_index, block_i, block_j, iu_index, briggs_index;
+	int last_index, block_i, block_j, iu_index;
 	double x0, y0, dx, dy, xys, xy1, btemp;
 	double b0, b1, b2, b3, b4, b5;
 
 	last_index = -1;
 	smalldistance = 0.05 * ((grid_xinc < grid_yinc) ? grid_xinc : grid_yinc);
 
-	for (i = 0; i < n_columns; i += grid) /* Reset grid info */
-		for (j = 0; j < n_rows; j += grid)
+	for (int i = 0; i < n_columns; i += grid) /* Reset grid info */
+		for (int j = 0; j < n_rows; j += grid)
 			iu[ij_sw_corner + i * m_rows + j] = 0;
 
-	briggs_index = 0;
-	for (k = 0; k < npoints; k++) { /* Find constraining value  */
+	int briggs_index = 0;
+	for (int k = 0; k < npoints; k++) { /* Find constraining value  */
 		if (data[k].index != last_index) {
 			block_i = data[k].index / block_n_rows;
 			block_j = data[k].index % block_n_rows;
@@ -629,16 +627,16 @@ void initialize_grid() { /*
 	                      * For the initial gridsize, compute weighted averages of data inside the search radius
 	                      * and assign the values to u[i,j] where i,j are multiples of gridsize.
 	                      */
-	int irad, jrad, i, j, imin, imax, jmin, jmax, index_1, index_2, k, ki, kj, k_index;
+	int irad, jrad, imin, imax, jmin, jmax, index_1, index_2, k, ki, kj, k_index;
 	double r, rfact, sum_w, sum_zw, weight, x0, y0;
 
 	irad = ceil(radius / grid_xinc);
 	jrad = ceil(radius / grid_yinc);
 	rfact = -4.5 / (radius * radius);
 
-	for (i = 0; i < block_n_columns; i++) {
+	for (int i = 0; i < block_n_columns; i++) {
 		x0 = xmin + i * grid_xinc;
-		for (j = 0; j < block_n_rows; j++) {
+		for (int j = 0; j < block_n_rows; j++) {
 			y0 = ymin + j * grid_yinc;
 			imin = i - irad;
 			if (imin < 0)
@@ -791,18 +789,16 @@ void read_data(int ndat, float *xdat, float *ydat, float *zdat) {
 
 /* this function rewritten from write_output() by D.W. Caress 5/3/94 */
 void get_output(float *sgrid) {
-	int index, i, j;
-
-	index = ij_sw_corner;
-	for (i = 0; i < n_columns; i++, index += m_rows)
-		for (j = 0; j < n_rows; j++) {
+        int index = ij_sw_corner;
+	for (int i = 0; i < n_columns; i++, index += m_rows)
+		for (int j = 0; j < n_rows; j++) {
 			sgrid[j * n_columns + i] = u[index + n_rows - j - 1];
 		}
 }
 
 int iterate(int mode) {
 
-	int i, j, k, ij, kase, briggs_index, ij_v2;
+	int k, ij, kase, briggs_index, ij_v2;
 	int x_case, y_case, x_w_case, x_e_case, y_s_case, y_n_case;
 	int iteration_count = 0;
 
@@ -826,7 +822,7 @@ int iterate(int mode) {
 		/* First set d2[]/dn2 = 0 along edges:  */
 		/* New experiment : (1-T)d2[]/dn2 + Td[]/dn = 0  */
 
-		for (i = 0; i < n_columns; i += grid) {
+		for (int i = 0; i < n_columns; i += grid) {
 			/* set d2[]/dy2 = 0 on south side:  */
 			ij = ij_sw_corner + i * m_rows;
 			/* u[ij - 1] = 2 * u[ij] - u[ij + grid];  */
@@ -837,7 +833,7 @@ int iterate(int mode) {
 			u[ij + 1] = y_0_const * u[ij] + y_1_const * u[ij - grid];
 		}
 
-		for (j = 0; j < n_rows; j += grid) {
+		for (int j = 0; j < n_rows; j += grid) {
 			/* set d2[]/dx2 = 0 on west side:  */
 			ij = ij_sw_corner + j;
 			/* u[ij - m_rows] = 2 * u[ij] - u[ij + grid_east];  */
@@ -867,7 +863,7 @@ int iterate(int mode) {
 
 		x_w_case = 0;
 		x_e_case = block_n_columns - 1;
-		for (i = 0; i < n_columns; i += grid, x_w_case++, x_e_case--) {
+		for (int i = 0; i < n_columns; i += grid, x_w_case++, x_e_case--) {
 
 			if (x_w_case < 2)
 				x_case = x_w_case;
@@ -896,7 +892,7 @@ int iterate(int mode) {
 
 		y_s_case = 0;
 		y_n_case = block_n_rows - 1;
-		for (j = 0; j < n_rows; j += grid, y_s_case++, y_n_case--) {
+		for (int j = 0; j < n_rows; j += grid, y_s_case++, y_n_case--) {
 
 			if (y_s_case < 2)
 				y_case = y_s_case;
@@ -927,7 +923,7 @@ int iterate(int mode) {
 
 		x_w_case = 0;
 		x_e_case = block_n_columns - 1;
-		for (i = 0; i < n_columns; i += grid, x_w_case++, x_e_case--) {
+		for (int i = 0; i < n_columns; i += grid, x_w_case++, x_e_case--) {
 
 			if (x_w_case < 2)
 				x_case = x_w_case;
@@ -941,7 +937,7 @@ int iterate(int mode) {
 
 			ij = ij_sw_corner + i * m_rows;
 
-			for (j = 0; j < n_rows; j += grid, ij += grid, y_s_case++, y_n_case--) {
+			for (int j = 0; j < n_rows; j += grid, ij += grid, y_s_case++, y_n_case--) {
 
 				if (iu[ij] == 5)
 					continue; /* Point is fixed  */
@@ -1083,7 +1079,7 @@ void check_errors() {
 	ij = ij_ne_corner;
 	u[ij + m_rows + 1] = u[ij - m_rows + 1] + u[ij + m_rows - 1] - u[ij - m_rows - 1];
 
-	for (i = 0; i < n_columns; i++) {
+	for (int i = 0; i < n_columns; i++) {
 
 		ij = ij_sw_corner + i * m_rows;
 		u[ij + move_over[11]] =
@@ -1178,13 +1174,12 @@ void check_errors() {
 
 int remove_planar_trend() {
 
-	int i;
 	double a, b, c, d, xx, yy, zz;
 	double sx, sy, sz, sxx, sxy, sxz, syy, syz;
 
 	sx = sy = sz = sxx = sxy = sxz = syy = syz = 0.0;
 
-	for (i = 0; i < npoints; i++) {
+	for (int i = 0; i < npoints; i++) {
 
 		xx = (data[i].x - xmin) * r_xinc;
 		yy = (data[i].y - ymin) * r_yinc;
@@ -1215,7 +1210,7 @@ int remove_planar_trend() {
 	plane_c1 = b / d;
 	plane_c2 = c / d;
 
-	for (i = 0; i < npoints; i++) {
+	for (int i = 0; i < npoints; i++) {
 
 		xx = (data[i].x - xmin) * r_xinc;
 		yy = (data[i].y - ymin) * r_yinc;
@@ -1227,11 +1222,9 @@ int remove_planar_trend() {
 }
 
 int replace_planar_trend() {
-	int i, j, ij;
-
-	for (i = 0; i < n_columns; i++) {
-		for (j = 0; j < n_rows; j++) {
-			ij = ij_sw_corner + i * m_rows + j;
+	for (int i = 0; i < n_columns; i++) {
+		for (int j = 0; j < n_rows; j++) {
+			const int ij = ij_sw_corner + i * m_rows + j;
 			u[ij] = (u[ij] * z_scale) + (plane_c0 + plane_c1 * i + plane_c2 * j);
 		}
 	}
@@ -1285,10 +1278,9 @@ int throw_away_unusables() {
 }
 
 int rescale_z_values() {
-	int i;
 	double ssz = 0.0;
 
-	for (i = 0; i < npoints; i++) {
+	for (int i = 0; i < npoints; i++) {
 		ssz += (data[i].z * data[i].z);
 	}
 
@@ -1297,7 +1289,7 @@ int rescale_z_values() {
 	z_scale = sqrt(ssz / npoints);
 	r_z_scale = 1.0 / z_scale;
 
-	for (i = 0; i < npoints; i++) {
+	for (int i = 0; i < npoints; i++) {
 		data[i].z *= r_z_scale;
 	}
 	return (0);
