@@ -53,15 +53,14 @@
  */
 
 /*--------------------------------------------------------------------*/
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <math.h>
 
-/* mbio include files */
-#include "mb_define.h"
 #include "mb_aux.h"
+#include "mb_define.h"
 
 void lsqup(double *a, int *ia, int *nia, int nnz, int nc, int nr, double *x, double *dx, double *d, int nfix, int *ifix,
            double *fix, int ncycle, double *sigma);

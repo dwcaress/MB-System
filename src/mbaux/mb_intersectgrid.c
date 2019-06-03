@@ -23,16 +23,14 @@
  * Date:	October 20, 2012
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 #include <time.h>
 
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_define.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_status.h"
 
 
 /*--------------------------------------------------------------------*/

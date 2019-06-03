@@ -21,17 +21,14 @@
  *
  */
 
-/* standard global include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_define.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_status.h"
 
-/* global defines */
 #define IMOVE 3
 #define IDRAW 2
 #define ISTROKE -2

@@ -97,19 +97,13 @@
  *
  */
 
-/* standard global include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_define.h"
 #include "mb_aux.h"
-
-/* some defines */
-#define LARGE 1.0e10
-
+#include "mb_define.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_delaun creates a network of triangles connecting an
