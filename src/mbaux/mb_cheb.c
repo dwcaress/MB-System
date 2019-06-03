@@ -124,44 +124,44 @@ void lsqup(double *a, int *ia, int *nia, int nnz, int nc, int nr, double *x, dou
  *
  *----------------------------------------------------------------------*/
 {
-	int i, j, k, icyc;
+	int k;
 	double res;
 	double s;
 
-	for (i = 0; i < nr; i++) {
+	for (int i = 0; i < nr; i++) {
 		s = 0.0;
-		for (j = 0; j < nia[i]; j++) {
+		for (int j = 0; j < nia[i]; j++) {
 			k = nnz * i + j;
 			s += x[ia[k]] * a[k];
 		}
 	}
 
 	/* loop over all cycles */
-	for (icyc = 0; icyc < ncycle; icyc++) {
+	for (int icyc = 0; icyc < ncycle; icyc++) {
 		/* initialize dx */
-		for (j = 0; j < nc; j++)
+		for (int j = 0; j < nc; j++)
 			dx[j] = 0.0;
 
 		/* loop over each row */
-		for (i = 0; i < nr; i++) {
+		for (int i = 0; i < nr; i++) {
 			res = 0.0;
-			for (j = 0; j < nia[i]; j++) {
+			for (int j = 0; j < nia[i]; j++) {
 				k = nnz * i + j;
 				res += a[k] * x[ia[k]];
 			}
 			res = d[i] - res;
-			for (j = 0; j < nia[i]; j++) {
+			for (int j = 0; j < nia[i]; j++) {
 				k = nnz * i + j;
 				dx[ia[k]] += res * a[k];
 			}
 		}
 
 		/* update x */
-		for (j = 0; j < nc; j++)
+		for (int j = 0; j < nc; j++)
 			x[j] += dx[j] / sigma[icyc];
 
 		/* apply fixed values */
-		for (j = 0; j < nfix; j++)
+		for (int j = 0; j < nfix; j++)
 			x[ifix[j]] = fix[j];
 
 		/* output info */
@@ -202,10 +202,10 @@ void chebyu(double *sigma, int ncycle, double shi, double slo, double *work)
  *
  *----------------------------------------------------------------------*/
 {
-	int i, len, is, i0, nsort;
+	int len, is, i0, nsort;
 
 	/* set up the chebyshev weights in increasing order */
-	for (i = 0; i < ncycle; i++) {
+	for (int i = 0; i < ncycle; i++) {
 		sigma[i] = -cos((2 * (i + 1) - 1) * M_PI / 2 / ncycle);
 		sigma[i] = (sigma[i] * (shi - slo) + (shi + slo)) / 2;
 	}
@@ -223,14 +223,14 @@ void chebyu(double *sigma, int ncycle, double shi, double slo, double *work)
 }
 /*----------------------------------------------------------------------*/
 void splits(double *x, double *t, int n) {
-	int i, l, nb2, nb2m1;
+	int l, nb2, nb2m1;
 
 	l = 0;
-	for (i = 0; i < n; i += 2) {
+	for (int i = 0; i < n; i += 2) {
 		t[l] = x[i];
 		l++;
 	}
-	for (i = 1; i < n; i += 2) {
+	for (int i = 1; i < n; i += 2) {
 		t[l] = x[i];
 		l++;
 	}
@@ -238,15 +238,15 @@ void splits(double *x, double *t, int n) {
 	nb2 = n / 2;
 	nb2m1 = nb2 - 1;
 	if (nb2 >= 2) {
-		for (i = 0; i < nb2; i++) {
+		for (int i = 0; i < nb2; i++) {
 			x[i] = t[nb2m1 - i];
 		}
-		for (i = nb2; i < n; i++) {
+		for (int i = nb2; i < n; i++) {
 			x[i] = t[i];
 		}
 	}
 	else {
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			x[i] = t[i];
 	}
 }
@@ -257,11 +257,10 @@ double errlim(double *sigma, int ncycle, double shi, double slo)
 {
 	double errlim;
 	double delta;
-	int i;
 
 	errlim = 1.0;
 	delta = 0.25 * (shi - slo);
-	for (i = 0; i < ncycle; i++) {
+	for (int i = 0; i < ncycle; i++) {
 		errlim *= delta / sigma[i];
 	}
 	errlim = 2 * errlim;
@@ -380,21 +379,21 @@ void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int
  *      certainty is obtained. */
 /*----------------------------------------------------------------------*/
 {
-	int i, j, k, icyc;
+	int i, k, icyc;
 	int nsig1;
 	double eps = 1.0e-6;
 	double res = 0.0;
 	double slo, smp, errsmp;
 
 	if (ncyc == 0) {
-		i = 0;
-		for (j = 0; j < nia[i]; j++) {
+		i = 0;  /* TODO(schwehr): Bug? */
+		for (int j = 0; j < nia[i]; j++) {
 			k = nnz * i + j;
 			x[ia[k]] = a[k];
 		}
 		for (i = 1; i < nr; i++) {
 			res = 0.0;
-			for (j = 0; j < nia[i]; j++) {
+			for (int j = 0; j < nia[i]; j++) {
 				k = nnz * i + j;
 				res += x[ia[k]] * a[k];
 			}
@@ -402,17 +401,17 @@ void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int
 				res = 1.0;
 			else
 				res = res / fabs(res);
-			for (j = 0; j < nia[i]; j++) {
+			for (int j = 0; j < nia[i]; j++) {
 				k = nnz * i + j;
 				x[ia[k]] += res * a[k];
 			}
 		}
 		res = 0.0;
-		for (j = 0; j < nc; j++) {
+		for (int j = 0; j < nc; j++) {
 			res += x[j] * x[j];
 		}
 		res = 1.0 / sqrt(res);
-		for (j = 0; j < nc; j++) {
+		for (int j = 0; j < nc; j++) {
 			x[j] = x[j] * res;
 		}
 	}
@@ -426,39 +425,39 @@ void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int
 	*nsig = nsig1 + ncyc;
 	sigma[*nsig - 1] = 0.0;
 	for (icyc = nsig1 - 1; icyc < *nsig; icyc++) {
-		for (j = 0; j < nc; j++) {
+		for (int j = 0; j < nc; j++) {
 			dx[j] = 0.0;
 		}
-		for (i = 0; i < nr; i++) {
+		for (int i = 0; i < nr; i++) {
 			res = 0.0;
-			for (j = 0; j < nia[i]; j++) {
+			for (int j = 0; j < nia[i]; j++) {
 				k = nnz * i + j;
 				res += a[k] * x[ia[k]];
 			}
-			for (j = 0; j < nia[i]; j++) {
+			for (int j = 0; j < nia[i]; j++) {
 				k = nnz * i + j;
 				dx[ia[k]] += res * a[k];
 			}
 		}
-		for (j = 0; j < nc; j++) {
+		for (int j = 0; j < nc; j++) {
 			dx[j] -= sigma[icyc] * x[j];
 		}
 		*smax = 0.0;
-		for (j = 0; j < nc; j++) {
+		for (int j = 0; j < nc; j++) {
 			*smax += dx[j] * dx[j];
 		}
 		*smax = sqrt(*smax);
 
 		if (icyc == *nsig - 1) {
 			*err = 0.0;
-			for (j = 0; j < nc; j++) {
+			for (int j = 0; j < nc; j++) {
 				res = dx[j] - *smax * x[j];
 				*err += res * res;
 			}
 			*err = sqrt(*err);
 		}
 
-		for (j = 0; j < nc; j++) {
+		for (int j = 0; j < nc; j++) {
 			x[j] = dx[j] / *smax;
 		}
 	}
@@ -530,8 +529,6 @@ void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int
   \param[in]     incY
 */
 void mbcblas_daxpy(const int N, const double alpha, const double *X, const int incX, double *Y, const int incY) {
-	int i;
-
 	if (N <= 0)
 		return;
 	if (alpha == 0.0)
@@ -540,10 +537,10 @@ void mbcblas_daxpy(const int N, const double alpha, const double *X, const int i
 	if (incX == 1 && incY == 1) {
 		const int m = N % 4;
 
-		for (i = 0; i < m; i++)
+		for (int i = 0; i < m; i++)
 			Y[i] += alpha * X[i];
 
-		for (i = m; i + 3 < N; i += 4) {
+		for (int i = m; i + 3 < N; i += 4) {
 			Y[i] += alpha * X[i];
 			Y[i + 1] += alpha * X[i + 1];
 			Y[i + 2] += alpha * X[i + 2];
@@ -554,7 +551,7 @@ void mbcblas_daxpy(const int N, const double alpha, const double *X, const int i
 		int ix = MBCBLAS_OFFSET(N, incX);
 		int iy = MBCBLAS_OFFSET(N, incY);
 
-		for (i = 0; i < N; i++) {
+		for (int i = 0; i < N; i++) {
 			Y[iy] += alpha * X[ix];
 			ix += incX;
 			iy += incY;
@@ -570,11 +567,10 @@ void mbcblas_daxpy(const int N, const double alpha, const double *X, const int i
   \param[in]     incY
 */
 void mbcblas_dcopy(const int N, const double *X, const int incX, double *Y, const int incY) {
-	int i;
 	int ix = MBCBLAS_OFFSET(N, incX);
 	int iy = MBCBLAS_OFFSET(N, incY);
 
-	for (i = 0; i < N; i++) {
+	for (int i = 0; i < N; i++) {
 		Y[iy] = X[ix];
 		ix += incX;
 		iy += incY;
@@ -593,11 +589,10 @@ void mbcblas_dcopy(const int N, const double *X, const int incX, double *Y, cons
 */
 double mbcblas_ddot(const int N, const double *X, const int incX, const double *Y, const int incY) {
 	double r = 0.0;
-	int i;
 	int ix = MBCBLAS_OFFSET(N, incX);
 	int iy = MBCBLAS_OFFSET(N, incY);
 
-	for (i = 0; i < N; i++) {
+	for (int i = 0; i < N; i++) {
 		r += X[ix] * Y[iy];
 		ix += incX;
 		iy += incY;
@@ -615,14 +610,14 @@ double mbcblas_ddot(const int N, const double *X, const int incX, const double *
 */
 double mbcblas_dnrm2(const int N, const double *X, const int incX) {
 	double scale = 0.0, ssq = 1.0;
-	int i, ix = 0;
+	int ix = 0;
 
 	if (N <= 0 || incX <= 0)
 		return 0;
 	else if (N == 1)
 		return fabs(X[0]);
 
-	for (i = 0; i < N; i++) {
+	for (int i = 0; i < N; i++) {
 		const double x = X[ix];
 
 		if (x != 0.0) {
@@ -650,14 +645,14 @@ double mbcblas_dnrm2(const int N, const double *X, const int incX) {
   \param[in]     incX
 */
 void mbcblas_dscal(const int N, const double alpha, double *X, const int incX) {
-	int i, ix;
+	int ix;
 
 	if (incX <= 0)
 		return;
 
 	ix = MBCBLAS_OFFSET(N, incX);
 
-	for (i = 0; i < N; i++) {
+	for (int i = 0; i < N; i++) {
 		X[ix] *= alpha;
 		ix += incX;
 	}
@@ -684,8 +679,7 @@ static double mblsqr_d2norm(const double a, const double b) {
 }
 
 static void mblsqr_dload(const int n, const double alpha, double x[]) {
-	int i;
-	for (i = 0; i < n; i++)
+	for (int i = 0; i < n; i++)
 		x[i] = alpha;
 	return;
 }
@@ -1066,7 +1060,7 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 
 	const bool extra = false, // true for extra printing below.
 	    damped = damp > ZERO, wantse = se != NULL;
-	int i, maxdx, nconv, nstop;
+	int maxdx, nconv, nstop;
 	double alfopt, alpha, arnorm0, beta, bnorm, cs, cs1, cs2, ctol, delta, dknorm, dnorm, dxk, dxmax, gamma, gambar, phi, phibar,
 	    psi, res2, rho, rhobar, rhbar1, rhs, rtol, sn, sn1, sn2, t, tau, temp, test1, test2, test3, theta, t1, t2, t3, xnorm1, z,
 	    zbar;
@@ -1232,7 +1226,7 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 		dknorm = ZERO;
 
 		if (wantse) {
-			for (i = 0; i < n; i++) {
+			for (int i = 0; i < n; i++) {
 				t = w[i];
 				x[i] = t1 * t + x[i];
 				w[i] = t2 * t + v[i];
@@ -1242,7 +1236,7 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 			}
 		}
 		else {
-			for (i = 0; i < n; i++) {
+			for (int i = 0; i < n; i++) {
 				t = w[i];
 				x[i] = t1 * t + x[i];
 				w[i] = t2 * t + v[i];
@@ -1398,7 +1392,7 @@ void mblsqr_lsqr(int m, int n, void (*aprod)(int mode, int m, int n, double x[],
 			t = m;
 		t = rnorm / sqrt(t);
 
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			se[i] = t * sqrt(se[i]);
 	}
 
