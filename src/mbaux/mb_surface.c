@@ -66,16 +66,14 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
-#define GMT_CHUNK 2000
 #ifndef FALSE
 #define FALSE 0
 #endif
 #ifndef TRUE
 #define TRUE 1
 #endif
-#define CNULL ((char *)NULL)
 
-#define OUTSIDE 2000000000 /* Index number indicating data is outside useable area */
+const int OUTSIDE = 2000000000; /* Index number indicating data is outside useable area */
 
 struct MB_SURFACE_DATA {
 	float x;
@@ -173,9 +171,6 @@ int gcd_euclid(int a, int b);
 
 int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, double xxmin, double xxmax, double yymin,
                double yymax, double xxinc, double yyinc, double ttension, float *sgrid) {
-
-	int serror = FALSE;
-	char low[100], high[100];
 	char *function_name = "mb_surface";
 
 	/* print input debug statements */
@@ -214,6 +209,7 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 	/* New in v4.3:  Default to unconstrained:  */
 	set_low = set_high = 0;
 
+	int serror = FALSE;
 	if (xmin >= xmax || ymin >= ymax)
 		serror = TRUE;
 	if (xinc <= 0.0 || yinc <= 0.0)
@@ -253,6 +249,9 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 	throw_away_unusables();
 	remove_planar_trend();
 	rescale_z_values();
+
+	char low[100];
+	char high[100];
 	load_constraints(low, high);
 
 	/* Set up factors and reset grid to first value  */
@@ -371,7 +370,6 @@ void set_coefficients() {
 
 void set_offset() {
 	int add_w[5], add_e[5], add_s[5], add_n[5], add_w2[5], add_e2[5], add_s2[5], add_n2[5];
-	int kase;
 
 	add_w[0] = -m_rows;
 	add_w[1] = add_w[2] = add_w[3] = add_w[4] = -grid_east;
@@ -419,12 +417,7 @@ void fill_in_forecast() {
 	   after grid is divided.
 	 */
 
-	int ii, jj, index_0, index_1, index_2, index_3;
-	int index_new;
-	double delta_x, delta_y, a0, a1, a2, a3;
-	double old_size;
-
-	old_size = 1.0 / (double)old_grid;
+	const double old_size = 1.0 / (double)old_grid;
 
 	/* first do from southwest corner */
 
@@ -433,26 +426,26 @@ void fill_in_forecast() {
 		for (int j = 0; j < n_rows - 1; j += old_grid) {
 
 			/* get indices of bilinear square */
-			index_0 = ij_sw_corner + i * m_rows + j;
-			index_1 = index_0 + old_grid * m_rows;
-			index_2 = index_1 + old_grid;
-			index_3 = index_0 + old_grid;
+			const int index_0 = ij_sw_corner + i * m_rows + j;
+			const int index_1 = index_0 + old_grid * m_rows;
+			const int index_2 = index_1 + old_grid;
+			const int index_3 = index_0 + old_grid;
 
 			/* get coefficients */
-			a0 = u[index_0];
-			a1 = u[index_1] - a0;
-			a2 = u[index_3] - a0;
-			a3 = u[index_2] - a0 - a1 - a2;
+			const double a0 = u[index_0];
+			const double a1 = u[index_1] - a0;
+			const double a2 = u[index_3] - a0;
+			const double a3 = u[index_2] - a0 - a1 - a2;
 
 			/* find all possible new fill ins */
 
-			for (ii = i; ii < i + old_grid; ii += grid) {
-				delta_x = (ii - i) * old_size;
-				for (jj = j; jj < j + old_grid; jj += grid) {
-					index_new = ij_sw_corner + ii * m_rows + jj;
+			for (int ii = i; ii < i + old_grid; ii += grid) {
+				const double delta_x = (ii - i) * old_size;
+				for (int jj = j; jj < j + old_grid; jj += grid) {
+					const int index_new = ij_sw_corner + ii * m_rows + jj;
 					if (index_new == index_0)
 						continue;
-					delta_y = (jj - j) * old_size;
+					const double delta_y = (jj - j) * old_size;
 					u[index_new] = a0 + a1 * delta_x + delta_y * (a2 + a3 * delta_x);
 					iu[index_new] = 0;
 				}
@@ -464,11 +457,11 @@ void fill_in_forecast() {
 	/* now do linear guess along east edge */
 
 	for (int j = 0; j < (n_rows - 1); j += old_grid) {
-		index_0 = ij_se_corner + j;
-		index_3 = index_0 + old_grid;
-		for (jj = j; jj < j + old_grid; jj += grid) {
-			index_new = ij_se_corner + jj;
-			delta_y = (jj - j) * old_size;
+		const int index_0 = ij_se_corner + j;
+		const int index_3 = index_0 + old_grid;
+		for (int jj = j; jj < j + old_grid; jj += grid) {
+			const int index_new = ij_se_corner + jj;
+			const double delta_y = (jj - j) * old_size;
 			u[index_new] = u[index_0] + delta_y * (u[index_3] - u[index_0]);
 			iu[index_new] = 0;
 		}
@@ -476,11 +469,11 @@ void fill_in_forecast() {
 	}
 	/* now do linear guess along north edge */
 	for (int i = 0; i < (n_columns - 1); i += old_grid) {
-		index_0 = ij_nw_corner + i * m_rows;
-		index_1 = index_0 + old_grid * m_rows;
-		for (ii = i; ii < i + old_grid; ii += grid) {
-			index_new = ij_nw_corner + ii * m_rows;
-			delta_x = (ii - i) * old_size;
+		const int index_0 = ij_nw_corner + i * m_rows;
+		const int index_1 = index_0 + old_grid * m_rows;
+		for (int ii = i; ii < i + old_grid; ii += grid) {
+			const int index_new = ij_nw_corner + ii * m_rows;
+			const double delta_x = (ii - i) * old_size;
 			u[index_new] = u[index_0] + delta_x * (u[index_1] - u[index_0]);
 			iu[index_new] = 0;
 		}
@@ -495,31 +488,29 @@ int compare_points(struct MB_SURFACE_DATA *point_1, struct MB_SURFACE_DATA *poin
 	    Sorts on index first, then on radius to node corresponding to index, so that index
 	    goes from low to high, and so does radius.
 	*/
-	int block_i, block_j, index_1, index_2;
-	double x0, y0, dist_1, dist_2;
 
-	index_1 = point_1->index;
-	index_2 = point_2->index;
+	const int index_1 = point_1->index;
+	const int index_2 = point_2->index;
 	if (index_1 < index_2)
 		return (-1);
 	else if (index_1 > index_2)
 		return (1);
 	else if (index_1 == OUTSIDE)
 		return (0);
-	else { /* Points are in same grid cell, find the one who is nearest to grid point */
-		block_i = point_1->index / block_n_rows;
-		block_j = point_1->index % block_n_rows;
-		x0 = xmin + block_i * grid_xinc;
-		y0 = ymin + block_j * grid_yinc;
-		dist_1 = (point_1->x - x0) * (point_1->x - x0) + (point_1->y - y0) * (point_1->y - y0);
-		dist_2 = (point_2->x - x0) * (point_2->x - x0) + (point_2->y - y0) * (point_2->y - y0);
-		if (dist_1 < dist_2)
-			return (-1);
-		if (dist_1 > dist_2)
-			return (1);
-		else
-			return (0);
-	}
+
+	/* Points are in same grid cell, find the one who is nearest to grid point */
+	const int block_i = point_1->index / block_n_rows;
+	const int block_j = point_1->index % block_n_rows;
+	const double x0 = xmin + block_i * grid_xinc;
+	const double y0 = ymin + block_j * grid_yinc;
+	const double dist_1 = (point_1->x - x0) * (point_1->x - x0) + (point_1->y - y0) * (point_1->y - y0);
+	const double dist_2 = (point_2->x - x0) * (point_2->x - x0) + (point_2->y - y0) * (point_2->y - y0);
+	if (dist_1 < dist_2)
+		return (-1);
+	if (dist_1 > dist_2)
+		return (1);
+	else
+		return (0);
 }
 
 void smart_divide() {
@@ -532,11 +523,11 @@ void set_index() {
 	/* recomputes data[k].index for new value of grid,
 	   sorts data on index and radii, and throws away
 	   data which are now outside the useable limits. */
-	int i, j, k, k_skipped = 0;
+	int k_skipped = 0;
 
-	for (k = 0; k < npoints; k++) {
-		i = floor(((data[k].x - xmin) * r_grid_xinc) + 0.5);
-		j = floor(((data[k].y - ymin) * r_grid_yinc) + 0.5);
+	for (int k = 0; k < npoints; k++) {
+		const int i = floor(((data[k].x - xmin) * r_grid_xinc) + 0.5);
+		const int j = floor(((data[k].y - ymin) * r_grid_yinc) + 0.5);
 		if (i < 0 || i >= block_n_columns || j < 0 || j >= block_n_rows) {
 			data[k].index = OUTSIDE;
 			k_skipped++;
@@ -551,11 +542,7 @@ void set_index() {
 }
 
 void find_nearest_point() {
-	int last_index, block_i, block_j, iu_index;
-	double x0, y0, dx, dy, xys, xy1, btemp;
-	double b0, b1, b2, b3, b4, b5;
-
-	last_index = -1;
+	int last_index = -1;
 	smalldistance = 0.05 * ((grid_xinc < grid_yinc) ? grid_xinc : grid_yinc);
 
 	for (int i = 0; i < n_columns; i += grid) /* Reset grid info */
@@ -565,14 +552,14 @@ void find_nearest_point() {
 	int briggs_index = 0;
 	for (int k = 0; k < npoints; k++) { /* Find constraining value  */
 		if (data[k].index != last_index) {
-			block_i = data[k].index / block_n_rows;
-			block_j = data[k].index % block_n_rows;
+			const int block_i = data[k].index / block_n_rows;
+			const int block_j = data[k].index % block_n_rows;
 			last_index = data[k].index;
-			iu_index = ij_sw_corner + (block_i * m_rows + block_j) * grid;
-			x0 = xmin + block_i * grid_xinc;
-			y0 = ymin + block_j * grid_yinc;
-			dx = (data[k].x - x0) * r_grid_xinc;
-			dy = (data[k].y - y0) * r_grid_yinc;
+			const int iu_index = ij_sw_corner + (block_i * m_rows + block_j) * grid;
+			const double x0 = xmin + block_i * grid_xinc;
+			const double y0 = ymin + block_j * grid_yinc;
+			double dx = (data[k].x - x0) * r_grid_xinc;
+			double dy = (data[k].y - y0) * r_grid_yinc;
 			if (fabs(dx) < smalldistance && fabs(dy) < smalldistance) {
 				iu[iu_index] = 5;
 				u[iu_index] = data[k].z;
@@ -592,15 +579,15 @@ void find_nearest_point() {
 				}
 				dx = fabs(dx);
 				dy = fabs(dy);
-				btemp = 2 * one_plus_e2 / ((dx + dy) * (1.0 + dx + dy));
-				b0 = 1.0 - 0.5 * (dx + (dx * dx)) * btemp;
-				b3 = 0.5 * (e_2 - (dy + (dy * dy)) * btemp);
-				xys = 1.0 + dx + dy;
-				xy1 = 1.0 / xys;
-				b1 = (e_2 * xys - 4 * dy) * xy1;
-				b2 = 2 * (dy - dx + 1.0) * xy1;
-				b4 = b0 + b1 + b2 + b3 + btemp;
-				b5 = btemp * data[k].z;
+				const double btemp = 2 * one_plus_e2 / ((dx + dy) * (1.0 + dx + dy));
+				const double b0 = 1.0 - 0.5 * (dx + (dx * dx)) * btemp;
+				const double b3 = 0.5 * (e_2 - (dy + (dy * dy)) * btemp);
+				const double xys = 1.0 + dx + dy;
+				const double xy1 = 1.0 / xys;
+				const double b1 = (e_2 * xys - 4 * dy) * xy1;
+				const double b2 = 2 * (dy - dx + 1.0) * xy1;
+				const double b4 = b0 + b1 + b2 + b3 + btemp;
+				const double b5 = btemp * data[k].z;
 				briggs[briggs_index].b[0] = b0;
 				briggs[briggs_index].b[1] = b1;
 				briggs[briggs_index].b[2] = b2;
@@ -627,43 +614,42 @@ void initialize_grid() { /*
 	                      * For the initial gridsize, compute weighted averages of data inside the search radius
 	                      * and assign the values to u[i,j] where i,j are multiples of gridsize.
 	                      */
-	int irad, jrad, imin, imax, jmin, jmax, index_1, index_2, k, ki, kj, k_index;
-	double r, rfact, sum_w, sum_zw, weight, x0, y0;
 
-	irad = ceil(radius / grid_xinc);
-	jrad = ceil(radius / grid_yinc);
-	rfact = -4.5 / (radius * radius);
+	const int irad = ceil(radius / grid_xinc);
+	const int jrad = ceil(radius / grid_yinc);
+	const double rfact = -4.5 / (radius * radius);
 
 	for (int i = 0; i < block_n_columns; i++) {
-		x0 = xmin + i * grid_xinc;
+		const double x0 = xmin + i * grid_xinc;
 		for (int j = 0; j < block_n_rows; j++) {
-			y0 = ymin + j * grid_yinc;
-			imin = i - irad;
+			const double y0 = ymin + j * grid_yinc;
+			int imin = i - irad;
 			if (imin < 0)
 				imin = 0;
-			imax = i + irad;
+			int imax = i + irad;
 			if (imax >= block_n_columns)
 				imax = block_n_columns - 1;
-			jmin = j - jrad;
+			int jmin = j - jrad;
 			if (jmin < 0)
 				jmin = 0;
-			jmax = j + jrad;
+			int jmax = j + jrad;
 			if (jmax >= block_n_rows)
 				jmax = block_n_rows - 1;
-			index_1 = imin * block_n_rows + jmin;
-			index_2 = imax * block_n_rows + jmax + 1;
-			sum_w = sum_zw = 0.0;
-			k = 0;
+			const int index_1 = imin * block_n_rows + jmin;
+			const int index_2 = imax * block_n_rows + jmax + 1;
+			double sum_w = 0.0;
+                        double sum_zw = 0.0;
+			int k = 0;
 			while (k < npoints && data[k].index < index_1)
 				k++;
-			for (ki = imin; k < npoints && ki <= imax && data[k].index < index_2; ki++) {
-				for (kj = jmin; k < npoints && kj <= jmax && data[k].index < index_2; kj++) {
-					k_index = ki * block_n_rows + kj;
+			for (int ki = imin; k < npoints && ki <= imax && data[k].index < index_2; ki++) {
+				for (int kj = jmin; k < npoints && kj <= jmax && data[k].index < index_2; kj++) {
+					const int k_index = ki * block_n_rows + kj;
 					while (k < npoints && data[k].index < k_index)
 						k++;
 					while (k < npoints && data[k].index == k_index) {
-						r = (data[k].x - x0) * (data[k].x - x0) + (data[k].y - y0) * (data[k].y - y0);
-						weight = exp(rfact * r);
+						const double r = (data[k].x - x0) * (data[k].x - x0) + (data[k].y - y0) * (data[k].y - y0);
+						const double weight = exp(rfact * r);
 						sum_w += weight;
 						sum_zw += weight * data[k].z;
 						k++;
@@ -687,32 +673,29 @@ void new_initialize_grid() { /*
 	                          * For the initial gridsize, load constrained nodes with weighted avg of their data;
 	                          * and then do something with the unconstrained ones.
 	                          */
-	int k, k_index, u_index, block_i, block_j;
-	double sum_w, sum_zw, weight, x0, y0, dx, dy, dx_scale, dy_scale;
-
-	dx_scale = 4.0 / grid_xinc;
-	dy_scale = 4.0 / grid_yinc;
+	const double dx_scale = 4.0 / grid_xinc;
+	const double dy_scale = 4.0 / grid_yinc;
 	n_empty = block_n_rows * block_n_columns;
-	k = 0;
+	int k = 0;
 	while (k < npoints) {
-		block_i = data[k].index / block_n_rows;
-		block_j = data[k].index % block_n_rows;
-		x0 = xmin + block_i * grid_xinc;
-		y0 = ymin + block_j * grid_yinc;
-		u_index = ij_sw_corner + (block_i * m_rows + block_j) * grid;
-		k_index = data[k].index;
+		const int block_i = data[k].index / block_n_rows;
+		const int block_j = data[k].index % block_n_rows;
+		const double x0 = xmin + block_i * grid_xinc;
+		const double y0 = ymin + block_j * grid_yinc;
+		const int u_index = ij_sw_corner + (block_i * m_rows + block_j) * grid;
+		const int k_index = data[k].index;
 
-		dy = (data[k].y - y0) * dy_scale;
-		dx = (data[k].x - x0) * dx_scale;
-		sum_w = 1.0 / (1.0 + dx * dx + dy * dy);
-		sum_zw = data[k].z * sum_w;
+		double dy = (data[k].y - y0) * dy_scale;
+		double dx = (data[k].x - x0) * dx_scale;
+		double sum_w = 1.0 / (1.0 + dx * dx + dy * dy);
+		double sum_zw = data[k].z * sum_w;
 		k++;
 
 		while (k < npoints && data[k].index == k_index) {
 
 			dy = (data[k].y - y0) * dy_scale;
 			dx = (data[k].x - x0) * dx_scale;
-			weight = 1.0 / (1.0 + dx * dx + dy * dy);
+			const double weight = 1.0 / (1.0 + dx * dx + dy * dy);
 			sum_zw += data[k].z * weight;
 			sum_w += weight;
 			sum_zw += weight * data[k].z;
@@ -726,17 +709,19 @@ void new_initialize_grid() { /*
 
 /* This function rewritten by D.W. Caress 5/3/94 */
 void read_data(int ndat, float *xdat, float *ydat, float *zdat) {
-	int i, j, k, kmax, kmin, idat;
-	double zmin = 1.0e38, zmax = -1.0e38;
+	int kmax = 0;
+	int kmin = 0;
+	double zmin = 1.0e38;
+	double zmax = -1.0e38;
 
 	status = mb_mallocd(local_verbose, __FILE__, __LINE__, ndat * sizeof(struct MB_SURFACE_DATA), (void **)&data, &local_error);
 
 	/* Read in xyz data and computes index no and store it in a structure */
-	k = 0;
+	int k = 0;
 	z_mean = 0;
-	for (idat = 0; idat < ndat; idat++) {
-		i = floor(((xdat[idat] - xmin) * r_grid_xinc) + 0.5);
-		j = floor(((ydat[idat] - ymin) * r_grid_yinc) + 0.5);
+	for (int idat = 0; idat < ndat; idat++) {
+		const int i = floor(((xdat[idat] - xmin) * r_grid_xinc) + 0.5);
+		const int j = floor(((ydat[idat] - ymin) * r_grid_yinc) + 0.5);
 		if (i >= 0 && i < block_n_columns && j >= 0 && j < block_n_rows) {
 			data[k].index = i * block_n_rows + j;
 			data[k].x = xdat[idat];
@@ -1027,17 +1012,18 @@ int iterate(int mode) {
 
 void check_errors() {
 
-	int i, j, k, ij, n_nodes, move_over[12]; /* move_over = offset[kase][12], but grid = 1 so move_over is easy  */
+	int ij, n_nodes;
 
-	double x0, y0, dx, dy, mean_error, mean_squared_error, z_est, z_err, curvature, c;
+	double x0, y0, dx, dy, z_est, z_err, curvature, c;
 	double du_dx, du_dy, d2u_dx2, d2u_dxdy, d2u_dy2, d3u_dx3, d3u_dx2dy, d3u_dxdy2, d3u_dy3;
 
-	double x_0_const = 4.0 * (1.0 - boundary_tension) / (2.0 - boundary_tension);
-	double x_1_const = (3 * boundary_tension - 2.0) / (2.0 - boundary_tension);
-	double y_denom = 2 * epsilon * (1.0 - boundary_tension) + boundary_tension;
-	double y_0_const = 4 * epsilon * (1.0 - boundary_tension) / y_denom;
-	double y_1_const = (boundary_tension - 2 * epsilon * (1.0 - boundary_tension)) / y_denom;
+	const double x_0_const = 4.0 * (1.0 - boundary_tension) / (2.0 - boundary_tension);
+	const double x_1_const = (3 * boundary_tension - 2.0) / (2.0 - boundary_tension);
+	const double y_denom = 2 * epsilon * (1.0 - boundary_tension) + boundary_tension;
+	const double y_0_const = 4 * epsilon * (1.0 - boundary_tension) / y_denom;
+	const double y_1_const = (boundary_tension - 2 * epsilon * (1.0 - boundary_tension)) / y_denom;
 
+	int move_over[12]; /* move_over = offset[kase][12], but grid = 1 so move_over is easy  */
 	move_over[0] = 2;
 	move_over[1] = 1 - m_rows;
 	move_over[2] = 1;
@@ -1051,19 +1037,18 @@ void check_errors() {
 	move_over[10] = -1 + m_rows;
 	move_over[11] = -2;
 
-	mean_error = 0;
-	mean_squared_error = 0;
+	double mean_error = 0.0;
+	double mean_squared_error = 0.0;
 
 	/* First update the boundary values  */
-
-	for (i = 0; i < n_columns; i++) {
+	for (int i = 0; i < n_columns; i++) {
 		ij = ij_sw_corner + i * m_rows;
 		u[ij - 1] = y_0_const * u[ij] + y_1_const * u[ij + 1];
 		ij = ij_nw_corner + i * m_rows;
 		u[ij + 1] = y_0_const * u[ij] + y_1_const * u[ij - 1];
 	}
 
-	for (j = 0; j < n_rows; j++) {
+	for (int j = 0; j < n_rows; j++) {
 		ij = ij_sw_corner + j;
 		u[ij - m_rows] = x_1_const * u[ij + m_rows] + x_0_const * u[ij];
 		ij = ij_se_corner + j;
@@ -1094,7 +1079,7 @@ void check_errors() {
 		      two_plus_em2 * (u[ij + move_over[9]] - u[ij + move_over[2]]));
 	}
 
-	for (j = 0; j < n_rows; j++) {
+	for (int j = 0; j < n_rows; j++) {
 
 		ij = ij_sw_corner + j;
 		u[ij + move_over[4]] =
@@ -1112,9 +1097,9 @@ void check_errors() {
 	/* That resets the boundary values.  Now we can test all data.
 	    Note that this loop checks all values, even though only nearest were used.  */
 
-	for (k = 0; k < npoints; k++) {
-		i = data[k].index / n_rows;
-		j = data[k].index % n_rows;
+	for (int k = 0; k < npoints; k++) {
+		int i = data[k].index / n_rows;
+		int j = data[k].index % n_rows;
 		ij = ij_sw_corner + i * m_rows + j;
 		if (iu[ij] == 5)
 			continue;
@@ -1151,8 +1136,8 @@ void check_errors() {
 	curvature = 0.0;
 	n_nodes = n_columns * n_rows;
 
-	for (i = 0; i < n_columns; i++) {
-		for (j = 0; j < n_rows; j++) {
+	for (int i = 0; i < n_columns; i++) {
+		for (int j = 0; j < n_rows; j++) {
 			ij = ij_sw_corner + i * m_rows + j;
 			c = u[ij + move_over[6]] + u[ij + move_over[5]] + u[ij + move_over[2]] + u[ij + move_over[9]] -
 			    4.0 * u[ij + move_over[6]];
@@ -1173,11 +1158,17 @@ void check_errors() {
 }
 
 int remove_planar_trend() {
-
-	double a, b, c, d, xx, yy, zz;
-	double sx, sy, sz, sxx, sxy, sxz, syy, syz;
-
-	sx = sy = sz = sxx = sxy = sxz = syy = syz = 0.0;
+	double xx = 0.0;
+	double yy = 0.0;
+	double zz = 0.0;
+	double sx = 0.0;
+	double sy = 0.0;
+	double sz = 0.0;
+	double sxx = 0.0;
+	double sxy = 0.0;
+	double sxz = 0.0;
+	double syy = 0.0;
+	double syz = 0.0;
 
 	for (int i = 0; i < npoints; i++) {
 
@@ -1195,16 +1186,16 @@ int remove_planar_trend() {
 		syz += (yy * zz);
 	}
 
-	d = npoints * sxx * syy + 2 * sx * sy * sxy - npoints * sxy * sxy - sx * sx * syy - sy * sy * sxx;
+	const double d = npoints * sxx * syy + 2 * sx * sy * sxy - npoints * sxy * sxy - sx * sx * syy - sy * sy * sxx;
 
 	if (d == 0.0) {
 		plane_c0 = plane_c1 = plane_c2 = 0.0;
 		return (0);
 	}
 
-	a = sz * sxx * syy + sx * sxy * syz + sy * sxy * sxz - sz * sxy * sxy - sx * sxz * syy - sy * syz * sxx;
-	b = npoints * sxz * syy + sz * sy * sxy + sy * sx * syz - npoints * sxy * syz - sz * sx * syy - sy * sy * sxz;
-	c = npoints * sxx * syz + sx * sy * sxz + sz * sx * sxy - npoints * sxy * sxz - sx * sx * syz - sz * sy * sxx;
+	const double a = sz * sxx * syy + sx * sxy * syz + sy * sxy * sxz - sz * sxy * sxy - sx * sxz * syy - sy * syz * sxx;
+	const double b = npoints * sxz * syy + sz * sy * sxy + sy * sx * syz - npoints * sxy * syz - sz * sx * syy - sy * sy * sxz;
+	const double c = npoints * sxx * syz + sx * sy * sxz + sz * sx * sxy - npoints * sxy * sxz - sx * sx * syz - sz * sy * sxx;
 
 	plane_c0 = a / d;
 	plane_c1 = b / d;
