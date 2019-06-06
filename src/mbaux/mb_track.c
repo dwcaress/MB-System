@@ -28,26 +28,15 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
-//* global defines */
+/* global defines */
 #define IMOVE 3
 #define IDRAW 2
 #define ISTROKE -2
-#define IOR -3
-#define EPS 0.0001
-
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_track plots the shiptrack of multibeam data. */
 void mb_track(int verbose, struct swath *data, int *error) {
 	char *function_name = "mb_track";
-	int status = MB_SUCCESS;
-	int time_tick, time_annot, date_annot;
-	double hour0, hour1;
-	int time_j[5];
-	double x, y, x1, y1, x2, y2, x3, y3, x4, y4;
-	double dx, dy;
-	double angle;
-	char label[25];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -75,25 +64,30 @@ void mb_track(int verbose, struct swath *data, int *error) {
 	/* draw the time ticks */
 	for (int i = 1; i < data->npings; i++) {
 		/* get time of day */
-		hour0 = data->pings[i - 1].time_i[3] + data->pings[i - 1].time_i[4] / 60.0 + data->pings[i - 1].time_i[5] / 3600.0;
-		hour1 = data->pings[i].time_i[3] + data->pings[i].time_i[4] / 60.0 + data->pings[i].time_i[5] / 3600.0;
+		const double hour0 = data->pings[i - 1].time_i[3] + data->pings[i - 1].time_i[4] / 60.0 + data->pings[i - 1].time_i[5] / 3600.0;
+		const double hour1 = data->pings[i].time_i[3] + data->pings[i].time_i[4] / 60.0 + data->pings[i].time_i[5] / 3600.0;
 
 		/* check for time tick */
-		time_tick = MB_NO;
+		int time_tick = MB_NO;
 		if (floor(hour0 / data->time_tick_int) != floor(hour1 / data->time_tick_int))
 			time_tick = MB_YES;
 
 		/* check for time annotation */
-		time_annot = MB_NO;
+		int time_annot = MB_NO;
 		if (floor(hour0 / data->time_annot_int) != floor(hour1 / data->time_annot_int))
 			time_annot = MB_YES;
 
 		/* check for date annotation */
-		date_annot = MB_NO;
+		int date_annot = MB_NO;
 		if (floor(hour0 / data->date_annot_int) != floor(hour1 / data->date_annot_int))
 			date_annot = MB_YES;
 
 		/* now get azimuth and location if needed */
+		double angle = 0.0;
+		double x = 0.0;
+		double y = 0.0;
+		double dy = 0.0;
+		double dx = 0.0;
 		if (date_annot == MB_YES || time_annot == MB_YES || time_tick == MB_YES) {
 			/* get azimuth from heading */
 			angle = data->pings[i].heading + 90.0;
@@ -109,51 +103,54 @@ void mb_track(int verbose, struct swath *data, int *error) {
 
 		/* do date annotation if needed */
 		if (date_annot == MB_YES) {
-			x1 = x + 0.375 * data->time_tick_len * (dx - dy);
-			y1 = y + 0.375 * data->time_tick_len * (dy + dx);
-			x3 = x + 0.375 * data->time_tick_len * (dx + dy);
-			y3 = y + 0.375 * data->time_tick_len * (dy - dx);
-			x2 = x + 0.375 * data->time_tick_len * (-dx + dy);
-			y2 = y + 0.375 * data->time_tick_len * (-dy - dx);
-			x4 = x + 0.375 * data->time_tick_len * (-dx - dy);
-			y4 = y + 0.375 * data->time_tick_len * (-dy + dx);
+			const double x1 = x + 0.375 * data->time_tick_len * (dx - dy);
+			const double y1 = y + 0.375 * data->time_tick_len * (dy + dx);
+			const double x3 = x + 0.375 * data->time_tick_len * (dx + dy);
+			const double y3 = y + 0.375 * data->time_tick_len * (dy - dx);
+			const double x2 = x + 0.375 * data->time_tick_len * (-dx + dy);
+			const double y2 = y + 0.375 * data->time_tick_len * (-dy - dx);
+			const double x4 = x + 0.375 * data->time_tick_len * (-dx - dy);
+			const double y4 = y + 0.375 * data->time_tick_len * (-dy + dx);
 			data->contour_plot(x1, y1, IMOVE);
 			data->contour_plot(x2, y2, IDRAW);
 			data->contour_plot(x3, y3, IMOVE);
 			data->contour_plot(x4, y4, ISTROKE);
+			int time_j[5];
 			mb_get_jtime(verbose, data->pings[i].time_i, time_j);
+			char label[25];
 			sprintf(label, " %2.2d:%2.2d/%3.3d", data->pings[i].time_i[3], data->pings[i].time_i[4], time_j[1]);
 			data->contour_plot_string(x, y, data->time_tick_len, 90.0 - angle, label);
 		}
 
 		/* do time annotation if needed */
 		else if (time_annot == MB_YES) {
-			x1 = x + 0.375 * data->time_tick_len * (dx - dy);
-			y1 = y + 0.375 * data->time_tick_len * (dy + dx);
-			x3 = x + 0.375 * data->time_tick_len * (dx + dy);
-			y3 = y + 0.375 * data->time_tick_len * (dy - dx);
-			x2 = x + 0.375 * data->time_tick_len * (-dx + dy);
-			y2 = y + 0.375 * data->time_tick_len * (-dy - dx);
-			x4 = x + 0.375 * data->time_tick_len * (-dx - dy);
-			y4 = y + 0.375 * data->time_tick_len * (-dy + dx);
+			const double x1 = x + 0.375 * data->time_tick_len * (dx - dy);
+			const double y1 = y + 0.375 * data->time_tick_len * (dy + dx);
+			const double x3 = x + 0.375 * data->time_tick_len * (dx + dy);
+			const double y3 = y + 0.375 * data->time_tick_len * (dy - dx);
+			const double x2 = x + 0.375 * data->time_tick_len * (-dx + dy);
+			const double y2 = y + 0.375 * data->time_tick_len * (-dy - dx);
+			const double x4 = x + 0.375 * data->time_tick_len * (-dx - dy);
+			const double y4 = y + 0.375 * data->time_tick_len * (-dy + dx);
 			data->contour_plot(x1, y1, IMOVE);
 			data->contour_plot(x2, y2, IDRAW);
 			data->contour_plot(x3, y3, IMOVE);
 			data->contour_plot(x4, y4, ISTROKE);
+			char label[25];
 			sprintf(label, "   %2.2d:%2.2d", data->pings[i].time_i[3], data->pings[i].time_i[4]);
 			data->contour_plot_string(x, y, data->time_tick_len, 90.0 - angle, label);
 		}
 
 		/* do time tick if needed */
 		else if (time_tick == MB_YES) {
-			x1 = x + 0.25 * data->time_tick_len * (dx - dy);
-			y1 = y + 0.25 * data->time_tick_len * (dy + dx);
-			x3 = x + 0.25 * data->time_tick_len * (dx + dy);
-			y3 = y + 0.25 * data->time_tick_len * (dy - dx);
-			x2 = x + 0.25 * data->time_tick_len * (-dx + dy);
-			y2 = y + 0.25 * data->time_tick_len * (-dy - dx);
-			x4 = x + 0.25 * data->time_tick_len * (-dx - dy);
-			y4 = y + 0.25 * data->time_tick_len * (-dy + dx);
+			const double x1 = x + 0.25 * data->time_tick_len * (dx - dy);
+			const double y1 = y + 0.25 * data->time_tick_len * (dy + dx);
+			const double x3 = x + 0.25 * data->time_tick_len * (dx + dy);
+			const double y3 = y + 0.25 * data->time_tick_len * (dy - dx);
+			const double x2 = x + 0.25 * data->time_tick_len * (-dx + dy);
+			const double y2 = y + 0.25 * data->time_tick_len * (-dy - dx);
+			const double x4 = x + 0.25 * data->time_tick_len * (-dx - dy);
+			const double y4 = y + 0.25 * data->time_tick_len * (-dy + dx);
 			data->contour_plot(x1, y1, IMOVE);
 			data->contour_plot(x2, y2, IDRAW);
 			data->contour_plot(x3, y3, IMOVE);
@@ -174,6 +171,8 @@ void mb_track(int verbose, struct swath *data, int *error) {
 	/* reset line width */
 	data->contour_setline(0);
 
+	int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -190,13 +189,6 @@ void mb_track(int verbose, struct swath *data, int *error) {
 /* 	function mb_trackpingnumber annotates pingnumbers */
 void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 	char *function_name = "mb_trackpingnumber";
-	int status = MB_SUCCESS;
-	int pingnumber_tick, pingnumber_annot;
-	double x, y, x1, y1, x2, y2;
-	double dx, dy;
-	double angle;
-	char label[25];
-	double justify[4];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -216,16 +208,21 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 	/* draw the pingnumber ticks and annotations */
 	for (int i = 0; i < data->npings; i++) {
 		/* check for pingnumber tick */
-		pingnumber_tick = MB_NO;
+		int pingnumber_tick = MB_NO;
 		if (data->pings[i].pingnumber % data->pingnumber_tick_int == 0)
 			pingnumber_tick = MB_YES;
 
 		/* check for pingnumber annotation */
-		pingnumber_annot = MB_NO;
+		int pingnumber_annot = MB_NO;
 		if (data->pings[i].pingnumber % data->pingnumber_annot_int == 0)
 			pingnumber_annot = MB_YES;
 
 		/* now get azimuth and location if needed */
+		double angle = 0.0;
+		double x = 0.0;
+		double y = 0.0;
+		double dx = 0.0;
+		double dy = 0.0;
 		if (pingnumber_tick == MB_YES || pingnumber_annot == MB_YES) {
 			/* get azimuth from heading */
 			angle = data->pings[i].heading + 90.0;
@@ -241,12 +238,14 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 
 		/* do pingnumber annotation if needed */
 		if (pingnumber_annot == MB_YES) {
-			sprintf(label, "%d ", data->pings[i].pingnumber);
+			char label[25];
+			sprintf(label, "%u ", data->pings[i].pingnumber);
+			double justify[4];
 			data->contour_justify_string(data->pingnumber_tick_len, label, justify);
-			x1 = x - 0.375 * data->pingnumber_tick_len * dx;
-			y1 = y - 0.375 * data->pingnumber_tick_len * dy;
-			x2 = x - 1.5 * justify[2] * dx;
-			y2 = y - 1.5 * justify[2] * dy;
+			const double x1 = x - 0.375 * data->pingnumber_tick_len * dx;
+			const double y1 = y - 0.375 * data->pingnumber_tick_len * dy;
+			const double x2 = x - 1.5 * justify[2] * dx;
+			const double y2 = y - 1.5 * justify[2] * dy;
 			data->contour_plot(x1, y1, IMOVE);
 			data->contour_plot(x, y, IDRAW);
 			data->contour_plot_string(x2, y2, data->pingnumber_tick_len, 90.0 - angle, label);
@@ -254,10 +253,11 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 
 		/* do time tick if needed */
 		else if (pingnumber_tick == MB_YES) {
-			x1 = x - 0.25 * data->pingnumber_tick_len * dx;
-			y1 = y - 0.25 * data->pingnumber_tick_len * dy;
-			x2 = x + 0.25 * data->pingnumber_tick_len * dx;
-			y2 = y + 0.25 * data->pingnumber_tick_len * dy;
+			const double x1 = x - 0.25 * data->pingnumber_tick_len * dx;
+			const double y1 = y - 0.25 * data->pingnumber_tick_len * dy;
+			/* TODO(schwehr): Why were x2 and y2 assigned but not used? */
+			/* const double x2 = x + 0.25 * data->pingnumber_tick_len * dx; */
+			/* const double y2 = y + 0.25 * data->pingnumber_tick_len * dy; */
 			data->contour_plot(x1, y1, IMOVE);
 			data->contour_plot(x, y, IDRAW);
 		}
@@ -265,6 +265,8 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 
 	/* reset line width */
 	data->contour_setline(0);
+
+	int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -283,9 +285,6 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
      - contributed by Gordon Keith, CSIRO, December 2004 */
 void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file, int *error) {
 	char *function_name = "mb_trackname";
-	int status = MB_SUCCESS;
-	double angle;
-	char label[MB_PATH_MAXLINE];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -297,8 +296,11 @@ void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file
 		fprintf(stderr, "dbg2       file:               %s\n", file);
 	}
 
+	char label[MB_PATH_MAXLINE];
 	strncpy(label, file, MB_PATH_MAXLINE);
 	mb_get_basename(verbose, label, error);
+
+	double angle = 0.0;
 	if (perpendicular == MB_YES)
 		angle = 0.0 - data->pings[0].heading;
 	else
@@ -308,6 +310,8 @@ void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file
 	if (angle > 360.0)
 		angle -= 360.0;
 	data->contour_plot_string(data->pings[0].navlon, data->pings[0].navlat, data->name_hgt, angle, label);
+
+	int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
