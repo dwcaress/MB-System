@@ -1360,13 +1360,17 @@ print "Behavior: acousticUpdate\r\n";
 		{
 		print MFILE "# Turn off power to sonars and stop logging on the PLC \r\n";
 		print MFILE "# by setting the value of the mode attribute to 0 (used to be False). \r\n";
+		print MFILE "behavior edgetech \r\n";
+		print MFILE "{ \r\n";
+		print MFILE "duration  = RESON_DURATION; \r\n";
+		print MFILE "SBP_Mode  = 0; \r\n";
+		print MFILE "LoSS_Mode = 0; \r\n";
+		print MFILE "HiSS_Mode = 0; \r\n";
+		print MFILE "} \r\n";
 		print MFILE "behavior reson \r\n";
 		print MFILE "{ \r\n";
 		print MFILE "duration  = RESON_DURATION; \r\n";
 		print MFILE "MB_Power = 0; \r\n";
-		print MFILE "SBP_Mode  = 0; \r\n";
-		print MFILE "LoSS_Mode = 0; \r\n";
-		print MFILE "HiSS_Mode = 0; \r\n";
 		print MFILE "Log_Mode  = 0; \r\n";
 		print MFILE "} \r\n";
 print "Behavior: reson (stop, Log_Mode = 0)\r\n";
@@ -1484,29 +1488,36 @@ print "GPS ASCENT!!\n";
 				{
 				print MFILE "#######################################################\r\n";
 				print MFILE "# Turn on power to sonars and restart logging on the PLC \r\n";
+        if (($subbottom && $mstartstops[$i] == 2) || ($subbottom && $mstartstops[$i] == 1) || $sidescanlo || $sidescanhi)
+          {
+  				print MFILE "behavior edgetech \r\n";
+  				print MFILE "{ \r\n";
+  				print MFILE "duration  = RESON_DURATION; \r\n";
+  				if ($subbottom && $mstartstops[$i] == 2)
+  					{
+  					print MFILE "SBP_Mode = 1; \r\n";
+  					print MFILE "SBP_Power = 100.0; \r\n";
+  					}
+  				elsif ($subbottom && $mstartstops[$i] == 1)
+  					{
+  					print MFILE "SBP_Mode = 1; \r\n";
+  					print MFILE "SBP_Power = 100.0; \r\n";
+  					}
+  				if ($sidescanlo)
+  					{
+  					print MFILE "LoSS_Power = 100.0; \r\n";
+  					}
+  				if ($sidescanhi)
+  					{
+  					print MFILE "HiSS_Power = 100.0; \r\n";
+  					}
+  				print MFILE "} \r\n";
+          }
 				print MFILE "behavior reson \r\n";
 				print MFILE "{ \r\n";
 				print MFILE "Log_Mode  = $logmode; \r\n";
 				print MFILE "duration  = RESON_DURATION; \r\n";
 				print MFILE "MB_Power = $mb_transmitgain; \r\n";
-				if ($subbottom && $mstartstops[$i] == 2)
-					{
-					print MFILE "SBP_Mode = 1; \r\n";
-					print MFILE "SBP_Power = 100.0; \r\n";
-					}
-				elsif ($subbottom && $mstartstops[$i] == 1)
-					{
-					print MFILE "SBP_Mode = 1; \r\n";
-					print MFILE "SBP_Power = 100.0; \r\n";
-					}
-				if ($sidescanlo)
-					{
-					print MFILE "LoSS_Power = 100.0; \r\n";
-					}
-				if ($sidescanhi)
-					{
-					print MFILE "HiSS_Power = 100.0; \r\n";
-					}
 				print MFILE "} \r\n";
 				print MFILE "#######################################################\r\n";
 print "Behavior: reson (start, Log_Mode = $logmode)\r\n";
@@ -1628,23 +1639,30 @@ print "Behavior: acousticUpdate\n";
 				print MFILE "#######################################################\r\n";
 				print MFILE "# Turn off power to sonars and stop logging on the PLC \r\n";
 				print MFILE "# by setting the value of the mode attribute to 0 (used to be False). \r\n";
+        if ($subbottom || $sidescanlo || $sidescanhi)
+          {
+  				print MFILE "behavior edgetech \r\n";
+  				print MFILE "{ \r\n";
+  				print MFILE "duration  = RESON_DURATION; \r\n";
+  				if ($subbottom)
+  					{
+  					print MFILE "SBP_Power = 0.0; \r\n";
+  					}
+  				if ($sidescanlo)
+  					{
+  					print MFILE "LoSS_Power = 0.0; \r\n";
+  					}
+  				if ($sidescanhi)
+  					{
+  					print MFILE "HiSS_Power = 0.0; \r\n";
+  					}
+  				print MFILE "} \r\n";
+          }
 				print MFILE "behavior reson \r\n";
 				print MFILE "{ \r\n";
 				print MFILE "duration  = RESON_DURATION; \r\n";
 				print MFILE "Log_Mode  = 0; \r\n";
 				print MFILE "MB_Power = 0.0; \r\n";
-				if ($subbottom)
-					{
-					print MFILE "SBP_Power = 0.0; \r\n";
-					}
-				if ($sidescanlo)
-					{
-					print MFILE "LoSS_Power = 0.0; \r\n";
-					}
-				if ($sidescanhi)
-					{
-					print MFILE "HiSS_Power = 0.0; \r\n";
-					}
 				print MFILE "} \r\n";
 				print MFILE "#######################################################\r\n";
 print "Behavior: reson (stop, Log_Mode = 0)\r\n";
@@ -1695,38 +1713,45 @@ print "Behavior: reson (startup, Log_Mode = $logmode)\r\n";
 			print MFILE "#   Commanded vehicle depth:  $mmissiondepths[$i] \r\n";
 			print MFILE "#   Seafloor depth:           $mtopos[$i]\r\n";
 			print MFILE "# \r\n";
+      if ($subbottom || $sidescanlo || $sidescanhi)
+        {
+  			print MFILE "behavior edgetech \r\n";
+  			print MFILE "{ \r\n";
+  			print MFILE "duration  = RESON_DURATION; \r\n";
+  			if ($subbottom && $mstartstops[$i] == 2)
+  				{
+  				print MFILE "SBP_Mode = 1; \r\n";
+  				print MFILE "SBP_Power = 100.0; \r\n";
+  print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
+  				}
+  			elsif ($subbottom && $mstartstops[$i] == 1)
+  				{
+  				print MFILE "SBP_Mode = 1; \r\n";
+  				print MFILE "SBP_Power = 100.0; \r\n";
+  print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
+  				}
+  			if ($subbottom)
+  				{
+  				print MFILE "SBP_Gain = 128.0; \r\n";
+  				printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
+  				}
+  			if ($sidescanlo)
+  				{
+  				print MFILE "LoSS_Mode = 1; \r\n";
+  				print MFILE "LoSS_Power = 100.0; \r\n";
+  				printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
+  				}
+  			if ($sidescanhi)
+  				{
+  				print MFILE "HiSS_Mode = 1; \r\n";
+  				print MFILE "HiSS_Power = 100.0; \r\n";
+  				print MFILE "HiSS_Range = $sslo_range; \r\n";
+  				}
+  			print MFILE "} \r\n";
+        }
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";
-			if ($subbottom && $mstartstops[$i] == 2)
-				{
-				print MFILE "SBP_Mode = 1; \r\n";
-				print MFILE "SBP_Power = 100.0; \r\n";
-print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
-				}
-			elsif ($subbottom && $mstartstops[$i] == 1)
-				{
-				print MFILE "SBP_Mode = 1; \r\n";
-				print MFILE "SBP_Power = 100.0; \r\n";
-print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
-				}
-			if ($subbottom)
-				{
-				print MFILE "SBP_Gain = 128.0; \r\n";
-				printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
-				}
-			if ($sidescanlo)
-				{
-				print MFILE "LoSS_Mode = 1; \r\n";
-				print MFILE "LoSS_Power = 100.0; \r\n";
-				printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
-				}
-			if ($sidescanhi)
-				{
-				print MFILE "HiSS_Mode = 1; \r\n";
-				print MFILE "HiSS_Power = 100.0; \r\n";
-				print MFILE "HiSS_Range = $sslo_range; \r\n";
-				}
 			print MFILE "MB_Power = $mb_transmitgain; \r\n";
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
 			print MFILE "MB_Rate = $mb_pingrate; \r\n";
@@ -2329,48 +2354,26 @@ print "Behavior: acousticUpdate\n";
 			print MFILE "#   Commanded vehicle depth:  $mmissiondepths[$i] \r\n";
 			print MFILE "#   Seafloor depth:           $mtopos[$i]\r\n";
 			print MFILE "# \r\n";
+#			if ($subbottom && $mstartstops[$i-1] == 2)
+#				{
+#print "Behavior: edgetech (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
+#				}
+#			elsif ($subbottom && $mstartstops[$i-1] == 1)
+#				{
+#print "Behavior: edgetech (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
+#				}
+#			elsif ($subbottom)
+#				{
+#print "Behavior: edgetech (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP no change, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
+#				}
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";
-			if ($subbottom && $mstartstops[$i-1] == 2)
-				{
-				#print MFILE "SBP_Mode = 1; \r\n";
-				#print MFILE "SBP_Power = 100.0; \r\n";
-print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
-				}
-			elsif ($subbottom && $mstartstops[$i-1] == 1)
-				{
-				#print MFILE "SBP_Mode = 1; \r\n";
-				#print MFILE "SBP_Power = 100.0; \r\n";
-print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
-				}
-			elsif ($subbottom)
-				{
-print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP no change, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n";
-				}
-			if ($subbottom)
-				{
-				#printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
-				}
-			if ($sidescanlo)
-				{
-				#printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
-				}
-			if ($sidescanhi)
-				{
-				#print MFILE "HiSS_Range = $sslo_range; \r\n";
-				}
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
-			#print MFILE "MB_Rate = $mb_pingrate; \r\n";
-			#print MFILE "MB_Gain = $mb_receivegain; \r\n";
 			print MFILE "MB_Sound_Velocity = 0.0; \r\n";
-			#printf MFILE "MB_Pulse_Width = %f; \r\n", $mb_pulsewidth;
 			printf MFILE "MB_Bottom_Detect_Filter_Min_Range = %.2f; \r\n", $mb_minrange;
 			printf MFILE "MB_Bottom_Detect_Filter_Max_Range = %.2f; \r\n", $mb_maxrange;
 			printf MFILE "MB_Bottom_Detect_Filter_Min_Depth = %.2f; \r\n", $mb_mindepth;
-			#printf MFILE "MB_Bottom_Detect_Filter_Max_Depth = %.2f; \r\n", $mb_maxdepth;
-			#print MFILE "MB_Bottom_Detect_Range_Mode = 1; \r\n";
-			#print MFILE "MB_Bottom_Detect_Depth_Mode = 0; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 			print MFILE "#######################################################\r\n";
@@ -2522,21 +2525,28 @@ print "Behavior: gps\r\n";
 		print MFILE "#######################################################\r\n";
 		print MFILE "# Set sonar parameters, turn pinging on, power zero and logging off \r\n";
 		print MFILE "# \r\n";
+    if ($subbottom || $sidescanlo || $sidescanhi)
+      {
+  		print MFILE "behavior edgetech \r\n";
+  		print MFILE "{ \r\n";
+  		print MFILE "duration  = RESON_DURATION; \r\n";
+  		print MFILE "SBP_Mode = 0; \r\n";
+  		print MFILE "SBP_Power = 0.0; \r\n";
+  		print MFILE "SBP_Gain = 128.0; \r\n";
+  		printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
+  		print MFILE "LoSS_Mode = 0; \r\n";
+  		print MFILE "LoSS_Power = 0.0; \r\n";
+  		printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
+  		print MFILE "HiSS_Mode = 0; \r\n";
+  		print MFILE "HiSS_Power = 0.0; \r\n";
+  		print MFILE "HiSS_Range = $sslo_range; \r\n";
+  		print MFILE "} \r\n";
+      }
 		print MFILE "behavior reson \r\n";
 		print MFILE "{ \r\n";
 		print MFILE "duration  = RESON_DURATION; \r\n";
 		print MFILE "MB_Mode  = 1; \r\n";
 		print MFILE "Log_Mode  = 0; \r\n";
-		print MFILE "SBP_Mode = 0; \r\n";
-		print MFILE "SBP_Power = 0.0; \r\n";
-		print MFILE "SBP_Gain = 128.0; \r\n";
-		printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
-		print MFILE "LoSS_Mode = 0; \r\n";
-		print MFILE "LoSS_Power = 0.0; \r\n";
-		printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
-		print MFILE "HiSS_Mode = 0; \r\n";
-		print MFILE "HiSS_Power = 0.0; \r\n";
-		print MFILE "HiSS_Range = $sslo_range; \r\n";
 		print MFILE "MB_Power = 0; \r\n";
 		printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
 		print MFILE "MB_Rate = $mb_pingrate; \r\n";

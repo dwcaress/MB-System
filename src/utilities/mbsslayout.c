@@ -489,7 +489,7 @@ int main(int argc, char **argv) {
 	int n_wf_comment = 0;
 	int n_wt_data = 0;
 	int n_wt_comment = 0;
-    
+
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	char *ctime();
@@ -647,9 +647,9 @@ int main(int argc, char **argv) {
 			}
 
 			/* line_name2 */
-			else if ((strcmp("line-name2", options[option_index].name) == 0) 
+			else if ((strcmp("line-name2", options[option_index].name) == 0)
                     || (strcmp("line_name2", options[option_index].name) == 0)
-			        || (strcmp("output-name2", options[option_index].name) == 0) 
+			        || (strcmp("output-name2", options[option_index].name) == 0)
                     || (strcmp("output_name2", options[option_index].name) == 0)) {
 				strcpy(line_name2, optarg);
 			}
@@ -674,7 +674,7 @@ int main(int argc, char **argv) {
 			 * Define sidescan layout algorithm parameters */
 
 			/* topo-grid-file */
-			else if ((strcmp("topo-grid-file", options[option_index].name) == 0) 
+			else if ((strcmp("topo-grid-file", options[option_index].name) == 0)
                     || (strcmp("topo_grid_file", options[option_index].name) == 0)) {
 				strcpy(topo_grid_file, optarg);
 				layout_mode = MBSSLAYOUT_LAYOUT_3DTOPO;
@@ -2151,7 +2151,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			exit(error);
 		}
-        
+
         /* get the fileroot (but don't use the format id returned here, we already
             know the format, probably from a datalist) */
         error_format = MB_ERROR_NO_ERROR;

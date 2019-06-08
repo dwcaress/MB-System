@@ -24,7 +24,7 @@ AC_INIT([mbsystem],[5.7.5beta9],[http://listserver.mbari.org/sympa/arc/mbsystem]
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 # AC_LANG([C++])
-AC_DEFINE(VERSION_DATE, "23 April 2019", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "8 June 2019", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -209,39 +209,36 @@ AC_CHECK_FUNC(xdrmem_create, XDR_LIB=, [
 AC_SUBST(XDR_LIB)
 
 dnl--------------------------------------------------------------------
+dnl Set up to check compiler support for specific flags.
+dnl There is no way to make clang's "argument unused" warning fatal,
+dnl so when using check_cc_cxx_flag and check_link_flag modify CC, CXX,
+dnl and LD to invoke the compiler through a wrapper script called
+dnl ./flag-check.sh that greps for this message (and then restore
+dnl CC, CXX, and LD when done).
+dnl--------------------------------------------------------------------
+AC_DEFUN([check_cc_cxx_flag], [AC_LANG_PUSH(C) AX_CHECK_COMPILE_FLAG([$1],
+  [AC_LANG_PUSH(C) AX_CHECK_COMPILE_FLAG([$1], [$2], [$3], [-Werror $4])
+    AC_LANG_POP(C)], [$3], [-Werror $4]) AC_LANG_POP(C)])
+AC_DEFUN([check_link_flag], [AX_CHECK_LINK_FLAG([$1], [$2], [$3], [-Werror $4])])
+
+dnl--------------------------------------------------------------------
 dnl Enable compiler and linker options to frustrate memory corruption exploits
 dnl including generating Position Independent Executables (PIE)
 dnl using --enable-hardening
 dnl--------------------------------------------------------------------
-
 dnl HARDENING START
 dnl This is taken from https://github.com/kmcallister/autoharden
 dnl With some very small modifications (to remove C++ checking for instance)
 dnl made by https://git.insomnia247.nl/irc/unreal4/blob/unreal40/configure.ac
-# We want to check for compiler flag support, but there is no way to make
-# clang's "argument unused" warning fatal.  So we invoke the compiler through a
-# wrapper script that greps for this message.
+dnl
+# Save the raw compiler names.
 saved_CC="$CC"
 saved_CXX="$CXX"
 saved_LD="$LD"
-flag_wrap="$srcdir/extras/wrap-compiler-for-flag-check"
+flag_wrap="./flag-check.sh"
 CC="$flag_wrap $CC"
 CXX="$flag_wrap $CXX"
 LD="$flag_wrap $LD"
-
-# We use the same hardening flags for C and C++.  We must check that each flag
-# is supported by both compilers.
-AC_DEFUN([check_cc_cxx_flag],
- [AC_LANG_PUSH(C)
-  AX_CHECK_COMPILE_FLAG([$1],
-   [AC_LANG_PUSH(C)
-    AX_CHECK_COMPILE_FLAG([$1], [$2], [$3], [-Werror $4])
-    AC_LANG_POP(C)],
-   [$3], [-Werror $4])
-  AC_LANG_POP(C)])
-
-AC_DEFUN([check_link_flag],
- [AX_CHECK_LINK_FLAG([$1], [$2], [$3], [-Werror $4])])
 
 AC_ARG_ENABLE([hardening],
   [AS_HELP_STRING([--enable-hardening],

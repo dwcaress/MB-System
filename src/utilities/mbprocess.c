@@ -949,10 +949,14 @@ and mbedit edit save files.\n";
 			}
 
 			/* check for right format if recalculating sidescan is on */
-			if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON && process.mbp_format != MBF_EM300MBA &&
-			    process.mbp_format != MBF_EM710MBA) {
-				fprintf(stderr, "\nProgram <%s> only recalculates sidescan for format %d\n", program_name, MBF_EM300MBA);
-				fprintf(stderr, "Format %d is specified. Sidescan recalculation disabled\n", process.mbp_format);
+			if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON
+          && process.mbp_format != MBF_EM300MBA
+          && process.mbp_format != MBF_EM710MBA
+          && process.mbp_format != MBF_KEMKMALL
+          && process.mbp_format != MBF_RESON7KR
+          && process.mbp_format != MBF_RESON7K3) {
+				fprintf(stderr, "\nProgram <%s> does not recalculate sidescan for format %d\n", program_name, process.mbp_format);
+				fprintf(stderr, "Sidescan recalculation disabled\n");
 				process.mbp_ssrecalc_mode = MBP_SSRECALC_OFF;
 			}
 

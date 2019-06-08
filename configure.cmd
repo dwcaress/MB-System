@@ -1,6 +1,4 @@
 #-------------------------------------------------------------------------
-# Version: $Id$
-#------------------------------------------------------------------------------
 # Notes on using the MB-System autotools based build system
 #------------------------------------------------------------------------------
 #
@@ -379,7 +377,7 @@ autoconf
 autoupdate
 autoreconf --force --install --warnings=all
 
-sudo LDFLAGS="-L/opt/X11/lib" CFLAGS="-g -I/opt/X11/include" \
+LDFLAGS="-L/opt/X11/lib" CFLAGS="-g -I/opt/X11/include" CXXFLAGS="-std=c++11" \
 ./configure \
     --prefix=/usr/local \
     --with-proj-include=/usr/local/opt/proj/include \
@@ -390,8 +388,8 @@ sudo LDFLAGS="-L/opt/X11/lib" CFLAGS="-g -I/opt/X11/include" \
     --with-motif-lib=/usr/local/lib \
     --with-otps-dir=/usr/local/opt/otps \
     --enable-mbtrn \
-    --enable-hardening \
-    --enable-test
+    --enable-hardening
+    #--enable-test
     #--enable-pcltools
 
 make

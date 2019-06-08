@@ -137,9 +137,9 @@
 #define R7KRECID_7kInstallationParameters 7030
 #define R7KRECID_7kSystemEvents 7050
 #define R7KRECID_7kSystemEventMessage 7051
-#define R7KRECID_7kTargetData 7060
 #define R7KRECID_7kDataStorageStatus 7052
 #define R7KRECID_7kCalibratedSnippetData 7058
+#define R7KRECID_7kTargetData 7060
 #define R7KRECID_7kFileHeader 7200
 #define R7KRECID_7kFileCatalog 7300
 #define R7KRECID_7kTriggerSequenceSetup 7301

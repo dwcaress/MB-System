@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
    *
    *     --output-sensor-fnv
    *     --skip-existing
-     *
+   *
    *     --nav-file=file
    *     --nav-file-format=format_id
    *     --output-sensor-fnv
@@ -1598,6 +1598,10 @@ int main(int argc, char **argv) {
         nav_mode = MBPREPROCESS_MERGE_ASYNC;
         nav_async = MB_DATA_NAV1;
       }
+      else if (iformat == MBF_RESON7K3) {
+        nav_mode = MBPREPROCESS_MERGE_ASYNC;
+        nav_async = MB_DATA_NAV;
+      }
     }
     if (sensordepth_mode == MBPREPROCESS_MERGE_OFF) {
       if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
@@ -1607,6 +1611,10 @@ int main(int argc, char **argv) {
       else if (iformat == MBF_RESON7KR) {
         sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
         sensordepth_async = MB_DATA_SONARDEPTH;
+      }
+      else if (iformat == MBF_RESON7K3) {
+        sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
+        sensordepth_async = MB_DATA_NAV;
       }
     }
     if (heading_mode == MBPREPROCESS_MERGE_OFF) {
@@ -1618,9 +1626,21 @@ int main(int argc, char **argv) {
         heading_mode = MBPREPROCESS_MERGE_ASYNC;
         heading_async = MB_DATA_HEADING;
       }
+      else if (iformat == MBF_RESON7K3) {
+        heading_mode = MBPREPROCESS_MERGE_ASYNC;
+        heading_async = MB_DATA_NAV;
+      }
     }
     if (attitude_mode == MBPREPROCESS_MERGE_OFF) {
-      if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW || iformat == MBF_RESON7KR) {
+      if (iformat == MBF_EMOLDRAW || iformat == MBF_EM300RAW || iformat == MBF_EM710RAW) {
+        attitude_mode = MBPREPROCESS_MERGE_ASYNC;
+        attitude_async = MB_DATA_ATTITUDE;
+      }
+      else if (iformat == MBF_RESON7KR) {
+        attitude_mode = MBPREPROCESS_MERGE_ASYNC;
+        attitude_async = MB_DATA_ATTITUDE;
+      }
+      else if (iformat == MBF_RESON7K3) {
         attitude_mode = MBPREPROCESS_MERGE_ASYNC;
         attitude_async = MB_DATA_ATTITUDE;
       }
@@ -1915,31 +1935,31 @@ int main(int argc, char **argv) {
       }
     }
 
-        /* copy data record index if used for this format */
-        status =  mb_indextable(verbose, imbio_ptr, &i_num_indextable, (void **)&i_indextable, &error);
-        if (i_num_indextable > 0) {
-            if (num_indextable_alloc <= num_indextable + i_num_indextable) {
-                /* allocate space */
-                num_indextable_alloc += i_num_indextable;
-                status = mb_reallocd(verbose, __FILE__, __LINE__,
-                                    num_indextable_alloc * sizeof(struct mb_io_indextable_struct),
-                                    (void **)(&indextable), &error);
-                if (error != MB_ERROR_NO_ERROR) {
-                    mb_error(verbose, error, &message);
-                    fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-                    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-                    exit(error);
-                }
-            }
-
-            /* copy the index */
-            memcpy(&indextable[num_indextable], i_indextable,
-                       i_num_indextable * sizeof(struct mb_io_indextable_struct));
-            for (i = num_indextable; i < num_indextable + i_num_indextable; i++) {
-                indextable[i].file_index = n_rt_files;
-            }
-            num_indextable += i_num_indextable;
+    /* copy data record index if used for this format */
+    status =  mb_indextable(verbose, imbio_ptr, &i_num_indextable, (void **)&i_indextable, &error);
+    if (i_num_indextable > 0) {
+      if (num_indextable_alloc <= num_indextable + i_num_indextable) {
+        /* allocate space */
+        num_indextable_alloc += i_num_indextable;
+        status = mb_reallocd(verbose, __FILE__, __LINE__,
+                            num_indextable_alloc * sizeof(struct mb_io_indextable_struct),
+                            (void **)(&indextable), &error);
+        if (error != MB_ERROR_NO_ERROR) {
+          mb_error(verbose, error, &message);
+          fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+          fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+          exit(error);
         }
+      }
+
+      /* copy the index */
+      memcpy(&indextable[num_indextable], i_indextable,
+                 i_num_indextable * sizeof(struct mb_io_indextable_struct));
+      for (i = num_indextable; i < num_indextable + i_num_indextable; i++) {
+        indextable[i].file_index = n_rt_files;
+      }
+      num_indextable += i_num_indextable;
+    }
 
     /* output data counts */
     if (verbose > 0) {
@@ -2867,24 +2887,24 @@ int main(int argc, char **argv) {
             }
           }
 
-                    /* if the input data are WiSSL data in format MBF_3DWISSLR
-                     * and kluge_fix_wissl_timestamps is enabled, call special function
-                     * to fix the timestmps in the file's internal index table */
-                    if (kind == MB_DATA_DATA && iformat == MBF_3DWISSLR
-                        && kluge_fix_wissl_timestamps == MB_YES) {
-                        if (kluge_fix_wissl_timestamps_setup1 == MB_NO) {
-                            status = mb_indextablefix(verbose, imbio_ptr,
-                                                      num_indextable, indextable,
-                                                      &error);
-                            kluge_fix_wissl_timestamps_setup1 = MB_YES;
-                        }
-                        if (kluge_fix_wissl_timestamps_setup2 == MB_NO) {
-                            status = mb_indextableapply(verbose, imbio_ptr,
-                                                        num_indextable, indextable,
-                                                        n_rt_files, &error);
-                            kluge_fix_wissl_timestamps_setup2 = MB_YES;
-                        }
-                    }
+          /* if the input data are WiSSL data in format MBF_3DWISSLR
+           * and kluge_fix_wissl_timestamps is enabled, call special function
+           * to fix the timestmps in the file's internal index table */
+          if (kind == MB_DATA_DATA && iformat == MBF_3DWISSLR
+            && kluge_fix_wissl_timestamps == MB_YES) {
+            if (kluge_fix_wissl_timestamps_setup1 == MB_NO) {
+                status = mb_indextablefix(verbose, imbio_ptr,
+                                          num_indextable, indextable,
+                                          &error);
+                kluge_fix_wissl_timestamps_setup1 = MB_YES;
+            }
+            if (kluge_fix_wissl_timestamps_setup2 == MB_NO) {
+                status = mb_indextableapply(verbose, imbio_ptr,
+                                            num_indextable, indextable,
+                                            n_rt_files, &error);
+                kluge_fix_wissl_timestamps_setup2 = MB_YES;
+            }
+          }
 
           /* apply time latency correction called for in the platform file */
           if (sensor_target != NULL && sensor_target->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {

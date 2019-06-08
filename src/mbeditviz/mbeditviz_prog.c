@@ -38,6 +38,7 @@
 #include "mb_status.h"
 #include "mb_define.h"
 #include "mb_format.h"
+#include "mb_io.h"
 #include "mb_aux.h"
 #include "mbsys_singlebeam.h"
 
