@@ -20,21 +20,17 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
-#include <unistd.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>
 
-/* GMT include files */
 #include "gmt.h"
-
-/* MBIO include files */
-#include "mb_status.h"
-#include "mb_define.h"
 #include "mb_aux.h"
+#include "mb_define.h"
+#include "mb_status.h"
 
 /* Projection defines */
 #define ModelTypeProjected 1
@@ -63,7 +59,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	double mtodeglon, mtodeglat;
 	double ddx, ddy;
 	int kx0, kx2, ky0, ky2;
-	int i, j, k, ii, jj, kk;
+	int j, k, ii, jj, kk;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -192,7 +188,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 
 		/* copy grid data, reordering to internal convention */
 		if (status == MB_SUCCESS) {
-			for (i = 0; i < *n_columns; i++)
+			for (int i = 0; i < *n_columns; i++)
 				for (j = 0; j < *n_rows; j++) {
 					k = i * *n_rows + j;
 					kk = (*n_rows + header->pad[2] + header->pad[3] - 1 - j) * (*n_columns + header->pad[0] + header->pad[1]) +
@@ -213,7 +209,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 				ddx /= mtodeglon;
 				ddy /= mtodeglon;
 			}
-			for (i = 0; i < *n_columns; i++)
+			for (int i = 0; i < *n_columns; i++)
 				for (j = 0; j < *n_rows; j++) {
 					k = i * (*n_rows) + j;
 					ii = 0;
@@ -374,7 +370,7 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	double max = 0.0;
 	double NaN;
 	int nx_node_registration;
-	int i, j, k, kk;
+	int j, k, kk;
 	char *ctime();
 	char *getenv();
 
@@ -504,7 +500,7 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	/* recopy grid data, reordering from internal convention to grd file convention */
 	if (status == MB_SUCCESS) {
 		MB_MAKE_FNAN(NaN);
-		for (i = 0; i < n_columns; i++)
+		for (int i = 0; i < n_columns; i++)
 			for (j = 0; j < n_rows; j++) {
 				k = i * n_rows + j;
 				kk = (n_rows - 1 - j) * n_columns + i;

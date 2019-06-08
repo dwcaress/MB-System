@@ -25,6 +25,9 @@
  *
  */
 
+#ifndef MB_AUX_H_
+#define MB_AUX_H_
+
 #include "mb_io.h"
 
 /* contour algorithm defines */
@@ -304,3 +307,5 @@ void mbcblas_dscal(const int N, const double alpha, double *X, const int incX);
 void mbcblas_dgemv(const enum MBCBLAS_ORDER order, const enum MBCBLAS_TRANSPOSE TransA, const int M, const int N,
                    const double alpha, const double *A, const int lda, const double *X, const int incX, const double beta,
                    double *Y, const int incY);
+
+#endif  /* MB_AUX_H_ */

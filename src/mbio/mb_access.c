@@ -20,25 +20,21 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
 #include "mb_segy.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mb_alloc";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -49,9 +45,10 @@ int mb_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call appropriate memory allocation routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_store_alloc != NULL) {
 		status = (*mb_io_ptr->mb_io_store_alloc)(verbose, mbio_ptr, store_ptr, error);
 	}
@@ -75,8 +72,6 @@ int mb_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mb_deall";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -88,9 +83,10 @@ int mb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call appropriate memory deallocation routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_store_free != NULL) {
 		status = (*mb_io_ptr->mb_io_store_free)(verbose, mbio_ptr, store_ptr, error);
 	}
@@ -113,8 +109,6 @@ int mb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_get_store(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mb_get_store";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -125,10 +119,12 @@ int mb_get_store(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get store pointer */
 	*store_ptr = (void *)mb_io_ptr->store_data;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -145,8 +141,6 @@ int mb_get_store(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
 	char *function_name = "mb_dimensions";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -158,9 +152,10 @@ int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_extract != NULL) {
 		status = (*mb_io_ptr->mb_io_dimensions)(verbose, mbio_ptr, store_ptr, kind, nbath, namp, nss, error);
 	}
@@ -187,8 +182,6 @@ int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *
 /*--------------------------------------------------------------------*/
 int mb_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
 	char *function_name = "mb_pingnumber";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -199,9 +192,10 @@ int mb_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *er
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_pingnumber != NULL) {
 		status = (*mb_io_ptr->mb_io_pingnumber)(verbose, mbio_ptr, pingnumber, error);
 	}
@@ -226,8 +220,6 @@ int mb_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *er
 /*--------------------------------------------------------------------*/
 int mb_segynumber(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, int *error) {
 	char *function_name = "mb_segynumber";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -238,9 +230,10 @@ int mb_segynumber(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_segynumber != NULL) {
 		status = (*mb_io_ptr->mb_io_segynumber)(verbose, mbio_ptr, line, shot, cdp, error);
 	}
@@ -269,8 +262,6 @@ int mb_segynumber(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, i
 /*--------------------------------------------------------------------*/
 int mb_beamwidths(int verbose, void *mbio_ptr, double *beamwidth_xtrack, double *beamwidth_ltrack, int *error) {
 	char *function_name = "mb_beamwidths";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -281,12 +272,12 @@ int mb_beamwidths(int verbose, void *mbio_ptr, double *beamwidth_xtrack, double 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* extract the values from the mb_io structure */
 	*beamwidth_xtrack = mb_io_ptr->beamwidth_xtrack;
 	*beamwidth_ltrack = mb_io_ptr->beamwidth_ltrack;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
@@ -305,8 +296,6 @@ int mb_beamwidths(int verbose, void *mbio_ptr, double *beamwidth_xtrack, double 
 /*--------------------------------------------------------------------*/
 int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
 	char *function_name = "mb_sonartype";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -318,10 +307,10 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
     
-    /* reset error value */
-    *error = MB_ERROR_NO_ERROR;
+	/* reset error value */
+	*error = MB_ERROR_NO_ERROR;
 
 	/* start off with sonartype unknown */
 	*sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
@@ -331,6 +320,7 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, i
 	        mb_io_ptr->system == MB_SYS_GSF
 	        mb_io_ptr->system == MB_SYS_HDCS
 	        mb_io_ptr->system == MB_SYS_HYSWEEP */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_sonartype != NULL) {
 		if (store_ptr == NULL)
 			store_ptr = (void *)mb_io_ptr->store_data;
@@ -396,8 +386,6 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, i
 /*--------------------------------------------------------------------*/
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
 	char *function_name = "mb_sidescantype";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -409,12 +397,13 @@ int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
     
-    /* reset error value */
-    *error = MB_ERROR_NO_ERROR;
+	/* reset error value */
+	*error = MB_ERROR_NO_ERROR;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_sidescantype != NULL) {
 		if (store_ptr == NULL)
 			store_ptr = (void *)mb_io_ptr->store_data;
@@ -440,8 +429,6 @@ int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, 
 /*--------------------------------------------------------------------*/
 int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr, int *error) {
 	char *function_name = "mb_preprocess";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -455,9 +442,10 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_p
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_preprocess != NULL) {
 		status = (*mb_io_ptr->mb_io_preprocess)(verbose, mbio_ptr, store_ptr, platform_ptr, preprocess_pars_ptr, error);
 	}
@@ -481,9 +469,6 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_p
 /*--------------------------------------------------------------------*/
 int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
 	char *function_name = "mb_extract_platform";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
-	struct mb_platform_struct *platform;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -497,9 +482,11 @@ int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	struct mb_platform_struct *platform = NULL;
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_extract_platform != NULL) {
 		status = (*mb_io_ptr->mb_io_extract_platform)(verbose, mbio_ptr, store_ptr, kind, platform_ptr, error);
 
@@ -599,8 +586,6 @@ int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mb_sensorhead(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead, int *error) {
 	char *function_name = "mb_sensorhead";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -612,14 +597,15 @@ int mb_sensorhead(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
     
-    /* reset error value */
-    *error = MB_ERROR_NO_ERROR;
+	/* reset error value */
+	*error = MB_ERROR_NO_ERROR;
 
 	/* call the appropriate mbsys_ sensorhead routine
 	        defined for:
 	          mb_io_ptr->system == MB_SYS_WISSL */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_sensorhead != NULL) {
 		if (store_ptr == NULL)
 			store_ptr = (void *)mb_io_ptr->store_data;
@@ -653,9 +639,6 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time
                double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mb_extract";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
-	double easting, northing;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -667,9 +650,10 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_extract != NULL) {
 		status = (*mb_io_ptr->mb_io_extract)(verbose, mbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
 		                                     nbath, namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
@@ -684,8 +668,8 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time
 	if (status == MB_SUCCESS) {
 		/* apply inverse projection if required */
 		if (mb_io_ptr->projection_initialized == MB_YES) {
-			easting = *navlon;
-			northing = *navlat;
+			const double easting = *navlon;
+			const double northing = *navlat;
 			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, navlon, navlat, error);
 		}
 
@@ -761,9 +745,6 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
               double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack, double *ssalongtrack,
               char *comment, int *error) {
 	char *function_name = "mb_insert";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
-	double easting, northing;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -810,11 +791,12 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* check that io arrays are large enough, allocate larger arrays if necessary */
+	int status = MB_SUCCESS;
 	if (nbath > mb_io_ptr->beams_bath_alloc || namp > mb_io_ptr->beams_amp_alloc || nss > mb_io_ptr->pixels_ss_alloc) {
-		status = mb_update_arrays(verbose, mbio_ptr, nbath, namp, nss, error);
+		status &= mb_update_arrays(verbose, mbio_ptr, nbath, namp, nss, error);
 	}
 	mb_io_ptr->beams_bath_max = MAX(mb_io_ptr->beams_bath_max, nbath);
 	mb_io_ptr->beams_amp_max = MAX(mb_io_ptr->beams_amp_max, namp);
@@ -822,6 +804,8 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
 
 	/* apply inverse projection if required */
 	if (mb_io_ptr->projection_initialized == MB_YES) {
+		double easting;
+		double northing;
 		mb_proj_forward(verbose, mb_io_ptr->pjptr, navlon, navlat, &easting, &northing, error);
 		navlon = easting;
 		navlat = northing;
@@ -829,7 +813,7 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
 
 	/* call the appropriate mbsys_ insertion routine */
 	if (mb_io_ptr->mb_io_insert != NULL) {
-		status = (*mb_io_ptr->mb_io_insert)(verbose, mbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
+		status &= (*mb_io_ptr->mb_io_insert)(verbose, mbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
 		                                    nbath, namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
 		                                    ssacrosstrack, ssalongtrack, comment, error);
 	}
@@ -854,9 +838,6 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int 
                    double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch, double *heave,
                    int *error) {
 	char *function_name = "mb_extract_nav";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
-	double easting, northing;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -868,9 +849,10 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_extract_nav != NULL) {
 		status = (*mb_io_ptr->mb_io_extract_nav)(verbose, mbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed,
 		                                         heading, draft, roll, pitch, heave, error);
@@ -884,8 +866,8 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int 
 	if (status == MB_SUCCESS) {
 		/* apply inverse projection if required */
 		if (mb_io_ptr->projection_initialized == MB_YES) {
-			easting = *navlon;
-			northing = *navlat;
+			const double easting = *navlon;
+			const double northing = *navlat;
 			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, navlon, navlat, error);
 		}
 
@@ -943,10 +925,6 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int 
                     double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                     double *heave, int *error) {
 	char *function_name = "mb_extract_nnav";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
-	double easting, northing;
-	int inav;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -958,9 +936,10 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_extract_nnav != NULL) {
 		status = (*mb_io_ptr->mb_io_extract_nnav)(verbose, mbio_ptr, store_ptr, nmax, kind, n, time_i, time_d, navlon, navlat,
 		                                          speed, heading, draft, roll, pitch, heave, error);
@@ -1016,6 +995,8 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int 
 		for (int inav = 0; inav < *n; inav++) {
 			/* apply inverse projection if required */
 			if (mb_io_ptr->projection_initialized == MB_YES) {
+				double easting;
+				double northing;
 				easting = navlon[inav];
 				northing = navlat[inav];
 				mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &(navlon[inav]), &(navlat[inav]), error);
@@ -1073,9 +1054,6 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int 
 int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
                   double speed, double heading, double draft, double roll, double pitch, double heave, int *error) {
 	char *function_name = "mb_insert_nav";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
-	double easting, northing;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1103,16 +1081,19 @@ int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], d
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* apply inverse projection if required */
 	if (mb_io_ptr->projection_initialized == MB_YES) {
+		double easting;
+		double northing;
 		mb_proj_forward(verbose, mb_io_ptr->pjptr, navlon, navlat, &easting, &northing, error);
 		navlon = easting;
 		navlat = northing;
 	}
 
 	/* call the appropriate mbsys_ insertion routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_insert_nav != NULL) {
 		status = (*mb_io_ptr->mb_io_insert_nav)(verbose, mbio_ptr, store_ptr, time_i, time_d, navlon, navlat, speed, heading,
 		                                        draft, roll, pitch, heave, error);
@@ -1137,8 +1118,6 @@ int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], d
 int mb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth, double *altitude,
                         int *error) {
 	char *function_name = "mb_extract_altitude";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1150,9 +1129,10 @@ int mb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_extract_altitude != NULL) {
 		status = (*mb_io_ptr->mb_io_extract_altitude)(verbose, mbio_ptr, store_ptr, kind, transducer_depth, altitude, error);
 	}
@@ -1178,8 +1158,6 @@ int mb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mb_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude, int *error) {
 	char *function_name = "mb_insert_altitude";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1193,9 +1171,10 @@ int mb_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double tran
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ insertion routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_insert_altitude != NULL) {
 		status = (*mb_io_ptr->mb_io_insert_altitude)(verbose, mbio_ptr, store_ptr, transducer_depth, altitude, error);
 	}
@@ -1219,8 +1198,6 @@ int mb_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double tran
 int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                    int *error) {
 	char *function_name = "mb_extract_svp";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1232,9 +1209,10 @@ int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_extract_svp != NULL) {
 		status = (*mb_io_ptr->mb_io_extract_svp)(verbose, mbio_ptr, store_ptr, kind, nsvp, depth, velocity, error);
 	}
@@ -1261,8 +1239,6 @@ int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int 
 /*--------------------------------------------------------------------*/
 int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
 	char *function_name = "mb_insert_svp";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1277,9 +1253,10 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ insertion routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_insert_svp != NULL) {
 		status = (*mb_io_ptr->mb_io_insert_svp)(verbose, mbio_ptr, store_ptr, nsvp, depth, velocity, error);
 	}
@@ -1473,8 +1450,6 @@ int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbea
               double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft, double *ssv,
               int *error) {
 	char *function_name = "mb_ttimes";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1486,9 +1461,10 @@ int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbea
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_ttimes != NULL) {
 		status = (*mb_io_ptr->mb_io_ttimes)(verbose, mbio_ptr, store_ptr, kind, nbeams, ttimes, angles, angles_forward,
 		                                    angles_null, heave, alongtrack_offset, draft, ssv, error);
@@ -1523,9 +1499,6 @@ int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbea
 /*--------------------------------------------------------------------*/
 int mb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mb_detects";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1537,14 +1510,15 @@ int mb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbe
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_detects != NULL) {
 		status = (*mb_io_ptr->mb_io_detects)(verbose, mbio_ptr, store_ptr, kind, nbeams, detects, error);
 	}
 	else {
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			detects[i] = MB_DETECT_UNKNOWN;
 	}
 
@@ -1556,7 +1530,7 @@ int mb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbe
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -1570,8 +1544,6 @@ int mb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbe
 /*--------------------------------------------------------------------*/
 int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error) {
 	char *function_name = "mb_pulses";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1583,9 +1555,10 @@ int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbea
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_pulses != NULL) {
 		status = (*mb_io_ptr->mb_io_pulses)(verbose, mbio_ptr, store_ptr, kind, nbeams, pulses, error);
 	}
@@ -1617,8 +1590,6 @@ int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbea
 int mb_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
              double *receive_gain, int *error) {
 	char *function_name = "mb_gains";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1630,9 +1601,10 @@ int mb_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *tr
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_gains != NULL) {
 		status = (*mb_io_ptr->mb_io_gains)(verbose, mbio_ptr, store_ptr, kind, transmit_gain, pulse_length, receive_gain, error);
 	}
@@ -1664,8 +1636,6 @@ int mb_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *tr
 int mb_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *sample_interval,
                                int *num_samples_port, int *num_samples_stbd, int *error) {
 	char *function_name = "mb_io_extract_rawsssdimensions";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1677,9 +1647,10 @@ int mb_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_extract_rawssdimensions != NULL) {
 		status = (*mb_io_ptr->mb_io_extract_rawssdimensions)(verbose, mbio_ptr, store_ptr, kind, sample_interval,
 		                                                     num_samples_port, num_samples_stbd, error);
@@ -1709,8 +1680,6 @@ int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
                      double *beamwidth_xtrack, double *beamwidth_ltrack, int *num_samples_port, double *rawss_port,
                      int *num_samples_stbd, double *rawss_stbd, int *error) {
 	char *function_name = "mb_extract_rawss";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1722,9 +1691,10 @@ int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_extract_rawss != NULL) {
 		status = (*mb_io_ptr->mb_io_extract_rawss)(verbose, mbio_ptr, store_ptr, kind, sidescan_type, sample_interval,
 		                                           beamwidth_xtrack, beamwidth_ltrack, num_samples_port, rawss_port,
@@ -1762,8 +1732,6 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
                     double beamwidth_xtrack, double beamwidth_ltrack, int num_samples_port, double *rawss_port,
                     int num_samples_stbd, double *rawss_stbd, int *error) {
 	char *function_name = "mb_insert_rawss";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1786,9 +1754,10 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ insertion routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_insert_rawss != NULL) {
 		status =
 		    (*mb_io_ptr->mb_io_insert_rawss)(verbose, mbio_ptr, store_ptr, kind, sidescan_type, sample_interval, beamwidth_xtrack,
@@ -1813,9 +1782,6 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
 /*--------------------------------------------------------------------*/
 int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void *segytraceheader_ptr, int *error) {
 	char *function_name = "mb_extract_segytraceheader";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
-	struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1829,10 +1795,11 @@ int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segytraceheader_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_segytraceheader_struct *mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segytraceheader_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_extract_segy != NULL) {
 		status = (*mb_io_ptr->mb_io_extract_segytraceheader)(verbose, mbio_ptr, store_ptr, kind, segytraceheader_ptr, error);
 	}
@@ -1922,9 +1889,6 @@ int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int
 int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *sampleformat, int *kind, void *segytraceheader_ptr,
                     float *segydata, int *error) {
 	char *function_name = "mb_extract_segy";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
-	struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1939,10 +1903,11 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *samplefor
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segytraceheader_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_segytraceheader_struct *mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segytraceheader_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_extract_segy != NULL) {
 		status = (*mb_io_ptr->mb_io_extract_segy)(verbose, mbio_ptr, store_ptr, sampleformat, kind, segytraceheader_ptr, segydata,
 		                                          error);
@@ -2036,13 +2001,10 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *samplefor
 int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void *segytraceheader_ptr, float *segydata,
                    int *error) {
 	char *function_name = "mb_insert_segy";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
-	struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segytraceheader_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_segytraceheader_struct *mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segytraceheader_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2124,6 +2086,7 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void 
 	}
 
 	/* call the appropriate mbsys_ insertion routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_insert_segy != NULL) {
 		status = (*mb_io_ptr->mb_io_insert_segy)(verbose, mbio_ptr, store_ptr, kind, segytraceheader_ptr, segydata, error);
 	}
@@ -2147,8 +2110,6 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void 
 int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, double *time_d, double *conductivity,
            double *temperature, double *depth, double *salinity, double *soundspeed, int *error) {
 	char *function_name = "mb_ctd";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2160,10 +2121,11 @@ int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, d
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
 	/* note: the arrays should be allocated to MB_CTD_MAX length */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_ctd != NULL) {
 		status = (*mb_io_ptr->mb_io_ctd)(verbose, mbio_ptr, store_ptr, kind, nctd, time_d, conductivity, temperature, depth,
 		                                 salinity, soundspeed, error);
@@ -2203,8 +2165,6 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *sensor2, double *sensor3, double *sensor4, double *sensor5, double *sensor6, double *sensor7,
                         double *sensor8, int *error) {
 	char *function_name = "mb_ancilliarysensor";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2216,10 +2176,11 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbsys_ extraction routine */
 	/* note: the arrays should be allocated to MB_CTD_MAX length */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_ancilliarysensor != NULL) {
 		status = (*mb_io_ptr->mb_io_ancilliarysensor)(verbose, mbio_ptr, store_ptr, kind, nsensor, time_d, sensor1, sensor2,
 		                                              sensor3, sensor4, sensor5, sensor6, sensor7, sensor8, error);
@@ -2260,8 +2221,6 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mb_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mb_copy_record";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2274,9 +2233,10 @@ int mb_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call appropriate memory copy routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_copyrecord != NULL) {
 		status = (*mb_io_ptr->mb_io_copyrecord)(verbose, mbio_ptr, store_ptr, copy_ptr, error);
 	}
@@ -2299,8 +2259,6 @@ int mb_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, 
 /*--------------------------------------------------------------------*/
 int mb_indextable(int verbose, void *mbio_ptr, int *num_indextable, void **indextable_ptr, int *error) {
 	char *function_name = "mb_indextable";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2311,15 +2269,15 @@ int mb_indextable(int verbose, void *mbio_ptr, int *num_indextable, void **index
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* return index table */
 	*num_indextable = mb_io_ptr->num_indextable;
 	*indextable_ptr = (void *) mb_io_ptr->indextable;
     
-    /* return no error */
-    *error = MB_ERROR_NO_ERROR;
-    status = MB_SUCCESS;
+	/* return no error */
+	*error = MB_ERROR_NO_ERROR;
+	int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2337,8 +2295,6 @@ int mb_indextable(int verbose, void *mbio_ptr, int *num_indextable, void **index
 /*--------------------------------------------------------------------*/
 int mb_indextablefix(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int *error) {
 	char *function_name = "mb_indextablefix";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2351,9 +2307,10 @@ int mb_indextablefix(int verbose, void *mbio_ptr, int num_indextable, void *inde
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call appropriate index table fix routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_indextablefix != NULL) {
 		status = (*mb_io_ptr->mb_io_indextablefix)(verbose, mbio_ptr, num_indextable, indextable_ptr, error);
 	}
@@ -2362,9 +2319,9 @@ int mb_indextablefix(int verbose, void *mbio_ptr, int num_indextable, void *inde
 		*error = MB_ERROR_BAD_SYSTEM;
 	}
     
-    /* return no error */
-    *error = MB_ERROR_NO_ERROR;
-    status = MB_SUCCESS;
+	/* return no error */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2380,8 +2337,6 @@ int mb_indextablefix(int verbose, void *mbio_ptr, int num_indextable, void *inde
 /*--------------------------------------------------------------------*/
 int mb_indextableapply(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int n_file, int *error) {
 	char *function_name = "mb_indextableapply";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2395,9 +2350,10 @@ int mb_indextableapply(int verbose, void *mbio_ptr, int num_indextable, void *in
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call appropriate index table fix routine */
+	int status = MB_SUCCESS;
 	if (mb_io_ptr->mb_io_indextableapply != NULL) {
 		status = (*mb_io_ptr->mb_io_indextableapply)(verbose, mbio_ptr, num_indextable, indextable_ptr, n_file, error);
 	}
@@ -2406,9 +2362,9 @@ int mb_indextableapply(int verbose, void *mbio_ptr, int num_indextable, void *in
 		*error = MB_ERROR_BAD_SYSTEM;
 	}
 
-    /* return no error */
-    *error = MB_ERROR_NO_ERROR;
-    status = MB_SUCCESS;
+	/* return no error */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
