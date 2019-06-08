@@ -121,6 +121,8 @@
 #define MBSYS_KMBES_START_BUFFER_SIZE 64000 // udp packet max is 64kbyte, but the KMBES K-Controller may concat a number of packets
 #define MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE 4096
 #define MBSYS_KMBES_HEADER_SIZE 20
+#define MBSYS_KMBES_PARITION_SIZE 4
+#define MBSYS_KMBES_END_SIZE 4
 #define MBSYS_KMBES_MAX_SPO_DATALENGTH 250
 #define MBSYS_KMBES_MAX_ATT_DATALENGTH 250
 #define MBSYS_KMBES_MAX_SVT_DATALENGTH 64
@@ -209,10 +211,14 @@ typedef enum {
     // X-datagrams (extra - defined only for MB-System)
     XMB, // The presence of this datagram indicates this file/stream has been
          // written by MB-System.
-         // - this means that pings include a sidescan datagram MMS after the MRZ datagrams
+         // - this means that pings include a corrected navigation, attitude, travel
+         //   time, and pointing angle datagram XMT after rthe MRZ datagrams
+         // - this means that pings include a sidescan datagram XMS after the MRZ datagrams
          // - this means that MB-System beamflags are embedded in the MRZ datagram soundings
+    XMT, // Corrected/interpolated navigation, attitude, travel time, and
+         //   pointing angle datagram (MB-System only)
     XMC, // Comment datagram (MB-System only)
-    XMS, // MB-System multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
+    XMS  // MB-System multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
 
 } mbsys_kmbes_emdgm_type;
 
@@ -1289,6 +1295,50 @@ struct mbsys_kmbes_xmc {
 
 /************************************
 
+    XMT, // MB-System multibeam ping navigation, attitude, travel time, and pointing angle (MB-System only)
+
+ ************************************/
+
+struct mbsys_kmbes_xmt_ping_info {
+    /* #XMTZ - ping info. Information on vessel/system level, i.e. information common to all beams in the current ping. */
+    unsigned short numBytesInfoData;    /* Number of bytes in current struct (32). */
+    unsigned short padding0;            /* Number of bytes per sounding entry (16) */
+    float longtitude;                   /* Sonar longtitude */
+    float latitude;                     /* Sonar latitude */
+    float sensorDepth;                  /* Sonar depth */
+    float heading;                      /* Sonar heading */
+    float roll;                         /* Sonar roll */
+    float pitch;                        /* Sonar pitch */
+    int numSoundings;                   /* number of soundings */
+};
+
+struct mbsys_kmbes_xmt_sounding {
+    /* #XMT - Corrected travel times and pointing angles ready for raytracing */
+
+    unsigned short soundingIndex;       /* Sounding index. Cross reference for seabed image.
+                                        * Valid range: 0 to (numSoundingsMaxMain+numExtraDetections)-1,
+                                        * i.e. 0 - (Nrx+Nd)-1. */
+    unsigned short padding0;            /* Byte alignment. */
+    float twtt;                         /* Corrected two way travel time (seconds) */
+    float angle_vertical;               /* Vertical beam angle for raytracing
+                                            (degrees, zero = vertical down) */
+    float angle_azimuthal;              /* Azimuthal beam angle for raytracing
+                                            (degrees, zero = forward, positive clockwise) */
+};
+struct mbsys_kmbes_xmt {
+    /* Definition of #XMT datagram containing corrected/interpolated navigation,
+       attitude, travel time, and pointing angle data resolved to ping time
+       for each MRZ datagram (MB-System only) */
+    struct mbsys_kmbes_header header;
+    struct mbsys_kmbes_m_partition partition;
+    struct mbsys_kmbes_xmt_ping_info xmtPingInfo;
+    struct mbsys_kmbes_xmt_sounding xmtSounding[MBSYS_KMBES_MAX_NUM_BEAMS+MBSYS_KMBES_MAX_EXTRA_DET];
+};
+
+ #define MBSYS_KMBES_XMT_VERSION 0
+
+/************************************
+
     XMS, // MB-System multibeam pseudosidescan derived from multibeam backscatter (MB-System only)
 
  ************************************/
@@ -1306,7 +1356,6 @@ struct mbsys_kmbes_xms {
 };
 
  #define MBSYS_KMBES_XMS_VERSION 0
-
 
 /*********************************************
 

@@ -14,31 +14,31 @@
  *--------------------------------------------------------------------*/
 /*
  * mbgpstide generates tide files from the GPS altitude data recorded in
- * the input files. 
- * 
+ * the input files.
+ *
  * Input (-I) may be a single data file or a datalist. The format of the input file may be specified
  * using the -F option. Default is -Idatalist.mb-1.
- * 
- * Output is either to a file specified by -O ("-" for stdout) or to <file>.gps.tde where <file> is 
- * the name of the input data file. The -S option specifies that the <file>.gps.tde will not be generated 
- * if it already exists. The format of the tide file may be specified with -A where 1 is 
+ *
+ * Output is either to a file specified by -O ("-" for stdout) or to <file>.gps.tde where <file> is
+ * the name of the input data file. The -S option specifies that the <file>.gps.tde will not be generated
+ * if it already exists. The format of the tide file may be specified with -A where 1 is
  * a two column format, seconds since 1970-01-01 and tide height; and two is a seven column format,
- * year, month, day, hour, minute, second and tide height. Default is -A2. 
- * 
+ * year, month, day, hour, minute, second and tide height. Default is -A2.
+ *
  * The -Dinterval indicates the time interval in seconds over which the tide values will be averaged to get a value.
  * The default is 300 seconds (5 minutes).
- * 
+ *
  * -M will cause the program to set tide processing on for the input data file using the output file generated.
- * 
+ *
  * -Roffset adds a constant offset to the tide value.
- * 
- * -Tgrid takes a geoid difference grid and adds the offset for each location in the file. 
- * The geoid difference grid is in GMT format. For example 
+ *
+ * -Tgrid takes a geoid difference grid and adds the offset for each location in the file.
+ * The geoid difference grid is in GMT format. For example
  *		wget  http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm2008/GIS/world_geoid/s45e135.zip
  * 		unzip s45e135.zip
  * 		grdconvert s45e135/s45e135/ s45e135.grd
  * 		mbgpstide -Ts45e135.grd
- * 
+ *
  * -Usource specifies the source of GPS elipsoid height. 0 = Simrad Height telegram or GSF ping height,
  * 		1 = GSF ping height + separator.
  *
@@ -56,6 +56,7 @@
 #include <unistd.h>
 
 #include "mb_define.h"
+#include "mb_io.h"
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_process.h"
@@ -113,7 +114,7 @@ int main(int argc, char **argv) {
 										{"geoid",required_argument , NULL, 0},
 										{"use", required_argument, NULL, 0},
 										{NULL, 0, NULL, 0}};
-	
+
 	/* MBIO status variables */
 	int status = MB_SUCCESS;
 	int verbose = 0;
@@ -181,7 +182,7 @@ int main(int argc, char **argv) {
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	int pid;
-	
+
 	FILE *tfp, *mfp, *ofp;
 	struct stat file_status;
 	int fstat;
@@ -195,7 +196,7 @@ int main(int argc, char **argv) {
 	double last_heave = 0.0;
 	double tide;
 	int i;
-	
+
 	int gps_source = 0;
 	double tide_offset = 0.0;
 	double geoid_offset = 0.0;
@@ -206,18 +207,18 @@ int main(int argc, char **argv) {
 	double ttime_d;
 	double atime_d;
 	double geoid_time = 0.0;
-	
+
 	double this_interval = 0.0;
 	double next_interval = 0.0;
 	int count_tide = 0;
 	double sum_tide = 0.0;
 	double atide = 0.0;
-	
+
 	struct mb_io_struct *mb_io_ptr = NULL;
 	struct mbsys_simrad2_struct *simrad2_ptr;
 	struct mbsys_simrad3_struct *simrad3_ptr;
 	struct mbsys_gsf_struct *gsf_ptr;
-	
+
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
@@ -233,67 +234,67 @@ int main(int argc, char **argv) {
 			if (strcmp("verbose", options[option_index].name) == 0) {
 				verbose++;
 			}
-			
+
 			/* help */
 			else if (strcmp("help", options[option_index].name) == 0) {
 				help = MB_YES;
 			}
-			
+
 			/* tideformat */
 			else if (strcmp("tideformat", options[option_index].name) == 0) {
 				sscanf(optarg, "%d", &tideformat);
 				if (tideformat != 2)
 					tideformat = 1;
 			}
-			
+
 			/* interval */
 			else if (strcmp("interval", options[option_index].name) == 0) {
 				sscanf(optarg, "%lf", &interval);
 			}
-			
+
 			/* format */
 			else if (strcmp("format", options[option_index].name) == 0) {
 				sscanf(optarg, "%d", &format);
 			}
-			
+
 			/* input */
 			else if (strcmp("input", options[option_index].name) == 0) {
 				sscanf(optarg, "%s", read_file);
 			}
-			
+
 			/*  */
 			else if (strcmp("setparameters", options[option_index].name) == 0) {
 				mbprocess_update = MB_YES;
 			}
-			
+
 			/*  */
 			else if (strcmp("output", options[option_index].name) == 0) {
 				sscanf(optarg, "%s", tide_file);
 				file_output = MB_YES;
 			}
-			
+
 			/*  */
 			else if (strcmp("offset", options[option_index].name) == 0) {
 				sscanf(optarg, "%lf", &tide_offset);
 			}
-			
+
 			/*  */
 			else if (strcmp("skipexisting", options[option_index].name) == 0) {
 				skip_existing = MB_YES;
 			}
-			
+
 			/*  */
 			else if (strcmp("geoid", options[option_index].name) == 0) {
 				sscanf(optarg, "%s", geoidgrid);
 				geoid_set = MB_YES;
 			}
-			
+
 			/*  */
 			else if (strcmp("use", options[option_index].name) == 0) {
 				sscanf(optarg, "%d", &gps_source);
 			}
 			break;
-			
+
 		/* short options */
 		case 'H':
 		case 'h':
@@ -401,8 +402,8 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(MB_FAILURE);
 			}
-		} 
-	
+		}
+
 		if (tideformat == 5) {
 			fprintf(ofp, "--------\n");
 		} else {
@@ -456,7 +457,7 @@ int main(int argc, char **argv) {
 
 	/* loop over all files to be read */
 	while (read_data == MB_YES) {
-		
+
 		/* Figure out if the file needs a tide model - don't generate a new tide
 			model if one was made previously and is up to date AND the
 			appropriate request has been made */
@@ -490,7 +491,7 @@ int main(int argc, char **argv) {
 			/* some helpful output */
 			fprintf(stderr, "\n---------------------------------------\n\nProcessing tides for %s\n\n", file);
 		}
-		
+
 		/* generate the tide model */
 		else {
 			/* if one output file per input file then open and initialise it */
@@ -501,7 +502,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 					exit(MB_FAILURE);
 				}
-				
+
 				if (tideformat == 5) {
 					fprintf(ofp, "--------\n");
 				} else {
@@ -525,12 +526,12 @@ int main(int argc, char **argv) {
 					fprintf(ofp, "# Run by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 				}
 			}
-			
+
 			/* some helpful output */
 			fprintf(stderr, "\n---------------------------------------\n\nProcessing tides for %s\n\n", file);
 
 			strcpy(swath_file, file);
-	
+
 			/* initialize reading the swath file */
 			if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 										&mbio_ptr, &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) !=
@@ -592,7 +593,7 @@ int main(int argc, char **argv) {
 					exit(MB_FAILURE);
 				}
 			}
-				
+
 			/* read and use data */
 			nread = 0;
 			while (error <= MB_ERROR_NO_ERROR) {
@@ -616,12 +617,12 @@ int main(int argc, char **argv) {
 					if (verbose >= 2)
 						fprintf(stderr, "dbg2       Have Installation telegram\n");
 				}
-				
+
 				mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-				
+
 				if (mb_io_ptr->format == MBF_GSFGENMB) {
 					if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
-						ttime_d = time_d; 
+						ttime_d = time_d;
 						gsf_ptr = (struct mbsys_gsf_struct *)mb_io_ptr->store_data;
 						height = gsf_ptr->records.mb_ping.height;
 						if (gps_source == 1) {
@@ -631,7 +632,7 @@ int main(int argc, char **argv) {
 						nread++;
 					}
 				}
-				
+
 				/* Read sounder height from height telegram */
 				if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_HEIGHT && gps_source == 0) {
 
@@ -647,7 +648,7 @@ int main(int argc, char **argv) {
 						time_i[6] = (simrad2_ptr->hgt_msec % 1000) * 1000;
 						mb_get_time(verbose, time_i, &ttime_d);
 						have_height = MB_YES;
-												
+
 					} else if (mb_io_ptr->format == MBF_EM710MBA || mb_io_ptr->format == MBF_EM710RAW) {
 						simrad3_ptr = (struct mbsys_simrad3_struct *)mb_io_ptr->store_data;
 						height = simrad3_ptr->hgt_height * 0.01;
@@ -660,31 +661,31 @@ int main(int argc, char **argv) {
 						time_i[6] = (simrad3_ptr->hgt_msec % 1000) * 1000;
 						mb_get_time(verbose, time_i, &ttime_d);
 						have_height = MB_YES;
-						
-					}	
-											
+
+					}
+
 					/* increment counter */
 					nread++;
 				}
-			
+
 				if (have_height == MB_YES) {
-					
+
 					if (ttime_d > next_interval || (file_output == MB_NO && error == MB_ERROR_EOF)) {
 						if (count_tide > 0) {
 							ngood++;
 							atide = sum_tide / count_tide;
 							if (tideformat == 1) {
 								fprintf(ofp, "%.3f %9.4f\n", this_interval, atide);
-								
+
 							} else if (tideformat == 5) { // CARIS
 								mb_get_date(verbose, this_interval, time_i);
-								fprintf(ofp, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%.3f  %.6f\n", 
+								fprintf(ofp, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%.3f  %.6f\n",
 										time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5] + time_i[6] * 0.000001, atide);
-								
+
 							} else {
 								mb_get_date(verbose, this_interval, time_i);
-								fprintf(ofp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d %9.4f\n", 
-										time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], 
+								fprintf(ofp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d %9.4f\n",
+										time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5],
 										atide);
 							}
 						}
@@ -697,7 +698,7 @@ int main(int argc, char **argv) {
 							next_interval = this_interval + interval / 2;
 						}
 					}
-					
+
 					/* find the first geoid offset along the track after the height time */
 					while (read_geoid == MB_YES && geoid_time < ttime_d) {
 						if (EOF == fscanf(tfp, "%lf %lf %lf %lf\n", &tidelat, &tidelon, &geoid_time, &geoid_offset)) {
@@ -705,27 +706,27 @@ int main(int argc, char **argv) {
 							read_geoid = MB_NO;
 						}
 						if (verbose >= 2)
-						fprintf(stderr, "tide %.0f, geoid %.0f, goff %.3f, %.4f %.4f\n", 
+						fprintf(stderr, "tide %.0f, geoid %.0f, goff %.3f, %.4f %.4f\n",
 								ttime_d, geoid_time, geoid_offset, tidelat, tidelon);
 					}
-					
+
 					count_tide++;
 					sum_tide += height + tide_offset - geoid_offset;
 					have_height = MB_NO;
 					if (verbose >= 1)
-						fprintf(stderr, "time %f, interval %f, count %d, sum %.2f, tide %.2f, offset %.2f, geoid %.2f\n", 
+						fprintf(stderr, "time %f, interval %f, count %d, sum %.2f, tide %.2f, offset %.2f, geoid %.2f\n",
 								ttime_d, next_interval, count_tide, sum_tide, height, tide_offset, geoid_offset);
 				}
 			}
 
 			/* close the swath file */
 			status = mb_close(verbose, &mbio_ptr, &error);
-			
+
 			if (read_geoid == MB_YES) {
 				pclose(tfp);
 				read_geoid = MB_NO;
 			}
-			
+
 			if (file_output == MB_NO) {
 				fclose(ofp);
 			}
@@ -738,7 +739,7 @@ int main(int argc, char **argv) {
 				status = mb_pr_update_tide(verbose, swath_file, MBP_TIDE_ON, tide_file, tideformat, &error);
 				fprintf(stderr, "MBprocess set to apply tide correction to %s\n", swath_file);
 			}
-				
+
 		}
 
 		/* figure out whether and what to read next */
@@ -764,15 +765,15 @@ int main(int argc, char **argv) {
 			atide = sum_tide / count_tide;
 			if (tideformat == 1) {
 				fprintf(ofp, "%.3f %9.4f\n", this_interval, atide);
-				
+
 			} else if (tideformat == 5) { // CARIS
 				mb_get_date(verbose, this_interval, time_i);
-				fprintf(ofp, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%.3f  %.6f\n", 
+				fprintf(ofp, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%.3f  %.6f\n",
 						time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5] + time_i[6] * 0.000001, atide);
-			
+
 			} else {
 				mb_get_date(verbose, this_interval, time_i);
-				fprintf(ofp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d %9.4f\n", 
+				fprintf(ofp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d %9.4f\n",
 						time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], atide);
 			}
 		}
@@ -780,7 +781,7 @@ int main(int argc, char **argv) {
 			fclose(ofp);
 		}
 	}
-				
+
 	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);

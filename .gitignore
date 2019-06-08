@@ -30,6 +30,7 @@ src/mbtrn/udpc
 src/mbtrn/udps
 src/mbvelocitytool/mbvelocitytool
 src/otps/mbotps
+src/otps/otps.h
 src/utilities/levitus.h
 src/utilities/mb7k2jstar
 src/utilities/mb7k2ss

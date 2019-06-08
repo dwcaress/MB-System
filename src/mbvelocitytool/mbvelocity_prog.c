@@ -369,6 +369,7 @@ int mbvt_init(int argc, char **argv) {
 int mbvt_quit() {
 	/* local variables */
 	char *function_name = "mbvt_quit";
+	struct profile *profile;
 	int status;
 
 	/* print input debug statements */
@@ -376,8 +377,22 @@ int mbvt_quit() {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 	}
 
+	/* get profile pointer */
+	profile = &profile_edit;
+
 	/* deallocate previously loaded data, if any */
 	mbvt_deallocate_swath();
+
+	/* clear out old velocity data */
+	if (edit == MB_YES) {
+		edit = MB_NO;
+		profile->n = 0;
+		strcpy(profile->name, "\0");
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_x, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_y, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->velocity, &error);
+	}
 
 	/* check allocated memory */
 	status = mb_memory_list(verbose, &error);

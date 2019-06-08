@@ -26,6 +26,7 @@
 
 #include "mb_define.h"
 #include "mb_status.h"
+#include "mb_process.h"
 
 #ifdef MBTRN_ENABLED
 #include "mbtrn.h"
@@ -498,8 +499,8 @@ struct mb_io_struct {
 	void *xdrs;                  /* XDR stream handle */
 	void *xdrs2;                 /* XDR stream handle #2 */
 	void *xdrs3;                 /* XDR stream handle #2 */
-    
-    
+
+
     /* file indexing (used by some formats) */
     int num_indextable;
     int num_indextable_alloc;
@@ -632,6 +633,9 @@ struct mb_io_struct {
 	double altitude_time_d[MB_ASYNCH_SAVE_MAX];
 	double altitude_altitude[MB_ASYNCH_SAVE_MAX];
 
+  /* preprocessing parameter structure used by some formats */
+  struct mb_preprocess_struct preprocess_pars;
+
 	/* variables for accumulating MBIO notices */
 	int notice_list[MB_NOTICE_MAX];
 
@@ -665,8 +669,14 @@ struct mb_io_struct {
 	int save12;
 	int save13;
 	int save14;
-    int save15;
-    int save16;
+  int save15;
+  int save16;
+  int save17;
+  int save18;
+  int save19;
+  int save20;
+  int save21;
+  int save22;
 	double saved1;
 	double saved2;
 	double saved3;
@@ -674,6 +684,7 @@ struct mb_io_struct {
 	double saved5;
 	void *saveptr1;
 	void *saveptr2;
+	void *saveptr3;
 
 	/* function pointers for allocating and deallocating format
 	    specific structures */

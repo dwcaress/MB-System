@@ -845,8 +845,8 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
             i++) {
         mrz->sounding[i].z_reRefPoint_m = bath[numSoundings] - mrz->pingInfo.z_waterLevelReRefPoint_m;
         mrz->sounding[i].beamflag = beamflag[numSoundings];
-        mrz->sounding[i].x_reRefPoint_m = bathacrosstrack[numSoundings];
-        mrz->sounding[i].y_reRefPoint_m = bathalongtrack[numSoundings];
+        mrz->sounding[i].x_reRefPoint_m = bathalongtrack[numSoundings];
+        mrz->sounding[i].y_reRefPoint_m = bathacrosstrack[numSoundings];
         mrz->sounding[i].reflectivity1_dB = amp[numSoundings];
 
         numSoundings++;
@@ -969,6 +969,8 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
+  struct mbsys_kmbes_mrz_tx_sector_info *sectorInfo;
+  struct mbsys_kmbes_mrz_sounding *sounding;
   int numSoundings = 0;
   int imrz;
   int i;
@@ -1015,12 +1017,15 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
       for (i = 0;
             i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
             i++) {
-        ttimes[numSoundings] = mrz->sounding[i].twoWayTravelTime_sec;
-        angles[numSoundings] = mrz->sounding[i].beamAngleReRx_deg;
+        sounding = &mrz->sounding[i];
+        sectorInfo = &mrz->sectorInfo[sounding->txSectorNumb];
+
+        ttimes[numSoundings] = sounding->twoWayTravelTime_sec;
+        angles[numSoundings] = sounding->beamAngleReRx_deg;
         angles_forward[numSoundings] = 0.0;
         angles_null[numSoundings] = 0.0;
         heave[numSoundings] = 0.0;
-        alongtrack_offset[numSoundings] = 0.0;
+        alongtrack_offset[numSoundings] = sectorInfo->sectorTransmitDelay_sec;
 
         numSoundings++;
       }
@@ -1359,7 +1364,9 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
-
+  double xtrackmin;
+  int altitude_found = MB_NO;
+  int imrz, i;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -1386,8 +1393,23 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
     /* get transducer depth and altitude */
     *transducer_depth = mrz->pingInfo.txTransducerDepth_m;
 
-    /* get altitude */
-    //*altitude = store->altitude;
+    /* get altitude using valid depth closest to nadir */
+    *altitudev = 0.0;
+    xtrackmin = 999999.9;
+    for (imrz = 0; imrz < store->n_mrz_read; imrz++) {
+      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+
+      for (i = 0;
+            i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
+            i++) {
+        if (mb_beam_ok(mrz->sounding[i].beamflag)) {
+          if (fabs(mrz->sounding[i].y_reRefPoint_m) < xtrackmin) {
+            xtrackmin = fabs(mrz->sounding[i].y_reRefPoint_m);
+            *altitudev = mrz->sounding[i].z_reRefPoint_m;
+          }
+        }
+      }
+    }
 
     /* set status */
     *error = MB_ERROR_NO_ERROR;
