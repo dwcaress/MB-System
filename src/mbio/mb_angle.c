@@ -192,8 +192,6 @@
 /*--------------------------------------------------------------------*/
 int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch, double *roll, int *error) {
 	char *function_name = "mb_takeoff_to_rollpitch";
-	int status = MB_SUCCESS;
-	double x, y, z;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -205,9 +203,9 @@ int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch
 	}
 
 	/* convert to cartesian coordinates */
-	x = sin(DTR * theta) * cos(DTR * phi);
-	y = sin(DTR * theta) * sin(DTR * phi);
-	z = cos(DTR * theta);
+	const double x = sin(DTR * theta) * cos(DTR * phi);
+	const double y = sin(DTR * theta) * sin(DTR * phi);
+	const double z = cos(DTR * theta);
 
 	/* convert to roll-pitch coordinates */
 	*roll = acos(x);
@@ -217,7 +215,7 @@ int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -235,9 +233,6 @@ int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch
 /*--------------------------------------------------------------------*/
 int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *theta, double *phi, int *error) {
 	char *function_name = "mb_rollpitch_to_takeoff";
-	int status = MB_SUCCESS;
-	double x, y, z;
-	double sintheta;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -249,13 +244,13 @@ int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *thet
 	}
 
 	/* convert to cartesian coordinates */
-	x = cos(DTR * roll);
-	y = sin(DTR * pitch) * sin(DTR * roll);
-	z = cos(DTR * pitch) * sin(DTR * roll);
+	const double x = cos(DTR * roll);
+	const double y = sin(DTR * pitch) * sin(DTR * roll);
+	const double z = cos(DTR * pitch) * sin(DTR * roll);
 
 	/* convert to takeoff angle coordinates */
 	*theta = acos(z);
-	sintheta = sin(*theta);
+	const double sintheta = sin(*theta);
 	if (fabs(sintheta) < 0.00001) {
 		*phi = 0.0;
 	}
@@ -267,7 +262,7 @@ int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *thet
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -285,8 +280,6 @@ int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *thet
 /*--------------------------------------------------------------------*/
 int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, double *phi, int *error) {
 	char *function_name = "mb_xyz_to_takeoff";
-	int status = MB_SUCCESS;
-	double aa, xx, yy, zz, rr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -299,13 +292,14 @@ int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, 
 	}
 
 	/* normalize cartesian coordinates */
-	rr = sqrt(x * x + y * y + z * z);
-	xx = x / rr;
-	yy = y / rr;
-	zz = z / rr;
+	const double rr = sqrt(x * x + y * y + z * z);
+	const double xx = x / rr;
+	const double yy = y / rr;
+	const double zz = z / rr;
 
 	/* convert to takeoff angle coordinates */
 	*theta = acos(zz);
+	double aa;
 	if (zz < 1.0)
 		aa = yy / sin(*theta);
 	else
@@ -323,7 +317,7 @@ int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, 
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -343,10 +337,6 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
              double nav_offset_y, double nav_offset_z, double vru_offset_x, double vru_offset_y, double vru_offset_z,
              double vru_pitch, double vru_roll, double *lever_x, double *lever_y, double *lever_z, int *error) {
 	char *function_name = "mb_lever";
-	int status = MB_SUCCESS;
-	double x, y, z;
-	double xx, yy, zz, r;
-	double pitch, roll;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -372,17 +362,18 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
 	    y = r * SIN(pitch)
 	    z = r * COS(pitch) * SIN(roll) */
 	/* get net offset between sonar and vru */
-	xx = sonar_offset_x - vru_offset_x;
-	yy = sonar_offset_y - vru_offset_y;
-	zz = sonar_offset_z - vru_offset_z;
-	r = sqrt(xx * xx + yy * yy + zz * zz);
+	double xx = sonar_offset_x - vru_offset_x;
+	double yy = sonar_offset_y - vru_offset_y;
+	double zz = sonar_offset_z - vru_offset_z;
+	double r = sqrt(xx * xx + yy * yy + zz * zz);
 
 	/* lever arm only matters if offset is nonzero */
 	if (r > 0.0) {
 		/* get initial angles */
-		roll = RTD * acos(xx / r);
+		double roll = RTD * acos(xx / r);
 		if (zz < 0.0)
 			roll = -roll;
+		double pitch;
 		if (sin(DTR * roll) != 0.0)
 			pitch = RTD * asin(yy / (r * sin(DTR * roll)));
 		else
@@ -393,9 +384,9 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
 		roll += vru_roll;
 
 		/* calculate new offsets */
-		x = r * cos(DTR * roll);
-		y = r * sin(DTR * pitch) * sin(DTR * roll);
-		z = r * cos(DTR * pitch) * sin(DTR * roll);
+		const double x = r * cos(DTR * roll);
+		const double y = r * sin(DTR * pitch) * sin(DTR * roll);
+		const double z = r * cos(DTR * pitch) * sin(DTR * roll);
 
 		/* get heave change due to lever arm */
 		*lever_z = z - zz;
@@ -418,7 +409,8 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
 	/* lever arm only matters if offset is nonzero */
 	if (r > 0.0) {
 		/* get initial angles */
-		roll = RTD * acos(xx / r);
+		double roll = RTD * acos(xx / r);
+		double pitch;
 		if (sin(DTR * roll) != 0.0)
 			pitch = RTD * asin(yy / (r * sin(DTR * roll)));
 		else
@@ -429,9 +421,9 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
 		roll += vru_roll;
 
 		/* calculate new offsets */
-		x = r * cos(DTR * roll);
-		y = r * sin(DTR * pitch) * sin(DTR * roll);
-		z = r * cos(DTR * pitch) * sin(DTR * roll);
+		const double x = r * cos(DTR * roll);
+		const double y = r * sin(DTR * pitch) * sin(DTR * roll);
+		const double z = r * cos(DTR * pitch) * sin(DTR * roll);
 
 		/* get position change due to lever arm */
 		*lever_x = x - xx;
@@ -444,7 +436,7 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -501,19 +493,6 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
                 mb_3D_orientation rx_align, mb_3D_orientation rx_orientation, double rx_steer, double reference_heading,
                 double *beamAzimuth, double *beamDepression, int *error) {
 	char *function_name = "mb_beaudoin";
-	int status = MB_SUCCESS;
-	mb_3D_orientation datt;
-	mb_3D_vector xPrime, yPrime, zPrime;
-	mb_3D_vector txIdeal;
-	mb_3D_vector txMount;
-	mb_3D_vector txGeo;
-	mb_3D_vector rxIdeal;
-	mb_3D_vector rxMount;
-	mb_3D_vector rxGeo;
-	mb_3D_vector beamVectRel;
-	mb_3D_vector beamVectGeo;
-	double non_ortho;
-	double y1, y2, radial;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -536,26 +515,31 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 		fprintf(stderr, "dbg2       rx_steer:                %f\n", rx_steer);
 		fprintf(stderr, "dbg2       reference_heading:       %f\n", reference_heading);
 	}
+	mb_3D_vector txIdeal;
 
 	txIdeal.x = 1.0;
 	txIdeal.y = 0.0;
 	txIdeal.z = 0.0;
 
 	// All of these in degrees, these are the transmitter array mount angles.
+	mb_3D_orientation datt;
 	datt.roll = tx_align.roll;
 	datt.pitch = tx_align.pitch;
 	datt.heading = tx_align.heading;
+	mb_3D_vector txMount;
 	mb_beaudoin_unrotate(verbose, txIdeal, datt, &txMount, error);
 
 	// All of these in degrees, these are the motion measurements at the time of transmit.
 	datt.roll = tx_orientation.roll;
 	datt.pitch = tx_orientation.pitch;
 	datt.heading = tx_orientation.heading;
+	mb_3D_vector txGeo;
 	mb_beaudoin_unrotate(verbose, txMount, datt, &txGeo, error);
 
 	if (verbose >= 4)
 		fprintf(stderr, "dbg4      TX array x %f y %f z %f in geographic reference frame\n", txGeo.x, txGeo.y, txGeo.z);
 
+	mb_3D_vector rxIdeal;
 	rxIdeal.x = 0.0;
 	rxIdeal.y = 1.0;
 	rxIdeal.z = 0.0;
@@ -564,12 +548,14 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 	datt.roll = rx_align.roll;
 	datt.pitch = rx_align.pitch;
 	datt.heading = rx_align.heading;
+	mb_3D_vector rxMount;
 	mb_beaudoin_unrotate(verbose, rxIdeal, datt, &rxMount, error);
 
 	// Degrees, these are the motion measurements at the time of reception (this is unique per beam)
 	datt.roll = rx_orientation.roll;
 	datt.pitch = rx_orientation.pitch;
 	datt.heading = rx_orientation.heading;
+	mb_3D_vector rxGeo;
 	mb_beaudoin_unrotate(verbose, rxMount, datt, &rxGeo, error);
 
 	if (verbose >= 4)
@@ -578,15 +564,17 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 	/* Have to negate it so signs work out...(was 90 - acos(...) before)  */
 	/* acos of dotproduct of rxGeo and txGeo yields angle from between vectors */
 	/* ...subtract 90 to bring into required units */
-	non_ortho = acos(rxGeo.x * txGeo.x + rxGeo.y * txGeo.y + rxGeo.z * txGeo.z) * 180.0 / M_PI - 90.0;
+	double non_ortho = acos(rxGeo.x * txGeo.x + rxGeo.y * txGeo.y + rxGeo.z * txGeo.z) * 180.0 / M_PI - 90.0;
 
 	if (verbose >= 4)
 		fprintf(stderr, "dbg4     TX/RX are non-orthogonal by %f degrees\n", non_ortho);
+	mb_3D_vector beamVectGeo;
 
-	y1 = sin(-rx_steer * DTR) / cos(non_ortho * DTR);
-	y2 = sin(tx_steer * DTR) * tan(non_ortho * DTR);
-	radial = sqrt((y1 + y2) * (y1 + y2) + sin(tx_steer * DTR) * sin(tx_steer * DTR));
+	const double y1 = sin(-rx_steer * DTR) / cos(non_ortho * DTR);
+	const double y2 = sin(tx_steer * DTR) * tan(non_ortho * DTR);
+	const double radial = sqrt((y1 + y2) * (y1 + y2) + sin(tx_steer * DTR) * sin(tx_steer * DTR));
 
+	mb_3D_vector beamVectRel;
 	if (radial <= 1.0) {
 		beamVectRel.x = sin(tx_steer * DTR);
 		beamVectRel.y = y1 + y2;
@@ -604,15 +592,18 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 		        beamVectRel.y, beamVectRel.z);
 
 	/* Build ortho-normal basis */
+	mb_3D_vector xPrime;
 	xPrime = txGeo;
 
 	/* Crossproduct of txGeo and rxGeo yields zPrime */
 	/* i.e. normal of plane containing txGeo and rxGeo */
+	mb_3D_vector zPrime;
 	zPrime.x = txGeo.y * rxGeo.z - txGeo.z * rxGeo.y;
 	zPrime.y = txGeo.z * rxGeo.x - txGeo.x * rxGeo.z;
 	zPrime.z = txGeo.x * rxGeo.y - txGeo.y * rxGeo.x;
 
 	/* Crossproduct of zPrime and xPrime yields yPrime */
+	mb_3D_vector yPrime;
 	yPrime.x = zPrime.y * xPrime.z - zPrime.z * xPrime.y;
 	yPrime.y = zPrime.z * xPrime.x - zPrime.x * xPrime.z;
 	yPrime.z = zPrime.x * xPrime.y - zPrime.y * xPrime.x;
@@ -661,7 +652,7 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -681,9 +672,6 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 
 int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotate, mb_3D_vector *final, int *error) {
 	char *function_name = "mb_beaudoin_unrotate";
-	int status = MB_SUCCESS;
-	double cosr, cosp, cosy;
-	double sinr, sinp, siny;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -698,12 +686,12 @@ int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotat
 		fprintf(stderr, "dbg2       rotate.heading:  %f\n", rotate.heading);
 	}
 
-	sinr = sin(rotate.roll * DTR);
-	cosr = cos(rotate.roll * DTR);
-	sinp = sin(rotate.pitch * DTR);
-	cosp = cos(rotate.pitch * DTR);
-	siny = sin(rotate.heading * DTR);
-	cosy = cos(rotate.heading * DTR);
+	const double sinr = sin(rotate.roll * DTR);
+	const double cosr = cos(rotate.roll * DTR);
+	const double sinp = sin(rotate.pitch * DTR);
+	const double cosp = cos(rotate.pitch * DTR);
+	const double siny = sin(rotate.heading * DTR);
+	const double cosy = cos(rotate.heading * DTR);
 
 	final->x = cosp * cosy * orig.x + (sinr * sinp * cosy - cosr * siny) * orig.y + (cosr * sinp * cosy + sinr * siny) * orig.z;
 
@@ -713,7 +701,7 @@ int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotat
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
