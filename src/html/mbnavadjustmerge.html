@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavadjustmerge</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  21 April 2016 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  28 May 2019 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -30,37 +30,141 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbnavadjustmerge</B> --input=project-base
-[--input=project-add --output=project-output
+<BR>
+
+[--input=project_path
+<BR>
+
+--output=project_path
+<BR>
+
 --set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
+<BR>
+
 --set-global-tie-xyz=file:section[:snav]
+<BR>
+
 --set-global-tie-xyonly=file:section[:snav]
+<BR>
+
 --set-global-tie-zonly=file:section[:snav]
+<BR>
+
 --unset-global-tie=file:section
+<BR>
+
+--unset-all-global-ties
+<BR>
+
 --add-crossing=file1:section1/file2:section2
+<BR>
+
+--set-tie=file1/file2/xoffset/yoffset/zoffset
+<BR>
+
 --set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset
+<BR>
+
+--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset/xsigma/ysigma/zsigma
+<BR>
+
 --set-tie-xyz=file1:section1/file2:section2
+<BR>
+
 --set-tie-xyonly=file1:section1/file2:section2
+<BR>
+
 --set-tie-zonly=file1:section1/file2:section2
---unset-tie=file1:section1/file2:section2
+<BR>
+
 --set-ties-xyz-all
+<BR>
+
 --set-ties-xyonly-all
+<BR>
+
 --set-ties-zonly-all
+<BR>
+
 --set-ties-xyz-with-file=file
+<BR>
+
 --set-ties-xyonly-with-file=file
+<BR>
+
 --set-ties-zonly-with-file=file
+<BR>
+
 --set-ties-xyz-by-survey=survey
+<BR>
+
 --set-ties-xyonly-by-survey=survey
+<BR>
+
 --set-ties-zonly-by-survey=survey
+<BR>
+
 --set-ties-xyz-by-block=survey1/survey2
+<BR>
+
 --set-ties-xyonly-by-block=survey1/survey2
+<BR>
+
 --set-ties-zonly-by-block=survey1/survey2
+<BR>
+
 --set-ties-zoffset-by-block=survey1/survey2/zoffset
---set-ties-xyonly-by-time=dt
+<BR>
+
+--set-ties-xyonly-by-time=timethreshold
+<BR>
+
+--unset-tie=file1:section1/file2:section2
+<BR>
+
+--unset-ties-with-file=file
+<BR>
+
+--unset-ties-with-survey=survey
+<BR>
+
+--unset-ties-by-survey=survey
+<BR>
+
+--unset-ties-by-block=survey1/survey2
+<BR>
+
+--unset-ties-all
+<BR>
+
 --skip-unset-crossings
+<BR>
+
+--unset-skipped-crossings-by-block=survey1/survey2
+<BR>
+
+--unset-skipped-crossings-between-surveys
+<BR>
+
 --insert-discontinuity=file:section
---import-tie-list=filename
---export-tie-list=filename
---verbose --help ]
+<BR>
+
+--reimport-file=file
+<BR>
+
+--reimport-all-files
+<BR>
+
+--import-tie-list=file
+<BR>
+
+--export-tie-list=file
+<BR>
+
+--verbose
+<BR>
+
+--help]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -85,7 +189,7 @@ single input project must be specified, along with one or more
 of the modification commands. These can include adding crossings,
 setting tie z-offset values, setting tie offsets (even if no
 corresponding crossing already exists), setting tie modes
-(xy only, z only, xyz),  and deleting ties.
+(xy only, z only, xyz), and deleting ties.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -93,25 +197,25 @@ corresponding crossing already exists), setting tie modes
 David W. Caress
 <BR>
 
-<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
 <BR>
 
 Dale N. Chayes
 <BR>
 
-<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
 <BR>
 
-<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
 <BR>
 
 Christian do Santos Ferreira
 <BR>
 
-<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
 <BR>
 
-<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<BR>&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
 <A NAME="lbAG">&nbsp;</A>
 <H2>OPTIONS</H2>
@@ -129,7 +233,7 @@ can be used twice to specify two input projects. The first
 use of <B>--input</B> defines the base input project, and the second
 defines the add input project. In the case where the <B>--output</B>
 option is used to define an output project, the two input projects
-will both be copied to the new output project (<I>project-base</I> 
+will both be copied to the new output project (<I>project-base</I>
 first followed by <I>project-add</I>). If the <B>output</B> option is
 not specified, then the <I>project-base</I> project is used as the
 output, and the <I>project-add</I> project is added on to the
@@ -141,7 +245,7 @@ more of the &quot;add&quot;, &quot;delete&quot;, &quot;skip&quot;, or &quot;set&
 <DD>
 This option defines the new <B>MBnavadjust output project. The two
 input projects will both be copied to the new output project
-(</B><I>project-base</I>  first followed by <I>project-add</I>).
+(</B><I>project-base</I> first followed by <I>project-add</I>).
 If the <B>output</B> option is
 not specified, then the <I>project-base</I> project is used as the
 output, and the <I>project-add</I> project is added on to the
@@ -181,17 +285,18 @@ for an optimal navigation model.
 
 <DD>
 This option unsets (deletes) the specified global tie in the
-<B>MBnavadjust</B> project. 
+<B>MBnavadjust</B> project.
 <DT><B>--add-crossing=file1:section1/file2:section2</B>
 
 <DD>
 This option adds the specified crossing to the <B>MBnavadjust</B> project.
-<DT><B>--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset</B>
+<DT><B>--set-tie=file1:section1/file2:section2/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]</B>
 
 <DD>
 This option adds the specified tie to the <B>MBnavadjust</B> project.
 If the corresponding crossing does not already exist, it will be
-created.
+created. If the uncertainties in the tie (xsigma, ysigma, zsigma)
+are not specified, then xsigma = ysigma = 10 m and zsigma = 0.5 m are assumed.
 <DT><B>--set-tie-xyz=file1:section1/file2:section2</B>
 
 <DD>
@@ -217,7 +322,7 @@ for an optimal navigation model.
 
 <DD>
 This option unsets (deletes) the specified tie in the
-<B>MBnavadjust</B> project. 
+<B>MBnavadjust</B> project.
 <DT><B>--set-ties-xyz-all</B>
 
 <DD>
@@ -332,6 +437,31 @@ This option sets the mode of all ties with nav points separated in time by dt or
 larger in the <B>MBnavadjust</B> project to be &quot;XY&quot;. This means only the horizontal
 coordinates of these ties will be used as constraints in the inversion
 for an optimal navigation model.
+<DT><B>--unset-ties-with-file=file</B>
+
+<DD>
+This option unsets (deletes) all ties involved with the specified
+file in the <B>MBnavadjust</B> project.
+<DT><B>--unset-ties-with-survey=survey</B>
+
+<DD>
+This option unsets (deletes) all ties involved with the specified
+survey in the <B>MBnavadjust</B> project.
+<DT><B>--unset-ties-by-survey=survey</B>
+
+<DD>
+This option unsets (deletes) all ties between two sections in the specified
+survey in the <B>MBnavadjust</B> project.
+<DT><B>--unset-ties-by-block=survey1/survey2</B>
+
+<DD>
+This option unsets (deletes) all ties between sections of the specified
+two surveys in the <B>MBnavadjust</B> project.
+<DT><B>--unset-ties-all</B>
+
+<DD>
+This option unsets (deletes) all ties in the <B>MBnavadjust</B> project. The
+command --unset-all-ties is also accepted.
 <DT><B>--skip-unset-crossings</B>
 
 <DD>
@@ -341,8 +471,8 @@ merged projects.
 <DT><B>--unset-skipped-crossings-by-block=survey1/survey2</B>
 
 <DD>
-This option sets all skipped crossings  in the specified
-two surveys to be unset. 
+This option sets all skipped crossings in the specified
+two surveys to be unset.
 <DT><B>--unset-skipped-crossings-between-surveys</B>
 
 <DD>
@@ -359,7 +489,7 @@ file and section.
 <DD>
 Import a listing of navigation ties that has been exported from a different
 <B>mbnavadjust</B> project using the <B>--export-tie-list</B>
-command. 
+command.
 <DT><B>--export-tie-list=filename</B>
 
 <DD>
@@ -394,7 +524,7 @@ directories with a &quot;.dir&quot; suffix. To create a new <B>MBnavadjust</B> p
 combining the two existing projects, the following will suffice:
 <BR>
 
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mbnavadjustmerge&nbsp;--input=Navadjust20140515m1.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input=Navadjust20140515m2.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=Navadjust20140515All.nvh
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbnavadjustmerge&nbsp;--input=Navadjust20140515m1.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--input=Navadjust20140515m2.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--output=Navadjust20140515All.nvh
 <P>
 The new project Navadjust20140515All can be opened and analyzed further using
 <B>MBnavadjust</B>. When opening the new project, the user should first solve
@@ -436,7 +566,7 @@ Good luck.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 21 April 2016</P></CENTER>
+Last Updated: 28 May 2019</P></CENTER>
 
 <HR>
 
