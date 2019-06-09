@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
-  *
+ *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -40,23 +40,18 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
 	char *function_name = "mb_buffer_init";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -66,12 +61,12 @@ int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
 	}
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_buffer_struct), buff_ptr, error);
-	buff = (struct mb_buffer_struct *)*buff_ptr;
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_buffer_struct), buff_ptr, error);
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)*buff_ptr;
 
 	/* set nbuffer to zero */
 	buff->nbuffer = 0;
-	for (i = 0; i < MB_BUFFER_MAX; i++)
+	for (int i = 0; i < MB_BUFFER_MAX; i++)
 		buff->buffer[i] = NULL;
 
 	/* print output debug statements */
@@ -89,8 +84,6 @@ int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 	char *function_name = "mb_buffer_close";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -102,9 +95,10 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 	}
 
 	/* get buffer structure */
-	buff = (struct mb_buffer_struct *)*buff_ptr;
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)*buff_ptr;
 
 	/* deal with any remaining records in the buffer */
+	int status = MB_SUCCESS;
 	if (buff->nbuffer > 0) {
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Remaining records in buffer: %d\n", buff->nbuffer);
@@ -116,7 +110,7 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 	}
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)buff_ptr, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)buff_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -132,13 +126,6 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *nload, int *nbuff, int *error) {
 	char *function_name = "mb_buffer_load";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-	char *store_ptr;
-	int nget;
-	int kind;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -151,14 +138,14 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 	}
 
 	/* get buffer structure */
-	buff = (struct mb_buffer_struct *)buff_ptr;
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store_ptr = mb_io_ptr->store_data;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	char *store_ptr = mb_io_ptr->store_data;
 
 	/* can't get more than the buffer will hold */
-	nget = nwant - buff->nbuffer;
+	int nget = nwant - buff->nbuffer;
 	if (buff->nbuffer + nget > MB_BUFFER_MAX)
 		nget = MB_BUFFER_MAX - buff->nbuffer;
 	*nload = 0;
@@ -174,9 +161,11 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 	}
 
 	/* read records into the buffer until its full or eof */
+	int status = MB_SUCCESS;
 	while (*error <= MB_ERROR_NO_ERROR && *nload < nget) {
 		/* read the next data record */
-		status = mb_read_ping(verbose, mbio_ptr, store_ptr, &kind, error);
+		int kind;
+		status &= mb_read_ping(verbose, mbio_ptr, store_ptr, &kind, error);
 
 		/* log errors */
 		if (*error < MB_ERROR_NO_ERROR)
@@ -224,7 +213,7 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 			fprintf(stderr, "dbg4       nwant:         %d\n", nwant);
 			fprintf(stderr, "dbg4       error:         %d\n", *error);
 			fprintf(stderr, "dbg4       status:        %d\n", status);
-			for (i = 0; i < buff->nbuffer; i++) {
+			for (int i = 0; i < buff->nbuffer; i++) {
 				fprintf(stderr, "dbg4       i:%d  kind:%d  ptr:%p\n", i, buff->buffer_kind[i], (void *)buff->buffer[i]);
 			}
 		}
@@ -265,11 +254,6 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 /*--------------------------------------------------------------------*/
 int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr, int nhold, int *ndump, int *nbuff, int *error) {
 	char *function_name = "mb_buffer_dump";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -283,13 +267,14 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 	}
 
 	/* get buffer structure */
-	buff = (struct mb_buffer_struct *)buff_ptr;
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* figure out how much to dump */
 	*ndump = buff->nbuffer - nhold;
+	int status = MB_SUCCESS;
 	if (buff->nbuffer <= 0) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BUFFER_EMPTY;
@@ -305,14 +290,14 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Buffer list in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
-		for (i = 0; i < buff->nbuffer; i++) {
+		for (int i = 0; i < buff->nbuffer; i++) {
 			fprintf(stderr, "dbg4       i:%d  kind:%d  ptr:%p\n", i, buff->buffer_kind[i], (void *)buff->buffer[i]);
 		}
 	}
 
 	/* dump records from buffer */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < *ndump; i++) {
+		for (int i = 0; i < *ndump; i++) {
 			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Dumping record in MBIO function <%s>\n", function_name);
@@ -344,7 +329,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 				fprintf(stderr, "dbg4       kind:        %d\n", buff->buffer_kind[i]);
 			}
 		}
-		for (i = 0; i < nhold; i++) {
+		for (int i = 0; i < nhold; i++) {
 			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Moving buffer record in MBIO function <%s>\n", function_name);
@@ -379,7 +364,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Buffer list at end of MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
-		for (i = 0; i < buff->nbuffer; i++) {
+		for (int i = 0; i < buff->nbuffer; i++) {
 			fprintf(stderr, "dbg4       i:%d  kind:%d  ptr:%p\n", i, buff->buffer_kind[i], (void *)buff->buffer[i]);
 		}
 	}
@@ -403,11 +388,6 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 /*--------------------------------------------------------------------*/
 int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int *ndump, int *nbuff, int *error) {
 	char *function_name = "mb_buffer_clear";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -420,13 +400,14 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 	}
 
 	/* get buffer structure */
-	buff = (struct mb_buffer_struct *)buff_ptr;
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* figure out how much to dump */
 	*ndump = buff->nbuffer - nhold;
+	int status = MB_SUCCESS;
 	if (buff->nbuffer <= 0) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BUFFER_EMPTY;
@@ -442,14 +423,14 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Buffer list in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
-		for (i = 0; i < buff->nbuffer; i++) {
+		for (int i = 0; i < buff->nbuffer; i++) {
 			fprintf(stderr, "dbg4       i:%d  kind:%d  ptr:%p\n", i, buff->buffer_kind[i], (void *)buff->buffer[i]);
 		}
 	}
 
 	/* dump records from buffer */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < *ndump; i++) {
+		for (int i = 0; i < *ndump; i++) {
 			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Deallocating record in MBIO function <%s>\n", function_name);
@@ -469,7 +450,7 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 				fprintf(stderr, "dbg4       kind:        %d\n", buff->buffer_kind[i]);
 			}
 		}
-		for (i = 0; i < nhold; i++) {
+		for (int i = 0; i < nhold; i++) {
 			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Moving buffer record in MBIO function <%s>\n", function_name);
@@ -504,7 +485,7 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Buffer list at end of MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
-		for (i = 0; i < buff->nbuffer; i++) {
+		for (int i = 0; i < buff->nbuffer; i++) {
 			fprintf(stderr, "dbg4       i:%d  kind:%d  ptr:%p\n", i, buff->buffer_kind[i], (void *)buff->buffer[i]);
 		}
 	}
@@ -531,13 +512,6 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
                             char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                             double *ss, double *ssacrosstrack, double *ssalongtrack, int *error) {
 	char *function_name = "mb_buffer_get_next_data";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-	int kind;
-	char comment[200];
-	int found;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -550,19 +524,22 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 	}
 
 	/* get buffer structure */
+	struct mb_buffer_struct *buff;
 	buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
+	struct mb_io_struct *mb_io_ptr;
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* look for next survey data */
-	found = MB_NO;
-	for (i = start; i < buff->nbuffer; i++) {
+	int found = MB_NO;
+	for (int i = start; i < buff->nbuffer; i++) {
 		if (found == MB_NO && buff->buffer_kind[i] == MB_DATA_DATA) {
 			*id = i;
 			found = MB_YES;
 		}
 	}
+	int status = MB_SUCCESS;
 	if (found == MB_NO) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_NO_MORE_DATA;
@@ -570,10 +547,13 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 	}
 
 	/* extract the data */
-	if (found == MB_YES)
+	if (found == MB_YES) {
+		char comment[200];
+		int kind;
 		status = mb_buffer_extract(verbose, buff_ptr, mbio_ptr, *id, &kind, time_i, time_d, navlon, navlat, speed, heading, nbath,
 		                           namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack,
 		                           ssalongtrack, comment, error);
+	}
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -597,20 +577,20 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 		fprintf(stderr, "dbg4       nbath:         %d\n", *nbath);
 		if (*nbath > 0) {
 			fprintf(stderr, "dbg4       beam   flag   bath  crosstrack alongtrack\n");
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       %4d   %3d   %f    %f     %f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg4       namp:          %d\n", *namp);
 		if (*namp > 0) {
 			fprintf(stderr, "dbg4       beam    amp  crosstrack alongtrack\n");
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       %4d   %f    %f     %f\n", i, amp[i], bathacrosstrack[i], bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg4       nss:           %d\n", *nss);
 		if (*nss > 0) {
 			fprintf(stderr, "dbg4       pixel sidescan crosstrack alongtrack\n");
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4       %4d   %f    %f     %f\n", i, ss[i], ssacrosstrack[i], ssalongtrack[i]);
 		}
 	}
@@ -627,12 +607,6 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int star
                            double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                            double *pitch, double *heave, int *error) {
 	char *function_name = "mb_buffer_get_next_nav";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-	int kind;
-	int found;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -645,19 +619,20 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int star
 	}
 
 	/* get buffer structure */
-	buff = (struct mb_buffer_struct *)buff_ptr;
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* look for next data of the appropriate type */
-	found = MB_NO;
-	for (i = start; i < buff->nbuffer; i++) {
+	int found = MB_NO;
+	for (int i = start; i < buff->nbuffer; i++) {
 		if (found == MB_NO && buff->buffer_kind[i] == mb_io_ptr->nav_source) {
 			*id = i;
 			found = MB_YES;
 		}
 	}
+	int status = MB_SUCCESS;
 	if (found == MB_NO) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_NO_MORE_DATA;
@@ -665,9 +640,11 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int star
 	}
 
 	/* extract the data */
-	if (found == MB_YES)
+	if (found == MB_YES) {
+		int kind;
 		status = mb_buffer_extract_nav(verbose, buff_ptr, mbio_ptr, *id, &kind, time_i, time_d, navlon, navlat, speed, heading,
 		                               draft, roll, pitch, heave, error);
+	}
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -707,10 +684,6 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
                       char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mb_buffer_extract";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-	char *store_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -723,12 +696,14 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
 	}
 
 	/* get buffer structure */
-	buff = (struct mb_buffer_struct *)buff_ptr;
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get store_ptr and kind for desired record */
+	int status = MB_SUCCESS;
+	char *store_ptr = NULL;
 	if (id < 0 || id >= buff->nbuffer) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_BUFFER_ID;
@@ -803,10 +778,6 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, i
                           double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                           double *pitch, double *heave, int *error) {
 	char *function_name = "mb_buffer_extract_nav";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-	char *store_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -819,12 +790,14 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, i
 	}
 
 	/* get buffer structure */
-	buff = (struct mb_buffer_struct *)buff_ptr;
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get store_ptr and kind for desired record */
+	int status = MB_SUCCESS;
+	char *store_ptr;
 	if (id < 0 || id >= buff->nbuffer) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_BUFFER_ID;
@@ -879,10 +852,6 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                      double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mb_buffer_insert";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-	char *store_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -926,18 +895,19 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
 	}
 
 	/* get buffer structure */
-	buff = (struct mb_buffer_struct *)buff_ptr;
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get store_ptr for specified record */
+	int status = MB_SUCCESS;
 	if (id < 0 || id >= buff->nbuffer) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_BUFFER_ID;
 	}
 	else {
-		store_ptr = buff->buffer[id];
+		char *store_ptr = buff->buffer[id];
 		status = mb_insert(verbose, mbio_ptr, store_ptr, buff->buffer_kind[id], time_i, time_d, navlon, navlat, speed, heading,
 		                   nbath, namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack,
 		                   ssalongtrack, comment, error);
@@ -959,10 +929,6 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
                          double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                          int *error) {
 	char *function_name = "mb_buffer_insert_nav";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
-	char *store_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -990,18 +956,19 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
 	}
 
 	/* get buffer structure */
-	buff = (struct mb_buffer_struct *)buff_ptr;
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get store_ptr for specified record */
+	int status = MB_SUCCESS;
 	if (id < 0 || id >= buff->nbuffer) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_BUFFER_ID;
 	}
 	else {
-		store_ptr = buff->buffer[id];
+		char *store_ptr = buff->buffer[id];
 		status = mb_insert_nav(verbose, mbio_ptr, store_ptr, time_i, time_d, navlon, navlat, speed, heading, draft, roll, pitch,
 		                       heave, error);
 	}
@@ -1020,9 +987,6 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
 /*--------------------------------------------------------------------*/
 int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *kind, int *error) {
 	char *function_name = "mb_buffer_get_kind";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1034,12 +998,13 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int 
 	}
 
 	/* get buffer structure */
-	buff = (struct mb_buffer_struct *)buff_ptr;
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get store_ptr for specified record */
+	int status = MB_SUCCESS;
 	if (id < 0 || id >= buff->nbuffer) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_BUFFER_ID;
@@ -1063,9 +1028,6 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int 
 /*--------------------------------------------------------------------*/
 int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void **store_ptr, int *error) {
 	char *function_name = "mb_buffer_get_ptr";
-	int status = MB_SUCCESS;
-	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1077,12 +1039,13 @@ int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void 
 	}
 
 	/* get buffer structure */
-	buff = (struct mb_buffer_struct *)buff_ptr;
+	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get store_ptr for specified record */
+	int status = MB_SUCCESS;
 	if (id < 0 || id >= buff->nbuffer) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_BUFFER_ID;
