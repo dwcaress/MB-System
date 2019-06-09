@@ -100,8 +100,10 @@ data are read, a density filter is applied such that containing more than a
 specified threshold of soundings are considered to be occupied by a valid target and
 voxels containing less than the threshold are considered to be empty.
 The user may specify one or both of the following actions:
+<P>
 <BR>&nbsp;&nbsp;1)&nbsp;Previously&nbsp;unflagged&nbsp;soundings&nbsp;in&nbsp;an&nbsp;empty&nbsp;voxel&nbsp;are&nbsp;flagged&nbsp;as&nbsp;bad.
 <BR>&nbsp;&nbsp;2)&nbsp;Previously&nbsp;flagged&nbsp;soundings&nbsp;in&nbsp;a&nbsp;full&nbsp;voxel&nbsp;are&nbsp;unflagged.
+<P>
 This program will also apply specified minimum and maximum range filters.
 If a sounding's flag status is changed, that flagging action is output
 to the edit save file of the swath file containing that sounding. This
@@ -151,17 +153,17 @@ This  &quot;help&quot; flag cause the program to print out a description of its 
 <DT><B>--input</B>=<I>datalist</I><DD>
 <BR>
 
-Sets the input filename. If <I>format</I> &gt; 0 (set with the  <B>--format</B><I> option)  then  the
-swath  sonar  data contained in infile is read and processed. If format &lt; 0,
-then infile is assumed to be a datalist, which is an ascii file containing a list  of  the  input
+Sets the input filename. If <I>format</I> &gt; 0 (set with the  <B>--format</B><I> option)  then the
+swath sona data contained in infile is read and processed. If format &lt; 0,
+then infile is assumed to be a datalist, which is an ascii file containing a list of the input
 swath sonar data files to be processed and their formats.  The program will
 read and process the data in each one of these files. In
 the infile file, each data file should be followed by a data format identifier, e.g.:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datafile1&nbsp;11
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datafile2&nbsp;24
-This  program  uses  the MBIO library and will read or write any swath sonar
-format supported by MBIO. A list of the swath sonar data  formats  currently
-supported  by  MBIO  and their identifier values is given in the MBIO manual
+This program uses the MBIO library and will read or write any swath sonar
+format supported by MBIO. A list of the swath sonar data formats currently
+supported by MBIO and their identifier values is given in the MBIO manual
 page. Default: datalist</I> = &quot;datalist.mb-1&quot;.
 <DT><B>--format</B>=<I>value</I><DD>
 <BR>
@@ -192,7 +194,7 @@ voxel is occupied. Otherwise the voxel is empty.
 
 If this option is specified then the soundings counted to determine if voxels
 are occupied or empty includes all soundings, including those previously flagged
-as bad. Otherwise only soundings that are unflagged  before <B>mbvoxelclean</B>
+as bad. Otherwise only soundings that are unflagged before <B>mbvoxelclean</B>
 is run are counted.
 <DT><B>--flag-empty</B><DD>
 <BR>
