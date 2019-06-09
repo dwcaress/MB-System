@@ -1177,9 +1177,11 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS \
 
 install-exec-local:
 	echo "'make install' is dangerous and not supported. Instead, see README for how to integrate Google Test into your build system."
+	false
 
 install-data-local:
 	echo "'make install' is dangerous and not supported. Instead, see README for how to integrate Google Test into your build system."
+	false
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
