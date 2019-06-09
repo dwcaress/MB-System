@@ -125,6 +125,7 @@ AC_CONFIG_HEADERS([src/mbio/mb_config.h])
 dnl Check for programs
 AC_PROG_CC
 AM_PROG_CC_C_O
+AC_PROG_CC_STDC
 AC_PROG_CXX
 AC_PROG_INSTALL
 AM_PROG_AS
