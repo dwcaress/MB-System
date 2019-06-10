@@ -17,29 +17,24 @@
  *
  * Author:	D. W. Caress
  * Date:	January 25, 1993
- *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
+#include "gsf.h"
 #include "mb_define.h"
-#include "mb_status.h"
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_segy.h"
-#include "../surf/mb_sapi.h"
-#include "gsf.h"
+#include "mb_status.h"
 #include "netcdf.h"
+#include "../surf/mb_sapi.h"
 
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error) {
 	char *function_name = "mb_close";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -50,10 +45,10 @@ int mb_close(int verbose, void **mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)*mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)*mbio_ptr;
 
 	/* deallocate format dependent structures */
-	status = (*mb_io_ptr->mb_io_format_free)(verbose, *mbio_ptr, error);
+	int status = (*mb_io_ptr->mb_io_format_free)(verbose, *mbio_ptr, error);
 
 	/* deallocate system dependent structures */
 	/*status = (*mb_io_ptr->mb_io_store_free)
@@ -61,14 +56,14 @@ int mb_close(int verbose, void **mbio_ptr, int *error) {
 
 	/* deallocate memory for arrays within the mbio descriptor */
 	if (mb_io_ptr->filetype == MB_FILETYPE_XDR && mb_io_ptr->xdrs != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs, error);
 	if (mb_io_ptr->filetype == MB_FILETYPE_XDR && mb_io_ptr->xdrs2 != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs2, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs2, error);
 	if (mb_io_ptr->filetype == MB_FILETYPE_XDR && mb_io_ptr->xdrs3 != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs3, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs3, error);
 	if (mb_io_ptr->hdr_comment != NULL)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->hdr_comment, error);
-	status = mb_deall_ioarrays(verbose, *mbio_ptr, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->hdr_comment, error);
+	status &= mb_deall_ioarrays(verbose, *mbio_ptr, error);
 
 	/* close the files if normal */
 	if (mb_io_ptr->filetype == MB_FILETYPE_NORMAL || mb_io_ptr->filetype == MB_FILETYPE_XDR) {
@@ -82,7 +77,7 @@ int mb_close(int verbose, void **mbio_ptr, int *error) {
 
 	/* else handle single normal files to be closed with mb_fileio_close() */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_SINGLE) {
-		status = mb_fileio_close(verbose, *mbio_ptr, error);
+		status &= mb_fileio_close(verbose, *mbio_ptr, error);
 	}
 
 	/* else if gsf then use gsfClose */
@@ -109,7 +104,7 @@ int mb_close(int verbose, void **mbio_ptr, int *error) {
 	}
 
 	/* deallocate the mbio descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
