@@ -26,38 +26,22 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
-#include <time.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
 
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_info.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error) {
 	char *function_name = "mb_check_info";
-	int status;
-	char file_inf[MB_PATH_MAXLINE];
-	char line[MB_PATH_MAXLINE];
-	int nrecords, nrecords_read;
-	double lon_min, lon_max;
-	double lat_min, lat_max;
-	int mask_nx, mask_ny;
-	double mask_dx, mask_dy;
-	double lonwest, loneast, latsouth, latnorth;
-	int *mask = NULL;
-	char *startptr, *endptr;
-	FILE *fp;
-	char *stdin_string = "stdin";
-	int nscan;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -73,6 +57,8 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 	}
 
 	/* cannot check bounds if input is stdin */
+	int status;
+	const char *stdin_string = "stdin";
 	if (strncmp(file, stdin_string, 5) == 0) {
 		*file_in_bounds = MB_YES;
 
@@ -85,24 +71,30 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 	/* check for inf file */
 	else {
 		/* get info file path */
+		char file_inf[MB_PATH_MAXLINE];
 		strcpy(file_inf, file);
 		strcat(file_inf, ".inf");
 
+		int *mask = NULL;
+
 		/* open if possible */
-		if ((fp = fopen(file_inf, "r")) != NULL) {
+		FILE *fp = fopen(file_inf, "r");
+		if (fp != NULL) {
 			/* initialize the parameters */
-			nrecords = -1;
-			lon_min = 0.0;
-			lon_max = 0.0;
-			lat_min = 0.0;
-			lat_max = 0.0;
-			mask_nx = 0;
-			mask_ny = 0;
+			int nrecords = -1;
+			double lon_min = 0.0;
+			double lon_max = 0.0;
+			double lat_min = 0.0;
+			double lat_max = 0.0;
+			int mask_nx = 0;
+			int mask_ny = 0;
 
 			/* read the inf file */
+			char line[MB_PATH_MAXLINE];
 			while (fgets(line, MB_PATH_MAXLINE, fp) != NULL) {
 				if (strncmp(line, "Number of Records:", 18) == 0) {
-					nscan = sscanf(line, "Number of Records: %d", &nrecords_read);
+					int nrecords_read;
+					const int nscan = sscanf(line, "Number of Records: %d", &nrecords_read);
 					if (nscan == 1)
 						nrecords = nrecords_read;
 				}
@@ -114,10 +106,12 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 					sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
 					status = mb_mallocd(verbose, __FILE__, __LINE__, mask_nx * mask_ny * sizeof(int), (void **)&mask, error);
 					for (int j = mask_ny - 1; j >= 0; j--) {
+						char *startptr = NULL; 
 						if ((startptr = fgets(line, 128, fp)) != NULL) {
 							startptr = &line[6];
 							for (int i = 0; i < mask_nx; i++) {
 								int k = i + j * mask_nx;
+								char *endptr = NULL; 
 								mask[k] = strtol(startptr, &endptr, 0);
 								startptr = endptr;
 							}
@@ -153,15 +147,15 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 				/* else check mask against desired input bounds */
 				else if (mask_nx > 0 && mask_ny > 0) {
 					*file_in_bounds = MB_NO;
-					mask_dx = (lon_max - lon_min) / mask_nx;
-					mask_dy = (lat_max - lat_min) / mask_ny;
+					const double mask_dx = (lon_max - lon_min) / mask_nx;
+					const double mask_dy = (lat_max - lat_min) / mask_ny;
 					for (int i = 0; i < mask_nx && *file_in_bounds == MB_NO; i++)
 						for (int j = 0; j < mask_ny && *file_in_bounds == MB_NO; j++) {
 							int k = i + j * mask_nx;
-							lonwest = lon_min + i * mask_dx;
-							loneast = lonwest + mask_dx;
-							latsouth = lat_min + j * mask_dy;
-							latnorth = latsouth + mask_dy;
+							const double lonwest = lon_min + i * mask_dx;
+							const double loneast = lonwest + mask_dx;
+							const double latsouth = lat_min + j * mask_dy;
+							const double latnorth = latsouth + mask_dy;
 							if (mask[k] == 1 && lonwest < bounds[1] && loneast > bounds[0] && latsouth < bounds[3] &&
 							    latnorth > bounds[2])
 								*file_in_bounds = MB_YES;
@@ -240,16 +234,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 /*--------------------------------------------------------------------*/
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip, int *error) {
 	char *function_name = "mb_get_info";
-	int status;
-	char file_inf[MB_PATH_MAXLINE];
-	char line[MB_PATH_MAXLINE];
-	char *startptr;
-	// char	*endptr;
-	FILE *fp;
-	int time_i[7];
-	double speedkts;
-	int nscan, nproblem, problemid;
-	int mask_nx, mask_ny;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -265,11 +249,14 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 	mb_info_init(verbose, mb_info, error);
 
 	/* get info file path */
+	char file_inf[MB_PATH_MAXLINE];
 	strcpy(file_inf, file);
 	strcat(file_inf, ".inf");
 
 	/* open if possible */
-	if ((fp = fopen(file_inf, "r")) == NULL) {
+	int status = MB_SUCCESS;
+	FILE *fp = fopen(file_inf, "r");
+	if (fp == NULL) {
 		/* set error */
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
@@ -289,7 +276,13 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		strcpy(mb_info->file, file);
 
 		/* read the inf file */
+		char line[MB_PATH_MAXLINE];
 		while (fgets(line, MB_PATH_MAXLINE, fp) != NULL) {
+			char *startptr;
+			int nscan;
+			int nproblem;
+			int problemid;
+			double speedkts;
 			if (strncmp(line, "Number of Records:", 18) == 0) {
 				nscan = sscanf(line, "Number of Records: %d", &mb_info->nrecords);
 			}
@@ -351,6 +344,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 
 			else if (strncmp(line, "Start of Data:", 14) == 0) {
 				if ((startptr = fgets(line, 128, fp)) != NULL) {
+					int time_i[7];
 					nscan = sscanf(line, "Time:  %d %d %d %d:%d:%d.%d  JD", &time_i[1], &time_i[2], &time_i[0], &time_i[3],
 					               &time_i[4], &time_i[5], &time_i[6]);
 					if (nscan == 7)
@@ -372,6 +366,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 
 			else if (strncmp(line, "End of Data:", 12) == 0) {
 				if ((startptr = fgets(line, 128, fp)) != NULL) {
+					int time_i[7];
 					nscan = sscanf(line, "Time:  %d %d %d %d:%d:%d.%d  JD", &time_i[1], &time_i[2], &time_i[0], &time_i[3],
 					               &time_i[4], &time_i[5], &time_i[6]);
 					if (nscan == 7)
@@ -429,6 +424,8 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 			}
 
 			else if (strncmp(line, "CM dimensions:", 14) == 0) {
+				int mask_nx;
+				int mask_ny;
 				sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
 				for (int j = 0; j < mask_ny; j++)
 					fgets(line, 128, fp);
@@ -575,18 +572,6 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 /*--------------------------------------------------------------------*/
 int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	char *function_name = "mb_make_info";
-	int status = MB_SUCCESS;
-	char inffile[MB_PATH_MAXLINE];
-	char fbtfile[MB_PATH_MAXLINE];
-	char fnvfile[MB_PATH_MAXLINE];
-	char command[MB_PATH_MAXLINE];
-	int datmodtime = 0;
-	int infmodtime = 0;
-	int fbtmodtime = 0;
-	int fnvmodtime = 0;
-	struct stat file_status;
-	int fstat;
-	int shellstatus;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -599,18 +584,28 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	}
 
 	/* check for existing ancillary files */
+	char inffile[MB_PATH_MAXLINE];
 	sprintf(inffile, "%s.inf", file);
+	char fbtfile[MB_PATH_MAXLINE];
 	sprintf(fbtfile, "%s.fbt", file);
+	char fnvfile[MB_PATH_MAXLINE];
 	sprintf(fnvfile, "%s.fnv", file);
+
+	int fstat;
+	struct stat file_status;
+	int datmodtime = 0;
 	if ((fstat = stat(file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		datmodtime = file_status.st_mtime;
 	}
+	int infmodtime = 0;
 	if ((fstat = stat(inffile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
 		infmodtime = file_status.st_mtime;
 	}
+	int fbtmodtime = 0;
 	if ((fstat = stat(fbtfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
 		fbtmodtime = file_status.st_mtime;
 	}
+	int fnvmodtime = 0;
 	if ((fstat = stat(fnvfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
 		fnvmodtime = file_status.st_mtime;
 	}
@@ -619,10 +614,12 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	if (force == MB_YES || (datmodtime > 0 && datmodtime > infmodtime)) {
 		if (verbose >= 1)
 			fprintf(stderr, "\nGenerating inf file for %s\n", file);
+		char command[MB_PATH_MAXLINE];
 		sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10", format, file);
 		if (verbose >= 2)
 			fprintf(stderr, "\t%s\n", command);
-		shellstatus = system(command);
+		/* int shellstatus = */ system(command);
+		/* TODO(schwehr): Check the result of shellstatus */
 	}
 
 	/* make new fbt file if not there or out of date */
@@ -635,8 +632,10 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	    format != MBF_MBARROV2 && format != MBF_MBPRONAV) {
 		if (verbose >= 1)
 			fprintf(stderr, "Generating fbt file for %s\n", file);
+		char command[MB_PATH_MAXLINE];
 		sprintf(command, "mbcopy -F %d/71 -I %s -D -O %s.fbt", format, file, file);
-		shellstatus = system(command);
+		/* int shellstatus = */ system(command);
+		/* TODO(schwehr): Check the result of shellstatus */
 	}
 
 	/* make new fnv file if not there or out of date */
@@ -646,9 +645,13 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 	    format != MBF_MBPRONAV) {
 		if (verbose >= 1)
 			fprintf(stderr, "Generating fnv file for %s\n", file);
+		char command[MB_PATH_MAXLINE];
 		sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN > %s.fnv", format, file, file);
-		shellstatus = system(command);
+		/* int shellstatus = */ system(command);
+		/* TODO(schwehr): Check the result of shellstatus */
 	}
+
+	int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -664,12 +667,6 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_get_fbt(int verbose, char *file, int *format, int *error) {
 	char *function_name = "mb_get_fbt";
-	int status = MB_SUCCESS;
-	char fbtfile[MB_PATH_MAXLINE];
-	int datmodtime = 0;
-	int fbtmodtime = 0;
-	struct stat file_status;
-	int fstat;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -681,11 +678,17 @@ int mb_get_fbt(int verbose, char *file, int *format, int *error) {
 	}
 
 	/* check for existing fbt file */
+	char fbtfile[MB_PATH_MAXLINE];
 	sprintf(fbtfile, "%s.fbt", file);
-	if ((fstat = stat(file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	int datmodtime = 0;
+	struct stat file_status;
+	int fstat = stat(file, &file_status);
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		datmodtime = file_status.st_mtime;
 	}
-	if ((fstat = stat(fbtfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	int fbtmodtime = 0;
+	fstat = stat(fbtfile, &file_status);
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		fbtmodtime = file_status.st_mtime;
 	}
 
@@ -694,6 +697,8 @@ int mb_get_fbt(int verbose, char *file, int *format, int *error) {
 		strcpy(file, fbtfile);
 		*format = 71;
 	}
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -711,12 +716,6 @@ int mb_get_fbt(int verbose, char *file, int *format, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_get_fnv(int verbose, char *file, int *format, int *error) {
 	char *function_name = "mb_get_fnv";
-	int status = MB_SUCCESS;
-	char fnvfile[MB_PATH_MAXLINE];
-	int datmodtime = 0;
-	int fnvmodtime = 0;
-	struct stat file_status;
-	int fstat;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -728,11 +727,17 @@ int mb_get_fnv(int verbose, char *file, int *format, int *error) {
 	}
 
 	/* check for existing fnv file */
+	char fnvfile[MB_PATH_MAXLINE];
 	sprintf(fnvfile, "%s.fnv", file);
-	if ((fstat = stat(file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	struct stat file_status;
+	int datmodtime = 0;
+	int fstat = stat(file, &file_status);
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		datmodtime = file_status.st_mtime;
 	}
-	if ((fstat = stat(fnvfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	int fnvmodtime = 0;
+	fstat = stat(fnvfile, &file_status);
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		fnvmodtime = file_status.st_mtime;
 	}
 
@@ -741,6 +746,8 @@ int mb_get_fnv(int verbose, char *file, int *format, int *error) {
 		strcpy(file, fnvfile);
 		*format = 166;
 	}
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -758,12 +765,6 @@ int mb_get_fnv(int verbose, char *file, int *format, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_get_ffa(int verbose, char *file, int *format, int *error) {
 	char *function_name = "mb_get_ffa";
-	int status = MB_SUCCESS;
-	char ffafile[MB_PATH_MAXLINE];
-	int datmodtime = 0;
-	int ffamodtime = 0;
-	struct stat file_status;
-	int fstat;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -775,15 +776,22 @@ int mb_get_ffa(int verbose, char *file, int *format, int *error) {
 	}
 
 	/* check for existing ffa file */
+	char ffafile[MB_PATH_MAXLINE];
 	sprintf(ffafile, "%s.ffa", file);
-	if ((fstat = stat(file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	struct stat file_status;
+	int fstat = stat(file, &file_status);
+	int datmodtime = 0;
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		datmodtime = file_status.st_mtime;
 	}
-	if ((fstat = stat(ffafile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	fstat = stat(ffafile, &file_status);
+	int ffamodtime = 0;
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		ffamodtime = file_status.st_mtime;
 	}
 
 	/* replace file with ffa file if ffa file exists */
+	int status = MB_SUCCESS;
 	if (datmodtime > 0 && ffamodtime > 0) {
 		strcpy(file, ffafile);
 		*format = 71;
@@ -809,12 +817,6 @@ int mb_get_ffa(int verbose, char *file, int *format, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_get_ffs(int verbose, char *file, int *format, int *error) {
 	char *function_name = "mb_get_ffs";
-	int status = MB_SUCCESS;
-	char ffsfile[MB_PATH_MAXLINE];
-	int datmodtime = 0;
-	int ffsmodtime = 0;
-	struct stat file_status;
-	int fstat;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -826,15 +828,22 @@ int mb_get_ffs(int verbose, char *file, int *format, int *error) {
 	}
 
 	/* check for existing ffs file */
+	char ffsfile[MB_PATH_MAXLINE];
 	sprintf(ffsfile, "%s.ffs", file);
-	if ((fstat = stat(file, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	int datmodtime = 0;
+	struct stat file_status;
+	int fstat = stat(file, &file_status);
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		datmodtime = file_status.st_mtime;
 	}
-	if ((fstat = stat(ffsfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	int ffsmodtime = 0;
+	fstat = stat(ffsfile, &file_status);
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		ffsmodtime = file_status.st_mtime;
 	}
 
 	/* replace file with ffs file if ffs file exists */
+	int status = MB_SUCCESS;
 	if (datmodtime > 0 && ffsmodtime > 0) {
 		strcpy(file, ffsfile);
 		*format = 71;
@@ -863,12 +872,6 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
                    double *ssalongtrack, int *ibeamport, int *ibeamcntr, int *ibeamstbd, int *ipixelport, int *ipixelcntr,
                    int *ipixelstbd, int *error) {
 	char *function_name = "mb_swathbounds";
-	int status = MB_SUCCESS;
-	double mtodeglon, mtodeglat;
-	double headingx, headingy;
-	double xtrackmin, xtrackmax, distmin;
-	int found;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -882,22 +885,25 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
 		fprintf(stderr, "dbg2       nbath:         %d\n", nbath);
 		if (verbose >= 3 && nbath > 0) {
 			fprintf(stderr, "dbg3       beam   flag  bath  crosstrack alongtrack\n");
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       %4d   %3d   %f    %f     %f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg2       nss:      %d\n", nss);
 		if (verbose >= 3 && nss > 0) {
 			fprintf(stderr, "dbg3       pixel sidescan crosstrack alongtrack\n");
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3       %4d   %f    %f     %f\n", i, ss[i], ssacrosstrack[i], ssalongtrack[i]);
 		}
 	}
 
 	/* get coordinate scaling */
+	double mtodeglon;
+	double mtodeglat;
 	mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-	headingx = sin(heading * DTR);
-	headingy = cos(heading * DTR);
+	/* TODO(schwehr): Remove unless there was supposed to be a use of headingx/headingy. */
+	/* const double headingx = sin(heading * DTR); */
+	/* const double headingy = cos(heading * DTR); */
 
 	/* set starting values */
 	*ibeamport = 0;
@@ -908,11 +914,11 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
 	*ipixelstbd = 0;
 
 	/* get min max of non-null beams */
-	xtrackmin = 0.0;
-	xtrackmax = 0.0;
-	distmin = 0.0;
-	found = MB_NO;
-	for (i = 0; i < nbath; i++) {
+	double xtrackmin = 0.0;
+	double xtrackmax = 0.0;
+	double distmin = 0.0;
+	int found = MB_NO;
+	for (int i = 0; i < nbath; i++) {
 		if ((checkgood && mb_beam_ok(beamflag[i])) || !mb_beam_check_flag_unusable(beamflag[i])) {
 			if (found == MB_NO) {
 				*ibeamport = i;
@@ -945,7 +951,7 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
 	xtrackmax = 0.0;
 	distmin = 0.0;
 	found = MB_NO;
-	for (i = 0; i < nss; i++) {
+	for (int i = 0; i < nss; i++) {
 		if (ss[i] > 0.0) {
 			if (found == MB_NO) {
 				*ipixelport = i;
@@ -973,6 +979,8 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -994,7 +1002,6 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
 /*--------------------------------------------------------------------*/
 int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error) {
 	char *function_name = "mb_info_init";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1007,7 +1014,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error) {
 	/* initialize mb_info_struct */
 	mb_info->loaded = MB_NO;
 	mb_info->file[0] = '\0';
-	;
+
 	mb_info->nrecords = 0;
 	mb_info->nrecords_ss1 = 0;
 	mb_info->nrecords_ss2 = 0;
@@ -1081,6 +1088,8 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error) {
 
 	*error = MB_ERROR_NO_ERROR;
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -1095,17 +1104,6 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_info_struct *mb_info, int lonflip, int *error) {
 	char *function_name = "mb_get_info_datalist";
-	int status = MB_SUCCESS;
-	char swathfile[MB_PATH_MAXLINE];
-	char dfile[MB_PATH_MAXLINE];
-	struct mb_info_struct mb_info_file;
-	int read_datalist = MB_NO;
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
-	int read_data;
-	double file_weight;
-	int nfile = 0;
-	// int	i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1126,18 +1124,25 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 		mb_get_format(verbose, read_file, NULL, format, error);
 
 	/* determine whether to read one file or a list of files */
+	int read_datalist = MB_NO;
 	if (*format < 0)
 		read_datalist = MB_YES;
 
 	/* open file list */
+	char swathfile[MB_PATH_MAXLINE];
+	void *datalist = NULL;
+	int read_data;
+	char dfile[MB_PATH_MAXLINE];
+	int status = MB_SUCCESS;
 	if (read_datalist == MB_YES) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, error)) != MB_SUCCESS) {
 			*error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
 			exit(status);
 		}
+		double file_weight;
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, format, &file_weight, error)) == MB_SUCCESS)
 			read_data = MB_YES;
 		else
@@ -1150,8 +1155,10 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 	}
 
 	/* loop over all files to be read */
+	int nfile = 0;
 	while (read_data == MB_YES) {
 		/* read inf file */
+		struct mb_info_struct mb_info_file;
 		status = mb_get_info(verbose, swathfile, &mb_info_file, lonflip, error);
 
 		/* only use if there are data */
@@ -1263,6 +1270,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 
 		/* figure out whether and what to read next */
 		if (read_datalist == MB_YES) {
+			double file_weight;
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, format, &file_weight, error)) == MB_SUCCESS)
 				read_data = MB_YES;
 			else
@@ -1357,7 +1365,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 		// for (j=mb_info->mask_ny-1;j>=0;j--)
 		//	{
 		//	fprintf(stderr, "dbg2       ");
-		//	for (i=0;i<mb_info->mask_nx;i++)
+		//	for (int i=0;i<mb_info->mask_nx;i++)
 		//		{
 		//		k = i + j * mb_info->mask_nx;
 		//		fprintf(stderr, " %1d", mb_info->mask[k]);
