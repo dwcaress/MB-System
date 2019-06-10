@@ -25,23 +25,20 @@
  *
  */
 
-/* standard include files */
+#include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
-#include <assert.h>
+#include <time.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
 #include "mb_process.h"
-#include "mbsys_reson7k3.h"
-
-/* include for byte swapping */
+#include "mb_status.h"
 #include "mb_swap.h"
+#include "mbsys_reson7k3.h"
 
 /* turn on debug statements here */
 //#define MBR_RESON7K3_DEBUG 1
