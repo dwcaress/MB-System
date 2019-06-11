@@ -17,23 +17,19 @@
  *
  * Author:	D. W. Caress
  * Date:	November 19,  1998
- *
- *
  */
-#include <stdio.h>
-#include <math.h>
 
-/* mbio include files */
+#include <math.h>
+#include <stdio.h>
+
 #include "mb_define.h"
 #include "mb_process.h"
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_int_compare compares int values. */
 int mb_int_compare(const void *a, const void *b) {
-	int *aa, *bb;
-
-	aa = (int *)a;
-	bb = (int *)b;
+	int *aa = (int *)a;
+	int *bb = (int *)b;
 
 	if (*aa > *bb)
 		return (1);
@@ -43,10 +39,8 @@ int mb_int_compare(const void *a, const void *b) {
 /*--------------------------------------------------------------------*/
 /* 	function mb_double_compare compares double values. */
 int mb_double_compare(const void *a, const void *b) {
-	double *aa, *bb;
-
-	aa = (double *)a;
-	bb = (double *)b;
+	double *aa = (double *)a;
+	double *bb = (double *)b;
 
 	if (*aa > *bb)
 		return (1);
@@ -56,10 +50,8 @@ int mb_double_compare(const void *a, const void *b) {
 /*--------------------------------------------------------------------*/
 /* 	function mb_edit_compare compares mb_edit_struct values. */
 int mb_edit_compare(const void *a, const void *b) {
-	struct mb_edit_struct *aa, *bb;
-
-	aa = (struct mb_edit_struct *)a;
-	bb = (struct mb_edit_struct *)b;
+	struct mb_edit_struct *aa = (struct mb_edit_struct *)a;
+	struct mb_edit_struct *bb = (struct mb_edit_struct *)b;
 
 	/*if (fabs(aa->time_d - bb->time_d) < MB_ESF_MAXTIMEDIFF && aa->time_d != bb->time_d)
 	{
@@ -81,10 +73,8 @@ int mb_edit_compare(const void *a, const void *b) {
 /*--------------------------------------------------------------------*/
 /* 	function mb_edit_compare compares mb_edit_struct values. */
 int mb_edit_compare_coarse(const void *a, const void *b) {
-	struct mb_edit_struct *aa, *bb;
-
-	aa = (struct mb_edit_struct *)a;
-	bb = (struct mb_edit_struct *)b;
+	struct mb_edit_struct *aa = (struct mb_edit_struct *)a;
+	struct mb_edit_struct *bb = (struct mb_edit_struct *)b;
 
 	/*if (fabs(aa->time_d - bb->time_d) < MB_ESF_MAXTIMEDIFF && aa->time_d != bb->time_d)
 	{
