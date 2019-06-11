@@ -25,21 +25,20 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
+#include "mb_status.h"
+
+static const char *HOME = "HOME";
 
 /*--------------------------------------------------------------------*/
 int mb_version(int verbose, char *version_string, int *version_id, int *version_major, int *version_minor, int *version_archive,
                int *error) {
 	char *function_name = "mb_version";
-	int status = MB_SUCCESS;
-	int nscan;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -52,7 +51,7 @@ int mb_version(int verbose, char *version_string, int *version_id, int *version_
 	strcpy(version_string, PACKAGE_VERSION);
 
 	/* get version components */
-	nscan = sscanf(version_string, "%d.%d.%d", version_major, version_minor, version_archive);
+	const int nscan = sscanf(version_string, "%d.%d.%d", version_major, version_minor, version_archive);
 	if (nscan == 3) {
 		*error = MB_ERROR_NO_ERROR;
 		// 5.5.2303 ==> 50000000 + 500000 + 2303 ==>  50502303
@@ -65,6 +64,8 @@ int mb_version(int verbose, char *version_string, int *version_id, int *version_
 		*version_minor = 0;
 		*version_archive = 0;
 	}
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -81,13 +82,6 @@ int mb_version(int verbose, char *version_string, int *version_id, int *version_
 int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bounds[4], int *btime_i, int *etime_i,
                 double *speedmin, double *timegap) {
 	char *function_name = "mb_defaults";
-	int status;
-	FILE *fp;
-	char file[MB_PATH_MAXLINE];
-	char string[MB_PATH_MAXLINE];
-	char *HOME = "HOME";
-	char *home_ptr;
-	char *getenv();
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -95,9 +89,6 @@ int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bound
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 	}
-
-	/* successful no matter what happens */
-	status = MB_SUCCESS;
 
 	/* set system default values */
 	*format = 0;
@@ -125,12 +116,16 @@ int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bound
 	*timegap = 1.0;
 
 	/* set the filename */
-	if ((home_ptr = getenv(HOME)) != NULL) {
+	const char *home_ptr = getenv(HOME);
+	if (home_ptr != NULL) {
+		char file[MB_PATH_MAXLINE];
 		strcpy(file, home_ptr);
 		strcat(file, "/.mbio_defaults");
 
 		/* open and read values from file if possible */
-		if ((fp = fopen(file, "r")) != NULL) {
+		FILE *fp = fopen(file, "r");
+		if (fp != NULL) {
+			char string[MB_PATH_MAXLINE];
 			while (fgets(string, sizeof(string), fp) != NULL) {
 				if (strncmp(string, "lonflip:", 8) == 0)
 					sscanf(string, "lonflip: %d", lonflip);
@@ -140,6 +135,9 @@ int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bound
 			fclose(fp);
 		}
 	}
+
+	/* successful no matter what happens */
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -177,13 +175,6 @@ int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bound
 /*--------------------------------------------------------------------*/
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject) {
 	char *function_name = "mbenv";
-	int status;
-	FILE *fp;
-	char file[MB_PATH_MAXLINE];
-	char string[MB_PATH_MAXLINE];
-	char *HOME = "HOME";
-	char *home_ptr;
-	char *getenv();
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -199,23 +190,23 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject) {
    need to be directly referenced.
   If desired, users can set the default postscript and image screen viewers
   using mbdefaults. */
-strcpy(psdisplay, "Default");
-strcpy(imgdisplay, "Default");
-
-	/* successful no matter what happens */
-	status = MB_SUCCESS;
+	strcpy(psdisplay, "Default");
+	strcpy(imgdisplay, "Default");
 
 	/* set system default project name */
 	strcpy(mbproject, "none");
 
 	/* set the filename */
-	if ((home_ptr = getenv(HOME)) != NULL) {
+	const char *home_ptr = getenv(HOME);
+	if (home_ptr != NULL) {
+		char file[MB_PATH_MAXLINE];
 		strcpy(file, home_ptr);
 		strcat(file, "/.mbio_defaults");
 
 		/* open and read values from file if possible */
-		if ((fp = fopen(file, "r")) != NULL) {
-			status = MB_SUCCESS;
+		FILE *fp = fopen(file, "r");
+		if (fp != NULL) {
+			char string[MB_PATH_MAXLINE];
 			while (fgets(string, sizeof(string), fp) != NULL) {
 				if (strncmp(string, "ps viewer:", 10) == 0)
 					sscanf(string, "ps viewer: %s", psdisplay);
@@ -227,6 +218,9 @@ strcpy(imgdisplay, "Default");
 			fclose(fp);
 		}
 	}
+
+	/* successful no matter what happens */
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -243,13 +237,6 @@ strcpy(imgdisplay, "Default");
 /*--------------------------------------------------------------------*/
 int mb_lonflip(int verbose, int *lonflip) {
 	char *function_name = "mb_lonflip";
-	int status;
-	FILE *fp;
-	char file[MB_PATH_MAXLINE];
-	char string[MB_PATH_MAXLINE];
-	char *HOME = "HOME";
-	char *home_ptr;
-	char *getenv();
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -258,19 +245,20 @@ int mb_lonflip(int verbose, int *lonflip) {
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 	}
 
-	/* successful no matter what happens */
-	status = MB_SUCCESS;
-
 	/* set system default values */
 	*lonflip = 0;
 
 	/* set the filename */
-	if ((home_ptr = getenv(HOME)) != NULL) {
+	const char *home_ptr = getenv(HOME);
+	if (home_ptr != NULL) {
+		char file[MB_PATH_MAXLINE];
 		strcpy(file, home_ptr);
 		strcat(file, "/.mbio_defaults");
 
 		/* open and read values from file if possible */
-		if ((fp = fopen(file, "r")) != NULL) {
+		FILE *fp = fopen(file, "r");
+		if (fp != NULL) {
+			char string[MB_PATH_MAXLINE];
 			while (fgets(string, sizeof(string), fp) != NULL) {
 				if (strncmp(string, "lonflip:", 8) == 0)
 					sscanf(string, "lonflip: %d", lonflip);
@@ -278,6 +266,9 @@ int mb_lonflip(int verbose, int *lonflip) {
 			fclose(fp);
 		}
 	}
+
+	/* successful no matter what happens */
+	int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -296,13 +287,6 @@ int mb_mbview_defaults(int verbose, int *primary_colortable, int *primary_colort
                        int *secondary_colortable_mode, double *illuminate_magnitude, double *illuminate_elevation,
                        double *illuminate_azimuth, double *slope_magnitude) {
 	char *function_name = "mb_mbview_defaults";
-	int status;
-	FILE *fp;
-	char file[MB_PATH_MAXLINE];
-	char string[MB_PATH_MAXLINE];
-	char *HOME = "HOME";
-	char *home_ptr;
-	char *getenv();
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -310,9 +294,6 @@ int mb_mbview_defaults(int verbose, int *primary_colortable, int *primary_colort
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 	}
-
-	/* successful no matter what happens */
-	status = MB_SUCCESS;
 
 	/* set system default values */
 	*primary_colortable = 0;
@@ -328,12 +309,16 @@ int mb_mbview_defaults(int verbose, int *primary_colortable, int *primary_colort
 	*slope_magnitude = 1.0;
 
 	/* set the filename */
-	if ((home_ptr = getenv(HOME)) != NULL) {
+	const char *home_ptr = getenv(HOME);
+	if (home_ptr != NULL) {
+		char file[MB_PATH_MAXLINE];
 		strcpy(file, home_ptr);
 		strcat(file, "/.mbio_defaults");
 
 		/* open and read values from file if possible */
-		if ((fp = fopen(file, "r")) != NULL) {
+		FILE *fp = fopen(file, "r");
+		if (fp != NULL) {
+			char string[MB_PATH_MAXLINE];
 			while (fgets(string, sizeof(string), fp) != NULL) {
 				if (strncmp(string, "mbview_primary_colortable:", 25) == 0)
 					sscanf(string, "mbview_primary_colortable:%d", primary_colortable);
@@ -362,6 +347,9 @@ int mb_mbview_defaults(int verbose, int *primary_colortable, int *primary_colort
 		}
 	}
 
+	/* successful no matter what happens */
+	int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -386,13 +374,6 @@ int mb_mbview_defaults(int verbose, int *primary_colortable, int *primary_colort
 /*--------------------------------------------------------------------*/
 int mb_fbtversion(int verbose, int *fbtversion) {
 	char *function_name = "mb_fbtversion";
-	int status;
-	FILE *fp;
-	char file[MB_PATH_MAXLINE];
-	char string[MB_PATH_MAXLINE];
-	char *HOME = "HOME";
-	char *home_ptr;
-	char *getenv();
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -401,19 +382,20 @@ int mb_fbtversion(int verbose, int *fbtversion) {
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 	}
 
-	/* successful no matter what happens */
-	status = MB_SUCCESS;
-
 	/* set system default values */
 	*fbtversion = 3;
 
 	/* set the filename */
-	if ((home_ptr = getenv(HOME)) != NULL) {
+	const char *home_ptr = getenv(HOME);
+	if (home_ptr != NULL) {
+		char file[MB_PATH_MAXLINE];
 		strcpy(file, home_ptr);
 		strcat(file, "/.mbio_defaults");
 
 		/* open and read values from file if possible */
-		if ((fp = fopen(file, "r")) != NULL) {
+		FILE *fp = fopen(file, "r");
+		if (fp != NULL) {
+	                char string[MB_PATH_MAXLINE];
 			while (fgets(string, sizeof(string), fp) != NULL) {
 				if (strncmp(string, "fbtversion:", 11) == 0)
 					sscanf(string, "fbtversion: %d", fbtversion);
@@ -421,6 +403,9 @@ int mb_fbtversion(int verbose, int *fbtversion) {
 			fclose(fp);
 		}
 	}
+
+	/* successful no matter what happens */
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -436,13 +421,6 @@ int mb_fbtversion(int verbose, int *fbtversion) {
 /*--------------------------------------------------------------------*/
 int mb_uselockfiles(int verbose, int *uselockfiles) {
 	char *function_name = "mb_uselockfiles";
-	int status;
-	FILE *fp;
-	char file[MB_PATH_MAXLINE];
-	char string[MB_PATH_MAXLINE];
-	char *HOME = "HOME";
-	char *home_ptr;
-	char *getenv();
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -451,27 +429,28 @@ int mb_uselockfiles(int verbose, int *uselockfiles) {
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 	}
 
-	/* successful no matter what happens */
-	status = MB_SUCCESS;
-
 #ifdef WIN32
 	/* It would crash because the lock file is attempted to be created with the new "wx"
 	   that VC12 does not know and we don't have any use for this anyway.
 	*/
 	*uselockfiles = 0;
-	return (status);
-#endif
+	return (MB_SUCCESS);
+#else  /* WIN32 */
 
 	/* set system default values */
 	*uselockfiles = 1;
 
 	/* set the filename */
-	if ((home_ptr = getenv(HOME)) != NULL) {
+	const char *home_ptr = getenv(HOME);
+	if (home_ptr != NULL) {
+		char file[MB_PATH_MAXLINE];
 		strcpy(file, home_ptr);
 		strcat(file, "/.mbio_defaults");
 
 		/* open and read values from file if possible */
-		if ((fp = fopen(file, "r")) != NULL) {
+		FILE *fp = fopen(file, "r");
+		if (fp != NULL) {
+			char string[MB_PATH_MAXLINE];
 			while (fgets(string, sizeof(string), fp) != NULL) {
 				if (strncmp(string, "uselockfiles:", 13) == 0)
 					sscanf(string, "uselockfiles:%d", uselockfiles);
@@ -481,6 +460,9 @@ int mb_uselockfiles(int verbose, int *uselockfiles) {
 			fclose(fp);
 		}
 	}
+
+	/* successful no matter what happens */
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -492,17 +474,11 @@ int mb_uselockfiles(int verbose, int *uselockfiles) {
 	}
 
 	return (status);
+#endif  /* WIN32 */
 }
 /*--------------------------------------------------------------------*/
 int mb_fileiobuffer(int verbose, int *fileiobuffer) {
 	char *function_name = "mb_fileiobuffer";
-	int status;
-	FILE *fp;
-	char file[MB_PATH_MAXLINE];
-	char string[MB_PATH_MAXLINE];
-	char *HOME = "HOME";
-	char *home_ptr;
-	char *getenv();
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -511,19 +487,20 @@ int mb_fileiobuffer(int verbose, int *fileiobuffer) {
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 	}
 
-	/* successful no matter what happens */
-	status = MB_SUCCESS;
-
 	/* set system default values */
 	*fileiobuffer = 0;
 
 	/* set the filename */
-	if ((home_ptr = getenv(HOME)) != NULL) {
+	const char *home_ptr = getenv(HOME);
+	if (home_ptr != NULL) {
+		char file[MB_PATH_MAXLINE];
 		strcpy(file, home_ptr);
 		strcat(file, "/.mbio_defaults");
 
 		/* open and read values from file if possible */
-		if ((fp = fopen(file, "r")) != NULL) {
+		FILE *fp = fopen(file, "r");
+		if (fp != NULL) {
+			char string[MB_PATH_MAXLINE];
 			while (fgets(string, sizeof(string), fp) != NULL) {
 				if (strncmp(string, "fileiobuffer:", 13) == 0)
 					sscanf(string, "fileiobuffer:%d", fileiobuffer);
@@ -531,6 +508,9 @@ int mb_fileiobuffer(int verbose, int *fileiobuffer) {
 			fclose(fp);
 		}
 	}
+
+	/* successful no matter what happens */
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
