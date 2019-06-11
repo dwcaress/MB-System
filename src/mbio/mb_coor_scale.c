@@ -19,35 +19,29 @@
  *
  * Author:	D. W. Caress
  * Date:	January 21, 1993
- *
- *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_io.h"
 #include "mb_define.h"
+#include "mb_io.h"
+#include "mb_status.h"
 
 /* ellipsoid coefficients from World Geodetic System Ellipsoid of 1972
  * - see Bowditch (H.O. 9 -- American Practical Navigator). */
-#define C1 111412.84
-#define C2 -93.5
-#define C3 0.118
-#define C4 111132.92
-#define C5 -559.82
-#define C6 1.175
-#define C7 0.0023
+const double C1 = 111412.84;
+const double C2 = -93.5;
+const double C3 = 0.118;
+const double C4 = 111132.92;
+const double C5 = -559.82;
+const double C6 = 1.175;
+const double C7 = 0.0023;
 
 /*--------------------------------------------------------------------*/
 int mb_coor_scale(int verbose, double latitude, double *mtodeglon, double *mtodeglat) {
 	char *function_name = "mb_coor_scale";
-	int status;
-	double radlat;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -58,11 +52,11 @@ int mb_coor_scale(int verbose, double latitude, double *mtodeglon, double *mtode
 	}
 
 	/* check that the latitude value is sensible */
+	int status = MB_SUCCESS;
 	if (fabs(latitude) <= 90.0) {
-		radlat = DTR * latitude;
+		const double radlat = DTR * latitude;
 		*mtodeglon = 1. / fabs(C1 * cos(radlat) + C2 * cos(3 * radlat) + C3 * cos(5 * radlat));
 		*mtodeglat = 1. / fabs(C4 + C5 * cos(2 * radlat) + C6 * cos(4 * radlat) + C7 * cos(6 * radlat));
-		status = MB_SUCCESS;
 	}
 
 	/* set error flag if needed */
@@ -85,7 +79,6 @@ int mb_coor_scale(int verbose, double latitude, double *mtodeglon, double *mtode
 /*--------------------------------------------------------------------*/
 int mb_apply_lonflip(int verbose, int lonflip, double *longitude) {
 	char *function_name = "mb_apply_lonflip";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -115,6 +108,8 @@ int mb_apply_lonflip(int verbose, int lonflip, double *longitude) {
 		else if (*longitude < 0.)
 			*longitude = *longitude + 360.;
 	}
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
