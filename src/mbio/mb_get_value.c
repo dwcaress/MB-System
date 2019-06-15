@@ -22,16 +22,14 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 
-/* mbio include files */
+#include "mb_define.h"
 #include "mb_status.h"
 #include "mb_swap.h"
-#include "mb_define.h"
 
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
@@ -60,9 +58,7 @@ int mb_get_int(int *value, char *str, int nchar) {
  *	a buffer, swapping if necessary
  */
 int mb_get_binary_short(int swapped, void *buffer, void *ptr) {
-	short *value;
-
-	value = (short *)ptr;
+	short *value = (short *)ptr;
 	memcpy(value, buffer, sizeof(short));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
@@ -78,9 +74,7 @@ int mb_get_binary_short(int swapped, void *buffer, void *ptr) {
  *	a buffer, swapping if necessary
  */
 int mb_get_binary_int(int swapped, void *buffer, void *ptr) {
-	int *value;
-
-	value = (int *)ptr;
+	int *value = (int *)ptr;
 	memcpy(value, buffer, sizeof(int));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
@@ -96,9 +90,7 @@ int mb_get_binary_int(int swapped, void *buffer, void *ptr) {
  *	a buffer, swapping if necessary
  */
 int mb_get_binary_float(int swapped, void *buffer, void *ptr) {
-	float *value;
-
-	value = (float *)ptr;
+	float *value = (float *)ptr;
 	memcpy(value, buffer, sizeof(float));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
@@ -114,9 +106,7 @@ int mb_get_binary_float(int swapped, void *buffer, void *ptr) {
  *	a buffer, swapping if necessary
  */
 int mb_get_binary_double(int swapped, void *buffer, void *ptr) {
-	double *value;
-
-	value = (double *)ptr;
+	double *value = (double *)ptr;
 	memcpy(value, buffer, sizeof(double));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
@@ -132,9 +122,7 @@ int mb_get_binary_double(int swapped, void *buffer, void *ptr) {
  *	a buffer, swapping if necessary
  */
 int mb_get_binary_long(int swapped, void *buffer, void *ptr) {
-	mb_s_long *value;
-
-	value = (mb_s_long *)ptr;
+	mb_s_long *value = (mb_s_long *)ptr;
 	memcpy(value, buffer, sizeof(mb_s_long));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
@@ -226,17 +214,14 @@ int mb_put_binary_long(int swapped, mb_s_long value, void *buffer) {
  *	form. This code derives from code in GMT (gmt_init.c).
  */
 int mb_get_bounds(char *text, double *bounds) {
-	int status = MB_SUCCESS;
-	char *result;
-	int i;
-
-	result = strtok(text, "/");
-	i = 0;
+	char *result = strtok(text, "/");
+	int i = 0;
 	while (result && i < 4) {
 		bounds[i] = mb_ddmmss_to_degree(result);
 		i++;
 		result = strtok(NULL, "/");
 	}
+	int status = MB_SUCCESS;
 	if (i == 4)
 		status = MB_SUCCESS;
 	else
@@ -250,25 +235,34 @@ int mb_get_bounds(char *text, double *bounds) {
  *	form. This code has been taken from GMT (gmt_init.c).
  */
 double mb_ddmmss_to_degree(char *text) {
-	int i, colons = 0, suffix;
-	double degree, minute, degfrac, second;
-
-	for (i = 0; text[i]; i++)
+	int colons = 0;
+	int i = 0;  /* Used after for. */ 
+	for (; text[i]; i++)
 		if (text[i] == ':')
 			colons++;
-	suffix = (int)text[i - 1]; /* Last character in string */
+
+	const int suffix = (int)text[i - 1]; /* Last character in string */
+	double degfrac;
+
 	if (colons == 2) {         /* dd:mm:ss format */
+		double second;
+		double degree;
+		double minute;
 		sscanf(text, "%lf:%lf:%lf", &degree, &minute, &second);
 		degfrac = degree + copysign(minute / 60.0 + second / 3600.0, degree);
 	}
 	else if (colons == 1) { /* dd:mm format */
+		double degree;
+		double minute;
 		sscanf(text, "%lf:%lf", &degree, &minute);
 		degfrac = degree + copysign(minute / 60.0, degree);
 	}
 	else
 		degfrac = atof(text);
+
 	if (suffix == 'W' || suffix == 'w' || suffix == 'S' || suffix == 's')
 		degfrac = -degfrac; /* Sign was given implicitly */
+
 	return (degfrac);
 }
 /*--------------------------------------------------------------------*/
