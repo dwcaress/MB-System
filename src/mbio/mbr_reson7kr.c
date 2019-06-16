@@ -25,27 +25,22 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
-#include "mbsys_reson7k.h"
-
-/* include for byte swapping */
+#include "mb_status.h"
 #include "mb_swap.h"
+#include "mbsys_reson7k.h"
 
 /* turn on debug statements here */
 //#define MBR_RESON7KR_DEBUG 1
 //#define MBR_RESON7KR_DEBUG2 1
 //#define MBR_RESON7KR_DEBUG3 1
 
-/* essential function prototypes */
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error);
 int mbr_info_reson7kr(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,

@@ -22,27 +22,22 @@
  *
  * Author:	D. W. Caress
  * Date:	August 26, 2001
- *
- *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
+#include "mb_define.h"
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
-#include "mbsys_reson8k.h"
 #include "mbf_xtfr8101.h"
+#include "mbsys_reson8k.h"
 
 /* turn on debug statements here */
 /* #define MBR_XTFR8101_DEBUG 1 */
 
-/* essential function prototypes */
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error);
 int mbr_info_xtfr8101(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
