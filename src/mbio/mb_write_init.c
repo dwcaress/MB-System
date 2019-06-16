@@ -20,23 +20,21 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "gsf.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
 #include "mb_segy.h"
+#include "mb_status.h"
+#include "netcdf.h"
 #include "../surf/mb_sapi.h"
 #ifdef _WIN32
 #	include <rpc/xdr.h>			/* Don't understand whay this is now need. It wasn't till recently. 26 Juin 2018 (JL)*/
 #endif
-#include "gsf.h"
-#include "netcdf.h"
 
 
 /*--------------------------------------------------------------------*/

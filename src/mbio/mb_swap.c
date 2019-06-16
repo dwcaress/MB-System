@@ -29,14 +29,12 @@
  *
  */
 
-/* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
 
-/* include for byte swapping on little-endian machines */
+#include "mb_define.h"
 #include "mb_status.h"
 #include "mb_swap.h"
-#include "mb_define.h"
 
 /*--------------------------------------------------------------------*/
 /* function mb_swap_check determines if the cpu is byteswapped */

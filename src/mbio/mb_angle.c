@@ -181,13 +181,11 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch, double *roll, int *error) {

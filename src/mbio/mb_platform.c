@@ -22,20 +22,18 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
 #include "mb_segy.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 int mb_platform_init(int verbose, void **platform_ptr, int *error) {

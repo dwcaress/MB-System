@@ -27,13 +27,11 @@
  * Date:	23 May 2012
  */
 
-/* standard include files */
 #include <stdio.h>
 
-/* mbio include files */
-#include "mb_status.h"
-#include "mb_io.h"
 #include "mb_define.h"
+#include "mb_io.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {

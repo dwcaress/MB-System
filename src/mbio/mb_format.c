@@ -20,24 +20,22 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
-#include <unistd.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-/* mbio include files */
 #include "mb_define.h"
-#include "mb_status.h"
-#include "mb_process.h"
-#include "mb_io.h"
-#include "mb_swap.h"
 #include "mb_format.h"
+#include "mb_io.h"
+#include "mb_process.h"
+#include "mb_status.h"
+#include "mb_swap.h"
+#include "mbsys_jstar.h"
 #include "mbsys_simrad.h"
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
-#include "mbsys_jstar.h"
 
 /* Alias table for old (pre-version 4.0) format id's */
 static int format_alias_table[] = {

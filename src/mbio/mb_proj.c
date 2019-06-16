@@ -34,15 +34,13 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
-#include <unistd.h>
+#include <stdio.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
+#include "mb_status.h"
 #include "proj_api.h"
 
 #ifndef _WIN32

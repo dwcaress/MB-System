@@ -20,16 +20,14 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include <mb_status.h>
 #include <mb_define.h>
+#include <mb_status.h>
 
 /*--------------------------------------------------------------------*/
 void mb_platform_math_matrix_times_vector_3x1(double *A, double *b, double *Ab) {
