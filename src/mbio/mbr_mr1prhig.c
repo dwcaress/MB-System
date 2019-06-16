@@ -25,21 +25,17 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 #include <time.h>
 
-/* mbio include files */
 #include "mb_define.h"
-#include "mb_status.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mbsys_mr1.h"
+#include "mb_status.h"
 #include "mbf_mr1prhig.h"
-
-/* essential function prototypes */
+#include "mbsys_mr1.h"
 
 int mbr_register_mr1prhig(int verbose, void *mbio_ptr, int *error);
 int mbr_info_mr1prhig(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,

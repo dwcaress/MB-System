@@ -26,27 +26,21 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
 
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
+#include "mb_status.h"
 #include "mbsys_swathplus.h"
-
-/* include for byte swapping */
-#include "mb_swap.h"
 
 /* turn on debug statements here */
 // #define MBF_SWPLSSXP_DEBUG 1
 
-/* essential function prototypes */
 int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error);
 int mbr_info_swplssxp(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,

@@ -25,23 +25,16 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
+#include "mb_status.h"
 #include "mbf_em12darw.h"
 #include "mbsys_simrad.h"
-
-/* include for byte swapping on little-endian machines */
-#ifdef BYTESWAPPED
-#include "mb_swap.h"
-#endif
 
 /* essential function prototypes */
 int mbr_register_em12darw(int verbose, void *mbio_ptr, int *error);

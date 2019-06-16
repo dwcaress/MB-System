@@ -26,20 +26,16 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mbsys_simrad3.h"
-
-/* include for byte swapping */
+#include "mb_status.h"
 #include "mb_swap.h"
+#include "mbsys_simrad3.h"
 
 /* get NaN detector */
 #if defined(isnanf)

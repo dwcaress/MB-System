@@ -26,23 +26,18 @@
  *
  */
 
-/* standard include files */
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
-#include "mbsys_reson.h"
-#include "mbf_cbat8101.h"
-
-/* include for byte swapping on little-endian machines */
+#include "mb_status.h"
 #include "mb_swap.h"
+#include "mbf_cbat8101.h"
+#include "mbsys_reson.h"
 
-/* essential function prototypes */
 int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error);
 int mbr_info_cbat8101(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,

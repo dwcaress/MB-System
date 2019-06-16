@@ -25,20 +25,16 @@
  *
  * Author:	D. W. Caress
  * Date:	2 May 2012 (when the code was brought into the MB-System archive as a read-only i/o module)
- *
- *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
+#include "mb_status.h"
 #include "mbsys_benthos.h"
 
 /* turn on debug statements here */

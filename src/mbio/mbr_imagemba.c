@@ -35,16 +35,14 @@
  *   3. Comment records are supported.
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
+#include "mb_status.h"
 #include "mbsys_image83p.h"
 
 /* time conversion constants */
@@ -53,11 +51,6 @@
 
 #define MBF_IMAGEMBA_BUFFER_SIZE 7456
 #define MBF_IMAGEMBA_BEAM_SIZE 15
-
-/* include for byte swapping */
-#ifdef BYTESWAPPED
-#include "mb_swap.h"
-#endif
 
 /* essential function prototypes */
 int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error);

@@ -22,24 +22,19 @@
  *
  * Author:	D. W. Caress
  * Date:	December 10, 1998
- *
- *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
-#include "mbsys_reson.h"
+#include "mb_status.h"
 #include "mbf_hypc8101.h"
+#include "mbsys_reson.h"
 
-/* essential function prototypes */
 int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error);
 int mbr_info_hypc8101(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
