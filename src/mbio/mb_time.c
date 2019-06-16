@@ -21,14 +21,12 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
+#include "mb_status.h"
 
 /* year-day conversion */
 int yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
