@@ -90,6 +90,8 @@
 #ifndef MBF_HSLDEOIH_H_
 #define MBF_HSLDEOIH_H_
 
+#include "mbsys_hsds.h"
+
 /* maximum number of depth-velocity pairs */
 #define MBF_HSLDEOIH_MAXVEL 30
 

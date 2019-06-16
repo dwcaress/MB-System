@@ -141,19 +141,16 @@
 #define MBF_HS10JAMS_MAXLINE 800
 #define MBF_HS10JAMS_LENGTH 717
 
-/* standard include files */
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
+#include "mb_status.h"
 #include "mbsys_hs10.h"
 
-/* essential function prototypes */
 int mbr_register_hs10jams(int verbose, void *mbio_ptr, int *error);
 int mbr_info_hs10jams(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,

@@ -25,24 +25,21 @@
  *
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
+#include "mb_status.h"
 #include "mbf_gsfgenmb.h"
 #include "mbsys_gsf.h"
 
 /* GSF error value */
 extern int gsfError;
 
-/* essential function prototypes */
 int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error);
 int mbr_info_gsfgenmb(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,

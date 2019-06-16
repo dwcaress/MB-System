@@ -25,25 +25,18 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
-#include "mbsys_sb2100.h"
-#include "mbf_sb2100rw.h"
-
-/* include for byte swapping on little-endian machines */
-#ifdef BYTESWAPPED
+#include "mb_status.h"
 #include "mb_swap.h"
-#endif
+#include "mbf_sb2100rw.h"
+#include "mbsys_sb2100.h"
 
-/* essential function prototypes */
 int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error);
 int mbr_info_sb2100rw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,

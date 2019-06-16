@@ -81,6 +81,8 @@
 #ifndef MBF_CBAT9001_H_
 #define MBF_CBAT9001_H_
 
+#include "mbsys_reson.h"
+
 /* maximum number of beams and pixels */
 #define MBF_CBAT9001_MAXBEAMS 60
 #define MBF_CBAT9001_COMMENT_LENGTH 200

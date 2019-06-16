@@ -26,18 +26,16 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
-#include "mbsys_dsl.h"
+#include "mb_status.h"
 #include "mbf_dsl120sf.h"
+#include "mbsys_dsl.h"
 
 /* essential function prototypes */
 int mbr_register_dsl120sf(int verbose, void *mbio_ptr, int *error);

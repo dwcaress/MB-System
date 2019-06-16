@@ -60,22 +60,19 @@
  * end of the first line, after the center water depth.
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
+#include "mb_status.h"
 #include "mbsys_hsds.h"
 
 #define LINE1SIZE 87
 #define LINE2SIZE 415
 
-/* essential function prototypes */
 int mbr_register_hsunknwn(int verbose, void *mbio_ptr, int *error);
 int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,

@@ -26,21 +26,17 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
-#include "mbsys_elacmk2.h"
-#include "mbf_elmk2unb.h"
-
-/* include for byte swapping */
+#include "mb_status.h"
 #include "mb_swap.h"
+#include "mbf_elmk2unb.h"
+#include "mbsys_elacmk2.h"
 
 /* essential function prototypes */
 int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error);

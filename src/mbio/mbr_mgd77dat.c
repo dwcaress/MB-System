@@ -22,24 +22,19 @@
  *
  * Author:	D. W. Caress
  * Date:	May 18, 1999
- *
- *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
-#include "mbsys_singlebeam.h"
+#include "mb_status.h"
 #include "mbf_mgd77dat.h"
+#include "mbsys_singlebeam.h"
 
-/* essential function prototypes */
 int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error);
 int mbr_info_mgd77dat(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,

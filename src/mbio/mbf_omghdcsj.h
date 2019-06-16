@@ -55,6 +55,8 @@
 #ifndef MBF_OMGHDCSJ_H_
 #define MBF_OMGHDCSJ_H_
 
+#include "mbsys_hdcs.h"
+
 /* defines sizes and maximums */
 #define MBF_OMGHDCSJ_SUMMARY_SIZE 96
 #define MBF_OMGHDCSJ_SUMMARY_V4EXTRA_SIZE 168

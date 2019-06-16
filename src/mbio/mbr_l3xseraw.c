@@ -27,20 +27,15 @@
  *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
+#include "mb_status.h"
 #include "mbsys_xse.h"
-
-/* include for byte swapping */
-#include "mb_swap.h"
 
 /* #define MB_DEBUG 1 */
 /* #define MB_DEBUG2 1 */
@@ -52,7 +47,6 @@
 #define SWAPFLAG MB_NO
 #endif
 
-/* essential function prototypes */
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error);
 int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,

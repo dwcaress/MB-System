@@ -414,6 +414,8 @@
 #ifndef MBF_HYPC8101_H_
 #define MBF_HYPC8101_H_
 
+#include "mbsys_reson.h"
+
 /* maximum number of beams and pixels */
 #define MBF_HYPC8101_MAXBEAMS 101
 #define MBF_HYPC8101_COMMENT_LENGTH 200

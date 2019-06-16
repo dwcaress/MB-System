@@ -84,6 +84,8 @@
 #ifndef MBF_HSMDLDIH_H_
 #define MBF_HSMDLDIH_H_
 
+#include "mbsys_hsmd.h"
+
 /* maximum number of depth/sound speed data pairs allowed */
 #define MBF_HSMDLDIH_MAXVEL 20
 
