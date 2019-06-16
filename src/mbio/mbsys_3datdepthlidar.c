@@ -167,20 +167,18 @@
  *
  */
 
-/* standard include files */
+#include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
-#include <assert.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_aux.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
 #include "mb_process.h"
-#include "mb_aux.h"
+#include "mb_status.h"
 #include "mbsys_3datdepthlidar.h"
 
 #define MBF_3DDEPTHP_DEBUG 1

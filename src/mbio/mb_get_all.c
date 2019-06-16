@@ -21,20 +21,16 @@
  *
  * Author:	D. W. Caress
  * Date:	January 26, 1993
- *
- *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
@@ -42,13 +38,6 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
                int *namp, int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mb_get_all";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	int i;
-	double mtodeglon, mtodeglat;
-	double dx, dy;
-	double delta_time;
-	double roll, pitch, heave;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -59,11 +48,11 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 	}
 
 	/* get mbio and data structure descriptors */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	*store_ptr = mb_io_ptr->store_data;
 
 	/* reset status */
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print debug statements */
@@ -82,20 +71,20 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 	    as these pointers may have changed */
 	if (status == MB_SUCCESS && mb_io_ptr->new_kind == MB_DATA_DATA) {
 		if (mb_io_ptr->bath_arrays_reallocated == MB_YES) {
-			status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&beamflag, error);
-			status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&bath, error);
-			status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathacrosstrack, error);
-			status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathalongtrack, error);
+			status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&beamflag, error);
+			status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bath, error);
+			status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathacrosstrack, error);
+			status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathalongtrack, error);
 			mb_io_ptr->bath_arrays_reallocated = MB_NO;
 		}
 		if (mb_io_ptr->amp_arrays_reallocated == MB_YES) {
-			status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&amp, error);
+			status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&amp, error);
 			mb_io_ptr->amp_arrays_reallocated = MB_NO;
 		}
 		if (mb_io_ptr->ss_arrays_reallocated == MB_YES) {
-			status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&ss, error);
-			status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&ssacrosstrack, error);
-			status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&ssalongtrack, error);
+			status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&ss, error);
+			status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&ssacrosstrack, error);
+			status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&ssalongtrack, error);
 			mb_io_ptr->ss_arrays_reallocated = MB_NO;
 		}
 	}
@@ -108,7 +97,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 	     *kind == MB_DATA_NAV3 || *kind == MB_DATA_COMMENT)) {
 		/* initialize return values */
 		*kind = MB_DATA_NONE;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = 0;
 		*time_d = 0.0;
 		*navlon = 0.0;
@@ -118,16 +107,16 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 		*nbath = 0;
 		*namp = 0;
 		*nss = 0;
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+		for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 			beamflag[i] = mb_beam_set_flag_null(beamflag[i]);
 			bath[i] = 0.0;
 			bathacrosstrack[i] = 0.0;
 			bathalongtrack[i] = 0.0;
 		}
-		for (i = 0; i < mb_io_ptr->beams_amp_max; i++) {
+		for (int i = 0; i < mb_io_ptr->beams_amp_max; i++) {
 			amp[i] = 0.0;
 		}
-		for (i = 0; i < mb_io_ptr->pixels_ss_max; i++) {
+		for (int i = 0; i < mb_io_ptr->pixels_ss_max; i++) {
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
 			ssalongtrack[i] = 0.0;
@@ -145,6 +134,9 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 		}
 		if (status == MB_SUCCESS &&
 		    (*kind == MB_DATA_NAV || *kind == MB_DATA_NAV1 || *kind == MB_DATA_NAV2 || *kind == MB_DATA_NAV3)) {
+			double roll;
+			double pitch;
+			double heave;
 			status = mb_extract_nav(verbose, mbio_ptr, *store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
 			                        sonardepth, &roll, &pitch, &heave, error);
 		}
@@ -188,18 +180,21 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 	                             *kind == MB_DATA_SUBBOTTOM_CNTRBEAM || *kind == MB_DATA_SUBBOTTOM_SUBBOTTOM ||
 	                             *kind == MB_DATA_SIDESCAN2 || *kind == MB_DATA_SIDESCAN3 || *kind == MB_DATA_WATER_COLUMN)) {
 		/* get coordinate scaling */
+		double mtodeglon;
+		double mtodeglat;
 		mb_coor_scale(verbose, *navlat, &mtodeglon, &mtodeglat);
 
 		/* get distance value */
 		if (mb_io_ptr->old_time_d > 0.0) {
-			dx = (*navlon - mb_io_ptr->old_lon) / mtodeglon;
-			dy = (*navlat - mb_io_ptr->old_lat) / mtodeglat;
+			const double dx = (*navlon - mb_io_ptr->old_lon) / mtodeglon;
+			const double dy = (*navlat - mb_io_ptr->old_lat) / mtodeglat;
 			*distance = 0.001 * sqrt(dx * dx + dy * dy); /* km */
 		}
 		else
 			*distance = 0.0;
 
 		/* get speed value */
+		double delta_time;
 		if (*speed <= 0.0 && mb_io_ptr->old_time_d > 0.0) {
 			delta_time = 0.000277778 * (*time_d - mb_io_ptr->old_time_d); /* hours */
 			if (delta_time > 0.0)
@@ -236,18 +231,21 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 	else if (status == MB_SUCCESS && (*kind == MB_DATA_NAV || *kind == MB_DATA_NAV || *kind == MB_DATA_NAV1 ||
 	                                  *kind == MB_DATA_NAV2 || *kind == MB_DATA_NAV3)) {
 		/* get coordinate scaling */
+		double mtodeglon;
+		double mtodeglat;
 		mb_coor_scale(verbose, *navlat, &mtodeglon, &mtodeglat);
 
 		/* get distance value */
 		if (mb_io_ptr->old_ntime_d > 0.0) {
-			dx = (*navlon - mb_io_ptr->old_nlon) / mtodeglon;
-			dy = (*navlat - mb_io_ptr->old_nlat) / mtodeglat;
+			const double dx = (*navlon - mb_io_ptr->old_nlon) / mtodeglon;
+			const double dy = (*navlat - mb_io_ptr->old_nlat) / mtodeglat;
 			*distance = 0.001 * sqrt(dx * dx + dy * dy); /* km */
 		}
 		else
 			*distance = 0.0;
 
 		/* get speed value */
+		double delta_time;
 		if (*speed <= 0.0 && mb_io_ptr->old_ntime_d > 0.0) {
 			delta_time = 0.000277778 * (*time_d - mb_io_ptr->old_ntime_d); /* hours */
 			if (delta_time > 0.0)
@@ -389,20 +387,20 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
 		if (verbose >= 3 && *nbath > 0) {
 			fprintf(stderr, "dbg3       beam   flag  bath  crosstrack alongtrack\n");
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg3       %4d   %3d   %f    %f     %f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg2       namp:      %d\n", *namp);
 		if (verbose >= 3 && *namp > 0) {
 			fprintf(stderr, "dbg3       beam   amp  crosstrack alongtrack\n");
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg3       %4d   %f    %f     %f\n", i, amp[i], bathacrosstrack[i], bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg2       nss:      %d\n", *nss);
 		if (verbose >= 3 && *nss > 0) {
 			fprintf(stderr, "dbg3       pixel sidescan crosstrack alongtrack\n");
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg3       %4d   %f    %f     %f\n", i, ss[i], ssacrosstrack[i], ssalongtrack[i]);
 		}
 	}

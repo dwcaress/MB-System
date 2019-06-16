@@ -22,21 +22,19 @@
  *
  */
 
-/* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <time.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
-/* mbio include files */
-#include "mb_io.h"
-#include "mb_status.h"
 #include "mb_define.h"
 #include "mb_format.h"
+#include "mb_io.h"
 #include "mb_process.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
 int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {

@@ -19,17 +19,15 @@
  * Date:	October 30, 2000
  */
 
-/* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
 #include "mb_io.h"
 #include "mb_process.h"
+#include "mb_status.h"
 
 //    #define MB_NAVINT_DEBUG 1
 //    #define MB_ATTINT_DEBUG 1
