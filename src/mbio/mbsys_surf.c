@@ -24,23 +24,18 @@
  * Author:	D. W. Caress
  * Author:	D. N. Chayes
  * Date:	June 20, 2002
- *
- *
- *
  */
 
-/* standard include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
-/* mbio include files */
-#include "mb_status.h"
+#include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
-#include "mb_define.h"
-#include "../surf/mb_sapi.h"
+#include "mb_status.h"
 #include "mbsys_surf.h"
+#include "../surf/mb_sapi.h"
 
 double mbsys_get_depth(SurfMultiBeamDepth *MultiBeamDepth, SurfTransducerParameterTable TransducerTable, float heave, int n);
 
