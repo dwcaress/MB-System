@@ -83,7 +83,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.7.5beta10"
+#define PACKAGE_STRING "mbsystem 5.7.5beta11"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -92,7 +92,7 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.7.5beta10"
+#define PACKAGE_VERSION "5.7.5beta11"
 
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
@@ -104,10 +104,10 @@
 /* #undef TEST_ENABLED */
 
 /* Version number of package */
-#define VERSION "5.7.5beta10"
+#define VERSION "5.7.5beta11"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "9 June 2019"
+#define VERSION_DATE "16 June 2019"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

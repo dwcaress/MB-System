@@ -1004,7 +1004,7 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     }
 
     status = mbsys_reson7k3_preprocess(verbose, mbio_ptr, store_ptr,
-                platform_ptr, preprocess_pars, error);
+                *platform_ptr, preprocess_pars, error);
   }
 
   /* set error and kind in mb_io_ptr */

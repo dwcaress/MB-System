@@ -1218,9 +1218,9 @@ int main(int argc, char **argv) {
   }
 
   /* initialize the project structures */
-  memset(&project_inputbase, sizeof(struct mbna_project), 0);
-  memset(&project_inputadd, sizeof(struct mbna_project), 0);
-  memset(&project_output, sizeof(struct mbna_project), 0);
+  memset(&project_inputbase, 0, sizeof(struct mbna_project));
+  memset(&project_inputadd, 0, sizeof(struct mbna_project));
+  memset(&project_output, 0, sizeof(struct mbna_project));
 
   /* if merging two projects then read the first, create new output project */
   if (mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_MERGE || mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_COPY) {
