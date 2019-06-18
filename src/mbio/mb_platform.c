@@ -38,8 +38,6 @@
 /*--------------------------------------------------------------------*/
 int mb_platform_init(int verbose, void **platform_ptr, int *error) {
 	char *function_name = "mb_platform_init";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -51,6 +49,7 @@ int mb_platform_init(int verbose, void **platform_ptr, int *error) {
 	}
 
 	/* allocate memory for platform descriptor structure if needed */
+	int status = MB_SUCCESS;
 	if (*platform_ptr == NULL) {
 		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_platform_struct), (void **)platform_ptr, error);
 		if (status == MB_SUCCESS) {
@@ -61,7 +60,7 @@ int mb_platform_init(int verbose, void **platform_ptr, int *error) {
 	/* initialize structure if platform structure is allocated */
 	if (*platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)*platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)*platform_ptr;
 
 		/* set values */
 		platform->type = MB_PLATFORM_NONE;
@@ -128,8 +127,6 @@ int mb_platform_init(int verbose, void **platform_ptr, int *error) {
 int mb_platform_setinfo(int verbose, void *platform_ptr, int type, char *name, char *organization, char *documentation_url,
                         double start_time_d, double end_time_d, int *error) {
 	char *function_name = "mb_platform_setinfo";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -145,10 +142,12 @@ int mb_platform_setinfo(int verbose, void *platform_ptr, int type, char *name, c
 		fprintf(stderr, "dbg2       end_time_d:	             %f\n", end_time_d);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* proceed if platform structure is allocated */
 	if (platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 		/* set values */
 		platform->type = type;
@@ -204,12 +203,6 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
                            mb_longname serialnumber, int capability1, int capability2, int num_offsets, int num_time_latency,
                            int *error) {
 	char *function_name = "mb_platform_add_sensor";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	struct mb_sensor_struct *sensor;
-	int isensor;
-	char *message = NULL;
-	size_t size;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -227,15 +220,17 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
 		fprintf(stderr, "dbg2       num_time_latency:     %d\n", num_time_latency);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* work with valid platform pointer */
 	if (platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 		/* allocate memory for sensor if needed */
 		platform->num_sensors++;
 		if (platform->num_sensors > platform->num_sensors_alloc) {
-			size = platform->num_sensors * sizeof(struct mb_sensor_struct);
+			size_t size = platform->num_sensors * sizeof(struct mb_sensor_struct);
 			status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&platform->sensors, error);
 			if (status == MB_SUCCESS) {
 				memset(&platform->sensors[platform->num_sensors_alloc], 0,
@@ -243,6 +238,7 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
 				platform->num_sensors_alloc = platform->num_sensors;
 			}
 			else {
+				char *message = NULL;
 				mb_error(verbose, *error, &message);
 				fprintf(stderr, "\nMBIO Error allocating sensor structures:\n%s\n", message);
 				fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
@@ -251,8 +247,8 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
 		}
 
 		/* insert values */
-		isensor = platform->num_sensors - 1;
-		sensor = &platform->sensors[isensor];
+		int isensor = platform->num_sensors - 1;
+		struct mb_sensor_struct *sensor = &platform->sensors[isensor];
 		sensor->type = type;
 		if (model != NULL)
 			strcpy(sensor->model, model);
@@ -275,13 +271,14 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
 		sensor = &platform->sensors[isensor];
 		sensor->num_offsets = num_offsets;
 		if (sensor->num_offsets > sensor->num_offsets_alloc) {
-			size = sensor->num_offsets * sizeof(struct mb_sensor_offset_struct);
+			size_t size = sensor->num_offsets * sizeof(struct mb_sensor_offset_struct);
 			status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&sensor->offsets, error);
 			if (status == MB_SUCCESS) {
 				memset(sensor->offsets, 0, size);
 				sensor->num_offsets_alloc = sensor->num_offsets;
 			}
 			else {
+				char *message = NULL;
 				mb_error(verbose, *error, &message);
 				fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
 				fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
@@ -291,7 +288,7 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
 
 		/* allocate memory for time latency model if needed */
 		if (num_time_latency > 0) {
-			size = num_time_latency * sizeof(double);
+			size_t size = num_time_latency * sizeof(double);
 			status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&sensor->time_latency_time_d, error);
 			if (status == MB_SUCCESS)
 				status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&sensor->time_latency_value, error);
@@ -301,6 +298,7 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
 				sensor->num_time_latency_alloc = num_time_latency;
 			}
 			else {
+				char *message = NULL;
 				mb_error(verbose, *error, &message);
 				fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
 				fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
@@ -338,12 +336,6 @@ int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, 
                                   int attitude_offset_mode, double attitude_offset_heading, double attitude_offset_roll,
                                   double attitude_offset_pitch, int *error) {
 	char *function_name = "mb_platform_set_sensor_offset";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	struct mb_sensor_struct *sensor;
-	struct mb_sensor_offset_struct *offset;
-	char *message = NULL;
-	size_t size;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -363,23 +355,26 @@ int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, 
 		fprintf(stderr, "dbg2       attitude_offset_pitch:       %f\n", attitude_offset_pitch);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* work with valid platform pointer */
 	if (platform_ptr != NULL) {
 		/* get platform and sensor structures */
-		platform = (struct mb_platform_struct *)platform_ptr;
-		sensor = &platform->sensors[isensor];
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_sensor_struct *sensor = &platform->sensors[isensor];
 
 		/* allocate memory for offsets if needed */
 		if (ioffset > sensor->num_offsets - 1)
 			sensor->num_offsets = ioffset + 1;
 		if (sensor->num_offsets > sensor->num_offsets_alloc) {
-			size = sensor->num_offsets * sizeof(struct mb_sensor_offset_struct);
+			size_t size = sensor->num_offsets * sizeof(struct mb_sensor_offset_struct);
 			status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&sensor->offsets, error);
 			if (status == MB_SUCCESS) {
 				memset(sensor->offsets, 0, size);
 				sensor->num_offsets_alloc = sensor->num_offsets;
 			}
 			else {
+				char *message = NULL;
 				mb_error(verbose, *error, &message);
 				fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
 				fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
@@ -388,7 +383,7 @@ int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, 
 		}
 
 		/* get offset structure */
-		offset = &sensor->offsets[ioffset];
+		struct mb_sensor_offset_struct *offset = &sensor->offsets[ioffset];
 
 		/* set offset values */
 		offset->position_offset_mode = position_offset_mode;
@@ -429,12 +424,6 @@ int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isen
                                        double time_latency_static, int num_time_latency, double *time_latency_time_d,
                                        double *time_latency_value, int *error) {
 	char *function_name = "mb_platform_set_sensor_timelatency";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	struct mb_sensor_struct *sensor;
-	char *message = NULL;
-	size_t size;
-	int k;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -446,21 +435,23 @@ int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isen
 		fprintf(stderr, "dbg2       time_latency_mode:	    %d\n", time_latency_mode);
 		fprintf(stderr, "dbg2       time_latency_static:	    %f\n", time_latency_static);
 		fprintf(stderr, "dbg2       num_time_latency:        %d\n", num_time_latency);
-		for (k = 0; k < num_time_latency; k++) {
+		for (int k = 0; k < num_time_latency; k++) {
 			fprintf(stderr, "dbg2       time_latency[%2d]:       %16.6f %8.6f\n", k, time_latency_time_d[k],
 			        time_latency_value[k]);
 		}
 	}
 
+	int status = MB_SUCCESS;
+
 	/* work with valid platform pointer */
 	if (platform_ptr != NULL) {
 		/* get platform and sensor structures */
-		platform = (struct mb_platform_struct *)platform_ptr;
-		sensor = &platform->sensors[isensor];
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_sensor_struct *sensor = &platform->sensors[isensor];
 
 		/* allocate memory for time latency model if needed */
 		if (num_time_latency > 0) {
-			size = num_time_latency * sizeof(double);
+			const size_t size = num_time_latency * sizeof(double);
 			status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&sensor->time_latency_time_d, error);
 			if (status == MB_SUCCESS)
 				status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&sensor->time_latency_value, error);
@@ -470,6 +461,7 @@ int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isen
 				sensor->num_time_latency_alloc = num_time_latency;
 			}
 			else {
+				char *message = NULL;
 				mb_error(verbose, *error, &message);
 				fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
 				fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
@@ -481,7 +473,7 @@ int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isen
 		sensor->time_latency_mode = time_latency_mode;
 		sensor->time_latency_static = time_latency_static;
 		sensor->num_time_latency = num_time_latency;
-		for (k = 0; k < sensor->num_time_latency; k++) {
+		for (int k = 0; k < sensor->num_time_latency; k++) {
 			sensor->time_latency_time_d[k] = time_latency_time_d[k];
 			sensor->time_latency_value[k] = time_latency_value[k];
 		}
@@ -513,8 +505,6 @@ int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isen
 /*--------------------------------------------------------------------*/
 int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_type, int sensor, int *error) {
 	char *function_name = "mb_platform_set_source_sensor";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -526,10 +516,12 @@ int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_ty
 		fprintf(stderr, "dbg2       sensor:		             %d\n", sensor);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* work with valid platform pointer */
 	if (platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 		/* set source sensor for bathymetry1 data */
 		if (source_type == MB_PLATFORM_SOURCE_BATHYMETRY)
@@ -615,6 +607,7 @@ int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_ty
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       platform_ptr:		          		%p\n", platform_ptr);
 		if (platform_ptr != NULL) {
+			struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 			if (source_type == MB_PLATFORM_SOURCE_BATHYMETRY)
 				fprintf(stderr, "dbg2       value set: platform->source_bathymetry:  	%d\n", platform->source_bathymetry);
 			if (source_type == MB_PLATFORM_SOURCE_BATHYMETRY1)
@@ -691,12 +684,6 @@ int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_ty
 
 int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
 	char *function_name = "mb_platform_deall";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	struct mb_sensor_struct *sensor;
-	struct mb_sensor_offset_struct *offset;
-	int isensor;
-	int ioffset;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -707,10 +694,12 @@ int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
 		fprintf(stderr, "dbg2       *platform_ptr:     %p\n", *platform_ptr);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* free memory for platform descriptor structure if needed */
 	if (*platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)*platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)*platform_ptr;
 
 		/* print platform */
 		if (verbose >= 2) {
@@ -718,17 +707,17 @@ int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
 		}
 
 		/* loop over all sensors */
-		for (isensor = 0; isensor < platform->num_sensors_alloc; isensor++) {
-			sensor = (struct mb_sensor_struct *)&platform->sensors[isensor];
+		for (int isensor = 0; isensor < platform->num_sensors_alloc; isensor++) {
+			struct mb_sensor_struct *sensor = (struct mb_sensor_struct *)&platform->sensors[isensor];
 
 			/* free all offsets */
 			if (sensor->num_offsets_alloc > 0 && sensor->offsets != NULL) {
 				/* free any time latency model */
-				for (ioffset = 0; ioffset < sensor->num_offsets; ioffset++) {
-					offset = (struct mb_sensor_offset_struct *)&sensor->offsets[ioffset];
+				for (int ioffset = 0; ioffset < sensor->num_offsets; ioffset++) {
+					struct mb_sensor_offset_struct *offset = (struct mb_sensor_offset_struct *)&sensor->offsets[ioffset];
 					if (sensor->num_time_latency_alloc > 0) {
-						status = mb_freed(verbose, __FILE__, __LINE__, (void **)&sensor->time_latency_time_d, error);
-						status = mb_freed(verbose, __FILE__, __LINE__, (void **)&sensor->time_latency_value, error);
+						status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sensor->time_latency_time_d, error);
+						status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sensor->time_latency_value, error);
 						sensor->num_time_latency_alloc = 0;
 					}
 				}
@@ -771,16 +760,6 @@ int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
 
 int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int *error) {
 	char *function_name = "mb_platform_read";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	size_t size;
-	FILE *fp;
-	char buffer[MB_PATH_MAXLINE], dummy[MB_PATH_MAXLINE], *result, *message;
-	int ivalue;
-	double dvalue, dvalue2, dvalue3;
-	char svalue[MB_PATH_MAXLINE];
-	int len;
-	int isensor, ioffset;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -792,6 +771,8 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 		fprintf(stderr, "dbg2       *platform_ptr:     %p\n", *platform_ptr);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* allocate memory for platform descriptor structure if needed */
 	if (*platform_ptr == NULL) {
 		status = mb_platform_init(verbose, platform_ptr, error);
@@ -800,19 +781,24 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 	/* proceed if platform structure is allocated */
 	if (*platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)*platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)*platform_ptr;
 
 		/* open and read platform file */
-		if ((fp = fopen(platform_file, "r")) != NULL) {
-			while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
+		FILE *fp = fopen(platform_file, "r");
+		if (fp != NULL) {
+			char buffer[MB_PATH_MAXLINE];
+			char *result = fgets(buffer, MB_PATH_MAXLINE, fp);
+			while (result == buffer) {
 				if (buffer[0] != '#') {
-					len = strlen(buffer);
+					const int len = strlen(buffer);
 					if (len > 0) {
 						if (buffer[len - 1] == '\n')
 							buffer[len - 1] = '\0';
 						if (buffer[len - 2] == '\r')
 							buffer[len - 2] = '\0';
 					}
+
+					char dummy[MB_PATH_MAXLINE];
 
 					/* general parameters */
 					if (strncmp(buffer, "PLATFORM_TYPE", 13) == 0) {
@@ -942,13 +928,14 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 					else if (strncmp(buffer, "PLATFORM_NUM_SENSORS", 20) == 0) {
 						sscanf(buffer, "%s %d", dummy, &platform->num_sensors);
 						if (platform->num_sensors > platform->num_sensors_alloc) {
-							size = platform->num_sensors * sizeof(struct mb_sensor_struct);
+							const size_t size = platform->num_sensors * sizeof(struct mb_sensor_struct);
 							status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&platform->sensors, error);
 							if (status == MB_SUCCESS) {
 								memset(platform->sensors, 0, size);
 								platform->num_sensors_alloc = platform->num_sensors;
 							}
 							else {
+								char *message;
 								mb_error(verbose, *error, &message);
 								fprintf(stderr, "\nMBIO Error allocating sensor structures:\n%s\n", message);
 								fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
@@ -958,41 +945,55 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 					}
 
 					else if (strncmp(buffer, "SENSOR_TYPE", 11) == 0) {
+						int isensor;
+						int ivalue;
 						sscanf(buffer, "%s %d %d", dummy, &isensor, &ivalue);
 						if (isensor >= 0 && isensor < platform->num_sensors)
 							platform->sensors[isensor].type = ivalue;
 					}
 					else if (strncmp(buffer, "SENSOR_MODEL", 12) == 0) {
+						int isensor;
+						char svalue[MB_PATH_MAXLINE];
 						sscanf(buffer, "%s %d %s", dummy, &isensor, svalue);
 						if (isensor >= 0 && isensor < platform->num_sensors)
 							strcpy(platform->sensors[isensor].model, svalue);
 					}
 					else if (strncmp(buffer, "SENSOR_MANUFACTURER", 19) == 0) {
+						int isensor;
+						char svalue[MB_PATH_MAXLINE];
 						sscanf(buffer, "%s %d %s", dummy, &isensor, svalue);
 						if (isensor >= 0 && isensor < platform->num_sensors)
 							strcpy(platform->sensors[isensor].manufacturer, svalue);
 					}
 					else if (strncmp(buffer, "SENSOR_SERIALNUMBER", 19) == 0) {
+						int isensor;
+						char svalue[MB_PATH_MAXLINE];
 						sscanf(buffer, "%s %d %s", dummy, &isensor, svalue);
 						if (isensor >= 0 && isensor < platform->num_sensors)
 							strcpy(platform->sensors[isensor].serialnumber, svalue);
 					}
 					else if (strncmp(buffer, "SENSOR_CAPABILITY1", 18) == 0) {
+						int isensor;
+						int ivalue;
 						sscanf(buffer, "%s %d %d", dummy, &isensor, &ivalue);
 						if (isensor >= 0 && isensor < platform->num_sensors)
 							platform->sensors[isensor].capability1 = ivalue;
 					}
 					else if (strncmp(buffer, "SENSOR_CAPABILITY2", 18) == 0) {
+						int isensor;
+						int ivalue;
 						sscanf(buffer, "%s %d %d", dummy, &isensor, &ivalue);
 						if (isensor >= 0 && isensor < platform->num_sensors)
 							platform->sensors[isensor].capability2 = ivalue;
 					}
 					else if (strncmp(buffer, "SENSOR_NUM_OFFSETS", 17) == 0) {
+						int isensor;
+						int ivalue;
 						sscanf(buffer, "%s %d %d", dummy, &isensor, &ivalue);
 						if (isensor >= 0 && isensor < platform->num_sensors)
 							platform->sensors[isensor].num_offsets = ivalue;
 						if (platform->sensors[isensor].num_offsets > platform->sensors[isensor].num_offsets_alloc) {
-							size = platform->sensors[isensor].num_offsets * sizeof(struct mb_sensor_offset_struct);
+							const size_t size = platform->sensors[isensor].num_offsets * sizeof(struct mb_sensor_offset_struct);
 							status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&platform->sensors[isensor].offsets,
 							                    error);
 							if (status == MB_SUCCESS) {
@@ -1000,6 +1001,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 								platform->sensors[isensor].num_offsets_alloc = platform->sensors[isensor].num_offsets;
 							}
 							else {
+								char *message;
 								mb_error(verbose, *error, &message);
 								fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
 								fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
@@ -1009,6 +1011,11 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 					}
 
 					else if (strncmp(buffer, "OFFSET_POSITION", 15) == 0) {
+						int isensor;
+						int ioffset;
+						double dvalue;
+						double dvalue2;
+						double dvalue3;
 						sscanf(buffer, "%s %d %d %lf %lf %lf", dummy, &isensor, &ioffset, &dvalue, &dvalue2, &dvalue3);
 						platform->sensors[isensor].offsets[ioffset].position_offset_x = dvalue;
 						platform->sensors[isensor].offsets[ioffset].position_offset_y = dvalue2;
@@ -1016,6 +1023,11 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 						platform->sensors[isensor].offsets[ioffset].position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 					}
 					else if (strncmp(buffer, "OFFSET_ATTITUDE", 15) == 0) {
+						int isensor;
+						int ioffset;
+						double dvalue;
+						double dvalue2;
+						double dvalue3;
 						sscanf(buffer, "%s %d %d %lf %lf %lf", dummy, &isensor, &ioffset, &dvalue, &dvalue2, &dvalue3);
 						platform->sensors[isensor].offsets[ioffset].attitude_offset_heading = dvalue;
 						platform->sensors[isensor].offsets[ioffset].attitude_offset_roll = dvalue2;
@@ -1024,6 +1036,8 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 					}
 
 					else if (strncmp(buffer, "SENSOR_TIME_LATENCY_STATIC", 26) == 0) {
+						int isensor;
+						double dvalue;
 						sscanf(buffer, "%s %d %lf", dummy, &isensor, &dvalue);
 						if (isensor >= 0 && isensor < platform->num_sensors) {
 							platform->sensors[isensor].time_latency_static = dvalue;
@@ -1031,15 +1045,17 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 						}
 					}
 					else if (strncmp(buffer, "SENSOR_TIME_LATENCY_MODEL", 26) == 0) {
+						int isensor;
+						int ivalue;
 						sscanf(buffer, "%s %d %d", dummy, &isensor, &ivalue);
 						if (isensor >= 0 && isensor < platform->num_sensors) {
 							platform->sensors[isensor].num_time_latency = ivalue;
 							platform->sensors[isensor].time_latency_mode = MB_SENSOR_TIME_LATENCY_MODEL;
 							if (platform->sensors[isensor].num_time_latency < platform->sensors[isensor].num_time_latency_alloc) {
-								size = platform->sensors[isensor].num_time_latency * sizeof(double);
-								status = mb_mallocd(verbose, __FILE__, __LINE__, size,
+								const size_t size = platform->sensors[isensor].num_time_latency * sizeof(double);
+								status &= mb_mallocd(verbose, __FILE__, __LINE__, size,
 								                    (void **)&platform->sensors[isensor].time_latency_time_d, error);
-								status = mb_mallocd(verbose, __FILE__, __LINE__, size,
+								status &= mb_mallocd(verbose, __FILE__, __LINE__, size,
 								                    (void **)&platform->sensors[isensor].time_latency_value, error);
 								if (status == MB_SUCCESS) {
 									memset(platform->sensors[isensor].time_latency_time_d, 0, size);
@@ -1048,6 +1064,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 									    platform->sensors[isensor].num_time_latency;
 								}
 								else {
+									char *message;
 									mb_error(verbose, *error, &message);
 									fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
 									fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
@@ -1062,6 +1079,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 									       &platform->sensors[isensor].time_latency_value[i]);
 								}
 								else {
+									char *message;
 									status = MB_FAILURE;
 									*error = MB_ERROR_EOF;
 									mb_error(verbose, *error, &message);
@@ -1112,13 +1130,6 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 /*--------------------------------------------------------------------*/
 int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int *error) {
 	char *function_name = "mb_platform_write";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	time_t right_now;
-	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	FILE *fp;
-	int isensor, ioffset;
-	mb_path type_string;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1128,9 +1139,11 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 		fprintf(stderr, "dbg2       platform_ptr:	  %p\n", platform_ptr);
 	}
 
+	int status = MB_SUCCESS;
+
 	if (platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 		/* print platform */
 		if (verbose >= 2) {
@@ -1138,22 +1151,28 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 		}
 
 		/* open and write platform file */
-		if ((fp = fopen(platform_file, "w")) != NULL) {
-			right_now = time((time_t *)0);
+		FILE *fp = fopen(platform_file, "w");
+		if (fp != NULL) {
+			const time_t right_now = time((time_t *)0);
+			char date[32];
 			strcpy(date, ctime(&right_now));
 			date[strlen(date) - 1] = '\0';
-			if ((user_ptr = getenv("USER")) == NULL)
+			char user[MB_PATH_MAXLINE];
+			char *user_ptr = getenv("USER");
+			if (user_ptr == NULL)
 				user_ptr = getenv("LOGNAME");
 			if (user_ptr != NULL)
 				strcpy(user, user_ptr);
 			else
 				strcpy(user, "unknown");
+			char host[MB_PATH_MAXLINE];
 			gethostname(host, MB_PATH_MAXLINE);
 			fprintf(fp, "## MB-System Platform Definition File\n");
 			fprintf(fp, "MB-SYSTEM_VERSION        %s\n", MB_VERSION);
 			fprintf(fp, "FILE_VERSION             1.00\n");
 			fprintf(fp, "ORIGIN                   Generated by user <%s> on cpu <%s> at <%s>\n", user, host, date);
 			fprintf(fp, "##\n");
+			mb_path type_string;
 			strcpy(type_string, mb_platform_type_string[platform->type]);
 			fprintf(fp, "PLATFORM_TYPE            %d  ## %s\n", platform->type, type_string);
 			fprintf(fp, "PLATFORM_NAME            %s\n", platform->name);
@@ -1302,7 +1321,7 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 				fprintf(fp, "  ## SOURCE_HEAVE3\n");
 			fprintf(fp, "##\n");
 			fprintf(fp, "## Sensor list:\n");
-			for (isensor = 0; isensor < platform->num_sensors; isensor++) {
+			for (int isensor = 0; isensor < platform->num_sensors; isensor++) {
 				fprintf(fp, "##\n");
 				strcpy(type_string, mb_sensor_type_string[0]);
 				for (int i = 0; i < NUM_MB_SENSOR_TYPES; i++) {
@@ -1447,7 +1466,7 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 					fprintf(fp, " unused31");
 				fprintf(fp, "\n");
 				fprintf(fp, "SENSOR_NUM_OFFSETS          %2d  %2d\n", isensor, platform->sensors[isensor].num_offsets);
-				for (ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {
+				for (int ioffset = 0; ioffset < platform->sensors[isensor].num_offsets; ioffset++) {
 					if (platform->sensors[isensor].offsets[ioffset].position_offset_mode == MB_SENSOR_POSITION_OFFSET_STATIC) {
 						fprintf(fp,
 						        "OFFSET_POSITION             %2d      %2d  %10.6lf  %10.6lf  %10.6lf ## Starboard, Forward, Up "
@@ -1505,16 +1524,6 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double heading, double roll,
                       double pitch, double *lever_x, double *lever_y, double *lever_z, int *error) {
 	char *function_name = "mb_platform_lever";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	struct mb_sensor_struct *sensor_target = NULL;
-	struct mb_sensor_struct *sensor_position = NULL;
-	struct mb_sensor_struct *sensor_depth = NULL;
-	double xx, yy, zz;
-	double pheading, proll, ppitch;
-	double croll, sroll;
-	double cpitch, spitch;
-	double cheading, sheading;
 
 	/* reset error */
 	*error = MB_ERROR_NO_ERROR;
@@ -1532,10 +1541,12 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
 		fprintf(stderr, "dbg2       pitch:				%f\n", pitch);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* work with valid platform pointer */
 	if (platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 		/* print platform */
 		if (verbose >= 2) {
@@ -1543,6 +1554,9 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
 		}
 
 		/* call mb_platform_orientation to get platform orientation */
+		double pheading;
+		double proll;
+		double ppitch;
 		status = mb_platform_orientation(verbose, platform_ptr, heading, roll, pitch, &pheading, &proll, &ppitch, error);
 
 		/* check that the required sensor id's are sensible for this platform */
@@ -1556,9 +1570,9 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
 		/* else proceed */
 		else {
 			/* get sensor structures */
-			sensor_target = &platform->sensors[targetsensor];
-			sensor_position = &platform->sensors[platform->source_position];
-			sensor_depth = &platform->sensors[platform->source_depth];
+			struct mb_sensor_struct *sensor_target = &platform->sensors[targetsensor];
+			struct mb_sensor_struct *sensor_position = &platform->sensors[platform->source_position];
+			struct mb_sensor_struct *sensor_depth = &platform->sensors[platform->source_depth];
 
 			/* start with zero lever */
 			*lever_x = 0.0;
@@ -1566,18 +1580,18 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
 			*lever_z = 0.0;
 
 			/* Convenient calculations for later coordinate operations */
-			croll = cos(DTR * proll);
-			sroll = sin(DTR * proll);
-			cpitch = cos(DTR * ppitch);
-			spitch = sin(DTR * ppitch);
-			cheading = cos(DTR * pheading);
-			sheading = sin(DTR * pheading);
+			const double croll = cos(DTR * proll);
+			const double sroll = sin(DTR * proll);
+			const double cpitch = cos(DTR * ppitch);
+			const double spitch = sin(DTR * ppitch);
+			const double cheading = cos(DTR * pheading);
+			const double sheading = sin(DTR * pheading);
 
 			/* apply change in z due to offset between the depth sensor and the target sensor
 			using roll add pitch values corrected for the attitude sensor offset */
-			xx = 0.0;
-			yy = 0.0;
-			zz = 0.0;
+			double xx = 0.0;
+			double yy = 0.0;
+			double zz = 0.0;
 			if (sensor_target->offsets[targetsensoroffset].position_offset_mode == MB_SENSOR_POSITION_OFFSET_STATIC) {
 				xx += sensor_target->offsets[targetsensoroffset].position_offset_x;
 				yy += sensor_target->offsets[targetsensoroffset].position_offset_y;
@@ -1639,10 +1653,6 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
                          double sensordepth, double heading, double roll, double pitch, double *targetlon, double *targetlat,
                          double *targetdepth, int *error) {
 	char *function_name = "mb_platform_position";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	double mtodeglon, mtodeglat;
-	double lever_x, lever_y, lever_z;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1660,21 +1670,29 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
 		fprintf(stderr, "dbg2       pitch:		        %f\n", pitch);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* work with valid platform pointer */
 	if (platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 		/* print platform */
 		if (verbose >= 2) {
 			status = mb_platform_print(verbose, (void *)platform, error);
 		}
 
+		double lever_x;
+		double lever_y;
+		double lever_z;
+
 		/* call mb_platform lever to get relative lever offsets */
 		status = mb_platform_lever(verbose, platform_ptr, targetsensor, targetsensoroffset, heading, roll, pitch, &lever_x,
 		                           &lever_y, &lever_z, error);
 
 		/* get local translation between lon lat degrees and meters */
+		double mtodeglon;
+		double mtodeglat;
 		mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
 
 		/* calculate absolute position and depth for target sensor
@@ -1708,10 +1726,6 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
 int mb_platform_orientation(int verbose, void *platform_ptr, double heading, double roll, double pitch, double *platform_heading,
                             double *platform_roll, double *platform_pitch, int *error) {
 	char *function_name = "mb_platform_orientation";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	struct mb_sensor_struct *sensor_heading = NULL;
-	struct mb_sensor_struct *sensor_rollpitch = NULL;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1724,10 +1738,12 @@ int mb_platform_orientation(int verbose, void *platform_ptr, double heading, dou
 		fprintf(stderr, "dbg2       pitch:		      %f\n", pitch);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* work with valid platform pointer */
 	if (platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 		/* print platform */
 		if (verbose >= 2) {
@@ -1744,8 +1760,8 @@ int mb_platform_orientation(int verbose, void *platform_ptr, double heading, dou
 		/* else proceed */
 		else {
 			/* get sensor structures */
-			sensor_heading = &platform->sensors[platform->source_heading];
-			sensor_rollpitch = &platform->sensors[platform->source_rollpitch];
+			struct mb_sensor_struct *sensor_heading = &platform->sensors[platform->source_heading];
+			struct mb_sensor_struct *sensor_rollpitch = &platform->sensors[platform->source_rollpitch];
 
 			/* get platform attitude */
 			if ((sensor_rollpitch->offsets[0].attitude_offset_mode == MB_SENSOR_ATTITUDE_OFFSET_STATIC) &&
@@ -1790,11 +1806,6 @@ int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetse
                                    double *target_hdg_offset, double *target_roll_offset, double *target_pitch_offset,
                                    int *error) {
 	char *function_name = "mb_platform_orientation_offset";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	struct mb_sensor_struct *sensor_target = NULL;
-	struct mb_sensor_struct *sensor_heading = NULL;
-	struct mb_sensor_struct *sensor_rollpitch = NULL;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1806,10 +1817,12 @@ int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetse
 		fprintf(stderr, "dbg2       targetsensoroffset:	%d\n", targetsensoroffset);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* work with valid platform pointer */
 	if (platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 		/* print platform */
 		if (verbose >= 2) {
@@ -1827,9 +1840,9 @@ int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetse
 		/* else proceed */
 		else {
 			/* get sensor structures */
-			sensor_target = &platform->sensors[targetsensor];
-			sensor_heading = &platform->sensors[platform->source_heading];
-			sensor_rollpitch = &platform->sensors[platform->source_rollpitch];
+			struct mb_sensor_struct *sensor_target = &platform->sensors[targetsensor];
+			struct mb_sensor_struct *sensor_heading = &platform->sensors[platform->source_heading];
+			struct mb_sensor_struct *sensor_rollpitch = &platform->sensors[platform->source_rollpitch];
 
 			/* start with zero attitude offset */
 			*target_roll_offset = 0.0;
@@ -1872,12 +1885,6 @@ int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetse
                                    double roll, double pitch, double *target_heading, double *target_roll, double *target_pitch,
                                    int *error) {
 	char *function_name = "mb_platform_orientation";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	struct mb_sensor_struct *sensor_target = NULL;
-	struct mb_sensor_struct *sensor_heading = NULL;
-	struct mb_sensor_struct *sensor_rollpitch = NULL;
-	double target_roll_offset, target_pitch_offset, target_hdg_offset;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1892,10 +1899,13 @@ int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetse
 		fprintf(stderr, "dbg2       pitch:		        %f\n", pitch);
 	}
 
+	int status = MB_SUCCESS;
+	double target_roll_offset, target_pitch_offset, target_hdg_offset;
+
 	/* work with valid platform pointer */
 	if (platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 		/* print platform */
 		if (verbose >= 2) {
@@ -1913,9 +1923,9 @@ int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetse
 		/* else proceed */
 		else {
 			/* get sensor structures */
-			sensor_target = &platform->sensors[targetsensor];
-			sensor_heading = &platform->sensors[platform->source_heading];
-			sensor_rollpitch = &platform->sensors[platform->source_rollpitch];
+			struct mb_sensor_struct *sensor_target = &platform->sensors[targetsensor];
+			struct mb_sensor_struct *sensor_heading = &platform->sensors[platform->source_heading];
+			struct mb_sensor_struct *sensor_rollpitch = &platform->sensors[platform->source_rollpitch];
 
 			/* start with zero attitude offset */
 			target_roll_offset = 0.0;
@@ -1963,8 +1973,6 @@ int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetse
 /*--------------------------------------------------------------------*/
 int mb_platform_print(int verbose, void *platform_ptr, int *error) {
 	char *function_name = "mb_platform_print";
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1974,10 +1982,12 @@ int mb_platform_print(int verbose, void *platform_ptr, int *error) {
 		fprintf(stderr, "dbg2       platform_ptr:         %p\n", platform_ptr);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* work with valid platform pointer */
 	if (platform_ptr != NULL) {
 		/* get platform structure */
-		platform = (struct mb_platform_struct *)platform_ptr;
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
 		/* print output debug statements */
 		if (verbose >= 2 && platform_ptr != NULL) {
