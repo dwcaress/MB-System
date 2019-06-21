@@ -35,6 +35,7 @@ void mb_platform_math_matrix_times_vector_3x1(double *A, double *b, double *Ab) 
 	Ab[1] = (A[1] * b[0]) + (A[4] * b[1]) + (A[7] * b[2]);
 	Ab[2] = (A[2] * b[0]) + (A[5] * b[1]) + (A[8] * b[2]);
 }
+
 /*--------------------------------------------------------------------*/
 void mb_platform_math_matrix_times_matrix_3x3(double *A, double *B, double *AB) {
 #define A(i, j) (A[j * 3 + i])
@@ -57,6 +58,7 @@ void mb_platform_math_matrix_times_matrix_3x3(double *A, double *B, double *AB) 
 #undef B
 #undef AB
 }
+
 /*--------------------------------------------------------------------*/
 void mb_platform_math_matrix_transpose_3x3(double *R, double *R_T) {
 	R_T[0] = R[0];
@@ -69,17 +71,17 @@ void mb_platform_math_matrix_transpose_3x3(double *R, double *R_T) {
 	R_T[5] = R[7];
 	R_T[8] = R[8];
 }
+
 /*--------------------------------------------------------------------*/
 void mb_platform_math_rph2rot(double *rph, double *R) {
-#define R(i, j) (R[j * 3 + i])
-	double sr, sp, sh, cr, cp, ch;
-	sr = sin(DTR * rph[0]);
-	sp = sin(DTR * rph[1]);
-	sh = sin(DTR * rph[2]);
-	cr = cos(DTR * rph[0]);
-	cp = cos(DTR * rph[1]);
-	ch = cos(DTR * rph[2]);
+	const double sr = sin(DTR * rph[0]);
+	const double sp = sin(DTR * rph[1]);
+	const double sh = sin(DTR * rph[2]);
+	const double cr = cos(DTR * rph[0]);
+	const double cp = cos(DTR * rph[1]);
+	const double ch = cos(DTR * rph[2]);
 
+#define R(i, j) (R[j * 3 + i])
 	R(0, 0) = ch * cp;
 	R(0, 1) = -sh * cr + ch * sp * sr;
 	R(0, 2) = sh * sr + ch * sp * cr;
@@ -91,15 +93,16 @@ void mb_platform_math_rph2rot(double *rph, double *R) {
 	R(2, 2) = cp * cr;
 #undef R
 }
+
 /*--------------------------------------------------------------------*/
 void mb_platform_math_rot2rph(double *R, double *rph) {
 #define R(i, j) (R[j * 3 + i])
 
 	/* Calculate heading */
 	rph[2] = RTD * atan2(R(1, 0), R(0, 0));
-	double sh, ch;
-	sh = sin(DTR * rph[2]);
-	ch = cos(DTR * rph[2]);
+
+	const double sh = sin(DTR * rph[2]);
+	const double ch = cos(DTR * rph[2]);
 
 	/* Calculate pitch */
 	rph[1] = RTD * atan2(-R(2, 0), R(0, 0) * ch + R(1, 0) * sh);
@@ -108,20 +111,13 @@ void mb_platform_math_rot2rph(double *R, double *rph) {
 	rph[0] = RTD * atan2(R(0, 2) * sh - R(1, 2) * ch, -R(0, 1) * sh + R(1, 1) * ch);
 #undef R
 }
+
 /*--------------------------------------------------------------------*/
 int mb_platform_math_attitude_offset(int verbose, double target_offset_roll, double target_offset_pitch,
                                      double target_offset_heading, double source_offset_roll, double source_offset_pitch,
                                      double source_offset_heading, double *target2source_offset_roll,
                                      double *target2source_offset_pitch, double *target2source_offset_heading, int *error) {
 	char *function_name = "mb_platform_math_attitude_offset";
-	int status = MB_SUCCESS;
-	double rph_target_offset[3];
-	double rph_source_offset[3];
-	double rph_offset_target_to_source[3];
-
-	double R1[9];
-	double R1T[9];
-	double R2[9];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -135,7 +131,7 @@ int mb_platform_math_attitude_offset(int verbose, double target_offset_roll, dou
 		fprintf(stderr, "dbg2       source_offset_pitch:     %f\n", source_offset_pitch);
 		fprintf(stderr, "dbg2       source_offset_heading:   %f\n", source_offset_heading);
 	}
-	double R1T2[9];
+
 
 	/* Check trivial case */
 	if (source_offset_roll == 0.0 && source_offset_pitch == 0.0 && source_offset_heading == 0.0) {
@@ -144,24 +140,33 @@ int mb_platform_math_attitude_offset(int verbose, double target_offset_roll, dou
 		*target2source_offset_heading = target_offset_heading;
 	}
 	else {
+		double rph_source_offset[3];
 		rph_source_offset[0] = source_offset_roll;
 		rph_source_offset[1] = source_offset_pitch;
 		rph_source_offset[2] = source_offset_heading;
 
+		double rph_target_offset[3];
 		rph_target_offset[0] = target_offset_roll;
 		rph_target_offset[1] = target_offset_pitch;
 		rph_target_offset[2] = target_offset_heading;
 
+		double R1[9];
+		double R1T[9];
+		double R2[9];
+		double R1T2[9];
 		mb_platform_math_rph2rot(rph_source_offset, R1);
 		mb_platform_math_matrix_transpose_3x3(R1, R1T);
 		mb_platform_math_rph2rot(rph_target_offset, R2);
 		mb_platform_math_matrix_times_matrix_3x3(R1T, R2, R1T2);
+		double rph_offset_target_to_source[3];
 		mb_platform_math_rot2rph(R1T2, rph_offset_target_to_source);
 
 		*target2source_offset_roll = rph_offset_target_to_source[0];
 		*target2source_offset_pitch = rph_offset_target_to_source[1];
 		*target2source_offset_heading = rph_offset_target_to_source[2];
 	}
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -177,21 +182,13 @@ int mb_platform_math_attitude_offset(int verbose, double target_offset_roll, dou
 
 	return (status);
 }
+
 /*--------------------------------------------------------------------*/
 int mb_platform_math_attitude_platform(int verbose, double nav_attitude_roll, double nav_attitude_pitch,
                                        double nav_attitude_heading, double attitude_offset_roll, double attitude_offset_pitch,
                                        double attitude_offset_heading, double *platform_roll, double *platform_pitch,
                                        double *platform_heading, int *error) {
 	char *function_name = "mb_platform_math_attitude_platform";
-	int status = MB_SUCCESS;
-	double rph_nav_attitude[3];
-	double rph_attitude_offset[3];
-	double rph_platform_attitude[3];
-
-	double R1[9];
-	double R2[9];
-	double R2T[9];
-	double R12T[9];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -206,18 +203,25 @@ int mb_platform_math_attitude_platform(int verbose, double nav_attitude_roll, do
 		fprintf(stderr, "dbg2       attitude_offset_heading: %f\n", attitude_offset_heading);
 	}
 
+	double rph_nav_attitude[3];
 	rph_nav_attitude[0] = nav_attitude_roll;
 	rph_nav_attitude[1] = nav_attitude_pitch;
 	rph_nav_attitude[2] = nav_attitude_heading;
 
+	double rph_attitude_offset[3];
 	rph_attitude_offset[0] = attitude_offset_roll;
 	rph_attitude_offset[1] = attitude_offset_pitch;
 	rph_attitude_offset[2] = attitude_offset_heading;
 
+	double R1[9];
+	double R2[9];
+	double R2T[9];
+	double R12T[9];
 	mb_platform_math_rph2rot(rph_nav_attitude, R1);
 	mb_platform_math_rph2rot(rph_attitude_offset, R2);
 	mb_platform_math_matrix_transpose_3x3(R2, R2T);
 	mb_platform_math_matrix_times_matrix_3x3(R1, R2T, R12T);
+	double rph_platform_attitude[3];
 	mb_platform_math_rot2rph(R12T, rph_platform_attitude);
 
 	*platform_roll = rph_platform_attitude[0];
@@ -228,6 +232,8 @@ int mb_platform_math_attitude_platform(int verbose, double nav_attitude_roll, do
 		*platform_heading += 360.0;
 	else if (*platform_heading >= 360.0)
 		*platform_heading -= 360.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -243,20 +249,13 @@ int mb_platform_math_attitude_platform(int verbose, double nav_attitude_roll, do
 
 	return (status);
 }
+
 /*--------------------------------------------------------------------*/
 int mb_platform_math_attitude_target(int verbose, double source_attitude_roll, double source_attitude_pitch,
                                      double source_attitude_heading, double target_offset_to_source_roll,
                                      double target_offset_to_source_pitch, double target_offset_to_source_heading,
                                      double *target_roll, double *target_pitch, double *target_heading, int *error) {
 	char *function_name = "mb_platform_math_attitude_target";
-	int status = MB_SUCCESS;
-	double rph_source_attitude[3];
-	double rph_target_offset[3];
-	double rph_target_attitude[3];
-
-	double R1[9];
-	double R2[9];
-	double R12[9];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -271,17 +270,23 @@ int mb_platform_math_attitude_target(int verbose, double source_attitude_roll, d
 		fprintf(stderr, "dbg2       target_offset_to_source_heading:   %f\n", target_offset_to_source_heading);
 	}
 
+	double rph_source_attitude[3];
 	rph_source_attitude[0] = source_attitude_roll;
 	rph_source_attitude[1] = source_attitude_pitch;
 	rph_source_attitude[2] = source_attitude_heading;
 
+	double rph_target_offset[3];
 	rph_target_offset[0] = target_offset_to_source_roll;
 	rph_target_offset[1] = target_offset_to_source_pitch;
 	rph_target_offset[2] = target_offset_to_source_heading;
 
+	double R1[9];
+	double R2[9];
+	double R12[9];
 	mb_platform_math_rph2rot(rph_source_attitude, R1);
 	mb_platform_math_rph2rot(rph_target_offset, R2);
 	mb_platform_math_matrix_times_matrix_3x3(R1, R2, R12);
+	double rph_target_attitude[3];
 	mb_platform_math_rot2rph(R12, rph_target_attitude);
 
 	*target_roll = rph_target_attitude[0];
@@ -292,6 +297,8 @@ int mb_platform_math_attitude_target(int verbose, double source_attitude_roll, d
 		*target_heading += 360.0;
 	else if (*target_heading >= 360.0)
 		*target_heading -= 360.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -307,6 +314,7 @@ int mb_platform_math_attitude_target(int verbose, double source_attitude_roll, d
 
 	return (status);
 }
+
 /*--------------------------------------------------------------------*/
 int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_attitude_roll, double prev_attitude_pitch,
                                                       double prev_attitude_heading, double target_offset_to_source_roll,
@@ -316,18 +324,6 @@ int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_a
                                                       double *corrected_offset_roll, double *corrected_offset_pitch,
                                                       double *corrected_offset_heading, int *error) {
 	char *function_name = "mb_platform_math_attitude_offset_corrected_by_nav";
-	int status = MB_SUCCESS;
-	double rph_prev_attitude[3];
-	double rph_target_offset[3];
-	double rph_updated_attitude[3];
-	double rph_corrected_offset_attitude[3];
-
-	double R1[9];
-	double R2[9];
-	double R3[9];
-	double R3T[9];
-	double R12[9];
-	double R123T[9];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -345,24 +341,34 @@ int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_a
 		fprintf(stderr, "dbg2       updated_attitude_heading:          %f\n", updated_attitude_heading);
 	}
 
+	double rph_prev_attitude[3];
 	rph_prev_attitude[0] = prev_attitude_roll;
 	rph_prev_attitude[1] = prev_attitude_pitch;
 	rph_prev_attitude[2] = prev_attitude_heading;
 
+	double rph_target_offset[3];
 	rph_target_offset[0] = target_offset_to_source_roll;
 	rph_target_offset[1] = target_offset_to_source_pitch;
 	rph_target_offset[2] = target_offset_to_source_heading;
 
+	double rph_updated_attitude[3];
 	rph_updated_attitude[0] = updated_attitude_roll;
 	rph_updated_attitude[1] = updated_attitude_pitch;
 	rph_updated_attitude[2] = updated_attitude_heading;
 
+	double R1[9];
+	double R2[9];
+	double R3[9];
+	double R3T[9];
+	double R12[9];
+	double R123T[9];
 	mb_platform_math_rph2rot(rph_prev_attitude, R3);
 	mb_platform_math_rph2rot(rph_target_offset, R2);
 	mb_platform_math_rph2rot(rph_updated_attitude, R1);
 	mb_platform_math_matrix_times_matrix_3x3(R1, R2, R12);
 	mb_platform_math_matrix_transpose_3x3(R3, R3T);
 	mb_platform_math_matrix_times_matrix_3x3(R12, R3T, R123T);
+	double rph_corrected_offset_attitude[3];
 	mb_platform_math_rot2rph(R123T, rph_corrected_offset_attitude);
 
 	*corrected_offset_roll = rph_corrected_offset_attitude[0];
@@ -373,6 +379,8 @@ int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_a
 		*corrected_offset_heading -= 360.0;
 	else if (*corrected_offset_heading < 0.0)
 		*corrected_offset_heading += 360.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -388,17 +396,12 @@ int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_a
 
 	return (status);
 }
+
 /*--------------------------------------------------------------------*/
 int mb_platform_math_attitude_rotate_beam(int verbose, double beam_acrosstrack, double beam_alongtrack, double beam_bath,
                                           double attitude_roll, double attitude_pitch, double attitude_heading,
                                           double *newbeam_easting, double *newbeam_northing, double *newbeam_bath, int *error) {
 	char *function_name = "mb_platform_math_attitude_rotate_beam";
-	int status = MB_SUCCESS;
-
-	double beam[3];
-	double rph_attitude[3];
-	double newbeam[3];
-	double R[9];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -413,20 +416,26 @@ int mb_platform_math_attitude_rotate_beam(int verbose, double beam_acrosstrack, 
 		fprintf(stderr, "dbg2       attitude_heading:                  %f\n", attitude_heading);
 	}
 
+	double beam[3];
 	beam[0] = beam_alongtrack;  // Local X-axis (along track)
 	beam[1] = beam_acrosstrack; // Local Y-axis (across track)
 	beam[2] = beam_bath;        // Local Z-axis (down)
 
+	double rph_attitude[3];
 	rph_attitude[0] = attitude_roll;
 	rph_attitude[1] = attitude_pitch;
 	rph_attitude[2] = attitude_heading;
 
+	double R[9];
 	mb_platform_math_rph2rot(rph_attitude, R);
+	double newbeam[3];
 	mb_platform_math_matrix_times_vector_3x1(R, beam, newbeam);
 
 	*newbeam_northing = newbeam[0]; // Local X-axis (North)
 	*newbeam_easting = newbeam[1];  // Local Y-axis (East)
 	*newbeam_bath = newbeam[2];     // Local Z-axis (Down)
+
+	int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
