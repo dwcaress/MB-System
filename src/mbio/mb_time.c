@@ -86,7 +86,6 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
 
 	char *function_name = "mb_get_date";
 	int status;
-	int i;
 	int daytotal;
 	int yearday;
 	int leapday;
@@ -117,7 +116,7 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
 	leapday = 0;
 	if (((time_i[0] % 4 == 0 && time_i[0] % 100 != 0) || time_i[0] % 400 == 0) && yearday > yday[2])
 		leapday = 1;
-	for (i = 0; i < 12; i++)
+	for (int i = 0; i < 12; i++)
 		if (yearday > (yday[i] + leapday))
 			time_i[1] = i + 1;
 	time_i[2] = yearday - yday[time_i[1] - 1] - leapday;
@@ -239,7 +238,6 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
 	char *function_name = "mb_get_itime";
 	int status;
 	int leapday;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -264,7 +262,7 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
 	else
 		leapday = 0;
 	time_i[1] = 0;
-	for (i = 0; i < 12; i++)
+	for (int i = 0; i < 12; i++)
 		if (time_j[1] > (yday[i] + leapday))
 			time_i[1] = i + 1;
 	if (leapday == 1 && time_j[1] == yday[2] + 1)

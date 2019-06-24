@@ -490,7 +490,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 	char beamflagorg;
 	double maxtimediff;
 	int ibeam;
-	int i, j;
+	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -500,13 +500,13 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 		fprintf(stderr, "dbg2       esf:              %p\n", esf);
 		fprintf(stderr, "dbg2       nedit:            %d\n", esf->nedit);
 		fprintf(stderr, "dbg2       mode:             %d\n", esf->mode);
-		for (i = 0; i < esf->nedit; i++)
+		for (int i = 0; i < esf->nedit; i++)
 			fprintf(stderr, "dbg2       edit event: %d %.6f %5d %3d %3d\n", i, esf->edit[i].time_d, esf->edit[i].beam,
 			        esf->edit[i].action, esf->edit[i].use);
 		fprintf(stderr, "dbg2       time_d:           %f\n", time_d);
 		fprintf(stderr, "dbg2       pingmultiplicity: %d\n", pingmultiplicity);
 		fprintf(stderr, "dbg2       nbath:            %d\n", nbath);
-		for (i = 0; i < nbath; i++)
+		for (int i = 0; i < nbath; i++)
 			fprintf(stderr, "dbg2       beamflag:    %d %d\n", i, beamflag[i]);
 	}
 
@@ -559,7 +559,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 		}
 
 		/* loop over all beams */
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			/* apply beam offset for cases of multiple pings */
 			ibeam = i + beamoffset;
 
@@ -672,7 +672,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 		fprintf(stderr, "dbg2       time_d:           %f\n", time_d);
 		fprintf(stderr, "dbg2       pingmultiplicity: %d\n", pingmultiplicity);
 		fprintf(stderr, "dbg2       nbath:            %d\n", nbath);
-		for (i = 0; i < nbath; i++)
+		for (int i = 0; i < nbath; i++)
 			fprintf(stderr, "dbg2       beamflag:    %d %d %d\n", i, ibeam, beamflag[i]);
 		fprintf(stderr, "dbg2       error:  %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -956,7 +956,7 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
  * Arguments are as for qsort.
  */
 int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void *)) {
-	register int i, sense;
+	register int sense;
 	int big, iflag;
 	register mb_u_char *f1, *f2, *t, *b, *tp2, *q, *l1, *l2;
 	mb_u_char *list2, *list1, *p2, *p, *last, **p1;
@@ -980,7 +980,7 @@ int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(cons
 	list1 = base;
 	mb_mergesort_setup(list1, list2, nmemb, size, cmp);
 	last = list2 + nmemb * size;
-	i = big = 0;
+	int i = big = 0;
 	while (*EVAL(list2) != last) {
 		l2 = list1;
 		p1 = EVAL(list1);
@@ -1125,7 +1125,7 @@ int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(cons
  * is defined.  Otherwise simple pairwise merging is used.)
  */
 void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void *)) {
-	int i, length, size2, tmp, sense;
+	int length, size2, tmp, sense;
 	mb_u_char *f1, *f2, *s, *l2, *last, *p2;
 
 	size2 = size * 2;
@@ -1138,7 +1138,7 @@ void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t siz
 	 * Avoid running pointers out of bounds; limit n to evens
 	 * for simplicity.
 	 */
-	i = 4 + (n & 1);
+	int i = 4 + (n & 1);
 	mb_mergesort_insertionsort(list1 + (n - i) * size, i, size, cmp);
 	last = list1 + size * (n - i);
 	*EVAL(list2 + (last - list1)) = list2 + n * size;

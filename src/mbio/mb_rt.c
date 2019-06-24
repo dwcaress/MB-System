@@ -115,7 +115,6 @@ int mb_rt_vertical(int verbose, int *error);
 int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, void **modelptr, int *error) {
 	char *function_name = "mb_rt_init";
 	int status = MB_SUCCESS;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -123,7 +122,7 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       number_node:      %d\n", number_node);
-		for (i = 0; i < number_node; i++) {
+		for (int i = 0; i < number_node; i++) {
 			fprintf(stderr, "dbg2       depth: %f  velocity:%f\n", depth[i], velocity[i]);
 		}
 		fprintf(stderr, "dbg2       modelptr:         %p\n", (void *)modelptr);
@@ -151,11 +150,11 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 	}
 
 	/* put model into structure */
-	for (i = 0; i < number_node; i++) {
+	for (int i = 0; i < number_node; i++) {
 		model->depth[i] = depth[i];
 		model->velocity[i] = velocity[i];
 	}
-	for (i = 0; i < model->number_layer; i++) {
+	for (int i = 0; i < model->number_layer; i++) {
 		model->layer_gradient[i] =
 		    (model->layer_vel_bottom[i] - model->layer_vel_top[i]) / (model->layer_depth_bottom[i] - model->layer_depth_top[i]);
 		if (fabs(model->layer_gradient[i]) > MB_RT_GRADIENT_TOLERANCE) {
@@ -246,7 +245,6 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 	int status = MB_SUCCESS;
 	double diff_angle;
 	double vel_ratio;
-	int i;
 
 	/* get pointer to velocity model */
 	model = (struct velocity_model *)modelptr;
@@ -259,12 +257,12 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 		fprintf(stderr, "dbg2       modelptr:         %p\n", (void *)modelptr);
 		fprintf(stderr, "dbg2       number_node:      %d\n", model->number_node);
 		fprintf(stderr, "dbg2       layer depth velocity:\n");
-		for (i = 0; i < model->number_node; i++) {
+		for (int i = 0; i < model->number_node; i++) {
 			fprintf(stderr, "dbg2       %d %f %f\n", i, model->depth[i], model->velocity[i]);
 		}
 		fprintf(stderr, "dbg2       number_layer:     %d\n", model->number_layer);
 		fprintf(stderr, "dbg2       layer top bottom veltop velbot  mode grad zc\n");
-		for (i = 0; i < model->number_layer; i++) {
+		for (int i = 0; i < model->number_layer; i++) {
 			fprintf(stderr, "dbg2       %d  %f %f  %f %f  %d %f %f\n", i, model->layer_depth_top[i], model->layer_depth_bottom[i],
 			        model->layer_vel_top[i], model->layer_vel_bottom[i], model->layer_mode[i], model->layer_gradient[i],
 			        model->layer_depth_center[i]);
@@ -280,7 +278,7 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 
 	/* prepare the ray */
 	model->layer = -1;
-	for (i = 0; i < model->number_layer; i++) {
+	for (int i = 0; i < model->number_layer; i++) {
 		if (source_depth >= model->layer_depth_top[i] && source_depth <= model->layer_depth_bottom[i])
 			model->layer = i;
 	}

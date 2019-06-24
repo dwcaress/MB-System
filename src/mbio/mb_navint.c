@@ -42,7 +42,6 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 	char *function_name = "mb_navint_add";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -61,7 +60,7 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Current nav fix values:\n");
-		for (i = 0; i < mb_io_ptr->nfix; i++)
+		for (int i = 0; i < mb_io_ptr->nfix; i++)
 			fprintf(stderr, "dbg2       nav fix[%2d]:   %f %f %f\n", i, mb_io_ptr->fix_time_d[i], mb_io_ptr->fix_lon[i],
 			        mb_io_ptr->fix_lat[i]);
 	}
@@ -71,7 +70,7 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 		/* if list if full make room for another nav fix */
 		if (mb_io_ptr->nfix >= MB_ASYNCH_SAVE_MAX) {
 			mb_io_ptr->nfix = MB_ASYNCH_SAVE_MAX - 1;
-			for (i = 0; i < mb_io_ptr->nfix; i++) {
+			for (int i = 0; i < mb_io_ptr->nfix; i++) {
 				mb_io_ptr->fix_time_d[i] = mb_io_ptr->fix_time_d[i + 1];
 				mb_io_ptr->fix_lon[i] = mb_io_ptr->fix_lon[i + 1];
 				mb_io_ptr->fix_lat[i] = mb_io_ptr->fix_lat[i + 1];
@@ -109,7 +108,7 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 		fprintf(stderr, "\ndbg2  Current nav fix values:\n");
-		for (i = 0; i < mb_io_ptr->nfix; i++)
+		for (int i = 0; i < mb_io_ptr->nfix; i++)
 			fprintf(stderr, "dbg2       nav fix[%2d]:   %f %f %f\n", i, mb_io_ptr->fix_time_d[i], mb_io_ptr->fix_lon[i],
 			        mb_io_ptr->fix_lat[i]);
 	}
@@ -507,7 +506,6 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	int shift;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -516,7 +514,7 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       nsamples:   %d\n", nsamples);
-		for (i = 0; i < nsamples; i++) {
+		for (int i = 0; i < nsamples; i++) {
 			fprintf(stderr, "dbg2       %d time_d:%f heave:%f roll:%f pitch:%f\n", i, time_d[i], heave[i], roll[i], pitch[i]);
 		}
 	}
@@ -527,7 +525,7 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	/* if necessary make room for attitude fixes */
 	if (mb_io_ptr->nattitude + nsamples >= MB_ASYNCH_SAVE_MAX) {
 		shift = mb_io_ptr->nattitude + nsamples - MB_ASYNCH_SAVE_MAX;
-		for (i = 0; i < mb_io_ptr->nattitude - shift; i++) {
+		for (int i = 0; i < mb_io_ptr->nattitude - shift; i++) {
 			mb_io_ptr->attitude_time_d[i] = mb_io_ptr->attitude_time_d[i + shift];
 			mb_io_ptr->attitude_heave[i] = mb_io_ptr->attitude_heave[i + shift];
 			mb_io_ptr->attitude_roll[i] = mb_io_ptr->attitude_roll[i + shift];
@@ -537,7 +535,7 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	}
 
 	/* add fixes */
-	for (i = 0; i < nsamples; i++) {
+	for (int i = 0; i < nsamples; i++) {
 		/* add new fix to list */
 		mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude] = time_d[i];
 		mb_io_ptr->attitude_heave[mb_io_ptr->nattitude] = heave[i];
@@ -750,7 +748,6 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	int shift;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -759,7 +756,7 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       nsamples:   %d\n", nsamples);
-		for (i = 0; i < nsamples; i++) {
+		for (int i = 0; i < nsamples; i++) {
 			fprintf(stderr, "dbg2       %d time_d:%f heading:%f\n", i, time_d[i], heading[i]);
 		}
 	}
@@ -770,7 +767,7 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	/* if necessary make room for heading fixes */
 	if (mb_io_ptr->nheading + nsamples >= MB_ASYNCH_SAVE_MAX) {
 		shift = mb_io_ptr->nheading + nsamples - MB_ASYNCH_SAVE_MAX;
-		for (i = 0; i < mb_io_ptr->nheading - shift; i++) {
+		for (int i = 0; i < mb_io_ptr->nheading - shift; i++) {
 			mb_io_ptr->heading_time_d[i] = mb_io_ptr->heading_time_d[i + shift];
 			mb_io_ptr->heading_heading[i] = mb_io_ptr->heading_heading[i + shift];
 		}
@@ -778,7 +775,7 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	}
 
 	/* add fixes */
-	for (i = 0; i < nsamples; i++) {
+	for (int i = 0; i < nsamples; i++) {
 		/* add new fix to list */
 		mb_io_ptr->heading_time_d[mb_io_ptr->nheading] = time_d[i];
 		mb_io_ptr->heading_heading[mb_io_ptr->nheading] = heading[i];
@@ -2744,7 +2741,7 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
 	int interp_status;
 	double time_latency;
 	int interp_error = MB_ERROR_NO_ERROR;
-	int i, j;
+	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2758,7 +2755,7 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
 		fprintf(stderr, "dbg2       time_latency_num:                 %d\n", time_latency_num);
 		fprintf(stderr, "dbg2       time_latency_time_d:              %p\n", time_latency_time_d);
 		fprintf(stderr, "dbg2       time_latency_value:               %p\n", time_latency_value);
-		for (i = 0; i < time_latency_num; i++)
+		for (int i = 0; i < time_latency_num; i++)
 			fprintf(stderr, "dbg2          time_latency[%d]:              %f %f\n", i, time_latency_time_d[i],
 			        time_latency_value[i]);
 	}
@@ -2766,14 +2763,14 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
 	/* apply time_latency model to time data */
 	if (time_latency_mode == MB_SENSOR_TIME_LATENCY_MODEL) {
 		j = 0;
-		for (i = 0; i < data_num; i++) {
+		for (int i = 0; i < data_num; i++) {
 			interp_status = mb_linear_interp(verbose, time_latency_time_d - 1, time_latency_value - 1, time_latency_num,
 			                                 data_time_d[i], &time_latency, &j, &interp_error);
 			data_time_d[i] -= time_latency;
 		}
 	}
 	else if (time_latency_mode == MB_SENSOR_TIME_LATENCY_STATIC) {
-		for (i = 0; i < data_num; i++) {
+		for (int i = 0; i < data_num; i++) {
 			data_time_d[i] -= time_latency_static;
 		}
 	}
