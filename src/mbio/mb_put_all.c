@@ -41,8 +41,6 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int 
                double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mb_put_all";
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -94,16 +92,17 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* insert values into structure if requested */
+	int status = MB_SUCCESS;
 	if (usevalues == MB_YES) {
 		status = mb_insert(verbose, mbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading, nbath, namp, nss,
 		                   beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 	}
 
 	/* write the data */
-	status = mb_write_ping(verbose, mbio_ptr, store_ptr, error);
+	status &= mb_write_ping(verbose, mbio_ptr, store_ptr, error);
 
 	/* increment counters */
 	if (status == MB_SUCCESS) {

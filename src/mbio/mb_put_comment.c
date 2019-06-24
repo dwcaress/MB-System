@@ -34,15 +34,6 @@
 /*--------------------------------------------------------------------*/
 int mb_put_comment(int verbose, void *mbio_ptr, char *comment, int *error) {
 	char *function_name = "mb_put_comment";
-	int status;
-	struct mb_io_struct *mb_io_ptr;
-	int time_i[7] = {0, 0, 0, 0, 0, 0, 0};
-	double time_d = 0.0;
-	double navlon = 0.0;
-	double navlat = 0.0;
-	double speed = 0.0;
-	double heading = 0.0;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -54,18 +45,20 @@ int mb_put_comment(int verbose, void *mbio_ptr, char *comment, int *error) {
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* insert comment using mb_insert */
-	for (i = 0; i < 7; i++)
-		time_i[i] = 0;
-	time_d = 0.0;
-	navlon = 0.0;
-	status = mb_insert(verbose, mbio_ptr, mb_io_ptr->store_data, MB_DATA_COMMENT, time_i, time_d, navlon, navlat, speed, heading,
+	int time_i[7] = {0, 0, 0, 0, 0, 0, 0};
+	double time_d = 0.0;
+	double navlon = 0.0;
+	double navlat = 0.0;
+	double speed = 0.0;
+	double heading = 0.0;
+	int status = mb_insert(verbose, mbio_ptr, mb_io_ptr->store_data, MB_DATA_COMMENT, time_i, time_d, navlon, navlat, speed, heading,
 	                   0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, comment, error);
 
 	/* write the data */
-	status = mb_write_ping(verbose, mbio_ptr, mb_io_ptr->store_data, error);
+	status &= mb_write_ping(verbose, mbio_ptr, mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
