@@ -15,6 +15,7 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.7.5beta12     June 24, 2019
   Version 5.7.5beta11     June 16, 2019
   Version 5.7.5beta10     June 9, 2019
   Version 5.7.5beta9     June 8, 2019
@@ -310,6 +311,12 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.7.5beta12 (June 24, 2019)
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
 
 -----> 5.7.5beta11 (June 16, 2019)
 
