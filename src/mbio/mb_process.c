@@ -171,7 +171,6 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	int len;
 	int explicit;
 	char *bufptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -234,7 +233,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 
 	/* data cutting */
 	process->mbp_cut_num = 0;
-	for (i = 0; i < MBP_CUT_NUM_MAX; i++) {
+	for (int i = 0; i < MBP_CUT_NUM_MAX; i++) {
 		process->mbp_cut_kind[i] = MBP_CUT_DATA_BATH;
 		process->mbp_cut_mode[i] = MBP_CUT_MODE_NONE;
 		process->mbp_cut_min[i] = 0.0;
@@ -925,7 +924,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	if (lookforfiles == 1 || lookforfiles == 2) {
 		/* look for navadj file */
 		if (process->mbp_navadj_mode == MBP_NAV_OFF) {
-			for (i = 9; i >= 0 && process->mbp_navadj_mode == MBP_NAV_OFF; i--) {
+			for (int i = 9; i >= 0 && process->mbp_navadj_mode == MBP_NAV_OFF; i--) {
 				sprintf(process->mbp_navadjfile, "%s.na%d", process->mbp_ifile, i);
 				if (stat(process->mbp_navadjfile, &statbuf) == 0) {
 					process->mbp_navadj_mode = MBP_NAV_ON;
@@ -1217,7 +1216,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		fprintf(stderr, "dbg2       mbp_sonardepthfile:     %s\n", process->mbp_sonardepthfile);
 		fprintf(stderr, "dbg2       mbp_sonardepth_format:  %d\n", process->mbp_sonardepth_format);
 		fprintf(stderr, "dbg2       mbp_cut_num:            %d\n", process->mbp_cut_num);
-		for (i = 0; i < process->mbp_cut_num; i++) {
+		for (int i = 0; i < process->mbp_cut_num; i++) {
 			fprintf(stderr, "dbg2           cut %d:\n", i);
 			fprintf(stderr, "dbg2           mbp_cut_kind[%d]:     %d\n", i, process->mbp_cut_kind[i]);
 			fprintf(stderr, "dbg2           mbp_cut_mode[%d]:     %d\n", i, process->mbp_cut_mode[i]);
@@ -1325,7 +1324,6 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 	time_t right_now;
 	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 	char *bufptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1368,7 +1366,7 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 		fprintf(stderr, "dbg2       mbp_sonardepthfile:     %s\n", process->mbp_sonardepthfile);
 		fprintf(stderr, "dbg2       mbp_sonardepth_format:  %d\n", process->mbp_sonardepth_format);
 		fprintf(stderr, "dbg2       mbp_cut_num:            %d\n", process->mbp_cut_num);
-		for (i = 0; i < process->mbp_cut_num; i++) {
+		for (int i = 0; i < process->mbp_cut_num; i++) {
 			fprintf(stderr, "dbg2           cut %d:\n", i);
 			fprintf(stderr, "dbg2           mbp_cut_kind[%d]:     %d\n", i, process->mbp_cut_kind[i]);
 			fprintf(stderr, "dbg2           mbp_cut_mode[%d]:     %d\n", i, process->mbp_cut_mode[i]);
@@ -1579,7 +1577,7 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 		if (process->mbp_cut_num == 0)
 			fprintf(fp, "DATACUTCLEAR\n");
 		else {
-			for (i = 0; i < process->mbp_cut_num; i++)
+			for (int i = 0; i < process->mbp_cut_num; i++)
 				fprintf(fp, "DATACUT %d %d %f %f\n", process->mbp_cut_kind[i], process->mbp_cut_mode[i], process->mbp_cut_min[i],
 				        process->mbp_cut_max[i]);
 		}
@@ -2931,7 +2929,6 @@ int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_
 	char *function_name = "mb_pr_update_datacut";
 	struct mb_process_struct process;
 	int status = MB_SUCCESS;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2940,7 +2937,7 @@ int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
 		fprintf(stderr, "dbg2       mbp_cut_num:       %d\n", mbp_cut_num);
-		for (i = 0; i < mbp_cut_num; i++) {
+		for (int i = 0; i < mbp_cut_num; i++) {
 			fprintf(stderr, "dbg2       mbp_cut_kind[%d]:   %d\n", i, mbp_cut_kind[i]);
 			fprintf(stderr, "dbg2       mbp_cut_mode[%d]:   %d\n", i, mbp_cut_mode[i]);
 			fprintf(stderr, "dbg2       mbp_cut_min[%d]:    %f\n", i, mbp_cut_min[i]);
@@ -2953,7 +2950,7 @@ int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_
 
 	/* set datacut values */
 	process.mbp_cut_num = mbp_cut_num;
-	for (i = 0; i < mbp_cut_num; i++) {
+	for (int i = 0; i < mbp_cut_num; i++) {
 		process.mbp_cut_kind[i] = mbp_cut_kind[i];
 		process.mbp_cut_mode[i] = mbp_cut_mode[i];
 		process.mbp_cut_min[i] = mbp_cut_min[i];
@@ -4003,7 +4000,6 @@ int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_ki
 	char *function_name = "mb_pr_update_datacut";
 	struct mb_process_struct process;
 	int status = MB_SUCCESS;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4018,7 +4014,7 @@ int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_ki
 
 	/* set datacut values */
 	*mbp_cut_num = process.mbp_cut_num;
-	for (i = 0; i < *mbp_cut_num; i++) {
+	for (int i = 0; i < *mbp_cut_num; i++) {
 		mbp_cut_kind[i] = process.mbp_cut_kind[i];
 		mbp_cut_mode[i] = process.mbp_cut_mode[i];
 		mbp_cut_min[i] = process.mbp_cut_min[i];
@@ -4030,7 +4026,7 @@ int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_ki
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_cut_num:        %d\n", *mbp_cut_num);
-		for (i = 0; i < *mbp_cut_num; i++) {
+		for (int i = 0; i < *mbp_cut_num; i++) {
 			fprintf(stderr, "dbg2       mbp_cut_kind[%d]:   %d\n", i, mbp_cut_kind[i]);
 			fprintf(stderr, "dbg2       mbp_cut_mode[%d]:   %d\n", i, mbp_cut_mode[i]);
 			fprintf(stderr, "dbg2       mbp_cut_min[%d]:    %f\n", i, mbp_cut_min[i]);
@@ -4345,7 +4341,7 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 	double dxtrack;
 	double weight;
 	int j1, j2;
-	int i, j;
+	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4358,7 +4354,7 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 		fprintf(stderr, "dbg2       bath:            %p\n", (void *)bath);
 		fprintf(stderr, "dbg2       bathacrosstrack: %p\n", (void *)bathacrosstrack);
 		fprintf(stderr, "dbg2       bath:\n");
-		for (i = 0; i < nbath; i++)
+		for (int i = 0; i < nbath; i++)
 			fprintf(stderr, "dbg2         %d  %d  %f %f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
 		fprintf(stderr, "dbg2       depths:           %p\n", (void *)depths);
 		fprintf(stderr, "dbg2       depthacrosstrack: %p\n", (void *)depthacrosstrack);
@@ -4368,13 +4364,13 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 
 	/* initialize depths */
 	*ndepths = 0;
-	for (i = 0; i < nbath; i++) {
+	for (int i = 0; i < nbath; i++) {
 		depths[i] = 0.0;
 		depthacrosstrack[i] = 0.0;
 	}
 
 	/* decimate by nsmooth, averaging the values used */
-	for (i = 0; i <= nbath / nsmooth; i++) {
+	for (int i = 0; i <= nbath / nsmooth; i++) {
 		j1 = i * nsmooth;
 		j2 = MIN((i + 1) * nsmooth, nbath);
 		depths[*ndepths] = 0.0;
@@ -4399,7 +4395,7 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 		*nslopes = *ndepths + 1;
 		slopeacrosstrack[0] = depthacrosstrack[0];
 		slopes[0] = 0.0;
-		for (i = 1; i < *ndepths; i++) {
+		for (int i = 1; i < *ndepths; i++) {
 			dxtrack = depthacrosstrack[i] - depthacrosstrack[i - 1];
 			slopeacrosstrack[i] = depthacrosstrack[i - 1] + 0.5 * dxtrack;
 			if (dxtrack > 0.0)
@@ -4419,11 +4415,11 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndepths:         %d\n", *ndepths);
 		fprintf(stderr, "dbg2       depths:\n");
-		for (i = 0; i < *ndepths; i++)
+		for (int i = 0; i < *ndepths; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, depths[i], depthacrosstrack[i]);
 		fprintf(stderr, "dbg2       nslopes:         %d\n", *nslopes);
 		fprintf(stderr, "dbg2       slopes:\n");
-		for (i = 0; i < *nslopes; i++)
+		for (int i = 0; i < *nslopes; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, slopes[i], slopeacrosstrack[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -4444,7 +4440,7 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 	double dacrosstrack;
 	double factor;
 	int j1, j2;
-	int i, j;
+	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4456,7 +4452,7 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 		fprintf(stderr, "dbg2       bath:            %p\n", (void *)bath);
 		fprintf(stderr, "dbg2       bathacrosstrack: %p\n", (void *)bathacrosstrack);
 		fprintf(stderr, "dbg2       bath:\n");
-		for (i = 0; i < nbath; i++)
+		for (int i = 0; i < nbath; i++)
 			fprintf(stderr, "dbg2         %d  %d  %f %f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
 		fprintf(stderr, "dbg2       depths:           %p\n", (void *)depths);
 		fprintf(stderr, "dbg2       depthacrosstrack: %p\n", (void *)depthacrosstrack);
@@ -4466,7 +4462,7 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 
 	/* initialize depths */
 	*ndepths = 0;
-	for (i = 0; i < nbath; i++) {
+	for (int i = 0; i < nbath; i++) {
 		depths[i] = 0.0;
 		depthacrosstrack[i] = 0.0;
 	}
@@ -4475,7 +4471,7 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 	first = -1;
 	last = -1;
 	nbathgood = 0;
-	for (i = 0; i < nbath; i++) {
+	for (int i = 0; i < nbath; i++) {
 		if (mb_beam_ok(beamflag[i])) {
 			if (first == -1) {
 				first = i;
@@ -4489,7 +4485,7 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 
 	/* now interpolate the depths */
 	if (nbathgood > 0)
-		for (i = first; i < last; i++) {
+		for (int i = first; i < last; i++) {
 			if (mb_beam_ok(beamflag[i])) {
 				next = i;
 				j = i + 1;
@@ -4511,7 +4507,7 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 
 	/* now smooth the depths */
 	if (nbathgood > 0 && nsmooth > 0) {
-		for (i = first; i <= last; i++) {
+		for (int i = first; i <= last; i++) {
 			j1 = i - nsmooth;
 			j2 = i + nsmooth;
 			if (j1 < first)
@@ -4527,7 +4523,7 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 			else
 				depthsmooth[i] = depths[i];
 		}
-		for (i = first; i <= last; i++)
+		for (int i = first; i <= last; i++)
 			depths[i] = depthsmooth[i];
 	}
 
@@ -4538,11 +4534,11 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 			dacrosstrack = (depthacrosstrack[last] - depthacrosstrack[first]) / (last - first);
 		else
 			dacrosstrack = 1.0;
-		for (i = 0; i < first; i++) {
+		for (int i = 0; i < first; i++) {
 			depths[i] = depths[first];
 			depthacrosstrack[i] = depthacrosstrack[first] + dacrosstrack * (i - first);
 		}
-		for (i = last + 1; i < nbath; i++) {
+		for (int i = last + 1; i < nbath; i++) {
 			depths[i] = depths[last];
 			depthacrosstrack[i] = depthacrosstrack[last] + dacrosstrack * (i - last);
 		}
@@ -4551,7 +4547,7 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 	/* now calculate slopes */
 	if (nbathgood > 0) {
 		*nslopes = nbath + 1;
-		for (i = 0; i < nbath - 1; i++) {
+		for (int i = 0; i < nbath - 1; i++) {
 			slopes[i + 1] = (depths[i + 1] - depths[i]) / (depthacrosstrack[i + 1] - depthacrosstrack[i]);
 			slopeacrosstrack[i + 1] = 0.5 * (depthacrosstrack[i + 1] + depthacrosstrack[i]);
 			/*fprintf(stderr,"SLOPECALC: i:%d depths: %f %f  xtrack: %f %f  slope:%f\n",
@@ -4569,11 +4565,11 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndepths:         %d\n", *ndepths);
 		fprintf(stderr, "dbg2       depths:\n");
-		for (i = 0; i < nbath; i++)
+		for (int i = 0; i < nbath; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, depths[i], depthacrosstrack[i]);
 		fprintf(stderr, "dbg2       nslopes:         %d\n", *nslopes);
 		fprintf(stderr, "dbg2       slopes:\n");
-		for (i = 0; i < *nslopes; i++)
+		for (int i = 0; i < *nslopes; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, slopes[i], slopeacrosstrack[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
