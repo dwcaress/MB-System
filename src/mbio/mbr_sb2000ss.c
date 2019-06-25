@@ -321,7 +321,6 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	unsigned short *short_ptr;
 	short test_sensor_size, test_data_size;
 	int found, skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -366,7 +365,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* if not a good header search through file to find one */
 	while (status == MB_SUCCESS && found == MB_NO) {
 		/* shift bytes by one */
-		for (i = 0; i < MBSYS_SB2000_HEADER_SIZE - 1; i++)
+		for (int i = 0; i < MBSYS_SB2000_HEADER_SIZE - 1; i++)
 			buffer[i] = buffer[i + 1];
 		mb_io_ptr->file_pos += 1;
 		skip++;
@@ -424,7 +423,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if ((strncmp(store->sensor_type, "SS", 2) != 0 || strncmp(store->data_type, "SC", 2) != 0) &&
 		    strncmp(store->data_type, "TR", 2) != 0 && strncmp(store->data_type, "SP", 2) != 0) {
 			/* read rest of record */
-			for (i = 0; (i < store->sensor_size + store->data_size) && status == MB_SUCCESS; i++) {
+			for (int i = 0; (i < store->sensor_size + store->data_size) && status == MB_SUCCESS; i++) {
 				if ((read_status = fread(buffer, 1, 1, mb_io_ptr->mbfp)) != 1) {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
@@ -507,7 +506,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_binary_short(MB_NO, &buffer[14], &store->start_time);
 		mb_get_binary_short(MB_NO, &buffer[16], &store->tot_slice);
 		mb_get_binary_short(MB_NO, &buffer[18], &store->pixels_ss);
-		for (i = 0; i < store->sensor_size - 20; i++)
+		for (int i = 0; i < store->sensor_size - 20; i++)
 			store->spare_ss[i] = buffer[18 + i];
 	}
 
@@ -549,7 +548,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* deal with 1-byte data */
 		if (buffer[0] == 'G') {
 			store->ss_type = 'G';
-			for (i = 0; i < store->pixels_ss; i++) {
+			for (int i = 0; i < store->pixels_ss; i++) {
 				store->ss[i] = buffer[i + 1];
 			}
 		}
@@ -557,7 +556,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* deal with 2-byte data */
 		else if (buffer[0] == 'R') {
 			store->ss_type = 'R';
-			for (i = 0; i < store->pixels_ss; i++) {
+			for (int i = 0; i < store->pixels_ss; i++) {
 				mb_get_binary_short(MB_NO, (short *)&(buffer[4 + 2 * i]), (short *)&(store->ss[2 * i]));
 			}
 		}
@@ -576,15 +575,15 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5       tot_slice:       %d\n", store->tot_slice);
 			fprintf(stderr, "dbg5       pixels_ss:       %d\n", store->pixels_ss);
 			fprintf(stderr, "dbg5       spare_ss:        ");
-			for (i = 0; i < 12; i++)
+			for (int i = 0; i < 12; i++)
 				fprintf(stderr, "%c", store->spare_ss[i]);
 			fprintf(stderr, "dbg5       sidescan_type:%c\n", store->ss_type);
 			if (store->ss_type == 'G') {
-				for (i = 0; i < store->pixels_ss; i++)
+				for (int i = 0; i < store->pixels_ss; i++)
 					fprintf(stderr, "dbg5       pixel: %d  ss: %d\n", i, store->ss[i]);
 			}
 			else if (store->ss_type == 'R') {
-				for (i = 1; i <= store->pixels_ss; i++) {
+				for (int i = 1; i <= store->pixels_ss; i++) {
 					short_ptr = (unsigned short *)&store->ss[i * 2];
 					fprintf(stderr, "dbg5       pixel: %d  ss: %d\n", i, *short_ptr);
 				}
@@ -598,7 +597,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_binary_int(MB_NO, &buffer[0], &store->svp_mean);
 		mb_get_binary_short(MB_NO, &buffer[4], &store->svp_number);
 		mb_get_binary_short(MB_NO, &buffer[6], &store->svp_spare);
-		for (i = 0; i < MIN(store->svp_number, 30); i++) {
+		for (int i = 0; i < MIN(store->svp_number, 30); i++) {
 			mb_get_binary_short(MB_NO, &buffer[8 + i * 4], &store->svp_depth[i]);
 			mb_get_binary_short(MB_NO, &buffer[10 + i * 4], &store->svp_vel[i]);
 		}
@@ -618,7 +617,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5       svp_mean:     %d\n", store->svp_mean);
 			fprintf(stderr, "dbg5       svp_number:   %d\n", store->svp_number);
 			fprintf(stderr, "dbg5       svp_spare:    %d\n", store->svp_spare);
-			for (i = 0; i < 30; i++)
+			for (int i = 0; i < 30; i++)
 				fprintf(stderr, "dbg5       %d  depth: %d  vel: %d\n", i, store->svp_depth[i], store->svp_vel[i]);
 			fprintf(stderr, "dbg5       vru1:         %d\n", store->vru1);
 			fprintf(stderr, "dbg5       vru1_port:    %d\n", store->vru1_port);
@@ -671,7 +670,6 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_sb2000_struct *store;
 	char buffer[2 * MBSYS_SB2000_PIXELS + 4];
 	unsigned short *short_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -732,7 +730,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       tot_slice:       %d\n", store->tot_slice);
 		fprintf(stderr, "dbg5       pixels_ss:       %d\n", store->pixels_ss);
 		fprintf(stderr, "dbg5       spare_ss:        ");
-		for (i = 0; i < 12; i++)
+		for (int i = 0; i < 12; i++)
 			fprintf(stderr, "%c", store->spare_ss[i]);
 		fprintf(stderr, "\n");
 	}
@@ -744,7 +742,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       svp_mean:     %d\n", store->svp_mean);
 		fprintf(stderr, "dbg5       svp_number:   %d\n", store->svp_number);
 		fprintf(stderr, "dbg5       svp_spare:   %d\n", store->svp_spare);
-		for (i = 0; i < 30; i++)
+		for (int i = 0; i < 30; i++)
 			fprintf(stderr, "dbg5       %d  depth: %d  vel: %d\n", i, store->svp_depth[i], store->svp_vel[i]);
 		fprintf(stderr, "dbg5       vru1:         %d\n", store->vru1);
 		fprintf(stderr, "dbg5       vru1_port:    %d\n", store->vru1_port);
@@ -766,11 +764,11 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5  Data values:\n");
 		fprintf(stderr, "dbg5       sidescan_type:%c\n", store->ss_type);
 		if (store->ss_type == 'G') {
-			for (i = 0; i < store->pixels_ss; i++)
+			for (int i = 0; i < store->pixels_ss; i++)
 				fprintf(stderr, "dbg5       pixel: %d  ss: %d\n", i, store->ss[i]);
 		}
 		else if (store->ss_type == 'R') {
-			for (i = 1; i <= store->pixels_ss; i++) {
+			for (int i = 1; i <= store->pixels_ss; i++) {
 				short_ptr = (unsigned short *)&store->ss[i * 2];
 				fprintf(stderr, "dbg5       pixel: %d  ss: %d\n", i, *short_ptr);
 			}
@@ -830,7 +828,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_put_binary_short(MB_NO, store->start_time, &buffer[14]);
 		mb_put_binary_short(MB_NO, store->tot_slice, &buffer[16]);
 		mb_put_binary_short(MB_NO, store->pixels_ss, &buffer[18]);
-		for (i = 0; i < store->sensor_size - 20; i++)
+		for (int i = 0; i < store->sensor_size - 20; i++)
 			buffer[18 + i] = store->spare_ss[i];
 
 		/* write sensor record to file */
@@ -849,7 +847,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_put_binary_int(MB_NO, store->svp_mean, &buffer[0]);
 		mb_put_binary_short(MB_NO, store->svp_number, &buffer[4]);
 		mb_put_binary_short(MB_NO, store->svp_spare, &buffer[6]);
-		for (i = 0; i < MIN(store->svp_number, 30); i++) {
+		for (int i = 0; i < MIN(store->svp_number, 30); i++) {
 			mb_put_binary_short(MB_NO, store->svp_depth[i], &buffer[8 + i * 4]);
 			mb_put_binary_short(MB_NO, store->svp_vel[i], &buffer[10 + i * 4]);
 		}
@@ -879,7 +877,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* deal with 1-byte data */
 		if (store->ss_type == 'G') {
 			buffer[0] = 'G';
-			for (i = 0; i < store->pixels_ss; i++) {
+			for (int i = 0; i < store->pixels_ss; i++) {
 				buffer[i + 1] = store->ss[i];
 			}
 			buffer[store->pixels_ss + 1] = 'G';
@@ -893,7 +891,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			buffer[1] = 'R';
 			buffer[2] = 'R';
 			buffer[3] = 'R';
-			for (i = 0; i < store->pixels_ss; i++) {
+			for (int i = 0; i < store->pixels_ss; i++) {
 				mb_get_binary_short(MB_NO, (short *)&(store->ss[2 * i]), (short *)&(buffer[4 + 2 * i]));
 			}
 		}

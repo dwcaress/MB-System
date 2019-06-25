@@ -346,7 +346,6 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double alpha, beta, theta, phi;
 	double rr, xx, zz;
 	double *pixel_size, *swath_width;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -478,7 +477,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (store->RMB_sonar_type == 1 || store->RMB_sonar_type == 2) {
 				/* get beam roll angles if necessary */
 				if (!(store->RMB_beam_data_available & 0x0080)) {
-					for (i = 0; i < store->RMB_num_beams; i++) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
 						store->RMB_sounding_rollangles[i] = device->MBI_first_beam_angle + i * device->MBI_angle_increment;
 					}
 					store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
@@ -486,7 +485,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 				/* get beam pitch angles if necessary */
 				if (!(store->RMB_beam_data_available & 0x0040)) {
-					for (i = 0; i < store->RMB_num_beams; i++) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
 						store->RMB_sounding_pitchangles[i] = 0.0;
 					}
 					store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0040;
@@ -495,7 +494,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* get beam takeoff and azimuthal angles if necessary */
 			if (!(store->RMB_beam_data_available & 0x0100) || !(store->RMB_beam_data_available & 0x0200)) {
-				for (i = 0; i < store->RMB_num_beams; i++) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
 					alpha = store->RMB_sounding_pitchangles[i];
 					beta = 90.0 + store->RMB_sounding_rollangles[i];
 
@@ -517,7 +516,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* get beam bathymetry if necessary */
 			if (!(store->RMB_beam_data_available & 0x0008) || !(store->RMB_beam_data_available & 0x0010) ||
 			    !(store->RMB_beam_data_available & 0x0020)) {
-				for (i = 0; i < store->RMB_num_beams; i++) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
 					rr = store->RMB_beam_ranges[i];
 					theta = store->RMB_sounding_takeoffangles[i];
 					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
@@ -532,14 +531,14 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* get beam flags if necessary */
 			if (!(store->RMB_beam_data_available & 0x2000)) {
-				for (i = 0; i < store->RMB_num_beams; i++) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
 					store->RMB_sounding_flags[i] = MB_FLAG_NONE;
 				}
 				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x2000;
 
 				/* incorporate quality values */
 				if ((store->RMB_beam_data_available & 0x1000) && strncmp(device->DEV_device_name, "Reson Seabat 8", 14) == 0) {
-					for (i = 0; i < store->RMB_num_beams; i++) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
 						if (store->RMB_sounding_quality[i] < 2)
 							store->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
 					}
@@ -547,7 +546,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 				/* check for null ranges */
 				if ((store->RMB_beam_data_available & 0x0001)) {
-					for (i = 0; i < store->RMB_num_beams; i++) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
 						if (store->RMB_beam_ranges[i] <= 0.0)
 							store->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
 					}
@@ -559,7 +558,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (store->RMB_beam_data_available & 0x0002) {
 			/* get beam roll angles if necessary */
 			if (!(store->RMB_beam_data_available & 0x0080)) {
-				for (i = 0; i < store->RMB_num_beams; i++) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
 					store->RMB_sounding_rollangles[i] = 0.0;
 				}
 				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
@@ -567,7 +566,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* correct beam roll angles for roll if necessary */
 			if (!(device->MBI_sonar_flags & 0x0001)) {
-				for (i = 0; i < store->RMB_num_beams; i++) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
 					store->RMB_sounding_rollangles[i] -= store->RMBint_roll;
 				}
 			}
@@ -575,12 +574,12 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* get beam pitch angles if necessary */
 			if (!(store->RMB_beam_data_available & 0x0040)) {
 				if (!(device->MBI_sonar_flags & 0x0002)) {
-					for (i = 0; i < store->RMB_num_beams; i++) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
 						store->RMB_sounding_pitchangles[i] = store->RMBint_pitch;
 					}
 				}
 				else {
-					for (i = 0; i < store->RMB_num_beams; i++) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
 						store->RMB_sounding_pitchangles[i] = 0.0;
 					}
 				}
@@ -589,7 +588,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* get beam takeoff and azimuthal angles if necessary */
 			if (!(store->RMB_beam_data_available & 0x0100) || !(store->RMB_beam_data_available & 0x0200)) {
-				for (i = 0; i < store->RMB_num_beams; i++) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
 					alpha = store->RMB_sounding_pitchangles[i];
 					beta = 90.0 - store->RMB_sounding_rollangles[i];
 					mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
@@ -602,7 +601,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* get beam bathymetry if necessary */
 			if (!(store->RMB_beam_data_available & 0x0004) || !(store->RMB_beam_data_available & 0x0008) ||
 			    !(store->RMB_beam_data_available & 0x0010) || !(store->RMB_beam_data_available & 0x0020)) {
-				for (i = 0; i < store->RMB_num_beams; i++) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
 					rr = store->RMB_multi_ranges[i];
 					theta = store->RMB_sounding_takeoffangles[i];
 					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
@@ -617,7 +616,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* get beam flags if necessary */
 			if (!(store->RMB_beam_data_available & 0x2000)) {
-				for (i = 0; i < store->RMB_num_beams; i++) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
 					store->RMB_sounding_flags[i] = MB_FLAG_NONE;
 				}
 				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x2000;
@@ -642,7 +641,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg4       RMB_num_beams_alloc:               %d\n", store->RMB_num_beams_alloc);
 			fprintf(stderr, "dbg4       RMB_sound_velocity:                %f\n", store->RMB_sound_velocity);
 			fprintf(stderr, "dbg4       RMB_ping_number:                   %d\n", store->RMB_ping_number);
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				fprintf(stderr, "dbg4       beam:%4d", i);
 
 				if (store->RMB_beam_data_available & 0x0001)
@@ -801,7 +800,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int tmpRMB_ping_number;
 	int SNRok, RSSok;
 	int len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -930,7 +928,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_beam_ranges[i]));
 							if (nscan == 1)
 								nread++;
@@ -951,7 +949,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_multi_ranges[i]));
 							if (nscan == 1)
 								nread++;
@@ -972,7 +970,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_eastings[i]));
 							if (nscan == 1)
 								nread++;
@@ -993,7 +991,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_northings[i]));
 							if (nscan == 1)
 								nread++;
@@ -1014,7 +1012,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_depths[i]));
 							if (nscan == 1)
 								nread++;
@@ -1035,7 +1033,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_along[i]));
 							if (nscan == 1)
 								nread++;
@@ -1056,7 +1054,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_across[i]));
 							if (nscan == 1)
 								nread++;
@@ -1077,7 +1075,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_pitchangles[i]));
 							if (nscan == 1)
 								nread++;
@@ -1098,7 +1096,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_rollangles[i]));
 							if (nscan == 1)
 								nread++;
@@ -1119,7 +1117,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_takeoffangles[i]));
 							if (nscan == 1)
 								nread++;
@@ -1140,7 +1138,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->RMB_sounding_azimuthalangles[i]));
 							if (nscan == 1)
 								nread++;
@@ -1161,7 +1159,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RMB_sounding_timedelays[i]));
 							if (nscan == 1)
 								nread++;
@@ -1182,7 +1180,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RMB_sounding_intensities[i]));
 							if (nscan == 1)
 								nread++;
@@ -1203,7 +1201,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RMB_sounding_quality[i]));
 							if (nscan == 1)
 								nread++;
@@ -1224,7 +1222,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RMB_num_beams && token != NULL; i++) {
+						for (int i = 0; i < store->RMB_num_beams && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RMB_sounding_flags[i]));
 							if (nscan == 1)
 								nread++;
@@ -1249,7 +1247,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					fprintf(stderr, "dbg4       RMB_num_beams_alloc:               %d\n", store->RMB_num_beams_alloc);
 					fprintf(stderr, "dbg4       RMB_sound_velocity:                %f\n", store->RMB_sound_velocity);
 					fprintf(stderr, "dbg4       RMB_ping_number:                   %d\n", store->RMB_ping_number);
-					for (i = 0; i < store->RMB_num_beams; i++) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
 						fprintf(stderr, "dbg4       beam:%4d", i);
 
 						if (store->RMB_beam_data_available & 0x0001)
@@ -1390,7 +1388,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RSS_port_num_samples && token != NULL; i++) {
+						for (int i = 0; i < store->RSS_port_num_samples && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RSS_port[i]));
 							if (nscan == 1)
 								nread++;
@@ -1411,7 +1409,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->RSS_starboard_num_samples && token != NULL; i++) {
+						for (int i = 0; i < store->RSS_starboard_num_samples && token != NULL; i++) {
 							nscan = sscanf(token, "%d", &(store->RSS_starboard[i]));
 							if (nscan == 1)
 								nread++;
@@ -1442,10 +1440,10 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					fprintf(stderr, "dbg4       RSS_maximum_amplitude:             %d\n", store->RSS_maximum_amplitude);
 					fprintf(stderr, "dbg4       RSS_bit_shift:                     %d\n", store->RSS_bit_shift);
 					fprintf(stderr, "dbg4       RSS_frequency:                     %d\n", store->RSS_frequency);
-					for (i = 0; i < store->RSS_port_num_samples; i++) {
+					for (int i = 0; i < store->RSS_port_num_samples; i++) {
 						fprintf(stderr, "dbg4       port pixel:%5d ss:%d\n", i, store->RSS_port[i]);
 					}
-					for (i = 0; i < store->RSS_port_num_samples; i++) {
+					for (int i = 0; i < store->RSS_port_num_samples; i++) {
 						fprintf(stderr, "dbg4       starboard pixel:%5d ss:%d\n", i, store->RSS_starboard[i]);
 					}
 				}
@@ -1503,7 +1501,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->MSS_num_pixels && token != NULL; i++) {
+						for (int i = 0; i < store->MSS_num_pixels && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->MSS_ss[i]));
 							if (nscan == 1)
 								nread++;
@@ -1524,7 +1522,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					/* parse the line */
 					if (status == MB_SUCCESS && (token = strtok(line + 0, " ")) != NULL) {
 						nread = 0;
-						for (i = 0; i < store->MSS_num_pixels && token != NULL; i++) {
+						for (int i = 0; i < store->MSS_num_pixels && token != NULL; i++) {
 							nscan = sscanf(token, "%lf", &(store->MSS_ss_along[i]));
 							if (nscan == 1)
 								nread++;
@@ -1537,7 +1535,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					}
 
 					/* calculate MSS_across */
-					for (i = 0; i < store->MSS_num_pixels; i++) {
+					for (int i = 0; i < store->MSS_num_pixels; i++) {
 						store->MSS_ss_across[i] = store->MSS_pixel_size * (double)(i - (store->MSS_num_pixels / 2));
 						;
 					}
@@ -1552,7 +1550,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					fprintf(stderr, "dbg4       MSS_num_pixels:                    %d\n", store->MSS_num_pixels);
 					fprintf(stderr, "dbg4       MSS_pixel_size:                    %f\n", store->MSS_pixel_size);
 					fprintf(stderr, "dbg4       MSS_ping_number:                   %d\n", store->MSS_ping_number);
-					for (i = 0; i < store->MSS_num_pixels; i++) {
+					for (int i = 0; i < store->MSS_num_pixels; i++) {
 						fprintf(stderr, "dbg4       pixel:%5d ss:%f across:%f along:%f\n", i, store->MSS_ss[i],
 						        store->MSS_ss_across[i], store->MSS_ss_along[i]);
 					}
@@ -1934,7 +1932,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 				else {
-					for (i = 0; i < len; i++) {
+					for (int i = 0; i < len; i++) {
 						if (store->FTP_record[i] == '\r' || store->FTP_record[i] == '\n')
 							store->FTP_record[i] = '\0';
 					}
@@ -2565,7 +2563,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int *device_number_MB_HCP;
 	int *device_number_MB_GYR;
 	int *device_number_MB_DFT;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2608,7 +2605,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		*add_MB_HCP = MB_YES;
 		*add_MB_GYR = MB_YES;
 		*add_MB_DFT = MB_YES;
-		for (i = 0; i < hysweeptmp.num_devices; i++) {
+		for (int i = 0; i < hysweeptmp.num_devices; i++) {
 			device = (struct mbsys_hysweep_device_struct *)&(hysweeptmp.devices[i]);
 			if (device->DV2_enabled == MB_YES) {
 				if ((strncmp(device->DEV_device_name, "MB-System", 9) == 0)) {
@@ -2648,7 +2645,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			device->DV2_enabled = 1;
 
 			device->num_offsets = 3;
-			for (i = 0; i < device->num_offsets; i++) {
+			for (int i = 0; i < device->num_offsets; i++) {
 				offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[i]);
 				offset->OF2_device_number = hysweeptmp.num_devices;
 				offset->OF2_offset_type = i;
@@ -2673,7 +2670,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			device->DV2_enabled = 1;
 
 			device->num_offsets = 2;
-			for (i = 0; i < device->num_offsets; i++) {
+			for (int i = 0; i < device->num_offsets; i++) {
 				offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[i]);
 				offset->OF2_device_number = hysweeptmp.num_devices;
 				offset->OF2_offset_type = i + 1;
@@ -2698,7 +2695,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			device->DV2_enabled = 1;
 
 			device->num_offsets = 2;
-			for (i = 0; i < device->num_offsets; i++) {
+			for (int i = 0; i < device->num_offsets; i++) {
 				offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[i]);
 				offset->OF2_device_number = hysweeptmp.num_devices;
 				offset->OF2_offset_type = i + 1;
@@ -2723,7 +2720,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			device->DV2_enabled = 1;
 
 			device->num_offsets = 3;
-			for (i = 0; i < device->num_offsets; i++) {
+			for (int i = 0; i < device->num_offsets; i++) {
 				offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[i]);
 				offset->OF2_device_number = hysweeptmp.num_devices;
 				offset->OF2_offset_type = i;
@@ -2806,13 +2803,13 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		        hysweeptmp.HSP_low_beam_quality, hysweeptmp.HSP_sonar_range, hysweeptmp.HSP_towfish_layback, hysweeptmp.HSP_units,
 		        hysweeptmp.HSP_sonar_id);
 
-		for (i = 0; i < hysweeptmp.num_devices; i++) {
+		for (int i = 0; i < hysweeptmp.num_devices; i++) {
 			device = (struct mbsys_hysweep_device_struct *)&(hysweeptmp.devices[i]);
 			fprintf(mbfp, "DEV %d %d \"%s\"\r\n", device->DEV_device_number, device->DEV_device_capability,
 			        device->DEV_device_name);
 			fprintf(mbfp, "DV2 %d %x %d %d\r\n", device->DEV_device_number, device->DV2_device_capability, device->DV2_towfish,
 			        device->DV2_enabled);
-			for (j = 0; j < device->num_offsets; j++) {
+			for (int j = 0; j < device->num_offsets; j++) {
 				offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[j]);
 				fprintf(mbfp, "OF2 %d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n", offset->OF2_device_number,
 				        offset->OF2_offset_type, offset->OF2_offset_starboard, offset->OF2_offset_forward,
@@ -2859,7 +2856,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "dbg4       RMB_num_beams_alloc:               %d\n", store->RMB_num_beams_alloc);
 			fprintf(stderr, "dbg4       RMB_sound_velocity:                %f\n", store->RMB_sound_velocity);
 			fprintf(stderr, "dbg4       RMB_ping_number:                   %d\n", store->RMB_ping_number);
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				fprintf(stderr, "dbg4       beam:%4d", i);
 
 				if (store->RMB_beam_data_available & 0x0001)
@@ -2946,7 +2943,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* fprintf(stderr,"writeline: %s",line); */
 
 			/* write RSS_port */
-			for (i = 0; i < store->RSS_port_num_samples; i++) {
+			for (int i = 0; i < store->RSS_port_num_samples; i++) {
 				if (i != 0)
 					fprintf(mbfp, " ");
 				fprintf(mbfp, "%d", store->RSS_port[i]);
@@ -2954,7 +2951,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(mbfp, "\r\n");
 
 			/* write RSS_starboard */
-			for (i = 0; i < store->RSS_starboard_num_samples; i++) {
+			for (int i = 0; i < store->RSS_starboard_num_samples; i++) {
 				if (i != 0)
 					fprintf(mbfp, " ");
 				fprintf(mbfp, "%d", store->RSS_starboard[i]);
@@ -2974,7 +2971,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* fprintf(stderr,"writeline: %s",line); */
 
 			/* write MSS_ss */
-			for (i = 0; i < store->MSS_num_pixels; i++) {
+			for (int i = 0; i < store->MSS_num_pixels; i++) {
 				if (i != 0)
 					fprintf(mbfp, " ");
 				fprintf(mbfp, "%.2f", store->MSS_ss[i]);
@@ -2982,7 +2979,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(mbfp, "\r\n");
 
 			/* write MSS_ss_along */
-			for (i = 0; i < store->MSS_num_pixels; i++) {
+			for (int i = 0; i < store->MSS_num_pixels; i++) {
 				if (i != 0)
 					fprintf(mbfp, " ");
 				fprintf(mbfp, "%.2f", store->MSS_ss_along[i]);
@@ -2994,7 +2991,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if ((store->SNR_ping_number == store->RMB_ping_number || 10 * store->SNR_ping_number == store->RMB_ping_number)) {
 			sprintf(line, "SNR %d %.3f %d %d %d", store->SNR_device_number, store->SNR_time, store->SNR_ping_number,
 			        store->SNR_sonar_id, store->SNR_num_settings);
-			for (i = 0; i < store->SNR_num_settings; i++) {
+			for (int i = 0; i < store->SNR_num_settings; i++) {
 				kindex = strlen(line);
 				sprintf(line + kindex, " %g", store->SNR_settings[i]);
 			}
@@ -3015,7 +3012,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0001) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %.2f", store->RMB_beam_ranges[i]);
@@ -3031,7 +3028,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0002) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %.2f", store->RMB_multi_ranges[i]);
@@ -3047,7 +3044,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0004) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %.2f", store->RMB_sounding_eastings[i]);
@@ -3063,7 +3060,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0004) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %.2f", store->RMB_sounding_northings[i]);
@@ -3079,7 +3076,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0008) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %.2f", store->RMB_sounding_depths[i]);
@@ -3095,7 +3092,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0010) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %.2f", store->RMB_sounding_along[i]);
@@ -3111,7 +3108,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0020) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %.2f", store->RMB_sounding_across[i]);
@@ -3127,7 +3124,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0040) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %.2f", store->RMB_sounding_pitchangles[i]);
@@ -3143,7 +3140,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0080) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %.2f", store->RMB_sounding_rollangles[i]);
@@ -3159,7 +3156,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0100) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %.2f", store->RMB_sounding_takeoffangles[i]);
@@ -3175,7 +3172,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0200) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %.2f", store->RMB_sounding_azimuthalangles[i]);
@@ -3191,7 +3188,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0400) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %d", store->RMB_sounding_timedelays[i]);
@@ -3207,7 +3204,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x0800) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %d", store->RMB_sounding_intensities[i]);
@@ -3223,7 +3220,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x1000) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %d", store->RMB_sounding_quality[i]);
@@ -3239,7 +3236,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->RMB_beam_data_available & 0x2000) {
 			/* write the next line */
 			line[0] = '\0';
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				kindex = strlen(line);
 				if (i > 0)
 					sprintf(line + kindex, " %d", store->RMB_sounding_flags[i]);

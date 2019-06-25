@@ -447,7 +447,6 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   int time_i[7];
   double time_d;
   int done;
-  int i;
   int record_num_heada = 0;
   int record_num_headb = 0;
   int record_num_comment = 0;
@@ -761,7 +760,7 @@ fprintf(stderr,"\n");
         qsort((void *)mb_io_ptr->indextable, mb_io_ptr->num_indextable,
               sizeof(struct mb_io_indextable_struct),
               (void *)mbr_3dwisslr_indextable_compare);
-        for (i=0;i<mb_io_ptr->num_indextable;i++) {
+        for (int i = 0; i < mb_io_ptr->num_indextable; i++) {
             mb_io_ptr->indextable[i].total_index_sorted = i;
         }
 //fprintf(stderr,"\nSorted Index Table:\n");
@@ -814,7 +813,7 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   int time_i[7];
   int time_j[5];
   int found;
-  int i, ipulse, isounding;
+  int ipulse, isounding;
   int irecord;
 
   /* print input debug statements */
@@ -846,7 +845,7 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
     /* find next unread record in the file index table */
     found = MB_NO;
-    for (i=0; i<mb_io_ptr->num_indextable && found == MB_NO; i++) {
+    for (int i = 0; i < mb_io_ptr->num_indextable && found == MB_NO; i++) {
         if (mb_io_ptr->indextable[i].read == MB_NO) {
             found = MB_YES;
             irecord = i;

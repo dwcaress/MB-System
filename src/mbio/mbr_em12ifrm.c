@@ -405,7 +405,6 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_em12ifrm";
 	int status = MB_SUCCESS;
 	struct mbf_em12ifrm_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -451,10 +450,10 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
 		                    offset (meters) */
 		data->em1000_ty = 0.0;      /* EM-1000 tranducer athwartships
 		                    offset (meters) */
-		for (i = 0; i < 128; i++)
+		for (int i = 0; i < 128; i++)
 			data->spare_parameter[i] = '\0';
 		data->survey_line = 0;
-		for (i = 0; i < 80; i++)
+		for (int i = 0; i < 80; i++)
 			data->comment[i] = '\0';
 
 		/* position (position datagrams) */
@@ -485,7 +484,7 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
 		data->svp_second = 0;
 		data->svp_centisecond = 0;
 		data->svp_num = 0;
-		for (i = 0; i < 100; i++) {
+		for (int i = 0; i < 100; i++) {
 			data->svp_depth[i] = 0; /* meters */
 			data->svp_vel[i] = 0;   /* 0.1 meters/sec */
 		}
@@ -513,7 +512,7 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
 		data->sound_vel = 0;
 		data->pixels_ssraw = 0;
 		data->ss_mode = 0;
-		for (i = 0; i < MBF_EM12IFRM_MAXBEAMS; i++) {
+		for (int i = 0; i < MBF_EM12IFRM_MAXBEAMS; i++) {
 			data->bath[i] = 0;
 			data->bath_acrosstrack[i] = 0;
 			data->bath_alongtrack[i] = 0;
@@ -526,13 +525,13 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
 			data->beam_center_sample[i] = 0;
 			data->beam_start_sample[i] = 0;
 		}
-		for (i = 0; i < MBF_EM12IFRM_MAXRAWPIXELS; i++) {
+		for (int i = 0; i < MBF_EM12IFRM_MAXRAWPIXELS; i++) {
 			data->ssraw[i] = 0;
 			data->ssp[i] = 0;
 		}
 		data->pixel_size = 0.0;
 		data->pixels_ss = 0;
-		for (i = 0; i < MBF_EM12IFRM_MAXPIXELS; i++) {
+		for (int i = 0; i < MBF_EM12IFRM_MAXPIXELS; i++) {
 			data->ss[i] = 0.0;
 			data->ssalongtrack[i] = 0.0;
 		}
@@ -568,7 +567,6 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double ptime_d;
 	double plon, plat, pspeed;
 	double *pixel_size, *swath_width;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -664,10 +662,10 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->em1000_td = data->em1000_td;
 		store->em1000_tx = data->em1000_tx;
 		store->em1000_ty = data->em1000_ty;
-		for (i = 0; i < 128; i++)
+		for (int i = 0; i < 128; i++)
 			store->spare_parameter[i] = data->spare_parameter[i];
 		store->survey_line = data->survey_line;
-		for (i = 0; i < 80; i++)
+		for (int i = 0; i < 80; i++)
 			store->comment[i] = data->comment[i];
 
 		/* position (position datagrams) */
@@ -698,7 +696,7 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->svp_second = data->svp_second;
 		store->svp_centisecond = data->svp_centisecond;
 		store->svp_num = data->svp_num;
-		for (i = 0; i < 100; i++) {
+		for (int i = 0; i < 100; i++) {
 			store->svp_depth[i] = data->svp_depth[i];
 			store->svp_vel[i] = data->svp_vel[i];
 		}
@@ -742,7 +740,7 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			ping->sound_vel = data->sound_vel;
 			ping->pixels_ssraw = 0;
 			ping->ss_mode = 0;
-			for (i = 0; i < ping->beams_bath; i++) {
+			for (int i = 0; i < ping->beams_bath; i++) {
 				if (data->bath[i] > 0) {
 					ping->bath[i] = data->bath[i];
 					ping->beamflag[i] = MB_FLAG_NONE;
@@ -769,13 +767,13 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (*save_ss == MB_NO) {
 				ping->pixels_ssraw = data->pixels_ssraw;
 				ping->ss_mode = data->ss_mode;
-				for (i = 0; i < ping->beams_bath; i++) {
+				for (int i = 0; i < ping->beams_bath; i++) {
 					ping->beam_frequency[i] = data->beam_frequency[i];
 					ping->beam_samples[i] = data->beam_samples[i];
 					ping->beam_center_sample[i] = data->beam_center_sample[i];
 					ping->beam_start_sample[i] = data->beam_start_sample[i];
 				}
-				for (i = 0; i < ping->pixels_ssraw; i++) {
+				for (int i = 0; i < ping->pixels_ssraw; i++) {
 					ping->ssraw[i] = data->ssraw[i];
 					ping->ssp[i] = data->ssp[i];
 				}
@@ -808,7 +806,6 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *data_ptr;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -854,10 +851,10 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->em1000_td = store->em1000_td;
 		data->em1000_tx = store->em1000_tx;
 		data->em1000_ty = store->em1000_ty;
-		for (i = 0; i < 128; i++)
+		for (int i = 0; i < 128; i++)
 			data->spare_parameter[i] = store->spare_parameter[i];
 		data->survey_line = store->survey_line;
-		for (i = 0; i < 80; i++)
+		for (int i = 0; i < 80; i++)
 			data->comment[i] = store->comment[i];
 
 		/* position (position datagrams) */
@@ -888,7 +885,7 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->svp_second = store->svp_second;
 		data->svp_centisecond = store->svp_centisecond;
 		data->svp_num = store->svp_num;
-		for (i = 0; i < 100; i++) {
+		for (int i = 0; i < 100; i++) {
 			data->svp_depth[i] = store->svp_depth[i];
 			data->svp_vel[i] = store->svp_vel[i];
 		}
@@ -924,7 +921,7 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			data->sound_vel = ping->sound_vel;
 			data->pixels_ssraw = ping->pixels_ssraw;
 			data->ss_mode = ping->ss_mode;
-			for (i = 0; i < data->beams_bath; i++) {
+			for (int i = 0; i < data->beams_bath; i++) {
 				if (ping->beamflag[i] == MB_FLAG_NULL)
 					data->bath[i] = 0;
 				else if (!mb_beam_ok(ping->beamflag[i]))
@@ -942,7 +939,7 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				data->beam_center_sample[i] = ping->beam_center_sample[i];
 				data->beam_start_sample[i] = ping->beam_start_sample[i];
 			}
-			for (i = 0; i < data->pixels_ssraw; i++) {
+			for (int i = 0; i < data->pixels_ssraw; i++) {
 				data->ssraw[i] = ping->ssraw[i];
 				data->ssp[i] = ping->ssp[i];
 			}
@@ -1003,7 +1000,6 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char NorS, EorW;
 	int latdeg, londeg;
 	double latmin, lonmin;
-	int i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1155,7 +1151,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* get bathymetry */
 			data->beams_bath = MBF_EM12IFRM_MAXBEAMS;
-			for (i = 0; i < MBF_EM12IFRM_MAXBEAMS; i++) {
+			for (int i = 0; i < MBF_EM12IFRM_MAXBEAMS; i++) {
 				mb_get_binary_short(MB_NO, &line[shift], &short_value);
 				data->bath[i] = (int)short_value;
 				shift += 2;
@@ -1184,14 +1180,14 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* initialize sidescan if none saved */
 			else if (*save_ss == MB_NO) {
 				data->pixels_ssraw = 0;
-				for (i = 0; i < MBF_EM12IFRM_MAXBEAMS; i++) {
+				for (int i = 0; i < MBF_EM12IFRM_MAXBEAMS; i++) {
 					beamlist[i] = 0;
 					data->beam_frequency[i] = 0;
 					data->beam_samples[i] = 0;
 					data->beam_start_sample[i] = 0;
 					data->beam_start_sample[i] = 0;
 				}
-				for (i = 0; i < MBF_EM12IFRM_MAXRAWPIXELS; i++) {
+				for (int i = 0; i < MBF_EM12IFRM_MAXRAWPIXELS; i++) {
 					data->ssraw[i] = 0;
 					data->ssp[i] = 0;
 				}
@@ -1267,7 +1263,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 				shift += 1;
 
 				/* loop over all beams */
-				for (i = 0; i < *ss_num_beams; i++) {
+				for (int i = 0; i < *ss_num_beams; i++) {
 					if ((read_status = fread(line, 1, MBF_EM12IFRM_SSBEAMHEADER_SIZE, mb_io_ptr->mbfp2)) !=
 					    MBF_EM12IFRM_SSBEAMHEADER_SIZE) {
 						status = MB_FAILURE;
@@ -1287,7 +1283,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 				}
 
 				/* load up the sidescan for each beam */
-				for (i = 0; i < *ss_num_beams; i++) {
+				for (int i = 0; i < *ss_num_beams; i++) {
 					if ((read_status = fread(line, 1, data->beam_samples[beamlist[i]], mb_io_ptr->mbfp2)) !=
 					    data->beam_samples[beamlist[i]]) {
 						status = MB_FAILURE;
@@ -1302,7 +1298,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 					/* get the sidescan */
 					data->beam_start_sample[beamlist[i]] = data->pixels_ssraw;
 					shift = 0;
-					for (j = 0; j < data->beam_samples[beamlist[i]]; j++) {
+					for (int j = 0; j < data->beam_samples[beamlist[i]]; j++) {
 						data->ssraw[data->pixels_ssraw] = (mb_s_char)line[shift];
 						shift++;
 						data->pixels_ssraw++;
@@ -1443,7 +1439,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
 		fprintf(stderr, "dbg5       bath_mode:        %d\n", data->bath_mode);
 		fprintf(stderr, "dbg5       beam bath xtrack ltrack tt amp qual heave\n");
-		for (i = 0; i < data->beams_bath; i++)
+		for (int i = 0; i < data->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam:%d  bath:%d  xtrck:%d  ltrck:%d tt:%d  amp:%d  qual:%d  heave:%d\n", i,
 			        data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i], data->tt[i], data->amp[i],
 			        data->quality[i], data->heave[i]);
@@ -1458,14 +1454,14 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg5       ss_mode:          %d\n", data->ss_mode);
 		fprintf(stderr, "dbg5       ss_num_beams:     %d\n", *ss_num_beams);
 		fprintf(stderr, "dbg5       beam frequency samples center\n");
-		for (i = 0; i < *ss_num_beams; i++)
+		for (int i = 0; i < *ss_num_beams; i++)
 			fprintf(stderr, "dbg5       beam:%d  frequency:%d  samples:%d  center:%d  start:%d\n", beamlist[i],
 			        data->beam_frequency[beamlist[i]], data->beam_samples[beamlist[i]], data->beam_center_sample[beamlist[i]],
 			        data->beam_start_sample[beamlist[i]]);
-		k = 0;
-		for (i = 0; i < *ss_num_beams; i++) {
+		int k = 0;
+		for (int i = 0; i < *ss_num_beams; i++) {
 			beam_ss = &data->ssraw[data->beam_start_sample[beamlist[i]]];
-			for (j = 0; j < data->beam_samples[beamlist[i]]; j++) {
+			for (int j = 0; j < data->beam_samples[beamlist[i]]; j++) {
 				fprintf(stderr, "dbg5       beam:%d pixel:%d  amp:%d\n", beamlist[i], k, beam_ss[j]);
 				k++;
 			}
@@ -1504,7 +1500,6 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	short short_value;
 	char char_value;
 	int len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1551,7 +1546,7 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		fprintf(stderr, "dbg5       ping_heave:       %d\n", data->ping_heave);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
 		fprintf(stderr, "dbg5       beam bath xtrack ltrack tt amp qual heave\n");
-		for (i = 0; i < data->beams_bath; i++)
+		for (int i = 0; i < data->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam:%d  bath:%d  xtrck:%d  ltrck:%d tt:%d  amp:%d  qual:%d  heave:%d\n", i,
 			        data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i], data->tt[i], data->amp[i],
 			        data->quality[i], data->heave[i]);
@@ -1608,7 +1603,7 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 
 		/* set bathymetry */
 		data->beams_bath = MBF_EM12IFRM_MAXBEAMS;
-		for (i = 0; i < data->beams_bath; i++) {
+		for (int i = 0; i < data->beams_bath; i++) {
 			short_value = (short)data->bath[i];
 			mb_put_binary_short(MB_NO, short_value, &line[shift]);
 			shift += 2;
@@ -1652,7 +1647,7 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		shift += 10;
 		strncpy(&line[shift], data->comment, len);
 		shift += len;
-		for (i = shift; i < MBF_EM12IFRM_RECORD_SIZE - 6; i++)
+		for (int i = shift; i < MBF_EM12IFRM_RECORD_SIZE - 6; i++)
 			line[i] = '\0';
 		shift = MBF_EM12IFRM_RECORD_SIZE - 6;
 		line[shift] = (char)0;

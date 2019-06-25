@@ -528,7 +528,6 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int done;
 	size_t read_len;
 	int skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -570,7 +569,7 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		skip = 0;
 		while (status == MB_SUCCESS && swpls_chk_header(verbose, mbio_ptr, buffer, recordid, size, error) != MB_SUCCESS) {
 			/* get next byte */
-			for (i = 0; i < SWPLS_SIZE_BLOCKHEADER - 1; i++) {
+			for (int i = 0; i < SWPLS_SIZE_BLOCKHEADER - 1; i++) {
 				buffer[i] = buffer[i + 1];
 			}
 			read_len = (size_t)1;

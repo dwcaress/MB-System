@@ -324,7 +324,6 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 	char *function_name = "mbr_zero_hsldeoih";
 	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -367,7 +366,7 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 		data->depth_center = 0.0;
 		data->depth_scale = 0.0;
 		data->spare = 0;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			data->distance[i] = 0;
 			data->depth[i] = 0;
 		}
@@ -379,9 +378,9 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 		data->roll = 0.0;
 		data->time_center = 0.0;
 		data->time_scale = 0.0;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			data->time[i] = 0;
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			data->gyro[i] = 0.0;
 
 		/* amplitude data (ERGNAMPL) */
@@ -405,11 +404,11 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 		data->amplitude_center = 0;
 		data->echo_duration_center = 0;
 		data->echo_scale_center = 0;
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			data->gain[i] = 0;
 			data->echo_scale[i] = 0;
 		}
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			data->amplitude[i] = 0;
 			data->echo_duration[i] = 0;
 		}
@@ -428,7 +427,7 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 
 			/* water velocity profile */
 			data->num_vel = 0;
-			for (i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+			for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
 				data->depth[i] = 0;
 				data->velocity[i] = 0;
 			}
@@ -444,7 +443,7 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 
 		/* processed backscatter */
 		data->back_scale = 0.0;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			data->back[i] = 0;
 	}
 
@@ -470,7 +469,6 @@ int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsldeoih_struct *data;
 	struct mbsys_hsds_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -522,7 +520,7 @@ int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->depth_center = data->depth_center;
 		store->depth_scale = data->depth_scale;
 		store->spare = data->spare;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->distance[i] = data->distance[i];
 			store->depth[i] = data->depth[i];
 		}
@@ -534,9 +532,9 @@ int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->roll = data->roll;
 		store->time_center = data->time_center;
 		store->time_scale = data->time_scale;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 			store->time[i] = data->time[i];
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			store->gyro[i] = data->gyro[i];
 
 		/* amplitude data (ERGNAMPL) */
@@ -560,11 +558,11 @@ int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->amplitude_center = data->amplitude_center;
 		store->echo_duration_center = data->echo_duration_center;
 		store->echo_scale_center = data->echo_scale_center;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->amplitude[i] = data->amplitude[i];
 			store->echo_duration[i] = data->echo_duration[i];
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			store->gain[i] = data->gain[i];
 			store->echo_scale[i] = data->echo_scale[i];
 		}
@@ -577,7 +575,7 @@ int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* water velocity profile (HS_ERGNCTDS) */
 		store->num_vel = data->num_vel;
-		for (i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
 			store->vdepth[i] = data->vdepth[i];
 			store->velocity[i] = data->velocity[i];
 		}
@@ -592,7 +590,7 @@ int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* processed backscatter */
 		store->back_scale = data->back_scale;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			store->back[i] = data->back[i];
 		}
 	}
@@ -616,7 +614,6 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_hsldeoih_struct *data;
 	char *data_ptr;
 	struct mbsys_hsds_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -664,7 +661,7 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->depth_center = store->depth_center;
 		data->depth_scale = store->depth_scale;
 		data->spare = store->spare;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			data->distance[i] = store->distance[i];
 			data->depth[i] = store->depth[i];
 		}
@@ -676,9 +673,9 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->roll = store->roll;
 		data->time_center = store->time_center;
 		data->time_scale = store->time_scale;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 			data->time[i] = store->time[i];
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			data->gyro[i] = store->gyro[i];
 
 		/* amplitude data (ERGNAMPL) */
@@ -702,11 +699,11 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->amplitude_center = store->amplitude_center;
 		data->echo_duration_center = store->echo_duration_center;
 		data->echo_scale_center = store->echo_scale_center;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			data->amplitude[i] = store->amplitude[i];
 			data->echo_duration[i] = store->echo_duration[i];
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			data->gain[i] = store->gain[i];
 			data->echo_scale[i] = store->echo_scale[i];
 		}
@@ -719,7 +716,7 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* water velocity profile (HS_ERGNCTDS) */
 		data->num_vel = store->num_vel;
-		for (i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
 			data->vdepth[i] = store->vdepth[i];
 			data->velocity[i] = store->velocity[i];
 		}
@@ -734,7 +731,7 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* processed backscatter */
 		data->back_scale = store->back_scale;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			data->back[i] = store->back[i];
 		}
 	}
@@ -801,7 +798,7 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
 		label_test = mb_swap_int(label_test);
 #endif
 		while (label != label_test && status == MB_SUCCESS) {
-			for (i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 				labelchar[i] = labelchar[i + 1];
 			if (fread(&labelchar[3], 1, 1, mbfp) != 1) {
 				status = MB_FAILURE;
@@ -1144,7 +1141,6 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_velocity_profile_struct read_data;
 	int read_size;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1178,7 +1174,7 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 		read_data.minute = mb_swap_short(read_data.minute);
 		read_data.second = mb_swap_short(read_data.second);
 		data->num_vel = mb_swap_short(read_data.num_vel);
-		for (i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
 			mb_swap_float(&read_data.vdepth[i]);
 			mb_swap_float(&read_data.velocity[i]);
 		}
@@ -1196,7 +1192,7 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 		data->minute = read_data.minute;
 		data->second = read_data.second;
 		data->num_vel = read_data.num_vel;
-		for (i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
 			data->vdepth[i] = read_data.vdepth[i];
 			data->velocity[i] = read_data.velocity[i];
 		}
@@ -1221,7 +1217,7 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 		fprintf(stderr, "dbg5       second:           %d\n", data->second);
 		fprintf(stderr, "dbg5       num_vel:          %d\n", data->num_vel);
 		fprintf(stderr, "dbg5       water depths and velocities:\n");
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			fprintf(stderr, "dbg5         %d  %f  %f\n", i, data->vdepth[i], data->velocity[i]);
 	}
 
@@ -1347,7 +1343,6 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 	int need_back, gain_ok;
 	int gain_inner, gain_outer;
 	double gain_beam, factor;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1395,7 +1390,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		mb_swap_float(&read_data.depth_center);
 		mb_swap_float(&read_data.depth_scale);
 		read_data.spare = mb_swap_short(read_data.spare);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			read_data.distance[i] = mb_swap_short(read_data.distance[i]);
 			read_data.depth[i] = mb_swap_short(read_data.depth[i]);
 		}
@@ -1407,9 +1402,9 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		mb_swap_float(&read_data.roll);
 		mb_swap_float(&read_data.time_center);
 		mb_swap_float(&read_data.time_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			read_data.time[i] = mb_swap_short(read_data.time[i]);
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			mb_swap_float(&read_data.gyro[i]);
 
 		/* amplitude data */
@@ -1432,18 +1427,18 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		read_data.amplitude_center = mb_swap_short(read_data.amplitude_center);
 		read_data.echo_duration_center = mb_swap_short(read_data.echo_duration_center);
 		read_data.echo_scale_center = mb_swap_short(read_data.echo_scale_center);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			read_data.amplitude[i] = mb_swap_short(read_data.amplitude[i]);
 			read_data.echo_duration[i] = mb_swap_short(read_data.echo_duration[i]);
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			read_data.gain[i] = mb_swap_short(read_data.gain[i]);
 			read_data.echo_scale[i] = mb_swap_short(read_data.echo_scale[i]);
 		}
 
 		/* processed backscatter data */
 		mb_swap_float(&read_data.back_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			read_data.back[i] = mb_swap_short(read_data.back[i]);
 	}
 #endif
@@ -1474,7 +1469,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		data->depth_center = read_data.depth_center;
 		data->depth_scale = read_data.depth_scale;
 		data->spare = read_data.spare;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			data->distance[i] = read_data.distance[i];
 			data->depth[i] = read_data.depth[i];
 		}
@@ -1487,9 +1482,9 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		data->time_center = read_data.time_center;
 		data->time_scale = read_data.time_scale;
 		data->mode[0] = read_data.mode[0];
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			data->time[i] = read_data.time[i];
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			data->gyro[i] = read_data.gyro[i];
 
 		/* amplitude data */
@@ -1512,18 +1507,18 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		data->amplitude_center = read_data.amplitude_center;
 		data->echo_duration_center = read_data.echo_duration_center;
 		data->echo_scale_center = read_data.echo_scale_center;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			data->amplitude[i] = read_data.amplitude[i];
 			data->echo_duration[i] = read_data.echo_duration[i];
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			data->gain[i] = read_data.gain[i];
 			data->echo_scale[i] = read_data.echo_scale[i];
 		}
 
 		/* processed backscatter data */
 		data->back_scale = read_data.back_scale;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			data->back[i] = read_data.back[i];
 	}
 
@@ -1539,7 +1534,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 
 		/* see if gain values are messed up */
 		gain_ok = MB_NO;
-		i = 0;
+		int i = 0;
 		while (i < 8 && gain_ok == MB_NO) {
 			if (data->gain[i] != data->gain[0])
 				gain_ok = MB_YES;
@@ -1552,7 +1547,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		if (gain_ok == MB_NO) {
 			gain_outer = data->gain[0];
 			gain_inner = data->gain[8];
-			for (i = 0; i < 16; i++) {
+			for (int i = 0; i < 16; i++) {
 				if (i < 4 || i > 11)
 					data->gain[i] = gain_outer;
 				else
@@ -1573,7 +1568,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		/* get beam amplitude values if needed */
 		if (need_back == MB_YES) {
 			data->back_scale = 1.0;
-			for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+			for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 				gain_beam = 6 * data->gain[which_gain[i]];
 				factor = 100. * pow(10., (-0.05 * gain_beam));
 				data->back[i] = factor * data->amplitude[i];
@@ -1604,7 +1599,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
 		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
 		fprintf(stderr, "dbg5       distances and depths:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
 		fprintf(stderr, "dbg5       course_ground:    %f\n", data->course_ground);
 		fprintf(stderr, "dbg5       speed_ground:     %f\n", data->speed_ground);
@@ -1614,10 +1609,10 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		fprintf(stderr, "dbg5       time_center:      %f\n", data->time_center);
 		fprintf(stderr, "dbg5       time_scale:       %f\n", data->time_scale);
 		fprintf(stderr, "dbg5       travel times:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->time[i]);
 		fprintf(stderr, "dbg5       gyro headings:\n");
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			fprintf(stderr, "dbg5         %d  %f\n", i, data->gyro[i]);
 		fprintf(stderr, "dbg5       mode:             %c\n", data->mode[0]);
 		fprintf(stderr, "dbg5       trans_strbd:      %d\n", data->trans_strbd);
@@ -1641,13 +1636,13 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		fprintf(stderr, "dbg5       echo_dur_center:  %d\n", data->echo_duration_center);
 		fprintf(stderr, "dbg5       echo_scal_center: %d\n", data->echo_scale_center);
 		fprintf(stderr, "dbg5       amplitudes and echo durations:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->amplitude[i], data->echo_duration[i]);
 		fprintf(stderr, "dbg5       gains and echo scales:\n");
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->gain[i], data->echo_scale[i]);
 		fprintf(stderr, "dbg5       back_scale:       %f\n", data->back_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->back[i]);
 	}
 
@@ -1671,7 +1666,6 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 	int need_back, gain_ok;
 	int gain_inner, gain_outer;
 	double gain_beam, factor;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1719,7 +1713,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		mb_swap_float(&read_data.depth_center);
 		mb_swap_float(&read_data.depth_scale);
 		read_data.spare = mb_swap_short(read_data.spare);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			read_data.distance[i] = mb_swap_short(read_data.distance[i]);
 			read_data.depth[i] = mb_swap_short(read_data.depth[i]);
 		}
@@ -1731,9 +1725,9 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		mb_swap_float(&read_data.roll);
 		mb_swap_float(&read_data.time_center);
 		mb_swap_float(&read_data.time_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			read_data.time[i] = mb_swap_short(read_data.time[i]);
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			mb_swap_float(&read_data.gyro[i]);
 
 		/* amplitude data */
@@ -1756,18 +1750,18 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		read_data.amplitude_center = mb_swap_short(read_data.amplitude_center);
 		read_data.echo_duration_center = mb_swap_short(read_data.echo_duration_center);
 		read_data.echo_scale_center = mb_swap_short(read_data.echo_scale_center);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			read_data.amplitude[i] = mb_swap_short(read_data.amplitude[i]);
 			read_data.echo_duration[i] = mb_swap_short(read_data.echo_duration[i]);
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			read_data.gain[i] = mb_swap_short(read_data.gain[i]);
 			read_data.echo_scale[i] = mb_swap_short(read_data.echo_scale[i]);
 		}
 
 		/* processed backscatter data */
 		mb_swap_float(&read_data.back_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			read_data.back[i] = mb_swap_short(read_data.back[i]);
 	}
 #endif
@@ -1798,7 +1792,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		data->depth_center = read_data.depth_center;
 		data->depth_scale = read_data.depth_scale;
 		data->spare = read_data.spare;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			data->distance[i] = read_data.distance[i];
 			data->depth[i] = read_data.depth[i];
 		}
@@ -1811,9 +1805,9 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		data->time_center = read_data.time_center;
 		data->time_scale = read_data.time_scale;
 		data->mode[0] = read_data.mode[0];
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			data->time[i] = read_data.time[i];
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			data->gyro[i] = read_data.gyro[i];
 
 		/* amplitude data */
@@ -1836,18 +1830,18 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		data->amplitude_center = read_data.amplitude_center;
 		data->echo_duration_center = read_data.echo_duration_center;
 		data->echo_scale_center = read_data.echo_scale_center;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			data->amplitude[i] = read_data.amplitude[i];
 			data->echo_duration[i] = read_data.echo_duration[i];
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			data->gain[i] = read_data.gain[i];
 			data->echo_scale[i] = read_data.echo_scale[i];
 		}
 
 		/* processed backscatter data */
 		data->back_scale = read_data.back_scale;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			data->back[i] = read_data.back[i];
 	}
 
@@ -1857,7 +1851,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 
 		/* see if gain values are messed up */
 		gain_ok = MB_NO;
-		i = 0;
+		int i = 0;
 		while (i < 8 && gain_ok == MB_NO) {
 			if (data->gain[i] != data->gain[0])
 				gain_ok = MB_YES;
@@ -1870,7 +1864,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		if (gain_ok == MB_NO) {
 			gain_outer = data->gain[0];
 			gain_inner = data->gain[8];
-			for (i = 0; i < 16; i++) {
+			for (int i = 0; i < 16; i++) {
 				if (i < 4 || i > 11)
 					data->gain[i] = gain_outer;
 				else
@@ -1891,7 +1885,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		/* get beam amplitude values if needed */
 		if (need_back == MB_YES) {
 			data->back_scale = 1.0;
-			for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+			for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 				gain_beam = 6 * data->gain[which_gain[i]];
 				factor = 100. * pow(10., (-0.05 * gain_beam));
 				data->back[i] = factor * data->amplitude[i];
@@ -1922,7 +1916,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
 		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
 		fprintf(stderr, "dbg5       distances and depths:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
 		fprintf(stderr, "dbg5       course_ground:    %f\n", data->course_ground);
 		fprintf(stderr, "dbg5       speed_ground:     %f\n", data->speed_ground);
@@ -1932,10 +1926,10 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		fprintf(stderr, "dbg5       time_center:      %f\n", data->depth_center);
 		fprintf(stderr, "dbg5       time_scale:       %f\n", data->time_scale);
 		fprintf(stderr, "dbg5       travel times:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->time[i]);
 		fprintf(stderr, "dbg5       gyro headings:\n");
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			fprintf(stderr, "dbg5         %d  %f\n", i, data->gyro[i]);
 		fprintf(stderr, "dbg5       mode:             %c\n", data->mode[0]);
 		fprintf(stderr, "dbg5       trans_strbd:      %d\n", data->trans_strbd);
@@ -1959,13 +1953,13 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		fprintf(stderr, "dbg5       echo_dur_center:  %d\n", data->echo_duration_center);
 		fprintf(stderr, "dbg5       echo_scal_center: %d\n", data->echo_scale_center);
 		fprintf(stderr, "dbg5       amplitudes and echo durations:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->amplitude[i], data->echo_duration[i]);
 		fprintf(stderr, "dbg5       gains and echo scales:\n");
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->gain[i], data->echo_scale[i]);
 		fprintf(stderr, "dbg5       back_scale:       %f\n", data->back_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->back[i]);
 	}
 
@@ -2363,7 +2357,6 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 	struct mbf_hsldeoih_velocity_profile_struct write_data;
 	int write_size;
 	short int write_size_short;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2387,7 +2380,7 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 		fprintf(stderr, "dbg5       second:           %d\n", data->second);
 		fprintf(stderr, "dbg5       num_vel:          %d\n", data->num_vel);
 		fprintf(stderr, "dbg5       water depths and velocities:\n");
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			fprintf(stderr, "dbg5         %d  %f  %f\n", i, data->vdepth[i], data->velocity[i]);
 	}
 
@@ -2402,7 +2395,7 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 		write_data.minute = data->minute;
 		write_data.second = data->second;
 		write_data.num_vel = data->num_vel;
-		for (i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
 			write_data.vdepth[i] = data->vdepth[i];
 			write_data.velocity[i] = data->velocity[i];
 		}
@@ -2420,7 +2413,7 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 		write_data.minute = mb_swap_short(write_data.minute);
 		write_data.second = mb_swap_short(write_data.second);
 		data->num_vel = mb_swap_short(write_data.num_vel);
-		for (i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
 			mb_swap_float(&write_data.vdepth[i]);
 			mb_swap_float(&write_data.velocity[i]);
 		}
@@ -2584,7 +2577,6 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 	struct mbf_hsldeoih_survey_struct write_data;
 	int write_size;
 	short int write_size_short;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2618,7 +2610,7 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
 		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
 		fprintf(stderr, "dbg5       distances and depths:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
 		fprintf(stderr, "dbg5       course_ground:    %f\n", data->course_ground);
 		fprintf(stderr, "dbg5       speed_ground:     %f\n", data->speed_ground);
@@ -2628,10 +2620,10 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		fprintf(stderr, "dbg5       time_center:      %f\n", data->depth_center);
 		fprintf(stderr, "dbg5       time_scale:       %f\n", data->time_scale);
 		fprintf(stderr, "dbg5       travel times:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->time[i]);
 		fprintf(stderr, "dbg5       gyro headings:\n");
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			fprintf(stderr, "dbg5         %d  %f\n", i, data->gyro[i]);
 		fprintf(stderr, "dbg5       mode:             %c\n", data->mode[0]);
 		fprintf(stderr, "dbg5       trans_strbd:      %d\n", data->trans_strbd);
@@ -2655,13 +2647,13 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		fprintf(stderr, "dbg5       echo_dur_center:  %d\n", data->echo_duration_center);
 		fprintf(stderr, "dbg5       echo_scal_center: %d\n", data->echo_scale_center);
 		fprintf(stderr, "dbg5       amplitudes and echo durations:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->amplitude[i], data->echo_duration[i]);
 		fprintf(stderr, "dbg5       gains and echo scales:\n");
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->gain[i], data->echo_scale[i]);
 		fprintf(stderr, "dbg5       back_scale:       %f\n", data->back_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->back[i]);
 	}
 
@@ -2691,7 +2683,7 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		write_data.depth_center = data->depth_center;
 		write_data.depth_scale = data->depth_scale;
 		write_data.spare = data->spare;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			write_data.distance[i] = data->distance[i];
 			write_data.depth[i] = data->depth[i];
 		}
@@ -2704,9 +2696,9 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		write_data.time_center = data->time_center;
 		write_data.time_scale = data->time_scale;
 		write_data.mode[0] = data->mode[0];
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			write_data.time[i] = data->time[i];
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			write_data.gyro[i] = data->gyro[i];
 
 		/* amplitude data */
@@ -2729,18 +2721,18 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		write_data.amplitude_center = data->amplitude_center;
 		write_data.echo_duration_center = data->echo_duration_center;
 		write_data.echo_scale_center = data->echo_scale_center;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			write_data.amplitude[i] = data->amplitude[i];
 			write_data.echo_duration[i] = data->echo_duration[i];
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			write_data.gain[i] = data->gain[i];
 			write_data.echo_scale[i] = data->echo_scale[i];
 		}
 
 		/* processed backscatter data */
 		write_data.back_scale = data->back_scale;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			write_data.back[i] = data->back[i];
 	}
 
@@ -2770,7 +2762,7 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		mb_swap_float(&write_data.depth_center);
 		mb_swap_float(&write_data.depth_scale);
 		write_data.spare = mb_swap_short(write_data.spare);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			write_data.distance[i] = mb_swap_short(write_data.distance[i]);
 			write_data.depth[i] = mb_swap_short(write_data.depth[i]);
 		}
@@ -2782,9 +2774,9 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		mb_swap_float(&write_data.roll);
 		mb_swap_float(&write_data.time_center);
 		mb_swap_float(&write_data.time_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			write_data.time[i] = mb_swap_short(write_data.time[i]);
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			mb_swap_float(&write_data.gyro[i]);
 
 		/* amplitude data */
@@ -2807,18 +2799,18 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		write_data.amplitude_center = mb_swap_short(write_data.amplitude_center);
 		write_data.echo_duration_center = mb_swap_short(write_data.echo_duration_center);
 		write_data.echo_scale_center = mb_swap_short(write_data.echo_scale_center);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			write_data.amplitude[i] = mb_swap_short(write_data.amplitude[i]);
 			write_data.echo_duration[i] = mb_swap_short(write_data.echo_duration[i]);
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			write_data.gain[i] = mb_swap_short(write_data.gain[i]);
 			write_data.echo_scale[i] = mb_swap_short(write_data.echo_scale[i]);
 		}
 
 		/* processed backscatter data */
 		mb_swap_float(&write_data.back_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			write_data.back[i] = mb_swap_short(write_data.back[i]);
 	}
 #endif
@@ -2864,7 +2856,6 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 	struct mbf_hsldeoih_calibrate_struct write_data;
 	int write_size;
 	short int write_size_short;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2898,7 +2889,7 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		fprintf(stderr, "dbg5       depth_scale:      %f\n", data->depth_scale);
 		fprintf(stderr, "dbg5       spare:            %d\n", data->spare);
 		fprintf(stderr, "dbg5       distances and depths:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->distance[i], data->depth[i]);
 		fprintf(stderr, "dbg5       course_ground:    %f\n", data->course_ground);
 		fprintf(stderr, "dbg5       speed_ground:     %f\n", data->speed_ground);
@@ -2908,10 +2899,10 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		fprintf(stderr, "dbg5       time_center:      %f\n", data->time_center);
 		fprintf(stderr, "dbg5       time_scale:       %f\n", data->time_scale);
 		fprintf(stderr, "dbg5       travel times:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->time[i]);
 		fprintf(stderr, "dbg5       gyro headings:\n");
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			fprintf(stderr, "dbg5         %d  %f\n", i, data->gyro[i]);
 		fprintf(stderr, "dbg5       mode:             %c\n", data->mode[0]);
 		fprintf(stderr, "dbg5       trans_strbd:      %d\n", data->trans_strbd);
@@ -2935,13 +2926,13 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		fprintf(stderr, "dbg5       echo_dur_center:  %d\n", data->echo_duration_center);
 		fprintf(stderr, "dbg5       echo_scal_center: %d\n", data->echo_scale_center);
 		fprintf(stderr, "dbg5       amplitudes and echo durations:\n");
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->amplitude[i], data->echo_duration[i]);
 		fprintf(stderr, "dbg5       gains and echo scales:\n");
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->gain[i], data->echo_scale[i]);
 		fprintf(stderr, "dbg5       back_scale:       %f\n", data->back_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->back[i]);
 	}
 
@@ -2971,7 +2962,7 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		write_data.depth_center = data->depth_center;
 		write_data.depth_scale = data->depth_scale;
 		write_data.spare = data->spare;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			write_data.distance[i] = data->distance[i];
 			write_data.depth[i] = data->depth[i];
 		}
@@ -2984,9 +2975,9 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		write_data.time_center = data->time_center;
 		write_data.time_scale = data->time_scale;
 		write_data.mode[0] = data->mode[0];
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			write_data.time[i] = data->time[i];
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			write_data.gyro[i] = data->gyro[i];
 
 		/* amplitude data */
@@ -3009,18 +3000,18 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		write_data.amplitude_center = data->amplitude_center;
 		write_data.echo_duration_center = data->echo_duration_center;
 		write_data.echo_scale_center = data->echo_scale_center;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			write_data.amplitude[i] = data->amplitude[i];
 			write_data.echo_duration[i] = data->echo_duration[i];
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			write_data.gain[i] = data->gain[i];
 			write_data.echo_scale[i] = data->echo_scale[i];
 		}
 
 		/* processed backscatter data */
 		write_data.back_scale = data->back_scale;
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			write_data.back[i] = data->back[i];
 	}
 
@@ -3050,7 +3041,7 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		mb_swap_float(&write_data.depth_center);
 		mb_swap_float(&write_data.depth_scale);
 		write_data.spare = mb_swap_short(write_data.spare);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			write_data.distance[i] = mb_swap_short(write_data.distance[i]);
 			write_data.depth[i] = mb_swap_short(write_data.depth[i]);
 		}
@@ -3062,9 +3053,9 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		mb_swap_float(&write_data.roll);
 		mb_swap_float(&write_data.time_center);
 		mb_swap_float(&write_data.time_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			write_data.time[i] = mb_swap_short(write_data.time[i]);
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			mb_swap_float(&write_data.gyro[i]);
 
 		/* amplitude data */
@@ -3087,18 +3078,18 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		write_data.amplitude_center = mb_swap_short(write_data.amplitude_center);
 		write_data.echo_duration_center = mb_swap_short(write_data.echo_duration_center);
 		write_data.echo_scale_center = mb_swap_short(write_data.echo_scale_center);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
 			write_data.amplitude[i] = mb_swap_short(write_data.amplitude[i]);
 			write_data.echo_duration[i] = mb_swap_short(write_data.echo_duration[i]);
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			write_data.gain[i] = mb_swap_short(write_data.gain[i]);
 			write_data.echo_scale[i] = mb_swap_short(write_data.echo_scale[i]);
 		}
 
 		/* processed backscatter data */
 		mb_swap_float(&write_data.back_scale);
-		for (i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
 			write_data.back[i] = mb_swap_short(write_data.back[i]);
 	}
 #endif

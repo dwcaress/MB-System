@@ -299,7 +299,6 @@ int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_sb_struct *store;
 	char *datacomment;
 	int id;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -336,7 +335,7 @@ int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < MBSYS_SB_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 			data->dist[i] = mb_swap_short(data->dist[i]);
 			data->deph[i] = mb_swap_short(data->deph[i]);
 		}
@@ -395,7 +394,7 @@ int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* depths and distances */
 			/* switch order of data as it is read into the global arrays */
 			id = MBSYS_SB_BEAMS - 1;
-			for (i = 0; i < MBSYS_SB_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 				store->dist[id - i] = data->dist[i];
 				store->deph[id - i] = data->deph[i];
 			}
@@ -435,7 +434,6 @@ int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_sb_struct *store;
 	char *datacomment;
 	int id;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -481,7 +479,7 @@ int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* switch order of data as it is read
 		    into the output arrays */
 		id = MBSYS_SB_BEAMS - 1;
-		for (i = 0; i < MBSYS_SB_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 			data->dist[i] = store->dist[id - i];
 			data->deph[i] = store->deph[id - i];
 		}
@@ -511,7 +509,7 @@ int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
 	if (dataplus->kind == MB_DATA_DATA || dataplus->kind == MB_DATA_COMMENT) {
-		for (i = 0; i < MBSYS_SB_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 			data->dist[i] = mb_swap_short(data->dist[i]);
 			data->deph[i] = mb_swap_short(data->deph[i]);
 		}

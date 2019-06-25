@@ -337,7 +337,6 @@ int mbr_zero_dsl120pf(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_dsl120pf";
 	int status = MB_SUCCESS;
 	struct mbf_dsl120pf_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -361,9 +360,9 @@ int mbr_zero_dsl120pf(int verbose, char *data_ptr, int *error) {
 		data->p_flags = 0;
 		data->num_data_types = 0;
 		data->ping = 0;
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			data->sonar_cmd[i] = '\0';
-		for (i = 0; i < 24; i++)
+		for (int i = 0; i < 24; i++)
 			data->time_stamp[i] = '\0';
 		data->nav_x = 0.0;
 		data->nav_y = 0.0;
@@ -383,7 +382,7 @@ int mbr_zero_dsl120pf(int verbose, char *data_ptr, int *error) {
 		data->tv_sec = 0;
 		data->tv_usec = 0;
 		data->digitalinterface = 0;
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			data->reserved[i] = 0;
 		data->bat_type = DSL_BATH;
 		data->bat_len = 0;
@@ -392,9 +391,9 @@ int mbr_zero_dsl120pf(int verbose, char *data_ptr, int *error) {
 		data->bat_sampleSize = 0.0;
 		data->bat_p_flags = 0;
 		data->bat_max_range = 0.0;
-		for (i = 0; i < 9; i++)
+		for (int i = 0; i < 9; i++)
 			data->bat_future[i] = 0;
-		for (i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
 			data->bat_port[i] = 0.0;
 			data->bat_stbd[i] = 0.0;
 		}
@@ -406,13 +405,13 @@ int mbr_zero_dsl120pf(int verbose, char *data_ptr, int *error) {
 		data->amp_p_flags = 0;
 		data->amp_max_range = 0.0;
 		data->amp_channel = 0.0;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			data->amp_future[i] = 0;
-		for (i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
 			data->amp_port[i] = 0.0;
 			data->amp_stbd[i] = 0.0;
 		}
-		for (i = 0; i < MBF_DSL120PF_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBF_DSL120PF_COMMENT_LENGTH; i++)
 			data->comment[i] = '\0';
 	}
 
@@ -438,7 +437,6 @@ int mbr_rt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_dsl120pf_struct *data;
 	struct mbsys_dsl_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -470,9 +468,9 @@ int mbr_rt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->p_flags = data->p_flags;
 		store->num_data_types = data->num_data_types;
 		store->ping = data->ping;
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			store->sonar_cmd[i] = data->sonar_cmd[i];
-		for (i = 0; i < 24; i++)
+		for (int i = 0; i < 24; i++)
 			store->time_stamp[i] = data->time_stamp[i];
 		store->nav_x = data->nav_x;
 		store->nav_y = data->nav_y;
@@ -492,7 +490,7 @@ int mbr_rt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->tv_sec = data->tv_sec;
 		store->tv_usec = data->tv_usec;
 		store->digitalinterface = data->digitalinterface;
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			store->reserved[i] = data->reserved[i];
 		store->bat_type = data->bat_type;
 		store->bat_len = data->bat_len;
@@ -501,9 +499,9 @@ int mbr_rt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->bat_sampleSize = data->bat_sampleSize;
 		store->bat_p_flags = data->bat_p_flags;
 		store->bat_max_range = data->bat_max_range;
-		for (i = 0; i < 9; i++)
+		for (int i = 0; i < 9; i++)
 			store->bat_future[i] = data->bat_future[i];
-		for (i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
 			store->bat_port[i] = data->bat_port[i];
 			store->bat_stbd[i] = data->bat_stbd[i];
 		}
@@ -515,9 +513,9 @@ int mbr_rt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->amp_p_flags = data->amp_p_flags;
 		store->amp_max_range = data->amp_max_range;
 		store->amp_channel = data->amp_channel;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			store->amp_future[i] = data->amp_future[i];
-		for (i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
 			store->amp_port[i] = data->amp_port[i];
 			store->amp_stbd[i] = data->amp_stbd[i];
 		}
@@ -543,7 +541,6 @@ int mbr_wt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_dsl120pf_struct *data;
 	struct mbsys_dsl_struct *store;
 	char *data_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -571,9 +568,9 @@ int mbr_wt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->p_flags = store->p_flags;
 		data->num_data_types = store->num_data_types;
 		data->ping = store->ping;
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			data->sonar_cmd[i] = store->sonar_cmd[i];
-		for (i = 0; i < 24; i++)
+		for (int i = 0; i < 24; i++)
 			data->time_stamp[i] = store->time_stamp[i];
 		data->nav_x = store->nav_x;
 		data->nav_y = store->nav_y;
@@ -593,7 +590,7 @@ int mbr_wt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->tv_sec = store->tv_sec;
 		data->tv_usec = store->tv_usec;
 		data->digitalinterface = store->digitalinterface;
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			data->reserved[i] = store->reserved[i];
 		data->bat_type = store->bat_type;
 		data->bat_len = store->bat_len;
@@ -602,9 +599,9 @@ int mbr_wt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->bat_sampleSize = store->bat_sampleSize;
 		data->bat_p_flags = store->bat_p_flags;
 		data->bat_max_range = store->bat_max_range;
-		for (i = 0; i < 9; i++)
+		for (int i = 0; i < 9; i++)
 			data->bat_future[i] = store->bat_future[i];
-		for (i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
 			data->bat_port[i] = store->bat_port[i];
 			data->bat_stbd[i] = store->bat_stbd[i];
 		}
@@ -616,9 +613,9 @@ int mbr_wt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->amp_p_flags = store->amp_p_flags;
 		data->amp_max_range = store->amp_max_range;
 		data->amp_channel = store->amp_channel;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			data->amp_future[i] = store->amp_future[i];
-		for (i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
 			data->amp_port[i] = store->amp_port[i];
 			data->amp_stbd[i] = store->amp_stbd[i];
 		}
@@ -651,7 +648,6 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int len;
 	int hdr_len;
 	int found;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -689,7 +685,7 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* read next byte */
 			if (found == MB_NO) {
-				for (i = 0; i < 3; i++)
+				for (int i = 0; i < 3; i++)
 					tag[i] = tag[i + 1];
 				status = fread(&tag[3], 1, 1, mb_io_ptr->mbfp);
 				if (status == 1)
@@ -707,7 +703,7 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* now read each of the data records */
 		if (status == MB_SUCCESS)
-			for (i = 0; i < data->num_data_types; i++) {
+			for (int i = 0; i < data->num_data_types; i++) {
 				status = mbr_dsl120pf_rd_dataheader(verbose, mbio_ptr, mb_io_ptr->mbfp, type, &len, &hdr_len, error);
 
 				if (status == MB_SUCCESS && strncmp(type, "BATH", 4) == 0) {
@@ -753,7 +749,7 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* read next byte */
 			if (found == MB_NO) {
-				for (i = 0; i < 3; i++)
+				for (int i = 0; i < 3; i++)
 					tag[i] = tag[i + 1];
 				status = fread(&tag[3], 1, 1, mb_io_ptr->mbfp2);
 				if (status == 1)
@@ -771,7 +767,7 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* now read each of the data records */
 		if (status == MB_SUCCESS)
-			for (i = 0; i < data->num_data_types; i++) {
+			for (int i = 0; i < data->num_data_types; i++) {
 				status = mbr_dsl120pf_rd_dataheader(verbose, mbio_ptr, mb_io_ptr->mbfp2, type, &len, &hdr_len, error);
 
 				if (status == MB_SUCCESS && strncmp(type, "BATH", 4) == 0) {
@@ -818,7 +814,6 @@ int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 	int tmp_int;
 	float tmp_float;
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -863,11 +858,11 @@ int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 		index += 4;
 		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->ping);
 		index += 4;
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			data->sonar_cmd[i] = buffer[index];
 			index++;
 		}
-		for (i = 0; i < 24; i++) {
+		for (int i = 0; i < 24; i++) {
 			data->time_stamp[i] = buffer[index];
 			index++;
 		}
@@ -910,7 +905,7 @@ int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 		index += 4;
 		mb_get_binary_short(MB_NO, &buffer[index], &data->digitalinterface);
 		index += 2;
-		for (i = 0; i < 5; i++) {
+		for (int i = 0; i < 5; i++) {
 			mb_get_binary_short(MB_NO, &buffer[index], &data->reserved[i]);
 			index += 2;
 		}
@@ -928,7 +923,7 @@ int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 		fprintf(stderr, "dbg5       sonar_cmd:        %c%c%c%c\n", data->sonar_cmd[0], data->sonar_cmd[1], data->sonar_cmd[2],
 		        data->sonar_cmd[3]);
 		fprintf(stderr, "dbg5       time_stamp:       ");
-		for (i = 0; i < 24; i++)
+		for (int i = 0; i < 24; i++)
 			fprintf(stderr, "%c", data->time_stamp[i]);
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       nav_x:            %f\n", data->nav_x);
@@ -949,7 +944,7 @@ int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 		fprintf(stderr, "dbg5       tv_sec:           %d\n", data->tv_sec);
 		fprintf(stderr, "dbg5       tv_usec:          %d\n", data->tv_usec);
 		fprintf(stderr, "dbg5       digitalinterface: %d\n", data->digitalinterface);
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			fprintf(stderr, "dbg5       reserved:         %d\n", data->reserved[i]);
 	}
 
@@ -1025,7 +1020,6 @@ int mbr_dsl120pf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	char *data_ptr;
 	char buffer[10000];
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1065,11 +1059,11 @@ int mbr_dsl120pf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		index += 4;
 		mb_get_binary_float(MB_NO, &buffer[index], &data->bat_max_range);
 		index += 4;
-		for (i = 0; i < 9; i++) {
+		for (int i = 0; i < 9; i++) {
 			mb_get_binary_int(MB_NO, &buffer[index], &data->bat_future[i]);
 			index += 4;
 		}
-		for (i = 0; i < data->bat_num_bins; i++) {
+		for (int i = 0; i < data->bat_num_bins; i++) {
 			mb_get_binary_float(MB_NO, &buffer[index], &data->bat_port[i]);
 			index += 4;
 			mb_get_binary_float(MB_NO, &buffer[index], &data->bat_stbd[i]);
@@ -1087,9 +1081,9 @@ int mbr_dsl120pf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg5       bat_sampleSize:   %f\n", data->bat_sampleSize);
 		fprintf(stderr, "dbg5       bat_p_flags:      %d\n", data->bat_p_flags);
 		fprintf(stderr, "dbg5       bat_max_range:    %f\n", data->bat_max_range);
-		for (i = 0; i < 9; i++)
+		for (int i = 0; i < 9; i++)
 			fprintf(stderr, "dbg5       bat_future:       %d\n", data->bat_future[i]);
-		for (i = 0; i < data->bat_num_bins; i++)
+		for (int i = 0; i < data->bat_num_bins; i++)
 			fprintf(stderr, "dbg5       bath[%d]:         %f\t%f\n", i, data->bat_port[i], data->bat_stbd[i]);
 	}
 
@@ -1114,7 +1108,6 @@ int mbr_dsl120pf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	char *data_ptr;
 	char buffer[10000];
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1156,11 +1149,11 @@ int mbr_dsl120pf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		index += 4;
 		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->amp_channel);
 		index += 4;
-		for (i = 0; i < 8; i++) {
+		for (int i = 0; i < 8; i++) {
 			mb_get_binary_int(MB_NO, &buffer[index], &data->amp_future[i]);
 			index += 4;
 		}
-		for (i = 0; i < data->bat_num_bins; i++) {
+		for (int i = 0; i < data->bat_num_bins; i++) {
 			mb_get_binary_float(MB_NO, &buffer[index], &data->amp_port[i]);
 			index += 4;
 			mb_get_binary_float(MB_NO, &buffer[index], &data->amp_stbd[i]);
@@ -1179,9 +1172,9 @@ int mbr_dsl120pf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg5       amp_p_flags:      %d\n", data->amp_p_flags);
 		fprintf(stderr, "dbg5       amp_max_range:    %f\n", data->amp_max_range);
 		fprintf(stderr, "dbg5       amp_channel:      %d\n", data->amp_channel);
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			fprintf(stderr, "dbg5       amp_future:       %d\n", data->amp_future[i]);
-		for (i = 0; i < data->amp_num_samp; i++)
+		for (int i = 0; i < data->amp_num_samp; i++)
 			fprintf(stderr, "dbg5       amp[%d]:          %f\t%f\n", i, data->amp_port[i], data->amp_stbd[i]);
 	}
 
@@ -1320,7 +1313,6 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	char *data_ptr;
 	char buffer[10000];
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1350,7 +1342,7 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg5       sonar_cmd:        %c%c%c%c\n", data->sonar_cmd[0], data->sonar_cmd[1], data->sonar_cmd[2],
 		        data->sonar_cmd[3]);
 		fprintf(stderr, "dbg5       time_stamp:       ");
-		for (i = 0; i < 24; i++)
+		for (int i = 0; i < 24; i++)
 			fprintf(stderr, "%c", data->time_stamp[i]);
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       nav_x:            %f\n", data->nav_x);
@@ -1371,7 +1363,7 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg5       tv_sec:           %d\n", data->tv_sec);
 		fprintf(stderr, "dbg5       tv_usec:          %d\n", data->tv_usec);
 		fprintf(stderr, "dbg5       digitalinterface: %d\n", data->digitalinterface);
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			fprintf(stderr, "dbg5       reserved:         %d\n", data->reserved[i]);
 		fprintf(stderr, "dbg5       bat_type:         %d\n", data->bat_type);
 		fprintf(stderr, "dbg5       bat_len:          %d\n", data->bat_len);
@@ -1380,9 +1372,9 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg5       bat_sampleSize:   %f\n", data->bat_sampleSize);
 		fprintf(stderr, "dbg5       bat_p_flags:      %d\n", data->bat_p_flags);
 		fprintf(stderr, "dbg5       bat_max_range:    %f\n", data->bat_max_range);
-		for (i = 0; i < 9; i++)
+		for (int i = 0; i < 9; i++)
 			fprintf(stderr, "dbg5       bat_future:       %d\n", data->bat_future[i]);
-		for (i = 0; i < data->bat_num_bins; i++)
+		for (int i = 0; i < data->bat_num_bins; i++)
 			fprintf(stderr, "dbg5       bath[%d]:         %f\t%f\n", i, data->bat_port[i], data->bat_stbd[i]);
 	}
 
@@ -1400,11 +1392,11 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	index += 4;
 	mb_put_binary_int(MB_NO, data->ping, &buffer[index]);
 	index += 4;
-	for (i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		buffer[index] = data->sonar_cmd[i];
 		index++;
 	}
-	for (i = 0; i < 24; i++) {
+	for (int i = 0; i < 24; i++) {
 		buffer[index] = data->time_stamp[i];
 		index++;
 	}
@@ -1445,7 +1437,7 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	index += 4;
 	mb_put_binary_short(MB_NO, data->digitalinterface, &buffer[index]);
 	index += 2;
-	for (i = 0; i < 5; i++) {
+	for (int i = 0; i < 5; i++) {
 		mb_put_binary_short(MB_NO, data->reserved[i], &buffer[index]);
 		index += 2;
 	}
@@ -1465,11 +1457,11 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	index += 4;
 	mb_put_binary_float(MB_NO, data->bat_max_range, &buffer[index]);
 	index += 4;
-	for (i = 0; i < 9; i++) {
+	for (int i = 0; i < 9; i++) {
 		mb_put_binary_int(MB_NO, data->bat_future[i], &buffer[index]);
 		index += 4;
 	}
-	for (i = 0; i < data->bat_num_bins; i++) {
+	for (int i = 0; i < data->bat_num_bins; i++) {
 		mb_put_binary_float(MB_NO, data->bat_port[i], &buffer[index]);
 		index += 4;
 		mb_put_binary_float(MB_NO, data->bat_stbd[i], &buffer[index]);
@@ -1505,7 +1497,6 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	char *data_ptr;
 	char buffer[10000];
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1535,7 +1526,7 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg5       sonar_cmd:        %c%c%c%c\n", data->sonar_cmd[0], data->sonar_cmd[1], data->sonar_cmd[2],
 		        data->sonar_cmd[3]);
 		fprintf(stderr, "dbg5       time_stamp:       ");
-		for (i = 0; i < 24; i++)
+		for (int i = 0; i < 24; i++)
 			fprintf(stderr, "%c", data->time_stamp[i]);
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       nav_x:            %f\n", data->nav_x);
@@ -1556,7 +1547,7 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg5       tv_sec:           %d\n", data->tv_sec);
 		fprintf(stderr, "dbg5       tv_usec:          %d\n", data->tv_usec);
 		fprintf(stderr, "dbg5       digitalinterface: %d\n", data->digitalinterface);
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			fprintf(stderr, "dbg5       reserved:         %d\n", data->reserved[i]);
 		fprintf(stderr, "dbg5       amp_type:         %d\n", data->amp_type);
 		fprintf(stderr, "dbg5       amp_len:          %d\n", data->amp_len);
@@ -1566,9 +1557,9 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		fprintf(stderr, "dbg5       amp_p_flags:      %d\n", data->amp_p_flags);
 		fprintf(stderr, "dbg5       amp_max_range:    %f\n", data->amp_max_range);
 		fprintf(stderr, "dbg5       amp_channel:      %d\n", data->amp_channel);
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			fprintf(stderr, "dbg5       amp_future:       %d\n", data->amp_future[i]);
-		for (i = 0; i < data->amp_num_samp; i++)
+		for (int i = 0; i < data->amp_num_samp; i++)
 			fprintf(stderr, "dbg5       amp[%d]:          %f\t%f\n", i, data->amp_port[i], data->amp_stbd[i]);
 	}
 
@@ -1586,11 +1577,11 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	index += 4;
 	mb_put_binary_int(MB_NO, data->ping, &buffer[index]);
 	index += 4;
-	for (i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		buffer[index] = data->sonar_cmd[i];
 		index++;
 	}
-	for (i = 0; i < 24; i++) {
+	for (int i = 0; i < 24; i++) {
 		buffer[index] = data->time_stamp[i];
 		index++;
 	}
@@ -1631,7 +1622,7 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	index += 4;
 	mb_put_binary_short(MB_NO, data->digitalinterface, &buffer[index]);
 	index += 2;
-	for (i = 0; i < 5; i++) {
+	for (int i = 0; i < 5; i++) {
 		mb_put_binary_short(MB_NO, data->reserved[i], &buffer[index]);
 		index += 2;
 	}
@@ -1653,11 +1644,11 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	index += 4;
 	mb_put_binary_int(MB_NO, data->amp_channel, &buffer[index]);
 	index += 4;
-	for (i = 0; i < 8; i++) {
+	for (int i = 0; i < 8; i++) {
 		mb_put_binary_int(MB_NO, data->amp_future[i], &buffer[index]);
 		index += 4;
 	}
-	for (i = 0; i < data->bat_num_bins; i++) {
+	for (int i = 0; i < data->bat_num_bins; i++) {
 		mb_put_binary_float(MB_NO, data->amp_port[i], &buffer[index]);
 		index += 4;
 		mb_put_binary_float(MB_NO, data->amp_stbd[i], &buffer[index]);
@@ -1693,7 +1684,6 @@ int mbr_dsl120pf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	char *data_ptr;
 	char buffer[10000];
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1736,11 +1726,11 @@ int mbr_dsl120pf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	index += 4;
 	mb_put_binary_int(MB_NO, data->ping, &buffer[index]);
 	index += 4;
-	for (i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		buffer[index] = data->sonar_cmd[i];
 		index++;
 	}
-	for (i = 0; i < 24; i++) {
+	for (int i = 0; i < 24; i++) {
 		buffer[index] = data->time_stamp[i];
 		index++;
 	}
@@ -1781,7 +1771,7 @@ int mbr_dsl120pf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	index += 4;
 	mb_put_binary_short(MB_NO, data->digitalinterface, &buffer[index]);
 	index += 2;
-	for (i = 0; i < 5; i++) {
+	for (int i = 0; i < 5; i++) {
 		mb_put_binary_short(MB_NO, data->reserved[i], &buffer[index]);
 		index += 2;
 	}

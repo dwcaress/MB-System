@@ -312,7 +312,6 @@ int mbr_zero_elmk2unb(int verbose, void *data_ptr, int *error) {
 	char *function_name = "mbr_zero_elmk2unb";
 	int status = MB_SUCCESS;
 	struct mbf_elmk2unb_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -361,7 +360,7 @@ int mbr_zero_elmk2unb(int verbose, void *data_ptr, int *error) {
 		data->line_number = 0;
 		data->start_or_stop = 0;
 		data->transducer_serial_number = 0;
-		for (i = 0; i < MBF_ELMK2UNB_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBF_ELMK2UNB_COMMENT_LENGTH; i++)
 			data->comment[i] = '\0';
 
 		/* position (position telegrams) */
@@ -395,7 +394,7 @@ int mbr_zero_elmk2unb(int verbose, void *data_ptr, int *error) {
 		data->svp_hundredth_sec = 0;
 		data->svp_thousandth_sec = 0;
 		data->svp_num = 0;
-		for (i = 0; i < 100; i++) {
+		for (int i = 0; i < 100; i++) {
 			data->svp_depth[i] = 0; /* 0.1 meters */
 			data->svp_vel[i] = 0;   /* 0.1 meters/sec */
 		}
@@ -422,7 +421,7 @@ int mbr_zero_elmk2unb(int verbose, void *data_ptr, int *error) {
 		data->receiver_gain_port = 0;
 		data->reserved = 0;
 		data->beams_bath = 0;
-		for (i = 0; i < MBF_ELMK2UNB_MAXBEAMS; i++) {
+		for (int i = 0; i < MBF_ELMK2UNB_MAXBEAMS; i++) {
 			data->beams[i].bath = 0;
 			data->beams[i].bath_acrosstrack = 0;
 			data->beams[i].bath_alongtrack = 0;
@@ -462,7 +461,6 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int time_i[7];
 	double time_d;
 	double lon, lat, heading, speed;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -558,7 +556,7 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* comment */
 		if (store->kind == MB_DATA_COMMENT) {
-			for (i = 0; i < MBF_ELMK2UNB_COMMENT_LENGTH; i++)
+			for (int i = 0; i < MBF_ELMK2UNB_COMMENT_LENGTH; i++)
 				store->comment[i] = data->comment[i];
 		}
 
@@ -596,7 +594,7 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->svp_hundredth_sec = data->svp_hundredth_sec;
 			store->svp_thousandth_sec = data->svp_thousandth_sec;
 			store->svp_num = data->svp_num;
-			for (i = 0; i < 500; i++) {
+			for (int i = 0; i < 500; i++) {
 				store->svp_depth[i] = data->svp_depth[i];
 				store->svp_vel[i] = data->svp_vel[i];
 			}
@@ -625,7 +623,7 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->receiver_gain_port = data->receiver_gain_port;
 			store->reserved = data->reserved;
 			store->beams_bath = data->beams_bath;
-			for (i = 0; i < data->beams_bath; i++) {
+			for (int i = 0; i < data->beams_bath; i++) {
 				store->beams[i].bath = data->beams[i].bath;
 				store->beams[i].bath_acrosstrack = data->beams[i].bath_acrosstrack;
 				store->beams[i].bath_alongtrack = data->beams[i].bath_alongtrack;
@@ -660,7 +658,6 @@ int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_elmk2unb_struct *data;
 	char *data_ptr;
 	struct mbsys_elacmk2_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -716,7 +713,7 @@ int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->line_number = store->line_number;
 		data->start_or_stop = store->start_or_stop;
 		data->transducer_serial_number = store->transducer_serial_number;
-		for (i = 0; i < MBF_ELMK2UNB_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBF_ELMK2UNB_COMMENT_LENGTH; i++)
 			data->comment[i] = store->comment[i];
 
 		/* position (position telegrams) */
@@ -750,7 +747,7 @@ int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->svp_hundredth_sec = store->svp_hundredth_sec;
 		data->svp_thousandth_sec = store->svp_thousandth_sec;
 		data->svp_num = store->svp_num;
-		for (i = 0; i < 500; i++) {
+		for (int i = 0; i < 500; i++) {
 			data->svp_depth[i] = store->svp_depth[i];
 			data->svp_vel[i] = store->svp_vel[i];
 		}
@@ -774,7 +771,7 @@ int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->receiver_gain_port = store->receiver_gain_port;
 		data->reserved = store->reserved;
 		data->beams_bath = store->beams_bath;
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			data->beams[i].bath = store->beams[i].bath;
 			data->beams[i].bath_acrosstrack = store->beams[i].bath_acrosstrack;
 			data->beams[i].bath_alongtrack = store->beams[i].bath_alongtrack;
@@ -1269,7 +1266,6 @@ int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *dat
 	short int *short_ptr;
 	short int *short_ptr2;
 	int *int_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1312,7 +1308,7 @@ int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *dat
 		data->svp_latitude = (int)mb_swap_int(*int_ptr);
 #endif
 		data->svp_num = 0;
-		for (i = 0; i < 500; i++) {
+		for (int i = 0; i < 500; i++) {
 			short_ptr = (short int *)&line[16 + 4 * i];
 			short_ptr2 = (short int *)&line[18 + 4 * i];
 #ifndef BYTESWAPPED
@@ -1341,7 +1337,7 @@ int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *dat
 		fprintf(stderr, "dbg5       svp_latitude:     %d\n", data->svp_latitude);
 		fprintf(stderr, "dbg5       svp_longitude:    %d\n", data->svp_longitude);
 		fprintf(stderr, "dbg5       svp_num:          %d\n", data->svp_num);
-		for (i = 0; i < data->svp_num; i++)
+		for (int i = 0; i < data->svp_num; i++)
 			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
 	}
 
@@ -1363,7 +1359,6 @@ int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct 
 	char line[ELACMK2_COMMENT_SIZE];
 	short int *short_ptr;
 	int *int_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1456,7 +1451,7 @@ int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct 
 
 	/* now read each of the beams */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < data->beams_bath; i++) {
+		for (int i = 0; i < data->beams_bath; i++) {
 			/* read record into char array */
 			status = fread(line, 1, ELACMK2_BATHGEN_BEAM_SIZE, mbfp);
 			if (status == ELACMK2_BATHGEN_BEAM_SIZE)
@@ -1622,7 +1617,6 @@ int mbr_elmk2unb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 	char line[ELACMK2_COMMENT_SIZE + 3];
 	short int label;
 	int len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1661,9 +1655,9 @@ int mbr_elmk2unb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		len = strlen(data->comment);
 		if (len > MBSYS_ELACMK2_COMMENT_LENGTH)
 			len = MBSYS_ELACMK2_COMMENT_LENGTH;
-		for (i = 0; i < len; i++)
+		for (int i = 0; i < len; i++)
 			line[i] = data->comment[i];
-		for (i = len; i < MBSYS_ELACMK2_COMMENT_LENGTH; i++)
+		for (int i = len; i < MBSYS_ELACMK2_COMMENT_LENGTH; i++)
 			line[i] = '\0';
 		line[ELACMK2_COMMENT_SIZE] = 0x03;
 		line[ELACMK2_COMMENT_SIZE + 1] = '\0';
@@ -2041,7 +2035,6 @@ int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	short int *short_ptr;
 	short int *short_ptr2;
 	int *int_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2069,7 +2062,7 @@ int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg5       svp_latitude:     %d\n", data->svp_latitude);
 		fprintf(stderr, "dbg5       svp_longitude:    %d\n", data->svp_longitude);
 		fprintf(stderr, "dbg5       svp_num:          %d\n", data->svp_num);
-		for (i = 0; i < data->svp_num; i++)
+		for (int i = 0; i < data->svp_num; i++)
 			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
 	}
 
@@ -2108,7 +2101,7 @@ int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		int_ptr = (int *)&line[12];
 		*int_ptr = (int)mb_swap_int(data->svp_longitude);
 #endif
-		for (i = 0; i < data->svp_num; i++) {
+		for (int i = 0; i < data->svp_num; i++) {
 			short_ptr = (short int *)&line[16 + 4 * i];
 			short_ptr2 = (short int *)&line[18 + 4 * i];
 #ifndef BYTESWAPPED
@@ -2119,7 +2112,7 @@ int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 			*short_ptr2 = (short int)mb_swap_short((short int)data->svp_vel[i]);
 #endif
 		}
-		for (i = data->svp_num; i < 500; i++) {
+		for (int i = data->svp_num; i < 500; i++) {
 			short_ptr = (short int *)&line[16 + 4 * i];
 			short_ptr2 = (short int *)&line[18 + 4 * i];
 			*short_ptr = 0;
@@ -2161,7 +2154,6 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 	short int label;
 	short int *short_ptr;
 	int *int_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2196,7 +2188,7 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		fprintf(stderr, "dbg5       receiver_gain_port:%d\n", data->receiver_gain_port);
 		fprintf(stderr, "dbg5       reserved:         %d\n", data->reserved);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (i = 0; i < data->beams_bath; i++) {
+		for (int i = 0; i < data->beams_bath; i++) {
 			fprintf(stderr, "\ndbg5       beam:             %d\n", i);
 			fprintf(stderr, "dbg5       bath:             %d\n", data->beams[i].bath);
 			fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->beams[i].bath_acrosstrack);
@@ -2285,7 +2277,7 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 
 	/* write out the beam data */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < data->beams_bath; i++) {
+		for (int i = 0; i < data->beams_bath; i++) {
 #ifndef BYTESWAPPED
 			int_ptr = (int *)&line[0];
 			*int_ptr = (unsigned int)data->beams[i].bath;

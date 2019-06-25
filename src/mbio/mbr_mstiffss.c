@@ -356,7 +356,6 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int ibottom;
 	int istart;
 	int index;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -431,7 +430,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				/* loop over all entries in the directory */
 				if ((status = fread(buffer, 6 * nentry * sizeof(short), 1, mb_io_ptr->mbfp)) == 1) {
 					index = 0;
-					for (i = 0; i < nentry && status == MB_SUCCESS; i++) {
+					for (int i = 0; i < nentry && status == MB_SUCCESS; i++) {
 						mb_get_binary_short(MB_YES, &(buffer[index]), &tag);
 						index += sizeof(short);
 						mb_get_binary_short(MB_YES, &(buffer[index]), &type);
@@ -573,7 +572,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					index = 0;
 					mb_get_binary_int(MB_YES, &(buffer[index]), ref_windows_time);
 					index += sizeof(int);
-					for (i = 0; i < 9; i++) {
+					for (int i = 0; i < 9; i++) {
 						mb_get_binary_short(MB_YES, &(buffer[index]), &(corr_time[i]));
 						index += sizeof(short);
 					}
@@ -654,7 +653,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += sizeof(short);
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
-				for (i = 0; i < 16; i++)
+				for (int i = 0; i < 16; i++)
 					sonar_gain[i] = 0;
 			}
 			else {
@@ -680,7 +679,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += sizeof(short);
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
-				for (i = 0; i < 16; i++)
+				for (int i = 0; i < 16; i++)
 					sonar_gain[i] = 0;
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
@@ -706,7 +705,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += sizeof(short);
 				mb_get_binary_short(MB_YES, &(buffer[index]), &altitude_bin);
 				index += sizeof(short);
-				for (i = 0; i < 16; i++) {
+				for (int i = 0; i < 16; i++) {
 					mb_get_binary_short(MB_YES, &(buffer[index]), &(sonar_gain[i]));
 					index += sizeof(short);
 				}
@@ -969,7 +968,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* if no altitude do bottom detect */
 		if (status == MB_SUCCESS && altitude <= 0.0) {
 			ibottom = 0;
-			for (i = 0; i < *n_pixel_channel && ibottom == 0; i++) {
+			for (int i = 0; i < *n_pixel_channel && ibottom == 0; i++) {
 				range_tot = range_delay + i * range_per_bin;
 				if (range_tot > MBF_MSTIFF_TRANSMIT_BINS * range_per_bin && right_channel[i] > MBF_MSTIFF_BOTTOM_THRESHOLD &&
 				    left_channel[i] > MBF_MSTIFF_BOTTOM_THRESHOLD) {
@@ -1007,17 +1006,17 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* port and starboard channels */
 			if (channel_mode == 0) {
-				for (i = 0; i < istart; i++) {
-					j = (*n_pixel_channel) - 1 - i;
+				for (int i = 0; i < istart; i++) {
+					int j = (*n_pixel_channel) - 1 - i;
 					data->ss[j] = left_channel[i];
 					data->ssacrosstrack[j] = 0.0;
 					j = (*n_pixel_channel) + i;
 					data->ss[j] = right_channel[i];
 					data->ssacrosstrack[j] = 0.0;
 				}
-				for (i = istart; i < *n_pixel_channel; i++) {
+				for (int i = istart; i < *n_pixel_channel; i++) {
 					range_tot = range_delay + i * range_per_bin;
-					j = (*n_pixel_channel) - 1 - i;
+					int j = (*n_pixel_channel) - 1 - i;
 					data->ss[j] = left_channel[i];
 					data->ssacrosstrack[j] = -sqrt(range_tot * range_tot - altitude * altitude);
 					j = (*n_pixel_channel) + i;
@@ -1028,17 +1027,17 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* port channel only */
 			else if (channel_mode == 1) {
-				for (i = 0; i < istart; i++) {
-					j = 2 * (*n_pixel_channel) - 1 - 2 * i;
+				for (int i = 0; i < istart; i++) {
+					int j = 2 * (*n_pixel_channel) - 1 - 2 * i;
 					data->ss[j] = left_channel[i];
 					data->ssacrosstrack[j] = 0.0;
 					j = 2 * (*n_pixel_channel) - 2 - 2 * i;
 					data->ss[j] = right_channel[i];
 					data->ssacrosstrack[j] = 0.0;
 				}
-				for (i = istart; i < *n_pixel_channel; i++) {
+				for (int i = istart; i < *n_pixel_channel; i++) {
 					range_tot = range_delay + (i - 0.5) * range_per_bin;
-					j = 2 * (*n_pixel_channel) - 1 - 2 * i;
+					int j = 2 * (*n_pixel_channel) - 1 - 2 * i;
 					data->ss[j] = left_channel[i];
 					data->ssacrosstrack[j] = -sqrt(range_tot * range_tot - altitude * altitude);
 					range_tot = range_delay + i * range_per_bin;
@@ -1050,17 +1049,17 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* starboard channel only */
 			else if (channel_mode == 2) {
-				for (i = 0; i < istart; i++) {
-					j = 2 * i;
+				for (int i = 0; i < istart; i++) {
+					int j = 2 * i;
 					data->ss[j] = right_channel[i];
 					data->ssacrosstrack[j] = 0.0;
 					j = 2 * i + 1;
 					data->ss[j] = left_channel[i];
 					data->ssacrosstrack[j] = 0.0;
 				}
-				for (i = istart; i < *n_pixel_channel; i++) {
+				for (int i = istart; i < *n_pixel_channel; i++) {
 					range_tot = range_delay + (i - 0.5) * range_per_bin;
-					j = 2 * i;
+					int j = 2 * i;
 					data->ss[j] = right_channel[i];
 					data->ssacrosstrack[j] = sqrt(range_tot * range_tot - altitude * altitude);
 					range_tot = range_delay + i * range_per_bin;
@@ -1092,7 +1091,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       range_delay:      %f\n", range_delay);
 		fprintf(stderr, "dbg5       altitude_bin:     %d\n", altitude_bin);
 		fprintf(stderr, "dbg5       altitude:         %f\n", altitude);
-		for (i = 0; i < *n_pixel_channel; i++)
+		for (int i = 0; i < *n_pixel_channel; i++)
 			fprintf(stderr, "dbg5       %4d  ss_left: %d  ss_right: %d\n", i, left_channel[i], right_channel[i]);
 		fprintf(stderr, "dbg5  Stored data values:\n");
 		fprintf(stderr, "dbg5       time:       %f\n", data->time_d);
@@ -1102,7 +1101,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       speed:      %f\n", data->speed);
 		fprintf(stderr, "dbg5       altitude:   %f\n", data->altitude);
 		fprintf(stderr, "dbg5       pixels_ss:  %d\n", data->pixels_ss);
-		for (i = 0; i < data->pixels_ss; i++)
+		for (int i = 0; i < data->pixels_ss; i++)
 			fprintf(stderr, "dbg5       ss[%4d]: %d  xtrack:%f\n", i, data->ss[i], data->ssacrosstrack[i]);
 	}
 
@@ -1132,7 +1131,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* sidescan data */
 		store->pixels_ss = data->pixels_ss;
-		for (i = 0; i < data->pixels_ss; i++) {
+		for (int i = 0; i < data->pixels_ss; i++) {
 			store->ss[i] = data->ss[i];
 			store->ssacrosstrack[i] = data->ssacrosstrack[i];
 		}

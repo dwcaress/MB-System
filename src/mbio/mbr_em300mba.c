@@ -373,7 +373,6 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double att_roll[MBSYS_SIMRAD2_MAXATTITUDE];
 	double att_pitch[MBSYS_SIMRAD2_MAXATTITUDE];
 	double att_heave[MBSYS_SIMRAD2_MAXATTITUDE];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -410,7 +409,7 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_time(verbose, time_i, &atime_d);
 
 		/* add latest attitude samples */
-		for (i = 0; i < MIN(attitude->att_ndata, MBSYS_SIMRAD2_MAXATTITUDE); i++) {
+		for (int i = 0; i < MIN(attitude->att_ndata, MBSYS_SIMRAD2_MAXATTITUDE); i++) {
 			att_time_d[i] = (double)(atime_d + 0.001 * attitude->att_time[i]);
 			att_heave[i] = (double)(0.01 * attitude->att_heave[i]);
 			att_roll[i] = (double)(0.01 * attitude->att_roll[i]);
@@ -479,7 +478,7 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					    ping->png_nbeams, ping->png_nbeams_ss);
 			}
 			else if (ping->png_nbeams == ping->png_nbeams_ss) {
-				for (i = 0; i < ping->png_nbeams; i++) {
+				for (int i = 0; i < ping->png_nbeams; i++) {
 					if (ping->png_beam_num[i] != ping->png_beam_index[i] + 1 &&
 					    ping->png_beam_num[i] != ping->png_beam_index[i] - 1) {
 						if (verbose > 1)
@@ -617,7 +616,6 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int read_len;
 	int skip = 0;
 	char junk;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -696,10 +694,10 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			skip = 0;
 			while (status == MB_SUCCESS && mbr_em300mba_chk_label(verbose, mbio_ptr, label, &type, &sonar) != MB_SUCCESS) {
 				/* get next byte */
-				for (i = 0; i < 3; i++)
+				for (int i = 0; i < 3; i++)
 					record_size_char[i] = record_size_char[i + 1];
 				record_size_char[3] = label[0];
-				for (i = 0; i < 3; i++)
+				for (int i = 0; i < 3; i++)
 					label[i] = label[i + 1];
 				if ((read_len = fread(&label[3], 1, 1, mb_io_ptr->mbfp)) != 1) {
 					status = MB_FAILURE;
@@ -1230,7 +1228,7 @@ Have a nice day...\n");
 #ifdef MBR_EM300MBA_DEBUG
 			fprintf(stderr, "skip over %d bytes of unsupported datagram type %x\n", *record_size_save, type);
 #endif
-			for (i = 0; i < *record_size_save - 4; i++) {
+			for (int i = 0; i < *record_size_save - 4; i++) {
 				if ((read_len = fread(&junk, 1, 1, mb_io_ptr->mbfp)) != 1) {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
@@ -1813,7 +1811,6 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 	char line[EM2_RUN_PARAMETER_SIZE];
 	short short_val;
 	int read_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1876,7 +1873,7 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 		store->run_beam_space = (mb_u_char)line[36];
 		store->run_swath_angle = (mb_u_char)line[37];
 		store->run_stab_mode = (mb_u_char)line[38];
-		for (i = 0; i < 6; i++)
+		for (int i = 0; i < 6; i++)
 			store->run_spare[i] = line[39 + i];
 #ifdef MBR_EM300MBA_DEBUG
 		fprintf(stderr, "End Bytes: %2.2hhX %d | %2.2hhX %d | %2.2hhX %d\n", line[EM2_RUN_PARAMETER_SIZE - 7],
@@ -1914,7 +1911,7 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 		fprintf(stderr, "dbg5       run_beam_space:  %d\n", store->run_beam_space);
 		fprintf(stderr, "dbg5       run_swath_angle: %d\n", store->run_swath_angle);
 		fprintf(stderr, "dbg5       run_stab_mode:   %d\n", store->run_stab_mode);
-		for (i = 0; i < 6; i++)
+		for (int i = 0; i < 6; i++)
 			fprintf(stderr, "dbg5       run_spare[%d]:    %d\n", i, store->run_spare[i]);
 	}
 
@@ -2173,7 +2170,6 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	char line[EM2_HEADING_HEADER_SIZE];
 	short short_val;
 	int read_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2219,7 +2215,7 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 
 	/* read binary heading values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < heading->hed_ndata && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < heading->hed_ndata && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_HEADING_SLICE_SIZE, mbfp);
 			if (read_len == EM2_HEADING_SLICE_SIZE && i < MBSYS_SIMRAD2_MAXHEADING) {
 				status = MB_SUCCESS;
@@ -2269,7 +2265,7 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg5       hed_ndata:       %d\n", heading->hed_ndata);
 		fprintf(stderr, "dbg5       count    time (msec)    heading (0.01 deg)\n");
 		fprintf(stderr, "dbg5       -----    -----------    ------------------\n");
-		for (i = 0; i < heading->hed_ndata; i++)
+		for (int i = 0; i < heading->hed_ndata; i++)
 			fprintf(stderr, "dbg5        %4d      %7d          %7d\n", i, heading->hed_time[i], heading->hed_heading[i]);
 		fprintf(stderr, "dbg5       hed_heading_status: %d\n", heading->hed_heading_status);
 	}
@@ -2293,7 +2289,6 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	char line[EM2_SSV_HEADER_SIZE];
 	short short_val;
 	int read_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2339,7 +2334,7 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 	/* read binary heading values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < ssv->ssv_ndata && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < ssv->ssv_ndata && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_SSV_SLICE_SIZE, mbfp);
 			if (read_len == EM2_SSV_SLICE_SIZE && i < MBSYS_SIMRAD2_MAXSSV) {
 				status = MB_SUCCESS;
@@ -2388,7 +2383,7 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		fprintf(stderr, "dbg5       ssv_ndata:       %d\n", ssv->ssv_ndata);
 		fprintf(stderr, "dbg5       count    time (msec)    ssv (0.1 m/s)\n");
 		fprintf(stderr, "dbg5       -----    -----------    ------------------\n");
-		for (i = 0; i < ssv->ssv_ndata; i++)
+		for (int i = 0; i < ssv->ssv_ndata; i++)
 			fprintf(stderr, "dbg5        %4d      %7d          %7d\n", i, ssv->ssv_time[i], ssv->ssv_ssv[i]);
 	}
 
@@ -2411,7 +2406,6 @@ int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	char line[EM2_TILT_HEADER_SIZE];
 	short short_val;
 	int read_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2457,7 +2451,7 @@ int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* read binary tilt values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < tilt->tlt_ndata && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < tilt->tlt_ndata && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_TILT_SLICE_SIZE, mbfp);
 			if (read_len == EM2_TILT_SLICE_SIZE && i < MBSYS_SIMRAD2_MAXTILT) {
 				status = MB_SUCCESS;
@@ -2506,7 +2500,7 @@ int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg5       tlt_ndata:       %d\n", tilt->tlt_ndata);
 		fprintf(stderr, "dbg5       count    time (msec)    tilt (0.01 deg)\n");
 		fprintf(stderr, "dbg5       -----    -----------    ------------------\n");
-		for (i = 0; i < tilt->tlt_ndata; i++)
+		for (int i = 0; i < tilt->tlt_ndata; i++)
 			fprintf(stderr, "dbg5        %4d      %7d          %7d\n", i, tilt->tlt_time[i], tilt->tlt_tilt[i]);
 	}
 
@@ -2588,16 +2582,16 @@ int mbr_em300mba_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 /*	if (status == MB_SUCCESS && extraparameters->xtr_id == 2) {
 		index = 0;
 		mb_get_binary_int(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_activepositioning);
-		for (i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++) {
 			mb_get_binary_short(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_qfsetting[i]);
 			index += 2;
 		}
-		for (i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++) {
 			mb_get_binary_int(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_nqualityfactors[i]);
 			index += 4;
 		}
-		for (i = 0; i < 3; i++) {
-			for (j = 0; j < extraparameters->xtr_pqf_nqualityfactors[i]; j++) {
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < extraparameters->xtr_pqf_nqualityfactors[i]; j++) {
 				mb_get_binary_int(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_qfvalues[i][j]);
 				index += 4;
 				mb_get_binary_int(swap, &(extraparameters->xtr_data[index]), &extraparameters->xtr_pqf_qflimits[i][j]);
@@ -2640,10 +2634,10 @@ int mbr_em300mba_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 		fprintf(stderr, "dbg5       xtr_nalloc:      %d\n", extraparameters->xtr_nalloc);
 /*		if (extraparameters->xtr_id == 2) {
 			fprintf(stderr, "dbg5       xtr_pqf_activepositioning:          %d\n", extraparameters->xtr_pqf_activepositioning);
-			for (i = 0; i < 3; i++) {
+			for (int i = 0; i < 3; i++) {
 				fprintf(stderr, "dbg5       positioning system:%d qfsetting:%d nqf:%d\n", i,
 				        extraparameters->xtr_pqf_qfsetting[i], extraparameters->xtr_pqf_nqualityfactors[i]);
-				for (j = 0; j < extraparameters->xtr_pqf_nqualityfactors[i]; j++)
+				for (int j = 0; j < extraparameters->xtr_pqf_nqualityfactors[i]; j++)
 					fprintf(stderr, "dbg5       quality factor:%d value:%d limit:%d\n", j,
 					        extraparameters->xtr_pqf_qfvalues[i][j], extraparameters->xtr_pqf_qflimits[i][j]);
 			}
@@ -2669,7 +2663,6 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	char line[EM2_ATTITUDE_HEADER_SIZE];
 	short short_val;
 	int read_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2715,7 +2708,7 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* read binary attitude values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < attitude->att_ndata && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < attitude->att_ndata && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_ATTITUDE_SLICE_SIZE, mbfp);
 			if (read_len == EM2_ATTITUDE_SLICE_SIZE && i < MBSYS_SIMRAD2_MAXATTITUDE) {
 				status = MB_SUCCESS;
@@ -2773,7 +2766,7 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg5       att_ndata:       %d\n", attitude->att_ndata);
 		fprintf(stderr, "dbg5       cnt   time   roll pitch heave heading\n");
 		fprintf(stderr, "dbg5       -------------------------------------\n");
-		for (i = 0; i < attitude->att_ndata; i++)
+		for (int i = 0; i < attitude->att_ndata; i++)
 			fprintf(stderr, "dbg5        %3d  %d  %d %d %d %d\n", i, attitude->att_time[i], attitude->att_roll[i],
 			        attitude->att_pitch[i], attitude->att_heave[i], attitude->att_heading[i]);
 		fprintf(stderr, "dbg5       att_heading_status: %d\n", attitude->att_heading_status);
@@ -2963,7 +2956,6 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	char line[EM2_SVP_HEADER_SIZE];
 	short short_val;
 	int read_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3010,7 +3002,7 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 	/* read binary svp values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < store->svp_num && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < store->svp_num && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_SVP_SLICE_SIZE, mbfp);
 			if (read_len != EM2_SVP_SLICE_SIZE) {
 				status = MB_FAILURE;
@@ -3062,7 +3054,7 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		fprintf(stderr, "dbg5       svp_depth_res:   %d\n", store->svp_depth_res);
 		fprintf(stderr, "dbg5       count    depth    speed\n");
 		fprintf(stderr, "dbg5       -----------------------\n");
-		for (i = 0; i < store->svp_num; i++)
+		for (int i = 0; i < store->svp_num; i++)
 			fprintf(stderr, "dbg5        %d   %d  %d\n", i, store->svp_depth[i], store->svp_vel[i]);
 	}
 
@@ -3084,7 +3076,6 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	char line[EM2_SVP2_HEADER_SIZE];
 	short short_val;
 	int read_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3131,7 +3122,7 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* read binary svp values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < store->svp_num && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < store->svp_num && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_SVP2_SLICE_SIZE, mbfp);
 			if (read_len != EM2_SVP2_SLICE_SIZE) {
 				status = MB_FAILURE;
@@ -3181,7 +3172,7 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg5       svp_depth_res:   %d\n", store->svp_depth_res);
 		fprintf(stderr, "dbg5       count    depth    speed\n");
 		fprintf(stderr, "dbg5       -----------------------\n");
-		for (i = 0; i < store->svp_num; i++)
+		for (int i = 0; i < store->svp_num; i++)
 			fprintf(stderr, "dbg5        %d   %d  %d\n", i, store->svp_depth[i], store->svp_vel[i]);
 	}
 
@@ -3208,7 +3199,6 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	int png_serial;
 	int head;
 	int read_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3293,7 +3283,7 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* read binary beam values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < ping->png_nbeams && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < ping->png_nbeams && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_BATH_MBA_BEAM_SIZE, mbfp);
 			if (read_len == EM2_BATH_MBA_BEAM_SIZE && i < MBSYS_SIMRAD2_MAXBEAMS) {
 				status = MB_SUCCESS;
@@ -3352,7 +3342,7 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 		}
-		for (i = 1; i < ping->png_nbeams; i++) {
+		for (int i = 1; i < ping->png_nbeams; i++) {
 			if (ping->png_beam_num[i] < ping->png_beam_num[i - 1] || ping->png_beam_num[i] > ping->png_nbeams_max) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
@@ -3394,7 +3384,7 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg5       png_sample_rate:       %d\n", ping->png_sample_rate);
 		fprintf(stderr, "dbg5       cnt  depth xtrack ltrack dprsn   azi   rng  qual wnd  amp num flag\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_nbeams; i++)
+		for (int i = 0; i < ping->png_nbeams; i++)
 			fprintf(stderr, "dbg5       %3d %6d %6d %6d %5d %5d %5d %4d %3d %4d %3d %4d\n", i, ping->png_depth[i],
 			        ping->png_acrosstrack[i], ping->png_alongtrack[i], ping->png_depression[i], ping->png_azimuth[i],
 			        ping->png_range[i], ping->png_quality[i], ping->png_window[i], ping->png_amp[i], ping->png_beam_num[i],
@@ -3421,7 +3411,6 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	char line[EM2_RAWBEAM_HEADER_SIZE];
 	short short_val;
 	int read_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3474,7 +3463,7 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 
 	/* read binary beam values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < ping->png_raw_nbeams && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < ping->png_raw_nbeams && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_RAWBEAM_BEAM_SIZE, mbfp);
 			if (read_len == EM2_RAWBEAM_BEAM_SIZE && i < MBSYS_SIMRAD2_MAXBEAMS) {
 				status = MB_SUCCESS;
@@ -3516,7 +3505,7 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 		}
-		for (i = 1; i < ping->png_raw_nbeams; i++) {
+		for (int i = 1; i < ping->png_raw_nbeams; i++) {
 			if (ping->png_raw_rxbeam_num[i] < ping->png_raw_rxbeam_num[i - 1] ||
 			    ping->png_raw_rxbeam_num[i] > ping->png_raw_nbeams_max) {
 				status = MB_FAILURE;
@@ -3541,7 +3530,7 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg5       png_raw_ssv:         %d\n", ping->png_raw_ssv);
 		fprintf(stderr, "dbg5       cnt  point   tilt   rng  amp num\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_raw_nbeams; i++)
+		for (int i = 0; i < ping->png_raw_nbeams; i++)
 			fprintf(stderr, "dbg5       %3d %5d %5d %5d %3d %3d\n", i, ping->png_raw_rxpointangle[i],
 			        ping->png_raw_rxtiltangle[i], ping->png_raw_rxrange[i], ping->png_raw_rxamp[i], ping->png_raw_rxbeam_num[i]);
 	}
@@ -3566,7 +3555,6 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	short short_val;
 	int read_len;
 	int spare;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3643,7 +3631,7 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* read binary tx values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < ping->png_raw_ntx && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < ping->png_raw_ntx && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_RAWBEAM2_TX_SIZE, mbfp);
 			if (read_len == EM2_RAWBEAM2_TX_SIZE && i < MBSYS_SIMRAD2_MAXTX) {
 				status = MB_SUCCESS;
@@ -3669,7 +3657,7 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* read binary beam values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < ping->png_raw_nbeams && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < ping->png_raw_nbeams && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_RAWBEAM2_BEAM_SIZE, mbfp);
 			if (read_len == EM2_RAWBEAM2_BEAM_SIZE && i < MBSYS_SIMRAD2_MAXBEAMS) {
 				status = MB_SUCCESS;
@@ -3719,7 +3707,7 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 		}
-		for (i = 1; i < ping->png_raw_nbeams; i++) {
+		for (int i = 1; i < ping->png_raw_nbeams; i++) {
 			if (ping->png_raw_rxbeam_num[i] < ping->png_raw_rxbeam_num[i - 1] ||
 			    ping->png_raw_rxbeam_num[i] > ping->png_raw_nbeams_max) {
 				status = MB_FAILURE;
@@ -3761,7 +3749,7 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg5       transmit pulse values:\n");
 		fprintf(stderr, "dbg5       cnt lastbeam tiltangle heading roll pitch heave\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_raw_ntx; i++)
+		for (int i = 0; i < ping->png_raw_ntx; i++)
 			fprintf(stderr, "dbg5       %3d %3d %4d %5d %4d %4d %4d\n", i, ping->png_raw_txlastbeam[i],
 			        ping->png_raw_txtiltangle[i], ping->png_raw_txheading[i], ping->png_raw_txroll[i], ping->png_raw_txpitch[i],
 			        ping->png_raw_txheave[i]);
@@ -3769,7 +3757,7 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg5       beam values:\n");
 		fprintf(stderr, "dbg5       cnt range quality window amp beam angle heading roll pitch heave\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_raw_nbeams; i++)
+		for (int i = 0; i < ping->png_raw_nbeams; i++)
 			fprintf(stderr, "dbg5       %3d %5d %3d %3d %4d %3d %5d %5d %4d %4d %4d\n", i, ping->png_raw_rxrange[i],
 			        ping->png_raw_rxquality[i], ping->png_raw_rxwindow[i], ping->png_raw_rxamp[i], ping->png_raw_rxbeam_num[i],
 			        ping->png_raw_rxpointangle[i], ping->png_raw_rxheading[i], ping->png_raw_rxroll[i], ping->png_raw_rxpitch[i],
@@ -3799,7 +3787,6 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	int png_raw3_serial;
 	int head;
 	int read_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3875,7 +3862,7 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* read binary tx values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < ping->png_raw3_ntx && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < ping->png_raw3_ntx && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_RAWBEAM3_TX_SIZE, mbfp);
 			if (read_len == EM2_RAWBEAM3_TX_SIZE && i < MBSYS_SIMRAD2_MAXTX) {
 				status = MB_SUCCESS;
@@ -3903,7 +3890,7 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* read binary beam values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < ping->png_raw3_nbeams && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < ping->png_raw3_nbeams && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_RAWBEAM3_BEAM_SIZE, mbfp);
 			if (read_len == EM2_RAWBEAM3_BEAM_SIZE && i < MBSYS_SIMRAD2_MAXBEAMS) {
 				status = MB_SUCCESS;
@@ -3949,7 +3936,7 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 		}
-		for (i = 1; i < ping->png_raw3_nbeams; i++) {
+		for (int i = 1; i < ping->png_raw3_nbeams; i++) {
 			if (ping->png_raw3_rxbeam_num[i] < ping->png_raw3_rxbeam_num[i - 1] ||
 			    ping->png_raw3_rxbeam_num[i] > ping->png_raw3_nbeams_max) {
 				status = MB_FAILURE;
@@ -3979,7 +3966,7 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg5       transmit pulse values:\n");
 		fprintf(stderr, "dbg5       tiltangle focus length offset center bandwidth waveform sector\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_raw3_ntx; i++)
+		for (int i = 0; i < ping->png_raw3_ntx; i++)
 			fprintf(stderr, "dbg5       %3d %5d %5d %6d %4d %4d %4d %4d %4d\n", i, ping->png_raw3_txtiltangle[i],
 			        ping->png_raw3_txfocus[i], ping->png_raw3_txsignallength[i], ping->png_raw3_txoffset[i],
 			        ping->png_raw3_txcenter[i], ping->png_raw3_txbandwidth[i], ping->png_raw3_txwaveform[i],
@@ -3988,7 +3975,7 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg5       beam values:\n");
 		fprintf(stderr, "dbg5       angle range sector amp quality window beam\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_raw3_nbeams; i++)
+		for (int i = 0; i < ping->png_raw3_nbeams; i++)
 			fprintf(stderr, "dbg5       %3d %5d %3d %3d %4d %3d %5d %5d\n", i, ping->png_raw3_rxpointangle[i],
 			        ping->png_raw3_rxrange[i], ping->png_raw3_rxsector[i], ping->png_raw3_rxamp[i], ping->png_raw3_rxquality[i],
 			        ping->png_raw3_rxwindow[i], ping->png_raw3_rxbeam_num[i]);
@@ -4021,7 +4008,6 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	int junk_bytes;
 	int read_size;
 	int offset;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4111,7 +4097,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* read binary beam values */
 	if (status == MB_SUCCESS) {
 		ping->png_npixels = 0;
-		for (i = 0; i < ping->png_nbeams_ss && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < ping->png_nbeams_ss && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_SS_MBA_BEAM_SIZE, mbfp);
 			if (read_len == EM2_SS_MBA_BEAM_SIZE && i < MBSYS_SIMRAD2_MAXBEAMS) {
 				status = MB_SUCCESS;
@@ -4164,7 +4150,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 		}
-		for (i = 1; i < ping->png_nbeams_ss; i++) {
+		for (int i = 1; i < ping->png_nbeams_ss; i++) {
 			if (ping->png_beam_index[i] < ping->png_beam_index[i - 1] || ping->png_beam_index[0] > MBSYS_SIMRAD2_MAXBEAMS) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
@@ -4187,13 +4173,13 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 	/* read any leftover binary sidescan values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < junk_bytes; i++)
+		for (int i = 0; i < junk_bytes; i++)
 			read_len = fread(&line[0], 1, 1, mbfp);
 	}
 
 	/* read processed sidescan data */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < MBSYS_SIMRAD2_MAXPIXELS; i++) {
+		for (int i = 0; i < MBSYS_SIMRAD2_MAXPIXELS; i++) {
 			ping->png_ss[i] = 0;
 		}
 		read_len = fread(line, 1, ping->png_pixels_ss * sizeof(short), mbfp);
@@ -4208,7 +4194,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* get processed sidescan data */
 	if (status == MB_SUCCESS) {
 		offset = (MBSYS_SIMRAD2_MAXPIXELS - ping->png_pixels_ss) / 2;
-		for (i = 0; i < ping->png_pixels_ss; i++) {
+		for (int i = 0; i < ping->png_pixels_ss; i++) {
 			mb_get_binary_short(swap, &line[2 * i], &short_val);
 			ping->png_ss[offset + i] = (int)((short)short_val);
 		}
@@ -4216,7 +4202,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 	/* read processed sidescan alongtrack data */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < MBSYS_SIMRAD2_MAXPIXELS; i++) {
+		for (int i = 0; i < MBSYS_SIMRAD2_MAXPIXELS; i++) {
 			ping->png_ssalongtrack[i] = 0;
 		}
 		read_len = fread(line, 1, ping->png_pixels_ss * sizeof(short), mbfp);
@@ -4231,7 +4217,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* get processed sidescan alongtrack data */
 	if (status == MB_SUCCESS) {
 		offset = (MBSYS_SIMRAD2_MAXPIXELS - ping->png_pixels_ss) / 2;
-		for (i = 0; i < ping->png_pixels_ss; i++) {
+		for (int i = 0; i < ping->png_pixels_ss; i++) {
 			mb_get_binary_short(swap, &line[2 * i], &short_val);
 			ping->png_ssalongtrack[offset + i] = (int)((short)short_val);
 		}
@@ -4304,7 +4290,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		fprintf(stderr, "dbg5       png_sample_rate:       %d\n", ping->png_sample_rate);
 		fprintf(stderr, "dbg5       cnt  depth xtrack ltrack dprsn   azi   rng  qual wnd  amp num flag\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_nbeams; i++)
+		for (int i = 0; i < ping->png_nbeams; i++)
 			fprintf(stderr, "dbg5       %3d %6d %6d %6d %5d %5d %5d %4d %3d %4d %3d %4d\n", i, ping->png_depth[i],
 			        ping->png_acrosstrack[i], ping->png_alongtrack[i], ping->png_depression[i], ping->png_azimuth[i],
 			        ping->png_range[i], ping->png_quality[i], ping->png_window[i], ping->png_amp[i], ping->png_beam_num[i],
@@ -4322,18 +4308,18 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		fprintf(stderr, "dbg5       png_npixels:       %d\n", ping->png_npixels);
 		fprintf(stderr, "dbg5       cnt  index sort samples start center\n");
 		fprintf(stderr, "dbg5       --------------------------------------------------\n");
-		for (i = 0; i < ping->png_nbeams_ss; i++)
+		for (int i = 0; i < ping->png_nbeams_ss; i++)
 			fprintf(stderr, "dbg5        %4d %3d %2d %4d %4d %4d\n", i, ping->png_beam_index[i], ping->png_sort_direction[i],
 			        ping->png_beam_samples[i], ping->png_start_sample[i], ping->png_center_sample[i]);
 		fprintf(stderr, "dbg5       cnt  ss\n");
 		fprintf(stderr, "dbg5       --------------------------------------------------\n");
-		for (i = 0; i < ping->png_npixels; i++)
+		for (int i = 0; i < ping->png_npixels; i++)
 			fprintf(stderr, "dbg5        %d %d\n", i, ping->png_ssraw[i]);
 		fprintf(stderr, "dbg5       png_pixel_size:    %d\n", ping->png_pixel_size);
 		fprintf(stderr, "dbg5       png_pixels_ss:     %d\n", ping->png_pixels_ss);
 		fprintf(stderr, "dbg5       pixel  ss  ltrack\n");
 		fprintf(stderr, "dbg5       --------------------------------------------------\n");
-		for (i = 0; i < MBSYS_SIMRAD2_MAXPIXELS; i++)
+		for (int i = 0; i < MBSYS_SIMRAD2_MAXPIXELS; i++)
 			fprintf(stderr, "dbg5        %4d %6d %6d\n", i, ping->png_ss[i], ping->png_ssalongtrack[i]);
 	}
 
@@ -4359,7 +4345,6 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	int read_len;
 	int done;
 	int file_bytes;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4434,7 +4419,7 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 	/* read binary beam values */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < wc->wtc_ntx && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < wc->wtc_ntx && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_WC_TX_SIZE, mbfp);
 			if (read_len == EM2_WC_TX_SIZE && i < MBSYS_SIMRAD2_MAXTX) {
 				mb_get_binary_short(swap, &line[0], &short_val);
@@ -4448,7 +4433,7 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 				*error = MB_ERROR_EOF;
 			}
 		}
-		for (i = 0; i < wc->wtc_nbeam && status == MB_SUCCESS; i++) {
+		for (int i = 0; i < wc->wtc_nbeam && status == MB_SUCCESS; i++) {
 			read_len = fread(line, 1, EM2_WC_BEAM_SIZE, mbfp);
 			if (read_len == EM2_WC_BEAM_SIZE && i < MBSYS_SIMRAD2_MAXBEAMS) {
 				mb_get_binary_short(swap, &line[0], &short_val);
@@ -4524,9 +4509,9 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		fprintf(stderr, "dbg5       ---------------------------\n");
 		fprintf(stderr, "dbg5       cnt  tilt center sector\n");
 		fprintf(stderr, "dbg5       ---------------------------\n");
-		for (i = 0; i < wc->wtc_ntx; i++)
+		for (int i = 0; i < wc->wtc_ntx; i++)
 			fprintf(stderr, "dbg5       %3d %6d %6d %6d\n", i, wc->wtc_txtiltangle[i], wc->wtc_txcenter[i], wc->wtc_txsector[i]);
-		for (i = 0; i < wc->wtc_nbeam; i++) {
+		for (int i = 0; i < wc->wtc_nbeam; i++) {
 			fprintf(stderr, "dbg5       --------------------------------------------------\n");
 			fprintf(stderr, "dbg5       cnt  angle start samples unknown sector beam\n");
 			fprintf(stderr, "dbg5       --------------------------------------------------\n");
@@ -4775,7 +4760,6 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	unsigned short checksum;
 	char *comma_ptr;
 	mb_u_char *uchar_ptr;
-	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -5063,7 +5047,7 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 
 	/* compute checksum */
 	uchar_ptr = (mb_u_char *)line;
-	for (j = 5; j < write_size - 3; j++)
+	for (int j = 5; j < write_size - 3; j++)
 		checksum += uchar_ptr[j];
 
 	/* set checksum */
@@ -5099,7 +5083,6 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -5140,7 +5123,7 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 		fprintf(stderr, "dbg5       run_beam_space:  %d\n", store->run_beam_space);
 		fprintf(stderr, "dbg5       run_swath_angle: %d\n", store->run_swath_angle);
 		fprintf(stderr, "dbg5       run_stab_mode:   %d\n", store->run_stab_mode);
-		for (i = 0; i < 6; i++)
+		for (int i = 0; i < 6; i++)
 			fprintf(stderr, "dbg5       run_spare[%d]:    %d\n", i, store->run_spare[i]);
 	}
 
@@ -5214,13 +5197,13 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 		line[36] = store->run_beam_space;
 		line[37] = store->run_swath_angle;
 		line[38] = store->run_stab_mode;
-		for (i = 0; i < 6; i++)
+		for (int i = 0; i < 6; i++)
 			line[39 + i] = store->run_spare[i];
 		line[EM2_RUN_PARAMETER_SIZE - 7] = 0x03;
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_RUN_PARAMETER_SIZE - 7; j++)
+		for (int j = 0; j < EM2_RUN_PARAMETER_SIZE - 7; j++)
 			checksum += uchar_ptr[j];
 
 		/* set checksum */
@@ -5259,7 +5242,6 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -5346,7 +5328,7 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_CLOCK_SIZE - 7; j++)
+		for (int j = 0; j < EM2_CLOCK_SIZE - 7; j++)
 			checksum += uchar_ptr[j];
 
 		/* set checksum */
@@ -5385,7 +5367,6 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -5473,7 +5454,7 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_TIDE_SIZE - 7; j++)
+		for (int j = 0; j < EM2_TIDE_SIZE - 7; j++)
 			checksum += uchar_ptr[j];
 
 		/* set checksum */
@@ -5512,7 +5493,6 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -5597,7 +5577,7 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_HEIGHT_SIZE - 7; j++)
+		for (int j = 0; j < EM2_HEIGHT_SIZE - 7; j++)
 			checksum += uchar_ptr[j];
 
 		/* set checksum */
@@ -5637,7 +5617,6 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -5666,7 +5645,7 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg5       hed_ndata:       %d\n", heading->hed_ndata);
 		fprintf(stderr, "dbg5       count    time (msec)    heading (0.01 deg)\n");
 		fprintf(stderr, "dbg5       -----    -----------    ------------------\n");
-		for (i = 0; i < heading->hed_ndata; i++)
+		for (int i = 0; i < heading->hed_ndata; i++)
 			fprintf(stderr, "dbg5        %4d      %7d          %7d\n", i, heading->hed_time[i], heading->hed_heading[i]);
 		fprintf(stderr, "dbg5       hed_heading_status: %d\n", heading->hed_heading_status);
 	}
@@ -5728,7 +5707,7 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_HEADING_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_HEADING_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -5745,13 +5724,13 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 
 	/* output binary heading data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < heading->hed_ndata; i++) {
+		for (int i = 0; i < heading->hed_ndata; i++) {
 			mb_put_binary_short(swap, (unsigned short)heading->hed_time[i], (void *)&line[0]);
 			mb_put_binary_short(swap, (unsigned short)heading->hed_heading[i], (void *)&line[2]);
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_HEADING_SLICE_SIZE; j++)
+			for (int j = 0; j < EM2_HEADING_SLICE_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -5812,7 +5791,6 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -5841,7 +5819,7 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		fprintf(stderr, "dbg5       ssv_ndata:       %d\n", ssv->ssv_ndata);
 		fprintf(stderr, "dbg5       count    time (msec)    ssv (0.1 m/s)\n");
 		fprintf(stderr, "dbg5       -----    -----------    ------------------\n");
-		for (i = 0; i < ssv->ssv_ndata; i++)
+		for (int i = 0; i < ssv->ssv_ndata; i++)
 			fprintf(stderr, "dbg5        %4d      %7d          %7d\n", i, ssv->ssv_time[i], ssv->ssv_ssv[i]);
 	}
 
@@ -5901,7 +5879,7 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_SSV_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_SSV_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -5918,13 +5896,13 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 	/* output binary ssv data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < ssv->ssv_ndata; i++) {
+		for (int i = 0; i < ssv->ssv_ndata; i++) {
 			mb_put_binary_short(swap, (unsigned short)ssv->ssv_time[i], (void *)&line[0]);
 			mb_put_binary_short(swap, (unsigned short)ssv->ssv_ssv[i], (void *)&line[2]);
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_SSV_SLICE_SIZE; j++)
+			for (int j = 0; j < EM2_SSV_SLICE_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -5985,7 +5963,6 @@ int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -6014,7 +5991,7 @@ int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg5       tlt_ndata:       %d\n", tilt->tlt_ndata);
 		fprintf(stderr, "dbg5       count    time (msec)    tilt (0.01 deg)\n");
 		fprintf(stderr, "dbg5       -----    -----------    ------------------\n");
-		for (i = 0; i < tilt->tlt_ndata; i++)
+		for (int i = 0; i < tilt->tlt_ndata; i++)
 			fprintf(stderr, "dbg5        %4d      %7d          %7d\n", i, tilt->tlt_time[i], tilt->tlt_tilt[i]);
 	}
 
@@ -6074,7 +6051,7 @@ int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_TILT_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_TILT_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -6091,13 +6068,13 @@ int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* output binary tilt data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < tilt->tlt_ndata; i++) {
+		for (int i = 0; i < tilt->tlt_ndata; i++) {
 			mb_put_binary_short(swap, (unsigned short)tilt->tlt_time[i], (void *)&line[0]);
 			mb_put_binary_short(swap, (unsigned short)tilt->tlt_tilt[i], (void *)&line[2]);
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_TILT_SLICE_SIZE; j++)
+			for (int j = 0; j < EM2_TILT_SLICE_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -6158,7 +6135,6 @@ int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -6189,10 +6165,10 @@ int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 		fprintf(stderr, "dbg5       xtr_nalloc:      %d\n", extraparameters->xtr_nalloc);
 /*		if (extraparameters->xtr_id == 2) {
 			fprintf(stderr, "dbg5       xtr_pqf_activepositioning:          %d\n", extraparameters->xtr_pqf_activepositioning);
-			for (i = 0; i < 3; i++) {
+			for (int i = 0; i < 3; i++) {
 				fprintf(stderr, "dbg5       positioning system:%d qfsetting:%d nqf:%d\n", i,
 				        extraparameters->xtr_pqf_qfsetting[i], extraparameters->xtr_pqf_nqualityfactors[i]);
-				for (j = 0; j < extraparameters->xtr_pqf_nqualityfactors[i]; j++)
+				for (int j = 0; j < extraparameters->xtr_pqf_nqualityfactors[i]; j++)
 					fprintf(stderr, "dbg5       quality factor:%d value:%d limit:%d\n", j,
 					        extraparameters->xtr_pqf_qfvalues[i][j], extraparameters->xtr_pqf_qflimits[i][j]);
 			}
@@ -6255,7 +6231,7 @@ int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_EXTRAPARAMETERS_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_EXTRAPARAMETERS_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -6274,7 +6250,7 @@ int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 	if (status == MB_SUCCESS) {
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)extraparameters->xtr_data;
-		for (j = 0; j < extraparameters->xtr_data_size; j++)
+		for (int j = 0; j < extraparameters->xtr_data_size; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -6335,7 +6311,6 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -6364,7 +6339,7 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg5       att_ndata:       %d\n", attitude->att_ndata);
 		fprintf(stderr, "dbg5       cnt   time   roll pitch heave heading\n");
 		fprintf(stderr, "dbg5       -------------------------------------\n");
-		for (i = 0; i < attitude->att_ndata; i++)
+		for (int i = 0; i < attitude->att_ndata; i++)
 			fprintf(stderr, "dbg5        %3d  %d  %d %d %d %d\n", i, attitude->att_time[i], attitude->att_roll[i],
 			        attitude->att_pitch[i], attitude->att_heave[i], attitude->att_heading[i]);
 		fprintf(stderr, "dbg5       att_heading_status: %d\n", attitude->att_heading_status);
@@ -6427,7 +6402,7 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_ATTITUDE_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_ATTITUDE_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -6444,7 +6419,7 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* output binary heading data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < attitude->att_ndata; i++) {
+		for (int i = 0; i < attitude->att_ndata; i++) {
 			mb_put_binary_short(swap, (unsigned short)attitude->att_time[i], (void *)&line[0]);
 			mb_put_binary_short(swap, (unsigned short)attitude->att_sensor_status[i], (void *)&line[2]);
 			mb_put_binary_short(swap, (short)attitude->att_roll[i], (void *)&line[4]);
@@ -6454,7 +6429,7 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_ATTITUDE_SLICE_SIZE; j++)
+			for (int j = 0; j < EM2_ATTITUDE_SLICE_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -6514,7 +6489,6 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -6612,7 +6586,7 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_POS_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_POS_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -6633,7 +6607,7 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)store->pos_input;
-		for (j = 0; j < write_size; j++)
+		for (int j = 0; j < write_size; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -6688,7 +6662,6 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -6717,7 +6690,7 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		fprintf(stderr, "dbg5       svp_depth_res:   %d\n", store->svp_depth_res);
 		fprintf(stderr, "dbg5       count    depth    speed\n");
 		fprintf(stderr, "dbg5       -----------------------\n");
-		for (i = 0; i < store->svp_num; i++)
+		for (int i = 0; i < store->svp_num; i++)
 			fprintf(stderr, "dbg5        %d   %d  %d\n", i, store->svp_depth[i], store->svp_vel[i]);
 	}
 
@@ -6780,7 +6753,7 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_SVP2_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_SVP2_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -6797,13 +6770,13 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 	/* output binary svp data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < store->svp_num; i++) {
+		for (int i = 0; i < store->svp_num; i++) {
 			mb_put_binary_int(swap, (int)store->svp_depth[i], (void *)&line[0]);
 			mb_put_binary_int(swap, (int)store->svp_vel[i], (void *)&line[4]);
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_SVP2_SLICE_SIZE; j++)
+			for (int j = 0; j < EM2_SVP2_SLICE_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -6864,7 +6837,6 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -6908,7 +6880,7 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		fprintf(stderr, "dbg5       png_sample_rate:       %d\n", ping->png_sample_rate);
 		fprintf(stderr, "dbg5       cnt  depth xtrack ltrack dprsn   azi   rng  qual wnd  amp num flag\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_nbeams; i++)
+		for (int i = 0; i < ping->png_nbeams; i++)
 			fprintf(stderr, "dbg5       %3d %6d %6d %6d %5d %5d %5d %4d %3d %4d %3d %4d\n", i, ping->png_depth[i],
 			        ping->png_acrosstrack[i], ping->png_alongtrack[i], ping->png_depression[i], ping->png_azimuth[i],
 			        ping->png_range[i], ping->png_quality[i], ping->png_window[i], ping->png_amp[i], ping->png_beam_num[i],
@@ -6981,7 +6953,7 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_BATH_MBA_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_BATH_MBA_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -6998,7 +6970,7 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* output binary beam data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < ping->png_nbeams; i++) {
+		for (int i = 0; i < ping->png_nbeams; i++) {
 			if (store->sonar == MBSYS_SIMRAD2_EM120 || store->sonar == MBSYS_SIMRAD2_EM300 ||
 			    store->sonar == MBSYS_SIMRAD2_EM12S || store->sonar == MBSYS_SIMRAD2_EM12D ||
 			    store->sonar == MBSYS_SIMRAD2_EM121 || store->sonar == MBSYS_SIMRAD2_EM100 ||
@@ -7019,7 +6991,7 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_BATH_MBA_BEAM_SIZE; j++)
+			for (int j = 0; j < EM2_BATH_MBA_BEAM_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -7080,7 +7052,6 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -7111,7 +7082,7 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg5       png_raw_ssv:         %d\n", ping->png_raw_ssv);
 		fprintf(stderr, "dbg5       cnt  point   tilt   rng  amp num\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_raw_nbeams; i++)
+		for (int i = 0; i < ping->png_raw_nbeams; i++)
 			fprintf(stderr, "dbg5       %3d %5d %5d %5d %3d %3d\n", i, ping->png_raw_rxpointangle[i],
 			        ping->png_raw_rxtiltangle[i], ping->png_raw_rxrange[i], ping->png_raw_rxamp[i], ping->png_raw_rxbeam_num[i]);
 	}
@@ -7175,7 +7146,7 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_RAWBEAM_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_RAWBEAM_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -7192,7 +7163,7 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 
 	/* output binary beam data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < ping->png_raw_nbeams; i++) {
+		for (int i = 0; i < ping->png_raw_nbeams; i++) {
 			mb_put_binary_short(swap, (short)ping->png_raw_rxpointangle[i], (void *)&line[0]);
 			mb_put_binary_short(swap, (short)ping->png_raw_rxtiltangle[i], (void *)&line[2]);
 			mb_put_binary_short(swap, (unsigned short)ping->png_raw_rxrange[i], (void *)&line[4]);
@@ -7201,7 +7172,7 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_RAWBEAM_BEAM_SIZE; j++)
+			for (int j = 0; j < EM2_RAWBEAM_BEAM_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -7262,7 +7233,6 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -7310,7 +7280,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg5       transmit pulse values:\n");
 		fprintf(stderr, "dbg5       cnt lastbeam tiltangle heading roll pitch heave\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_raw_ntx; i++)
+		for (int i = 0; i < ping->png_raw_ntx; i++)
 			fprintf(stderr, "dbg5       %3d %3d %4d %5d %4d %4d %4d\n", i, ping->png_raw_txlastbeam[i],
 			        ping->png_raw_txtiltangle[i], ping->png_raw_txheading[i], ping->png_raw_txroll[i], ping->png_raw_txpitch[i],
 			        ping->png_raw_txheave[i]);
@@ -7318,7 +7288,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg5       beam values:\n");
 		fprintf(stderr, "dbg5       cnt range quality window amp beam angle heading roll pitch heave\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_raw_nbeams; i++)
+		for (int i = 0; i < ping->png_raw_nbeams; i++)
 			fprintf(stderr, "dbg5       %3d %5d %3d %3d %4d %3d %5d %5d %4d %4d %4d\n", i, ping->png_raw_rxrange[i],
 			        ping->png_raw_rxquality[i], ping->png_raw_rxwindow[i], ping->png_raw_rxamp[i], ping->png_raw_rxbeam_num[i],
 			        ping->png_raw_rxpointangle[i], ping->png_raw_rxheading[i], ping->png_raw_rxroll[i], ping->png_raw_rxpitch[i],
@@ -7401,7 +7371,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_RAWBEAM2_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_RAWBEAM2_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -7418,7 +7388,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* output binary tx data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < ping->png_raw_ntx; i++) {
+		for (int i = 0; i < ping->png_raw_ntx; i++) {
 			mb_put_binary_short(swap, (unsigned short)ping->png_raw_txlastbeam[i], (void *)&line[0]);
 			mb_put_binary_short(swap, (short)ping->png_raw_txtiltangle[i], (void *)&line[2]);
 			mb_put_binary_short(swap, (unsigned short)ping->png_raw_txheading[i], (void *)&line[4]);
@@ -7428,7 +7398,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_RAWBEAM2_TX_SIZE; j++)
+			for (int j = 0; j < EM2_RAWBEAM2_TX_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -7445,7 +7415,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* output binary beam data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < ping->png_raw_nbeams; i++) {
+		for (int i = 0; i < ping->png_raw_nbeams; i++) {
 			mb_put_binary_short(swap, (unsigned short)ping->png_raw_rxrange[i], (void *)&line[0]);
 			line[2] = (mb_u_char)ping->png_raw_rxquality[i];
 			line[3] = (mb_u_char)ping->png_raw_rxwindow[i];
@@ -7459,7 +7429,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_RAWBEAM2_BEAM_SIZE; j++)
+			for (int j = 0; j < EM2_RAWBEAM2_BEAM_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -7520,7 +7490,6 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	int write_size;
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -7561,7 +7530,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg5       transmit pulse values:\n");
 		fprintf(stderr, "dbg5       tiltangle focus length offset center bandwidth waveform sector\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_raw3_ntx; i++)
+		for (int i = 0; i < ping->png_raw3_ntx; i++)
 			fprintf(stderr, "dbg5       %3d %5d %5d %6d %4d %4d %4d %4d %4d\n", i, ping->png_raw3_txtiltangle[i],
 			        ping->png_raw3_txfocus[i], ping->png_raw3_txsignallength[i], ping->png_raw3_txoffset[i],
 			        ping->png_raw3_txcenter[i], ping->png_raw3_txbandwidth[i], ping->png_raw3_txwaveform[i],
@@ -7570,7 +7539,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg5       beam values:\n");
 		fprintf(stderr, "dbg5       angle range sector amp quality window beam\n");
 		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
-		for (i = 0; i < ping->png_raw3_nbeams; i++)
+		for (int i = 0; i < ping->png_raw3_nbeams; i++)
 			fprintf(stderr, "dbg5       %3d %5d %3d %3d %4d %3d %5d %5d\n", i, ping->png_raw3_rxpointangle[i],
 			        ping->png_raw3_rxrange[i], ping->png_raw3_rxsector[i], ping->png_raw3_rxamp[i], ping->png_raw3_rxquality[i],
 			        ping->png_raw3_rxwindow[i], ping->png_raw3_rxbeam_num[i]);
@@ -7642,7 +7611,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_RAWBEAM3_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_RAWBEAM3_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -7659,7 +7628,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* output binary tx data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < ping->png_raw3_ntx; i++) {
+		for (int i = 0; i < ping->png_raw3_ntx; i++) {
 			mb_put_binary_short(swap, (short)ping->png_raw3_txtiltangle[i], (void *)&line[0]);
 			mb_put_binary_short(swap, (unsigned short)ping->png_raw3_txfocus[i], (void *)&line[2]);
 			mb_put_binary_int(swap, (int)ping->png_raw3_txsignallength[i], (void *)&line[4]);
@@ -7671,7 +7640,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_RAWBEAM3_TX_SIZE; j++)
+			for (int j = 0; j < EM2_RAWBEAM3_TX_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -7688,7 +7657,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* output binary beam data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < ping->png_raw3_nbeams; i++) {
+		for (int i = 0; i < ping->png_raw3_nbeams; i++) {
 			mb_put_binary_short(swap, (short)ping->png_raw3_rxpointangle[i], (void *)&line[0]);
 			mb_put_binary_short(swap, (unsigned short)ping->png_raw3_rxrange[i], (void *)&line[2]);
 			line[4] = (mb_u_char)ping->png_raw3_rxsector[i];
@@ -7700,7 +7669,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_RAWBEAM3_BEAM_SIZE; j++)
+			for (int j = 0; j < EM2_RAWBEAM3_BEAM_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -7762,7 +7731,6 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	unsigned short checksum;
 	mb_u_char *uchar_ptr;
 	int offset;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -7805,18 +7773,18 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		fprintf(stderr, "dbg5       png_npixels:       %d\n", ping->png_npixels);
 		fprintf(stderr, "dbg5       cnt  index sort samples start center\n");
 		fprintf(stderr, "dbg5       --------------------------------------------------\n");
-		for (i = 0; i < ping->png_nbeams_ss; i++)
+		for (int i = 0; i < ping->png_nbeams_ss; i++)
 			fprintf(stderr, "dbg5        %4d %3d %2d %4d %4d %4d\n", i, ping->png_beam_index[i], ping->png_sort_direction[i],
 			        ping->png_beam_samples[i], ping->png_start_sample[i], ping->png_center_sample[i]);
 		fprintf(stderr, "dbg5       cnt  ss\n");
 		fprintf(stderr, "dbg5       --------------------------------------------------\n");
-		for (i = 0; i < ping->png_npixels; i++)
+		for (int i = 0; i < ping->png_npixels; i++)
 			fprintf(stderr, "dbg5        %d %d\n", i, ping->png_ssraw[i]);
 		fprintf(stderr, "dbg5       png_pixel_size:    %d\n", ping->png_pixel_size);
 		fprintf(stderr, "dbg5       png_pixels_ss:     %d\n", ping->png_pixels_ss);
 		fprintf(stderr, "dbg5       pixel  ss  ltrack\n");
 		fprintf(stderr, "dbg5       --------------------------------------------------\n");
-		for (i = 0; i < MBSYS_SIMRAD2_MAXPIXELS; i++)
+		for (int i = 0; i < MBSYS_SIMRAD2_MAXPIXELS; i++)
 			fprintf(stderr, "dbg5        %4d %6d %6d\n", i, ping->png_ss[i], ping->png_ssalongtrack[i]);
 	}
 
@@ -7889,7 +7857,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_SS_MBA_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_SS_MBA_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -7906,7 +7874,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 	/* output binary beam data */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < ping->png_nbeams_ss; i++) {
+		for (int i = 0; i < ping->png_nbeams_ss; i++) {
 			line[0] = (mb_u_char)ping->png_beam_index[i];
 			line[1] = (mb_s_char)ping->png_sort_direction[i];
 			mb_put_binary_short(swap, (unsigned short)ping->png_beam_samples[i], (void *)&line[2]);
@@ -7914,7 +7882,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_SS_MBA_BEAM_SIZE; j++)
+			for (int j = 0; j < EM2_SS_MBA_BEAM_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -7937,7 +7905,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)ping->png_ssraw;
-		for (j = 0; j < write_size; j++)
+		for (int j = 0; j < write_size; j++)
 			checksum += uchar_ptr[j];
 
 		write_len = fwrite(ping->png_ssraw, 1, write_size, mbfp);
@@ -7954,14 +7922,14 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* output processed sidescan data */
 	if (status == MB_SUCCESS) {
 		offset = (MBSYS_SIMRAD2_MAXPIXELS - ping->png_pixels_ss) / 2;
-		for (i = 0; i < ping->png_pixels_ss; i++) {
+		for (int i = 0; i < ping->png_pixels_ss; i++) {
 			mb_put_binary_short(swap, (short)ping->png_ss[offset + i], (void *)&line[2 * i]);
 		}
 
 		/* compute checksum */
 		write_size = ping->png_pixels_ss * sizeof(short);
 		uchar_ptr = (mb_u_char *)&line[0];
-		for (j = 0; j < write_size; j++)
+		for (int j = 0; j < write_size; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -7979,14 +7947,14 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* output processed sidescan alongtrack data */
 	if (status == MB_SUCCESS) {
 		offset = (MBSYS_SIMRAD2_MAXPIXELS - ping->png_pixels_ss) / 2;
-		for (i = 0; i < ping->png_pixels_ss; i++) {
+		for (int i = 0; i < ping->png_pixels_ss; i++) {
 			mb_put_binary_short(swap, (short)ping->png_ssalongtrack[offset + i], (void *)&line[2 * i]);
 		}
 
 		/* compute checksum */
 		write_size = ping->png_pixels_ss * sizeof(short);
 		uchar_ptr = (mb_u_char *)&line[0];
-		for (j = 0; j < write_size; j++)
+		for (int j = 0; j < write_size; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -8044,7 +8012,6 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	mb_u_char *uchar_ptr;
 	int record_size;
 	int pad;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -8084,9 +8051,9 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		fprintf(stderr, "dbg5       ---------------------------\n");
 		fprintf(stderr, "dbg5       cnt  tilt center sector\n");
 		fprintf(stderr, "dbg5       ---------------------------\n");
-		for (i = 0; i < wc->wtc_ntx; i++)
+		for (int i = 0; i < wc->wtc_ntx; i++)
 			fprintf(stderr, "dbg5       %3d %6d %6d %6d\n", i, wc->wtc_txtiltangle[i], wc->wtc_txcenter[i], wc->wtc_txsector[i]);
-		for (i = 0; i < wc->wtc_nbeam; i++) {
+		for (int i = 0; i < wc->wtc_nbeam; i++) {
 			fprintf(stderr, "dbg5       --------------------------------------------------\n");
 			fprintf(stderr, "dbg5       cnt  angle start samples unknown sector beam\n");
 			fprintf(stderr, "dbg5       --------------------------------------------------\n");
@@ -8107,7 +8074,7 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 	/* write the record size */
 	record_size = EM2_WC_HEADER_SIZE + EM2_WC_BEAM_SIZE * wc->wtc_nbeam + EM2_WC_TX_SIZE * wc->wtc_ntx + 8;
-	for (i = 0; i < wc->wtc_nbeam; i++) {
+	for (int i = 0; i < wc->wtc_nbeam; i++) {
 		record_size += wc->beam[i].wtc_beam_samples;
 	}
 	pad = (record_size % 2);
@@ -8173,7 +8140,7 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
-		for (j = 0; j < EM2_WC_HEADER_SIZE; j++)
+		for (int j = 0; j < EM2_WC_HEADER_SIZE; j++)
 			checksum += uchar_ptr[j];
 
 		/* write out data */
@@ -8190,7 +8157,7 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 	/* output binary beam data */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < wc->wtc_ntx; i++) {
+		for (int i = 0; i < wc->wtc_ntx; i++) {
 			mb_put_binary_short(swap, (short)wc->wtc_txtiltangle[i], (void *)&line[0]);
 			mb_put_binary_short(swap, (unsigned short)wc->wtc_txcenter[i], (void *)&line[2]);
 			line[4] = (mb_u_char)wc->wtc_txsector[i];
@@ -8198,7 +8165,7 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_WC_TX_SIZE; j++)
+			for (int j = 0; j < EM2_WC_TX_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -8212,7 +8179,7 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 				status = MB_SUCCESS;
 			}
 		}
-		for (i = 0; i < wc->wtc_nbeam; i++) {
+		for (int i = 0; i < wc->wtc_nbeam; i++) {
 			mb_put_binary_short(swap, (short)wc->beam[i].wtc_rxpointangle, (void *)&line[0]);
 			mb_put_binary_short(swap, (unsigned short)wc->beam[i].wtc_start_sample, (void *)&line[2]);
 			mb_put_binary_short(swap, (unsigned short)wc->beam[i].wtc_beam_samples, (void *)&line[4]);
@@ -8222,7 +8189,7 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
-			for (j = 0; j < EM2_WC_BEAM_SIZE; j++)
+			for (int j = 0; j < EM2_WC_BEAM_SIZE; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
@@ -8238,7 +8205,7 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)wc->beam[i].wtc_amp;
-			for (j = 0; j < wc->beam[i].wtc_beam_samples; j++)
+			for (int j = 0; j < wc->beam[i].wtc_beam_samples; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */

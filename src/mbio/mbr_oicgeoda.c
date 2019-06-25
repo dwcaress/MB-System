@@ -232,7 +232,6 @@ int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_oicgeoda_struct *dataplus;
 	struct mbf_oicgeoda_header_struct *header;
 	struct mbf_oicgeoda_data_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -262,7 +261,7 @@ int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	header->pixels_ss = 0;
 	header->ss_chan_port = -1;
 	header->ss_chan_stbd = -1;
-	for (i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
+	for (int i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
 		header->channel[i].offset = 0;
 		header->channel[i].num_samples = 0;
 		data->rawsize[i] = 0;
@@ -301,7 +300,6 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_oicgeoda_struct *dataplus;
 	struct mbf_oicgeoda_header_struct *header;
 	struct mbf_oicgeoda_data_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -318,7 +316,7 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	data = &(dataplus->data);
 
 	/* deallocate memory for data descriptor */
-	for (i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
+	for (int i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
 		if (data->raw[i] != NULL)
 			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(data->raw[i]), error);
 	}
@@ -377,7 +375,6 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double dx, rr, xx, zz;
 	double alpha, beta, theta, phi;
 	int index, ichan;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -409,7 +406,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* read another byted at a time until header found */
 	while (status == MB_SUCCESS && (buffer[0] != 'G' || buffer[1] != 'E' || buffer[2] != 'O')) {
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
 			buffer[i] = buffer[i + 1];
 		if ((read_size = fread(&buffer[3], 1, 1, mb_io_ptr->mbfp)) != 1) {
 			status = MB_FAILURE;
@@ -494,11 +491,11 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_get_binary_int(MB_NO, &buffer[index], &header->num_chan);
 		index += 4;
-		for (i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
+		for (int i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
 			mb_get_binary_int(MB_NO, &buffer[index], &header->channel[i].offset);
 			index += 4;
 		}
-		for (i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
+		for (int i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
 			header->channel[i].type = buffer[index];
 			index += 1;
 			header->channel[i].side = buffer[index];
@@ -547,7 +544,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* loop over each data channel and read data */
 	if (status == MB_SUCCESS && header->num_chan > 0) {
-		for (i = 0; i < header->num_chan; i++) {
+		for (int i = 0; i < header->num_chan; i++) {
 			/* get size of data array */
 			if (header->channel[i].size == OIC_SIZE_CHAR)
 				data_size = sizeof(char) * header->channel[i].num_samples;
@@ -581,25 +578,25 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (status == MB_SUCCESS) {
 				if (header->channel[i].size == OIC_SIZE_SHORT) {
 					short_ptr = (short *)data->raw[i];
-					for (j = 0; j < header->channel[i].num_samples; j++) {
+					for (int j = 0; j < header->channel[i].num_samples; j++) {
 						short_ptr[j] = mb_swap_short(short_ptr[j]);
 					}
 				}
 				else if (header->channel[i].size == OIC_SIZE_INT) {
 					int_ptr = (int *)data->raw[i];
-					for (j = 0; j < header->channel[i].num_samples; j++) {
+					for (int j = 0; j < header->channel[i].num_samples; j++) {
 						int_ptr[j] = mb_swap_int(int_ptr[j]);
 					}
 				}
 				else if (header->channel[i].size == OIC_SIZE_FLOAT) {
 					float_ptr = (float *)data->raw[i];
-					for (j = 0; j < header->channel[i].num_samples; j++) {
+					for (int j = 0; j < header->channel[i].num_samples; j++) {
 						mb_swap_float(&float_ptr[j]);
 					}
 				}
 				else if (header->channel[i].size == OIC_SIZE_3FLOAT) {
 					float_ptr = (float *)data->raw[i];
-					for (j = 0; j < 3 * header->channel[i].num_samples; j++) {
+					for (int j = 0; j < 3 * header->channel[i].num_samples; j++) {
 						mb_swap_float(&float_ptr[j]);
 					}
 				}
@@ -644,7 +641,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 						int_ptr = (int *)data->raw[ichan];
 					else if (header->channel[ichan].size == OIC_SIZE_FLOAT)
 						float_ptr = (float *)data->raw[ichan];
-					for (i = 0; i < header->channel[ichan].num_samples; i++) {
+					for (int i = 0; i < header->channel[ichan].num_samples; i++) {
 						if (header->channel[ichan].size == OIC_SIZE_SHORT) {
 							if (short_ptr[i] > 0)
 								beams_bath_port++;
@@ -669,7 +666,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 						int_ptr = (int *)data->raw[ichan];
 					else if (header->channel[ichan].size == OIC_SIZE_FLOAT)
 						float_ptr = (float *)data->raw[ichan];
-					for (i = 0; i < header->channel[ichan].num_samples; i++) {
+					for (int i = 0; i < header->channel[ichan].num_samples; i++) {
 						if (header->channel[ichan].size == OIC_SIZE_SHORT) {
 							if (short_ptr[i] > 0)
 								beams_bath_stbd++;
@@ -744,7 +741,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       pixels_ss:        %d\n", header->pixels_ss);
 		fprintf(stderr, "dbg5       ss_chan_port:     %d\n", header->ss_chan_port);
 		fprintf(stderr, "dbg5       ss_chan_stbd:     %d\n", header->ss_chan_stbd);
-		for (i = 0; i < header->num_chan; i++) {
+		for (int i = 0; i < header->num_chan; i++) {
 			fprintf(stderr, "dbg5       offset[%1d]:      %d\n", i, header->channel[i].offset);
 			fprintf(stderr, "dbg5       type[%1d]:        %d\n", i, header->channel[i].type);
 			fprintf(stderr, "dbg5       side[%1d]:        %d\n", i, header->channel[i].side);
@@ -753,7 +750,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5       frequency[%1d]:   %d\n", i, header->channel[i].frequency);
 			fprintf(stderr, "dbg5       num_samples[%1d]: %d\n", i, header->channel[i].num_samples);
 		}
-		for (i = 0; i < header->num_chan; i++) {
+		for (int i = 0; i < header->num_chan; i++) {
 			fprintf(stderr, "\ndbg5  New data read in function <%s>\n", function_name);
 			fprintf(stderr, "dbg5       channel:   %d\n", i);
 			if (header->channel[i].type == OIC_TYPE_SIDESCAN)
@@ -775,35 +772,35 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (header->channel[i].size == OIC_SIZE_CHAR) {
 				fprintf(stderr, "dbg5       size:      char (1 byte)\n");
 				char_ptr = (char *)data->raw[i];
-				for (j = 0; j < header->channel[i].num_samples; j++) {
+				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %5d\n", j, char_ptr[j]);
 				}
 			}
 			else if (header->channel[i].size == OIC_SIZE_SHORT) {
 				fprintf(stderr, "dbg5        size:      short (2 bytes)\n");
 				short_ptr = (short *)data->raw[i];
-				for (j = 0; j < header->channel[i].num_samples; j++) {
+				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %5d\n", j, short_ptr[j]);
 				}
 			}
 			else if (header->channel[i].size == OIC_SIZE_INT) {
 				fprintf(stderr, "dbg5       size:       int (4 bytes)\n");
 				int_ptr = (int *)data->raw[i];
-				for (j = 0; j < header->channel[i].num_samples; j++) {
+				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %5d\n", j, int_ptr[j]);
 				}
 			}
 			else if (header->channel[i].size == OIC_SIZE_FLOAT) {
 				fprintf(stderr, "dbg5       size:       float (4 bytes)\n");
 				float_ptr = (float *)data->raw[i];
-				for (j = 0; j < header->channel[i].num_samples; j++) {
+				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %10f\n", j, float_ptr[j]);
 				}
 			}
 			else if (header->channel[i].size == OIC_SIZE_3FLOAT) {
 				fprintf(stderr, "dbg5       size:       3 floats (12 bytes)\n");
 				float_ptr = (float *)data->raw[i];
-				for (j = 0; j < header->channel[i].num_samples; j++) {
+				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %10f %10f %10f\n", j, float_ptr[3 * j], float_ptr[3 * j + 1],
 					        float_ptr[3 * j + 2]);
 				}
@@ -860,17 +857,17 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* initialize bathymetry and sidescan */
-		for (j = 0; j < header->beams_bath; j++) {
+		for (int j = 0; j < header->beams_bath; j++) {
 			data->bathacrosstrack[j] = 0.0;
 			data->bathalongtrack[j] = 0.0;
 			data->bath[j] = 0.0;
 			data->tt[j] = 0.0;
 			data->angle[j] = 0.0;
 		}
-		for (j = 0; j < header->beams_amp; j++) {
+		for (int j = 0; j < header->beams_amp; j++) {
 			data->amp[j] = 0.0;
 		}
-		for (j = 0; j < header->pixels_ss; j++) {
+		for (int j = 0; j < header->pixels_ss; j++) {
 			data->ssacrosstrack[j] = 0.0;
 			data->ssalongtrack[j] = 0.0;
 			data->ss[j] = 0.0;
@@ -879,7 +876,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* get center bathymetry */
 		if (header->bath_chan_port >= 0 && header->channel[header->bath_chan_port].type == OIC_TYPE_ANGLE &&
 		    header->bath_chan_stbd >= 0 && header->channel[header->bath_chan_stbd].type == OIC_TYPE_ANGLE) {
-			j = header->beams_bath / 2;
+			const int j = header->beams_bath / 2;
 			rr = header->fish_altitude;
 			beta = 90.0;
 			alpha = header->fish_pitch;
@@ -896,6 +893,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* get port bathymetry */
 		if (header->bath_chan_port >= 0) {
 			ichan = header->bath_chan_port;
+			int j = 0;
 			if (header->channel[ichan].size == OIC_SIZE_3FLOAT) {
 				j = header->channel[ichan].num_samples;
 			}
@@ -911,7 +909,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				float_ptr = (float *)data->raw[ichan];
 			else if (header->channel[ichan].size == OIC_SIZE_3FLOAT)
 				float_ptr = (float *)data->raw[ichan];
-			for (i = 0; i < header->channel[ichan].num_samples; i++) {
+			for (int i = 0; i < header->channel[ichan].num_samples; i++) {
 				if (header->channel[ichan].size == OIC_SIZE_3FLOAT) {
 					j--;
 					beta = -float_ptr[3 * i + 1] + header->fish_roll;
@@ -958,6 +956,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* get starboard bathymetry */
 		if (header->bath_chan_stbd >= 0) {
 			ichan = header->bath_chan_stbd;
+			int j = 0;
 			if (header->channel[ichan].size == OIC_SIZE_3FLOAT) {
 				j = header->beams_bath - header->channel[ichan].num_samples - 1;
 			}
@@ -973,7 +972,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				float_ptr = (float *)data->raw[ichan];
 			else if (header->channel[ichan].size == OIC_SIZE_3FLOAT)
 				float_ptr = (float *)data->raw[ichan];
-			for (i = 0; i < header->channel[ichan].num_samples; i++) {
+			for (int i = 0; i < header->channel[ichan].num_samples; i++) {
 				if (header->channel[ichan].size == OIC_SIZE_3FLOAT) {
 					j++;
 					beta = float_ptr[3 * i + 1] + header->fish_roll;
@@ -1029,8 +1028,8 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				int_ptr = (int *)data->raw[ichan];
 			else if (header->channel[ichan].size == OIC_SIZE_FLOAT)
 				float_ptr = (float *)data->raw[ichan];
-			for (i = header->fish_altitude_samples + 1; i < header->channel[ichan].num_samples; i++) {
-				j = header->channel[ichan].num_samples - i + header->fish_altitude_samples;
+			for (int i = header->fish_altitude_samples + 1; i < header->channel[ichan].num_samples; i++) {
+				const int j = header->channel[ichan].num_samples - i + header->fish_altitude_samples;
 				if (header->channel[ichan].size == OIC_SIZE_CHAR)
 					data->ss[j] = char_ptr[i];
 				else if (header->channel[ichan].size == OIC_SIZE_SHORT)
@@ -1062,8 +1061,8 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				int_ptr = (int *)data->raw[ichan];
 			else if (header->channel[ichan].size == OIC_SIZE_FLOAT)
 				float_ptr = (float *)data->raw[ichan];
-			for (i = header->fish_altitude_samples + 1; i < header->channel[ichan].num_samples; i++) {
-				j = header->pixels_ss - header->channel[ichan].num_samples + i - header->fish_altitude_samples - 1;
+			for (int i = header->fish_altitude_samples + 1; i < header->channel[ichan].num_samples; i++) {
+				const int j = header->pixels_ss - header->channel[ichan].num_samples + i - header->fish_altitude_samples - 1;
 				if (header->channel[ichan].size == OIC_SIZE_CHAR)
 					data->ss[j] = char_ptr[i];
 				else if (header->channel[ichan].size == OIC_SIZE_SHORT)
@@ -1089,19 +1088,19 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "\ndbg5  New processed data generated in function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", header->beams_bath);
 		fprintf(stderr, "dbg5       beam   bath  xtrack ltrack   tt   angle\n");
-		for (i = 0; i < header->beams_bath; i++) {
+		for (int i = 0; i < header->beams_bath; i++) {
 			fprintf(stderr, "dbg5       %4d %10f %10f %10f %10f %10f\n", i, data->bath[i], data->bathacrosstrack[i],
 			        data->bathalongtrack[i], data->tt[i], data->angle[i]);
 		}
 		fprintf(stderr, "dbg5       beams_amp:       %d\n", header->beams_amp);
 		fprintf(stderr, "dbg5       beam   amp  xtrack ltrack\n");
-		for (i = 0; i < header->beams_amp; i++) {
+		for (int i = 0; i < header->beams_amp; i++) {
 			fprintf(stderr, "dbg5       %4d %10f %10f %10f\n", i, data->amp[i], data->bathacrosstrack[i],
 			        data->bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg5       pixels_ss:       %d\n", header->pixels_ss);
 		fprintf(stderr, "dbg5       beam   ss  xtrack ltrack\n");
-		for (i = 0; i < header->beams_amp; i++) {
+		for (int i = 0; i < header->beams_amp; i++) {
 			fprintf(stderr, "dbg5       %4d %10f %10f %10f\n", i, data->ss[i], data->ssacrosstrack[i], data->ssalongtrack[i]);
 		}
 	}
@@ -1162,7 +1161,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->ss_chan_stbd = header->ss_chan_stbd;
 
 		/* raw data */
-		for (i = 0; i < store->num_chan; i++) {
+		for (int i = 0; i < store->num_chan; i++) {
 			/* copy channel info */
 			store->channel[i].offset = header->channel[i].offset;
 			store->channel[i].type = header->channel[i].type;
@@ -1182,7 +1181,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* copy the data */
 			if (status == MB_SUCCESS) {
-				for (j = 0; j < store->rawsize[i]; j++) {
+				for (int j = 0; j < store->rawsize[i]; j++) {
 					store->raw[i][j] = data->raw[i][j];
 				}
 			}
@@ -1240,7 +1239,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, store->pixels_ss_alloc * sizeof(float),
 			                    (void **)&(store->ssalongtrack), error);
 		}
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			if (data->bath[i] == 0.0)
 				store->beamflag[i] = MB_FLAG_NULL;
 			else
@@ -1251,17 +1250,17 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->tt[i] = data->tt[i];
 			store->angle[i] = data->angle[i];
 		}
-		for (i = 0; i < store->beams_amp; i++) {
+		for (int i = 0; i < store->beams_amp; i++) {
 			store->amp[i] = data->amp[i];
 		}
-		for (i = 0; i < store->pixels_ss; i++) {
+		for (int i = 0; i < store->pixels_ss; i++) {
 			store->ss[i] = data->ss[i];
 			store->ssacrosstrack[i] = data->ssacrosstrack[i];
 			store->ssalongtrack[i] = data->ssalongtrack[i];
 		}
 
 		/* client */
-		for (i = 0; i < header->client_size; i++)
+		for (int i = 0; i < header->client_size; i++)
 			store->client[i] = dataplus->client[i];
 	}
 
@@ -1294,7 +1293,6 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int *int_ptr;
 	float *float_ptr;
 	int index;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1371,7 +1369,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		header->ss_chan_stbd = store->ss_chan_stbd;
 
 		/* raw data */
-		for (i = 0; i < header->num_chan; i++) {
+		for (int i = 0; i < header->num_chan; i++) {
 			/* copy channel info */
 			header->channel[i].offset = store->channel[i].offset;
 			header->channel[i].type = store->channel[i].type;
@@ -1391,7 +1389,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* copy the data */
 			if (status == MB_SUCCESS) {
-				for (j = 0; j < data->rawsize[i]; j++) {
+				for (int j = 0; j < data->rawsize[i]; j++) {
 					data->raw[i][j] = store->raw[i][j];
 				}
 			}
@@ -1442,24 +1440,24 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, data->pixels_ss_alloc * sizeof(float),
 			                    (void **)&(data->ssalongtrack), error);
 		}
-		for (i = 0; i < header->beams_bath; i++) {
+		for (int i = 0; i < header->beams_bath; i++) {
 			data->bath[i] = store->bath[i];
 			data->bathacrosstrack[i] = store->bathacrosstrack[i];
 			data->bathalongtrack[i] = store->bathalongtrack[i];
 			data->tt[i] = store->tt[i];
 			data->angle[i] = store->angle[i];
 		}
-		for (i = 0; i < header->beams_amp; i++) {
+		for (int i = 0; i < header->beams_amp; i++) {
 			data->amp[i] = store->amp[i];
 		}
-		for (i = 0; i < header->pixels_ss; i++) {
+		for (int i = 0; i < header->pixels_ss; i++) {
 			data->ss[i] = store->ss[i];
 			data->ssacrosstrack[i] = store->ssacrosstrack[i];
 			data->ssalongtrack[i] = store->ssalongtrack[i];
 		}
 
 		/* client */
-		for (i = 0; i < header->client_size; i++)
+		for (int i = 0; i < header->client_size; i++)
 			dataplus->client[i] = store->client[i];
 	}
 
@@ -1506,7 +1504,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       pixels_ss:        %d\n", header->pixels_ss);
 		fprintf(stderr, "dbg5       ss_chan_port:     %d\n", header->ss_chan_port);
 		fprintf(stderr, "dbg5       ss_chan_stbd:     %d\n", header->ss_chan_stbd);
-		for (i = 0; i < header->num_chan; i++) {
+		for (int i = 0; i < header->num_chan; i++) {
 			fprintf(stderr, "dbg5       offset[%1d]:      %d\n", i, header->channel[i].offset);
 			fprintf(stderr, "dbg5       type[%1d]:        %d\n", i, header->channel[i].type);
 			fprintf(stderr, "dbg5       side[%1d]:        %d\n", i, header->channel[i].side);
@@ -1521,7 +1519,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* print debug messages */
 	if (verbose >= 5 && status == MB_SUCCESS) {
-		for (i = 0; i < header->num_chan; i++) {
+		for (int i = 0; i < header->num_chan; i++) {
 			fprintf(stderr, "\ndbg5  New data set in function <%s>\n", function_name);
 			fprintf(stderr, "dbg5       channel:   %d\n", i);
 			if (header->channel[i].type == OIC_TYPE_SIDESCAN)
@@ -1543,35 +1541,35 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (header->channel[i].size == OIC_SIZE_CHAR) {
 				fprintf(stderr, "dbg5       size:      char (1 byte)\n");
 				char_ptr = (char *)data->raw[i];
-				for (j = 0; j < header->channel[i].num_samples; j++) {
+				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %5d\n", j, char_ptr[j]);
 				}
 			}
 			else if (header->channel[i].size == OIC_SIZE_SHORT) {
 				fprintf(stderr, "dbg5       size:      short (2 bytes)\n");
 				short_ptr = (short *)data->raw[i];
-				for (j = 0; j < header->channel[i].num_samples; j++) {
+				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %5d\n", j, short_ptr[j]);
 				}
 			}
 			else if (header->channel[i].size == OIC_SIZE_INT) {
 				fprintf(stderr, "dbg5       size:      int (4 bytes)\n");
 				int_ptr = (int *)data->raw[i];
-				for (j = 0; j < header->channel[i].num_samples; j++) {
+				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %5d\n", j, int_ptr[j]);
 				}
 			}
 			else if (header->channel[i].size == OIC_SIZE_FLOAT) {
 				fprintf(stderr, "dbg5       size:      float (4 bytes)\n");
 				float_ptr = (float *)data->raw[i];
-				for (j = 0; j < header->channel[i].num_samples; j++) {
+				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %10f\n", j, float_ptr[j]);
 				}
 			}
 			else if (header->channel[i].size == OIC_SIZE_3FLOAT) {
 				fprintf(stderr, "dbg5       size:      3 floats (12 bytes)\n");
 				float_ptr = (float *)data->raw[i];
-				for (j = 0; j < header->channel[i].num_samples; j++) {
+				for (int j = 0; j < header->channel[i].num_samples; j++) {
 					fprintf(stderr, "dbg5      %5d  %10f %10f %10f\n", j, float_ptr[3 * j], float_ptr[3 * j + 1],
 					        float_ptr[3 * j + 2]);
 				}
@@ -1656,11 +1654,11 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_put_binary_int(MB_NO, header->num_chan, &buffer[index]);
 		index += 4;
-		for (i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
+		for (int i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
 			mb_put_binary_int(MB_NO, header->channel[i].offset, &buffer[index]);
 			index += 4;
 		}
-		for (i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
+		for (int i = 0; i < MBF_OICGEODA_MAX_CHANNELS; i++) {
 			buffer[index] = header->channel[i].type;
 			index += 1;
 			buffer[index] = header->channel[i].side;
@@ -1697,7 +1695,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* loop over each data channel and write data */
 	if (status == MB_SUCCESS && header->num_chan > 0) {
-		for (i = 0; i < header->num_chan; i++) {
+		for (int i = 0; i < header->num_chan; i++) {
 			/* get size of data array */
 			if (header->channel[i].size == OIC_SIZE_CHAR)
 				data_size = sizeof(char) * header->channel[i].num_samples;
@@ -1715,25 +1713,25 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (status == MB_SUCCESS) {
 				if (header->channel[i].size == OIC_SIZE_SHORT) {
 					short_ptr = (short *)data->raw[i];
-					for (j = 0; j < header->channel[i].num_samples; j++) {
+					for (int j = 0; j < header->channel[i].num_samples; j++) {
 						short_ptr[j] = mb_swap_short(short_ptr[j]);
 					}
 				}
 				else if (header->channel[i].size == OIC_SIZE_INT) {
 					int_ptr = (int *)data->raw[i];
-					for (j = 0; j < header->channel[i].num_samples; j++) {
+					for (int j = 0; j < header->channel[i].num_samples; j++) {
 						int_ptr[j] = mb_swap_int(int_ptr[j]);
 					}
 				}
 				else if (header->channel[i].size == OIC_SIZE_FLOAT) {
 					float_ptr = (float *)data->raw[i];
-					for (j = 0; j < header->channel[i].num_samples; j++) {
+					for (int j = 0; j < header->channel[i].num_samples; j++) {
 						mb_swap_float(&float_ptr[j]);
 					}
 				}
 				else if (header->channel[i].size == OIC_SIZE_3FLOAT) {
 					float_ptr = (float *)data->raw[i];
-					for (j = 0; j < 3 * header->channel[i].num_samples; j++) {
+					for (int j = 0; j < 3 * header->channel[i].num_samples; j++) {
 						mb_swap_float(&float_ptr[j]);
 					}
 				}

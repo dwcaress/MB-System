@@ -321,7 +321,6 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char buffer[2 * MBSYS_SB2000_PIXELS + 4];
 	short test_sensor_size, test_data_size;
 	int found, skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -366,7 +365,7 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* if not a good header search through file to find one */
 	while (status == MB_SUCCESS && found == MB_NO) {
 		/* shift bytes by one */
-		for (i = 0; i < MBSYS_SB2000_HEADER_SIZE - 1; i++)
+		for (int i = 0; i < MBSYS_SB2000_HEADER_SIZE - 1; i++)
 			buffer[i] = buffer[i + 1];
 		mb_io_ptr->file_pos += 1;
 		skip++;
@@ -557,7 +556,7 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* extract the values */
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			mb_get_binary_short(MB_NO, &buffer[4 + i * 4], &store->bath[i]);
 			mb_get_binary_short(MB_NO, &buffer[6 + i * 4], &store->bath_acrosstrack[i]);
 		}
@@ -568,7 +567,7 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5  New data values:\n");
 			fprintf(stderr, "dbg5       beams_bath:   %d\n", store->beams_bath);
 			fprintf(stderr, "dbg5       scale_factor: %d\n", store->scale_factor);
-			for (i = 0; i < store->beams_bath; i++)
+			for (int i = 0; i < store->beams_bath; i++)
 				fprintf(stderr, "dbg5       beam: %d  bath: %d  across_track: %d\n", i, store->bath[i],
 				        store->bath_acrosstrack[i]);
 		}
@@ -580,7 +579,7 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_binary_int(MB_NO, &buffer[0], &store->svp_mean);
 		mb_get_binary_short(MB_NO, &buffer[4], &store->svp_number);
 		mb_get_binary_short(MB_NO, &buffer[6], &store->svp_spare);
-		for (i = 0; i < MIN(store->svp_number, 30); i++) {
+		for (int i = 0; i < MIN(store->svp_number, 30); i++) {
 			mb_get_binary_short(MB_NO, &buffer[8 + i * 4], &store->svp_depth[i]);
 			mb_get_binary_short(MB_NO, &buffer[10 + i * 4], &store->svp_vel[i]);
 		}
@@ -600,7 +599,7 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5       svp_mean:     %d\n", store->svp_mean);
 			fprintf(stderr, "dbg5       svp_number:   %d\n", store->svp_number);
 			fprintf(stderr, "dbg5       svp_spare:    %d\n", store->svp_spare);
-			for (i = 0; i < 30; i++)
+			for (int i = 0; i < 30; i++)
 				fprintf(stderr, "dbg5       %d  depth: %d  vel: %d\n", i, store->svp_depth[i], store->svp_vel[i]);
 			fprintf(stderr, "dbg5       vru1:         %d\n", store->vru1);
 			fprintf(stderr, "dbg5       vru1_port:    %d\n", store->vru1_port);
@@ -652,7 +651,6 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 	char buffer[2 * MBSYS_SB2000_PIXELS + 4];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -724,7 +722,7 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       svp_mean:     %d\n", store->svp_mean);
 		fprintf(stderr, "dbg5       svp_number:   %d\n", store->svp_number);
 		fprintf(stderr, "dbg5       svp_spare:   %d\n", store->svp_spare);
-		for (i = 0; i < 30; i++)
+		for (int i = 0; i < 30; i++)
 			fprintf(stderr, "dbg5       %d  depth: %d  vel: %d\n", i, store->svp_depth[i], store->svp_vel[i]);
 		fprintf(stderr, "dbg5       vru1:         %d\n", store->vru1);
 		fprintf(stderr, "dbg5       vru1_port:    %d\n", store->vru1_port);
@@ -746,7 +744,7 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5  Data values:\n");
 		fprintf(stderr, "dbg5       beams_bath:   %d\n", store->beams_bath);
 		fprintf(stderr, "dbg5       scale_factor: %d\n", store->scale_factor);
-		for (i = 0; i < store->beams_bath; i++)
+		for (int i = 0; i < store->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam: %d  bath: %d  across_track: %d\n", i, store->bath[i], store->bath_acrosstrack[i]);
 	}
 
@@ -826,7 +824,7 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_put_binary_int(MB_NO, store->svp_mean, &buffer[0]);
 		mb_put_binary_short(MB_NO, store->svp_number, &buffer[4]);
 		mb_put_binary_short(MB_NO, store->svp_spare, &buffer[6]);
-		for (i = 0; i < MIN(store->svp_number, 30); i++) {
+		for (int i = 0; i < MIN(store->svp_number, 30); i++) {
 			mb_put_binary_short(MB_NO, store->svp_depth[i], &buffer[8 + i * 4]);
 			mb_put_binary_short(MB_NO, store->svp_vel[i], &buffer[10 + i * 4]);
 		}
@@ -854,7 +852,7 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* put the values */
 		mb_put_binary_short(MB_NO, store->beams_bath, &buffer[0]);
 		mb_put_binary_short(MB_NO, store->scale_factor, &buffer[2]);
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			mb_put_binary_short(MB_NO, store->bath[i], &buffer[4 + i * 4]);
 			mb_put_binary_short(MB_NO, store->bath_acrosstrack[i], &buffer[6 + i * 4]);
 		}

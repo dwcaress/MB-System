@@ -301,7 +301,6 @@ int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_hsds_struct *store;
 	char *datacomment;
 	int time_j[5];
-	int i;
 	int id;
 
 	/* print input debug statements */
@@ -352,7 +351,7 @@ int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->speed = mb_swap_short(data->speed);
 		data->pitch = mb_swap_short(data->pitch);
 		data->scale = mb_swap_short(data->scale);
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			data->dist[i] = mb_swap_short(data->dist[i]);
 			data->deph[i] = mb_swap_short(data->deph[i]);
 		}
@@ -419,7 +418,7 @@ int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->depth_center = store->depth_scale * data->deph[MBSYS_HSDS_BEAMS / 2];
 		store->spare = 1;
 		id = MBSYS_HSDS_BEAMS - 1;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->distance[i] = data->dist[i];
 			store->depth[i] = data->deph[i];
 		}
@@ -436,9 +435,9 @@ int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->roll = 0.0;
 		store->time_center = 0.0;
 		store->time_scale = 0.0;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 			store->time[i] = 0;
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			store->gyro[i] = 0.0;
 
 		/* amplitude data (ERGNAMPL) */
@@ -462,11 +461,11 @@ int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->amplitude_center = 0;
 		store->echo_duration_center = 0;
 		store->echo_scale_center = 0;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->amplitude[i] = 0;
 			store->echo_duration[i] = 0;
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			store->gain[i] = 0;
 			store->echo_scale[i] = 0;
 		}
@@ -490,7 +489,7 @@ int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* processed backscatter */
 		store->back_scale = 0.0;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 			store->back[i] = 0;
 	}
 
@@ -516,7 +515,6 @@ int mbr_wt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *datacomment;
 	int time_i[7];
 	int time_j[5];
-	int i;
 	int id;
 
 	/* print input debug statements */
@@ -590,7 +588,7 @@ int mbr_wt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			data->pitch = 10.0 * store->pitch;
 			data->scale = 100 * store->depth_scale;
 			id = MBSYS_HSDS_BEAMS - 1;
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 				data->dist[i] = store->distance[i];
 				data->deph[i] = store->depth[i];
 			}
@@ -630,7 +628,7 @@ int mbr_wt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->speed = mb_swap_short(data->speed);
 		data->pitch = mb_swap_short(data->pitch);
 		data->scale = mb_swap_short(data->scale);
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			data->dist[i] = mb_swap_short(data->dist[i]);
 			data->deph[i] = mb_swap_short(data->deph[i]);
 		}

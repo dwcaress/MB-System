@@ -312,7 +312,6 @@ int mbr_zero_mbarirov(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_mbarirov";
 	int status = MB_SUCCESS;
 	struct mbf_mbarirov_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -329,7 +328,7 @@ int mbr_zero_mbarirov(int verbose, char *data_ptr, int *error) {
 	if (data != NULL) {
 		data->kind = MB_DATA_NONE;
 		data->time_d = 0.0;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			data->time_i[i] = 0;
 		data->longitude = 0.0;
 		data->latitude = 0.0;
@@ -346,7 +345,7 @@ int mbr_zero_mbarirov(int verbose, char *data_ptr, int *error) {
 		data->heading_flag = 0;
 		data->altitude_flag = 0;
 		data->attitude_flag = 0;
-		for (i = 0; i < MBF_MBARIROV_MAXLINE; i++)
+		for (int i = 0; i < MBF_MBARIROV_MAXLINE; i++)
 			data->comment[i] = 0;
 	}
 
@@ -372,7 +371,6 @@ int mbr_rt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mbarirov_struct *data;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -399,7 +397,7 @@ int mbr_rt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && store != NULL) {
 		store->kind = data->kind;
 		store->time_d = data->time_d;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = data->time_i[i];
 		store->longitude = data->longitude;
 		store->latitude = data->latitude;
@@ -416,7 +414,7 @@ int mbr_rt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->heading_flag = data->heading_flag;
 		store->altitude_flag = data->altitude_flag;
 		store->attitude_flag = data->attitude_flag;
-		for (i = 0; i < MBF_MBARIROV_MAXLINE; i++)
+		for (int i = 0; i < MBF_MBARIROV_MAXLINE; i++)
 			store->comment[i] = data->comment[i];
 	}
 
@@ -438,7 +436,6 @@ int mbr_wt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mbarirov_struct *data;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -460,7 +457,7 @@ int mbr_wt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (store != NULL) {
 		data->kind = store->kind;
 		data->time_d = store->time_d;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			data->time_i[i] = store->time_i[i];
 		data->longitude = store->longitude;
 		data->latitude = store->latitude;
@@ -477,7 +474,7 @@ int mbr_wt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->heading_flag = store->heading_flag;
 		data->altitude_flag = store->altitude_flag;
 		data->attitude_flag = store->attitude_flag;
-		for (i = 0; i < MBF_MBARIROV_MAXLINE; i++)
+		for (int i = 0; i < MBF_MBARIROV_MAXLINE; i++)
 			data->comment[i] = store->comment[i];
 		data->comment[MBF_MBARIROV_MAXLINE - 1] = '\0';
 	}

@@ -1293,7 +1293,6 @@ int mbr_emoldraw_rd_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 	char *function_name = "mbr_emoldraw_rd_start";
 	int status = MB_SUCCESS;
 	char line[EM_START_SIZE];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1337,10 +1336,10 @@ int mbr_emoldraw_rd_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 		mb_get_double(&(store->em1000_td), line + 152, 5);
 		mb_get_double(&(store->em1000_tx), line + 167, 5);
 		mb_get_double(&(store->em1000_ty), line + 182, 5);
-		for (i = 0; i < 128; i++)
+		for (int i = 0; i < 128; i++)
 			store->spare_parameter[i] = line[188 + i];
 		mb_get_int(&(store->survey_line), line + 328, 4);
-		for (i = 0; i < 80; i++)
+		for (int i = 0; i < 80; i++)
 			store->comment[i] = line[341 + i];
 	}
 
@@ -1388,7 +1387,6 @@ int mbr_emoldraw_rd_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 	char *function_name = "mbr_emoldraw_rd_stop";
 	int status = MB_SUCCESS;
 	char line[EM_STOP_SIZE];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1432,10 +1430,10 @@ int mbr_emoldraw_rd_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 		mb_get_double(&(store->em1000_td), line + 152, 5);
 		mb_get_double(&(store->em1000_tx), line + 167, 5);
 		mb_get_double(&(store->em1000_ty), line + 182, 5);
-		for (i = 0; i < 128; i++)
+		for (int i = 0; i < 128; i++)
 			store->spare_parameter[i] = line[188 + i];
 		mb_get_int(&(store->survey_line), line + 328, 4);
-		for (i = 0; i < 80; i++)
+		for (int i = 0; i < 80; i++)
 			store->comment[i] = line[341 + i];
 	}
 
@@ -1483,7 +1481,6 @@ int mbr_emoldraw_rd_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 	char *function_name = "mbr_emoldraw_rd_parameter";
 	int status = MB_SUCCESS;
 	char line[EM_PARAMETER_SIZE];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1527,10 +1524,10 @@ int mbr_emoldraw_rd_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		mb_get_double(&(store->em1000_td), line + 152, 5);
 		mb_get_double(&(store->em1000_tx), line + 167, 5);
 		mb_get_double(&(store->em1000_ty), line + 182, 5);
-		for (i = 0; i < 128; i++)
+		for (int i = 0; i < 128; i++)
 			store->spare_parameter[i] = line[188 + i];
 		mb_get_int(&(store->survey_line), line + 328, 4);
-		for (i = 0; i < 80; i++)
+		for (int i = 0; i < 80; i++)
 			store->comment[i] = line[341 + i];
 
 		/* infer sonar type from transducer depths */
@@ -1682,7 +1679,6 @@ int mbr_emoldraw_rd_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	int status = MB_SUCCESS;
 	char line[EM_SVP_SIZE];
 	short short_val;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1714,7 +1710,7 @@ int mbr_emoldraw_rd_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		mb_get_int(&(store->svp_centisecond), line + 12, 2);
 		mb_get_binary_short(MB_YES, &line[14], &short_val);
 		store->svp_num = short_val;
-		for (i = 0; i < store->svp_num; i++) {
+		for (int i = 0; i < store->svp_num; i++) {
 			mb_get_binary_short(MB_YES, &line[16 + 4 * i], &short_val);
 			store->svp_depth[i] = short_val;
 			mb_get_binary_short(MB_YES, &line[18 + 4 * i], &short_val);
@@ -1733,7 +1729,7 @@ int mbr_emoldraw_rd_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		fprintf(stderr, "dbg5       sec:              %d\n", store->svp_second);
 		fprintf(stderr, "dbg5       centisecond:      %d\n", store->svp_centisecond);
 		fprintf(stderr, "dbg5       svp_num:          %d\n", store->svp_num);
-		for (i = 0; i < store->svp_num; i++)
+		for (int i = 0; i < store->svp_num; i++)
 			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", store->svp_depth[i], store->svp_vel[i]);
 	}
 
@@ -1757,7 +1753,6 @@ int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 	char beamarray[11];
 	short int short_val;
 	short int *short_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1814,8 +1809,8 @@ int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		ping->ping_heave = (int)short_val;
 		mb_get_binary_short(MB_YES, &line[30], &short_val);
 		ping->sound_vel = (int)short_val;
-		for (i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
-			for (j = 0; j < 11; j++)
+		for (int i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
+			for (int j = 0; j < 11; j++)
 				beamarray[j] = line[32 + 11 * i + j];
 			short_ptr = (short int *)beamarray;
 			mb_get_binary_short(MB_YES, &short_ptr[0], (short *)&ping->bath[i]);
@@ -1860,7 +1855,7 @@ int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		fprintf(stderr, "dbg5       ping_heave:       %d\n", ping->ping_heave);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", ping->sound_vel);
 		fprintf(stderr, "dbg5       beam bath xtrack ltrack tt amp qual heave\n");
-		for (i = 0; i < ping->beams_bath; i++)
+		for (int i = 0; i < ping->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam:%d  bath:%d  xtrck:%d  ltrck:%d tt:%d  amp:%d  qual:%d  heave:%d\n", i,
 			        ping->bath[i], ping->bath_acrosstrack[i], ping->bath_alongtrack[i], ping->tt[i], ping->amp[i],
 			        ping->quality[i], ping->heave[i]);
@@ -1886,7 +1881,6 @@ int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 	char beamarray[11];
 	short int short_val;
 	short int *short_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1950,8 +1944,8 @@ int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		mb_get_binary_short(MB_YES, &line[28], &short_val);
 		ping->sound_vel = (int)short_val;
 		ping->bath_mode = (int)line[30];
-		for (i = 0; i < ping->beams_bath; i++) {
-			for (j = 0; j < 11; j++)
+		for (int i = 0; i < ping->beams_bath; i++) {
+			for (int j = 0; j < 11; j++)
 				beamarray[j] = line[32 + 11 * i + j];
 			short_ptr = (short int *)beamarray;
 			mb_get_binary_short(MB_YES, &short_ptr[0], (short *)&ping->bath[i]);
@@ -1990,7 +1984,7 @@ int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		fprintf(stderr, "dbg5       ping_heave:       %d\n", ping->ping_heave);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", ping->sound_vel);
 		fprintf(stderr, "dbg5       beam bath xtrack ltrack tt amp qual heave\n");
-		for (i = 0; i < ping->beams_bath; i++)
+		for (int i = 0; i < ping->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam:%d  bath:%d  xtrck:%d  ltrck:%d tt:%d  amp:%d  qual:%d  heave:%d\n", i,
 			        ping->bath[i], ping->bath_acrosstrack[i], ping->bath_alongtrack[i], ping->tt[i], ping->amp[i],
 			        ping->quality[i], ping->heave[i]);
@@ -2016,7 +2010,6 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 	char beamarray[11];
 	short int short_val;
 	short int *short_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2080,8 +2073,8 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		ping->across_res = (int)line[37];
 		ping->depth_res = (int)line[38];
 		ping->range_res = (int)line[39];
-		for (i = 0; i < ping->beams_bath; i++) {
-			for (j = 0; j < 11; j++)
+		for (int i = 0; i < ping->beams_bath; i++) {
+			for (int j = 0; j < 11; j++)
 				beamarray[j] = line[44 + 11 * i + j];
 			short_ptr = (short int *)beamarray;
 			mb_get_binary_short(MB_YES, &short_ptr[0], (short *)&ping->bath[i]);
@@ -2129,7 +2122,7 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		fprintf(stderr, "dbg5       ping_heave:       %d\n", ping->ping_heave);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", ping->sound_vel);
 		fprintf(stderr, "dbg5       beam bath xtrack ltrack tt amp qual heave\n");
-		for (i = 0; i < ping->beams_bath; i++)
+		for (int i = 0; i < ping->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam:%d  bath:%d  xtrck:%d  ltrck:%d tt:%d  amp:%d  qual:%d  heave:%d\n", i,
 			        ping->bath[i], ping->bath_acrosstrack[i], ping->bath_alongtrack[i], ping->tt[i], ping->amp[i],
 			        ping->quality[i], ping->heave[i]);
@@ -2161,7 +2154,6 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 	int ioffset;
 	int npixelsum;
 	short int short_val;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2180,7 +2172,7 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 	/* if first call for current ping, initialize */
 	if (first == MB_YES) {
 		ping->pixels_ssraw = 0;
-		for (i = 0; i < ping->beams_bath; i++) {
+		for (int i = 0; i < ping->beams_bath; i++) {
 			ping->beam_samples[i] = 0;
 			ping->beam_center_sample[i] = 0;
 			ping->beam_start_sample[i] = 0;
@@ -2228,7 +2220,7 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 
 		/* get number of pixels */
 		npixelsum = 0;
-		for (i = 0; i < num_beams; i++) {
+		for (int i = 0; i < num_beams; i++) {
 			beamlist[i] = ((int)line[22 + 6 * i]) - 1;
 			ping->beam_frequency[beamlist[i]] = (short int)line[23 + 6 * i];
 			mb_get_binary_short(MB_YES, &line[24 + 6 * i], &ping->beam_samples[beamlist[i]]);
@@ -2239,13 +2231,13 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 		/* check for bad numbers of pixels indicating a broken
 		    record */
 		if (npixelsum > 523)
-			for (i = 0; i < num_beams; i++) {
+			for (int i = 0; i < num_beams; i++) {
 				ping->beam_samples[beamlist[i]] = 0;
 			}
 
 		/* load up the sidescan for each beam */
 		ioffset = 22 + 6 * num_beams;
-		for (i = 0; i < num_beams; i++) {
+		for (int i = 0; i < num_beams; i++) {
 			/* do not ever load more data than can be
 			    in the data record */
 			if (ping->pixels_ssraw + ping->beam_samples[beamlist[i]] > MBSYS_SIMRAD_MAXRAWPIXELS)
@@ -2253,7 +2245,7 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 
 			/* get the sidescan */
 			ping->beam_start_sample[beamlist[i]] = ping->pixels_ssraw;
-			for (j = 0; j < ping->beam_samples[beamlist[i]]; j++) {
+			for (int j = 0; j < ping->beam_samples[beamlist[i]]; j++) {
 				ping->ssraw[ping->pixels_ssraw] = (mb_s_char)line[ioffset];
 				ioffset++;
 				ping->pixels_ssraw++;
@@ -2290,13 +2282,13 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 		fprintf(stderr, "dbg5       datagram:         %d\n", datagram);
 		fprintf(stderr, "dbg5       num_beams:        %d\n", num_beams);
 		fprintf(stderr, "dbg5       beam frequency samples center\n");
-		for (i = 0; i < num_beams; i++)
+		for (int i = 0; i < num_beams; i++)
 			fprintf(stderr, "dbg5       beam:%d  frequency:%d  samples:%d  center:%d  start:%d\n", beamlist[i],
 			        ping->beam_frequency[beamlist[i]], ping->beam_samples[beamlist[i]], ping->beam_center_sample[beamlist[i]],
 			        ping->beam_start_sample[beamlist[i]]);
-		for (i = 0; i < num_beams; i++) {
+		for (int i = 0; i < num_beams; i++) {
 			beam_ss = &ping->ssraw[ping->beam_start_sample[beamlist[i]]];
-			for (j = 0; j < ping->beam_samples[beamlist[i]]; j++)
+			for (int j = 0; j < ping->beam_samples[beamlist[i]]; j++)
 				fprintf(stderr, "dbg5       beam:%d pixel:%d  amp:%d\n", beamlist[i], j, beam_ss[j]);
 		}
 	}
@@ -2330,7 +2322,6 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	int ioffset;
 	int npixelsum;
 	short int short_val;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2349,7 +2340,7 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	/* if first call for current ping, initialize */
 	if (first == MB_YES) {
 		ping->pixels_ssraw = 0;
-		for (i = 0; i < ping->beams_bath; i++) {
+		for (int i = 0; i < ping->beams_bath; i++) {
 			ping->beam_samples[i] = 0;
 			ping->beam_center_sample[i] = 0;
 			ping->beam_start_sample[i] = 0;
@@ -2397,7 +2388,7 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 
 		/* get number of pixels */
 		npixelsum = 0;
-		for (i = 0; i < num_beams; i++) {
+		for (int i = 0; i < num_beams; i++) {
 			beamlist[i] = ((int)line[22 + 6 * i]) - 1;
 			ping->beam_frequency[beamlist[i]] = (short int)line[23 + 6 * i];
 			mb_get_binary_short(MB_YES, &line[24 + 6 * i], &ping->beam_samples[beamlist[i]]);
@@ -2408,21 +2399,21 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		/* check for bad numbers of pixels indicating a broken
 		    record */
 		if (npixelsum > 523)
-			for (i = 0; i < num_beams; i++) {
+			for (int i = 0; i < num_beams; i++) {
 				ping->beam_samples[beamlist[i]] = 0;
 			}
 
 		/* load up the sidescan for each beam */
 		ioffset = 22 + 6 * num_beams;
 		char_ptr = (char *)&short_val;
-		for (i = 0; i < num_beams; i++) {
+		for (int i = 0; i < num_beams; i++) {
 			/* do not ever load more data than we can store */
 			if (ping->pixels_ssraw + ping->beam_samples[beamlist[i]] > MBSYS_SIMRAD_MAXRAWPIXELS)
 				ping->beam_samples[beamlist[i]] = 0;
 
 			/* get the sidescan */
 			ping->beam_start_sample[beamlist[i]] = ping->pixels_ssraw;
-			for (j = 0; j < ping->beam_samples[beamlist[i]]; j++) {
+			for (int j = 0; j < ping->beam_samples[beamlist[i]]; j++) {
 				ping->ssraw[ping->pixels_ssraw] = (mb_s_char)line[ioffset];
 				char_ptr[0] = line[ioffset + 1];
 				char_ptr[1] = line[ioffset + 2];
@@ -2462,14 +2453,14 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		fprintf(stderr, "dbg5       datagram:         %d\n", datagram);
 		fprintf(stderr, "dbg5       num_beams:        %d\n", num_beams);
 		fprintf(stderr, "dbg5       beam frequency samples center\n");
-		for (i = 0; i < num_beams; i++)
+		for (int i = 0; i < num_beams; i++)
 			fprintf(stderr, "dbg5       beam:%d  frequency:%d  samples:%d  center:%d  start:%d\n", beamlist[i],
 			        ping->beam_frequency[beamlist[i]], ping->beam_samples[beamlist[i]], ping->beam_center_sample[beamlist[i]],
 			        ping->beam_start_sample[beamlist[i]]);
-		for (i = 0; i < num_beams; i++) {
+		for (int i = 0; i < num_beams; i++) {
 			beam_ss = &ping->ssraw[ping->beam_start_sample[beamlist[i]]];
 			beam_ssp = &ping->ssp[ping->beam_start_sample[beamlist[i]]];
-			for (j = 0; j < ping->beam_samples[beamlist[i]]; j++)
+			for (int j = 0; j < ping->beam_samples[beamlist[i]]; j++)
 				fprintf(stderr, "dbg5       beam:%d pixel:%d  amp:%d phase:%d\n", beamlist[i], j, beam_ss[j], beam_ssp[j]);
 		}
 	}
@@ -2633,7 +2624,6 @@ int mbr_emoldraw_wr_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 	short int short_val;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2711,18 +2701,18 @@ int mbr_emoldraw_wr_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 		sprintf(line + 143, "EM1000TD=%5.1f,", store->em1000_td);
 		sprintf(line + 158, "EM1000TX=%5.1f,", store->em1000_tx);
 		sprintf(line + 173, "EM1000TY=%5.1f,", store->em1000_ty);
-		for (i = 0; i < 128; i++)
+		for (int i = 0; i < 128; i++)
 			line[188 + i] = store->spare_parameter[i];
 		sprintf(line + 316, "SURVEY_LINE_%4.4d,", store->survey_line);
 		sprintf(line + 333, "COMMENT:");
-		for (i = 0; i < 80; i++)
+		for (int i = 0; i < 80; i++)
 			line[341 + i] = store->comment[i];
 		line[EM_START_SIZE - 3] = 0x03;
 
 		/* compute and set checksum */
 		uchar_ptr = (mb_u_char *)line;
 		checksum = 0;
-		for (j = 0; j < EM_START_SIZE - 3; j++)
+		for (int j = 0; j < EM_START_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
 		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
@@ -2765,7 +2755,6 @@ int mbr_emoldraw_wr_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 	short int short_val;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2843,18 +2832,18 @@ int mbr_emoldraw_wr_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 		sprintf(line + 143, "EM1000TD=%5.1f,", store->em1000_td);
 		sprintf(line + 158, "EM1000TX=%5.1f,", store->em1000_tx);
 		sprintf(line + 173, "EM1000TY=%5.1f,", store->em1000_ty);
-		for (i = 0; i < 128; i++)
+		for (int i = 0; i < 128; i++)
 			line[188 + i] = store->spare_parameter[i];
 		sprintf(line + 316, "SURVEY_LINE_%4.4d,", store->survey_line);
 		sprintf(line + 333, "COMMENT:");
-		for (i = 0; i < 80; i++)
+		for (int i = 0; i < 80; i++)
 			line[341 + i] = store->comment[i];
 		line[EM_STOP_SIZE - 3] = 0x03;
 
 		/* compute and set checksum */
 		uchar_ptr = (mb_u_char *)line;
 		checksum = 0;
-		for (j = 0; j < EM_STOP_SIZE - 3; j++)
+		for (int j = 0; j < EM_STOP_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
 		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
@@ -2896,7 +2885,6 @@ int mbr_emoldraw_wr_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 	short int short_val;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2974,18 +2962,18 @@ int mbr_emoldraw_wr_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		sprintf(line + 143, "EM1000TD=%5.1f,", store->em1000_td);
 		sprintf(line + 158, "EM1000TX=%5.1f,", store->em1000_tx);
 		sprintf(line + 173, "EM1000TY=%5.1f,", store->em1000_ty);
-		for (i = 0; i < 128; i++)
+		for (int i = 0; i < 128; i++)
 			line[188 + i] = store->spare_parameter[i];
 		sprintf(line + 316, "SURVEY_LINE_%4.4d,", store->survey_line);
 		sprintf(line + 333, "COMMENT:");
-		for (i = 0; i < 80; i++)
+		for (int i = 0; i < 80; i++)
 			line[341 + i] = store->comment[i];
 		line[EM_PARAMETER_SIZE - 3] = 0x03;
 
 		/* compute and set checksum */
 		uchar_ptr = (mb_u_char *)line;
 		checksum = 0;
-		for (j = 0; j < EM_PARAMETER_SIZE - 3; j++)
+		for (int j = 0; j < EM_PARAMETER_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
 		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
@@ -3031,7 +3019,6 @@ int mbr_emoldraw_wr_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	int degree;
 	double minute;
 	char hemisphere;
-	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3137,7 +3124,7 @@ int mbr_emoldraw_wr_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		/* compute and set checksum */
 		uchar_ptr = (mb_u_char *)line;
 		checksum = 0;
-		for (j = 0; j < EM_POS_SIZE - 3; j++)
+		for (int j = 0; j < EM_POS_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
 		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
@@ -3179,7 +3166,6 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	short int short_val;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3201,7 +3187,7 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		fprintf(stderr, "dbg5       sec:              %d\n", store->svp_second);
 		fprintf(stderr, "dbg5       centisecond:      %d\n", store->svp_centisecond);
 		fprintf(stderr, "dbg5       svp_num:          %d\n", store->svp_num);
-		for (i = 0; i < store->svp_num; i++)
+		for (int i = 0; i < store->svp_num; i++)
 			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", store->svp_depth[i], store->svp_vel[i]);
 	}
 
@@ -3231,11 +3217,11 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		sprintf(line, "%2.2d%2.2d%2.2d", store->svp_day, store->svp_month, store->svp_year);
 		sprintf(line + 6, "%2.2d%2.2d%2.2d%2.2d", store->svp_hour, store->svp_minute, store->svp_second, store->svp_centisecond);
 		mb_put_binary_short(MB_YES, (short)store->svp_num, (void *)&line[14]);
-		for (i = 0; i < store->svp_num; i++) {
+		for (int i = 0; i < store->svp_num; i++) {
 			mb_put_binary_short(MB_YES, (short)store->svp_depth[i], (void *)&line[16 + 4 * i]);
 			mb_put_binary_short(MB_YES, (short)store->svp_vel[i], (void *)&line[18 + 4 * i]);
 		}
-		for (i = store->svp_num; i < 100; i++) {
+		for (int i = store->svp_num; i < 100; i++) {
 			mb_put_binary_short(MB_YES, (short)0, (void *)&line[16 + 4 * i]);
 			mb_put_binary_short(MB_YES, (short)0, (void *)&line[18 + 4 * i]);
 		}
@@ -3244,7 +3230,7 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		/* compute and set checksum */
 		uchar_ptr = (mb_u_char *)line;
 		checksum = 0;
-		for (j = 0; j < EM_SVP_SIZE - 3; j++)
+		for (int j = 0; j < EM_SVP_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
 		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
@@ -3288,7 +3274,6 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 	short int short_val;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3325,7 +3310,7 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		fprintf(stderr, "dbg5       ping_heave:       %d\n", ping->ping_heave);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", ping->sound_vel);
 		fprintf(stderr, "dbg5       beam bath xtrack ltrack tt amp qual heave\n");
-		for (i = 0; i < ping->beams_bath; i++)
+		for (int i = 0; i < ping->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam:%d  bath:%d  xtrck:%d  ltrck:%d tt:%d  amp:%d  qual:%d  heave:%d\n", i,
 			        ping->bath[i], ping->bath_acrosstrack[i], ping->bath_alongtrack[i], ping->tt[i], ping->amp[i],
 			        ping->quality[i], ping->heave[i]);
@@ -3366,7 +3351,7 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		mb_put_binary_short(MB_YES, (short)ping->xducer_pitch, (void *)&line[26]);
 		mb_put_binary_short(MB_YES, (short)ping->ping_heave, (void *)&line[28]);
 		mb_put_binary_short(MB_YES, (short)ping->sound_vel, (void *)&line[30]);
-		for (i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
+		for (int i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
 			if (!mb_beam_ok(ping->beamflag[i]))
 				ping->bath[i] = 0;
 			mb_put_binary_short(MB_YES, (short)ping->bath[i], (void *)&beamarray[0]);
@@ -3376,7 +3361,7 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 			beamarray[8] = (char)ping->amp[i];
 			beamarray[9] = (char)ping->quality[i];
 			beamarray[10] = (char)ping->heave[i];
-			for (j = 0; j < 11; j++)
+			for (int j = 0; j < 11; j++)
 				line[32 + 11 * i + j] = beamarray[j];
 		}
 		line[EM_1000_BATH_SIZE - 3] = 0x03;
@@ -3384,7 +3369,7 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		/* compute and set checksum */
 		uchar_ptr = (mb_u_char *)line;
 		checksum = 0;
-		for (j = 0; j < EM_1000_BATH_SIZE - 3; j++)
+		for (int j = 0; j < EM_1000_BATH_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
 		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
@@ -3428,7 +3413,6 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 	short int short_val;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3464,7 +3448,7 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		fprintf(stderr, "dbg5       ping_heave:       %d\n", ping->ping_heave);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", ping->sound_vel);
 		fprintf(stderr, "dbg5       beam bath xtrack ltrack tt amp qual heave\n");
-		for (i = 0; i < ping->beams_bath; i++)
+		for (int i = 0; i < ping->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam:%d  bath:%d  xtrck:%d  ltrck:%d tt:%d  amp:%d  qual:%d  heave:%d\n", i,
 			        ping->bath[i], ping->bath_acrosstrack[i], ping->bath_alongtrack[i], ping->tt[i], ping->amp[i],
 			        ping->quality[i], ping->heave[i]);
@@ -3511,7 +3495,7 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		mb_put_binary_short(MB_YES, (short)ping->sound_vel, (void *)&line[28]);
 		line[30] = (char)ping->bath_mode;
 		line[31] = (char)0;
-		for (i = 0; i < MBSYS_EM12_MAXBEAMS; i++) {
+		for (int i = 0; i < MBSYS_EM12_MAXBEAMS; i++) {
 			if (!mb_beam_ok(ping->beamflag[i]))
 				ping->bath[i] = 0;
 			mb_put_binary_short(MB_YES, (short)ping->bath[i], (void *)&beamarray[0]);
@@ -3521,7 +3505,7 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 			beamarray[8] = (char)ping->amp[i];
 			beamarray[9] = (char)ping->quality[i];
 			beamarray[10] = (char)ping->heave[i];
-			for (j = 0; j < 11; j++)
+			for (int j = 0; j < 11; j++)
 				line[32 + 11 * i + j] = beamarray[j];
 		}
 		line[EM_12S_BATH_SIZE - 3] = 0x03;
@@ -3529,7 +3513,7 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		/* compute and set checksum */
 		uchar_ptr = (mb_u_char *)line;
 		checksum = 0;
-		for (j = 0; j < EM_12S_BATH_SIZE - 3; j++)
+		for (int j = 0; j < EM_12S_BATH_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
 		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
@@ -3573,7 +3557,6 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 	short int short_val;
 	mb_u_char *uchar_ptr;
 	char *char_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3618,7 +3601,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		fprintf(stderr, "dbg5       ping_heave:       %d\n", ping->ping_heave);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", ping->sound_vel);
 		fprintf(stderr, "dbg5       beam bath xtrack ltrack tt amp qual heave\n");
-		for (i = 0; i < ping->beams_bath; i++)
+		for (int i = 0; i < ping->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam:%d  bath:%d  xtrck:%d  ltrck:%d tt:%d  amp:%d  qual:%d  heave:%d\n", i,
 			        ping->bath[i], ping->bath_acrosstrack[i], ping->bath_alongtrack[i], ping->tt[i], ping->amp[i],
 			        ping->quality[i], ping->heave[i]);
@@ -3668,7 +3651,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		line[37] = (char)ping->across_res;
 		line[38] = (char)ping->depth_res;
 		line[39] = (char)ping->range_res;
-		for (i = 0; i < MBSYS_EM121_MAXBEAMS; i++) {
+		for (int i = 0; i < MBSYS_EM121_MAXBEAMS; i++) {
 			if (!mb_beam_ok(ping->beamflag[i]))
 				ping->bath[i] = 0;
 			mb_put_binary_short(MB_YES, (short)ping->bath[i], (void *)&beamarray[0]);
@@ -3678,7 +3661,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 			beamarray[8] = (char)ping->amp[i];
 			beamarray[9] = (char)ping->quality[i];
 			beamarray[10] = (char)ping->heave[i];
-			for (j = 0; j < 11; j++)
+			for (int j = 0; j < 11; j++)
 				line[44 + 11 * i + j] = beamarray[j];
 		}
 		line[EM_121_BATH_SIZE - 3] = 0x03;
@@ -3686,7 +3669,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		/* compute and set checksum */
 		uchar_ptr = (mb_u_char *)line;
 		checksum = 0;
-		for (j = 0; j < EM_121_BATH_SIZE - 3; j++)
+		for (int j = 0; j < EM_121_BATH_SIZE - 3; j++)
 			checksum += uchar_ptr[j];
 		mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
 		char_ptr = (char *)&short_val;
@@ -3739,7 +3722,6 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 	mb_s_char *beam_ss;
 	int ioffset;
 	int odatagram;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3767,12 +3749,12 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", ping->sound_vel);
 		fprintf(stderr, "dbg5       ss_mode:          %d\n", ping->ss_mode);
 		fprintf(stderr, "dbg5       beam frequency samples center start\n");
-		for (i = 0; i < MBSYS_EM1000_MAXBEAMS; i++)
+		for (int i = 0; i < MBSYS_EM1000_MAXBEAMS; i++)
 			fprintf(stderr, "dbg5       beam:%d  frequency:%d  samples:%d  center:%d  start:%d\n", i, ping->beam_frequency[i],
 			        ping->beam_samples[i], ping->beam_center_sample[i], ping->beam_start_sample[i]);
-		for (i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
+		for (int i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
 			beam_ss = &ping->ssraw[ping->beam_start_sample[i]];
-			for (j = 0; j < ping->beam_samples[i]; j++)
+			for (int j = 0; j < ping->beam_samples[i]; j++)
 				fprintf(stderr, "dbg5       beam:%d pixel:%d  amp:%d\n", i, j, beam_ss[j]);
 		}
 	}
@@ -3783,7 +3765,7 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 	datagram_size[0] = 22;
 	datagram_start[0] = 0;
 	datagram_end[0] = 0;
-	for (i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
+	for (int i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
 		new_datagram_size = datagram_size[num_datagrams] + 6 + ping->beam_samples[i];
 		if (new_datagram_size > 551 && i == MBSYS_EM1000_MAXBEAMS - 1) {
 			datagram_end[num_datagrams] = i - 1;
@@ -3824,7 +3806,7 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 		for (datagram = 0; datagram < num_datagrams; datagram++) {
 			fprintf(stderr, "\ndbg5       datagram[%d]:  beam %d to beam %d\n", datagram, datagram_start[datagram],
 			        datagram_end[datagram]);
-			for (i = datagram_start[datagram]; i <= datagram_end[datagram]; i++)
+			for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++)
 				fprintf(stderr, "dbg5       beam:%d  frequency:%d  samples:%d  center:%d\n", i, ping->beam_frequency[i],
 				        ping->beam_samples[i], ping->beam_center_sample[i]);
 		}
@@ -3850,12 +3832,12 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 			fprintf(stderr, "dbg5       num_datagrams:    %d\n", num_datagrams);
 			fprintf(stderr, "dbg5       datagram:         %d\n", datagram);
 			fprintf(stderr, "dbg5       num_beams:        %d\n", num_beams);
-			for (i = datagram_start[datagram]; i <= datagram_end[datagram]; i++)
+			for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++)
 				fprintf(stderr, "dbg5       beam:%d  frequency:%d  samples:%d  center:%d  start:%d\n", i, ping->beam_frequency[i],
 				        ping->beam_samples[i], ping->beam_center_sample[i], ping->beam_start_sample[i]);
-			for (i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
+			for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
 				beam_ss = &ping->ssraw[ping->beam_start_sample[i]];
-				for (j = 0; j < ping->beam_samples[i]; j++)
+				for (int j = 0; j < ping->beam_samples[i]; j++)
 					fprintf(stderr, "dbg5       beam:%d pixel:%d  amp:%d\n", i, j, beam_ss[j]);
 			}
 		}
@@ -3897,30 +3879,32 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 			odatagram = datagram + 1;
 			line[20] = (char)odatagram;
 			line[21] = (char)num_beams;
-			j = 0;
-			for (i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
-				line[22 + 6 * j] = (char)(i + 1);
-				line[23 + 6 * j] = (char)ping->beam_frequency[i];
-				mb_put_binary_short(MB_YES, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
-				mb_put_binary_short(MB_YES, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
-				j++;
+			{
+			int j = 0;
+				for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
+					line[22 + 6 * j] = (char)(i + 1);
+					line[23 + 6 * j] = (char)ping->beam_frequency[i];
+					mb_put_binary_short(MB_YES, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
+					mb_put_binary_short(MB_YES, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
+					j++;
+				}
 			}
 			ioffset = 22 + 6 * num_beams;
-			for (i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
+			for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
 				beam_ss = &ping->ssraw[ping->beam_start_sample[i]];
-				for (j = 0; j < ping->beam_samples[i]; j++) {
+				for (int j = 0; j < ping->beam_samples[i]; j++) {
 					line[ioffset + j] = (char)beam_ss[j];
 				}
 				ioffset = ioffset + ping->beam_samples[i];
 			}
-			for (i = ioffset; i < EM_SS_SIZE; i++)
+			for (int i = ioffset; i < EM_SS_SIZE; i++)
 				line[i] = (char)0;
 			line[EM_SS_SIZE - 3] = 0x03;
 
 			/* compute and set checksum */
 			uchar_ptr = (mb_u_char *)line;
 			checksum = 0;
-			for (j = 0; j < EM_SS_SIZE - 3; j++)
+			for (int j = 0; j < EM_SS_SIZE - 3; j++)
 				checksum += uchar_ptr[j];
 			mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
 			char_ptr = (char *)&short_val;
@@ -3977,7 +3961,6 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	short int *beam_ssp;
 	int ioffset;
 	int odatagram;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4005,13 +3988,13 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", ping->sound_vel);
 		fprintf(stderr, "dbg5       ss_mode:          %d\n", ping->ss_mode);
 		fprintf(stderr, "dbg5       beam frequency samples center start\n");
-		for (i = 0; i < MBSYS_SIMRAD_MAXBEAMS; i++)
+		for (int i = 0; i < MBSYS_SIMRAD_MAXBEAMS; i++)
 			fprintf(stderr, "dbg5       beam:%d  frequency:%d  samples:%d  center:%d  start:%d\n", i, ping->beam_frequency[i],
 			        ping->beam_samples[i], ping->beam_center_sample[i], ping->beam_start_sample[i]);
-		for (i = 0; i < MBSYS_SIMRAD_MAXBEAMS; i++) {
+		for (int i = 0; i < MBSYS_SIMRAD_MAXBEAMS; i++) {
 			beam_ss = &ping->ssraw[ping->beam_start_sample[i]];
 			beam_ssp = &ping->ssp[ping->beam_start_sample[i]];
-			for (j = 0; j < ping->beam_samples[i]; j++)
+			for (int j = 0; j < ping->beam_samples[i]; j++)
 				fprintf(stderr, "dbg5       beam:%d pixel:%d  amp:%d phase:%d\n", i, j, beam_ss[j], beam_ssp[j]);
 		}
 	}
@@ -4022,7 +4005,7 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	datagram_size[0] = 22;
 	datagram_start[0] = 0;
 	datagram_end[0] = 0;
-	for (i = 0; i < MBSYS_SIMRAD_MAXBEAMS; i++) {
+	for (int i = 0; i < MBSYS_SIMRAD_MAXBEAMS; i++) {
 		new_datagram_size = datagram_size[num_datagrams] + 6 + 3 * ping->beam_samples[i];
 		if (new_datagram_size > 1465 && i == MBSYS_SIMRAD_MAXBEAMS - 1) {
 			datagram_end[num_datagrams] = i - 1;
@@ -4063,7 +4046,7 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		for (datagram = 0; datagram < num_datagrams; datagram++) {
 			fprintf(stderr, "\ndbg5       datagram[%d]:  beam %d to beam %d\n", datagram, datagram_start[datagram],
 			        datagram_end[datagram]);
-			for (i = datagram_start[datagram]; i <= datagram_end[datagram]; i++)
+			for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++)
 				fprintf(stderr, "dbg5       beam:%d  frequency:%d  samples:%d  center:%d\n", i, ping->beam_frequency[i],
 				        ping->beam_samples[i], ping->beam_center_sample[i]);
 		}
@@ -4089,13 +4072,13 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 			fprintf(stderr, "dbg5       num_datagrams:    %d\n", num_datagrams);
 			fprintf(stderr, "dbg5       datagram:         %d\n", datagram);
 			fprintf(stderr, "dbg5       num_beams:        %d\n", num_beams);
-			for (i = datagram_start[datagram]; i <= datagram_end[datagram]; i++)
+			for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++)
 				fprintf(stderr, "dbg5       beam:%d  frequency:%d  samples:%d  center:%d  start:%d\n", i, ping->beam_frequency[i],
 				        ping->beam_samples[i], ping->beam_center_sample[i], ping->beam_start_sample[i]);
-			for (i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
+			for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
 				beam_ss = &ping->ssraw[ping->beam_start_sample[i]];
 				beam_ssp = &ping->ssp[ping->beam_start_sample[i]];
-				for (j = 0; j < ping->beam_samples[i]; j++)
+				for (int j = 0; j < ping->beam_samples[i]; j++)
 					fprintf(stderr, "dbg5       beam:%d pixel:%d  amp:%d phase:%d\n", i, j, beam_ss[j], beam_ssp[j]);
 			}
 		}
@@ -4137,20 +4120,22 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 			odatagram = datagram + 1;
 			line[20] = (char)odatagram;
 			line[21] = (char)num_beams;
-			j = 0;
-			for (i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
-				line[22 + 6 * j] = (char)(i + 1);
-				line[23 + 6 * j] = (char)ping->beam_frequency[i];
-				mb_put_binary_short(MB_YES, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
-				mb_put_binary_short(MB_YES, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
-				j++;
+			{
+				int j = 0;
+				for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
+					line[22 + 6 * j] = (char)(i + 1);
+					line[23 + 6 * j] = (char)ping->beam_frequency[i];
+					mb_put_binary_short(MB_YES, (short)ping->beam_samples[i], (void *)&line[24 + 6 * j]);
+					mb_put_binary_short(MB_YES, (short)ping->beam_center_sample[i], (void *)&line[26 + 6 * j]);
+					j++;
+				}
 			}
 			ioffset = 22 + 6 * num_beams;
 			char_ptr = (char *)&short_val;
-			for (i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
+			for (int i = datagram_start[datagram]; i <= datagram_end[datagram]; i++) {
 				beam_ss = &ping->ssraw[ping->beam_start_sample[i]];
 				beam_ssp = &ping->ssp[ping->beam_start_sample[i]];
-				for (j = 0; j < ping->beam_samples[i]; j++) {
+				for (int j = 0; j < ping->beam_samples[i]; j++) {
 					line[ioffset] = (char)beam_ss[j];
 					mb_put_binary_short(MB_YES, (short)beam_ssp[j], (void *)&short_val);
 					line[ioffset + 1] = char_ptr[0];
@@ -4158,7 +4143,7 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 					ioffset += 3;
 				}
 			}
-			for (i = ioffset; i < EM_SSP_SIZE; i++)
+			for (int i = ioffset; i < EM_SSP_SIZE; i++)
 				line[i] = (char)0;
 
 			line[EM_SSP_SIZE - 3] = 0x03;
@@ -4166,7 +4151,7 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 			/* compute and set checksum */
 			uchar_ptr = (mb_u_char *)line;
 			checksum = 0;
-			for (j = 0; j < EM_SSP_SIZE - 3; j++)
+			for (int j = 0; j < EM_SSP_SIZE - 3; j++)
 				checksum += uchar_ptr[j];
 			mb_put_binary_short(MB_YES, (short)checksum, (void *)&short_val);
 			char_ptr = (char *)&short_val;

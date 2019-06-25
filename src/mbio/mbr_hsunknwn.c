@@ -330,7 +330,6 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char line[MB_PATH_MAXLINE];
 	char *result;
 	double value;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -403,7 +402,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 				mb_get_double(&value, line + i * 7, 7);
 				store->depth[i] = (int)(10.0 * value);
 			}
@@ -420,7 +419,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 				mb_get_double(&value, line + i * 7, 7);
 				store->distance[i] = (int)(10.0 * value);
 			}
@@ -437,7 +436,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 				mb_get_double(&value, line + i * 7, 7);
 				store->back[i] = (int)(10.0 * value);
 			}
@@ -454,7 +453,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 				mb_get_double(&value, line + i * 7, 7);
 			}
 		}
@@ -470,7 +469,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 				mb_get_double(&value, line + i * 7, 7);
 			}
 		}
@@ -503,7 +502,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5       depth_scale:      %f\n", store->depth_scale);
 			fprintf(stderr, "dbg5       back_scale:       %f\n", store->back_scale);
 			fprintf(stderr, "dbg5       beam distance depth back:\n");
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 				fprintf(stderr, "dbg5         %d  %d  %d  %d\n", i, store->distance[i], store->depth[i], store->back[i]);
 		}
 		else if (store->kind == MB_DATA_COMMENT) {
@@ -529,7 +528,6 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hsds_struct *store;
 	double value;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -575,7 +573,7 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5       depth_scale:      %f\n", store->depth_scale);
 			fprintf(stderr, "dbg5       back_scale:       %f\n", store->back_scale);
 			fprintf(stderr, "dbg5       beam distance depth back:\n");
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 				fprintf(stderr, "dbg5         %d  %d  %d  %d\n", i, store->distance[i], store->depth[i], store->back[i]);
 		}
 		else if (store->kind == MB_DATA_COMMENT) {
@@ -604,27 +602,27 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(mb_io_ptr->mbfp, " M  %4.4d%2.2d%2.2d %2.2d%2.2d%2.2d%12.7f%12.7f%8.1f%8.1f%9.3f%9.3f        \r\n", store->year,
 		        store->month, store->day, store->hour, store->minute, store->second, store->lon, store->lat, 0.0, 0.0,
 		        store->course_true, store->depth_center);
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			value = store->depth[i] * store->depth_scale;
 			fprintf(mb_io_ptr->mbfp, "%7.1f", value);
 		}
 		fprintf(mb_io_ptr->mbfp, "\r\n");
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			value = store->distance[i] * store->depth_scale;
 			fprintf(mb_io_ptr->mbfp, "%7.1f", value);
 		}
 		fprintf(mb_io_ptr->mbfp, "\r\n");
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			value = store->back[i] * store->back_scale;
 			fprintf(mb_io_ptr->mbfp, "%7.1f", value);
 		}
 		fprintf(mb_io_ptr->mbfp, "\r\n");
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			value = -9999.9;
 			fprintf(mb_io_ptr->mbfp, "%7.1f", value);
 		}
 		fprintf(mb_io_ptr->mbfp, "\r\n");
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			value = 100.0;
 			fprintf(mb_io_ptr->mbfp, "%7.1f", value);
 		}

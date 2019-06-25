@@ -296,7 +296,6 @@ int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_hypc8101";
 	int status = MB_SUCCESS;
 	struct mbf_hypc8101_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -347,7 +346,7 @@ int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error) {
 		data->line_number = 0;
 		data->start_or_stop = 0;
 		data->transducer_serial_number = 0;
-		for (i = 0; i < MBF_HYPC8101_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBF_HYPC8101_COMMENT_LENGTH; i++)
 			data->comment[i] = '\0';
 
 		/* position (position telegrams) */
@@ -381,7 +380,7 @@ int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error) {
 		data->svp_hundredth_sec = 0;
 		data->svp_thousandth_sec = 0;
 		data->svp_num = 0;
-		for (i = 0; i < 100; i++) {
+		for (int i = 0; i < 100; i++) {
 			data->svp_depth[i] = 0; /* 0.1 meters */
 			data->svp_vel[i] = 0;   /* 0.1 meters/sec */
 		}
@@ -408,7 +407,7 @@ int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error) {
 		data->gain2 = 0;
 		data->gain3 = 0;
 		data->beams_bath = 0;
-		for (i = 0; i < MBF_HYPC8101_MAXBEAMS; i++) {
+		for (int i = 0; i < MBF_HYPC8101_MAXBEAMS; i++) {
 			data->bath[i] = 0;
 			data->bath_acrosstrack[i] = 0;
 			data->bath_alongtrack[i] = 0;
@@ -444,7 +443,6 @@ int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int time_i[7];
 	double time_d;
 	double lon, lat, heading, speed;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -516,7 +514,7 @@ int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->line_number = data->line_number;
 		store->start_or_stop = data->start_or_stop;
 		store->transducer_serial_number = data->transducer_serial_number;
-		for (i = 0; i < MBSYS_RESON_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBSYS_RESON_COMMENT_LENGTH; i++)
 			store->comment[i] = data->comment[i];
 
 		/* position (position telegrams) */
@@ -550,7 +548,7 @@ int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->svp_hundredth_sec = data->svp_hundredth_sec;
 		store->svp_thousandth_sec = data->svp_thousandth_sec;
 		store->svp_num = data->svp_num;
-		for (i = 0; i < 500; i++) {
+		for (int i = 0; i < 500; i++) {
 			store->svp_depth[i] = data->svp_depth[i];
 			store->svp_vel[i] = data->svp_vel[i];
 		}
@@ -577,7 +575,7 @@ int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->gain2 = data->gain2;
 		store->gain3 = data->gain3;
 		store->beams_bath = data->beams_bath;
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			store->bath[i] = data->bath[i];
 			store->bath_acrosstrack[i] = data->bath_acrosstrack[i];
 			store->bath_alongtrack[i] = data->bath_alongtrack[i];
@@ -668,7 +666,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	double rr, xx, zz;
 	double ddummy1, ddummy2;
 	char *token;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -956,7 +953,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					sb2_nbeams_read = 0;
 					sb2_nbeams = floor(0.8 * (sb2_nvalues - 1));
 					sb2_nquality = sb2_nvalues - sb2_nbeams - 1;
-					for (i = 0; i < sb2_nbeams; i++) {
+					for (int i = 0; i < sb2_nbeams; i++) {
 						if (status == MB_SUCCESS && (token = strtok(NULL, " ")) != NULL) {
 							if ((nscan = sscanf(token, "%lf", &sb2_range)) == 1) {
 								data->tt[sb2_nbeams_read] = 100 * sb2_range;
@@ -973,7 +970,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				/* copy values and get quality data */
 				if (status == MB_SUCCESS) {
 					sb2_nquality_read = 0;
-					for (i = 0; i < sb2_nquality; i++) {
+					for (int i = 0; i < sb2_nquality; i++) {
 						if (status == MB_SUCCESS && (token = strtok(NULL, " ")) != NULL) {
 							if ((nscan = sscanf(token, "%lf", &sb2_quality)) == 1) {
 								iquality = sb2_quality;
@@ -1030,7 +1027,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					data->longitude = lon / 0.00000009;
 
 					/* calculate bathymetry */
-					for (i = 0; i < data->beams_bath; i++) {
+					for (int i = 0; i < data->beams_bath; i++) {
 						angle = data->angle0 + data->angle_inc * (i - 0) - roll;
 						data->angle[i] = 200 * angle;
 						angle = 90.0 - angle;
@@ -1080,7 +1077,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 						fprintf(stderr, "dbg4       heave:      %d\n", data->heave);
 						fprintf(stderr, "dbg4       beams_bath: %d\n", data->beams_bath);
 						fprintf(stderr, "dbg4       cnt bath xtrk ltrk tt ang qual\n");
-						for (i = 0; i < data->beams_bath; i++)
+						for (int i = 0; i < data->beams_bath; i++)
 							fprintf(stderr, "dbg4       %3d  %6d %6d %6d %6d %6d %d\n", i, data->bath[i],
 							        data->bath_acrosstrack[i], data->bath_alongtrack[i], data->tt[i], data->angle[i],
 							        data->quality[i]);

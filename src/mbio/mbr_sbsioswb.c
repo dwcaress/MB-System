@@ -303,7 +303,6 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double lon, lat;
 	int id;
 	int skip;
-	int i, k;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -405,7 +404,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 		/* shift bytes by one */
-		for (i = 0; i < MB_SBSIOSWB_HEADER_SIZE - 1; i++)
+		for (int i = 0; i < MB_SBSIOSWB_HEADER_SIZE - 1; i++)
 			headerptr[i] = headerptr[i + 1];
 		mb_io_ptr->file_pos += 1;
 
@@ -487,14 +486,14 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* deal with unintelligible record */
 	if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE) {
 		/* read rest of record into dummy */
-		for (i = 0; i < data->sensor_size; i++) {
+		for (int i = 0; i < data->sensor_size; i++) {
 			if ((read_status = fread(dummy, 1, 1, mb_io_ptr->mbfp)) != 1) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 			}
 			mb_io_ptr->file_bytes += read_status;
 		}
-		for (i = 0; i < data->data_size; i++) {
+		for (int i = 0; i < data->data_size; i++) {
 			if ((read_status = fread(dummy, 1, 1, mb_io_ptr->mbfp)) != 1) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
@@ -566,7 +565,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
 		if (status == MB_SUCCESS && data->kind == MB_DATA_DATA) {
-			for (i = 0; i < data->beams_bath; i++) {
+			for (int i = 0; i < data->beams_bath; i++) {
 				data->bath_struct[i].bath = mb_swap_short(data->bath_struct[i].bath);
 				data->bath_struct[i].bath_acrosstrack = mb_swap_short(data->bath_struct[i].bath_acrosstrack);
 			}
@@ -575,8 +574,8 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* check for fewer than expected beams */
 		if (status == MB_SUCCESS && (data->data_size / 4) - 1 < data->beams_bath) {
-			k = (data->data_size / 4) - 2;
-			for (i = k; i < data->beams_bath; i++) {
+			const int k = (data->data_size / 4) - 2;
+			for (int i = k; i < data->beams_bath; i++) {
 				data->bath_struct[i].bath = 0;
 				data->bath_struct[i].bath_acrosstrack = 0;
 			}
@@ -584,7 +583,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* zero ridiculous soundings */
 		if (status == MB_SUCCESS && data->kind == MB_DATA_DATA) {
-			for (i = 0; i < data->beams_bath; i++) {
+			for (int i = 0; i < data->beams_bath; i++) {
 				if (data->bath_struct[i].bath > 11000 || data->bath_struct[i].bath_acrosstrack > 11000 ||
 				    data->bath_struct[i].bath_acrosstrack < -11000) {
 					data->bath_struct[i].bath = 0;
@@ -599,7 +598,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5  New data values:\n");
 			fprintf(stderr, "dbg5       beams_bath:   %d\n", data->beams_bath);
 			fprintf(stderr, "dbg5       scale_factor: %d\n", data->scale_factor);
-			for (i = 0; i < data->beams_bath; i++)
+			for (int i = 0; i < data->beams_bath; i++)
 				fprintf(stderr, "dbg5       beam: %d  bath: %d  across_track: %d\n", i, data->bath_struct[i].bath,
 				        data->bath_struct[i].bath_acrosstrack);
 		}
@@ -611,7 +610,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
-			for (i = data->data_size; i < MBSYS_SB_MAXLINE; i++)
+			for (int i = data->data_size; i < MBSYS_SB_MAXLINE; i++)
 				commentptr[i] = '\0';
 		}
 		else {
@@ -660,7 +659,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* depths and distances */
 			id = data->beams_bath - 1;
-			for (i = 0; i < data->beams_bath; i++) {
+			for (int i = 0; i < data->beams_bath; i++) {
 				store->deph[id - i] = data->bath_struct[i].bath;
 				store->dist[id - i] = data->bath_struct[i].bath_acrosstrack;
 			}
@@ -704,7 +703,6 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int id;
 	int sensor_size;
 	int data_size;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -742,7 +740,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       sec:        %d\n", store->sec);
 	}
 	if (verbose >= 2 && store->kind == MB_DATA_DATA) {
-		for (i = 0; i < MBSYS_SB_BEAMS; i++)
+		for (int i = 0; i < MBSYS_SB_BEAMS; i++)
 			fprintf(stderr, "dbg3       dist[%d]: %d  deph[%d]: %d\n", i, store->dist[i], i, store->deph[i]);
 		fprintf(stderr, "dbg2       sbtim:        %d\n", store->sbtim);
 		fprintf(stderr, "dbg2       sbhdg:        %d\n", store->sbhdg);
@@ -790,7 +788,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	data->sensor_size = 4;
 	data->data_size = 4 + 4 * data->beams_bath;
 	data->scale_factor = 100;
-	for (i = 0; i < MB_BEAMS_SBSIOSWB; i++) {
+	for (int i = 0; i < MB_BEAMS_SBSIOSWB; i++) {
 		data->bath_struct[i].bath = 0;
 		data->bath_struct[i].bath_acrosstrack = 0;
 	}
@@ -827,7 +825,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* put distance and depth values
 		    into sbsioswb data structure */
 		id = data->beams_bath - 1;
-		for (i = 0; i < MB_BEAMS_SBSIOSWB; i++) {
+		for (int i = 0; i < MB_BEAMS_SBSIOSWB; i++) {
 			data->bath_struct[id - i].bath = store->deph[i];
 			;
 			data->bath_struct[id - i].bath_acrosstrack = store->dist[i];
@@ -898,7 +896,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5  Data values:\n");
 		fprintf(stderr, "dbg5       beams_bath:   %d\n", data->beams_bath);
 		fprintf(stderr, "dbg5       scale_factor: %d\n", data->scale_factor);
-		for (i = 0; i < data->beams_bath; i++)
+		for (int i = 0; i < data->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam: %d  bath: %d  across_track: %d\n", i, data->bath_struct[i].bath,
 			        data->bath_struct[i].bath_acrosstrack);
 	}
@@ -930,7 +928,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	data->beams_bath = mb_swap_short(data->beams_bath);
 	data->scale_factor = mb_swap_short(data->scale_factor);
 	if (store->kind == MB_DATA_DATA) {
-		for (i = 0; i < MB_BEAMS_SBSIOSWB; i++) {
+		for (int i = 0; i < MB_BEAMS_SBSIOSWB; i++) {
 			data->bath_struct[i].bath = mb_swap_short(data->bath_struct[i].bath);
 			data->bath_struct[i].bath_acrosstrack = mb_swap_short(data->bath_struct[i].bath_acrosstrack);
 		}

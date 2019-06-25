@@ -825,7 +825,6 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error) {
 	char *function_name = "mbr_zero_sb2100bi";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -855,7 +854,7 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error) {
 		store->offset_y = 0.0;            /* m */
 		store->offset_z = 0.0;            /* m */
 		store->num_svp = 0;
-		for (i = 0; i < MBSYS_SB2100_MAXVEL; i++) {
+		for (int i = 0; i < MBSYS_SB2100_MAXVEL; i++) {
 			store->svp[i].depth = 0.0;
 			store->svp[i].velocity = 0.0;
 		}
@@ -898,7 +897,7 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error) {
 		store->spare6 = 0;
 
 		/* bathymetry record (SB21BIBR) */
-		for (i = 0; i < MBSYS_SB2100_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_SB2100_BEAMS; i++) {
 			store->beams[i].depth = 0.0;         /* m */
 			store->beams[i].acrosstrack = 0.0;   /* m */
 			store->beams[i].alongtrack = 0.0;    /* m */
@@ -915,7 +914,7 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error) {
 		}
 
 		/* sidescan record (SB21BISR) */
-		for (i = 0; i < MBSYS_SB2100_PIXELS; i++) {
+		for (int i = 0; i < MBSYS_SB2100_PIXELS; i++) {
 			store->pixels[i].amplitude = 0;
 			store->pixels[i].alongtrack = 0; /* 0.1 m */
 		}
@@ -942,7 +941,6 @@ int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -975,7 +973,7 @@ int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->spare_dr[0] = ' ';
 		store->spare_dr[1] = ' ';
 		store->num_algorithms = 1;
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			store->algorithm_order[i] = ' ';
 		store->svp_corr_ss = 0;
 		store->ss_data_length = 4 * MBSYS_SB2100_PIXELS;
@@ -1050,7 +1048,6 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	char *record_length_ptr;
 	char record_length_fh_str[8];
 	int record_length_fh;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1091,7 +1088,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 			/* if not a format 42 label read individual
 			    bytes until label found or eof */
 			while (status == MB_SUCCESS && strncmp(label, "SB21BI", 6) != 0) {
-				for (i = 0; i < 9; i++)
+				for (int i = 0; i < 9; i++)
 					label[i] = label[i + 1];
 				if ((status = fread(&label[9], 1, 1, mbfp)) != 1) {
 					status = MB_FAILURE;
@@ -1108,7 +1105,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		if (status == MB_SUCCESS) {
 			/* get type */
 			type = MBF_SB2100BI_NONE;
-			for (i = 1; i <= MBF_SB2100BI_RECORDS; i++)
+			for (int i = 1; i <= MBF_SB2100BI_RECORDS; i++)
 				if (strncmp(label, mbf_sb2100bi_labels[i], 8) == 0)
 					type = i;
 
@@ -1229,7 +1226,6 @@ int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error) {
 	int status = MB_SUCCESS;
 	int nread;
 	int nlast;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1251,7 +1247,7 @@ int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error) {
 		/* read data into buffer */
 		nread = record_length / 100;
 		nlast = record_length % 100;
-		for (i = 0; i < nread; i++)
+		for (int i = 0; i < nread; i++)
 			if ((status = fread(buffer, 100, 1, mbfp)) != 1) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
@@ -1283,7 +1279,6 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	unsigned int checksum;
 	char eor_read[6];
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1338,7 +1333,7 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		index += 4;
 		mb_get_binary_int(MB_NO, &buffer[index], &store->num_svp);
 		index += 4;
-		for (i = 0; i < store->num_svp; i++) {
+		for (int i = 0; i < store->num_svp; i++) {
 			mb_get_binary_float(MB_NO, &buffer[index], &(store->svp[i].depth));
 			index += 4;
 			mb_get_binary_float(MB_NO, &buffer[index], &(store->svp[i].velocity));
@@ -1355,7 +1350,7 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		/* do checksum */
 		if (verbose >= 2) {
 			checksum = 0;
-			for (i = 0; i < read_length; i++)
+			for (int i = 0; i < read_length; i++)
 				checksum += (unsigned int)buffer[i];
 
 			/* check checksum and report */
@@ -1389,7 +1384,7 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg5       offset_z:         %f\n", store->offset_z);
 		fprintf(stderr, "dbg5       num_svp:          %d\n", store->num_svp);
 		fprintf(stderr, "dbg5       Sound Velocity Profile:\n");
-		for (i = 0; i < store->num_svp; i++)
+		for (int i = 0; i < store->num_svp; i++)
 			fprintf(stderr, "dbg5       %d  depth:%f  velocity:%f\n", i, store->svp[i].depth, store->svp[i].velocity);
 	}
 
@@ -1412,7 +1407,6 @@ int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	unsigned int checksum_read;
 	unsigned int checksum;
 	char eor_read[6];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1449,7 +1443,7 @@ int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		/* do checksum */
 		if (verbose >= 2) {
 			checksum = 0;
-			for (i = 0; i < read_length; i++)
+			for (int i = 0; i < read_length; i++)
 				checksum += (unsigned int)buffer[i];
 
 			/* check checksum and report */
@@ -1491,7 +1485,6 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	unsigned int checksum;
 	char eor_read[6];
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1591,7 +1584,7 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		/* do checksum */
 		if (verbose >= 2) {
 			checksum = 0;
-			for (i = 0; i < read_length; i++)
+			for (int i = 0; i < read_length; i++)
 				checksum += (unsigned int)buffer[i];
 
 			/* check checksum and report */
@@ -1663,7 +1656,6 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	unsigned int checksum;
 	char eor_read[6];
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1692,7 +1684,7 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 			}
 
 		index = 0;
-		for (i = 0; i < store->nbeams; i++) {
+		for (int i = 0; i < store->nbeams; i++) {
 			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].depth);
 			index += 4;
 			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].acrosstrack);
@@ -1727,7 +1719,7 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		/* do checksum */
 		if (verbose >= 2) {
 			checksum = 0;
-			for (i = 0; i < read_length; i++)
+			for (int i = 0; i < read_length; i++)
 				checksum += (unsigned int)buffer[i];
 
 			/* check checksum and report */
@@ -1747,7 +1739,7 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       beam depth xtrack ltrack tt angle angfor amp sig2noise echo src quality\n");
-		for (i = 0; i < store->nbeams; i++) {
+		for (int i = 0; i < store->nbeams; i++) {
 			fprintf(stderr, "dbg5       %3d %8.2f %9.2f %8.2f %6.3f %7.3f %7.3f %3d %3d %3d %c %c\n", i, store->beams[i].depth,
 			        store->beams[i].acrosstrack, store->beams[i].alongtrack, store->beams[i].range, store->beams[i].angle_across,
 			        store->beams[i].angle_forward, store->beams[i].amplitude, store->beams[i].signal_to_noise,
@@ -1777,7 +1769,6 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	short amplitude_short;
 	short alongtrack_short;
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1806,7 +1797,7 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 			}
 
 		index = 0;
-		for (i = 0; i < store->npixels; i++) {
+		for (int i = 0; i < store->npixels; i++) {
 			mb_get_binary_short(MB_NO, &buffer[index], &amplitude_short);
 			index += 2;
 			mb_get_binary_short(MB_NO, &buffer[index], &alongtrack_short);
@@ -1825,7 +1816,7 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		/* do checksum */
 		if (verbose >= 2) {
 			checksum = 0;
-			for (i = 0; i < read_length; i++)
+			for (int i = 0; i < read_length; i++)
 				checksum += (unsigned int)buffer[i];
 
 			/* check checksum and report */
@@ -1845,7 +1836,7 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       pixel amplitude alongtrack\n");
-		for (i = 0; i < store->npixels; i++) {
+		for (int i = 0; i < store->npixels; i++) {
 			fprintf(stderr, "dbg5       %3d   %f   %f\n", i, store->pixels[i].amplitude, store->pixels[i].alongtrack);
 		}
 	}
@@ -2010,7 +2001,6 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	int write_length;
 	unsigned int checksum;
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2039,7 +2029,7 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		fprintf(stderr, "dbg5       offset_z:         %f\n", store->offset_z);
 		fprintf(stderr, "dbg5       num_svp:          %d\n", store->num_svp);
 		fprintf(stderr, "dbg5       Sound Velocity Profile:\n");
-		for (i = 0; i < store->num_svp; i++)
+		for (int i = 0; i < store->num_svp; i++)
 			fprintf(stderr, "dbg5       %d  depth:%f  velocity:%f\n", i, store->svp[i].depth, store->svp[i].velocity);
 	}
 
@@ -2098,7 +2088,7 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		index += 4;
 		mb_put_binary_int(MB_NO, store->num_svp, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->num_svp; i++) {
+		for (int i = 0; i < store->num_svp; i++) {
 			mb_put_binary_float(MB_NO, store->svp[i].depth, &buffer[index]);
 			index += 4;
 			mb_put_binary_float(MB_NO, store->svp[i].velocity, &buffer[index]);
@@ -2108,7 +2098,7 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		/* do checksum */
 		write_length = MBF_SB2100BI_PR_WRITE_LEN;
 		checksum = 0;
-		for (i = 0; i < write_length; i++)
+		for (int i = 0; i < write_length; i++)
 			checksum += (unsigned int)buffer[i];
 		mb_put_binary_int(MB_NO, checksum, &buffer[index]);
 		index += 4;
@@ -2148,7 +2138,6 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	int write_length;
 	unsigned int checksum;
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2200,7 +2189,7 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		strcpy(buffer, store->comment);
 		write_length = strlen(buffer) + 1;
 		checksum = 0;
-		for (i = 0; i < write_length; i++)
+		for (int i = 0; i < write_length; i++)
 			checksum += (unsigned int)buffer[i];
 		index = write_length;
 		mb_put_binary_int(MB_NO, checksum, &buffer[index]);
@@ -2241,7 +2230,6 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	int write_length;
 	unsigned int checksum;
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2381,7 +2369,7 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		/* do checksum */
 		checksum = 0;
 		write_length = MBF_SB2100BI_DH_WRITE_LEN;
-		for (i = 0; i < write_length; i++)
+		for (int i = 0; i < write_length; i++)
 			checksum += (unsigned int)buffer[i];
 		mb_put_binary_int(MB_NO, checksum, &buffer[index]);
 		index += 4;
@@ -2421,7 +2409,6 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	int write_length;
 	unsigned int checksum;
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2436,7 +2423,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       beam depth xtrack ltrack tt angle angfor amp sig2noise echo src quality\n");
-		for (i = 0; i < store->nbeams; i++) {
+		for (int i = 0; i < store->nbeams; i++) {
 			fprintf(stderr, "dbg5       %3d %8.2f %9.2f %8.2f %6.3f %7.3f %7.3f %3d %3d %3d %c %c\n", i, store->beams[i].depth,
 			        store->beams[i].acrosstrack, store->beams[i].alongtrack, store->beams[i].range, store->beams[i].angle_across,
 			        store->beams[i].angle_forward, store->beams[i].amplitude, store->beams[i].signal_to_noise,
@@ -2471,7 +2458,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		index = 0;
-		for (i = 0; i < store->nbeams; i++) {
+		for (int i = 0; i < store->nbeams; i++) {
 			mb_put_binary_float(MB_NO, store->beams[i].depth, &buffer[index]);
 			index += 4;
 			mb_put_binary_float(MB_NO, store->beams[i].acrosstrack, &buffer[index]);
@@ -2499,7 +2486,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		/* do checksum */
 		checksum = 0;
 		write_length = store->nbeams * MBF_SB2100BI_BR_WRITE_LEN;
-		for (i = 0; i < write_length; i++)
+		for (int i = 0; i < write_length; i++)
 			checksum += (unsigned int)buffer[i];
 		mb_put_binary_int(MB_NO, checksum, &buffer[index]);
 		index += 4;
@@ -2541,7 +2528,6 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	short amplitude_short;
 	short alongtrack_short;
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2556,7 +2542,7 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       pixel amplitude alongtrack\n");
-		for (i = 0; i < store->npixels; i++) {
+		for (int i = 0; i < store->npixels; i++) {
 			fprintf(stderr, "dbg5       %3d   %f   %f\n", i, store->pixels[i].amplitude, store->pixels[i].alongtrack);
 		}
 	}
@@ -2588,7 +2574,7 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		index = 0;
-		for (i = 0; i < store->npixels; i++) {
+		for (int i = 0; i < store->npixels; i++) {
 			amplitude_short = (short)store->pixels[i].amplitude;
 			alongtrack_short = (short)(10 * store->pixels[i].alongtrack);
 			mb_put_binary_short(MB_NO, amplitude_short, &buffer[index]);
@@ -2600,7 +2586,7 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		/* do checksum */
 		checksum = 0;
 		write_length = store->npixels * MBF_SB2100BI_SR_WRITE_LEN;
-		for (i = 0; i < write_length; i++)
+		for (int i = 0; i < write_length; i++)
 			checksum += (unsigned int)buffer[i];
 		mb_put_binary_int(MB_NO, checksum, &buffer[index]);
 		index += 4;

@@ -310,7 +310,6 @@ int mbr_zero_mbarrov2(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_mbarrov2";
 	int status = MB_SUCCESS;
 	struct mbf_mbarrov2_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -326,11 +325,11 @@ int mbr_zero_mbarrov2(int verbose, char *data_ptr, int *error) {
 	/* initialize everything to zeros */
 	if (data != NULL) {
 		data->kind = MB_DATA_NONE;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			data->rovname[i] = 0;
 		data->divenumber = 0;
 		data->time_d = 0.0;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			data->time_i[i] = 0;
 		data->longitude = 0.0;
 		data->latitude = 0.0;
@@ -344,7 +343,7 @@ int mbr_zero_mbarrov2(int verbose, char *data_ptr, int *error) {
 		data->ship_latitude = 0.0;
 		data->ship_heading = 0.0;
 		data->qc_flag = 0;
-		for (i = 0; i < MBF_MBARROV2_MAXLINE; i++)
+		for (int i = 0; i < MBF_MBARROV2_MAXLINE; i++)
 			data->comment[i] = 0;
 	}
 
@@ -370,7 +369,6 @@ int mbr_rt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mbarrov2_struct *data;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -399,7 +397,7 @@ int mbr_rt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		strncpy(store->survey_id, data->rovname, 4);
 		store->seismic_line = data->divenumber;
 		store->time_d = data->time_d;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = data->time_i[i];
 		store->longitude = data->longitude;
 		store->latitude = data->latitude;
@@ -413,7 +411,7 @@ int mbr_rt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->ship_latitude = data->ship_latitude;
 		store->ship_heading = data->ship_heading;
 		store->qc_flag = data->qc_flag;
-		for (i = 0; i < MBF_MBARROV2_MAXLINE; i++)
+		for (int i = 0; i < MBF_MBARROV2_MAXLINE; i++)
 			store->comment[i] = data->comment[i];
 	}
 
@@ -435,7 +433,6 @@ int mbr_wt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mbarrov2_struct *data;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -460,7 +457,7 @@ int mbr_wt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->rovname[4] = 0;
 		data->divenumber = store->seismic_line;
 		data->time_d = store->time_d;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			data->time_i[i] = store->time_i[i];
 		data->longitude = store->longitude;
 		data->latitude = store->latitude;
@@ -474,7 +471,7 @@ int mbr_wt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->ship_latitude = store->ship_latitude;
 		data->ship_heading = store->ship_heading;
 		data->qc_flag = store->qc_flag;
-		for (i = 0; i < MBF_MBARROV2_MAXLINE; i++)
+		for (int i = 0; i < MBF_MBARROV2_MAXLINE; i++)
 			data->comment[i] = store->comment[i];
 		data->comment[MBF_MBARROV2_MAXLINE - 1] = '\0';
 	}

@@ -315,7 +315,6 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	gsfRecords *records;
 	gsfSwathBathyPing *mb_ping;
 	int ret;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -386,14 +385,14 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* if needed create array for beam flags */
 			if (mb_ping->number_beams > 0 && mb_ping->beam_flags == NULL) {
 				mb_ping->beam_flags = (unsigned char *)malloc(mb_ping->number_beams * sizeof(unsigned char));
-				for (i = 0; i < mb_ping->number_beams; i++)
+				for (int i = 0; i < mb_ping->number_beams; i++)
 					mb_ping->beam_flags[i] = MB_FLAG_NONE;
 			}
 
 			/* if needed create array for along_track */
 			if (mb_ping->number_beams > 0 && mb_ping->along_track == NULL) {
 				mb_ping->along_track = (double *)malloc(mb_ping->number_beams * sizeof(double));
-				for (i = 0; i < mb_ping->number_beams; i++)
+				for (int i = 0; i < mb_ping->number_beams; i++)
 					mb_ping->along_track[i] = 0.0;
 			}
 		}
@@ -505,15 +504,15 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg4       speed:      %f\n", mb_ping->speed);
 		fprintf(stderr, "dbg4       heading:    %f\n", mb_ping->heading);
 		fprintf(stderr, "dbg4       beams:      %d\n", mb_ping->number_beams);
-		for (i = 0; i < mb_ping->number_beams; i++)
+		for (int i = 0; i < mb_ping->number_beams; i++)
 			fprintf(stderr, "dbg4       beam:%d  flag:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, mb_ping->beam_flags[i],
 			        mb_ping->depth[i], mb_ping->across_track[i], mb_ping->along_track[i]);
 		if (mb_ping->mc_amplitude != NULL)
-			for (i = 0; i < mb_ping->number_beams; i++)
+			for (int i = 0; i < mb_ping->number_beams; i++)
 				fprintf(stderr, "dbg4       beam:%d  amp:%f  acrosstrack:%f  alongtrack:%f\n", i, mb_ping->mc_amplitude[i],
 				        mb_ping->across_track[i], mb_ping->along_track[i]);
 		if (mb_ping->mr_amplitude != NULL)
-			for (i = 0; i < mb_ping->number_beams; i++)
+			for (int i = 0; i < mb_ping->number_beams; i++)
 				fprintf(stderr, "dbg4       beam:%d  amp:%f  acrosstrack:%f  alongtrack:%f\n", i, mb_ping->mr_amplitude[i],
 				        mb_ping->across_track[i], mb_ping->along_track[i]);
 	}
@@ -548,7 +547,6 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	gsfRecords *records;
 	gsfSwathBathyPing *mb_ping;
 	int ret = 0;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -605,15 +603,15 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg4       speed:      %f\n", mb_ping->speed);
 		fprintf(stderr, "dbg4       heading:    %f\n", mb_ping->heading);
 		fprintf(stderr, "dbg4       beams:      %d\n", mb_ping->number_beams);
-		for (i = 0; i < mb_ping->number_beams; i++)
+		for (int i = 0; i < mb_ping->number_beams; i++)
 			fprintf(stderr, "dbg4       beam:%d  flag:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, mb_ping->beam_flags[i],
 			        mb_ping->depth[i], mb_ping->across_track[i], mb_ping->along_track[i]);
 		if (mb_ping->mc_amplitude != NULL)
-			for (i = 0; i < mb_ping->number_beams; i++)
+			for (int i = 0; i < mb_ping->number_beams; i++)
 				fprintf(stderr, "dbg4       beam:%d  amp:%f  acrosstrack:%f  alongtrack:%f\n", i, mb_ping->mc_amplitude[i],
 				        mb_ping->across_track[i], mb_ping->along_track[i]);
 		if (mb_ping->mr_amplitude != NULL)
-			for (i = 0; i < mb_ping->number_beams; i++)
+			for (int i = 0; i < mb_ping->number_beams; i++)
 				fprintf(stderr, "dbg4       beam:%d  amp:%f  acrosstrack:%f  alongtrack:%f\n", i, mb_ping->mr_amplitude[i],
 				        mb_ping->across_track[i], mb_ping->along_track[i]);
 	}

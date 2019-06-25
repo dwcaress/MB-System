@@ -387,7 +387,6 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int read_size;
 	int bs_status = BS_SUCCESS;
 	char *eol;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -492,13 +491,13 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 		/* Fix case of old file with no beam flags excepting negative depths */
 		if (store->ping.png_flags & PNG_BTYSSFLAGSABSENT) {
 			if (store->ping.png_flags & PNG_XYZ) {
-				for (i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
+				for (int i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
 					if (store->pingdata.pd_bty[ACP_PORT][3 * i + 2] < 0.0) {
 						store->pingdata.pd_bty[ACP_PORT][3 * i + 2] *= -1.0;
 						store->pingdata.pd_btyflags[ACP_PORT][i] = BTYD_EXTERNAL;
 					}
 				}
-				for (i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
+				for (int i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
 					if (store->pingdata.pd_bty[ACP_STBD][3 * i + 2] < 0.0) {
 						store->pingdata.pd_bty[ACP_STBD][3 * i + 2] *= -1.0;
 						store->pingdata.pd_btyflags[ACP_STBD][i] = BTYD_EXTERNAL;
@@ -506,13 +505,13 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 				}
 			}
 			else {
-				for (i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
+				for (int i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
 					if (store->pingdata.pd_bty[ACP_PORT][2 * i + 1] < 0.0) {
 						store->pingdata.pd_bty[ACP_PORT][2 * i + 1] *= -1.0;
 						store->pingdata.pd_btyflags[ACP_PORT][i] = BTYD_EXTERNAL;
 					}
 				}
-				for (i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
+				for (int i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
 					if (store->pingdata.pd_bty[ACP_STBD][2 * i + 1] < 0.0) {
 						store->pingdata.pd_bty[ACP_STBD][2 * i + 1] *= -1.0;
 						store->pingdata.pd_btyflags[ACP_STBD][i] = BTYD_EXTERNAL;
@@ -542,7 +541,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			fprintf(stderr, "dbg5       towfish compass samples:   %d\n", store->ping.png_compass.sns_nsamps);
 			fprintf(stderr, "dbg5       towfish compass value:     %f\n", store->ping.png_compass.sns_repval);
 			fprintf(stderr, "dbg5       towfish compass  heading:\n");
-			for (i = 0; i < store->ping.png_compass.sns_nsamps; i++) {
+			for (int i = 0; i < store->ping.png_compass.sns_nsamps; i++) {
 				fprintf(stderr, "dbg5         %3d     %12.4g\n", i, store->pingdata.pd_compass[i]);
 			}
 			fprintf(stderr, "dbg5       depth ptr:                 %p\n", (void *)store->pingdata.pd_depth);
@@ -550,7 +549,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			fprintf(stderr, "dbg5       towfish depth samples:     %d\n", store->ping.png_depth.sns_nsamps);
 			fprintf(stderr, "dbg5       towfish depth value:       %f\n", store->ping.png_depth.sns_repval);
 			fprintf(stderr, "dbg5       towfish depth:\n");
-			for (i = 0; i < store->ping.png_depth.sns_nsamps; i++) {
+			for (int i = 0; i < store->ping.png_depth.sns_nsamps; i++) {
 				fprintf(stderr, "dbg5         %3d     %12.4g\n", i, store->pingdata.pd_depth[i]);
 			}
 			fprintf(stderr, "dbg5       pitch ptr:                 %p\n", (void *)store->pingdata.pd_pitch);
@@ -558,7 +557,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			fprintf(stderr, "dbg5       towfish pitch samples:     %d\n", store->ping.png_pitch.sns_nsamps);
 			fprintf(stderr, "dbg5       towfish pitch value:       %f\n", store->ping.png_pitch.sns_repval);
 			fprintf(stderr, "dbg5       towfish pitch:\n");
-			for (i = 0; i < store->ping.png_pitch.sns_nsamps; i++) {
+			for (int i = 0; i < store->ping.png_pitch.sns_nsamps; i++) {
 				fprintf(stderr, "dbg5         %3d     %12.4g\n", i, store->pingdata.pd_pitch[i]);
 			}
 			fprintf(stderr, "dbg5       roll ptr:                  %p\n", (void *)store->pingdata.pd_roll);
@@ -566,7 +565,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			fprintf(stderr, "dbg5       towfish roll samples:      %d\n", store->ping.png_roll.sns_nsamps);
 			fprintf(stderr, "dbg5       towfish roll value:        %f\n", store->ping.png_roll.sns_repval);
 			fprintf(stderr, "dbg5       towfish roll:\n");
-			for (i = 0; i < store->ping.png_roll.sns_nsamps; i++) {
+			for (int i = 0; i < store->ping.png_roll.sns_nsamps; i++) {
 				fprintf(stderr, "dbg5         %3d     %12.4g\n", i, store->pingdata.pd_roll[i]);
 			}
 			fprintf(stderr, "dbg5       png_snspad:       %d\n", store->ping.png_snspad);
@@ -591,7 +590,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			fprintf(stderr, "dbg5       port abi ptr:     %p\n", (void *)store->pingdata.pd_abi[ACP_PORT]);
 			if (store->ping.png_flags & PNG_XYZ) {
 				fprintf(stderr, "dbg5       port flag acrosstrack alongtrack bathymetry:\n");
-				for (i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
+				for (int i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
 					fprintf(stderr, "dbg5         %3d     %d %12.4g %12.4g %12.4g\n", i, store->pingdata.pd_btyflags[ACP_PORT][i],
 					        store->pingdata.pd_bty[ACP_PORT][3 * i], store->pingdata.pd_bty[ACP_PORT][3 * i + 1],
 					        store->pingdata.pd_bty[ACP_PORT][3 * i + 2]);
@@ -599,7 +598,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			}
 			else {
 				fprintf(stderr, "dbg5       port flag acrosstrack bathymetry:\n");
-				for (i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
+				for (int i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
 					fprintf(stderr, "dbg5         %3d     %d %12.4g %12.4g\n", i, store->pingdata.pd_btyflags[ACP_PORT][i],
 					        store->pingdata.pd_bty[ACP_PORT][2 * i], store->pingdata.pd_bty[ACP_PORT][2 * i + 1]);
 				}
@@ -612,7 +611,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			fprintf(stderr, "dbg5       port ss ptr:      %p\n", (void *)store->pingdata.pd_ss[ACP_PORT]);
 			fprintf(stderr, "dbg5       port ssflags ptr: %p\n", (void *)store->pingdata.pd_ssflags[ACP_PORT]);
 			fprintf(stderr, "dbg5       port flag sidescan:\n");
-			for (i = 0; i < store->ping.png_sides[ACP_PORT].ps_sscount; i++) {
+			for (int i = 0; i < store->ping.png_sides[ACP_PORT].ps_sscount; i++) {
 				fprintf(stderr, "dbg5         %3d     %d %12.4g\n", i, store->pingdata.pd_ssflags[ACP_PORT][i],
 				        store->pingdata.pd_ss[ACP_PORT][i]);
 			}
@@ -628,7 +627,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			fprintf(stderr, "dbg5       stbd abi ptr:     %p\n", (void *)store->pingdata.pd_abi[ACP_STBD]);
 			if (store->ping.png_flags & PNG_XYZ) {
 				fprintf(stderr, "dbg5       stbd flag acrosstrack alongtrack bathymetry:\n");
-				for (i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
+				for (int i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
 					fprintf(stderr, "dbg5         %3d     %d %12.4g %12.4g %12.4g\n", i, store->pingdata.pd_btyflags[ACP_STBD][i],
 					        store->pingdata.pd_bty[ACP_STBD][3 * i], store->pingdata.pd_bty[ACP_STBD][3 * i + 1],
 					        store->pingdata.pd_bty[ACP_STBD][3 * i + 2]);
@@ -636,7 +635,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			}
 			else {
 				fprintf(stderr, "dbg5       stbd flag acrosstrack bathymetry:\n");
-				for (i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
+				for (int i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
 					fprintf(stderr, "dbg5         %3d     %d %12.4g %12.4g\n", i, store->pingdata.pd_btyflags[ACP_STBD][i],
 					        store->pingdata.pd_bty[ACP_STBD][2 * i], store->pingdata.pd_bty[ACP_STBD][2 * i + 1]);
 				}
@@ -649,7 +648,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			fprintf(stderr, "dbg5       stbd ss ptr:      %p\n", (void *)store->pingdata.pd_ss[ACP_STBD]);
 			fprintf(stderr, "dbg5       stbd ssflags ptr: %p\n", (void *)store->pingdata.pd_ssflags[ACP_STBD]);
 			fprintf(stderr, "dbg5       stbd flag sidescan:\n");
-			for (i = 0; i < store->ping.png_sides[ACP_STBD].ps_sscount; i++) {
+			for (int i = 0; i < store->ping.png_sides[ACP_STBD].ps_sscount; i++) {
 				fprintf(stderr, "dbg5         %3d     %d %12.4g\n", i, store->pingdata.pd_ssflags[ACP_STBD][i],
 				        store->pingdata.pd_ss[ACP_STBD][i]);
 			}
@@ -677,7 +676,6 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	struct mbsys_mr1v2001_struct *store;
 	char *xdrs;
 	int bs_status = BS_SUCCESS;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -714,7 +712,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr, "dbg5       towfish compass samples:   %d\n", store->ping.png_compass.sns_nsamps);
 		fprintf(stderr, "dbg5       towfish compass value:     %f\n", store->ping.png_compass.sns_repval);
 		fprintf(stderr, "dbg5       towfish compass  heading:\n");
-		for (i = 0; i < store->ping.png_compass.sns_nsamps; i++) {
+		for (int i = 0; i < store->ping.png_compass.sns_nsamps; i++) {
 			fprintf(stderr, "dbg5         %3d     %12.4g\n", i, store->pingdata.pd_compass[i]);
 		}
 		fprintf(stderr, "dbg5       depth ptr:                 %p\n", (void *)store->pingdata.pd_depth);
@@ -722,7 +720,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr, "dbg5       towfish depth samples:     %d\n", store->ping.png_depth.sns_nsamps);
 		fprintf(stderr, "dbg5       towfish depth value:       %f\n", store->ping.png_depth.sns_repval);
 		fprintf(stderr, "dbg5       towfish depth:\n");
-		for (i = 0; i < store->ping.png_depth.sns_nsamps; i++) {
+		for (int i = 0; i < store->ping.png_depth.sns_nsamps; i++) {
 			fprintf(stderr, "dbg5         %3d     %12.4g\n", i, store->pingdata.pd_depth[i]);
 		}
 		fprintf(stderr, "dbg5       pitch ptr:                 %p\n", (void *)store->pingdata.pd_pitch);
@@ -730,7 +728,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr, "dbg5       towfish pitch samples:     %d\n", store->ping.png_pitch.sns_nsamps);
 		fprintf(stderr, "dbg5       towfish pitch value:       %f\n", store->ping.png_pitch.sns_repval);
 		fprintf(stderr, "dbg5       towfish pitch:\n");
-		for (i = 0; i < store->ping.png_pitch.sns_nsamps; i++) {
+		for (int i = 0; i < store->ping.png_pitch.sns_nsamps; i++) {
 			fprintf(stderr, "dbg5         %3d     %12.4g\n", i, store->pingdata.pd_pitch[i]);
 		}
 		fprintf(stderr, "dbg5       roll ptr:                  %p\n", (void *)store->pingdata.pd_roll);
@@ -738,7 +736,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr, "dbg5       towfish roll samples:      %d\n", store->ping.png_roll.sns_nsamps);
 		fprintf(stderr, "dbg5       towfish roll value:        %f\n", store->ping.png_roll.sns_repval);
 		fprintf(stderr, "dbg5       towfish roll:\n");
-		for (i = 0; i < store->ping.png_roll.sns_nsamps; i++) {
+		for (int i = 0; i < store->ping.png_roll.sns_nsamps; i++) {
 			fprintf(stderr, "dbg5         %3d     %12.4g\n", i, store->pingdata.pd_roll[i]);
 		}
 		fprintf(stderr, "dbg5       png_snspad:       %d\n", store->ping.png_snspad);
@@ -763,7 +761,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr, "dbg5       port abi ptr:     %p\n", (void *)store->pingdata.pd_abi[ACP_PORT]);
 		if (store->ping.png_flags & PNG_XYZ) {
 			fprintf(stderr, "dbg5       port flag acrosstrack alongtrack bathymetry:\n");
-			for (i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
+			for (int i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
 				fprintf(stderr, "dbg5         %3d     %d %12.4g %12.4g %12.4g\n", i, store->pingdata.pd_btyflags[ACP_PORT][i],
 				        store->pingdata.pd_bty[ACP_PORT][3 * i], store->pingdata.pd_bty[ACP_PORT][3 * i + 1],
 				        store->pingdata.pd_bty[ACP_PORT][3 * i + 2]);
@@ -771,7 +769,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		}
 		else {
 			fprintf(stderr, "dbg5       port flag acrosstrack bathymetry:\n");
-			for (i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
+			for (int i = 0; i < store->ping.png_sides[ACP_PORT].ps_btycount; i++) {
 				fprintf(stderr, "dbg5         %3d     %d %12.4g %12.4g\n", i, store->pingdata.pd_btyflags[ACP_PORT][i],
 				        store->pingdata.pd_bty[ACP_PORT][2 * i], store->pingdata.pd_bty[ACP_PORT][2 * i + 1]);
 			}
@@ -784,7 +782,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr, "dbg5       port ss ptr:      %p\n", (void *)store->pingdata.pd_ss[ACP_PORT]);
 		fprintf(stderr, "dbg5       port ssflags ptr: %p\n", (void *)store->pingdata.pd_ssflags[ACP_PORT]);
 		fprintf(stderr, "dbg5       port flag sidescan:\n");
-		for (i = 0; i < store->ping.png_sides[ACP_PORT].ps_sscount; i++) {
+		for (int i = 0; i < store->ping.png_sides[ACP_PORT].ps_sscount; i++) {
 			fprintf(stderr, "dbg5         %3d     %d %12.4g\n", i, store->pingdata.pd_ssflags[ACP_PORT][i],
 			        store->pingdata.pd_ss[ACP_PORT][i]);
 		}
@@ -800,7 +798,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr, "dbg5       stbd abi ptr:     %p\n", (void *)store->pingdata.pd_abi[ACP_STBD]);
 		if (store->ping.png_flags & PNG_XYZ) {
 			fprintf(stderr, "dbg5       stbd flag acrosstrack alongtrack bathymetry:\n");
-			for (i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
+			for (int i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
 				fprintf(stderr, "dbg5         %3d     %d %12.4g %12.4g %12.4g\n", i, store->pingdata.pd_btyflags[ACP_STBD][i],
 				        store->pingdata.pd_bty[ACP_STBD][3 * i], store->pingdata.pd_bty[ACP_STBD][3 * i + 1],
 				        store->pingdata.pd_bty[ACP_STBD][3 * i + 2]);
@@ -808,7 +806,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		}
 		else {
 			fprintf(stderr, "dbg5       stbd flag acrosstrack bathymetry:\n");
-			for (i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
+			for (int i = 0; i < store->ping.png_sides[ACP_STBD].ps_btycount; i++) {
 				fprintf(stderr, "dbg5         %3d     %d %12.4g %12.4g\n", i, store->pingdata.pd_btyflags[ACP_STBD][i],
 				        store->pingdata.pd_bty[ACP_STBD][2 * i], store->pingdata.pd_bty[ACP_STBD][2 * i + 1]);
 			}
@@ -821,7 +819,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr, "dbg5       stbd ss ptr:      %p\n", (void *)store->pingdata.pd_ss[ACP_STBD]);
 		fprintf(stderr, "dbg5       stbd ssflags ptr: %p\n", (void *)store->pingdata.pd_ssflags[ACP_STBD]);
 		fprintf(stderr, "dbg5       stbd flag sidescan:\n");
-		for (i = 0; i < store->ping.png_sides[ACP_STBD].ps_sscount; i++) {
+		for (int i = 0; i < store->ping.png_sides[ACP_STBD].ps_sscount; i++) {
 			fprintf(stderr, "dbg5         %3d     %d %12.4g\n", i, store->pingdata.pd_ssflags[ACP_STBD][i],
 			        store->pingdata.pd_ss[ACP_STBD][i]);
 		}
