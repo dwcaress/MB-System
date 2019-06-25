@@ -480,7 +480,6 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int index;
 	int read_len;
 	int skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -555,7 +554,7 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 			{
 				/* get next byte */
-				for (i = 0; i < 3; i++)
+				for (int i = 0; i < 3; i++)
 					label[i] = label[i + 1];
 				if ((read_len = fread(&label[3], 1, 1, mb_io_ptr->mbfp)) != 1) {
 					status = MB_FAILURE;
@@ -849,7 +848,7 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			if (store->kind == MB_DATA_RAW_LINE) {
 				store->rawsize = buffer_size;
-				for (i = 0; i < buffer_size; i++)
+				for (int i = 0; i < buffer_size; i++)
 					store->raw[i] = buffer[i];
 				done = MB_YES;
 			}
@@ -900,7 +899,6 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 	int done;
 	int index;
 	int skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1006,7 +1004,7 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_description_len);
 				index += 4;
-				for (i = 0; i < store->nav_description_len; i++) {
+				for (int i = 0; i < store->nav_description_len; i++) {
 					store->nav_description[i] = buffer[index];
 					index++;
 				}
@@ -1215,7 +1213,6 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 	int done;
 	int index;
 	int skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1302,7 +1299,7 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->svp_nsvp);
 				index += 4;
-				for (i = 0; i < store->svp_nsvp; i++) {
+				for (int i = 0; i < store->svp_nsvp; i++) {
 					if (i < MBSYS_XSE_MAXSVP) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_depth[i]);
 						index += 8;
@@ -1317,7 +1314,7 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->svp_nsvp);
 				index += 4;
-				for (i = 0; i < store->svp_nsvp; i++) {
+				for (int i = 0; i < store->svp_nsvp; i++) {
 					if (i < MBSYS_XSE_MAXSVP) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_velocity[i]);
 						index += 8;
@@ -1332,7 +1329,7 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->svp_nctd);
 				index += 4;
-				for (i = 0; i < store->svp_nctd; i++) {
+				for (int i = 0; i < store->svp_nctd; i++) {
 					if (i < MBSYS_XSE_MAXSVP) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_conductivity[i]);
 						index += 8;
@@ -1347,7 +1344,7 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->svp_nctd);
 				index += 4;
-				for (i = 0; i < store->svp_nctd; i++) {
+				for (int i = 0; i < store->svp_nctd; i++) {
 					if (i < MBSYS_XSE_MAXSVP) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_salinity[i]);
 						index += 8;
@@ -1362,7 +1359,7 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->svp_nctd);
 				index += 4;
-				for (i = 0; i < store->svp_nctd; i++) {
+				for (int i = 0; i < store->svp_nctd; i++) {
 					if (i < MBSYS_XSE_MAXSVP) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_temperature[i]);
 						index += 8;
@@ -1377,7 +1374,7 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->svp_nctd);
 				index += 4;
-				for (i = 0; i < store->svp_nctd; i++) {
+				for (int i = 0; i < store->svp_nctd; i++) {
 					if (i < MBSYS_XSE_MAXSVP) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_pressure[i]);
 						index += 8;
@@ -1423,9 +1420,9 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 		fprintf(stderr, "dbg5       svp_nsvp:            %d\n", store->svp_nsvp);
 		fprintf(stderr, "dbg5       svp_nctd:            %d\n", store->svp_nctd);
 		fprintf(stderr, "dbg5       svp_ssv:             %f\n", store->svp_ssv);
-		for (i = 0; i < store->svp_nsvp; i++)
+		for (int i = 0; i < store->svp_nsvp; i++)
 			fprintf(stderr, "dbg5       svp[%d]:	        %f %f\n", i, store->svp_depth[i], store->svp_velocity[i]);
-		for (i = 0; i < store->svp_nctd; i++)
+		for (int i = 0; i < store->svp_nctd; i++)
 			fprintf(stderr, "dbg5       cstd[%d]:        %f %f %f %f\n", i, store->svp_conductivity[i], store->svp_salinity[i],
 			        store->svp_temperature[i], store->svp_pressure[i]);
 	}
@@ -1484,7 +1481,6 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 	int index;
 	int skip;
 	int nchar;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1560,7 +1556,7 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 			if (group_id == MBSYS_XSE_SHP_GROUP_GEN) {
 				mb_get_binary_int(SWAPFLAG, &buffer[index], &nchar);
 				index += 4;
-				for (i = 0; i < nchar; i++) {
+				for (int i = 0; i < nchar; i++) {
 					store->par_ship_name[i] = buffer[index];
 					index++;
 				}
@@ -1593,15 +1589,15 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 			else if (group_id == MBSYS_XSE_SHP_GROUP_SENSORS) {
 				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_ship_nsensor);
 				index += 4;
-				for (i = 0; i < store->par_ship_nsensor; i++) {
+				for (int i = 0; i < store->par_ship_nsensor; i++) {
 					mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_ship_sensor_id[i]);
 					index += 4;
 				}
-				for (i = 0; i < store->par_ship_nsensor; i++) {
+				for (int i = 0; i < store->par_ship_nsensor; i++) {
 					mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_ship_sensor_type[i]);
 					index += 4;
 				}
-				for (i = 0; i < store->par_ship_nsensor; i++) {
+				for (int i = 0; i < store->par_ship_nsensor; i++) {
 					mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_ship_sensor_frequency[i]);
 					index += 4;
 				}
@@ -1694,7 +1690,7 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 			else if (group_id == MBSYS_XSE_SHP_GROUP_TRANSDUCER) {
 				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_xdr_num_transducer);
 				index += 4;
-				for (i = 0; i < store->par_xdr_num_transducer; i++) {
+				for (int i = 0; i < store->par_xdr_num_transducer; i++) {
 					mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_xdr_sensorid[i]);
 					index += 4;
 					mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->par_xdr_frequency[i]);
@@ -1730,7 +1726,7 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 			else if (group_id == MBSYS_XSE_SHP_GROUP_TRANSDUCEREXTENDED) {
 				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_xdx_num_transducer);
 				index += 4;
-				for (i = 0; i < store->par_xdx_num_transducer; i++) {
+				for (int i = 0; i < store->par_xdx_num_transducer; i++) {
 					store->par_xdx_roll[i] = buffer[index];
 					index++;
 					store->par_xdx_pitch[i] = buffer[index];
@@ -1756,7 +1752,7 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 		fprintf(stderr, "dbg5       par_ship_height:     %f\n", store->par_ship_height);
 		fprintf(stderr, "dbg5       par_ship_displacement: %f\n", store->par_ship_displacement);
 		fprintf(stderr, "dbg5       par_ship_weight:     %f\n", store->par_ship_weight);
-		for (i = 0; i < store->par_ship_nsensor; i++) {
+		for (int i = 0; i < store->par_ship_nsensor; i++) {
 			fprintf(stderr, "dbg5       par_ship_sensor_id[%d]:        %d\n", i, store->par_ship_sensor_id[i]);
 			fprintf(stderr, "dbg5       par_ship_sensor_type[%d]:      %d\n", i, store->par_ship_sensor_type[i]);
 			fprintf(stderr, "dbg5       par_ship_sensor_frequency[%d]: %d\n", i, store->par_ship_sensor_frequency[i]);
@@ -1794,18 +1790,18 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 		fprintf(stderr, "dbg5       par_nam_hrp_z:           %f\n", store->par_nam_hrp_z);
 		fprintf(stderr, "dbg5       par_xdr_num_transducer:  %d\n", store->par_xdr_num_transducer);
 		fprintf(stderr, "dbg5       # sensor xducer freq side roll pitch azi dist\n");
-		for (i = 0; i < store->par_xdr_num_transducer; i++)
+		for (int i = 0; i < store->par_xdr_num_transducer; i++)
 			fprintf(stderr, "dbg5       %d %d %d %d %d %f %f %f %f\n", i, store->par_xdr_sensorid[i],
 			        store->par_xdr_transducer[i], store->par_xdr_frequency[i], store->par_xdr_side[i],
 			        store->par_xdr_mountingroll[i], store->par_xdr_mountingpitch[i], store->par_xdr_mountingazimuth[i],
 			        store->par_xdr_mountingdistance[i]);
 		fprintf(stderr, "dbg5       # x y z roll pitch azimuth\n");
-		for (i = 0; i < store->par_xdr_num_transducer; i++)
+		for (int i = 0; i < store->par_xdr_num_transducer; i++)
 			fprintf(stderr, "dbg5       %d %f %f %f %f %f %f\n", i, store->par_xdr_x[i], store->par_xdr_y[i], store->par_xdr_z[i],
 			        store->par_xdr_roll[i], store->par_xdr_pitch[i], store->par_xdr_azimuth[i]);
 		fprintf(stderr, "dbg5       par_xdx_num_transducer:  %d\n", store->par_xdx_num_transducer);
 		fprintf(stderr, "dbg5       # roll pitch azimuth\n");
-		for (i = 0; i < store->par_xdx_num_transducer; i++)
+		for (int i = 0; i < store->par_xdx_num_transducer; i++)
 			fprintf(stderr, "dbg5       %d %d %d %d\n", i, store->par_xdx_roll[i], store->par_xdx_pitch[i],
 			        store->par_xdx_azimuth[i]);
 	}
@@ -1833,7 +1829,6 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 	int ngoodss;
 	double xmin, xmax, binsize;
 	int skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1943,7 +1938,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_avt_num_samples);
 				index += 4;
-				for (i = 0; i < store->sid_avt_num_samples; i++)
+				for (int i = 0; i < store->sid_avt_num_samples; i++)
 					if (i < MBSYS_XSE_MAXPIXELS) {
 						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_avt_amp[i]);
 						index += 2;
@@ -1953,7 +1948,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				fprintf(stderr, "sid_avt_sampleus=%d\n", store->sid_avt_sampleus);
 				fprintf(stderr, "sid_avt_offset=%d\n", store->sid_avt_offset);
 				fprintf(stderr, "sid_avt_num_samples=%d\n", store->sid_avt_num_samples);
-				for (i = 0; i < store->sid_avt_num_samples; i++)
+				for (int i = 0; i < store->sid_avt_num_samples; i++)
 					fprintf(stderr, "sid_avt_amp[%d]:%d\n", i, store->sid_avt_amp[i]);
 #endif
 			}
@@ -1969,7 +1964,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_pvt_num_samples);
 				index += 4;
-				for (i = 0; i < store->sid_pvt_num_samples; i++)
+				for (int i = 0; i < store->sid_pvt_num_samples; i++)
 					if (i < MBSYS_XSE_MAXPIXELS) {
 						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_pvt_phase[i]);
 						index += 2;
@@ -1979,7 +1974,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				fprintf(stderr, "sid_pvt_sampleus=%d\n", store->sid_pvt_sampleus);
 				fprintf(stderr, "sid_pvt_offset=%d\n", store->sid_pvt_offset);
 				fprintf(stderr, "sid_pvt_num_samples=%d\n", store->sid_pvt_num_samples);
-				for (i = 0; i < store->sid_pvt_num_samples; i++)
+				for (int i = 0; i < store->sid_pvt_num_samples; i++)
 					fprintf(stderr, "sid_pvt_phase[%d]:%d\n", i, store->sid_pvt_phase[i]);
 #endif
 			}
@@ -1995,7 +1990,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->sid_avl_num_samples);
 				index += 4;
-				for (i = 0; i < store->sid_avl_num_samples; i++)
+				for (int i = 0; i < store->sid_avl_num_samples; i++)
 					if (i < MBSYS_XSE_MAXPIXELS) {
 						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_avl_amp[i]);
 						index += 2;
@@ -2005,7 +2000,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				fprintf(stderr, "sid_avl_binsize=%d\n", store->sid_avl_binsize);
 				fprintf(stderr, "sid_avl_offset=%d\n", store->sid_avl_offset);
 				fprintf(stderr, "sid_avl_num_samples=%d\n", store->sid_avl_num_samples);
-				for (i = 0; i < store->sid_avl_num_samples; i++)
+				for (int i = 0; i < store->sid_avl_num_samples; i++)
 					fprintf(stderr, "sid_avl_amp[%d]:%d\n", i, store->sid_avl_amp[i]);
 #endif
 			}
@@ -2020,7 +2015,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->sid_pvl_num_samples);
 				index += 4;
-				for (i = 0; i < store->sid_pvl_num_samples; i++)
+				for (int i = 0; i < store->sid_pvl_num_samples; i++)
 					if (i < MBSYS_XSE_MAXPIXELS) {
 						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_pvl_phase[i]);
 						index += 2;
@@ -2030,7 +2025,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				fprintf(stderr, "sid_pvl_binsize=%d\n", store->sid_pvl_binsize);
 				fprintf(stderr, "sid_pvl_offset=%d\n", store->sid_pvl_offset);
 				fprintf(stderr, "sid_pvl_num_samples=%d\n", store->sid_pvl_num_samples);
-				for (i = 0; i < store->sid_pvl_num_samples; i++)
+				for (int i = 0; i < store->sid_pvl_num_samples; i++)
 					fprintf(stderr, "sid_pvl_phase[%d]:%d\n", i, store->sid_pvl_phase[i]);
 #endif
 			}
@@ -2049,7 +2044,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				index += 8;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->sid_sig_num_samples);
 				index += 4;
-				for (i = 0; i < store->sid_sig_num_samples; i++)
+				for (int i = 0; i < store->sid_sig_num_samples; i++)
 					if (i < MBSYS_XSE_MAXPIXELS) {
 						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_sig_phase[i]);
 						index += 2;
@@ -2061,7 +2056,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				fprintf(stderr, "sid_sig_offset=%g\n", store->sid_sig_offset);
 				fprintf(stderr, "sid_sig_sample=%g\n", store->sid_sig_sample);
 				fprintf(stderr, "sid_sig_num_samples=%d\n", store->sid_sig_num_samples);
-				for (i = 0; i < store->sid_sig_num_samples; i++)
+				for (int i = 0; i < store->sid_sig_num_samples; i++)
 					fprintf(stderr, "sid_sig_phase[%d]:%d\n", i, store->sid_sig_phase[i]);
 #endif
 			}
@@ -2082,7 +2077,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->sid_png_pulseid);
 				index += 4;
-				for (i = 0; i < byte_count - 40; i++) {
+				for (int i = 0; i < byte_count - 40; i++) {
 					store->sid_png_pulsename[i] = buffer[index];
 					index++;
 				}
@@ -2112,7 +2107,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				index += 8;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->sid_cmp_num_samples);
 				index += 4;
-				for (i = 0; i < store->sid_cmp_num_samples; i++)
+				for (int i = 0; i < store->sid_cmp_num_samples; i++)
 					if (i < MBSYS_XSE_MAXPIXELS) {
 						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_cmp_real[i]);
 						index += 2;
@@ -2126,7 +2121,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 				fprintf(stderr, "sid_cmp_offset=%f\n", store->sid_cmp_offset);
 				fprintf(stderr, "sid_cmp_sample=%f\n", store->sid_cmp_sample);
 				fprintf(stderr, "sid_cmp_num_samples=%d\n", store->sid_cmp_num_samples);
-				for (i = 0; i < store->sid_cmp_num_samples; i++)
+				for (int i = 0; i < store->sid_cmp_num_samples; i++)
 					fprintf(stderr, "sid_cmp_real[%d]:%d sid_cmp_imaginary[%d]:%d\n", i, store->sid_cmp_real[i], i,
 					        store->sid_cmp_imaginary[i]);
 #endif
@@ -2167,14 +2162,14 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 		/* get width of bathymetry swath size */
 		xmin = 9999999.9;
 		xmax = -9999999.9;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			xmin = MIN(xmin, store->beams[i].lateral);
 			xmax = MAX(xmax, store->beams[i].lateral);
 		}
 
 		/* get number of nonzero pixels */
 		ngoodss = 0;
-		for (i = 0; i < store->sid_avl_num_samples; i++)
+		for (int i = 0; i < store->sid_avl_num_samples; i++)
 			if (store->sid_avl_amp[i] != 0)
 				ngoodss++;
 
@@ -2209,29 +2204,29 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 		fprintf(stderr, "dbg5       sid_avt_sampleus:     %d\n", store->sid_avt_sampleus);
 		fprintf(stderr, "dbg5       sid_avt_offset:       %d\n", store->sid_avt_offset);
 		fprintf(stderr, "dbg5       sid_avt_num_samples:  %d\n", store->sid_avt_num_samples);
-		for (i = 0; i < store->sid_avt_num_samples; i++)
+		for (int i = 0; i < store->sid_avt_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_avt_amp[%d]:%d\n", i, store->sid_avt_amp[i]);
 		fprintf(stderr, "dbg5       sid_pvt_sampleus:  %d\n", store->sid_pvt_sampleus);
 		fprintf(stderr, "dbg5       sid_pvt_offset:  %d\n", store->sid_pvt_offset);
 		fprintf(stderr, "dbg5       sid_pvt_num_samples:  %d\n", store->sid_pvt_num_samples);
-		for (i = 0; i < store->sid_pvt_num_samples; i++)
+		for (int i = 0; i < store->sid_pvt_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_pvt_phase[%d]:%d\n", i, store->sid_pvt_phase[i]);
 		fprintf(stderr, "dbg5       sid_avl_binsize:  %d\n", store->sid_avl_binsize);
 		fprintf(stderr, "dbg5       sid_avl_offset:  %d\n", store->sid_avl_offset);
 		fprintf(stderr, "dbg5       sid_avl_num_samples:  %d\n", store->sid_avl_num_samples);
-		for (i = 0; i < store->sid_avl_num_samples; i++)
+		for (int i = 0; i < store->sid_avl_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_avl_amp[%d]:%d\n", i, store->sid_avl_amp[i]);
 		fprintf(stderr, "dbg5       sid_pvl_binsize:  %d\n", store->sid_pvl_binsize);
 		fprintf(stderr, "dbg5       sid_pvl_offset:  %d\n", store->sid_pvl_offset);
 		fprintf(stderr, "dbg5       sid_pvl_num_samples:  %d\n", store->sid_pvl_num_samples);
-		for (i = 0; i < store->sid_pvl_num_samples; i++)
+		for (int i = 0; i < store->sid_pvl_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_pvl_phase[%d]:%d\n", i, store->sid_pvl_phase[i]);
 		fprintf(stderr, "dbg5       sid_sig_ping:  %d\n", store->sid_sig_ping);
 		fprintf(stderr, "dbg5       sid_sig_channel:  %d\n", store->sid_sig_channel);
 		fprintf(stderr, "dbg5       sid_sig_offset:  %f\n", store->sid_sig_offset);
 		fprintf(stderr, "dbg5       sid_sig_sample:  %f\n", store->sid_sig_sample);
 		fprintf(stderr, "dbg5       sid_sig_num_samples:  %d\n", store->sid_sig_num_samples);
-		for (i = 0; i < store->sid_sig_num_samples; i++)
+		for (int i = 0; i < store->sid_sig_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_sig_phase[%d]:%d\n", i, store->sid_sig_phase[i]);
 		fprintf(stderr, "dbg5       sid_png_pulse:  %u\n", store->sid_png_pulse);
 		fprintf(stderr, "dbg5       sid_png_startfrequency:  %f\n", store->sid_png_startfrequency);
@@ -2245,7 +2240,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 		fprintf(stderr, "dbg5       sid_cmp_offset:  %f\n", store->sid_cmp_offset);
 		fprintf(stderr, "dbg5       sid_cmp_sample:  %f\n", store->sid_cmp_sample);
 		fprintf(stderr, "dbg5       sid_cmp_num_samples:  %d\n", store->sid_cmp_num_samples);
-		for (i = 0; i < store->sid_sig_num_samples; i++)
+		for (int i = 0; i < store->sid_sig_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_cmp_real[%d]:%d sid_cmp_imaginary[%d]:%d\n", i, store->sid_cmp_real[i], i,
 			        store->sid_cmp_imaginary[i]);
 		fprintf(stderr, "dbg5       sid_wgt_factorleft:  %d\n", store->sid_wgt_factorleft);
@@ -2279,7 +2274,6 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 	double xmin, xmax, binsize;
 	int ngoodss;
 	int skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2412,7 +2406,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_beam = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->beams[i].beam);
 						index += 2;
@@ -2428,7 +2422,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_tt = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].tt);
 						index += 8;
@@ -2436,7 +2430,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "tt[%d]=%f\n", i, store->beams[i].tt);
 #endif
 			}
@@ -2449,13 +2443,13 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_quality = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS)
 						store->beams[i].quality = buffer[index++];
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "quality[%d]=%u\n", i, store->beams[i].quality);
 #endif
 			}
@@ -2468,7 +2462,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_amp = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->beams[i].amplitude);
 						index += 2;
@@ -2476,7 +2470,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "amp[%d]=%d\n", i, store->beams[i].amplitude);
 #endif
 			}
@@ -2489,7 +2483,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_delay = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].delay);
 						index += 8;
@@ -2497,7 +2491,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "delay[%d]=%lf\n", i, store->beams[i].delay);
 #endif
 			}
@@ -2510,7 +2504,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_lateral = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].lateral);
 						index += 8;
@@ -2518,7 +2512,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "lateral[%d]=%lf\n", i, store->beams[i].lateral);
 #endif
 			}
@@ -2531,7 +2525,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_along = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].along);
 						index += 8;
@@ -2539,7 +2533,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "along[%d]=%lf\n", i, store->beams[i].along);
 #endif
 			}
@@ -2552,7 +2546,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_depth = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].depth);
 						index += 8;
@@ -2560,7 +2554,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "depth[%d]=%lf\n", i, store->beams[i].depth);
 #endif
 			}
@@ -2573,7 +2567,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_angle = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].angle);
 						index += 8;
@@ -2581,7 +2575,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "angle[%d]=%lf\n", i, store->beams[i].angle);
 #endif
 			}
@@ -2594,7 +2588,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_heave = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].heave);
 						index += 8;
@@ -2602,7 +2596,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "heave[%d]=%lf\n", i, store->beams[i].heave);
 #endif
 			}
@@ -2615,7 +2609,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_roll = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].roll);
 						index += 8;
@@ -2623,7 +2617,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "roll[%d]=%lf\n", i, store->beams[i].roll);
 #endif
 			}
@@ -2636,7 +2630,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_pitch = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].pitch);
 						index += 8;
@@ -2644,7 +2638,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "pitch[%d]=%lf\n", i, store->beams[i].pitch);
 #endif
 			}
@@ -2657,7 +2651,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_gates = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], &store->beams[i].gate_angle);
 						index += 8;
@@ -2669,7 +2663,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "gate_angle[%d]=%lf gate_start[%d]=%lf gate_stop[%d]=%lf\n", i, store->beams[i].gate_angle, i,
 					        store->beams[i].gate_start, i, store->beams[i].gate_stop);
 #endif
@@ -2683,7 +2677,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_noise = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_float(SWAPFLAG, &buffer[index], &store->beams[i].noise);
 						index += 4;
@@ -2691,7 +2685,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "noise[%d]=%f\n", i, store->beams[i].noise);
 #endif
 			}
@@ -2704,7 +2698,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_length = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_float(SWAPFLAG, &buffer[index], &store->beams[i].length);
 						index += 4;
@@ -2712,7 +2706,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "length[%d]=%f\n", i, store->beams[i].length);
 #endif
 			}
@@ -2725,7 +2719,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_hits = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->beams[i].hits);
 						index += 4;
@@ -2733,7 +2727,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "hits[%d]=%d\n", i, store->beams[i].hits);
 #endif
 			}
@@ -2746,7 +2740,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_heavereceive = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], (double *)&store->beams[i].heavereceive);
 						index += 8;
@@ -2754,7 +2748,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "heavereceive[%d]=%f\n", i, store->beams[i].heavereceive);
 #endif
 			}
@@ -2767,7 +2761,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_azimuth = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_beams);
 				index += 4;
-				for (i = 0; i < store->mul_num_beams; i++) {
+				for (int i = 0; i < store->mul_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_double(SWAPFLAG, &buffer[index], (double *)&store->beams[i].azimuth);
 						index += 8;
@@ -2775,7 +2769,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "azimuth[%d]=%f\n", i, store->beams[i].azimuth);
 #endif
 			}
@@ -2788,7 +2782,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				store->mul_group_properties = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_num_properties);
 				index += 4;
-				for (i = 0; i < store->mul_num_properties; i++) {
+				for (int i = 0; i < store->mul_num_properties; i++) {
 					if (i < MBSYS_XSE_MAXPROPERTIES) {
 						mb_get_binary_short(SWAPFLAG, &buffer[index], (double *)&store->mul_properties_type[i]);
 						index += 2;
@@ -2796,16 +2790,16 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 						index += 8;
 					}
 				}
-				for (i = 0; i < 40; i++) {
+				for (int i = 0; i < 40; i++) {
 					store->mul_properties_reserved[i] = buffer[index];
 					index++;
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_properties);
-				for (i = 0; i < store->mul_num_properties; i++)
+				for (int i = 0; i < store->mul_num_properties; i++)
 					fprintf(stderr, "dbg5       mul_properties[%d]: %d %f\n", i, store->mul_properties_type[i],
 					        store->mul_properties_value[i]);
-				for (i = 0; i < 40; i++)
+				for (int i = 0; i < 40; i++)
 					fprintf(stderr, "dbg5       mul_properties_reserved[%d]: %d\n", i, store->mul_properties_reserved[i]);
 #endif
 			}
@@ -2824,7 +2818,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *)&store->mul_normamp_across_beamwidth);
 				index += 4;
-				for (i = 0; i < store->mul_normamp_num_beams; i++) {
+				for (int i = 0; i < store->mul_normamp_num_beams; i++) {
 					if (i < MBSYS_XSE_MAXBEAMS) {
 						mb_get_binary_short(SWAPFLAG, &buffer[index], (double *)&store->beams[i].normamp);
 						index += 2;
@@ -2833,12 +2827,12 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				if (store->mul_normamp_flags == 0) {
 					mb_get_binary_float(SWAPFLAG, &buffer[index], (double *)&store->beams[0].frequency);
 					index += 4;
-					for (i = 1; i < store->mul_normamp_num_beams; i++) {
+					for (int i = 1; i < store->mul_normamp_num_beams; i++) {
 						store->beams[i].frequency = store->beams[0].frequency;
 					}
 				}
 				else {
-					for (i = 0; i < store->mul_normamp_num_beams; i++) {
+					for (int i = 0; i < store->mul_normamp_num_beams; i++) {
 						if (i < MBSYS_XSE_MAXBEAMS) {
 							mb_get_binary_float(SWAPFLAG, &buffer[index], (double *)&store->beams[i].frequency);
 							index += 4;
@@ -2847,7 +2841,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 				}
 #ifdef MB_DEBUG2
 				fprintf(stderr, "N=%u\n", store->mul_num_beams);
-				for (i = 0; i < store->mul_num_beams; i++)
+				for (int i = 0; i < store->mul_num_beams; i++)
 					fprintf(stderr, "beam[%d]: normamp=%d frequency=%f\n", i, store->beams[i].normamp, store->beams[i].frequency);
 #endif
 			}
@@ -2890,7 +2884,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 		store->mul_group_lateral = MB_YES;
 		store->mul_group_along = MB_YES;
 		store->mul_group_depth = MB_YES;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			beta = 90.0 - RTD * store->beams[i].angle;
 			alpha = RTD * store->beams[i].pitch;
 			mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
@@ -2906,7 +2900,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 
 	/* check for sensible bathymetry */
 	if (status == MB_SUCCESS && store->mul_group_depth == MB_YES) {
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			if (fabs(store->beams[i].depth) > 11000.0) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
@@ -2923,14 +2917,14 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 		/* get width of bathymetry swath size */
 		xmin = 9999999.9;
 		xmax = -9999999.9;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			xmin = MIN(xmin, store->beams[i].lateral);
 			xmax = MAX(xmax, store->beams[i].lateral);
 		}
 
 		/* get number of nonzero pixels */
 		ngoodss = 0;
-		for (i = 0; i < store->sid_avl_num_samples; i++)
+		for (int i = 0; i < store->sid_avl_num_samples; i++)
 			if (store->sid_avl_amp[i] != 0)
 				ngoodss++;
 
@@ -2980,7 +2974,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 		fprintf(stderr, "dbg5       mul_lat:             %f\n", store->mul_lat);
 		fprintf(stderr, "dbg5       mul_heading:         %f\n", store->mul_heading);
 		fprintf(stderr, "dbg5       mul_speed:           %f\n", store->mul_speed);
-		for (i = 0; i < store->mul_num_beams; i++)
+		for (int i = 0; i < store->mul_num_beams; i++)
 			fprintf(stderr,
 			        "dbg5       beam[%d]: %3d %7.2f %7.2f %7.2f %3d %3d %6.3f %6.2f %5.3f %5.2f %6.2f %6.2f  %f %f %f %f %f %d "
 			        "%f %f %d %f\n",
@@ -2991,10 +2985,10 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 			        store->beams[i].length, store->beams[i].hits, store->beams[i].heavereceive, store->beams[i].azimuth,
 			        store->beams[i].normamp, store->beams[i].frequency);
 		fprintf(stderr, "dbg5       mul_num_properties: %d\n", store->mul_num_properties);
-		for (i = 0; i < store->mul_num_properties; i++)
+		for (int i = 0; i < store->mul_num_properties; i++)
 			fprintf(stderr, "dbg5       mun_property[%d]: %d %f\n", i, store->mul_properties_type[i],
 			        store->mul_properties_value[i]);
-		for (i = 0; i < 40; i++)
+		for (int i = 0; i < 40; i++)
 			fprintf(stderr, "dbg5       mul_properties_reserved[%d]: %d\n", i, store->mul_properties_reserved[i]);
 		fprintf(stderr, "dbg5       mul_normamp_num_beams:        %d\n", store->mul_normamp_num_beams);
 		fprintf(stderr, "dbg5       mul_normamp_flags:            %d\n", store->mul_normamp_flags);
@@ -3087,7 +3081,6 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 	int done;
 	int index;
 	int skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3216,7 +3209,7 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->sbm_signal_count);
 				index += 4;
 				store->sbm_signal_count = MIN(MBSYS_XSE_MAXSAMPLES, store->sbm_signal_count);
-				for (i = 0; i < store->sbm_signal_count; i++) {
+				for (int i = 0; i < store->sbm_signal_count; i++) {
 					mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_signal_amp[i]);
 					index += 4;
 				}
@@ -3234,7 +3227,7 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 				index += 4;
 				if (store->sbm_message_len > buffer_size)
 					fprintf(stderr, "Read message: %d %d %d\n", buffer_size, store->sbm_message_len, store->sbm_message_id);
-				for (i = 0; i < store->sbm_message_len; i++) {
+				for (int i = 0; i < store->sbm_message_len; i++) {
 					store->sbm_message_txt[i] = buffer[index];
 					index++;
 				}
@@ -3320,7 +3313,7 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 	if (verbose >= 5 && store->sbm_signal == MB_YES) {
 		fprintf(stderr, "dbg5       sbm_signal_beam:     %d\n", store->sbm_signal_beam);
 		fprintf(stderr, "dbg5       sbm_signal_count:    %d\n", store->sbm_signal_count);
-		for (i = 0; i < store->sbm_signal_count; i++)
+		for (int i = 0; i < store->sbm_signal_count; i++)
 			fprintf(stderr, "dbg5       sample[%d]: %f\n", i, store->sbm_signal_amp[i]);
 	}
 	if (verbose >= 5 && store->sbm_message == MB_YES) {
@@ -3530,7 +3523,6 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 	int done;
 	int index;
 	int skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3604,7 +3596,7 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 
 			/* handle general group */
 			if (group_id == MBSYS_XSE_COM_GROUP_GEN) {
-				for (i = 0; i < byte_count; i++) {
+				for (int i = 0; i < byte_count; i++) {
 					if (i < MBSYS_XSE_COMMENT_LENGTH - 1)
 						store->comment[i] = buffer[index++];
 				}
@@ -3783,7 +3775,6 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	int group_cnt_index;
 	int frame_id;
 	int group_id;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3910,7 +3901,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->nav_description_len, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->nav_description_len; i++) {
+		for (int i = 0; i < store->nav_description_len; i++) {
 			buffer[index] = store->nav_description[i];
 			index++;
 		}
@@ -4462,7 +4453,6 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 	int write_salinity = MB_NO;
 	int write_temperature = MB_NO;
 	int write_pressure = MB_NO;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4485,9 +4475,9 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 		fprintf(stderr, "dbg5       svp_nsvp:            %d\n", store->svp_nsvp);
 		fprintf(stderr, "dbg5       svp_nctd:            %d\n", store->svp_nctd);
 		fprintf(stderr, "dbg5       svp_ssv:             %f\n", store->svp_ssv);
-		for (i = 0; i < store->svp_nsvp; i++)
+		for (int i = 0; i < store->svp_nsvp; i++)
 			fprintf(stderr, "dbg5       svp[%d]:	        %f %f\n", i, store->svp_depth[i], store->svp_velocity[i]);
-		for (i = 0; i < store->svp_nctd; i++)
+		for (int i = 0; i < store->svp_nctd; i++)
 			fprintf(stderr, "dbg5       cstd[%d]:        %f %f %f %f\n", i, store->svp_conductivity[i], store->svp_salinity[i],
 			        store->svp_temperature[i], store->svp_pressure[i]);
 	}
@@ -4541,7 +4531,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->svp_nsvp, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->svp_nsvp; i++) {
+		for (int i = 0; i < store->svp_nsvp; i++) {
 			mb_put_binary_double(SWAPFLAG, store->svp_depth[i], &buffer[index]);
 			index += 8;
 		}
@@ -4581,7 +4571,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->svp_nsvp, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->svp_nsvp; i++) {
+		for (int i = 0; i < store->svp_nsvp; i++) {
 			mb_put_binary_double(SWAPFLAG, store->svp_velocity[i], &buffer[index]);
 			index += 8;
 		}
@@ -4608,7 +4598,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 
 	/* figure out which ctd groups are nonzero */
 	if (store->svp_nctd > 0) {
-		for (i = 0; i < store->svp_nctd; i++) {
+		for (int i = 0; i < store->svp_nctd; i++) {
 			if (store->svp_conductivity[i] != 0.0)
 				write_conductivity = MB_YES;
 			if (store->svp_salinity[i] != 0.0)
@@ -4642,7 +4632,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->svp_nctd, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->svp_nctd; i++) {
+		for (int i = 0; i < store->svp_nctd; i++) {
 			mb_put_binary_double(SWAPFLAG, store->svp_conductivity[i], &buffer[index]);
 			index += 8;
 		}
@@ -4685,7 +4675,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->svp_nctd, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->svp_nctd; i++) {
+		for (int i = 0; i < store->svp_nctd; i++) {
 			mb_put_binary_double(SWAPFLAG, store->svp_salinity[i], &buffer[index]);
 			index += 8;
 		}
@@ -4728,7 +4718,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->svp_nctd, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->svp_nctd; i++) {
+		for (int i = 0; i < store->svp_nctd; i++) {
 			mb_put_binary_double(SWAPFLAG, store->svp_temperature[i], &buffer[index]);
 			index += 8;
 		}
@@ -4771,7 +4761,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->svp_nctd, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->svp_nctd; i++) {
+		for (int i = 0; i < store->svp_nctd; i++) {
 			mb_put_binary_double(SWAPFLAG, store->svp_pressure[i], &buffer[index]);
 			index += 8;
 		}
@@ -4874,7 +4864,6 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 	int frame_id;
 	int group_id;
 	int nchar;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4901,7 +4890,7 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 		fprintf(stderr, "dbg5       par_ship_height:     %f\n", store->par_ship_height);
 		fprintf(stderr, "dbg5       par_ship_displacement: %f\n", store->par_ship_displacement);
 		fprintf(stderr, "dbg5       par_ship_weight:     %f\n", store->par_ship_weight);
-		for (i = 0; i < store->par_ship_nsensor; i++) {
+		for (int i = 0; i < store->par_ship_nsensor; i++) {
 			fprintf(stderr, "dbg5       par_ship_sensor_id[%d]:        %d\n", i, store->par_ship_sensor_id[i]);
 			fprintf(stderr, "dbg5       par_ship_sensor_type[%d]:      %d\n", i, store->par_ship_sensor_type[i]);
 			fprintf(stderr, "dbg5       par_ship_sensor_frequency[%d]: %d\n", i, store->par_ship_sensor_frequency[i]);
@@ -4939,18 +4928,18 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 		fprintf(stderr, "dbg5       par_nam_hrp_z:           %f\n", store->par_nam_hrp_z);
 		fprintf(stderr, "dbg5       par_xdr_num_transducer:  %d\n", store->par_xdr_num_transducer);
 		fprintf(stderr, "dbg5       # sensor xducer freq side roll pitch azi dist\n");
-		for (i = 0; i < store->par_xdr_num_transducer; i++)
+		for (int i = 0; i < store->par_xdr_num_transducer; i++)
 			fprintf(stderr, "dbg5       %d %d %d %d %d %f %f %f %f\n", i, store->par_xdr_sensorid[i],
 			        store->par_xdr_transducer[i], store->par_xdr_frequency[i], store->par_xdr_side[i],
 			        store->par_xdr_mountingroll[i], store->par_xdr_mountingpitch[i], store->par_xdr_mountingazimuth[i],
 			        store->par_xdr_mountingdistance[i]);
 		fprintf(stderr, "dbg5       # x y z roll pitch azimuth\n");
-		for (i = 0; i < store->par_xdr_num_transducer; i++)
+		for (int i = 0; i < store->par_xdr_num_transducer; i++)
 			fprintf(stderr, "dbg5       %d %f %f %f %f %f %f\n", i, store->par_xdr_x[i], store->par_xdr_y[i], store->par_xdr_z[i],
 			        store->par_xdr_roll[i], store->par_xdr_pitch[i], store->par_xdr_azimuth[i]);
 		fprintf(stderr, "dbg5       par_xdx_num_transducer:  %d\n", store->par_xdx_num_transducer);
 		fprintf(stderr, "dbg5       # roll pitch azimuth\n");
-		for (i = 0; i < store->par_xdx_num_transducer; i++)
+		for (int i = 0; i < store->par_xdx_num_transducer; i++)
 			fprintf(stderr, "dbg5       %d %d %d %d\n", i, store->par_xdx_roll[i], store->par_xdx_pitch[i],
 			        store->par_xdx_azimuth[i]);
 	}
@@ -5005,7 +4994,7 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 	nchar = strlen(store->par_ship_name);
 	mb_put_binary_int(SWAPFLAG, nchar, &buffer[index]);
 	index += 4;
-	for (i = 0; i < nchar; i++) {
+	for (int i = 0; i < nchar; i++) {
 		buffer[index] = store->par_ship_name[i];
 		index++;
 	}
@@ -5060,15 +5049,15 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->par_ship_nsensor, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->par_ship_nsensor; i++) {
+		for (int i = 0; i < store->par_ship_nsensor; i++) {
 			mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_id[i], &buffer[index]);
 			index += 4;
 		}
-		for (i = 0; i < store->par_ship_nsensor; i++) {
+		for (int i = 0; i < store->par_ship_nsensor; i++) {
 			mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_type[i], &buffer[index]);
 			index += 4;
 		}
-		for (i = 0; i < store->par_ship_nsensor; i++) {
+		for (int i = 0; i < store->par_ship_nsensor; i++) {
 			mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_frequency[i], &buffer[index]);
 			index += 4;
 		}
@@ -5246,7 +5235,7 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->par_xdr_num_transducer, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->par_xdr_num_transducer; i++) {
+		for (int i = 0; i < store->par_xdr_num_transducer; i++) {
 			mb_put_binary_int(SWAPFLAG, store->par_xdr_sensorid[i], &buffer[index]);
 			index += 4;
 			mb_put_binary_int(SWAPFLAG, store->par_xdr_frequency[i], &buffer[index]);
@@ -5316,14 +5305,14 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->par_xdx_num_transducer, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->par_xdx_num_transducer; i++) {
+		for (int i = 0; i < store->par_xdx_num_transducer; i++) {
 			buffer[index] = store->par_xdx_roll[i];
 			index++;
 			buffer[index] = store->par_xdx_pitch[i];
 			index++;
 			buffer[index] = store->par_xdx_azimuth[i];
 			index++;
-			for (j = 0; j < 48; j++) {
+			for (int j = 0; j < 48; j++) {
 				buffer[index] = 0;
 				index++;
 			}
@@ -5385,7 +5374,6 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	int group_cnt_index;
 	int frame_id;
 	int group_id;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -5439,7 +5427,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		fprintf(stderr, "dbg5       mul_lat:             %f\n", store->mul_lat);
 		fprintf(stderr, "dbg5       mul_heading:         %f\n", store->mul_heading);
 		fprintf(stderr, "dbg5       mul_speed:           %f\n", store->mul_speed);
-		for (i = 0; i < store->mul_num_beams; i++)
+		for (int i = 0; i < store->mul_num_beams; i++)
 			fprintf(stderr,
 			        "dbg5       beam[%d]: %3d %7.2f %7.2f %7.2f %3d %3d %6.3f %6.2f %5.3f %5.2f %6.2f %6.2f  %f %f %f %f %f %d "
 			        "%f %f %d %f\n",
@@ -5450,10 +5438,10 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 			        store->beams[i].length, store->beams[i].hits, store->beams[i].heavereceive, store->beams[i].azimuth,
 			        store->beams[i].normamp, store->beams[i].frequency);
 		fprintf(stderr, "dbg5       mul_num_properties: %d\n", store->mul_num_properties);
-		for (i = 0; i < store->mul_num_properties; i++)
+		for (int i = 0; i < store->mul_num_properties; i++)
 			fprintf(stderr, "dbg5       mun_property[%d]: %d %f\n", i, store->mul_properties_type[i],
 			        store->mul_properties_value[i]);
-		for (i = 0; i < 40; i++)
+		for (int i = 0; i < 40; i++)
 			fprintf(stderr, "dbg5       mul_properties_reserved[%d]: %d\n", i, store->mul_properties_reserved[i]);
 		fprintf(stderr, "dbg5       mul_normamp_num_beams:        %d\n", store->mul_normamp_num_beams);
 		fprintf(stderr, "dbg5       mul_normamp_flags:            %d\n", store->mul_normamp_flags);
@@ -5558,7 +5546,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_short(SWAPFLAG, store->beams[i].beam, &buffer[index]);
 			index += 2;
 		}
@@ -5601,7 +5589,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].tt, &buffer[index]);
 			index += 8;
 		}
@@ -5644,7 +5632,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			buffer[index] = store->beams[i].quality;
 			index++;
 		}
@@ -5687,7 +5675,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_short(SWAPFLAG, store->beams[i].amplitude, &buffer[index]);
 			index += 2;
 		}
@@ -5730,7 +5718,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].delay, &buffer[index]);
 			index += 8;
 		}
@@ -5773,7 +5761,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].lateral, &buffer[index]);
 			index += 8;
 		}
@@ -5816,7 +5804,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].along, &buffer[index]);
 			index += 8;
 		}
@@ -5859,7 +5847,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].depth, &buffer[index]);
 			index += 8;
 		}
@@ -5902,7 +5890,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].angle, &buffer[index]);
 			index += 8;
 		}
@@ -5945,7 +5933,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].heave, &buffer[index]);
 			index += 8;
 		}
@@ -5988,7 +5976,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].roll, &buffer[index]);
 			index += 8;
 		}
@@ -6031,7 +6019,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].pitch, &buffer[index]);
 			index += 8;
 		}
@@ -6074,7 +6062,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].gate_angle, &buffer[index]);
 			index += 8;
 			mb_put_binary_double(SWAPFLAG, store->beams[i].gate_start, &buffer[index]);
@@ -6121,7 +6109,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_float(SWAPFLAG, store->beams[i].noise, &buffer[index]);
 			index += 4;
 		}
@@ -6164,7 +6152,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_float(SWAPFLAG, store->beams[i].length, &buffer[index]);
 			index += 4;
 		}
@@ -6207,7 +6195,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_int(SWAPFLAG, store->beams[i].hits, &buffer[index]);
 			index += 4;
 		}
@@ -6250,7 +6238,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].heavereceive, &buffer[index]);
 			index += 8;
 		}
@@ -6293,7 +6281,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_beams; i++) {
+		for (int i = 0; i < store->mul_num_beams; i++) {
 			mb_put_binary_double(SWAPFLAG, store->beams[i].azimuth, &buffer[index]);
 			index += 8;
 		}
@@ -6336,13 +6324,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->mul_num_properties, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_num_properties; i++) {
+		for (int i = 0; i < store->mul_num_properties; i++) {
 			mb_put_binary_short(SWAPFLAG, store->mul_properties_type[i], &buffer[index]);
 			index += 2;
 			mb_put_binary_double(SWAPFLAG, store->mul_properties_value[i], &buffer[index]);
 			index += 8;
 		}
-		for (i = 0; i < 40; i++) {
+		for (int i = 0; i < 40; i++) {
 			buffer[index] = store->mul_properties_reserved[i];
 			index++;
 		}
@@ -6391,7 +6379,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 		index += 4;
 		mb_put_binary_float(SWAPFLAG, store->mul_normamp_across_beamwidth, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->mul_normamp_num_beams; i++) {
+		for (int i = 0; i < store->mul_normamp_num_beams; i++) {
 			mb_put_binary_short(SWAPFLAG, store->beams[i].normamp, &buffer[index]);
 			index += 2;
 		}
@@ -6400,7 +6388,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 			index += 4;
 		}
 		else
-			for (i = 0; i < store->mul_normamp_num_beams; i++) {
+			for (int i = 0; i < store->mul_normamp_num_beams; i++) {
 				mb_put_binary_float(SWAPFLAG, store->beams[i].frequency, &buffer[index]);
 				index += 4;
 			}
@@ -6507,7 +6495,6 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	int group_cnt_index;
 	int frame_id;
 	int group_id;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -6545,29 +6532,29 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 		fprintf(stderr, "dbg5       sid_avt_sampleus:     %d\n", store->sid_avt_sampleus);
 		fprintf(stderr, "dbg5       sid_avt_offset:       %d\n", store->sid_avt_offset);
 		fprintf(stderr, "dbg5       sid_avt_num_samples:  %d\n", store->sid_avt_num_samples);
-		for (i = 0; i < store->sid_avt_num_samples; i++)
+		for (int i = 0; i < store->sid_avt_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_avt_amp[%d]:%d\n", i, store->sid_avt_amp[i]);
 		fprintf(stderr, "dbg5       sid_pvt_sampleus:  %d\n", store->sid_pvt_sampleus);
 		fprintf(stderr, "dbg5       sid_pvt_offset:  %d\n", store->sid_pvt_offset);
 		fprintf(stderr, "dbg5       sid_pvt_num_samples:  %d\n", store->sid_pvt_num_samples);
-		for (i = 0; i < store->sid_pvt_num_samples; i++)
+		for (int i = 0; i < store->sid_pvt_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_pvt_phase[%d]:%d\n", i, store->sid_pvt_phase[i]);
 		fprintf(stderr, "dbg5       sid_avl_binsize:  %d\n", store->sid_avl_binsize);
 		fprintf(stderr, "dbg5       sid_avl_offset:  %d\n", store->sid_avl_offset);
 		fprintf(stderr, "dbg5       sid_avl_num_samples:  %d\n", store->sid_avl_num_samples);
-		for (i = 0; i < store->sid_avl_num_samples; i++)
+		for (int i = 0; i < store->sid_avl_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_avl_amp[%d]:%d\n", i, store->sid_avl_amp[i]);
 		fprintf(stderr, "dbg5       sid_pvl_binsize:  %d\n", store->sid_pvl_binsize);
 		fprintf(stderr, "dbg5       sid_pvl_offset:  %d\n", store->sid_pvl_offset);
 		fprintf(stderr, "dbg5       sid_pvl_num_samples:  %d\n", store->sid_pvl_num_samples);
-		for (i = 0; i < store->sid_pvl_num_samples; i++)
+		for (int i = 0; i < store->sid_pvl_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_pvl_phase[%d]:%d\n", i, store->sid_pvl_phase[i]);
 		fprintf(stderr, "dbg5       sid_sig_ping:  %d\n", store->sid_sig_ping);
 		fprintf(stderr, "dbg5       sid_sig_channel:  %d\n", store->sid_sig_channel);
 		fprintf(stderr, "dbg5       sid_sig_offset:  %f\n", store->sid_sig_offset);
 		fprintf(stderr, "dbg5       sid_sig_sample:  %f\n", store->sid_sig_sample);
 		fprintf(stderr, "dbg5       sid_sig_num_samples:  %d\n", store->sid_sig_num_samples);
-		for (i = 0; i < store->sid_sig_num_samples; i++)
+		for (int i = 0; i < store->sid_sig_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_sig_phase[%d]:%d\n", i, store->sid_sig_phase[i]);
 		fprintf(stderr, "dbg5       sid_png_pulse:  %u\n", store->sid_png_pulse);
 		fprintf(stderr, "dbg5       sid_png_startfrequency:  %f\n", store->sid_png_startfrequency);
@@ -6581,7 +6568,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 		fprintf(stderr, "dbg5       sid_cmp_offset:  %f\n", store->sid_cmp_offset);
 		fprintf(stderr, "dbg5       sid_cmp_sample:  %f\n", store->sid_cmp_sample);
 		fprintf(stderr, "dbg5       sid_cmp_num_samples:  %d\n", store->sid_cmp_num_samples);
-		for (i = 0; i < store->sid_sig_num_samples; i++)
+		for (int i = 0; i < store->sid_sig_num_samples; i++)
 			fprintf(stderr, "dbg5       sid_cmp_real[%d]:%d sid_cmp_imaginary[%d]:%d\n", i, store->sid_cmp_real[i], i,
 			        store->sid_cmp_imaginary[i]);
 		fprintf(stderr, "dbg5       sid_wgt_factorleft:  %d\n", store->sid_wgt_factorleft);
@@ -6694,7 +6681,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->sid_avt_num_samples, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->sid_avt_num_samples; i++) {
+		for (int i = 0; i < store->sid_avt_num_samples; i++) {
 			mb_put_binary_short(SWAPFLAG, store->sid_avt_amp[i], &buffer[index]);
 			index += 2;
 		}
@@ -6743,7 +6730,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->sid_pvt_num_samples, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->sid_pvt_num_samples; i++) {
+		for (int i = 0; i < store->sid_pvt_num_samples; i++) {
 			mb_put_binary_short(SWAPFLAG, store->sid_pvt_phase[i], &buffer[index]);
 			index += 2;
 		}
@@ -6792,7 +6779,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->sid_avl_num_samples, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->sid_avl_num_samples; i++) {
+		for (int i = 0; i < store->sid_avl_num_samples; i++) {
 			mb_put_binary_short(SWAPFLAG, store->sid_avl_amp[i], &buffer[index]);
 			index += 2;
 		}
@@ -6841,7 +6828,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->sid_pvl_num_samples, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->sid_pvl_num_samples; i++) {
+		for (int i = 0; i < store->sid_pvl_num_samples; i++) {
 			mb_put_binary_short(SWAPFLAG, store->sid_pvl_phase[i], &buffer[index]);
 			index += 2;
 		}
@@ -6894,7 +6881,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 		index += 8;
 		mb_put_binary_int(SWAPFLAG, store->sid_sig_num_samples, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->sid_sig_num_samples; i++) {
+		for (int i = 0; i < store->sid_sig_num_samples; i++) {
 			mb_put_binary_short(SWAPFLAG, store->sid_sig_phase[i], &buffer[index]);
 			index += 2;
 		}
@@ -7004,7 +6991,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 		index += 8;
 		mb_put_binary_int(SWAPFLAG, store->sid_cmp_num_samples, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->sid_cmp_num_samples; i++) {
+		for (int i = 0; i < store->sid_cmp_num_samples; i++) {
 			mb_put_binary_short(SWAPFLAG, store->sid_cmp_real[i], &buffer[index]);
 			index += 2;
 			mb_put_binary_short(SWAPFLAG, store->sid_cmp_imaginary[i], &buffer[index]);
@@ -7114,7 +7101,6 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	int group_cnt_index;
 	int frame_id;
 	int group_id;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -7157,7 +7143,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	if (verbose >= 5 && store->sbm_signal == MB_YES) {
 		fprintf(stderr, "dbg5       sbm_signal_beam:     %d\n", store->sbm_signal_beam);
 		fprintf(stderr, "dbg5       sbm_signal_count:    %d\n", store->sbm_signal_count);
-		for (i = 0; i < store->sbm_signal_count; i++)
+		for (int i = 0; i < store->sbm_signal_count; i++)
 			fprintf(stderr, "dbg5       sample[%d]: %f\n", i, store->sbm_signal_amp[i]);
 	}
 	if (verbose >= 5 && store->sbm_message == MB_YES) {
@@ -7341,7 +7327,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->sbm_signal_count, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->sbm_signal_count; i++) {
+		for (int i = 0; i < store->sbm_signal_count; i++) {
 			mb_put_binary_float(SWAPFLAG, store->sbm_signal_amp[i], &buffer[index]);
 			index += 4;
 		}
@@ -7386,7 +7372,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 		index += 4;
 		mb_put_binary_int(SWAPFLAG, store->sbm_message_len, &buffer[index]);
 		index += 4;
-		for (i = 0; i < store->sbm_message_len; i++) {
+		for (int i = 0; i < store->sbm_message_len; i++) {
 			buffer[index] = store->sbm_message_txt[i];
 			index++;
 		}

@@ -503,7 +503,6 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int swap = MB_YES;
 	int index;
 	int skip;
-	int i, n;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -533,7 +532,7 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		buffer[read_len] = '\0';
 		status = mb_fileio_get(verbose, mbio_ptr, (char *)buffer, &read_len, error);
 		if (strncmp(buffer, "##PHOTGRAM##V", 13) == 0) {
-			n = sscanf(buffer, "##PHOTGRAM##V%d", formatversion);
+			int n = sscanf(buffer, "##PHOTGRAM##V%d", formatversion);
 			*fileheader_initialized = MB_YES;
 		}
 		else {
@@ -550,7 +549,7 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    record label is found or the read fails */
 	skip = 0;
 	while (status == MB_SUCCESS && strncmp(&buffer[4], "DD", 2) != 0) {
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			buffer[i] = buffer[i + 1];
 		read_len = 1;
 		status = mb_fileio_get(verbose, mbio_ptr, (char *)&buffer[7], &read_len, error);
@@ -630,7 +629,7 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 
 			/* read in the soundings */
-			for (i = 0; i < store->num_soundings; i++) {
+			for (int i = 0; i < store->num_soundings; i++) {
 				sounding = &store->soundings[i];
 
 				/* read the sounding */
@@ -810,7 +809,6 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int *formatversion;
 	int swap = MB_YES;
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -867,7 +865,7 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "dbg4     num_soundings_alloc:        %d\n", store->num_soundings_alloc);
 				fprintf(stderr, "dbg4     num_soundings_alloc:        %d\n", store->num_soundings_alloc);
 				// for (i=0; i< store->num_soundings; i++)
-				for (i = 0; i < 10; i++) {
+				for (int i = 0; i < 10; i++) {
 					sounding = &store->soundings[i];
 					fprintf(stderr, "dbg4     %10d  %10g  %10g  %10g %x   %3d %3d %3d\n", i, sounding->acrosstrack,
 					        sounding->alongtrack, sounding->depth, sounding->beamflag, sounding->red, sounding->green,
@@ -905,7 +903,7 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 
 			/* write out the soundings */
-			for (i = 0; i < store->num_soundings; i++) {
+			for (int i = 0; i < store->num_soundings; i++) {
 				/* insert the sounding */
 				sounding = &store->soundings[i];
 				index = 0;

@@ -335,7 +335,6 @@ int mbr_zero_hsmdaraw(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_hsmdaraw";
 	int status = MB_SUCCESS;
 	struct mbf_hsmdaraw_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -350,7 +349,7 @@ int mbr_zero_hsmdaraw(int verbose, char *data_ptr, int *error) {
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			data->scsid[i] = 0;
 			data->scsart[i] = 0;
 		}
@@ -363,10 +362,10 @@ int mbr_zero_hsmdaraw(int verbose, char *data_ptr, int *error) {
 
 		data->datuhr = -1.0;
 
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			data->mksysint[i] = 0;
 
-		for (i = 0; i < 84; i++)
+		for (int i = 0; i < 84; i++)
 			data->mktext[i] = 0;
 
 		data->navid = 0;
@@ -387,7 +386,7 @@ int mbr_zero_hsmdaraw(int verbose, char *data_ptr, int *error) {
 		data->noho = 0;
 		data->skals = 0;
 
-		for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
+		for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
 			data->spfb[i] = 0;
 			data->angle[i] = mbf_hsmdaraw_beamangle[i];
 			data->depth[i] = 0.0;
@@ -395,23 +394,23 @@ int mbr_zero_hsmdaraw(int verbose, char *data_ptr, int *error) {
 		}
 
 		data->ss_range = 0.0;
-		for (i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++)
+		for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++)
 			data->ss[i] = 0;
 
 		data->heading_tx = 0.0;
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			data->heading_rx[i] = 0.0;
 
 		data->roll_tx = 0.0;
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			data->roll_rx[i] = 0.0;
 
 		data->pitch_tx = 0.0;
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			data->pitch_rx[i] = 0.0;
 
 		data->num_vel = 0;
-		for (i = 0; i < MBF_HSMDARAW_MAXVEL; i++) {
+		for (int i = 0; i < MBF_HSMDARAW_MAXVEL; i++) {
 			data->vdepth[i] = 0.0;
 			data->velocity[i] = 0.0;
 		}
@@ -442,7 +441,6 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int time_i[7];
 	double time_d;
 	double lon, lat, heading, speed;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -512,7 +510,7 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->kind = data->kind;
 
 		/* header values */
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			store->scsid[i] = data->scsid[i];
 			store->scsart[i] = data->scsart[i];
 		}
@@ -525,9 +523,9 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* event data */
 		store->datuhr = data->datuhr;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			store->mksysint[i] = data->mksysint[i];
-		for (i = 0; i < 84; i++)
+		for (int i = 0; i < 84; i++)
 			store->mktext[i] = data->mktext[i];
 
 		/* navigation data */
@@ -552,20 +550,20 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->Port = data->Port;
 		store->noho = data->noho;
 		store->skals = data->skals;
-		for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
+		for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
 			store->spfb[i] = data->spfb[i];
 			store->depth[i] = data->depth[i];
 			store->distance[i] = data->distance[i];
 			store->angle[i] = data->angle[i];
 		}
 		store->ss_range = data->ss_range;
-		for (i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++) {
+		for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++) {
 			store->ss[i] = data->ss[i];
 		}
 		store->heading_tx = data->heading_tx;
 		store->roll_tx = data->roll_tx;
 		store->pitch_tx = data->pitch_tx;
-		for (i = 0; i < 5; i++) {
+		for (int i = 0; i < 5; i++) {
 			store->heading_rx[i] = data->heading_rx[i];
 			store->pitch_rx[i] = data->pitch_rx[i];
 			store->roll_rx[i] = data->roll_rx[i];
@@ -573,11 +571,11 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* MD event data */
 		store->evid = data->evid;
-		for (i = 0; i < 84; i++)
+		for (int i = 0; i < 84; i++)
 			store->evtext[i] = data->evtext[i];
 
 		store->num_vel = data->num_vel;
-		for (i = 0; i < data->num_vel; i++) {
+		for (int i = 0; i < data->num_vel; i++) {
 			store->vdepth[i] = data->vdepth[i];
 			store->velocity[i] = data->velocity[i];
 		}
@@ -607,7 +605,6 @@ int mbr_wt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_hsmdaraw_struct *data;
 	char *data_ptr;
 	struct mbsys_hsmd_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -632,7 +629,7 @@ int mbr_wt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->kind = store->kind;
 
 		/* header values */
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			data->scsid[i] = store->scsid[i];
 			data->scsart[i] = store->scsart[i];
 		}
@@ -645,9 +642,9 @@ int mbr_wt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* event data */
 		data->datuhr = store->datuhr;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			data->mksysint[i] = store->mksysint[i];
-		for (i = 0; i < 84; i++)
+		for (int i = 0; i < 84; i++)
 			data->mktext[i] = store->mktext[i];
 
 		/* navigation data */
@@ -672,20 +669,20 @@ int mbr_wt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->Port = store->Port;
 		data->noho = store->noho;
 		data->skals = store->skals;
-		for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
+		for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
 			data->spfb[i] = store->spfb[i];
 			data->depth[i] = store->depth[i];
 			data->distance[i] = store->distance[i];
 			data->angle[i] = store->angle[i];
 		}
 		data->ss_range = store->ss_range;
-		for (i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++) {
+		for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++) {
 			data->ss[i] = store->ss[i];
 		}
 		data->heading_tx = store->heading_tx;
 		data->roll_tx = store->roll_tx;
 		data->pitch_tx = store->pitch_tx;
-		for (i = 0; i < 5; i++) {
+		for (int i = 0; i < 5; i++) {
 			data->heading_rx[i] = store->heading_rx[i];
 			data->pitch_rx[i] = store->pitch_rx[i];
 			data->roll_rx[i] = store->roll_rx[i];
@@ -693,11 +690,11 @@ int mbr_wt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* MD event data */
 		data->evid = store->evid;
-		for (i = 0; i < 84; i++)
+		for (int i = 0; i < 84; i++)
 			data->evtext[i] = store->evtext[i];
 
 		data->num_vel = store->num_vel;
-		for (i = 0; i < store->num_vel; i++) {
+		for (int i = 0; i < store->num_vel; i++) {
 			data->vdepth[i] = store->vdepth[i];
 			data->velocity[i] = store->velocity[i];
 		}
@@ -731,7 +728,6 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *data_ptr;
 	FILE *mbfp;
 	XDR *xdrs; /* xdr i/o pointer */
-	int i;
 	int time_i[7];
 	double scale;
 	double PingTime; /* Synthesised time of this ping
@@ -778,13 +774,13 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* Start reading an HSMD Header structure */
 	/* read the first four bytes */
-	for (i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 		status = xdr_char(xdrs, &data->scsid[i]);
 
 	/* loop until the beginning of a record is found */
 	while (status == MB_SUCCESS && strncmp(data->scsid, "DXT", 3) != 0) {
 		if (data->scsid[1] == 'D' || data->scsid[2] == 'D' || data->scsid[3] == 'D') {
-			for (i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 				data->scsid[i] = data->scsid[i + 1];
 			status = xdr_char(xdrs, &data->scsid[3]);
 		}
@@ -796,7 +792,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				}
 			}
 			if (status == MB_SUCCESS) {
-				for (i = 1; i < 4; i++)
+				for (int i = 1; i < 4; i++)
 					status = xdr_char(xdrs, &data->scsid[i]);
 			}
 		}
@@ -804,7 +800,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* now read the rest of the record */
 	if (status == MB_SUCCESS)
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			status = xdr_char(xdrs, &data->scsart[i]);
 	if (status == MB_SUCCESS)
 		status = xdr_int(xdrs, &data->scslng);
@@ -873,7 +869,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (status == MB_SUCCESS)
 				status = xdr_int(xdrs, &data->skals);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
 					status = xdr_int(xdrs, &data->spfb[i]);
 
 			/* Check for bad beams - broken records produce
@@ -883,7 +879,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else
 				scale = 0.000015;
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
 					if (data->spfb[i] < -65535 || data->spfb[i] > 65535) {
 						data->spfb[i] = 0;
 					}
@@ -899,7 +895,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			else
 				scale = 0.000015;
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
 					data->depth[i] = (fabs(scale * data->spfb[i]) * 0.5 * data->cmean) * cos(data->angle[i] * DTR);
 					data->distance[i] = data->depth[i] * tan(data->angle[i] * DTR);
 					if (data->spfb[i] < 0)
@@ -912,24 +908,24 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->ss_range);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++)
+				for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++)
 					status = xdr_char(xdrs, (char *)&data->ss[i]);
 
 			/* get attitude data */
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->heading_tx);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 					status = xdr_double(xdrs, &data->heading_rx[i]);
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->roll_tx);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 					status = xdr_double(xdrs, &data->roll_rx[i]);
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->pitch_tx);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 					status = xdr_double(xdrs, &data->pitch_rx[i]);
 
 			/* Establish the time of day for this
@@ -976,13 +972,13 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "\tnoho\t%d\n", data->noho);
 				fprintf(stderr, "\tskals\t%d\n", data->skals);
 				fprintf(stderr, "\tspfbs\n");
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i = i + 4) {
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i = i + 4) {
 					fprintf(stderr, "\t(%02d) %10d (%02d) %10d (%02d) %10d (%02d) %10d\n", i, data->spfb[i], i + 1,
 					        data->spfb[i + 1], i + 2, data->spfb[i + 2], i + 3, data->spfb[i + 3]);
 				}
 				fprintf(stderr, "\tss_range\t%lf\n", data->ss_range);
 				fprintf(stderr, "\tampl\n");
-				for (i = 0; i < MBF_HSMDARAW_PIXELS_PING; i = i + 4) {
+				for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i = i + 4) {
 					fprintf(stderr, "\t%d\t%d\t%d\t%d\n", data->ss[i], data->ss[i + 1], data->ss[i + 2], data->ss[i + 3]);
 				}
 
@@ -1037,37 +1033,37 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (status == MB_SUCCESS)
 				status = xdr_int(xdrs, &data->skals);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
 					status = xdr_int(xdrs, &data->spfb[i]);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
 					status = xdr_double(xdrs, &data->depth[i]);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
 					status = xdr_double(xdrs, &data->distance[i]);
 
 			/* get sidescan data */
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->ss_range);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++)
+				for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++)
 					status = xdr_char(xdrs, (char *)&data->ss[i]);
 
 			/* get attitude data */
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->heading_tx);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 					status = xdr_double(xdrs, &data->heading_rx[i]);
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->roll_tx);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 					status = xdr_double(xdrs, &data->roll_rx[i]);
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->pitch_tx);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 					status = xdr_double(xdrs, &data->pitch_rx[i]);
 
 			/* Establish the time of day for this
@@ -1112,13 +1108,13 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "\tnoho\t%d\n", data->noho);
 				fprintf(stderr, "\tskals\t%d\n", data->skals);
 				fprintf(stderr, "\tspfbs\n");
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i = i + 4) {
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i = i + 4) {
 					fprintf(stderr, "\t(%02d) %10d (%02d) %10d (%02d) %10d (%02d) %10d\n", i, data->spfb[i], i + 1,
 					        data->spfb[i + 1], i + 2, data->spfb[i + 2], i + 3, data->spfb[i + 3]);
 				}
 				fprintf(stderr, "\tss_range\t%lf\n", data->ss_range);
 				fprintf(stderr, "\tampl\n");
-				for (i = 0; i < MBF_HSMDARAW_PIXELS_PING; i = i + 4) {
+				for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i = i + 4) {
 					fprintf(stderr, "\t%d\t%d\t%d\t%d\n", data->ss[i], data->ss[i + 1], data->ss[i + 2], data->ss[i + 3]);
 				}
 
@@ -1249,7 +1245,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				status = xdr_int(xdrs, &data->evid);
 
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 84; i++)
+				for (int i = 0; i < 84; i++)
 					status = xdr_char(xdrs, &data->evtext[i]);
 
 			/* Establish the time of day for this
@@ -1299,7 +1295,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 				status = xdr_int(xdrs, &data->noho);
 
 			if (status == MB_SUCCESS && status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
 					status = xdr_double(xdrs, &data->angle[i]);
 					mbf_hsmdaraw_beamangle[i] = data->angle[i];
 				}
@@ -1331,7 +1327,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (verbose >= 5 && status == MB_SUCCESS) {
 				fprintf(stderr, "\ndgb5: Ang");
 				fprintf(stderr, "dbg5:\tnoho:\t%d\n", data->noho);
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i = i + 4) {
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i = i + 4) {
 					fprintf(stderr, "\t%02d: %8.3lf\t%02d: %8.3lf\t%02d: %8.3lf\t%02d: %8.3lf\n", i, data->angle[i], i + 1,
 					        data->angle[i + 1], i + 2, data->angle[i + 2], i + 3, data->angle[i + 3]);
 				}
@@ -1351,7 +1347,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			data->kind = MB_DATA_VELOCITY_PROFILE;
 
 			data->num_vel = 20;
-			for (i = 0; i < data->num_vel; i++) {
+			for (int i = 0; i < data->num_vel; i++) {
 				status = xdr_double(xdrs, &data->vdepth[i]);
 				status = xdr_double(xdrs, &data->velocity[i]);
 			}
@@ -1396,10 +1392,10 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->datuhr);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 8; i++)
+				for (int i = 0; i < 8; i++)
 					status = xdr_char(xdrs, &data->mksysint[i]);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 84; i++)
+				for (int i = 0; i < 84; i++)
 					status = xdr_char(xdrs, &data->mktext[i]);
 
 			/* Establish the time of day for this
@@ -1452,7 +1448,7 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 			data->kind = MB_DATA_COMMENT;
 
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_COMMENT; i++)
+				for (int i = 0; i < MBF_HSMDARAW_COMMENT; i++)
 					status = xdr_char(xdrs, &data->comment[i]);
 
 			/* Check status. */
@@ -1498,7 +1494,6 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	struct mbf_hsmdaraw_struct *data;
 	FILE *mbfp;
 	XDR *xdrs; /* xdr i/o pointer */
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1522,10 +1517,10 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		data->transid = MBF_HSMDARAW_RAW;
 
 	/* Start writing an HSMD Header structure */
-	for (i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 		status = xdr_char(xdrs, &data->scsid[i]);
 	if (status == MB_SUCCESS)
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			status = xdr_char(xdrs, &data->scsart[i]);
 	if (status == MB_SUCCESS)
 		status = xdr_int(xdrs, &data->scslng);
@@ -1550,7 +1545,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 
 			/* First make sure bathymetry edits are
 			    carried over into travel times */
-			for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
+			for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
 				if (data->depth[i] < 0.0 && data->spfb[i] > 0.0)
 					data->spfb[i] = -data->spfb[i];
 				else if (data->depth[i] > 0.0 && data->spfb[i] < 0.0)
@@ -1581,13 +1576,13 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 				fprintf(stderr, "\tnoho\t%d\n", data->noho);
 				fprintf(stderr, "\tskals\t%d\n", data->skals);
 				fprintf(stderr, "\tspfbs\n");
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i = i + 4) {
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i = i + 4) {
 					fprintf(stderr, "\t(%02d) %10d (%02d) %10d (%02d) %10d (%02d) %10d\n", i, data->spfb[i], i + 1,
 					        data->spfb[i + 1], i + 2, data->spfb[i + 2], i + 3, data->spfb[i + 3]);
 				}
 				fprintf(stderr, "\tss_range\t%lf\n", data->ss_range);
 				fprintf(stderr, "\tampl\n");
-				for (i = 0; i < MBF_HSMDARAW_PIXELS_PING; i = i + 4) {
+				for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i = i + 4) {
 					fprintf(stderr, "\t%d\t%d\t%d\t%d\n", data->ss[i], data->ss[i + 1], data->ss[i + 2], data->ss[i + 3]);
 				}
 
@@ -1619,31 +1614,31 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 			if (status == MB_SUCCESS)
 				status = xdr_int(xdrs, &data->skals);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
 					status = xdr_int(xdrs, &data->spfb[i]);
 
 			/* set sidescan data */
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->ss_range);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++)
+				for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++)
 					status = xdr_char(xdrs, (char *)&data->ss[i]);
 
 			/* set attitude data */
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->heading_tx);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 					status = xdr_double(xdrs, &data->heading_rx[i]);
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->roll_tx);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 					status = xdr_double(xdrs, &data->roll_rx[i]);
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->pitch_tx);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 					status = xdr_double(xdrs, &data->pitch_rx[i]);
 
 			/* check status */
@@ -1697,7 +1692,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 			if (status == MB_SUCCESS)
 				status = xdr_int(xdrs, &data->evid);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 84; i++)
+				for (int i = 0; i < 84; i++)
 					status = xdr_char(xdrs, &data->evtext[i]);
 
 			/* check status */
@@ -1713,7 +1708,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 			if (status == MB_SUCCESS)
 				status = xdr_int(xdrs, &data->noho);
 			if (status == MB_SUCCESS && status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
+				for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++)
 					status = xdr_double(xdrs, &data->angle[i]);
 
 			/* check status */
@@ -1728,7 +1723,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		{
 
 			data->num_vel = 20;
-			for (i = 0; i < data->num_vel; i++) {
+			for (int i = 0; i < data->num_vel; i++) {
 				status = xdr_double(xdrs, &data->vdepth[i]);
 				status = xdr_double(xdrs, &data->velocity[i]);
 			}
@@ -1746,10 +1741,10 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 			if (status == MB_SUCCESS)
 				status = xdr_double(xdrs, &data->datuhr);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 8; i++)
+				for (int i = 0; i < 8; i++)
 					status = xdr_char(xdrs, &data->mksysint[i]);
 			if (status == MB_SUCCESS)
-				for (i = 0; i < 84; i++)
+				for (int i = 0; i < 84; i++)
 					status = xdr_char(xdrs, &data->mktext[i]);
 
 			/* Check status. */
@@ -1763,7 +1758,7 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		case (MBF_HSMDARAW_COM): /* 7, Comment */
 		{
 			if (status == MB_SUCCESS)
-				for (i = 0; i < MBF_HSMDARAW_COMMENT; i++)
+				for (int i = 0; i < MBF_HSMDARAW_COMMENT; i++)
 					status = xdr_char(xdrs, &data->comment[i]);
 
 			/* Check status. */

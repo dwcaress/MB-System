@@ -304,7 +304,6 @@ int mbr_zero_mgd77dat(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_mgd77dat";
 	int status = MB_SUCCESS;
 	struct mbf_mgd77dat_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -320,10 +319,10 @@ int mbr_zero_mgd77dat(int verbose, char *data_ptr, int *error) {
 	/* initialize everything to zeros */
 	if (data != NULL) {
 		data->kind = MB_DATA_NONE;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			data->survey_id[i] = 0;
 		data->time_d = 0.0;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			data->time_i[i] = 0;
 		data->timezone = 0;
 		data->longitude = 0.0;
@@ -351,7 +350,7 @@ int mbr_zero_mgd77dat(int verbose, char *data_ptr, int *error) {
 		data->free_air = 0.0;
 		data->seismic_line = 0;
 		data->seismic_shot = 0;
-		for (i = 0; i < MBF_MGD77DAT_DATA_LEN; i++)
+		for (int i = 0; i < MBF_MGD77DAT_DATA_LEN; i++)
 			data->comment[i] = 0;
 	}
 
@@ -377,7 +376,6 @@ int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77dat_struct *data;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -403,10 +401,10 @@ int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* translate values to data storage structure */
 	if (status == MB_SUCCESS && store != NULL) {
 		store->kind = data->kind;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			store->survey_id[i] = data->survey_id[i];
 		store->time_d = data->time_d;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = data->time_i[i];
 		store->timezone = data->timezone;
 		store->longitude = data->longitude;
@@ -434,9 +432,9 @@ int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->free_air = data->free_air;
 		store->seismic_line = data->seismic_line;
 		store->seismic_shot = data->seismic_shot;
-		for (i = 0; i < MBF_MGD77DAT_DATA_LEN; i++)
+		for (int i = 0; i < MBF_MGD77DAT_DATA_LEN; i++)
 			store->comment[i] = data->comment[i];
-		for (i = MBF_MGD77DAT_DATA_LEN; i < MB_COMMENT_MAXLINE; i++)
+		for (int i = MBF_MGD77DAT_DATA_LEN; i < MB_COMMENT_MAXLINE; i++)
 			store->comment[i] = 0;
 	}
 
@@ -458,7 +456,6 @@ int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77dat_struct *data;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -479,10 +476,10 @@ int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* first translate values from data storage structure */
 	if (store != NULL) {
 		data->kind = store->kind;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			data->survey_id[i] = store->survey_id[i];
 		data->time_d = store->time_d;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			data->time_i[i] = store->time_i[i];
 		data->timezone = store->timezone;
 		data->longitude = store->longitude;
@@ -510,7 +507,7 @@ int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->free_air = store->free_air;
 		data->seismic_line = store->seismic_line;
 		data->seismic_shot = store->seismic_shot;
-		for (i = 0; i < MBF_MGD77DAT_DATA_LEN; i++)
+		for (int i = 0; i < MBF_MGD77DAT_DATA_LEN; i++)
 			data->comment[i] = store->comment[i];
 	}
 
@@ -542,7 +539,6 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int neg_unit;
 	int itmp;
 	double dtmp;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -590,7 +586,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 	if (line[1] == '\r' || line[1] == '\n')
 		skip++;
 	if (skip > 0) {
-		for (j = 0; j < MBF_MGD77DAT_DATA_LEN - skip; j++) {
+		for (int j = 0; j < MBF_MGD77DAT_DATA_LEN - skip; j++) {
 			line[j] = line[j + skip];
 		}
 		if ((read_len = fread(&line[MBF_MGD77DAT_DATA_LEN - skip], 1, skip, mb_io_ptr->mbfp)) == skip) {
@@ -616,13 +612,13 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 	if (status == MB_SUCCESS && *header_read > 0 && *header_read < MBF_MGD77DAT_HEADER_NUM) {
 		data->kind = MB_DATA_HEADER;
 		(*header_read)++;
-		for (i = 0; i < MBF_MGD77DAT_DATA_LEN; i++)
+		for (int i = 0; i < MBF_MGD77DAT_DATA_LEN; i++)
 			data->comment[i] = line[i];
 	}
 	else if (status == MB_SUCCESS && (line[0] == '1' || line[0] == '4')) {
 		data->kind = MB_DATA_HEADER;
 		(*header_read) = 1;
-		for (i = 0; i < MBF_MGD77DAT_DATA_LEN; i++)
+		for (int i = 0; i < MBF_MGD77DAT_DATA_LEN; i++)
 			data->comment[i] = line[i];
 	}
 	else if (status == MB_SUCCESS && line[0] == '#') {
@@ -634,7 +630,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* get survey id */
 		shift = 1;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			data->survey_id[i] = line[i + shift];
 
 		/* get time */
@@ -745,7 +741,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* get survey id */
 		shift = 1;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			data->survey_id[i] = line[i + shift];
 
 		/* get time */
@@ -873,7 +869,6 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	int itmp;
 	int write_len;
 	int shift;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -893,13 +888,13 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	/* handle the data */
 	if (data->kind == MB_DATA_HEADER) {
 		strcpy(line, data->comment);
-		for (i = strlen(line); i < MBF_MGD77DAT_DATA_LEN; i++)
+		for (int i = strlen(line); i < MBF_MGD77DAT_DATA_LEN; i++)
 			line[i] = ' ';
 	}
 	else if (data->kind == MB_DATA_COMMENT) {
 		line[0] = '#';
 		strncpy(&line[1], data->comment, MBF_MGD77DAT_DATA_LEN - 1);
-		for (i = strlen(line); i < MBF_MGD77DAT_DATA_LEN; i++)
+		for (int i = strlen(line); i < MBF_MGD77DAT_DATA_LEN; i++)
 			line[i] = ' ';
 	}
 	else if (data->kind == MB_DATA_DATA) {
@@ -909,7 +904,7 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		shift += 1;
 
 		/* get survey id */
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			line[i + shift] = data->survey_id[i];
 		shift += 8;
 

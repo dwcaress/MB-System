@@ -401,7 +401,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int dim_id;
 	size_t index[3], count[3];
 	int nc_status;
-	int i;
 #ifdef MBNETCDF_DEBUG
 	int nc_verbose = 1;
 #else
@@ -721,20 +720,20 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				fprintf(stderr, "dbg2       mbEllipsoidInvF:       %f\n", store->mbEllipsoidInvF);
 				fprintf(stderr, "dbg2       mbEllipsoidE2:         %f\n", store->mbEllipsoidE2);
 				fprintf(stderr, "dbg2       mbProjType:            %d\n", store->mbProjType);
-				for (i = 0; i < 10; i++)
+				for (int i = 0; i < 10; i++)
 					fprintf(stderr, "dbg2       mbProjParameterValue[%d]:%f\n", i, store->mbProjParameterValue[i]);
 				fprintf(stderr, "dbg2       mbProjParameterCode:   %s\n", store->mbProjParameterCode);
 				fprintf(stderr, "dbg2       mbSounder:             %d\n", store->mbSounder);
 				fprintf(stderr, "dbg2       mbShip:                %s\n", store->mbShip);
 				fprintf(stderr, "dbg2       mbSurvey:              %s\n", store->mbSurvey);
 				fprintf(stderr, "dbg2       mbReference:           %s\n", store->mbReference);
-				for (i = 0; i < 3; i++)
+				for (int i = 0; i < 3; i++)
 					fprintf(stderr, "dbg2       mbAntennaOffset[%d]:    %f\n", i, store->mbAntennaOffset[i]);
 				fprintf(stderr, "dbg2       mbAntennaDelay:        %f\n", store->mbAntennaDelay);
-				for (i = 0; i < 3; i++)
+				for (int i = 0; i < 3; i++)
 					fprintf(stderr, "dbg2       mbSounderOffset[%d]:    %f\n", i, store->mbSounderOffset[i]);
 				fprintf(stderr, "dbg2       mbSounderDelay:        %f\n", store->mbSounderDelay);
-				for (i = 0; i < 3; i++)
+				for (int i = 0; i < 3; i++)
 					fprintf(stderr, "dbg2       mbVRUOffset[%d]:        %f\n", i, store->mbVRUOffset[i]);
 				fprintf(stderr, "dbg2       mbVRUDelay:            %f\n", store->mbVRUDelay);
 				fprintf(stderr, "dbg2       mbHeadingBias:         %f\n", store->mbHeadingBias);
@@ -4551,7 +4550,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				fprintf(stderr, "dbg2       error:                   %d\n", *error);
 				fprintf(stderr, "dbg2       nc_status:               %d\n", nc_status);
 				fprintf(stderr, "dbg2       mbNbrHistoryRec:         %d\n", store->mbNbrHistoryRec);
-				for (i = 0; i < store->mbNbrHistoryRec; i++) {
+				for (int i = 0; i < store->mbNbrHistoryRec; i++) {
 					fprintf(stderr, "dbg2       mbHistDate[%2d]:          %d\n", i, store->mbHistDate[i]);
 					fprintf(stderr, "dbg2       mbHistTime[%2d]:          %d\n", i, store->mbHistTime[i]);
 					fprintf(stderr, "dbg2       mbHistCode[%2d]:          %d\n", i, store->mbHistCode[i]);
@@ -4564,16 +4563,16 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				}
 				fprintf(stderr, "dbg2       mbAntennaNbr:              %zu\n", store->mbAntennaNbr);
 				fprintf(stderr, "dbg2       Antenna mbBeam mbAFlag\n");
-				for (i = 0; i < store->mbAntennaNbr; i++) {
+				for (int i = 0; i < store->mbAntennaNbr; i++) {
 					fprintf(stderr, "dbg2       %d %d %d\n", i, store->mbBeam[i], store->mbAFlag[i]);
 				}
 				fprintf(stderr, "dbg2       mbBeamNbr:              %zu\n", store->mbBeamNbr);
 				fprintf(stderr, "dbg2       beam mbAntenna mbBeamBias mbBFlag\n");
-				for (i = 0; i < store->mbBeamNbr; i++) {
+				for (int i = 0; i < store->mbBeamNbr; i++) {
 					fprintf(stderr, "dbg2       %3d %d %d %d\n", i, store->mbAntenna[i], store->mbBeamBias[i], store->mbBFlag[i]);
 				}
 				fprintf(stderr, "dbg2       mbVelocityProfilNbr:    %zu\n", store->mbVelocityProfilNbr);
-				for (i = 0; i < store->mbVelocityProfilNbr; i++) {
+				for (int i = 0; i < store->mbVelocityProfilNbr; i++) {
 					fprintf(stderr, "dbg2       mbVelProfilRef[%2d]:      %s\n", i,
 					        &(store->mbVelProfilRef[i * store->mbCommentLength]));
 					fprintf(stderr, "dbg2       mbVelProfilIdx[%2d]:      %d\n", i, store->mbVelProfilIdx[i]);
@@ -4921,96 +4920,96 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg2       error:                   %d\n", *error);
 			fprintf(stderr, "dbg2       nc_status:               %d\n", nc_status);
 			fprintf(stderr, "dbg2       mbCycle:                 ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbCycle[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbDate:                  ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbDate[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbTime:                  ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbTime[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbOrdinate:              ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbOrdinate[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbAbscissa:              ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbAbscissa[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbFrequency:             ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbFrequency[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbSounderMode:           ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbSounderMode[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbReferenceDepth:        ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbReferenceDepth[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbDynamicDraught:        ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbDynamicDraught[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbTide:                  ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbTide[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbSoundVelocity:         ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbSoundVelocity[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbHeading:               ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbHeading[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbRoll:                  ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbRoll[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbPitch:                 ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbPitch[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbTransmissionHeave:     ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbTransmissionHeave[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbDistanceScale:         ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbDistanceScale[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbDepthScale:            ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbDepthScale[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbVerticalDepth:         ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbVerticalDepth[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbCQuality:              ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbCQuality[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbCFlag:                 ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbCFlag[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbInterlacing:           ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbInterlacing[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbSamplingRate:          ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbSamplingRate[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbBeamNbr:               %zu\n", store->mbBeamNbr);
 			fprintf(stderr, "dbg2       beam ltrack xtrack depth quality flag\n");
-			for (i = 0; i < store->mbBeamNbr; i++) {
+			for (int i = 0; i < store->mbBeamNbr; i++) {
 				fprintf(stderr, "dbg2       %3d %8d %8d %8d %d %d\n", i, store->mbAlongDistance[i], store->mbAcrossDistance[i],
 				        store->mbDepth[i], store->mbSQuality[i], store->mbSFlag[i]);
 			}
@@ -5067,7 +5066,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *user_ptr;
 	double time_d;
 	int icomment;
-	int i;
 	int extended = MB_NO;
 #ifdef MBNETCDF_DEBUG
 	int nc_verbose = 1;
@@ -5116,7 +5114,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status =
 			    mb_reallocd(verbose, __FILE__, __LINE__, storelocal->mbHistoryRecNbr * storelocal->mbCommentLength * sizeof(char),
 			                (void **)&storelocal->mbHistComment, error);
-			for (i = storelocal->mbNbrHistoryRec; i < storelocal->mbHistoryRecNbr; i++) {
+			for (int i = storelocal->mbNbrHistoryRec; i < storelocal->mbHistoryRecNbr; i++) {
 				storelocal->mbHistDate[i] = 0;
 				storelocal->mbHistTime[i] = 0;
 				storelocal->mbHistCode[i] = 0;
@@ -5127,7 +5125,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (store != storelocal) {
 			/* figure out which comment is being passed */
 			icomment = -1;
-			for (i = 0; i < store->mbNbrHistoryRec; i++) {
+			for (int i = 0; i < store->mbNbrHistoryRec; i++) {
 				if (strncmp(store->comment, &store->mbHistComment[i * store->mbCommentLength], MBSYS_NETCDF_COMMENTLEN) == 0) {
 					icomment = i;
 				}
@@ -5708,20 +5706,20 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg2       mbEllipsoidInvF:       %f\n", store->mbEllipsoidInvF);
 			fprintf(stderr, "dbg2       mbEllipsoidE2:         %f\n", store->mbEllipsoidE2);
 			fprintf(stderr, "dbg2       mbProjType:            %d\n", store->mbProjType);
-			for (i = 0; i < 10; i++)
+			for (int i = 0; i < 10; i++)
 				fprintf(stderr, "dbg2       mbProjParameterValue[%d]:%f\n", i, store->mbProjParameterValue[i]);
 			fprintf(stderr, "dbg2       mbProjParameterCode:   %s\n", store->mbProjParameterCode);
 			fprintf(stderr, "dbg2       mbSounder:             %d\n", store->mbSounder);
 			fprintf(stderr, "dbg2       mbShip:                %s\n", store->mbShip);
 			fprintf(stderr, "dbg2       mbSurvey:              %s\n", store->mbSurvey);
 			fprintf(stderr, "dbg2       mbReference:           %s\n", store->mbReference);
-			for (i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 				fprintf(stderr, "dbg2       mbAntennaOffset[%d]:    %f\n", i, store->mbAntennaOffset[i]);
 			fprintf(stderr, "dbg2       mbAntennaDelay:        %f\n", store->mbAntennaDelay);
-			for (i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 				fprintf(stderr, "dbg2       mbSounderOffset[%d]:    %f\n", i, store->mbSounderOffset[i]);
 			fprintf(stderr, "dbg2       mbSounderDelay:        %f\n", store->mbSounderDelay);
-			for (i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 				fprintf(stderr, "dbg2       mbVRUOffset[%d]:        %f\n", i, store->mbVRUOffset[i]);
 			fprintf(stderr, "dbg2       mbVRUDelay:            %f\n", store->mbVRUDelay);
 			fprintf(stderr, "dbg2       mbHeadingBias:         %f\n", store->mbHeadingBias);
@@ -9596,96 +9594,96 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg2       error:                   %d\n", *error);
 			fprintf(stderr, "dbg2       nc_status:               %d\n", nc_status);
 			fprintf(stderr, "dbg2       mbCycle:                 ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbCycle[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbDate:                  ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbDate[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbTime:                  ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbTime[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbOrdinate:              ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbOrdinate[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbAbscissa:              ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbAbscissa[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbFrequency:             ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbFrequency[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbSounderMode:           ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbSounderMode[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbReferenceDepth:        ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbReferenceDepth[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbDynamicDraught:        ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbDynamicDraught[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbTide:                  ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbTide[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbSoundVelocity:         ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbSoundVelocity[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbHeading:               ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbHeading[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbRoll:                  ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbRoll[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbPitch:                 ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbPitch[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbTransmissionHeave:     ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbTransmissionHeave[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbDistanceScale:         ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbDistanceScale[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbDepthScale:            ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbDepthScale[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbVerticalDepth:         ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbVerticalDepth[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbCQuality:              ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbCQuality[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbCFlag:                 ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbCFlag[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbInterlacing:           ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbInterlacing[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbSamplingRate:          ");
-			for (i = 0; i < store->mbAntennaNbr; i++)
+			for (int i = 0; i < store->mbAntennaNbr; i++)
 				fprintf(stderr, "%d ", store->mbSamplingRate[i]);
 			fprintf(stderr, "\n");
 			fprintf(stderr, "dbg2       mbBeamNbr:               %zu\n", store->mbBeamNbr);
 			fprintf(stderr, "dbg2       beam ltrack xtrack depth quality flag\n");
-			for (i = 0; i < store->mbBeamNbr; i++) {
+			for (int i = 0; i < store->mbBeamNbr; i++) {
 				fprintf(stderr, "dbg2       %3d %8d %8d %8d %d %d\n", i, store->mbAlongDistance[i], store->mbAcrossDistance[i],
 				        store->mbDepth[i], store->mbSQuality[i], store->mbSFlag[i]);
 			}

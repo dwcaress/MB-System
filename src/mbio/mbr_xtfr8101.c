@@ -368,7 +368,6 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int badtime;
 	double gain_correction;
 	double lon, lat;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -456,7 +455,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* parameter info */
 		nchan = data->fileheader.NumberOfSonarChannels + data->fileheader.NumberOfBathymetryChannels;
-		for (i = 0; i < nchan; i++) {
+		for (int i = 0; i < nchan; i++) {
 			if (data->fileheader.chaninfo[i].TypeOfChannel == 3) {
 				store->MBOffsetX = data->fileheader.chaninfo[i].OffsetX;
 				store->MBOffsetY = data->fileheader.chaninfo[i].OffsetY;
@@ -482,7 +481,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->att_pitch = data->attitudeheader.Pitch;
 
 		/* comment */
-		for (i = 0; i < MBSYS_RESON8K_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBSYS_RESON8K_COMMENT_LENGTH; i++)
 			store->comment[i] = data->comment[i];
 
 		/* survey data */
@@ -605,10 +604,10 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		                                                           /* bit 1 - depth filter (0 = off, 1 = active) */
 		store->temperature = data->reson8100rit.temperature;       /* temperature at sonar head (deg C * 10) */
 		store->beam_count = data->reson8100rit.beam_count;         /* number of sets of beam data in packet */
-		for (i = 0; i < store->beam_count; i++)
+		for (int i = 0; i < store->beam_count; i++)
 			store->range[i] = data->reson8100rit.range[i]; /* range for beam where n = Beam Count */
 		                                                   /* range units = sample cells * 4 */
-		for (i = 0; i < store->beam_count / 2 + 1; i++)
+		for (int i = 0; i < store->beam_count / 2 + 1; i++)
 			store->quality[i] = data->reson8100rit.quality[i]; /* packed quality array (two 4 bit values/char) */
 		                                                       /* cnt = n/2 if beam count even, n/2+1 if odd */
 		                                                       /* cnt then rounded up to next even number */
@@ -620,7 +619,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		                                                       /* bit 3 - phase bottom detect used */
 		                                                       /* bottom detect can be amplitude, phase or both */
 		intensity_max = 0;
-		for (i = 0; i < store->beam_count; i++) {
+		for (int i = 0; i < store->beam_count; i++) {
 			store->intensity[i] = data->reson8100rit.intensity[i]; /* intensities at bottom detect  */
 			intensity_max = MAX(intensity_max, (int)store->intensity[i]);
 		}
@@ -635,7 +634,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		ttscale = 0.25 / store->sample_rate;
 		icenter = store->beams_bath / 2;
 		angscale = ((double)store->beam_width_num) / ((double)store->beam_width_denom);
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			/* get beamflag */
 			if (i % 2 == 0)
 				quality = ((store->quality[i / 2]) & 15) & 3;
@@ -667,7 +666,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 		}
 		gain_correction = 2.2 * (store->gain & 63) + 6 * store->power;
-		for (i = 0; i < store->beams_amp; i++) {
+		for (int i = 0; i < store->beams_amp; i++) {
 			store->amp[i] = (double)(40.0 * log10(store->intensity[i]) - gain_correction);
 		}
 		store->ssrawtimedelay = data->pingchanportheader.TimeDelay;
@@ -675,9 +674,9 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->ssrawbottompick = data->sidescanheader.SensorPrimaryAltitude / data->sidescanheader.SoundVelocity;
 		store->ssrawportsamples = data->pingchanportheader.NumSamples;
 		store->ssrawstbdsamples = data->pingchanstbdheader.NumSamples;
-		for (i = 0; i < store->ssrawportsamples; i++)
+		for (int i = 0; i < store->ssrawportsamples; i++)
 			store->ssrawport[i] = data->ssrawport[store->ssrawportsamples - i - 1];
-		for (i = 0; i < store->ssrawstbdsamples; i++)
+		for (int i = 0; i < store->ssrawstbdsamples; i++)
 			store->ssrawstbd[i] = data->ssrawstbd[i];
 
 		/* generate processed sidescan */
@@ -757,7 +756,6 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	double timetag, heave, roll, pitch, heading;
 	int utm_zone;
 	char projection[MB_NAME_LENGTH];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -801,21 +799,21 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			index++;
 			fileheader->SystemType = line[index];
 			index++;
-			for (i = 0; i < 8; i++)
+			for (int i = 0; i < 8; i++)
 				fileheader->RecordingProgramName[i] = line[index + i];
 			index += 8;
-			for (i = 0; i < 8; i++)
+			for (int i = 0; i < 8; i++)
 				fileheader->RecordingProgramVersion[i] = line[index + i];
 			index += 8;
-			for (i = 0; i < 16; i++)
+			for (int i = 0; i < 16; i++)
 				fileheader->SonarName[i] = line[index + i];
 			index += 16;
 			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->SonarType));
 			index += 2;
-			for (i = 0; i < 64; i++)
+			for (int i = 0; i < 64; i++)
 				fileheader->NoteString[i] = line[index + i];
 			index += 64;
-			for (i = 0; i < 64; i++)
+			for (int i = 0; i < 64; i++)
 				fileheader->ThisFileName[i] = line[index + i];
 			index += 64;
 			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->NavUnits));
@@ -836,10 +834,10 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			index += 2;
 			mb_get_binary_short(MB_YES, &line[index], (short int *)&(fileheader->Reserved6));
 			index += 2;
-			for (i = 0; i < 12; i++)
+			for (int i = 0; i < 12; i++)
 				fileheader->ProjectionType[i] = line[index + i];
 			index += 12;
-			for (i = 0; i < 10; i++)
+			for (int i = 0; i < 10; i++)
 				fileheader->SpheroidType[i] = line[index + i];
 			index += 10;
 			mb_get_binary_int(MB_YES, &line[index], (int *)&(fileheader->NavigationLatency));
@@ -881,7 +879,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index += 2;
 				mb_get_binary_int(MB_YES, &line[index], (int *)&(fileheader->chaninfo[ichan].SamplesPerChannel));
 				index += 4;
-				for (i = 0; i < 16; i++)
+				for (int i = 0; i < 16; i++)
 					fileheader->chaninfo[ichan].ChannelName[i] = line[index + i];
 				index += 16;
 				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].VoltScale));
@@ -906,7 +904,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index += 4;
 				mb_get_binary_float(MB_YES, &line[index], &(fileheader->chaninfo[ichan].OffsetRoll));
 				index += 4;
-				for (i = 0; i < 56; i++)
+				for (int i = 0; i < 56; i++)
 					fileheader->chaninfo[ichan].ReservedArea[i] = line[index + i];
 				index += 56;
 			}
@@ -957,7 +955,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg5       MRUOffsetYaw:               %f\n", fileheader->MRUOffsetYaw);
 				fprintf(stderr, "dbg5       MRUOffsetPitch:             %f\n", fileheader->MRUOffsetPitch);
 				fprintf(stderr, "dbg5       MRUOffsetRoll:              %f\n", fileheader->MRUOffsetRoll);
-				for (i = 0; i < fileheader->NumberOfSonarChannels + fileheader->NumberOfBathymetryChannels; i++) {
+				for (int i = 0; i < fileheader->NumberOfSonarChannels + fileheader->NumberOfBathymetryChannels; i++) {
 					fprintf(stderr, "dbg5       TypeOfChannel:              %d\n", fileheader->chaninfo[i].TypeOfChannel);
 					fprintf(stderr, "dbg5       SubChannelNumber:           %d\n", fileheader->chaninfo[i].SubChannelNumber);
 					fprintf(stderr, "dbg5       CorrectionFlags:            %d\n", fileheader->chaninfo[i].CorrectionFlags);
@@ -1072,7 +1070,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (read_len == 50) {
 				/* parse the rest of the attitude record */
 				index = 0;
-				for (i = 0; i < 4; i++) {
+				for (int i = 0; i < 4; i++) {
 					mb_get_binary_int(MB_YES, &line[index], (int *)&(attitudeheader->Reserved2[i]));
 					index += 4;
 				}
@@ -1088,7 +1086,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index += 4;
 				mb_get_binary_float(MB_YES, &line[index], &(attitudeheader->Heading));
 				index += 4;
-				for (i = 0; i < 10; i++) {
+				for (int i = 0; i < 10; i++) {
 					attitudeheader->Reserved3[i] = line[index];
 					index++;
 				}
@@ -1273,7 +1271,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index += 4;
 				mb_get_binary_float(MB_YES, &line[index], &(sidescanheader->DOT));
 				index += 4;
-				for (i = 0; i < 20; i++) {
+				for (int i = 0; i < 20; i++) {
 					sidescanheader->ReservedSpace[i] = line[index];
 					index++;
 				}
@@ -1333,7 +1331,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index++;
 				mb_get_binary_float(MB_YES, &line[index], &(pingchanportheader->FixedVSOP));
 				index += 4;
-				for (i = 0; i < 6; i++) {
+				for (int i = 0; i < 6; i++) {
 					pingchanportheader->ReservedSpace[i] = (mb_u_char)line[index];
 					index++;
 				}
@@ -1368,14 +1366,14 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			}
 			if (status == MB_SUCCESS && read_len == read_bytes) {
 				if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 1) {
-					for (i = 0; i < pingchanportheader->NumSamples; i++) {
+					for (int i = 0; i < pingchanportheader->NumSamples; i++) {
 						mb_u_char_ptr = (mb_u_char *)&line[i];
 						data->ssrawport[i] = (unsigned short)(*mb_u_char_ptr);
 					}
 				}
 				else if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 2) {
 					index = 0;
-					for (i = 0; i < pingchanportheader->NumSamples; i++) {
+					for (int i = 0; i < pingchanportheader->NumSamples; i++) {
 						mb_get_binary_short(MB_YES, &line[index], (short *)&(data->ssrawport[i]));
 						index += 2;
 					}
@@ -1436,7 +1434,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index++;
 				mb_get_binary_float(MB_YES, &line[index], &(pingchanstbdheader->FixedVSOP));
 				index += 4;
-				for (i = 0; i < 6; i++) {
+				for (int i = 0; i < 6; i++) {
 					pingchanstbdheader->ReservedSpace[i] = (mb_u_char)line[index];
 					index++;
 				}
@@ -1471,14 +1469,14 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			}
 			if (status == MB_SUCCESS && read_len == read_bytes) {
 				if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 1) {
-					for (i = 0; i < pingchanstbdheader->NumSamples; i++) {
+					for (int i = 0; i < pingchanstbdheader->NumSamples; i++) {
 						mb_u_char_ptr = (mb_u_char *)&line[i];
 						data->ssrawstbd[i] = (unsigned short)(*mb_u_char_ptr);
 					}
 				}
 				else if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 2) {
 					index = 0;
-					for (i = 0; i < pingchanstbdheader->NumSamples; i++) {
+					for (int i = 0; i < pingchanstbdheader->NumSamples; i++) {
 						mb_get_binary_short(MB_YES, &line[index], (short *)&(data->ssrawstbd[i]));
 						index += 2;
 					}
@@ -1565,7 +1563,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg5       Yaw:                        %f\n", sidescanheader->Yaw);
 				fprintf(stderr, "dbg5       AttitudeTimeTag:            %d\n", sidescanheader->AttitudeTimeTag);
 				fprintf(stderr, "dbg5       DOT:                        %f\n", sidescanheader->DOT);
-				for (i = 0; i < 20; i++)
+				for (int i = 0; i < 20; i++)
 					fprintf(stderr, "dbg5       ReservedSpace[%2.2d]:          %d\n", i, sidescanheader->ReservedSpace[i]);
 				fprintf(stderr, "dbg5       ChannelNumber:              %d\n", pingchanportheader->ChannelNumber);
 				fprintf(stderr, "dbg5       DownsampleMethod:           %d\n", pingchanportheader->DownsampleMethod);
@@ -1589,7 +1587,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg5       ContactCloseNumber:         %d\n", pingchanportheader->ContactCloseNumber);
 				fprintf(stderr, "dbg5       Reserved2:                  %d\n", pingchanportheader->Reserved2);
 				fprintf(stderr, "dbg5       FixedVSOP:                  %f\n", pingchanportheader->FixedVSOP);
-				for (i = 0; i < 6; i++)
+				for (int i = 0; i < 6; i++)
 					fprintf(stderr, "dbg5       ReservedSpace[%2.2d]:          %d\n", i, pingchanportheader->ReservedSpace[i]);
 				fprintf(stderr, "dbg5       ChannelNumber:              %d\n", pingchanstbdheader->ChannelNumber);
 				fprintf(stderr, "dbg5       DownsampleMethod:           %d\n", pingchanstbdheader->DownsampleMethod);
@@ -1613,9 +1611,9 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg5       ContactCloseNumber:         %d\n", pingchanstbdheader->ContactCloseNumber);
 				fprintf(stderr, "dbg5       Reserved2:                  %d\n", pingchanstbdheader->Reserved2);
 				fprintf(stderr, "dbg5       FixedVSOP:                  %f\n", pingchanstbdheader->FixedVSOP);
-				for (i = 0; i < 6; i++)
+				for (int i = 0; i < 6; i++)
 					fprintf(stderr, "dbg5       ReservedSpace[%2.2d]:          %d\n", i, pingchanstbdheader->ReservedSpace[i]);
-				for (i = 0; i < MAX(pingchanportheader->NumSamples, pingchanstbdheader->NumSamples); i++)
+				for (int i = 0; i < MAX(pingchanportheader->NumSamples, pingchanstbdheader->NumSamples); i++)
 					fprintf(stderr, "dbg5       sidescan[%4.4d]: %d %d\n", i, data->ssrawport[i], data->ssrawstbd[i]);
 			}
 		}
@@ -1759,7 +1757,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index += 4;
 				mb_get_binary_float(MB_YES, &line[index], &(bathheader->DOT));
 				index += 4;
-				for (i = 0; i < 20; i++) {
+				for (int i = 0; i < 20; i++) {
 					bathheader->ReservedSpace[i] = line[index];
 					index++;
 				}
@@ -1778,7 +1776,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					/* handle RESON_PACKETID_RT_VERY_OLD */
 					else if (line[4] == 0x13) {
 						index = 0;
-						for (i = 0; i < 4; i++) {
+						for (int i = 0; i < 4; i++) {
 							reson8100rit->synch_header[i] = line[index];
 							index++;
 						}
@@ -1831,12 +1829,12 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 						reson8100rit->temperature = 0;
 						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->beam_count));
 						index += 2;
-						for (i = 0; i < reson8100rit->beam_count; i++) {
+						for (int i = 0; i < reson8100rit->beam_count; i++) {
 							mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->range[i]));
 							reson8100rit->intensity[i] = 0;
 							index += 2;
 						}
-						for (i = 0; i < reson8100rit->beam_count / 2 + reson8100rit->beam_count % 2; i++) {
+						for (int i = 0; i < reson8100rit->beam_count / 2 + reson8100rit->beam_count % 2; i++) {
 							reson8100rit->quality[i] = (mb_u_char)line[index];
 							index++;
 						}
@@ -1845,7 +1843,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					/* handle RESON_PACKETID_RIT */
 					else if (line[4] == 0x18) {
 						index = 0;
-						for (i = 0; i < 4; i++) {
+						for (int i = 0; i < 4; i++) {
 							reson8100rit->synch_header[i] = line[index];
 							index++;
 						}
@@ -1944,15 +1942,15 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 						mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->beam_count));
 						index += 2;
 
-						for (i = 0; i < reson8100rit->beam_count; i++) {
+						for (int i = 0; i < reson8100rit->beam_count; i++) {
 							mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->range[i]));
 							index += 2;
 						}
-						for (i = 0; i < reson8100rit->beam_count / 2 + reson8100rit->beam_count % 2; i++) {
+						for (int i = 0; i < reson8100rit->beam_count / 2 + reson8100rit->beam_count % 2; i++) {
 							reson8100rit->quality[i] = (mb_u_char)line[index];
 							index++;
 						}
-						for (i = 0; i < reson8100rit->beam_count; i++) {
+						for (int i = 0; i < reson8100rit->beam_count; i++) {
 							mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->intensity[i]));
 							index += 2;
 						}
@@ -2044,7 +2042,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					fprintf(stderr, "dbg5       Yaw:                        %f\n", bathheader->Yaw);
 					fprintf(stderr, "dbg5       AttitudeTimeTag:            %d\n", bathheader->AttitudeTimeTag);
 					fprintf(stderr, "dbg5       DOT:                        %f\n", bathheader->DOT);
-					for (i = 0; i < 20; i++)
+					for (int i = 0; i < 20; i++)
 						fprintf(stderr, "dbg5       ReservedSpace[%2.2d]:          %d\n", i, bathheader->ReservedSpace[i]);
 					fprintf(stderr, "dbg5       synch_header:               %x %x %x %x \n", reson8100rit->synch_header[0],
 					        reson8100rit->synch_header[1], reson8100rit->synch_header[2], reson8100rit->synch_header[3]);
@@ -2080,7 +2078,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					fprintf(stderr, "dbg5       spare:                      %d\n", reson8100rit->spare[2]);
 					fprintf(stderr, "dbg5       temperature:                %d\n", reson8100rit->temperature);
 					fprintf(stderr, "dbg5       beam_count:                 %d\n", reson8100rit->beam_count);
-					for (i = 0; i < reson8100rit->beam_count; i++) {
+					for (int i = 0; i < reson8100rit->beam_count; i++) {
 						fprintf(stderr, "dbg5       beam[%3.3d]   range:%5.5d", i, reson8100rit->range[i]);
 						if (i % 2 == 0)
 							quality = ((reson8100rit->quality[i / 2]) & 15);
@@ -2106,7 +2104,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 		/* else read rest of unknown packet */
 		else if (status == MB_SUCCESS) {
 			if (((int)packetheader.NumBytesThisRecord) > 14) {
-				for (i = 0; i < ((int)packetheader.NumBytesThisRecord) - 14; i++) {
+				for (int i = 0; i < ((int)packetheader.NumBytesThisRecord) - 14; i++) {
 					read_len = fread(line, 1, 1, mb_io_ptr->mbfp);
 				}
 				if (read_len != 1) {

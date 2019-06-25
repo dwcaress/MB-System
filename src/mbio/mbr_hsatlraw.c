@@ -1671,7 +1671,6 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	char *function_name = "mbr_hsatlraw_rd_ergnctds";
 	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
-	int i, j, k;
 	int nlines;
 	int numvals;
 
@@ -1723,8 +1722,8 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 			numvals = 10;
 			if (i == nlines - 1)
 				numvals = data->num_vel % 10;
-			for (j = 0; j < numvals; j++) {
-				k = j + i * 10;
+			for (int j = 0; j < numvals; j++) {
+				const int k = j + i * 10;
 				mb_get_double(&(data->vdepth[k]), line + j * 11 + shift, 5);
 				mb_get_double(&(data->velocity[k]), line + j * 11 + 5 + shift, 6);
 			}

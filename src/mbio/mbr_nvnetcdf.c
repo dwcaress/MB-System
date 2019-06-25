@@ -315,7 +315,6 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int dim_id;
 	size_t index[2], count[2];
 	int nc_status;
-	int i;
 #ifdef MBNETCDF_DEBUG
 	int nc_verbose = 1;
 #else
@@ -512,7 +511,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				fprintf(stderr, "dbg2       mbEllipsoidInvF:       %f\n", store->mbEllipsoidInvF);
 				fprintf(stderr, "dbg2       mbEllipsoidE2:         %f\n", store->mbEllipsoidE2);
 				fprintf(stderr, "dbg2       mbProjType:            %d\n", store->mbProjType);
-				for (i = 0; i < 10; i++)
+				for (int i = 0; i < 10; i++)
 					fprintf(stderr, "dbg2       mbProjParameterValue[%d]:%f\n", i, store->mbProjParameterValue[i]);
 				fprintf(stderr, "dbg2       mbProjParameterCode:   %s\n", store->mbProjParameterCode);
 				fprintf(stderr, "dbg2       mbShip:                %s\n", store->mbShip);
@@ -1588,7 +1587,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				fprintf(stderr, "dbg2       error:                   %d\n", *error);
 				fprintf(stderr, "dbg2       nc_status:               %d\n", nc_status);
 				fprintf(stderr, "dbg2       mbNbrHistoryRec:         %d\n", store->mbNbrHistoryRec);
-				for (i = 0; i < store->mbNbrHistoryRec; i++) {
+				for (int i = 0; i < store->mbNbrHistoryRec; i++) {
 					fprintf(stderr, "dbg2       mbHistDate[%2d]:          %d\n", i, store->mbHistDate[i]);
 					fprintf(stderr, "dbg2       mbHistTime[%2d]:          %d\n", i, store->mbHistTime[i]);
 					fprintf(stderr, "dbg2       mbHistCode[%2d]:          %d\n", i, store->mbHistCode[i]);
@@ -1784,7 +1783,6 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *user_ptr;
 	double time_d;
 	int icomment;
-	int i;
 #ifdef MBNETCDF_DEBUG
 	int nc_verbose = 1;
 #else
@@ -1829,7 +1827,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status =
 			    mb_reallocd(verbose, __FILE__, __LINE__, storelocal->mbHistoryRecNbr * storelocal->mbCommentLength * sizeof(char),
 			                (void **)&storelocal->mbHistComment, error);
-			for (i = storelocal->mbNbrHistoryRec; i < storelocal->mbHistoryRecNbr; i++) {
+			for (int i = storelocal->mbNbrHistoryRec; i < storelocal->mbHistoryRecNbr; i++) {
 				storelocal->mbHistDate[i] = 0;
 				storelocal->mbHistTime[i] = 0;
 				storelocal->mbHistCode[i] = 0;
@@ -1840,7 +1838,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (store != storelocal) {
 			/* figure out which comment is being passed */
 			icomment = -1;
-			for (i = 0; i < store->mbNbrHistoryRec; i++) {
+			for (int i = 0; i < store->mbNbrHistoryRec; i++) {
 				if (strncmp(store->comment, &store->mbHistComment[i * store->mbCommentLength], MBSYS_NAVNETCDF_COMMENTLEN) == 0) {
 					icomment = i;
 				}
@@ -2152,7 +2150,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg2       mbEllipsoidInvF:       %f\n", store->mbEllipsoidInvF);
 			fprintf(stderr, "dbg2       mbEllipsoidE2:         %f\n", store->mbEllipsoidE2);
 			fprintf(stderr, "dbg2       mbProjType:            %d\n", store->mbProjType);
-			for (i = 0; i < 10; i++)
+			for (int i = 0; i < 10; i++)
 				fprintf(stderr, "dbg2       mbProjParameterValue[%d]:%f\n", i, store->mbProjParameterValue[i]);
 			fprintf(stderr, "dbg2       mbProjParameterCode:   %s\n", store->mbProjParameterCode);
 			fprintf(stderr, "dbg2       mbShip:                %s\n", store->mbShip);

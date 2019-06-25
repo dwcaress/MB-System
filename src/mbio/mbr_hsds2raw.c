@@ -471,7 +471,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	double rr;
 	double pspeed;
 	double *angle_table;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -518,7 +517,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		read_status = 1;
 		nskip = 0;
 		while (strncmp(telegram_recv, "BROADCAST", 9) != 0 && read_status == 1) {
-			for (i = 0; i < 15; i++)
+			for (int i = 0; i < 15; i++)
 				telegram_recv[i] = telegram_recv[i + 1];
 			if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
 				nskip++;
@@ -587,7 +586,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg5       start_ping_no:           %d\n", store->start_ping_no);
 		fprintf(stderr, "dbg5       start_transmit_time_d:   %f\n", store->start_transmit_time_d);
 		fprintf(stderr, "dbg5       start_opmode:            ");
-		for (i = 0; i < 32; i++)
+		for (int i = 0; i < 32; i++)
 			fprintf(stderr, " %d", store->start_opmode[i]);
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       start_heave:             %f\n", store->start_heave);
@@ -627,7 +626,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			read_status = 1;
 			nskip = 0;
 			while (strncmp(telegram_recv, "BROADCAST", 9) != 0 && read_status == 1) {
-				for (i = 0; i < 15; i++)
+				for (int i = 0; i < 15; i++)
 					telegram_recv[i] = telegram_recv[i + 1];
 				if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
 					nskip++;
@@ -684,7 +683,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->tt_sensdraught);
 		if (xdr_status == MB_YES)
 			xdr_status = xdr_double((XDR *)mb_io_ptr->xdrs, &store->tt_draught);
-		for (i = 0; i < MBSYS_ATLAS_MAXBEAMTELEGRAM; i++) {
+		for (int i = 0; i < MBSYS_ATLAS_MAXBEAMTELEGRAM; i++) {
 			if (xdr_status == MB_YES)
 				xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &(store->tt_lruntime[i]));
 		}
@@ -743,7 +742,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg5       tt_sensdraught:          %f\n", store->tt_sensdraught);
 		fprintf(stderr, "dbg5       tt_draught:              %f\n", store->tt_draught);
 		if (verbose > 0)
-			for (i = 0; i < MBSYS_ATLAS_MAXBEAMS; i++)
+			for (int i = 0; i < MBSYS_ATLAS_MAXBEAMS; i++)
 				fprintf(stderr, "dbg5       beam[%d] tt amp stat:    %12f %3d %3d\n", i, store->tt_lruntime[i],
 				        store->tt_lamplitude[i], store->tt_lstatus[i]);
 	}
@@ -774,7 +773,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			read_status = 1;
 			nskip = 0;
 			while (strncmp(telegram_recv, "BROADCAST", 9) != 0 && read_status == 1) {
-				for (i = 0; i < 15; i++)
+				for (int i = 0; i < 15; i++)
 					telegram_recv[i] = telegram_recv[i + 1];
 				if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
 					nskip++;
@@ -821,10 +820,9 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (xdr_status == MB_YES)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &length);
 		if (xdr_status == MB_YES) {
+			int i = 0;
 			if (telegram_act_no * MBSYS_ATLAS_MAXPIXELTELEGRAM <= MBSYS_ATLAS_MAXPIXELS)
 				i = (telegram_act_no - 1) * MBSYS_ATLAS_MAXPIXELTELEGRAM;
-			else
-				i = 0;
 			xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)&(store->ss_sidescan[i]), MBSYS_ATLAS_MAXPIXELTELEGRAM);
 		}
 
@@ -870,7 +868,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg5       ss_max_side_bb_cnt:      %d\n", store->ss_max_side_bb_cnt);
 		fprintf(stderr, "dbg5       ss_max_side_sb_cnt:      %d\n", store->ss_max_side_sb_cnt);
 		if (verbose > 0)
-			for (i = 0; i < MBSYS_ATLAS_MAXPIXELS; i++)
+			for (int i = 0; i < MBSYS_ATLAS_MAXPIXELS; i++)
 				fprintf(stderr, "dbg5       pixel[%d] ss:            %d\n", i, store->ss_sidescan[i]);
 	}
 
@@ -897,7 +895,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		read_status = 1;
 		nskip = 0;
 		while (strncmp(telegram_recv, "BROADCAST", 9) != 0 && read_status == 1) {
-			for (i = 0; i < 15; i++)
+			for (int i = 0; i < 15; i++)
 				telegram_recv[i] = telegram_recv[i + 1];
 			if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
 				nskip++;
@@ -931,7 +929,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->tr_window_mode);
 	if (xdr_status == MB_YES)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->tr_no_of_win_groups);
-	for (i = 0; i < 100; i++) {
+	for (int i = 0; i < 100; i++) {
 		if (xdr_status == MB_YES)
 			xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &store->tr_repeat_count[i]);
 		if (xdr_status == MB_YES)
@@ -964,7 +962,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg5       tr_window_mode:          %d\n", store->tr_window_mode);
 		fprintf(stderr, "dbg5       tr_no_of_win_groups:     %d\n", store->tr_no_of_win_groups);
 		if (verbose > 0)
-			for (i = 0; i < MBSYS_ATLAS_MAXWINDOWS; i++) {
+			for (int i = 0; i < MBSYS_ATLAS_MAXWINDOWS; i++) {
 				fprintf(stderr, "dbg5       window[%d]:cnt start stop: %d %f %f\n", i, store->tr_repeat_count[i],
 				        store->tr_start[i], store->tr_stop[i]);
 			}
@@ -993,7 +991,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		read_status = 1;
 		nskip = 0;
 		while (strncmp(telegram_recv, "BROADCAST", 9) != 0 && read_status == 1) {
-			for (i = 0; i < 15; i++)
+			for (int i = 0; i < 15; i++)
 				telegram_recv[i] = telegram_recv[i + 1];
 			if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
 				nskip++;
@@ -1031,7 +1029,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_rxGain);
 	if (xdr_status == MB_YES)
 		xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_ar);
-	for (i = 0; i < MBSYS_ATLAS_HSDS2_RX_PAR; i++) {
+	for (int i = 0; i < MBSYS_ATLAS_HSDS2_RX_PAR; i++) {
 		if (xdr_status == MB_YES)
 			xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_TvgRx_time[i]);
 		if (xdr_status == MB_YES)
@@ -1039,7 +1037,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 	if (xdr_status == MB_YES)
 		xdr_status = xdr_u_short((XDR *)mb_io_ptr->xdrs, &store->bs_nrTxSets);
-	for (i = 0; i < MBSYS_ATLAS_HSDS2_TX_PAR; i++) {
+	for (int i = 0; i < MBSYS_ATLAS_HSDS2_TX_PAR; i++) {
 		if (xdr_status == MB_YES)
 			xdr_status = xdr_u_int((XDR *)mb_io_ptr->xdrs, &store->bs_txBeamIndex[i]);
 		if (xdr_status == MB_YES)
@@ -1051,7 +1049,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 	if (xdr_status == MB_YES)
 		xdr_status = xdr_u_short((XDR *)mb_io_ptr->xdrs, &store->bs_nrBsSets);
-	for (i = 0; i < MBSYS_ATLAS_HSDS2_PFB_NUM; i++) {
+	for (int i = 0; i < MBSYS_ATLAS_HSDS2_PFB_NUM; i++) {
 		if (xdr_status == MB_YES)
 			xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->bs_m_tau[i]);
 	}
@@ -1090,18 +1088,18 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg5       bs_rxGain:               %f\n", store->bs_rxGain);
 		fprintf(stderr, "dbg5       bs_ar:                   %f\n", store->bs_ar);
 		if (verbose > 0)
-			for (i = 0; i < MBSYS_ATLAS_HSDS2_RX_PAR; i++) {
+			for (int i = 0; i < MBSYS_ATLAS_HSDS2_RX_PAR; i++) {
 				fprintf(stderr, "dbg5       tvgrx[%d]: time gain: %f %f\n", i, store->bs_TvgRx_time[i], store->bs_TvgRx_gain[i]);
 			}
 		fprintf(stderr, "dbg5       bs_nrTxSets:             %d\n", store->bs_nrTxSets);
 		if (verbose > 0)
-			for (i = 0; i < MBSYS_ATLAS_HSDS2_TX_PAR; i++) {
+			for (int i = 0; i < MBSYS_ATLAS_HSDS2_TX_PAR; i++) {
 				fprintf(stderr, "dbg5       tx[%d]: # gain ang len:    %d %f %f %f\n", i, store->bs_txBeamIndex[i],
 				        store->bs_txLevel[i], store->bs_txBeamAngle[i], store->bs_pulseLength[i]);
 			}
 		fprintf(stderr, "dbg5       bs_nrBsSets:             %d\n", store->bs_nrBsSets);
 		if (verbose > 0)
-			for (i = 0; i < MBSYS_ATLAS_HSDS2_TX_PAR; i++) {
+			for (int i = 0; i < MBSYS_ATLAS_HSDS2_TX_PAR; i++) {
 				fprintf(stderr, "dbg5       bs[%d]: # tau amp nis:   %f %d %d\n", i, store->bs_m_tau[i], store->bs_eff_ampli[i],
 				        store->bs_nis[i]);
 			}
@@ -1122,7 +1120,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* check again for broken records - these do happen!!! */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < store->tt_beam_cnt; i++) {
+		for (int i = 0; i < store->tt_beam_cnt; i++) {
 			if (store->tt_lruntime[i] > 20.0) {
 				*error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
@@ -1132,7 +1130,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* check again for broken records - these do happen!!! */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < store->tt_beam_cnt; i++) {
+		for (int i = 0; i < store->tt_beam_cnt; i++) {
 			if (store->tt_lruntime[i] > 20.0) {
 				*error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
@@ -1159,7 +1157,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 
 		/* calculate bathymetry */
-		for (i = 0; i < store->tt_beam_cnt; i++) {
+		for (int i = 0; i < store->tt_beam_cnt; i++) {
 			if (store->tt_lruntime[i] > 0.0) {
 				rr = store->start_cmean * store->tt_lruntime[i] / 2.0;
 				store->pr_bath[i] = rr * cos(angle_table[i]) + store->start_heave + store->tt_draught;
@@ -1205,7 +1203,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				read_status = 1;
 				nskip = 0;
 				while (strncmp(telegram_recv, "BROADCAST", 9) != 0 && read_status == 1) {
-					for (i = 0; i < 15; i++)
+					for (int i = 0; i < 15; i++)
 						telegram_recv[i] = telegram_recv[i + 1];
 					if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp2)) == 1)
 						nskip++;

@@ -409,7 +409,6 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char line[MBF_HS10JAMS_MAXLINE];
 	char *line_ptr;
 	int shift;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -450,7 +449,7 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && store != NULL) {
 		/* deal with comment */
 		if (line[0] == '#') {
-			for (i = 0; i < MBSYS_HS10_COMMENT; i++)
+			for (int i = 0; i < MBSYS_HS10_COMMENT; i++)
 				store->comment[i] = '\0';
 			store->kind = MB_DATA_COMMENT;
 			strncpy(store->comment, &line[2], MIN(MBSYS_HS10_COMMENT, strlen(&line[2]) - 2));
@@ -493,19 +492,19 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			shift += 5;
 
 			/* get depth */
-			for (i = 0; i < MBSYS_HS10_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_HS10_BEAMS; i++) {
 				mb_get_int(&store->depth[i], &line[shift], 5);
 				shift += 5;
 			}
 
 			/* get acrosstrack */
-			for (i = 0; i < MBSYS_HS10_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_HS10_BEAMS; i++) {
 				mb_get_int(&store->acrosstrack[i], &line[shift], 5);
 				shift += 5;
 			}
 
 			/* get amplitude */
-			for (i = 0; i < MBSYS_HS10_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_HS10_BEAMS; i++) {
 				mb_get_int(&store->amplitude[i], &line[shift], 5);
 				shift += 5;
 			}
@@ -534,7 +533,7 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       heading:          %d\n", store->heading);
 		fprintf(stderr, "dbg5       center_depth:     %d\n", store->center_depth);
 		fprintf(stderr, "dbg5       beam values (beam depth acrosstrack amplitude):\n");
-		for (i = 0; i < MBSYS_HS10_BEAMS; i++)
+		for (int i = 0; i < MBSYS_HS10_BEAMS; i++)
 			fprintf(stderr, "dbg5       %2d %5d %5d %5d\n", i, store->depth[i], store->acrosstrack[i], store->amplitude[i]);
 	}
 	else if (verbose >= 5 && status == MB_SUCCESS && store->kind == MB_DATA_COMMENT) {
@@ -561,7 +560,6 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_hs10_struct *store;
 	char line[MBF_HS10JAMS_MAXLINE];
 	int shift;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -593,7 +591,7 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       heading:          %d\n", store->heading);
 		fprintf(stderr, "dbg5       center_depth:     %d\n", store->center_depth);
 		fprintf(stderr, "dbg5       beam values (beam depth acrosstrack amplitude):\n");
-		for (i = 0; i < MBSYS_HS10_BEAMS; i++)
+		for (int i = 0; i < MBSYS_HS10_BEAMS; i++)
 			fprintf(stderr, "dbg5       %2d %5d %5d %5d\n", i, store->depth[i], store->acrosstrack[i], store->amplitude[i]);
 	}
 	else if (verbose >= 5 && store->kind == MB_DATA_COMMENT) {
@@ -604,7 +602,7 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* translate data from data storage structure */
 	if (store->kind == MB_DATA_COMMENT) {
 		/* deal with comment */
-		for (i = 0; i < MBF_HS10JAMS_MAXLINE; i++)
+		for (int i = 0; i < MBF_HS10JAMS_MAXLINE; i++)
 			line[i] = '\0';
 		line[0] = '#';
 		line[1] = '#';
@@ -618,15 +616,15 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		        store->minute, store->tenth_second, store->NorS, store->latdeg, store->latmin, store->EorW, store->londeg,
 		        store->lonmin, store->heading, store->center_depth);
 		shift = 40;
-		for (i = 0; i < MBSYS_HS10_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HS10_BEAMS; i++) {
 			sprintf(&line[shift], "%5d", store->depth[i]);
 			shift += 5;
 		}
-		for (i = 0; i < MBSYS_HS10_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HS10_BEAMS; i++) {
 			sprintf(&line[shift], "%5d", store->acrosstrack[i]);
 			shift += 5;
 		}
-		for (i = 0; i < MBSYS_HS10_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HS10_BEAMS; i++) {
 			sprintf(&line[shift], "%5d", store->amplitude[i]);
 			shift += 5;
 		}

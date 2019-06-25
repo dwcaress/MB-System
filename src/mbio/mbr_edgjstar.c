@@ -526,7 +526,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double depthofsensor, offset;
 	char **nap, *nargv[25], *string;
 	int nargc;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -656,7 +655,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(sbp->pingNum));
 				index += 4;
-				for (i = 0; i < 2; i++) {
+				for (int i = 0; i < 2; i++) {
 					mb_get_binary_short(MB_YES, &buffer[index], &(sbp->reserved1[i]));
 					index += 2;
 				}
@@ -665,7 +664,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 				mb_get_binary_short(MB_YES, &buffer[index], &(sbp->lsb2));
 				index += 2;
-				for (i = 0; i < 3; i++) {
+				for (int i = 0; i < 3; i++) {
 					mb_get_binary_short(MB_YES, &buffer[index], &(sbp->reserved2[i]));
 					index += 2;
 				}
@@ -681,13 +680,13 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 				mb_get_binary_short(MB_YES, &buffer[index], &(sbp->NMEAantennaeO));
 				index += 2;
-				for (i = 0; i < 2; i++) {
+				for (int i = 0; i < 2; i++) {
 					mb_get_binary_short(MB_YES, &buffer[index], &(sbp->reserved4[i]));
 					index += 2;
 				}
 				mb_get_binary_float(MB_YES, &buffer[index], &(sbp->kmOfPipe));
 				index += 4;
-				for (i = 0; i < 16; i++) {
+				for (int i = 0; i < 16; i++) {
 					mb_get_binary_short(MB_YES, &buffer[index], &(sbp->reserved5[i]));
 					index += 2;
 				}
@@ -697,7 +696,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 4;
 				mb_get_binary_short(MB_YES, &buffer[index], &(sbp->coordUnits));
 				index += 2;
-				for (i = 0; i < 24; i++) {
+				for (int i = 0; i < 24; i++) {
 					sbp->annotation[i] = buffer[index];
 					index++;
 				}
@@ -783,7 +782,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 				mb_get_binary_short(MB_YES, &buffer[index], &(sbp->reserved11));
 				index += 2;
-				for (i = 0; i < 6; i++) {
+				for (int i = 0; i < 6; i++) {
 					sbp->softwareVersion[i] = buffer[index];
 					index++;
 				}
@@ -832,7 +831,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				/* read the trace */
 				if (status == MB_SUCCESS && (read_status = fread(sbp->trace, trace_size, 1, mb_io_ptr->mbfp)) == 1) {
 #ifndef BYTESWAPPED
-					for (i = 0; i < shortspersample * sbp->samples; i++) {
+					for (int i = 0; i < shortspersample * sbp->samples; i++) {
 						sbp->trace[i] = mb_swap_short(sbp->trace[i]);
 						;
 					}
@@ -926,7 +925,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(ss->pingNum));
 				index += 4;
-				for (i = 0; i < 2; i++) {
+				for (int i = 0; i < 2; i++) {
 					mb_get_binary_short(MB_YES, &buffer[index], &(ss->reserved1[i]));
 					index += 2;
 				}
@@ -935,7 +934,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 				mb_get_binary_short(MB_YES, &buffer[index], &(ss->lsb2));
 				index += 2;
-				for (i = 0; i < 3; i++) {
+				for (int i = 0; i < 3; i++) {
 					mb_get_binary_short(MB_YES, &buffer[index], &(ss->reserved2[i]));
 					index += 2;
 				}
@@ -951,13 +950,13 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 				mb_get_binary_short(MB_YES, &buffer[index], &(ss->NMEAantennaeO));
 				index += 2;
-				for (i = 0; i < 2; i++) {
+				for (int i = 0; i < 2; i++) {
 					mb_get_binary_short(MB_YES, &buffer[index], &(ss->reserved4[i]));
 					index += 2;
 				}
 				mb_get_binary_float(MB_YES, &buffer[index], &(ss->kmOfPipe));
 				index += 4;
-				for (i = 0; i < 16; i++) {
+				for (int i = 0; i < 16; i++) {
 					mb_get_binary_short(MB_YES, &buffer[index], &(ss->reserved5[i]));
 					index += 2;
 				}
@@ -967,7 +966,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 4;
 				mb_get_binary_short(MB_YES, &buffer[index], &(ss->coordUnits));
 				index += 2;
-				for (i = 0; i < 24; i++) {
+				for (int i = 0; i < 24; i++) {
 					ss->annotation[i] = buffer[index];
 					index++;
 				}
@@ -1053,7 +1052,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 				mb_get_binary_short(MB_YES, &buffer[index], &(ss->reserved11));
 				index += 2;
-				for (i = 0; i < 6; i++) {
+				for (int i = 0; i < 6; i++) {
 					ss->softwareVersion[i] = buffer[index];
 					index++;
 				}
@@ -1094,7 +1093,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				/* read the trace */
 				if (status == MB_SUCCESS && (read_status = fread(ss->trace, trace_size, 1, mb_io_ptr->mbfp)) == 1) {
 #ifndef BYTESWAPPED
-					for (i = 0; i < shortspersample * ss->samples; i++) {
+					for (int i = 0; i < shortspersample * ss->samples; i++) {
 						ss->trace[i] = mb_swap_short(ss->trace[i]);
 						;
 					}
@@ -1248,7 +1247,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 4;
 				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.temperature));
 				index += 2;
-				for (i = 0; i < 10; i++) {
+				for (int i = 0; i < 10; i++) {
 					ssold_tmp.reserved2[i] = buffer[index];
 					index++;
 				}
@@ -1262,7 +1261,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
                 sbp->msb = 0;
                 sbp->lsb1 = 0;
                 sbp->lsb2 = 0;
-				for (i = 0; i < 3; i++) {
+				for (int i = 0; i < 3; i++) {
                     sbp->reserved2[0] = 0;
 				}
 				sbp->traceIDCode = 1;
@@ -1271,17 +1270,17 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				sbp->dataFormat = ssold_tmp.dataFormat;
 				sbp->NMEAantennaeR = 0;
 				sbp->NMEAantennaeO = 0;
-				for (i = 0; i < 2; i++) {
+				for (int i = 0; i < 2; i++) {
 					sbp->reserved4[i] = 0;
 				}
                 sbp->kmOfPipe = 0.0;
-				for (i = 0; i < 16; i++) {
+				for (int i = 0; i < 16; i++) {
 					sbp->reserved5[i] = 0;
 				}
 				sbp->coordX = 0;
 				sbp->coordY = 0;
 				sbp->coordUnits = 2;
-				for (i = 0; i < 24; i++) {
+				for (int i = 0; i < 24; i++) {
 					sbp->annotation[i] = 0;
 				}
 				sbp->samples = ssold_tmp.samples;
@@ -1325,7 +1324,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				sbp->ADCMax = ssold_tmp.ADCMax;
 				sbp->reserved10 = 0;
 				sbp->reserved11 = 0;
-				for (i = 0; i < 6; i++) {
+				for (int i = 0; i < 6; i++) {
 					sbp->softwareVersion[i] = 0;
 				}
 				sbp->sphericalCorrection = 0;
@@ -1356,7 +1355,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				/* read the trace */
 				if (status == MB_SUCCESS && (read_status = fread(sbp->trace, trace_size, 1, mb_io_ptr->mbfp)) == 1) {
 #ifndef BYTESWAPPED
-					for (i = 0; i < shortspersample * sbp->samples; i++) {
+					for (int i = 0; i < shortspersample * sbp->samples; i++) {
 						sbp->trace[i] = mb_swap_short(sbp->trace[i]);
 					}
 #endif
@@ -1493,7 +1492,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 4;
 				mb_get_binary_short(MB_YES, &buffer[index], &(ssold_tmp.temperature));
 				index += 2;
-				for (i = 0; i < 10; i++) {
+				for (int i = 0; i < 10; i++) {
 					ssold_tmp.reserved2[i] = buffer[index];
 					index++;
 				}
@@ -1507,7 +1506,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
                 ss->msb = 0;
                 ss->lsb1 = 0;
                 ss->lsb2 = 0;
-				for (i = 0; i < 3; i++) {
+				for (int i = 0; i < 3; i++) {
                     ss->reserved2[0] = 0;
 				}
 				ss->traceIDCode = 1;
@@ -1516,17 +1515,17 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				ss->dataFormat = ssold_tmp.dataFormat;
 				ss->NMEAantennaeR = 0;
 				ss->NMEAantennaeO = 0;
-				for (i = 0; i < 2; i++) {
+				for (int i = 0; i < 2; i++) {
 					ss->reserved4[i] = 0;
 				}
                 ss->kmOfPipe = 0.0;
-				for (i = 0; i < 16; i++) {
+				for (int i = 0; i < 16; i++) {
 					ss->reserved5[i] = 0;
 				}
 				ss->coordX = 0;
 				ss->coordY = 0;
 				ss->coordUnits = 2;
-				for (i = 0; i < 24; i++) {
+				for (int i = 0; i < 24; i++) {
 					ss->annotation[i] = 0;
 				}
 				ss->samples = ssold_tmp.samples;
@@ -1570,7 +1569,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				ss->ADCMax = ssold_tmp.ADCMax;
 				ss->reserved10 = 0;
 				ss->reserved11 = 0;
-				for (i = 0; i < 6; i++) {
+				for (int i = 0; i < 6; i++) {
 					ss->softwareVersion[i] = 0;
 				}
 				ss->sphericalCorrection = 0;
@@ -1601,7 +1600,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				/* read the trace */
 				if (status == MB_SUCCESS && (read_status = fread(ss->trace, trace_size, 1, mb_io_ptr->mbfp)) == 1) {
 #ifndef BYTESWAPPED
-					for (i = 0; i < shortspersample * ss->samples; i++) {
+					for (int i = 0; i < shortspersample * ss->samples; i++) {
 						ss->trace[i] = mb_swap_short(ss->trace[i]);
 						;
 					}
@@ -1699,7 +1698,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				mb_get_binary_int(MB_YES, &buffer[index], &(sysinfo->platformserialnumber));
 				index += 4;
 				sysinfo->sysinfosize = MIN((message.size - index), MBSYS_JSTAR_SYSINFO_MAX - 1);
-				for (i = 0; i < sysinfo->sysinfosize; i++) {
+				for (int i = 0; i < sysinfo->sysinfosize; i++) {
 					sysinfo->sysinfo[i] = buffer[index];
 					index++;
 				}
@@ -1754,7 +1753,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index++;
 				nmea->reserve[2] = buffer[index];
 				index++;
-				for (i = 0; i < message.size - 12; i++) {
+				for (int i = 0; i < message.size - 12; i++) {
 					nmea->nmea[i] = buffer[index];
 					index++;
 				}
@@ -1915,7 +1914,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 4;
 				mb_get_binary_int(MB_YES, &buffer[index], &(pressure->soundspeed));
 				index += 4;
-				for (i = 0; i < 10; i++) {
+				for (int i = 0; i < 10; i++) {
 					mb_get_binary_int(MB_YES, &buffer[index], &(pressure->reserve2[i]));
 					index += 4;
 				}
@@ -1995,7 +1994,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 				mb_get_binary_short(MB_YES, &buffer[index], &(dvl->soundspeed));
 				index += 2;
-				for (i = 0; i < 7; i++) {
+				for (int i = 0; i < 7; i++) {
 					mb_get_binary_short(MB_YES, &buffer[index], &(dvl->reserve2[i]));
 					index += 2;
 				}
@@ -2018,7 +2017,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #ifdef MBF_EDGJSTAR_DEBUG
 			fprintf(stderr, "UNKNOWN: throwing away %d bytes\n", message.size);
 #endif
-			for (i = 0; i < message.size; i++) {
+			for (int i = 0; i < message.size; i++) {
 				read_status = fread(buffer, 1, 1, mb_io_ptr->mbfp);
 			}
 			done = MB_YES;
@@ -2089,22 +2088,22 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     pingTime:                    %d\n", sbp->pingTime);
 		fprintf(stderr, "dbg5     startDepth:                  %d\n", sbp->startDepth);
 		fprintf(stderr, "dbg5     pingNum:                     %d\n", sbp->pingNum);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
             fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, sbp->reserved1[i]);
 		fprintf(stderr, "dbg5     msb:                         %d\n", sbp->msb);
 		fprintf(stderr, "dbg5     lsb1:                        %d\n", sbp->lsb1);
 		fprintf(stderr, "dbg5     lsb2:                        %d\n", sbp->lsb2);
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
             fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, sbp->reserved2[i]);
 		fprintf(stderr, "dbg5     validityFlag:                %d\n", sbp->validityFlag);
 		fprintf(stderr, "dbg5     reserved3:                   %d\n", sbp->reserved3);
 		fprintf(stderr, "dbg5     dataFormat:                  %d\n", sbp->dataFormat);
 		fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", sbp->NMEAantennaeR);
 		fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", sbp->NMEAantennaeO);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 			fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, sbp->reserved4[i]);
 		fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", sbp->kmOfPipe);
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, sbp->reserved5[i]);
 		fprintf(stderr, "dbg5     coordX:                      %d\n", sbp->coordX);
 		fprintf(stderr, "dbg5     coordY:                      %d\n", sbp->coordY);
@@ -2162,11 +2161,11 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     cableOut:                    %d\n", sbp->cableOut);
 		fprintf(stderr, "dbg5     reserved14:                  %d\n", sbp->reserved14);
 		if (sbp->dataFormat == 1) {
-			for (i = 0; i < sbp->samples; i++)
+			for (int i = 0; i < sbp->samples; i++)
 				fprintf(stderr, "dbg5     Channel[%d]: %10d %10d\n", i, sbp->trace[2 * i], sbp->trace[2 * i + 1]);
 		}
 		else {
-			for (i = 0; i < sbp->samples; i++)
+			for (int i = 0; i < sbp->samples; i++)
 				fprintf(stderr, "dbg5     Channel[%d]: %10d\n", i, sbp->trace[i]);
 		}
 	}
@@ -2195,22 +2194,22 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     pingTime:                    %d\n", ss->pingTime);
 		fprintf(stderr, "dbg5     startDepth:                  %d\n", ss->startDepth);
 		fprintf(stderr, "dbg5     pingNum:                     %d\n", ss->pingNum);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
             fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, ss->reserved1[i]);
 		fprintf(stderr, "dbg5     msb:                         %d\n", ss->msb);
 		fprintf(stderr, "dbg5     lsb1:                        %d\n", ss->lsb1);
 		fprintf(stderr, "dbg5     lsb2:                        %d\n", ss->lsb2);
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
             fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, ss->reserved2[i]);
 		fprintf(stderr, "dbg5     validityFlag:                %d\n", ss->validityFlag);
 		fprintf(stderr, "dbg5     reserved3:                   %d\n", ss->reserved3);
 		fprintf(stderr, "dbg5     dataFormat:                  %d\n", ss->dataFormat);
 		fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", ss->NMEAantennaeR);
 		fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", ss->NMEAantennaeO);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 			fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, ss->reserved4[i]);
 		fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", ss->kmOfPipe);
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, ss->reserved5[i]);
 		fprintf(stderr, "dbg5     coordX:                      %d\n", ss->coordX);
 		fprintf(stderr, "dbg5     coordY:                      %d\n", ss->coordY);
@@ -2268,11 +2267,11 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     cableOut:                    %d\n", ss->cableOut);
 		fprintf(stderr, "dbg5     reserved14:                  %d\n", ss->reserved14);
 		if (ss->dataFormat == 1) {
-			for (i = 0; i < ss->samples; i++)
+			for (int i = 0; i < ss->samples; i++)
 				fprintf(stderr, "dbg5     Channel 0[%d]: %10d %10d\n", i, ss->trace[2 * i], ss->trace[2 * i + 1]);
 		}
 		else {
-			for (i = 0; i < ss->samples; i++)
+			for (int i = 0; i < ss->samples; i++)
 				fprintf(stderr, "dbg5     Channel 0[%d]: %10d\n", i, ss->trace[i]);
 		}
 
@@ -2292,22 +2291,22 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     pingTime:                    %d\n", ss->pingTime);
 		fprintf(stderr, "dbg5     startDepth:                  %d\n", ss->startDepth);
 		fprintf(stderr, "dbg5     pingNum:                     %d\n", ss->pingNum);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
             fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, ss->reserved1[i]);
 		fprintf(stderr, "dbg5     msb:                         %d\n", ss->msb);
 		fprintf(stderr, "dbg5     lsb1:                        %d\n", ss->lsb1);
 		fprintf(stderr, "dbg5     lsb2:                        %d\n", ss->lsb2);
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
             fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, ss->reserved2[i]);
 		fprintf(stderr, "dbg5     validityFlag:                %d\n", ss->validityFlag);
 		fprintf(stderr, "dbg5     reserved3:                   %d\n", ss->reserved3);
 		fprintf(stderr, "dbg5     dataFormat:                  %d\n", ss->dataFormat);
 		fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", ss->NMEAantennaeR);
 		fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", ss->NMEAantennaeO);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 			fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, ss->reserved4[i]);
 		fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", ss->kmOfPipe);
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, ss->reserved5[i]);
 		fprintf(stderr, "dbg5     coordX:                      %d\n", ss->coordX);
 		fprintf(stderr, "dbg5     coordY:                      %d\n", ss->coordY);
@@ -2365,11 +2364,11 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     cableOut:                    %d\n", ss->cableOut);
 		fprintf(stderr, "dbg5     reserved14:                  %d\n", ss->reserved14);
 		if (ss->dataFormat == 1) {
-			for (i = 0; i < ss->samples; i++)
+			for (int i = 0; i < ss->samples; i++)
 				fprintf(stderr, "dbg5     Channel 1[%d]: %10d %10d\n", i, ss->trace[2 * i], ss->trace[2 * i + 1]);
 		}
 		else {
-			for (i = 0; i < ss->samples; i++)
+			for (int i = 0; i < ss->samples; i++)
 				fprintf(stderr, "dbg5     Channel 1[%d]: %10d\n", i, ss->trace[i]);
 		}
 	}
@@ -2462,7 +2461,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     salinity:                    %d\n", dvl->salinity);
 		fprintf(stderr, "dbg5     temperature:                 %d\n", dvl->temperature);
 		fprintf(stderr, "dbg5     soundspeed:                  %d\n", dvl->soundspeed);
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			fprintf(stderr, "dbg5     reserve2[%d]:                %d\n", i, dvl->reserve2[i]);
 	}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_CTD) {
@@ -2490,7 +2489,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     datavalidflags:              %d\n", pressure->datavalidflags);
 		fprintf(stderr, "dbg5     conductivity:                %d\n", pressure->conductivity);
 		fprintf(stderr, "dbg5     soundspeed:                  %d\n", pressure->soundspeed);
-		for (i = 0; i < 10; i++)
+		for (int i = 0; i < 10; i++)
 			fprintf(stderr, "dbg5     reserve2[%2d]:                 %d\n", i, pressure->reserve2[i]);
 	}
 	else if (status == MB_SUCCESS && verbose >= 5 &&
@@ -2569,7 +2568,6 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int write_len;
 	int shortspersample;
 	int trace_size;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 3) {
@@ -2633,22 +2631,22 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     pingTime:                    %d\n", sbp->pingTime);
 		fprintf(stderr, "dbg5     startDepth:                  %d\n", sbp->startDepth);
 		fprintf(stderr, "dbg5     pingNum:                     %d\n", sbp->pingNum);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
             fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, sbp->reserved1[i]);
 		fprintf(stderr, "dbg5     msb:                         %d\n", sbp->msb);
 		fprintf(stderr, "dbg5     lsb1:                        %d\n", sbp->lsb1);
 		fprintf(stderr, "dbg5     lsb2:                        %d\n", sbp->lsb2);
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
             fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, sbp->reserved2[i]);
 		fprintf(stderr, "dbg5     validityFlag:                %d\n", sbp->validityFlag);
 		fprintf(stderr, "dbg5     reserved3:                   %d\n", sbp->reserved3);
 		fprintf(stderr, "dbg5     dataFormat:                  %d\n", sbp->dataFormat);
 		fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", sbp->NMEAantennaeR);
 		fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", sbp->NMEAantennaeO);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 			fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, sbp->reserved4[i]);
 		fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", sbp->kmOfPipe);
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, sbp->reserved5[i]);
 		fprintf(stderr, "dbg5     coordX:                      %d\n", sbp->coordX);
 		fprintf(stderr, "dbg5     coordY:                      %d\n", sbp->coordY);
@@ -2706,11 +2704,11 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     cableOut:                    %d\n", sbp->cableOut);
 		fprintf(stderr, "dbg5     reserved14:                  %d\n", sbp->reserved14);
 		if (sbp->dataFormat == 1) {
-			for (i = 0; i < sbp->samples; i++)
+			for (int i = 0; i < sbp->samples; i++)
 				fprintf(stderr, "dbg5     Channel[%d]: %10d %10d\n", i, sbp->trace[2 * i], sbp->trace[2 * i + 1]);
 		}
 		else {
-			for (i = 0; i < sbp->samples; i++)
+			for (int i = 0; i < sbp->samples; i++)
 				fprintf(stderr, "dbg5     Channel[%d]: %10d\n", i, sbp->trace[i]);
 		}
 	}
@@ -2739,22 +2737,22 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     pingTime:                    %d\n", ss->pingTime);
 		fprintf(stderr, "dbg5     startDepth:                  %d\n", ss->startDepth);
 		fprintf(stderr, "dbg5     pingNum:                     %d\n", ss->pingNum);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
             fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, ss->reserved1[i]);
 		fprintf(stderr, "dbg5     msb:                         %d\n", ss->msb);
 		fprintf(stderr, "dbg5     lsb1:                        %d\n", ss->lsb1);
 		fprintf(stderr, "dbg5     lsb2:                        %d\n", ss->lsb2);
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
             fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, ss->reserved2[i]);
 		fprintf(stderr, "dbg5     validityFlag:                %d\n", ss->validityFlag);
 		fprintf(stderr, "dbg5     reserved3:                   %d\n", ss->reserved3);
 		fprintf(stderr, "dbg5     dataFormat:                  %d\n", ss->dataFormat);
 		fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", ss->NMEAantennaeR);
 		fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", ss->NMEAantennaeO);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 			fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, ss->reserved4[i]);
 		fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", ss->kmOfPipe);
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, ss->reserved5[i]);
 		fprintf(stderr, "dbg5     coordX:                      %d\n", ss->coordX);
 		fprintf(stderr, "dbg5     coordY:                      %d\n", ss->coordY);
@@ -2812,11 +2810,11 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     cableOut:                    %d\n", ss->cableOut);
 		fprintf(stderr, "dbg5     reserved14:                  %d\n", ss->reserved14);
 		if (ss->dataFormat == 1) {
-			for (i = 0; i < ss->samples; i++)
+			for (int i = 0; i < ss->samples; i++)
 				fprintf(stderr, "dbg5     Channel 0[%d]: %10d %10d\n", i, ss->trace[2 * i], ss->trace[2 * i + 1]);
 		}
 		else {
-			for (i = 0; i < ss->samples; i++)
+			for (int i = 0; i < ss->samples; i++)
 				fprintf(stderr, "dbg5     Channel 0[%d]: %10d\n", i, ss->trace[i]);
 		}
 
@@ -2836,22 +2834,22 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     pingTime:                    %d\n", ss->pingTime);
 		fprintf(stderr, "dbg5     startDepth:                  %d\n", ss->startDepth);
 		fprintf(stderr, "dbg5     pingNum:                     %d\n", ss->pingNum);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
             fprintf(stderr, "dbg5     reserved1[%d]:               %d\n", i, ss->reserved1[i]);
 		fprintf(stderr, "dbg5     msb:                         %d\n", ss->msb);
 		fprintf(stderr, "dbg5     lsb1:                        %d\n", ss->lsb1);
 		fprintf(stderr, "dbg5     lsb2:                        %d\n", ss->lsb2);
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
             fprintf(stderr, "dbg5     reserved2[%d]:               %d\n", i, ss->reserved2[i]);
 		fprintf(stderr, "dbg5     validityFlag:                %d\n", ss->validityFlag);
 		fprintf(stderr, "dbg5     reserved3:                   %d\n", ss->reserved3);
 		fprintf(stderr, "dbg5     dataFormat:                  %d\n", ss->dataFormat);
 		fprintf(stderr, "dbg5     NMEAantennaeR:               %d\n", ss->NMEAantennaeR);
 		fprintf(stderr, "dbg5     NMEAantennaeO:               %d\n", ss->NMEAantennaeO);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 			fprintf(stderr, "dbg5     reserved4[%d]:               %d\n", i, ss->reserved4[i]);
 		fprintf(stderr, "dbg5     kmOfPipe:                    %f\n", ss->kmOfPipe);
-		for (i = 0; i < 16; i++)
+		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5     reserved5[%d]:               %d\n", i, ss->reserved5[i]);
 		fprintf(stderr, "dbg5     coordX:                      %d\n", ss->coordX);
 		fprintf(stderr, "dbg5     coordY:                      %d\n", ss->coordY);
@@ -2909,11 +2907,11 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     cableOut:                    %d\n", ss->cableOut);
 		fprintf(stderr, "dbg5     reserved14:                  %d\n", ss->reserved14);
 		if (ss->dataFormat == 1) {
-			for (i = 0; i < ss->samples; i++)
+			for (int i = 0; i < ss->samples; i++)
 				fprintf(stderr, "dbg5     Channel 1[%d]: %10d %10d\n", i, ss->trace[2 * i], ss->trace[2 * i + 1]);
 		}
 		else {
-			for (i = 0; i < ss->samples; i++)
+			for (int i = 0; i < ss->samples; i++)
 				fprintf(stderr, "dbg5     Channel 1[%d]: %10d\n", i, ss->trace[i]);
 		}
 	}
@@ -3006,7 +3004,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     salinity:                    %d\n", dvl->salinity);
 		fprintf(stderr, "dbg5     temperature:                 %d\n", dvl->temperature);
 		fprintf(stderr, "dbg5     soundspeed:                  %d\n", dvl->soundspeed);
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			fprintf(stderr, "dbg5     reserve2[%d]:                %d\n", i, dvl->reserve2[i]);
 	}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_CTD) {
@@ -3034,7 +3032,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     datavalidflags:              %d\n", pressure->datavalidflags);
 		fprintf(stderr, "dbg5     conductivity:                %d\n", pressure->conductivity);
 		fprintf(stderr, "dbg5     soundspeed:                  %d\n", pressure->soundspeed);
-		for (i = 0; i < 10; i++)
+		for (int i = 0; i < 10; i++)
 			fprintf(stderr, "dbg5     reserve2[%2d]:                 %d\n", i, pressure->reserve2[i]);
 	}
 	else if (status == MB_SUCCESS && verbose >= 5 &&
@@ -3178,7 +3176,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_put_binary_int(MB_YES, sbp->pingNum, &buffer[index]);
 		index += 4;
-		for (i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; i++) {
 			mb_put_binary_short(MB_YES, sbp->reserved1[i], &buffer[index]);
 			index += 2;
 		}
@@ -3188,7 +3186,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 2;
 		mb_put_binary_short(MB_YES, sbp->lsb2, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++) {
 			mb_put_binary_short(MB_YES, sbp->reserved2[i], &buffer[index]);
 			index += 2;
 		}
@@ -3204,13 +3202,13 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 2;
 		mb_put_binary_short(MB_YES, sbp->NMEAantennaeO, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; i++) {
 			mb_put_binary_short(MB_YES, sbp->reserved4[i], &buffer[index]);
 			index += 2;
 		}
 		mb_put_binary_float(MB_YES, sbp->kmOfPipe, &buffer[index]);
 		index += 4;
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			mb_put_binary_short(MB_YES, sbp->reserved5[i], &buffer[index]);
 			index += 2;
 		}
@@ -3220,7 +3218,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_put_binary_short(MB_YES, sbp->coordUnits, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 24; i++) {
+		for (int i = 0; i < 24; i++) {
 			buffer[index] = sbp->annotation[i];
 			index++;
 		}
@@ -3306,7 +3304,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 2;
 		mb_put_binary_short(MB_YES, sbp->reserved11, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 6; i++) {
+		for (int i = 0; i < 6; i++) {
 			buffer[index] = sbp->softwareVersion[i];
 			index++;
 		}
@@ -3341,7 +3339,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			shortspersample = 2;
 		else
 			shortspersample = 1;
-		for (i = 0; i < shortspersample * sbp->samples; i++) {
+		for (int i = 0; i < shortspersample * sbp->samples; i++) {
 			sbp->trace[i] = mb_swap_short(sbp->trace[i]);
 			;
 		}
@@ -3402,7 +3400,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_put_binary_int(MB_YES, ss->pingNum, &buffer[index]);
 		index += 4;
-		for (i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; i++) {
 			mb_put_binary_short(MB_YES, ss->reserved1[i], &buffer[index]);
 			index += 2;
 		}
@@ -3412,7 +3410,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 2;
 		mb_put_binary_short(MB_YES, ss->lsb2, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++) {
 			mb_put_binary_short(MB_YES, ss->reserved2[i], &buffer[index]);
 			index += 2;
 		}
@@ -3428,13 +3426,13 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 2;
 		mb_put_binary_short(MB_YES, ss->NMEAantennaeO, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; i++) {
 			mb_put_binary_short(MB_YES, ss->reserved4[i], &buffer[index]);
 			index += 2;
 		}
 		mb_put_binary_float(MB_YES, ss->kmOfPipe, &buffer[index]);
 		index += 4;
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			mb_put_binary_short(MB_YES, ss->reserved5[i], &buffer[index]);
 			index += 2;
 		}
@@ -3444,7 +3442,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_put_binary_short(MB_YES, ss->coordUnits, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 24; i++) {
+		for (int i = 0; i < 24; i++) {
 			buffer[index] = ss->annotation[i];
 			index++;
 		}
@@ -3530,7 +3528,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 2;
 		mb_put_binary_short(MB_YES, ss->reserved11, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 6; i++) {
+		for (int i = 0; i < 6; i++) {
 			buffer[index] = ss->softwareVersion[i];
 			index++;
 		}
@@ -3565,7 +3563,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			shortspersample = 2;
 		else
 			shortspersample = 1;
-		for (i = 0; i < shortspersample * ss->samples; i++) {
+		for (int i = 0; i < shortspersample * ss->samples; i++) {
 			ss->trace[i] = mb_swap_short(ss->trace[i]);
 			;
 		}
@@ -3623,7 +3621,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_put_binary_int(MB_YES, ss->pingNum, &buffer[index]);
 		index += 4;
-		for (i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; i++) {
 			mb_put_binary_short(MB_YES, ss->reserved1[i], &buffer[index]);
 			index += 2;
 		}
@@ -3633,7 +3631,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 2;
 		mb_put_binary_short(MB_YES, ss->lsb2, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++) {
 			mb_put_binary_short(MB_YES, ss->reserved2[i], &buffer[index]);
 			index += 2;
 		}
@@ -3649,13 +3647,13 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 2;
 		mb_put_binary_short(MB_YES, ss->NMEAantennaeO, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; i++) {
 			mb_put_binary_short(MB_YES, ss->reserved4[i], &buffer[index]);
 			index += 2;
 		}
 		mb_put_binary_float(MB_YES, ss->kmOfPipe, &buffer[index]);
 		index += 4;
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			mb_put_binary_short(MB_YES, ss->reserved5[i], &buffer[index]);
 			index += 2;
 		}
@@ -3665,7 +3663,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_put_binary_short(MB_YES, ss->coordUnits, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 24; i++) {
+		for (int i = 0; i < 24; i++) {
 			buffer[index] = ss->annotation[i];
 			index++;
 		}
@@ -3751,7 +3749,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 2;
 		mb_put_binary_short(MB_YES, ss->reserved11, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 6; i++) {
+		for (int i = 0; i < 6; i++) {
 			buffer[index] = ss->softwareVersion[i];
 			index++;
 		}
@@ -3786,7 +3784,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			shortspersample = 2;
 		else
 			shortspersample = 1;
-		for (i = 0; i < shortspersample * ss->samples; i++) {
+		for (int i = 0; i < shortspersample * ss->samples; i++) {
 			ss->trace[i] = mb_swap_short(ss->trace[i]);
 			;
 		}
@@ -3962,7 +3960,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 2;
 		mb_put_binary_short(MB_YES, dvl->soundspeed, &buffer[index]);
 		index += 2;
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			mb_put_binary_short(MB_YES, dvl->reserve2[i], &buffer[index]);
 			index += 2;
 		}
@@ -4019,7 +4017,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index++;
 		buffer[index] = nmea->reserve[2];
 		index++;
-		for (i = 0; i < (nmea->message.size - 12); i++) {
+		for (int i = 0; i < (nmea->message.size - 12); i++) {
 			buffer[index] = nmea->nmea[i];
 			index++;
 		}
@@ -4086,7 +4084,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_put_binary_int(MB_YES, pressure->soundspeed, &buffer[index]);
 		index += 4;
-		for (i = 0; i < 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			mb_put_binary_int(MB_YES, pressure->reserve2[i], &buffer[index]);
 			index += 4;
 		}
@@ -4141,7 +4139,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_put_binary_int(MB_YES, sysinfo->platformserialnumber, &buffer[index]);
 		index += 4;
-		for (i = 0; i < sysinfo->sysinfosize; i++) {
+		for (int i = 0; i < sysinfo->sysinfosize; i++) {
 			buffer[index] = sysinfo->sysinfo[i];
 		}
 

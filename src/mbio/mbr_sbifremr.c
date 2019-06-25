@@ -302,7 +302,6 @@ int mbr_rt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_sbifremr_struct *data;
 	struct mbsys_sb_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -346,7 +345,7 @@ int mbr_rt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->sec = data->sec;
 
 		/* depths and distances */
-		for (i = 0; i < MBSYS_SB_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 			store->dist[i] = data->dist[i];
 			store->deph[i] = data->deph[i];
 		}
@@ -380,7 +379,6 @@ int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_sbifremr_struct *data;
 	struct mbsys_sb_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -415,7 +413,7 @@ int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			data->sec = store->sec;
 
 			/* depths and distances */
-			for (i = 0; i < MBSYS_SB_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 				data->dist[i] = store->dist[i];
 				data->deph[i] = store->deph[i];
 			}
@@ -489,7 +487,6 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int beam_port, beam_starboard;
 	double denom;
 	double dx, dy, distance;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -507,7 +504,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mbfp = mb_io_ptr->mbfp;
 
 	/* initialize beams to zeros */
-	for (i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++) {
+	for (int i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++) {
 		data->deph[i] = 0;
 		data->dist[i] = 0;
 	}
@@ -623,7 +620,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		/* find port-most and starboard-most beams */
 		beam_port = MBF_SBIFREMR_NUM_BEAMS;
 		beam_starboard = -1;
-		for (i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++) {
+		for (int i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++) {
 			if (data->deph[i] != 0) {
 				if (beam_port > i)
 					beam_port = i;
@@ -702,7 +699,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 		/* do acrosstrack distances */
 		if (status == MB_SUCCESS) {
-			for (i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++)
+			for (int i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++)
 				if (data->deph[i] != 0) {
 					dx = (data->lon[i] - data->lon[center]) / mtodeglon;
 					dy = (data->lat[i] - data->lat[center]) / mtodeglat;
@@ -744,7 +741,6 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 	int time_i[7], time_j[5];
 	double mtodeglon, mtodeglat;
 	double headingx, headingy;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -811,7 +807,7 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 		headingy = cos(heading * DTR);
 
 		/* write beams */
-		for (i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++) {
+		for (int i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++) {
 			if (data->deph[i] != 0) {
 				/* increment sounding counter */
 				sounding_num_save++;

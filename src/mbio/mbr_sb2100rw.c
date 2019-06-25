@@ -323,7 +323,6 @@ int mbr_zero_sb2100rw(int verbose, void *data_ptr, int *error) {
 	char *function_name = "mbr_zero_sb2100rw";
 	int status = MB_SUCCESS;
 	struct mbf_sb2100rw_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -354,7 +353,7 @@ int mbr_zero_sb2100rw(int verbose, void *data_ptr, int *error) {
 		data->pitch_bias = 0;
 		data->ship_draft = 0;
 		data->num_svp = 0;
-		for (i = 0; i < MBF_SB2100RW_MAXVEL; i++) {
+		for (int i = 0; i < MBF_SB2100RW_MAXVEL; i++) {
 			data->vdepth[i] = 0;
 			data->velocity[i] = 0;
 		}
@@ -372,10 +371,10 @@ int mbr_zero_sb2100rw(int verbose, void *data_ptr, int *error) {
 		/* DR header info */
 		data->num_beams = 0;
 		data->svp_corr_beams = '0';
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 			data->spare_dr[i] = ' ';
 		data->num_algorithms = 1;
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			data->algorithm_order[i] = ' ';
 
 		/* SS header info */
@@ -407,7 +406,7 @@ int mbr_zero_sb2100rw(int verbose, void *data_ptr, int *error) {
 		data->heading_36khz = 0;
 
 		/* formed beam data (DR) */
-		for (i = 0; i < MBF_SB2100RW_BEAMS; i++) {
+		for (int i = 0; i < MBF_SB2100RW_BEAMS; i++) {
 			data->source[i] = 'U';
 			data->travel_time[i] = 0;
 			data->angle_across[i] = 0;
@@ -422,7 +421,7 @@ int mbr_zero_sb2100rw(int verbose, void *data_ptr, int *error) {
 		}
 
 		/* sidescan data (SS) */
-		for (i = 0; i < MBF_SB2100RW_PIXELS; i++) {
+		for (int i = 0; i < MBF_SB2100RW_PIXELS; i++) {
 			data->amplitude_ss[i] = 0;
 			data->alongtrack_ss[i] = 0;
 		}
@@ -454,7 +453,6 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_sb2100rw_struct *data;
 	struct mbsys_sb2100_struct *store;
 	double scale;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -498,7 +496,7 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->offset_y = 0.0;
 			store->offset_z = 0.0;
 			store->num_svp = data->num_svp;
-			for (i = 0; i < MBF_SB2100RW_MAXVEL; i++) {
+			for (int i = 0; i < MBF_SB2100RW_MAXVEL; i++) {
 				store->svp[i].depth = 0.01 * data->vdepth[i];
 				store->svp[i].velocity = 0.01 * data->velocity[i];
 			}
@@ -527,10 +525,10 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* DR header info */
 			store->nbeams = data->num_beams;
 			store->svp_correction = data->svp_corr_beams;
-			for (i = 0; i < 2; i++)
+			for (int i = 0; i < 2; i++)
 				store->spare_dr[i] = data->spare_dr[i];
 			store->num_algorithms = data->num_algorithms;
-			for (i = 0; i < 4; i++)
+			for (int i = 0; i < 4; i++)
 				store->algorithm_order[i] = data->algorithm_order[i];
 
 			/* transmit parameters and navigation (DR and SS) */
@@ -559,7 +557,7 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				scale = 0.1;
 			else if (data->range_scale == 'D')
 				scale = 1.0;
-			for (i = 0; i < MBF_SB2100RW_BEAMS; i++) {
+			for (int i = 0; i < MBF_SB2100RW_BEAMS; i++) {
 				store->beams[i].depth = scale * data->depth[i];
 				store->beams[i].acrosstrack = scale * data->acrosstrack_beam[i];
 				store->beams[i].alongtrack = scale * data->alongtrack_beam[i];
@@ -586,7 +584,7 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->spare_ss = data->spare_ss;
 
 			/* sidescan data (SS) */
-			for (i = 0; i < MBF_SB2100RW_PIXELS; i++) {
+			for (int i = 0; i < MBF_SB2100RW_PIXELS; i++) {
 				store->pixels[i].amplitude = data->amplitude_ss[i];
 				store->pixels[i].alongtrack = scale * data->alongtrack_ss[i];
 			}
@@ -618,7 +616,6 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_sb2100_struct *store;
 	double scale;
 	double depth_max, across_max, along_max;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -654,7 +651,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			data->pitch_bias = 100 * store->pitch_bias;
 			data->ship_draft = 100 * store->ship_draft;
 			data->num_svp = store->num_svp;
-			for (i = 0; i < MBF_SB2100RW_MAXVEL; i++) {
+			for (int i = 0; i < MBF_SB2100RW_MAXVEL; i++) {
 				data->vdepth[i] = 100 * store->svp[i].depth;
 				data->velocity[i] = 100 * store->svp[i].velocity;
 			}
@@ -682,10 +679,10 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* DR header info */
 			data->num_beams = store->nbeams;
 			data->svp_corr_beams = store->svp_correction;
-			for (i = 0; i < 2; i++)
+			for (int i = 0; i < 2; i++)
 				data->spare_dr[i] = store->spare_dr[i];
 			data->num_algorithms = store->num_algorithms;
-			for (i = 0; i < 4; i++)
+			for (int i = 0; i < 4; i++)
 				data->algorithm_order[i] = store->algorithm_order[i];
 
 			/* transmit parameters and navigation (DR and SS) */
@@ -742,7 +739,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				depth_max = 0.0;
 				across_max = 0.0;
 				along_max = 0.0;
-				for (i = 0; i < MBF_SB2100RW_BEAMS; i++) {
+				for (int i = 0; i < MBF_SB2100RW_BEAMS; i++) {
 					if (store->beams[i].depth != 0.0 && store->beams[i].quality == ' ') {
 						depth_max = MAX(depth_max, fabs(store->beams[i].depth));
 						across_max = MAX(across_max, fabs(store->beams[i].acrosstrack));
@@ -762,7 +759,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					data->range_scale = 'S';
 				}
 			}
-			for (i = 0; i < MBF_SB2100RW_BEAMS; i++) {
+			for (int i = 0; i < MBF_SB2100RW_BEAMS; i++) {
 				data->depth[i] = store->beams[i].depth / scale;
 				data->acrosstrack_beam[i] = store->beams[i].acrosstrack / scale;
 				data->alongtrack_beam[i] = store->beams[i].alongtrack / scale;
@@ -797,7 +794,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->spare_ss = data->spare_ss;
 
 			/* sidescan data (SS) */
-			for (i = 0; i < MBF_SB2100RW_PIXELS; i++) {
+			for (int i = 0; i < MBF_SB2100RW_PIXELS; i++) {
 				data->amplitude_ss[i] = store->pixels[i].amplitude;
 				data->alongtrack_ss[i] = store->pixels[i].alongtrack / scale;
 			}
@@ -960,7 +957,6 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 int mbr_sb2100rw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *error) {
 	char *function_name = "mbr_sb2100rw_rd_label";
 	int status = MB_SUCCESS;
-	int i, j;
 	char *label;
 	int icmp;
 
@@ -978,7 +974,7 @@ int mbr_sb2100rw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *e
 	/* see if we just encountered an identifier record */
 	if (status == MB_SUCCESS) {
 		*type = MBF_SB2100RW_RAW_LINE;
-		for (i = 1; i < MBF_SB2100RW_RECORDS; i++) {
+		for (int i = 1; i < MBF_SB2100RW_RECORDS; i++) {
 			icmp = strncmp(line, mbf_sb2100rw_labels[i], 8);
 			if (icmp == 0)
 				*type = i;
@@ -987,8 +983,8 @@ int mbr_sb2100rw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *e
 		/* if it looks like a raw line, check for up to
 		   four lost bytes */
 		if (*type == MBF_SB2100RW_RAW_LINE)
-			for (i = 1; i < MBF_SB2100RW_RECORDS; i++)
-				for (j = 1; j < 5; j++) {
+			for (int i = 1; i < MBF_SB2100RW_RECORDS; i++)
+				for (int j = 1; j < 5; j++) {
 					label = mbf_sb2100rw_labels[i];
 					icmp = strncmp(line, &label[j], 8 - j);
 					if (icmp == 0)
@@ -1074,7 +1070,6 @@ int mbr_sb2100rw_rd_pr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 	char *function_name = "mbr_sb2100rw_rd_pr";
 	int status = MB_SUCCESS;
 	char line[MBF_SB2100RW_MAXLINE];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1112,7 +1107,7 @@ int mbr_sb2100rw_rd_pr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 	}
 
 	/* read and parse data from other lines of record */
-	for (i = 0; i < data->num_svp; i++) {
+	for (int i = 0; i < data->num_svp; i++) {
 		if ((status = mbr_sb2100rw_read_line(verbose, mbfp, 1, line, error)) == MB_SUCCESS) {
 			mb_get_int(&(data->vdepth[i]), line, 7);
 			mb_get_int(&(data->velocity[i]), line + 7, 6);
@@ -1133,7 +1128,7 @@ int mbr_sb2100rw_rd_pr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 		fprintf(stderr, "dbg5       num_svp:          %d\n", data->num_svp);
 		fprintf(stderr, "dbg5       ship_draft:       %d\n", data->ship_draft);
 		fprintf(stderr, "dbg5       Sound Velocity Profile:\n");
-		for (i = 0; i < data->num_svp; i++)
+		for (int i = 0; i < data->num_svp; i++)
 			fprintf(stderr, "dbg5       %d  depth:%d  velocity:%d\n", i, data->vdepth[i], data->velocity[i]);
 	}
 
@@ -1198,7 +1193,6 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 	int shift;
 	char ew, ns;
 	int degrees, minutes;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1240,7 +1234,7 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 		data->frequency[0] = line[47];
 		data->frequency[1] = line[48];
 		mb_get_int(&(data->heave), line + 49, 6);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 			data->spare_dr[i] = line[55 + i];
 		data->range_scale = line[57];
 		mb_get_int(&(data->surface_sound_velocity), line + 58, 6);
@@ -1273,7 +1267,7 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 
 		/* now get last things in header */
 		mb_get_int(&(data->num_algorithms), line + shift, 1);
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			data->algorithm_order[i] = line[1 + shift + i];
 	}
 
@@ -1293,7 +1287,7 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 		fprintf(stderr, "dbg5       frequency:        %c%c\n", data->frequency[0], data->frequency[1]);
 		fprintf(stderr, "dbg5       heave:            %d\n", data->heave);
 		fprintf(stderr, "dbg5       spare:            ");
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 			fprintf(stderr, "%c", data->spare_dr[i]);
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       range_scale:      %c\n", data->range_scale);
@@ -1314,14 +1308,14 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 		fprintf(stderr, "dbg5       heading_36khz:    %d\n", data->heading_36khz);
 		fprintf(stderr, "dbg5       num_algorithms:   %d\n", data->num_algorithms);
 		fprintf(stderr, "dbg5       algorithm_order:  ");
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			fprintf(stderr, "%c", data->algorithm_order[i]);
 		fprintf(stderr, "\n");
 	}
 
 	/* read and parse data from subsequent lines of record
 	    - one line per beam */
-	for (i = 0; i < data->num_beams; i++) {
+	for (int i = 0; i < data->num_beams; i++) {
 		if ((status = mbr_sb2100rw_read_line(verbose, mbfp, 1, line, error)) == MB_SUCCESS) {
 			data->source[i] = line[0];
 			mb_get_int(&(data->travel_time[i]), line + 1, 5);
@@ -1362,7 +1356,7 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "dbg5       beam src tt angle angfor depth xtrack ltrack amp sig2noise echo quality\n");
-		for (i = 0; i < data->num_beams; i++) {
+		for (int i = 0; i < data->num_beams; i++) {
 			fprintf(stderr, "dbg5       %3d %c %5d %6d %5d %5d %6d %6d %3d %2d %3d %c\n", i, data->source[i],
 			        data->travel_time[i], data->angle_across[i], data->angle_forward[i], data->depth[i],
 			        data->acrosstrack_beam[i], data->alongtrack_beam[i], data->amplitude_beam[i], data->signal_to_noise[i],
@@ -1392,7 +1386,6 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 	char *char_ptr;
 	short *read_ss_ptr;
 	int degrees, minutes;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1538,7 +1531,7 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 	/* get the data */
 	if (status == MB_SUCCESS) {
 		read_ss_ptr = (short *)read_ss;
-		for (i = 0; i < data->num_pixels; i++) {
+		for (int i = 0; i < data->num_pixels; i++) {
 /* deal with byte swapping if necessary */
 #ifdef BYTESWAPPED
 			data->amplitude_ss[i] = (int)mb_swap_short(read_ss[2 * i]);
@@ -1553,7 +1546,7 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "dbg5       beam amp_ss ltrack\n");
-		for (i = 0; i < data->num_pixels; i++) {
+		for (int i = 0; i < data->num_pixels; i++) {
 			fprintf(stderr, "dbg5       %3d %6d %6d\n", i, data->amplitude_ss[i], data->alongtrack_ss[i]);
 		}
 	}
@@ -1747,7 +1740,6 @@ int mbr_sb2100rw_wr_pr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	char *function_name = "mbr_sb2100rw_wr_pr";
 	int status = MB_SUCCESS;
 	struct mbf_sb2100rw_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1775,7 +1767,7 @@ int mbr_sb2100rw_wr_pr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg5       ship_draft:       %d\n", data->ship_draft);
 		fprintf(stderr, "dbg5       num_svp:          %d\n", data->num_svp);
 		fprintf(stderr, "dbg5       Sound Velocity Profile:\n");
-		for (i = 0; i < data->num_svp; i++)
+		for (int i = 0; i < data->num_svp; i++)
 			fprintf(stderr, "dbg5       %d  depth:%d  velocity:%d\n", i, data->vdepth[i], data->velocity[i]);
 	}
 
@@ -1797,7 +1789,7 @@ int mbr_sb2100rw_wr_pr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		status = fprintf(mbfp, "\r\n");
 
 		/* output the second line */
-		for (i = 0; i < data->num_svp; i++) {
+		for (int i = 0; i < data->num_svp; i++) {
 			status = fprintf(mbfp, "%7.7d", data->vdepth[i]);
 			status = fprintf(mbfp, "%6.6d", data->velocity[i]);
 			status = fprintf(mbfp, "\r\n");
@@ -1886,7 +1878,6 @@ int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	struct mbf_sb2100rw_struct *data;
 	double degrees;
 	int idegrees, minutes;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1916,13 +1907,13 @@ int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg5       frequency:        %c%c\n", data->frequency[0], data->frequency[1]);
 		fprintf(stderr, "dbg5       heave:            %d\n", data->heave);
 		fprintf(stderr, "dbg5       spare:            ");
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 			fprintf(stderr, "%c", data->spare_dr[i]);
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       range_scale:      %c\n", data->range_scale);
 		fprintf(stderr, "dbg5       num_algorithms:   %d\n", data->num_algorithms);
 		fprintf(stderr, "dbg5       algorithm_order:  ");
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			fprintf(stderr, "%c", data->algorithm_order[i]);
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       ping_gain_12khz:  %d\n", data->ping_gain_12khz);
@@ -1941,7 +1932,7 @@ int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg5       ssv_source:       %c\n", data->ssv_source);
 		fprintf(stderr, "dbg5       depth_gate_mode:  %c\n", data->depth_gate_mode);
 		fprintf(stderr, "dbg5       beam src tt angle angfor depth xtrack ltrack amp sig2noise echo quality\n");
-		for (i = 0; i < data->num_beams; i++) {
+		for (int i = 0; i < data->num_beams; i++) {
 			fprintf(stderr, "dbg5       %3d %c %5d %6d %5d %5d %6d %6d %3d %2d %3d %c\n", i, data->source[i],
 			        data->travel_time[i], data->angle_across[i], data->angle_forward[i], data->depth[i],
 			        data->acrosstrack_beam[i], data->alongtrack_beam[i], data->amplitude_beam[i], data->signal_to_noise[i],
@@ -1994,7 +1985,7 @@ int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		status = fprintf(mbfp, "%c", data->svp_corr_beams);
 		status = fprintf(mbfp, "%c%c", data->frequency[0], data->frequency[1]);
 		status = fprintf(mbfp, "%+06d", data->heave);
-		for (i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 			status = fprintf(mbfp, "%c", data->spare_dr[i]);
 		status = fprintf(mbfp, "%c", data->range_scale);
 		status = fprintf(mbfp, "%6.6d", data->surface_sound_velocity);
@@ -2017,12 +2008,12 @@ int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 			status = fprintf(mbfp, "%6.6d", data->heading_36khz);
 		}
 		status = fprintf(mbfp, "%1d", data->num_algorithms);
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			status = fprintf(mbfp, "%c", data->algorithm_order[i]);
 		status = fprintf(mbfp, "\r\n");
 
 		/* output a line for each beam */
-		for (i = 0; i < data->num_beams; i++) {
+		for (int i = 0; i < data->num_beams; i++) {
 			if (data->quality[i] == '0') {
 				status = fprintf(mbfp, "                                          0\r\n");
 			}
@@ -2073,7 +2064,6 @@ int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	short *write_ss_ptr;
 	double degrees;
 	int idegrees, minutes;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2127,7 +2117,7 @@ int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg5       roll_36khz:       %d\n", data->roll_36khz);
 		fprintf(stderr, "dbg5       heading_36khz:    %d\n", data->heading_36khz);
 		fprintf(stderr, "dbg5       beam amp_ss ltrack\n");
-		for (i = 0; i < data->num_pixels; i++) {
+		for (int i = 0; i < data->num_pixels; i++) {
 			fprintf(stderr, "dbg5       %3d %6d %6d\n", i, data->amplitude_ss[i], data->alongtrack_ss[i]);
 		}
 	}
@@ -2216,7 +2206,7 @@ int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 
 		/* construct and write out sidescan data */
 		write_ss_ptr = (short *)write_ss;
-		for (i = 0; i < data->num_pixels; i++) {
+		for (int i = 0; i < data->num_pixels; i++) {
 /* deal with byte swapping if necessary */
 #ifdef BYTESWAPPED
 			write_ss[2 * i] = mb_swap_short((unsigned short)data->amplitude_ss[i]);
