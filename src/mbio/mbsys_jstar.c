@@ -281,7 +281,6 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 	int jheading = 0;
 	int jaltitude = 0;
 	int jattitude = 0;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -336,7 +335,7 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 		fprintf(stderr, "dbg2       attitude_pitch:             %p\n", pars->attitude_pitch);
 		fprintf(stderr, "dbg2       attitude_heave:             %p\n", pars->attitude_heave);
 		fprintf(stderr, "dbg2       n_kluge:                    %d\n", pars->n_kluge);
-		for (i = 0; i < pars->n_kluge; i++)
+		for (int i = 0; i < pars->n_kluge; i++)
 			fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
 	}
 
@@ -586,7 +585,6 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	double range, altitude;
 	double weight;
 	int istart, jstart;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -676,11 +674,11 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%4d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -754,7 +752,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		// fprintf(stderr,"rawpixelsize:%f pixelsize:%f altitude:%f\n", rawpixelsize,pixelsize,altitude);
 
 		/* zero the array */
-		for (i = 0; i < *nss; i++) {
+		for (int i = 0; i < *nss; i++) {
 			ss[i] = 0.0;
 			range = altitude + fabs(pixelsize * (i - *nss / 2));
 			ssacrosstrack[i] = sqrt(range * range - altitude * altitude);
@@ -772,9 +770,9 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		/*fprintf(stderr, "Subsystem: %d Weights: %d %f ",ssport->message.subsystem,ssport->weightingFactor,weight);*/
 		jstart = *nss / 2;
 		/*fprintf(stderr,"Port istart:%d of %d    jstart:%d of %d\n",istart,ssport->samples,jstart,*nss);*/
-		for (i = istart; i < ssport->samples; i++) {
+		for (int i = istart; i < ssport->samples; i++) {
 			range = rawpixelsize * (i + ssport->startDepth);
-			j = jstart - (int)((i - istart) * rawpixelsize / pixelsize);
+			const int j = jstart - (int)((i - istart) * rawpixelsize / pixelsize);
 			ss[j] += ssport->trace[i] / weight;
 			ssalongtrack[j] += 1.0;
 			/*fprintf(stderr,"Binning Port: i:%d j:%d ss:%f\n",i,j,ss[j]/ssalongtrack[j]);*/
@@ -783,16 +781,16 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		weight = exp(MB_LN_2 * ((double)ssstbd->weightingFactor));
 		/*fprintf(stderr, "   %d %f\n",ssstbd->weightingFactor,weight);*/
 		/*fprintf(stderr,"Stbd istart:%d of %d    jstart:%d of %d\n",istart,ssstbd->samples,jstart,*nss);*/
-		for (i = istart; i < ssstbd->samples; i++) {
+		for (int i = istart; i < ssstbd->samples; i++) {
 			range = rawpixelsize * (i + ssstbd->startDepth);
-			j = jstart + (int)((i - istart) * rawpixelsize / pixelsize);
+			const int j = jstart + (int)((i - istart) * rawpixelsize / pixelsize);
 			ss[j] += ssstbd->trace[i] / weight;
 			ssalongtrack[j] += 1.0;
 			/*fprintf(stderr,"Binning Stbd: i:%d j:%d ss:%f\n",i,j,ss[j]/ssalongtrack[j]);*/
 		}
 
 		/* average the data in the bins */
-		for (i = 0; i < *nss; i++) {
+		for (int i = 0; i < *nss; i++) {
 			if (ss[i] > 0.0 && ssalongtrack[i] > 0.0) {
 				ss[i] /= ssalongtrack[i];
 				ssalongtrack[i] = 0.0;
@@ -801,7 +799,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 				ss[i] = MB_SIDESCAN_NULL;
 			}
 		}
-		for (i = *nss; i < MBSYS_JSTAR_PIXELS_MAX; i++) {
+		for (int i = *nss; i < MBSYS_JSTAR_PIXELS_MAX; i++) {
 			ss[i] = MB_SIDESCAN_NULL;
 		}
 
@@ -824,11 +822,11 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%4d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -875,7 +873,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && (*kind == MB_DATA_DATA || *kind == MB_DATA_SIDESCAN2)) {
 		fprintf(stderr, "dbg2       nbath:         %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%4d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
 	}
 	if (verbose >= 2) {
@@ -903,7 +901,6 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	int istart, jstart, jxtrackmax;
 	int shortspersample;
 	int nsamples, trace_size;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -931,16 +928,16 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_SIDESCAN2)) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%4d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        amp[%d]: %f\n", i, amp[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        ss[%d]: %f    ssdist[%d]: %f\n", i, ss[i], i, ssacrosstrack[i]);
 	}
 	if (verbose >= 2 && kind == MB_DATA_COMMENT) {
@@ -1094,7 +1091,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		pixelsize = 2.0 * altitude / nss;
 		nsamples = nss / 2;
 		range = altitude;
-		for (j = 0; j < nss; j++) {
+		for (int j = 0; j < nss; j++) {
 			if (xtrackmax < fabs(ssacrosstrack[j])) {
 				xtrackmax = fabs(ssacrosstrack[j]);
 				jxtrackmax = j;
@@ -1143,14 +1140,14 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
 			/* zero trace before bottom arrival */
 			istart = (int)(altitude / pixelsize);
-			for (i = 0; i < istart; i++) {
+			for (int i = 0; i < istart; i++) {
 				ssport->trace[i] = 0;
 				ssstbd->trace[i] = 0;
 			}
 
 			/* get maximum value to determine scaling */
 			ssmax = 0.0;
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				ssmax = MAX(ssmax, ss[i]);
 			if (ssmax > 0.0) {
 				weight = 65535.0 / ssmax;
@@ -1161,14 +1158,14 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 			/* insert port and starboard traces from sidescan swath */
 			jstart = nss / 2 - 1;
 			weight = exp(MB_LN_2 * ((double)ssport->weightingFactor));
-			for (j = jstart; j >= 0; j--) {
-				i = istart + (jstart - j);
+			for (int j = jstart; j >= 0; j--) {
+				const int i = istart + (jstart - j);
 				ssport->trace[i] = (short)(ss[j] * weight);
 			}
 			jstart = nss / 2;
 			weight = exp(MB_LN_2 * ((double)ssstbd->weightingFactor));
-			for (j = jstart; j < nss; j++) {
-				i = istart + (j - jstart);
+			for (int j = jstart; j < nss; j++) {
+				const int i = istart + (j - jstart);
 				ssstbd->trace[i] = (short)(ss[j] * weight);
 			}
 		}
@@ -1198,7 +1195,6 @@ int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_jstar_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1254,7 +1250,7 @@ int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -1272,7 +1268,6 @@ int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_jstar_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1327,7 +1322,7 @@ int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -1977,7 +1972,6 @@ int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mbsys_jstar_channel_struct *ssport;
 	struct mbsys_jstar_channel_struct *ssstbd;
 	double weight;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2040,7 +2034,7 @@ int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int 
 		if (ssport != NULL) {
 			*num_samples_port = ssport->samples;
 			weight = exp(MB_LN_2 * ((double)ssport->weightingFactor));
-			for (i = 0; i < *num_samples_port; i++) {
+			for (int i = 0; i < *num_samples_port; i++) {
 				rawss_port[i] = ssport->trace[i] / weight;
 			}
 		}
@@ -2049,7 +2043,7 @@ int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int 
 		if (ssstbd != NULL) {
 			*num_samples_stbd = ssstbd->samples;
 			weight = exp(MB_LN_2 * ((double)ssstbd->weightingFactor));
-			for (i = 0; i < *num_samples_stbd; i++) {
+			for (int i = 0; i < *num_samples_stbd; i++) {
 				rawss_stbd[i] = ssstbd->trace[i] / weight;
 			}
 		}
@@ -2073,10 +2067,10 @@ int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "dbg2       beamwidth_xtrack:  %lf\n", *beamwidth_xtrack);
 		fprintf(stderr, "dbg2       beamwidth_ltrack:  %lf\n", *beamwidth_ltrack);
 		fprintf(stderr, "dbg2       num_samples_port:  %d\n", *num_samples_port);
-		for (i = 0; i < *num_samples_port; i++)
+		for (int i = 0; i < *num_samples_port; i++)
 			fprintf(stderr, "dbg2       sample: %d  rawss_port:%f\n", i, rawss_port[i]);
 		fprintf(stderr, "dbg2       num_samples_stbd:  %d\n", *num_samples_stbd);
-		for (i = 0; i < *num_samples_stbd; i++)
+		for (int i = 0; i < *num_samples_stbd; i++)
 			fprintf(stderr, "dbg2       sample: %d  rawss_stbd:%f\n", i, rawss_stbd[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2097,7 +2091,6 @@ int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int k
 	struct mbsys_jstar_channel_struct *ssstbd;
 	double weight;
 	size_t data_size;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2112,10 +2105,10 @@ int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int k
 		fprintf(stderr, "dbg2       beamwidth_xtrack:  %lf\n", beamwidth_xtrack);
 		fprintf(stderr, "dbg2       beamwidth_ltrack:  %lf\n", beamwidth_ltrack);
 		fprintf(stderr, "dbg2       num_samples_port:  %d\n", num_samples_port);
-		for (i = 0; i < num_samples_port; i++)
+		for (int i = 0; i < num_samples_port; i++)
 			fprintf(stderr, "dbg2       sample: %d  rawss_port:%f\n", i, rawss_port[i]);
 		fprintf(stderr, "dbg2       num_samples_stbd:  %d\n", num_samples_stbd);
-		for (i = 0; i < num_samples_stbd; i++)
+		for (int i = 0; i < num_samples_stbd; i++)
 			fprintf(stderr, "dbg2       sample: %d  rawss_stbd:%f\n", i, rawss_stbd[i]);
 	}
 
@@ -2162,7 +2155,7 @@ int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int k
 
 			/* copy the samples, correcting for weighting */
 			weight = exp(MB_LN_2 * ((double)ssport->weightingFactor));
-			for (i = 0; i < num_samples_port; i++) {
+			for (int i = 0; i < num_samples_port; i++) {
 				ssport->trace[i] = (short)(weight * rawss_port[i]);
 			}
 		}
@@ -2185,7 +2178,7 @@ int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int k
 
 			/* copy the samples, correcting for weighting */
 			weight = exp(MB_LN_2 * ((double)ssstbd->weightingFactor));
-			for (i = 0; i < num_samples_stbd; i++) {
+			for (int i = 0; i < num_samples_stbd; i++) {
 				ssstbd->trace[i] = (short)(weight * rawss_stbd[i]);
 			}
 		}
@@ -2223,7 +2216,6 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 	float fwatertime;
 	double longitude, latitude;
 	int time_i[7], time_j[5];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2320,7 +2312,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		mb_segytraceheader_ptr->emute_mils = 0;
 		mb_segytraceheader_ptr->nsamps = sbp->samples;
 		mb_segytraceheader_ptr->si_micros = (short)(sbp->sampleInterval / 1000);
-		for (i = 0; i < 19; i++)
+		for (int i = 0; i < 19; i++)
 			mb_segytraceheader_ptr->other_1[i] = 0;
 		mb_segytraceheader_ptr->year = time_i[0];
 		mb_segytraceheader_ptr->day_of_yr = time_j[1];
@@ -2329,7 +2321,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		mb_segytraceheader_ptr->sec = time_i[5];
 		mb_segytraceheader_ptr->mils = time_i[6] / 1000;
 		mb_segytraceheader_ptr->tr_weight = 1;
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			mb_segytraceheader_ptr->other_2[i] = 0;
 		mb_segytraceheader_ptr->delay = 0.0;
 		mb_segytraceheader_ptr->smute_sec = 0.0;
@@ -2408,7 +2400,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		fprintf(stderr, "dbg2       emute_mils:        %d\n", mb_segytraceheader_ptr->emute_mils);
 		fprintf(stderr, "dbg2       nsamps:            %d\n", mb_segytraceheader_ptr->nsamps);
 		fprintf(stderr, "dbg2       si_micros:         %d\n", mb_segytraceheader_ptr->si_micros);
-		for (i = 0; i < 19; i++)
+		for (int i = 0; i < 19; i++)
 			fprintf(stderr, "dbg2       other_1[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_1[i]);
 		fprintf(stderr, "dbg2       year:              %d\n", mb_segytraceheader_ptr->year);
 		fprintf(stderr, "dbg2       day_of_yr:         %d\n", mb_segytraceheader_ptr->day_of_yr);
@@ -2417,7 +2409,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		fprintf(stderr, "dbg2       sec:               %d\n", mb_segytraceheader_ptr->sec);
 		fprintf(stderr, "dbg2       mils:              %d\n", mb_segytraceheader_ptr->mils);
 		fprintf(stderr, "dbg2       tr_weight:         %d\n", mb_segytraceheader_ptr->tr_weight);
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			fprintf(stderr, "dbg2       other_2[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_2[i]);
 		fprintf(stderr, "dbg2       delay:             %f\n", mb_segytraceheader_ptr->delay);
 		fprintf(stderr, "dbg2       smute_sec:         %f\n", mb_segytraceheader_ptr->smute_sec);
@@ -2453,7 +2445,6 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 	short *shortptr;
 	unsigned short *ushortptr;
 	double weight;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2497,7 +2488,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 		/* extract the data */
 		if (sbp->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ENVELOPE) {
 			*sampleformat = MB_SEGY_SAMPLEFORMAT_ENVELOPE;
-			for (i = 0; i < sbp->samples; i++) {
+			for (int i = 0; i < sbp->samples; i++) {
 				segydata[i] = (float)(((double)ushortptr[i]) / weight);
 			}
 		}
@@ -2508,7 +2499,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 
 			/* convert analytic data to desired envelope */
 			if (*sampleformat == MB_SEGY_SAMPLEFORMAT_ENVELOPE) {
-				for (i = 0; i < sbp->samples; i++) {
+				for (int i = 0; i < sbp->samples; i++) {
 					segydata[i] =
 					    (float)(sqrt((double)(shortptr[2 * i] * shortptr[2 * i] + shortptr[2 * i + 1] * shortptr[2 * i + 1])) /
 					            weight);
@@ -2517,7 +2508,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 
 			/* else extract desired analytic data */
 			else if (*sampleformat == MB_SEGY_SAMPLEFORMAT_ANALYTIC) {
-				for (i = 0; i < sbp->samples; i++) {
+				for (int i = 0; i < sbp->samples; i++) {
 					segydata[2 * i] = (float)(((double)shortptr[2 * i]) / weight);
 					segydata[2 * i + 1] = (float)(((double)shortptr[2 * i + 1]) / weight);
 				}
@@ -2525,26 +2516,26 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 
 			/* else extract desired real trace from analytic data */
 			else if (*sampleformat == MB_SEGY_SAMPLEFORMAT_TRACE) {
-				for (i = 0; i < sbp->samples; i++) {
+				for (int i = 0; i < sbp->samples; i++) {
 					segydata[i] = (float)(((double)shortptr[2 * i]) / weight);
 				}
 			}
 		}
 		else if (sbp->dataFormat == MBSYS_JSTAR_TRACEFORMAT_RAW) {
 			*sampleformat = MB_SEGY_SAMPLEFORMAT_TRACE;
-			for (i = 0; i < sbp->samples; i++) {
+			for (int i = 0; i < sbp->samples; i++) {
 				segydata[i] = (float)(((double)ushortptr[i]) / weight);
 			}
 		}
 		else if (sbp->dataFormat == MBSYS_JSTAR_TRACEFORMAT_REALANALYTIC) {
 			*sampleformat = MB_SEGY_SAMPLEFORMAT_TRACE;
-			for (i = 0; i < sbp->samples; i++) {
+			for (int i = 0; i < sbp->samples; i++) {
 				segydata[i] = (float)(((double)ushortptr[i]) / weight);
 			}
 		}
 		else if (sbp->dataFormat == MBSYS_JSTAR_TRACEFORMAT_PIXEL) {
 			*sampleformat = MB_SEGY_SAMPLEFORMAT_TRACE;
-			for (i = 0; i < sbp->samples; i++) {
+			for (int i = 0; i < sbp->samples; i++) {
 				segydata[i] = (float)(((double)ushortptr[i]) / weight);
 			}
 		}
@@ -2611,7 +2602,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       emute_mils:        %d\n", mb_segytraceheader_ptr->emute_mils);
 		fprintf(stderr, "dbg2       nsamps:            %d\n", mb_segytraceheader_ptr->nsamps);
 		fprintf(stderr, "dbg2       si_micros:         %d\n", mb_segytraceheader_ptr->si_micros);
-		for (i = 0; i < 19; i++)
+		for (int i = 0; i < 19; i++)
 			fprintf(stderr, "dbg2       other_1[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_1[i]);
 		fprintf(stderr, "dbg2       year:              %d\n", mb_segytraceheader_ptr->year);
 		fprintf(stderr, "dbg2       day_of_yr:         %d\n", mb_segytraceheader_ptr->day_of_yr);
@@ -2620,7 +2611,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       sec:               %d\n", mb_segytraceheader_ptr->sec);
 		fprintf(stderr, "dbg2       mils:              %d\n", mb_segytraceheader_ptr->mils);
 		fprintf(stderr, "dbg2       tr_weight:         %d\n", mb_segytraceheader_ptr->tr_weight);
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			fprintf(stderr, "dbg2       other_2[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_2[i]);
 		fprintf(stderr, "dbg2       delay:             %f\n", mb_segytraceheader_ptr->delay);
 		fprintf(stderr, "dbg2       smute_sec:         %f\n", mb_segytraceheader_ptr->smute_sec);
@@ -2637,7 +2628,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       roll:              %f\n", mb_segytraceheader_ptr->roll);
 		fprintf(stderr, "dbg2       pitch:             %f\n", mb_segytraceheader_ptr->pitch);
 		fprintf(stderr, "dbg2       heading:           %f\n", mb_segytraceheader_ptr->heading);
-		for (i = 0; i < mb_segytraceheader_ptr->nsamps; i++)
+		for (int i = 0; i < mb_segytraceheader_ptr->nsamps; i++)
 			fprintf(stderr, "dbg2       segydata[%d]:      %f\n", i, segydata[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2663,7 +2654,6 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	double weight;
 	int data_size;
 	short *shortptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2751,7 +2741,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 
 		/* get max data value */
 		datamax = 0.0;
-		for (i = 0; i < mb_segytraceheader_ptr->nsamps; i++) {
+		for (int i = 0; i < mb_segytraceheader_ptr->nsamps; i++) {
 			if (fabs(segydata[i]) > datamax)
 				datamax = fabs(segydata[i]);
 		}
@@ -2778,7 +2768,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		/* copy over the data */
 		if (sbp->trace_alloc >= data_size) {
 			shortptr = (short *)sbp->trace;
-			for (i = 0; i < sbp->samples; i++) {
+			for (int i = 0; i < sbp->samples; i++) {
 				shortptr[i] = (short)(segydata[i] * weight);
 			}
 		}
@@ -2843,7 +2833,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		fprintf(stderr, "dbg2       emute_mils:        %d\n", mb_segytraceheader_ptr->emute_mils);
 		fprintf(stderr, "dbg2       nsamps:            %d\n", mb_segytraceheader_ptr->nsamps);
 		fprintf(stderr, "dbg2       si_micros:         %d\n", mb_segytraceheader_ptr->si_micros);
-		for (i = 0; i < 19; i++)
+		for (int i = 0; i < 19; i++)
 			fprintf(stderr, "dbg2       other_1[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_1[i]);
 		fprintf(stderr, "dbg2       year:              %d\n", mb_segytraceheader_ptr->year);
 		fprintf(stderr, "dbg2       day_of_yr:         %d\n", mb_segytraceheader_ptr->day_of_yr);
@@ -2852,7 +2842,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		fprintf(stderr, "dbg2       sec:               %d\n", mb_segytraceheader_ptr->sec);
 		fprintf(stderr, "dbg2       mils:              %d\n", mb_segytraceheader_ptr->mils);
 		fprintf(stderr, "dbg2       tr_weight:         %d\n", mb_segytraceheader_ptr->tr_weight);
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			fprintf(stderr, "dbg2       other_2[%2d]:       %d\n", i, mb_segytraceheader_ptr->other_2[i]);
 		fprintf(stderr, "dbg2       delay:             %f\n", mb_segytraceheader_ptr->delay);
 		fprintf(stderr, "dbg2       smute_sec:         %f\n", mb_segytraceheader_ptr->smute_sec);
@@ -2885,7 +2875,6 @@ int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_pressure_struct *pressure;
 	double g, x, p;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2934,7 +2923,7 @@ int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nctd:          %d\n", *nctd);
-		for (i = 0; i < *nctd; i++) {
+		for (int i = 0; i < *nctd; i++) {
 			fprintf(stderr, "dbg2       time_d:        %f\n", time_d[i]);
 			fprintf(stderr, "dbg2       conductivity:  %f\n", conductivity[i]);
 			fprintf(stderr, "dbg2       temperature:   %f\n", temperature[i]);
@@ -2966,7 +2955,6 @@ int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *c
 	unsigned short *ssstbd_trace;
 	int shortspersample;
 	int trace_size;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3018,7 +3006,7 @@ int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *c
 		}
 	}
 	if (copy->sbp.trace_alloc >= trace_size) {
-		for (i = 0; i < shortspersample * copy->sbp.samples; i++) {
+		for (int i = 0; i < shortspersample * copy->sbp.samples; i++) {
 			copy->sbp.trace[i] = store->sbp.trace[i];
 		}
 	}
@@ -3036,7 +3024,7 @@ int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *c
 		}
 	}
 	if (copy->ssport.trace_alloc >= trace_size) {
-		for (i = 0; i < shortspersample * copy->ssport.samples; i++) {
+		for (int i = 0; i < shortspersample * copy->ssport.samples; i++) {
 			copy->ssport.trace[i] = store->ssport.trace[i];
 		}
 	}
@@ -3054,7 +3042,7 @@ int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *c
 		}
 	}
 	if (copy->ssstbd.trace_alloc >= trace_size) {
-		for (i = 0; i < shortspersample * copy->ssstbd.samples; i++) {
+		for (int i = 0; i < shortspersample * copy->ssstbd.samples; i++) {
 			copy->ssstbd.trace[i] = store->ssstbd.trace[i];
 		}
 	}

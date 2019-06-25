@@ -52,7 +52,6 @@ int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_swathplus_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -84,7 +83,7 @@ int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 
 	/* initialize MB-System time stamp */
 	store->time_d = 0;
-	for (i = 0; i < 7; i++) {
+	for (int i = 0; i < 7; i++) {
 		store->time_i[i] = 0;
 	}
 
@@ -392,7 +391,6 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	swpls_point *points;
 	swpls_matrix wtov;
 	int type;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -418,7 +416,7 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	/* extract data from structure */
 	if ((*kind == MB_DATA_DATA) && ((type == SWPLS_ID_PROCESSED_PING) || (type == SWPLS_ID_PROCESSED_PING2))) {
 		/* get time */
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			time_i[i] = store->time_i[i];
 		}
 		*time_d = store->time_d;
@@ -460,7 +458,7 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		swpls_concat_rotate_y(verbose, &wtov, -(sxp_ping->heading) * DTR, error);
 
 		points = sxp_ping->points;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			swpls_vector ppos;
 
 			ppos.x = points[i].x;
@@ -504,17 +502,17 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++) {
+			for (int i = 0; i < *nbath; i++) {
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			}
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++) {
+			for (int i = 0; i < *namp; i++) {
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			}
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++) {
+			for (int i = 0; i < *nss; i++) {
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 			}
@@ -525,7 +523,7 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* get time */
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			time_i[i] = store->time_i[i];
 		}
 		*time_d = store->time_d;
@@ -558,7 +556,7 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	/* set time for other data records */
 	else {
 		/* get time */
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			time_i[i] = store->time_i[i];
 		}
 		*time_d = store->time_d;
@@ -608,17 +606,17 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 	if ((verbose >= 2) && (*error <= MB_ERROR_NO_ERROR) && (*kind == MB_DATA_DATA)) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++) {
+		for (int i = 0; i < *namp; i++) {
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		}
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++) {
+		for (int i = 0; i < *nss; i++) {
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 		}
@@ -646,7 +644,6 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 	swpls_comment *ocomment;
 	swpls_matrix vtow;
 	char path[MB_PATH_MAXLINE];
-	int i;
 	int nchars;
 
 	/* print input debug statements */
@@ -680,21 +677,21 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 	if ((verbose >= 2) && (kind == MB_DATA_DATA)) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3) {
-			for (i = 0; i < nbath; i++) {
+			for (int i = 0; i < nbath; i++) {
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			}
 		}
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3) {
-			for (i = 0; i < namp; i++) {
+			for (int i = 0; i < namp; i++) {
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			}
 		}
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3) {
-			for (i = 0; i < nss; i++) {
+			for (int i = 0; i < nss; i++) {
 				fprintf(stderr, "dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 			}
@@ -716,7 +713,7 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 	/* insert data in structure */
 	if ((store->kind == MB_DATA_DATA) && (mb_io_ptr->format == MBF_SWPLSSXP)) {
 		/* get time */
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			store->time_i[i] = time_i[i];
 		}
 		store->time_d = time_d;
@@ -757,7 +754,7 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 			swpls_concat_translate(verbose, &vtow, sxp_ping->txer_e, 0.0, sxp_ping->txer_n, error);
 
 			points = store->sxp_ping.points;
-			for (i = 0; i < nbath; i++) {
+			for (int i = 0; i < nbath; i++) {
 				swpls_vector ppos;
 
 				ppos.x = bathacrosstrack[i];
@@ -788,7 +785,7 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 	else if (store->kind == MB_DATA_COMMENT) {
 		/* get time */
 		if (time_d > 0.0) {
-			for (i = 0; i < 7; i++) {
+			for (int i = 0; i < 7; i++) {
 				store->time_i[i] = time_i[i];
 			}
 			store->time_d = time_d;
@@ -845,7 +842,6 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	int type;
 	double dist;
 	double alpha, beta, theta, phi;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -894,7 +890,7 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		swpls_concat_rotate_y(verbose, &wtov, -sxp_ping->heading, error);
 
 		points = sxp_ping->points;
-		for (i = 0; i < sxp_ping->nosampsfile; i++) {
+		for (int i = 0; i < sxp_ping->nosampsfile; i++) {
 			swpls_vector ppos;
 
 			/* point position relative to reference point */
@@ -950,7 +946,7 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 		}
@@ -970,7 +966,6 @@ int mbsys_swathplus_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
-	int i;
 	int type;
 
 	/* print input debug statements */
@@ -1002,7 +997,7 @@ int mbsys_swathplus_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		    MB_DETECT_PHASE
 		    MB_DETECT_UNKNOWN */
 		*nbeams = sxp_ping->nosampsfile;
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_PHASE;
 		}
 
@@ -1033,7 +1028,7 @@ int mbsys_swathplus_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 	if ((verbose >= 2) && (*error == MB_ERROR_NO_ERROR)) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 		}
 	}
@@ -1132,7 +1127,6 @@ int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
-	int i;
 	int n;
 	double sum, ave;
 	int type;
@@ -1163,7 +1157,8 @@ int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 		*transducer_depth = sxp_ping->txer_waterdepth; /* static draft */
 
 		/* calculate mean depth of first 25 near-nadir samples */
-		i = n = 0;
+		int i = 0;
+		int n = 0;
 		sum = 0.0;
 		while (i < sxp_ping->nosampsfile && n < 25) {
 			if (sxp_ping->points[i].status != SWPLS_POINT_REJECTED) {
@@ -1224,7 +1219,6 @@ int mbsys_swathplus_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
-	int i;
 	int type;
 
 	/* print input debug statements */
@@ -1252,7 +1246,7 @@ int mbsys_swathplus_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 		double sxpheave;
 
 		/* get time */
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			time_i[i] = store->time_i[i];
 		}
 		*time_d = store->time_d;
@@ -1292,7 +1286,7 @@ int mbsys_swathplus_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 		status = MB_FAILURE;
 
 		/* get time */
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			time_i[i] = store->time_i[i];
 		}
 		*time_d = store->time_d;
@@ -1304,7 +1298,7 @@ int mbsys_swathplus_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 		status = MB_FAILURE;
 
 		/* get time */
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			time_i[i] = store->time_i[i];
 		}
 		*time_d = store->time_d;
@@ -1347,7 +1341,6 @@ int mbsys_swathplus_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
-	int i;
 	int kind, type;
 
 	/* print input debug statements */
@@ -1434,7 +1427,7 @@ int mbsys_swathplus_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 
 		/* transform points from old to new coordinates */
 		points = sxp_ping->points;
-		for (i = 0; i < sxp_ping->nosampsfile; i++) {
+		for (int i = 0; i < sxp_ping->nosampsfile; i++) {
 			swpls_vector p;
 
 			p.x = points[i].x;
@@ -1447,7 +1440,7 @@ int mbsys_swathplus_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 		}
 
 		/* set time */
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			store->time_i[i] = time_i[i];
 		}
 		store->time_d = time_d;
@@ -1498,7 +1491,6 @@ int mbsys_swathplus_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 	size_t message_alloc_save;
 	char *message_save;
 	size_t copy_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1524,7 +1516,7 @@ int mbsys_swathplus_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 
 	/* copy MB-System time stamp of most recently read record */
 	copy->time_d = store->time_d;
-	for (i = 0; i < 7; i++) {
+	for (int i = 0; i < 7; i++) {
 		copy->time_i[i] = store->time_i[i];
 	}
 
@@ -1790,7 +1782,6 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 	int index;
 	int int_val;
 	short int short_val;
-	int i;
 	size_t read_len;
 
 	/* print input debug statements */
@@ -1844,7 +1835,7 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 	mb_get_binary_short(MB_YES, &buffer[index], &(ping->analoggain));
 	index += 2;
 	ping->nostaves = buffer[index++];
-	for (i = 0; i < SWPLS_MAX_TX_INFO; i++) {
+	for (int i = 0; i < SWPLS_MAX_TX_INFO; i++) {
 		ping->txinfo[i] = buffer[index++];
 	}
 	index += 1; /* padding bytes */
@@ -1909,7 +1900,7 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 
 	/* extract the point data from the buffer into the ping struct */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < ping->nosampsfile; i++) {
+		for (int i = 0; i < ping->nosampsfile; i++) {
 			mb_get_binary_int(MB_YES, &buffer[index], &(ping->points[i].sampnum));
 			index += 4;
 			index += 4; /* padding bytes */
@@ -2178,7 +2169,6 @@ int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
 	int int_val;
 	int index;
 	size_t read_len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2253,7 +2243,7 @@ int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the sample data from the buffer into the ping struct */
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < ping->nosamps; i++) {
+		for (int i = 0; i < ping->nosamps; i++) {
 			mb_get_binary_short(MB_YES, &buffer[index], &short_val);
 			index += 2;
 			ping->sampnum[i] = (unsigned short)short_val;
@@ -3187,7 +3177,6 @@ int swpls_wr_sxpping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 	swpls_sxpping *ping;
 	char *buffer;
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3271,7 +3260,7 @@ int swpls_wr_sxpping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 		index += 2;
 		buffer[index] = ping->nostaves;
 		index += 1;
-		for (i = 0; i < SWPLS_MAX_TX_INFO; i++) {
+		for (int i = 0; i < SWPLS_MAX_TX_INFO; i++) {
 			buffer[index] = ping->txinfo[i];
 			index += 1;
 		}
@@ -3319,7 +3308,7 @@ int swpls_wr_sxpping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 		index += 8;
 
 		/* insert the xyza point data */
-		for (i = 0; i != ping->nosampsfile; ++i) {
+		for (int i = 0; i != ping->nosampsfile; ++i) {
 			mb_put_binary_int(MB_YES, ping->points[i].sampnum, &buffer[index]);
 			index += 4;
 			index += 4; /* padding bytes */
@@ -3597,7 +3586,6 @@ int swpls_wr_sxiping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 	swpls_sxiping *ping;
 	char *buffer;
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3672,7 +3660,7 @@ int swpls_wr_sxiping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 		index += 2;
 		mb_put_binary_short(MB_YES, ping->reserve1, &buffer[index]);
 		index += 2;
-		for (i = 0; i < ping->nosamps; i++) {
+		for (int i = 0; i < ping->nosamps; i++) {
 			mb_put_binary_short(MB_YES, ping->sampnum[i], &buffer[index]);
 			index += 2;
 			mb_put_binary_short(MB_YES, ping->angle[i], &buffer[index]);
@@ -4623,7 +4611,6 @@ int swpls_pr_sxpping(int verbose, FILE *fout, swpls_sxpping *ping, int *error) {
 	char starter[5];
 	int size;
 	time_t tm;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4661,7 +4648,7 @@ int swpls_pr_sxpping(int verbose, FILE *fout, swpls_sxpping *ping, int *error) {
 	fprintf(fout, "%s        txpower:              %u\n", starter, ping->txpower);
 	fprintf(fout, "%s        analoggain:           %u\n", starter, ping->analoggain);
 	fprintf(fout, "%s        nostaves:             %u\n", starter, ping->nostaves);
-	for (i = 0; i < SWPLS_MAX_TX_INFO; i++) {
+	for (int i = 0; i < SWPLS_MAX_TX_INFO; i++) {
 		fprintf(fout, "%s        txinfo[%d]:            %u\n", starter, i, ping->txinfo[i]);
 	}
 	fprintf(fout, "%s        freq:                 %u\n", starter, ping->freq);
@@ -4685,7 +4672,7 @@ int swpls_pr_sxpping(int verbose, FILE *fout, swpls_sxpping *ping, int *error) {
 	fprintf(fout, "%s        txer_pitch:           %lf\n", starter, ping->txer_pitch);
 
 	points = ping->points;
-	for (i = 0; i < ping->nosampsfile; i++) {
+	for (int i = 0; i < ping->nosampsfile; i++) {
 		fprintf(fout, "%s        %4d %11.2lf %10.2lf %7.2f %5u %5u %u %5.2lf\n", starter, points[i].sampnum, points[i].y,
 		        points[i].x, points[i].z, points[i].amp, points[i].procamp, points[i].status, points[i].tpu);
 	}
@@ -4829,7 +4816,6 @@ int swpls_pr_sxiping(int verbose, FILE *fout, swpls_sxiping *ping, int *error) {
 	char starter[5];
 	int size;
 	time_t tm;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4864,7 +4850,7 @@ int swpls_pr_sxiping(int verbose, FILE *fout, swpls_sxiping *ping, int *error) {
 	fprintf(fout, "%s        ping_state:   %u\n", starter, ping->ping_state);
 	fprintf(fout, "%s        max_count:    %u\n", starter, ping->max_count);
 	fprintf(fout, "%s        reserve1:     %u\n", starter, ping->reserve1);
-	for (i = 0; i < ping->nosamps; i++) {
+	for (int i = 0; i < ping->nosamps; i++) {
 		fprintf(fout, "%s        sampnum: %4u angle: %6d amplitude: %5u quality: %u\n", starter, ping->sampnum[i], ping->angle[i],
 		        ping->amplitude[i], ping->quality[i]);
 	}

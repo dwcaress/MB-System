@@ -40,7 +40,6 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_netcdf_struct *store;
 	char c;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -89,7 +88,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 		store->mbEastLongitude = 0.;
 		store->mbWestLongitude = 0.;
 		strcpy(store->mbMeridian180, " ");
-		for (i = 0; i < MBSYS_NETCDF_ATTRIBUTELEN; i++) {
+		for (int i = 0; i < MBSYS_NETCDF_ATTRIBUTELEN; i++) {
 			if (i < MBSYS_NETCDF_ATTRIBUTELEN - 1)
 				c = ' ';
 			else
@@ -102,16 +101,16 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 		store->mbEllipsoidInvF = 0.;
 		store->mbEllipsoidE2 = 0.;
 		store->mbProjType = -1;
-		for (i = 0; i < 10; i++)
+		for (int i = 0; i < 10; i++)
 			store->mbProjParameterValue[i] = 0.;
 		store->mbSounder = MBSYS_NETCDF_SONAR_UNKNOWN;
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
 			store->mbAntennaOffset[i] = 0.;
 		store->mbAntennaDelay = 0.;
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
 			store->mbSounderOffset[i] = 0.;
 		store->mbSounderDelay = 0.;
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
 			store->mbVRUOffset[i] = 0.;
 		store->mbVRUDelay = 0.;
 		store->mbHeadingBias = 0.;
@@ -124,7 +123,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 		store->mbMinDepth = 0.;
 		store->mbMaxDepth = 0.;
 		store->mbCycleCounter = 0;
-		for (i = 0; i < MBSYS_NETCDF_COMMENTLEN - 1; i++) {
+		for (int i = 0; i < MBSYS_NETCDF_COMMENTLEN - 1; i++) {
 			if (i < MBSYS_NETCDF_COMMENTLEN - 1)
 				c = ' ';
 			else
@@ -1270,7 +1269,6 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_netcdf_struct *store;
 	double depthscale, distancescale;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1323,7 +1321,7 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*nss = 0;
 		depthscale = store->mbDepthScale[0] * store->mbDepthScale_scale_factor;
 		distancescale = store->mbDistanceScale[0] * store->mbDistanceScale_scale_factor;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			if (store->mbSFlag[i] == 0)
 				beamflag[i] = MB_FLAG_NULL;
 			else if (store->mbSFlag[i] == 2)
@@ -1357,15 +1355,15 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -1419,15 +1417,15 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -1450,7 +1448,6 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	struct mbsys_netcdf_struct *store;
 	double depthscale, distancescale;
 	double depthmax, distancemax;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1478,17 +1475,17 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -1767,7 +1764,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		}
 
 		/* get stuff */
-		for (i = 0; i < store->mbAntennaNbr; i++) {
+		for (int i = 0; i < store->mbAntennaNbr; i++) {
 			/* get time */
 			store->mbDate[i] = (int)(time_d / SECINDAY);
 			store->mbTime[i] = (int)(1000 * (time_d - store->mbDate[0] * SECINDAY));
@@ -1783,7 +1780,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		/* get depth and distance scales */
 		depthmax = 0.0;
 		distancemax = 0.0;
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			if (beamflag[i] != MB_FLAG_NULL) {
 				depthmax = MAX(fabs(bath[i]), depthmax);
 				distancemax = MAX(fabs(bathacrosstrack[i]), distancemax);
@@ -1797,13 +1794,13 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		store->mbBeamNbr = nbath;
 		/* if (store->mbDepthScale[0] <= 0
 		    || (depthmax */
-		for (i = 0; i < store->mbAntennaNbr; i++) {
+		for (int i = 0; i < store->mbAntennaNbr; i++) {
 			store->mbDepthScale[i] = 1 + (int)(depthscale / store->mbDepthScale_scale_factor);
 			store->mbDistanceScale[i] = 1 + (int)(distancescale / store->mbDistanceScale_scale_factor);
 		}
 		depthscale = store->mbDepthScale[0] * store->mbDepthScale_scale_factor;
 		distancescale = store->mbDistanceScale[0] * store->mbDistanceScale_scale_factor;
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			if (beamflag[i] == MB_FLAG_NONE)
 				store->mbSFlag[i] = 2;
 			else if (beamflag[i] == MB_FLAG_NULL)
@@ -1821,7 +1818,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 				store->mbAlongDistance[i] = 0;
 			}
 		}
-		for (i = 0; i < namp; i++) {
+		for (int i = 0; i < namp; i++) {
 			if (beamflag[i] != MB_FLAG_NULL)
 				store->mbReflectivity[i] = (char)(amp[i] / store->mbReflectivity_scale_factor);
 			else
@@ -1854,7 +1851,6 @@ int mbsys_netcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_netcdf_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1914,7 +1910,7 @@ int mbsys_netcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -1932,7 +1928,6 @@ int mbsys_netcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_netcdf_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1959,7 +1954,7 @@ int mbsys_netcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*nbeams = store->mbBeamNbr;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_UNKNOWN;
 		}
 
@@ -1992,7 +1987,7 @@ int mbsys_netcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -2016,7 +2011,6 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 	double vdepthbest;
 	double xtrackmin;
 	double vdepth;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2062,7 +2056,7 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 			vdepthbest = 0.0;
 			xtrackmin = 10000000.0;
 			vdepth = 0.0;
-			for (i = 0; i < store->mbBeamNbr; i++) {
+			for (int i = 0; i < store->mbBeamNbr; i++) {
 				if (store->mbSFlag[i] == 2) {
 					if (fabs((double)store->mbAcrossDistance[i]) < xtrackminbest) {
 						xtrackminbest = (double)store->mbAcrossDistance[i];
@@ -2124,7 +2118,6 @@ int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, d
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_netcdf_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2146,7 +2139,7 @@ int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, d
 	/* insert data into structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get stuff */
-		for (i = 0; i < store->mbAntennaNbr; i++) {
+		for (int i = 0; i < store->mbAntennaNbr; i++) {
 			/* set draft */
 			store->mbDynamicDraught[i] = (int)(transducer_depth / store->mbDynamicDraught_scale_factor);
 
@@ -2319,7 +2312,6 @@ int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_netcdf_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2389,7 +2381,7 @@ int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 		}
 
 		/* get stuff */
-		for (i = 0; i < store->mbAntennaNbr; i++) {
+		for (int i = 0; i < store->mbAntennaNbr; i++) {
 			/* get time */
 			store->mbDate[i] = (int)(time_d / SECINDAY);
 			store->mbTime[i] = (int)(1000 * (time_d - store->mbDate[0] * SECINDAY));
@@ -2431,7 +2423,6 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_netcdf_struct *store;
 	struct mbsys_netcdf_struct *copy;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2632,7 +2623,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 
 		/* global attributes */
 		copy->mbVersion = store->mbVersion;
-		for (i = 0; i < 64; i++) {
+		for (int i = 0; i < 64; i++) {
 			copy->mbName[i] = store->mbName[i];
 			copy->mbClasse[i] = store->mbClasse[i];
 			copy->mbTimeReference[i] = store->mbTimeReference[i];
@@ -2641,7 +2632,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 			copy->mbGeoRepresentation[i] = store->mbGeoRepresentation[i];
 			copy->mbGeodesicSystem[i] = store->mbGeodesicSystem[i];
 		}
-		for (i = 0; i < 256; i++) {
+		for (int i = 0; i < 256; i++) {
 			copy->mbEllipsoidName[i] = store->mbEllipsoidName[i];
 			copy->mbProjParameterCode[i] = store->mbProjParameterCode[i];
 			copy->mbShip[i] = store->mbShip[i];
@@ -2664,10 +2655,10 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 		copy->mbEllipsoidInvF = store->mbEllipsoidInvF;
 		copy->mbEllipsoidE2 = store->mbEllipsoidE2;
 		copy->mbProjType = store->mbProjType;
-		for (i = 0; i < 10; i++)
+		for (int i = 0; i < 10; i++)
 			copy->mbProjParameterValue[i] = store->mbProjParameterValue[i];
 		copy->mbSounder = store->mbSounder = store->mbSounder;
-		for (i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++) {
 			copy->mbAntennaOffset[i] = store->mbAntennaOffset[i];
 			copy->mbSounderOffset[i] = store->mbSounderOffset[i];
 			copy->mbVRUOffset[i] = store->mbVRUOffset[i];
@@ -2731,7 +2722,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 		copy->mbVelProfilTime_id = store->mbVelProfilTime_id;
 
 		/* variable pointers */
-		for (i = 0; i < copy->mbHistoryRecNbr; i++) {
+		for (int i = 0; i < copy->mbHistoryRecNbr; i++) {
 			copy->mbHistDate[i] = store->mbHistDate[i];
 			copy->mbHistTime[i] = store->mbHistTime[i];
 			copy->mbHistCode[i] = store->mbHistCode[i];
@@ -2739,7 +2730,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 			copy->mbHistModule[i] = store->mbHistModule[i];
 			copy->mbHistComment[i] = store->mbHistComment[i];
 		}
-		for (i = 0; i < copy->mbAntennaNbr; i++) {
+		for (int i = 0; i < copy->mbAntennaNbr; i++) {
 			copy->mbCycle[i] = store->mbCycle[i];
 			copy->mbDate[i] = store->mbDate[i];
 			copy->mbTime[i] = store->mbTime[i];
@@ -2763,7 +2754,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 			copy->mbInterlacing[i] = store->mbInterlacing[i];
 			copy->mbSamplingRate[i] = store->mbSamplingRate[i];
 		}
-		for (i = 0; i < copy->mbBeamNbr; i++) {
+		for (int i = 0; i < copy->mbBeamNbr; i++) {
 			copy->mbAlongDistance[i] = store->mbAlongDistance[i];
 			copy->mbAcrossDistance[i] = store->mbAcrossDistance[i];
 			copy->mbDepth[i] = store->mbDepth[i];
@@ -2773,11 +2764,11 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 			copy->mbBeamBias[i] = store->mbBeamBias[i];
 			copy->mbBFlag[i] = store->mbBFlag[i];
 		}
-		for (i = 0; i < copy->mbAntennaNbr; i++) {
+		for (int i = 0; i < copy->mbAntennaNbr; i++) {
 			copy->mbBeam[i] = store->mbBeam[i];
 			copy->mbAFlag[i] = store->mbAFlag[i];
 		}
-		for (i = 0; i < copy->mbVelocityProfilNbr; i++) {
+		for (int i = 0; i < copy->mbVelocityProfilNbr; i++) {
 			copy->mbVelProfilRef[i] = store->mbVelProfilRef[i];
 			copy->mbVelProfilIdx[i] = store->mbVelProfilIdx[i];
 			copy->mbVelProfilDate[i] = store->mbVelProfilDate[i];
@@ -2785,7 +2776,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 		}
 
 		/* variable attributes */
-		for (i = 0; i < 64; i++) {
+		for (int i = 0; i < 64; i++) {
 			copy->mbHistDate_type[i] = store->mbHistDate_type[i];
 			copy->mbHistDate_long_name[i] = store->mbHistDate_long_name[i];
 			copy->mbHistDate_name_code[i] = store->mbHistDate_name_code[i];
@@ -3333,7 +3324,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 		copy->mbVelProfilTime_missing_value = store->mbVelProfilTime_missing_value;
 
 		/* storage comment string */
-		for (i = 0; i < MBSYS_NETCDF_COMMENTLEN; i++)
+		for (int i = 0; i < MBSYS_NETCDF_COMMENTLEN; i++)
 			copy->comment[i] = store->comment[i];
 	}
 

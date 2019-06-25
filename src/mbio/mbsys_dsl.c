@@ -44,7 +44,6 @@ int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_dsl_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -71,9 +70,9 @@ int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	store->p_flags = 0;
 	store->num_data_types = 0;
 	store->ping = 0;
-	for (i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 		store->sonar_cmd[i] = '\0';
-	for (i = 0; i < 24; i++)
+	for (int i = 0; i < 24; i++)
 		store->time_stamp[i] = '\0';
 	store->nav_x = 0.0;
 	store->nav_y = 0.0;
@@ -93,7 +92,7 @@ int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	store->tv_sec = 0;
 	store->tv_usec = 0;
 	store->digitalinterface = 0;
-	for (i = 0; i < 5; i++)
+	for (int i = 0; i < 5; i++)
 		store->reserved[i] = 0;
 	store->bat_type = DSL_BATH;
 	store->bat_len = 0;
@@ -102,9 +101,9 @@ int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	store->bat_sampleSize = 0.0;
 	store->bat_p_flags = 0;
 	store->bat_max_range = 0.0;
-	for (i = 0; i < 9; i++)
+	for (int i = 0; i < 9; i++)
 		store->bat_future[i] = 0;
-	for (i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+	for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
 		store->bat_port[i] = 0.0;
 		store->bat_stbd[i] = 0.0;
 	}
@@ -116,9 +115,9 @@ int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	store->amp_p_flags = 0;
 	store->amp_max_range = 0.0;
 	store->amp_channel = 0.0;
-	for (i = 0; i < 8; i++)
+	for (int i = 0; i < 8; i++)
 		store->amp_future[i] = 0;
-	for (i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+	for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
 		store->amp_port[i] = 0.0;
 		store->amp_stbd[i] = 0.0;
 	}
@@ -228,7 +227,6 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_dsl_struct *store;
 	double dx;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -278,8 +276,8 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		*nbath = 2 * store->bat_num_bins;
 		*namp = 0;
 		dx = 0.5 * store->swath_width / store->bat_num_bins;
-		for (i = 0; i < store->bat_num_bins; i++) {
-			j = store->bat_num_bins - i - 1;
+		for (int i = 0; i < store->bat_num_bins; i++) {
+			int j = store->bat_num_bins - i - 1;
 			if (store->bat_port[i] > 0.0) {
 				beamflag[j] = MB_FLAG_NONE;
 				bath[j] = store->bat_port[i];
@@ -312,8 +310,8 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		/* read sidescan values into storage arrays */
 		*nss = 2 * store->amp_num_samp;
 		dx = 0.5 * store->swath_width / store->amp_num_samp;
-		for (i = 0; i < store->amp_num_samp; i++) {
-			j = store->amp_num_samp - i - 1;
+		for (int i = 0; i < store->amp_num_samp; i++) {
+			int j = store->amp_num_samp - i - 1;
 			ss[j] = store->amp_port[i];
 			ssacrosstrack[j] = -dx * (i + 0.5);
 			j = store->amp_num_samp + i;
@@ -340,14 +338,14 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -394,15 +392,15 @@ int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -423,7 +421,6 @@ int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_dsl_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -451,17 +448,17 @@ int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -492,7 +489,7 @@ int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 		store->heading = heading;
 
 		/* insert bathymetry values into storage arrays */
-		for (i = 0; i < store->bat_num_bins; i++) {
+		for (int i = 0; i < store->bat_num_bins; i++) {
 			if (mb_beam_check_flag(beamflag[store->bat_num_bins - i - 1]))
 				store->bat_port[i] = -bath[store->bat_num_bins - i - 1];
 			else
@@ -504,7 +501,7 @@ int mbsys_dsl_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 		}
 
 		/* insert sidescan values into storage arrays */
-		for (i = 0; i < store->amp_num_samp; i++) {
+		for (int i = 0; i < store->amp_num_samp; i++) {
 			store->amp_port[i] = ss[store->amp_num_samp - i - 1];
 			store->amp_stbd[i] = ss[store->amp_num_samp + i];
 		}
@@ -534,7 +531,6 @@ int mbsys_dsl_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_dsl_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -564,7 +560,7 @@ int mbsys_dsl_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	if (*kind == MB_DATA_DATA) {
 		/* get nbeams */
 		*nbeams = 2 * store->bat_num_bins;
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
@@ -608,7 +604,7 @@ int mbsys_dsl_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -626,7 +622,6 @@ int mbsys_dsl_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_dsl_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -651,7 +646,7 @@ int mbsys_dsl_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	if (*kind == MB_DATA_DATA) {
 		/* get nbeams */
 		*nbeams = 2 * store->bat_num_bins;
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_PHASE;
 		}
 
@@ -682,7 +677,7 @@ int mbsys_dsl_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detect:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -703,7 +698,6 @@ int mbsys_dsl_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 	double dx;
 	double bath_best;
 	double xtrack_min;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -729,7 +723,7 @@ int mbsys_dsl_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 		bath_best = 0.0;
 		xtrack_min = 99999999.9;
 		dx = 0.5 * store->swath_width / store->bat_num_bins;
-		for (i = 0; i < store->bat_num_bins; i++) {
+		for (int i = 0; i < store->bat_num_bins; i++) {
 			if (store->bat_port[i] > 0.0 && dx * (i + 0.5) < xtrack_min) {
 				xtrack_min = dx * (i + 0.5);
 				bath_best = store->bat_port[i];
@@ -741,7 +735,7 @@ int mbsys_dsl_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 		}
 		if (bath_best <= 0.0) {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < store->bat_num_bins; i++) {
+			for (int i = 0; i < store->bat_num_bins; i++) {
 				if (store->bat_port[i] != 0.0 && dx * (i + 0.5) < xtrack_min) {
 					xtrack_min = dx * (i + 0.5);
 					bath_best = fabs(store->bat_port[i]);

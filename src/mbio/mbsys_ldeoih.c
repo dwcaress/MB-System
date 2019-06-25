@@ -338,7 +338,6 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	double ss_scale;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -389,7 +388,7 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*nbath = store->beams_bath;
 		*namp = store->beams_amp;
 		*nss = store->pixels_ss;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			beamflag[i] = store->beamflag[i];
 			if (beamflag[i] != MB_FLAG_NULL) {
 				bath[i] = store->depth_scale * store->bath[i] + store->sonardepth;
@@ -402,11 +401,11 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 				bathalongtrack[i] = 0.0;
 			}
 		}
-		for (i = 0; i < *namp; i++) {
+		for (int i = 0; i < *namp; i++) {
 			amp[i] = store->amp[i];
 		}
 		ss_scale = pow(2.0, (double)(store->ss_scalepower));
-		for (i = 0; i < *nss; i++) {
+		for (int i = 0; i < *nss; i++) {
 			if (store->ss[i] != 0)
 				ss[i] = ss_scale * store->ss[i];
 			else
@@ -434,15 +433,15 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -489,15 +488,15 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -521,7 +520,6 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	double depthmax, distmax;
 	double ssmax, ss_scale;
 	int ngood;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -549,17 +547,17 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -691,14 +689,14 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		depthmax = 0.0;
 		distmax = 0.0;
 		ssmax = 0.0;
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			if (beamflag[i] != MB_FLAG_NULL) {
 				depthmax = MAX(depthmax, fabs(bath[i] - store->sonardepth));
 				distmax = MAX(distmax, fabs(bathacrosstrack[i]));
 				distmax = MAX(distmax, fabs(bathalongtrack[i]));
 			}
 		}
-		for (i = 0; i < nss; i++) {
+		for (int i = 0; i < nss; i++) {
 			if (ss[i] > MB_SIDESCAN_NULL) {
 				distmax = MAX(distmax, fabs(ssacrosstrack[i]));
 				distmax = MAX(distmax, fabs(ssalongtrack[i]));
@@ -728,7 +726,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		/* put distance, depth, and backscatter values
 		    into data structure */
 		store->beams_bath = nbath;
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			if (beamflag[i] != MB_FLAG_NULL) {
 				store->beamflag[i] = beamflag[i];
 				store->bath[i] = (bath[i] - store->sonardepth) / store->depth_scale;
@@ -743,12 +741,12 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 			}
 		}
 		store->beams_amp = namp;
-		for (i = 0; i < namp; i++) {
+		for (int i = 0; i < namp; i++) {
 			store->amp[i] = amp[i];
 		}
 		store->pixels_ss = nss;
 		ngood = 0;
-		for (i = 0; i < nss; i++) {
+		for (int i = 0; i < nss; i++) {
 			if (ss[i] > MB_SIDESCAN_NULL) {
 				store->ss[i] = (short)(ss[i] / ss_scale);
 				ngood++;
@@ -786,7 +784,6 @@ int mbsys_ldeoih_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -818,7 +815,7 @@ int mbsys_ldeoih_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		*nbeams = store->beams_bath;
 
 		/* get travel times, angles */
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
@@ -862,7 +859,7 @@ int mbsys_ldeoih_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -880,7 +877,6 @@ int mbsys_ldeoih_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -907,7 +903,7 @@ int mbsys_ldeoih_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*nbeams = store->beams_bath;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_UNKNOWN;
 		}
 
@@ -940,7 +936,7 @@ int mbsys_ldeoih_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -960,7 +956,6 @@ int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 	struct mbsys_ldeoih_struct *store;
 	double bath_best;
 	double xtrack_min;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -989,7 +984,7 @@ int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 				bath_best = store->depth_scale * store->bath[store->beams_bath / 2] + (*transducer_depth);
 			else {
 				xtrack_min = 99999999.9;
-				for (i = 0; i < store->beams_bath; i++) {
+				for (int i = 0; i < store->beams_bath; i++) {
 					if (store->bath[i] > 0 && fabs(store->distance_scale * store->bath_acrosstrack[i]) < xtrack_min) {
 						xtrack_min = fabs(store->distance_scale * store->bath_acrosstrack[i]);
 						bath_best = store->depth_scale * store->bath[i] + (*transducer_depth);
@@ -998,7 +993,7 @@ int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 			}
 			if (bath_best <= 0.0) {
 				xtrack_min = 99999999.9;
-				for (i = 0; i < store->beams_bath; i++) {
+				for (int i = 0; i < store->beams_bath; i++) {
 					if (store->bath[i] < 0.0 && fabs(store->distance_scale * store->bath_acrosstrack[i]) < xtrack_min) {
 						xtrack_min = fabs(store->distance_scale * store->bath_acrosstrack[i]);
 						bath_best = -store->depth_scale * store->bath[i] + (*transducer_depth);
@@ -1299,7 +1294,6 @@ int mbsys_ldeoih_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	struct mbsys_ldeoih_struct *copy;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1380,16 +1374,16 @@ int mbsys_ldeoih_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 		copy->distance_scale = store->distance_scale;
 		copy->ss_type = store->ss_type;
 		copy->ss_scalepower = store->ss_scalepower;
-		for (i = 0; i < copy->beams_bath; i++) {
+		for (int i = 0; i < copy->beams_bath; i++) {
 			copy->beamflag[i] = store->beamflag[i];
 			copy->bath[i] = store->bath[i];
 			copy->bath_acrosstrack[i] = store->bath_acrosstrack[i];
 			copy->bath_alongtrack[i] = store->bath_alongtrack[i];
 		}
-		for (i = 0; i < copy->beams_amp; i++) {
+		for (int i = 0; i < copy->beams_amp; i++) {
 			copy->amp[i] = store->amp[i];
 		}
-		for (i = 0; i < copy->pixels_ss; i++) {
+		for (int i = 0; i < copy->pixels_ss; i++) {
 			copy->ss[i] = store->ss[i];
 			copy->ss_acrosstrack[i] = store->ss_acrosstrack[i];
 			copy->ss_alongtrack[i] = store->ss_alongtrack[i];

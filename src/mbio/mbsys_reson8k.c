@@ -43,7 +43,6 @@ int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -104,7 +103,7 @@ int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	/* sound velocity profile */
 	store->svp_time_d = 0.0;
 	store->svp_num = 0;
-	for (i = 0; i < store->svp_num; i++) {
+	for (int i = 0; i < store->svp_num; i++) {
 		store->svp_depth[0] = 0.0; /* meters */
 		store->svp_vel[0] = 0.0;   /* meters/sec */
 	}
@@ -165,10 +164,10 @@ int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	                           /* bit 1 - depth filter (0 = off, 1 = active) */
 	store->temperature = 0;    /* temperature at sonar head (deg C * 10) */
 	store->beam_count = 0;     /* number of sets of beam data in packet */
-	for (i = 0; i < MBSYS_RESON8K_MAXBEAMS; i++)
+	for (int i = 0; i < MBSYS_RESON8K_MAXBEAMS; i++)
 		store->range[i] = 0; /* range for beam where n = Beam Count */
 	                         /* range units = sample cells * 4 */
-	for (i = 0; i < MBSYS_RESON8K_MAXBEAMS / 2 + 1; i++)
+	for (int i = 0; i < MBSYS_RESON8K_MAXBEAMS / 2 + 1; i++)
 		store->quality[i] = 0; /* packed quality array (two 4 bit values/char) */
 	                           /* cnt = n/2 if beam count even, n/2+1 if odd */
 	                           /* cnt then rounded up to next even number */
@@ -179,14 +178,14 @@ int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	                           /* bit 2 - amplitude bottom detect used */
 	                           /* bit 3 - phase bottom detect used */
 	                           /* bottom detect can be amplitude, phase or both */
-	for (i = 0; i < MBSYS_RESON8K_MAXBEAMS; i++)
+	for (int i = 0; i < MBSYS_RESON8K_MAXBEAMS; i++)
 		store->intensity[i] = 0;    /* intensities at bottom detect  */
 	store->ssrawtimedelay = 0.0;    /* raw sidescan delay (sec) */
 	store->ssrawtimeduration = 0.0; /* raw sidescan duration (sec) */
 	store->ssrawbottompick = 0.0;   /* bottom pick time (sec) */
 	store->ssrawportsamples = 0;    /* number of port raw sidescan samples */
 	store->ssrawstbdsamples = 0;    /* number of stbd raw sidescan samples */
-	for (i = 0; i < MBSYS_RESON8K_MAXRAWPIXELS; i++) {
+	for (int i = 0; i < MBSYS_RESON8K_MAXRAWPIXELS; i++) {
 		store->ssrawport[i] = 0; /* raw port sidescan */
 		store->ssrawstbd[i] = 0; /* raw starboard sidescan */
 	}
@@ -195,14 +194,14 @@ int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	store->beams_amp = 0;
 	store->pixels_ss = 0;
 	store->pixel_size = 0.0;
-	for (i = 0; i < MBSYS_RESON8K_MAXBEAMS; i++) {
+	for (int i = 0; i < MBSYS_RESON8K_MAXBEAMS; i++) {
 		store->beamflag[i] = MB_FLAG_NULL; /* beamflags */
 		store->bath[i] = 0.0;              /* bathymetry (m) */
 		store->amp[i] = 0.0;               /* amplitude */
 		store->bath_acrosstrack[i] = 0.0;  /* acrosstrack distance (m) */
 		store->bath_alongtrack[i] = 0.0;   /* alongtrack distance (m) */
 	}
-	for (i = 0; i < MBSYS_RESON8K_MAXPIXELS; i++) {
+	for (int i = 0; i < MBSYS_RESON8K_MAXPIXELS; i++) {
 		store->ss[i] = 0.0;            /* sidescan */
 		store->ss_alongtrack[i] = 0.0; /* alongtrack distance (m) */
 	}
@@ -312,7 +311,6 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -357,16 +355,16 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*namp = store->beams_amp;
 		*nss = store->pixels_ss;
 		;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			beamflag[i] = store->beamflag[i];
 			bath[i] = store->bath[i];
 			bathacrosstrack[i] = store->bath_acrosstrack[i];
 			bathalongtrack[i] = store->bath_alongtrack[i];
 		}
-		for (i = 0; i < *namp; i++) {
+		for (int i = 0; i < *namp; i++) {
 			amp[i] = store->intensity[i];
 		}
-		for (i = 0; i < *nss; i++) {
+		for (int i = 0; i < *nss; i++) {
 			ss[i] = store->ss[i];
 			ssacrosstrack[i] = store->pixel_size * (i - store->pixels_ss / 2);
 			ssalongtrack[i] = store->ss_alongtrack[i];
@@ -391,11 +389,11 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		}
@@ -486,11 +484,11 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 	}
@@ -511,7 +509,6 @@ int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -539,12 +536,12 @@ int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 	}
@@ -582,16 +579,16 @@ int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 		store->pixels_ss = nss;
 		if (store->pixels_ss > 0)
 			store->pixel_size = (ssacrosstrack[store->pixels_ss - 1] - ssacrosstrack[0]) / store->pixels_ss;
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			store->beamflag[i] = beamflag[i];
 			store->bath[i] = bath[i];
 			store->bath_acrosstrack[i] = bathacrosstrack[i];
 			store->bath_alongtrack[i] = bathalongtrack[i];
 		}
-		for (i = 0; i < namp; i++) {
+		for (int i = 0; i < namp; i++) {
 			store->intensity[i] = (unsigned short)amp[i];
 		}
-		for (i = 0; i < nss; i++) {
+		for (int i = 0; i < nss; i++) {
 			store->ss[i] = ss[i];
 			store->ss_alongtrack[i] = ssalongtrack[i];
 		}
@@ -640,7 +637,6 @@ int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	double heave_use;
 	double angle, pitch;
 	int icenter;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -680,7 +676,7 @@ int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		ttscale = 0.25 / store->sample_rate;
 		icenter = store->beams_bath / 2;
 		angscale = ((double)store->beam_width_num) / ((double)store->beam_width_denom);
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = ttscale * store->range[i];
 			angle = 90.0 + (icenter - i) * angscale + store->png_roll;
 			pitch = store->png_pitch;
@@ -721,7 +717,7 @@ int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  heave:%f  ltrk_off:%f\n", i,
 			        ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -740,7 +736,6 @@ int mbsys_reson8k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 	int detect;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -767,10 +762,10 @@ int mbsys_reson8k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*nbeams = store->beams_bath;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_AMPLITUDE;
 		}
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			/* get beamflag */
 			if (i % 2 == 0)
 				detect = ((store->quality[i / 2]) & 15) & 12;
@@ -813,7 +808,7 @@ int mbsys_reson8k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -833,7 +828,6 @@ int mbsys_reson8k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_reson8k_struct *store;
 	double bath_best;
 	double xtrack_min;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -860,7 +854,7 @@ int mbsys_reson8k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			bath_best = store->bath[store->beams_bath / 2];
 		else {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < store->beams_bath; i++) {
+			for (int i = 0; i < store->beams_bath; i++) {
 				if (mb_beam_ok(store->beamflag[i]) && fabs(store->bath_acrosstrack[i]) < xtrack_min) {
 					xtrack_min = fabs(store->bath_acrosstrack[i]);
 					bath_best = store->bath[i];
@@ -869,7 +863,7 @@ int mbsys_reson8k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 		if (bath_best == 0.0) {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < store->beams_bath; i++) {
+			for (int i = 0; i < store->beams_bath; i++) {
 				if (store->beamflag[i] != MB_FLAG_NULL && fabs(store->bath_acrosstrack[i]) < xtrack_min) {
 					xtrack_min = fabs(store->bath_acrosstrack[i]);
 					bath_best = store->bath[i];
@@ -1187,7 +1181,6 @@ int mbsys_reson8k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1213,7 +1206,7 @@ int mbsys_reson8k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 		*nsvp = store->svp_num;
 
 		/* get profile */
-		for (i = 0; i < *nsvp; i++) {
+		for (int i = 0; i < *nsvp; i++) {
 			depth[i] = 0.1 * store->svp_depth[i];
 			velocity[i] = 0.1 * store->svp_vel[i];
 		}
@@ -1241,7 +1234,7 @@ int mbsys_reson8k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
-		for (i = 0; i < *nsvp; i++)
+		for (int i = 0; i < *nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1257,7 +1250,6 @@ int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1267,7 +1259,7 @@ int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 		fprintf(stderr, "dbg2       nsvp:       %d\n", nsvp);
-		for (i = 0; i < nsvp; i++)
+		for (int i = 0; i < nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 	}
 
@@ -1283,7 +1275,7 @@ int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 		store->svp_num = MIN(nsvp, MBSYS_RESON8K_MAXSVP);
 
 		/* get profile */
-		for (i = 0; i < store->svp_num; i++) {
+		for (int i = 0; i < store->svp_num; i++) {
 			store->svp_depth[i] = (int)(10 * depth[i]);
 			store->svp_vel[i] = (int)(10 * velocity[i]);
 		}
@@ -1360,7 +1352,6 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	double angscale, ttscale;
 	double anglestart, angleend;
 	int goodbeam1, goodbeam2, pixel1, pixel2, ipixel;
-	int i, k, kk;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1384,7 +1375,7 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA && store->ssrawstbdsamples > 0 && store->ssrawportsamples > 0) {
 		/* zero the sidescan */
-		for (i = 0; i < MBSYS_RESON8K_MAXPIXELS; i++) {
+		for (int i = 0; i < MBSYS_RESON8K_MAXPIXELS; i++) {
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
 			ssalongtrack[i] = 0.0;
@@ -1398,7 +1389,7 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		nbathsort = 0;
 		istart = store->beams_bath;
 		iend = -1;
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			if (mb_beam_ok(store->beamflag[i])) {
 				bathsort[nbathsort] = store->bath[i];
 				nbathsort++;
@@ -1438,7 +1429,7 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		    acrosstrack distance for each raw sidescan sample */
 		goodbeam1 = -1;
 		goodbeam2 = -1;
-		for (i = store->beams_bath / 2; i >= 0; i--) {
+		for (int i = store->beams_bath / 2; i >= 0; i--) {
 			if (mb_beam_ok(store->beamflag[i])) {
 				goodbeam1 = goodbeam2;
 				goodbeam2 = i;
@@ -1453,7 +1444,7 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 						ltrackss = store->bath_alongtrack[goodbeam1] +
 						           ((double)(ipixel - pixel1)) / ((double)(pixel2 - pixel1)) *
 						               (store->bath_alongtrack[goodbeam2] - store->bath_alongtrack[goodbeam1]);
-						kk = MBSYS_RESON8K_MAXPIXELS / 2 + (int)(xtrackss / (*pixel_size));
+						const int kk = MBSYS_RESON8K_MAXPIXELS / 2 + (int)(xtrackss / (*pixel_size));
 						if (kk > 0 && kk < MBSYS_RESON8K_MAXPIXELS) {
 							ss[kk] += store->ssrawport[ipixel];
 							ssalongtrack[kk] += ltrackss;
@@ -1468,7 +1459,7 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		    acrosstrack distance for each raw sidescan sample */
 		goodbeam1 = -1;
 		goodbeam2 = -1;
-		for (i = store->beams_bath / 2; i < store->beams_bath; i++) {
+		for (int i = store->beams_bath / 2; i < store->beams_bath; i++) {
 			if (mb_beam_ok(store->beamflag[i])) {
 				goodbeam1 = goodbeam2;
 				goodbeam2 = i;
@@ -1482,7 +1473,7 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 						ltrackss = store->bath_alongtrack[goodbeam1] +
 						           ((double)(ipixel - pixel1)) / ((double)(pixel2 - pixel1)) *
 						               (store->bath_alongtrack[goodbeam2] - store->bath_alongtrack[goodbeam1]);
-						kk = MBSYS_RESON8K_MAXPIXELS / 2 + (int)(xtrackss / (*pixel_size));
+						const int kk = MBSYS_RESON8K_MAXPIXELS / 2 + (int)(xtrackss / (*pixel_size));
 						if (kk > 0 && kk < MBSYS_RESON8K_MAXPIXELS) {
 							ss[kk] += store->ssrawstbd[ipixel];
 							ssalongtrack[kk] += ltrackss;
@@ -1496,7 +1487,7 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		/* average the sidescan */
 		first = MBSYS_RESON8K_MAXPIXELS;
 		last = -1;
-		for (k = 0; k < MBSYS_RESON8K_MAXPIXELS; k++) {
+		for (int k = 0; k < MBSYS_RESON8K_MAXPIXELS; k++) {
 			if (ss_cnt[k] > 0) {
 				ss[k] /= ss_cnt[k];
 				ssalongtrack[k] /= ss_cnt[k];
@@ -1511,7 +1502,7 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		/* interpolate the sidescan */
 		k1 = first;
 		k2 = first;
-		for (k = first + 1; k < last; k++) {
+		for (int k = first + 1; k < last; k++) {
 			if (ss_cnt[k] <= 0) {
 				if (k2 <= k) {
 					k2 = k + 1;
@@ -1534,7 +1525,7 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			store->pixels_ss = MBSYS_RESON8K_MAXPIXELS;
 		else
 			store->pixels_ss = 0;
-		for (i = 0; i < MBSYS_RESON8K_MAXPIXELS; i++) {
+		for (int i = 0; i < MBSYS_RESON8K_MAXPIXELS; i++) {
 			store->ss[i] = ss[i];
 			store->ss_alongtrack[i] = ssalongtrack[i];
 		}
@@ -1543,15 +1534,15 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Sidescan regenerated in <%s>\n", function_name);
 			fprintf(stderr, "dbg2       beams_bath:    %d\n", store->beams_bath);
-			for (i = 0; i < store->beams_bath; i++)
+			for (int i = 0; i < store->beams_bath; i++)
 				fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%10f  amp:%10f  acrosstrack:%10f  alongtrack:%10f\n", i,
 				        store->beamflag[i], store->bath[i], store->amp[i], store->bath_acrosstrack[i], store->bath_alongtrack[i]);
 			fprintf(stderr, "dbg2       pixels_ss:  %d\n", MBSYS_RESON8K_MAXPIXELS);
-			for (i = 0; i < MBSYS_RESON8K_MAXPIXELS; i++)
+			for (int i = 0; i < MBSYS_RESON8K_MAXPIXELS; i++)
 				fprintf(stderr, "dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, ss_cnt[i], ss[i],
 				        ssacrosstrack[i], ssalongtrack[i]);
 			fprintf(stderr, "dbg2       pixels_ss:  %d\n", store->pixels_ss);
-			for (i = 0; i < MBSYS_RESON8K_MAXPIXELS; i++)
+			for (int i = 0; i < MBSYS_RESON8K_MAXPIXELS; i++)
 				fprintf(stderr, "dbg2       pixel:%4d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, store->ss[i],
 				        store->ss_acrosstrack[i], store->ss_alongtrack[i]);
 		}

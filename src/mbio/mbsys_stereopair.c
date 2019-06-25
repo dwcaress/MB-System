@@ -285,7 +285,6 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_stereopair_struct *store;
 	struct mbsys_stereopair_sounding_struct *sounding;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -328,7 +327,7 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 		/* read distance and depth values into storage arrays */
 		*nbath = store->num_soundings;
 		*namp = 0;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			sounding = (struct mbsys_stereopair_sounding_struct *)&store->soundings[i];
 			bath[i] = sounding->depth + store->sensordepth;
 			beamflag[i] = sounding->beamflag;
@@ -361,15 +360,15 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -475,15 +474,15 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -505,7 +504,6 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_stereopair_struct *store;
 	struct mbsys_stereopair_sounding_struct *sounding;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -538,17 +536,17 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -590,7 +588,7 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 
 		/* read distance and depth values into storage arrays */
 		store->num_soundings = nbath;
-		for (i = 0; i < store->num_soundings; i++) {
+		for (int i = 0; i < store->num_soundings; i++) {
 			sounding = (struct mbsys_stereopair_sounding_struct *)&store->soundings[i];
 			sounding->depth = bath[i] - store->sensordepth;
 			sounding->beamflag = beamflag[i];
@@ -647,7 +645,6 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_stereopair_struct *store;
 	struct mbsys_stereopair_sounding_struct *sounding;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -683,7 +680,7 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 
 		/* get travel times, angles */
 		*nbeams = store->num_soundings;
-		for (i = 0; i < store->num_soundings; i++) {
+		for (int i = 0; i < store->num_soundings; i++) {
 			sounding = (struct mbsys_stereopair_sounding_struct *)&store->soundings[i];
 			ttimes[i] = 0.0;
 			mb_xyz_to_takeoff(verbose, sounding->acrosstrack, sounding->alongtrack, sounding->depth, &angles[i],
@@ -724,7 +721,7 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -742,7 +739,6 @@ int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_stereopair_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -772,7 +768,7 @@ int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 		    MB_DETECT_LIDAR
 		    MB_DETECT_PHOTOGRAMMETRY */
 		*nbeams = store->num_soundings;
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_PHOTOGRAMMETRY;
 		}
 
@@ -805,7 +801,7 @@ int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -970,7 +966,6 @@ int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_stereopair_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1051,7 +1046,7 @@ int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 		status = MB_FAILURE;
 
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 	}
@@ -1103,7 +1098,6 @@ int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_stereopair_struct *store;
-	int i, inav;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1213,8 +1207,8 @@ int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       n:          %d\n", *n);
-		for (inav = 0; inav < *n; inav++) {
-			for (i = 0; i < 7; i++)
+		for (int inav = 0; inav < *n; inav++) {
+			for (int i = 0; i < 7; i++)
 				fprintf(stderr, "dbg2       %d time_i[%d]:     %d\n", inav, i, time_i[inav * 7 + i]);
 			fprintf(stderr, "dbg2       %d time_d:        %f\n", inav, time_d[inav]);
 			fprintf(stderr, "dbg2       %d longitude:     %f\n", inav, navlon[inav]);

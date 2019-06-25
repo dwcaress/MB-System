@@ -162,7 +162,6 @@ int mbsys_mr1b_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mr1b_struct *store;
 	int beam_center, pixel_center;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -204,13 +203,13 @@ int mbsys_mr1b_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		mb_io_ptr->beamwidth_xtrack = 0.1;
 
 		/* zero data arrays */
-		for (i = 0; i < MBSYS_MR1B_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_MR1B_BEAMS; i++) {
 			beamflag[i] = MB_FLAG_NULL;
 			bath[i] = 0.0;
 			bathacrosstrack[i] = 0.0;
 			bathalongtrack[i] = 0.0;
 		}
-		for (i = 0; i < MBSYS_MR1B_PIXELS; i++) {
+		for (int i = 0; i < MBSYS_MR1B_PIXELS; i++) {
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
 			ssalongtrack[i] = 0.0;
@@ -224,8 +223,8 @@ int mbsys_mr1b_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			*nss += 3;
 		beam_center = *nbath / 2;
 		pixel_center = *nss / 2;
-		for (i = 0; i < store->port_btycount; i++) {
-			j = beam_center - i - 2;
+		for (int i = 0; i < store->port_btycount; i++) {
+			const int j = beam_center - i - 2;
 			if (store->bath_port[i] > 0) {
 				beamflag[j] = MB_FLAG_NONE;
 				bath[j] = store->bath_port[i];
@@ -241,8 +240,8 @@ int mbsys_mr1b_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			bathacrosstrack[j] = -store->bath_acrosstrack_port[i];
 			bathalongtrack[j] = 0.0;
 		}
-		for (i = 0; i < 3; i++) {
-			j = beam_center + i - 1;
+		for (int i = 0; i < 3; i++) {
+			const int j = beam_center + i - 1;
 			if (j == beam_center) {
 				if (store->png_alt > 0.0) {
 					beamflag[j] = MB_FLAG_NONE;
@@ -264,8 +263,8 @@ int mbsys_mr1b_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			bathacrosstrack[j] = 0.0;
 			bathalongtrack[j] = 0.0;
 		}
-		for (i = 0; i < store->stbd_btycount; i++) {
-			j = beam_center + 2 + i;
+		for (int i = 0; i < store->stbd_btycount; i++) {
+			const int j = beam_center + 2 + i;
 			if (store->bath_stbd[i] > 0) {
 				beamflag[j] = MB_FLAG_NONE;
 				bath[j] = store->bath_stbd[i];
@@ -282,20 +281,20 @@ int mbsys_mr1b_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			bathalongtrack[j] = 0.0;
 		}
 
-		for (i = 0; i < store->port_sscount; i++) {
-			j = pixel_center - i - 2;
+		for (int i = 0; i < store->port_sscount; i++) {
+			const int j = pixel_center - i - 2;
 			ss[j] = store->ss_port[i];
 			ssacrosstrack[j] = -store->port_ssoffset - i * store->png_atssincr;
 			ssalongtrack[j] = 0.0;
 		}
-		for (i = 0; i < 3; i++) {
-			j = pixel_center + i - 1;
+		for (int i = 0; i < 3; i++) {
+			const int j = pixel_center + i - 1;
 			ss[j] = 0.0;
 			ssacrosstrack[j] = 0.0;
 			ssalongtrack[j] = 0.0;
 		}
-		for (i = 0; i < store->stbd_sscount; i++) {
-			j = pixel_center + 2 + i;
+		for (int i = 0; i < store->stbd_sscount; i++) {
+			const int j = pixel_center + 2 + i;
 			ss[j] = store->ss_stbd[i];
 			ssacrosstrack[j] = store->stbd_ssoffset + i * store->png_atssincr;
 			ssalongtrack[j] = 0.0;
@@ -320,15 +319,15 @@ int mbsys_mr1b_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%6g  acrosstrack:%6g  alongtrack:%6g\n", i, beamflag[i],
 				        bath[i], bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%6g  acrosstrack:%6g  alongtrack:%6g\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%6g  acrosstrack:%6g  alongtrack:%6g\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -375,15 +374,15 @@ int mbsys_mr1b_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -405,7 +404,6 @@ int mbsys_mr1b_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mr1b_struct *store;
 	int beam_center, pixel_center;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -433,17 +431,17 @@ int mbsys_mr1b_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -480,8 +478,8 @@ int mbsys_mr1b_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 
 		/* get port bathymetry */
 		beam_center = nbath / 2;
-		for (i = 0; i < store->port_btycount; i++) {
-			j = beam_center - 2 - i;
+		for (int i = 0; i < store->port_btycount; i++) {
+			const int j = beam_center - 2 - i;
 			if (beamflag[j] != MB_FLAG_NULL) {
 				if (mb_beam_check_flag(beamflag[j]))
 					store->bath_port[i] = -bath[j];
@@ -507,8 +505,8 @@ int mbsys_mr1b_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		}
 
 		/* get starboard bathymetry */
-		for (i = 0; i < store->stbd_btycount; i++) {
-			j = beam_center + 2 + i;
+		for (int i = 0; i < store->stbd_btycount; i++) {
+			const int j = beam_center + 2 + i;
 			if (beamflag[j] != MB_FLAG_NULL) {
 				if (mb_beam_check_flag(beamflag[j]))
 					store->bath_stbd[i] = -bath[j];
@@ -524,14 +522,14 @@ int mbsys_mr1b_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 
 		/* get port sidescan */
 		pixel_center = nss / 2;
-		for (i = 0; i < store->port_sscount; i++) {
-			j = pixel_center - 2 - i;
+		for (int i = 0; i < store->port_sscount; i++) {
+			const int j = pixel_center - 2 - i;
 			store->ss_port[i] = ss[j];
 		}
 
 		/* get starboard sidescan */
-		for (i = 0; i < store->stbd_sscount; i++) {
-			j = pixel_center + 2 + i;
+		for (int i = 0; i < store->stbd_sscount; i++) {
+			const int j = pixel_center + 2 + i;
 			store->ss_stbd[i] = ss[j];
 		}
 	}
@@ -561,7 +559,6 @@ int mbsys_mr1b_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mr1b_struct *store;
 	int beam_center;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -598,7 +595,7 @@ int mbsys_mr1b_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		beam_center = *nbeams / 2;
 
 		/* zero data arrays */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
@@ -608,8 +605,8 @@ int mbsys_mr1b_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		}
 
 		/* get travel times and angles */
-		for (i = 0; i < store->port_btycount; i++) {
-			j = beam_center - i - 2;
+		for (int i = 0; i < store->port_btycount; i++) {
+			const int j = beam_center - i - 2;
 			angles_null[j] = MBSYS_MR1B_XDUCER_ANGLE;
 			angles_forward[j] = 180.0;
 			if (fabs(store->bath_port[i]) > 0.0) {
@@ -622,8 +619,8 @@ int mbsys_mr1b_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 				angles[j] = 0.0;
 			}
 		}
-		for (i = 0; i < 3; i++) {
-			j = beam_center + i - 1;
+		for (int i = 0; i < 3; i++) {
+			const int j = beam_center + i - 1;
 			angles_forward[j] = 0.0;
 			angles_null[j] = 0.0;
 			if (j == beam_center) {
@@ -636,8 +633,8 @@ int mbsys_mr1b_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 				angles[j] = 0.0;
 			}
 		}
-		for (i = 0; i < store->stbd_btycount; i++) {
-			j = beam_center + 2 + i;
+		for (int i = 0; i < store->stbd_btycount; i++) {
+			const int j = beam_center + 2 + i;
 			angles_forward[j] = 0.0;
 			angles_null[j] = MBSYS_MR1B_XDUCER_ANGLE;
 			if (fabs(store->bath_stbd[i]) > 0.0) {
@@ -682,7 +679,7 @@ int mbsys_mr1b_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -700,7 +697,6 @@ int mbsys_mr1b_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mr1b_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -727,7 +723,7 @@ int mbsys_mr1b_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		*nbeams = store->port_btycount + store->stbd_btycount + 3;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_PHASE;
 		}
 
@@ -760,7 +756,7 @@ int mbsys_mr1b_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {

@@ -40,7 +40,6 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 	char c;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -83,7 +82,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 		store->mbEastLongitude = 0.;
 		store->mbWestLongitude = 0.;
 		strcpy(store->mbMeridian180, " ");
-		for (i = 0; i < MBSYS_NAVNETCDF_ATTRIBUTELEN; i++) {
+		for (int i = 0; i < MBSYS_NAVNETCDF_ATTRIBUTELEN; i++) {
 			if (i < MBSYS_NAVNETCDF_ATTRIBUTELEN - 1)
 				c = ' ';
 			else
@@ -96,10 +95,10 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 		store->mbEllipsoidInvF = 0.;
 		store->mbEllipsoidE2 = 0.;
 		store->mbProjType = -1;
-		for (i = 0; i < 10; i++)
+		for (int i = 0; i < 10; i++)
 			store->mbProjParameterValue[i] = 0.;
 		store->mbPointCounter = 0;
-		for (i = 0; i < MBSYS_NAVNETCDF_COMMENTLEN - 1; i++) {
+		for (int i = 0; i < MBSYS_NAVNETCDF_COMMENTLEN - 1; i++) {
 			if (i < MBSYS_NAVNETCDF_COMMENTLEN - 1)
 				c = ' ';
 			else
@@ -474,7 +473,6 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -543,15 +541,15 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -697,7 +695,6 @@ int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -757,7 +754,7 @@ int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -775,7 +772,6 @@ int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -830,7 +826,7 @@ int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -1174,7 +1170,6 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 	struct mbsys_navnetcdf_struct *copy;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1246,7 +1241,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 
 		/* global attributes */
 		copy->mbVersion = store->mbVersion;
-		for (i = 0; i < MBSYS_NAVNETCDF_ATTRIBUTELEN; i++) {
+		for (int i = 0; i < MBSYS_NAVNETCDF_ATTRIBUTELEN; i++) {
 			copy->mbName[i] = store->mbName[i];
 			copy->mbClasse[i] = store->mbClasse[i];
 			copy->mbTimeReference[i] = store->mbTimeReference[i];
@@ -1255,7 +1250,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 			copy->mbGeoRepresentation[i] = store->mbGeoRepresentation[i];
 			copy->mbGeodesicSystem[i] = store->mbGeodesicSystem[i];
 		}
-		for (i = 0; i < MBSYS_NAVNETCDF_ATTRIBUTELEN; i++) {
+		for (int i = 0; i < MBSYS_NAVNETCDF_ATTRIBUTELEN; i++) {
 			copy->mbEllipsoidName[i] = store->mbEllipsoidName[i];
 			copy->mbProjParameterCode[i] = store->mbProjParameterCode[i];
 			copy->mbShip[i] = store->mbShip[i];
@@ -1276,7 +1271,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 		copy->mbEllipsoidInvF = store->mbEllipsoidInvF;
 		copy->mbEllipsoidE2 = store->mbEllipsoidE2;
 		copy->mbProjType = store->mbProjType;
-		for (i = 0; i < 10; i++)
+		for (int i = 0; i < 10; i++)
 			copy->mbProjParameterValue[i] = store->mbProjParameterValue[i];
 		copy->mbPointCounter = store->mbPointCounter;
 
@@ -1300,7 +1295,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 		copy->mbPFlag_id = store->mbPFlag_id;
 
 		/* variable pointers */
-		for (i = 0; i < copy->mbHistoryRecNbr; i++) {
+		for (int i = 0; i < copy->mbHistoryRecNbr; i++) {
 			copy->mbHistDate[i] = store->mbHistDate[i];
 			copy->mbHistTime[i] = store->mbHistTime[i];
 			copy->mbHistCode[i] = store->mbHistCode[i];
@@ -1321,7 +1316,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 		copy->mbPFlag = store->mbPFlag;
 
 		/* variable attributes */
-		for (i = 0; i < MBSYS_NAVNETCDF_ATTRIBUTELEN; i++) {
+		for (int i = 0; i < MBSYS_NAVNETCDF_ATTRIBUTELEN; i++) {
 			copy->mbHistDate_type[i] = store->mbHistDate_type[i];
 			copy->mbHistDate_long_name[i] = store->mbHistDate_long_name[i];
 			copy->mbHistDate_name_code[i] = store->mbHistDate_name_code[i];
@@ -1530,7 +1525,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 		copy->mbPFlag_missing_value = store->mbPFlag_missing_value;
 
 		/* storage comment string */
-		for (i = 0; i < MBSYS_NAVNETCDF_COMMENTLEN; i++)
+		for (int i = 0; i < MBSYS_NAVNETCDF_COMMENTLEN; i++)
 			copy->comment[i] = store->comment[i];
 	}
 

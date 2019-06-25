@@ -160,7 +160,6 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hsmd_struct *store;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -207,13 +206,13 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		mb_io_ptr->beamwidth_xtrack = 1.7;
 
 		/* zero bathymetry and sidescan */
-		for (i = 0; i < MBSYS_HSMD_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSMD_BEAMS; i++) {
 			beamflag[i] = MB_FLAG_NULL;
 			bath[i] = 0.0;
 			bathacrosstrack[i] = 0.0;
 			bathalongtrack[i] = 0.0;
 		}
-		for (i = 0; i < MBSYS_HSMD_PIXELS; i++) {
+		for (int i = 0; i < MBSYS_HSMD_PIXELS; i++) {
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
 			ssalongtrack[i] = 0.0;
@@ -224,8 +223,8 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
 		/* deal with a ping to port */
 		if (store->Port == -1) {
-			for (i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
-				j = MBSYS_HSMD_BEAMS_PING - i - 1;
+			for (int i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
+				const int j = MBSYS_HSMD_BEAMS_PING - i - 1;
 				if (store->depth[i] > 0.0) {
 					beamflag[j] = MB_FLAG_NONE;
 					bath[j] = store->depth[i];
@@ -245,8 +244,8 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
 		/* deal with a ping to starboard */
 		else {
-			for (i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
-				j = i + MBSYS_HSMD_BEAMS_PING - 1;
+			for (int i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
+				const int j = i + MBSYS_HSMD_BEAMS_PING - 1;
 				if (store->depth[i] > 0.0) {
 					beamflag[j] = MB_FLAG_NONE;
 					bath[j] = store->depth[i];
@@ -269,8 +268,8 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
 		/* deal with a ping to port */
 		if (store->Port == -1) {
-			for (i = 0; i < MBSYS_HSMD_PIXELS_PING; i++) {
-				j = MBSYS_HSMD_PIXELS_PING - i - 1;
+			for (int i = 0; i < MBSYS_HSMD_PIXELS_PING; i++) {
+				const int j = MBSYS_HSMD_PIXELS_PING - i - 1;
 				ss[j] = store->ss[i];
 				ssacrosstrack[j] = -store->ss_range * i / ((double)(MBSYS_HSMD_PIXELS_PING - 1));
 				ssalongtrack[j] = 0.0;
@@ -279,8 +278,8 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
 		/* deal with a ping to starboard */
 		else {
-			for (i = 0; i < MBSYS_HSMD_PIXELS_PING; i++) {
-				j = i + MBSYS_HSMD_PIXELS_PING - 1;
+			for (int i = 0; i < MBSYS_HSMD_PIXELS_PING; i++) {
+				const int j = i + MBSYS_HSMD_PIXELS_PING - 1;
 				ss[j] = store->ss[i];
 				ssacrosstrack[j] = store->ss_range * i / ((double)(MBSYS_HSMD_PIXELS_PING - 1));
 				ssalongtrack[j] = 0.0;
@@ -306,11 +305,11 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:      %d\n", *namp);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        ss[%d]: %f  ssdist[%d]:%f\n", i, ss[i], i, ssacrosstrack[i]);
 		}
 
@@ -356,11 +355,11 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2         nbath:         %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2         nss:           %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2       ss[%d]:   %f  ssdist[%d]:   %f\n", i, ss[i], i, ssacrosstrack[i]);
 	}
 	if (verbose >= 2) {
@@ -381,7 +380,6 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hsmd_struct *store;
 	int first;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -409,16 +407,16 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        amp[%d]: %f\n", i, amp[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        ss[%d]: %f    ssdist[%d]: %f\n", i, ss[i], i, ssacrosstrack[i]);
 	}
 	if (verbose >= 2 && kind == MB_DATA_COMMENT) {
@@ -455,7 +453,7 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 
 		/* figure out if port or starboard ping */
 		first = -1;
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			if (first == -1 && bath[i] != 0.0)
 				first = i;
 		}
@@ -468,8 +466,8 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 
 		/* deal with a ping to port */
 		if (store->Port == -1) {
-			for (i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
-				j = MBSYS_HSMD_BEAMS_PING - i - 1;
+			for (int i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
+				const int j = MBSYS_HSMD_BEAMS_PING - i - 1;
 				if (mb_beam_check_flag_null(beamflag[j]))
 					store->depth[i] = 0.0;
 				else if (mb_beam_check_flag(beamflag[j]))
@@ -482,8 +480,8 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 
 		/* deal with a ping to starboard */
 		else {
-			for (i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
-				j = i + MBSYS_HSMD_BEAMS_PING - 1;
+			for (int i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
+				const int j = i + MBSYS_HSMD_BEAMS_PING - 1;
 				if (mb_beam_check_flag_null(beamflag[j]))
 					store->depth[i] = 0.0;
 				else if (mb_beam_check_flag(beamflag[j]))
@@ -499,8 +497,8 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		/* deal with a ping to port */
 		if (store->Port == -1) {
 			store->ss_range = fabs(ssacrosstrack[0]);
-			for (i = 0; i < MBSYS_HSMD_PIXELS_PING; i++) {
-				j = MBSYS_HSMD_PIXELS_PING - i - 1;
+			for (int i = 0; i < MBSYS_HSMD_PIXELS_PING; i++) {
+				const int j = MBSYS_HSMD_PIXELS_PING - i - 1;
 				store->ss[i] = ss[j];
 			}
 		}
@@ -508,8 +506,8 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		/* deal with a ping to starboard */
 		else {
 			store->ss_range = ssacrosstrack[MBSYS_HSMD_PIXELS_PING - 1];
-			for (i = 0; i < MBSYS_HSMD_PIXELS_PING; i++) {
-				j = i + MBSYS_HSMD_PIXELS_PING - 1;
+			for (int i = 0; i < MBSYS_HSMD_PIXELS_PING; i++) {
+				const int j = i + MBSYS_HSMD_PIXELS_PING - 1;
 				store->ss[i] = ss[j];
 			}
 		}
@@ -540,7 +538,6 @@ int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hsmd_struct *store;
 	double scale;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -572,7 +569,7 @@ int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		*nbeams = MBSYS_HSMD_BEAMS;
 
 		/* zero travel times, angles */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
@@ -589,8 +586,8 @@ int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 
 		/* deal with a ping to port */
 		if (store->Port == -1) {
-			for (i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
-				j = MBSYS_HSMD_BEAMS_PING - i - 1;
+			for (int i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
+				const int j = MBSYS_HSMD_BEAMS_PING - i - 1;
 				ttimes[j] = fabs(scale * store->spfb[i]);
 
 				/* angle convention in raw data
@@ -609,8 +606,8 @@ int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 
 		/* deal with a ping to starboard */
 		else {
-			for (i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
-				j = i + MBSYS_HSMD_BEAMS_PING - 1;
+			for (int i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
+				const int j = i + MBSYS_HSMD_BEAMS_PING - 1;
 				ttimes[j] = fabs(scale * store->spfb[i]);
 				angles[j] = store->angle[i];
 				heave[j] = store->heave;
@@ -652,7 +649,7 @@ int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  heave:%f  ltrk_off:%f\n", i,
 			        ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -670,7 +667,6 @@ int mbsys_hsmd_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hsmd_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -697,7 +693,7 @@ int mbsys_hsmd_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		*nbeams = MBSYS_HSMD_BEAMS;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_AMPLITUDE;
 		}
 
@@ -730,7 +726,7 @@ int mbsys_hsmd_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -750,7 +746,6 @@ int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mbsys_hsmd_struct *store;
 	double bath_best;
 	double xtrack_min;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -778,7 +773,7 @@ int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 			bath_best = store->depth[0];
 		else {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
+			for (int i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
 				if (store->depth[i] > 0.0 && fabs(store->distance[i]) < xtrack_min) {
 					xtrack_min = fabs(store->distance[i]);
 					bath_best = store->depth[i];
@@ -787,7 +782,7 @@ int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 		}
 		if (bath_best <= 0.0) {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
+			for (int i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
 				if (store->depth[i] < 0.0 && fabs(store->distance[i]) < xtrack_min) {
 					xtrack_min = fabs(store->distance[i]);
 					bath_best = -store->depth[i];
