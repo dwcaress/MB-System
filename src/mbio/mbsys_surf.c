@@ -175,7 +175,6 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
 	double v0, tlx, tly, tlz, z0, t0, t2, tn, dt, y;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -221,7 +220,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		tlz = store->ActualTransducerTable.transducerDepth - store->SoundingData.heaveWhileTransmitting;
 
 		/* reset storage arrays */
-		for (i = 0; i < MBSYS_SURF_MAXBEAMS; i++) {
+		for (int i = 0; i < MBSYS_SURF_MAXBEAMS; i++) {
 			bath[i] = 0.0;
 			beamflag[i] = MB_FLAG_NULL;
 			amp[i] = 0.0;
@@ -230,7 +229,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		}
 		/* read distance and depth values into storage arrays */
 		*nbath = store->NrBeams;
-		for (i = 0; i < store->NrBeams; i++) {
+		for (int i = 0; i < store->NrBeams; i++) {
 			if ((store->MultiBeamDepth[i].depthFlag & SB_DELETED) != 0)
 				beamflag[i] = MB_FLAG_NULL;
 			else if ((store->MultiBeamDepth[i].depthFlag & (SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) != 0)
@@ -246,7 +245,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
 		/* get beam amplitudes */
 		*namp = store->NrAmplitudes;
-		for (i = 0; i < store->NrAmplitudes; i++) {
+		for (int i = 0; i < store->NrAmplitudes; i++) {
 			amp[i] = (double)store->MultibeamBeamAmplitudes[i].beamAmplitude;
 		}
 
@@ -288,7 +287,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
 		/* reset sidescan */
 		*nss = 0;
-		for (i = 0; i < store->NrSidescan; i++) {
+		for (int i = 0; i < store->NrSidescan; i++) {
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
 			ssalongtrack[i] = 0.0;
@@ -309,7 +308,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 				tn = store->SidescanData.minSsTimePort / 2;
 				dt = (store->SidescanData.maxSsTimePort / 2 - tn) / (store->SidescanData.actualNrOfSsDataPort - 1);
 				/* start reading: */
-				for (i = 0, j = store->SidescanData.actualNrOfSsDataPort; 0 < --j; i++) {
+				for (int i = 0, j = store->SidescanData.actualNrOfSsDataPort; 0 < --j; i++) {
 					y = (tn > t0 ? v0 * sqrt(tn * tn - t2) : 0.0);
 					ssalongtrack[j] = tlx;
 					ssacrosstrack[j] = tly - y;
@@ -322,7 +321,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 				/* initialise */
 				tn = store->SidescanData.minSsTimeStb / 2;
 				dt = (store->SidescanData.maxSsTimeStb / 2 - tn) / (store->SidescanData.actualNrOfSsDataStb - 1);
-				for (j = store->SidescanData.actualNrOfSsDataPort; j < store->NrSidescan; j++) {
+				for (int j = store->SidescanData.actualNrOfSsDataPort; j < store->NrSidescan; j++) {
 					y = (tn > t0 ? v0 * sqrt(tn * tn - t2) : 0.0);
 					ssalongtrack[j] = tlx;
 					ssacrosstrack[j] = tly + y;
@@ -350,15 +349,15 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -406,15 +405,15 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -435,7 +434,6 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -461,17 +459,17 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		fprintf(stderr, "dbg2       heading:    %f\n", heading);
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f   acrosstrack:%f  alongtrack:%f\n", i, beamflag[i],
 				        bath[i], bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -506,7 +504,7 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		/* write distance and depth values into storage arrays */
 		if (store->GlobalData.typeOfSounder == 'B' || store->GlobalData.typeOfSounder == 'F') {
 			store->NrBeams = nbath;
-			for (i = 0; i < store->NrBeams; i++) {
+			for (int i = 0; i < store->NrBeams; i++) {
 				store->MultiBeamDepth[i].depth = bath[i];
 				if (beamflag[i] == MB_FLAG_NULL)
 					store->MultiBeamDepth[i].depthFlag = store->MultiBeamDepth[i].depthFlag | SB_DELETED;
@@ -520,7 +518,7 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		}
 		else if (store->GlobalData.typeOfSounder == 'V') {
 			store->NrBeams = 0;
-			i = 0;
+			int i = 0;
 			if (store->SingleBeamDepth.depthHFreq > 0.0)
 				store->SingleBeamDepth.depthHFreq = bath[0];
 			else if (store->SingleBeamDepth.depthMFreq > 0.0)
@@ -539,15 +537,15 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 
 		/* set beam amplitudes */
 		store->NrAmplitudes = namp;
-		for (i = 0; i < store->NrAmplitudes; i++) {
+		for (int i = 0; i < store->NrAmplitudes; i++) {
 			store->MultibeamBeamAmplitudes[i].beamAmplitude = (unsigned short)amp[i];
 		}
 
 		if (nss == store->SidescanData.actualNrOfSsDataPort + store->SidescanData.actualNrOfSsDataStb) {
-			for (i = 0; i < store->SidescanData.actualNrOfSsDataPort; i++) {
+			for (int i = 0; i < store->SidescanData.actualNrOfSsDataPort; i++) {
 				store->SidescanData.ssData[i] = ss[store->SidescanData.actualNrOfSsDataPort - i - 1];
 			}
-			for (i = store->SidescanData.actualNrOfSsDataStb; i < nss; i++) {
+			for (int i = store->SidescanData.actualNrOfSsDataStb; i < nss; i++) {
 				store->SidescanData.ssData[i] = ss[i];
 			}
 		}
@@ -579,7 +577,6 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
 	double pitch, angle;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -619,7 +616,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		    (store->NrBeams == store->ActualAngleTable.actualNumberOfBeams) && (store->NrBeams == store->NrTravelTimes)) {
 			*nbeams = store->NrBeams;
 			pitch = -RTD * store->SoundingData.pitchWhileTransmitting;
-			for (i = 0; i < store->NrBeams; i++) {
+			for (int i = 0; i < store->NrBeams; i++) {
 				ttimes[i] = 0.0;
 				angles[i] = 0.0;
 				angles_forward[i] = 0.0;
@@ -627,7 +624,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 				heave[i] = 0.0;
 				alongtrack_offset[i] = 0.0;
 			}
-			for (i = 0; i < store->NrBeams; i++) {
+			for (int i = 0; i < store->NrBeams; i++) {
 				ttimes[i] = 2 * store->MultiBeamTraveltime[i].travelTimeOfRay;
 				angle = 90. - RTD * store->ActualAngleTable.beamAngle[i];
 				mb_rollpitch_to_takeoff(verbose, pitch, angle, &angles[i], &angles_forward[i], error);
@@ -683,7 +680,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -701,7 +698,6 @@ int mbsys_surf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -727,7 +723,7 @@ int mbsys_surf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		/* amplitude detects from Atlas multibeams */
 		if (store->GlobalData.typeOfSounder == 'B') {
 			*nbeams = store->NrBeams;
-			for (i = 0; i < store->NrBeams; i++) {
+			for (int i = 0; i < store->NrBeams; i++) {
 				detects[i] = MB_DETECT_AMPLITUDE;
 			}
 		}
@@ -735,7 +731,7 @@ int mbsys_surf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		/* phase detects from Atlas fansweeps */
 		else if (store->GlobalData.typeOfSounder == 'F') {
 			*nbeams = store->NrBeams;
-			for (i = 0; i < store->NrBeams; i++) {
+			for (int i = 0; i < store->NrBeams; i++) {
 				detects[i] = MB_DETECT_PHASE;
 			}
 		}
@@ -773,7 +769,7 @@ int mbsys_surf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -787,14 +783,14 @@ int mbsys_surf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 double mbsys_get_depth(SurfMultiBeamDepth *MultiBeamDepth, SurfTransducerParameterTable TransducerTable, float heave, int n) {
 	double x, y, z, a, b, c, d, depth;
-	int i, N;
+	int N;
 
 	a = b = c = d = 0.0;
 	N = 0;
 	/* include all beams with a lateral distance within ~15 % of the depth
 	   and calculate the depth @ centre assuming a linear slope.
 	 */
-	for (i = 0; i < n; i++)
+	for (int i = 0; i < n; i++)
 		if ((MultiBeamDepth[i].depthFlag & (SB_DELETED | SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) == 0) {
 			x = MultiBeamDepth[i].beamPositionAhead - TransducerTable.transducerPositionAhead;
 			y = MultiBeamDepth[i].beamPositionStar - TransducerTable.transducerPositionStar;
@@ -1103,7 +1099,6 @@ int mbsys_surf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1129,7 +1124,7 @@ int mbsys_surf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*nsvp = store->ActualCProfileTable.numberOfActualValues;
 
 		/* get profile */
-		for (i = 0; i < *nsvp; i++) {
+		for (int i = 0; i < *nsvp; i++) {
 			depth[i] = store->ActualCProfileTable.values[i].depth;
 			velocity[i] = store->ActualCProfileTable.values[i].cValue;
 		}
@@ -1157,7 +1152,7 @@ int mbsys_surf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
-		for (i = 0; i < *nsvp; i++)
+		for (int i = 0; i < *nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1173,7 +1168,6 @@ int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
 	int kind;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1183,7 +1177,7 @@ int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 		fprintf(stderr, "dbg2       nsvp:       %d\n", nsvp);
-		for (i = 0; i < nsvp; i++)
+		for (int i = 0; i < nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 	}
 
@@ -1204,7 +1198,7 @@ int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 		store->ActualCProfileTable.numberOfActualValues = MIN(nsvp, MBSYS_SURF_MAXCVALUES);
 
 		/* set profile */
-		for (i = 0; i < store->ActualCProfileTable.numberOfActualValues; i++) {
+		for (int i = 0; i < store->ActualCProfileTable.numberOfActualValues; i++) {
 			store->ActualCProfileTable.values[i].depth = depth[i];
 			store->ActualCProfileTable.values[i].cValue = velocity[i];
 		}

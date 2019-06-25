@@ -63,7 +63,7 @@ int mbsys_templatesystem_alloc(int verbose, void *mbio_ptr, void **store_ptr, in
 
 	/* initialize MB-System time stamp */
 	store->time_d = 0;
-	for (i = 0; i < 7; i++)
+	for (int i = 0; i < 7; i++)
 		store->time_i[i] = 0;
 
 	/* initialize everything else */
@@ -289,7 +289,6 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -312,7 +311,7 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -333,7 +332,7 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 		/* read distance and depth values into storage arrays */
 		*nbath = store->number_beams;
 		*namp = *nbath;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			bath[i] = store->bath[i];
 			beamflag[i] = store->beamflag[i];
 			bathacrosstrack[i] = store->bathacrosstrack[i];
@@ -343,7 +342,7 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 
 		/* extract sidescan */
 		*nss = store->number_pixels;
-		for (i = 0; i < store->number_pixels; i++) {
+		for (int i = 0; i < store->number_pixels; i++) {
 			ss[i] = store->sidescan[i];
 			ssacrosstrack[i] = store->ssacrosstrack[i];
 			ssalongtrack[i] = store->ssalongtrack[i];
@@ -368,15 +367,15 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -387,7 +386,7 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 	/* extract data from structure */
 	else if (*kind == MB_DATA_NAV) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -432,7 +431,7 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -463,7 +462,7 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 	/* set time for other data records */
 	else {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -512,15 +511,15 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -541,7 +540,6 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -574,17 +572,17 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -601,7 +599,7 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
@@ -617,7 +615,7 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 
 		/* read distance and depth values into storage arrays */
 		store->number_beams = nbath;
-		for (i = 0; i < bathymetry->number_beams; i++) {
+		for (int i = 0; i < bathymetry->number_beams; i++) {
 			store->depth[i] = bath[i];
 			store->beamflag[i] = beamflag[i];
 			store->acrosstrack[i] = bathacrosstrack[i];
@@ -627,7 +625,7 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 
 		/* insert the sidescan */
 		store->number_pixels = nss;
-		for (i = 0; i < store->number_pixels; i++) {
+		for (int i = 0; i < store->number_pixels; i++) {
 			store->sidescan[i] = ss[i];
 			store->acrosstrack[i] = store->acrosstrack[i];
 			store->alongtrack[i] = store->alongtrack[i];
@@ -637,7 +635,7 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 	/* insert data in nav structure */
 	else if (store->kind == MB_DATA_NAV) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
@@ -678,7 +676,6 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mbsys_templatesystem_struct *store;
 	double heave_use, roll, pitch;
 	double alpha, beta, theta, phi;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -714,7 +711,7 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
 
 		/* get travel times, angles */
 		*nbeams = bathymetry->number_beams;
-		for (i = 0; i < bathymetry->number_beams; i++) {
+		for (int i = 0; i < bathymetry->number_beams; i++) {
 			ttimes[i] = store->ttimes[i];
 			angles[i] = store->vertical_angle[i];
 			angles_forward[i] = store->azimuthal_angle[i];
@@ -754,7 +751,7 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -772,7 +769,6 @@ int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, i
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -801,7 +797,7 @@ int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, i
 		    MB_DETECT_PHASE
 		    MB_DETECT_UNKNOWN */
 		*nbeams = bathymetry->number_beams;
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_UNKNOWN;
 		}
 
@@ -834,7 +830,7 @@ int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -932,7 +928,6 @@ int mbsys_templatesystem_extract_altitude(int verbose, void *mbio_ptr, void *sto
 	double heave, roll, pitch;
 	double xtrackmin;
 	int altitude_found;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1003,7 +998,6 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1026,7 +1020,7 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
 	/* extract data from survey record */
 	if (*kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -1055,7 +1049,7 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
 	/* extract data from nav record */
 	else if (*kind == MB_DATA_NAV) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -1088,7 +1082,7 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
 		status = MB_FAILURE;
 
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 	}
@@ -1100,7 +1094,7 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
 		status = MB_FAILURE;
 
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 	}
@@ -1141,7 +1135,7 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
-	int i, inav;
+	int inav;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1168,7 +1162,7 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 		*n = 1;
 
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		time_d[0] = store->time_d;
 
@@ -1201,7 +1195,7 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 		*n = 1;
 
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		time_d[0] = store->time_d;
 
@@ -1234,7 +1228,7 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 		status = MB_FAILURE;
 
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		time_d[0] = store->time_d;
 	}
@@ -1246,7 +1240,7 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 		status = MB_FAILURE;
 
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		time_d[0] = store->time_d;
 	}
@@ -1258,7 +1252,7 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       n:          %d\n", *n);
 		for (inav = 0; inav < *n; inav++) {
-			for (i = 0; i < 7; i++)
+			for (int i = 0; i < 7; i++)
 				fprintf(stderr, "dbg2       %d time_i[%d]:     %d\n", inav, i, time_i[inav * 7 + i]);
 			fprintf(stderr, "dbg2       %d time_d:        %f\n", inav, time_d[inav]);
 			fprintf(stderr, "dbg2       %d longitude:     %f\n", inav, navlon[inav]);
@@ -1285,7 +1279,6 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1321,7 +1314,7 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
 	/* insert data in ping structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
@@ -1349,7 +1342,7 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
 	/* insert data in nav structure */
 	else if (store->kind == MB_DATA_NAV) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
@@ -1392,7 +1385,6 @@ int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_pt
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1418,7 +1410,7 @@ int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_pt
 		*nsvp = store->number_svp;
 
 		/* get profile */
-		for (i = 0; i < *nsvp; i++) {
+		for (int i = 0; i < *nsvp; i++) {
 			depth[i] = store->svp_depth[i];
 			velocity[i] = store->svp_sv[i];
 		}
@@ -1446,7 +1438,7 @@ int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_pt
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
-		for (i = 0; i < *nsvp; i++)
+		for (int i = 0; i < *nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1463,7 +1455,6 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 	s7kr_svp *svp;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1473,7 +1464,7 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 		fprintf(stderr, "dbg2       nsvp:       %d\n", nsvp);
-		for (i = 0; i < nsvp; i++)
+		for (int i = 0; i < nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 	}
 
@@ -1488,7 +1479,7 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 		/* get profile */
 		if (status == MB_SUCCESS) {
 			store->number_svp = MIN(nsvp, MBSYS_TEMPLATESYSTEM_NUMBER_SVP_MAX);
-			for (i = 0; i < store->number_svp; i++) {
+			for (int i = 0; i < store->number_svp; i++) {
 				store->svp_depth[i] = depth[i];
 				store->svp_sv[i] = velocity[i];
 			}

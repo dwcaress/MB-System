@@ -214,7 +214,6 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	AuxBeamInfo *sabi;
 	int beam_center, pixel_center;
 	double ssyoffset;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -292,13 +291,13 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		mb_io_ptr->beamwidth_xtrack = 0.1;
 
 		/* zero data arrays */
-		for (i = 0; i < MBSYS_MR1V2001_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_MR1V2001_BEAMS; i++) {
 			beamflag[i] = MB_FLAG_NULL;
 			bath[i] = 0.0;
 			bathacrosstrack[i] = 0.0;
 			bathalongtrack[i] = 0.0;
 		}
-		for (i = 0; i < MBSYS_MR1V2001_PIXELS; i++) {
+		for (int i = 0; i < MBSYS_MR1V2001_PIXELS; i++) {
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
 			ssalongtrack[i] = 0.0;
@@ -315,8 +314,8 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 
 		/* extract bathymetry */
 		if (store->ping.png_flags & PNG_XYZ) {
-			for (i = 0; i < pingport->ps_btycount; i++) {
-				j = beam_center - 1 - i;
+			for (int i = 0; i < pingport->ps_btycount; i++) {
+				const int j = beam_center - 1 - i;
 				if (pbtyflags[i] == 0) {
 					beamflag[j] = MB_FLAG_NONE;
 				}
@@ -327,8 +326,8 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 				bathalongtrack[j] = pbty[3 * i + 1];
 				bath[j] = pbty[3 * i + 2];
 			}
-			for (i = 0; i < pingstbd->ps_btycount; i++) {
-				j = beam_center + i;
+			for (int i = 0; i < pingstbd->ps_btycount; i++) {
+				const int j = beam_center + i;
 				if (pbtyflags[i] == 0) {
 					beamflag[j] = MB_FLAG_NONE;
 				}
@@ -341,8 +340,8 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 			}
 		}
 		else {
-			for (i = 0; i < pingport->ps_btycount; i++) {
-				j = beam_center - i - 1;
+			for (int i = 0; i < pingport->ps_btycount; i++) {
+				const int j = beam_center - i - 1;
 				if (pbtyflags[i] == 0) {
 					beamflag[j] = MB_FLAG_NONE;
 				}
@@ -353,8 +352,8 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 				bathalongtrack[j] = 0.0;
 				bath[j] = pbty[2 * i + 1];
 			}
-			for (i = 0; i < pingstbd->ps_btycount; i++) {
-				j = beam_center + i;
+			for (int i = 0; i < pingstbd->ps_btycount; i++) {
+				const int j = beam_center + i;
 				if (sbtyflags[i] == 0) {
 					beamflag[j] = MB_FLAG_NONE;
 				}
@@ -372,8 +371,8 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 			ssyoffset = pingport->ps_ssyoffset;
 		else
 			ssyoffset = 0.0;
-		for (i = 0; i < pingport->ps_sscount; i++) {
-			j = pixel_center - i - 1;
+		for (int i = 0; i < pingport->ps_sscount; i++) {
+			const int j = pixel_center - i - 1;
 			ss[j] = pss[i];
 			ssacrosstrack[j] = -pingport->ps_ssxoffset - i * ping->png_ssincr;
 			ssalongtrack[j] = ssyoffset;
@@ -382,8 +381,8 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 			ssyoffset = pingstbd->ps_ssyoffset;
 		else
 			ssyoffset = 0.0;
-		for (i = 0; i < pingstbd->ps_sscount; i++) {
-			j = pixel_center + i;
+		for (int i = 0; i < pingstbd->ps_sscount; i++) {
+			const int j = pixel_center + i;
 			ss[j] = sss[i];
 			ssacrosstrack[j] = pingstbd->ps_ssxoffset + i * ping->png_ssincr;
 			ssalongtrack[j] = ssyoffset;
@@ -408,15 +407,15 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%6g  acrosstrack:%6g  alongtrack:%6g\n", i, beamflag[i],
 				        bath[i], bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%6g  acrosstrack:%6g  alongtrack:%6g\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%6g  acrosstrack:%6g  alongtrack:%6g\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -463,15 +462,15 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -508,7 +507,6 @@ int mbsys_mr1v2001_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 	unsigned char *sssflags;
 	AuxBeamInfo *sabi;
 	int beam_center, pixel_center;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -536,17 +534,17 @@ int mbsys_mr1v2001_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -603,8 +601,8 @@ int mbsys_mr1v2001_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 		beam_center = nbath / 2;
 		if (store->ping.png_flags & PNG_XYZ) {
 			/* get port bathymetry */
-			for (i = 0; i < pingport->ps_btycount; i++) {
-				j = beam_center - i - 1;
+			for (int i = 0; i < pingport->ps_btycount; i++) {
+				const int j = beam_center - i - 1;
 				if (beamflag[j] != MB_FLAG_NULL) {
 					pbty[2 * i] = -bathacrosstrack[j];
 					pbty[2 * i + 1] = bathalongtrack[j];
@@ -623,8 +621,8 @@ int mbsys_mr1v2001_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 			}
 
 			/* get starboard bathymetry */
-			for (i = 0; i < pingstbd->ps_btycount; i++) {
-				j = beam_center + i;
+			for (int i = 0; i < pingstbd->ps_btycount; i++) {
+				const int j = beam_center + i;
 				if (beamflag[j] != MB_FLAG_NULL) {
 					sbty[2 * i] = bathacrosstrack[j];
 					sbty[2 * i + 1] = bathalongtrack[j];
@@ -644,8 +642,8 @@ int mbsys_mr1v2001_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 		}
 		else {
 			/* get port bathymetry */
-			for (i = 0; i < pingport->ps_btycount; i++) {
-				j = beam_center - i - 1;
+			for (int i = 0; i < pingport->ps_btycount; i++) {
+				const int j = beam_center - i - 1;
 				if (beamflag[j] != MB_FLAG_NULL) {
 					pbty[2 * i] = -bathacrosstrack[j];
 					pbty[2 * i + 1] = bath[j];
@@ -662,8 +660,8 @@ int mbsys_mr1v2001_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 			}
 
 			/* get starboard bathymetry */
-			for (i = 0; i < pingstbd->ps_btycount; i++) {
-				j = beam_center + i;
+			for (int i = 0; i < pingstbd->ps_btycount; i++) {
+				const int j = beam_center + i;
 				if (beamflag[j] != MB_FLAG_NULL) {
 					sbty[2 * i] = bathacrosstrack[j];
 					sbty[2 * i + 1] = bath[j];
@@ -682,14 +680,14 @@ int mbsys_mr1v2001_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 
 		/* get port sidescan */
 		pixel_center = nss / 2;
-		for (i = 0; i < pingport->ps_sscount; i++) {
-			j = pixel_center - 2 - i;
+		for (int i = 0; i < pingport->ps_sscount; i++) {
+			const int j = pixel_center - 2 - i;
 			pss[i] = ss[j];
 		}
 
 		/* get starboard sidescan */
-		for (i = 0; i < pingstbd->ps_sscount; i++) {
-			j = pixel_center + 2 + i;
+		for (int i = 0; i < pingstbd->ps_sscount; i++) {
+			const int j = pixel_center + 2 + i;
 			sss[i] = ss[j];
 		}
 	}
@@ -735,7 +733,6 @@ int mbsys_mr1v2001_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	AuxBeamInfo *sabi;
 	double xx, yy, zz, rr;
 	int beam_center;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -792,7 +789,7 @@ int mbsys_mr1v2001_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		beam_center = *nbeams / 2;
 
 		/* zero data arrays */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
@@ -802,8 +799,8 @@ int mbsys_mr1v2001_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		}
 
 		/* get travel times and angles */
-		for (i = 0; i < pingport->ps_btycount; i++) {
-			j = beam_center - i - 1;
+		for (int i = 0; i < pingport->ps_btycount; i++) {
+			const int j = beam_center - i - 1;
 			if (store->ping.png_flags & PNG_XYZ) {
 				zz = fabs(pbty[2 * i + 2]) - store->ping.png_depth.sns_repval;
 				xx = -pbty[2 * i];
@@ -820,8 +817,8 @@ int mbsys_mr1v2001_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			heave[j] = 0.0;
 			angles_null[j] = MBSYS_MR1V2001_XDUCER_ANGLE;
 		}
-		for (i = 0; i < pingstbd->ps_btycount; i++) {
-			j = beam_center + i;
+		for (int i = 0; i < pingstbd->ps_btycount; i++) {
+			const int j = beam_center + i;
 			if (store->ping.png_flags & PNG_XYZ) {
 				zz = fabs(sbty[2 * i + 2]) - store->ping.png_depth.sns_repval;
 				xx = sbty[2 * i];
@@ -870,7 +867,7 @@ int mbsys_mr1v2001_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -903,7 +900,6 @@ int mbsys_mr1v2001_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	float *sss;
 	unsigned char *sssflags;
 	AuxBeamInfo *sabi;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -947,7 +943,7 @@ int mbsys_mr1v2001_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*nbeams = 2 * MAX(pingport->ps_btycount, pingstbd->ps_btycount);
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_PHASE;
 		}
 
@@ -980,7 +976,7 @@ int mbsys_mr1v2001_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -1017,7 +1013,6 @@ int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 	double bestxtrack, bestxtrackflagged;
 	int found, foundflagged;
 	double depth, xtrack;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1071,7 +1066,7 @@ int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 			foundflagged = MB_NO;
 
 			/* loop over port bathymetry */
-			for (i = 0; i < pingport->ps_btycount; i++) {
+			for (int i = 0; i < pingport->ps_btycount; i++) {
 				if (store->ping.png_flags & PNG_XYZ) {
 					xtrack = pbty[3 * i];
 					depth = pbty[3 * i + 2];
@@ -1093,7 +1088,7 @@ int mbsys_mr1v2001_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 			}
 
 			/* loop over starboard bathymetry */
-			for (i = 0; i < pingstbd->ps_btycount; i++) {
+			for (int i = 0; i < pingstbd->ps_btycount; i++) {
 				if (store->ping.png_flags & PNG_XYZ) {
 					xtrack = sbty[3 * i];
 					depth = sbty[3 * i + 2];

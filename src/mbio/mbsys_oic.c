@@ -40,7 +40,6 @@ int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_oic_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -111,7 +110,7 @@ int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	store->ss = NULL;
 	store->ssacrosstrack = NULL;
 	store->ssalongtrack = NULL;
-	for (i = 0; i < MBSYS_OIC_MAX_CHANNELS; i++) {
+	for (int i = 0; i < MBSYS_OIC_MAX_CHANNELS; i++) {
 		store->channel[i].offset = 0;
 		store->channel[i].type = 0;
 		store->channel[i].side = 0;
@@ -121,7 +120,7 @@ int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 		store->channel[i].num_samples = 0;
 	}
 	memset(store->client, 0, MBSYS_OIC_MAX_CLIENT);
-	for (i = 0; i < MBSYS_OIC_MAX_CHANNELS; i++) {
+	for (int i = 0; i < MBSYS_OIC_MAX_CHANNELS; i++) {
 		store->rawsize[i] = 0;
 		store->raw[i] = NULL;
 	}
@@ -156,7 +155,6 @@ int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_oic_deall";
 	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -171,7 +169,7 @@ int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	store = (struct mbsys_oic_struct *)*store_ptr;
 
 	/* deallocate memory for data structures */
-	for (i = 0; i < store->num_chan; i++)
+	for (int i = 0; i < store->num_chan; i++)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->raw[i]), error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->beamflag, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&store->bath, error);
@@ -261,7 +259,6 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_oic_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -312,16 +309,16 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		*nbath = store->beams_bath;
 		*namp = store->beams_amp;
 		*nss = store->pixels_ss;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			beamflag[i] = store->beamflag[i];
 			bath[i] = store->bath[i];
 			bathacrosstrack[i] = store->bathacrosstrack[i];
 			bathalongtrack[i] = store->bathalongtrack[i];
 		}
-		for (i = 0; i < *namp; i++) {
+		for (int i = 0; i < *namp; i++) {
 			amp[i] = store->amp[i];
 		}
-		for (i = 0; i < *nss; i++) {
+		for (int i = 0; i < *nss; i++) {
 			ss[i] = store->ss[i];
 			ssacrosstrack[i] = store->ssacrosstrack[i];
 			ssalongtrack[i] = store->ssalongtrack[i];
@@ -346,15 +343,15 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -401,15 +398,15 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -430,7 +427,6 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_oic_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -458,17 +454,17 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -561,16 +557,16 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 			status = mb_mallocd(verbose, __FILE__, __LINE__, store->pixels_ss_alloc * sizeof(float),
 			                    (void **)&(store->ssalongtrack), error);
 		}
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			store->beamflag[i] = beamflag[i];
 			store->bath[i] = bath[i];
 			store->bathacrosstrack[i] = bathacrosstrack[i];
 			store->bathalongtrack[i] = bathalongtrack[i];
 		}
-		for (i = 0; i < store->beams_amp; i++) {
+		for (int i = 0; i < store->beams_amp; i++) {
 			store->amp[i] = amp[i];
 		}
-		for (i = 0; i < store->pixels_ss; i++) {
+		for (int i = 0; i < store->pixels_ss; i++) {
 			store->ss[i] = ss[i];
 			store->ssacrosstrack[i] = ssacrosstrack[i];
 			store->ssalongtrack[i] = ssalongtrack[i];
@@ -604,7 +600,6 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_oic_struct *store;
 	double alpha, beta;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -636,7 +631,7 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 		*nbeams = store->beams_bath;
 
 		/* initialize */
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			ttimes[i] = store->tt[i];
 			beta = store->angle[i];
 			alpha = store->fish_pitch;
@@ -683,7 +678,7 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -701,7 +696,6 @@ int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_oic_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -728,7 +722,7 @@ int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		*nbeams = store->beams_bath;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_PHASE;
 		}
 
@@ -761,7 +755,7 @@ int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -1102,7 +1096,6 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_oic_struct *store;
 	struct mbsys_oic_struct *copy;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1182,7 +1175,7 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 
 	/* allocate the raw data */
 	if (store != NULL && copy != NULL) {
-		for (i = 0; i < copy->num_chan; i++) {
+		for (int i = 0; i < copy->num_chan; i++) {
 			/* copy channel info */
 			copy->channel[i].offset = store->channel[i].offset;
 			copy->channel[i].type = store->channel[i].type;
@@ -1201,7 +1194,7 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 			}
 
 			/* copy the raw data */
-			for (j = 0; j < copy->rawsize[i]; j++) {
+			for (int j = 0; j < copy->rawsize[i]; j++) {
 				copy->raw[i][j] = store->raw[i][j];
 			}
 		}
@@ -1261,7 +1254,7 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 
 	/* copy the depths and sidescan */
 	if (status == MB_SUCCESS && store != NULL && copy != NULL) {
-		for (i = 0; i < copy->beams_bath; i++) {
+		for (int i = 0; i < copy->beams_bath; i++) {
 			copy->beamflag[i] = store->beamflag[i];
 			copy->bath[i] = store->bath[i];
 			copy->bathacrosstrack[i] = store->bathacrosstrack[i];
@@ -1269,23 +1262,23 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 			copy->tt[i] = store->tt[i];
 			copy->angle[i] = store->angle[i];
 		}
-		for (i = 0; i < copy->beams_amp; i++) {
+		for (int i = 0; i < copy->beams_amp; i++) {
 			copy->amp[i] = store->amp[i];
 		}
-		for (i = 0; i < copy->pixels_ss; i++) {
+		for (int i = 0; i < copy->pixels_ss; i++) {
 			copy->ss[i] = store->ss[i];
 			copy->ssacrosstrack[i] = store->ssacrosstrack[i];
 			copy->ssalongtrack[i] = store->ssalongtrack[i];
 		}
 
 		/* client */
-		for (i = 0; i < store->client_size; i++)
+		for (int i = 0; i < store->client_size; i++)
 			copy->client[i] = store->client[i];
 	}
 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE) {
-		for (i = 0; i < copy->num_chan; i++) {
+		for (int i = 0; i < copy->num_chan; i++) {
 			if (copy->raw[i] != NULL)
 				status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(copy->raw[i]), error);
 		}

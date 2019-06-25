@@ -45,7 +45,6 @@ int mbsys_benthos_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_benthos_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -124,7 +123,7 @@ int mbsys_benthos_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	store->ssrawbottompick = 0.0;   /* bottom pick time (sec) */
 	store->ssrawportsamples = 0;    /* number of port raw sidescan samples */
 	store->ssrawstbdsamples = 0;    /* number of stbd raw sidescan samples */
-	for (i = 0; i < MBSYS_BENTHOS_MAXRAWPIXELS; i++) {
+	for (int i = 0; i < MBSYS_BENTHOS_MAXRAWPIXELS; i++) {
 		store->ssrawport[i] = 0; /* raw port sidescan */
 		store->ssrawstbd[i] = 0; /* raw starboard sidescan */
 	}
@@ -132,11 +131,11 @@ int mbsys_benthos_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	store->beams_bath = 0;
 	store->pixels_ss = 0;
 	store->pixel_size = 0.0;
-	for (i = 0; i < MBSYS_BENTHOS_MAXBEAMS; i++) {
+	for (int i = 0; i < MBSYS_BENTHOS_MAXBEAMS; i++) {
 		store->beamflag[i] = MB_FLAG_NULL; /* beamflags */
 		store->bath[i] = 0.0;              /* bathymetry (m) */
 	}
-	for (i = 0; i < MBSYS_BENTHOS_MAXPIXELS; i++) {
+	for (int i = 0; i < MBSYS_BENTHOS_MAXPIXELS; i++) {
 		store->ss[i] = 0.0;             /* sidescan */
 		store->ss_alongtrack[i] = 0.0;  /* alongtrack distance (m) */
 		store->ss_acrosstrack[i] = 0.0; /* alongtrack distance (m) */
@@ -250,7 +249,6 @@ int mbsys_benthos_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_benthos_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -295,13 +293,13 @@ int mbsys_benthos_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*namp = 0;
 		*nss = store->pixels_ss;
 		;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			beamflag[i] = 0;
 			bath[i] = store->bath[i];
 			bathacrosstrack[i] = 0;
 			bathalongtrack[i] = 0;
 		}
-		for (i = 0; i < *nss; i++) {
+		for (int i = 0; i < *nss; i++) {
 			ss[i] = store->ss[i];
 			ssacrosstrack[i] = store->ss_acrosstrack[i];
 			//				= store->pixel_size * (i - store->pixels_ss / 2);
@@ -327,11 +325,11 @@ int mbsys_benthos_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		}
@@ -422,11 +420,11 @@ int mbsys_benthos_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 	}
@@ -447,7 +445,6 @@ int mbsys_benthos_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_benthos_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -475,12 +472,12 @@ int mbsys_benthos_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 	}
@@ -525,7 +522,6 @@ int mbsys_benthos_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_benthos_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -585,7 +581,7 @@ int mbsys_benthos_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  heave:%f  ltrk_off:%f\n", i,
 			        ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -950,7 +946,6 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	int groundsamples;
 	double groundrange;
 	int pixel1;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -974,7 +969,7 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA && store->ssrawstbdsamples > 0 && store->ssrawportsamples > 0) {
 		/* zero the sidescan */
-		for (i = 0; i < MBSYS_BENTHOS_MAXPIXELS; i++) {
+		for (int i = 0; i < MBSYS_BENTHOS_MAXPIXELS; i++) {
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
 			ssalongtrack[i] = 0.0;
@@ -1009,7 +1004,7 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 		/* loop over the port beams, figuring out
 		    acrosstrack distance for each raw sidescan sample */
-		for (i = 0; i < store->ssrawportsamples; i++) {
+		for (int i = 0; i < store->ssrawportsamples; i++) {
 			if (i > (store->ssrawportsamples - pixel1)) {
 				xtrackss = 0;
 			}
@@ -1024,7 +1019,7 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 		//		kk = store->ssrawportsamples - 1;
 		//		ipixel = pixel1 + 1;
-		//		for (i = store->ssrawportsamples - pixel1 - 1; i >= 0; i-- ) {
+		//		for (int i = store->ssrawportsamples - pixel1 - 1; i >= 0; i-- ) {
 		////			double q1 = pow(0.5 * ss_spacing * ipixel * store->png_computedsv, 2);
 		////			double q2 = pow( store->bath[0], 2);
 		////			xtrackss = sqrt(q1 -q2);
@@ -1041,7 +1036,7 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 		/* loop over the starboard beams, figuring out
 		    acrosstrack distance for each raw sidescan sample */
-		for (i = 0; i < store->ssrawstbdsamples; i++) {
+		for (int i = 0; i < store->ssrawstbdsamples; i++) {
 			if (i < pixel1) {
 				xtrackss = 0;
 			}
@@ -1055,7 +1050,7 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 
 		//		kk = MBSYS_BENTHOS_MAXPIXELS / 2;
 		//		ipixel = pixel1 + 1;
-		//		for (i = pixel1; i < store->ssrawstbdsamples; i++) {
+		//		for (int i = pixel1; i < store->ssrawstbdsamples; i++) {
 		//			xtrackss = sqrt( pow(0.5 * ss_spacing * ipixel * store->png_computedsv, 2)
 		//					- pow( store->bath[0], 2) );
 		//			ipixel++;
@@ -1121,7 +1116,7 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		//		    store->pixels_ss = MBSYS_BENTHOS_MAXPIXELS;
 		//		else
 		//		    store->pixels_ss = 0;
-		for (i = 0; i < store->pixels_ss; i++) {
+		for (int i = 0; i < store->pixels_ss; i++) {
 			store->ss[i] = ss[i];
 			store->ss_alongtrack[i] = ssalongtrack[i];
 			store->ss_acrosstrack[i] = ssacrosstrack[i];
@@ -1140,11 +1135,11 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			//				store->bath_acrosstrack[i],
 			//				store->bath_alongtrack[i]);
 			fprintf(stderr, "dbg2       pixels_ss:  %d\n", MBSYS_BENTHOS_MAXPIXELS);
-			for (i = 0; i < MBSYS_BENTHOS_MAXPIXELS; i++)
+			for (int i = 0; i < MBSYS_BENTHOS_MAXPIXELS; i++)
 				fprintf(stderr, "dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, ss_cnt[i], ss[i],
 				        ssacrosstrack[i], ssalongtrack[i]);
 			fprintf(stderr, "dbg2       pixels_ss:  %d\n", store->pixels_ss);
-			for (i = 0; i < MBSYS_BENTHOS_MAXPIXELS; i++)
+			for (int i = 0; i < MBSYS_BENTHOS_MAXPIXELS; i++)
 				fprintf(stderr, "dbg2       pixel:%4d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, store->ss[i],
 				        store->ss_acrosstrack[i], store->ss_alongtrack[i]);
 		}

@@ -171,7 +171,6 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	double gain_db;
 	double gain_factor;
 	int center_pixel;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -223,7 +222,7 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		center_pixel = store->npixels / 2;
 		gain_db = store->ping_gain - store->transmitter_attenuation + 10.0 * log10(store->ping_pulse_width / 5.0) - 30.0;
 		gain_factor = pow(10.0, (-gain_db / 20.0));
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			if (store->beams[i].quality == ' ')
 				beamflag[i] = MB_FLAG_NONE;
 			else if (store->beams[i].quality == '\n')
@@ -240,10 +239,10 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			bathacrosstrack[i] = store->beams[i].acrosstrack;
 			bathalongtrack[i] = store->beams[i].alongtrack;
 		}
-		for (i = 0; i < *namp; i++) {
+		for (int i = 0; i < *namp; i++) {
 			amp[i] = 0.25 * store->beams[i].amplitude - gain_db;
 		}
-		for (i = 0; i < *nss; i++) {
+		for (int i = 0; i < *nss; i++) {
 			if (store->pixels[i].amplitude > 0)
 				ss[i] = gain_factor * store->pixels[i].amplitude;
 			else
@@ -271,15 +270,15 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -326,15 +325,15 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -360,7 +359,6 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	double gain_db;
 	double gain_factor;
 	int center_pixel;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -388,17 +386,17 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -447,7 +445,7 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		    into data structure */
 		gain_db = store->ping_gain - store->transmitter_attenuation + 10.0 * log10(store->ping_pulse_width / 5.0) - 30.0;
 		gain_factor = pow(10.0, (gain_db / 20.0));
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			if (mb_beam_check_flag(beamflag[i])) {
 				if (mb_beam_check_flag_null(beamflag[i]))
 					store->beams[i].quality = '0';
@@ -464,13 +462,13 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 			store->beams[i].acrosstrack = bathacrosstrack[i];
 			store->beams[i].alongtrack = bathalongtrack[i];
 		}
-		for (i = 0; i < namp; i++)
+		for (int i = 0; i < namp; i++)
 			store->beams[i].amplitude = 4.0 * (amp[i] + gain_db);
 		if (store->pixel_size <= 0.0)
 			set_pixel_size = MB_YES;
 		else
 			set_pixel_size = MB_NO;
-		for (i = 0; i < nss; i++) {
+		for (int i = 0; i < nss; i++) {
 			if (ss[i] > MB_SIDESCAN_NULL)
 				store->pixels[i].amplitude = gain_factor * ss[i];
 			else
@@ -507,7 +505,6 @@ int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -542,7 +539,7 @@ int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		*ssv = store->ssv;
 
 		/* get travel times, angles */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = store->beams[i].range;
 			angles[i] = store->beams[i].angle_across;
 			angles_forward[i] = store->beams[i].angle_forward;
@@ -586,7 +583,7 @@ int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -604,7 +601,6 @@ int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -631,7 +627,7 @@ int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*nbeams = store->nbeams;
 
 		/* get bottom detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			if (store->beams[i].source == 'W')
 				detects[i] = MB_DETECT_AMPLITUDE;
 			else if (store->beams[i].source == 'B')
@@ -669,7 +665,7 @@ int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detect:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -766,7 +762,6 @@ int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 	struct mbsys_sb2100_struct *store;
 	double bath_best;
 	double xtrack_min;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -793,7 +788,7 @@ int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 			bath_best = store->beams[store->nbeams / 2].depth;
 		else {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < store->nbeams; i++) {
+			for (int i = 0; i < store->nbeams; i++) {
 				if (store->beams[i].depth > 0.0 && fabs(store->beams[i].acrosstrack) < xtrack_min) {
 					xtrack_min = fabs(store->beams[i].acrosstrack);
 					bath_best = store->beams[i].depth;
@@ -802,7 +797,7 @@ int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 		}
 		if (bath_best <= 0.0) {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < store->nbeams; i++) {
+			for (int i = 0; i < store->nbeams; i++) {
 				if (store->beams[i].depth < 0.0 && fabs(store->beams[i].acrosstrack) < xtrack_min) {
 					xtrack_min = fabs(store->beams[i].acrosstrack);
 					bath_best = -store->beams[i].depth;
@@ -1068,7 +1063,6 @@ int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1094,7 +1088,7 @@ int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
 		*nsvp = store->num_svp;
 
 		/* get profile */
-		for (i = 0; i < *nsvp; i++) {
+		for (int i = 0; i < *nsvp; i++) {
 			depth[i] = store->svp[i].depth;
 			velocity[i] = store->svp[i].velocity;
 		}
@@ -1122,7 +1116,7 @@ int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
-		for (i = 0; i < *nsvp; i++)
+		for (int i = 0; i < *nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1137,7 +1131,6 @@ int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1147,7 +1140,7 @@ int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 		fprintf(stderr, "dbg2       nsvp:       %d\n", nsvp);
-		for (i = 0; i < nsvp; i++)
+		for (int i = 0; i < nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 	}
 
@@ -1163,7 +1156,7 @@ int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 		store->num_svp = MIN(nsvp, MBSYS_SB2100_MAXVEL);
 
 		/* get profile */
-		for (i = 0; i < store->num_svp; i++) {
+		for (int i = 0; i < store->num_svp; i++) {
 			store->svp[i].depth = depth[i];
 			store->svp[i].velocity = velocity[i];
 		}

@@ -156,7 +156,6 @@ int mbsys_mstiff_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mstiff_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -200,7 +199,7 @@ int mbsys_mstiff_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*nbath = 0;
 		*namp = 0;
 		*nss = store->pixels_ss;
-		for (i = 0; i < *nss; i++) {
+		for (int i = 0; i < *nss; i++) {
 			ss[i] = store->ss[i];
 			ssacrosstrack[i] = store->ssacrosstrack[i];
 			ssalongtrack[i] = 0.0;
@@ -225,11 +224,11 @@ int mbsys_mstiff_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%4d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -259,7 +258,7 @@ int mbsys_mstiff_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:         %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%4d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
 	}
 	if (verbose >= 2) {
@@ -279,7 +278,6 @@ int mbsys_mstiff_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mstiff_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -307,16 +305,16 @@ int mbsys_mstiff_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%4d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        amp[%d]: %f\n", i, amp[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        ss[%d]: %f    ssdist[%d]: %f\n", i, ss[i], i, ssacrosstrack[i]);
 	}
 	if (verbose >= 2 && kind == MB_DATA_COMMENT) {
@@ -349,7 +347,7 @@ int mbsys_mstiff_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		/* put sidescan values
 		    into data structure */
 		store->pixels_ss = nss;
-		for (i = 0; i < nss; i++) {
+		for (int i = 0; i < nss; i++) {
 			store->ss[i] = ss[i];
 			store->ssacrosstrack[i] = ssacrosstrack[i];
 		}
@@ -374,7 +372,6 @@ int mbsys_mstiff_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mstiff_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -426,7 +423,7 @@ int mbsys_mstiff_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -444,7 +441,6 @@ int mbsys_mstiff_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mstiff_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -499,7 +495,7 @@ int mbsys_mstiff_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {

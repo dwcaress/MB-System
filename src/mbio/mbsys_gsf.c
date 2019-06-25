@@ -112,7 +112,6 @@ int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	gsfRecords *records;
 	gsfSwathBathyPing *mb_ping;
 	gsfTimeSeriesIntensity *snippet;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -149,7 +148,7 @@ int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			*namp = 0;
 		*nss = 0;
 		if (mb_ping->brb_inten != NULL) {
-			for (i = 0; i < *nbath; i++) {
+			for (int i = 0; i < *nbath; i++) {
 				snippet = &(mb_ping->brb_inten->time_series[i]);
 				(*nss) += snippet->sample_count;
 			}
@@ -362,7 +361,6 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	double ss_spacing, ss_spacing_use;
 	double vertical, range, beam_foot, sint, angle;
 	int gsfstatus;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -501,7 +499,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		*nss = 0;
 
 		/* read depth and beam location values into storage arrays */
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			/* set null beam flag if required */
 			if (mb_ping->depth[i] == 0.0 && mb_ping->across_track[i] == 0.0 && mb_ping->beam_flags[i] != MB_FLAG_NULL)
 				mb_ping->beam_flags[i] = MB_FLAG_NULL;
@@ -523,11 +521,11 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 
 		/* read amplitude values into storage arrays */
 		if (mb_ping->mc_amplitude != NULL)
-			for (i = 0; i < *namp; i++) {
+			for (int i = 0; i < *namp; i++) {
 				amp[i] = mb_ping->mc_amplitude[i];
 			}
 		else if (mb_ping->mr_amplitude != NULL)
-			for (i = 0; i < *namp; i++) {
+			for (int i = 0; i < *namp; i++) {
 				amp[i] = mb_ping->mr_amplitude[i];
 			}
 
@@ -552,7 +550,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfEM3Specific.sample_rate);
 			}
 			*nss = 0;
-			for (i = 0; i < *nbath; i++) {
+			for (int i = 0; i < *nbath; i++) {
 				/* get pixel sample size */
 				snippet = &(mb_ping->brb_inten->time_series[i]);
 				vertical = mb_ping->depth[i] - mb_ping->depth_corrector;
@@ -564,7 +562,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 					ss_spacing_use = beam_foot / snippet->sample_count;
 				else
 					ss_spacing_use = ss_spacing / sint;
-				for (j = 0; j < snippet->sample_count; j++) {
+				for (int j = 0; j < snippet->sample_count; j++) {
 					ss[*nss] = snippet->samples[j];
 					ssacrosstrack[*nss] = bathacrosstrack[i] + ss_spacing_use * (j - snippet->detect_sample);
 					ssalongtrack[*nss] = bathalongtrack[i];
@@ -592,11 +590,11 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		}
@@ -646,15 +644,15 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2       pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -679,7 +677,6 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	gsfRecords *records;
 	gsfSwathBathyPing *mb_ping;
 	int anyunflagged;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -707,12 +704,12 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 	}
@@ -798,7 +795,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 		    beam flags - set or unset ping flag based on whether any
 		    unflagged beams are found */
 		anyunflagged = MB_NO;
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			if (mb_beam_ok(beamflag[i]))
 				anyunflagged = MB_YES;
 		}
@@ -808,7 +805,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 			mb_ping->ping_flags = 0;
 
 		/* read depth and beam location values into storage arrays */
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			mb_ping->beam_flags[i] = beamflag[i];
 			if (beamflag[i] != MB_FLAG_NULL) {
 				mb_ping->depth[i] = bath[i];
@@ -824,11 +821,11 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 
 		/* read amplitude values into storage arrays */
 		if (mb_ping->mc_amplitude != NULL)
-			for (i = 0; i < namp; i++) {
+			for (int i = 0; i < namp; i++) {
 				mb_ping->mc_amplitude[i] = amp[i];
 			}
 		else if (mb_ping->mr_amplitude != NULL)
-			for (i = 0; i < namp; i++) {
+			for (int i = 0; i < namp; i++) {
 				mb_ping->mr_amplitude[i] = amp[i];
 			}
 
@@ -877,7 +874,6 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	gsfRecords *records;
 	gsfSwathBathyPing *mb_ping;
 	double alpha, beta;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -914,7 +910,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 		/* get travel times, angles */
 		if (mb_ping->travel_time != NULL && mb_ping->beam_angle != NULL) {
 			if (mb_ping->beam_angle_forward != NULL) {
-				for (i = 0; i < *nbeams; i++) {
+				for (int i = 0; i < *nbeams; i++) {
 					ttimes[i] = mb_ping->travel_time[i];
 					angles[i] = fabs(mb_ping->beam_angle[i]);
 					angles_forward[i] = mb_ping->beam_angle_forward[i];
@@ -927,7 +923,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 				}
 			}
 			else {
-				for (i = 0; i < *nbeams; i++) {
+				for (int i = 0; i < *nbeams; i++) {
 					ttimes[i] = mb_ping->travel_time[i];
 					angles[i] = fabs(mb_ping->beam_angle[i]);
 					if (mb_ping->across_track[i] < 0.0 || mb_ping->beam_angle[i] < 0.0)
@@ -944,44 +940,44 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 			if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC) {
 				*ssv = 1500.0;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = 0.0;
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM100_SPECIFIC) {
 				*ssv = 1500.0;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = angles[i];
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM950_SPECIFIC) {
 				*ssv = mb_ping->sensor_data.gsfEM950Specific.surface_velocity;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = angles[i];
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM121A_SPECIFIC) {
 				*ssv = mb_ping->sensor_data.gsfEM121ASpecific.surface_velocity;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = 0.0;
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM121_SPECIFIC) {
 				*ssv = mb_ping->sensor_data.gsfEM121Specific.surface_velocity;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = 0.0;
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC) {
 				*ssv = 1500.0;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = 50.0;
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC) {
 				*ssv = mb_ping->sensor_data.gsfSeaBatSpecific.surface_velocity;
 				*draft = mb_ping->depth_corrector;
 				if (mb_ping->beam_angle_forward == NULL) {
-					for (i = 0; i < *nbeams; i++) {
+					for (int i = 0; i < *nbeams; i++) {
 						if (mb_ping->across_track[i] < 0.0 && mb_ping->beam_angle[i] > 0.0)
 							beta = 90.0 + mb_ping->beam_angle[i];
 						else
@@ -990,32 +986,32 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 						mb_rollpitch_to_takeoff(verbose, alpha, beta, &angles[i], &angles_forward[i], error);
 					}
 				}
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = angles[i];
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM1000_SPECIFIC) {
 				*ssv = mb_ping->sensor_data.gsfEM1000Specific.surface_velocity;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = angles[i];
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_TYPEIII_SEABEAM_SPECIFIC) {
 				*ssv = 1500.0;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = 0.0;
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SB_AMP_SPECIFIC) {
 				*ssv = 1500.0;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = 0.0;
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEABAT_II_SPECIFIC) {
 				*ssv = mb_ping->sensor_data.gsfSeaBatIISpecific.surface_velocity;
 				*draft = mb_ping->depth_corrector;
 				if (mb_ping->beam_angle_forward == NULL) {
-					for (i = 0; i < *nbeams; i++) {
+					for (int i = 0; i < *nbeams; i++) {
 						if (mb_ping->across_track[i] < 0.0 && mb_ping->beam_angle[i] > 0.0)
 							beta = 90.0 + mb_ping->beam_angle[i];
 						else
@@ -1024,14 +1020,14 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 						mb_rollpitch_to_takeoff(verbose, alpha, beta, &angles[i], &angles_forward[i], error);
 					}
 				}
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = angles[i];
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEABAT_8101_SPECIFIC) {
 				*ssv = mb_ping->sensor_data.gsfSeaBat8101Specific.surface_velocity;
 				*draft = mb_ping->depth_corrector;
 				if (mb_ping->beam_angle_forward == NULL) {
-					for (i = 0; i < *nbeams; i++) {
+					for (int i = 0; i < *nbeams; i++) {
 						if (mb_ping->across_track[i] < 0.0 && mb_ping->beam_angle[i] > 0.0)
 							beta = 90.0 + mb_ping->beam_angle[i];
 						else
@@ -1040,38 +1036,38 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 						mb_rollpitch_to_takeoff(verbose, alpha, beta, &angles[i], &angles_forward[i], error);
 					}
 				}
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = angles[i];
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC) {
 				*ssv = mb_ping->sensor_data.gsfReson8100Specific.surface_velocity;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = angles[i];
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC) {
 				*ssv = mb_ping->sensor_data.gsfSeaBeam2112Specific.surface_velocity;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = 0.0;
 			}
 			else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC) {
 				*ssv = mb_ping->sensor_data.gsfElacMkIISpecific.sound_vel;
 				*draft = mb_ping->depth_corrector;
 				if (mb_ping->beam_angle_forward == NULL) {
-					for (i = 0; i < *nbeams; i++) {
+					for (int i = 0; i < *nbeams; i++) {
 						beta = 90.0 - mb_ping->beam_angle[i];
 						alpha = mb_ping->pitch;
 						mb_rollpitch_to_takeoff(verbose, alpha, beta, &angles[i], &angles_forward[i], error);
 					}
 				}
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = 37.5;
 			}
 			else {
 				*ssv = 1500.0;
 				*draft = mb_ping->depth_corrector;
-				for (i = 0; i < *nbeams; i++)
+				for (int i = 0; i < *nbeams; i++)
 					angles_null[i] = 0.0;
 			}
 		}
@@ -1107,7 +1103,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  heave:%f  ltrk_off:%f\n", i,
 			        ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -1128,7 +1124,6 @@ int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	gsfDataID *dataID;
 	gsfRecords *records;
 	gsfSwathBathyPing *mb_ping;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1158,7 +1153,7 @@ int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		*nbeams = mb_ping->number_beams;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_UNKNOWN;
 		}
 
@@ -1191,7 +1186,7 @@ int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -1214,7 +1209,6 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 	gsfSwathBathyPing *mb_ping;
 	double bath_best;
 	double xtrack_min;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1263,7 +1257,7 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 			}
 			else {
 				xtrack_min = 99999999.9;
-				for (i = 0; i < mb_ping->number_beams; i++) {
+				for (int i = 0; i < mb_ping->number_beams; i++) {
 					if (mb_beam_ok(mb_ping->beam_flags[i]) && fabs(mb_ping->across_track[i]) < xtrack_min) {
 						xtrack_min = fabs(mb_ping->across_track[i]);
 						bath_best = mb_ping->depth[i];
@@ -1272,7 +1266,7 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 			}
 			if (bath_best <= 0.0) {
 				xtrack_min = 99999999.9;
-				for (i = 0; i < mb_ping->number_beams; i++) {
+				for (int i = 0; i < mb_ping->number_beams; i++) {
 					if (!mb_beam_check_flag(mb_ping->beam_flags[i]) && fabs(mb_ping->across_track[i]) < xtrack_min) {
 						xtrack_min = fabs(mb_ping->across_track[i]);
 						bath_best = mb_ping->depth[i];
@@ -1674,7 +1668,6 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	gsfDataID *dataID;
 	gsfRecords *records;
 	gsfSVP *svp;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1703,7 +1696,7 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*nsvp = svp->number_points;
 
 		/* get profile */
-		for (i = 0; i < *nsvp; i++) {
+		for (int i = 0; i < *nsvp; i++) {
 			depth[i] = svp->depth[i];
 			velocity[i] = svp->sound_speed[i];
 		}
@@ -1731,7 +1724,7 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
-		for (i = 0; i < *nsvp; i++)
+		for (int i = 0; i < *nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1749,7 +1742,6 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp,
 	gsfDataID *dataID;
 	gsfRecords *records;
 	gsfSVP *svp;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1759,7 +1751,7 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp,
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 		fprintf(stderr, "dbg2       nsvp:       %d\n", nsvp);
-		for (i = 0; i < nsvp; i++)
+		for (int i = 0; i < nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 	}
 
@@ -1784,7 +1776,7 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp,
 		svp->number_points = nsvp;
 
 		/* get profile */
-		for (i = 0; i < svp->number_points; i++) {
+		for (int i = 0; i < svp->number_points; i++) {
 			svp->depth[i] = depth[i];
 			svp->sound_speed[i] = velocity[i];
 		}
@@ -1875,7 +1867,6 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 	const double GSF_DOPPLER_CORRECTION_ASSUMED_HIGHEST_PRECISION = 100;
 	const double GSF_SONAR_VERT_UNCERT_ASSUMED_HIGHEST_PRECISION = 10000;
 
-	int i, j;                                  /* iterators */
 	double *dptr;                              /* pointer to ping array */
 	unsigned short *usptr;                     /* pointer to ping array */
 	unsigned char *ucptr;                      /* pointer to ping array */
@@ -1894,7 +1885,7 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 		fprintf(stderr, "dbg2       mb_ping:     %p\n", (void *)mb_ping);
 	}
 
-	for (i = 1; i <= GSF_MAX_PING_ARRAY_SUBRECORDS; i++) {
+	for (int i = 1; i <= GSF_MAX_PING_ARRAY_SUBRECORDS; i++) {
 		dptr = NULL;
 		usptr = NULL;
 
@@ -2160,7 +2151,7 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 			min = DBL_MAX;
 
 			if (dptr != NULL) {
-				for (j = 0; j < mb_ping->number_beams; j++) {
+				for (int j = 0; j < mb_ping->number_beams; j++) {
 					if (dptr[j] > max)
 						max = dptr[j];
 					if (dptr[j] < min)
@@ -2168,7 +2159,7 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 				}
 			}
 			else if (usptr != NULL) {
-				for (j = 0; j < mb_ping->number_beams; j++) {
+				for (int j = 0; j < mb_ping->number_beams; j++) {
 					if (usptr[j] > max)
 						max = (double)usptr[j];
 					if (usptr[j] < min)
@@ -2176,7 +2167,7 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 				}
 			}
 			else if (ucptr != NULL) {
-				for (j = 0; j < mb_ping->number_beams; j++) {
+				for (int j = 0; j < mb_ping->number_beams; j++) {
 					if (ucptr[j] > max)
 						max = (double)ucptr[j];
 					if (ucptr[j] < min)
@@ -2221,7 +2212,7 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 	/* print output debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  GSF Scale Factors Calculated in MBIO function <%s>\n", function_name);
-		for (i = 1; i <= GSF_MAX_PING_ARRAY_SUBRECORDS; i++) {
+		for (int i = 1; i <= GSF_MAX_PING_ARRAY_SUBRECORDS; i++) {
 			fprintf(stderr, "dbg4       Scale Factors %2d of %2d: compressionFlag:%5x offset:%10f multiplier:%10f\n", i,
 			        GSF_MAX_PING_ARRAY_SUBRECORDS, mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag,
 			        mb_ping->scaleFactors.scaleTable[i - 1].offset, mb_ping->scaleFactors.scaleTable[i - 1].multiplier);
