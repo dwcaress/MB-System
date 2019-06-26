@@ -39,7 +39,6 @@
 /*--------------------------------------------------------------------*/
 int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 	char *function_name = "mb_pr_checkstatus";
-	int status = MB_SUCCESS;
 	int ifilemodtime = 0;
 	int ofilemodtime = 0;
 	int pfilemodtime = 0;
@@ -51,7 +50,6 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 	int svpmodtime = 0;
 	struct stat file_status;
 	int fstat;
-	struct mb_process_struct process;
 	mb_path mbp_pfile;
 
 	/* print input debug statements */
@@ -89,6 +87,7 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 	/* if input and parameter files found check output and dependencies */
 	if (*prstatus == MB_PR_FILE_NEEDS_PROCESSING) {
 		/* read the parameter file */
+		struct mb_process_struct process;
 		mb_pr_readpar(verbose, file, MB_NO, &process, error);
 
 		/* get mod time for the output file */
@@ -147,6 +146,8 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -167,7 +168,6 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	char *lastslash;
 	FILE *fp;
 	struct stat statbuf;
-	int status = MB_SUCCESS;
 	int len;
 	int explicit;
 	char *bufptr;
@@ -1172,6 +1172,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, process, error);
 
+	int status = MB_SUCCESS;
+
 	/* check for error */
 	if (process->mbp_ifile_specified == MB_NO || process->mbp_ofile_specified == MB_NO ||
 	    process->mbp_format_specified == MB_NO) {
@@ -1320,7 +1322,6 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 	char relative_path[MBP_FILENAMESIZE];
 	char *lastslash;
 	FILE *fp;
-	int status = MB_SUCCESS;
 	time_t right_now;
 	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 	char *bufptr;
@@ -1478,6 +1479,8 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 	/* get expected process parameter file name */
 	strcpy(parfile, file);
 	strcat(parfile, ".par");
+
+	int status = MB_SUCCESS;
 
 	/* open parameter file */
 	if ((fp = fopen(parfile, "w")) != NULL) {
@@ -1758,7 +1761,6 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 /*--------------------------------------------------------------------*/
 int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error) {
 	char *function_name = "mb_pr_bathmode";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1783,6 +1785,8 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error) {
 	else
 		process->mbp_bathrecalc_mode = MBP_BATHRECALC_OFF;
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -1797,7 +1801,6 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *error) {
 	char *function_name = "mb_pr_default_output";
-	int status = MB_SUCCESS;
 	char fileroot[MBP_FILENAMESIZE];
 	int format;
 
@@ -1814,7 +1817,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 	}
 
 	/* figure out data format and fileroot if possible */
-	status = mb_get_format(verbose, process->mbp_ifile, fileroot, &format, error);
+	int status = mb_get_format(verbose, process->mbp_ifile, fileroot, &format, error);
 
 	/* deal with format */
 	if (status == MB_SUCCESS && format > 0) {
@@ -1863,7 +1866,6 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 /*--------------------------------------------------------------------*/
 int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *error) {
 	char *function_name = "mb_pr_get_output";
-	int status = MB_SUCCESS;
 	char fileroot[MBP_FILENAMESIZE];
 	int tformat;
 
@@ -1877,7 +1879,7 @@ int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *er
 	}
 
 	/* figure out data format and fileroot if possible */
-	status = mb_get_format(verbose, ifile, fileroot, &tformat, error);
+	int status = mb_get_format(verbose, ifile, fileroot, &tformat, error);
 
 	/* use fileroot if possible */
 	if (status == MB_SUCCESS) {
@@ -1922,8 +1924,6 @@ int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *er
 /*--------------------------------------------------------------------*/
 int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, int *error) {
 	char *function_name = "mb_pr_check";
-	int status = MB_SUCCESS;
-	struct mb_process_struct process;
 	char ofile[MBP_FILENAMESIZE];
 	int format;
 	char line[MB_PATH_MAXLINE];
@@ -1979,6 +1979,9 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 		missing_ifile = MB_YES;
 		(*nparproblem)++;
 	}
+
+	int status = MB_SUCCESS;
+	struct mb_process_struct process;
 
 	/* only check parameter file if parameter file exists */
 	sprintf(ofile, "%s.par", ifile);
@@ -2142,8 +2145,6 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 /*--------------------------------------------------------------------*/
 int mb_pr_update_ofile(int verbose, char *file, int mbp_ofile_specified, char *mbp_ofile, int *error) {
 	char *function_name = "mb_pr_update_ofile";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2156,7 +2157,8 @@ int mb_pr_update_ofile(int verbose, char *file, int mbp_ofile_specified, char *m
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set ofile value */
 	if (mbp_ofile != NULL) {
@@ -2185,8 +2187,6 @@ int mb_pr_update_ofile(int verbose, char *file, int mbp_ofile_specified, char *m
 /*--------------------------------------------------------------------*/
 int mb_pr_update_format(int verbose, char *file, int mbp_format_specified, int mbp_format, int *error) {
 	char *function_name = "mb_pr_update_format";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2199,7 +2199,8 @@ int mb_pr_update_format(int verbose, char *file, int mbp_format_specified, int m
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set format value */
 	process.mbp_format_specified = mbp_format_specified;
@@ -2223,8 +2224,6 @@ int mb_pr_update_format(int verbose, char *file, int mbp_format_specified, int m
 int mb_pr_update_rollbias(int verbose, char *file, int mbp_rollbias_mode, double mbp_rollbias, double mbp_rollbias_port,
                           double mbp_rollbias_stbd, int *error) {
 	char *function_name = "mb_pr_update_rollbias";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2239,7 +2238,8 @@ int mb_pr_update_rollbias(int verbose, char *file, int mbp_rollbias_mode, double
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set rollbias values */
 	process.mbp_rollbias_mode = mbp_rollbias_mode;
@@ -2267,8 +2267,6 @@ int mb_pr_update_rollbias(int verbose, char *file, int mbp_rollbias_mode, double
 /*--------------------------------------------------------------------*/
 int mb_pr_update_pitchbias(int verbose, char *file, int mbp_pitchbias_mode, double mbp_pitchbias, int *error) {
 	char *function_name = "mb_pr_update_pitchbias";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2281,7 +2279,8 @@ int mb_pr_update_pitchbias(int verbose, char *file, int mbp_pitchbias_mode, doub
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set pitchbias values */
 	process.mbp_pitchbias_mode = mbp_pitchbias_mode;
@@ -2308,8 +2307,6 @@ int mb_pr_update_pitchbias(int verbose, char *file, int mbp_pitchbias_mode, doub
 int mb_pr_update_draft(int verbose, char *file, int mbp_draft_mode, double mbp_draft, double mbp_draft_offset,
                        double mbp_draft_mult, int *error) {
 	char *function_name = "mb_pr_update_draft";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2324,7 +2321,8 @@ int mb_pr_update_draft(int verbose, char *file, int mbp_draft_mode, double mbp_d
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set draft values */
 	process.mbp_draft_mode = mbp_draft_mode;
@@ -2352,8 +2350,6 @@ int mb_pr_update_draft(int verbose, char *file, int mbp_draft_mode, double mbp_d
 /*--------------------------------------------------------------------*/
 int mb_pr_update_heave(int verbose, char *file, int mbp_heave_mode, double mbp_heave, double mbp_heave_mult, int *error) {
 	char *function_name = "mb_pr_update_heave";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2367,7 +2363,8 @@ int mb_pr_update_heave(int verbose, char *file, int mbp_heave_mode, double mbp_h
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set heave values */
 	process.mbp_heave_mode = mbp_heave_mode;
@@ -2396,8 +2393,6 @@ int mb_pr_update_lever(int verbose, char *file, int mbp_lever_mode, double mbp_v
                        double mbp_vru_offsetz, double mbp_sonar_offsetx, double mbp_sonar_offsety, double mbp_sonar_offsetz,
                        int *error) {
 	char *function_name = "mb_pr_update_lever";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2415,7 +2410,8 @@ int mb_pr_update_lever(int verbose, char *file, int mbp_lever_mode, double mbp_v
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set lever values */
 	process.mbp_lever_mode = mbp_lever_mode;
@@ -2446,8 +2442,6 @@ int mb_pr_update_lever(int verbose, char *file, int mbp_lever_mode, double mbp_v
 /*--------------------------------------------------------------------*/
 int mb_pr_update_tide(int verbose, char *file, int mbp_tide_mode, char *mbp_tidefile, int mbp_tide_format, int *error) {
 	char *function_name = "mb_pr_update_tide";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2461,7 +2455,8 @@ int mb_pr_update_tide(int verbose, char *file, int mbp_tide_mode, char *mbp_tide
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set lever values */
 	process.mbp_tide_mode = mbp_tide_mode;
@@ -2489,8 +2484,6 @@ int mb_pr_update_tide(int verbose, char *file, int mbp_tide_mode, char *mbp_tide
 /*--------------------------------------------------------------------*/
 int mb_pr_update_tt(int verbose, char *file, int mbp_tt_mode, double mbp_tt_mult, int *error) {
 	char *function_name = "mb_pr_update_tt";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2503,7 +2496,8 @@ int mb_pr_update_tt(int verbose, char *file, int mbp_tt_mode, double mbp_tt_mult
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set tt values */
 	process.mbp_tt_mode = mbp_tt_mode;
@@ -2529,8 +2523,6 @@ int mb_pr_update_tt(int verbose, char *file, int mbp_tt_mode, double mbp_tt_mult
 /*--------------------------------------------------------------------*/
 int mb_pr_update_ssv(int verbose, char *file, int mbp_ssv_mode, double mbp_ssv, int *error) {
 	char *function_name = "mb_pr_update_ssv";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2543,7 +2535,8 @@ int mb_pr_update_ssv(int verbose, char *file, int mbp_ssv_mode, double mbp_ssv, 
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set ssv values */
 	process.mbp_ssv_mode = mbp_ssv_mode;
@@ -2570,8 +2563,6 @@ int mb_pr_update_ssv(int verbose, char *file, int mbp_ssv_mode, double mbp_ssv, 
 int mb_pr_update_svp(int verbose, char *file, int mbp_svp_mode, char *mbp_svpfile, int mbp_angle_mode, int mbp_corrected,
                      int *error) {
 	char *function_name = "mb_pr_update_svp";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2586,7 +2577,8 @@ int mb_pr_update_svp(int verbose, char *file, int mbp_svp_mode, char *mbp_svpfil
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set svp values */
 	process.mbp_svp_mode = mbp_svp_mode;
@@ -2615,8 +2607,6 @@ int mb_pr_update_svp(int verbose, char *file, int mbp_svp_mode, char *mbp_svpfil
 /*--------------------------------------------------------------------*/
 int mb_pr_update_static(int verbose, char *file, int mbp_static_mode, char *mbp_staticfile, int *error) {
 	char *function_name = "mb_pr_update_static";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2629,7 +2619,8 @@ int mb_pr_update_static(int verbose, char *file, int mbp_static_mode, char *mbp_
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set svp values */
 	process.mbp_static_mode = mbp_static_mode;
@@ -2654,8 +2645,6 @@ int mb_pr_update_static(int verbose, char *file, int mbp_static_mode, char *mbp_
 int mb_pr_update_navadj(int verbose, char *file, int mbp_navadj_mode, char *mbp_navadjfile, int mbp_navadj_algorithm,
                         int *error) {
 	char *function_name = "mb_pr_update_navadj";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2669,7 +2658,8 @@ int mb_pr_update_navadj(int verbose, char *file, int mbp_navadj_mode, char *mbp_
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set navadj values */
 	process.mbp_navadj_mode = mbp_navadj_mode;
@@ -2697,8 +2687,6 @@ int mb_pr_update_navadj(int verbose, char *file, int mbp_navadj_mode, char *mbp_
 int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *mbp_attitudefile, int mbp_attitude_format,
                           int *error) {
 	char *function_name = "mb_pr_update_attitude";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2712,7 +2700,8 @@ int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set lever values */
 	process.mbp_attitude_mode = mbp_attitude_mode;
@@ -2741,8 +2730,6 @@ int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *
 int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, char *mbp_sonardepthfile, int mbp_sonardepth_format,
                             int *error) {
 	char *function_name = "mb_pr_update_sonardepth";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2756,7 +2743,8 @@ int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, ch
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set lever values */
 	process.mbp_sonardepth_mode = mbp_sonardepth_mode;
@@ -2786,8 +2774,6 @@ int mb_pr_update_nav(int verbose, char *file, int mbp_nav_mode, char *mbp_navfil
                      int mbp_nav_speed, int mbp_nav_draft, int mbp_nav_attitude, int mbp_nav_algorithm, double mbp_nav_timeshift,
                      int *error) {
 	char *function_name = "mb_pr_update_nav";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2807,7 +2793,8 @@ int mb_pr_update_nav(int verbose, char *file, int mbp_nav_mode, char *mbp_navfil
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set nav values */
 	process.mbp_nav_mode = mbp_nav_mode;
@@ -2840,8 +2827,6 @@ int mb_pr_update_navshift(int verbose, char *file, int mbp_nav_shift, double mbp
                           double mbp_nav_offsetz, double mbp_nav_shiftlon, double mbp_nav_shiftlat, double mbp_nav_shiftx,
                           double mbp_nav_shifty, int *error) {
 	char *function_name = "mb_pr_update_navshift";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2860,7 +2845,8 @@ int mb_pr_update_navshift(int verbose, char *file, int mbp_nav_shift, double mbp
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set nav values */
 	process.mbp_nav_shift = mbp_nav_shift;
@@ -2889,8 +2875,6 @@ int mb_pr_update_navshift(int verbose, char *file, int mbp_nav_shift, double mbp
 /*--------------------------------------------------------------------*/
 int mb_pr_update_heading(int verbose, char *file, int mbp_heading_mode, double mbp_headingbias, int *error) {
 	char *function_name = "mb_pr_update_heading";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2903,7 +2887,8 @@ int mb_pr_update_heading(int verbose, char *file, int mbp_heading_mode, double m
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set heading values */
 	process.mbp_heading_mode = mbp_heading_mode;
@@ -2927,8 +2912,6 @@ int mb_pr_update_heading(int verbose, char *file, int mbp_heading_mode, double m
 int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_kind, int *mbp_cut_mode, double *mbp_cut_min,
                          double *mbp_cut_max, int *error) {
 	char *function_name = "mb_pr_update_datacut";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2946,7 +2929,8 @@ int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set datacut values */
 	process.mbp_cut_num = mbp_cut_num;
@@ -2974,8 +2958,6 @@ int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_
 /*--------------------------------------------------------------------*/
 int mb_pr_update_edit(int verbose, char *file, int mbp_edit_mode, char *mbp_editfile, int *error) {
 	char *function_name = "mb_pr_update_edit";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2988,7 +2970,8 @@ int mb_pr_update_edit(int verbose, char *file, int mbp_edit_mode, char *mbp_edit
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set edit values */
 	process.mbp_edit_mode = mbp_edit_mode;
@@ -3014,8 +2997,6 @@ int mb_pr_update_ampcorr(int verbose, char *file, int mbp_ampcorr_mode, char *mb
                          int mbp_ampcorr_symmetry, double mbp_ampcorr_angle, int mbp_ampcorr_slope, char *mbp_ampsscorr_topofile,
                          int *error) {
 	char *function_name = "mb_pr_update_ampcorr";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3033,7 +3014,8 @@ int mb_pr_update_ampcorr(int verbose, char *file, int mbp_ampcorr_mode, char *mb
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set ampcorr values */
 	process.mbp_ampcorr_mode = mbp_ampcorr_mode;
@@ -3065,8 +3047,6 @@ int mb_pr_update_sscorr(int verbose, char *file, int mbp_sscorr_mode, char *mbp_
                         int mbp_sscorr_symmetry, double mbp_sscorr_angle, int mbp_sscorr_slope, char *mbp_ampsscorr_topofile,
                         int *error) {
 	char *function_name = "mb_pr_update_sscorr";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3084,7 +3064,8 @@ int mb_pr_update_sscorr(int verbose, char *file, int mbp_sscorr_mode, char *mbp_
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set sscorr values */
 	process.mbp_sscorr_mode = mbp_sscorr_mode;
@@ -3115,8 +3096,6 @@ int mb_pr_update_sscorr(int verbose, char *file, int mbp_sscorr_mode, char *mbp_
 int mb_pr_update_ssrecalc(int verbose, char *file, int mbp_ssrecalc_mode, double mbp_ssrecalc_pixelsize,
                           double mbp_ssrecalc_swathwidth, int mbp_ssrecalc_interpolate, int *error) {
 	char *function_name = "mb_pr_update_ssrecalc";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3131,7 +3110,8 @@ int mb_pr_update_ssrecalc(int verbose, char *file, int mbp_ssrecalc_mode, double
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set ssrecalc values */
 	process.mbp_ssrecalc_mode = mbp_ssrecalc_mode;
@@ -3234,8 +3214,6 @@ int mb_pr_update_kluges(int verbose, char *file, int mbp_kluge001, int mbp_kluge
                         int mbp_kluge005, int mbp_kluge006, int mbp_kluge007, int mbp_kluge008, int mbp_kluge009,
                         int mbp_kluge010, int *error) {
 	char *function_name = "mb_pr_update_kluges";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3256,7 +3234,8 @@ int mb_pr_update_kluges(int verbose, char *file, int mbp_kluge001, int mbp_kluge
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set metadata values */
 	process.mbp_kluge001 = mbp_kluge001;
@@ -3287,7 +3266,6 @@ int mb_pr_update_kluges(int verbose, char *file, int mbp_kluge001, int mbp_kluge
 /*--------------------------------------------------------------------*/
 int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp_ofile, int *error) {
 	char *function_name = "mb_pr_get_ofile";
-	int status = MB_SUCCESS;
 	char parfile[MBP_FILENAMESIZE];
 	char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	FILE *fp;
@@ -3326,6 +3304,8 @@ int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp
 		fclose(fp);
 	}
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -3342,8 +3322,6 @@ int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp
 /*--------------------------------------------------------------------*/
 int mb_pr_get_format(int verbose, char *file, int *mbp_format_specified, int *mbp_format, int *error) {
 	char *function_name = "mb_pr_get_format";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3354,7 +3332,8 @@ int mb_pr_get_format(int verbose, char *file, int *mbp_format_specified, int *mb
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set format value */
 	*mbp_format_specified = process.mbp_format_specified;
@@ -3377,8 +3356,6 @@ int mb_pr_get_format(int verbose, char *file, int *mbp_format_specified, int *mb
 int mb_pr_get_rollbias(int verbose, char *file, int *mbp_rollbias_mode, double *mbp_rollbias, double *mbp_rollbias_port,
                        double *mbp_rollbias_stbd, int *error) {
 	char *function_name = "mb_pr_get_rollbias";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3389,7 +3366,8 @@ int mb_pr_get_rollbias(int verbose, char *file, int *mbp_rollbias_mode, double *
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set rollbias values */
 	*mbp_rollbias_mode = process.mbp_rollbias_mode;
@@ -3415,8 +3393,6 @@ int mb_pr_get_rollbias(int verbose, char *file, int *mbp_rollbias_mode, double *
 /*--------------------------------------------------------------------*/
 int mb_pr_get_pitchbias(int verbose, char *file, int *mbp_pitchbias_mode, double *mbp_pitchbias, int *error) {
 	char *function_name = "mb_pr_get_pitchbias";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3427,7 +3403,8 @@ int mb_pr_get_pitchbias(int verbose, char *file, int *mbp_pitchbias_mode, double
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set pitchbias values */
 	*mbp_pitchbias_mode = process.mbp_pitchbias_mode;
@@ -3450,8 +3427,6 @@ int mb_pr_get_pitchbias(int verbose, char *file, int *mbp_pitchbias_mode, double
 int mb_pr_get_draft(int verbose, char *file, int *mbp_draft_mode, double *mbp_draft, double *mbp_draft_offset,
                     double *mbp_draft_mult, int *error) {
 	char *function_name = "mb_pr_get_draft";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3462,7 +3437,8 @@ int mb_pr_get_draft(int verbose, char *file, int *mbp_draft_mode, double *mbp_dr
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set draft values */
 	*mbp_draft_mode = process.mbp_draft_mode;
@@ -3488,8 +3464,6 @@ int mb_pr_get_draft(int verbose, char *file, int *mbp_draft_mode, double *mbp_dr
 /*--------------------------------------------------------------------*/
 int mb_pr_get_heave(int verbose, char *file, int *mbp_heave_mode, double *mbp_heave, double *mbp_heave_mult, int *error) {
 	char *function_name = "mb_pr_get_heave";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3500,7 +3474,8 @@ int mb_pr_get_heave(int verbose, char *file, int *mbp_heave_mode, double *mbp_he
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set heave values */
 	*mbp_heave_mode = process.mbp_heave_mode;
@@ -3526,8 +3501,6 @@ int mb_pr_get_lever(int verbose, char *file, int *mbp_lever_mode, double *mbp_vr
                     double *mbp_vru_offsetz, double *mbp_sonar_offsetx, double *mbp_sonar_offsety, double *mbp_sonar_offsetz,
                     int *error) {
 	char *function_name = "mb_pr_get_lever";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3538,7 +3511,8 @@ int mb_pr_get_lever(int verbose, char *file, int *mbp_lever_mode, double *mbp_vr
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set lever values */
 	*mbp_lever_mode = process.mbp_lever_mode;
@@ -3570,8 +3544,6 @@ int mb_pr_get_lever(int verbose, char *file, int *mbp_lever_mode, double *mbp_vr
 /*--------------------------------------------------------------------*/
 int mb_pr_get_tide(int verbose, char *file, int *mbp_tide_mode, char *mbp_tidefile, int *mbp_tide_format, int *error) {
 	char *function_name = "mb_pr_get_tide";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3582,7 +3554,8 @@ int mb_pr_get_tide(int verbose, char *file, int *mbp_tide_mode, char *mbp_tidefi
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set lever values */
 	*mbp_tide_mode = process.mbp_tide_mode;
@@ -3607,8 +3580,6 @@ int mb_pr_get_tide(int verbose, char *file, int *mbp_tide_mode, char *mbp_tidefi
 /*--------------------------------------------------------------------*/
 int mb_pr_get_tt(int verbose, char *file, int *mbp_tt_mode, double *mbp_tt_mult, int *error) {
 	char *function_name = "mb_pr_get_tt";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3619,7 +3590,8 @@ int mb_pr_get_tt(int verbose, char *file, int *mbp_tt_mode, double *mbp_tt_mult,
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set tt values */
 	*mbp_tt_mode = process.mbp_tt_mode;
@@ -3641,8 +3613,6 @@ int mb_pr_get_tt(int verbose, char *file, int *mbp_tt_mode, double *mbp_tt_mult,
 /*--------------------------------------------------------------------*/
 int mb_pr_get_ssv(int verbose, char *file, int *mbp_ssv_mode, double *mbp_ssv, int *error) {
 	char *function_name = "mb_pr_get_ssv";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3653,7 +3623,8 @@ int mb_pr_get_ssv(int verbose, char *file, int *mbp_ssv_mode, double *mbp_ssv, i
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set ssv values */
 	*mbp_ssv_mode = process.mbp_ssv_mode;
@@ -3676,8 +3647,6 @@ int mb_pr_get_ssv(int verbose, char *file, int *mbp_ssv_mode, double *mbp_ssv, i
 int mb_pr_get_svp(int verbose, char *file, int *mbp_svp_mode, char *mbp_svpfile, int *mbp_angle_mode, int *mbp_corrected,
                   int *error) {
 	char *function_name = "mb_pr_get_svp";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3688,7 +3657,8 @@ int mb_pr_get_svp(int verbose, char *file, int *mbp_svp_mode, char *mbp_svpfile,
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set svp values */
 	*mbp_svp_mode = process.mbp_svp_mode;
@@ -3715,8 +3685,6 @@ int mb_pr_get_svp(int verbose, char *file, int *mbp_svp_mode, char *mbp_svpfile,
 /*--------------------------------------------------------------------*/
 int mb_pr_get_static(int verbose, char *file, int *mbp_static_mode, char *mbp_staticfile, int *error) {
 	char *function_name = "mb_pr_get_static";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3727,7 +3695,8 @@ int mb_pr_get_static(int verbose, char *file, int *mbp_static_mode, char *mbp_st
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set svp values */
 	*mbp_static_mode = process.mbp_static_mode;
@@ -3750,8 +3719,6 @@ int mb_pr_get_static(int verbose, char *file, int *mbp_static_mode, char *mbp_st
 /*--------------------------------------------------------------------*/
 int mb_pr_get_navadj(int verbose, char *file, int *mbp_navadj_mode, char *mbp_navadjfile, int *mbp_navadj_algorithm, int *error) {
 	char *function_name = "mb_pr_get_navadj";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3762,7 +3729,8 @@ int mb_pr_get_navadj(int verbose, char *file, int *mbp_navadj_mode, char *mbp_na
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set navadj values */
 	*mbp_navadj_mode = process.mbp_navadj_mode;
@@ -3791,8 +3759,6 @@ int mb_pr_get_navadj(int verbose, char *file, int *mbp_navadj_mode, char *mbp_na
 int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mbp_attitudefile, int *mbp_attitude_format,
                        int *error) {
 	char *function_name = "mb_pr_get_attitude";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3803,7 +3769,8 @@ int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mb
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set lever values */
 	*mbp_attitude_mode = process.mbp_attitude_mode;
@@ -3829,8 +3796,6 @@ int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mb
 int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char *mbp_sonardepthfile, int *mbp_sonardepth_format,
                          int *error) {
 	char *function_name = "mb_pr_get_sonardepth";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3841,7 +3806,8 @@ int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set lever values */
 	*mbp_sonardepth_mode = process.mbp_sonardepth_mode;
@@ -3868,8 +3834,6 @@ int mb_pr_get_nav(int verbose, char *file, int *mbp_nav_mode, char *mbp_navfile,
                   int *mbp_nav_speed, int *mbp_nav_draft, int *mbp_nav_attitude, int *mbp_nav_algorithm,
                   double *mbp_nav_timeshift, int *error) {
 	char *function_name = "mb_pr_get_nav";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3880,7 +3844,8 @@ int mb_pr_get_nav(int verbose, char *file, int *mbp_nav_mode, char *mbp_navfile,
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set nav values */
 	*mbp_nav_mode = process.mbp_nav_mode;
@@ -3919,8 +3884,6 @@ int mb_pr_get_navshift(int verbose, char *file, int *mbp_nav_shift, double *mbp_
                        double *mbp_nav_offsetz, double *mbp_nav_shiftlon, double *mbp_nav_shiftlat, double *mbp_nav_shiftx,
                        double *mbp_nav_shifty, int *error) {
 	char *function_name = "mb_pr_get_navshift";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3931,7 +3894,8 @@ int mb_pr_get_navshift(int verbose, char *file, int *mbp_nav_shift, double *mbp_
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set nav values */
 	*mbp_nav_shift = process.mbp_nav_shift;
@@ -3964,8 +3928,6 @@ int mb_pr_get_navshift(int verbose, char *file, int *mbp_nav_shift, double *mbp_
 } /*--------------------------------------------------------------------*/
 int mb_pr_get_heading(int verbose, char *file, int *mbp_heading_mode, double *mbp_headingbias, int *error) {
 	char *function_name = "mb_pr_get_heading";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3976,7 +3938,8 @@ int mb_pr_get_heading(int verbose, char *file, int *mbp_heading_mode, double *mb
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set heading values */
 	*mbp_heading_mode = process.mbp_heading_mode;
@@ -4000,8 +3963,6 @@ int mb_pr_get_heading(int verbose, char *file, int *mbp_heading_mode, double *mb
 int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_kind, int *mbp_cut_mode, double *mbp_cut_min,
                       double *mbp_cut_max, int *error) {
 	char *function_name = "mb_pr_update_datacut";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4012,7 +3973,8 @@ int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_ki
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set datacut values */
 	*mbp_cut_num = process.mbp_cut_num;
@@ -4044,8 +4006,6 @@ int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_ki
 /*--------------------------------------------------------------------*/
 int mb_pr_get_edit(int verbose, char *file, int *mbp_edit_mode, char *mbp_editfile, int *error) {
 	char *function_name = "mb_pr_get_edit";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4056,7 +4016,8 @@ int mb_pr_get_edit(int verbose, char *file, int *mbp_edit_mode, char *mbp_editfi
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set edit values */
 	*mbp_edit_mode = process.mbp_edit_mode;
@@ -4081,8 +4042,6 @@ int mb_pr_get_ampcorr(int verbose, char *file, int *mbp_ampcorr_mode, char *mbp_
                       int *mbp_ampcorr_symmetry, double *mbp_ampcorr_angle, int *mbp_ampcorr_slope, char *mbp_ampsscorr_topofile,
                       int *error) {
 	char *function_name = "mb_pr_get_ampcorr";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4093,7 +4052,8 @@ int mb_pr_get_ampcorr(int verbose, char *file, int *mbp_ampcorr_mode, char *mbp_
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set ssrecalc values */
 	*mbp_ampcorr_mode = process.mbp_ampcorr_mode;
@@ -4129,8 +4089,6 @@ int mb_pr_get_sscorr(int verbose, char *file, int *mbp_sscorr_mode, char *mbp_ss
                      int *mbp_sscorr_symmetry, double *mbp_sscorr_angle, int *mbp_sscorr_slope, char *mbp_ampsscorr_topofile,
                      int *error) {
 	char *function_name = "mb_pr_get_sscorr";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4141,7 +4099,8 @@ int mb_pr_get_sscorr(int verbose, char *file, int *mbp_sscorr_mode, char *mbp_ss
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set ssrecalc values */
 	*mbp_sscorr_mode = process.mbp_sscorr_mode;
@@ -4176,8 +4135,6 @@ int mb_pr_get_sscorr(int verbose, char *file, int *mbp_sscorr_mode, char *mbp_ss
 int mb_pr_get_ssrecalc(int verbose, char *file, int *mbp_ssrecalc_mode, double *mbp_ssrecalc_pixelsize,
                        double *mbp_ssrecalc_swathwidth, int *mbp_ssrecalc_interpolate, int *error) {
 	char *function_name = "mb_pr_get_ssrecalc";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4188,7 +4145,8 @@ int mb_pr_get_ssrecalc(int verbose, char *file, int *mbp_ssrecalc_mode, double *
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set ssrecalc values */
 	*mbp_ssrecalc_mode = process.mbp_ssrecalc_mode;
@@ -4219,8 +4177,6 @@ int mb_pr_get_metadata(int verbose, char *file, char *mbp_meta_vessel, char *mbp
                        double *mbp_meta_rollbias, double *mbp_meta_pitchbias, double *mbp_meta_headingbias,
                        double *mbp_meta_draft, int *error) {
 	char *function_name = "mb_pr_get_metadata";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4231,7 +4187,8 @@ int mb_pr_get_metadata(int verbose, char *file, char *mbp_meta_vessel, char *mbp
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set metadata values */
 	strcpy(mbp_meta_vessel, process.mbp_meta_vessel);
@@ -4287,8 +4244,6 @@ int mb_pr_get_kluges(int verbose, char *file, int *mbp_kluge001, int *mbp_kluge0
                      int *mbp_kluge005, int *mbp_kluge006, int *mbp_kluge007, int *mbp_kluge008, int *mbp_kluge009,
                      int *mbp_kluge010, int *error) {
 	char *function_name = "mb_pr_get_kluges";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4299,7 +4254,8 @@ int mb_pr_get_kluges(int verbose, char *file, int *mbp_kluge001, int *mbp_kluge0
 	}
 
 	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set metadata values */
 	*mbp_kluge001 = process.mbp_kluge001;
@@ -4339,7 +4295,6 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
                             int *ndepths, double *depths, double *depthacrosstrack, int *nslopes, double *slopes,
                             double *slopeacrosstrack, double *depthsmooth, int *error) {
 	char *function_name = "mb_pr_set_bathyslopenew";
-	int status = MB_SUCCESS;
 	double dxtrack;
 	double weight;
 	int j1, j2;
@@ -4411,6 +4366,8 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 		slopes[*ndepths] = 0.0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -4435,7 +4392,6 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
                          double *depths, double *depthacrosstrack, int *nslopes, double *slopes, double *slopeacrosstrack,
                          double *depthsmooth, int *error) {
 	char *function_name = "mb_pr_set_bathyslope";
-	int status = MB_SUCCESS;
 	int first, next, last;
 	int nbathgood;
 	double depthsum;
@@ -4561,6 +4517,8 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 		slopeacrosstrack[nbath] = depthacrosstrack[nbath - 1];
 	}
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -4584,7 +4542,6 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
                          double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error) {
 	char *function_name = "get_bathyslope";
-	int status = MB_SUCCESS;
 	int found_depth, found_slope;
 	int idepth, islope;
 
@@ -4652,6 +4609,8 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 			}
 		}
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for failure */
 	if (found_depth != MB_YES || found_slope != MB_YES) {
@@ -4748,7 +4707,6 @@ int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y,
 
 int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int *error) {
 	char *function_name = "mb_pr_lockswathfile";
-	int status = MB_SUCCESS;
 	mb_path lockfile;
 	FILE *fp;
 
@@ -4769,6 +4727,8 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int
 		fprintf(stderr, "dbg2       program:    %s\n", program);
 		fprintf(stderr, "dbg2       purpose:    %d\n", purpose);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* proceed only if lock file does not exist */
 	sprintf(lockfile, "%s.lck", file);
@@ -4829,7 +4789,6 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int
 int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *program, char *user, char *cpu, char *date,
                    int *error) {
 	char *function_name = "mb_pr_lockinfo";
-	int status = MB_SUCCESS;
 	mb_path lockfile;
 	FILE *fp;
 	mb_path line;
@@ -4853,6 +4812,8 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 	user[0] = '\0';
 	cpu[0] = '\0';
 	date[0] = '\0';
+
+	int status = MB_SUCCESS;
 
 	/* check if lock file exists */
 	sprintf(lockfile, "%s.lck", file);
@@ -4912,7 +4873,6 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 /*--------------------------------------------------------------------*/
 int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, int *error) {
 	char *function_name = "mb_pr_unlockswathfile";
-	int status = MB_SUCCESS;
 	mb_path lockfile;
 	int locked;
 	mb_path lock_program;
@@ -4939,6 +4899,8 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, i
 		fprintf(stderr, "dbg2       purpose:    %d\n", purpose);
 		fprintf(stderr, "dbg2       program:    %s\n", program);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check if lock file exists */
 	sprintf(lockfile, "%s.lck", file);
