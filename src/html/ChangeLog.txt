@@ -15,6 +15,10 @@ MB-SYSTEM VERSION 5 RELEASE DATES:
 Here "*" denotes source distribution release made available for ftp download.
 Releases without an "*" are discrete revisions available from the source code
 archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+  Version 5.7.5          June 26, 2019
+  Version 5.7.5beta12    June 24, 2019
+  Version 5.7.5beta11    June 16, 2019
+  Version 5.7.5beta10    June 9, 2019
   Version 5.7.5beta9     June 8, 2019
   Version 5.7.5beta8     April 11, 2019
   Version 5.7.5beta7     March 28, 2019
@@ -308,6 +312,39 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.7.5 (June 26, 2019)
+
+Version: Set for release 5.7.5
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
+
+mb_platform.c: Fixed problem introduced in code style changes
+
+mbpreprocess: Fixed problem introduced in code style changes
+
+-----> 5.7.5beta12 (June 24, 2019)
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
+
+-----> 5.7.5beta11 (June 16, 2019)
+
+Format 89 (MBF_RESON7K3): Fixed bug in support of the Teledyne 7k version 3 format
+that caused mbpreprocess to crash.
+
+Mbnavadjustmerge: Fixed bug due to failure to initialize new project structures.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
+
+-----> 5.7.5beta10 (June 9, 2019)
+
+Build system: Set Autotools build system to force use of standard C (i.e. C99).
 
 -----> 5.7.5beta9 (June 8, 2019)
 

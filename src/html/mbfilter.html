@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbfilter</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  3 June 2013 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  26 June 2019 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -370,12 +370,36 @@ all error status messages.
 <A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
-Suppose one has a SeaBeam 2100 data file called test.mb41
-which contains bathymetry (121 beams in a 120 degree swath),
-beam amplitude (121 beams coincident with bathymetry),
-and sidescan data (2000 pixels, roughly a 150 degree swath)
-which has been corrected for the amplitude vs grazing angle
-variation using the program <B>mbanglecorrect</B>.
+Suppose one has a set of Reson multibeam data with raw files referenced in
+a datalist called datalist.mb-1, with entries like:
+<BR>&nbsp;&nbsp;20180925_022346.mb88&nbsp;88
+<BR>&nbsp;&nbsp;20180925_023029.mb88&nbsp;88
+<BR>&nbsp;&nbsp;20180925_023713.mb88&nbsp;88
+<BR>&nbsp;&nbsp;20180925_024407.mb88&nbsp;88
+<BR>&nbsp;&nbsp;20180925_025104.mb88&nbsp;88
+<BR>&nbsp;&nbsp;20180925_025753.mb88&nbsp;88
+<BR>&nbsp;&nbsp;20180925_030439.mb88&nbsp;88
+<BR>&nbsp;&nbsp;20180925_031121.mb88&nbsp;88
+<BR>&nbsp;&nbsp;20180925_031803.mb88&nbsp;88
+<BR>
+
+The Reson *.mb88 files contain pseudo-sidescan data generated from the snippet backscatter
+records included in the logged *.s7k files by <B>mbpreprocess</B>. The pseudo-sidescan
+is often corrected using an amplitude versus grazing angle function created using
+<B>mbbackangle</B>. The correction is applied using <B>mbprocess</B> and the
+corrected pseudo-sidescan is included in the output processed files (*p.mb88).
+A datalist file (datalistp.mb-1) referencing the processed data can be obtained by running:
+<BR>&nbsp;&nbsp;<B>mbdatalist&nbsp;-Z
+<BR>
+
+To apply filtering to the corrected pseudo-sidescan, run mbfilter</B> with the
+desired settings on the processed data referenced by datalistp.mb-1. This will
+produce ancilliary files ending in &quot;&quot;*p.mb88.ffs&quot;.
+Then, when using <B>mbmosaic</B> to generate mosaics of the sidescan data,
+the filtered data can be accessed by appending &quot;F&quot; to the data kind argument
+(e.g. <B>-A</B><I>4F</I>). Examples of some filtering options are listed below.
+<BR>
+
 Plots of the corrected sidescan often show a large amount
 of speckle that was suppressed in plots of the raw data
 by the large contrast between the specular and non-specular
@@ -383,27 +407,27 @@ regions of the swath. To reduce the speckle and make coherent
 features of the data clearer, the user can apply any of
 the smoothing filters available in <B>mbfilter</B>. One iteration
 of the boxcar mean filter can be applied as follows:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbfilter&nbsp;-F41&nbsp;-Itest.mb41&nbsp;-Otest_mean.mb41&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-S1/3/3/1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbfilter&nbsp;-Idatalistp.mb-1&nbsp;-S1/3/3/1<BR>
 <BR>
 
 Five iterations of the inverse gradient filter can be applied as follows:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbfilter&nbsp;-F41&nbsp;-Itest.mb41&nbsp;-Otest_igrad.mb41&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-S4/3/3/5<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbfilter&nbsp;-Idatalistp.mb-1&nbsp;-S4/3/3/5<BR>
 <BR>
 
 To remove large scale variations in seafloor reflectivity, one can
 apply a high-pass filter to the data:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbfilter&nbsp;-F41&nbsp;-Itest.mb41&nbsp;-Otest_hipass.mb41&nbsp;&nbsp;<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-D1/3/10/1/10000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbfilter&nbsp;-Idatalistp.mb-1&nbsp;-D1/3/10/1/10000<BR>
 <BR>
 
 To first apply a high-pass filter to emphasize fine-scale structure
 and then apply a low-pass filter to reduce speckle:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbfilter&nbsp;-F41&nbsp;-Itest.mb41&nbsp;-Otest_hipass.mb41&nbsp;&nbsp;<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-D1/3/10/1/10000&nbsp;-S4/3/3/5<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbfilter&nbsp;-Idatalistp.mb-1&nbsp;-D1/3/10/1/10000&nbsp;-S4/3/3/5<BR>
 <BR>
 
 To first reduce speckle by smoothing the data with Gaussian
 mean filter and apply an edge detection contrast enhancement
 filter:
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbfilter&nbsp;-F41&nbsp;-Itest.mb41&nbsp;-Otest_hipass.mb41&nbsp;&nbsp;<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-S3/7/7/1&nbsp;-C1/5/5/1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbfilter&nbsp;-Idatalistp.mb-1&nbsp;-S3/7/7/1&nbsp;-C1/5/5/1<BR>
 <P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>SEE ALSO</H2>
@@ -441,7 +465,7 @@ All the filtering in the world won't make bad data good.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 3 June 2013</P></CENTER>
+Last Updated: 26 June 2019</P></CENTER>
 
 <HR>
 
