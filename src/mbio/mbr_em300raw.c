@@ -13,7 +13,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_em300raw.c contains the functions for reading and writing
- * multibeam data in the EM200RAW format.
+ * multibeam data in the EM300RAW format.
  * These functions include:
  *   mbr_alm_em300raw	- allocate read/write memory
  *   mbr_dem_em300raw	- deallocate read/write memory
@@ -239,10 +239,10 @@ int mbr_info_em300raw(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beams_bath_max = 254;
 	*beams_amp_max = 254;
 	*pixels_ss_max = 1024;
-	strncpy(format_name, "EM200RAW", MB_NAME_LENGTH);
+	strncpy(format_name, "EM300RAW", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD2", MB_NAME_LENGTH);
 	strncpy(format_description,
-	        "Format name:          MBF_EM200RAW\nInformal Description: Simrad current multibeam vendor format\nAttributes:       "
+	        "Format name:          MBF_EM300RAW\nInformal Description: Simrad current multibeam vendor format\nAttributes:       "
 	        "    Simrad EM120, EM300, EM1002, EM3000, \n                      bathymetry, amplitude, and sidescan,\n             "
 	        "         up to 254 beams, variable pixels, ascii + binary, Simrad.\n",
 	        MB_DESCRIPTION_LENGTH);
@@ -793,7 +793,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* report problem */
 			if (skip > 0 && verbose > 0) {
 				if (*nbadrec == 0)
-					fprintf(stderr, "\nThe MBF_EM200RAW module skipped data between identified\n\
+					fprintf(stderr, "\nThe MBF_EM300RAW module skipped data between identified\n\
 data records. Something is broken, most probably the data...\n\
 However, the data may include a data record type that we\n\
 haven't seen yet, or there could be an error in the code.\n\
@@ -802,7 +802,7 @@ we recommend you send a data sample and problem \n\
 description to the MB-System team \n\
 (caress@mbari.org and dale@ldeo.columbia.edu)\n\
 Have a nice day...\n");
-				fprintf(stderr, "MBF_EM200RAW skipped %d bytes between records %4.4hX:%d and %4.4hX:%d\n", skip, *typelast,
+				fprintf(stderr, "MBF_EM300RAW skipped %d bytes between records %4.4hX:%d and %4.4hX:%d\n", skip, *typelast,
 				        *typelast, type, type);
 				(*nbadrec)++;
 			}
