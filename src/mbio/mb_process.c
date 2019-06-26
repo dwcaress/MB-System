@@ -3161,8 +3161,6 @@ int mb_pr_update_metadata(int verbose, char *file, char *mbp_meta_vessel, char *
                           double mbp_meta_rollbias, double mbp_meta_pitchbias, double mbp_meta_headingbias, double mbp_meta_draft,
                           int *error) {
 	char *function_name = "mb_pr_update_metadata";
-	struct mb_process_struct process;
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3170,6 +3168,13 @@ int mb_pr_update_metadata(int verbose, char *file, char *mbp_meta_vessel, char *
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                     %s\n", file);
+	}
+
+	/* get known process parameters */
+	struct mb_process_struct process;
+	int status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       mbp_meta_vessel:          %s\n", process.mbp_meta_vessel);
 		fprintf(stderr, "dbg2       mbp_meta_institution:     %s\n", process.mbp_meta_institution);
 		fprintf(stderr, "dbg2       mbp_meta_platform:        %s\n", process.mbp_meta_platform);
@@ -3189,9 +3194,6 @@ int mb_pr_update_metadata(int verbose, char *file, char *mbp_meta_vessel, char *
 		fprintf(stderr, "dbg2       mbp_meta_headingbias:     %f\n", process.mbp_meta_headingbias);
 		fprintf(stderr, "dbg2       mbp_meta_draft:           %f\n", process.mbp_meta_draft);
 	}
-
-	/* get known process parameters */
-	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set metadata values */
 	strcpy(process.mbp_meta_vessel, mbp_meta_vessel);
@@ -3214,7 +3216,7 @@ int mb_pr_update_metadata(int verbose, char *file, char *mbp_meta_vessel, char *
 	process.mbp_meta_draft = mbp_meta_draft;
 
 	/* write new process parameter file */
-	status = mb_pr_writepar(verbose, file, &process, error);
+	status &= mb_pr_writepar(verbose, file, &process, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
