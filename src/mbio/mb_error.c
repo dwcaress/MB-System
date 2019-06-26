@@ -181,7 +181,6 @@ int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 	char *function_name = "mb_notice_get_list";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -196,7 +195,7 @@ int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* copy notice list */
-	for (i = 0; i < MB_NOTICE_MAX; i++) {
+	for (int i = 0; i < MB_NOTICE_MAX; i++) {
 		notice_list[i] = mb_io_ptr->notice_list[i];
 	}
 
@@ -204,7 +203,7 @@ int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
-		for (i = 0; i < MB_NOTICE_MAX; i++)
+		for (int i = 0; i < MB_NOTICE_MAX; i++)
 			fprintf(stderr, "dbg2       notice_list[%2.2d]: %d\n", i, notice_list[i]);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);

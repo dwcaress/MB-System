@@ -45,7 +45,6 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	struct mbsys_hysweep_device_offset_struct *offset;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -71,22 +70,22 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	store->type = MBSYS_HYSWEEP_RECORDTYPE_NONE;
 
 	/* HYSWEEP file header */
-	for (i = 0; i < MB_NAME_LENGTH; i++)
+	for (int i = 0; i < MB_NAME_LENGTH; i++)
 		store->FTP_record[i] = '\0'; /* FTP NEW 2: HYSWEEP file type */
 	store->HSX_record = 0;           /* HSX: HYSWEEP format version number */
-	for (i = 0; i < MB_NAME_LENGTH; i++)
+	for (int i = 0; i < MB_NAME_LENGTH; i++)
 		store->VER_version[i] = '\0'; /* VER: HYSWEEP distribution version */
-	for (i = 0; i < 7; i++)
+	for (int i = 0; i < 7; i++)
 		store->TND_survey_time_i[i] = 0; /* TND: Survey time and date (system startup)
 		                     hh:mm:ss mm/dd/yy */
 	store->TND_survey_time_d = 0.0;
-	for (i = 0; i < MB_NAME_LENGTH; i++)
+	for (int i = 0; i < MB_NAME_LENGTH; i++)
 		store->INF_surveyor[i] = '\0'; /* INF: surveyor name */
-	for (i = 0; i < MB_NAME_LENGTH; i++)
+	for (int i = 0; i < MB_NAME_LENGTH; i++)
 		store->INF_boat[i] = '\0'; /* INF: boat name */
-	for (i = 0; i < MB_NAME_LENGTH; i++)
+	for (int i = 0; i < MB_NAME_LENGTH; i++)
 		store->INF_project[i] = '\0'; /* INF: project name */
-	for (i = 0; i < MB_NAME_LENGTH; i++)
+	for (int i = 0; i < MB_NAME_LENGTH; i++)
 		store->INF_area[i] = '\0';      /* INF: area name */
 	store->INF_tide_correction = 0.0;   /* INF: initial tide correction */
 	store->INF_draft_correction = 0.0;  /* INF: initial draft correction */
@@ -106,14 +105,14 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	              1 = US foot
 	              2 = international foot */
 	store->HSP_sonar_id = 0; /* HSP: sonar id for advanced processing (see defines above) */
-	for (i = 0; i < MB_NAME_LENGTH; i++)
+	for (int i = 0; i < MB_NAME_LENGTH; i++)
 		store->PRJ_proj4_command[i] = '\0'; /* PRJ: projection in use defined as either
 		                        a PROJ4 command string or as an
 		                        EPSG identifier */
 
 	/* HYSWEEP devices */
 	store->num_devices = 0; /* number of devices defined */
-	for (i = 0; i < MBSYS_HYSWEEP_DEVICE_NUM_MAX; i++) {
+	for (int i = 0; i < MBSYS_HYSWEEP_DEVICE_NUM_MAX; i++) {
 		device = (struct mbsys_hysweep_device_struct *)&(store->devices[i]);
 
 		/* DEV: first line of device declaration
@@ -137,7 +136,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		                   8192 - device accepts output from Hypack
 		                   16384 - xxx
 		                   32768 - device has extended capability */
-		for (j = 0; j < MB_PATH_MAXLINE; j++)
+		for (int j = 0; j < MB_PATH_MAXLINE; j++)
 			device->DEV_device_name[j] = '\0'; /* e.g. "GPS" */
 
 		/* DV2: second line of device declaration
@@ -157,7 +156,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 
 		/* OF2: Hysweep device offsets  */
 		device->num_offsets = 0; /* number of offsets identified for this device */
-		for (j = 0; j < MBSYS_HYSWEEP_OFFSET_NUM_MAX; j++) {
+		for (int j = 0; j < MBSYS_HYSWEEP_OFFSET_NUM_MAX; j++) {
 			offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[j]);
 
 			/* OF2: Hysweep device offsets
@@ -423,7 +422,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	store->MSS_num_pixels = 0;       /* number of pixels (typically 1024) */
 	store->MSS_pixel_size = 0.0;     /* pixel size (meters) */
 	store->MSS_ping_number = 0;      /* ping number (or 0 if not tracked) */
-	for (i = 0; i < MBSYS_HYSWEEP_MSS_NUM_PIXELS; i++) {
+	for (int i = 0; i < MBSYS_HYSWEEP_MSS_NUM_PIXELS; i++) {
 		store->MSS_ss[i] = 0.0;
 		store->MSS_ss_across[i] = 0.0;
 		store->MSS_ss_along[i] = 0.0;
@@ -475,7 +474,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	store->SNR_ping_number = 0.0;  /* ping number (or 0 if not tracked) */
 	store->SNR_sonar_id = 0.0;     /* sonar ID (see defines above) */
 	store->SNR_num_settings = 0.0; /* number of settings to follow */
-	for (i = 0; i < 12; i++)
+	for (int i = 0; i < 12; i++)
 		store->SNR_settings[i] = 0; /* sonar settings */
 
 	/* PSA - pitch stabilization angle
@@ -598,7 +597,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	        c: comment string
 	    Example:
 	    COM everything after the first four characters is part of the comment */
-	for (i = 0; i < MB_COMMENT_MAXLINE; i++)
+	for (int i = 0; i < MB_COMMENT_MAXLINE; i++)
 		store->COM_comment[i] = '\0'; /* comment string */
 
 	/* print output debug statements */
@@ -1313,7 +1312,6 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hysweep_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1336,7 +1334,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -1360,7 +1358,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			*namp = store->RMB_num_beams;
 		else
 			*namp = 0;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			if (store->RMB_sounding_depths != NULL)
 				bath[i] = store->RMB_sounding_depths[i];
 			else
@@ -1394,7 +1392,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		if (store->MSS_num_pixels > 0 &&
 		    (store->MSS_ping_number == store->RMB_ping_number || 10 * store->MSS_ping_number == store->RMB_ping_number)) {
 			*nss = store->MSS_num_pixels;
-			for (i = 0; i < *nss; i++) {
+			for (int i = 0; i < *nss; i++) {
 				ss[i] = store->MSS_ss[i];
 				ssacrosstrack[i] = store->MSS_ss_across[i];
 				ssalongtrack[i] = store->MSS_ss_along[i];
@@ -1422,15 +1420,15 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -1441,7 +1439,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	/* extract data from structure */
 	else if (*kind == MB_DATA_NAV || *kind == MB_DATA_NAV1 || *kind == MB_DATA_NAV2) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -1491,7 +1489,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -1522,7 +1520,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	/* set time for other data records */
 	else {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -1569,15 +1567,15 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -1598,7 +1596,6 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hysweep_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1626,17 +1623,17 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -1656,7 +1653,7 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
@@ -1687,7 +1684,7 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 				                     error);
 
 			/* insert the depth and distance values into the storage arrays */
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				store->RMB_sounding_depths[i] = bath[i];
 				store->RMB_sounding_across[i] = bathacrosstrack[i];
 				store->RMB_sounding_along[i] = bathalongtrack[i];
@@ -1701,7 +1698,7 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 				                     (void **)&(store->RMB_sounding_intensities), error);
 
 			/* insert the amplitude values into the storage arrays */
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				store->RMB_sounding_intensities[i] = amp[i];
 			}
 		}
@@ -1711,7 +1708,7 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 		/* initialize sidescan */
 		if (nss == store->MSS_num_pixels &&
 		    (store->MSS_ping_number == store->RMB_ping_number || 10 * store->MSS_ping_number == store->RMB_ping_number)) {
-			for (i = 0; i < nss; i++) {
+			for (int i = 0; i < nss; i++) {
 				store->MSS_ss[i] = ss[i];
 				store->MSS_ss_across[i] = ssacrosstrack[i];
 				store->MSS_ss_along[i] = ssalongtrack[i];
@@ -1722,7 +1719,7 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	/* insert data in nav structure */
 	else if (store->kind == MB_DATA_NAV || store->kind == MB_DATA_NAV1 || store->kind == MB_DATA_NAV2) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
@@ -1764,7 +1761,6 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	double alpha, beta, theta, phi;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1801,7 +1797,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		/* get travel times, angles */
 		*nbeams = store->RMB_num_beams;
 		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->RMB_device_number]);
-		for (i = 0; i < store->RMB_num_beams; i++) {
+		for (int i = 0; i < store->RMB_num_beams; i++) {
 			ttimes[i] = 2.0 * store->RMB_beam_ranges[i] / (*ssv);
 			if (store->RMB_sounding_takeoffangles != NULL && store->RMB_sounding_azimuthalangles != NULL) {
 				angles[i] = store->RMB_sounding_takeoffangles[i];
@@ -1865,7 +1861,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -1883,7 +1879,6 @@ int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hysweep_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1908,7 +1903,7 @@ int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	if (*kind == MB_DATA_DATA) {
 		/* read distance and depth values into storage arrays */
 		*nbeams = store->RMB_num_beams;
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_UNKNOWN;
 		}
 
@@ -1941,7 +1936,7 @@ int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -2038,7 +2033,6 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_hysweep_struct *store;
 	double xtrackmin;
 	int altitude_found;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2072,7 +2066,7 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		if (altitude_found == MB_NO) {
 			/* get depth closest to nadir */
 			xtrackmin = 999999.9;
-			for (i = 0; i < store->RMB_num_beams; i++) {
+			for (int i = 0; i < store->RMB_num_beams; i++) {
 				if ((store->RMB_sounding_flags[i] == MB_FLAG_NONE) && fabs((double)store->RMB_sounding_across[i]) < xtrackmin) {
 					*altitudev = store->RMB_sounding_depths[i] - *transducer_depth;
 					altitude_found = MB_YES;
@@ -2127,7 +2121,6 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hysweep_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2150,7 +2143,7 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	/* extract data from ping structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -2182,7 +2175,7 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	/* extract data from nav structure */
 	else if (*kind == MB_DATA_NAV || *kind == MB_DATA_NAV1 || *kind == MB_DATA_NAV2) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -2220,7 +2213,7 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	else if (*kind == MB_DATA_ATTITUDE || *kind == MB_DATA_ATTITUDE1 || *kind == MB_DATA_ATTITUDE2 ||
 	         *kind == MB_DATA_ATTITUDE3) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -2255,7 +2248,7 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		status = MB_FAILURE;
 
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 	}
@@ -2267,7 +2260,7 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		status = MB_FAILURE;
 
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 	}
@@ -2312,7 +2305,6 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hysweep_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2348,7 +2340,7 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 	/* insert data in ping structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
@@ -2377,7 +2369,7 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 	/* insert data in nav structure */
 	else if (store->kind == MB_DATA_NAV || store->kind == MB_DATA_NAV1 || store->kind == MB_DATA_NAV2) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
@@ -2530,7 +2522,6 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	double xtrackss, ltrackss, factor;
 	double range;
 	int first, last, k1, k2;
-	int i, j, k, kk;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2584,7 +2575,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		maxxtrack = 0.0;
 		iminxtrack = store->RMB_num_beams / 2;
 		found = MB_NO;
-		for (i = 0; i < store->RMB_num_beams; i++) {
+		for (int i = 0; i < store->RMB_num_beams; i++) {
 			if (mb_beam_ok(store->RMB_sounding_flags[i])) {
 				store->MSS_table_altitude_sort[nbathsort] =
 				    store->RMB_sounding_depths[i] - store->RMBint_draft + store->RMBint_heave;
@@ -2637,13 +2628,13 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		pixel_int_use = pixel_int + 1;
 
 		/* zero the sidescan */
-		for (i = 0; i < store->MSS_num_pixels; i++) {
+		for (int i = 0; i < store->MSS_num_pixels; i++) {
 			store->MSS_ss[i] = 0.0;
 			store->MSS_ss_across[i] = 0.0;
 			store->MSS_ss_along[i] = 0.0;
 			store->MSS_ss_cnt[i] = 0;
 		}
-		for (i = 0; i < store->MSS_num_pixels; i++) {
+		for (int i = 0; i < store->MSS_num_pixels; i++) {
 			store->MSS_ss_across[i] = (*pixel_size) * (double)(i - (store->MSS_num_pixels / 2));
 			;
 		}
@@ -2656,7 +2647,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		nrangetable = 0;
 		irangenadir = 0;
 		acrosstracktablemin = 99999.99;
-		for (i = 0; i < store->RMB_num_beams; i++) {
+		for (int i = 0; i < store->RMB_num_beams; i++) {
 			if (mb_beam_ok(store->RMB_sounding_flags[i])) {
 				store->MSS_table_range[nrangetable] = 2.0 * store->RMB_beam_ranges[i] / store->RSS_sound_velocity;
 				store->MSS_table_acrosstrack[nrangetable] = store->RMB_sounding_across[i];
@@ -2674,10 +2665,10 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		sample_end = MIN(store->MSS_table_range[0] * store->RSS_sample_rate, store->RSS_port_num_samples - 1);
 		irange = irangenadir;
 		/* fprintf(stderr,"Port: irangenadir:%d sample_start:%d sample_end:%d\n",irangenadir,sample_start, sample_end); */
-		for (i = sample_start; i < sample_end; i++) {
+		for (int i = sample_start; i < sample_end; i++) {
 			range = ((double)i) / ((double)store->RSS_sample_rate);
 			found = MB_NO;
-			for (j = irange; j > 0 && found == MB_NO; j--) {
+			for (int j = irange; j > 0 && found == MB_NO; j--) {
 				if (range >= store->MSS_table_range[j] && range < store->MSS_table_range[j - 1]) {
 					irange = j;
 					found = MB_YES;
@@ -2689,7 +2680,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			           factor * (store->MSS_table_acrosstrack[irange - 1] - store->MSS_table_acrosstrack[irange]);
 			ltrackss = store->MSS_table_alongtrack[irange] +
 			           factor * (store->MSS_table_alongtrack[irange - 1] - store->MSS_table_alongtrack[irange]);
-			kk = store->MSS_num_pixels / 2 + (int)(xtrackss / (*pixel_size));
+			const int kk = store->MSS_num_pixels / 2 + (int)(xtrackss / (*pixel_size));
 			if (kk >= 0 && kk < store->MSS_num_pixels) {
 				store->MSS_ss[kk] += (double)store->RSS_port[i];
 				store->MSS_ss_along[kk] += ltrackss;
@@ -2702,10 +2693,10 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		sample_end = MIN(store->MSS_table_range[nrangetable - 1] * store->RSS_sample_rate, store->RSS_starboard_num_samples - 1);
 		irange = irangenadir;
 		/* fprintf(stderr,"Starboard: irangenadir:%d sample_start:%d sample_end:%d\n",irangenadir,sample_start, sample_end); */
-		for (i = sample_start; i < sample_end; i++) {
+		for (int i = sample_start; i < sample_end; i++) {
 			range = ((double)i) / ((double)store->RSS_sample_rate);
 			found = MB_NO;
-			for (j = irange; j < nrangetable - 1 && found == MB_NO; j++) {
+			for (int j = irange; j < nrangetable - 1 && found == MB_NO; j++) {
 				if (range >= store->MSS_table_range[j] && range < store->MSS_table_range[j + 1]) {
 					irange = j;
 					found = MB_YES;
@@ -2717,7 +2708,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			           factor * (store->MSS_table_acrosstrack[irange + 1] - store->MSS_table_acrosstrack[irange]);
 			ltrackss = store->MSS_table_alongtrack[irange] +
 			           factor * (store->MSS_table_alongtrack[irange + 1] - store->MSS_table_alongtrack[irange]);
-			kk = store->MSS_num_pixels / 2 + (int)(xtrackss / (*pixel_size));
+			const int kk = store->MSS_num_pixels / 2 + (int)(xtrackss / (*pixel_size));
 			if (kk >= 0 && kk < store->MSS_num_pixels) {
 				store->MSS_ss[kk] += (double)store->RSS_starboard[i];
 				store->MSS_ss_along[kk] += ltrackss;
@@ -2728,7 +2719,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		/* average the sidescan */
 		first = store->MSS_num_pixels;
 		last = -1;
-		for (k = 0; k < store->MSS_num_pixels; k++) {
+		for (int k = 0; k < store->MSS_num_pixels; k++) {
 			if (store->MSS_ss_cnt[k] > 0) {
 				store->MSS_ss[k] /= store->MSS_ss_cnt[k];
 				store->MSS_ss_along[k] /= store->MSS_ss_cnt[k];
@@ -2742,7 +2733,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		/* interpolate the sidescan */
 		k1 = first;
 		k2 = first;
-		for (k = first + 1; k < last; k++) {
+		for (int k = first + 1; k < last; k++) {
 			if (store->MSS_ss_cnt[k] <= 0) {
 				if (k2 <= k) {
 					k2 = k + 1;
@@ -2766,7 +2757,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Sidescan regenerated in <%s>\n", function_name);
 			fprintf(stderr, "dbg2       pixels_ss:  %d\n", store->MSS_num_pixels);
-			for (i = 0; i < store->MSS_num_pixels; i++)
+			for (int i = 0; i < store->MSS_num_pixels; i++)
 				fprintf(stderr, "dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, store->MSS_ss_cnt[i],
 				        store->MSS_ss[i], store->MSS_ss_across[i], store->MSS_ss_along[i]);
 		}

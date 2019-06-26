@@ -52,7 +52,6 @@ int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -103,10 +102,10 @@ int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	                     offset (meters) */
 	store->em1000_ty = 0.0;      /* EM-1000 tranducer athwartships
 	                     offset (meters) */
-	for (i = 0; i < 128; i++)
+	for (int i = 0; i < 128; i++)
 		store->spare_parameter[i] = '\0';
 	store->survey_line = 0;
-	for (i = 0; i < 80; i++)
+	for (int i = 0; i < 80; i++)
 		store->comment[i] = '\0';
 
 	/* position (position datagrams) */
@@ -137,7 +136,7 @@ int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	store->svp_second = 0;
 	store->svp_centisecond = 0;
 	store->svp_num = 0;
-	for (i = 0; i < 100; i++) {
+	for (int i = 0; i < 100; i++) {
 		store->svp_depth[i] = 0; /* meters */
 		store->svp_vel[i] = 0;   /* 0.1 meters/sec */
 	}
@@ -174,7 +173,6 @@ int mbsys_simrad_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -230,7 +228,7 @@ int mbsys_simrad_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int 
 		ping->ss_status = EM_SS_NONE;
 		ping->pixels_ssraw = 0;
 		ping->ss_mode = 0;
-		for (i = 0; i < MBSYS_SIMRAD_MAXBEAMS; i++) {
+		for (int i = 0; i < MBSYS_SIMRAD_MAXBEAMS; i++) {
 			ping->bath[i] = 0;
 			ping->bath_acrosstrack[i] = 0;
 			ping->bath_alongtrack[i] = 0;
@@ -246,7 +244,7 @@ int mbsys_simrad_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int 
 		}
 		ping->pixel_size = 0.0;
 		ping->pixels_ss = 0;
-		for (i = 0; i < MBSYS_SIMRAD_MAXRAWPIXELS; i++) {
+		for (int i = 0; i < MBSYS_SIMRAD_MAXRAWPIXELS; i++) {
 			ping->ssraw[i] = 0;
 			ping->ssp[i] = 0;
 		}
@@ -369,7 +367,6 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	double ss_spacing;
 	double depthscale, dacrscale, daloscale, ttscale, reflscale;
 	double pixel_size;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -503,19 +500,19 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			ss_spacing = 0.3;
 		else
 			ss_spacing = 0.15;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			beamflag[i] = ping->beamflag[i];
 			bath[i] = depthscale * ping->bath[i];
 			bathacrosstrack[i] = dacrscale * ping->bath_acrosstrack[i];
 			bathalongtrack[i] = daloscale * ping->bath_alongtrack[i];
 		}
-		for (i = 0; i < *namp; i++) {
+		for (int i = 0; i < *namp; i++) {
 			amp[i] = reflscale * ping->amp[i];
 		}
 		if (ss != NULL) {
 			*nss = MBSYS_SIMRAD_MAXPIXELS;
 			pixel_size = 0.01 * ping->pixel_size;
-			for (i = 0; i < MBSYS_SIMRAD_MAXPIXELS; i++) {
+			for (int i = 0; i < MBSYS_SIMRAD_MAXPIXELS; i++) {
 				if (ping->ss[i] != 0) {
 					ss[i] = 0.01 * ping->ss[i];
 					ssacrosstrack[i] = pixel_size * (i - MBSYS_SIMRAD_MAXPIXELS / 2);
@@ -551,14 +548,14 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -655,15 +652,15 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -686,7 +683,6 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 	double depthscale, dacrscale, daloscale, ttscale, reflscale;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -714,17 +710,17 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -843,7 +839,7 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 			status = MB_FAILURE;
 		}
 		if (status == MB_SUCCESS) {
-			for (i = 0; i < nbath; i++) {
+			for (int i = 0; i < nbath; i++) {
 				ping->bath[i] = bath[i] / depthscale;
 				ping->bath_acrosstrack[i] = bathacrosstrack[i] / dacrscale;
 				ping->bath_alongtrack[i] = bathalongtrack[i] / daloscale;
@@ -851,12 +847,12 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 				if (beamflag[i] == MB_FLAG_NULL)
 					ping->bath[i] = 0;
 			}
-			for (i = 0; i < namp; i++) {
+			for (int i = 0; i < namp; i++) {
 				ping->amp[i] = amp[i] / reflscale;
 			}
 		}
 		if (status == MB_SUCCESS) {
-			for (i = 0; i < nss; i++) {
+			for (int i = 0; i < nss; i++) {
 				if (ss[i] > MB_SIDESCAN_NULL) {
 					ping->ss[i] = 100 * ss[i];
 					ping->ssalongtrack[i] = ssalongtrack[i] / daloscale;
@@ -922,7 +918,6 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	double alpha, beta;
 	int istep = 0;
 	int interleave = 0;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1103,7 +1098,7 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		}
 
 		/* get travel times and angles */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = ttscale * ping->tt[i];
 			alpha = 0.01 * ping->pitch;
 			if (store->sonar == MBSYS_SIMRAD_EM1000 && ping->bath_mode == 13) {
@@ -1133,9 +1128,9 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 
 		/* reset null angles for EM1000 outer beams */
 		if (store->sonar == MBSYS_SIMRAD_EM1000 && *nbeams == 60) {
-			for (i = 0; i < 6; i++)
+			for (int i = 0; i < 6; i++)
 				angles_null[i] = angles_null[6];
-			for (i = 55; i <= 60; i++)
+			for (int i = 55; i <= 60; i++)
 				angles_null[i] = angles_null[54];
 		}
 
@@ -1170,7 +1165,7 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -1189,7 +1184,6 @@ int mbsys_simrad_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1216,7 +1210,7 @@ int mbsys_simrad_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
 		*nbeams = ping->beams_bath;
-		for (i = 0; i < ping->beams_bath; i++) {
+		for (int i = 0; i < ping->beams_bath; i++) {
 			if (ping->bath[i] == 0)
 				detects[i] = MB_DETECT_UNKNOWN;
 			else if (ping->quality[i] & 128)
@@ -1254,7 +1248,7 @@ int mbsys_simrad_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -1272,7 +1266,6 @@ int mbsys_simrad_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1299,7 +1292,7 @@ int mbsys_simrad_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
 		*nbeams = ping->beams_bath;
-		for (i = 0; i < ping->beams_bath; i++) {
+		for (int i = 0; i < ping->beams_bath; i++) {
 			pulses[i] = MB_PULSE_CW;
 		}
 
@@ -1332,7 +1325,7 @@ int mbsys_simrad_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: pulses:%d\n", i, pulses[i]);
 	}
 	if (verbose >= 2) {
@@ -1435,7 +1428,6 @@ int mbsys_simrad_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 	double depthscale, dacrscale;
 	double bath_best;
 	double xtrack_min;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1506,7 +1498,7 @@ int mbsys_simrad_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 			bath_best = depthscale * ping->bath[ping->beams_bath / 2];
 		else {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < ping->beams_bath; i++) {
+			for (int i = 0; i < ping->beams_bath; i++) {
 				if (ping->bath[i] > 0.0 && fabs(dacrscale * ping->bath_acrosstrack[i]) < xtrack_min) {
 					xtrack_min = fabs(dacrscale * ping->bath_acrosstrack[i]);
 					bath_best = depthscale * ping->bath[i];
@@ -1515,7 +1507,7 @@ int mbsys_simrad_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 		}
 		if (bath_best <= 0.0) {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < ping->beams_bath; i++) {
+			for (int i = 0; i < ping->beams_bath; i++) {
 				if (ping->bath[i] < 0.0 && fabs(dacrscale * ping->bath_acrosstrack[i]) < xtrack_min) {
 					xtrack_min = fabs(dacrscale * ping->bath_acrosstrack[i]);
 					bath_best = -depthscale * ping->bath[i];
@@ -1899,7 +1891,6 @@ int mbsys_simrad_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1925,7 +1916,7 @@ int mbsys_simrad_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
 		*nsvp = store->svp_num;
 
 		/* get profile */
-		for (i = 0; i < *nsvp; i++) {
+		for (int i = 0; i < *nsvp; i++) {
 			depth[i] = store->svp_depth[i];
 			velocity[i] = 0.1 * store->svp_vel[i];
 		}
@@ -1953,7 +1944,7 @@ int mbsys_simrad_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
-		for (i = 0; i < *nsvp; i++)
+		for (int i = 0; i < *nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1968,7 +1959,6 @@ int mbsys_simrad_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1978,7 +1968,7 @@ int mbsys_simrad_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 		fprintf(stderr, "dbg2       nsvp:       %d\n", nsvp);
-		for (i = 0; i < nsvp; i++)
+		for (int i = 0; i < nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 	}
 
@@ -1994,7 +1984,7 @@ int mbsys_simrad_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 		store->svp_num = MIN(nsvp, MBSYS_SIMRAD_MAXSVP);
 
 		/* get profile */
-		for (i = 0; i < store->svp_num; i++) {
+		for (int i = 0; i < store->svp_num; i++) {
 			store->svp_depth[i] = (int)depth[i];
 			store->svp_vel[i] = (int)(10 * velocity[i]);
 		}
@@ -2104,7 +2094,6 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 	double angle;
 	int interleave, istep;
 	int first, last, k1, k2;
-	int i, k, kk;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2132,7 +2121,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		ping = (struct mbsys_simrad_survey_struct *)store->ping;
 
 		/* zero the sidescan */
-		for (i = 0; i < MBSYS_SIMRAD_MAXPIXELS; i++) {
+		for (int i = 0; i < MBSYS_SIMRAD_MAXPIXELS; i++) {
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
 			ssalongtrack[i] = 0.0;
@@ -2341,7 +2330,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 
 		/* get median depth */
 		nbathsort = 0;
-		for (i = 0; i < ping->beams_bath; i++) {
+		for (int i = 0; i < ping->beams_bath; i++) {
 			if (ping->bath[i] > 0.0) {
 				bathsort[nbathsort] = depthscale * ping->bath[i];
 				nbathsort++;
@@ -2383,7 +2372,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 			fprintf(stderr, "dbg2       ss_spacing:    %f\n", ss_spacing);
 			fprintf(stderr, "dbg2       pixel_size:    %f\n", *pixel_size);
 			fprintf(stderr, "dbg2       swath_width:   %f\n", *swath_width);
-			for (i = 0; i < ping->beams_bath; i++)
+			for (int i = 0; i < ping->beams_bath; i++)
 				fprintf(stderr, "dbg2       beam:%d  bath: %d %d %d freq:%d nsamp:%d center:%d start:%d\n", i, ping->bath[i],
 				        ping->bath_acrosstrack[i], ping->bath_alongtrack[i], ping->beam_frequency[i], ping->beam_samples[i],
 				        ping->beam_center_sample[i], ping->beam_start_sample[i]);
@@ -2391,7 +2380,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 
 		/* loop over raw sidescan, putting each raw pixel into
 		    the binning arrays */
-		for (i = 0; i < ping->beams_bath; i++) {
+		for (int i = 0; i < ping->beams_bath; i++) {
 			beam_ss = &ping->ssraw[ping->beam_start_sample[i]];
 			if (ping->bath[i] > 0.0) {
 				if (ping->beam_samples[i] > 0) {
@@ -2422,9 +2411,9 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 					ping->beam_samples[i], sint, angle, range, beam_foot,
 					ping->beam_samples[i] * ss_spacing / beam_foot);*/
 				}
-				for (k = 0; k < ping->beam_samples[i]; k++) {
+				for (int k = 0; k < ping->beam_samples[i]; k++) {
 					xtrackss = xtrack + ss_spacing_use * (k - ping->beam_center_sample[i]);
-					kk = MBSYS_SIMRAD_MAXPIXELS / 2 + (int)(xtrackss / (*pixel_size));
+					const int kk = MBSYS_SIMRAD_MAXPIXELS / 2 + (int)(xtrackss / (*pixel_size));
 					if (kk > 0 && kk < MBSYS_SIMRAD_MAXPIXELS) {
 						ss[kk] += reflscale * ((double)beam_ss[k]);
 						ssalongtrack[kk] += ltrack;
@@ -2437,7 +2426,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		/* average the sidescan */
 		first = MBSYS_SIMRAD_MAXPIXELS;
 		last = -1;
-		for (k = 0; k < MBSYS_SIMRAD_MAXPIXELS; k++) {
+		for (int k = 0; k < MBSYS_SIMRAD_MAXPIXELS; k++) {
 			if (ss_cnt[k] > 0) {
 				ss[k] /= ss_cnt[k];
 				ssalongtrack[k] /= ss_cnt[k];
@@ -2452,7 +2441,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		/* interpolate the sidescan */
 		k1 = first;
 		k2 = first;
-		for (k = first + 1; k < last; k++) {
+		for (int k = first + 1; k < last; k++) {
 			if (ss_cnt[k] <= 0) {
 				if (k2 <= k) {
 					k2 = k + 1;
@@ -2477,7 +2466,7 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 			ping->pixels_ss = MBSYS_SIMRAD_MAXPIXELS;
 		else
 			ping->pixels_ss = 0;
-		for (i = 0; i < MBSYS_SIMRAD_MAXPIXELS; i++) {
+		for (int i = 0; i < MBSYS_SIMRAD_MAXPIXELS; i++) {
 			if (ss[i] > MB_SIDESCAN_NULL) {
 				ping->ss[i] = (short)(100 * ss[i]);
 				ping->ssalongtrack[i] = (short)(ssalongtrack[i] / daloscale);
@@ -2492,15 +2481,15 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Sidescan regenerated in <%s>\n", function_name);
 			fprintf(stderr, "dbg2       beams_bath:    %d\n", ping->beams_bath);
-			for (i = 0; i < ping->beams_bath; i++)
+			for (int i = 0; i < ping->beams_bath; i++)
 				fprintf(stderr, "dbg2       beam:%d  bath:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n", i, ping->bath[i],
 				        ping->amp[i], ping->bath_acrosstrack[i], ping->bath_alongtrack[i]);
 			fprintf(stderr, "dbg2       pixels_ss:  %d\n", MBSYS_SIMRAD_MAXPIXELS);
-			for (i = 0; i < MBSYS_SIMRAD_MAXPIXELS; i++)
+			for (int i = 0; i < MBSYS_SIMRAD_MAXPIXELS; i++)
 				fprintf(stderr, "dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, ss_cnt[i], ss[i],
 				        ssacrosstrack[i], ssalongtrack[i]);
 			fprintf(stderr, "dbg2       pixels_ss:  %d\n", ping->pixels_ss);
-			for (i = 0; i < ping->pixels_ss; i++)
+			for (int i = 0; i < ping->pixels_ss; i++)
 				fprintf(stderr, "dbg2       pixel:%4d  ss:%8d  ltrack:%8d\n", i, ping->ss[i], ping->ssalongtrack[i]);
 		}
 	}

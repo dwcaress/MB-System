@@ -304,9 +304,8 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_segyio_struct *mb_segyio_ptr;
 	struct mb_segytraceheader_struct traceheader;
 	float *trace;
-    double factor;
+	double factor;
 	int time_j[5];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -332,7 +331,7 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* translate values to data storage structure */
 	if (status == MB_SUCCESS && store != NULL) {
 		store->kind = MB_DATA_DATA;
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			store->survey_id[i] = '\0';
 		time_j[0] = traceheader.year;
 		time_j[1] = traceheader.day_of_yr;
@@ -404,7 +403,7 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->seismic_line = mb_segyio_ptr->fileheader.line;
 		store->seismic_shot = traceheader.shot_num;
 		store->seismic_cdp = traceheader.rp_num;
-		for (i = 0; i < MB_COMMENT_MAXLINE; i++)
+		for (int i = 0; i < MB_COMMENT_MAXLINE; i++)
 			store->comment[i] = '\0';
 	}
 

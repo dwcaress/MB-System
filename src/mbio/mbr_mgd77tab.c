@@ -961,7 +961,6 @@ int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_singlebeam_struct *store;
 	double minutes;
 	double seconds;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -990,7 +989,7 @@ int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->kind = data->kind;
 
 		/* survey id */
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			store->survey_id[i] = data->survey_id[i];
 
 		/* get MB-System time values from the MGD77T date, time, and timezone values */
@@ -1044,7 +1043,7 @@ int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->seismic_line = data->lineid;
 		store->seismic_shot = data->pointid;
 
-		for (i = 0; i < MB_COMMENT_MAXLINE; i++)
+		for (int i = 0; i < MB_COMMENT_MAXLINE; i++)
 			store->comment[i] = data->comment[i];
 	}
 
@@ -1066,7 +1065,6 @@ int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77tab_struct *data;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1090,7 +1088,7 @@ int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->kind = store->kind;
 
 		/* survey id */
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			data->survey_id[i] = store->survey_id[i];
 
 		/* get MB-System time values from the MGD77T date, time, and timezone values */
@@ -1136,7 +1134,7 @@ int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->lineid = store->seismic_line;
 		data->pointid = store->seismic_shot;
 
-		for (i = 0; i < MB_COMMENT_MAXLINE; i++)
+		for (int i = 0; i < MB_COMMENT_MAXLINE; i++)
 			data->comment[i] = store->comment[i];
 
 		/* check for valid fields */
@@ -1275,7 +1273,6 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int nfields, ifield;
 	char *fields[MBF_MGD77TAB_HEADER_FIELDS];
 	int nscan;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1313,7 +1310,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 		/* count the number of tabs in the line */
 		line_len = strlen(line);
 		ntabs = 0;
-		for (i = 0; i < line_len; i++) {
+		for (int i = 0; i < line_len; i++) {
 			if (line[i] == '\t')
 				ntabs++;
 		}
@@ -1341,7 +1338,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			nfields = 0;
 			fields[nfields] = &line[0];
 			nfields++;
-			for (i = 0; i < line_len - 2; i++) {
+			for (int i = 0; i < line_len - 2; i++) {
 				if (line[i] == '\t') {
 					line[i] = '\0';
 					fields[nfields] = &line[i + 1];

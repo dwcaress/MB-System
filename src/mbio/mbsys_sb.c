@@ -166,7 +166,6 @@ int mbsys_sb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	struct mbsys_sb_struct *store;
 	int time_j[5];
 	int id;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -217,7 +216,7 @@ int mbsys_sb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 		*namp = 0;
 		*nss = 0;
 		id = *nbath - 1;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			if (store->deph[i] > 0) {
 				beamflag[id - i] = MB_FLAG_NONE;
 				bath[id - i] = store->deph[i];
@@ -253,7 +252,7 @@ int mbsys_sb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%2d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i]);
 		}
@@ -300,7 +299,7 @@ int mbsys_sb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:         %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%2d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
 	}
 	if (verbose >= 2) {
@@ -322,7 +321,6 @@ int mbsys_sb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
 	struct mbsys_sb_struct *store;
 	int time_j[5];
 	int id;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -350,16 +348,16 @@ int mbsys_sb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       flag[%d]: %d  bath[%d]: %f  bathdist[%d]: %f\n", i, beamflag[i], i, bath[i], i,
 				        bathacrosstrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        amp[%d]: %f\n", i, amp[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        ss[%d]: %f    ssdist[%d]: %f\n", i, ss[i], i, ssacrosstrack[i]);
 	}
 	if (verbose >= 2 && kind == MB_DATA_COMMENT) {
@@ -401,7 +399,7 @@ int mbsys_sb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
 		/* switch order of data as it is read
 		    into the output arrays */
 		id = nbath - 1;
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			if (mb_beam_check_flag(beamflag[id - i]))
 				store->deph[i] = -bath[id - i];
 			else
@@ -428,7 +426,7 @@ int mbsys_sb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
 		fprintf(stderr, "dbg2       sec:        %d\n", store->sec);
 	}
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
-		for (i = 0; i < MBSYS_SB_BEAMS; i++)
+		for (int i = 0; i < MBSYS_SB_BEAMS; i++)
 			fprintf(stderr, "dbg3       dist[%d]: %d  deph[%d]: %d\n", i, store->dist[i], i, store->deph[i]);
 		fprintf(stderr, "dbg2       sbtim:        %d\n", store->sbtim);
 		fprintf(stderr, "dbg2       sbhdg:        %d\n", store->sbhdg);
@@ -460,7 +458,6 @@ int mbsys_sb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -492,7 +489,7 @@ int mbsys_sb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 		*nbeams = mb_io_ptr->beams_bath_max;
 
 		/* get travel times, angles */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
@@ -536,7 +533,7 @@ int mbsys_sb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  heave:%f  ltrk_off:%f\n", i,
 			        ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -554,7 +551,6 @@ int mbsys_sb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -581,7 +577,7 @@ int mbsys_sb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 		*nbeams = mb_io_ptr->beams_bath_max;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_AMPLITUDE;
 		}
 
@@ -614,7 +610,7 @@ int mbsys_sb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -634,7 +630,6 @@ int mbsys_sb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mbsys_sb_struct *store;
 	double bath_best;
 	double xtrack_min;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -661,7 +656,7 @@ int mbsys_sb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int 
 			bath_best = store->deph[mb_io_ptr->beams_bath_max / 2];
 		else {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+			for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 				if (store->deph[i] > 0.0 && (double)abs(store->dist[i]) < xtrack_min) {
 					xtrack_min = (double)abs(store->dist[i]);
 					bath_best = store->deph[i];
@@ -670,7 +665,7 @@ int mbsys_sb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int 
 		}
 		if (bath_best <= 0.0) {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+			for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 				if (store->deph[i] < 0.0 && (double)abs(store->dist[i]) < xtrack_min) {
 					xtrack_min = (double)abs(store->dist[i]);
 					bath_best = -store->deph[i];

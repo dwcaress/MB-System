@@ -61,7 +61,6 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 	char *function_name = "mb_format_register";
 	int status;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -75,8 +74,10 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 	/* get mb_io_ptr */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+
 	/* check for old format id and provide alias if needed */
 	if (*format > 0 && (*format < 10 || *format == 44 || *format == 52 || *format == 55)) {
+		int i;
 		/* replace original mbio id's */
 		if (*format < 10)
 			i = format_alias_table[*format];
@@ -423,7 +424,6 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
                    double *beamwidth_ltrack, int *error) {
 	char *function_name = "mb_format_info";
 	int status;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -435,6 +435,7 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 
 	/* check for old format id and provide alias if needed */
 	if (*format > 0 && (*format < 10 || *format == 44 || *format == 52 || *format == 55)) {
+		int i;
 		/* replace original mbio id's */
 		if (*format < 10)
 			i = format_alias_table[*format];
@@ -1471,7 +1472,6 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 	short type1, sonar1, type2, sonar2, type1swap, sonar1swap, type2swap, sonar2swap;
 	int nsonar, nlow, nhigh, subsystem, size;
 	int done;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1487,6 +1487,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* first look for MB suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 6)
 			i = strlen(filename) - 6;
 		else
@@ -1506,6 +1507,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for mbnavedit navigation suffix */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1525,6 +1527,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for mbnavadjust navigation suffixes */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1544,6 +1547,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for "fast bath" or .fbt suffix */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1563,6 +1567,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for "fast filtered bath" or .ffb suffix */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1582,6 +1587,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for "fast filtered amplitude" or .ffa suffix */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1601,6 +1607,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for "fast filtered sidescan" or .ffs suffix */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1620,6 +1627,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for "fast nav" or .fnv suffix */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1639,6 +1647,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for datalist suffixes */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1658,6 +1667,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for SeaBeam suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1677,6 +1687,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for L3 XSE suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1696,6 +1707,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for old Simrad Mermaid suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 8)
 			i = strlen(filename) - 8;
 		else
@@ -1768,6 +1780,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for newer Simrad Mermaid suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1839,6 +1852,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for Kongsberg multibeam *.kmall format suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 6)
 			i = strlen(filename) - 6;
 		else
@@ -1858,6 +1872,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for JHC format suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 7)
 			i = strlen(filename) - 7;
 		else
@@ -1877,6 +1892,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for Hypac format suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) > 4)
 			i = strlen(filename) - 4;
 		else
@@ -1896,6 +1912,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for MBARI format suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 18)
 			i = strlen(filename) - 8;
 		else
@@ -1924,6 +1941,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for MBARI edited format suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 24)
 			i = strlen(filename) - 14;
 		else
@@ -1952,6 +1970,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for NIO Hydrosweep DS raw format suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 4)
 			i = strlen(filename) - 3;
 		else
@@ -1972,6 +1991,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for STN Atlas raw format suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -1992,6 +2012,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for Triton-ELics XTF format suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2012,6 +2033,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for MGD77 suffix conventions */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 7)
 			i = strlen(filename) - 6;
 		else
@@ -2032,6 +2054,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for MGD77 suffix conventions */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2052,6 +2075,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for MGD77T suffix conventions */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 6)
 			i = strlen(filename) - 5;
 		else
@@ -2072,6 +2096,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for segy suffix convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 6)
 			i = strlen(filename) - 5;
 		else
@@ -2090,6 +2115,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 		}
 	}
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2110,6 +2136,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for IFREMER Trismus format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 4)
 			i = strlen(filename) - 3;
 		else
@@ -2130,6 +2157,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for IFREMER netCDF format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2150,6 +2178,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for IFREMER netCDF format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2170,6 +2199,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for IFREMER netCDF navigation format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2190,6 +2220,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for SAME SURF format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2216,6 +2247,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for xyz sounding format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2238,6 +2270,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for yxz sounding format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2260,6 +2293,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for xyt sounding format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2282,6 +2316,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for yxt sounding format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2304,6 +2339,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for binary HYDRO93 sounding format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2337,6 +2373,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for Marine Sonic MSTIFF format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2359,6 +2396,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for Edgetech Jstar format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2429,6 +2467,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for HMRG MR1 and BS format conventions */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 6)
 			i = strlen(filename) - 5;
 		else
@@ -2449,6 +2488,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 		}
 	}
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 7)
 			i = strlen(filename) - 6;
 		else
@@ -2469,6 +2509,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 		}
 	}
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 12)
 			i = strlen(filename) - 11;
 		else
@@ -2489,6 +2530,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 		}
 	}
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 7)
 			i = strlen(filename) - 6;
 		else
@@ -2511,6 +2553,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for a CARIS GSF export *.gsf format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2533,6 +2576,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for a SAIC GSF *.d0X format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2553,6 +2597,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for a Reson 7K multibeam *.s7k format convention */
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2579,6 +2624,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for a Imagex multibeam .83p format convention*/
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2601,6 +2647,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for an R2R navigation format convention*/
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 8)
 			i = strlen(filename) - 7;
 		else
@@ -2623,6 +2670,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for a HYSWEEP *.HSX file format convention*/
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2645,6 +2693,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for a SEA SWATHplus *.sxi file format convention*/
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2667,6 +2716,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for a SEA SWATHplus *.sxp file format convention*/
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2689,6 +2739,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for a 3DatDepth *.raa file format convention*/
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2730,6 +2781,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for a WASSP *.000 file format convention*/
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 5)
 			i = strlen(filename) - 4;
 		else
@@ -2750,6 +2802,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* look for a WASSP *.nwsf file format convention*/
 	if (found == MB_NO) {
+		int i;
 		if (strlen(filename) >= 6)
 			i = strlen(filename) - 5;
 		else
@@ -2798,6 +2851,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 	/* check for old format id and provide alias if needed */
 	if (found == MB_YES && *format > 0 && (*format < 10 || *format == 44 || *format == 52 || *format == 55)) {
+		int i;
 		/* replace original mbio id's */
 		if (*format < 10)
 			i = format_alias_table[*format];
@@ -3346,7 +3400,6 @@ int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recur
 	int status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist;
 	int start;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3364,7 +3417,7 @@ int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recur
 		*recursion = datalist->recursion;
 		if (print == MB_YES && datalist->printed == MB_NO) {
 			fprintf(stderr, "<%2.2d> ", *recursion);
-			for (i = 0; i < *recursion; i++)
+			for (int i = 0; i < *recursion; i++)
 				fprintf(stderr, "\t");
 			fprintf(stderr, "%s\n", datalist->path);
 			datalist->printed = MB_YES;
@@ -3377,7 +3430,7 @@ int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recur
 			*recursion = datalist->recursion;
 			if (print == MB_YES && datalist->printed == MB_NO) {
 				fprintf(stderr, "<%2.2d> ", *recursion);
-				for (i = 0; i < *recursion; i++)
+				for (int i = 0; i < *recursion; i++)
 					fprintf(stderr, "\t");
 				fprintf(stderr, "%s\n", datalist->path);
 				datalist->printed = MB_YES;
@@ -3800,7 +3853,6 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 	int pwdlen;
 	int same, isame, ndiff;
 	char *bufptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3877,7 +3929,7 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 		/* look for last identical slash-terminated section */
 		same = MB_YES;
 		isame = 0;
-		for (i = 0; i < MIN(pathlen, pwdlen) && same == MB_YES; i++) {
+		for (int i = 0; i < MIN(pathlen, pwdlen) && same == MB_YES; i++) {
 			if (path[i] == pwd[i]) {
 				if (path[i] == '/')
 					isame = i;
@@ -3893,14 +3945,14 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 		if (isame > 0) {
 			/* look for number of different directories in pwd */
 			ndiff = 0;
-			for (i = isame; i < pwdlen - 1; i++) {
+			for (int i = isame; i < pwdlen - 1; i++) {
 				if (pwd[i] == '/')
 					ndiff++;
 			}
 
 			/* now make relative path if possible */
 			relativepath[0] = '\0';
-			for (i = 0; i < ndiff; i++) {
+			for (int i = 0; i < ndiff; i++) {
 				strcat(relativepath, "../");
 			}
 			if (pathlen > isame + 1)
@@ -4032,7 +4084,6 @@ int mb_get_basename(int verbose, char *path, int *error) {
 	int status = MB_SUCCESS;
 	char tmppath[MB_PATH_MAXLINE];
 	char *result;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4052,7 +4103,7 @@ int mb_get_basename(int verbose, char *path, int *error) {
 
 	/* remove .fbt .fnv .inf .esf suffix if present */
 	if (strlen(path) > 4) {
-		i = strlen(path) - 4;
+		const int i = strlen(path) - 4;
 		if ((result = strstr(&path[i], ".fbt")) != NULL) {
 			path[i] = '\0';
 		}

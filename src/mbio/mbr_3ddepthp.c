@@ -415,7 +415,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	unsigned int *newscancheck, newscancheckvalue;
 	int time_i[7];
 	int done;
-	int i;
 	int skip;
 	int valid_id;
 
@@ -780,7 +779,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					store->speed = 0.0;
 
 					/* read all of the pulses */
-					for (i = 0; i < store->num_pulses; i++) {
+					for (int i = 0; i < store->num_pulses; i++) {
 						/* read the next pulse */
 						read_len = (size_t)MBF_3DDEPTHP_VERSION_1_1_RAWPULSE_SIZE;
 						status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -821,7 +820,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 							pulse->pitch = 0.0;
 						}
 					}
-					for (i = store->num_pulses; i < store->counts_per_scan; i++) {
+					for (int i = store->num_pulses; i < store->counts_per_scan; i++) {
 						pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 						pulse->range = 0.0;
 						pulse->amplitude = 0;
@@ -901,7 +900,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* read all of the pulses */
 				if (status == MB_SUCCESS) {
-					for (i = 0; i < store->num_pulses; i++) {
+					for (int i = 0; i < store->num_pulses; i++) {
 						/* read the next pulse */
 						read_len = (size_t)MBF_3DDEPTHP_VERSION_1_1_PULSE_SIZE;
 						status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -952,7 +951,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 							index += 4;
 						}
 					}
-					for (i = store->num_pulses; i < store->counts_per_scan; i++) {
+					for (int i = store->num_pulses; i < store->counts_per_scan; i++) {
 						pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 						pulse->range = 0.0;
 						pulse->amplitude = 0;
@@ -1003,7 +1002,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 		else {
 			// fprintf(stderr,"Bytes saved, read rest of scan\n");
-			for (i = 0; i < 4; i++)
+			for (int i = 0; i < 4; i++)
 				buffer[i] = mb_io_ptr->save_label[i];
 			read_len = (size_t)(MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE - 4);
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[4], &read_len, error);
@@ -1085,7 +1084,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				else if (*newscancheck == newscancheckvalue) {
 					done = MB_YES;
 					mb_io_ptr->save2 = MB_YES;
-					for (i = 0; i < 4; i++)
+					for (int i = 0; i < 4; i++)
 						mb_io_ptr->save_label[i] = buffer[i];
 				}
 				else {
@@ -1135,7 +1134,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						done = MB_YES;
 				}
 			}
-			for (i = store->num_pulses; i < store->counts_per_scan; i++) {
+			for (int i = store->num_pulses; i < store->counts_per_scan; i++) {
 				pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 				pulse->range = 0.0;
 				pulse->amplitude = 0;
@@ -1208,7 +1207,6 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	unsigned short magic_number;
 	unsigned short file_version;
 	unsigned short sub_version;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1441,7 +1439,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* write LIDAR scan pulses */
 			if (status == MB_SUCCESS) {
-				for (i = 0; i < store->num_pulses; i++) {
+				for (int i = 0; i < store->num_pulses; i++) {
 					/* encode the data */
 					pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 					index = 0;

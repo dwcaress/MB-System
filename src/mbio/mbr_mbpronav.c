@@ -308,7 +308,6 @@ int mbr_zero_mbpronav(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_mbpronav";
 	int status = MB_SUCCESS;
 	struct mbf_mbpronav_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -325,7 +324,7 @@ int mbr_zero_mbpronav(int verbose, char *data_ptr, int *error) {
 	if (data != NULL) {
 		data->kind = MB_DATA_NONE;
 		data->time_d = 0.0;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			data->time_i[i] = 0;
 		data->longitude = 0.0;
 		data->latitude = 0.0;
@@ -335,7 +334,7 @@ int mbr_zero_mbpronav(int verbose, char *data_ptr, int *error) {
 		data->roll = 0.0;
 		data->pitch = 0.0;
 		data->heave = 0.0;
-		for (i = 0; i < MBF_MBPRONAV_MAXLINE; i++)
+		for (int i = 0; i < MBF_MBPRONAV_MAXLINE; i++)
 			data->comment[i] = 0;
 	}
 
@@ -361,7 +360,6 @@ int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mbpronav_struct *data;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -388,7 +386,7 @@ int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (status == MB_SUCCESS && store != NULL) {
 		store->kind = data->kind;
 		store->time_d = data->time_d;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = data->time_i[i];
 		store->longitude = data->longitude;
 		store->latitude = data->latitude;
@@ -398,12 +396,12 @@ int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->roll = data->roll;
 		store->pitch = data->pitch;
 		store->heave = data->heave;
-		for (i = 0; i < MBF_MBPRONAV_MAXLINE - 1; i++)
+		for (int i = 0; i < MBF_MBPRONAV_MAXLINE - 1; i++)
 			store->comment[i] = data->comment[i];
 		store->comment[MBF_MBPRONAV_MAXLINE - 1] = 0;
 
 		/* zero the other parts of the structure */
-		for (i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			store->survey_id[i] = 0;
 		store->timezone = 0;
 		store->easting = 0.0;
@@ -458,7 +456,6 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mbpronav_struct *data;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -480,7 +477,7 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (store != NULL) {
 		data->kind = store->kind;
 		data->time_d = store->time_d;
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			data->time_i[i] = store->time_i[i];
 		data->longitude = store->longitude;
 		data->latitude = store->latitude;
@@ -490,7 +487,7 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->roll = store->roll;
 		data->pitch = store->pitch;
 		data->heave = store->heave;
-		for (i = 0; i < MBF_MBPRONAV_MAXLINE - 1; i++)
+		for (int i = 0; i < MBF_MBPRONAV_MAXLINE - 1; i++)
 			data->comment[i] = store->comment[i];
 		data->comment[MBF_MBPRONAV_MAXLINE - 1] = 0;
 		data->portlon = store->portlon;

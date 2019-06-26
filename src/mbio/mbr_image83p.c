@@ -315,7 +315,6 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double degrees, minutes, dec_minutes;
 	double alpha, beta, theta, phi;
 	double soundspeed, rr, xx, zz;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -337,7 +336,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* read next record header from file */
 	done = MB_NO;
-	for (i = 0; i < MBF_IMAGE83P_BUFFER_SIZE; i++)
+	for (int i = 0; i < MBF_IMAGE83P_BUFFER_SIZE; i++)
 		buffer[i] = 0;
 	if ((status = fread(buffer, 1, 6, mb_io_ptr->mbfp)) == 6) {
 		/* check for valid header */
@@ -349,7 +348,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		else {
 			/* loop over reading bytes until valid header is found */
 			while (done == MB_NO) {
-				for (i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 					buffer[i] = buffer[i + 1];
 				status = fread(&buffer[5], 1, 1, mb_io_ptr->mbfp);
 				if (status != 1) {
@@ -464,7 +463,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_int(&seconds_hundredths, &buffer[index + 10], 2);
 		store->time_i[6] = 10000 * seconds_hundredths;
 		mb_get_time(verbose, store->time_i, &store->time_d);
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			mb_io_ptr->new_time_i[i] = store->time_i[i];
 		}
 		mb_io_ptr->new_time_d = store->time_d;
@@ -585,7 +584,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->profile_tilt_angle = 180;
 
 		/* get ranges */
-		for (i = 0; i < store->num_beams; i++) {
+		for (int i = 0; i < store->num_beams; i++) {
 			mb_get_binary_short(swap, &buffer[index], &short_val);
 			index += 2;
 			store->range[i] = (int)((unsigned short)short_val);
@@ -603,7 +602,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->sonar_depth = 0.0;
 		store->heave = 0.0;
 		store->num_proc_beams = store->num_beams;
-		for (i = 0; i < store->num_proc_beams; i++) {
+		for (int i = 0; i < store->num_proc_beams; i++) {
 			if (store->range[i] > 0) {
 				alpha = 0.1 * (store->pitch - 900) + ((double)store->profile_tilt_angle - 180.0);
 				beta = 270.0 - 0.01 * (store->start_angle + i * store->angle_increment) + 0.1 * (store->roll - 900);
@@ -665,12 +664,12 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg4       profile_tilt_angle: %d\n", store->profile_tilt_angle); /* degrees + 180.0 */
 		fprintf(stderr, "dbg4       rep_rate:           %d\n", store->rep_rate);           /* msec */
 		fprintf(stderr, "dbg4       ping_number:        %d\n", store->ping_number);
-		for (i = 0; i < store->num_beams; i++)
+		for (int i = 0; i < store->num_beams; i++)
 			fprintf(stderr, "dbg4       range[%d]:            %d\n", i, store->range[i]);
 		fprintf(stderr, "dbg4       sonar_depth:        %f\n", store->sonar_depth);
 		fprintf(stderr, "dbg4       heave:              %f\n", store->heave);
 		fprintf(stderr, "dbg4       num_proc_beams:     %d\n", store->num_proc_beams);
-		for (i = 0; i < store->num_proc_beams; i++)
+		for (int i = 0; i < store->num_proc_beams; i++)
 			fprintf(stderr, "dbg4       tt[%d]: %f angles:%f %f   bath: %f %f %f %d\n", i, store->beamrange[i], store->angles[i],
 			        store->angles_forward[i], store->bath[i], store->bathacrosstrack[i], store->bathalongtrack[i],
 			        store->beamflag[i]);
@@ -701,7 +700,6 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char NorS;
 	int write_len = 0;
 	int index;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -763,12 +761,12 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg4       profile_tilt_angle: %d\n", store->profile_tilt_angle); /* degrees + 180.0 */
 		fprintf(stderr, "dbg4       rep_rate:           %d\n", store->rep_rate);           /* msec */
 		fprintf(stderr, "dbg4       ping_number:        %d\n", store->ping_number);
-		for (i = 0; i < store->num_beams; i++)
+		for (int i = 0; i < store->num_beams; i++)
 			fprintf(stderr, "dbg4       range[%d]:            %d\n", i, store->range[i]);
 		fprintf(stderr, "dbg4       sonar_depth:        %f\n", store->sonar_depth);
 		fprintf(stderr, "dbg4       heave:              %f\n", store->heave);
 		fprintf(stderr, "dbg4       num_proc_beams:     %d\n", store->num_proc_beams);
-		for (i = 0; i < store->num_proc_beams; i++)
+		for (int i = 0; i < store->num_proc_beams; i++)
 			fprintf(stderr, "dbg4       tt[%d]: %f angles:%f %f   bath: %f %f %f %d\n", i, store->beamrange[i], store->angles[i],
 			        store->angles_forward[i], store->bath[i], store->bathacrosstrack[i], store->bathalongtrack[i],
 			        store->beamflag[i]);
@@ -932,12 +930,12 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 4; /* index = 97 */
 
 			/* blank part of header */
-			for (i = index; i <= 255; i++)
+			for (int i = index; i <= 255; i++)
 				buffer[i] = 0;
 			index += 159; /* index 256 */
 
 			/* ranges */
-			for (i = 0; i < store->num_beams; i++) {
+			for (int i = 0; i < store->num_beams; i++) {
 				mb_put_binary_short(swap, (unsigned short)store->range[i], &buffer[index + (i * 2)]);
 			}
 		}
@@ -963,7 +961,7 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* write comment */
 			strncpy(&buffer[index], store->comment, MBSYS_IMAGE83P_COMMENTLEN);
-			for (i = 8 + strlen(store->comment); i < 8 + MBSYS_IMAGE83P_COMMENTLEN; i++)
+			for (int i = 8 + strlen(store->comment); i < 8 + MBSYS_IMAGE83P_COMMENTLEN; i++)
 				buffer[i] = 0;
 		}
 

@@ -315,7 +315,6 @@ int mbr_zero_bchrxunb(int verbose, void *data_ptr, int *error) {
 	char *function_name = "mbr_zero_bchrxunb";
 	int status = MB_SUCCESS;
 	struct mbf_bchrxunb_struct *data;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -365,7 +364,7 @@ int mbr_zero_bchrxunb(int verbose, void *data_ptr, int *error) {
 		data->line_number = 0;
 		data->start_or_stop = 0;
 		data->transducer_serial_number = 0;
-		for (i = 0; i < MBF_BCHRXUNB_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBF_BCHRXUNB_COMMENT_LENGTH; i++)
 			data->comment[i] = '\0';
 
 		/* position (position telegrams) */
@@ -399,7 +398,7 @@ int mbr_zero_bchrxunb(int verbose, void *data_ptr, int *error) {
 		data->svp_hundredth_sec = 0;
 		data->svp_thousandth_sec = 0;
 		data->svp_num = 0;
-		for (i = 0; i < 100; i++) {
+		for (int i = 0; i < 100; i++) {
 			data->svp_depth[i] = 0; /* 0.1 meters */
 			data->svp_vel[i] = 0;   /* 0.1 meters/sec */
 		}
@@ -413,7 +412,7 @@ int mbr_zero_bchrxunb(int verbose, void *data_ptr, int *error) {
 		data->receiver_gain = 0;
 		data->profile_num = 0;
 		data->beams_bath = 0;
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			data->profile[i].year = 0;
 			data->profile[i].month = 0;
 			data->profile[i].day = 0;
@@ -428,7 +427,7 @@ int mbr_zero_bchrxunb(int verbose, void *data_ptr, int *error) {
 			data->profile[i].pitch = 0;
 			data->profile[i].heading = 0;
 			data->profile[i].heave = 0;
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				data->profile[i].bath[j] = 0;
 				data->profile[i].bath_acrosstrack[j] = 0;
 				data->profile[i].bath_alongtrack[j] = 0;
@@ -465,7 +464,6 @@ int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int time_i[7];
 	double time_d;
 	double lon, lat, heading, speed;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -558,7 +556,7 @@ int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->line_number = data->line_number;
 		store->start_or_stop = data->start_or_stop;
 		store->transducer_serial_number = data->transducer_serial_number;
-		for (i = 0; i < MBF_BCHRXUNB_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBF_BCHRXUNB_COMMENT_LENGTH; i++)
 			store->comment[i] = data->comment[i];
 
 		/* position (position telegrams) */
@@ -592,7 +590,7 @@ int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->svp_hundredth_sec = data->svp_hundredth_sec;
 		store->svp_thousandth_sec = data->svp_thousandth_sec;
 		store->svp_num = data->svp_num;
-		for (i = 0; i < 500; i++) {
+		for (int i = 0; i < 500; i++) {
 			store->svp_depth[i] = data->svp_depth[i];
 			store->svp_vel[i] = data->svp_vel[i];
 		}
@@ -606,7 +604,7 @@ int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->receiver_gain = data->receiver_gain;
 		store->profile_num = data->profile_num;
 		store->beams_bath = data->beams_bath;
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			store->profile[i].year = data->profile[i].year;
 			store->profile[i].month = data->profile[i].month;
 			store->profile[i].day = data->profile[i].day;
@@ -621,7 +619,7 @@ int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->profile[i].pitch = data->profile[i].pitch;
 			store->profile[i].heading = data->profile[i].heading;
 			store->profile[i].heave = data->profile[i].heave;
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				store->profile[i].bath[j] = data->profile[i].bath[j];
 				store->profile[i].bath_acrosstrack[j] = data->profile[i].bath_acrosstrack[j];
 				store->profile[i].bath_alongtrack[j] = data->profile[i].bath_alongtrack[j];
@@ -652,7 +650,6 @@ int mbr_wt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_bchrxunb_struct *data;
 	char *data_ptr;
 	struct mbsys_elac_struct *store;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -709,7 +706,7 @@ int mbr_wt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->line_number = store->line_number;
 		data->start_or_stop = store->start_or_stop;
 		data->transducer_serial_number = store->transducer_serial_number;
-		for (i = 0; i < MBF_BCHRXUNB_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBF_BCHRXUNB_COMMENT_LENGTH; i++)
 			data->comment[i] = store->comment[i];
 
 		/* position (position telegrams) */
@@ -743,7 +740,7 @@ int mbr_wt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->svp_hundredth_sec = store->svp_hundredth_sec;
 		data->svp_thousandth_sec = store->svp_thousandth_sec;
 		data->svp_num = store->svp_num;
-		for (i = 0; i < 500; i++) {
+		for (int i = 0; i < 500; i++) {
 			data->svp_depth[i] = store->svp_depth[i];
 			data->svp_vel[i] = store->svp_vel[i];
 		}
@@ -757,7 +754,7 @@ int mbr_wt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->receiver_gain = store->receiver_gain;
 		data->profile_num = store->profile_num;
 		data->beams_bath = store->beams_bath;
-		for (i = 0; i < 7; i++) {
+		for (int i = 0; i < 7; i++) {
 			data->profile[i].year = store->profile[i].year;
 			data->profile[i].month = store->profile[i].month;
 			data->profile[i].day = store->profile[i].day;
@@ -772,7 +769,7 @@ int mbr_wt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			data->profile[i].pitch = store->profile[i].pitch;
 			data->profile[i].heading = store->profile[i].heading;
 			data->profile[i].heave = store->profile[i].heave;
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				data->profile[i].bath[j] = store->profile[i].bath[j];
 				data->profile[i].bath_acrosstrack[j] = store->profile[i].bath_acrosstrack[j];
 				data->profile[i].bath_alongtrack[j] = store->profile[i].bath_alongtrack[j];
@@ -1278,7 +1275,6 @@ int mbr_bchrxunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *dat
 	short int *short_ptr;
 	short int *short_ptr2;
 	int *int_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1321,7 +1317,7 @@ int mbr_bchrxunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *dat
 		data->svp_latitude = (int)mb_swap_int(*int_ptr);
 #endif
 		data->svp_num = 0;
-		for (i = 0; i < 500; i++) {
+		for (int i = 0; i < 500; i++) {
 			short_ptr = (short int *)&line[16 + 4 * i];
 			short_ptr2 = (short int *)&line[18 + 4 * i];
 #ifndef BYTESWAPPED
@@ -1350,7 +1346,7 @@ int mbr_bchrxunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *dat
 		fprintf(stderr, "dbg5       svp_latitude:     %d\n", data->svp_latitude);
 		fprintf(stderr, "dbg5       svp_longitude:    %d\n", data->svp_longitude);
 		fprintf(stderr, "dbg5       svp_num:          %d\n", data->svp_num);
-		for (i = 0; i < data->svp_num; i++)
+		for (int i = 0; i < data->svp_num; i++)
 			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
 	}
 
@@ -1374,7 +1370,6 @@ int mbr_bchrxunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 	char *beam;
 	short int *short_ptr;
 	int *int_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1414,7 +1409,7 @@ int mbr_bchrxunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 		data->receiver_gain = (int)line[7];
 		data->profile_num = 7;
 		data->beams_bath = 56;
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			profile = &line[8 + i * 152];
 			data->profile[i].day = (int)profile[0];
 			data->profile[i].month = (int)profile[1];
@@ -1437,7 +1432,7 @@ int mbr_bchrxunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 			data->profile[i].heading = (int)(unsigned short)*short_ptr;
 			short_ptr = (short int *)&profile[22];
 			data->profile[i].heave = (int)*short_ptr;
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				data->profile[i].bath[j] = (int)*int_ptr;
@@ -1465,7 +1460,7 @@ int mbr_bchrxunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 			data->profile[i].heading = (int)(unsigned short)mb_swap_short(*short_ptr);
 			short_ptr = (short int *)&profile[22];
 			data->profile[i].heave = (int)mb_swap_short(*short_ptr);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				data->profile[i].bath[j] = (int)mb_swap_int(*int_ptr);
@@ -1495,7 +1490,7 @@ int mbr_bchrxunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
 		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			fprintf(stderr, "dbg5       profile:          %d\n", i);
 			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
 			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
@@ -1511,7 +1506,7 @@ int mbr_bchrxunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
 			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
 			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				fprintf(stderr, "dbg5       bath[%2d][%d]:             %d\n", i, j, data->profile[i].bath[j]);
 				fprintf(stderr, "dbg5       bath_acrosstrack[%2d][%d]: %d\n", i, j, data->profile[i].bath_acrosstrack[j]);
 				fprintf(stderr, "dbg5       bath_alongtrack[%2d][%d]:  %d\n", i, j, data->profile[i].bath_alongtrack[j]);
@@ -1544,7 +1539,6 @@ int mbr_bchrxunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 	char *beam;
 	short int *short_ptr;
 	int *int_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1584,7 +1578,7 @@ int mbr_bchrxunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 		data->receiver_gain = (int)line[7];
 		data->profile_num = 5;
 		data->beams_bath = 40;
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			profile = &line[8 + i * 152];
 			data->profile[i].day = (int)profile[0];
 			data->profile[i].month = (int)profile[1];
@@ -1607,7 +1601,7 @@ int mbr_bchrxunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 			data->profile[i].heading = (int)(unsigned short)*short_ptr;
 			short_ptr = (short int *)&profile[22];
 			data->profile[i].heave = (int)*short_ptr;
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				data->profile[i].bath[j] = (int)*int_ptr;
@@ -1635,7 +1629,7 @@ int mbr_bchrxunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 			data->profile[i].heading = (int)(unsigned short)mb_swap_short(*short_ptr);
 			short_ptr = (short int *)&profile[22];
 			data->profile[i].heave = (int)mb_swap_short(*short_ptr);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				data->profile[i].bath[j] = (int)mb_swap_int(*int_ptr);
@@ -1665,7 +1659,7 @@ int mbr_bchrxunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
 		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			fprintf(stderr, "dbg5       profile:          %d\n", i);
 			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
 			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
@@ -1681,7 +1675,7 @@ int mbr_bchrxunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
 			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
 			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
 				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
 				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
@@ -1714,7 +1708,6 @@ int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 	char *beam;
 	short int *short_ptr;
 	int *int_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1754,7 +1747,7 @@ int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 		data->receiver_gain = (int)line[7];
 		data->profile_num = 4;
 		data->beams_bath = 32;
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			profile = &line[8 + i * 152];
 			data->profile[i].day = (int)profile[0];
 			data->profile[i].month = (int)profile[1];
@@ -1777,7 +1770,7 @@ int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 			data->profile[i].heading = (int)(unsigned short)*short_ptr;
 			short_ptr = (short int *)&profile[22];
 			data->profile[i].heave = (int)*short_ptr;
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				data->profile[i].bath[j] = (int)*int_ptr;
@@ -1805,7 +1798,7 @@ int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 			data->profile[i].heading = (int)(unsigned short)mb_swap_short(*short_ptr);
 			short_ptr = (short int *)&profile[22];
 			data->profile[i].heave = (int)mb_swap_short(*short_ptr);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				data->profile[i].bath[j] = (int)mb_swap_int(*int_ptr);
@@ -1835,7 +1828,7 @@ int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
 		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			fprintf(stderr, "dbg5       profile:          %d\n", i);
 			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
 			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
@@ -1851,7 +1844,7 @@ int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
 			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
 			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
 				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
 				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
@@ -1950,7 +1943,6 @@ int mbr_bchrxunb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 	char line[ELAC_COMMENT_SIZE + 3];
 	short int label;
 	int len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1989,9 +1981,9 @@ int mbr_bchrxunb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		len = strlen(data->comment);
 		if (len > MBSYS_ELAC_COMMENT_LENGTH)
 			len = MBSYS_ELAC_COMMENT_LENGTH;
-		for (i = 0; i < len; i++)
+		for (int i = 0; i < len; i++)
 			line[i] = data->comment[i];
-		for (i = len; i < MBSYS_ELAC_COMMENT_LENGTH; i++)
+		for (int i = len; i < MBSYS_ELAC_COMMENT_LENGTH; i++)
 			line[i] = '\0';
 		line[ELAC_COMMENT_SIZE] = 0x03;
 		line[ELAC_COMMENT_SIZE + 1] = '\0';
@@ -2369,7 +2361,6 @@ int mbr_bchrxunb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	short int *short_ptr;
 	short int *short_ptr2;
 	int *int_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2397,7 +2388,7 @@ int mbr_bchrxunb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		fprintf(stderr, "dbg5       svp_latitude:     %d\n", data->svp_latitude);
 		fprintf(stderr, "dbg5       svp_longitude:    %d\n", data->svp_longitude);
 		fprintf(stderr, "dbg5       svp_num:          %d\n", data->svp_num);
-		for (i = 0; i < data->svp_num; i++)
+		for (int i = 0; i < data->svp_num; i++)
 			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
 	}
 
@@ -2436,7 +2427,7 @@ int mbr_bchrxunb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 		int_ptr = (int *)&line[12];
 		*int_ptr = (int)mb_swap_int(data->svp_longitude);
 #endif
-		for (i = 0; i < data->svp_num; i++) {
+		for (int i = 0; i < data->svp_num; i++) {
 			short_ptr = (short int *)&line[16 + 4 * i];
 			short_ptr2 = (short int *)&line[18 + 4 * i];
 #ifndef BYTESWAPPED
@@ -2447,7 +2438,7 @@ int mbr_bchrxunb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 			*short_ptr2 = (short int)mb_swap_short((short int)data->svp_vel[i]);
 #endif
 		}
-		for (i = data->svp_num; i < 500; i++) {
+		for (int i = data->svp_num; i < 500; i++) {
 			short_ptr = (short int *)&line[16 + 4 * i];
 			short_ptr2 = (short int *)&line[18 + 4 * i];
 			*short_ptr = 0;
@@ -2491,7 +2482,6 @@ int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 	short int label;
 	short int *short_ptr;
 	int *int_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2516,7 +2506,7 @@ int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
 		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			fprintf(stderr, "dbg5       profile:          %d\n", i);
 			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
 			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
@@ -2532,7 +2522,7 @@ int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
 			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
 			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
 				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
 				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
@@ -2576,7 +2566,7 @@ int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 		line[5] = (char)data->pulse_length;
 		line[6] = (char)data->source_power;
 		line[7] = (char)data->receiver_gain;
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			profile = &line[8 + i * 152];
 			profile[0] = (char)data->profile[i].day;
 			profile[1] = (char)data->profile[i].month;
@@ -2599,7 +2589,7 @@ int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 			*short_ptr = (short int)(unsigned short)data->profile[i].heading;
 			short_ptr = (short int *)&profile[22];
 			*short_ptr = (short int)data->profile[i].heave;
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				*int_ptr = (int)data->profile[i].bath[j];
@@ -2627,7 +2617,7 @@ int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 			*short_ptr = (short int)mb_swap_short((short int)(unsigned short)data->profile[i].heading);
 			short_ptr = (short int *)&profile[22];
 			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].heave);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				*int_ptr = (int)mb_swap_int(data->profile[i].bath[j]);
@@ -2682,7 +2672,6 @@ int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 	short int label;
 	short int *short_ptr;
 	int *int_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2707,7 +2696,7 @@ int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
 		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			fprintf(stderr, "dbg5       profile:          %d\n", i);
 			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
 			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
@@ -2723,7 +2712,7 @@ int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
 			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
 			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
 				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
 				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
@@ -2767,7 +2756,7 @@ int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 		line[5] = (char)data->pulse_length;
 		line[6] = (char)data->source_power;
 		line[7] = (char)data->receiver_gain;
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			profile = &line[8 + i * 152];
 			profile[0] = (char)data->profile[i].day;
 			profile[1] = (char)data->profile[i].month;
@@ -2790,7 +2779,7 @@ int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 			*short_ptr = (short int)(unsigned short)data->profile[i].heading;
 			short_ptr = (short int *)&profile[22];
 			*short_ptr = (short int)data->profile[i].heave;
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				*int_ptr = (int)data->profile[i].bath[j];
@@ -2818,7 +2807,7 @@ int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 			*short_ptr = (short int)mb_swap_short((short int)(unsigned short)data->profile[i].heading);
 			short_ptr = (short int *)&profile[22];
 			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].heave);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				*int_ptr = (int)mb_swap_int(data->profile[i].bath[j]);
@@ -2873,7 +2862,6 @@ int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 	short int label;
 	short int *short_ptr;
 	int *int_ptr;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2898,7 +2886,7 @@ int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
 		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			fprintf(stderr, "dbg5       profile:          %d\n", i);
 			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
 			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
@@ -2914,7 +2902,7 @@ int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
 			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
 			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
 				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
 				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
@@ -2958,7 +2946,7 @@ int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 		line[5] = (char)data->pulse_length;
 		line[6] = (char)data->source_power;
 		line[7] = (char)data->receiver_gain;
-		for (i = 0; i < data->profile_num; i++) {
+		for (int i = 0; i < data->profile_num; i++) {
 			profile = &line[8 + i * 152];
 			profile[0] = (char)data->profile[i].day;
 			profile[1] = (char)data->profile[i].month;
@@ -2981,7 +2969,7 @@ int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 			*short_ptr = (short int)(unsigned short)data->profile[i].heading;
 			short_ptr = (short int *)&profile[22];
 			*short_ptr = (short int)data->profile[i].heave;
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				*int_ptr = (int)data->profile[i].bath[j];
@@ -3009,7 +2997,7 @@ int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 			*short_ptr = (short int)mb_swap_short((short int)(unsigned short)data->profile[i].heading);
 			short_ptr = (short int *)&profile[22];
 			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].heave);
-			for (j = 0; j < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				beam = &profile[24 + 16 * j];
 				int_ptr = (int *)&beam[0];
 				*int_ptr = (int)mb_swap_int(data->profile[i].bath[j]);

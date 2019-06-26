@@ -45,7 +45,6 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 	char *function_name = "mbsys_singlebeam_alloc";
 	int status = MB_SUCCESS;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -63,10 +62,10 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 
 	/* initialize the structure */
 	store->kind = MB_DATA_NONE;
-	for (i = 0; i < 8; i++)
+	for (int i = 0; i < 8; i++)
 		store->survey_id[i] = 0;
 	store->time_d = 0.0;
-	for (i = 0; i < 7; i++)
+	for (int i = 0; i < 7; i++)
 		store->time_i[i] = 0;
 	store->timezone = 0;
 	store->longitude = 0.0;
@@ -114,7 +113,7 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 	store->portlat = 0.0;
 	store->stbdlon = 0.0;
 	store->stbdlat = 0.0;
-	for (i = 0; i < MB_COMMENT_MAXLINE; i++)
+	for (int i = 0; i < MB_COMMENT_MAXLINE; i++)
 		store->comment[i] = 0;
 
 	/* print output debug statements */
@@ -297,7 +296,6 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -320,7 +318,7 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -366,7 +364,7 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%2d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i]);
 		}
@@ -413,7 +411,7 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:         %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%2d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
 	}
 	if (verbose >= 2) {
@@ -432,7 +430,6 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	char *function_name = "mbsys_singlebeam_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -458,16 +455,16 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		fprintf(stderr, "dbg2       heading:    %f\n", heading);
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       flag[%d]: %d  bath[%d]: %f  bathdist[%d]: %f\n", i, beamflag[i], i, bath[i], i,
 				        bathacrosstrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        amp[%d]: %f\n", i, amp[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        ss[%d]: %f    ssdist[%d]: %f\n", i, ss[i], i, ssacrosstrack[i]);
 	}
 	if (verbose >= 2 && kind == MB_DATA_COMMENT) {
@@ -483,7 +480,7 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
@@ -529,7 +526,6 @@ int mbsys_singlebeam_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	char *function_name = "mbsys_singlebeam_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -604,7 +600,7 @@ int mbsys_singlebeam_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  heave:%f  ltrk_off:%f\n", i,
 			        ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -622,7 +618,6 @@ int mbsys_singlebeam_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -649,7 +644,7 @@ int mbsys_singlebeam_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 		*nbeams = 1;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_UNKNOWN;
 		}
 
@@ -682,7 +677,7 @@ int mbsys_singlebeam_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -785,7 +780,6 @@ int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -808,7 +802,7 @@ int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -911,7 +905,6 @@ int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	char *function_name = "mbsys_singlebeam_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_singlebeam_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -944,7 +937,7 @@ int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 

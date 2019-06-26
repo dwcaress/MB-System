@@ -48,7 +48,6 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	int sapi_status;
 	char *lastslash;
 	char path[MB_PATH_MAXLINE], name[MB_PATH_MAXLINE];
-	int i;
 	char *stdout_string = "stdout";
 
 	/* print input debug statements */
@@ -123,9 +122,9 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	mb_io_ptr->format = format;
 	mb_io_ptr->pings = 0;
 	mb_io_ptr->lonflip = 0;
-	for (i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 		mb_io_ptr->bounds[i] = 0;
-	for (i = 0; i < 7; i++) {
+	for (int i = 0; i < 7; i++) {
 		mb_io_ptr->btime_i[i] = 0;
 		mb_io_ptr->etime_i[i] = 0;
 	}
@@ -515,18 +514,18 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	mb_io_ptr->lat = 0.0;
 	mb_io_ptr->speed = 0.0;
 	mb_io_ptr->heading = 0.0;
-	for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+	for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 		mb_io_ptr->beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->bath[i] = 0.0;
 		mb_io_ptr->bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->bath_alongtrack[i] = 0.0;
 		mb_io_ptr->bath_num[i] = 0;
 	}
-	for (i = 0; i < mb_io_ptr->beams_amp_max; i++) {
+	for (int i = 0; i < mb_io_ptr->beams_amp_max; i++) {
 		mb_io_ptr->amp[i] = 0.0;
 		mb_io_ptr->amp_num[i] = 0;
 	}
-	for (i = 0; i < mb_io_ptr->pixels_ss_max; i++) {
+	for (int i = 0; i < mb_io_ptr->pixels_ss_max; i++) {
 		mb_io_ptr->ss[i] = 0.0;
 		mb_io_ptr->ss_acrosstrack[i] = 0.0;
 		mb_io_ptr->ss_alongtrack[i] = 0.0;
@@ -540,7 +539,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	mb_io_ptr->nheading = 0;
 	mb_io_ptr->nsonardepth = 0;
 	mb_io_ptr->naltitude = 0;
-	for (i = 0; i < MB_ASYNCH_SAVE_MAX; i++) {
+	for (int i = 0; i < MB_ASYNCH_SAVE_MAX; i++) {
 		mb_io_ptr->fix_time_d[i] = 0.0;
 		mb_io_ptr->fix_lon[i] = 0.0;
 		mb_io_ptr->fix_lat[i] = 0.0;
@@ -557,7 +556,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	}
 
 	/* initialize notices */
-	for (i = 0; i < MB_NOTICE_MAX; i++)
+	for (int i = 0; i < MB_NOTICE_MAX; i++)
 		mb_io_ptr->notice_list[i] = 0;
 
 	/* set error and status (if you got here you succeeded */

@@ -163,7 +163,6 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_image83p_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -186,7 +185,7 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -208,7 +207,7 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*nbath = store->num_proc_beams;
 		*namp = 0;
 		*nss = 0;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			beamflag[i] = store->beamflag[i];
 			bath[i] = store->bath[i];
 			bathacrosstrack[i] = store->bathacrosstrack[i];
@@ -234,7 +233,7 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		}
@@ -281,7 +280,7 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 	}
@@ -302,7 +301,6 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_image83p_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -330,17 +328,17 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -360,7 +358,7 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
@@ -378,7 +376,7 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 		/* put depth values
 		    into data structure */
 		store->num_proc_beams = nbath;
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			store->beamflag[i] = beamflag[i];
 			store->bath[i] = bath[i];
 			store->bathacrosstrack[i] = bathacrosstrack[i];
@@ -410,7 +408,6 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_image83p_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -448,7 +445,7 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			*ssv = 1500.0;
 
 		/* get travel times, angles */
-		for (i = 0; i < store->num_proc_beams; i++) {
+		for (int i = 0; i < store->num_proc_beams; i++) {
 			ttimes[i] = store->beamrange[i];
 			angles[i] = store->angles[i];
 			angles_forward[i] = store->angles_forward[i];
@@ -488,7 +485,7 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -506,7 +503,6 @@ int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_image83p_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -533,7 +529,7 @@ int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*nbeams = store->num_proc_beams;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_PHASE;
 		}
 
@@ -566,7 +562,7 @@ int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -586,7 +582,6 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 	struct mbsys_image83p_struct *store;
 	double xtrackmin;
 	int altitude_found;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -615,7 +610,7 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 		altitude_found = MB_NO;
 		xtrackmin = 999999.9;
 		*altitudev = 0.0;
-		for (i = 0; i < store->num_proc_beams; i++) {
+		for (int i = 0; i < store->num_proc_beams; i++) {
 			if (mb_beam_ok(store->beamflag[i]) && fabs(store->bathacrosstrack[i]) < xtrackmin) {
 				*altitudev = store->bath[i] - *transducer_depth;
 				altitude_found = MB_YES;
@@ -666,7 +661,6 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_image83p_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -689,7 +683,7 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get time */
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
@@ -792,7 +786,6 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_image83p_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -827,7 +820,7 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
-		for (i = 0; i < 7; i++)
+		for (int i = 0; i < 7; i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 

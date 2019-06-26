@@ -306,7 +306,6 @@ int mbr_zero_em12darw(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_em12darw";
 	int status = MB_SUCCESS;
 	struct mbf_em12darw_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -350,7 +349,7 @@ int mbr_zero_em12darw(int verbose, char *data_ptr, int *error) {
 		data->sndval = 0.0;
 
 		/* beam values */
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			data->depth[i] = 0;
 			data->distacr[i] = 0;
 			data->distalo[i] = 0;
@@ -389,7 +388,6 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int time_j[5];
 	int time_i[7];
 	int kind;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -479,27 +477,27 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_get_binary_float(MB_NO, &line[index], &(data->sndval));
 		index += 4;
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_get_binary_short(MB_NO, &line[index], &(data->depth[i]));
 			index += 2;
 		}
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_get_binary_short(MB_NO, &line[index], &(data->distacr[i]));
 			index += 2;
 		}
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_get_binary_short(MB_NO, &line[index], &(data->distalo[i]));
 			index += 2;
 		}
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_get_binary_short(MB_NO, &line[index], &(data->range[i]));
 			index += 2;
 		}
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_get_binary_short(MB_NO, &line[index], &(data->refl[i]));
 			index += 2;
 		}
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_get_binary_short(MB_NO, &line[index], &(data->beamq[i]));
 			index += 2;
 		}
@@ -529,7 +527,7 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg4       pitch:      %f\n", data->pitch);
 			fprintf(stderr, "dbg4       heave:      %f\n", data->heave);
 			fprintf(stderr, "dbg4       sndval:     %f\n", data->sndval);
-			for (i = 0; i < MBF_EM12DARW_BEAMS; i++)
+			for (int i = 0; i < MBF_EM12DARW_BEAMS; i++)
 				fprintf(stderr, "dbg4       beam:%d  depth:%d  distacr:%d  distalo:%d  range:%d refl:%d beamq:%d\n", i,
 				        data->depth[i], data->distacr[i], data->distalo[i], data->range[i], data->refl[i], data->beamq[i]);
 		}
@@ -624,7 +622,7 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			ping->sound_vel = (int)10 * data->sndval;
 			ping->pixels_ss = 0;
 			ping->ss_mode = 0;
-			for (i = 0; i < ping->beams_bath; i++) {
+			for (int i = 0; i < ping->beams_bath; i++) {
 				if (data->depth[i] > 0) {
 					ping->bath[i] = data->depth[i];
 					ping->beamflag[i] = MB_FLAG_NONE;
@@ -680,7 +678,6 @@ int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int time_i[7];
 	int time_j[5];
 	int year;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -759,7 +756,7 @@ int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			data->pitch = 0.01 * ping->pitch;
 			data->heave = 0.01 * ping->ping_heave;
 			data->sndval = 0.1 * ping->sound_vel;
-			for (i = 0; i < ping->beams_bath; i++) {
+			for (int i = 0; i < ping->beams_bath; i++) {
 				if (ping->beamflag[i] == MB_FLAG_NULL)
 					data->depth[i] = 0;
 				else if (!mb_beam_ok(ping->beamflag[i]))
@@ -817,7 +814,7 @@ int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg4       pitch:      %f\n", data->pitch);
 			fprintf(stderr, "dbg4       heave:      %f\n", data->heave);
 			fprintf(stderr, "dbg4       sndval:     %f\n", data->sndval);
-			for (i = 0; i < MBF_EM12DARW_BEAMS; i++)
+			for (int i = 0; i < MBF_EM12DARW_BEAMS; i++)
 				fprintf(stderr, "dbg4       beam:%d  depth:%d  distacr:%d  distalo:%d  range:%d refl:%d beamq:%d\n", i,
 				        data->depth[i], data->distacr[i], data->distalo[i], data->range[i], data->refl[i], data->beamq[i]);
 		}
@@ -830,7 +827,7 @@ int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* deal with comment */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_COMMENT) {
 		index = 0;
-		for (i = 0; i < MBF_EM12DARW_RECORD_LENGTH; i++)
+		for (int i = 0; i < MBF_EM12DARW_RECORD_LENGTH; i++)
 			line[i] = 0;
 		mb_put_binary_short(MB_NO, data->func, &line[0]);
 		index += 2;
@@ -880,27 +877,27 @@ int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		index += 4;
 		mb_put_binary_float(MB_NO, data->sndval, &line[index]);
 		index += 4;
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_put_binary_short(MB_NO, data->depth[i], &line[index]);
 			index += 2;
 		}
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_put_binary_short(MB_NO, data->distacr[i], &line[index]);
 			index += 2;
 		}
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_put_binary_short(MB_NO, data->distalo[i], &line[index]);
 			index += 2;
 		}
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_put_binary_short(MB_NO, data->range[i], &line[index]);
 			index += 2;
 		}
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_put_binary_short(MB_NO, data->refl[i], &line[index]);
 			index += 2;
 		}
-		for (i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
 			mb_put_binary_short(MB_NO, data->beamq[i], &line[index]);
 			index += 2;
 		}

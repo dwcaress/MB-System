@@ -478,7 +478,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	double speed;   /* speed (degrees) */
 	int interp_status = MB_SUCCESS;
 	int interp_error = MB_ERROR_NO_ERROR;
-	int i;
 	int jnav = 0;
 	int jsensordepth = 0;
 	int jheading = 0;
@@ -535,7 +534,7 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 		fprintf(stderr, "dbg2       attitude_pitch:             %p\n", pars->attitude_pitch);
 		fprintf(stderr, "dbg2       attitude_heave:             %p\n", pars->attitude_heave);
 		fprintf(stderr, "dbg2       n_kluge:                    %d\n", pars->n_kluge);
-		for (i = 0; i < pars->n_kluge; i++)
+		for (int i = 0; i < pars->n_kluge; i++)
 			fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
 	}
 
@@ -623,7 +622,7 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	}
 
 	/* loop over all pulses */
-	for (i = 0; i < store->num_pulses; i++) {
+	for (int i = 0; i < store->num_pulses; i++) {
 		/* get pulse */
 		pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 
@@ -732,7 +731,6 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -790,7 +788,7 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
 		mb_io_ptr->beamwidth_ltrack = 0.02;
 
 		/* get the bathymetry */
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			pulse = &store->pulses[i];
 			beamflag[i] = pulse->beamflag;
 			bath[i] = pulse->depth + pulse->sensordepth;
@@ -850,7 +848,6 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	double dlon, dlat, dheading;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -903,7 +900,7 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
 		dheading = heading - store->heading;
 
 		/* set the bathymetry */
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			pulse = &store->pulses[i];
 			pulse->beamflag = beamflag[i];
 			pulse->navlon += dlon;
@@ -968,7 +965,6 @@ int mbsys_3datdepthlidar_ttimes(int verbose,            /* in: verbosity level s
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1009,7 +1005,7 @@ int mbsys_3datdepthlidar_ttimes(int verbose,            /* in: verbosity level s
 		}
 
 		/* get travel times, angles */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
@@ -1065,7 +1061,6 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1101,7 +1096,7 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
 		}
 
 		/* LIDAR detects */
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			detects[i] = MB_DETECT_LIDAR;
 
 		/* always successful */
@@ -1129,7 +1124,7 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
 	}
 	if ((verbose >= 2) && (*error == MB_ERROR_NO_ERROR)) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -1153,7 +1148,6 @@ int mbsys_3datdepthlidar_pulses(int verbose,     /* in: verbosity level set on c
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1189,7 +1183,7 @@ int mbsys_3datdepthlidar_pulses(int verbose,     /* in: verbosity level set on c
 		}
 
 		/* get pulse type */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			pulses[i] = MB_PULSE_LIDAR;
 		}
 
@@ -1219,7 +1213,7 @@ int mbsys_3datdepthlidar_pulses(int verbose,     /* in: verbosity level set on c
 	}
 	if ((verbose >= 2) && (*error == MB_ERROR_NO_ERROR)) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: pulses:%d\n", i, pulses[i]);
 	}
 	if (verbose >= 2) {
@@ -1329,7 +1323,6 @@ int mbsys_3datdepthlidar_extract_altitude(
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
-	int i;
 	double rmin, r;
 
 	/* check for non-null data */
@@ -1361,7 +1354,7 @@ int mbsys_3datdepthlidar_extract_altitude(
 
 		/* loop over all soundings looking for most nadir */
 		rmin = 9999999.9;
-		for (i = 0; i < store->num_pulses; i++) {
+		for (int i = 0; i < store->num_pulses; i++) {
 			pulse = &store->pulses[i];
 			r = sqrt(pulse->acrosstrack * pulse->acrosstrack + pulse->alongtrack * pulse->alongtrack);
 			if (r < rmin) {
@@ -1424,7 +1417,6 @@ int mbsys_3datdepthlidar_extract_nnav(int verbose,     /* in: verbosity level se
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	int inav;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1497,7 +1489,7 @@ int mbsys_3datdepthlidar_extract_nnav(int verbose,     /* in: verbosity level se
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       n:          %d\n", *n);
 		for (inav = 0; inav < *n; inav++) {
-			for (i = 0; i < 7; i++)
+			for (int i = 0; i < 7; i++)
 				fprintf(stderr, "dbg2       %d time_i[%d]:     %d\n", inav, i, time_i[inav * 7 + i]);
 			fprintf(stderr, "dbg2       %d time_d:        %f\n", inav, time_d[inav]);
 			fprintf(stderr, "dbg2       %d longitude:     %f\n", inav, navlon[inav]);
@@ -1637,7 +1629,6 @@ int mbsys_3datdepthlidar_insert_nav(int verbose, void *mbio_ptr, /* in: verbosit
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	double dlon, dlat, dheading, dsensordepth, droll, dpitch;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1694,7 +1685,7 @@ int mbsys_3datdepthlidar_insert_nav(int verbose, void *mbio_ptr, /* in: verbosit
 		store->pitch = pitch;
 
 		/* need to apply nav values to all pulses */
-		for (i = 0; i < store->num_pulses; i++) {
+		for (int i = 0; i < store->num_pulses; i++) {
 			pulse = &store->pulses[i];
 			pulse->navlon += dlon;
 			pulse->navlat += dlat;
@@ -1738,7 +1729,6 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1782,7 +1772,7 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
-		for (i = 0; i < *nsvp; i++)
+		for (int i = 0; i < *nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1804,7 +1794,6 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1819,7 +1808,7 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", store_ptr);
 		fprintf(stderr, "dbg2       nsvp:       %d\n", nsvp);
-		for (i = 0; i < nsvp; i++)
+		for (int i = 0; i < nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 	}
 
@@ -1935,7 +1924,6 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
 	char *nodebug_str = "  ";
 	char *first;
 	int npulses;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2005,7 +1993,7 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
 		else {
 			npulses = store->counts_per_cross_track * store->counts_per_forward_track;
 		}
-		for (i = 0; i < store->num_pulses; i++) {
+		for (int i = 0; i < store->num_pulses; i++) {
 			pulse = &(store->pulses[i]);
 			fprintf(stderr, "%s------------------------------------------\n", first);
 			fprintf(stderr, "%s     pulse:                         %d\n", first, i);
@@ -2061,7 +2049,6 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
 	double alpha, beta, theta, phi;
 	double mtodeglon, mtodeglat;
 	double xx;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2097,7 +2084,7 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
 		mb_coor_scale(verbose, store->navlat, &mtodeglon, &mtodeglat);
 
 		/* loop over all pulses */
-		for (i = 0; i < store->num_pulses; i++) {
+		for (int i = 0; i < store->num_pulses; i++) {
 			/* get pulse */
 			pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 

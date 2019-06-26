@@ -312,7 +312,6 @@ int mbr_dem_mr1prhig(int verbose, void *mbio_ptr, int *error) {
 int mbr_zero_mr1prhig(int verbose, struct mbf_mr1prhig_struct *data, int *error) {
 	char *function_name = "mbr_zero_mr1prhig";
 	int status = MB_SUCCESS;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -369,7 +368,7 @@ int mbr_zero_mr1prhig(int verbose, struct mbf_mr1prhig_struct *data, int *error)
 		data->stbd_sspad = 0;
 
 		/* bathymetry */
-		for (i = 0; i < MBF_MR1PRHIG_BEAMS_SIDE; i++) {
+		for (int i = 0; i < MBF_MR1PRHIG_BEAMS_SIDE; i++) {
 			data->bath_acrosstrack_port[i] = 0.0;
 			data->bath_port[i] = 0.0;
 			data->bath_acrosstrack_stbd[i] = 0.0;
@@ -377,7 +376,7 @@ int mbr_zero_mr1prhig(int verbose, struct mbf_mr1prhig_struct *data, int *error)
 		}
 
 		/* sidescan */
-		for (i = 0; i < MBF_MR1PRHIG_PIXELS_SIDE; i++) {
+		for (int i = 0; i < MBF_MR1PRHIG_PIXELS_SIDE; i++) {
 			data->ss_port[i] = 0.0;
 			data->ss_stbd[i] = 0.0;
 		}
@@ -409,7 +408,6 @@ int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_mr1prhig_struct *data;
 	struct mbsys_mr1_struct *store;
 	double xtrack, depth;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -478,11 +476,11 @@ int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->stbd_sspad = data->stbd_sspad;
 
 		/* bathymetry */
-		for (i = 0; i < store->port_btycount; i++) {
+		for (int i = 0; i < store->port_btycount; i++) {
 			store->bath_acrosstrack_port[i] = data->bath_acrosstrack_port[i];
 			store->bath_port[i] = data->bath_port[i];
 		}
-		for (i = 0; i < store->stbd_btycount; i++) {
+		for (int i = 0; i < store->stbd_btycount; i++) {
 			store->bath_acrosstrack_stbd[i] = data->bath_acrosstrack_stbd[i];
 			store->bath_stbd[i] = data->bath_stbd[i];
 		}
@@ -490,7 +488,7 @@ int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* get travel times and angles assuming
 		   bathymetry calculated using simple
 		   1500 m/s water velocity */
-		for (i = 0; i < store->port_btycount; i++) {
+		for (int i = 0; i < store->port_btycount; i++) {
 			depth = fabs(store->bath_port[i]) - store->png_prdepth;
 			xtrack = -store->bath_acrosstrack_port[i];
 			if (fabs(depth) > 0.0) {
@@ -503,7 +501,7 @@ int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 		}
 		store->png_tt = fabs(store->png_alt) / 750.0;
-		for (i = 0; i < store->stbd_btycount; i++) {
+		for (int i = 0; i < store->stbd_btycount; i++) {
 			depth = fabs(store->bath_stbd[i]) - store->png_prdepth;
 			xtrack = store->bath_acrosstrack_stbd[i];
 			if (fabs(depth) > 0.0) {
@@ -517,10 +515,10 @@ int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* sidescan */
-		for (i = 0; i < store->port_sscount; i++) {
+		for (int i = 0; i < store->port_sscount; i++) {
 			store->ss_port[i] = data->ss_port[i];
 		}
-		for (i = 0; i < store->stbd_sscount; i++) {
+		for (int i = 0; i < store->stbd_sscount; i++) {
 			store->ss_stbd[i] = data->ss_stbd[i];
 		}
 
@@ -546,7 +544,6 @@ int mbr_wt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mr1prhig_struct *data;
 	struct mbsys_mr1_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -610,20 +607,20 @@ int mbr_wt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->stbd_sspad = store->stbd_sspad;
 
 		/* bathymetry */
-		for (i = 0; i < data->port_btycount; i++) {
+		for (int i = 0; i < data->port_btycount; i++) {
 			data->bath_acrosstrack_port[i] = store->bath_acrosstrack_port[i];
 			data->bath_port[i] = store->bath_port[i];
 		}
-		for (i = 0; i < data->stbd_btycount; i++) {
+		for (int i = 0; i < data->stbd_btycount; i++) {
 			data->bath_acrosstrack_stbd[i] = store->bath_acrosstrack_stbd[i];
 			data->bath_stbd[i] = store->bath_stbd[i];
 		}
 
 		/* sidescan */
-		for (i = 0; i < data->port_sscount; i++) {
+		for (int i = 0; i < data->port_sscount; i++) {
 			data->ss_port[i] = store->ss_port[i];
 		}
-		for (i = 0; i < data->stbd_sscount; i++) {
+		for (int i = 0; i < data->stbd_sscount; i++) {
 			data->ss_stbd[i] = store->ss_stbd[i];
 		}
 
@@ -795,7 +792,6 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 	int status = MB_SUCCESS;
 	int dummy_count;
 	float dummy;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -853,11 +849,11 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 	}
 	else
 		dummy_count = 0;
-	for (i = 0; i < data->port_btycount; i++) {
+	for (int i = 0; i < data->port_btycount; i++) {
 		status = xdr_float(xdrs, &data->bath_acrosstrack_port[i]);
 		status = xdr_float(xdrs, &data->bath_port[i]);
 	}
-	for (i = 0; i < dummy_count; i++) {
+	for (int i = 0; i < dummy_count; i++) {
 		status = xdr_float(xdrs, &dummy);
 		status = xdr_float(xdrs, &dummy);
 	}
@@ -873,10 +869,10 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 	}
 	else
 		dummy_count = 0;
-	for (i = 0; i < data->port_sscount; i++) {
+	for (int i = 0; i < data->port_sscount; i++) {
 		status = xdr_float(xdrs, &data->ss_port[i]);
 	}
-	for (i = 0; i < dummy_count; i++) {
+	for (int i = 0; i < dummy_count; i++) {
 		status = xdr_float(xdrs, &dummy);
 	}
 
@@ -892,11 +888,11 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 	}
 	else
 		dummy_count = 0;
-	for (i = 0; i < data->stbd_btycount; i++) {
+	for (int i = 0; i < data->stbd_btycount; i++) {
 		status = xdr_float(xdrs, &data->bath_acrosstrack_stbd[i]);
 		status = xdr_float(xdrs, &data->bath_stbd[i]);
 	}
-	for (i = 0; i < dummy_count; i++) {
+	for (int i = 0; i < dummy_count; i++) {
 		status = xdr_float(xdrs, &dummy);
 		status = xdr_float(xdrs, &dummy);
 	}
@@ -913,10 +909,10 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 	}
 	else
 		dummy_count = 0;
-	for (i = 0; i < data->stbd_sscount; i++) {
+	for (int i = 0; i < data->stbd_sscount; i++) {
 		status = xdr_float(xdrs, &data->ss_stbd[i]);
 	}
-	for (i = 0; i < dummy_count; i++) {
+	for (int i = 0; i < dummy_count; i++) {
 		status = xdr_float(xdrs, &dummy);
 	}
 
@@ -958,22 +954,22 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "dbg5       port_beam  depth   xtrack\n");
-		for (i = 0; i < data->port_btycount; i++) {
+		for (int i = 0; i < data->port_btycount; i++) {
 			fprintf(stderr, "dbg5       %3d     %12.4g %12.4g\n", i, data->bath_port[i], data->bath_acrosstrack_port[i]);
 		}
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       stbd_beam  depth   xtrack\n");
-		for (i = 0; i < data->stbd_btycount; i++) {
+		for (int i = 0; i < data->stbd_btycount; i++) {
 			fprintf(stderr, "dbg5       %3d     %12.4g %12.4g\n", i, data->bath_stbd[i], data->bath_acrosstrack_stbd[i]);
 		}
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       port_pixel  sidescan\n");
-		for (i = 0; i < data->port_sscount; i++) {
+		for (int i = 0; i < data->port_sscount; i++) {
 			fprintf(stderr, "dbg5       %3d     %12.4g\n", i, data->ss_port[i]);
 		}
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       stbd_pixel  sidescan\n");
-		for (i = 0; i < data->stbd_sscount; i++) {
+		for (int i = 0; i < data->stbd_sscount; i++) {
 			fprintf(stderr, "dbg5       %3d     %12.4g\n", i, data->ss_stbd[i]);
 		}
 		fprintf(stderr, "\n");
@@ -1142,7 +1138,6 @@ int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data
 int mbr_mr1prhig_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data, int *error) {
 	char *function_name = "mbr_mr1prhig_wr_ping";
 	int status = MB_SUCCESS;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1184,22 +1179,22 @@ int mbr_mr1prhig_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 		fprintf(stderr, "dbg5       stbd ss count:    %d\n", data->stbd_sscount);
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       port_beam  depth   xtrack\n");
-		for (i = 0; i < data->port_btycount; i++) {
+		for (int i = 0; i < data->port_btycount; i++) {
 			fprintf(stderr, "dbg5       %3d     %12.4g %12.4g\n", i, data->bath_port[i], data->bath_acrosstrack_port[i]);
 		}
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       stbd_beam  depth   xtrack\n");
-		for (i = 0; i < data->stbd_btycount; i++) {
+		for (int i = 0; i < data->stbd_btycount; i++) {
 			fprintf(stderr, "dbg5       %3d     %12.4g %12.4g\n", i, data->bath_stbd[i], data->bath_acrosstrack_stbd[i]);
 		}
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       port_pixel  sidescan\n");
-		for (i = 0; i < data->port_sscount; i++) {
+		for (int i = 0; i < data->port_sscount; i++) {
 			fprintf(stderr, "dbg5       %3d     %12.4g\n", i, data->ss_port[i]);
 		}
 		fprintf(stderr, "\n");
 		fprintf(stderr, "dbg5       stbd_pixel  sidescan\n");
-		for (i = 0; i < data->stbd_sscount; i++) {
+		for (int i = 0; i < data->stbd_sscount; i++) {
 			fprintf(stderr, "dbg5       %3d     %12.4g\n", i, data->ss_stbd[i]);
 		}
 		fprintf(stderr, "\n");
@@ -1238,18 +1233,18 @@ int mbr_mr1prhig_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 	status = xdr_int(xdrs, &data->stbd_sscount);
 
 	/* write bathymetry and sidescan data */
-	for (i = 0; i < data->port_btycount; i++) {
+	for (int i = 0; i < data->port_btycount; i++) {
 		status = xdr_float(xdrs, &data->bath_acrosstrack_port[i]);
 		status = xdr_float(xdrs, &data->bath_port[i]);
 	}
-	for (i = 0; i < data->port_sscount; i++) {
+	for (int i = 0; i < data->port_sscount; i++) {
 		status = xdr_float(xdrs, &data->ss_port[i]);
 	}
-	for (i = 0; i < data->stbd_btycount; i++) {
+	for (int i = 0; i < data->stbd_btycount; i++) {
 		status = xdr_float(xdrs, &data->bath_acrosstrack_stbd[i]);
 		status = xdr_float(xdrs, &data->bath_stbd[i]);
 	}
-	for (i = 0; i < data->stbd_sscount; i++) {
+	for (int i = 0; i < data->stbd_sscount; i++) {
 		status = xdr_float(xdrs, &data->ss_stbd[i]);
 	}
 	if (status == MB_FAILURE)

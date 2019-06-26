@@ -49,7 +49,6 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -74,7 +73,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	/* start telegram */
 	store->start_ping_no = 0;           /* ping number */
 	store->start_transmit_time_d = 0.0; /* ping timestamp */
-	for (i = 0; i < 32; i++)
+	for (int i = 0; i < 32; i++)
 		store->start_opmode[i] = 0; /* 32 single byte mode indicators:			*/
 	                                /*	start_opmode[ 0] = OPMODE_SOUNDING = 0		*/
 	                                /*		OM_SOUNDING_OFF = 0			*/
@@ -185,7 +184,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	store->tt_double2 = 0.0;     /* FS10: data age */
 	store->tt_sensdraught = 0.0; /* sens/inst draft */
 	store->tt_draught = 0.0;     /* system draft (m) */
-	for (i = 0; i < MBSYS_ATLAS_MAXBEAMS; i++) {
+	for (int i = 0; i < MBSYS_ATLAS_MAXBEAMS; i++) {
 		store->tt_lruntime[i] = 0.0; /* array of beam traveltimes with   */
 		                             /* each entry related to the beam   */
 		                             /* angle in the actual angle table  */
@@ -209,7 +208,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	store->pr_navlon = 0.0; /* longitude (degrees) */
 	store->pr_navlat = 0.0; /* latitude (degrees) */
 	store->pr_speed = 0.0;  /* speed made good (m/s) */
-	for (i = 0; i < MBSYS_ATLAS_MAXBEAMS; i++) {
+	for (int i = 0; i < MBSYS_ATLAS_MAXBEAMS; i++) {
 		store->pr_bath[i] = 0.0;              /* bathymetry (m) */
 		store->pr_bathacrosstrack[i] = 0.0;   /* acrosstrack distance (m) */
 		store->pr_bathalongtrack[i] = 0.0;    /* alongtrack distance (m) */
@@ -223,7 +222,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	store->ss_timespacing = 0.0;     /* time spacing between sidescan values (s) */
 	store->ss_max_side_bb_cnt = 0;   /* total number of values to port */
 	store->ss_max_side_sb_cnt = 0;   /* total number of values to starboard */
-	for (i = 0; i < MBSYS_ATLAS_MAXPIXELS; i++)
+	for (int i = 0; i < MBSYS_ATLAS_MAXPIXELS; i++)
 		store->ss_sidescan[i] = 0;
 
 	/* tracking windows telegram */
@@ -233,7 +232,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	store->tr_no_of_win_groups = 0;  /* number of window groups  */
 	                                 /* DS2 & MD => 8	    */
 	                                 /* Fansweep => 20	    */
-	for (i = 0; i < MBSYS_ATLAS_MAXWINDOWS; i++) {
+	for (int i = 0; i < MBSYS_ATLAS_MAXWINDOWS; i++) {
 		store->tr_repeat_count[i] = 0; /* this window repeats n times  */
 		                               /* DS2 => 6,8,8,8,8,8,8,5	    */
 		                               /* MD => 5,5,5,5,5,5,5,5	    */
@@ -249,26 +248,26 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	/* MD: -185.0 dB relative to 1 V/uPa */
 	store->bs_rxGain = 0.0; /* scale : dB */
 	store->bs_ar = 0.0;     /* scale : dB/m */
-	for (i = 0; i < MBSYS_ATLAS_HSDS2_RX_PAR; i++) {
+	for (int i = 0; i < MBSYS_ATLAS_HSDS2_RX_PAR; i++) {
 		store->bs_TvgRx_time[i] = 0.0; /* two way time (s) */
 		store->bs_TvgRx_gain[i] = 0.0; /* receiver gain (dB) */
 	}
 	store->bs_nrTxSets = 0; /* number of transmit sets (1, 3, 5) */
-	for (i = 0; i < MBSYS_ATLAS_HSDS2_TX_PAR; i++) {
+	for (int i = 0; i < MBSYS_ATLAS_HSDS2_TX_PAR; i++) {
 		store->bs_txBeamIndex[i] = 0;   /* code of external beamshape table */
 		store->bs_txLevel[i] = 0.0;     /* transmit level: dB relative to 1 uPa */
 		store->bs_txBeamAngle[i] = 0.0; /* transmit beam angle (radians) */
 		store->bs_pulseLength[i] = 0.0; /* transmit pulse length (s) */
 	}
 	store->bs_nrBsSets = 0; /* number of backscatter sets */
-	for (i = 0; i < MBSYS_ATLAS_HSDS2_PFB_NUM; i++) {
+	for (int i = 0; i < MBSYS_ATLAS_HSDS2_PFB_NUM; i++) {
 		store->bs_m_tau[i] = 0.0;   /* echo duration (s) */
 		store->bs_eff_ampli[i] = 0; /* effective amplitude */
 		store->bs_nis[i] = 0;       /* noise isotropic */
 	}
 
 	/* comment */
-	for (i = 0; i < MBSYS_ATLAS_COMMENT_LENGTH; i++) {
+	for (int i = 0; i < MBSYS_ATLAS_COMMENT_LENGTH; i++) {
 		store->comment[i] = '\0';
 	}
 
@@ -381,7 +380,6 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mbsys_atlas_struct *store;
 	double pixel_size;
 	double range, tt, ttmin, ssdepth;
-	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -423,7 +421,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 
 		/* read distance and depth values into storage arrays */
 		*nbath = store->tt_beam_cnt;
-		for (i = 0; i < MBSYS_ATLAS_MAXBEAMS; i++) {
+		for (int i = 0; i < MBSYS_ATLAS_MAXBEAMS; i++) {
 			bath[i] = 0.0;
 			beamflag[i] = MB_FLAG_NULL;
 			amp[i] = 0.0;
@@ -431,7 +429,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			bathalongtrack[i] = 0.0;
 		}
 		ttmin = 999999.9;
-		for (i = 0; i < store->tt_beam_cnt; i++) {
+		for (int i = 0; i < store->tt_beam_cnt; i++) {
 			bath[i] = store->pr_bath[i];
 			beamflag[i] = store->pr_beamflag[i];
 			bathacrosstrack[i] = store->pr_bathacrosstrack[i];
@@ -444,13 +442,13 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		*nss = store->ss_max_side_bb_cnt + store->ss_max_side_sb_cnt;
 		pixel_size = store->start_cmean * store->ss_timespacing;
 		ssdepth = store->start_cmean * ttmin / 2.0;
-		for (i = 0; i < *nss; i++) {
+		for (int i = 0; i < *nss; i++) {
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
 			ssalongtrack[i] = 0.0;
 		}
-		for (i = 0; i < store->ss_max_side_bb_cnt; i++) {
-			j = store->ss_max_side_bb_cnt - i;
+		for (int i = 0; i < store->ss_max_side_bb_cnt; i++) {
+			const int j = store->ss_max_side_bb_cnt - i;
 			tt = store->ss_timedelay + store->ss_timespacing * (i - 1);
 			if (tt > ttmin) {
 				ss[j] = store->ss_sidescan[i];
@@ -459,7 +457,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 				ssalongtrack[j] = 0.0;
 			}
 		}
-		for (i = store->ss_max_side_bb_cnt; i < *nss; i++) {
+		for (int i = store->ss_max_side_bb_cnt; i < *nss; i++) {
 			tt = store->ss_timedelay + store->ss_timespacing * (i - store->ss_max_side_bb_cnt);
 			if (tt > ttmin) {
 				ss[i] = store->ss_sidescan[i];
@@ -488,15 +486,15 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -543,15 +541,15 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -574,7 +572,6 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	struct mbsys_atlas_struct *store;
 	double xtrackmin;
 	int centerpixel;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -600,17 +597,17 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		fprintf(stderr, "dbg2       heading:    %f\n", heading);
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -644,7 +641,7 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
 		/* read distance and depth values into storage arrays */
 		store->tt_beam_cnt = nbath;
-		for (i = 0; i < store->tt_beam_cnt; i++) {
+		for (int i = 0; i < store->tt_beam_cnt; i++) {
 			store->pr_bath[i] = bath[i];
 			store->pr_beamflag[i] = beamflag[i];
 			store->pr_bathacrosstrack[i] = bathacrosstrack[i];
@@ -654,7 +651,7 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		if (store->ss_max_side_bb_cnt + store->ss_max_side_sb_cnt != nss) {
 			xtrackmin = 99999.9;
 			centerpixel = 0;
-			for (i = 0; i < nss; i++) {
+			for (int i = 0; i < nss; i++) {
 				if (ss[i] > 0.0 && fabs(ssacrosstrack[i]) < xtrackmin) {
 					xtrackmin = fabs(ssacrosstrack[i]);
 					centerpixel = i;
@@ -669,10 +666,10 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 				store->ss_max_side_sb_cnt = nss / 2;
 			}
 		}
-		for (i = 0; i < store->ss_max_side_bb_cnt; i++) {
+		for (int i = 0; i < store->ss_max_side_bb_cnt; i++) {
 			store->ss_sidescan[i] = ss[store->ss_max_side_bb_cnt - i];
 		}
-		for (i = store->ss_max_side_bb_cnt; i < nss; i++) {
+		for (int i = store->ss_max_side_bb_cnt; i < nss; i++) {
 			store->ss_sidescan[i] = ss[i];
 		}
 	}
@@ -702,7 +699,6 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 	double *angle_table;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -748,7 +744,7 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
 		/* get travel times */
 		*nbeams = store->tt_beam_cnt;
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
@@ -756,7 +752,7 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			heave[i] = 0.0;
 			alongtrack_offset[i] = 0.0;
 		}
-		for (i = 0; i < store->tt_beam_cnt; i++) {
+		for (int i = 0; i < store->tt_beam_cnt; i++) {
 			ttimes[i] = store->tt_lruntime[i];
 			angles[i] = RTD * fabs(angle_table[i]);
 			if (angle_table[i] < 0.0)
@@ -799,7 +795,7 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -818,7 +814,6 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 	int detect;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -849,7 +844,7 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 
 		/* get detects */
 		*nbeams = store->tt_beam_cnt;
-		for (i = 0; i < store->tt_beam_cnt; i++) {
+		for (int i = 0; i < store->tt_beam_cnt; i++) {
 			detects[i] = detect;
 		}
 
@@ -880,7 +875,7 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -901,7 +896,6 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	double bath_best;
 	double xtrack_min;
 	int found;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -928,7 +922,7 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 		found = MB_NO;
 		bath_best = 0.0;
 		xtrack_min = 99999999.9;
-		for (i = 0; i < store->tt_beam_cnt; i++) {
+		for (int i = 0; i < store->tt_beam_cnt; i++) {
 			if (mb_beam_ok(store->pr_beamflag[i]) && fabs(store->pr_bathacrosstrack[i]) < xtrack_min) {
 				xtrack_min = fabs(store->pr_bathacrosstrack[i]);
 				bath_best = store->pr_bath[i];
@@ -937,7 +931,7 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 		}
 		if (found == MB_NO) {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < store->tt_beam_cnt; i++) {
+			for (int i = 0; i < store->tt_beam_cnt; i++) {
 				if (store->pr_beamflag[i] != MB_FLAG_NULL && fabs(store->pr_bathacrosstrack[i]) < xtrack_min) {
 					xtrack_min = fabs(store->pr_bathacrosstrack[i]);
 					bath_best = store->pr_bath[i];
@@ -1229,7 +1223,6 @@ int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1249,12 +1242,12 @@ int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* check for correct kind of data - hsd2 */
 	if (store->start_opmode[14] == 6 && store->kind == MB_DATA_DATA && store->tt_beam_cnt == 140) {
 		if (store->start_opmode[6] == 1) {
-			for (i = 0; i < store->tt_beam_cnt; i++) {
+			for (int i = 0; i < store->tt_beam_cnt; i++) {
 				store->tt_lruntime[i] += 0.001 * DS2_TimeCorrMedium1[i];
 			}
 		}
 		else if (store->start_opmode[6] == 2) {
-			for (i = 0; i < store->tt_beam_cnt; i++) {
+			for (int i = 0; i < store->tt_beam_cnt; i++) {
 				store->tt_lruntime[i] -= DS2_TimeCorrDeep3[i];
 			}
 		}

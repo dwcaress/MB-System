@@ -162,7 +162,6 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mbsys_sb2000_struct *store;
 	unsigned short *short_ptr;
 	int time_j[5];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -211,7 +210,7 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		/* read distance and depth values into storage arrays */
 		*nbath = store->beams_bath;
 		*namp = 0;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			/* read distance and depth values into storage arrays */
 			if (store->bath[i] > 0) {
 				beamflag[i] = MB_FLAG_NONE;
@@ -230,7 +229,7 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		}
 		*nss = store->pixels_ss;
 		if (store->ss_type == 'G') {
-			for (i = 0; i < *nss; i++) {
+			for (int i = 0; i < *nss; i++) {
 				ss[i] = store->ss[i];
 				if (ss[i] <= 0.0)
 					ss[i] = MB_SIDESCAN_NULL;
@@ -239,7 +238,7 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			}
 		}
 		else {
-			for (i = 0; i < *nss; i++) {
+			for (int i = 0; i < *nss; i++) {
 				short_ptr = (unsigned short *)&store->ss[2 * i];
 				ss[i] = (double)(*short_ptr);
 				if (ss[i] <= 0.0)
@@ -268,11 +267,11 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%4d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -319,7 +318,7 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:         %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%4d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
 	}
 	if (verbose >= 2) {
@@ -341,7 +340,6 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	struct mbsys_sb2000_struct *store;
 	int time_j[5];
 	unsigned short *short_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -369,16 +367,16 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%4d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        amp[%d]: %f\n", i, amp[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        ss[%d]: %f    ssdist[%d]: %f\n", i, ss[i], i, ssacrosstrack[i]);
 	}
 	if (verbose >= 2 && kind == MB_DATA_COMMENT) {
@@ -418,7 +416,7 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		/* put distance and depth values
 		    into data structure */
 		store->beams_bath = nbath;
-		for (i = 0; i < nbath; i++) {
+		for (int i = 0; i < nbath; i++) {
 			if (beamflag[i] == MB_FLAG_NULL) {
 				store->bath[i] = 0;
 				store->bath_acrosstrack[i] = 0;
@@ -445,7 +443,7 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		    into data structure */
 		store->pixels_ss = nss;
 		if (store->ss_type == 'G') {
-			for (i = 0; i < nss; i++) {
+			for (int i = 0; i < nss; i++) {
 				if (ss[i] > MB_SIDESCAN_NULL)
 					store->ss[i] = (mb_u_char)ss[i];
 				else
@@ -453,7 +451,7 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 			}
 		}
 		else {
-			for (i = 0; i < nss; i++) {
+			for (int i = 0; i < nss; i++) {
 				short_ptr = (unsigned short *)&store->ss[2 * i];
 				if (ss[i] > MB_SIDESCAN_NULL)
 					*short_ptr = (unsigned short)ss[i];
@@ -493,7 +491,6 @@ int mbsys_sb2000_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -525,7 +522,7 @@ int mbsys_sb2000_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		*nbeams = store->beams_bath;
 
 		/* get travel times, angles */
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
@@ -569,7 +566,7 @@ int mbsys_sb2000_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -587,7 +584,6 @@ int mbsys_sb2000_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -614,7 +610,7 @@ int mbsys_sb2000_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*nbeams = store->beams_bath;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			detects[i] = MB_DETECT_UNKNOWN;
 		}
 
@@ -647,7 +643,7 @@ int mbsys_sb2000_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -667,7 +663,6 @@ int mbsys_sb2000_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 	struct mbsys_sb2000_struct *store;
 	double bath_best;
 	double xtrack_min;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -694,7 +689,7 @@ int mbsys_sb2000_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 			bath_best = store->bath[store->beams_bath / 2];
 		else {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < store->beams_bath; i++) {
+			for (int i = 0; i < store->beams_bath; i++) {
 				if (store->bath[i] > 0.0 && (double)abs(store->bath_acrosstrack[i]) < xtrack_min) {
 					xtrack_min = (double)abs(store->bath_acrosstrack[i]);
 					bath_best = store->bath[i];
@@ -703,7 +698,7 @@ int mbsys_sb2000_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 		}
 		if (bath_best <= 0.0) {
 			xtrack_min = 99999999.9;
-			for (i = 0; i < store->beams_bath; i++) {
+			for (int i = 0; i < store->beams_bath; i++) {
 				if (store->bath[i] < 0.0 && (double)abs(store->bath_acrosstrack[i]) < xtrack_min) {
 					xtrack_min = (double)abs(store->bath_acrosstrack[i]);
 					bath_best = -store->bath[i];

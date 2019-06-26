@@ -310,7 +310,6 @@ int mbr_zero_cbat9001(int verbose, void *data_ptr, int *error) {
 	char *function_name = "mbr_zero_cbat9001";
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -361,7 +360,7 @@ int mbr_zero_cbat9001(int verbose, void *data_ptr, int *error) {
 		data->line_number = 0;
 		data->start_or_stop = 0;
 		data->transducer_serial_number = 0;
-		for (i = 0; i < MBF_CBAT9001_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBF_CBAT9001_COMMENT_LENGTH; i++)
 			data->comment[i] = '\0';
 
 		/* position (position telegrams) */
@@ -395,7 +394,7 @@ int mbr_zero_cbat9001(int verbose, void *data_ptr, int *error) {
 		data->svp_hundredth_sec = 0;
 		data->svp_thousandth_sec = 0;
 		data->svp_num = 0;
-		for (i = 0; i < 100; i++) {
+		for (int i = 0; i < 100; i++) {
 			data->svp_depth[i] = 0; /* 0.1 meters */
 			data->svp_vel[i] = 0;   /* 0.1 meters/sec */
 		}
@@ -420,7 +419,7 @@ int mbr_zero_cbat9001(int verbose, void *data_ptr, int *error) {
 		data->gain2 = 0;
 		data->gain3 = 0;
 		data->beams_bath = MBF_CBAT9001_MAXBEAMS;
-		for (i = 0; i < MBF_CBAT9001_MAXBEAMS; i++) {
+		for (int i = 0; i < MBF_CBAT9001_MAXBEAMS; i++) {
 			data->bath[i] = 0;
 			data->bath_acrosstrack[i] = 0;
 			data->bath_alongtrack[i] = 0;
@@ -456,7 +455,6 @@ int mbr_rt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int time_i[7];
 	double time_d;
 	double lon, lat, heading, speed;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -543,7 +541,7 @@ int mbr_rt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->line_number = data->line_number;
 		store->start_or_stop = data->start_or_stop;
 		store->transducer_serial_number = data->transducer_serial_number;
-		for (i = 0; i < MBSYS_RESON_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBSYS_RESON_COMMENT_LENGTH; i++)
 			store->comment[i] = data->comment[i];
 
 		/* position (position telegrams) */
@@ -577,7 +575,7 @@ int mbr_rt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->svp_hundredth_sec = data->svp_hundredth_sec;
 		store->svp_thousandth_sec = data->svp_thousandth_sec;
 		store->svp_num = data->svp_num;
-		for (i = 0; i < 500; i++) {
+		for (int i = 0; i < 500; i++) {
 			store->svp_depth[i] = data->svp_depth[i];
 			store->svp_vel[i] = data->svp_vel[i];
 		}
@@ -604,7 +602,7 @@ int mbr_rt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->gain2 = data->gain2;
 		store->gain3 = data->gain3;
 		store->beams_bath = data->beams_bath;
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			store->bath[i] = data->bath[i];
 			store->bath_acrosstrack[i] = data->bath_acrosstrack[i];
 			store->bath_alongtrack[i] = data->bath_alongtrack[i];
@@ -634,7 +632,6 @@ int mbr_wt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_cbat9001_struct *data;
 	char *data_ptr;
 	struct mbsys_reson_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -685,7 +682,7 @@ int mbr_wt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->line_number = store->line_number;
 		data->start_or_stop = store->start_or_stop;
 		data->transducer_serial_number = store->transducer_serial_number;
-		for (i = 0; i < MBF_CBAT9001_COMMENT_LENGTH; i++)
+		for (int i = 0; i < MBF_CBAT9001_COMMENT_LENGTH; i++)
 			data->comment[i] = store->comment[i];
 
 		/* position (position telegrams) */
@@ -719,7 +716,7 @@ int mbr_wt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->svp_hundredth_sec = store->svp_hundredth_sec;
 		data->svp_thousandth_sec = store->svp_thousandth_sec;
 		data->svp_num = store->svp_num;
-		for (i = 0; i < 500; i++) {
+		for (int i = 0; i < 500; i++) {
 			data->svp_depth[i] = store->svp_depth[i];
 			data->svp_vel[i] = store->svp_vel[i];
 		}
@@ -746,7 +743,7 @@ int mbr_wt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->gain2 = store->gain2;
 		data->gain3 = store->gain3;
 		data->beams_bath = store->beams_bath;
-		for (i = 0; i < data->beams_bath; i++) {
+		for (int i = 0; i < data->beams_bath; i++) {
 			data->bath[i] = store->bath[i];
 			data->bath_acrosstrack[i] = store->bath_acrosstrack[i];
 			data->bath_alongtrack[i] = store->bath_alongtrack[i];
@@ -1266,7 +1263,6 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 	short *short_ptr;
 	short *short_ptr2;
 	int *int_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1311,7 +1307,7 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 			data->svp_latitude = (int)mb_swap_int(*int_ptr);
 		}
 		data->svp_num = 0;
-		for (i = 0; i < 500; i++) {
+		for (int i = 0; i < 500; i++) {
 			short_ptr = (short *)&line[16 + 4 * i];
 			short_ptr2 = (short *)&line[18 + 4 * i];
 			if (swap == MB_NO) {
@@ -1341,7 +1337,7 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		fprintf(stderr, "dbg5       svp_latitude:     %d\n", data->svp_latitude);
 		fprintf(stderr, "dbg5       svp_longitude:    %d\n", data->svp_longitude);
 		fprintf(stderr, "dbg5       svp_num:          %d\n", data->svp_num);
-		for (i = 0; i < data->svp_num; i++)
+		for (int i = 0; i < data->svp_num; i++)
 			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
 	}
 
@@ -1364,7 +1360,6 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 	short *short_ptr;
 	short *short_ptr2;
 	int *int_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1409,7 +1404,7 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 			data->svp_latitude = (int)mb_swap_int(*int_ptr);
 		}
 		data->svp_num = 0;
-		for (i = 0; i < 200; i++) {
+		for (int i = 0; i < 200; i++) {
 			short_ptr = (short *)&line[16 + 4 * i];
 			short_ptr2 = (short *)&line[18 + 4 * i];
 			if (swap == MB_NO) {
@@ -1439,7 +1434,7 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		fprintf(stderr, "dbg5       svp_latitude:     %d\n", data->svp_latitude);
 		fprintf(stderr, "dbg5       svp_longitude:    %d\n", data->svp_longitude);
 		fprintf(stderr, "dbg5       svp_num:          %d\n", data->svp_num);
-		for (i = 0; i < data->svp_num; i++)
+		for (int i = 0; i < data->svp_num; i++)
 			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
 	}
 
@@ -1463,7 +1458,6 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 	unsigned char *char_ptr;
 	short *short_ptr;
 	int *int_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1537,7 +1531,7 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 		data->gain3 = (int)line[31];
 		data->beams_bath = MBF_CBAT9001_MAXBEAMS;
 		if (swap == MB_NO) {
-			for (i = 0; i < data->beams_bath; i++) {
+			for (int i = 0; i < data->beams_bath; i++) {
 				beamarray = line + 32 + 12 * i;
 				short_ptr = (short *)beamarray;
 				data->bath[i] = *short_ptr;
@@ -1556,7 +1550,7 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 			}
 		}
 		else {
-			for (i = 0; i < data->beams_bath; i++) {
+			for (int i = 0; i < data->beams_bath; i++) {
 				beamarray = line + 32 + 12 * i;
 				short_ptr = (short *)beamarray;
 				data->bath[i] = (short)mb_swap_short(*short_ptr);
@@ -1601,7 +1595,7 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 		fprintf(stderr, "dbg5       gain3:            %d\n", data->gain3);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
 		fprintf(stderr, "dbg5       beam bath xtrack ltrack tt amp qual heave\n");
-		for (i = 0; i < data->beams_bath; i++)
+		for (int i = 0; i < data->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam:%d  bath:%d  xtrck:%d  ltrck:%d tt:%d  angle:%d amp:%d  qual:%d\n", i, data->bath[i],
 			        data->bath_acrosstrack[i], data->bath_alongtrack[i], data->tt[i], data->angle[i], data->amp[i],
 			        data->quality[i]);
@@ -1687,7 +1681,6 @@ int mbr_cbat9001_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 	char line[RESON_COMMENT_SIZE + 3];
 	short label;
 	int len;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1726,9 +1719,9 @@ int mbr_cbat9001_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 		len = strlen(data->comment);
 		if (len > MBF_CBAT9001_COMMENT_LENGTH)
 			len = MBF_CBAT9001_COMMENT_LENGTH;
-		for (i = 0; i < len; i++)
+		for (int i = 0; i < len; i++)
 			line[i] = data->comment[i];
-		for (i = len; i < MBF_CBAT9001_COMMENT_LENGTH; i++)
+		for (int i = len; i < MBF_CBAT9001_COMMENT_LENGTH; i++)
 			line[i] = '\0';
 		line[RESON_COMMENT_SIZE] = 0x03;
 		line[RESON_COMMENT_SIZE + 1] = '\0';
@@ -2085,7 +2078,6 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	short *short_ptr;
 	short *short_ptr2;
 	int *int_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2114,7 +2106,7 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 		fprintf(stderr, "dbg5       svp_latitude:     %d\n", data->svp_latitude);
 		fprintf(stderr, "dbg5       svp_longitude:    %d\n", data->svp_longitude);
 		fprintf(stderr, "dbg5       svp_num:          %d\n", data->svp_num);
-		for (i = 0; i < data->svp_num; i++)
+		for (int i = 0; i < data->svp_num; i++)
 			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
 	}
 
@@ -2164,7 +2156,7 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 			int_ptr = (int *)&line[12];
 			*int_ptr = (int)mb_swap_int(data->svp_longitude);
 		}
-		for (i = 0; i < data->svp_num; i++) {
+		for (int i = 0; i < data->svp_num; i++) {
 			short_ptr = (short *)&line[16 + 4 * i];
 			short_ptr2 = (short *)&line[18 + 4 * i];
 			if (swap == MB_NO) {
@@ -2177,7 +2169,7 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 				*short_ptr2 = (short)mb_swap_short((short)data->svp_vel[i]);
 			}
 		}
-		for (i = data->svp_num; i < svp_num_max; i++) {
+		for (int i = data->svp_num; i < svp_num_max; i++) {
 			short_ptr = (short *)&line[16 + 4 * i];
 			short_ptr2 = (short *)&line[18 + 4 * i];
 			*short_ptr = 0;
@@ -2221,7 +2213,6 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 	unsigned char *char_ptr;
 	short *short_ptr;
 	int *int_ptr;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2261,7 +2252,7 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 		fprintf(stderr, "dbg5       gain3:            %d\n", data->gain3);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
 		fprintf(stderr, "dbg5       beam bath xtrack ltrack tt amp qual heave\n");
-		for (i = 0; i < data->beams_bath; i++)
+		for (int i = 0; i < data->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam:%d  bath:%d  xtrck:%d  ltrck:%d tt:%d  angle:%d amp:%d  qual:%d\n", i, data->bath[i],
 			        data->bath_acrosstrack[i], data->bath_alongtrack[i], data->tt[i], data->angle[i], data->amp[i],
 			        data->quality[i]);
@@ -2332,7 +2323,7 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 		line[31] = (char)data->gain3;
 
 		if (swap == MB_NO) {
-			for (i = 0; i < MBF_CBAT9001_MAXBEAMS; i++) {
+			for (int i = 0; i < MBF_CBAT9001_MAXBEAMS; i++) {
 				beamarray = line + 32 + 12 * i;
 				short_ptr = (short *)beamarray;
 				*short_ptr = (short)data->bath[i];
@@ -2351,7 +2342,7 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 			}
 		}
 		else {
-			for (i = 0; i < MBF_CBAT9001_MAXBEAMS; i++) {
+			for (int i = 0; i < MBF_CBAT9001_MAXBEAMS; i++) {
 				beamarray = line + 32 + 12 * i;
 				short_ptr = (short *)beamarray;
 				*short_ptr = (short)mb_swap_short((short)data->bath[i]);

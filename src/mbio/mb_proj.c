@@ -261,7 +261,6 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, double *x, double *y, double *z, int *error) {
 	char *function_name = "mb_proj_transform";
 	int status = MB_SUCCESS;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -271,7 +270,7 @@ int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, d
 		fprintf(stderr, "dbg2       pjptr:      %p\n", (void *)pjsrcptr);
 		fprintf(stderr, "dbg2       pjptr:      %p\n", (void *)pjdstptr);
 		fprintf(stderr, "dbg2       npoint:     %d\n", npoint);
-		for (i = 0; i < npoint; i++)
+		for (int i = 0; i < npoint; i++)
 			fprintf(stderr, "dbg2       point[%d]:  x:%f y:%f z:%f\n", i, x[i], y[i], z[i]);
 	}
 
@@ -289,7 +288,7 @@ int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, d
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       npoint:     %d\n", npoint);
-		for (i = 0; i < npoint; i++)
+		for (int i = 0; i < npoint; i++)
 			fprintf(stderr, "dbg2       point[%d]:  x:%f y:%f z:%f\n", i, x[i], y[i], z[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

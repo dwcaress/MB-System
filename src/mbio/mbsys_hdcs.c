@@ -40,7 +40,6 @@ int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hdcs_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -134,7 +133,7 @@ int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 		store->ss_raw = NULL;
 		store->pixel_size = 0;
 		store->pixels_ss = 0;
-		for (i = 0; i < MBSYS_HDCS_MAX_PIXELS; i++) {
+		for (int i = 0; i < MBSYS_HDCS_MAX_PIXELS; i++) {
 			store->ss_proc[i] = 0;
 			store->ssalongtrack[i] = 0;
 		}
@@ -390,7 +389,6 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hdcs_struct *store;
 	struct mbsys_hdcs_beam_struct *beam;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -578,7 +576,7 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		*nbath = store->numDepths_pro;
 		*namp = store->numDepths_pro;
 		*nss = store->pixels_ss;
-		for (i = 0; i < *nbath; i++) {
+		for (int i = 0; i < *nbath; i++) {
 			beam = &store->beams[i];
 			if (beam->observedDepth == 0)
 				beamflag[i] = MB_FLAG_NULL;
@@ -595,11 +593,11 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			bathacrosstrack[i] = 0.001 * beam->acrossTrack;
 			bathalongtrack[i] = 0.001 * beam->alongTrack;
 		}
-		for (i = 0; i < *namp; i++) {
+		for (int i = 0; i < *namp; i++) {
 			beam = &store->beams[i];
 			amp[i] = beam->reflectivity;
 		}
-		for (i = 0; i < *nss; i++) {
+		for (int i = 0; i < *nss; i++) {
 			ss[i] = store->ss_proc[i];
 			ssacrosstrack[i] = 0.001 * (i - MBSYS_HDCS_MAX_PIXELS / 2) * store->pixel_size;
 			ssalongtrack[i] = 0.001 * store->ssalongtrack[i];
@@ -624,15 +622,15 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			fprintf(stderr, "dbg4       speed:      %f\n", *speed);
 			fprintf(stderr, "dbg4       heading:    %f\n", *heading);
 			fprintf(stderr, "dbg4       nbath:      %d\n", *nbath);
-			for (i = 0; i < *nbath; i++)
+			for (int i = 0; i < *nbath; i++)
 				fprintf(stderr, "dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 			fprintf(stderr, "dbg4        namp:     %d\n", *namp);
-			for (i = 0; i < *namp; i++)
+			for (int i = 0; i < *namp; i++)
 				fprintf(stderr, "dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 			fprintf(stderr, "dbg4        nss:      %d\n", *nss);
-			for (i = 0; i < *nss; i++)
+			for (int i = 0; i < *nss; i++)
 				fprintf(stderr, "dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 		}
@@ -679,15 +677,15 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR && *kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
-		for (i = 0; i < *nbath; i++)
+		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2        namp:     %d\n", *namp);
-		for (i = 0; i < *namp; i++)
+		for (int i = 0; i < *namp; i++)
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
-		for (i = 0; i < *nss; i++)
+		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
@@ -709,7 +707,6 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hdcs_struct *store;
 	struct mbsys_hdcs_beam_struct *beam;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -737,17 +734,17 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -791,7 +788,7 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		/* get bath and sidescan */
 		if (status == MB_SUCCESS && store->num_beam >= nbath) {
 			store->numDepths_pro = nbath;
-			for (i = 0; i < store->numDepths_pro; i++) {
+			for (int i = 0; i < store->numDepths_pro; i++) {
 				beam = &store->beams[i];
 				if (mb_beam_check_flag_null(beamflag[i])) {
 					beam->status = 0;
@@ -807,7 +804,7 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 			}
 
 			/* read amplitude values into storage arrays */
-			for (i = 0; i < store->numDepths_pro; i++) {
+			for (int i = 0; i < store->numDepths_pro; i++) {
 				beam->reflectivity = amp[i];
 			}
 		}
@@ -837,7 +834,6 @@ int mbsys_hdcs_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hdcs_struct *store;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -869,7 +865,7 @@ int mbsys_hdcs_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		*nbeams = store->numDepths_pro;
 
 		/* initialize */
-		for (i = 0; i < store->numDepths_pro; i++) {
+		for (int i = 0; i < store->numDepths_pro; i++) {
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
@@ -913,7 +909,7 @@ int mbsys_hdcs_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		fprintf(stderr, "dbg2       draft:      %f\n", *draft);
 		fprintf(stderr, "dbg2       ssv:        %f\n", *ssv);
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: tt:%f  angle_xtrk:%f angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 			        i, ttimes[i], angles[i], angles_forward[i], angles_null[i], heave[i], alongtrack_offset[i]);
 	}
@@ -932,7 +928,6 @@ int mbsys_hdcs_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hdcs_struct *store;
 	struct mbsys_hdcs_beam_struct *beam;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -959,7 +954,7 @@ int mbsys_hdcs_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		*nbeams = store->numDepths_pro;
 
 		/* get detects */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			beam = &store->beams[i];
 			if (beam->Q_factor)
 				detects[i] = MB_DETECT_PHASE;
@@ -996,7 +991,7 @@ int mbsys_hdcs_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -1346,7 +1341,6 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 	struct mbsys_hdcs_struct *copy;
 	struct mbsys_hdcs_beam_struct *beam;
 	struct mbsys_hdcs_beam_struct *cbeam;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1460,7 +1454,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->num_beam * sizeof(struct mbsys_hdcs_beam_struct),
 			                    (void **)&copy->beams, error);
 			if (status == MB_SUCCESS) {
-				for (i = 0; i < copy->numDepths_pro; i++) {
+				for (int i = 0; i < copy->numDepths_pro; i++) {
 					beam = &store->beams[i];
 					cbeam = &copy->beams[i];
 
@@ -1511,7 +1505,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 				status = mb_freed(verbose, __FILE__, __LINE__, (void **)&copy->ss_raw, error);
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->numSamples, (void **)&copy->ss_raw, error);
 			if (status == MB_SUCCESS) {
-				for (i = 0; i < copy->numSamples; i++) {
+				for (int i = 0; i < copy->numSamples; i++) {
 					copy->ss_raw[i] = store->ss_raw[i];
 				}
 			}

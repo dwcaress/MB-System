@@ -445,7 +445,7 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	double headingx, headingy;
 	int interp_status = MB_SUCCESS;
 	int interp_error = MB_ERROR_NO_ERROR;
-	int i, ipulse;
+	int ipulse;
 	int jnav = 0;
 	int jsensordepth = 0;
 	int jheading = 0;
@@ -504,7 +504,7 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 		fprintf(stderr, "dbg2       attitude_pitch:             %p\n", pars->attitude_pitch);
 		fprintf(stderr, "dbg2       attitude_heave:             %p\n", pars->attitude_heave);
 		fprintf(stderr, "dbg2       n_kluge:                    %d\n", pars->n_kluge);
-		for (i = 0; i < pars->n_kluge; i++)
+		for (int i = 0; i < pars->n_kluge; i++)
 			fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
 	}
 
@@ -1049,7 +1049,6 @@ int mbsys_3ddwissl_ttimes(int verbose,            /* in: verbosity level set on 
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1085,7 +1084,7 @@ int mbsys_3ddwissl_ttimes(int verbose,            /* in: verbosity level set on 
 		*nbeams = store->pulses_per_scan * store->soundings_per_pulse;
 
 		/* get travel times, angles */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
@@ -1141,7 +1140,6 @@ int mbsys_3ddwissl_detects(int verbose,     /* in: verbosity level set on comman
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1172,7 +1170,7 @@ int mbsys_3ddwissl_detects(int verbose,     /* in: verbosity level set on comman
 		*nbeams = store->pulses_per_scan * store->soundings_per_pulse;
 
 		/* LIDAR detects */
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			detects[i] = MB_DETECT_LIDAR;
 
 		/* always successful */
@@ -1200,7 +1198,7 @@ int mbsys_3ddwissl_detects(int verbose,     /* in: verbosity level set on comman
 	}
 	if ((verbose >= 2) && (*error == MB_ERROR_NO_ERROR)) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: detects:%d\n", i, detects[i]);
 	}
 	if (verbose >= 2) {
@@ -1224,7 +1222,6 @@ int mbsys_3ddwissl_pulses(int verbose,     /* in: verbosity level set on command
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1255,7 +1252,7 @@ int mbsys_3ddwissl_pulses(int verbose,     /* in: verbosity level set on command
 		*nbeams = store->pulses_per_scan * store->soundings_per_pulse;
 
 		/* get pulse type */
-		for (i = 0; i < *nbeams; i++) {
+		for (int i = 0; i < *nbeams; i++) {
 			pulses[i] = MB_PULSE_LIDAR;
 		}
 
@@ -1285,7 +1282,7 @@ int mbsys_3ddwissl_pulses(int verbose,     /* in: verbosity level set on command
 	}
 	if ((verbose >= 2) && (*error == MB_ERROR_NO_ERROR)) {
 		fprintf(stderr, "dbg2       nbeams:     %d\n", *nbeams);
-		for (i = 0; i < *nbeams; i++)
+		for (int i = 0; i < *nbeams; i++)
 			fprintf(stderr, "dbg2       beam %d: pulses:%d\n", i, pulses[i]);
 	}
 	if (verbose >= 2) {
@@ -1496,7 +1493,6 @@ int mbsys_3ddwissl_extract_nnav(int verbose,     /* in: verbosity level set on c
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 	int inav;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1569,7 +1565,7 @@ int mbsys_3ddwissl_extract_nnav(int verbose,     /* in: verbosity level set on c
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       n:          %d\n", *n);
 		for (inav = 0; inav < *n; inav++) {
-			for (i = 0; i < 7; i++)
+			for (int i = 0; i < 7; i++)
 				fprintf(stderr, "dbg2       %d time_i[%d]:     %d\n", inav, i, time_i[inav * 7 + i]);
 			fprintf(stderr, "dbg2       %d time_d:        %f\n", inav, time_d[inav]);
 			fprintf(stderr, "dbg2       %d longitude:     %f\n", inav, navlon[inav]);
@@ -1793,7 +1789,6 @@ int mbsys_3ddwissl_extract_svp(int verbose,      /* in: verbosity level set on c
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1837,7 +1832,7 @@ int mbsys_3ddwissl_extract_svp(int verbose,      /* in: verbosity level set on c
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
-		for (i = 0; i < *nsvp; i++)
+		for (int i = 0; i < *nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1859,7 +1854,6 @@ int mbsys_3ddwissl_insert_svp(int verbose,      /* in: verbosity level set on co
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
-	int i;
 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
@@ -1874,7 +1868,7 @@ int mbsys_3ddwissl_insert_svp(int verbose,      /* in: verbosity level set on co
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", store_ptr);
 		fprintf(stderr, "dbg2       nsvp:       %d\n", nsvp);
-		for (i = 0; i < nsvp; i++)
+		for (int i = 0; i < nsvp; i++)
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 	}
 
@@ -2573,7 +2567,7 @@ fprintf(stderr, "\n");
     head_a_end = -1;
     head_b_start = num_indextable;
     head_b_end = -1;
-    for (i = 0; i < num_indextable; i++) {
+    for (int i = 0; i < num_indextable; i++) {
         if (indextable[i].subsensor == MBSYS_3DDWISSL_HEADA) {
             if (i < head_a_start)
                 head_a_start = i;
@@ -2595,7 +2589,7 @@ fprintf(stderr, "\n");
     num_good_timestamps = 0;
     first_good_timestamp = head_a_end;
     last_good_timestamp = head_a_start;
-    for (i = head_a_start; i <= head_a_end; i++) {
+    for (int i = head_a_start; i <= head_a_end; i++) {
         if (i > head_a_start)
             dt = indextable[i].time_d_org - indextable[i-1].time_d_org;
         nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
@@ -2620,12 +2614,12 @@ fprintf(stderr, "\n");
         dt = (indextable[last_good_timestamp].time_d_corrected - indextable[first_good_timestamp].time_d_corrected)
             / ((double)(last_good_timestamp - first_good_timestamp));
 //fprintf(stderr,"dt:%.6f\n",dt);
-        for (i = head_a_start; i < first_good_timestamp; i++) {
+        for (int i = head_a_start; i < first_good_timestamp; i++) {
             indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected
                                                 + dt * (i - first_good_timestamp);
 //fprintf(stderr,"New time_d A-0: %5d %.6f\n", i, indextable[i].time_d_corrected);
         }
-        for (i = last_good_timestamp + 1; i <= head_a_end; i++) {
+        for (int i = last_good_timestamp + 1; i <= head_a_end; i++) {
             indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected
                                                 + dt * (i - last_good_timestamp);
 //fprintf(stderr,"New time_d A-2: %5d %.6f\n", i, indextable[i].time_d_corrected);
@@ -2633,7 +2627,7 @@ fprintf(stderr, "\n");
         done = MB_NO;
         next_good_timestamp = first_good_timestamp;
         while (done == MB_NO) {
-            for (i = first_good_timestamp + 1;
+            for (int i = first_good_timestamp + 1;
                  i <= last_good_timestamp && next_good_timestamp == first_good_timestamp;
                  i++) {
                 if (indextable[i].time_d_corrected > 0.0) {
@@ -2642,7 +2636,7 @@ fprintf(stderr, "\n");
             }
             dt = (indextable[next_good_timestamp].time_d_corrected - indextable[first_good_timestamp].time_d_corrected)
             / ((double)(next_good_timestamp - first_good_timestamp));
-            for (i = first_good_timestamp + 1; i < next_good_timestamp; i++) {
+            for (int i = first_good_timestamp + 1; i < next_good_timestamp; i++) {
                 indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected
                                                 + dt * (i - first_good_timestamp);
 //fprintf(stderr,"New time_d A-1: %5d %.6f\n", i, indextable[i].time_d_corrected);
@@ -2656,7 +2650,7 @@ fprintf(stderr, "\n");
     /* if no good timestamps identified assume all are good and reset all
         timestamps to the original values */
     else {
-        for (i = head_a_start; i <= head_a_end; i++) {
+        for (int i = head_a_start; i <= head_a_end; i++) {
             indextable[i].time_d_corrected = indextable[i].time_d_org;
         }
     }
@@ -2666,7 +2660,7 @@ fprintf(stderr, "\n");
     num_good_timestamps = 0;
     first_good_timestamp = head_b_end;
     last_good_timestamp = head_b_start;
-    for (i = head_b_start; i <= head_b_end; i++) {
+    for (int i = head_b_start; i <= head_b_end; i++) {
         if (i > head_b_start)
             dt = indextable[i].time_d_org - indextable[i-1].time_d_org;
         nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
@@ -2690,12 +2684,12 @@ fprintf(stderr, "\n");
     if (last_good_timestamp > first_good_timestamp) {
         dt = (indextable[last_good_timestamp].time_d_corrected - indextable[first_good_timestamp].time_d_corrected)
             / ((double)(last_good_timestamp - first_good_timestamp));
-        for (i = head_b_start; i < first_good_timestamp; i++) {
+        for (int i = head_b_start; i < first_good_timestamp; i++) {
             indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected
                                                 + dt * (i - first_good_timestamp);
 //fprintf(stderr,"New time_d B-0: %5d %.6f\n", i, indextable[i].time_d_corrected);
         }
-        for (i = last_good_timestamp + 1; i <= head_b_end; i++) {
+        for (int i = last_good_timestamp + 1; i <= head_b_end; i++) {
             indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected
                                                 + dt * (i - last_good_timestamp);
 //fprintf(stderr,"New time_d B-2: %5d %.6f\n", i, indextable[i].time_d_corrected);
@@ -2703,7 +2697,7 @@ fprintf(stderr, "\n");
         done = MB_NO;
         next_good_timestamp = first_good_timestamp;
         while (done == MB_NO) {
-            for (i = first_good_timestamp + 1;
+            for (int i = first_good_timestamp + 1;
                  i <= last_good_timestamp && next_good_timestamp == first_good_timestamp;
                  i++) {
                 if (indextable[i].time_d_corrected > 0.0) {
@@ -2712,7 +2706,7 @@ fprintf(stderr, "\n");
             }
             dt = (indextable[next_good_timestamp].time_d_corrected - indextable[first_good_timestamp].time_d_corrected)
             / ((double)(next_good_timestamp - first_good_timestamp));
-            for (i = first_good_timestamp + 1; i < next_good_timestamp; i++) {
+            for (int i = first_good_timestamp + 1; i < next_good_timestamp; i++) {
                 indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected
                                                 + dt * (i - first_good_timestamp);
 //fprintf(stderr,"New time_d B-1: %5d %.6f\n", i, indextable[i].time_d_corrected);
@@ -2726,7 +2720,7 @@ fprintf(stderr, "\n");
     /* if no good timestamps identified assume all are good and reset all
         timestamps to the original values */
     else {
-        for (i = head_b_start; i <= head_b_end; i++) {
+        for (int i = head_b_start; i <= head_b_end; i++) {
             indextable[i].time_d_corrected = indextable[i].time_d_org;
         }
     }

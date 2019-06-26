@@ -298,7 +298,6 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_sbsiomrg_data_struct *data;
 	struct mbsys_sb_struct *store;
 	char *datacomment;
-	int i, j, k, l;
 	int icenter;
 	int jpos, jneg;
 	int ipos, ineg;
@@ -362,15 +361,15 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->lat2b = mb_swap_short(data->lat2b);
 		data->lon2u = mb_swap_short(data->lon2u);
 		data->lon2b = mb_swap_short(data->lon2b);
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
 			data->spare1[i] = mb_swap_short(data->spare1[i]);
 		data->sbtim = mb_swap_short(data->sbtim);
 		data->sbhdg = mb_swap_short(data->sbhdg);
-		for (i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
+		for (int i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
 			data->dist[i] = mb_swap_short(data->dist[i]);
 			data->deph[i] = mb_swap_short(data->deph[i]);
 		}
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			data->spare2[i] = mb_swap_short(data->spare2[i]);
 	}
 #endif
@@ -401,7 +400,7 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       spare2[2]:  %d\n", data->spare2[2]);
 		fprintf(stderr, "dbg5       spare2[3]:  %d\n", data->spare2[3]);
 		fprintf(stderr, "dbg5       spare2[4]:  %d\n", data->spare2[4]);
-		for (i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++)
+		for (int i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++)
 			fprintf(stderr, "dbg5       deph[%d]: %d  dist[%d]: %d\n", i, data->deph[i], i, data->dist[i]);
 	}
 
@@ -424,14 +423,14 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->sec = data->sec;
 
 			/* zero arrays */
-			for (i = 0; i < MBSYS_SB_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 				store->deph[i] = 0;
 				store->dist[i] = 0;
 			}
 
 			/* find center beam */
 			icenter = -1;
-			for (i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
+			for (int i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
 				if (data->dist[i] == 0 && data->deph[i] != 0)
 					icenter = i;
 				if (icenter < 0 && data->dist[i] == 0 && data->dist[i - 1] < 0 && data->dist[i + 1] > 0)
@@ -442,7 +441,7 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (icenter < 0) {
 				jpos = 0;
 				jneg = 0;
-				for (i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
+				for (int i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
 					if (data->dist[i] > 0 && (data->dist[i] < jpos || jpos == 0)) {
 						jpos = data->dist[i];
 						ipos = i;
@@ -465,7 +464,7 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (icenter < 0) {
 				jneg = 0;
 				jpos = 0;
-				for (i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
+				for (int i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
 					if (data->dist[i] != 0) {
 						if (jneg == 0 && jpos == 0) {
 							jneg = data->dist[i];
@@ -495,14 +494,14 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* center the data in the global arrays */
 			if (icenter >= 0) {
 				id = MB_BEAMS_PROC_SBSIOMRG / 2 - icenter;
-				j = 0;
-				k = MB_BEAMS_RAW_SBSIOMRG;
+				int j = 0;
+				int k = MB_BEAMS_RAW_SBSIOMRG;
 				if (id < 0)
 					j = -id;
 				if (id > (MB_BEAMS_PROC_SBSIOMRG - MB_BEAMS_RAW_SBSIOMRG))
 					k = MB_BEAMS_PROC_SBSIOMRG - id;
-				for (i = j; i < k; i++) {
-					l = MBSYS_SB_BEAMS - 1 - id - i;
+				for (int i = j; i < k; i++) {
+					const int l = MBSYS_SB_BEAMS - 1 - id - i;
 					store->deph[l] = data->deph[i];
 					store->dist[l] = data->dist[i];
 				}
@@ -542,7 +541,6 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_sbsiomrg_data_struct *data;
 	struct mbsys_sb_struct *store;
 	char *datacomment;
-	int i, j;
 	int offset, iend, id;
 
 	/* print input debug statements */
@@ -583,7 +581,7 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* initialize depth and distance in
 		    output structure */
-		for (i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
+		for (int i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
 			data->deph[i] = 0;
 			data->dist[i] = 0;
 		}
@@ -591,7 +589,7 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* find first nonzero beam */
 		id = MB_BEAMS_PROC_SBSIOMRG - 1;
 		offset = -1;
-		for (i = 0; i < MB_BEAMS_PROC_SBSIOMRG; i++)
+		for (int i = 0; i < MB_BEAMS_PROC_SBSIOMRG; i++)
 			if (store->deph[id - i] != 0 && offset == -1)
 				offset = i;
 		if (offset == -1)
@@ -602,8 +600,8 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* read depth and distance values into
 		    output structure */
-		for (i = 0; i < iend; i++) {
-			j = id - i - offset;
+		for (int i = 0; i < iend; i++) {
+			const int j = id - i - offset;
 			data->deph[i] = store->deph[j];
 			data->dist[i] = store->dist[j];
 		}
@@ -638,15 +636,15 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->lat2b = mb_swap_short(data->lat2b);
 		data->lon2u = mb_swap_short(data->lon2u);
 		data->lon2b = mb_swap_short(data->lon2b);
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
 			data->spare1[i] = mb_swap_short(data->spare1[i]);
 		data->sbtim = mb_swap_short(data->sbtim);
 		data->sbhdg = mb_swap_short(data->sbhdg);
-		for (i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
+		for (int i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
 			data->dist[i] = mb_swap_short(data->dist[i]);
 			data->deph[i] = mb_swap_short(data->deph[i]);
 		}
-		for (i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			data->spare2[i] = mb_swap_short(data->spare2[i]);
 	}
 #endif

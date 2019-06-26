@@ -372,7 +372,6 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double depthmax;
 	int time_i[7], time_j[6];
 	int version;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -899,15 +898,15 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			store->bath[i] = mb_swap_short(store->bath[i]);
 			store->bath_acrosstrack[i] = mb_swap_short(store->bath_acrosstrack[i]);
 			store->bath_alongtrack[i] = mb_swap_short(store->bath_alongtrack[i]);
 		}
-		for (i = 0; i < store->beams_amp; i++) {
+		for (int i = 0; i < store->beams_amp; i++) {
 			store->amp[i] = mb_swap_short(store->amp[i]);
 		}
-		for (i = 0; i < store->pixels_ss; i++) {
+		for (int i = 0; i < store->pixels_ss; i++) {
 			store->ss[i] = mb_swap_short(store->ss[i]);
 			store->ss_acrosstrack[i] = mb_swap_short(store->ss_acrosstrack[i]);
 			store->ss_alongtrack[i] = mb_swap_short(store->ss_alongtrack[i]);
@@ -918,12 +917,12 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		    1 or 2 data has been read */
 		if (version < 3) {
 			depthmax = 0.0;
-			for (i = 0; i < store->beams_bath; i++) {
+			for (int i = 0; i < store->beams_bath; i++) {
 				depthmax = MAX(depthmax, (store->depth_scale * store->bath[i] - store->sonardepth));
 			}
 			if (depthmax > 0.0)
 				newdepthscale = 0.001 * (double)(MAX((int)(1 + depthmax / 30.0), 1));
-			for (i = 0; i < store->beams_bath; i++) {
+			for (int i = 0; i < store->beams_bath; i++) {
 				store->bath[i] = (short)((store->depth_scale * store->bath[i] - store->sonardepth) / newdepthscale);
 			}
 			store->depth_scale = newdepthscale;
@@ -948,15 +947,15 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (verbose >= 5 && status == MB_SUCCESS) {
 			fprintf(stderr, "\ndbg5  New data read in function <%s>\n", function_name);
 			fprintf(stderr, "dbg5       beams_bath: %d\n", store->beams_bath);
-			for (i = 0; i < store->beams_bath; i++)
+			for (int i = 0; i < store->beams_bath; i++)
 				fprintf(stderr, "dbg5       beam:%d  flag:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n", i, store->beamflag[i],
 				        store->bath[i], store->bath_acrosstrack[i], store->bath_alongtrack[i]);
 			fprintf(stderr, "dbg5       beams_amp:  %d\n", store->beams_amp);
-			for (i = 0; i < store->beams_amp; i++)
+			for (int i = 0; i < store->beams_amp; i++)
 				fprintf(stderr, "dbg5       beam:%d  flag:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n", i, store->beamflag[i],
 				        store->amp[i], store->bath_acrosstrack[i], store->bath_alongtrack[i]);
 			fprintf(stderr, "dbg5       pixels_ss:  %d\n", store->pixels_ss);
-			for (i = 0; i < store->pixels_ss; i++)
+			for (int i = 0; i < store->pixels_ss; i++)
 				fprintf(stderr, "dbg5       pixel:%d  ss:%d acrosstrack:%d  alongtrack:%d\n", i, store->ss[i],
 				        store->ss_acrosstrack[i], store->ss_alongtrack[i]);
 		}
@@ -992,7 +991,6 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	short short_altitude;
 	int *version;
 	int time_j[5], time_i[7];
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1163,13 +1161,13 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			depthscale = 0.001 * oldstore.depth_scale;
 			transducer_depth = 0.001 * oldstore.transducer_depth;
 			depthmax = 0.0;
-			for (i = 0; i < oldstore.beams_bath; i++) {
+			for (int i = 0; i < oldstore.beams_bath; i++) {
 				depthmax = MAX(depthmax, (depthscale * store->bath[i] + transducer_depth));
 			}
 			if (depthmax > 0.0)
 				oldstore.depth_scale = MAX((int)(1 + depthmax / 30.0), 1);
 			newdepthscale = 0.001 * oldstore.depth_scale;
-			for (i = 0; i < oldstore.beams_bath; i++) {
+			for (int i = 0; i < oldstore.beams_bath; i++) {
 				store->bath[i] = (short int)((store->depth_scale * store->bath[i] + transducer_depth) / newdepthscale);
 			}
 			short_transducer_depth = (short)(oldstore.transducer_depth / oldstore.depth_scale);
@@ -1344,15 +1342,15 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 	if (verbose >= 5 && store->kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg5       beams_bath: %d\n", store->beams_bath);
-		for (i = 0; i < store->beams_bath; i++)
+		for (int i = 0; i < store->beams_bath; i++)
 			fprintf(stderr, "dbg5       beam:%d  flag:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n", i, store->beamflag[i],
 			        store->bath[i], store->bath_acrosstrack[i], store->bath_alongtrack[i]);
 		fprintf(stderr, "dbg5       beams_amp:  %d\n", store->beams_amp);
-		for (i = 0; i < store->beams_amp; i++)
+		for (int i = 0; i < store->beams_amp; i++)
 			fprintf(stderr, "dbg5       beam:%d  flag:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n", i, store->beamflag[i],
 			        store->amp[i], store->bath_acrosstrack[i], store->bath_alongtrack[i]);
 		fprintf(stderr, "dbg5       pixels_ss:  %d\n", store->pixels_ss);
-		for (i = 0; i < store->pixels_ss; i++)
+		for (int i = 0; i < store->pixels_ss; i++)
 			fprintf(stderr, "dbg5       pixel:%d  ss:%d acrosstrack:%d  alongtrack:%d\n", i, store->ss[i],
 			        store->ss_acrosstrack[i], store->ss_alongtrack[i]);
 	}
@@ -1372,15 +1370,15 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	else if (store->kind == MB_DATA_DATA) {
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-		for (i = 0; i < store->beams_bath; i++) {
+		for (int i = 0; i < store->beams_bath; i++) {
 			store->bath[i] = mb_swap_short(store->bath[i]);
 			store->bath_acrosstrack[i] = mb_swap_short(store->bath_acrosstrack[i]);
 			store->bath_alongtrack[i] = mb_swap_short(store->bath_alongtrack[i]);
 		}
-		for (i = 0; i < store->beams_amp; i++) {
+		for (int i = 0; i < store->beams_amp; i++) {
 			store->amp[i] = mb_swap_short(store->amp[i]);
 		}
-		for (i = 0; i < store->pixels_ss; i++) {
+		for (int i = 0; i < store->pixels_ss; i++) {
 			store->ss[i] = mb_swap_short(store->ss[i]);
 			store->ss_acrosstrack[i] = mb_swap_short(store->ss_acrosstrack[i]);
 			store->ss_alongtrack[i] = mb_swap_short(store->ss_alongtrack[i]);

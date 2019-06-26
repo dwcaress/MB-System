@@ -298,7 +298,6 @@ int mbr_rt_sbsiolsi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_sbsiolsi_data_struct *data;
 	struct mbsys_sb_struct *store;
 	char *datacomment;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -335,7 +334,7 @@ int mbr_rt_sbsiolsi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
 	if (status == MB_SUCCESS) {
-		for (i = 0; i < MBSYS_SB_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 			data->dist[i] = mb_swap_short(data->dist[i]);
 			data->deph[i] = mb_swap_short(data->deph[i]);
 		}
@@ -391,7 +390,7 @@ int mbr_rt_sbsiolsi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->sec = data->sec;
 
 			/* depths and distances */
-			for (i = 0; i < MBSYS_SB_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 				store->dist[i] = data->dist[i];
 				store->deph[i] = data->deph[i];
 			}
@@ -430,7 +429,6 @@ int mbr_wt_sbsiolsi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_sbsiolsi_data_struct *data;
 	struct mbsys_sb_struct *store;
 	char *datacomment;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -473,7 +471,7 @@ int mbr_wt_sbsiolsi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			data->sec = store->sec;
 
 			/* depths and distances */
-			for (i = 0; i < MBSYS_SB_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 				data->dist[i] = store->dist[i];
 				data->deph[i] = store->deph[i];
 			}
@@ -503,7 +501,7 @@ int mbr_wt_sbsiolsi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
 	if (dataplus->kind == MB_DATA_DATA) {
-		for (i = 0; i < MBSYS_SB_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 			data->dist[i] = mb_swap_short(data->dist[i]);
 			data->deph[i] = mb_swap_short(data->deph[i]);
 		}

@@ -301,7 +301,6 @@ int mbr_rt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_hsldedmb_data_struct *data;
 	struct mbsys_hsds_struct *store;
 	char *datacomment;
-	int i;
 	int id;
 
 	/* print input debug statements */
@@ -352,11 +351,11 @@ int mbr_rt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->speed = mb_swap_short(data->speed);
 		data->pitch = mb_swap_short(data->pitch);
 		data->scale = mb_swap_short(data->scale);
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			data->depth[i] = mb_swap_short(data->depth[i]);
 			data->range[i] = mb_swap_short(data->range[i]);
 		}
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			data->flag[i] = mb_swap_int(data->flag[i]);
 	}
 #endif
@@ -417,7 +416,7 @@ int mbr_rt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->depth_scale = 1.0;
 		store->spare = 1;
 		id = MBSYS_HSDS_BEAMS - 1;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->distance[id - i] = data->range[i];
 			store->depth[id - i] = data->depth[i];
 		}
@@ -429,9 +428,9 @@ int mbr_rt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->roll = 0.0;
 		store->time_center = 0.0;
 		store->time_scale = 0.0;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 			store->time[i] = 0;
-		for (i = 0; i < 11; i++)
+		for (int i = 0; i < 11; i++)
 			store->gyro[i] = 0.0;
 
 		/* amplitude data (ERGNAMPL) */
@@ -455,11 +454,11 @@ int mbr_rt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->amplitude_center = 0;
 		store->echo_duration_center = 0;
 		store->echo_scale_center = 0;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->amplitude[i] = 0;
 			store->echo_duration[i] = 0;
 		}
-		for (i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++) {
 			store->gain[i] = 0;
 			store->echo_scale[i] = 0;
 		}
@@ -483,7 +482,7 @@ int mbr_rt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* processed backscatter */
 		store->back_scale = 0.0;
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 			store->back[i] = 0;
 	}
 
@@ -509,7 +508,6 @@ int mbr_wt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *datacomment;
 	int time_i[7];
 	double time_d;
-	int i;
 	int id;
 
 	/* print input debug statements */
@@ -548,7 +546,7 @@ int mbr_wt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	data->scale = 100;     /* this is a unit scale factor */
 	data->speed_ref = 'B'; /* assume speed is over the ground */
 	data->quality = '\0';
-	for (i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 		data->flag[i] = 0.0;
 
 	/* second translate values from hydrosweep data storage structure */
@@ -582,7 +580,7 @@ int mbr_wt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			data->pitch = 10.0 * store->pitch;
 			data->scale = 100 * store->depth_scale;
 			id = MBSYS_HSDS_BEAMS - 1;
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 				data->range[i] = store->distance[id - i];
 				data->depth[i] = store->depth[id - i];
 			}
@@ -609,11 +607,11 @@ int mbr_wt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		data->speed = mb_swap_short(data->speed);
 		data->pitch = mb_swap_short(data->pitch);
 		data->scale = mb_swap_short(data->scale);
-		for (i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			data->depth[i] = mb_swap_short(data->depth[i]);
 			data->range[i] = mb_swap_short(data->range[i]);
 		}
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			data->flag[i] = mb_swap_int(data->flag[i]);
 	}
 #endif
