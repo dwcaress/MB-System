@@ -37,7 +37,6 @@
 int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_navnetcdf_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 	char c;
 
@@ -50,7 +49,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_navnetcdf_struct), store_ptr, error);
@@ -361,7 +360,6 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_navnetcdf_deall";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 
 	/* print input debug statements */
@@ -374,7 +372,7 @@ int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_navnetcdf_struct *)*store_ptr;
@@ -412,7 +410,6 @@ int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int
                                int *error) {
 	char *function_name = "mbsys_navnetcdf_dimensions";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 
 	/* print input debug statements */
@@ -425,7 +422,7 @@ int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -471,7 +468,6 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
                             double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_navnetcdf_extract";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 
 	/* print input debug statements */
@@ -484,7 +480,7 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -616,7 +612,6 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
                            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_navnetcdf_insert";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 
 	/* print input debug statements */
@@ -647,7 +642,7 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -693,7 +688,6 @@ int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
                            double *ssv, int *error) {
 	char *function_name = "mbsys_navnetcdf_ttimes";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 
 	/* print input debug statements */
@@ -712,7 +706,7 @@ int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -770,7 +764,6 @@ int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_navnetcdf_detects";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 
 	/* print input debug statements */
@@ -784,7 +777,7 @@ int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -842,7 +835,6 @@ int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
                                      double *altitude, int *error) {
 	char *function_name = "mbsys_navnetcdf_extract_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 
 	/* print input debug statements */
@@ -855,7 +847,7 @@ int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -907,7 +899,6 @@ int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr
                                     int *error) {
 	char *function_name = "mbsys_navnetcdf_insert_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 
 	/* print input debug statements */
@@ -922,7 +913,7 @@ int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -969,7 +960,6 @@ int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
                                 double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_navnetcdf_extract_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 
 	/* print input debug statements */
@@ -982,7 +972,7 @@ int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -1096,7 +1086,6 @@ int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
                                int *error) {
 	char *function_name = "mbsys_navnetcdf_insert_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 
 	/* print input debug statements */
@@ -1125,7 +1114,7 @@ int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;
@@ -1167,7 +1156,6 @@ int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_navnetcdf_copy";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 	struct mbsys_navnetcdf_struct *copy;
 
@@ -1182,7 +1170,7 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;

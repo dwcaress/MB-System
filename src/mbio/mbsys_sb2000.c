@@ -40,7 +40,6 @@
 int mbsys_sb2000_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_sb2000_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -51,7 +50,7 @@ int mbsys_sb2000_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2000_struct), store_ptr, error);
@@ -101,7 +100,6 @@ int mbsys_sb2000_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *k
                             int *error) {
 	char *function_name = "mbsys_sb2000_dimensions";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 
 	/* print input debug statements */
@@ -114,7 +112,7 @@ int mbsys_sb2000_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_sb2000_struct *)store_ptr;
@@ -158,7 +156,6 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_sb2000_extract";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 	unsigned short *short_ptr;
 	int time_j[5];
@@ -173,7 +170,7 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_sb2000_struct *)store_ptr;
@@ -336,7 +333,6 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
                         double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_sb2000_insert";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 	int time_j[5];
 	unsigned short *short_ptr;
@@ -384,7 +380,7 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_sb2000_struct *)store_ptr;
@@ -489,7 +485,6 @@ int mbsys_sb2000_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *ssv, int *error) {
 	char *function_name = "mbsys_sb2000_ttimes";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 
 	/* print input debug statements */
@@ -508,7 +503,7 @@ int mbsys_sb2000_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_sb2000_struct *)store_ptr;
@@ -582,7 +577,6 @@ int mbsys_sb2000_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 int mbsys_sb2000_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_sb2000_detects";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 
 	/* print input debug statements */
@@ -596,7 +590,7 @@ int mbsys_sb2000_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_sb2000_struct *)store_ptr;
@@ -659,7 +653,6 @@ int mbsys_sb2000_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
                                   double *altitude, int *error) {
 	char *function_name = "mbsys_sb2000_extract_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 	double bath_best;
 	double xtrack_min;
@@ -674,7 +667,7 @@ int mbsys_sb2000_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_sb2000_struct *)store_ptr;
@@ -749,7 +742,6 @@ int mbsys_sb2000_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
                              double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_sb2000_extract_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 	int time_j[5];
 
@@ -763,7 +755,7 @@ int mbsys_sb2000_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_sb2000_struct *)store_ptr;
@@ -880,7 +872,6 @@ int mbsys_sb2000_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
                             int *error) {
 	char *function_name = "mbsys_sb2000_insert_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 	int time_j[5];
 
@@ -910,7 +901,7 @@ int mbsys_sb2000_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_sb2000_struct *)store_ptr;
@@ -958,7 +949,6 @@ int mbsys_sb2000_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 int mbsys_sb2000_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_sb2000_copy";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 	struct mbsys_sb2000_struct *copy;
 
@@ -973,7 +963,7 @@ int mbsys_sb2000_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_sb2000_struct *)store_ptr;

@@ -166,7 +166,6 @@ int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command
                                ) {
 	char *function_name = "mbsys_3ddwissl_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 
 	/* check for non-null data */
@@ -182,7 +181,7 @@ int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_3ddwissl_struct), (void **)store_ptr, error);
@@ -325,7 +324,6 @@ int mbsys_3ddwissl_dimensions(int verbose, void *mbio_ptr, /* in: verbosity leve
                                     ) {
 	char *function_name = "mbsys_3ddwissl_dimensions";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 
 	/* check for non-null data */
@@ -342,7 +340,7 @@ int mbsys_3ddwissl_dimensions(int verbose, void *mbio_ptr, /* in: verbosity leve
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -385,7 +383,6 @@ int mbsys_3ddwissl_pingnumber(int verbose,     /* in: verbosity level set on com
                                     ) {
 	char *function_name = "mbsys_3ddwissl_pingnumber";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 
 	/* check for non-null data */
@@ -400,7 +397,7 @@ int mbsys_3ddwissl_pingnumber(int verbose,     /* in: verbosity level set on com
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)mb_io_ptr->store_data;
@@ -715,7 +712,6 @@ int mbsys_3ddwissl_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
 							  int *sensorhead, int *error) {
 	char *function_name = "mbsys_3ddwissl_sensorhead";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 
 	/* check for non-null data */
@@ -732,7 +728,7 @@ int mbsys_3ddwissl_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -788,7 +784,6 @@ int mbsys_3ddwissl_extract(int verbose,     /* in: verbosity level set on comman
                                  ) {
 	char *function_name = "mbsys_3ddwissl_extract";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_pulse_struct *pulse;
 	struct mbsys_3ddwissl_sounding_struct *sounding;
@@ -808,7 +803,7 @@ int mbsys_3ddwissl_extract(int verbose,     /* in: verbosity level set on comman
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -907,7 +902,6 @@ int mbsys_3ddwissl_insert(int verbose,     /* in: verbosity level set on command
                                 ) {
 	char *function_name = "mbsys_3ddwissl_insert";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_pulse_struct *pulse;
 	struct mbsys_3ddwissl_sounding_struct *sounding;
@@ -935,7 +929,7 @@ int mbsys_3ddwissl_insert(int verbose,     /* in: verbosity level set on command
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1047,7 +1041,6 @@ int mbsys_3ddwissl_ttimes(int verbose,            /* in: verbosity level set on 
                                 ) {
 	char *function_name = "mbsys_3ddwissl_ttimes";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 
 	/* check for non-null data */
@@ -1070,7 +1063,7 @@ int mbsys_3ddwissl_ttimes(int verbose,            /* in: verbosity level set on 
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structre pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1138,7 +1131,6 @@ int mbsys_3ddwissl_detects(int verbose,     /* in: verbosity level set on comman
                                  ) {
 	char *function_name = "mbsys_3ddwissl_detects";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 
 	/* check for non-null data */
@@ -1156,7 +1148,7 @@ int mbsys_3ddwissl_detects(int verbose,     /* in: verbosity level set on comman
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1220,7 +1212,6 @@ int mbsys_3ddwissl_pulses(int verbose,     /* in: verbosity level set on command
                                 ) {
 	char *function_name = "mbsys_3ddwissl_pulses";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 
 	/* check for non-null data */
@@ -1238,7 +1229,7 @@ int mbsys_3ddwissl_pulses(int verbose,     /* in: verbosity level set on command
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1305,7 +1296,6 @@ int mbsys_3ddwissl_gains(int verbose,           /* in: verbosity level set on co
                                ) {
 	char *function_name = "mbsys_3ddwissl_gains";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 
 	/* check for non-null data */
@@ -1322,7 +1312,7 @@ int mbsys_3ddwissl_gains(int verbose,           /* in: verbosity level set on co
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1389,7 +1379,6 @@ int mbsys_3ddwissl_extract_altitude(
     ) {
 	char *function_name = "mbsys_3ddwissl_extract_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_pulse_struct *pulse;
 	struct mbsys_3ddwissl_sounding_struct *sounding;
@@ -1410,7 +1399,7 @@ int mbsys_3ddwissl_extract_altitude(
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1490,7 +1479,6 @@ int mbsys_3ddwissl_extract_nnav(int verbose,     /* in: verbosity level set on c
                                       ) {
 	char *function_name = "mbsys_3ddwissl_extract_nnav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 	int inav;
 
@@ -1510,7 +1498,7 @@ int mbsys_3ddwissl_extract_nnav(int verbose,     /* in: verbosity level set on c
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1602,7 +1590,6 @@ int mbsys_3ddwissl_extract_nav(int verbose, void *mbio_ptr, /* in: verbosity lev
                                      ) {
 	char *function_name = "mbsys_3ddwissl_extract_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 
 	/* check for non-null data */
@@ -1619,7 +1606,7 @@ int mbsys_3ddwissl_extract_nav(int verbose, void *mbio_ptr, /* in: verbosity lev
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1701,7 +1688,6 @@ int mbsys_3ddwissl_insert_nav(int verbose, void *mbio_ptr, /* in: verbosity leve
                                     ) {
 	char *function_name = "mbsys_3ddwissl_insert_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 	double dlon, dlat, dheading, dsensordepth, droll, dpitch;
 
@@ -1736,7 +1722,7 @@ int mbsys_3ddwissl_insert_nav(int verbose, void *mbio_ptr, /* in: verbosity leve
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1787,7 +1773,6 @@ int mbsys_3ddwissl_extract_svp(int verbose,      /* in: verbosity level set on c
                                      ) {
 	char *function_name = "mbsys_3ddwissl_extract_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 
 	/* check for non-null data */
@@ -1804,7 +1789,7 @@ int mbsys_3ddwissl_extract_svp(int verbose,      /* in: verbosity level set on c
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1852,7 +1837,6 @@ int mbsys_3ddwissl_insert_svp(int verbose,      /* in: verbosity level set on co
                                     ) {
 	char *function_name = "mbsys_3ddwissl_insert_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 
 	/* check for non-null data */
@@ -1873,7 +1857,7 @@ int mbsys_3ddwissl_insert_svp(int verbose,      /* in: verbosity level set on co
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -1910,7 +1894,6 @@ int mbsys_3ddwissl_copy(int verbose,     /* in: verbosity level set on command l
                               ) {
 	char *function_name = "mbsys_3ddwissl_copy";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_struct *copy;
 	int num_pulses_alloc;
@@ -1936,7 +1919,7 @@ int mbsys_3ddwissl_copy(int verbose,     /* in: verbosity level set on command l
 	*error = MB_ERROR_NO_ERROR;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_3ddwissl_struct *)store_ptr;
@@ -2472,7 +2455,6 @@ int mbsys_3ddwissl_indextablefix(int verbose, void *mbio_ptr, int num_indextable
                                  void *indextable_ptr, int *error) {
 	char *function_name = "mbsys_3ddwissl_fixwissltimestamps";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
     struct mb_io_indextable_struct *indextable;
 	struct mbsys_3ddwissl_struct *store;
     double dt, dt_threshold, nearest_minute_time_d;
@@ -2497,7 +2479,7 @@ int mbsys_3ddwissl_indextablefix(int verbose, void *mbio_ptr, int num_indextable
 	*error = MB_ERROR_NO_ERROR;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3ddwissl_struct *)mb_io_ptr->store_data;
@@ -2766,7 +2748,6 @@ int mbsys_3ddwissl_indextableapply(int verbose, void *mbio_ptr, int num_indextab
                                    void *indextable_ptr, int n_file, int *error) {
 	char *function_name = "mbsys_3ddwissl_indextableapply";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
         struct mb_io_indextable_struct *indextable;
         int giindex, iindex;
         int giindex_a_begin, giindex_a_end;
@@ -2792,7 +2773,7 @@ int mbsys_3ddwissl_indextableapply(int verbose, void *mbio_ptr, int num_indextab
 	*error = MB_ERROR_NO_ERROR;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get index table structure pointer */
 	indextable = (struct mb_io_indextable_struct *)indextable_ptr;

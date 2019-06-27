@@ -38,7 +38,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mb_get";
 	int status;
-	struct mb_io_struct *mb_io_ptr;
 	char *store_ptr;
 	int done;
 	int reset_last;
@@ -57,7 +56,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store_ptr = (char *)mb_io_ptr->store_data;
 
 	/* initialize binning values */

@@ -192,7 +192,6 @@ int mbsys_3datdepthlidar_alloc(int verbose,      /* in: verbosity level set on c
                                ) {
 	char *function_name = "mbsys_3datdepthlidar_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* check for non-null data */
@@ -208,7 +207,7 @@ int mbsys_3datdepthlidar_alloc(int verbose,      /* in: verbosity level set on c
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_3datdepthlidar_struct), (void **)store_ptr, error);
@@ -359,7 +358,6 @@ int mbsys_3datdepthlidar_dimensions(int verbose, void *mbio_ptr, /* in: verbosit
                                     ) {
 	char *function_name = "mbsys_3datdepthlidar_dimensions";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* check for non-null data */
@@ -376,7 +374,7 @@ int mbsys_3datdepthlidar_dimensions(int verbose, void *mbio_ptr, /* in: verbosit
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -424,7 +422,6 @@ int mbsys_3datdepthlidar_pingnumber(int verbose,     /* in: verbosity level set 
                                     ) {
 	char *function_name = "mbsys_3datdepthlidar_pingnumber";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* check for non-null data */
@@ -439,7 +436,7 @@ int mbsys_3datdepthlidar_pingnumber(int verbose,     /* in: verbosity level set 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)mb_io_ptr->store_data;
@@ -728,7 +725,6 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
                                  ) {
 	char *function_name = "mbsys_3datdepthlidar_extract";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 
@@ -746,7 +742,7 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -844,7 +840,6 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
                                 ) {
 	char *function_name = "mbsys_3datdepthlidar_insert";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	double dlon, dlat, dheading;
@@ -869,7 +864,7 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -963,7 +958,6 @@ int mbsys_3datdepthlidar_ttimes(int verbose,            /* in: verbosity level s
                                 ) {
 	char *function_name = "mbsys_3datdepthlidar_ttimes";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* check for non-null data */
@@ -986,7 +980,7 @@ int mbsys_3datdepthlidar_ttimes(int verbose,            /* in: verbosity level s
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structre pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -1059,7 +1053,6 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
                                  ) {
 	char *function_name = "mbsys_3datdepthlidar_detects";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* check for non-null data */
@@ -1077,7 +1070,7 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -1146,7 +1139,6 @@ int mbsys_3datdepthlidar_pulses(int verbose,     /* in: verbosity level set on c
                                 ) {
 	char *function_name = "mbsys_3datdepthlidar_pulses";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* check for non-null data */
@@ -1164,7 +1156,7 @@ int mbsys_3datdepthlidar_pulses(int verbose,     /* in: verbosity level set on c
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -1236,7 +1228,6 @@ int mbsys_3datdepthlidar_gains(int verbose,           /* in: verbosity level set
                                ) {
 	char *function_name = "mbsys_3datdepthlidar_gains";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* check for non-null data */
@@ -1253,7 +1244,7 @@ int mbsys_3datdepthlidar_gains(int verbose,           /* in: verbosity level set
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -1320,7 +1311,6 @@ int mbsys_3datdepthlidar_extract_altitude(
     ) {
 	char *function_name = "mbsys_3datdepthlidar_extract_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	double rmin, r;
@@ -1339,7 +1329,7 @@ int mbsys_3datdepthlidar_extract_altitude(
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -1414,7 +1404,6 @@ int mbsys_3datdepthlidar_extract_nnav(int verbose,     /* in: verbosity level se
                                       ) {
 	char *function_name = "mbsys_3datdepthlidar_extract_nnav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	int inav;
 
@@ -1434,7 +1423,7 @@ int mbsys_3datdepthlidar_extract_nnav(int verbose,     /* in: verbosity level se
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -1526,7 +1515,6 @@ int mbsys_3datdepthlidar_extract_nav(int verbose, void *mbio_ptr, /* in: verbosi
                                      ) {
 	char *function_name = "mbsys_3datdepthlidar_extract_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* check for non-null data */
@@ -1543,7 +1531,7 @@ int mbsys_3datdepthlidar_extract_nav(int verbose, void *mbio_ptr, /* in: verbosi
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -1625,7 +1613,6 @@ int mbsys_3datdepthlidar_insert_nav(int verbose, void *mbio_ptr, /* in: verbosit
                                     ) {
 	char *function_name = "mbsys_3datdepthlidar_insert_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	double dlon, dlat, dheading, dsensordepth, droll, dpitch;
@@ -1661,7 +1648,7 @@ int mbsys_3datdepthlidar_insert_nav(int verbose, void *mbio_ptr, /* in: verbosit
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -1727,7 +1714,6 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
                                      ) {
 	char *function_name = "mbsys_3datdepthlidar_extract_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* check for non-null data */
@@ -1744,7 +1730,7 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -1792,7 +1778,6 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
                                     ) {
 	char *function_name = "mbsys_3datdepthlidar_insert_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* check for non-null data */
@@ -1813,7 +1798,7 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
@@ -1850,7 +1835,6 @@ int mbsys_3datdepthlidar_copy(int verbose,     /* in: verbosity level set on com
                               ) {
 	char *function_name = "mbsys_3datdepthlidar_copy";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_struct *copy;
 	int npulses;
@@ -1875,7 +1859,7 @@ int mbsys_3datdepthlidar_copy(int verbose,     /* in: verbosity level set on com
 	*error = MB_ERROR_NO_ERROR;
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
