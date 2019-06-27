@@ -35,7 +35,6 @@
 int mb_write_ping(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mb_write_ping";
 	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -47,7 +46,7 @@ int mb_write_ping(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* call the appropriate mbr_ write and translate routine */
 	if (mb_io_ptr->mb_io_write_ping != NULL) {

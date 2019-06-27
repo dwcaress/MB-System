@@ -75,7 +75,6 @@ int mb_error(int verbose, int error, char **message) {
 int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id) {
 	char *function_name = "mb_notice_log_datatype";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -87,7 +86,7 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* log data record type in the notice list */
 	if (data_id > 0 && data_id <= MB_DATA_KINDS) {
@@ -110,7 +109,6 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id) {
 int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
 	char *function_name = "mb_notice_log_error";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -122,7 +120,7 @@ int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* log any nonfatal error in the notice list */
 	if (error_id < 0 && error_id >= MB_ERROR_MIN) {
@@ -145,7 +143,6 @@ int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
 int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
 	char *function_name = "mb_notice_log_problem";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -157,7 +154,7 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* log data record type in the notice list */
 	if (problem_id > 0 && problem_id <= MB_PROBLEM_MAX) {
@@ -180,7 +177,6 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
 int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 	char *function_name = "mb_notice_get_list";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -192,7 +188,7 @@ int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* copy notice list */
 	for (int i = 0; i < MB_NOTICE_MAX; i++) {

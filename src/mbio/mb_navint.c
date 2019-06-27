@@ -41,7 +41,6 @@
 int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting, double lat_northing, int *error) {
 	char *function_name = "mb_navint_add";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -55,7 +54,7 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -123,7 +122,6 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
                      double *speed, int *error) {
 	char *function_name = "mb_navint_interp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	double mtodeglon = 0.0;
 	double mtodeglat = 0.0;
 	double dx, dy, dt, dd;
@@ -144,7 +142,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -281,7 +279,6 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
                         double *northing, double *speed, int *error) {
 	char *function_name = "mb_navintprj_interp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	double dx, dy, dt, dd;
 	double factor, headingx, headingy;
 	double speed_mps;
@@ -300,7 +297,7 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -429,7 +426,6 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
 int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, double roll, double pitch, int *error) {
 	char *function_name = "mb_attint_add";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -444,7 +440,7 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* add another fix only if time stamp has changed */
 	if (mb_io_ptr->nattitude == 0 || (time_d > mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude - 1])) {
@@ -504,7 +500,6 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
                    int *error) {
 	char *function_name = "mb_attint_nadd";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	int shift;
 
 	/* print input debug statements */
@@ -520,7 +515,7 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* if necessary make room for attitude fixes */
 	if (mb_io_ptr->nattitude + nsamples >= MB_ASYNCH_SAVE_MAX) {
@@ -580,7 +575,6 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, double *roll, double *pitch, int *error) {
 	char *function_name = "mb_attint_interp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	double factor;
 	int ifix;
 
@@ -594,7 +588,7 @@ int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, 
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* interpolate if possible */
 	if (mb_io_ptr->nattitude > 1 && (mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude - 1] >= time_d) &&
@@ -681,7 +675,6 @@ int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, 
 int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, int *error) {
 	char *function_name = "mb_hedint_add";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -694,7 +687,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* add another fix only if time stamp has changed */
 	if (mb_io_ptr->nheading == 0 || (time_d > mb_io_ptr->heading_time_d[mb_io_ptr->nheading - 1])) {
@@ -746,7 +739,6 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, double *heading, int *error) {
 	char *function_name = "mb_hedint_nadd";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	int shift;
 
 	/* print input debug statements */
@@ -762,7 +754,7 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* if necessary make room for heading fixes */
 	if (mb_io_ptr->nheading + nsamples >= MB_ASYNCH_SAVE_MAX) {
@@ -815,7 +807,6 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading, int *error) {
 	char *function_name = "mb_hedint_interp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	double factor;
 	int ifix;
 	double heading1, heading2;
@@ -830,7 +821,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* interpolate if possible */
 	if (mb_io_ptr->nheading > 1 && (mb_io_ptr->heading_time_d[mb_io_ptr->nheading - 1] >= time_d) &&
@@ -911,7 +902,6 @@ int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading
 int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth, int *error) {
 	char *function_name = "mb_depint_add";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -924,7 +914,7 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* add another fix only if time stamp has changed */
 	if (mb_io_ptr->nsonardepth == 0 || (time_d > mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth - 1])) {
@@ -977,7 +967,6 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonardepth, int *error) {
 	char *function_name = "mb_depint_interp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	double factor;
 	int ifix;
 
@@ -991,7 +980,7 @@ int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonarde
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* interpolate if possible */
 	if (mb_io_ptr->nsonardepth > 1 && (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth - 1] >= time_d) &&
@@ -1065,7 +1054,6 @@ int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonarde
 int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, int *error) {
 	char *function_name = "mb_altint_add";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1078,7 +1066,7 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* add another fix only if time stamp has changed */
 	if (mb_io_ptr->naltitude == 0 || (time_d > mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude - 1])) {
@@ -1130,7 +1118,6 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 int mb_altint_interp(int verbose, void *mbio_ptr, double time_d, double *altitude, int *error) {
 	char *function_name = "mb_altint_interp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	double factor;
 	int ifix;
 
@@ -1144,7 +1131,7 @@ int mb_altint_interp(int verbose, void *mbio_ptr, double time_d, double *altitud
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* interpolate if possible */
 	if (mb_io_ptr->naltitude > 1 && (mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude - 1] >= time_d) &&
