@@ -39,7 +39,6 @@
 int mbsys_hs10_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_hs10_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -50,7 +49,7 @@ int mbsys_hs10_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hs10_struct), store_ptr, error);
@@ -99,7 +98,6 @@ int mbsys_hs10_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 int mbsys_hs10_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
 	char *function_name = "mbsys_hs10_dimensions";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;
 
 	/* print input debug statements */
@@ -112,7 +110,7 @@ int mbsys_hs10_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_hs10_struct *)store_ptr;
@@ -156,7 +154,6 @@ int mbsys_hs10_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_hs10_extract";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;
 
 	/* print input debug statements */
@@ -169,7 +166,7 @@ int mbsys_hs10_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_hs10_struct *)store_ptr;
@@ -324,7 +321,6 @@ int mbsys_hs10_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
                       double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_hs10_insert";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;
 
 	/* print input debug statements */
@@ -372,7 +368,7 @@ int mbsys_hs10_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_hs10_struct *)store_ptr;
@@ -454,7 +450,6 @@ int mbsys_hs10_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
                       double *ssv, int *error) {
 	char *function_name = "mbsys_hs10_ttimes";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;
 
 	/* print input debug statements */
@@ -473,7 +468,7 @@ int mbsys_hs10_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_hs10_struct *)store_ptr;
@@ -552,7 +547,6 @@ int mbsys_hs10_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 int mbsys_hs10_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_hs10_detects";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;
 
 	/* print input debug statements */
@@ -566,7 +560,7 @@ int mbsys_hs10_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_hs10_struct *)store_ptr;
@@ -629,7 +623,6 @@ int mbsys_hs10_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
                                 double *altitude, int *error) {
 	char *function_name = "mbsys_hs10_extract_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;
 
 	/* print input debug statements */
@@ -643,7 +636,7 @@ int mbsys_hs10_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_hs10_struct *)store_ptr;
@@ -697,7 +690,6 @@ int mbsys_hs10_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
                            double *heave, int *error) {
 	char *function_name = "mbsys_hs10_extract_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;
 
 	/* print input debug statements */
@@ -710,7 +702,7 @@ int mbsys_hs10_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_hs10_struct *)store_ptr;
@@ -831,7 +823,6 @@ int mbsys_hs10_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
                           int *error) {
 	char *function_name = "mbsys_hs10_insert_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;
 
 	/* print input debug statements */
@@ -860,7 +851,7 @@ int mbsys_hs10_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_hs10_struct *)store_ptr;
@@ -918,7 +909,6 @@ int mbsys_hs10_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 int mbsys_hs10_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_hs10_copy";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;
 	struct mbsys_hs10_struct *copy;
 
@@ -933,7 +923,7 @@ int mbsys_hs10_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_hs10_struct *)store_ptr;

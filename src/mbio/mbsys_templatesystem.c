@@ -38,7 +38,6 @@
 int mbsys_templatesystem_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_templatesystem_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -50,7 +49,7 @@ int mbsys_templatesystem_alloc(int verbose, void *mbio_ptr, void **store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_templatesystem_struct), (void **)store_ptr, error);
@@ -120,7 +119,6 @@ int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr
                                     int *error) {
 	char *function_name = "mbsys_templatesystem_dimensions";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -133,7 +131,7 @@ int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -174,7 +172,6 @@ int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr
 int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
 	char *function_name = "mbsys_templatesystem_pingnumber";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -186,7 +183,7 @@ int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *p
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)mb_io_ptr->store_data;
@@ -210,7 +207,6 @@ int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *p
 int mbsys_templatesystem_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
 	char *function_name = "mbsys_templatesystem_sonartype";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -223,7 +219,7 @@ int mbsys_templatesystem_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -247,7 +243,6 @@ int mbsys_templatesystem_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_templatesystem_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
 	char *function_name = "mbsys_templatesystem_sidescantype";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -260,7 +255,7 @@ int mbsys_templatesystem_sidescantype(int verbose, void *mbio_ptr, void *store_p
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -287,7 +282,6 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
                                  double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_templatesystem_extract";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -300,7 +294,7 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -538,7 +532,6 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
                                 double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_templatesystem_insert";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -588,7 +581,7 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -672,7 +665,6 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
                                 double *alongtrack_offset, double *draft, double *ssv, int *error) {
 	char *function_name = "mbsys_templatesystem_ttimes";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 	double heave_use, roll, pitch;
 	double alpha, beta, theta, phi;
@@ -693,7 +685,7 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -767,7 +759,6 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
 int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_templatesystem_detects";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -781,7 +772,7 @@ int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -846,7 +837,6 @@ int mbsys_templatesystem_gains(int verbose, void *mbio_ptr, void *store_ptr, int
                                double *pulse_length, double *receive_gain, int *error) {
 	char *function_name = "mbsys_templatesystem_gains";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -859,7 +849,7 @@ int mbsys_templatesystem_gains(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -923,7 +913,6 @@ int mbsys_templatesystem_extract_altitude(int verbose, void *mbio_ptr, void *sto
                                           double *altitudev, int *error) {
 	char *function_name = "mbsys_templatesystem_extract_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 	double heave, roll, pitch;
 	double xtrackmin;
@@ -939,7 +928,7 @@ int mbsys_templatesystem_extract_altitude(int verbose, void *mbio_ptr, void *sto
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -996,7 +985,6 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
                                      double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_templatesystem_extract_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -1009,7 +997,7 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -1133,7 +1121,6 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
                                       double *draft, double *roll, double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_templatesystem_extract_nnav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 	int inav;
 
@@ -1148,7 +1135,7 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -1277,7 +1264,6 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
                                     double heave, int *error) {
 	char *function_name = "mbsys_templatesystem_insert_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -1306,7 +1292,7 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -1383,7 +1369,6 @@ int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_pt
                                      double *velocity, int *error) {
 	char *function_name = "mbsys_templatesystem_extract_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 
 	/* print input debug statements */
@@ -1396,7 +1381,7 @@ int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_pt
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -1452,7 +1437,6 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
                                     int *error) {
 	char *function_name = "mbsys_templatesystem_insert_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 	s7kr_svp *svp;
 
@@ -1469,7 +1453,7 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
@@ -1501,7 +1485,6 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 int mbsys_templatesystem_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_templatesystem_copy";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_templatesystem_struct *store;
 	struct mbsys_templatesystem_struct *copy;
 
@@ -1516,7 +1499,7 @@ int mbsys_templatesystem_copy(int verbose, void *mbio_ptr, void *store_ptr, void
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;

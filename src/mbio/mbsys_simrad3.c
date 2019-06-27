@@ -52,7 +52,6 @@
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -63,7 +62,7 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_simrad3_struct), (void **)store_ptr, error);
@@ -89,7 +88,6 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_survey_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 
 	/* print input debug statements */
@@ -102,7 +100,7 @@ int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -123,7 +121,6 @@ int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_extraparameters_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 
 	/* print input debug statements */
@@ -136,7 +133,7 @@ int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -165,7 +162,6 @@ int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store
 int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_wc_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_watercolumn_struct *wc;
 
@@ -179,7 +175,7 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -248,7 +244,6 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_attitude_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_attitude_struct *attitude;
 
@@ -262,7 +257,7 @@ int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -324,7 +319,6 @@ int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, i
 int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_netattitude_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_netattitude_struct *netattitude;
 
@@ -338,7 +332,7 @@ int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -400,7 +394,6 @@ int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr
 int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_heading_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_heading_struct *heading;
 
@@ -414,7 +407,7 @@ int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, in
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -467,7 +460,6 @@ int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, in
 int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_ssv_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ssv_struct *ssv;
 
@@ -481,7 +473,7 @@ int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -531,7 +523,6 @@ int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_tilt_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_tilt_struct *tilt;
 
@@ -545,7 +536,7 @@ int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -771,7 +762,6 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
                              int *error) {
 	char *function_name = "mbsys_simrad3_dimensions";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -785,7 +775,7 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -827,7 +817,6 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
 	char *function_name = "mbsys_simrad3_pingnumber";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -840,7 +829,7 @@ int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)mb_io_ptr->store_data;
@@ -865,7 +854,6 @@ int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
 	char *function_name = "mbsys_simrad3_sonartype";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 
 	/* print input debug statements */
@@ -878,7 +866,7 @@ int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -902,7 +890,6 @@ int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
 	char *function_name = "mbsys_simrad3_sidescantype";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 
 	/* print input debug statements */
@@ -915,7 +902,7 @@ int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -942,7 +929,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_preprocess";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr = NULL;
 	struct mbsys_simrad3_struct *store = NULL;
 	struct mbsys_simrad3_ping_struct *ping = NULL;
 	struct mb_platform_struct *platform = NULL;
@@ -994,7 +980,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 	assert(preprocess_pars_ptr != NULL);
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -1438,7 +1424,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_extract_platform";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mb_platform_struct *platform;
 	struct mbsys_simrad3_struct *store;
 	int sensor_multibeam;
@@ -1472,7 +1457,7 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* if needed allocate a new platform structure */
@@ -2127,7 +2112,6 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_simrad3_extract";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	double reflscale;
@@ -2143,7 +2127,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2381,7 +2365,6 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_simrad3_insert";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	double reflscale;
@@ -2431,7 +2414,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2580,7 +2563,6 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *ssv, int *error) {
 	char *function_name = "mbsys_simrad3_ttimes";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	int time_i[7];
@@ -2604,7 +2586,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2727,7 +2709,6 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_simrad3_detects";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -2742,7 +2723,7 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2812,7 +2793,6 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error) {
 	char *function_name = "mbsys_simrad3_pulses";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -2827,7 +2807,7 @@ int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2898,7 +2878,6 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *receive_gain, int *error) {
 	char *function_name = "mbsys_simrad3_gains";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -2912,7 +2891,7 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -2979,7 +2958,6 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
                                    double *altitude, int *error) {
 	char *function_name = "mbsys_simrad3_extract_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	double altitude_best;
@@ -2996,7 +2974,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -3078,7 +3056,6 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 	char *function_name = "mbsys_simrad3_extract_nnav";
 	int status = MB_SUCCESS;
 	int interp_error = MB_ERROR_NO_ERROR;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	struct mbsys_simrad3_attitude_struct *attitude;
@@ -3098,7 +3075,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -3346,7 +3323,6 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
                               double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_simrad3_extract_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -3360,7 +3336,7 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -3520,7 +3496,6 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
                              int *error) {
 	char *function_name = "mbsys_simrad3_insert_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -3550,7 +3525,7 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -3656,7 +3631,6 @@ int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
                               int *error) {
 	char *function_name = "mbsys_simrad3_extract_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 
 	/* print input debug statements */
@@ -3669,7 +3643,7 @@ int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -3725,7 +3699,6 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
                              int *error) {
 	char *function_name = "mbsys_simrad3_insert_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 
 	/* print input debug statements */
@@ -3741,7 +3714,7 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -3774,7 +3747,6 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_copy";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_struct *copy;
 	struct mbsys_simrad3_attitude_struct *attitude_store;
@@ -3804,7 +3776,7 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -3929,7 +3901,6 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
 	char *function_name = "mbsys_simrad3_makess";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	double ss[MBSYS_SIMRAD3_MAXPIXELS];
@@ -3967,7 +3938,7 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;

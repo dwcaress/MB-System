@@ -47,7 +47,6 @@
 int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_atlas_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 
 	/* print input debug statements */
@@ -59,7 +58,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_atlas_struct), store_ptr, error);
@@ -319,7 +318,6 @@ int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
 	char *function_name = "mbsys_atlas_dimensions";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 
 	/* print input debug statements */
@@ -332,7 +330,7 @@ int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_atlas_struct *)store_ptr;
@@ -376,7 +374,6 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_atlas_extract";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 	double pixel_size;
 	double range, tt, ttmin, ssdepth;
@@ -391,7 +388,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_atlas_struct *)store_ptr;
@@ -568,7 +565,6 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                        double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_atlas_insert";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 	double xtrackmin;
 	int centerpixel;
@@ -616,7 +612,7 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_atlas_struct *)store_ptr;
@@ -696,7 +692,6 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *ssv, int *error) {
 	char *function_name = "mbsys_atlas_ttimes";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 	double *angle_table;
 
@@ -716,7 +711,7 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_atlas_struct *)store_ptr;
@@ -811,7 +806,6 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_atlas_detects";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 	int detect;
 
@@ -826,7 +820,7 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_atlas_struct *)store_ptr;
@@ -891,7 +885,6 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
                                  double *altitude, int *error) {
 	char *function_name = "mbsys_atlas_extract_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 	double bath_best;
 	double xtrack_min;
@@ -907,7 +900,7 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_atlas_struct *)store_ptr;
@@ -985,7 +978,6 @@ int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
                             double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_atlas_extract_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 
 	/* print input debug statements */
@@ -998,7 +990,7 @@ int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_atlas_struct *)store_ptr;
@@ -1109,7 +1101,6 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
                            int *error) {
 	char *function_name = "mbsys_atlas_insert_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 
 	/* print input debug statements */
@@ -1138,7 +1129,7 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_atlas_struct *)store_ptr;
@@ -1182,7 +1173,6 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_atlas_copy";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 	struct mbsys_atlas_struct *copy;
 
@@ -1197,7 +1187,7 @@ int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_atlas_struct *)store_ptr;
@@ -1221,7 +1211,6 @@ int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_atlas_ttcorr";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_atlas_struct *store;
 
 	/* print input debug statements */
@@ -1234,7 +1223,7 @@ int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_atlas_struct *)store_ptr;

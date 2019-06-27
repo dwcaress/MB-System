@@ -60,7 +60,6 @@ void cvt_to_nix_path(char *path);
 int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 	char *function_name = "mb_format_register";
 	int status;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -72,7 +71,7 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 
 	/* check for old format id and provide alias if needed */

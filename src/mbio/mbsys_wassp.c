@@ -38,7 +38,6 @@
 int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	const char *function_name = "mbsys_wassp_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -60,7 +59,7 @@ int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_wassp_struct), (void **)store_ptr, error);
@@ -172,7 +171,6 @@ int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
 	char *function_name = "mbsys_wassp_dimensions";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -195,7 +193,7 @@ int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -246,7 +244,6 @@ int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
 	char *function_name = "mbsys_wassp_pingnumber";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -268,7 +265,7 @@ int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_wassp_struct *)mb_io_ptr->store_data;
@@ -302,7 +299,6 @@ int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 int mbsys_wassp_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
 	char *function_name = "mbsys_wassp_sonartype";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -325,7 +321,7 @@ int mbsys_wassp_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *son
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -362,7 +358,6 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_wassp_extract";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -386,7 +381,7 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -641,7 +636,6 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                        double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_wassp_insert";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -702,7 +696,7 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -798,7 +792,6 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *ssv, int *error) {
 	char *function_name = "mbsys_wassp_ttimes";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -828,7 +821,7 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -917,7 +910,6 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_wassp_detects";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -941,7 +933,7 @@ int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -1021,7 +1013,6 @@ int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
                       double *receive_gain, int *error) {
 	char *function_name = "mbsys_wassp_gains";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1044,7 +1035,7 @@ int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -1118,7 +1109,6 @@ int mbsys_wassp_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
                                  double *altitude, int *error) {
 	char *function_name = "mbsys_wassp_extract_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1141,7 +1131,7 @@ int mbsys_wassp_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -1208,7 +1198,6 @@ int mbsys_wassp_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
                             double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_wassp_extract_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1231,7 +1220,7 @@ int mbsys_wassp_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -1363,7 +1352,6 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
                            int *error) {
 	char *function_name = "mbsys_wassp_insert_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1402,7 +1390,7 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -1479,7 +1467,6 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 int mbsys_wassp_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_wassp_copy";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_struct *copy;
 	size_t rawdata_alloc_save;
@@ -1503,7 +1490,7 @@ int mbsys_wassp_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_wassp_struct *)store_ptr;

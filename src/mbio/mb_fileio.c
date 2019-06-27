@@ -37,7 +37,6 @@
 int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mb_fileio_open";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	int fileiobuffer;
 	size_t fileiobufferbytes;
 	int buffer_status = MB_SUCCESS;
@@ -52,7 +51,7 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* open the file for reading */
 	if (mb_io_ptr->filemode == MB_FILEMODE_READ) {
@@ -107,7 +106,6 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
 int mb_fileio_close(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mb_fileio_close";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -118,7 +116,7 @@ int mb_fileio_close(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* open the file */
 	if (mb_io_ptr->mbfp != NULL) {
@@ -141,7 +139,6 @@ int mb_fileio_close(int verbose, void *mbio_ptr, int *error) {
 int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error) {
 	char *function_name = "mb_fileio_get";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	size_t read_len;
 
 	/* print input debug statements */
@@ -156,7 +153,7 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
     if (mb_io_ptr->mbfp != NULL) {
         /* read expected number of bytes into buffer */
@@ -226,7 +223,6 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error) {
 	char *function_name = "mb_fileio_put";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	size_t write_len;
 
 	/* print input debug statements */
@@ -241,7 +237,7 @@ int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* write expected number of bytes from buffer */
 	if ((write_len = fwrite(buffer, 1, *size, mb_io_ptr->mbfp)) != *size) {

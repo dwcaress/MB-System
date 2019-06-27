@@ -40,7 +40,6 @@
 int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_gsf_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -51,7 +50,7 @@ int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_gsf_struct), store_ptr, error);
@@ -106,7 +105,6 @@ int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
 	char *function_name = "mbsys_gsf_dimensions";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -123,7 +121,7 @@ int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -180,7 +178,6 @@ int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
 	char *function_name = "mbsys_gsf_sonartype";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -196,7 +193,7 @@ int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonar
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -301,7 +298,6 @@ int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonar
 int mbsys_gsf_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
 	char *function_name = "mbsys_gsf_sidescantype";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -317,7 +313,7 @@ int mbsys_gsf_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -352,7 +348,6 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_gsf_extract";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -372,7 +367,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -671,7 +666,6 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
                      double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_gsf_insert";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -718,7 +712,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -868,7 +862,6 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
                      double *ssv, int *error) {
 	char *function_name = "mbsys_gsf_ttimes";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -891,7 +884,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -1119,7 +1112,6 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_gsf_detects";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -1136,7 +1128,7 @@ int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -1202,7 +1194,6 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
                                double *altitude, int *error) {
 	char *function_name = "mbsys_gsf_extract_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -1220,7 +1211,7 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -1321,7 +1312,6 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, doub
                               int *error) {
 	char *function_name = "mbsys_gsf_insert_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -1339,7 +1329,7 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, doub
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -1397,7 +1387,6 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *heave, int *error) {
 	char *function_name = "mbsys_gsf_extract_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -1413,7 +1402,7 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -1554,7 +1543,6 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
                          double speed, double heading, double draft, double roll, double pitch, double heave, int *error) {
 	char *function_name = "mbsys_gsf_insert_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -1586,7 +1574,7 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -1663,7 +1651,6 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           int *error) {
 	char *function_name = "mbsys_gsf_extract_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -1679,7 +1666,7 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -1737,7 +1724,6 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
 	char *function_name = "mbsys_gsf_insert_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
 	gsfRecords *records;
@@ -1756,7 +1742,7 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_gsf_struct *)store_ptr;
@@ -1797,7 +1783,6 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp,
 int mbsys_gsf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_gsf_copy";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_gsf_struct *store;
 	struct mbsys_gsf_struct *copy;
 
@@ -1812,7 +1797,7 @@ int mbsys_gsf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_gsf_struct *)store_ptr;

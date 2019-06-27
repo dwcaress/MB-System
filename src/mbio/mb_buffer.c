@@ -528,8 +528,7 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 	buff = (struct mb_buffer_struct *)buff_ptr;
 
 	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr;
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* look for next survey data */
 	int found = MB_NO;
