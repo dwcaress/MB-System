@@ -41,7 +41,6 @@
 int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_reson8k_alloc";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 
 	/* print input debug statements */
@@ -53,7 +52,7 @@ int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson8k_struct), store_ptr, error);
@@ -251,7 +250,6 @@ int mbsys_reson8k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
                              int *error) {
 	char *function_name = "mbsys_reson8k_dimensions";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 
 	/* print input debug statements */
@@ -264,7 +262,7 @@ int mbsys_reson8k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -309,7 +307,6 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_reson8k_extract";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 
 	/* print input debug statements */
@@ -322,7 +319,7 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -507,7 +504,6 @@ int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_reson8k_insert";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 
 	/* print input debug statements */
@@ -550,7 +546,7 @@ int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -631,7 +627,6 @@ int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *ssv, int *error) {
 	char *function_name = "mbsys_reson8k_ttimes";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 	double ttscale, angscale;
 	double heave_use;
@@ -654,7 +649,7 @@ int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -733,7 +728,6 @@ int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 int mbsys_reson8k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_reson8k_detects";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 	int detect;
 
@@ -748,7 +742,7 @@ int mbsys_reson8k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -824,7 +818,6 @@ int mbsys_reson8k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
                                    double *altitude, int *error) {
 	char *function_name = "mbsys_reson8k_extract_altitude";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 	double bath_best;
 	double xtrack_min;
@@ -839,7 +832,7 @@ int mbsys_reson8k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -914,7 +907,6 @@ int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
                               double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_reson8k_extract_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 
 	/* print input debug statements */
@@ -927,7 +919,7 @@ int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -1087,7 +1079,6 @@ int mbsys_reson8k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
                              int *error) {
 	char *function_name = "mbsys_reson8k_insert_nav";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 
 	/* print input debug statements */
@@ -1116,7 +1107,7 @@ int mbsys_reson8k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -1179,7 +1170,6 @@ int mbsys_reson8k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
                               int *error) {
 	char *function_name = "mbsys_reson8k_extract_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 
 	/* print input debug statements */
@@ -1192,7 +1182,7 @@ int mbsys_reson8k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -1248,7 +1238,6 @@ int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
                              int *error) {
 	char *function_name = "mbsys_reson8k_insert_svp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 
 	/* print input debug statements */
@@ -1264,7 +1253,7 @@ int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -1296,7 +1285,6 @@ int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 int mbsys_reson8k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_reson8k_copy";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 	struct mbsys_reson8k_struct *copy;
 
@@ -1311,7 +1299,7 @@ int mbsys_reson8k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -1336,7 +1324,6 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
                          int swath_width_set, double *swath_width, int *error) {
 	char *function_name = "mbsys_reson8k_makess";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson8k_struct *store;
 	double ss[MBSYS_RESON8K_MAXPIXELS];
 	int ss_cnt[MBSYS_RESON8K_MAXPIXELS];
@@ -1367,7 +1354,7 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	}
 
 	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson8k_struct *)store_ptr;
