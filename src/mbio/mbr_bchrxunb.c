@@ -70,7 +70,6 @@ int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error);
 int mbr_register_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_bchrxunb";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -80,7 +79,7 @@ int mbr_register_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_bchrxunb(
@@ -242,7 +241,6 @@ int mbr_info_bchrxunb(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_bchrxunb";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -253,7 +251,7 @@ int mbr_alm_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -282,7 +280,6 @@ int mbr_alm_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_bchrxunb";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -293,7 +290,7 @@ int mbr_dem_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
@@ -458,7 +455,6 @@ int mbr_zero_bchrxunb(int verbose, void *data_ptr, int *error) {
 int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_bchrxunb";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_bchrxunb_struct *data;
 	struct mbsys_elac_struct *store;
 	int time_i[7];
@@ -475,7 +471,7 @@ int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	data = (struct mbf_bchrxunb_struct *)mb_io_ptr->raw_data;
 	store = (struct mbsys_elac_struct *)store_ptr;
 
@@ -646,7 +642,6 @@ int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_bchrxunb";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_bchrxunb_struct *data;
 	char *data_ptr;
 	struct mbsys_elac_struct *store;
@@ -661,7 +656,7 @@ int mbr_wt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_bchrxunb_struct *)mb_io_ptr->raw_data;
@@ -799,7 +794,6 @@ int mbr_wt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_bchrxunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_bchrxunb_rd_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_bchrxunb_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -816,7 +810,7 @@ int mbr_bchrxunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_bchrxunb_struct *)mb_io_ptr->raw_data;
@@ -1872,7 +1866,6 @@ int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 int mbr_bchrxunb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_bchrxunb_wr_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_bchrxunb_struct *data;
 	FILE *mbfp;
 
@@ -1886,7 +1879,7 @@ int mbr_bchrxunb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_bchrxunb_struct *)data_ptr;

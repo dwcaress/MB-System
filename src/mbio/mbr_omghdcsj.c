@@ -57,7 +57,6 @@ int profile_cnt = 0;
 int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_omghdcsj";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -67,7 +66,7 @@ int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_omghdcsj(
@@ -229,7 +228,6 @@ int mbr_info_omghdcsj(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_omghdcsj";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_omghdcsj_struct *dataplus;
 	struct mbf_omghdcsj_summary_struct *summary;
 	struct mbf_omghdcsj_profile_struct *profile;
@@ -253,7 +251,7 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -488,7 +486,6 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_omghdcsj";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_omghdcsj_struct *dataplus;
 	struct mbf_omghdcsj_profile_struct *profile;
 	struct mbf_omghdcsj_data_struct *data;
@@ -502,7 +499,7 @@ int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	dataplus = (struct mbf_omghdcsj_struct *)mb_io_ptr->raw_data;
 	profile = &(dataplus->profile);
 	data = &(dataplus->data);
@@ -532,7 +529,6 @@ int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_omghdcsj";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_omghdcsj_struct *dataplus;
 	struct mbf_omghdcsj_summary_struct *summary;
 	struct mbf_omghdcsj_profile_struct *profile;
@@ -578,7 +574,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor and data structure */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_hdcs_struct *)store_ptr;
 
 	/* get pointer to raw data structure */
@@ -4219,7 +4215,6 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_omghdcsj";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_omghdcsj_struct *dataplus;
 	struct mbf_omghdcsj_summary_struct *summary;
 	struct mbf_omghdcsj_profile_struct *profile;
@@ -4259,7 +4254,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor and data structure */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_hdcs_struct *)store_ptr;
 
 	/* get pointer to raw data structure */

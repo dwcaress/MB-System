@@ -71,7 +71,6 @@ int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, void *data_ptr, 
 int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_cbat8101";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -81,7 +80,7 @@ int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_cbat8101(
@@ -242,7 +241,6 @@ int mbr_info_cbat8101(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_cbat8101";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -253,7 +251,7 @@ int mbr_alm_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -282,7 +280,6 @@ int mbr_alm_cbat8101(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_cbat8101";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -293,7 +290,7 @@ int mbr_dem_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->raw_data, error);
@@ -454,7 +451,6 @@ int mbr_zero_cbat8101(int verbose, void *data_ptr, int *error) {
 int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_cbat8101";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_cbat8101_struct *data;
 	struct mbsys_reson_struct *store;
 	int time_i[7];
@@ -471,7 +467,7 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	data = (struct mbf_cbat8101_struct *)mb_io_ptr->raw_data;
 	store = (struct mbsys_reson_struct *)store_ptr;
 
@@ -633,7 +629,6 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_cbat8101";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_cbat8101_struct *data;
 	char *data_ptr;
 	struct mbsys_reson_struct *store;
@@ -648,7 +643,7 @@ int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_cbat8101_struct *)mb_io_ptr->raw_data;
@@ -777,7 +772,6 @@ int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_cbat8101_rd_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_cbat8101_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -796,7 +790,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_cbat8101_struct *)mb_io_ptr->raw_data;
@@ -1786,7 +1780,6 @@ int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbf_cbat8
 int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_cbat8101_wr_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_cbat8101_struct *data;
 	FILE *mbfp;
 
@@ -1800,7 +1793,7 @@ int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_cbat8101_struct *)data_ptr;

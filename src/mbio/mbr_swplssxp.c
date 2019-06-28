@@ -58,7 +58,6 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_swplssxp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -68,7 +67,7 @@ int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_swplssxp(
@@ -244,7 +243,6 @@ int mbr_info_swplssxp(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_swplssxp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	int *recordid;
 	int *recordidlast;
 	char **bufferptr;
@@ -264,7 +262,7 @@ int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -315,7 +313,6 @@ int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_swplssxp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	char **bufferptr;
 	char *buffer;
 	int *bufferalloc;
@@ -329,7 +326,7 @@ int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mbsys_swathplus_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
@@ -356,7 +353,6 @@ int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_swplssxp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_swathplus_struct *store;
 	swpls_header *header;
 	swpls_sxpping *ping;
@@ -373,7 +369,7 @@ int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* read next data from file */
 	status = mbr_swplssxp_rd_data(verbose, mbio_ptr, store_ptr, error);
@@ -444,7 +440,6 @@ int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_swplssxp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_swathplus_struct *store;
 	int *header_rec_written;
 	int *projection_rec_written;
@@ -459,7 +454,7 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_swathplus_struct *)store_ptr;
@@ -516,7 +511,6 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_swplssxp_rd_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_swathplus_struct *store;
 	char **bufferptr;
 	char *buffer;
@@ -539,7 +533,7 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_swathplus_struct *)store_ptr;

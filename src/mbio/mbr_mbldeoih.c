@@ -115,7 +115,6 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mbldeoih";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -125,7 +124,7 @@ int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_mbldeoih(
@@ -292,7 +291,6 @@ int mbr_info_mbldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_mbldeoih(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_mbldeoih";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -303,7 +301,7 @@ int mbr_alm_mbldeoih(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -326,7 +324,6 @@ int mbr_alm_mbldeoih(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_mbldeoih(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mbldeoih";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -337,7 +334,7 @@ int mbr_dem_mbldeoih(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mbsys_ldeoih_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
@@ -357,7 +354,6 @@ int mbr_dem_mbldeoih(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_mbldeoih";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	struct mbsys_ldeoih_old_struct oldstore;
 	int read_size;
@@ -383,7 +379,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor and data structure */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_ldeoih_struct *)store_ptr;
 	memset((void *)&oldstore, 0, sizeof(struct mbsys_ldeoih_old_struct));
 
@@ -976,7 +972,6 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_mbldeoih";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	struct mbsys_ldeoih_old_struct oldstore;
 	int write_size;
@@ -1002,7 +997,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor and data storage */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_ldeoih_struct *)store_ptr;
 
 	/* set data flag pointer */

@@ -61,7 +61,6 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_edgjstar";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -71,7 +70,7 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_edgjstar(
@@ -245,7 +244,6 @@ int mbr_info_edgjstar(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_edgjstr2";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -255,7 +253,7 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_edgjstr2(
@@ -429,7 +427,6 @@ int mbr_info_edgjstr2(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_edgjstar";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -440,7 +437,7 @@ int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -464,7 +461,6 @@ int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_edgjstar";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -475,7 +471,7 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data structure */
 	status = mbsys_jstar_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
@@ -495,7 +491,6 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_edgjstar";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_jstar_message_struct message;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -537,7 +532,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_jstar_struct *)store_ptr;
@@ -2553,7 +2548,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_edgjstar";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ss;
@@ -2579,7 +2573,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_jstar_struct *)store_ptr;

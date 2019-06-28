@@ -55,7 +55,6 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_oicgeoda";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -65,7 +64,7 @@ int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_oicgeoda(
@@ -228,7 +227,6 @@ int mbr_info_oicgeoda(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_oicgeoda";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_oicgeoda_struct *dataplus;
 	struct mbf_oicgeoda_header_struct *header;
 	struct mbf_oicgeoda_data_struct *data;
@@ -242,7 +240,7 @@ int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -296,7 +294,6 @@ int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_oicgeoda";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_oicgeoda_struct *dataplus;
 	struct mbf_oicgeoda_header_struct *header;
 	struct mbf_oicgeoda_data_struct *data;
@@ -310,7 +307,7 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	dataplus = (struct mbf_oicgeoda_struct *)mb_io_ptr->raw_data;
 	header = &(dataplus->header);
 	data = &(dataplus->data);
@@ -356,7 +353,6 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_oicgeoda";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_oicgeoda_struct *dataplus;
 	struct mbf_oicgeoda_header_struct *header;
 	struct mbf_oicgeoda_data_struct *data;
@@ -386,7 +382,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor and data structure */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_oic_struct *)store_ptr;
 
 	/* get pointer to raw data structure */
@@ -1279,7 +1275,6 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_oicgeoda";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_oicgeoda_struct *dataplus;
 	struct mbf_oicgeoda_header_struct *header;
 	struct mbf_oicgeoda_data_struct *data;
@@ -1304,7 +1299,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor and data storage */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_oic_struct *)store_ptr;
 
 	/* get pointer to raw data structure */
