@@ -354,7 +354,6 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                                  double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
   char *function_name = "mbsys_kmbes_extract";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
@@ -377,7 +376,7 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -737,7 +736,6 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                                 double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
   char *function_name = "mbsys_kmbes_insert";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
@@ -798,7 +796,7 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -954,7 +952,6 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                                 double *alongtrack_offset, double *draft, double *ssv, int *error) {
   char *function_name = "mbsys_kmbes_ttimes";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
@@ -979,7 +976,7 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1067,7 +1064,6 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
   char *function_name = "mbsys_kmbes_detects";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
   int numSoundings = 0;
@@ -1084,7 +1080,7 @@ int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1163,7 +1159,6 @@ int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 int mbsys_kmbes_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error) {
   char *function_name = "mbsys_kmbes_pulses";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
   int numSoundings = 0;
@@ -1180,7 +1175,7 @@ int mbsys_kmbes_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1264,7 +1259,6 @@ int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
                                double *pulse_length, double *receive_gain, int *error) {
   char *function_name = "mbsys_kmbes_gains";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
   int numSoundings = 0;
@@ -1279,7 +1273,7 @@ int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1346,7 +1340,6 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
                                           double *altitudev, int *error) {
   char *function_name = "mbsys_kmbes_extract_altitude";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
@@ -1364,7 +1357,7 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1439,7 +1432,6 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
                                      double *pitch, double *heave, int *error) {
   char *function_name = "mbsys_kmbes_extract_nav";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
@@ -1457,7 +1449,7 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1643,7 +1635,6 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
                                       double *draft, double *roll, double *pitch, double *heave, int *error) {
   char *function_name = "mbsys_kmbes_extract_nnav";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
@@ -1663,7 +1654,7 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -1978,7 +1969,6 @@ int mbsys_kmbes_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
                                      double *velocity, int *error) {
   char *function_name = "mbsys_kmbes_extract_svp";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_svp *svp = NULL;
 
@@ -1992,7 +1982,7 @@ int mbsys_kmbes_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -2101,7 +2091,6 @@ int mbsys_kmbes_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
 int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
   char *function_name = "mbsys_kmbes_copy";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_struct *copy = NULL;
   struct mbsys_kmbes_mwc *copy_mwc = NULL;
@@ -2122,7 +2111,7 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointers */
   store = (struct mbsys_kmbes_struct *)store_ptr;

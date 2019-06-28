@@ -101,7 +101,6 @@ int mbsys_reson7k_zero7kheader(int verbose, s7k_header *header, int *error) {
 int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
   char *function_name = "mbsys_reson7k_alloc";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_reference *reference;
   s7kr_sensoruncal *sensoruncal;
@@ -166,7 +165,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* allocate memory for data structure */
   status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson7k_struct), (void **)store_ptr, error);
@@ -4796,7 +4795,6 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
                              int *error) {
   char *function_name = "mbsys_reson7k_dimensions";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
 
@@ -4810,7 +4808,7 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -4852,7 +4850,6 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
   char *function_name = "mbsys_reson7k_pingnumber";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
 
@@ -4865,7 +4862,7 @@ int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)mb_io_ptr->store_data;
@@ -4890,7 +4887,6 @@ int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
   char *function_name = "mbsys_reson7k_sonartype";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
 
   /* print input debug statements */
@@ -4903,7 +4899,7 @@ int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -4927,7 +4923,6 @@ int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
   char *function_name = "mbsys_reson7k_sidescantype";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
 
   /* print input debug statements */
@@ -4940,7 +4935,7 @@ int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -4967,7 +4962,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
   char *function_name = "mbsys_reson7k_preprocess";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   struct mb_platform_struct *platform;
   struct mb_preprocess_struct *pars;
@@ -5096,7 +5090,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
   assert(preprocess_pars_ptr != NULL);
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointers */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -6226,7 +6220,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
   char *function_name = "mbsys_reson7k_extract_platform";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mb_platform_struct *platform;
   struct mbsys_reson7k_struct *store;
   s7kr_installation *installation;
@@ -6246,7 +6239,7 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
   store = (struct mbsys_reson7k_struct *)store_ptr;
   installation = (s7kr_installation *)&store->installation;
 
@@ -6404,7 +6397,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
   char *function_name = "mbsys_reson7k_extract";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_bluefin *bluefin;
   s7kr_processedsidescan *processedsidescan;
@@ -6434,7 +6426,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -6961,7 +6953,6 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double *ssalongtrack, char *comment, int *error) {
   char *function_name = "mbsys_reson7k_insert";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_bluefin *bluefin;
   s7kr_processedsidescan *processedsidescan;
@@ -7024,7 +7015,7 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -7271,7 +7262,6 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *ssv, int *error) {
   char *function_name = "mbsys_reson7k_ttimes";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   s7kr_depth *depth;
@@ -7299,7 +7289,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -7414,7 +7404,6 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
   char *function_name = "mbsys_reson7k_detects";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   mb_u_char detect;
@@ -7431,7 +7420,7 @@ int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -7501,7 +7490,6 @@ int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *receive_gain, int *error) {
   char *function_name = "mbsys_reson7k_gains";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_volatilesettings *volatilesettings;
@@ -7516,7 +7504,7 @@ int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -7584,7 +7572,6 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
                                    double *altitudev, int *error) {
   char *function_name = "mbsys_reson7k_extract_altitude";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   s7kr_depth *depth;
@@ -7607,7 +7594,7 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -7728,7 +7715,6 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
                               double *pitch, double *heave, int *error) {
   char *function_name = "mbsys_reson7k_extract_nav";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   s7kr_bluefin *bluefin;
@@ -7754,7 +7740,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -8099,7 +8085,6 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
                                double *roll, double *pitch, double *heave, int *error) {
   char *function_name = "mbsys_reson7k_extract_nnav";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   s7kr_bluefin *bluefin;
@@ -8122,7 +8107,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -8416,7 +8401,6 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
                              int *error) {
   char *function_name = "mbsys_reson7k_insert_nav";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   s7kr_position *position;
@@ -8451,7 +8435,7 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -8522,7 +8506,6 @@ int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
                               int *error) {
   char *function_name = "mbsys_reson7k_extract_svp";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_svp *svp;
   int i;
@@ -8537,7 +8520,7 @@ int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -8594,7 +8577,6 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
                              int *error) {
   char *function_name = "mbsys_reson7k_insert_svp";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_svp *svp;
   int i;
@@ -8612,7 +8594,7 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -8659,7 +8641,6 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
                                           int *error) {
   char *function_name = "mbsys_reson7k_extract_segytraceheader";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
   s7k_header *header;
@@ -8692,7 +8673,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -8921,7 +8902,6 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
                                float *segydata, int *error) {
   char *function_name = "mbsys_reson7k_extract_segy";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
   s7k_header *header;
@@ -8947,7 +8927,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -9130,7 +9110,6 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
                               int *error) {
   char *function_name = "mbsys_reson7k_insert_segy";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
   s7k_header *header;
@@ -9163,7 +9142,7 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -9376,7 +9355,6 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, double *time_d, double *conductivity,
                       double *temperature, double *depth, double *salinity, double *soundspeed, int *error) {
   char *function_name = "mbsys_reson7k_ctd";
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_bluefin *bluefin;
@@ -9397,7 +9375,7 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -9501,7 +9479,6 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
                                    double *sensor1, double *sensor2, double *sensor3, double *sensor4, double *sensor5,
                                    double *sensor6, double *sensor7, double *sensor8, int *error) {
   char *function_name = "mbsys_reson7k_ancilliarysensor";
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_bluefin *bluefin;
@@ -9519,7 +9496,7 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -9585,7 +9562,6 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
   char *function_name = "mbsys_reson7k_copy";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   struct mbsys_reson7k_struct *copy;
   s7kr_attitude *attitude;
@@ -9616,7 +9592,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointers */
   store = (struct mbsys_reson7k_struct *)store_ptr;
@@ -10055,7 +10031,6 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
   char *function_name = "mbsys_reson7k_makess";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k_struct *store;
   s7kr_reference *reference;
   s7kr_volatilesettings *volatilesettings;
@@ -10118,7 +10093,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
   }
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_reson7k_struct *)store_ptr;
