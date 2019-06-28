@@ -166,7 +166,6 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_register_hs10jams(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hs10jams";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -176,7 +175,7 @@ int mbr_register_hs10jams(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_hs10jams(
@@ -337,7 +336,6 @@ int mbr_info_hs10jams(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_hs10jams(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hs10jams";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -348,7 +346,7 @@ int mbr_alm_hs10jams(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -373,7 +371,6 @@ int mbr_alm_hs10jams(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_hs10jams(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hs10jams";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -384,7 +381,7 @@ int mbr_dem_hs10jams(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
@@ -404,7 +401,6 @@ int mbr_dem_hs10jams(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_hs10jams";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;
 	char line[MBF_HS10JAMS_MAXLINE];
 	char *line_ptr;
@@ -420,7 +416,7 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_hs10_struct *)store_ptr;
 
 	/* set file position */
@@ -556,7 +552,6 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_hs10jams";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hs10_struct *store;
 	char line[MBF_HS10JAMS_MAXLINE];
 	int shift;
@@ -571,7 +566,7 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to storage data structure */
 	store = (struct mbsys_hs10_struct *)store_ptr;

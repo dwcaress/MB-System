@@ -56,7 +56,6 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_3ddepthp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -69,7 +68,7 @@ int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	assert(mbio_ptr != NULL);
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_3ddepthp(
@@ -233,7 +232,6 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_3ddepthp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	int *file_header_readwritten;
 
 	/* print input debug statements */
@@ -248,7 +246,7 @@ int mbr_alm_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	assert(mbio_ptr != NULL);
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -281,7 +279,6 @@ int mbr_alm_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_3ddepthp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -295,7 +292,7 @@ int mbr_dem_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	assert(mbio_ptr != NULL);
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory  */
 	status = mbsys_3datdepthlidar_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
@@ -315,7 +312,6 @@ int mbr_dem_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_3ddepthp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* print input debug statements */
@@ -332,7 +328,7 @@ int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	assert(store_ptr != NULL);
 
 	/* get pointers to mbio descriptor and data structure */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
 
 	/* read next data from file */
@@ -366,7 +362,6 @@ int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_3ddepthp";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 
 	/* print input debug statements */
@@ -383,7 +378,7 @@ int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	assert(store_ptr != NULL);
 
 	/* get pointers to mbio descriptor and data structure */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
 
 	/* write next data to file */
@@ -404,7 +399,6 @@ int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_3ddepthp_rd_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	int *file_header_readwritten;
@@ -432,7 +426,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	assert(store_ptr != NULL);
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
 
 	/* get saved values */
@@ -1196,7 +1190,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_3ddepthp_wr_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	int *file_header_readwritten;
@@ -1222,7 +1215,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	assert(store_ptr != NULL);
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
 
 	/* get saved values */

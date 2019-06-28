@@ -71,7 +71,6 @@ int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_asciixyz";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -81,7 +80,7 @@ int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_asciixyz(
@@ -242,7 +241,6 @@ int mbr_info_asciixyz(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_register_asciiyxz(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_asciiyxz";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -252,7 +250,7 @@ int mbr_register_asciiyxz(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_asciiyxz(
@@ -411,7 +409,6 @@ int mbr_info_asciiyxz(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_register_asciixyt(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_asciixyt";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -421,7 +418,7 @@ int mbr_register_asciixyt(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_asciixyt(
@@ -580,7 +577,6 @@ int mbr_info_asciixyt(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_register_asciiyxt(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_asciiyxt";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -590,7 +586,7 @@ int mbr_register_asciiyxt(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_asciiyxt(
@@ -749,7 +745,6 @@ int mbr_info_asciiyxt(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_asciixyz(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_asciixyz";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -760,7 +755,7 @@ int mbr_alm_asciixyz(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -772,6 +767,7 @@ int mbr_alm_asciixyz(int verbose, void *mbio_ptr, int *error) {
 	    mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), (void **)&mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
+	/* TODO(schwehr): Do we really want this again? */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set number of header records read to zero */
@@ -792,7 +788,6 @@ int mbr_alm_asciixyz(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_asciixyz";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -803,7 +798,7 @@ int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
@@ -823,7 +818,6 @@ int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_asciixyz";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
 	char line[MB_COMMENT_MAXLINE + 1] = "";
 	char flag;
@@ -840,7 +834,7 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* set file position */
@@ -966,7 +960,6 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_asciixyz";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
 	char line[MB_COMMENT_MAXLINE + 1] = "";
 	int len;
@@ -983,7 +976,7 @@ int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_singlebeam_struct *)store_ptr;

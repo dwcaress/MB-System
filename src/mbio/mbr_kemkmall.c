@@ -99,7 +99,6 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
 int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_register_kemkmall";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -109,7 +108,7 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   }
 
   /* get mb_io_ptr */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* set format info parameters */
   status = mbr_info_kemkmall(
@@ -287,9 +286,8 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_alm_kemkmall";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
-    char **bufferptr = NULL;
-    int *bufferalloc = NULL;
+  char **bufferptr = NULL;
+  int *bufferalloc = NULL;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -303,7 +301,7 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
     assert(mbio_ptr != NULL);
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* set initial status */
   status = MB_SUCCESS;
@@ -345,7 +343,6 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_dem_kemkmall";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   int *dgm_count = NULL;
 
@@ -358,7 +355,7 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
   }
 
   /* get pointers to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* deallocate reading/writing buffer */
   if (mb_io_ptr->raw_data != NULL && mb_io_ptr->structure_size > 0) {
@@ -402,7 +399,6 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_rt_kemkmall";
   int status = MB_SUCCESS;
   int interp_error = MB_ERROR_NO_ERROR;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   int *file_indexed = NULL;
   double *pixel_size, *swath_width;
@@ -417,7 +413,7 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   }
 
   /* get pointers to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get saved values */
   file_indexed = (int *)&mb_io_ptr->save2;
@@ -472,7 +468,6 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_wt_kemkmall";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
 
   /* print input debug statements */
@@ -489,7 +484,7 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     assert(store_ptr != NULL);
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -523,7 +518,6 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_kemkmall_index_data";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index dgm_index;
@@ -558,7 +552,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   mbr_kemkmall_create_dgm_index_table(verbose, mbio_ptr, store_ptr, error);
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -875,7 +869,6 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_kemkmall_create_dgm_index_table";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   size_t size_bytes = 0;
@@ -890,7 +883,7 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
   }
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* we will store the datagram index table in mbio descriptor field saveptr1 */
   dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
@@ -1106,7 +1099,6 @@ int mbr_kemkmall_indextable_compare(const void *a, const void *b) {
 int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_data";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *dgm_index = NULL;
@@ -1129,7 +1121,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   }
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get buffer and related vars from mbio saved values */
   bufferptr = (char **)&mb_io_ptr->raw_data;
@@ -1426,7 +1418,6 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_kemkmall_wr_data";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_kmbes_struct *store = NULL;
   size_t write_len = 0;
   char **bufferptr = NULL;
@@ -1446,7 +1437,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   }
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get buffer and related vars from mbio saved values */
   bufferptr = (char **)&mb_io_ptr->raw_data;

@@ -52,7 +52,6 @@ int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_register_mstiffss(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mstiffss";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -62,7 +61,7 @@ int mbr_register_mstiffss(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_mstiffss(
@@ -223,7 +222,6 @@ int mbr_info_mstiffss(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_mstiffss(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_mstiffss";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	int *n_read;
 	int *n_nav_use;
 
@@ -236,7 +234,7 @@ int mbr_alm_mstiffss(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -267,7 +265,6 @@ int mbr_alm_mstiffss(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_mstiffss(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mstiffss";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -278,7 +275,7 @@ int mbr_dem_mstiffss(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
@@ -299,7 +296,6 @@ int mbr_dem_mstiffss(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_mstiffss";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mstiffss_struct *data;
 	struct mbsys_mstiff_struct *store;
 	char buffer[MBF_MSTIFFSS_BUFFERSIZE];
@@ -367,7 +363,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_mstiffss_struct *)mb_io_ptr->raw_data;
@@ -1152,7 +1148,6 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_mstiffss";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mstiffss_struct *data;
 	struct mbsys_mstiff_struct *store;
 
@@ -1166,7 +1161,7 @@ int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_mstiffss_struct *)mb_io_ptr->raw_data;

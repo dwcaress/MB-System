@@ -79,7 +79,6 @@ int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, vo
 int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_wasspenl";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -89,7 +88,7 @@ int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_wasspenl(
@@ -264,7 +263,6 @@ int mbr_info_wasspenl(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_wasspenl";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	char **bufferptr;
 	char *buffer;
 	int *bufferalloc;
@@ -278,7 +276,7 @@ int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -315,7 +313,6 @@ int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_wasspenl";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	char **bufferptr;
 	char *buffer;
 	int *bufferalloc;
@@ -329,7 +326,7 @@ int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for reading/writing buffer */
 	bufferptr = (char **)&mb_io_ptr->saveptr1;
@@ -356,7 +353,6 @@ int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_wasspenl";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 
 	/* print input debug statements */
@@ -369,7 +365,7 @@ int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 #ifdef MBR_WASSPENLDEBUG
 	fprintf(stderr, "About to call mbr_wasspenl_rd_data...\n");
@@ -404,7 +400,6 @@ int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_wasspenl";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 
 	/* print input debug statements */
@@ -417,7 +412,7 @@ int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -448,7 +443,6 @@ int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wasspenl_rd_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -481,7 +475,7 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_wassp_struct *)store_ptr;
@@ -693,7 +687,6 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wasspenl_wr_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_wassp_struct *store;
 	char **bufferptr;
 	char *buffer;
@@ -711,7 +704,7 @@ int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_wassp_struct *)store_ptr;

@@ -705,7 +705,6 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 int mbr_register_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mgd77tab";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -715,7 +714,7 @@ int mbr_register_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_mgd77tab(
@@ -877,7 +876,6 @@ int mbr_info_mgd77tab(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_mgd77tab";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77tab_struct *data;
 	char *data_ptr;
 
@@ -890,7 +888,7 @@ int mbr_alm_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_mgd77tab_struct);
@@ -924,7 +922,6 @@ int mbr_alm_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mgd77tab";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -935,7 +932,7 @@ int mbr_dem_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
@@ -956,7 +953,6 @@ int mbr_dem_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_mgd77tab";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77tab_struct *data;
 	struct mbsys_singlebeam_struct *store;
 	double minutes;
@@ -972,7 +968,7 @@ int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
 	store = (struct mbsys_singlebeam_struct *)store_ptr;
 
@@ -1062,7 +1058,6 @@ int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_mgd77tab";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77tab_struct *data;
 	struct mbsys_singlebeam_struct *store;
 
@@ -1076,7 +1071,7 @@ int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
@@ -1263,7 +1258,6 @@ int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_mgd77tab_rd_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77tab_struct *data;
 	int *header_read;
 	char line[MB_COMMENT_MAXLINE] = "";
@@ -1283,7 +1277,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
@@ -1710,7 +1704,6 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_mgd77tab_wr_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_mgd77tab_struct *data;
 	char line[MB_COMMENT_MAXLINE] = "";
 	int write_status;
@@ -1726,7 +1719,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_mgd77tab_struct *)data_ptr;

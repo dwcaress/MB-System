@@ -56,7 +56,6 @@ int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_swplssxi";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -66,7 +65,7 @@ int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_swplssxi(
@@ -241,7 +240,6 @@ int mbr_info_swplssxi(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_swplssxi";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	int *current_ping;
 	int *last_ping;
 	int *save_flag;
@@ -264,7 +262,7 @@ int mbr_alm_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -321,7 +319,6 @@ int mbr_alm_swplssxi(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_swplssxi";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	char **bufferptr;
 	char *buffer;
 	int *bufferalloc;
@@ -335,7 +332,7 @@ int mbr_dem_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for reading/writing buffer */
 	bufferptr = (char **)&mb_io_ptr->saveptr1;
@@ -362,7 +359,6 @@ int mbr_dem_swplssxi(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_swplssxi";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_swathplus_struct *store;
 	swpls_projection *projection;
 
@@ -376,7 +372,7 @@ int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* read next data from file */
 	status = mbr_swplssxi_rd_data(verbose, mbio_ptr, store_ptr, error);
@@ -456,7 +452,6 @@ int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_swplssxi";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_swathplus_struct *store;
 	int *header_rec_written;
 	int *projection_rec_written;
@@ -471,7 +466,7 @@ int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_swathplus_struct *)store_ptr;
@@ -539,7 +534,6 @@ int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_swplssxi_rd_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_swathplus_struct *store;
 	char **bufferptr;
 	char *buffer;
@@ -562,7 +556,7 @@ int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_swathplus_struct *)store_ptr;

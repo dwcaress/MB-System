@@ -80,7 +80,6 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 int mbr_register_emoldraw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_emoldraw";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -90,7 +89,7 @@ int mbr_register_emoldraw(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_emoldraw(
@@ -254,7 +253,6 @@ int mbr_info_emoldraw(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_emoldraw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_emoldraw";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	int *wrapper;
 	double *pixel_size;
 	double *swath_width;
@@ -271,7 +269,7 @@ int mbr_alm_emoldraw(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -310,7 +308,6 @@ int mbr_alm_emoldraw(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_emoldraw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_emoldraw";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -321,7 +318,7 @@ int mbr_dem_emoldraw(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mbsys_simrad_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
@@ -341,7 +338,6 @@ int mbr_dem_emoldraw(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_emoldraw";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 	int ntime_i[7];
@@ -363,7 +359,7 @@ int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_simrad_struct *)store_ptr;
 	pixel_size = (double *)&mb_io_ptr->saved1;
 	swath_width = (double *)&mb_io_ptr->saved2;
@@ -444,7 +440,6 @@ int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_emoldraw";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
 
 	/* print input debug statements */
@@ -457,7 +452,7 @@ int mbr_wt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_simrad_struct *)store_ptr;
@@ -480,7 +475,6 @@ int mbr_wt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_emoldraw_rd_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
 	FILE *mbfp;
 	int done;
@@ -513,7 +507,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	mbfp = mb_io_ptr->mbfp;
 	store = (struct mbsys_simrad_struct *)store_ptr;
 
@@ -1244,7 +1238,6 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type) {
 	char *function_name = "mbr_emoldraw_chk_label";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	char *startid;
 
 	/* print input debug statements */
@@ -1257,7 +1250,7 @@ int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 /* swap bytes if necessary */
 #ifdef BYTESWAPPED
@@ -2481,7 +2474,6 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 int mbr_emoldraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_emoldraw_wr_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 	FILE *mbfp;
@@ -2496,7 +2488,7 @@ int mbr_emoldraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_simrad_struct *)store_ptr;

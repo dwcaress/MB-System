@@ -222,7 +222,6 @@ int mbr_reson7k3_wr_SpreadingLoss(int verbose, int *bufferalloc, char **bufferpt
 int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_register_reson7k3";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -232,7 +231,7 @@ int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error) {
   }
 
   /* get mb_io_ptr */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* set format info parameters */
   status = mbr_info_reson7k3(
@@ -409,7 +408,6 @@ int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_alm_reson7k3";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   int *current_ping;
   int *last_ping;
   int *save_flag;
@@ -440,7 +438,7 @@ int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
   }
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* set initial status */
   status = MB_SUCCESS;
@@ -509,7 +507,6 @@ int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_dem_reson7k3";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k3_struct *store = NULL;
   char **bufferptr = NULL;
   char *buffer = NULL;
@@ -532,7 +529,7 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   }
 
   /* get pointers to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointers to buffers */
   store = (struct mbsys_reson7k3_struct *) &mb_io_ptr->store_data;
@@ -638,7 +635,6 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
   int interp_status;
   int interp_error = MB_ERROR_NO_ERROR;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_Position *Position;
   s7k3_CustomAttitude *CustomAttitude;
@@ -679,7 +675,7 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   }
 
   /* get pointers to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
   store = (struct mbsys_reson7k3_struct *)store_ptr;
@@ -1026,7 +1022,6 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_wt_reson7k3";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k3_struct *store = NULL;
 
   /* print input debug statements */
@@ -1039,7 +1034,7 @@ int mbr_wt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   }
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
   store = (struct mbsys_reson7k3_struct *)store_ptr;
@@ -1062,7 +1057,6 @@ int mbr_wt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_reson7k3_rd_data";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RawDetection *RawDetection;
@@ -1103,7 +1097,7 @@ int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   }
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
   store = (struct mbsys_reson7k3_struct *)store_ptr;
@@ -2222,7 +2216,6 @@ int mbr_reson7k3_chk_header(int verbose, void *mbio_ptr, char *buffer, int *reco
                             int *deviceid, unsigned short *enumerator, int *size) {
   char *function_name = "mbr_reson7k3_chk_label";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   unsigned short version;
   unsigned short offset;
   unsigned int sync;
@@ -2237,7 +2230,7 @@ int mbr_reson7k3_chk_header(int verbose, void *mbio_ptr, char *buffer, int *reco
   }
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get values to check */
   mb_get_binary_short(MB_YES, &buffer[0], &version);
@@ -2961,7 +2954,6 @@ int mbr_reson7k3_FileCatalog_compare(const void *a, const void *b) {
 int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr, int size, void *header_ptr, int *error) {
   char *function_name = "mbr_reson7k3_FileCatalog_update";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr = NULL;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_FileCatalog *FileCatalog = NULL;
@@ -2986,7 +2978,7 @@ int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr
   }
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
   store = (struct mbsys_reson7k3_struct *)mb_io_ptr->store_data;
@@ -10328,7 +10320,6 @@ int mbr_reson7k3_rd_SpreadingLoss(int verbose, char *buffer, void *store_ptr, in
 int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_reson7k3_wr_data";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_reson7k3_struct *store = NULL;
   struct mbsys_reson7k3_struct *ostore = NULL;
   FILE *mbfp = NULL;
@@ -10350,7 +10341,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   }
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
   store = (struct mbsys_reson7k3_struct *)store_ptr;

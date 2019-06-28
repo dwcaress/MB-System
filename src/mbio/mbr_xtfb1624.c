@@ -387,7 +387,6 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_register_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_xtfb1624";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -397,7 +396,7 @@ int mbr_register_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_xtfb1624(
@@ -557,7 +556,6 @@ int mbr_info_xtfb1624(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_xtfb1624";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	int *fileheaderread;
 	double *pixel_size;
 	double *swath_width;
@@ -571,7 +569,7 @@ int mbr_alm_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -608,7 +606,6 @@ int mbr_alm_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_xtfb1624";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -619,7 +616,7 @@ int mbr_dem_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
@@ -679,7 +676,6 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_xtfb1624";
 	int status = MB_SUCCESS;
 
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_xtfb1624_struct *data;
 	struct mbsys_benthos_struct *store;
 	int nchan;
@@ -699,7 +695,7 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor and data structures */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	data = (struct mbf_xtfb1624_struct *)mb_io_ptr->raw_data;
 	store = (struct mbsys_benthos_struct *)store_ptr;
 	pixel_size = (double *)&mb_io_ptr->saved1;
@@ -1028,7 +1024,6 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_xtfb1624";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1040,7 +1035,7 @@ int mbr_wt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set error as this is a read only format */
 	status = MB_FAILURE;
@@ -1062,7 +1057,6 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_xtfb1624_rd_data";
 	int status = MB_SUCCESS;
 
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_xtfb1624_struct *data;
 	char line[MBF_XTFB1624_MAXLINE];
 	int *fileheaderread;
@@ -1092,7 +1086,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set saved flags */
 	fileheaderread = (int *)&(mb_io_ptr->save1);

@@ -55,7 +55,6 @@ int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_register_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_register_3dwisslr";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -68,7 +67,7 @@ int mbr_register_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   assert(mbio_ptr != NULL);
 
   /* get mb_io_ptr */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* set format info parameters */
   status = mbr_info_3dwisslr(
@@ -238,7 +237,6 @@ int mbr_info_3dwisslr(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_alm_3dwisslr";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   int *file_header_readwritten;
   int *file_indexed;
 
@@ -254,7 +252,7 @@ int mbr_alm_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   assert(mbio_ptr != NULL);
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* set initial status */
   status = MB_SUCCESS;
@@ -288,7 +286,6 @@ int mbr_alm_3dwisslr(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_dem_3dwisslr";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -302,7 +299,7 @@ int mbr_dem_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   assert(mbio_ptr != NULL);
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
     /* deallocate reading/writing buffer */
     if (mb_io_ptr->data_structure_size > 0 && mb_io_ptr->raw_data != NULL) {
@@ -337,7 +334,6 @@ int mbr_dem_3dwisslr(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_rt_3dwisslr";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_3ddwissl_struct *store;
   int *file_indexed;
 
@@ -355,7 +351,7 @@ int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   assert(store_ptr != NULL);
 
   /* get pointers to mbio descriptor and data structure */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
   store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* get saved values */
@@ -399,7 +395,6 @@ int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_wt_3dwisslr";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_3ddwissl_struct *store;
 
   /* print input debug statements */
@@ -416,7 +411,7 @@ int mbr_wt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   assert(store_ptr != NULL);
 
   /* get pointers to mbio descriptor and data structure */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
   store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* write next data to file */
@@ -437,7 +432,6 @@ int mbr_wt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_3dwisslr_index_data";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_3ddwissl_struct *store;
   int *file_indexed;
   char *buffer = NULL;
@@ -467,7 +461,7 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   assert(store_ptr != NULL);
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
   store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* get saved values */
@@ -802,7 +796,6 @@ int mbr_3dwisslr_indextable_compare(const void *a, const void *b) {
 int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_3dwisslr_rd_data";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_3ddwissl_struct *store;
   struct mbsys_3ddwissl_calibration_struct *calibration;
   struct mbsys_3ddwissl_pulse_struct *pulse;
@@ -830,7 +823,7 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   assert(store_ptr != NULL);
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
   store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* get saved values */
@@ -1181,7 +1174,6 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_3dwisslr_wr_data";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_3ddwissl_struct *store;
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_calibration_struct *calibration;
@@ -1205,7 +1197,7 @@ int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   assert(store_ptr != NULL);
 
   /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
   store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* get saved values */
@@ -1544,7 +1536,6 @@ int mbr_3dwisslr_fixtimestamps(int verbose, void *mbio_ptr,
                                 int num_indextable, struct mb_io_indextable_struct *indextable, int n_file, int *error) {
   char *function_name = "mbr_3dwisslr_fixtimestamps";
   int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
   struct mbsys_3ddwissl_struct *store;
 
   /* print input debug statements */
@@ -1566,15 +1557,13 @@ int mbr_3dwisslr_fixtimestamps(int verbose, void *mbio_ptr,
   *error = MB_ERROR_NO_ERROR;
 
   /* get mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
   store = (struct mbsys_3ddwissl_struct *)mb_io_ptr->store_data;
 
     /* correct timestamps in the file's internal index table using information
      * supplied in the external index table */
-
-
 
   /* print output debug statements */
   if (verbose >= 2) {
