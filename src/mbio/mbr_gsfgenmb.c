@@ -55,7 +55,6 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_gsfgenmb";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -65,7 +64,7 @@ int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_gsfgenmb(
@@ -231,7 +230,6 @@ int mbr_info_gsfgenmb(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_gsfgenmb";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -242,7 +240,7 @@ int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -271,7 +269,6 @@ int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_gsfgenmb";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_gsfgenmb_struct *data;
 	gsfRecords *records;
 
@@ -284,7 +281,7 @@ int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	data = (struct mbf_gsfgenmb_struct *)mb_io_ptr->raw_data;
 	records = &(data->records);
 
@@ -308,7 +305,6 @@ int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_gsfgenmb";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_gsfgenmb_struct *data;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -326,7 +322,7 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor and data structure */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_gsf_struct *)store_ptr;
 
 	/* get pointer to raw data structure */
@@ -540,7 +536,6 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_gsfgenmb";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbf_gsfgenmb_struct *data;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -558,7 +553,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor and data structure */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_gsf_struct *)store_ptr;
 
 	/* get pointer to raw data structure */

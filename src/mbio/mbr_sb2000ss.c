@@ -77,7 +77,6 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_sb2000ss";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -87,7 +86,7 @@ int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_sb2000ss(
@@ -249,7 +248,6 @@ int mbr_info_sb2000ss(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_sb2000ss(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_sb2000ss";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -260,7 +258,7 @@ int mbr_alm_sb2000ss(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -283,7 +281,6 @@ int mbr_alm_sb2000ss(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_sb2000ss";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -294,7 +291,7 @@ int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
@@ -314,7 +311,6 @@ int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_sb2000ss";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 	int read_status;
 	char buffer[2 * MBSYS_SB2000_PIXELS + 4];
@@ -332,7 +328,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_sb2000_struct *)store_ptr;
@@ -666,7 +662,6 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_sb2000ss";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2000_struct *store;
 	char buffer[2 * MBSYS_SB2000_PIXELS + 4];
 	unsigned short *short_ptr;
@@ -681,7 +676,7 @@ int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_sb2000_struct *)store_ptr;

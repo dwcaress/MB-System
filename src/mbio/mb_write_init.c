@@ -60,7 +60,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 
 	/* allocate memory for mbio descriptor */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_io_struct), (void **)mbio_ptr, error);
-	struct mb_io_struct *mb_io_ptr;
+	struct mb_io_struct *mb_io_ptr = NULL;
 	if (status == MB_SUCCESS) {
 		memset(*mbio_ptr, 0, sizeof(struct mb_io_struct));
 		mb_io_ptr = (struct mb_io_struct *)*mbio_ptr;

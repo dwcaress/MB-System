@@ -115,7 +115,6 @@ int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_em300raw";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -125,7 +124,7 @@ int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_em300raw(
@@ -295,7 +294,6 @@ int mbr_info_em300raw(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_em300raw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_em300raw";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	int *databyteswapped;
 	double *pixel_size;
 	double *swath_width;
@@ -309,7 +307,7 @@ int mbr_alm_em300raw(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -342,7 +340,6 @@ int mbr_alm_em300raw(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_em300raw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_em300raw";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -353,7 +350,7 @@ int mbr_dem_em300raw(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mbsys_simrad2_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
@@ -373,7 +370,6 @@ int mbr_dem_em300raw(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_em300raw";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_attitude_struct *attitude;
 	struct mbsys_simrad2_heading_struct *heading;
@@ -400,7 +396,7 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointers to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* read next data from file */
 	status = mbr_em300raw_rd_data(verbose, mbio_ptr, store_ptr, error);
@@ -624,7 +620,6 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_em300raw";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
 
 	/* print input debug statements */
@@ -637,7 +632,7 @@ int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_simrad2_struct *)store_ptr;
@@ -660,7 +655,6 @@ int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_em300raw_rd_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	struct mbsys_simrad2_ping_struct *ping2;
@@ -703,7 +697,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_simrad2_struct *)store_ptr;
@@ -1370,7 +1364,6 @@ Have a nice day...\n");
 int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type, short *sonar) {
 	char *function_name = "mbr_em300raw_chk_label";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	mb_u_char startbyte;
 	mb_u_char typebyte;
 	short *sonar_save = NULL;
@@ -1393,7 +1386,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	sonar_save = (short *)(&mb_io_ptr->save4);
 	databyteswapped = (int *)&mb_io_ptr->save10;
 
@@ -4713,7 +4706,6 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_em300raw_wr_data";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	FILE *mbfp;
@@ -4729,7 +4721,7 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_simrad2_struct *)store_ptr;

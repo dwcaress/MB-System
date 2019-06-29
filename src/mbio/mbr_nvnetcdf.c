@@ -56,7 +56,6 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_nvnetcdf";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -66,7 +65,7 @@ int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get mb_io_ptr */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
 	status = mbr_info_nvnetcdf(
@@ -227,7 +226,6 @@ int mbr_info_nvnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_nvnetcdf";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 	int *dataread;
 	int *commentread;
@@ -242,7 +240,7 @@ int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set initial status */
 	status = MB_SUCCESS;
@@ -276,7 +274,6 @@ int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_nvnetcdf";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -287,7 +284,7 @@ int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
 	status = mbsys_navnetcdf_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
@@ -307,7 +304,6 @@ int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_nvnetcdf";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 	int *dataread;
 	int *commentread;
@@ -331,7 +327,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor and data structure */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;
 	dataread = (int *)&mb_io_ptr->save1;
 	commentread = (int *)&mb_io_ptr->save2;
@@ -1767,7 +1763,6 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_nvnetcdf";
 	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_navnetcdf_struct *store;
 	struct mbsys_navnetcdf_struct *storelocal;
 	int *datawrite;
@@ -1799,7 +1794,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor and data storage */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_navnetcdf_struct *)store_ptr;
 	storelocal = (struct mbsys_navnetcdf_struct *)mb_io_ptr->store_data;
 	datawrite = (int *)&mb_io_ptr->save1;
