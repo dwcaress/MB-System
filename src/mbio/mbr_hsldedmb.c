@@ -37,11 +37,6 @@
 #include "mbf_hsldedmb.h"
 #include "mbsys_hsds.h"
 
-/* time conversion constants */
-#define MININYEAR 525600.0
-#define MININDAY 1440.0
-
-
 /*--------------------------------------------------------------------*/
 int mbr_info_hsldedmb(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
