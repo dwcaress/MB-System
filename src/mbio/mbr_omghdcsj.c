@@ -39,8 +39,6 @@
 #include "mbf_omghdcsj.h"
 #include "mbsys_hdcs.h"
 
-int profile_cnt = 0;
-
 /*--------------------------------------------------------------------*/
 int mbr_info_omghdcsj(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -3483,7 +3481,6 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					*/
 				}
 			}
-			profile_cnt++;
 		}
 
 		/* now deal with sidescan in parallel file */
