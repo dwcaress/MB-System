@@ -46,10 +46,6 @@
 #include "mb_status.h"
 #include "mbsys_image83p.h"
 
-/* time conversion constants */
-#define MININYEAR 525600.0
-#define MININDAY 1440.0
-
 #define MBF_IMAGE83P_BUFFER_SIZE 2176
 
 /*--------------------------------------------------------------------*/
