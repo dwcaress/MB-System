@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
-  *
+ *
  *    Copyright (c) 2003-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -918,7 +918,7 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
  */
 
 #define NATURAL
-#define THRESHOLD 16 /* Best choice for natural merge cut-off. */
+static const int THRESHOLD = 16; /* Best choice for natural merge cut-off. */
 
 /* #define NATURAL to get hybrid natural merge.
  * (The default is pairwise merging.)

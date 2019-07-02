@@ -40,8 +40,8 @@
 
 /* define IFREMER EM12 Archive format record size */
 #define MBF_EM12IFRM_RECORD_SIZE 1032
-#define MBF_EM12IFRM_SSHEADER_SIZE 42
-#define MBF_EM12IFRM_SSBEAMHEADER_SIZE 6
+static const size_t MBF_EM12IFRM_SSHEADER_SIZE = 42;
+static const size_t MBF_EM12IFRM_SSBEAMHEADER_SIZE = 6;
 
 int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error);
 int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error);

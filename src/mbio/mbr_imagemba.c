@@ -46,7 +46,7 @@
 #include "mbsys_image83p.h"
 
 #define MBF_IMAGEMBA_BUFFER_SIZE 7456
-#define MBF_IMAGEMBA_BEAM_SIZE 15
+static const int MBF_IMAGEMBA_BEAM_SIZE = 15;
 
 /*--------------------------------------------------------------------*/
 int mbr_info_imagemba(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,

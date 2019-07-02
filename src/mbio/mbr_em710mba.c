@@ -53,11 +53,6 @@ extern int isnanf(float x);
 #define check_fnan(x) ((x) != (x))
 #endif
 
-/* set precision of iterative raytracing depth & distance matching */
-#define MBR_EM710MBA_BATH_RECALC_PRECISION 0.0001
-#define MBR_EM710MBA_BATH_RECALC_NCALCMAX 50
-#define MBR_EM710MBA_BATH_RECALC_ANGLEMODE 0
-
 /* control method of estimating range and angles for bathymetry recalculation
     - by default the code solves for the angles and heave offsets that come
       close to matching the original reported bathymetry by raytracing through

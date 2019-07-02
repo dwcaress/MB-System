@@ -38,9 +38,6 @@
 #include "mbf_sbifremr.h"
 #include "mbsys_sb.h"
 
-/* angle spacing for SeaBeam Classic */
-#define ANGLE_SPACING 3.75
-
 int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error);
 

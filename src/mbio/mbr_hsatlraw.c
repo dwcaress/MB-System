@@ -37,9 +37,8 @@
 #include "mb_status.h"
 #include "mbsys_hsds.h"
 
-/* local defines */
-#define ZERO_ALL 0
-#define ZERO_SOME 1
+static const int ZERO_ALL = 0;
+static const int ZERO_SOME = 1;
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error) {

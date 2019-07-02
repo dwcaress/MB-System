@@ -520,7 +520,6 @@
 
 /* header and data record in bytes */
 #define MBF_MGD77TAB_HEADER_FIELDS 58
-#define MBF_MGD77TAB_DATA_FIELDS 26
 
 struct mbf_mgd77tab_struct {
 	/* type of data record */

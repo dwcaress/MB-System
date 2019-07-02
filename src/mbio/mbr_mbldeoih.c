@@ -87,18 +87,18 @@
 #include "mbsys_ldeoih.h"
 
 /* define header sizes */
-#define MBF_MBLDEOIH_V1HEADERSIZE 38
-#define MBF_MBLDEOIH_V2HEADERSIZE 44
-#define MBF_MBLDEOIH_V3HEADERSIZE 48
-#define MBF_MBLDEOIH_V4HEADERSIZE 90
+static const int MBF_MBLDEOIH_V1HEADERSIZE = 38;
+static const int MBF_MBLDEOIH_V2HEADERSIZE = 44;
+static const int MBF_MBLDEOIH_V3HEADERSIZE = 48;
+static const int MBF_MBLDEOIH_V4HEADERSIZE = 90;
 #define MBF_MBLDEOIH_V5HEADERSIZE 98
-#define MBF_MBLDEOIH_ID_COMMENT1 8995  /* ## */
-#define MBF_MBLDEOIH_ID_COMMENT2 25443 /* cc */
-#define MBF_MBLDEOIH_ID_DATA1 25700    /* dd */
-#define MBF_MBLDEOIH_ID_DATA2 28270    /* nn */
-#define MBF_MBLDEOIH_ID_DATA3 17476    /* DD */
-#define MBF_MBLDEOIH_ID_DATA4 22068    /* V4 big endian, 13398 little endian*/
-#define MBF_MBLDEOIH_ID_DATA5 22069    /* V5 bin endian, 13654 little endian */
+static const int MBF_MBLDEOIH_ID_COMMENT1 = 8995;  /* ## */
+static const int MBF_MBLDEOIH_ID_COMMENT2 = 25443; /* cc */
+static const int MBF_MBLDEOIH_ID_DATA1 = 25700;    /* dd */
+static const int MBF_MBLDEOIH_ID_DATA2 = 28270;    /* nn */
+static const int MBF_MBLDEOIH_ID_DATA3 = 17476;    /* DD */
+static const int MBF_MBLDEOIH_ID_DATA4 = 22068;    /* V4 big endian, 13398 little endian*/
+static const int MBF_MBLDEOIH_ID_DATA5 = 22069;    /* V5 bin endian, 13654 little endian */
 
 /*--------------------------------------------------------------------*/
 int mbr_info_mbldeoih(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,

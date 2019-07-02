@@ -138,9 +138,6 @@
  *
  */
 
-#define MBF_HS10JAMS_MAXLINE 800
-#define MBF_HS10JAMS_LENGTH 717
-
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -150,6 +147,9 @@
 #include "mb_io.h"
 #include "mb_status.h"
 #include "mbsys_hs10.h"
+
+#define MBF_HS10JAMS_MAXLINE 800
+static const size_t MBF_HS10JAMS_LENGTH = 717;
 
 /*--------------------------------------------------------------------*/
 int mbr_info_hs10jams(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
