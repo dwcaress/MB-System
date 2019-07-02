@@ -41,34 +41,34 @@
 /* #define MBR_XTFB1624_DEBUG 1 */
 
 /* maximum number of beams and pixels */
-#define MBF_XTFB1624_MAXBEAMS 1
+// #define MBF_XTFB1624_MAXBEAMS 1
 #define MBF_XTFB1624_MAXRAWPIXELS 15360
 #define MBF_XTFB1624_COMMENT_LENGTH 200
 #define MBF_XTFB1624_MAXLINE 16384
-#define MBF_XTFB1624_FILEHEADERLEN 1024
-#define XTF_MAGIC_NUMBER 0xFACE
-#define XTF_DATA_SIDESCAN 0
-#define XTF_DATA_ANNOTATION 1
-#define XTF_DATA_BATHYMETRY 2
-#define XTF_DATA_ATTITUDE 3
-#define XTF_DATA_POSITION 100
-#define XTF_HEADER_SONAR 0              // sidescan and subbottom
-#define XTF_HEADER_NOTES 1              // notes - text annotation
-#define XTF_HEADER_BATHY 2              // bathymetry (Seabat, Odom)
-#define XTF_HEADER_ATTITUDE 3           // TSS or MRU attitude (pitch, roll, heave, yaw)
-#define XTF_HEADER_FORWARD 4            // forward-look sonar (polar display)
-#define XTF_HEADER_ELAC 5               // Elac multibeam
-#define XTF_HEADER_RAW_SERIAL 6         // Raw data from serial port
-#define XTF_HEADER_EMBED_HEAD 7         // Embedded header structure
-#define XTF_HEADER_HIDDEN_SONAR 8       // hidden (non-displayable) ping
-#define XTF_HEADER_SEAVIEW_ANGLES 9     // Bathymetry (angles) for Seaview
-#define XTF_HEADER_SEAVIEW_DEPTHS 10    // Bathymetry from Seaview data (depths)
-#define XTF_HEADER_HIGHSPEED_SENSOR 11  // used by Klein (Cliff Chase) 0=roll, 1=yaw
-#define XTF_HEADER_ECHOSTRENGTH 12      // Elac EchoStrength (10 values)
-#define XTF_HEADER_GEOREC 13            // Used to store mosaic params
-#define XTF_HEADER_K5000_BATHYMETRY 14  // Bathymetry data from the Klein 5000
-#define XTF_HEADER_HIGHSPEED_SENSOR2 15 // High speed sensor from Klein 5000
-#define XTF_HEADER_RAW_CUSTOM 199       // Raw Custom Header
+static const size_t MBF_XTFB1624_FILEHEADERLEN = 1024;
+// #define XTF_MAGIC_NUMBER 0xFACE
+static const mb_u_char XTF_DATA_SIDESCAN = 0;
+// #define XTF_DATA_ANNOTATION 1
+// #define XTF_DATA_BATHYMETRY 2
+static const mb_u_char XTF_DATA_ATTITUDE = 3;
+// #define XTF_DATA_POSITION 100
+// #define XTF_HEADER_SONAR 0              // sidescan and subbottom
+// #define XTF_HEADER_NOTES 1              // notes - text annotation
+// #define XTF_HEADER_BATHY 2              // bathymetry (Seabat, Odom)
+// #define XTF_HEADER_ATTITUDE 3           // TSS or MRU attitude (pitch, roll, heave, yaw)
+// #define XTF_HEADER_FORWARD 4            // forward-look sonar (polar display)
+// #define XTF_HEADER_ELAC 5               // Elac multibeam
+// #define XTF_HEADER_RAW_SERIAL 6         // Raw data from serial port
+// #define XTF_HEADER_EMBED_HEAD 7         // Embedded header structure
+// #define XTF_HEADER_HIDDEN_SONAR 8       // hidden (non-displayable) ping
+// #define XTF_HEADER_SEAVIEW_ANGLES 9     // Bathymetry (angles) for Seaview
+// #define XTF_HEADER_SEAVIEW_DEPTHS 10    // Bathymetry from Seaview data (depths)
+// #define XTF_HEADER_HIGHSPEED_SENSOR 11  // used by Klein (Cliff Chase) 0=roll, 1=yaw
+// #define XTF_HEADER_ECHOSTRENGTH 12      // Elac EchoStrength (10 values)
+// #define XTF_HEADER_GEOREC 13            // Used to store mosaic params
+// #define XTF_HEADER_K5000_BATHYMETRY 14  // Bathymetry data from the Klein 5000
+// #define XTF_HEADER_HIGHSPEED_SENSOR2 15 // High speed sensor from Klein 5000
+// #define XTF_HEADER_RAW_CUSTOM 199       // Raw Custom Header
 
 struct mbf_xtfb1624_xtfchaninfo {
 	char TypeOfChannel;

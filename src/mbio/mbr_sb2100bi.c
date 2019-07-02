@@ -47,24 +47,24 @@
 #include "mbsys_sb2100.h"
 
 /* define id's for the different types of raw records */
-#define MBF_SB2100BI_RECORDS 6
-#define MBF_SB2100BI_NONE 0
-#define MBF_SB2100BI_FH 1
-#define MBF_SB2100BI_TR 2
-#define MBF_SB2100BI_PR 3
-#define MBF_SB2100BI_DH 4
-#define MBF_SB2100BI_BR 5
-#define MBF_SB2100BI_SR 6
+static const int MBF_SB2100BI_RECORDS = 6;
+static const int MBF_SB2100BI_NONE = 0;
+static const int MBF_SB2100BI_FH = 1;
+static const int MBF_SB2100BI_TR = 2;
+static const int MBF_SB2100BI_PR = 3;
+static const int MBF_SB2100BI_DH = 4;
+static const int MBF_SB2100BI_BR = 5;
+static const int MBF_SB2100BI_SR = 6;
 char *mbf_sb2100bi_labels[] = {"NONE    ", "SB21BIFH", "SB21BITR", "SB21BIPR", "SB21BIDH", "SB21BIBR", "SB21BISR"};
 
-#define MBF_SB2100BI_PR_WRITE_LEN 284
-#define MBF_SB2100BI_DH_WRITE_LEN 80
-#define MBF_SB2100BI_BR_WRITE_LEN 32
-#define MBF_SB2100BI_SR_WRITE_LEN 4
-#define MBF_SB2100BI_LABEL_LEN 8
+static const int MBF_SB2100BI_PR_WRITE_LEN = 284;
+static const int MBF_SB2100BI_DH_WRITE_LEN = 80;
+static const int MBF_SB2100BI_BR_WRITE_LEN = 32;
+static const int MBF_SB2100BI_SR_WRITE_LEN = 4;
+static const int MBF_SB2100BI_LABEL_LEN = 8;
 
 /* define end of record label */
-char mbf_sb2100bi_eor[2] = {'\r', '\n'};
+static const char mbf_sb2100bi_eor[2] = {'\r', '\n'};
 
 int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error);
 int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *error);
@@ -83,7 +83,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
 
 /* text for ascii file header */
-char *mbf_sb2100bi_file_header_text_1 = {"\
+static const char *mbf_sb2100bi_file_header_text_1 = {"\
 \nSeaBeam 2100 multibeam sonar binary data format\n\
 MB-System formats 42 and 43\n\
 Format specification 1.2 defined March 20, 1997\n\
@@ -230,7 +230,7 @@ Record End                      03338           2       298     unsigned short\n
 \n\
 "};
 
-char *mbf_sb2100bi_file_header_text_2 = {"\
+static const char *mbf_sb2100bi_file_header_text_2 = {"\
 Sonar Data Header Record (96 bytes - navigation and sonar parameters):\n\
 ----------------------------------------------------------------------------\n\
 Item            Units           Valid           # of    Byte    Coding\n\
@@ -379,7 +379,7 @@ Record End                      03338           2       varies  unsigned short\n
 "};
 
 /* read & write buffer */
-char buffer[4 * MBSYS_SB2100_PIXELS];
+static char buffer[4 * MBSYS_SB2100_PIXELS];
 
 
 /*--------------------------------------------------------------------*/

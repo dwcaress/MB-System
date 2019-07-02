@@ -57,8 +57,8 @@
  */
 
 /* header and data record in bytes */
-#define MBF_MGD77TXT_HEADER_NUM 16
-#define MBF_MGD77TXT_DATA_LEN 128
+static const int  MBF_MGD77TXT_HEADER_NUM = 16;
+static const int MBF_MGD77TXT_DATA_LEN = 128;
 
 struct mbf_mgd77txt_struct {
 	/* type of data record */

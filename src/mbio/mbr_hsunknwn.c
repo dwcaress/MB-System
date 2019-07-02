@@ -70,8 +70,8 @@
 #include "mb_status.h"
 #include "mbsys_hsds.h"
 
-#define LINE1SIZE 87
-#define LINE2SIZE 415
+static const size_t LINE1SIZE = 87;
+static const size_t LINE2SIZE = 415;
 
 /*--------------------------------------------------------------------*/
 int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,

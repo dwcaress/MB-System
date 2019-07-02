@@ -35,8 +35,6 @@
 #include "mb_status.h"
 #include "mbsys_3datdepthlidar.h"
 
-#define ZERO_ALL 0
-#define ZERO_SOME 1
 #define MBF_3DDEPTHP_BUFFER_SIZE MB_COMMENT_MAXLINE
 
 int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
