@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:  mbr_3dwisslp.c  2/11/93
-  *
+ *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -295,17 +295,12 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   char *function_name = "mbr_3dwisslp_rd_data";
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_struct *store;
-  struct mbsys_3ddwissl_calibration_struct *calibration;
-  struct mbsys_3ddwissl_pulse_struct *pulse;
   int *file_header_readwritten;
   char *buffer = NULL;
   size_t read_len;
   size_t index;
   unsigned short magic_number = 0;
   int done;
-  int ipulse, isounding, ivalidpulse, ivalidsounding;
-  int skip;
-  int valid_id;
   unsigned short ushort_val;
 
   /* print input debug statements */
@@ -420,7 +415,7 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
                 store->headb_offset_pitch_deg = MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG;
 
                 /* get calibration information for head a */
-                calibration = &store->calibration_a;
+                struct mbsys_3ddwissl_calibration_struct *calibration = &store->calibration_a;
                 memcpy(calibration->cfg_path, &buffer[index], 64); index +=64;
                 mb_get_binary_int(MB_YES, (void *)&buffer[index], &(calibration->laser_head_no)); index += 4;
                 mb_get_binary_int(MB_YES, (void *)&buffer[index], &(calibration->process_for_air)); index += 4;
@@ -554,8 +549,8 @@ int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     /* read and check two bytes until a valid record_id is found */
         buffer = mb_io_ptr->raw_data;
     read_len = (size_t)sizeof(short);
-    valid_id = MB_NO;
-    skip = 0;
+    int valid_id = MB_NO;
+    int skip = 0;
     status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
     do {
       if (status == MB_SUCCESS) {
@@ -637,19 +632,21 @@ __FILE__, __FUNCTION__, __LINE__, (mb_u_char)buffer[0], (mb_u_char)buffer[1], st
                 mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->validpulse_count)); index += 2;
                 mb_get_binary_short(MB_YES, (void *)&buffer[index], &(store->validsounding_count)); index += 2;
 
+		struct mbsys_3ddwissl_pulse_struct *pulse = NULL;
+
                 /* initialize all of the pulses with zero values excepting for null beamflags */
                 memset(store->pulses, 0, (size_t)(store->pulses_per_scan * sizeof(struct mbsys_3ddwissl_pulse_struct)));
-                for (ipulse=0; ipulse<store->pulses_per_scan; ipulse++) {
+                for (int ipulse=0; ipulse<store->pulses_per_scan; ipulse++) {
                     pulse = &store->pulses[ipulse];
-                    for (isounding = 0; isounding < store->soundings_per_pulse; isounding++) {
+                    for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++) {
                         pulse->soundings[isounding].beamflag = MB_FLAG_NULL;
                     }
                 }
 
                 /* parse the list of pulses - note that for this format the list of valid soundings follows separately */
-                for (ivalidpulse=0; ivalidpulse<store->validpulse_count; ivalidpulse++) {
+                for (int ivalidpulse=0; ivalidpulse<store->validpulse_count; ivalidpulse++) {
                     mb_get_binary_short(MB_YES, (void *)&buffer[index], &ushort_val); index += 2;
-                    ipulse = ushort_val;
+                    const int ipulse = ushort_val;
                     pulse = &store->pulses[ipulse];
                     mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->angle_az)); index += 4;
                     mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->angle_el)); index += 4;
@@ -666,10 +663,10 @@ __FILE__, __FUNCTION__, __LINE__, (mb_u_char)buffer[0], (mb_u_char)buffer[1], st
                 }
 
                 /* parse the list of valid soundings */
-                for (ivalidsounding = 0; ivalidsounding < store->validsounding_count; ivalidsounding++) {
+                for (int ivalidsounding = 0; ivalidsounding < store->validsounding_count; ivalidsounding++) {
                     mb_get_binary_short(MB_YES, (void *)&buffer[index], &ushort_val); index += 2;
-                    ipulse = (int) ushort_val;
-                    isounding = (int) buffer[index]; index += 1;
+                    const int ipulse = (int) ushort_val;
+                    const int isounding = (int) buffer[index]; index += 1;
                     pulse = &store->pulses[ipulse];
                     pulse->validsounding_count += 1;
                     mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].range)); index += 4;

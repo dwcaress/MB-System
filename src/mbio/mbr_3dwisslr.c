@@ -328,8 +328,6 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   int record_num_heada = 0;
   int record_num_headb = 0;
   int record_num_comment = 0;
-  int skip;
-  int valid_id;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -457,8 +455,8 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
     /* read and check two bytes until a valid record_id is found */
     read_len = (size_t)sizeof(short);
     buffer = mb_io_ptr->raw_data;
-    valid_id = MB_NO;
-    skip = 0;
+    int valid_id = MB_NO;
+    int skip = 0;
     status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
     do {
       if (status == MB_SUCCESS) {
@@ -681,16 +679,12 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   char *function_name = "mbr_3dwisslr_rd_data";
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_struct *store;
-  struct mbsys_3ddwissl_calibration_struct *calibration;
-  struct mbsys_3ddwissl_pulse_struct *pulse;
   int *file_header_readwritten;
   char *buffer = NULL;
   size_t read_len;
-  size_t index;
   int time_i[7];
   int time_j[5];
   int found;
-  int ipulse, isounding;
   int irecord;
 
   /* print input debug statements */
@@ -728,6 +722,8 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
             irecord = i;
         }
     }
+
+    size_t index = 0;
 
     /* read the next record */
     if (found == MB_YES) {
@@ -803,7 +799,7 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
             store->headb_offset_pitch_deg = MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG;
 
             /* get calibration information for head a */
-            calibration = &store->calibration_a;
+            struct mbsys_3ddwissl_calibration_struct *calibration = &store->calibration_a;
             memcpy(calibration->cfg_path, &buffer[index], 64); index +=64;
             mb_get_binary_int(MB_YES, (void *)&buffer[index], &(calibration->laser_head_no)); index += 4;
             mb_get_binary_int(MB_YES, (void *)&buffer[index], &(calibration->process_for_air)); index += 4;
@@ -969,8 +965,10 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 //store->year,store->month,store->day,store->hour,store->minutes,store->seconds,
 //store->nanoseconds,store->pulse_count);
 
+            struct mbsys_3ddwissl_pulse_struct *pulse = NULL;
+
             /* read the pulses */
-            for (ipulse=0; ipulse<store->pulses_per_scan; ipulse++) {
+            for (int ipulse=0; ipulse<store->pulses_per_scan; ipulse++) {
                 pulse = &store->pulses[ipulse];
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->angle_az)); index += 4;
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->angle_el)); index += 4;
@@ -984,13 +982,13 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
                 pulse->heading_offset = 0.0;
                 pulse->roll_offset = 0.0;
                 pulse->pitch_offset = 0.0;
-                for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
+                for (int isounding=0; isounding<store->soundings_per_pulse; isounding++) {
                     mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].range)); index += 4;
                 }
-                for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
+                for (int isounding=0; isounding<store->soundings_per_pulse; isounding++) {
                     mb_get_binary_short(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].amplitude)); index += 2;
                 }
-                for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
+                for (int isounding=0; isounding<store->soundings_per_pulse; isounding++) {
                     pulse->soundings[isounding].beamflag = MB_FLAG_NULL;
                     pulse->soundings[isounding].acrosstrack = 0.0;
                     pulse->soundings[isounding].alongtrack = 0.0;

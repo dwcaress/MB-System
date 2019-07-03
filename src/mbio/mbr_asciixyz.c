@@ -860,7 +860,6 @@ int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mbsys_singlebeam_struct *store;
 	char line[MB_COMMENT_MAXLINE + 1] = "";
-	int len;
 	char flag;
 	double depth;
 
@@ -883,7 +882,7 @@ int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	if (store->kind == MB_DATA_COMMENT) {
 		line[0] = '#';
 		strncpy(&line[1], store->comment, MB_COMMENT_MAXLINE - 2);
-		len = strlen(line);
+		const int len = strlen(line);
 		line[len] = '\n';
 		line[len + 1] = '\0';
 	}
