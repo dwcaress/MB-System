@@ -352,7 +352,9 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_elac_struct *store;
 	int time_i[7];
 	double time_d;
-	double lon, lat, heading, speed;
+	double lon;
+	double lat;
+	double speed;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -401,7 +403,7 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		time_i[5] = data->profile[0].second;
 		time_i[6] = 10000 * data->profile[0].hundredth_sec + 100 * data->profile[0].thousandth_sec;
 		mb_get_time(verbose, time_i, &time_d);
-		heading = 0.01 * data->profile[0].heading;
+		const double heading = 0.01 * data->profile[0].heading;
 		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, &lon, &lat, &speed, error);
 		data->profile[0].longitude = (int)(lon / 0.00000009);
 		data->profile[0].latitude = (int)(lat / 0.00000009);
@@ -863,7 +865,6 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 	char *function_name = "mbr_bchrtunb_rd_parameter";
 	int status = MB_SUCCESS;
 	char line[ELAC_PARAMETER_SIZE + 3];
-	short int *short_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -895,7 +896,7 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 		data->par_hundredth_sec = (int)line[6];
 		data->par_thousandth_sec = (int)line[7];
 #ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[8];
+		short int *short_ptr = (short int *)&line[8];
 		data->roll_offset = *short_ptr;
 		short_ptr = (short int *)&line[10];
 		data->pitch_offset = *short_ptr;
@@ -944,7 +945,7 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 		short_ptr = (short int *)&line[54];
 		data->transducer_serial_number = *short_ptr;
 #else
-		short_ptr = (short int *)&line[8];
+		short int *short_ptr = (short int *)&line[8];
 		data->roll_offset = (short int)mb_swap_short(*short_ptr);
 		short_ptr = (short int *)&line[10];
 		data->pitch_offset = (short int)mb_swap_short(*short_ptr);
@@ -1048,8 +1049,6 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	char *function_name = "mbr_bchrtunb_rd_pos";
 	int status = MB_SUCCESS;
 	char line[ELAC_POS_SIZE + 3];
-	short int *short_ptr;
-	int *int_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1081,7 +1080,7 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 		data->pos_hundredth_sec = (int)line[6];
 		data->pos_thousandth_sec = (int)line[7];
 #ifndef BYTESWAPPED
-		int_ptr = (int *)&line[8];
+		int *int_ptr = (int *)&line[8];
 		data->pos_latitude = *int_ptr;
 		int_ptr = (int *)&line[12];
 		data->pos_longitude = *int_ptr;
@@ -1095,12 +1094,12 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 		data->hemisphere = line[29];
 		data->ellipsoid = line[30];
 		data->pos_spare = line[31];
-		short_ptr = (short int *)&line[32];
+		short int *short_ptr = (short int *)&line[32];
 		data->semi_major_axis = (int)*short_ptr;
 		short_ptr = (short int *)&line[34];
 		data->other_quality = (int)*short_ptr;
 #else
-		int_ptr = (int *)&line[8];
+		int *int_ptr = (int *)&line[8];
 		data->pos_latitude = (int)mb_swap_int(*int_ptr);
 		int_ptr = (int *)&line[12];
 		data->pos_longitude = (int)mb_swap_int(*int_ptr);
@@ -1114,7 +1113,7 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 		data->hemisphere = line[29];
 		data->ellipsoid = line[30];
 		data->pos_spare = line[31];
-		short_ptr = (short int *)&line[32];
+		short int *short_ptr = (short int *)&line[32];
 		data->semi_major_axis = (int)mb_swap_short(*short_ptr);
 		short_ptr = (short int *)&line[34];
 		data->other_quality = (int)mb_swap_short(*short_ptr);
@@ -1165,9 +1164,6 @@ int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	char *function_name = "mbr_bchrtunb_rd_svp";
 	int status = MB_SUCCESS;
 	char line[ELAC_SVP_SIZE + 3];
-	short int *short_ptr;
-	short int *short_ptr2;
-	int *int_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1199,20 +1195,20 @@ int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 		data->svp_hundredth_sec = (int)line[6];
 		data->svp_thousandth_sec = (int)line[7];
 #ifndef BYTESWAPPED
-		int_ptr = (int *)&line[8];
+		int *int_ptr = (int *)&line[8];
 		data->svp_latitude = *int_ptr;
 		int_ptr = (int *)&line[12];
 		data->svp_longitude = *int_ptr;
 #else
-		int_ptr = (int *)&line[8];
+		int *int_ptr = (int *)&line[8];
 		data->svp_latitude = (int)mb_swap_int(*int_ptr);
 		int_ptr = (int *)&line[12];
 		data->svp_latitude = (int)mb_swap_int(*int_ptr);
 #endif
 		data->svp_num = 0;
 		for (int i = 0; i < 500; i++) {
-			short_ptr = (short int *)&line[16 + 4 * i];
-			short_ptr2 = (short int *)&line[18 + 4 * i];
+			short int *short_ptr = (short int *)&line[16 + 4 * i];
+			short int *short_ptr2 = (short int *)&line[18 + 4 * i];
 #ifndef BYTESWAPPED
 			data->svp_depth[i] = *short_ptr;
 			data->svp_vel[i] = *short_ptr2;
@@ -1261,8 +1257,6 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	char line[ELAC_BATH56_SIZE + 3];
 	char *profile;
 	char *beam;
-	short int *short_ptr;
-	int *int_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1286,12 +1280,12 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	if (status == MB_SUCCESS) {
 		data->kind = MB_DATA_DATA;
 #ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		data->ping_num = (int)*short_ptr;
 		short_ptr = (short int *)&line[2];
 		data->sound_vel = (int)*short_ptr;
 #else
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		data->ping_num = (int)mb_swap_short(*short_ptr);
 		short_ptr = (short int *)&line[2];
 		data->sound_vel = (int)mb_swap_short(*short_ptr);
@@ -1313,7 +1307,7 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 			data->profile[i].hundredth_sec = (int)profile[6];
 			data->profile[i].thousandth_sec = (int)profile[7];
 #ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			data->profile[i].latitude = (int)*int_ptr;
 			int_ptr = (int *)&profile[12];
 			data->profile[i].longitude = (int)*int_ptr;
@@ -1341,7 +1335,7 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 				data->profile[i].amp[j] = (short int)beam[11];
 			}
 #else
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			data->profile[i].latitude = (int)mb_swap_int(*int_ptr);
 			int_ptr = (int *)&profile[12];
 			data->profile[i].longitude = (int)mb_swap_int(*int_ptr);
@@ -1430,8 +1424,6 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	char line[ELAC_BATH40_SIZE + 3];
 	char *profile;
 	char *beam;
-	short int *short_ptr;
-	int *int_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1455,12 +1447,12 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	if (status == MB_SUCCESS) {
 		data->kind = MB_DATA_DATA;
 #ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		data->ping_num = (int)*short_ptr;
 		short_ptr = (short int *)&line[2];
 		data->sound_vel = (int)*short_ptr;
 #else
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		data->ping_num = (int)mb_swap_short(*short_ptr);
 		short_ptr = (short int *)&line[2];
 		data->sound_vel = (int)mb_swap_short(*short_ptr);
@@ -1482,7 +1474,7 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 			data->profile[i].hundredth_sec = (int)profile[6];
 			data->profile[i].thousandth_sec = (int)profile[7];
 #ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			data->profile[i].latitude = (int)*int_ptr;
 			int_ptr = (int *)&profile[12];
 			data->profile[i].longitude = (int)*int_ptr;
@@ -1510,7 +1502,7 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 				data->profile[i].amp[j] = (short int)beam[11];
 			}
 #else
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			data->profile[i].latitude = (int)mb_swap_int(*int_ptr);
 			int_ptr = (int *)&profile[12];
 			data->profile[i].longitude = (int)mb_swap_int(*int_ptr);
@@ -1599,8 +1591,6 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	char line[ELAC_BATH32_SIZE + 3];
 	char *profile;
 	char *beam;
-	short int *short_ptr;
-	int *int_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1624,12 +1614,12 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	if (status == MB_SUCCESS) {
 		data->kind = MB_DATA_DATA;
 #ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		data->ping_num = (int)*short_ptr;
 		short_ptr = (short int *)&line[2];
 		data->sound_vel = (int)*short_ptr;
 #else
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		data->ping_num = (int)mb_swap_short(*short_ptr);
 		short_ptr = (short int *)&line[2];
 		data->sound_vel = (int)mb_swap_short(*short_ptr);
@@ -1651,7 +1641,7 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 			data->profile[i].hundredth_sec = (int)profile[6];
 			data->profile[i].thousandth_sec = (int)profile[7];
 #ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			data->profile[i].latitude = (int)*int_ptr;
 			int_ptr = (int *)&profile[12];
 			data->profile[i].longitude = (int)*int_ptr;
@@ -1679,7 +1669,7 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 				data->profile[i].amp[j] = (short int)beam[11];
 			}
 #else
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			data->profile[i].latitude = (int)mb_swap_int(*int_ptr);
 			int_ptr = (int *)&profile[12];
 			data->profile[i].longitude = (int)mb_swap_int(*int_ptr);
@@ -1829,9 +1819,7 @@ int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 
 	char *function_name = "mbr_bchrtunb_wr_comment";
 	int status = MB_SUCCESS;
-	char line[ELAC_COMMENT_SIZE + 3];
 	short int label;
-	int len;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1864,9 +1852,10 @@ int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		/* construct record */
-		len = strlen(data->comment);
+		int len = strlen(data->comment);
 		if (len > MBSYS_ELAC_COMMENT_LENGTH)
 			len = MBSYS_ELAC_COMMENT_LENGTH;
+		char line[ELAC_COMMENT_SIZE + 3];
 		for (int i = 0; i < len; i++)
 			line[i] = data->comment[i];
 		for (int i = len; i < MBSYS_ELAC_COMMENT_LENGTH; i++)
@@ -1905,7 +1894,6 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 	int status = MB_SUCCESS;
 	char line[ELAC_PARAMETER_SIZE + 3];
 	short int label;
-	short int *short_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1978,7 +1966,7 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 		line[6] = (char)data->par_hundredth_sec;
 		line[7] = (char)data->par_thousandth_sec;
 #ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[8];
+		short int *short_ptr = (short int *)&line[8];
 		*short_ptr = data->roll_offset;
 		short_ptr = (short int *)&line[10];
 		*short_ptr = data->pitch_offset;
@@ -2027,7 +2015,7 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 		short_ptr = (short int *)&line[54];
 		*short_ptr = data->transducer_serial_number;
 #else
-		short_ptr = (short int *)&line[8];
+		short int *short_ptr = (short int *)&line[8];
 		*short_ptr = (short int)mb_swap_short(data->roll_offset);
 		short_ptr = (short int *)&line[10];
 		*short_ptr = (short int)mb_swap_short(data->pitch_offset);
@@ -2110,8 +2098,6 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	int status = MB_SUCCESS;
 	char line[ELAC_POS_SIZE + 3];
 	short int label;
-	short int *short_ptr;
-	int *int_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2171,7 +2157,7 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 		line[6] = (char)data->pos_hundredth_sec;
 		line[7] = (char)data->pos_thousandth_sec;
 #ifndef BYTESWAPPED
-		int_ptr = (int *)&line[8];
+		int *int_ptr = (int *)&line[8];
 		*int_ptr = data->pos_latitude;
 		int_ptr = (int *)&line[12];
 		*int_ptr = data->pos_longitude;
@@ -2185,12 +2171,12 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 		line[29] = data->hemisphere;
 		line[30] = data->ellipsoid;
 		line[31] = data->pos_spare;
-		short_ptr = (short int *)&line[32];
+		short int *short_ptr = (short int *)&line[32];
 		*short_ptr = (short int)data->semi_major_axis;
 		short_ptr = (short int *)&line[34];
 		*short_ptr = (short int)data->other_quality;
 #else
-		int_ptr = (int *)&line[8];
+		int *int_ptr = (int *)&line[8];
 		*int_ptr = (int)mb_swap_int(data->pos_latitude);
 		int_ptr = (int *)&line[12];
 		*int_ptr = (int)mb_swap_int(data->pos_longitude);
@@ -2204,7 +2190,7 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 		line[29] = data->hemisphere;
 		line[30] = data->ellipsoid;
 		line[31] = data->pos_spare;
-		short_ptr = (short int *)&line[32];
+		short int *short_ptr = (short int *)&line[32];
 		*short_ptr = (int)mb_swap_short(data->semi_major_axis);
 		short_ptr = (short int *)&line[34];
 		*short_ptr = (int)mb_swap_short(data->other_quality);
@@ -2243,9 +2229,6 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	int status = MB_SUCCESS;
 	char line[ELAC_SVP_SIZE + 3];
 	short int label;
-	short int *short_ptr;
-	short int *short_ptr2;
-	int *int_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2299,19 +2282,19 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 		line[6] = (char)data->svp_hundredth_sec;
 		line[7] = (char)data->svp_thousandth_sec;
 #ifndef BYTESWAPPED
-		int_ptr = (int *)&line[8];
+		int *int_ptr = (int *)&line[8];
 		*int_ptr = data->svp_latitude;
 		int_ptr = (int *)&line[12];
 		*int_ptr = data->svp_longitude;
 #else
-		int_ptr = (int *)&line[8];
+		int *int_ptr = (int *)&line[8];
 		*int_ptr = (int)mb_swap_int(data->svp_latitude);
 		int_ptr = (int *)&line[12];
 		*int_ptr = (int)mb_swap_int(data->svp_longitude);
 #endif
 		for (int i = 0; i < data->svp_num; i++) {
-			short_ptr = (short int *)&line[16 + 4 * i];
-			short_ptr2 = (short int *)&line[18 + 4 * i];
+			short int *short_ptr = (short int *)&line[16 + 4 * i];
+			short int *short_ptr2 = (short int *)&line[18 + 4 * i];
 #ifndef BYTESWAPPED
 			*short_ptr = (short int)data->svp_depth[i];
 			*short_ptr2 = (short int)data->svp_vel[i];
@@ -2321,8 +2304,8 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 #endif
 		}
 		for (int i = data->svp_num; i < 500; i++) {
-			short_ptr = (short int *)&line[16 + 4 * i];
-			short_ptr2 = (short int *)&line[18 + 4 * i];
+			short int *short_ptr = (short int *)&line[16 + 4 * i];
+			short int *short_ptr2 = (short int *)&line[18 + 4 * i];
 			*short_ptr = 0;
 			*short_ptr2 = 0;
 		}
@@ -2361,8 +2344,6 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	char *profile;
 	char *beam;
 	short int label;
-	short int *short_ptr;
-	int *int_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2430,12 +2411,12 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	if (status == MB_SUCCESS) {
 /* construct record */
 #ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		*short_ptr = (short int)data->ping_num;
 		short_ptr = (short int *)&line[2];
 		*short_ptr = (short int)data->sound_vel;
 #else
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		*short_ptr = (short int)mb_swap_short((short int)data->ping_num);
 		short_ptr = (short int *)&line[2];
 		*short_ptr = (short int)mb_swap_short((short int)data->sound_vel);
@@ -2455,7 +2436,7 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 			profile[6] = (char)data->profile[i].hundredth_sec;
 			profile[7] = (char)data->profile[i].thousandth_sec;
 #ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			*int_ptr = (int)data->profile[i].latitude;
 			int_ptr = (int *)&profile[12];
 			*int_ptr = (int)data->profile[i].longitude;
@@ -2483,7 +2464,7 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 				beam[11] = (char)data->profile[i].amp[j];
 			}
 #else
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			*int_ptr = (int)mb_swap_int(data->profile[i].latitude);
 			int_ptr = (int *)&profile[12];
 			*int_ptr = (int)mb_swap_int(data->profile[i].longitude);
@@ -2548,8 +2529,6 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	char *profile;
 	char *beam;
 	short int label;
-	short int *short_ptr;
-	int *int_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2617,12 +2596,12 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	if (status == MB_SUCCESS) {
 /* construct record */
 #ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		*short_ptr = (short int)data->ping_num;
 		short_ptr = (short int *)&line[2];
 		*short_ptr = (short int)data->sound_vel;
 #else
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		*short_ptr = (short int)mb_swap_short((short int)data->ping_num);
 		short_ptr = (short int *)&line[2];
 		*short_ptr = (short int)mb_swap_short((short int)data->sound_vel);
@@ -2642,7 +2621,7 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 			profile[6] = (char)data->profile[i].hundredth_sec;
 			profile[7] = (char)data->profile[i].thousandth_sec;
 #ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			*int_ptr = (int)data->profile[i].latitude;
 			int_ptr = (int *)&profile[12];
 			*int_ptr = (int)data->profile[i].longitude;
@@ -2670,7 +2649,7 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 				beam[11] = (char)data->profile[i].amp[j];
 			}
 #else
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			*int_ptr = (int)mb_swap_int(data->profile[i].latitude);
 			int_ptr = (int *)&profile[12];
 			*int_ptr = (int)mb_swap_int(data->profile[i].longitude);
@@ -2735,8 +2714,6 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	char *profile;
 	char *beam;
 	short int label;
-	short int *short_ptr;
-	int *int_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2804,12 +2781,12 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	if (status == MB_SUCCESS) {
 /* construct record */
 #ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		*short_ptr = (short int)data->ping_num;
 		short_ptr = (short int *)&line[2];
 		*short_ptr = (short int)data->sound_vel;
 #else
-		short_ptr = (short int *)&line[0];
+		short int *short_ptr = (short int *)&line[0];
 		*short_ptr = (short int)mb_swap_short((short int)data->ping_num);
 		short_ptr = (short int *)&line[2];
 		*short_ptr = (short int)mb_swap_short((short int)data->sound_vel);
@@ -2829,7 +2806,7 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 			profile[6] = (char)data->profile[i].hundredth_sec;
 			profile[7] = (char)data->profile[i].thousandth_sec;
 #ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			*int_ptr = (int)data->profile[i].latitude;
 			int_ptr = (int *)&profile[12];
 			*int_ptr = (int)data->profile[i].longitude;
@@ -2857,7 +2834,7 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 				beam[11] = (char)data->profile[i].amp[j];
 			}
 #else
-			int_ptr = (int *)&profile[8];
+			int *int_ptr = (int *)&profile[8];
 			*int_ptr = (int)mb_swap_int(data->profile[i].latitude);
 			int_ptr = (int *)&profile[12];
 			*int_ptr = (int)mb_swap_int(data->profile[i].longitude);
