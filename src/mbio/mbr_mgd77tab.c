@@ -696,7 +696,6 @@ int mbr_info_mgd77tab(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_mgd77tab";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -706,7 +705,7 @@ int mbr_info_mgd77tab(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SINGLEBEAM;
 	*beams_bath_max = 1;
@@ -767,9 +766,6 @@ int mbr_info_mgd77tab(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_mgd77tab";
-	int status = MB_SUCCESS;
-	struct mbf_mgd77tab_struct *data;
-	char *data_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -785,13 +781,13 @@ int mbr_alm_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_mgd77tab_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), &mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_mgd77tab_struct *data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* set number of header records read to zero */
 	mb_io_ptr->save1 = 0;
@@ -813,7 +809,6 @@ int mbr_alm_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mgd77tab";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -827,7 +822,7 @@ int mbr_dem_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
@@ -844,11 +839,6 @@ int mbr_dem_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_mgd77tab";
-	int status = MB_SUCCESS;
-	struct mbf_mgd77tab_struct *data;
-	struct mbsys_singlebeam_struct *store;
-	double minutes;
-	double seconds;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -861,11 +851,11 @@ int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbf_mgd77tab_struct *data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_mgd77tab_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_mgd77tab_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -885,9 +875,9 @@ int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->time_i[1] = (int)((data->date - 10000 * store->time_i[0]) / 100);
 		store->time_i[2] = (int)(data->date - 10000 * store->time_i[0] - 100 * store->time_i[1]);
 		store->time_i[3] = (int)floor(data->time / 100.0);
-		minutes = data->time - 100.0 * store->time_i[3];
+		const double minutes = data->time - 100.0 * store->time_i[3];
 		store->time_i[4] = (int)floor(minutes);
-		seconds = (minutes - store->time_i[4]) * 60.0;
+		const double seconds = (minutes - store->time_i[4]) * 60.0;
 		store->time_i[5] = (int)floor(seconds);
 		store->time_i[6] = (int)((seconds - store->time_i[5]) * 1000000);
 		mb_get_time(verbose, store->time_i, &store->time_d);
@@ -949,9 +939,6 @@ int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_mgd77tab";
-	int status = MB_SUCCESS;
-	struct mbf_mgd77tab_struct *data;
-	struct mbsys_singlebeam_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -966,8 +953,8 @@ int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbf_mgd77tab_struct *data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {
@@ -1133,7 +1120,7 @@ int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write next data to file */
-	status = mbr_mgd77tab_wr_data(verbose, mbio_ptr, (void *)data, error);
+	const int status = mbr_mgd77tab_wr_data(verbose, mbio_ptr, (void *)data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1149,16 +1136,6 @@ int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_mgd77tab_rd_data";
-	int status = MB_SUCCESS;
-	struct mbf_mgd77tab_struct *data;
-	int *header_read;
-	char line[MB_COMMENT_MAXLINE] = "";
-	int line_len;
-	char *read_ptr;
-	int ntabs;
-	int nfields, ifield;
-	char *fields[MBF_MGD77TAB_HEADER_FIELDS];
-	int nscan;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1172,15 +1149,19 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
-	header_read = (int *)&mb_io_ptr->save1;
+	struct mbf_mgd77tab_struct *data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
+	int *header_read = (int *)&mb_io_ptr->save1;
 
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
+	int status = MB_SUCCESS;
+
 	/* read next record */
-	if ((read_ptr = fgets(line, MB_PATH_MAXLINE, mb_io_ptr->mbfp)) != NULL) {
+	char line[MB_COMMENT_MAXLINE] = "";
+	const char *read_ptr = fgets(line, MB_PATH_MAXLINE, mb_io_ptr->mbfp);
+	if (read_ptr != NULL) {
 		mb_io_ptr->file_bytes += strlen(line);
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
@@ -1194,8 +1175,8 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* parse the record */
 	if (status == MB_SUCCESS && strlen(line) > 0) {
 		/* count the number of tabs in the line */
-		line_len = strlen(line);
-		ntabs = 0;
+		const int line_len = strlen(line);
+		int ntabs = 0;
 		for (int i = 0; i < line_len; i++) {
 			if (line[i] == '\t')
 				ntabs++;
@@ -1221,7 +1202,8 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* break line up into null-terminated fields
 			    - keep array of pointers to the start of each field */
-			nfields = 0;
+			char *fields[MBF_MGD77TAB_HEADER_FIELDS];
+			int nfields = 0;
 			fields[nfields] = &line[0];
 			nfields++;
 			for (int i = 0; i < line_len - 2; i++) {
@@ -1234,10 +1216,10 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* now parse field 0 of the 26 expected fields */
 			data->last_field_defined = 0;
-			ifield = 0;
+			int ifield = 0;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_survey_id = MB_NO;
-				nscan = sscanf(fields[ifield], "%s", data->survey_id);
+				const int nscan = sscanf(fields[ifield], "%s", data->survey_id);
 				if (nscan == 1) {
 					data->defined_survey_id = MB_YES;
 					data->last_field_defined = ifield;
@@ -1248,7 +1230,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 1;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_timezone = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->timezone);
+				const int nscan = sscanf(fields[ifield], "%f", &data->timezone);
 				if (nscan == 1) {
 					data->defined_timezone = MB_YES;
 					data->last_field_defined = ifield;
@@ -1259,7 +1241,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 2;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_date = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->date);
+				const int nscan = sscanf(fields[ifield], "%d", &data->date);
 				if (nscan == 1) {
 					data->defined_date = MB_YES;
 					data->last_field_defined = ifield;
@@ -1270,7 +1252,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 3;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_time = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->time);
+				const int nscan = sscanf(fields[ifield], "%f", &data->time);
 				if (nscan == 1) {
 					data->defined_time = MB_YES;
 					data->last_field_defined = ifield;
@@ -1281,7 +1263,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 4;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_lat = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->lat);
+				const int nscan = sscanf(fields[ifield], "%f", &data->lat);
 				if (nscan == 1) {
 					data->defined_lat = MB_YES;
 					data->last_field_defined = ifield;
@@ -1292,7 +1274,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 5;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_lon = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->lon);
+				const int nscan = sscanf(fields[ifield], "%f", &data->lon);
 				if (nscan == 1) {
 					data->defined_lon = MB_YES;
 					data->last_field_defined = ifield;
@@ -1303,7 +1285,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 6;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_pos_type = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->pos_type);
+				const int nscan = sscanf(fields[ifield], "%d", &data->pos_type);
 				if (nscan == 1) {
 					data->defined_pos_type = MB_YES;
 					data->last_field_defined = ifield;
@@ -1314,7 +1296,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 7;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_nav_qualco = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->nav_qualco);
+				const int nscan = sscanf(fields[ifield], "%d", &data->nav_qualco);
 				if (nscan == 1) {
 					data->defined_nav_qualco = MB_YES;
 					data->last_field_defined = ifield;
@@ -1325,7 +1307,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 8;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_bat_ttime = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->bat_ttime);
+				const int nscan = sscanf(fields[ifield], "%f", &data->bat_ttime);
 				if (nscan == 1) {
 					data->defined_bat_ttime = MB_YES;
 					data->last_field_defined = ifield;
@@ -1336,7 +1318,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 9;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_corr_depth = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->corr_depth);
+				const int nscan = sscanf(fields[ifield], "%f", &data->corr_depth);
 				if (nscan == 1) {
 					data->defined_corr_depth = MB_YES;
 					data->last_field_defined = ifield;
@@ -1347,7 +1329,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 10;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_bat_cpco = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->bat_cpco);
+				const int nscan = sscanf(fields[ifield], "%d", &data->bat_cpco);
 				if (nscan == 1) {
 					data->defined_bat_cpco = MB_YES;
 					data->last_field_defined = ifield;
@@ -1358,7 +1340,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 11;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_bat_typco = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->bat_typco);
+				const int nscan = sscanf(fields[ifield], "%d", &data->bat_typco);
 				if (nscan == 1) {
 					data->defined_bat_typco = MB_YES;
 					data->last_field_defined = ifield;
@@ -1369,7 +1351,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 12;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_bat_qualco = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->bat_qualco);
+				const int nscan = sscanf(fields[ifield], "%d", &data->bat_qualco);
 				if (nscan == 1) {
 					data->defined_bat_qualco = MB_YES;
 					data->last_field_defined = ifield;
@@ -1380,7 +1362,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 13;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_mag_tot = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->mag_tot);
+				const int nscan = sscanf(fields[ifield], "%f", &data->mag_tot);
 				if (nscan == 1) {
 					data->defined_mag_tot = MB_YES;
 					data->last_field_defined = ifield;
@@ -1391,7 +1373,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 14;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_mag_tot2 = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->mag_tot2);
+				const int nscan = sscanf(fields[ifield], "%f", &data->mag_tot2);
 				if (nscan == 1) {
 					data->defined_mag_tot2 = MB_YES;
 					data->last_field_defined = ifield;
@@ -1402,7 +1384,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 15;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_mag_res = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->mag_res);
+				const int nscan = sscanf(fields[ifield], "%f", &data->mag_res);
 				if (nscan == 1) {
 					data->defined_mag_res = MB_YES;
 					data->last_field_defined = ifield;
@@ -1413,7 +1395,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 16;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_mag_ressen = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->mag_ressen);
+				const int nscan = sscanf(fields[ifield], "%d", &data->mag_ressen);
 				if (nscan == 1) {
 					data->defined_mag_ressen = MB_YES;
 					data->last_field_defined = ifield;
@@ -1424,7 +1406,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 17;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_mag_dicorr = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->mag_dicorr);
+				const int nscan = sscanf(fields[ifield], "%f", &data->mag_dicorr);
 				if (nscan == 1) {
 					data->defined_mag_dicorr = MB_YES;
 					data->last_field_defined = ifield;
@@ -1435,7 +1417,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 18;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_mag_sdepth = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->mag_sdepth);
+				const int nscan = sscanf(fields[ifield], "%d", &data->mag_sdepth);
 				if (nscan == 1) {
 					data->defined_mag_sdepth = MB_YES;
 					data->last_field_defined = ifield;
@@ -1446,7 +1428,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 19;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_mag_qualco = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->mag_qualco);
+				const int nscan = sscanf(fields[ifield], "%d", &data->mag_qualco);
 				if (nscan == 1) {
 					data->defined_mag_qualco = MB_YES;
 					data->last_field_defined = ifield;
@@ -1457,7 +1439,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 20;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_gra_obs = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->gra_obs);
+				const int nscan = sscanf(fields[ifield], "%f", &data->gra_obs);
 				if (nscan == 1) {
 					data->defined_gra_obs = MB_YES;
 					data->last_field_defined = ifield;
@@ -1468,7 +1450,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 21;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_eotvos = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->eotvos);
+				const int nscan = sscanf(fields[ifield], "%f", &data->eotvos);
 				if (nscan == 1) {
 					data->defined_eotvos = MB_YES;
 					data->last_field_defined = ifield;
@@ -1479,7 +1461,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 22;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_freeair = MB_NO;
-				nscan = sscanf(fields[ifield], "%f", &data->freeair);
+				const int nscan = sscanf(fields[ifield], "%f", &data->freeair);
 				if (nscan == 1) {
 					data->defined_freeair = MB_YES;
 					data->last_field_defined = ifield;
@@ -1490,7 +1472,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 23;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_gra_qualco = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->gra_qualco);
+				const int nscan = sscanf(fields[ifield], "%d", &data->gra_qualco);
 				if (nscan == 1) {
 					data->defined_gra_qualco = MB_YES;
 					data->last_field_defined = ifield;
@@ -1501,7 +1483,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 24;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_lineid = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->lineid);
+				const int nscan = sscanf(fields[ifield], "%d", &data->lineid);
 				if (nscan == 1) {
 					data->defined_lineid = MB_YES;
 					data->last_field_defined = ifield;
@@ -1512,7 +1494,7 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 			ifield = 25;
 			if (nfields > ifield && strlen(fields[ifield]) > 0) {
 				data->defined_pointid = MB_NO;
-				nscan = sscanf(fields[ifield], "%d", &data->pointid);
+				const int nscan = sscanf(fields[ifield], "%d", &data->pointid);
 				if (nscan == 1) {
 					data->defined_pointid = MB_YES;
 					data->last_field_defined = ifield;
@@ -1595,11 +1577,6 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_mgd77tab_wr_data";
-	int status = MB_SUCCESS;
-	struct mbf_mgd77tab_struct *data;
-	char line[MB_COMMENT_MAXLINE] = "";
-	int write_status;
-	int shift;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1614,7 +1591,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mgd77tab_struct *)data_ptr;
+	struct mbf_mgd77tab_struct *data = (struct mbf_mgd77tab_struct *)data_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 5) {
@@ -1676,6 +1653,8 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		fprintf(stderr, "dbg5       data->comment:              %s\n", data->comment);
 	}
 
+	char line[MB_COMMENT_MAXLINE] = "";
+
 	/* handle the data */
 	if (data->kind == MB_DATA_HEADER) {
 		sprintf(line, "%s\r\n", data->comment);
@@ -1688,7 +1667,7 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		 * written past that field */
 
 		/* write out each field */
-		shift = 0;
+		int shift = 0;
 		if (data->defined_survey_id == MB_YES) {
 			sprintf(&line[shift], "%s", data->survey_id);
 			shift = strlen(line);
@@ -1897,7 +1876,9 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		/* shift++; */
 	}
 
-	if ((write_status = fputs(line, mb_io_ptr->mbfp)) > 0) {
+	const int write_status = fputs(line, mb_io_ptr->mbfp);
+	int status = MB_SUCCESS;
+	if (write_status > 0) {
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 	}
@@ -1927,7 +1908,6 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_register_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mgd77tab";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1940,7 +1920,7 @@ int mbr_register_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_mgd77tab(
+	const int status = mbr_info_mgd77tab(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
