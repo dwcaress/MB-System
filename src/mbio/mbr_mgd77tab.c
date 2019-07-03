@@ -686,9 +686,6 @@ struct mbf_mgd77tab_struct {
 	char comment[MB_COMMENT_MAXLINE];
 };
 
-int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_mgd77tab(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -824,303 +821,6 @@ int mbr_dem_mgd77tab(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_mgd77tab";
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	struct mbf_mgd77tab_struct *data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
-	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
-
-	/* read next data from file */
-	const int status = mbr_mgd77tab_rd_data(verbose, mbio_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = data->kind;
-
-	/* translate values to data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
-		/* record kind */
-		store->kind = data->kind;
-
-		/* survey id */
-		for (int i = 0; i < 8; i++)
-			store->survey_id[i] = data->survey_id[i];
-
-		/* get MB-System time values from the MGD77T date, time, and timezone values */
-		store->time_i[0] = (int)(data->date / 10000);
-		store->time_i[1] = (int)((data->date - 10000 * store->time_i[0]) / 100);
-		store->time_i[2] = (int)(data->date - 10000 * store->time_i[0] - 100 * store->time_i[1]);
-		store->time_i[3] = (int)floor(data->time / 100.0);
-		const double minutes = data->time - 100.0 * store->time_i[3];
-		store->time_i[4] = (int)floor(minutes);
-		const double seconds = (minutes - store->time_i[4]) * 60.0;
-		store->time_i[5] = (int)floor(seconds);
-		store->time_i[6] = (int)((seconds - store->time_i[5]) * 1000000);
-		mb_get_time(verbose, store->time_i, &store->time_d);
-		store->timezone = (int)round(data->timezone);
-		store->time_d += 3600.0 * store->timezone;
-		mb_get_date(verbose, store->time_d, store->time_i);
-
-		/* position data */
-		store->longitude = data->lon;
-		store->latitude = data->lat;
-		store->nav_type = data->pos_type;
-		store->nav_quality = data->nav_qualco;
-
-		/* bathymetry data */
-		if (data->corr_depth == 0.0)
-			store->flag = MB_FLAG_NULL;
-		else if (data->bat_qualco <= 1)
-			store->flag = MB_FLAG_NONE;
-		else
-			store->flag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
-		store->tt = data->bat_ttime;
-		store->bath = data->corr_depth;
-		store->bath_corr = data->bat_cpco;
-		store->bath_type = data->bat_typco;
-
-		/* magnetic data */
-		store->mag_tot_1 = data->mag_tot;
-		store->mag_tot_2 = data->mag_tot2;
-		store->mag_res = data->mag_res;
-		store->mag_res_sensor = data->mag_ressen;
-		store->mag_diurnal = data->mag_dicorr;
-		store->mag_altitude = data->mag_sdepth;
-		store->mag_qualco = data->mag_qualco;
-
-		/* gravity data */
-		store->gravity = data->gra_obs;
-		store->eotvos = data->eotvos;
-		store->free_air = data->freeair;
-		store->gra_qualco = data->gra_qualco;
-
-		store->seismic_line = data->lineid;
-		store->seismic_shot = data->pointid;
-
-		for (int i = 0; i < MB_COMMENT_MAXLINE; i++)
-			store->comment[i] = data->comment[i];
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_mgd77tab";
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	struct mbf_mgd77tab_struct *data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
-	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
-
-	/* first translate values from data storage structure */
-	if (store != NULL) {
-		/* record kind */
-		data->kind = store->kind;
-
-		/* survey id */
-		for (int i = 0; i < 8; i++)
-			data->survey_id[i] = store->survey_id[i];
-
-		/* get MB-System time values from the MGD77T date, time, and timezone values */
-		data->date = store->time_i[0] * 10000 + store->time_i[1] * 100 + store->time_i[2];
-		data->time =
-		    store->time_i[3] * 100.0 + store->time_i[4] + store->time_i[5] / 3600.0 + store->time_i[6] / 3600.0 / 1000000.0;
-
-		/* position data */
-		data->lon = store->longitude;
-		data->lat = store->latitude;
-		data->pos_type = store->nav_type;
-		data->nav_qualco = store->nav_quality;
-
-		/* bathymetry data */
-		if (mb_beam_check_flag_null(store->flag)) {
-			data->bat_qualco = 0;
-			data->corr_depth = 0.0;
-		}
-		else if (mb_beam_ok(store->flag))
-			data->bat_qualco = 1;
-		else
-			data->bat_qualco = 4;
-		store->tt = data->bat_ttime;
-		data->corr_depth = store->bath;
-		data->bat_cpco = store->bath_corr;
-		data->bat_typco = store->bath_type;
-
-		/* magnetic data */
-		data->mag_tot = store->mag_tot_1;
-		data->mag_tot2 = store->mag_tot_2;
-		data->mag_res = store->mag_res;
-		data->mag_ressen = store->mag_res_sensor;
-		data->mag_dicorr = store->mag_diurnal;
-		data->mag_sdepth = store->mag_altitude;
-		data->mag_qualco = store->mag_qualco;
-
-		/* gravity data */
-		data->gra_obs = store->gravity;
-		data->eotvos = store->eotvos;
-		data->freeair = store->free_air;
-		data->gra_qualco = store->gra_qualco;
-
-		data->lineid = store->seismic_line;
-		data->pointid = store->seismic_shot;
-
-		for (int i = 0; i < MB_COMMENT_MAXLINE; i++)
-			data->comment[i] = store->comment[i];
-
-		/* check for valid fields */
-		data->last_field_defined = 0;
-		if (strlen(data->survey_id) > 0) {
-			data->defined_survey_id = MB_YES;
-			data->last_field_defined = 0;
-		}
-		if (data->timezone != 0.0) {
-			data->defined_timezone = MB_YES;
-			data->last_field_defined = 1;
-		}
-		if (data->date != 0) {
-			data->defined_date = MB_YES;
-			data->last_field_defined = 2;
-		}
-		if (data->time != 0.0) {
-			data->defined_time = MB_YES;
-			data->last_field_defined = 3;
-		}
-		if (data->lat != 0.0) {
-			data->defined_lat = MB_YES;
-			data->last_field_defined = 4;
-		}
-		if (data->lon != 0.0) {
-			data->defined_lon = MB_YES;
-			data->last_field_defined = 5;
-		}
-		if (data->pos_type != 0) {
-			data->defined_pos_type = MB_YES;
-			data->last_field_defined = 6;
-		}
-		if (data->nav_qualco != 0) {
-			data->defined_nav_qualco = MB_YES;
-			data->last_field_defined = 7;
-		}
-		if (data->bat_ttime != 0.0) {
-			data->defined_bat_ttime = MB_YES;
-			data->last_field_defined = 8;
-		}
-		if (data->corr_depth != 0.0) {
-			data->defined_corr_depth = MB_YES;
-			data->last_field_defined = 9;
-		}
-		if (data->bat_cpco != 0) {
-			data->defined_bat_cpco = MB_YES;
-			data->last_field_defined = 10;
-		}
-		if (data->bat_typco != 0) {
-			data->defined_bat_typco = MB_YES;
-			data->last_field_defined = 11;
-		}
-		if (data->bat_qualco != 0) {
-			data->defined_bat_qualco = MB_YES;
-			data->last_field_defined = 12;
-		}
-		if (data->mag_tot != 0.0) {
-			data->defined_mag_tot = MB_YES;
-			data->last_field_defined = 13;
-		}
-		if (data->mag_tot2 != 0.0) {
-			data->defined_mag_tot2 = MB_YES;
-			data->last_field_defined = 14;
-		}
-		if (data->mag_res != 0.0) {
-			data->defined_mag_res = MB_YES;
-			data->last_field_defined = 15;
-		}
-		if (data->mag_ressen != 0) {
-			data->defined_mag_ressen = MB_YES;
-			data->last_field_defined = 16;
-		}
-		if (data->mag_dicorr != 0.0) {
-			data->defined_mag_dicorr = MB_YES;
-			data->last_field_defined = 17;
-		}
-		if (data->mag_sdepth != 0) {
-			data->defined_mag_sdepth = MB_YES;
-			data->last_field_defined = 18;
-		}
-		if (data->mag_qualco != 0) {
-			data->defined_mag_qualco = MB_YES;
-			data->last_field_defined = 19;
-		}
-		if (data->gra_obs != 0.0) {
-			data->defined_gra_obs = MB_YES;
-			data->last_field_defined = 20;
-		}
-		if (data->eotvos != 0.0) {
-			data->defined_eotvos = MB_YES;
-			data->last_field_defined = 21;
-		}
-		if (data->freeair != 0.0) {
-			data->defined_freeair = MB_YES;
-			data->last_field_defined = 22;
-		}
-		if (data->gra_qualco != 0) {
-			data->defined_gra_qualco = MB_YES;
-			data->last_field_defined = 23;
-		}
-		if (data->lineid != 0) {
-			data->defined_lineid = MB_YES;
-			data->last_field_defined = 24;
-		}
-		if (data->pointid != 0) {
-			data->defined_pointid = MB_YES;
-			data->last_field_defined = 25;
-		}
-	}
-
-	/* write next data to file */
-	const int status = mbr_mgd77tab_wr_data(verbose, mbio_ptr, (void *)data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1575,6 +1275,106 @@ int mbr_mgd77tab_rd_data(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_rt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_mgd77tab";
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mbf_mgd77tab_struct *data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
+
+	/* read next data from file */
+	const int status = mbr_mgd77tab_rd_data(verbose, mbio_ptr, error);
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = data->kind;
+
+	/* translate values to data storage structure */
+	if (status == MB_SUCCESS && store != NULL) {
+		/* record kind */
+		store->kind = data->kind;
+
+		/* survey id */
+		for (int i = 0; i < 8; i++)
+			store->survey_id[i] = data->survey_id[i];
+
+		/* get MB-System time values from the MGD77T date, time, and timezone values */
+		store->time_i[0] = (int)(data->date / 10000);
+		store->time_i[1] = (int)((data->date - 10000 * store->time_i[0]) / 100);
+		store->time_i[2] = (int)(data->date - 10000 * store->time_i[0] - 100 * store->time_i[1]);
+		store->time_i[3] = (int)floor(data->time / 100.0);
+		const double minutes = data->time - 100.0 * store->time_i[3];
+		store->time_i[4] = (int)floor(minutes);
+		const double seconds = (minutes - store->time_i[4]) * 60.0;
+		store->time_i[5] = (int)floor(seconds);
+		store->time_i[6] = (int)((seconds - store->time_i[5]) * 1000000);
+		mb_get_time(verbose, store->time_i, &store->time_d);
+		store->timezone = (int)round(data->timezone);
+		store->time_d += 3600.0 * store->timezone;
+		mb_get_date(verbose, store->time_d, store->time_i);
+
+		/* position data */
+		store->longitude = data->lon;
+		store->latitude = data->lat;
+		store->nav_type = data->pos_type;
+		store->nav_quality = data->nav_qualco;
+
+		/* bathymetry data */
+		if (data->corr_depth == 0.0)
+			store->flag = MB_FLAG_NULL;
+		else if (data->bat_qualco <= 1)
+			store->flag = MB_FLAG_NONE;
+		else
+			store->flag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+		store->tt = data->bat_ttime;
+		store->bath = data->corr_depth;
+		store->bath_corr = data->bat_cpco;
+		store->bath_type = data->bat_typco;
+
+		/* magnetic data */
+		store->mag_tot_1 = data->mag_tot;
+		store->mag_tot_2 = data->mag_tot2;
+		store->mag_res = data->mag_res;
+		store->mag_res_sensor = data->mag_ressen;
+		store->mag_diurnal = data->mag_dicorr;
+		store->mag_altitude = data->mag_sdepth;
+		store->mag_qualco = data->mag_qualco;
+
+		/* gravity data */
+		store->gravity = data->gra_obs;
+		store->eotvos = data->eotvos;
+		store->free_air = data->freeair;
+		store->gra_qualco = data->gra_qualco;
+
+		store->seismic_line = data->lineid;
+		store->seismic_shot = data->pointid;
+
+		for (int i = 0; i < MB_COMMENT_MAXLINE; i++)
+			store->comment[i] = data->comment[i];
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_mgd77tab_wr_data";
 
@@ -1892,6 +1692,203 @@ int mbr_mgd77tab_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_mgd77tab(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_mgd77tab";
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	struct mbf_mgd77tab_struct *data = (struct mbf_mgd77tab_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
+
+	/* first translate values from data storage structure */
+	if (store != NULL) {
+		/* record kind */
+		data->kind = store->kind;
+
+		/* survey id */
+		for (int i = 0; i < 8; i++)
+			data->survey_id[i] = store->survey_id[i];
+
+		/* get MB-System time values from the MGD77T date, time, and timezone values */
+		data->date = store->time_i[0] * 10000 + store->time_i[1] * 100 + store->time_i[2];
+		data->time =
+		    store->time_i[3] * 100.0 + store->time_i[4] + store->time_i[5] / 3600.0 + store->time_i[6] / 3600.0 / 1000000.0;
+
+		/* position data */
+		data->lon = store->longitude;
+		data->lat = store->latitude;
+		data->pos_type = store->nav_type;
+		data->nav_qualco = store->nav_quality;
+
+		/* bathymetry data */
+		if (mb_beam_check_flag_null(store->flag)) {
+			data->bat_qualco = 0;
+			data->corr_depth = 0.0;
+		}
+		else if (mb_beam_ok(store->flag))
+			data->bat_qualco = 1;
+		else
+			data->bat_qualco = 4;
+		store->tt = data->bat_ttime;
+		data->corr_depth = store->bath;
+		data->bat_cpco = store->bath_corr;
+		data->bat_typco = store->bath_type;
+
+		/* magnetic data */
+		data->mag_tot = store->mag_tot_1;
+		data->mag_tot2 = store->mag_tot_2;
+		data->mag_res = store->mag_res;
+		data->mag_ressen = store->mag_res_sensor;
+		data->mag_dicorr = store->mag_diurnal;
+		data->mag_sdepth = store->mag_altitude;
+		data->mag_qualco = store->mag_qualco;
+
+		/* gravity data */
+		data->gra_obs = store->gravity;
+		data->eotvos = store->eotvos;
+		data->freeair = store->free_air;
+		data->gra_qualco = store->gra_qualco;
+
+		data->lineid = store->seismic_line;
+		data->pointid = store->seismic_shot;
+
+		for (int i = 0; i < MB_COMMENT_MAXLINE; i++)
+			data->comment[i] = store->comment[i];
+
+		/* check for valid fields */
+		data->last_field_defined = 0;
+		if (strlen(data->survey_id) > 0) {
+			data->defined_survey_id = MB_YES;
+			data->last_field_defined = 0;
+		}
+		if (data->timezone != 0.0) {
+			data->defined_timezone = MB_YES;
+			data->last_field_defined = 1;
+		}
+		if (data->date != 0) {
+			data->defined_date = MB_YES;
+			data->last_field_defined = 2;
+		}
+		if (data->time != 0.0) {
+			data->defined_time = MB_YES;
+			data->last_field_defined = 3;
+		}
+		if (data->lat != 0.0) {
+			data->defined_lat = MB_YES;
+			data->last_field_defined = 4;
+		}
+		if (data->lon != 0.0) {
+			data->defined_lon = MB_YES;
+			data->last_field_defined = 5;
+		}
+		if (data->pos_type != 0) {
+			data->defined_pos_type = MB_YES;
+			data->last_field_defined = 6;
+		}
+		if (data->nav_qualco != 0) {
+			data->defined_nav_qualco = MB_YES;
+			data->last_field_defined = 7;
+		}
+		if (data->bat_ttime != 0.0) {
+			data->defined_bat_ttime = MB_YES;
+			data->last_field_defined = 8;
+		}
+		if (data->corr_depth != 0.0) {
+			data->defined_corr_depth = MB_YES;
+			data->last_field_defined = 9;
+		}
+		if (data->bat_cpco != 0) {
+			data->defined_bat_cpco = MB_YES;
+			data->last_field_defined = 10;
+		}
+		if (data->bat_typco != 0) {
+			data->defined_bat_typco = MB_YES;
+			data->last_field_defined = 11;
+		}
+		if (data->bat_qualco != 0) {
+			data->defined_bat_qualco = MB_YES;
+			data->last_field_defined = 12;
+		}
+		if (data->mag_tot != 0.0) {
+			data->defined_mag_tot = MB_YES;
+			data->last_field_defined = 13;
+		}
+		if (data->mag_tot2 != 0.0) {
+			data->defined_mag_tot2 = MB_YES;
+			data->last_field_defined = 14;
+		}
+		if (data->mag_res != 0.0) {
+			data->defined_mag_res = MB_YES;
+			data->last_field_defined = 15;
+		}
+		if (data->mag_ressen != 0) {
+			data->defined_mag_ressen = MB_YES;
+			data->last_field_defined = 16;
+		}
+		if (data->mag_dicorr != 0.0) {
+			data->defined_mag_dicorr = MB_YES;
+			data->last_field_defined = 17;
+		}
+		if (data->mag_sdepth != 0) {
+			data->defined_mag_sdepth = MB_YES;
+			data->last_field_defined = 18;
+		}
+		if (data->mag_qualco != 0) {
+			data->defined_mag_qualco = MB_YES;
+			data->last_field_defined = 19;
+		}
+		if (data->gra_obs != 0.0) {
+			data->defined_gra_obs = MB_YES;
+			data->last_field_defined = 20;
+		}
+		if (data->eotvos != 0.0) {
+			data->defined_eotvos = MB_YES;
+			data->last_field_defined = 21;
+		}
+		if (data->freeair != 0.0) {
+			data->defined_freeair = MB_YES;
+			data->last_field_defined = 22;
+		}
+		if (data->gra_qualco != 0) {
+			data->defined_gra_qualco = MB_YES;
+			data->last_field_defined = 23;
+		}
+		if (data->lineid != 0) {
+			data->defined_lineid = MB_YES;
+			data->last_field_defined = 24;
+		}
+		if (data->pointid != 0) {
+			data->defined_pointid = MB_YES;
+			data->last_field_defined = 25;
+		}
+	}
+
+	/* write next data to file */
+	const int status = mbr_mgd77tab_wr_data(verbose, mbio_ptr, (void *)data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
