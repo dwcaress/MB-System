@@ -38,20 +38,6 @@
 #include "mbf_elmk2unb.h"
 #include "mbsys_elacmk2.h"
 
-int mbr_zero_elmk2unb(int verbose, void *data_ptr, int *error);
-int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_elmk2unb_rd_comment(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *data, int *error);
-int mbr_elmk2unb_rd_parameter(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *data, int *error);
-int mbr_elmk2unb_rd_pos(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *data, int *error);
-int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *data, int *error);
-int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *data, int *error);
-int mbr_elmk2unb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);
-int mbr_elmk2unb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error);
-int mbr_elmk2unb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *error);
-int mbr_elmk2unb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error);
-int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error);
-int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_elmk2unb(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -123,76 +109,6 @@ int mbr_info_elmk2unb(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:         %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_alm_elmk2unb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_elmk2unb";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
-	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_elmk2unb_struct);
-	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	mbsys_elacmk2_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-
-	/* initialize everything to zeros */
-	mbr_zero_elmk2unb(verbose, mb_io_ptr->raw_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dem_elmk2unb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_elmk2unb";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointers to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
 	return (status);
@@ -342,14 +258,9 @@ int mbr_zero_elmk2unb(int verbose, void *data_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_elmk2unb";
+int mbr_alm_elmk2unb(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_alm_elmk2unb";
 	int status = MB_SUCCESS;
-	struct mbf_elmk2unb_struct *data;
-	struct mbsys_elacmk2_struct *store;
-	int time_i[7];
-	double time_d;
-	double lon, lat, heading, speed;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -357,176 +268,22 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointers to mbio descriptor and data structures */
+	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_elmk2unb_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
 
-	/* read next data from file */
-	status = mbr_elmk2unb_rd_data(verbose, mbio_ptr, error);
+	/* set initial status */
+	status = MB_SUCCESS;
 
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = data->kind;
+	/* allocate memory for data structure */
+	mb_io_ptr->structure_size = sizeof(struct mbf_elmk2unb_struct);
+	mb_io_ptr->data_structure_size = 0;
+	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	mbsys_elacmk2_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* add nav records to list for interpolation */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_NAV) {
-		mb_fix_y2k(verbose, data->pos_year, &time_i[0]);
-		time_i[1] = data->pos_month;
-		time_i[2] = data->pos_day;
-		time_i[3] = data->pos_hour;
-		time_i[4] = data->pos_minute;
-		time_i[5] = data->pos_second;
-		time_i[6] = 10000 * data->pos_hundredth_sec + 100 * data->pos_thousandth_sec;
-		mb_get_time(verbose, time_i, &time_d);
-		lon = data->pos_longitude * 0.00000009;
-		lat = data->pos_latitude * 0.00000009;
-		mb_navint_add(verbose, mbio_ptr, time_d, lon, lat, error);
-	}
-
-	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA && mb_io_ptr->nfix >= 1) {
-		mb_fix_y2k(verbose, data->year, &time_i[0]);
-		time_i[1] = data->month;
-		time_i[2] = data->day;
-		time_i[3] = data->hour;
-		time_i[4] = data->minute;
-		time_i[5] = data->second;
-		time_i[6] = 10000 * data->hundredth_sec + 100 * data->thousandth_sec;
-		mb_get_time(verbose, time_i, &time_d);
-		heading = 0.01 * data->heading;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, &lon, &lat, &speed, error);
-		data->longitude = (int)(lon / 0.00000009);
-		data->latitude = (int)(lat / 0.00000009);
-	}
-
-	/* translate values to elac data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
-		store->kind = data->kind;
-		store->sonar = data->sonar;
-
-		/* parameter telegram */
-		if (store->kind == MB_DATA_PARAMETER) {
-			store->par_year = data->par_year;
-			store->par_month = data->par_month;
-			store->par_day = data->par_day;
-			store->par_hour = data->par_hour;
-			store->par_minute = data->par_minute;
-			store->par_second = data->par_second;
-			store->par_hundredth_sec = data->par_hundredth_sec;
-			store->par_thousandth_sec = data->par_thousandth_sec;
-			store->roll_offset = data->roll_offset;
-			store->pitch_offset = data->pitch_offset;
-			store->heading_offset = data->heading_offset;
-			store->time_delay = data->time_delay;
-			store->transducer_port_height = data->transducer_port_height;
-			store->transducer_starboard_height = data->transducer_starboard_height;
-			store->transducer_port_depth = data->transducer_port_depth;
-			store->transducer_starboard_depth = data->transducer_starboard_depth;
-			store->transducer_port_x = data->transducer_port_x;
-			store->transducer_starboard_x = data->transducer_starboard_x;
-			store->transducer_port_y = data->transducer_port_y;
-			store->transducer_starboard_y = data->transducer_starboard_y;
-			store->transducer_port_error = data->transducer_port_error;
-			store->transducer_starboard_error = data->transducer_starboard_error;
-			store->antenna_height = data->antenna_height;
-			store->antenna_x = data->antenna_x;
-			store->antenna_y = data->antenna_y;
-			store->vru_height = data->vru_height;
-			store->vru_x = data->vru_x;
-			store->vru_y = data->vru_y;
-			store->line_number = data->line_number;
-			store->start_or_stop = data->start_or_stop;
-			store->transducer_serial_number = data->transducer_serial_number;
-		}
-
-		/* comment */
-		if (store->kind == MB_DATA_COMMENT) {
-			for (int i = 0; i < MBF_ELMK2UNB_COMMENT_LENGTH; i++)
-				store->comment[i] = data->comment[i];
-		}
-
-		/* position (position telegrams) */
-		if (store->kind == MB_DATA_NAV) {
-			store->pos_year = data->pos_year;
-			store->pos_month = data->pos_month;
-			store->pos_day = data->pos_day;
-			store->pos_hour = data->pos_hour;
-			store->pos_minute = data->pos_minute;
-			store->pos_second = data->pos_second;
-			store->pos_hundredth_sec = data->pos_hundredth_sec;
-			store->pos_thousandth_sec = data->pos_thousandth_sec;
-			store->pos_latitude = data->pos_latitude;
-			store->pos_longitude = data->pos_longitude;
-			store->utm_northing = data->utm_northing;
-			store->utm_easting = data->utm_easting;
-			store->utm_zone_lon = data->utm_zone_lon;
-			store->utm_zone = data->utm_zone;
-			store->hemisphere = data->hemisphere;
-			store->ellipsoid = data->ellipsoid;
-			store->pos_spare = data->pos_spare;
-			store->semi_major_axis = data->semi_major_axis;
-			store->other_quality = data->other_quality;
-		}
-
-		/* sound velocity profile */
-		if (store->kind == MB_DATA_VELOCITY_PROFILE) {
-			store->svp_year = data->svp_year;
-			store->svp_month = data->svp_month;
-			store->svp_day = data->svp_day;
-			store->svp_hour = data->svp_hour;
-			store->svp_minute = data->svp_minute;
-			store->svp_second = data->svp_second;
-			store->svp_hundredth_sec = data->svp_hundredth_sec;
-			store->svp_thousandth_sec = data->svp_thousandth_sec;
-			store->svp_num = data->svp_num;
-			for (int i = 0; i < 500; i++) {
-				store->svp_depth[i] = data->svp_depth[i];
-				store->svp_vel[i] = data->svp_vel[i];
-			}
-		}
-
-		/* depth telegram */
-		if (store->kind == MB_DATA_DATA) {
-			store->year = data->year;
-			store->month = data->month;
-			store->day = data->day;
-			store->hour = data->hour;
-			store->minute = data->minute;
-			store->second = data->second;
-			store->hundredth_sec = data->hundredth_sec;
-			store->thousandth_sec = data->thousandth_sec;
-			store->longitude = lon;
-			store->latitude = lat;
-			store->speed = speed / 3.6;
-			store->ping_num = data->ping_num;
-			store->sound_vel = data->sound_vel;
-			store->heading = data->heading;
-			store->pulse_length = data->pulse_length;
-			store->mode = data->mode;
-			store->source_power = data->source_power;
-			store->receiver_gain_stbd = data->receiver_gain_stbd;
-			store->receiver_gain_port = data->receiver_gain_port;
-			store->reserved = data->reserved;
-			store->beams_bath = data->beams_bath;
-			for (int i = 0; i < data->beams_bath; i++) {
-				store->beams[i].bath = data->beams[i].bath;
-				store->beams[i].bath_acrosstrack = data->beams[i].bath_acrosstrack;
-				store->beams[i].bath_alongtrack = data->beams[i].bath_alongtrack;
-				store->beams[i].tt = data->beams[i].tt;
-				store->beams[i].quality = data->beams[i].quality;
-				store->beams[i].amplitude = data->beams[i].amplitude;
-				store->beams[i].time_offset = data->beams[i].time_offset;
-				store->beams[i].heave = data->beams[i].heave;
-				store->beams[i].roll = data->beams[i].roll;
-				store->beams[i].pitch = data->beams[i].pitch;
-				store->beams[i].angle = data->beams[i].angle;
-			}
-		}
-	}
+	/* initialize everything to zeros */
+	mbr_zero_elmk2unb(verbose, mb_io_ptr->raw_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -540,164 +297,9 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_elmk2unb";
+int mbr_dem_elmk2unb(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_dem_elmk2unb";
 	int status = MB_SUCCESS;
-	struct mbf_elmk2unb_struct *data;
-	char *data_ptr;
-	struct mbsys_elacmk2_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_elmk2unb_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
-
-	/* first translate values from data storage structure */
-	if (store != NULL) {
-		data->kind = store->kind;
-		data->sonar = store->sonar;
-
-		/* parameter telegram */
-		data->par_year = store->par_year;
-		data->par_month = store->par_month;
-		data->par_day = store->par_day;
-		data->par_hour = store->par_hour;
-		data->par_minute = store->par_minute;
-		data->par_second = store->par_second;
-		data->par_hundredth_sec = store->par_hundredth_sec;
-		data->par_thousandth_sec = store->par_thousandth_sec;
-		data->roll_offset = store->roll_offset;
-		data->pitch_offset = store->pitch_offset;
-		data->heading_offset = store->heading_offset;
-		data->time_delay = store->time_delay;
-		data->transducer_port_height = store->transducer_port_height;
-		data->transducer_starboard_height = store->transducer_starboard_height;
-		data->transducer_port_depth = store->transducer_port_depth;
-		data->transducer_starboard_depth = store->transducer_starboard_depth;
-		data->transducer_port_x = store->transducer_port_x;
-		data->transducer_starboard_x = store->transducer_starboard_x;
-		data->transducer_port_y = store->transducer_port_y;
-		data->transducer_starboard_y = store->transducer_starboard_y;
-		data->transducer_port_error = store->transducer_port_error;
-		data->transducer_starboard_error = store->transducer_starboard_error;
-		data->antenna_height = store->antenna_height;
-		data->antenna_x = store->antenna_x;
-		data->antenna_y = store->antenna_y;
-		data->vru_height = store->vru_height;
-		data->vru_x = store->vru_x;
-		data->vru_y = store->vru_y;
-		data->line_number = store->line_number;
-		data->start_or_stop = store->start_or_stop;
-		data->transducer_serial_number = store->transducer_serial_number;
-		for (int i = 0; i < MBF_ELMK2UNB_COMMENT_LENGTH; i++)
-			data->comment[i] = store->comment[i];
-
-		/* position (position telegrams) */
-		data->pos_year = store->pos_year;
-		data->pos_month = store->pos_month;
-		data->pos_day = store->pos_day;
-		data->pos_hour = store->pos_hour;
-		data->pos_minute = store->pos_minute;
-		data->pos_second = store->pos_second;
-		data->pos_hundredth_sec = store->pos_hundredth_sec;
-		data->pos_thousandth_sec = store->pos_thousandth_sec;
-		data->pos_latitude = store->pos_latitude;
-		data->pos_longitude = store->pos_longitude;
-		data->utm_northing = store->utm_northing;
-		data->utm_easting = store->utm_easting;
-		data->utm_zone_lon = store->utm_zone_lon;
-		data->utm_zone = store->utm_zone;
-		data->hemisphere = store->hemisphere;
-		data->ellipsoid = store->ellipsoid;
-		data->pos_spare = store->pos_spare;
-		data->semi_major_axis = store->semi_major_axis;
-		data->other_quality = store->other_quality;
-
-		/* sound velocity profile */
-		data->svp_year = store->svp_year;
-		data->svp_month = store->svp_month;
-		data->svp_day = store->svp_day;
-		data->svp_hour = store->svp_hour;
-		data->svp_minute = store->svp_minute;
-		data->svp_second = store->svp_second;
-		data->svp_hundredth_sec = store->svp_hundredth_sec;
-		data->svp_thousandth_sec = store->svp_thousandth_sec;
-		data->svp_num = store->svp_num;
-		for (int i = 0; i < 500; i++) {
-			data->svp_depth[i] = store->svp_depth[i];
-			data->svp_vel[i] = store->svp_vel[i];
-		}
-
-		/* depth telegram */
-		data->year = store->year;
-		data->month = store->month;
-		data->day = store->day;
-		data->hour = store->hour;
-		data->minute = store->minute;
-		data->second = store->second;
-		data->hundredth_sec = store->hundredth_sec;
-		data->thousandth_sec = store->thousandth_sec;
-		data->ping_num = store->ping_num;
-		data->sound_vel = store->sound_vel;
-		data->heading = store->heading;
-		data->pulse_length = store->pulse_length;
-		data->mode = store->mode;
-		data->source_power = store->source_power;
-		data->receiver_gain_stbd = store->receiver_gain_stbd;
-		data->receiver_gain_port = store->receiver_gain_port;
-		data->reserved = store->reserved;
-		data->beams_bath = store->beams_bath;
-		for (int i = 0; i < store->beams_bath; i++) {
-			data->beams[i].bath = store->beams[i].bath;
-			data->beams[i].bath_acrosstrack = store->beams[i].bath_acrosstrack;
-			data->beams[i].bath_alongtrack = store->beams[i].bath_alongtrack;
-			data->beams[i].tt = store->beams[i].tt;
-			data->beams[i].quality = store->beams[i].quality;
-			data->beams[i].amplitude = store->beams[i].amplitude;
-			data->beams[i].time_offset = store->beams[i].time_offset;
-			data->beams[i].heave = store->beams[i].heave;
-			data->beams[i].roll = store->beams[i].roll;
-			data->beams[i].pitch = store->beams[i].pitch;
-			data->beams[i].angle = store->beams[i].angle;
-		}
-	}
-
-	/* write next data to file */
-	status = mbr_elmk2unb_wr_data(verbose, mbio_ptr, data_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_elmk2unb_rd_data";
-	int status = MB_SUCCESS;
-	struct mbf_elmk2unb_struct *data;
-	char *data_ptr;
-	FILE *mbfp;
-	int done;
-	short int *type;
-	static char label[2];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -707,88 +309,12 @@ int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
+	/* get pointers to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* get pointer to raw data structure */
-	data = (struct mbf_elmk2unb_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	mbfp = mb_io_ptr->mbfp;
-
-	/* set file position */
-	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-
-	done = MB_NO;
-	type = (short int *)label;
-	*error = MB_ERROR_NO_ERROR;
-	while (done == MB_NO) {
-		/* get next record label */
-		if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-		if (label[0] == 0x02)
-			if ((status = fread(&label[1], 1, 1, mb_io_ptr->mbfp)) != 1) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-
-/* swap bytes if necessary */
-#ifdef BYTESWAPPED
-		*type = (short int)mb_swap_short(*type);
-#endif
-
-		/* read the appropriate data records */
-		if (status == MB_FAILURE) {
-			done = MB_YES;
-		}
-		else if (*type == ELACMK2_COMMENT) {
-			status = mbr_elmk2unb_rd_comment(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_COMMENT;
-			}
-		}
-		else if (*type == ELACMK2_PARAMETER) {
-			status = mbr_elmk2unb_rd_parameter(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_PARAMETER;
-			}
-		}
-		else if (*type == ELACMK2_POS) {
-			status = mbr_elmk2unb_rd_pos(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_NAV;
-			}
-		}
-		else if (*type == ELACMK2_SVP) {
-			status = mbr_elmk2unb_rd_svp(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_VELOCITY_PROFILE;
-			}
-		}
-		else if (*type == ELACMK2_BATHGEN) {
-			status = mbr_elmk2unb_rd_bathgen(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_DATA;
-			}
-		}
-		else {
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-		}
-
-		/* bail out if there is an error */
-		if (status == MB_FAILURE)
-			done = MB_YES;
-	}
-
-	/* get file position */
-	mb_io_ptr->file_bytes = ftell(mbfp);
+	/* deallocate memory for data descriptor */
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1436,11 +962,15 @@ int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct 
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_elmk2unb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	char *function_name = "mbr_elmk2unb_wr_data";
+int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_elmk2unb_rd_data";
 	int status = MB_SUCCESS;
 	struct mbf_elmk2unb_struct *data;
+	char *data_ptr;
 	FILE *mbfp;
+	int done;
+	short int *type;
+	static char label[2];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1448,40 +978,287 @@ int mbr_elmk2unb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
 	}
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_elmk2unb_struct *)data_ptr;
+	data = (struct mbf_elmk2unb_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
 	mbfp = mb_io_ptr->mbfp;
 
-	if (data->kind == MB_DATA_COMMENT) {
-		status = mbr_elmk2unb_wr_comment(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_PARAMETER) {
-		status = mbr_elmk2unb_wr_parameter(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_NAV) {
-		status = mbr_elmk2unb_wr_pos(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_VELOCITY_PROFILE) {
-		status = mbr_elmk2unb_wr_svp(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_DATA) {
-		status = mbr_elmk2unb_wr_bathgen(verbose, mbfp, data, error);
-	}
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_KIND;
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	done = MB_NO;
+	type = (short int *)label;
+	*error = MB_ERROR_NO_ERROR;
+	while (done == MB_NO) {
+		/* get next record label */
+		if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+		if (label[0] == 0x02)
+			if ((status = fread(&label[1], 1, 1, mb_io_ptr->mbfp)) != 1) {
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+
+/* swap bytes if necessary */
+#ifdef BYTESWAPPED
+		*type = (short int)mb_swap_short(*type);
+#endif
+
+		/* read the appropriate data records */
+		if (status == MB_FAILURE) {
+			done = MB_YES;
+		}
+		else if (*type == ELACMK2_COMMENT) {
+			status = mbr_elmk2unb_rd_comment(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_COMMENT;
+			}
+		}
+		else if (*type == ELACMK2_PARAMETER) {
+			status = mbr_elmk2unb_rd_parameter(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_PARAMETER;
+			}
+		}
+		else if (*type == ELACMK2_POS) {
+			status = mbr_elmk2unb_rd_pos(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_NAV;
+			}
+		}
+		else if (*type == ELACMK2_SVP) {
+			status = mbr_elmk2unb_rd_svp(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_VELOCITY_PROFILE;
+			}
+		}
+		else if (*type == ELACMK2_BATHGEN) {
+			status = mbr_elmk2unb_rd_bathgen(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_DATA;
+			}
+		}
+		else {
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+
+		/* bail out if there is an error */
+		if (status == MB_FAILURE)
+			done = MB_YES;
 	}
 
+	/* get file position */
+	mb_io_ptr->file_bytes = ftell(mbfp);
+
 	/* print output debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_elmk2unb";
+	int status = MB_SUCCESS;
+	struct mbf_elmk2unb_struct *data;
+	struct mbsys_elacmk2_struct *store;
+	int time_i[7];
+	double time_d;
+	double lon, lat, heading, speed;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	data = (struct mbf_elmk2unb_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_elacmk2_struct *)store_ptr;
+
+	/* read next data from file */
+	status = mbr_elmk2unb_rd_data(verbose, mbio_ptr, error);
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = data->kind;
+
+	/* add nav records to list for interpolation */
+	if (status == MB_SUCCESS && data->kind == MB_DATA_NAV) {
+		mb_fix_y2k(verbose, data->pos_year, &time_i[0]);
+		time_i[1] = data->pos_month;
+		time_i[2] = data->pos_day;
+		time_i[3] = data->pos_hour;
+		time_i[4] = data->pos_minute;
+		time_i[5] = data->pos_second;
+		time_i[6] = 10000 * data->pos_hundredth_sec + 100 * data->pos_thousandth_sec;
+		mb_get_time(verbose, time_i, &time_d);
+		lon = data->pos_longitude * 0.00000009;
+		lat = data->pos_latitude * 0.00000009;
+		mb_navint_add(verbose, mbio_ptr, time_d, lon, lat, error);
+	}
+
+	/* interpolate navigation for survey pings if needed */
+	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA && mb_io_ptr->nfix >= 1) {
+		mb_fix_y2k(verbose, data->year, &time_i[0]);
+		time_i[1] = data->month;
+		time_i[2] = data->day;
+		time_i[3] = data->hour;
+		time_i[4] = data->minute;
+		time_i[5] = data->second;
+		time_i[6] = 10000 * data->hundredth_sec + 100 * data->thousandth_sec;
+		mb_get_time(verbose, time_i, &time_d);
+		heading = 0.01 * data->heading;
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, &lon, &lat, &speed, error);
+		data->longitude = (int)(lon / 0.00000009);
+		data->latitude = (int)(lat / 0.00000009);
+	}
+
+	/* translate values to elac data storage structure */
+	if (status == MB_SUCCESS && store != NULL) {
+		store->kind = data->kind;
+		store->sonar = data->sonar;
+
+		/* parameter telegram */
+		if (store->kind == MB_DATA_PARAMETER) {
+			store->par_year = data->par_year;
+			store->par_month = data->par_month;
+			store->par_day = data->par_day;
+			store->par_hour = data->par_hour;
+			store->par_minute = data->par_minute;
+			store->par_second = data->par_second;
+			store->par_hundredth_sec = data->par_hundredth_sec;
+			store->par_thousandth_sec = data->par_thousandth_sec;
+			store->roll_offset = data->roll_offset;
+			store->pitch_offset = data->pitch_offset;
+			store->heading_offset = data->heading_offset;
+			store->time_delay = data->time_delay;
+			store->transducer_port_height = data->transducer_port_height;
+			store->transducer_starboard_height = data->transducer_starboard_height;
+			store->transducer_port_depth = data->transducer_port_depth;
+			store->transducer_starboard_depth = data->transducer_starboard_depth;
+			store->transducer_port_x = data->transducer_port_x;
+			store->transducer_starboard_x = data->transducer_starboard_x;
+			store->transducer_port_y = data->transducer_port_y;
+			store->transducer_starboard_y = data->transducer_starboard_y;
+			store->transducer_port_error = data->transducer_port_error;
+			store->transducer_starboard_error = data->transducer_starboard_error;
+			store->antenna_height = data->antenna_height;
+			store->antenna_x = data->antenna_x;
+			store->antenna_y = data->antenna_y;
+			store->vru_height = data->vru_height;
+			store->vru_x = data->vru_x;
+			store->vru_y = data->vru_y;
+			store->line_number = data->line_number;
+			store->start_or_stop = data->start_or_stop;
+			store->transducer_serial_number = data->transducer_serial_number;
+		}
+
+		/* comment */
+		if (store->kind == MB_DATA_COMMENT) {
+			for (int i = 0; i < MBF_ELMK2UNB_COMMENT_LENGTH; i++)
+				store->comment[i] = data->comment[i];
+		}
+
+		/* position (position telegrams) */
+		if (store->kind == MB_DATA_NAV) {
+			store->pos_year = data->pos_year;
+			store->pos_month = data->pos_month;
+			store->pos_day = data->pos_day;
+			store->pos_hour = data->pos_hour;
+			store->pos_minute = data->pos_minute;
+			store->pos_second = data->pos_second;
+			store->pos_hundredth_sec = data->pos_hundredth_sec;
+			store->pos_thousandth_sec = data->pos_thousandth_sec;
+			store->pos_latitude = data->pos_latitude;
+			store->pos_longitude = data->pos_longitude;
+			store->utm_northing = data->utm_northing;
+			store->utm_easting = data->utm_easting;
+			store->utm_zone_lon = data->utm_zone_lon;
+			store->utm_zone = data->utm_zone;
+			store->hemisphere = data->hemisphere;
+			store->ellipsoid = data->ellipsoid;
+			store->pos_spare = data->pos_spare;
+			store->semi_major_axis = data->semi_major_axis;
+			store->other_quality = data->other_quality;
+		}
+
+		/* sound velocity profile */
+		if (store->kind == MB_DATA_VELOCITY_PROFILE) {
+			store->svp_year = data->svp_year;
+			store->svp_month = data->svp_month;
+			store->svp_day = data->svp_day;
+			store->svp_hour = data->svp_hour;
+			store->svp_minute = data->svp_minute;
+			store->svp_second = data->svp_second;
+			store->svp_hundredth_sec = data->svp_hundredth_sec;
+			store->svp_thousandth_sec = data->svp_thousandth_sec;
+			store->svp_num = data->svp_num;
+			for (int i = 0; i < 500; i++) {
+				store->svp_depth[i] = data->svp_depth[i];
+				store->svp_vel[i] = data->svp_vel[i];
+			}
+		}
+
+		/* depth telegram */
+		if (store->kind == MB_DATA_DATA) {
+			store->year = data->year;
+			store->month = data->month;
+			store->day = data->day;
+			store->hour = data->hour;
+			store->minute = data->minute;
+			store->second = data->second;
+			store->hundredth_sec = data->hundredth_sec;
+			store->thousandth_sec = data->thousandth_sec;
+			store->longitude = lon;
+			store->latitude = lat;
+			store->speed = speed / 3.6;
+			store->ping_num = data->ping_num;
+			store->sound_vel = data->sound_vel;
+			store->heading = data->heading;
+			store->pulse_length = data->pulse_length;
+			store->mode = data->mode;
+			store->source_power = data->source_power;
+			store->receiver_gain_stbd = data->receiver_gain_stbd;
+			store->receiver_gain_port = data->receiver_gain_port;
+			store->reserved = data->reserved;
+			store->beams_bath = data->beams_bath;
+			for (int i = 0; i < data->beams_bath; i++) {
+				store->beams[i].bath = data->beams[i].bath;
+				store->beams[i].bath_acrosstrack = data->beams[i].bath_acrosstrack;
+				store->beams[i].bath_alongtrack = data->beams[i].bath_alongtrack;
+				store->beams[i].tt = data->beams[i].tt;
+				store->beams[i].quality = data->beams[i].quality;
+				store->beams[i].amplitude = data->beams[i].amplitude;
+				store->beams[i].time_offset = data->beams[i].time_offset;
+				store->beams[i].heave = data->beams[i].heave;
+				store->beams[i].roll = data->beams[i].roll;
+				store->beams[i].pitch = data->beams[i].pitch;
+				store->beams[i].angle = data->beams[i].angle;
+			}
+		}
 	}
 
 	/* print output debug statements */
@@ -2239,6 +2016,215 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 			status = MB_SUCCESS;
 		}
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_elmk2unb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
+	char *function_name = "mbr_elmk2unb_wr_data";
+	int status = MB_SUCCESS;
+	struct mbf_elmk2unb_struct *data;
+	FILE *mbfp;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_elmk2unb_struct *)data_ptr;
+	mbfp = mb_io_ptr->mbfp;
+
+	if (data->kind == MB_DATA_COMMENT) {
+		status = mbr_elmk2unb_wr_comment(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_PARAMETER) {
+		status = mbr_elmk2unb_wr_parameter(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_NAV) {
+		status = mbr_elmk2unb_wr_pos(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_VELOCITY_PROFILE) {
+		status = mbr_elmk2unb_wr_svp(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_DATA) {
+		status = mbr_elmk2unb_wr_bathgen(verbose, mbfp, data, error);
+	}
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_KIND;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_elmk2unb";
+	int status = MB_SUCCESS;
+	struct mbf_elmk2unb_struct *data;
+	char *data_ptr;
+	struct mbsys_elacmk2_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_elmk2unb_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
+	store = (struct mbsys_elacmk2_struct *)store_ptr;
+
+	/* first translate values from data storage structure */
+	if (store != NULL) {
+		data->kind = store->kind;
+		data->sonar = store->sonar;
+
+		/* parameter telegram */
+		data->par_year = store->par_year;
+		data->par_month = store->par_month;
+		data->par_day = store->par_day;
+		data->par_hour = store->par_hour;
+		data->par_minute = store->par_minute;
+		data->par_second = store->par_second;
+		data->par_hundredth_sec = store->par_hundredth_sec;
+		data->par_thousandth_sec = store->par_thousandth_sec;
+		data->roll_offset = store->roll_offset;
+		data->pitch_offset = store->pitch_offset;
+		data->heading_offset = store->heading_offset;
+		data->time_delay = store->time_delay;
+		data->transducer_port_height = store->transducer_port_height;
+		data->transducer_starboard_height = store->transducer_starboard_height;
+		data->transducer_port_depth = store->transducer_port_depth;
+		data->transducer_starboard_depth = store->transducer_starboard_depth;
+		data->transducer_port_x = store->transducer_port_x;
+		data->transducer_starboard_x = store->transducer_starboard_x;
+		data->transducer_port_y = store->transducer_port_y;
+		data->transducer_starboard_y = store->transducer_starboard_y;
+		data->transducer_port_error = store->transducer_port_error;
+		data->transducer_starboard_error = store->transducer_starboard_error;
+		data->antenna_height = store->antenna_height;
+		data->antenna_x = store->antenna_x;
+		data->antenna_y = store->antenna_y;
+		data->vru_height = store->vru_height;
+		data->vru_x = store->vru_x;
+		data->vru_y = store->vru_y;
+		data->line_number = store->line_number;
+		data->start_or_stop = store->start_or_stop;
+		data->transducer_serial_number = store->transducer_serial_number;
+		for (int i = 0; i < MBF_ELMK2UNB_COMMENT_LENGTH; i++)
+			data->comment[i] = store->comment[i];
+
+		/* position (position telegrams) */
+		data->pos_year = store->pos_year;
+		data->pos_month = store->pos_month;
+		data->pos_day = store->pos_day;
+		data->pos_hour = store->pos_hour;
+		data->pos_minute = store->pos_minute;
+		data->pos_second = store->pos_second;
+		data->pos_hundredth_sec = store->pos_hundredth_sec;
+		data->pos_thousandth_sec = store->pos_thousandth_sec;
+		data->pos_latitude = store->pos_latitude;
+		data->pos_longitude = store->pos_longitude;
+		data->utm_northing = store->utm_northing;
+		data->utm_easting = store->utm_easting;
+		data->utm_zone_lon = store->utm_zone_lon;
+		data->utm_zone = store->utm_zone;
+		data->hemisphere = store->hemisphere;
+		data->ellipsoid = store->ellipsoid;
+		data->pos_spare = store->pos_spare;
+		data->semi_major_axis = store->semi_major_axis;
+		data->other_quality = store->other_quality;
+
+		/* sound velocity profile */
+		data->svp_year = store->svp_year;
+		data->svp_month = store->svp_month;
+		data->svp_day = store->svp_day;
+		data->svp_hour = store->svp_hour;
+		data->svp_minute = store->svp_minute;
+		data->svp_second = store->svp_second;
+		data->svp_hundredth_sec = store->svp_hundredth_sec;
+		data->svp_thousandth_sec = store->svp_thousandth_sec;
+		data->svp_num = store->svp_num;
+		for (int i = 0; i < 500; i++) {
+			data->svp_depth[i] = store->svp_depth[i];
+			data->svp_vel[i] = store->svp_vel[i];
+		}
+
+		/* depth telegram */
+		data->year = store->year;
+		data->month = store->month;
+		data->day = store->day;
+		data->hour = store->hour;
+		data->minute = store->minute;
+		data->second = store->second;
+		data->hundredth_sec = store->hundredth_sec;
+		data->thousandth_sec = store->thousandth_sec;
+		data->ping_num = store->ping_num;
+		data->sound_vel = store->sound_vel;
+		data->heading = store->heading;
+		data->pulse_length = store->pulse_length;
+		data->mode = store->mode;
+		data->source_power = store->source_power;
+		data->receiver_gain_stbd = store->receiver_gain_stbd;
+		data->receiver_gain_port = store->receiver_gain_port;
+		data->reserved = store->reserved;
+		data->beams_bath = store->beams_bath;
+		for (int i = 0; i < store->beams_bath; i++) {
+			data->beams[i].bath = store->beams[i].bath;
+			data->beams[i].bath_acrosstrack = store->beams[i].bath_acrosstrack;
+			data->beams[i].bath_alongtrack = store->beams[i].bath_alongtrack;
+			data->beams[i].tt = store->beams[i].tt;
+			data->beams[i].quality = store->beams[i].quality;
+			data->beams[i].amplitude = store->beams[i].amplitude;
+			data->beams[i].time_offset = store->beams[i].time_offset;
+			data->beams[i].heave = store->beams[i].heave;
+			data->beams[i].roll = store->beams[i].roll;
+			data->beams[i].pitch = store->beams[i].pitch;
+			data->beams[i].angle = store->beams[i].angle;
+		}
+	}
+
+	/* write next data to file */
+	status = mbr_elmk2unb_wr_data(verbose, mbio_ptr, data_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
