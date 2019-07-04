@@ -37,17 +37,6 @@
 #include "mbf_dsl120sf.h"
 #include "mbsys_dsl.h"
 
-int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error);
-int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error);
-int mbr_dsl120sf_rd_dataheader(int verbose, void *mbio_ptr, FILE *mbfp, char *type, int *len, int *hdr_len, int *error);
-int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error);
-int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error);
-int mbr_dsl120sf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error);
-int mbr_dsl120sf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error);
-int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error);
-int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_dsl120sf(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -118,80 +107,6 @@ int mbr_info_dsl120sf(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:         %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_alm_dsl120sf(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_dsl120sf";
-	int status = MB_SUCCESS;
-	struct mbf_dsl120sf_struct *data;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
-	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_dsl120sf_struct);
-	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mbsys_dsl_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-
-	/* initialize everything to zeros */
-	mbr_zero_dsl120sf(verbose, mb_io_ptr->raw_data, error);
-
-	/* get pointer to data descriptor */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dem_dsl120sf(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_dsl120sf";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointers to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mbsys_dsl_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
 	return (status);
@@ -295,11 +210,10 @@ int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_dsl120sf";
+int mbr_alm_dsl120sf(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_alm_dsl120sf";
 	int status = MB_SUCCESS;
 	struct mbf_dsl120sf_struct *data;
-	struct mbsys_dsl_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -307,83 +221,25 @@ int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointers to mbio descriptor and data structures */
+	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* set initial status */
+	status = MB_SUCCESS;
+
+	/* allocate memory for data structure */
+	mb_io_ptr->structure_size = sizeof(struct mbf_dsl120sf_struct);
+	mb_io_ptr->data_structure_size = 0;
+	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status = mbsys_dsl_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+
+	/* initialize everything to zeros */
+	mbr_zero_dsl120sf(verbose, mb_io_ptr->raw_data, error);
+
+	/* get pointer to data descriptor */
 	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_dsl_struct *)store_ptr;
-
-	/* read next data from file */
-	status = mbr_dsl120sf_rd_data(verbose, mbio_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = data->kind;
-
-	/* translate values to dsl data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
-		store->kind = data->kind;
-		store->rec_type = data->rec_type;
-		store->rec_len = data->rec_len;
-		store->rec_hdr_len = data->rec_hdr_len;
-		store->p_flags = data->p_flags;
-		store->num_data_types = data->num_data_types;
-		store->ping = data->ping;
-		for (int i = 0; i < 4; i++)
-			store->sonar_cmd[i] = data->sonar_cmd[i];
-		for (int i = 0; i < 24; i++)
-			store->time_stamp[i] = data->time_stamp[i];
-		store->nav_x = data->nav_x;
-		store->nav_y = data->nav_y;
-		store->depth = data->depth;
-		store->heading = data->heading;
-		store->pitch = data->pitch;
-		store->roll = data->roll;
-		store->alt = data->alt;
-		store->ang_offset = data->ang_offset;
-		store->transmit_pwr = data->transmit_pwr;
-		store->gain_port = data->gain_port;
-		store->gain_starbd = data->gain_starbd;
-		store->pulse_width = data->pulse_width;
-		store->swath_width = data->swath_width;
-		store->side = data->side;
-		store->swapped = data->swapped;
-		store->tv_sec = data->tv_sec;
-		store->tv_usec = data->tv_usec;
-		store->digitalinterface = data->digitalinterface;
-		for (int i = 0; i < 5; i++)
-			store->reserved[i] = data->reserved[i];
-		store->bat_type = data->bat_type;
-		store->bat_len = data->bat_len;
-		store->bat_hdr_len = data->bat_hdr_len;
-		store->bat_num_bins = data->bat_num_bins;
-		store->bat_sampleSize = data->bat_sampleSize;
-		store->bat_p_flags = data->bat_p_flags;
-		store->bat_max_range = data->bat_max_range;
-		for (int i = 0; i < 9; i++)
-			store->bat_future[i] = data->bat_future[i];
-		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
-			store->bat_port[i] = data->bat_port[i];
-			store->bat_stbd[i] = data->bat_stbd[i];
-		}
-		store->amp_type = data->amp_type;
-		store->amp_len = data->amp_len;
-		store->amp_hdr_len = data->amp_hdr_len;
-		store->amp_num_samp = data->amp_num_samp;
-		store->amp_sampleSize = data->amp_sampleSize;
-		store->amp_p_flags = data->amp_p_flags;
-		store->amp_max_range = data->amp_max_range;
-		store->amp_channel = data->amp_channel;
-		for (int i = 0; i < 8; i++)
-			store->amp_future[i] = data->amp_future[i];
-		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
-			store->amp_port[i] = data->amp_port[i];
-			store->amp_stbd[i] = data->amp_stbd[i];
-		}
-		strncpy(store->comment, data->comment, MBSYS_DSL_COMMENT_LENGTH - 1);
-	}
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -397,118 +253,9 @@ int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_dsl120sf";
+int mbr_dem_dsl120sf(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_dem_dsl120sf";
 	int status = MB_SUCCESS;
-	struct mbf_dsl120sf_struct *data;
-	struct mbsys_dsl_struct *store;
-	char *data_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	store = (struct mbsys_dsl_struct *)store_ptr;
-
-	/* first translate values from data storage structure */
-	if (store != NULL) {
-		data->kind = store->kind;
-		data->rec_type = store->rec_type;
-		data->rec_len = store->rec_len;
-		data->rec_hdr_len = store->rec_hdr_len;
-		data->p_flags = store->p_flags;
-		data->num_data_types = store->num_data_types;
-		data->ping = store->ping;
-		for (int i = 0; i < 4; i++)
-			data->sonar_cmd[i] = store->sonar_cmd[i];
-		for (int i = 0; i < 24; i++)
-			data->time_stamp[i] = store->time_stamp[i];
-		data->nav_x = store->nav_x;
-		data->nav_y = store->nav_y;
-		data->depth = store->depth;
-		data->heading = store->heading;
-		data->pitch = store->pitch;
-		data->roll = store->roll;
-		data->alt = store->alt;
-		data->ang_offset = store->ang_offset;
-		data->transmit_pwr = store->transmit_pwr;
-		data->gain_port = store->gain_port;
-		data->gain_starbd = store->gain_starbd;
-		data->pulse_width = store->pulse_width;
-		data->swath_width = store->swath_width;
-		data->side = store->side;
-		data->swapped = store->swapped;
-		data->tv_sec = store->tv_sec;
-		data->tv_usec = store->tv_usec;
-		data->digitalinterface = store->digitalinterface;
-		for (int i = 0; i < 5; i++)
-			data->reserved[i] = store->reserved[i];
-		data->bat_type = store->bat_type;
-		data->bat_len = store->bat_len;
-		data->bat_hdr_len = store->bat_hdr_len;
-		data->bat_num_bins = store->bat_num_bins;
-		data->bat_sampleSize = store->bat_sampleSize;
-		data->bat_p_flags = store->bat_p_flags;
-		data->bat_max_range = store->bat_max_range;
-		for (int i = 0; i < 9; i++)
-			data->bat_future[i] = store->bat_future[i];
-		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
-			data->bat_port[i] = store->bat_port[i];
-			data->bat_stbd[i] = store->bat_stbd[i];
-		}
-		data->amp_type = store->amp_type;
-		data->amp_len = store->amp_len;
-		data->amp_hdr_len = store->amp_hdr_len;
-		data->amp_num_samp = store->amp_num_samp;
-		data->amp_sampleSize = store->amp_sampleSize;
-		data->amp_p_flags = store->amp_p_flags;
-		data->amp_max_range = store->amp_max_range;
-		data->amp_channel = store->amp_channel;
-		for (int i = 0; i < 8; i++)
-			data->amp_future[i] = store->amp_future[i];
-		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
-			data->amp_port[i] = store->amp_port[i];
-			data->amp_stbd[i] = store->amp_stbd[i];
-		}
-		strncpy(data->comment, store->comment, MBF_DSL120SF_COMMENT_LENGTH - 1);
-	}
-
-	/* write next data to file */
-	status = mbr_dsl120sf_wr_data(verbose, mbio_ptr, data_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dsl120sf_rd_data";
-	int status = MB_SUCCESS;
-	struct mbf_dsl120sf_struct *data;
-	char *data_ptr;
-	char tag[5];
-	char type[5];
-	int len;
-	int hdr_len;
-	int found;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -518,76 +265,12 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
+	/* get pointers to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-
-	/* read data */
-	if (mb_io_ptr->mbfp != NULL) {
-		/* read next four bytes */
-		found = MB_NO;
-		status = fread(tag, 1, 4, mb_io_ptr->mbfp);
-		if (status == 4)
-			status = MB_SUCCESS;
-		else {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-
-		/* if tag not found read single bytes until found
-		    or end of file */
-		while (found == MB_NO && status == MB_SUCCESS) {
-			/* look for "DSL " tag at start of record */
-			if (strncmp(tag, "DSL ", 4) == 0)
-				found = MB_YES;
-
-			/* read next byte */
-			if (found == MB_NO) {
-				for (int i = 0; i < 3; i++)
-					tag[i] = tag[i + 1];
-				status = fread(&tag[3], 1, 1, mb_io_ptr->mbfp);
-				if (status == 1)
-					status = MB_SUCCESS;
-				else {
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-				}
-			}
-		}
-
-		/* now read the rest of the header */
-		if (status == MB_SUCCESS)
-			status = mbr_dsl120sf_rd_header(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
-
-		/* now read each of the data records */
-		if (status == MB_SUCCESS)
-			for (int i = 0; i < data->num_data_types; i++) {
-				status = mbr_dsl120sf_rd_dataheader(verbose, mbio_ptr, mb_io_ptr->mbfp, type, &len, &hdr_len, error);
-
-				if (status == MB_SUCCESS && strncmp(type, "BATH", 4) == 0) {
-					data->bat_len = len;
-					data->bat_hdr_len = hdr_len;
-					status = mbr_dsl120sf_rd_bath(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
-					if (status == MB_SUCCESS)
-						data->kind = MB_DATA_DATA;
-				}
-				else if (status == MB_SUCCESS && strncmp(type, "AMP ", 4) == 0) {
-					data->amp_len = len;
-					data->amp_hdr_len = hdr_len;
-					status = mbr_dsl120sf_rd_amp(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
-					if (status == MB_SUCCESS)
-						data->kind = MB_DATA_DATA;
-				}
-				else if (status == MB_SUCCESS && strncmp(type, "COMM", 4) == 0) {
-					status = mbr_dsl120sf_rd_comment(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
-					if (status == MB_SUCCESS)
-						data->kind = MB_DATA_COMMENT;
-				}
-			}
-	}
+	/* deallocate memory for data descriptor */
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status = mbsys_dsl_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1037,10 +720,16 @@ int mbr_dsl120sf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120sf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error) {
-	char *function_name = "mbr_dsl120sf_wr_data";
+int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_dsl120sf_rd_data";
 	int status = MB_SUCCESS;
 	struct mbf_dsl120sf_struct *data;
+	char *data_ptr;
+	char tag[5];
+	char type[5];
+	int len;
+	int hdr_len;
+	int found;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1048,30 +737,179 @@ int mbr_dsl120sf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
 	}
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)data_ptr;
+	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
 
-	if (data->kind == MB_DATA_COMMENT) {
-		status = mbr_dsl120sf_wr_comment(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
-	}
-	else if (data->kind == MB_DATA_DATA) {
-		status = mbr_dsl120sf_wr_bathamp(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
-	}
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_KIND;
+	/* read data */
+	if (mb_io_ptr->mbfp != NULL) {
+		/* read next four bytes */
+		found = MB_NO;
+		status = fread(tag, 1, 4, mb_io_ptr->mbfp);
+		if (status == 4)
+			status = MB_SUCCESS;
+		else {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+
+		/* if tag not found read single bytes until found
+		    or end of file */
+		while (found == MB_NO && status == MB_SUCCESS) {
+			/* look for "DSL " tag at start of record */
+			if (strncmp(tag, "DSL ", 4) == 0)
+				found = MB_YES;
+
+			/* read next byte */
+			if (found == MB_NO) {
+				for (int i = 0; i < 3; i++)
+					tag[i] = tag[i + 1];
+				status = fread(&tag[3], 1, 1, mb_io_ptr->mbfp);
+				if (status == 1)
+					status = MB_SUCCESS;
+				else {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+				}
+			}
+		}
+
+		/* now read the rest of the header */
+		if (status == MB_SUCCESS)
+			status = mbr_dsl120sf_rd_header(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
+
+		/* now read each of the data records */
+		if (status == MB_SUCCESS)
+			for (int i = 0; i < data->num_data_types; i++) {
+				status = mbr_dsl120sf_rd_dataheader(verbose, mbio_ptr, mb_io_ptr->mbfp, type, &len, &hdr_len, error);
+
+				if (status == MB_SUCCESS && strncmp(type, "BATH", 4) == 0) {
+					data->bat_len = len;
+					data->bat_hdr_len = hdr_len;
+					status = mbr_dsl120sf_rd_bath(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
+					if (status == MB_SUCCESS)
+						data->kind = MB_DATA_DATA;
+				}
+				else if (status == MB_SUCCESS && strncmp(type, "AMP ", 4) == 0) {
+					data->amp_len = len;
+					data->amp_hdr_len = hdr_len;
+					status = mbr_dsl120sf_rd_amp(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
+					if (status == MB_SUCCESS)
+						data->kind = MB_DATA_DATA;
+				}
+				else if (status == MB_SUCCESS && strncmp(type, "COMM", 4) == 0) {
+					status = mbr_dsl120sf_rd_comment(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
+					if (status == MB_SUCCESS)
+						data->kind = MB_DATA_COMMENT;
+				}
+			}
 	}
 
 	/* print output debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_dsl120sf";
+	int status = MB_SUCCESS;
+	struct mbf_dsl120sf_struct *data;
+	struct mbsys_dsl_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_dsl_struct *)store_ptr;
+
+	/* read next data from file */
+	status = mbr_dsl120sf_rd_data(verbose, mbio_ptr, error);
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = data->kind;
+
+	/* translate values to dsl data storage structure */
+	if (status == MB_SUCCESS && store != NULL) {
+		store->kind = data->kind;
+		store->rec_type = data->rec_type;
+		store->rec_len = data->rec_len;
+		store->rec_hdr_len = data->rec_hdr_len;
+		store->p_flags = data->p_flags;
+		store->num_data_types = data->num_data_types;
+		store->ping = data->ping;
+		for (int i = 0; i < 4; i++)
+			store->sonar_cmd[i] = data->sonar_cmd[i];
+		for (int i = 0; i < 24; i++)
+			store->time_stamp[i] = data->time_stamp[i];
+		store->nav_x = data->nav_x;
+		store->nav_y = data->nav_y;
+		store->depth = data->depth;
+		store->heading = data->heading;
+		store->pitch = data->pitch;
+		store->roll = data->roll;
+		store->alt = data->alt;
+		store->ang_offset = data->ang_offset;
+		store->transmit_pwr = data->transmit_pwr;
+		store->gain_port = data->gain_port;
+		store->gain_starbd = data->gain_starbd;
+		store->pulse_width = data->pulse_width;
+		store->swath_width = data->swath_width;
+		store->side = data->side;
+		store->swapped = data->swapped;
+		store->tv_sec = data->tv_sec;
+		store->tv_usec = data->tv_usec;
+		store->digitalinterface = data->digitalinterface;
+		for (int i = 0; i < 5; i++)
+			store->reserved[i] = data->reserved[i];
+		store->bat_type = data->bat_type;
+		store->bat_len = data->bat_len;
+		store->bat_hdr_len = data->bat_hdr_len;
+		store->bat_num_bins = data->bat_num_bins;
+		store->bat_sampleSize = data->bat_sampleSize;
+		store->bat_p_flags = data->bat_p_flags;
+		store->bat_max_range = data->bat_max_range;
+		for (int i = 0; i < 9; i++)
+			store->bat_future[i] = data->bat_future[i];
+		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+			store->bat_port[i] = data->bat_port[i];
+			store->bat_stbd[i] = data->bat_stbd[i];
+		}
+		store->amp_type = data->amp_type;
+		store->amp_len = data->amp_len;
+		store->amp_hdr_len = data->amp_hdr_len;
+		store->amp_num_samp = data->amp_num_samp;
+		store->amp_sampleSize = data->amp_sampleSize;
+		store->amp_p_flags = data->amp_p_flags;
+		store->amp_max_range = data->amp_max_range;
+		store->amp_channel = data->amp_channel;
+		for (int i = 0; i < 8; i++)
+			store->amp_future[i] = data->amp_future[i];
+		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+			store->amp_port[i] = data->amp_port[i];
+			store->amp_stbd[i] = data->amp_stbd[i];
+		}
+		strncpy(store->comment, data->comment, MBSYS_DSL_COMMENT_LENGTH - 1);
 	}
 
 	/* print output debug statements */
@@ -1433,6 +1271,157 @@ int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_dsl120sf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error) {
+	char *function_name = "mbr_dsl120sf_wr_data";
+	int status = MB_SUCCESS;
+	struct mbf_dsl120sf_struct *data;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_dsl120sf_struct *)data_ptr;
+
+	if (data->kind == MB_DATA_COMMENT) {
+		status = mbr_dsl120sf_wr_comment(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
+	}
+	else if (data->kind == MB_DATA_DATA) {
+		status = mbr_dsl120sf_wr_bathamp(verbose, mbio_ptr, mb_io_ptr->mbfp, error);
+	}
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_KIND;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_dsl120sf";
+	int status = MB_SUCCESS;
+	struct mbf_dsl120sf_struct *data;
+	struct mbsys_dsl_struct *store;
+	char *data_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
+	store = (struct mbsys_dsl_struct *)store_ptr;
+
+	/* first translate values from data storage structure */
+	if (store != NULL) {
+		data->kind = store->kind;
+		data->rec_type = store->rec_type;
+		data->rec_len = store->rec_len;
+		data->rec_hdr_len = store->rec_hdr_len;
+		data->p_flags = store->p_flags;
+		data->num_data_types = store->num_data_types;
+		data->ping = store->ping;
+		for (int i = 0; i < 4; i++)
+			data->sonar_cmd[i] = store->sonar_cmd[i];
+		for (int i = 0; i < 24; i++)
+			data->time_stamp[i] = store->time_stamp[i];
+		data->nav_x = store->nav_x;
+		data->nav_y = store->nav_y;
+		data->depth = store->depth;
+		data->heading = store->heading;
+		data->pitch = store->pitch;
+		data->roll = store->roll;
+		data->alt = store->alt;
+		data->ang_offset = store->ang_offset;
+		data->transmit_pwr = store->transmit_pwr;
+		data->gain_port = store->gain_port;
+		data->gain_starbd = store->gain_starbd;
+		data->pulse_width = store->pulse_width;
+		data->swath_width = store->swath_width;
+		data->side = store->side;
+		data->swapped = store->swapped;
+		data->tv_sec = store->tv_sec;
+		data->tv_usec = store->tv_usec;
+		data->digitalinterface = store->digitalinterface;
+		for (int i = 0; i < 5; i++)
+			data->reserved[i] = store->reserved[i];
+		data->bat_type = store->bat_type;
+		data->bat_len = store->bat_len;
+		data->bat_hdr_len = store->bat_hdr_len;
+		data->bat_num_bins = store->bat_num_bins;
+		data->bat_sampleSize = store->bat_sampleSize;
+		data->bat_p_flags = store->bat_p_flags;
+		data->bat_max_range = store->bat_max_range;
+		for (int i = 0; i < 9; i++)
+			data->bat_future[i] = store->bat_future[i];
+		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+			data->bat_port[i] = store->bat_port[i];
+			data->bat_stbd[i] = store->bat_stbd[i];
+		}
+		data->amp_type = store->amp_type;
+		data->amp_len = store->amp_len;
+		data->amp_hdr_len = store->amp_hdr_len;
+		data->amp_num_samp = store->amp_num_samp;
+		data->amp_sampleSize = store->amp_sampleSize;
+		data->amp_p_flags = store->amp_p_flags;
+		data->amp_max_range = store->amp_max_range;
+		data->amp_channel = store->amp_channel;
+		for (int i = 0; i < 8; i++)
+			data->amp_future[i] = store->amp_future[i];
+		for (int i = 0; i < MBSYS_DSL_MAXBEAMS_SIDE; i++) {
+			data->amp_port[i] = store->amp_port[i];
+			data->amp_stbd[i] = store->amp_stbd[i];
+		}
+		strncpy(data->comment, store->comment, MBF_DSL120SF_COMMENT_LENGTH - 1);
+	}
+
+	/* write next data to file */
+	status = mbr_dsl120sf_wr_data(verbose, mbio_ptr, data_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
