@@ -36,8 +36,6 @@
 #include "mbf_em12darw.h"
 #include "mbsys_simrad.h"
 
-int mbr_zero_em12darw(int verbose, char *data_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_em12darw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -113,6 +111,79 @@ int mbr_info_em12darw(int verbose, int *system, int *beams_bath_max, int *beams_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_zero_em12darw(int verbose, char *data_ptr, int *error) {
+	char *function_name = "mbr_zero_em12darw";
+	int status = MB_SUCCESS;
+	struct mbf_em12darw_struct *data;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
+
+	/* get pointer to data descriptor */
+	data = (struct mbf_em12darw_struct *)data_ptr;
+
+	/* initialize everything to zeros */
+	if (data != NULL) {
+		/* record type */
+		data->func = 150;
+
+		/* time */
+		data->year = 0;
+		data->jday = 0;
+		data->minute = 0;
+		data->secs = 0;
+
+		/* navigation */
+		data->latitude = 0.0;
+		data->longitude = 0.0;
+		data->speed = 0.0;
+		data->gyro = 0.0;
+		data->roll = 0.0;
+		data->pitch = 0.0;
+		data->heave = 0.0;
+
+		/* other parameters */
+		data->corflag = 0;
+		data->utm_merd = 0.0;
+		data->utm_zone = 0;
+		data->posq = 0;
+		data->pingno = 0;
+		data->mode = 0;
+		data->depthl = 0.0;
+		data->sndval = 0.0;
+
+		/* beam values */
+		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
+			data->depth[i] = 0;
+			data->distacr[i] = 0;
+			data->distalo[i] = 0;
+			data->range[i] = 0;
+			data->refl[i] = 0;
+			data->beamq[i] = 0;
+		}
+	}
+
+	/* assume success */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_alm_em12darw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_em12darw";
 	int status = MB_SUCCESS;
@@ -178,79 +249,6 @@ int mbr_dem_em12darw(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status = mbsys_simrad_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_zero_em12darw(int verbose, char *data_ptr, int *error) {
-	char *function_name = "mbr_zero_em12darw";
-	int status = MB_SUCCESS;
-	struct mbf_em12darw_struct *data;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
-	}
-
-	/* get pointer to data descriptor */
-	data = (struct mbf_em12darw_struct *)data_ptr;
-
-	/* initialize everything to zeros */
-	if (data != NULL) {
-		/* record type */
-		data->func = 150;
-
-		/* time */
-		data->year = 0;
-		data->jday = 0;
-		data->minute = 0;
-		data->secs = 0;
-
-		/* navigation */
-		data->latitude = 0.0;
-		data->longitude = 0.0;
-		data->speed = 0.0;
-		data->gyro = 0.0;
-		data->roll = 0.0;
-		data->pitch = 0.0;
-		data->heave = 0.0;
-
-		/* other parameters */
-		data->corflag = 0;
-		data->utm_merd = 0.0;
-		data->utm_zone = 0;
-		data->posq = 0;
-		data->pingno = 0;
-		data->mode = 0;
-		data->depthl = 0.0;
-		data->sndval = 0.0;
-
-		/* beam values */
-		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			data->depth[i] = 0;
-			data->distacr[i] = 0;
-			data->distalo[i] = 0;
-			data->range[i] = 0;
-			data->refl[i] = 0;
-			data->beamq[i] = 0;
-		}
-	}
-
-	/* assume success */
-	status = MB_SUCCESS;
-	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
 	if (verbose >= 2) {

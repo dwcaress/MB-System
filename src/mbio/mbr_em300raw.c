@@ -39,76 +39,6 @@
 /* turn on debug statements here */
 // #define MBR_EM300RAW_DEBUG 1
 
-// int mbr_info_em300raw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
-//                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
-//                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
-//                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
-//                       double *beamwidth_ltrack, int *error);
-// int mbr_alm_em300raw(int verbose, void *mbio_ptr, int *error);
-// int mbr_dem_em300raw(int verbose, void *mbio_ptr, int *error);
-// int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-// int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type, short *sonar);
-int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short type, short sonar,
-                          int *version, int *goodend, int *error);
-int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar,
-                                  int *goodend, int *error);
-int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                          int *error);
-int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                         int *error);
-int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                           int *error);
-int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                            int *error);
-int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                        int *error);
-int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                         int *error);
-int mbr_em300raw_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar,
-                                    int *goodend, int *error);
-int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                             int *error);
-int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                        int *error);
-int mbr_em300raw_rd_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                        int *error);
-int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                         int *error);
-int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *match, short sonar,
-                         int version, int *goodend, int *error);
-int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                            int *error);
-int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                             int *error);
-int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                             int *error);
-int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int length, int *match,
-                       int *goodend, int *error);
-int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
-                       int *error);
-int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_em300raw_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_height(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int head, int *error);
-int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-int mbr_em300raw_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int head, int *error);
-int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int head, int *error);
-int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_em300raw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -248,1000 +178,6 @@ int mbr_dem_em300raw(int verbose, void *mbio_ptr, int *error) {
 
 	/* deallocate memory for data descriptor */
 	status = mbsys_simrad2_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_em300raw";
-	int status = MB_SUCCESS;
-	struct mbsys_simrad2_struct *store;
-	struct mbsys_simrad2_attitude_struct *attitude;
-	struct mbsys_simrad2_heading_struct *heading;
-	struct mbsys_simrad2_ssv_struct *ssv;
-	struct mbsys_simrad2_ping_struct *ping;
-	int time_i[7];
-	double ntime_d, ptime_d, atime_d;
-	double bath_time_d, ss_time_d;
-	double rawspeed, pheading;
-	double plon, plat, pspeed, roll, pitch, heave;
-	double att_time_d[MBSYS_SIMRAD2_MAXATTITUDE];
-	double att_roll[MBSYS_SIMRAD2_MAXATTITUDE];
-	double att_pitch[MBSYS_SIMRAD2_MAXATTITUDE];
-	double att_heave[MBSYS_SIMRAD2_MAXATTITUDE];
-	double *pixel_size, *swath_width;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* read next data from file */
-	status = mbr_em300raw_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* get pointers to data structures */
-	store = (struct mbsys_simrad2_struct *)store_ptr;
-	attitude = (struct mbsys_simrad2_attitude_struct *)store->attitude;
-	heading = (struct mbsys_simrad2_heading_struct *)store->heading;
-	ssv = (struct mbsys_simrad2_ssv_struct *)store->ssv;
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
-
-	/* save fix if nav data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_NAV) {
-		/* get nav time */
-		time_i[0] = store->pos_date / 10000;
-		time_i[1] = (store->pos_date % 10000) / 100;
-		time_i[2] = store->pos_date % 100;
-		time_i[3] = store->pos_msec / 3600000;
-		time_i[4] = (store->pos_msec % 3600000) / 60000;
-		time_i[5] = (store->pos_msec % 60000) / 1000;
-		time_i[6] = (store->pos_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &ntime_d);
-
-		/* add latest fix */
-		if (store->pos_longitude != EM2_INVALID_INT && store->pos_latitude != EM2_INVALID_INT)
-			mb_navint_add(verbose, mbio_ptr, ntime_d, (double)(0.0000001 * store->pos_longitude),
-			              (double)(0.00000005 * store->pos_latitude), error);
-	}
-
-	/* save attitude if attitude data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_ATTITUDE) {
-		/* get attitude time */
-		time_i[0] = attitude->att_date / 10000;
-		time_i[1] = (attitude->att_date % 10000) / 100;
-		time_i[2] = attitude->att_date % 100;
-		time_i[3] = attitude->att_msec / 3600000;
-		time_i[4] = (attitude->att_msec % 3600000) / 60000;
-		time_i[5] = (attitude->att_msec % 60000) / 1000;
-		time_i[6] = (attitude->att_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &atime_d);
-
-		/* add latest attitude samples */
-		for (int i = 0; i < MIN(attitude->att_ndata, MBSYS_SIMRAD2_MAXATTITUDE); i++) {
-			att_time_d[i] = (double)(atime_d + 0.001 * attitude->att_time[i]);
-			att_heave[i] = (double)(0.01 * attitude->att_heave[i]);
-			att_roll[i] = (double)(0.01 * attitude->att_roll[i]);
-			att_pitch[i] = (double)(0.01 * attitude->att_pitch[i]);
-		}
-		mb_attint_nadd(verbose, mbio_ptr, attitude->att_ndata, att_time_d, att_heave, att_roll, att_pitch, error);
-	}
-
-	/* if no sidescan read then zero sidescan data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && ping->png_ss_read == MB_NO) {
-		status = mbsys_simrad2_zero_ss(verbose, store_ptr, error);
-	}
-
-	/* else check that bath and sidescan data record time stamps
-	   match for survey data - we can have bath without
-	   sidescan but not sidescan without bath */
-	else if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
-		/* get times of bath and sidescan records */
-		time_i[0] = ping->png_date / 10000;
-		time_i[1] = (ping->png_date % 10000) / 100;
-		time_i[2] = ping->png_date % 100;
-		time_i[3] = ping->png_msec / 3600000;
-		time_i[4] = (ping->png_msec % 3600000) / 60000;
-		time_i[5] = (ping->png_msec % 60000) / 1000;
-		time_i[6] = (ping->png_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &bath_time_d);
-		time_i[0] = ping->png_ss_date / 10000;
-		time_i[1] = (ping->png_ss_date % 10000) / 100;
-		time_i[2] = ping->png_ss_date % 100;
-		time_i[3] = ping->png_ss_msec / 3600000;
-		time_i[4] = (ping->png_ss_msec % 3600000) / 60000;
-		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
-		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &ss_time_d);
-		/* fprintf(stderr,"Check: png_count:%d png_raw3_count:%d png_ss_count:%d    Beams:%d %d %d\n",
-		ping->png_count,ping->png_raw3_count,ping->png_ss_count,ping->png_nbeams,ping->png_raw3_nbeams,ping->png_nbeams_ss);*/
-
-		/* check for time match - if bath newer than
-		   sidescan then zero sidescan,  if sidescan
-		   newer than bath then set error,  if ok then
-		   check that beam ids are the same */
-		if (ping->png_ss_date == 0 || ping->png_nbeams_ss == 0 || bath_time_d > ss_time_d) {
-			status = mbsys_simrad2_zero_ss(verbose, store_ptr, error);
-		}
-		else if (bath_time_d > ss_time_d) {
-			if (verbose > 0)
-				fprintf(stderr, "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan zeroed, bathtime:%f >  sstime:%f\n",
-				        function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], bath_time_d,
-				        ss_time_d);
-			status = mbsys_simrad2_zero_ss(verbose, store_ptr, error);
-		}
-		else if (bath_time_d < ss_time_d) {
-			if (verbose > 0)
-				fprintf(stderr, "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Ping unintelligible bathtime:%f < sstime%f\n",
-				        function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], bath_time_d,
-				        ss_time_d);
-			*error = MB_ERROR_UNINTELLIGIBLE;
-			status = MB_FAILURE;
-		}
-		else {
-			/* check for some indicators of broken records */
-			if (ping->png_nbeams < ping->png_nbeams_ss || ping->png_nbeams > ping->png_nbeams_ss + 1) {
-				if (verbose > 1)
-					fprintf(
-					    stderr,
-					    "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
-					    function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
-					    ping->png_nbeams, ping->png_nbeams_ss);
-			}
-			else if (ping->png_nbeams == ping->png_nbeams_ss) {
-				for (int i = 0; i < ping->png_nbeams; i++) {
-					if (ping->png_beam_num[i] != ping->png_beam_index[i] + 1 &&
-					    ping->png_beam_num[i] != ping->png_beam_index[i] - 1) {
-						if (verbose > 1)
-							fprintf(stderr,
-							        "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: bath and ss beam indexes "
-							        "don't match: : %d %d %d\n",
-							        function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], i,
-							        ping->png_beam_num[i], ping->png_beam_index[i]);
-					}
-				}
-			}
-		}
-	}
-
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
-		/*fprintf(stderr, "mode:%d absorption:%d tran_pulse:%d tran_beam:%d tran_pow:%d rec_beam:%d rec_band:%d rec_gain:%d
-		tvg_cross:%d\n", store->run_mode, store->run_absorption, store->run_tran_pulse, store->run_tran_pow, store->run_rec_beam,
-		store->run_rec_band, store->run_rec_gain, store->run_tvg_cross); fprintf(stderr, "max_range:%d r_zero:%d r_zero_corr:%d
-		tvg_start:%d tvg_stop:%d bsn:%d bso:%d tx:%d tvg_crossover:%d\n", ping->png_max_range, ping->png_r_zero,
-		ping->png_r_zero_corr, ping->png_tvg_start,
-		ping->png_tvg_stop, ping->png_bsn,
-		ping->png_bso, ping->png_tx,
-		ping->png_tvg_crossover);
-		fprintf(stderr, "mode:%d depth:%11f max_range:%d r_zero:%d r_zero_corr:%d bsn:%d bso:%d\n",
-		store->run_mode,
-		0.01 * ping->png_depth_res * ping->png_depth[ping->png_nbeams/2],
-		ping->png_max_range, ping->png_r_zero,
-		ping->png_r_zero_corr, ping->png_bsn,
-		ping->png_bso);*/
-
-		/* get ping time */
-		time_i[0] = ping->png_date / 10000;
-		time_i[1] = (ping->png_date % 10000) / 100;
-		time_i[2] = ping->png_date % 100;
-		time_i[3] = ping->png_msec / 3600000;
-		time_i[4] = (ping->png_msec % 3600000) / 60000;
-		time_i[5] = (ping->png_msec % 60000) / 1000;
-		time_i[6] = (ping->png_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &ptime_d);
-
-		/* interpolate from saved nav */
-		if (store->pos_speed == 0 || store->pos_speed == EM2_INVALID_SHORT)
-			rawspeed = 0.0;
-		else
-			rawspeed = 0.036 * store->pos_speed;
-		pheading = 0.01 * ping->png_heading;
-		mb_navint_interp(verbose, mbio_ptr, ptime_d, pheading, rawspeed, &plon, &plat, &pspeed, error);
-		if (plon == 0.0 && plat == 0.0) {
-			ping->png_longitude = (int)EM2_INVALID_INT;
-			ping->png_latitude = (int)EM2_INVALID_INT;
-		}
-		else {
-			ping->png_longitude = (int)rint(10000000 * plon);
-			ping->png_latitude = (int)rint(20000000 * plat);
-		}
-		ping->png_speed = (int)rint(pspeed / 0.036);
-
-		/* interpolate from saved attitude */
-		mb_attint_interp(verbose, mbio_ptr, ptime_d, &heave, &roll, &pitch, error);
-		ping->png_roll = (int)rint(roll / 0.01);
-		ping->png_pitch = (int)rint(pitch / 0.01);
-		ping->png_heave = (int)rint(heave / 0.01);
-
-		/* generate processed sidescan */
-		ping->png_pixel_size = 0;
-		ping->png_pixels_ss = 0;
-		status = mbsys_simrad2_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
-	}
-
-	if (status == MB_SUCCESS && (store->kind == MB_DATA_NAV || store->kind == MB_DATA_NAV1 || store->kind == MB_DATA_NAV2 ||
-	                             store->kind == MB_DATA_NAV3)) {
-		/* get nav time */
-		time_i[0] = store->pos_date / 10000;
-		time_i[1] = (store->pos_date % 10000) / 100;
-		time_i[2] = store->pos_date % 100;
-		time_i[3] = store->pos_msec / 3600000;
-		time_i[4] = (store->pos_msec % 3600000) / 60000;
-		time_i[5] = (store->pos_msec % 60000) / 1000;
-		time_i[6] = (store->pos_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &ntime_d);
-
-		/* interpolate from saved attitude */
-		mb_attint_interp(verbose, mbio_ptr, ntime_d, &heave, &roll, &pitch, error);
-		store->pos_roll = (int)rint(roll / 0.01);
-		store->pos_pitch = (int)rint(pitch / 0.01);
-		store->pos_heave = (int)rint(heave / 0.01);
-	}
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_em300raw";
-	int status = MB_SUCCESS;
-	struct mbsys_simrad2_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad2_struct *)store_ptr;
-
-	/* write next data to file */
-	status = mbr_em300raw_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_em300raw_rd_data";
-	int status = MB_SUCCESS;
-	struct mbsys_simrad2_struct *store;
-	struct mbsys_simrad2_ping_struct *ping;
-	struct mbsys_simrad2_ping_struct *ping2;
-	struct mbsys_simrad2_extraparameters_struct *extraparameters;
-	FILE *mbfp;
-	int swap = -1;
-	int done;
-	int *databyteswapped;
-	int record_size;
-	int *record_size_save;
-	int bytes_read;
-	char *label;
-	int *label_save_flag;
-	char *record_size_char;
-	short expect;
-	short type;
-	short sonar;
-	int *version;
-	short first_type;
-	short *expect_save;
-	int *expect_save_flag;
-	short *first_type_save;
-	short *typelast;
-	short *sonarlast;
-	int *nbadrec;
-	int *length;
-	int good_end_bytes;
-	int match;
-	int read_len;
-	int skip = 0;
-	char junk;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad2_struct *)store_ptr;
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	ping2 = (struct mbsys_simrad2_ping_struct *)store->ping2;
-	mbfp = mb_io_ptr->mbfp;
-
-	/* get saved values */
-	databyteswapped = (int *)&mb_io_ptr->save10;
-	record_size_save = (int *)&mb_io_ptr->save5;
-	label = (char *)mb_io_ptr->save_label;
-	version = (int *)(&mb_io_ptr->save3);
-	label_save_flag = (int *)&mb_io_ptr->save_label_flag;
-	expect_save_flag = (int *)&mb_io_ptr->save_flag;
-	expect_save = (short *)&mb_io_ptr->save1;
-	first_type_save = (short *)&mb_io_ptr->save2;
-	typelast = (short *)&mb_io_ptr->save6;
-	sonarlast = (short *)&mb_io_ptr->save9;
-	nbadrec = (int *)&mb_io_ptr->save7;
-	length = (int *)&mb_io_ptr->save8;
-	record_size_char = (char *)&record_size;
-	if (*expect_save_flag == MB_YES) {
-		expect = *expect_save;
-		first_type = *first_type_save;
-		*expect_save_flag = MB_NO;
-	}
-	else {
-		expect = EM2_NONE;
-		first_type = EM2_NONE;
-		if (ping != NULL) {
-			ping->png_raw1_read = MB_NO;
-			ping->png_raw2_read = MB_NO;
-			ping->png_ss_read = MB_NO;
-			ping->png_raw_nbeams = 0;
-			ping->png_nbeams_ss = 0;
-		}
-		if (ping2 != NULL) {
-			ping2->png_raw1_read = MB_NO;
-			ping2->png_raw2_read = MB_NO;
-			ping2->png_ss_read = MB_NO;
-			ping2->png_raw_nbeams = 0;
-			ping2->png_nbeams_ss = 0;
-		}
-	}
-
-	/* set file position */
-	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-
-	/* set flag to swap bytes if necessary */
-	swap = *databyteswapped;
-
-	/* loop over reading data until a record is ready for return */
-	done = MB_NO;
-	*error = MB_ERROR_NO_ERROR;
-	while (done == MB_NO) {
-		/* if no label saved get next record label */
-		if (*label_save_flag == MB_NO) {
-			/* read four byte record size */
-			if ((read_len = fread(&record_size, 1, 4, mb_io_ptr->mbfp)) != 4) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-
-			/* read label */
-			if ((read_len = fread(label, 1, 4, mb_io_ptr->mbfp)) != 4) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-
-			/* check label - if not a good label read a byte
-			    at a time until a good label is found */
-			skip = 0;
-			while (status == MB_SUCCESS && mbr_em300raw_chk_label(verbose, mbio_ptr, label, &type, &sonar) != MB_SUCCESS) {
-				/* get next byte */
-				for (int i = 0; i < 3; i++)
-					record_size_char[i] = record_size_char[i + 1];
-				record_size_char[3] = label[0];
-				for (int i = 0; i < 3; i++)
-					label[i] = label[i + 1];
-				if ((read_len = fread(&label[3], 1, 1, mb_io_ptr->mbfp)) != 1) {
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-				}
-				skip++;
-			}
-
-			/* report problem */
-			if (skip > 0 && verbose > 0) {
-				if (*nbadrec == 0)
-					fprintf(stderr, "\nThe MBF_EM300RAW module skipped data between identified\n\
-data records. Something is broken, most probably the data...\n\
-However, the data may include a data record type that we\n\
-haven't seen yet, or there could be an error in the code.\n\
-If skipped data are reported multiple times, \n\
-we recommend you send a data sample and problem \n\
-description to the MB-System team \n\
-(caress@mbari.org and dale@ldeo.columbia.edu)\n\
-Have a nice day...\n");
-				fprintf(stderr, "MBF_EM300RAW skipped %d bytes between records %4.4hX:%d and %4.4hX:%d\n", skip, *typelast,
-				        *typelast, type, type);
-				(*nbadrec)++;
-			}
-			*typelast = type;
-			*sonarlast = sonar;
-
-			/* set flag to swap MBR_EM300RAW_DEBUGbytes if necessary */
-			swap = *databyteswapped;
-
-			/* get record_size */
-			if (*databyteswapped != mb_io_ptr->byteswapped)
-				record_size = mb_swap_int(record_size);
-			*record_size_save = record_size;
-		}
-
-		/* else use saved label */
-		else {
-			*label_save_flag = MB_NO;
-			type = *typelast;
-			sonar = *sonarlast;
-			record_size = *record_size_save;
-		}
-
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "\nstart of mbr_em300raw_rd_data loop:\n");
-		fprintf(stderr, "skip:%d expect:%x type:%x first_type:%x sonar:%d recsize:%u done:%d\n", skip, expect, type, first_type,
-		        sonar, *record_size_save, done);
-#endif
-
-		/* allocate secondary data structure for
-		    extraparameters data if needed */
-		if (status == MB_SUCCESS && (type == EM2_EXTRAPARAMETERS)) {
-			if (store->extraparameters == NULL) {
-				status = mbsys_simrad2_extraparameters_alloc(verbose, mbio_ptr, store_ptr, error);
-			}
-			if (status == MB_SUCCESS && store->extraparameters != NULL) {
-				extraparameters = (struct mbsys_simrad2_extraparameters_struct *)store->extraparameters;
-				extraparameters->xtr_data_size = *record_size_save - EM2_EXTRAPARAMETERS_HEADER_SIZE - 8;
-				if (extraparameters->xtr_data_size > extraparameters->xtr_nalloc) {
-					status = mb_reallocd(verbose, __FILE__, __LINE__, extraparameters->xtr_data_size,
-					                     (void **)&extraparameters->xtr_data, error);
-					if (status == MB_SUCCESS)
-						extraparameters->xtr_nalloc = extraparameters->xtr_data_size;
-					else
-						extraparameters->xtr_nalloc = 0;
-				}
-			}
-		}
-
-		/* allocate secondary data structure for
-		    heading data if needed */
-		if (status == MB_SUCCESS && (type == EM2_HEADING) && store->heading == NULL) {
-			status = mbsys_simrad2_heading_alloc(verbose, mbio_ptr, store_ptr, error);
-		}
-
-		/* allocate secondary data structure for
-		    attitude data if needed */
-		if (status == MB_SUCCESS && (type == EM2_ATTITUDE) && store->attitude == NULL) {
-			status = mbsys_simrad2_attitude_alloc(verbose, mbio_ptr, store_ptr, error);
-		}
-
-		/* allocate secondary data structure for
-		    ssv data if needed */
-		if (status == MB_SUCCESS && (type == EM2_SSV) && store->ssv == NULL) {
-			status = mbsys_simrad2_ssv_alloc(verbose, mbio_ptr, store_ptr, error);
-		}
-
-		/* allocate secondary data structure for
-		    tilt data if needed */
-		if (status == MB_SUCCESS && (type == EM2_TILT) && store->tilt == NULL) {
-			status = mbsys_simrad2_tilt_alloc(verbose, mbio_ptr, store_ptr, error);
-		}
-
-		/* allocate secondary data structure for
-		    survey data if needed */
-		if (status == MB_SUCCESS &&
-		    (type == EM2_BATH || type == EM2_RAWBEAM || type == EM2_RAWBEAM2 || type == EM2_RAWBEAM3 || type == EM2_SS)) {
-			if (store->ping == NULL)
-				status = mbsys_simrad2_survey_alloc(verbose, mbio_ptr, store_ptr, error);
-			ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-			ping2 = (struct mbsys_simrad2_ping_struct *)store->ping2;
-		}
-
-		/* allocate secondary data structure for
-		    water column data if needed */
-		if (status == MB_SUCCESS && (type == EM2_WATERCOLUMN)) {
-			if (store->wc == NULL)
-				status = mbsys_simrad2_wc_alloc(verbose, mbio_ptr, store_ptr, error);
-		}
-
-		/* read the appropriate data records */
-		if (status == MB_FAILURE && expect == EM2_NONE) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call nothing, read failure, no expect\n");
-#endif
-			done = MB_YES;
-			record_size = 0;
-			*record_size_save = record_size;
-		}
-		else if (status == MB_FAILURE && expect != EM2_NONE) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call nothing, read failure, expect %x\n", expect);
-#endif
-			done = MB_YES;
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-		else if (type != EM2_STOP2 && type != EM2_OFF && type != EM2_ON && type != EM2_EXTRAPARAMETERS && type != EM2_ATTITUDE &&
-		         type != EM2_CLOCK && type != EM2_BATH && type != EM2_SBDEPTH && type != EM2_RAWBEAM && type != EM2_SSV &&
-		         type != EM2_HEADING && type != EM2_START && type != EM2_TILT && type != EM2_CBECHO && type != EM2_POS &&
-		         type != EM2_RUN_PARAMETER && type != EM2_SS && type != EM2_TIDE && type != EM2_SVP2 && type != EM2_SVP &&
-		         type != EM2_SSPINPUT && type != EM2_RAWBEAM2 && type != EM2_RAWBEAM3 && type != EM2_HEIGHT && type != EM2_STOP &&
-		         type != EM2_WATERCOLUMN && type != EM2_REMOTE && type != EM2_SSP && type != EM2_BATH_MBA && type != EM2_SS_MBA) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call nothing, try again\n");
-#endif
-			done = MB_NO;
-		}
-		else if ((type == EM2_START || type == EM2_STOP) && expect != EM2_NONE) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, type);
-#endif
-			done = MB_YES;
-			expect = EM2_NONE;
-			type = first_type;
-			*label_save_flag = MB_YES;
-			store->kind = MB_DATA_DATA;
-		}
-		else if (type == EM2_START || type == EM2_STOP) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_start type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_start(verbose, mbfp, swap, store, type, sonar, version, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_RUN_PARAMETER) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_run_parameter type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_run_parameter(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_CLOCK) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_clock type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_clock(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_TIDE) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_tide type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_tide(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_HEIGHT) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_height type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_height(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_HEADING) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_heading type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_heading(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_SSV) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_ssv type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_ssv(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_TILT) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_tilt type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_tilt(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_EXTRAPARAMETERS) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_extraparameters type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_extraparameters(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_ATTITUDE) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_attitude type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_attitude(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_POS) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_pos type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_pos(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_SVP) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_svp type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_svp(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_SVP2) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_svp2 type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_svp2(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (type == EM2_BATH && sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2) {
-			if (expect == EM2_SS && store->ping->png_count == store->ping2->png_count &&
-			    store->ping->png_serial != store->ping2->png_serial) {
-#ifdef MBR_EM300RAW_DEBUG
-				fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, type);
-#endif
-				done = MB_YES;
-				expect = EM2_NONE;
-				type = first_type;
-				*label_save_flag = MB_YES;
-				store->kind = MB_DATA_DATA;
-			}
-			else {
-#ifdef MBR_EM300RAW_DEBUG
-				fprintf(stderr, "call mbr_em300raw_rd_bath type %x\n", type);
-#endif
-				status = mbr_em300raw_rd_bath(verbose, mbfp, swap, store, &match, sonar, *version, &good_end_bytes, error);
-				if (status == MB_SUCCESS) {
-					if (first_type == EM2_NONE || match == MB_NO || store->ping->png_count != store->ping2->png_count ||
-					    store->ping->png_serial != store->ping2->png_serial) {
-						done = MB_NO;
-						first_type = EM2_BATH;
-						expect = EM2_SS;
-					}
-					else {
-						done = MB_YES;
-						expect = EM2_NONE;
-					}
-				}
-			}
-		}
-		else if (type == EM2_BATH && expect == EM2_SS) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, type);
-#endif
-			done = MB_YES;
-			expect = EM2_NONE;
-			type = first_type;
-			*label_save_flag = MB_YES;
-			store->kind = MB_DATA_DATA;
-		}
-		else if (type == EM2_BATH) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_bath type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_bath(verbose, mbfp, swap, store, &match, sonar, *version, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				if (first_type == EM2_NONE || match == MB_NO) {
-					done = MB_NO;
-					first_type = EM2_BATH;
-					expect = EM2_SS;
-				}
-				else {
-					done = MB_YES;
-					expect = EM2_NONE;
-				}
-			}
-		}
-		else if (type == EM2_RAWBEAM) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_rawbeam type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_rawbeam(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS)
-				ping->png_raw1_read = MB_YES;
-			if (expect == EM2_SS && ping->png_nbeams == 0) {
-				done = MB_YES;
-				expect = EM2_NONE;
-			}
-		}
-		else if (type == EM2_RAWBEAM2) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_rawbeam2 type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_rawbeam2(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS)
-				ping->png_raw2_read = MB_YES;
-			if (expect == EM2_SS && ping->png_nbeams == 0) {
-				done = MB_YES;
-				expect = EM2_NONE;
-			}
-		}
-		else if (type == EM2_RAWBEAM3 && sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_rawbeam3 type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_rawbeam3(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS)
-				ping->png_raw3_read = MB_YES;
-		}
-		else if (type == EM2_RAWBEAM3) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_rawbeam3 type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_rawbeam3(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS)
-				ping->png_raw3_read = MB_YES;
-			if (expect == EM2_SS && ping->png_nbeams == 0) {
-				done = MB_YES;
-				expect = EM2_NONE;
-			}
-		}
-		else if (type == EM2_SS && sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_ss a type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_ss(verbose, mbfp, swap, store, sonar, *length, &match, &good_end_bytes, error);
-			if (status == MB_SUCCESS)
-				ping->png_ss_read = MB_YES;
-			if (status == MB_SUCCESS && ping->png_count == store->ping2->png_count && ping->png_count == ping->png_raw3_count &&
-			    ping->png_count == ping->png_ss_count && store->ping2->png_count == store->ping2->png_raw3_count &&
-			    store->ping2->png_count == store->ping2->png_ss_count) {
-				done = MB_YES;
-				expect = EM2_NONE;
-			}
-		}
-		else if (type == EM2_SS && expect != EM2_NONE && expect != EM2_SS) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, type);
-#endif
-			done = MB_YES;
-			expect = EM2_NONE;
-			type = first_type;
-			*label_save_flag = MB_YES;
-			store->kind = MB_DATA_DATA;
-		}
-		else if (type == EM2_SS) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_ss b type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_ss(verbose, mbfp, swap, store, sonar, *length, &match, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				ping->png_ss_read = MB_YES;
-				if (first_type == EM2_NONE || match == MB_NO) {
-					done = MB_NO;
-					first_type = EM2_SS;
-					expect = EM2_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM2_NONE;
-				}
-			}
-
-			/* salvage bath even if sidescan is corrupt */
-			else {
-				if (first_type == EM2_BATH && match == MB_YES) {
-					status = MB_SUCCESS;
-					done = MB_YES;
-					expect = EM2_NONE;
-				}
-			}
-		}
-		else if (type == EM2_WATERCOLUMN) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_rd_wc type %x\n", type);
-#endif
-			status = mbr_em300raw_rd_wc(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				if (expect != EM2_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "skip over %d bytes of unsupported datagram type %x\n", *record_size_save, type);
-#endif
-			for (int i = 0; i < *record_size_save - 4; i++) {
-				if ((read_len = fread(&junk, 1, 1, mb_io_ptr->mbfp)) != 1) {
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-					expect = EM2_NONE;
-				}
-			}
-			done = MB_NO;
-		}
-
-		/* bail out if there is an error */
-		if (status == MB_FAILURE)
-			done = MB_YES;
-
-		/* if necessary read over unread but expected bytes */
-		bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
-		if (*label_save_flag == MB_NO && good_end_bytes == MB_NO && bytes_read < record_size) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "skip over %d unread bytes of supported datagram type %x\n", record_size - bytes_read, type);
-#endif
-			for (int i = 0; i < record_size - bytes_read; i++) {
-				if ((read_len = fread(&junk, 1, 1, mb_io_ptr->mbfp)) != 1) {
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-					expect = EM2_NONE;
-				}
-			}
-		}
-
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n", record_size,
-		        ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
-		fprintf(stderr, "done:%d expect:%x status:%d error:%d\n", done, expect, status, *error);
-		fprintf(stderr, "end of mbr_em300raw_rd_data loop:\n\n");
-#endif
-
-		/* get file position */
-		if (*label_save_flag == MB_YES)
-			mb_io_ptr->file_bytes = ftell(mbfp) - 2;
-		else
-			mb_io_ptr->file_bytes = ftell(mbfp);
-	}
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -4597,13 +3533,40 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_em300raw_wr_data";
+int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_em300raw_rd_data";
 	int status = MB_SUCCESS;
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
+	struct mbsys_simrad2_ping_struct *ping2;
+	struct mbsys_simrad2_extraparameters_struct *extraparameters;
 	FILE *mbfp;
-	int swap;
+	int swap = -1;
+	int done;
+	int *databyteswapped;
+	int record_size;
+	int *record_size_save;
+	int bytes_read;
+	char *label;
+	int *label_save_flag;
+	char *record_size_char;
+	short expect;
+	short type;
+	short sonar;
+	int *version;
+	short first_type;
+	short *expect_save;
+	int *expect_save_flag;
+	short *first_type_save;
+	short *typelast;
+	short *sonarlast;
+	int *nbadrec;
+	int *length;
+	int good_end_bytes;
+	int match;
+	int read_len;
+	int skip = 0;
+	char junk;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -4620,184 +3583,902 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get pointer to raw data structure */
 	store = (struct mbsys_simrad2_struct *)store_ptr;
 	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+	ping2 = (struct mbsys_simrad2_ping_struct *)store->ping2;
 	mbfp = mb_io_ptr->mbfp;
 
-#ifdef MBR_EM300RAW_DEBUG
-	fprintf(stderr, "\nstart of mbr_em300raw_wr_data:\n");
-	fprintf(stderr, "kind:%d %d type:%x\n", store->kind, mb_io_ptr->new_kind, store->type);
-#endif
-
-	/* set swap flag */
-	swap = MB_NO;
-
-	if (store->kind == MB_DATA_COMMENT || store->kind == MB_DATA_START || store->kind == MB_DATA_STOP) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_start kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_start(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_RUN_PARAMETER) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_run_parameter kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_run_parameter(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_CLOCK) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_clock kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_clock(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_TIDE) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_tide kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_tide(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_HEIGHT) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_height kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_height(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_HEADING) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_heading kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_heading(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_SSV) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_ssv kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_ssv(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_TILT) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_tilt kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_tilt(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_PARAMETER) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_extraparameters kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_extraparameters(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_ATTITUDE) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_attitude kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_attitude(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_NAV || store->kind == MB_DATA_NAV1 || store->kind == MB_DATA_NAV2 ||
-	         store->kind == MB_DATA_NAV3) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_pos kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_pos(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_VELOCITY_PROFILE) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_svp kind:%d type %x\n", store->kind, store->type);
-#endif
-		if (store->type == EM2_SVP)
-			status = mbr_em300raw_wr_svp(verbose, mbfp, swap, store, error);
-		else
-			status = mbr_em300raw_wr_svp2(verbose, mbfp, swap, store, error);
-	}
-	else if (store->kind == MB_DATA_DATA) {
-/* write out data from first head for all sonars */
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_bath kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_bath(verbose, mbfp, swap, store, 0, error);
-		if (ping->png_raw1_read == MB_YES) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
-#endif
-			status = mbr_em300raw_wr_rawbeam(verbose, mbfp, swap, store, error);
-		}
-		if (ping->png_raw2_read == MB_YES) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_wr_rawbeam2 kind:%d type %x\n", store->kind, store->type);
-#endif
-			status = mbr_em300raw_wr_rawbeam2(verbose, mbfp, swap, store, error);
-		}
-		if (ping->png_raw3_read == MB_YES) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_wr_rawbeam3 kind:%d type %x\n", store->kind, store->type);
-#endif
-			status = mbr_em300raw_wr_rawbeam3(verbose, mbfp, swap, store, 0, error);
-		}
-#ifdef MBR_EM300RAW_DEBUG
-		if (ping->png_raw1_read == MB_NO && ping->png_raw2_read == MB_NO && ping->png_raw3_read == MB_NO)
-			fprintf(stderr, "NOT call mbr_em300raw_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
-#endif
-		if (ping->png_ss_read == MB_YES) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_wr_ss kind:%d type %x\n", store->kind, store->type);
-#endif
-			status = mbr_em300raw_wr_ss(verbose, mbfp, swap, store, 0, error);
-		}
-#ifdef MBR_EM300RAW_DEBUG
-		else
-			fprintf(stderr, "NOT call mbr_em300raw_wr_ss kind:%d type %x\n", store->kind, store->type);
-#endif
-
-		/* write out data from second head for EM2002 */
-		if (store->sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2 && store->ping2 != NULL &&
-		    store->ping2->png_count == store->ping->png_count) {
-#ifdef MBR_EM300RAW_DEBUG
-			fprintf(stderr, "call mbr_em300raw_wr_bath kind:%d type %x\n", store->kind, store->type);
-#endif
-			status = mbr_em300raw_wr_bath(verbose, mbfp, swap, store, 1, error);
-			if (ping->png_raw3_read == MB_YES) {
-#ifdef MBR_EM300RAW_DEBUG
-				fprintf(stderr, "call mbr_em300raw_wr_rawbeam3 kind:%d type %x\n", store->kind, store->type);
-#endif
-				status = mbr_em300raw_wr_rawbeam3(verbose, mbfp, swap, store, 1, error);
-			}
-#ifdef MBR_EM300RAW_DEBUG
-			if (ping->png_raw3_read == MB_NO)
-				fprintf(stderr, "NOT call mbr_em300raw_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
-#endif
-			if (ping->png_ss_read == MB_YES) {
-#ifdef MBR_EM300RAW_DEBUG
-				fprintf(stderr, "call mbr_em300raw_wr_ss kind:%d type %x\n", store->kind, store->type);
-#endif
-				status = mbr_em300raw_wr_ss(verbose, mbfp, swap, store, 1, error);
-			}
-#ifdef MBR_EM300RAW_DEBUG
-			else
-				fprintf(stderr, "NOT call mbr_em300raw_wr_ss kind:%d type %x\n", store->kind, store->type);
-#endif
-		}
-	}
-	else if (store->kind == MB_DATA_WATER_COLUMN) {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call mbr_em300raw_wr_wc kind:%d type %x\n", store->kind, store->type);
-#endif
-		status = mbr_em300raw_wr_wc(verbose, mbfp, swap, store, error);
+	/* get saved values */
+	databyteswapped = (int *)&mb_io_ptr->save10;
+	record_size_save = (int *)&mb_io_ptr->save5;
+	label = (char *)mb_io_ptr->save_label;
+	version = (int *)(&mb_io_ptr->save3);
+	label_save_flag = (int *)&mb_io_ptr->save_label_flag;
+	expect_save_flag = (int *)&mb_io_ptr->save_flag;
+	expect_save = (short *)&mb_io_ptr->save1;
+	first_type_save = (short *)&mb_io_ptr->save2;
+	typelast = (short *)&mb_io_ptr->save6;
+	sonarlast = (short *)&mb_io_ptr->save9;
+	nbadrec = (int *)&mb_io_ptr->save7;
+	length = (int *)&mb_io_ptr->save8;
+	record_size_char = (char *)&record_size;
+	if (*expect_save_flag == MB_YES) {
+		expect = *expect_save;
+		first_type = *first_type_save;
+		*expect_save_flag = MB_NO;
 	}
 	else {
-#ifdef MBR_EM300RAW_DEBUG
-		fprintf(stderr, "call nothing bad kind: %d type %x\n", store->kind, store->type);
-#endif
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_KIND;
+		expect = EM2_NONE;
+		first_type = EM2_NONE;
+		if (ping != NULL) {
+			ping->png_raw1_read = MB_NO;
+			ping->png_raw2_read = MB_NO;
+			ping->png_ss_read = MB_NO;
+			ping->png_raw_nbeams = 0;
+			ping->png_nbeams_ss = 0;
+		}
+		if (ping2 != NULL) {
+			ping2->png_raw1_read = MB_NO;
+			ping2->png_raw2_read = MB_NO;
+			ping2->png_ss_read = MB_NO;
+			ping2->png_raw_nbeams = 0;
+			ping2->png_nbeams_ss = 0;
+		}
 	}
 
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	/* set flag to swap bytes if necessary */
+	swap = *databyteswapped;
+
+	/* loop over reading data until a record is ready for return */
+	done = MB_NO;
+	*error = MB_ERROR_NO_ERROR;
+	while (done == MB_NO) {
+		/* if no label saved get next record label */
+		if (*label_save_flag == MB_NO) {
+			/* read four byte record size */
+			if ((read_len = fread(&record_size, 1, 4, mb_io_ptr->mbfp)) != 4) {
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+
+			/* read label */
+			if ((read_len = fread(label, 1, 4, mb_io_ptr->mbfp)) != 4) {
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+
+			/* check label - if not a good label read a byte
+			    at a time until a good label is found */
+			skip = 0;
+			while (status == MB_SUCCESS && mbr_em300raw_chk_label(verbose, mbio_ptr, label, &type, &sonar) != MB_SUCCESS) {
+				/* get next byte */
+				for (int i = 0; i < 3; i++)
+					record_size_char[i] = record_size_char[i + 1];
+				record_size_char[3] = label[0];
+				for (int i = 0; i < 3; i++)
+					label[i] = label[i + 1];
+				if ((read_len = fread(&label[3], 1, 1, mb_io_ptr->mbfp)) != 1) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+				}
+				skip++;
+			}
+
+			/* report problem */
+			if (skip > 0 && verbose > 0) {
+				if (*nbadrec == 0)
+					fprintf(stderr, "\nThe MBF_EM300RAW module skipped data between identified\n\
+data records. Something is broken, most probably the data...\n\
+However, the data may include a data record type that we\n\
+haven't seen yet, or there could be an error in the code.\n\
+If skipped data are reported multiple times, \n\
+we recommend you send a data sample and problem \n\
+description to the MB-System team \n\
+(caress@mbari.org and dale@ldeo.columbia.edu)\n\
+Have a nice day...\n");
+				fprintf(stderr, "MBF_EM300RAW skipped %d bytes between records %4.4hX:%d and %4.4hX:%d\n", skip, *typelast,
+				        *typelast, type, type);
+				(*nbadrec)++;
+			}
+			*typelast = type;
+			*sonarlast = sonar;
+
+			/* set flag to swap MBR_EM300RAW_DEBUGbytes if necessary */
+			swap = *databyteswapped;
+
+			/* get record_size */
+			if (*databyteswapped != mb_io_ptr->byteswapped)
+				record_size = mb_swap_int(record_size);
+			*record_size_save = record_size;
+		}
+
+		/* else use saved label */
+		else {
+			*label_save_flag = MB_NO;
+			type = *typelast;
+			sonar = *sonarlast;
+			record_size = *record_size_save;
+		}
+
 #ifdef MBR_EM300RAW_DEBUG
-	fprintf(stderr, "status:%d error:%d\n", status, *error);
-	fprintf(stderr, "end of mbr_em300raw_wr_data:\n");
+		fprintf(stderr, "\nstart of mbr_em300raw_rd_data loop:\n");
+		fprintf(stderr, "skip:%d expect:%x type:%x first_type:%x sonar:%d recsize:%u done:%d\n", skip, expect, type, first_type,
+		        sonar, *record_size_save, done);
 #endif
+
+		/* allocate secondary data structure for
+		    extraparameters data if needed */
+		if (status == MB_SUCCESS && (type == EM2_EXTRAPARAMETERS)) {
+			if (store->extraparameters == NULL) {
+				status = mbsys_simrad2_extraparameters_alloc(verbose, mbio_ptr, store_ptr, error);
+			}
+			if (status == MB_SUCCESS && store->extraparameters != NULL) {
+				extraparameters = (struct mbsys_simrad2_extraparameters_struct *)store->extraparameters;
+				extraparameters->xtr_data_size = *record_size_save - EM2_EXTRAPARAMETERS_HEADER_SIZE - 8;
+				if (extraparameters->xtr_data_size > extraparameters->xtr_nalloc) {
+					status = mb_reallocd(verbose, __FILE__, __LINE__, extraparameters->xtr_data_size,
+					                     (void **)&extraparameters->xtr_data, error);
+					if (status == MB_SUCCESS)
+						extraparameters->xtr_nalloc = extraparameters->xtr_data_size;
+					else
+						extraparameters->xtr_nalloc = 0;
+				}
+			}
+		}
+
+		/* allocate secondary data structure for
+		    heading data if needed */
+		if (status == MB_SUCCESS && (type == EM2_HEADING) && store->heading == NULL) {
+			status = mbsys_simrad2_heading_alloc(verbose, mbio_ptr, store_ptr, error);
+		}
+
+		/* allocate secondary data structure for
+		    attitude data if needed */
+		if (status == MB_SUCCESS && (type == EM2_ATTITUDE) && store->attitude == NULL) {
+			status = mbsys_simrad2_attitude_alloc(verbose, mbio_ptr, store_ptr, error);
+		}
+
+		/* allocate secondary data structure for
+		    ssv data if needed */
+		if (status == MB_SUCCESS && (type == EM2_SSV) && store->ssv == NULL) {
+			status = mbsys_simrad2_ssv_alloc(verbose, mbio_ptr, store_ptr, error);
+		}
+
+		/* allocate secondary data structure for
+		    tilt data if needed */
+		if (status == MB_SUCCESS && (type == EM2_TILT) && store->tilt == NULL) {
+			status = mbsys_simrad2_tilt_alloc(verbose, mbio_ptr, store_ptr, error);
+		}
+
+		/* allocate secondary data structure for
+		    survey data if needed */
+		if (status == MB_SUCCESS &&
+		    (type == EM2_BATH || type == EM2_RAWBEAM || type == EM2_RAWBEAM2 || type == EM2_RAWBEAM3 || type == EM2_SS)) {
+			if (store->ping == NULL)
+				status = mbsys_simrad2_survey_alloc(verbose, mbio_ptr, store_ptr, error);
+			ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+			ping2 = (struct mbsys_simrad2_ping_struct *)store->ping2;
+		}
+
+		/* allocate secondary data structure for
+		    water column data if needed */
+		if (status == MB_SUCCESS && (type == EM2_WATERCOLUMN)) {
+			if (store->wc == NULL)
+				status = mbsys_simrad2_wc_alloc(verbose, mbio_ptr, store_ptr, error);
+		}
+
+		/* read the appropriate data records */
+		if (status == MB_FAILURE && expect == EM2_NONE) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call nothing, read failure, no expect\n");
+#endif
+			done = MB_YES;
+			record_size = 0;
+			*record_size_save = record_size;
+		}
+		else if (status == MB_FAILURE && expect != EM2_NONE) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call nothing, read failure, expect %x\n", expect);
+#endif
+			done = MB_YES;
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+		}
+		else if (type != EM2_STOP2 && type != EM2_OFF && type != EM2_ON && type != EM2_EXTRAPARAMETERS && type != EM2_ATTITUDE &&
+		         type != EM2_CLOCK && type != EM2_BATH && type != EM2_SBDEPTH && type != EM2_RAWBEAM && type != EM2_SSV &&
+		         type != EM2_HEADING && type != EM2_START && type != EM2_TILT && type != EM2_CBECHO && type != EM2_POS &&
+		         type != EM2_RUN_PARAMETER && type != EM2_SS && type != EM2_TIDE && type != EM2_SVP2 && type != EM2_SVP &&
+		         type != EM2_SSPINPUT && type != EM2_RAWBEAM2 && type != EM2_RAWBEAM3 && type != EM2_HEIGHT && type != EM2_STOP &&
+		         type != EM2_WATERCOLUMN && type != EM2_REMOTE && type != EM2_SSP && type != EM2_BATH_MBA && type != EM2_SS_MBA) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call nothing, try again\n");
+#endif
+			done = MB_NO;
+		}
+		else if ((type == EM2_START || type == EM2_STOP) && expect != EM2_NONE) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, type);
+#endif
+			done = MB_YES;
+			expect = EM2_NONE;
+			type = first_type;
+			*label_save_flag = MB_YES;
+			store->kind = MB_DATA_DATA;
+		}
+		else if (type == EM2_START || type == EM2_STOP) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_start type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_start(verbose, mbfp, swap, store, type, sonar, version, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_RUN_PARAMETER) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_run_parameter type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_run_parameter(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_CLOCK) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_clock type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_clock(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_TIDE) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_tide type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_tide(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_HEIGHT) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_height type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_height(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_HEADING) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_heading type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_heading(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_SSV) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_ssv type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_ssv(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_TILT) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_tilt type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_tilt(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_EXTRAPARAMETERS) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_extraparameters type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_extraparameters(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_ATTITUDE) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_attitude type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_attitude(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_POS) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_pos type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_pos(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_SVP) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_svp type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_svp(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_SVP2) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_svp2 type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_svp2(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (type == EM2_BATH && sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2) {
+			if (expect == EM2_SS && store->ping->png_count == store->ping2->png_count &&
+			    store->ping->png_serial != store->ping2->png_serial) {
+#ifdef MBR_EM300RAW_DEBUG
+				fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, type);
+#endif
+				done = MB_YES;
+				expect = EM2_NONE;
+				type = first_type;
+				*label_save_flag = MB_YES;
+				store->kind = MB_DATA_DATA;
+			}
+			else {
+#ifdef MBR_EM300RAW_DEBUG
+				fprintf(stderr, "call mbr_em300raw_rd_bath type %x\n", type);
+#endif
+				status = mbr_em300raw_rd_bath(verbose, mbfp, swap, store, &match, sonar, *version, &good_end_bytes, error);
+				if (status == MB_SUCCESS) {
+					if (first_type == EM2_NONE || match == MB_NO || store->ping->png_count != store->ping2->png_count ||
+					    store->ping->png_serial != store->ping2->png_serial) {
+						done = MB_NO;
+						first_type = EM2_BATH;
+						expect = EM2_SS;
+					}
+					else {
+						done = MB_YES;
+						expect = EM2_NONE;
+					}
+				}
+			}
+		}
+		else if (type == EM2_BATH && expect == EM2_SS) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, type);
+#endif
+			done = MB_YES;
+			expect = EM2_NONE;
+			type = first_type;
+			*label_save_flag = MB_YES;
+			store->kind = MB_DATA_DATA;
+		}
+		else if (type == EM2_BATH) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_bath type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_bath(verbose, mbfp, swap, store, &match, sonar, *version, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				if (first_type == EM2_NONE || match == MB_NO) {
+					done = MB_NO;
+					first_type = EM2_BATH;
+					expect = EM2_SS;
+				}
+				else {
+					done = MB_YES;
+					expect = EM2_NONE;
+				}
+			}
+		}
+		else if (type == EM2_RAWBEAM) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_rawbeam type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_rawbeam(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS)
+				ping->png_raw1_read = MB_YES;
+			if (expect == EM2_SS && ping->png_nbeams == 0) {
+				done = MB_YES;
+				expect = EM2_NONE;
+			}
+		}
+		else if (type == EM2_RAWBEAM2) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_rawbeam2 type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_rawbeam2(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS)
+				ping->png_raw2_read = MB_YES;
+			if (expect == EM2_SS && ping->png_nbeams == 0) {
+				done = MB_YES;
+				expect = EM2_NONE;
+			}
+		}
+		else if (type == EM2_RAWBEAM3 && sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_rawbeam3 type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_rawbeam3(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS)
+				ping->png_raw3_read = MB_YES;
+		}
+		else if (type == EM2_RAWBEAM3) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_rawbeam3 type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_rawbeam3(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS)
+				ping->png_raw3_read = MB_YES;
+			if (expect == EM2_SS && ping->png_nbeams == 0) {
+				done = MB_YES;
+				expect = EM2_NONE;
+			}
+		}
+		else if (type == EM2_SS && sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_ss a type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_ss(verbose, mbfp, swap, store, sonar, *length, &match, &good_end_bytes, error);
+			if (status == MB_SUCCESS)
+				ping->png_ss_read = MB_YES;
+			if (status == MB_SUCCESS && ping->png_count == store->ping2->png_count && ping->png_count == ping->png_raw3_count &&
+			    ping->png_count == ping->png_ss_count && store->ping2->png_count == store->ping2->png_raw3_count &&
+			    store->ping2->png_count == store->ping2->png_ss_count) {
+				done = MB_YES;
+				expect = EM2_NONE;
+			}
+		}
+		else if (type == EM2_SS && expect != EM2_NONE && expect != EM2_SS) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, type);
+#endif
+			done = MB_YES;
+			expect = EM2_NONE;
+			type = first_type;
+			*label_save_flag = MB_YES;
+			store->kind = MB_DATA_DATA;
+		}
+		else if (type == EM2_SS) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_ss b type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_ss(verbose, mbfp, swap, store, sonar, *length, &match, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				ping->png_ss_read = MB_YES;
+				if (first_type == EM2_NONE || match == MB_NO) {
+					done = MB_NO;
+					first_type = EM2_SS;
+					expect = EM2_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM2_NONE;
+				}
+			}
+
+			/* salvage bath even if sidescan is corrupt */
+			else {
+				if (first_type == EM2_BATH && match == MB_YES) {
+					status = MB_SUCCESS;
+					done = MB_YES;
+					expect = EM2_NONE;
+				}
+			}
+		}
+		else if (type == EM2_WATERCOLUMN) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_rd_wc type %x\n", type);
+#endif
+			status = mbr_em300raw_rd_wc(verbose, mbfp, swap, store, sonar, &good_end_bytes, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				if (expect != EM2_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "skip over %d bytes of unsupported datagram type %x\n", *record_size_save, type);
+#endif
+			for (int i = 0; i < *record_size_save - 4; i++) {
+				if ((read_len = fread(&junk, 1, 1, mb_io_ptr->mbfp)) != 1) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					expect = EM2_NONE;
+				}
+			}
+			done = MB_NO;
+		}
+
+		/* bail out if there is an error */
+		if (status == MB_FAILURE)
+			done = MB_YES;
+
+		/* if necessary read over unread but expected bytes */
+		bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
+		if (*label_save_flag == MB_NO && good_end_bytes == MB_NO && bytes_read < record_size) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "skip over %d unread bytes of supported datagram type %x\n", record_size - bytes_read, type);
+#endif
+			for (int i = 0; i < record_size - bytes_read; i++) {
+				if ((read_len = fread(&junk, 1, 1, mb_io_ptr->mbfp)) != 1) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					expect = EM2_NONE;
+				}
+			}
+		}
+
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n", record_size,
+		        ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
+		fprintf(stderr, "done:%d expect:%x status:%d error:%d\n", done, expect, status, *error);
+		fprintf(stderr, "end of mbr_em300raw_rd_data loop:\n\n");
+#endif
+
+		/* get file position */
+		if (*label_save_flag == MB_YES)
+			mb_io_ptr->file_bytes = ftell(mbfp) - 2;
+		else
+			mb_io_ptr->file_bytes = ftell(mbfp);
+	}
 
 	/* print output debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_em300raw";
+	int status = MB_SUCCESS;
+	struct mbsys_simrad2_struct *store;
+	struct mbsys_simrad2_attitude_struct *attitude;
+	struct mbsys_simrad2_heading_struct *heading;
+	struct mbsys_simrad2_ssv_struct *ssv;
+	struct mbsys_simrad2_ping_struct *ping;
+	int time_i[7];
+	double ntime_d, ptime_d, atime_d;
+	double bath_time_d, ss_time_d;
+	double rawspeed, pheading;
+	double plon, plat, pspeed, roll, pitch, heave;
+	double att_time_d[MBSYS_SIMRAD2_MAXATTITUDE];
+	double att_roll[MBSYS_SIMRAD2_MAXATTITUDE];
+	double att_pitch[MBSYS_SIMRAD2_MAXATTITUDE];
+	double att_heave[MBSYS_SIMRAD2_MAXATTITUDE];
+	double *pixel_size, *swath_width;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* read next data from file */
+	status = mbr_em300raw_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+	/* get pointers to data structures */
+	store = (struct mbsys_simrad2_struct *)store_ptr;
+	attitude = (struct mbsys_simrad2_attitude_struct *)store->attitude;
+	heading = (struct mbsys_simrad2_heading_struct *)store->heading;
+	ssv = (struct mbsys_simrad2_ssv_struct *)store->ssv;
+	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+	pixel_size = (double *)&mb_io_ptr->saved1;
+	swath_width = (double *)&mb_io_ptr->saved2;
+
+	/* save fix if nav data */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_NAV) {
+		/* get nav time */
+		time_i[0] = store->pos_date / 10000;
+		time_i[1] = (store->pos_date % 10000) / 100;
+		time_i[2] = store->pos_date % 100;
+		time_i[3] = store->pos_msec / 3600000;
+		time_i[4] = (store->pos_msec % 3600000) / 60000;
+		time_i[5] = (store->pos_msec % 60000) / 1000;
+		time_i[6] = (store->pos_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &ntime_d);
+
+		/* add latest fix */
+		if (store->pos_longitude != EM2_INVALID_INT && store->pos_latitude != EM2_INVALID_INT)
+			mb_navint_add(verbose, mbio_ptr, ntime_d, (double)(0.0000001 * store->pos_longitude),
+			              (double)(0.00000005 * store->pos_latitude), error);
+	}
+
+	/* save attitude if attitude data */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_ATTITUDE) {
+		/* get attitude time */
+		time_i[0] = attitude->att_date / 10000;
+		time_i[1] = (attitude->att_date % 10000) / 100;
+		time_i[2] = attitude->att_date % 100;
+		time_i[3] = attitude->att_msec / 3600000;
+		time_i[4] = (attitude->att_msec % 3600000) / 60000;
+		time_i[5] = (attitude->att_msec % 60000) / 1000;
+		time_i[6] = (attitude->att_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &atime_d);
+
+		/* add latest attitude samples */
+		for (int i = 0; i < MIN(attitude->att_ndata, MBSYS_SIMRAD2_MAXATTITUDE); i++) {
+			att_time_d[i] = (double)(atime_d + 0.001 * attitude->att_time[i]);
+			att_heave[i] = (double)(0.01 * attitude->att_heave[i]);
+			att_roll[i] = (double)(0.01 * attitude->att_roll[i]);
+			att_pitch[i] = (double)(0.01 * attitude->att_pitch[i]);
+		}
+		mb_attint_nadd(verbose, mbio_ptr, attitude->att_ndata, att_time_d, att_heave, att_roll, att_pitch, error);
+	}
+
+	/* if no sidescan read then zero sidescan data */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && ping->png_ss_read == MB_NO) {
+		status = mbsys_simrad2_zero_ss(verbose, store_ptr, error);
+	}
+
+	/* else check that bath and sidescan data record time stamps
+	   match for survey data - we can have bath without
+	   sidescan but not sidescan without bath */
+	else if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
+		/* get times of bath and sidescan records */
+		time_i[0] = ping->png_date / 10000;
+		time_i[1] = (ping->png_date % 10000) / 100;
+		time_i[2] = ping->png_date % 100;
+		time_i[3] = ping->png_msec / 3600000;
+		time_i[4] = (ping->png_msec % 3600000) / 60000;
+		time_i[5] = (ping->png_msec % 60000) / 1000;
+		time_i[6] = (ping->png_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &bath_time_d);
+		time_i[0] = ping->png_ss_date / 10000;
+		time_i[1] = (ping->png_ss_date % 10000) / 100;
+		time_i[2] = ping->png_ss_date % 100;
+		time_i[3] = ping->png_ss_msec / 3600000;
+		time_i[4] = (ping->png_ss_msec % 3600000) / 60000;
+		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
+		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &ss_time_d);
+		/* fprintf(stderr,"Check: png_count:%d png_raw3_count:%d png_ss_count:%d    Beams:%d %d %d\n",
+		ping->png_count,ping->png_raw3_count,ping->png_ss_count,ping->png_nbeams,ping->png_raw3_nbeams,ping->png_nbeams_ss);*/
+
+		/* check for time match - if bath newer than
+		   sidescan then zero sidescan,  if sidescan
+		   newer than bath then set error,  if ok then
+		   check that beam ids are the same */
+		if (ping->png_ss_date == 0 || ping->png_nbeams_ss == 0 || bath_time_d > ss_time_d) {
+			status = mbsys_simrad2_zero_ss(verbose, store_ptr, error);
+		}
+		else if (bath_time_d > ss_time_d) {
+			if (verbose > 0)
+				fprintf(stderr, "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan zeroed, bathtime:%f >  sstime:%f\n",
+				        function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], bath_time_d,
+				        ss_time_d);
+			status = mbsys_simrad2_zero_ss(verbose, store_ptr, error);
+		}
+		else if (bath_time_d < ss_time_d) {
+			if (verbose > 0)
+				fprintf(stderr, "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Ping unintelligible bathtime:%f < sstime%f\n",
+				        function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], bath_time_d,
+				        ss_time_d);
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			status = MB_FAILURE;
+		}
+		else {
+			/* check for some indicators of broken records */
+			if (ping->png_nbeams < ping->png_nbeams_ss || ping->png_nbeams > ping->png_nbeams_ss + 1) {
+				if (verbose > 1)
+					fprintf(
+					    stderr,
+					    "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
+					    function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+					    ping->png_nbeams, ping->png_nbeams_ss);
+			}
+			else if (ping->png_nbeams == ping->png_nbeams_ss) {
+				for (int i = 0; i < ping->png_nbeams; i++) {
+					if (ping->png_beam_num[i] != ping->png_beam_index[i] + 1 &&
+					    ping->png_beam_num[i] != ping->png_beam_index[i] - 1) {
+						if (verbose > 1)
+							fprintf(stderr,
+							        "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: bath and ss beam indexes "
+							        "don't match: : %d %d %d\n",
+							        function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], i,
+							        ping->png_beam_num[i], ping->png_beam_index[i]);
+					}
+				}
+			}
+		}
+	}
+
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
+		/*fprintf(stderr, "mode:%d absorption:%d tran_pulse:%d tran_beam:%d tran_pow:%d rec_beam:%d rec_band:%d rec_gain:%d
+		tvg_cross:%d\n", store->run_mode, store->run_absorption, store->run_tran_pulse, store->run_tran_pow, store->run_rec_beam,
+		store->run_rec_band, store->run_rec_gain, store->run_tvg_cross); fprintf(stderr, "max_range:%d r_zero:%d r_zero_corr:%d
+		tvg_start:%d tvg_stop:%d bsn:%d bso:%d tx:%d tvg_crossover:%d\n", ping->png_max_range, ping->png_r_zero,
+		ping->png_r_zero_corr, ping->png_tvg_start,
+		ping->png_tvg_stop, ping->png_bsn,
+		ping->png_bso, ping->png_tx,
+		ping->png_tvg_crossover);
+		fprintf(stderr, "mode:%d depth:%11f max_range:%d r_zero:%d r_zero_corr:%d bsn:%d bso:%d\n",
+		store->run_mode,
+		0.01 * ping->png_depth_res * ping->png_depth[ping->png_nbeams/2],
+		ping->png_max_range, ping->png_r_zero,
+		ping->png_r_zero_corr, ping->png_bsn,
+		ping->png_bso);*/
+
+		/* get ping time */
+		time_i[0] = ping->png_date / 10000;
+		time_i[1] = (ping->png_date % 10000) / 100;
+		time_i[2] = ping->png_date % 100;
+		time_i[3] = ping->png_msec / 3600000;
+		time_i[4] = (ping->png_msec % 3600000) / 60000;
+		time_i[5] = (ping->png_msec % 60000) / 1000;
+		time_i[6] = (ping->png_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &ptime_d);
+
+		/* interpolate from saved nav */
+		if (store->pos_speed == 0 || store->pos_speed == EM2_INVALID_SHORT)
+			rawspeed = 0.0;
+		else
+			rawspeed = 0.036 * store->pos_speed;
+		pheading = 0.01 * ping->png_heading;
+		mb_navint_interp(verbose, mbio_ptr, ptime_d, pheading, rawspeed, &plon, &plat, &pspeed, error);
+		if (plon == 0.0 && plat == 0.0) {
+			ping->png_longitude = (int)EM2_INVALID_INT;
+			ping->png_latitude = (int)EM2_INVALID_INT;
+		}
+		else {
+			ping->png_longitude = (int)rint(10000000 * plon);
+			ping->png_latitude = (int)rint(20000000 * plat);
+		}
+		ping->png_speed = (int)rint(pspeed / 0.036);
+
+		/* interpolate from saved attitude */
+		mb_attint_interp(verbose, mbio_ptr, ptime_d, &heave, &roll, &pitch, error);
+		ping->png_roll = (int)rint(roll / 0.01);
+		ping->png_pitch = (int)rint(pitch / 0.01);
+		ping->png_heave = (int)rint(heave / 0.01);
+
+		/* generate processed sidescan */
+		ping->png_pixel_size = 0;
+		ping->png_pixels_ss = 0;
+		status = mbsys_simrad2_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
+	}
+
+	if (status == MB_SUCCESS && (store->kind == MB_DATA_NAV || store->kind == MB_DATA_NAV1 || store->kind == MB_DATA_NAV2 ||
+	                             store->kind == MB_DATA_NAV3)) {
+		/* get nav time */
+		time_i[0] = store->pos_date / 10000;
+		time_i[1] = (store->pos_date % 10000) / 100;
+		time_i[2] = store->pos_date % 100;
+		time_i[3] = store->pos_msec / 3600000;
+		time_i[4] = (store->pos_msec % 3600000) / 60000;
+		time_i[5] = (store->pos_msec % 60000) / 1000;
+		time_i[6] = (store->pos_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &ntime_d);
+
+		/* interpolate from saved attitude */
+		mb_attint_interp(verbose, mbio_ptr, ntime_d, &heave, &roll, &pitch, error);
+		store->pos_roll = (int)rint(roll / 0.01);
+		store->pos_pitch = (int)rint(pitch / 0.01);
+		store->pos_heave = (int)rint(heave / 0.01);
+	}
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -8422,6 +8103,255 @@ int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	return (status);
 }
 
+/*--------------------------------------------------------------------*/
+int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_em300raw_wr_data";
+	int status = MB_SUCCESS;
+	struct mbsys_simrad2_struct *store;
+	struct mbsys_simrad2_ping_struct *ping;
+	FILE *mbfp;
+	int swap;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_simrad2_struct *)store_ptr;
+	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+	mbfp = mb_io_ptr->mbfp;
+
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr, "\nstart of mbr_em300raw_wr_data:\n");
+	fprintf(stderr, "kind:%d %d type:%x\n", store->kind, mb_io_ptr->new_kind, store->type);
+#endif
+
+	/* set swap flag */
+	swap = MB_NO;
+
+	if (store->kind == MB_DATA_COMMENT || store->kind == MB_DATA_START || store->kind == MB_DATA_STOP) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_start kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_start(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_RUN_PARAMETER) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_run_parameter kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_run_parameter(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_CLOCK) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_clock kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_clock(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_TIDE) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_tide kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_tide(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_HEIGHT) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_height kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_height(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_HEADING) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_heading kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_heading(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_SSV) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_ssv kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_ssv(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_TILT) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_tilt kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_tilt(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_PARAMETER) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_extraparameters kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_extraparameters(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_ATTITUDE) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_attitude kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_attitude(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_NAV || store->kind == MB_DATA_NAV1 || store->kind == MB_DATA_NAV2 ||
+	         store->kind == MB_DATA_NAV3) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_pos kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_pos(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_VELOCITY_PROFILE) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_svp kind:%d type %x\n", store->kind, store->type);
+#endif
+		if (store->type == EM2_SVP)
+			status = mbr_em300raw_wr_svp(verbose, mbfp, swap, store, error);
+		else
+			status = mbr_em300raw_wr_svp2(verbose, mbfp, swap, store, error);
+	}
+	else if (store->kind == MB_DATA_DATA) {
+/* write out data from first head for all sonars */
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_bath kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_bath(verbose, mbfp, swap, store, 0, error);
+		if (ping->png_raw1_read == MB_YES) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
+#endif
+			status = mbr_em300raw_wr_rawbeam(verbose, mbfp, swap, store, error);
+		}
+		if (ping->png_raw2_read == MB_YES) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_wr_rawbeam2 kind:%d type %x\n", store->kind, store->type);
+#endif
+			status = mbr_em300raw_wr_rawbeam2(verbose, mbfp, swap, store, error);
+		}
+		if (ping->png_raw3_read == MB_YES) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_wr_rawbeam3 kind:%d type %x\n", store->kind, store->type);
+#endif
+			status = mbr_em300raw_wr_rawbeam3(verbose, mbfp, swap, store, 0, error);
+		}
+#ifdef MBR_EM300RAW_DEBUG
+		if (ping->png_raw1_read == MB_NO && ping->png_raw2_read == MB_NO && ping->png_raw3_read == MB_NO)
+			fprintf(stderr, "NOT call mbr_em300raw_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
+#endif
+		if (ping->png_ss_read == MB_YES) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_wr_ss kind:%d type %x\n", store->kind, store->type);
+#endif
+			status = mbr_em300raw_wr_ss(verbose, mbfp, swap, store, 0, error);
+		}
+#ifdef MBR_EM300RAW_DEBUG
+		else
+			fprintf(stderr, "NOT call mbr_em300raw_wr_ss kind:%d type %x\n", store->kind, store->type);
+#endif
+
+		/* write out data from second head for EM2002 */
+		if (store->sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2 && store->ping2 != NULL &&
+		    store->ping2->png_count == store->ping->png_count) {
+#ifdef MBR_EM300RAW_DEBUG
+			fprintf(stderr, "call mbr_em300raw_wr_bath kind:%d type %x\n", store->kind, store->type);
+#endif
+			status = mbr_em300raw_wr_bath(verbose, mbfp, swap, store, 1, error);
+			if (ping->png_raw3_read == MB_YES) {
+#ifdef MBR_EM300RAW_DEBUG
+				fprintf(stderr, "call mbr_em300raw_wr_rawbeam3 kind:%d type %x\n", store->kind, store->type);
+#endif
+				status = mbr_em300raw_wr_rawbeam3(verbose, mbfp, swap, store, 1, error);
+			}
+#ifdef MBR_EM300RAW_DEBUG
+			if (ping->png_raw3_read == MB_NO)
+				fprintf(stderr, "NOT call mbr_em300raw_wr_rawbeam kind:%d type %x\n", store->kind, store->type);
+#endif
+			if (ping->png_ss_read == MB_YES) {
+#ifdef MBR_EM300RAW_DEBUG
+				fprintf(stderr, "call mbr_em300raw_wr_ss kind:%d type %x\n", store->kind, store->type);
+#endif
+				status = mbr_em300raw_wr_ss(verbose, mbfp, swap, store, 1, error);
+			}
+#ifdef MBR_EM300RAW_DEBUG
+			else
+				fprintf(stderr, "NOT call mbr_em300raw_wr_ss kind:%d type %x\n", store->kind, store->type);
+#endif
+		}
+	}
+	else if (store->kind == MB_DATA_WATER_COLUMN) {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call mbr_em300raw_wr_wc kind:%d type %x\n", store->kind, store->type);
+#endif
+		status = mbr_em300raw_wr_wc(verbose, mbfp, swap, store, error);
+	}
+	else {
+#ifdef MBR_EM300RAW_DEBUG
+		fprintf(stderr, "call nothing bad kind: %d type %x\n", store->kind, store->type);
+#endif
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_KIND;
+	}
+
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr, "status:%d error:%d\n", status, *error);
+	fprintf(stderr, "end of mbr_em300raw_wr_data:\n");
+#endif
+
+	/* print output debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_em300raw";
+	int status = MB_SUCCESS;
+	struct mbsys_simrad2_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_simrad2_struct *)store_ptr;
+
+	/* write next data to file */
+	status = mbr_em300raw_wr_data(verbose, mbio_ptr, store_ptr, error);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_em300raw";
