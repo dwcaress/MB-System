@@ -36,11 +36,6 @@
 #include "mb_status.h"
 #include "mbsys_3ddwissl.h"
 
-int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_3dwisslr_indextable_compare(const void *a, const void *b);
-int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_3dwisslr(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -215,103 +210,20 @@ int mbr_dem_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_rt_3dwisslr";
-  int status = MB_SUCCESS;
-  struct mbsys_3ddwissl_struct *store;
-  int *file_indexed;
+int mbr_3dwisslr_indextable_compare(const void *a, const void *b) {
+    struct mb_io_indextable_struct *aa;
+    struct mb_io_indextable_struct *bb;
+    int result = 0;
 
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-  /* check for non-null pointers */
-  assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
-
-  /* get pointers to mbio descriptor and data structure */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-  store = (struct mbsys_3ddwissl_struct *)store_ptr;
-
-  /* get saved values */
-  file_indexed = (int *)&mb_io_ptr->save2;
-
-  /* if needed index the file */
-    if (*file_indexed == MB_NO) {
-        status = mbr_3dwisslr_index_data(verbose, mbio_ptr, store_ptr, error);
-    }
-
-  /* read next data from file */
-  status = mbr_3dwisslr_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-  /* if needed calculate bathymetry */
-  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == MB_NO) {
-    mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
-                MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD,
-                MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE, error);
-  }
-
-  /* print out status info */
-  if (verbose > 1)
-    mbsys_3ddwissl_print_store(verbose, store_ptr, error);
-
-  /* set error and kind in mb_io_ptr */
-  mb_io_ptr->new_error = *error;
-  mb_io_ptr->new_kind = store->kind;
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  return (status);
+    aa = (struct mb_io_indextable_struct*) a;
+    bb = (struct mb_io_indextable_struct*) b;
+    if (aa->time_d_org < bb->time_d_org)
+        result = -1;
+    else if (aa->time_d_org > bb->time_d_org)
+        result = 1;
+    return(result);
 }
-/*--------------------------------------------------------------------*/
-int mbr_wt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_wt_3dwisslr";
-  int status = MB_SUCCESS;
-  struct mbsys_3ddwissl_struct *store;
 
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-  /* check for non-null pointers */
-  assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
-
-  /* get pointers to mbio descriptor and data structure */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-  store = (struct mbsys_3ddwissl_struct *)store_ptr;
-
-  /* write next data to file */
-  status = mbr_3dwisslr_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  return (status);
-}
 /*--------------------------------------------------------------------*/
 int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_3dwisslr_index_data";
@@ -328,8 +240,6 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   int record_num_heada = 0;
   int record_num_headb = 0;
   int record_num_comment = 0;
-  int skip;
-  int valid_id;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -457,8 +367,8 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
     /* read and check two bytes until a valid record_id is found */
     read_len = (size_t)sizeof(short);
     buffer = mb_io_ptr->raw_data;
-    valid_id = MB_NO;
-    skip = 0;
+    int valid_id = MB_NO;
+    int skip = 0;
     status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
     do {
       if (status == MB_SUCCESS) {
@@ -662,35 +572,16 @@ fprintf(stderr,"\n");
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_3dwisslr_indextable_compare(const void *a, const void *b) {
-    struct mb_io_indextable_struct *aa;
-    struct mb_io_indextable_struct *bb;
-    int result = 0;
-
-    aa = (struct mb_io_indextable_struct*) a;
-    bb = (struct mb_io_indextable_struct*) b;
-    if (aa->time_d_org < bb->time_d_org)
-        result = -1;
-    else if (aa->time_d_org > bb->time_d_org)
-        result = 1;
-    return(result);
-}
-
-/*--------------------------------------------------------------------*/
 int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_3dwisslr_rd_data";
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_struct *store;
-  struct mbsys_3ddwissl_calibration_struct *calibration;
-  struct mbsys_3ddwissl_pulse_struct *pulse;
   int *file_header_readwritten;
   char *buffer = NULL;
   size_t read_len;
-  size_t index;
   int time_i[7];
   int time_j[5];
   int found;
-  int ipulse, isounding;
   int irecord;
 
   /* print input debug statements */
@@ -728,6 +619,8 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
             irecord = i;
         }
     }
+
+    size_t index = 0;
 
     /* read the next record */
     if (found == MB_YES) {
@@ -803,7 +696,7 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
             store->headb_offset_pitch_deg = MBSYS_3DDWISSL_HEADB_OFFSET_PITCH_DEG;
 
             /* get calibration information for head a */
-            calibration = &store->calibration_a;
+            struct mbsys_3ddwissl_calibration_struct *calibration = &store->calibration_a;
             memcpy(calibration->cfg_path, &buffer[index], 64); index +=64;
             mb_get_binary_int(MB_YES, (void *)&buffer[index], &(calibration->laser_head_no)); index += 4;
             mb_get_binary_int(MB_YES, (void *)&buffer[index], &(calibration->process_for_air)); index += 4;
@@ -969,8 +862,10 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 //store->year,store->month,store->day,store->hour,store->minutes,store->seconds,
 //store->nanoseconds,store->pulse_count);
 
+            struct mbsys_3ddwissl_pulse_struct *pulse = NULL;
+
             /* read the pulses */
-            for (ipulse=0; ipulse<store->pulses_per_scan; ipulse++) {
+            for (int ipulse=0; ipulse<store->pulses_per_scan; ipulse++) {
                 pulse = &store->pulses[ipulse];
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->angle_az)); index += 4;
                 mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->angle_el)); index += 4;
@@ -984,13 +879,13 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
                 pulse->heading_offset = 0.0;
                 pulse->roll_offset = 0.0;
                 pulse->pitch_offset = 0.0;
-                for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
+                for (int isounding=0; isounding<store->soundings_per_pulse; isounding++) {
                     mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].range)); index += 4;
                 }
-                for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
+                for (int isounding=0; isounding<store->soundings_per_pulse; isounding++) {
                     mb_get_binary_short(MB_YES, (void *)&buffer[index], &(pulse->soundings[isounding].amplitude)); index += 2;
                 }
-                for (isounding=0; isounding<store->soundings_per_pulse; isounding++) {
+                for (int isounding=0; isounding<store->soundings_per_pulse; isounding++) {
                     pulse->soundings[isounding].beamflag = MB_FLAG_NULL;
                     pulse->soundings[isounding].acrosstrack = 0.0;
                     pulse->soundings[isounding].alongtrack = 0.0;
@@ -1050,6 +945,67 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_rt_3dwisslr";
+  int status = MB_SUCCESS;
+  struct mbsys_3ddwissl_struct *store;
+  int *file_indexed;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* check for non-null pointers */
+  assert(mbio_ptr != NULL);
+  assert(store_ptr != NULL);
+
+  /* get pointers to mbio descriptor and data structure */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  store = (struct mbsys_3ddwissl_struct *)store_ptr;
+
+  /* get saved values */
+  file_indexed = (int *)&mb_io_ptr->save2;
+
+  /* if needed index the file */
+    if (*file_indexed == MB_NO) {
+        status = mbr_3dwisslr_index_data(verbose, mbio_ptr, store_ptr, error);
+    }
+
+  /* read next data from file */
+  status = mbr_3dwisslr_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+  /* if needed calculate bathymetry */
+  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == MB_NO) {
+    mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
+                MBSYS_3DDWISSL_DEFAULT_AMPLITUDE_THRESHOLD,
+                MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE, error);
+  }
+
+  /* print out status info */
+  if (verbose > 1)
+    mbsys_3ddwissl_print_store(verbose, store_ptr, error);
+
+  /* set error and kind in mb_io_ptr */
+  mb_io_ptr->new_error = *error;
+  mb_io_ptr->new_kind = store->kind;
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
   return (status);
@@ -1403,6 +1359,43 @@ int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 //fprintf(stderr,"%s:%s():%d Wrote lidar record %zu bytes  pulse_count:%d time_d:%f\n",
 //__FILE__, __FUNCTION__, __LINE__, write_len, store->pulse_count, store->time_d);
   }
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_wt_3dwisslr";
+  int status = MB_SUCCESS;
+  struct mbsys_3ddwissl_struct *store;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* check for non-null pointers */
+  assert(mbio_ptr != NULL);
+  assert(store_ptr != NULL);
+
+  /* get pointers to mbio descriptor and data structure */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  store = (struct mbsys_3ddwissl_struct *)store_ptr;
+
+  /* write next data to file */
+  status = mbr_3dwisslr_wr_data(verbose, mbio_ptr, store_ptr, error);
 
   /* print output debug statements */
   if (verbose >= 2) {

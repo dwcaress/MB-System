@@ -37,24 +37,6 @@
 #include "mbf_bchrtunb.h"
 #include "mbsys_elac.h"
 
-int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error);
-int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_bchrtunb(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -130,76 +112,6 @@ int mbr_info_bchrtunb(int verbose, int *system, int *beams_bath_max, int *beams_
 	return (status);
 }
 
-/*--------------------------------------------------------------------*/
-int mbr_alm_bchrtunb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_bchrtunb";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
-	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_bchrtunb_struct);
-	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_elac_struct), &mb_io_ptr->store_data, error);
-
-	/* initialize everything to zeros */
-	mbr_zero_bchrtunb(verbose, mb_io_ptr->raw_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dem_bchrtunb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_bchrtunb";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointers to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
 /*--------------------------------------------------------------------*/
 int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error) {
 	char *function_name = "mbr_zero_bchrtunb";
@@ -345,6 +257,1141 @@ int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_alm_bchrtunb(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_alm_bchrtunb";
+	int status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* set initial status */
+	status = MB_SUCCESS;
+
+	/* allocate memory for data structure */
+	mb_io_ptr->structure_size = sizeof(struct mbf_bchrtunb_struct);
+	mb_io_ptr->data_structure_size = 0;
+	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_elac_struct), &mb_io_ptr->store_data, error);
+
+	/* initialize everything to zeros */
+	mbr_zero_bchrtunb(verbose, mb_io_ptr->raw_data, error);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_dem_bchrtunb(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_dem_bchrtunb";
+	int status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
+
+	/* get pointers to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* deallocate memory for data descriptor */
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+	char *function_name = "mbr_bchrtunb_rd_comment";
+	int status = MB_SUCCESS;
+	char line[ELAC_COMMENT_SIZE + 3];
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* read record into char array */
+	status = fread(line, 1, ELAC_COMMENT_SIZE + 3, mbfp);
+	if (status == ELAC_COMMENT_SIZE + 3)
+		status = MB_SUCCESS;
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+	}
+
+	/* get data */
+	if (status == MB_SUCCESS) {
+		data->kind = MB_DATA_COMMENT;
+		strncpy(data->comment, line, MBF_BCHRTUNB_COMMENT_LENGTH - 1);
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+	char *function_name = "mbr_bchrtunb_rd_parameter";
+	int status = MB_SUCCESS;
+	char line[ELAC_PARAMETER_SIZE + 3];
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* read record into char array */
+	status = fread(line, 1, ELAC_PARAMETER_SIZE + 3, mbfp);
+	if (status == ELAC_PARAMETER_SIZE + 3)
+		status = MB_SUCCESS;
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+	}
+
+	/* get data */
+	if (status == MB_SUCCESS) {
+		data->kind = MB_DATA_PARAMETER;
+		data->par_day = (int)line[0];
+		data->par_month = (int)line[1];
+		data->par_year = (int)line[2];
+		data->par_hour = (int)line[3];
+		data->par_minute = (int)line[4];
+		data->par_second = (int)line[5];
+		data->par_hundredth_sec = (int)line[6];
+		data->par_thousandth_sec = (int)line[7];
+#ifndef BYTESWAPPED
+		short int *short_ptr = (short int *)&line[8];
+		data->roll_offset = *short_ptr;
+		short_ptr = (short int *)&line[10];
+		data->pitch_offset = *short_ptr;
+		short_ptr = (short int *)&line[12];
+		data->heading_offset = *short_ptr;
+		short_ptr = (short int *)&line[14];
+		data->time_delay = *short_ptr;
+		short_ptr = (short int *)&line[16];
+		data->transducer_port_height = *short_ptr;
+		short_ptr = (short int *)&line[18];
+		data->transducer_starboard_height = *short_ptr;
+		short_ptr = (short int *)&line[20];
+		data->transducer_port_depth = *short_ptr;
+		short_ptr = (short int *)&line[22];
+		data->transducer_starboard_depth = *short_ptr;
+		short_ptr = (short int *)&line[24];
+		data->transducer_port_x = *short_ptr;
+		short_ptr = (short int *)&line[26];
+		data->transducer_starboard_x = *short_ptr;
+		short_ptr = (short int *)&line[28];
+		data->transducer_port_y = *short_ptr;
+		short_ptr = (short int *)&line[30];
+		data->transducer_starboard_y = *short_ptr;
+		short_ptr = (short int *)&line[32];
+		data->transducer_port_error = *short_ptr;
+		short_ptr = (short int *)&line[34];
+		data->transducer_starboard_error = *short_ptr;
+		short_ptr = (short int *)&line[36];
+		data->antenna_height = *short_ptr;
+		short_ptr = (short int *)&line[38];
+		data->antenna_x = *short_ptr;
+		short_ptr = (short int *)&line[40];
+		data->antenna_y = *short_ptr;
+		short_ptr = (short int *)&line[42];
+		data->vru_height = *short_ptr;
+		short_ptr = (short int *)&line[44];
+		data->vru_x = *short_ptr;
+		short_ptr = (short int *)&line[46];
+		data->vru_y = *short_ptr;
+		short_ptr = (short int *)&line[48];
+		data->heave_offset = *short_ptr;
+		short_ptr = (short int *)&line[50];
+		data->line_number = *short_ptr;
+		short_ptr = (short int *)&line[52];
+		data->start_or_stop = *short_ptr;
+		short_ptr = (short int *)&line[54];
+		data->transducer_serial_number = *short_ptr;
+#else
+		short int *short_ptr = (short int *)&line[8];
+		data->roll_offset = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[10];
+		data->pitch_offset = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[12];
+		data->heading_offset = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[14];
+		data->time_delay = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[16];
+		data->transducer_port_height = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[18];
+		data->transducer_starboard_height = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[20];
+		data->transducer_port_depth = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[22];
+		data->transducer_starboard_depth = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[24];
+		data->transducer_port_x = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[26];
+		data->transducer_starboard_x = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[28];
+		data->transducer_port_y = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[30];
+		data->transducer_starboard_y = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[32];
+		data->transducer_port_error = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[34];
+		data->transducer_starboard_error = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[36];
+		data->antenna_height = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[38];
+		data->antenna_x = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[40];
+		data->antenna_y = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[42];
+		data->vru_height = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[44];
+		data->vru_x = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[46];
+		data->vru_y = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[48];
+		data->heave_offset = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[50];
+		data->line_number = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[52];
+		data->start_or_stop = (short int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[54];
+		data->transducer_serial_number = (short int)mb_swap_short(*short_ptr);
+#endif
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->par_month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->par_day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->par_hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->par_minute);
+		fprintf(stderr, "dbg5       sec:              %d\n", data->par_second);
+		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->par_hundredth_sec);
+		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->par_thousandth_sec);
+		fprintf(stderr, "dbg5       roll_offset:      %d\n", data->roll_offset);
+		fprintf(stderr, "dbg5       pitch_offset:     %d\n", data->pitch_offset);
+		fprintf(stderr, "dbg5       heading_offset:   %d\n", data->heading_offset);
+		fprintf(stderr, "dbg5       time_delay:       %d\n", data->time_delay);
+		fprintf(stderr, "dbg5       transducer_port_height: %d\n", data->transducer_port_height);
+		fprintf(stderr, "dbg5       transducer_starboard_height:%d\n", data->transducer_starboard_height);
+		fprintf(stderr, "dbg5       transducer_port_depth:     %d\n", data->transducer_port_depth);
+		fprintf(stderr, "dbg5       transducer_starboard_depth:     %d\n", data->transducer_starboard_depth);
+		fprintf(stderr, "dbg5       transducer_port_x:        %d\n", data->transducer_port_x);
+		fprintf(stderr, "dbg5       transducer_starboard_x:        %d\n", data->transducer_starboard_x);
+		fprintf(stderr, "dbg5       transducer_port_y:        %d\n", data->transducer_port_y);
+		fprintf(stderr, "dbg5       transducer_starboard_y:  %d\n", data->transducer_starboard_y);
+		fprintf(stderr, "dbg5       transducer_port_error:  %d\n", data->transducer_port_error);
+		fprintf(stderr, "dbg5       transducer_starboard_error:  %d\n", data->transducer_starboard_error);
+		fprintf(stderr, "dbg5       antenna_height:            %d\n", data->antenna_height);
+		fprintf(stderr, "dbg5       antenna_x:      %d\n", data->antenna_x);
+		fprintf(stderr, "dbg5       antenna_y:    %d\n", data->antenna_y);
+		fprintf(stderr, "dbg5       vru_height:%d\n", data->vru_height);
+		fprintf(stderr, "dbg5       vru_x:%d\n", data->vru_x);
+		fprintf(stderr, "dbg5       vru_y:%d\n", data->vru_y);
+		fprintf(stderr, "dbg5       heave_offset:%d\n", data->heave_offset);
+		fprintf(stderr, "dbg5       line_number:%d\n", data->line_number);
+		fprintf(stderr, "dbg5       start_or_stop:%d\n", data->start_or_stop);
+		fprintf(stderr, "dbg5       transducer_serial_number:%d\n", data->transducer_serial_number);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+	char *function_name = "mbr_bchrtunb_rd_pos";
+	int status = MB_SUCCESS;
+	char line[ELAC_POS_SIZE + 3];
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* read record into char array */
+	status = fread(line, 1, ELAC_POS_SIZE + 3, mbfp);
+	if (status == ELAC_POS_SIZE + 3)
+		status = MB_SUCCESS;
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+	}
+
+	/* get data */
+	if (status == MB_SUCCESS) {
+		data->kind = MB_DATA_NAV;
+		data->pos_day = (int)line[0];
+		data->pos_month = (int)line[1];
+		data->pos_year = (int)line[2];
+		data->pos_hour = (int)line[3];
+		data->pos_minute = (int)line[4];
+		data->pos_second = (int)line[5];
+		data->pos_hundredth_sec = (int)line[6];
+		data->pos_thousandth_sec = (int)line[7];
+#ifndef BYTESWAPPED
+		int *int_ptr = (int *)&line[8];
+		data->pos_latitude = *int_ptr;
+		int_ptr = (int *)&line[12];
+		data->pos_longitude = *int_ptr;
+		int_ptr = (int *)&line[16];
+		data->utm_northing = *int_ptr;
+		int_ptr = (int *)&line[20];
+		data->utm_easting = *int_ptr;
+		int_ptr = (int *)&line[24];
+		data->utm_zone_lon = *int_ptr;
+		data->utm_zone = line[28];
+		data->hemisphere = line[29];
+		data->ellipsoid = line[30];
+		data->pos_spare = line[31];
+		short int *short_ptr = (short int *)&line[32];
+		data->semi_major_axis = (int)*short_ptr;
+		short_ptr = (short int *)&line[34];
+		data->other_quality = (int)*short_ptr;
+#else
+		int *int_ptr = (int *)&line[8];
+		data->pos_latitude = (int)mb_swap_int(*int_ptr);
+		int_ptr = (int *)&line[12];
+		data->pos_longitude = (int)mb_swap_int(*int_ptr);
+		int_ptr = (int *)&line[16];
+		data->utm_northing = (int)mb_swap_int(*int_ptr);
+		int_ptr = (int *)&line[20];
+		data->utm_easting = (int)mb_swap_int(*int_ptr);
+		int_ptr = (int *)&line[24];
+		data->utm_zone_lon = (int)mb_swap_int(*int_ptr);
+		data->utm_zone = line[28];
+		data->hemisphere = line[29];
+		data->ellipsoid = line[30];
+		data->pos_spare = line[31];
+		short int *short_ptr = (short int *)&line[32];
+		data->semi_major_axis = (int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[34];
+		data->other_quality = (int)mb_swap_short(*short_ptr);
+#endif
+	}
+
+	/* KLUGE for 1996 UNB TRAINING COURSE - FLIP LONGITUDE */
+	if (data->pos_year == 96 && data->pos_month >= 6 && data->pos_month <= 8)
+		data->pos_longitude = -data->pos_longitude;
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->pos_month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->pos_day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->pos_hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->pos_minute);
+		fprintf(stderr, "dbg5       sec:              %d\n", data->pos_second);
+		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->pos_hundredth_sec);
+		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->pos_thousandth_sec);
+		fprintf(stderr, "dbg5       pos_latitude:     %d\n", data->pos_latitude);
+		fprintf(stderr, "dbg5       pos_longitude:    %d\n", data->pos_longitude);
+		fprintf(stderr, "dbg5       utm_northing:     %d\n", data->utm_northing);
+		fprintf(stderr, "dbg5       utm_easting:      %d\n", data->utm_easting);
+		fprintf(stderr, "dbg5       utm_zone_lon:     %d\n", data->utm_zone_lon);
+		fprintf(stderr, "dbg5       utm_zone:         %c\n", data->utm_zone);
+		fprintf(stderr, "dbg5       hemisphere:       %c\n", data->hemisphere);
+		fprintf(stderr, "dbg5       ellipsoid:        %c\n", data->ellipsoid);
+		fprintf(stderr, "dbg5       pos_spare:        %c\n", data->pos_spare);
+		fprintf(stderr, "dbg5       semi_major_axis:  %d\n", data->semi_major_axis);
+		fprintf(stderr, "dbg5       other_quality:    %d\n", data->other_quality);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+	char *function_name = "mbr_bchrtunb_rd_svp";
+	int status = MB_SUCCESS;
+	char line[ELAC_SVP_SIZE + 3];
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* read record into char array */
+	status = fread(line, 1, ELAC_SVP_SIZE + 3, mbfp);
+	if (status == ELAC_SVP_SIZE + 3)
+		status = MB_SUCCESS;
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+	}
+
+	/* get data */
+	if (status == MB_SUCCESS) {
+		data->kind = MB_DATA_VELOCITY_PROFILE;
+		data->svp_day = (int)line[0];
+		data->svp_month = (int)line[1];
+		data->svp_year = (int)line[2];
+		data->svp_hour = (int)line[3];
+		data->svp_minute = (int)line[4];
+		data->svp_second = (int)line[5];
+		data->svp_hundredth_sec = (int)line[6];
+		data->svp_thousandth_sec = (int)line[7];
+#ifndef BYTESWAPPED
+		int *int_ptr = (int *)&line[8];
+		data->svp_latitude = *int_ptr;
+		int_ptr = (int *)&line[12];
+		data->svp_longitude = *int_ptr;
+#else
+		int *int_ptr = (int *)&line[8];
+		data->svp_latitude = (int)mb_swap_int(*int_ptr);
+		int_ptr = (int *)&line[12];
+		data->svp_latitude = (int)mb_swap_int(*int_ptr);
+#endif
+		data->svp_num = 0;
+		for (int i = 0; i < 500; i++) {
+			short int *short_ptr = (short int *)&line[16 + 4 * i];
+			short int *short_ptr2 = (short int *)&line[18 + 4 * i];
+#ifndef BYTESWAPPED
+			data->svp_depth[i] = *short_ptr;
+			data->svp_vel[i] = *short_ptr2;
+#else
+			data->svp_depth[i] = (short int)mb_swap_short(*short_ptr);
+			data->svp_vel[i] = (short int)mb_swap_short(*short_ptr2);
+#endif
+			if (data->svp_vel[i] > 0)
+				data->svp_num = i + 1;
+		}
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->svp_month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->svp_day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->svp_hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->svp_minute);
+		fprintf(stderr, "dbg5       sec:              %d\n", data->svp_second);
+		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->svp_hundredth_sec);
+		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->svp_thousandth_sec);
+		fprintf(stderr, "dbg5       svp_latitude:     %d\n", data->svp_latitude);
+		fprintf(stderr, "dbg5       svp_longitude:    %d\n", data->svp_longitude);
+		fprintf(stderr, "dbg5       svp_num:          %d\n", data->svp_num);
+		for (int i = 0; i < data->svp_num; i++)
+			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+	char *function_name = "mbr_bchrtunb_rd_bath56";
+	int status = MB_SUCCESS;
+	char line[ELAC_BATH56_SIZE + 3];
+	char *profile;
+	char *beam;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* read record into char array */
+	status = fread(line, 1, ELAC_BATH56_SIZE + 3, mbfp);
+	if (status == ELAC_BATH56_SIZE + 3)
+		status = MB_SUCCESS;
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+	}
+
+	/* get data */
+	if (status == MB_SUCCESS) {
+		data->kind = MB_DATA_DATA;
+#ifndef BYTESWAPPED
+		short int *short_ptr = (short int *)&line[0];
+		data->ping_num = (int)*short_ptr;
+		short_ptr = (short int *)&line[2];
+		data->sound_vel = (int)*short_ptr;
+#else
+		short int *short_ptr = (short int *)&line[0];
+		data->ping_num = (int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[2];
+		data->sound_vel = (int)mb_swap_short(*short_ptr);
+#endif
+		data->mode = (int)line[4];
+		data->pulse_length = (int)line[5];
+		data->source_power = (int)line[6];
+		data->receiver_gain = (int)line[7];
+		data->profile_num = 7;
+		data->beams_bath = 56;
+		for (int i = 0; i < data->profile_num; i++) {
+			profile = &line[8 + i * 120];
+			data->profile[i].day = (int)profile[0];
+			data->profile[i].month = (int)profile[1];
+			data->profile[i].year = (int)profile[2];
+			data->profile[i].hour = (int)profile[3];
+			data->profile[i].minute = (int)profile[4];
+			data->profile[i].second = (int)profile[5];
+			data->profile[i].hundredth_sec = (int)profile[6];
+			data->profile[i].thousandth_sec = (int)profile[7];
+#ifndef BYTESWAPPED
+			int *int_ptr = (int *)&profile[8];
+			data->profile[i].latitude = (int)*int_ptr;
+			int_ptr = (int *)&profile[12];
+			data->profile[i].longitude = (int)*int_ptr;
+			short_ptr = (short int *)&profile[16];
+			data->profile[i].roll = (int)*short_ptr;
+			short_ptr = (short int *)&profile[18];
+			data->profile[i].pitch = (int)*short_ptr;
+			short_ptr = (short int *)&profile[20];
+			data->profile[i].heading = (int)(unsigned short)*short_ptr;
+			short_ptr = (short int *)&profile[22];
+			data->profile[i].heave = (int)*short_ptr;
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				data->profile[i].bath[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[2];
+				data->profile[i].bath_acrosstrack[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[4];
+				data->profile[i].bath_alongtrack[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[6];
+				data->profile[i].tt[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[8];
+				data->profile[i].angle[j] = (short int)*short_ptr;
+				data->profile[i].quality[j] = (short int)beam[10];
+				data->profile[i].amp[j] = (short int)beam[11];
+			}
+#else
+			int *int_ptr = (int *)&profile[8];
+			data->profile[i].latitude = (int)mb_swap_int(*int_ptr);
+			int_ptr = (int *)&profile[12];
+			data->profile[i].longitude = (int)mb_swap_int(*int_ptr);
+			short_ptr = (short int *)&profile[16];
+			data->profile[i].roll = (int)mb_swap_short(*short_ptr);
+			short_ptr = (short int *)&profile[18];
+			data->profile[i].pitch = (int)mb_swap_short(*short_ptr);
+			short_ptr = (short int *)&profile[20];
+			data->profile[i].heading = (int)(unsigned short)mb_swap_short(*short_ptr);
+			short_ptr = (short int *)&profile[22];
+			data->profile[i].heave = (int)mb_swap_short(*short_ptr);
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				data->profile[i].bath[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[2];
+				data->profile[i].bath_acrosstrack[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[4];
+				data->profile[i].bath_alongtrack[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[6];
+				data->profile[i].tt[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[8];
+				data->profile[i].angle[j] = (short int)mb_swap_short(*short_ptr);
+				data->profile[i].quality[j] = (short int)beam[10];
+				data->profile[i].amp[j] = (short int)beam[11];
+			}
+#endif
+		}
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
+		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
+		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
+		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
+		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
+		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
+		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
+		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
+		for (int i = 0; i < data->profile_num; i++) {
+			fprintf(stderr, "dbg5       profile:          %d\n", i);
+			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
+			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
+			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
+			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
+			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
+			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
+			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
+			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
+			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
+			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
+			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
+			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
+			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
+			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
+			for (int j = 0; j < 8; j++) {
+				fprintf(stderr, "dbg5       bath[%2d][%d]:             %d\n", i, j, data->profile[i].bath[j]);
+				fprintf(stderr, "dbg5       bath_acrosstrack[%2d][%d]: %d\n", i, j, data->profile[i].bath_acrosstrack[j]);
+				fprintf(stderr, "dbg5       bath_alongtrack[%2d][%d]:  %d\n", i, j, data->profile[i].bath_alongtrack[j]);
+				fprintf(stderr, "dbg5       tt[%2d][%d]:               %d\n", i, j, data->profile[i].tt[j]);
+				fprintf(stderr, "dbg5       angle[%2d][%d]:            %d\n", i, j, data->profile[i].angle[j]);
+				fprintf(stderr, "dbg5       quality[%2d][%d]:          %d\n", i, j, data->profile[i].quality[j]);
+				fprintf(stderr, "dbg5       amp[%2d][%d]:              %d\n", i, j, data->profile[i].amp[j]);
+			}
+			fprintf(stderr, "dbg5       \n");
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+	char *function_name = "mbr_bchrtunb_rd_bath40";
+	int status = MB_SUCCESS;
+	char line[ELAC_BATH40_SIZE + 3];
+	char *profile;
+	char *beam;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* read record into char array */
+	status = fread(line, 1, ELAC_BATH40_SIZE + 3, mbfp);
+	if (status == ELAC_BATH40_SIZE + 3)
+		status = MB_SUCCESS;
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+	}
+
+	/* get data */
+	if (status == MB_SUCCESS) {
+		data->kind = MB_DATA_DATA;
+#ifndef BYTESWAPPED
+		short int *short_ptr = (short int *)&line[0];
+		data->ping_num = (int)*short_ptr;
+		short_ptr = (short int *)&line[2];
+		data->sound_vel = (int)*short_ptr;
+#else
+		short int *short_ptr = (short int *)&line[0];
+		data->ping_num = (int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[2];
+		data->sound_vel = (int)mb_swap_short(*short_ptr);
+#endif
+		data->mode = (int)line[4];
+		data->pulse_length = (int)line[5];
+		data->source_power = (int)line[6];
+		data->receiver_gain = (int)line[7];
+		data->profile_num = 5;
+		data->beams_bath = 40;
+		for (int i = 0; i < data->profile_num; i++) {
+			profile = &line[8 + i * 120];
+			data->profile[i].day = (int)profile[0];
+			data->profile[i].month = (int)profile[1];
+			data->profile[i].year = (int)profile[2];
+			data->profile[i].hour = (int)profile[3];
+			data->profile[i].minute = (int)profile[4];
+			data->profile[i].second = (int)profile[5];
+			data->profile[i].hundredth_sec = (int)profile[6];
+			data->profile[i].thousandth_sec = (int)profile[7];
+#ifndef BYTESWAPPED
+			int *int_ptr = (int *)&profile[8];
+			data->profile[i].latitude = (int)*int_ptr;
+			int_ptr = (int *)&profile[12];
+			data->profile[i].longitude = (int)*int_ptr;
+			short_ptr = (short int *)&profile[16];
+			data->profile[i].roll = (int)*short_ptr;
+			short_ptr = (short int *)&profile[18];
+			data->profile[i].pitch = (int)*short_ptr;
+			short_ptr = (short int *)&profile[20];
+			data->profile[i].heading = (int)(unsigned short)*short_ptr;
+			short_ptr = (short int *)&profile[22];
+			data->profile[i].heave = (int)*short_ptr;
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				data->profile[i].bath[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[2];
+				data->profile[i].bath_acrosstrack[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[4];
+				data->profile[i].bath_alongtrack[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[6];
+				data->profile[i].tt[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[8];
+				data->profile[i].angle[j] = (short int)*short_ptr;
+				data->profile[i].quality[j] = (short int)beam[10];
+				data->profile[i].amp[j] = (short int)beam[11];
+			}
+#else
+			int *int_ptr = (int *)&profile[8];
+			data->profile[i].latitude = (int)mb_swap_int(*int_ptr);
+			int_ptr = (int *)&profile[12];
+			data->profile[i].longitude = (int)mb_swap_int(*int_ptr);
+			short_ptr = (short int *)&profile[16];
+			data->profile[i].roll = (int)mb_swap_short(*short_ptr);
+			short_ptr = (short int *)&profile[18];
+			data->profile[i].pitch = (int)mb_swap_short(*short_ptr);
+			short_ptr = (short int *)&profile[20];
+			data->profile[i].heading = (int)(unsigned short)mb_swap_short(*short_ptr);
+			short_ptr = (short int *)&profile[22];
+			data->profile[i].heave = (int)mb_swap_short(*short_ptr);
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				data->profile[i].bath[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[2];
+				data->profile[i].bath_acrosstrack[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[4];
+				data->profile[i].bath_alongtrack[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[6];
+				data->profile[i].tt[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[8];
+				data->profile[i].angle[j] = (short int)mb_swap_short(*short_ptr);
+				data->profile[i].quality[j] = (short int)beam[10];
+				data->profile[i].amp[j] = (short int)beam[11];
+			}
+#endif
+		}
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
+		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
+		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
+		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
+		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
+		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
+		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
+		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
+		for (int i = 0; i < data->profile_num; i++) {
+			fprintf(stderr, "dbg5       profile:          %d\n", i);
+			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
+			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
+			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
+			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
+			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
+			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
+			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
+			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
+			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
+			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
+			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
+			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
+			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
+			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
+			for (int j = 0; j < 8; j++) {
+				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
+				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
+				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
+				fprintf(stderr, "dbg5       tt:               %d\n", data->profile[i].tt[j]);
+				fprintf(stderr, "dbg5       angle:            %d\n", data->profile[i].angle[j]);
+				fprintf(stderr, "dbg5       quality:          %d\n", data->profile[i].quality[j]);
+				fprintf(stderr, "dbg5       amp:              %d\n", data->profile[i].amp[j]);
+			}
+			fprintf(stderr, "dbg5       \n");
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+	char *function_name = "mbr_bchrtunb_rd_bath32";
+	int status = MB_SUCCESS;
+	char line[ELAC_BATH32_SIZE + 3];
+	char *profile;
+	char *beam;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* read record into char array */
+	status = fread(line, 1, ELAC_BATH32_SIZE + 3, mbfp);
+	if (status == ELAC_BATH32_SIZE + 3)
+		status = MB_SUCCESS;
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+	}
+
+	/* get data */
+	if (status == MB_SUCCESS) {
+		data->kind = MB_DATA_DATA;
+#ifndef BYTESWAPPED
+		short int *short_ptr = (short int *)&line[0];
+		data->ping_num = (int)*short_ptr;
+		short_ptr = (short int *)&line[2];
+		data->sound_vel = (int)*short_ptr;
+#else
+		short int *short_ptr = (short int *)&line[0];
+		data->ping_num = (int)mb_swap_short(*short_ptr);
+		short_ptr = (short int *)&line[2];
+		data->sound_vel = (int)mb_swap_short(*short_ptr);
+#endif
+		data->mode = (int)line[4];
+		data->pulse_length = (int)line[5];
+		data->source_power = (int)line[6];
+		data->receiver_gain = (int)line[7];
+		data->profile_num = 4;
+		data->beams_bath = 32;
+		for (int i = 0; i < data->profile_num; i++) {
+			profile = &line[8 + i * 120];
+			data->profile[i].day = (int)profile[0];
+			data->profile[i].month = (int)profile[1];
+			data->profile[i].year = (int)profile[2];
+			data->profile[i].hour = (int)profile[3];
+			data->profile[i].minute = (int)profile[4];
+			data->profile[i].second = (int)profile[5];
+			data->profile[i].hundredth_sec = (int)profile[6];
+			data->profile[i].thousandth_sec = (int)profile[7];
+#ifndef BYTESWAPPED
+			int *int_ptr = (int *)&profile[8];
+			data->profile[i].latitude = (int)*int_ptr;
+			int_ptr = (int *)&profile[12];
+			data->profile[i].longitude = (int)*int_ptr;
+			short_ptr = (short int *)&profile[16];
+			data->profile[i].roll = (int)*short_ptr;
+			short_ptr = (short int *)&profile[18];
+			data->profile[i].pitch = (int)*short_ptr;
+			short_ptr = (short int *)&profile[20];
+			data->profile[i].heading = (int)(unsigned short)*short_ptr;
+			short_ptr = (short int *)&profile[22];
+			data->profile[i].heave = (int)*short_ptr;
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				data->profile[i].bath[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[2];
+				data->profile[i].bath_acrosstrack[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[4];
+				data->profile[i].bath_alongtrack[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[6];
+				data->profile[i].tt[j] = (short int)*short_ptr;
+				short_ptr = (short *)&beam[8];
+				data->profile[i].angle[j] = (short int)*short_ptr;
+				data->profile[i].quality[j] = (short int)beam[10];
+				data->profile[i].amp[j] = (short int)beam[11];
+			}
+#else
+			int *int_ptr = (int *)&profile[8];
+			data->profile[i].latitude = (int)mb_swap_int(*int_ptr);
+			int_ptr = (int *)&profile[12];
+			data->profile[i].longitude = (int)mb_swap_int(*int_ptr);
+			short_ptr = (short int *)&profile[16];
+			data->profile[i].roll = (int)mb_swap_short(*short_ptr);
+			short_ptr = (short int *)&profile[18];
+			data->profile[i].pitch = (int)mb_swap_short(*short_ptr);
+			short_ptr = (short int *)&profile[20];
+			data->profile[i].heading = (int)(unsigned short)mb_swap_short(*short_ptr);
+			short_ptr = (short int *)&profile[22];
+			data->profile[i].heave = (int)mb_swap_short(*short_ptr);
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				data->profile[i].bath[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[2];
+				data->profile[i].bath_acrosstrack[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[4];
+				data->profile[i].bath_alongtrack[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[6];
+				data->profile[i].tt[j] = (short int)mb_swap_short(*short_ptr);
+				short_ptr = (short *)&beam[8];
+				data->profile[i].angle[j] = (short int)mb_swap_short(*short_ptr);
+				data->profile[i].quality[j] = (short int)beam[10];
+				data->profile[i].amp[j] = (short int)beam[11];
+			}
+#endif
+		}
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
+		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
+		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
+		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
+		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
+		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
+		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
+		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
+		for (int i = 0; i < data->profile_num; i++) {
+			fprintf(stderr, "dbg5       profile:          %d\n", i);
+			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
+			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
+			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
+			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
+			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
+			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
+			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
+			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
+			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
+			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
+			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
+			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
+			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
+			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
+			for (int j = 0; j < 8; j++) {
+				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
+				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
+				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
+				fprintf(stderr, "dbg5       tt:               %d\n", data->profile[i].tt[j]);
+				fprintf(stderr, "dbg5       angle:            %d\n", data->profile[i].angle[j]);
+				fprintf(stderr, "dbg5       quality:          %d\n", data->profile[i].quality[j]);
+				fprintf(stderr, "dbg5       amp:              %d\n", data->profile[i].amp[j]);
+			}
+			fprintf(stderr, "dbg5       \n");
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_bchrtunb_rd_data";
+	int status = MB_SUCCESS;
+	struct mbf_bchrtunb_struct *data;
+	char *data_ptr;
+	FILE *mbfp;
+	int done;
+	short int *type;
+	static char label[2];
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
+	mbfp = mb_io_ptr->mbfp;
+
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	done = MB_NO;
+	type = (short int *)label;
+	*error = MB_ERROR_NO_ERROR;
+	while (done == MB_NO) {
+		/* get next record label */
+		if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+		if (label[0] == 0x02)
+			if ((status = fread(&label[1], 1, 1, mb_io_ptr->mbfp)) != 1) {
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+
+/* swap bytes if necessary */
+#ifdef BYTESWAPPED
+		*type = (short int)mb_swap_short(*type);
+#endif
+
+		/* read the appropriate data records */
+		if (status == MB_FAILURE) {
+			done = MB_YES;
+		}
+		else if (*type == ELAC_COMMENT) {
+			status = mbr_bchrtunb_rd_comment(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_COMMENT;
+			}
+		}
+		else if (*type == ELAC_PARAMETER) {
+			status = mbr_bchrtunb_rd_parameter(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_PARAMETER;
+			}
+		}
+		else if (*type == ELAC_POS) {
+			status = mbr_bchrtunb_rd_pos(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_NAV;
+			}
+		}
+		else if (*type == ELAC_SVP) {
+			status = mbr_bchrtunb_rd_svp(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_VELOCITY_PROFILE;
+			}
+		}
+		else if (*type == ELAC_BATH56) {
+			status = mbr_bchrtunb_rd_bath56(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_DATA;
+			}
+		}
+		else if (*type == ELAC_BATH40) {
+			status = mbr_bchrtunb_rd_bath40(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_DATA;
+			}
+		}
+		else if (*type == ELAC_BATH32) {
+			status = mbr_bchrtunb_rd_bath32(verbose, mbfp, data, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_DATA;
+			}
+		}
+		else {
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+
+		/* bail out if there is an error */
+		if (status == MB_FAILURE)
+			done = MB_YES;
+	}
+
+	/* get file position */
+	mb_io_ptr->file_bytes = ftell(mbfp);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_bchrtunb";
 	int status = MB_SUCCESS;
@@ -352,7 +1399,9 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_elac_struct *store;
 	int time_i[7];
 	double time_d;
-	double lon, lat, heading, speed;
+	double lon;
+	double lat;
+	double speed;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -401,7 +1450,7 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		time_i[5] = data->profile[0].second;
 		time_i[6] = 10000 * data->profile[0].hundredth_sec + 100 * data->profile[0].thousandth_sec;
 		mb_get_time(verbose, time_i, &time_d);
-		heading = 0.01 * data->profile[0].heading;
+		const double heading = 0.01 * data->profile[0].heading;
 		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, &lon, &lat, &speed, error);
 		data->profile[0].longitude = (int)(lon / 0.00000009);
 		data->profile[0].latitude = (int)(lat / 0.00000009);
@@ -518,6 +1567,1146 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				store->profile[i].amp[j] = data->profile[i].amp[j];
 			}
 		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+
+	char *function_name = "mbr_bchrtunb_wr_comment";
+	int status = MB_SUCCESS;
+	short int label;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
+	}
+
+	/* write the record label */
+	label = ELAC_COMMENT;
+#ifdef BYTESWAPPED
+	label = (short)mb_swap_short(label);
+#endif
+	status = fwrite(&label, 1, 2, mbfp);
+	if (status != 2) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+	}
+	else
+		status = MB_SUCCESS;
+
+	/* write out the data */
+	if (status == MB_SUCCESS) {
+		/* construct record */
+		int len = strlen(data->comment);
+		if (len > MBSYS_ELAC_COMMENT_LENGTH)
+			len = MBSYS_ELAC_COMMENT_LENGTH;
+		char line[ELAC_COMMENT_SIZE + 3];
+		for (int i = 0; i < len; i++)
+			line[i] = data->comment[i];
+		for (int i = len; i < MBSYS_ELAC_COMMENT_LENGTH; i++)
+			line[i] = '\0';
+		line[ELAC_COMMENT_SIZE] = 0x03;
+		line[ELAC_COMMENT_SIZE + 1] = '\0';
+		line[ELAC_COMMENT_SIZE + 2] = '\0';
+
+		/* write out data */
+		status = fwrite(line, 1, ELAC_COMMENT_SIZE + 3, mbfp);
+		if (status != ELAC_COMMENT_SIZE + 3) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+		else {
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+
+	char *function_name = "mbr_bchrtunb_wr_parameter";
+	int status = MB_SUCCESS;
+	char line[ELAC_PARAMETER_SIZE + 3];
+	short int label;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->par_month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->par_day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->par_hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->par_minute);
+		fprintf(stderr, "dbg5       sec:              %d\n", data->par_second);
+		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->par_hundredth_sec);
+		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->par_thousandth_sec);
+		fprintf(stderr, "dbg5       roll_offset:      %d\n", data->roll_offset);
+		fprintf(stderr, "dbg5       pitch_offset:     %d\n", data->pitch_offset);
+		fprintf(stderr, "dbg5       heading_offset:   %d\n", data->heading_offset);
+		fprintf(stderr, "dbg5       time_delay:       %d\n", data->time_delay);
+		fprintf(stderr, "dbg5       transducer_port_height: %d\n", data->transducer_port_height);
+		fprintf(stderr, "dbg5       transducer_starboard_height:%d\n", data->transducer_starboard_height);
+		fprintf(stderr, "dbg5       transducer_port_depth:     %d\n", data->transducer_port_depth);
+		fprintf(stderr, "dbg5       transducer_starboard_depth:     %d\n", data->transducer_starboard_depth);
+		fprintf(stderr, "dbg5       transducer_port_x:        %d\n", data->transducer_port_x);
+		fprintf(stderr, "dbg5       transducer_starboard_x:        %d\n", data->transducer_starboard_x);
+		fprintf(stderr, "dbg5       transducer_port_y:        %d\n", data->transducer_port_y);
+		fprintf(stderr, "dbg5       transducer_starboard_y:  %d\n", data->transducer_starboard_y);
+		fprintf(stderr, "dbg5       transducer_port_error:  %d\n", data->transducer_port_error);
+		fprintf(stderr, "dbg5       transducer_starboard_error:  %d\n", data->transducer_starboard_error);
+		fprintf(stderr, "dbg5       antenna_height:            %d\n", data->antenna_height);
+		fprintf(stderr, "dbg5       antenna_x:      %d\n", data->antenna_x);
+		fprintf(stderr, "dbg5       antenna_y:    %d\n", data->antenna_y);
+		fprintf(stderr, "dbg5       vru_height:%d\n", data->vru_height);
+		fprintf(stderr, "dbg5       vru_x:%d\n", data->vru_x);
+		fprintf(stderr, "dbg5       vru_y:%d\n", data->vru_y);
+		fprintf(stderr, "dbg5       heave_offset:%d\n", data->heave_offset);
+		fprintf(stderr, "dbg5       line_number:%d\n", data->line_number);
+		fprintf(stderr, "dbg5       start_or_stop:%d\n", data->start_or_stop);
+		fprintf(stderr, "dbg5       transducer_serial_number:%d\n", data->transducer_serial_number);
+	}
+
+	/* write the record label */
+	label = ELAC_PARAMETER;
+#ifdef BYTESWAPPED
+	label = (short)mb_swap_short(label);
+#endif
+	status = fwrite(&label, 1, 2, mbfp);
+	if (status != 2) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+	}
+	else
+		status = MB_SUCCESS;
+
+	/* write out the data */
+	if (status == MB_SUCCESS) {
+		/* construct record */
+		line[0] = (char)data->par_day;
+		line[1] = (char)data->par_month;
+		line[2] = (char)data->par_year;
+		line[3] = (char)data->par_hour;
+		line[4] = (char)data->par_minute;
+		line[5] = (char)data->par_second;
+		line[6] = (char)data->par_hundredth_sec;
+		line[7] = (char)data->par_thousandth_sec;
+#ifndef BYTESWAPPED
+		short int *short_ptr = (short int *)&line[8];
+		*short_ptr = data->roll_offset;
+		short_ptr = (short int *)&line[10];
+		*short_ptr = data->pitch_offset;
+		short_ptr = (short int *)&line[12];
+		*short_ptr = data->heading_offset;
+		short_ptr = (short int *)&line[14];
+		*short_ptr = data->time_delay;
+		short_ptr = (short int *)&line[16];
+		*short_ptr = data->transducer_port_height;
+		short_ptr = (short int *)&line[18];
+		*short_ptr = data->transducer_starboard_height;
+		short_ptr = (short int *)&line[20];
+		*short_ptr = data->transducer_port_depth;
+		short_ptr = (short int *)&line[22];
+		*short_ptr = data->transducer_starboard_depth;
+		short_ptr = (short int *)&line[24];
+		*short_ptr = data->transducer_port_x;
+		short_ptr = (short int *)&line[26];
+		*short_ptr = data->transducer_starboard_x;
+		short_ptr = (short int *)&line[28];
+		*short_ptr = data->transducer_port_y;
+		short_ptr = (short int *)&line[30];
+		*short_ptr = data->transducer_starboard_y;
+		short_ptr = (short int *)&line[32];
+		*short_ptr = data->transducer_port_error;
+		short_ptr = (short int *)&line[34];
+		*short_ptr = data->transducer_starboard_error;
+		short_ptr = (short int *)&line[36];
+		*short_ptr = data->antenna_height;
+		short_ptr = (short int *)&line[38];
+		*short_ptr = data->antenna_x;
+		short_ptr = (short int *)&line[40];
+		*short_ptr = data->antenna_y;
+		short_ptr = (short int *)&line[42];
+		*short_ptr = data->vru_height;
+		short_ptr = (short int *)&line[44];
+		*short_ptr = data->vru_x;
+		short_ptr = (short int *)&line[46];
+		*short_ptr = data->vru_y;
+		short_ptr = (short int *)&line[48];
+		*short_ptr = data->heave_offset;
+		short_ptr = (short int *)&line[50];
+		*short_ptr = data->line_number;
+		short_ptr = (short int *)&line[52];
+		*short_ptr = data->start_or_stop;
+		short_ptr = (short int *)&line[54];
+		*short_ptr = data->transducer_serial_number;
+#else
+		short int *short_ptr = (short int *)&line[8];
+		*short_ptr = (short int)mb_swap_short(data->roll_offset);
+		short_ptr = (short int *)&line[10];
+		*short_ptr = (short int)mb_swap_short(data->pitch_offset);
+		short_ptr = (short int *)&line[12];
+		*short_ptr = (short int)mb_swap_short(data->heading_offset);
+		short_ptr = (short int *)&line[14];
+		*short_ptr = (short int)mb_swap_short(data->time_delay);
+		short_ptr = (short int *)&line[16];
+		*short_ptr = (short int)mb_swap_short(data->transducer_port_height);
+		short_ptr = (short int *)&line[18];
+		*short_ptr = (short int)mb_swap_short(data->transducer_starboard_height);
+		short_ptr = (short int *)&line[20];
+		*short_ptr = (short int)mb_swap_short(data->transducer_port_depth);
+		short_ptr = (short int *)&line[22];
+		*short_ptr = (short int)mb_swap_short(data->transducer_starboard_depth);
+		short_ptr = (short int *)&line[24];
+		*short_ptr = (short int)mb_swap_short(data->transducer_port_x);
+		short_ptr = (short int *)&line[26];
+		*short_ptr = (short int)mb_swap_short(data->transducer_starboard_x);
+		short_ptr = (short int *)&line[28];
+		*short_ptr = (short int)mb_swap_short(data->transducer_port_y);
+		short_ptr = (short int *)&line[30];
+		*short_ptr = (short int)mb_swap_short(data->transducer_starboard_y);
+		short_ptr = (short int *)&line[32];
+		*short_ptr = (short int)mb_swap_short(data->transducer_port_error);
+		short_ptr = (short int *)&line[34];
+		*short_ptr = (short int)mb_swap_short(data->transducer_starboard_error);
+		short_ptr = (short int *)&line[36];
+		*short_ptr = (short int)mb_swap_short(data->antenna_height);
+		short_ptr = (short int *)&line[38];
+		*short_ptr = (short int)mb_swap_short(data->antenna_x);
+		short_ptr = (short int *)&line[40];
+		*short_ptr = (short int)mb_swap_short(data->antenna_y);
+		short_ptr = (short int *)&line[42];
+		*short_ptr = (short int)mb_swap_short(data->vru_height);
+		short_ptr = (short int *)&line[44];
+		*short_ptr = (short int)mb_swap_short(data->vru_x);
+		short_ptr = (short int *)&line[46];
+		*short_ptr = (short int)mb_swap_short(data->vru_y);
+		short_ptr = (short int *)&line[48];
+		*short_ptr = (short int)mb_swap_short(data->heave_offset);
+		short_ptr = (short int *)&line[50];
+		*short_ptr = (short int)mb_swap_short(data->line_number);
+		short_ptr = (short int *)&line[52];
+		*short_ptr = (short int)mb_swap_short(data->start_or_stop);
+		short_ptr = (short int *)&line[54];
+		*short_ptr = (short int)mb_swap_short(data->transducer_serial_number);
+#endif
+		line[ELAC_PARAMETER_SIZE] = 0x03;
+		line[ELAC_PARAMETER_SIZE + 1] = '\0';
+		line[ELAC_PARAMETER_SIZE + 2] = '\0';
+
+		/* write out data */
+		status = fwrite(line, 1, ELAC_PARAMETER_SIZE + 3, mbfp);
+		if (status != ELAC_PARAMETER_SIZE + 3) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+		else {
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+
+	char *function_name = "mbr_bchrtunb_wr_pos";
+	int status = MB_SUCCESS;
+	char line[ELAC_POS_SIZE + 3];
+	short int label;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->pos_month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->pos_day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->pos_hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->pos_minute);
+		fprintf(stderr, "dbg5       sec:              %d\n", data->pos_second);
+		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->pos_hundredth_sec);
+		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->pos_thousandth_sec);
+		fprintf(stderr, "dbg5       pos_latitude:     %d\n", data->pos_latitude);
+		fprintf(stderr, "dbg5       pos_longitude:    %d\n", data->pos_longitude);
+		fprintf(stderr, "dbg5       utm_northing:     %d\n", data->utm_northing);
+		fprintf(stderr, "dbg5       utm_easting:      %d\n", data->utm_easting);
+		fprintf(stderr, "dbg5       utm_zone_lon:     %d\n", data->utm_zone_lon);
+		fprintf(stderr, "dbg5       utm_zone:         %c\n", data->utm_zone);
+		fprintf(stderr, "dbg5       hemisphere:       %c\n", data->hemisphere);
+		fprintf(stderr, "dbg5       ellipsoid:        %c\n", data->ellipsoid);
+		fprintf(stderr, "dbg5       pos_spare:        %c\n", data->pos_spare);
+		fprintf(stderr, "dbg5       semi_major_axis:  %d\n", data->semi_major_axis);
+		fprintf(stderr, "dbg5       other_quality:    %d\n", data->other_quality);
+	}
+
+	/* write the record label */
+	label = ELAC_POS;
+#ifdef BYTESWAPPED
+	label = (short)mb_swap_short(label);
+#endif
+	status = fwrite(&label, 1, 2, mbfp);
+	if (status != 2) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+	}
+	else
+		status = MB_SUCCESS;
+
+	/* write out the data */
+	if (status == MB_SUCCESS) {
+		/* construct record */
+		line[0] = (char)data->pos_day;
+		line[1] = (char)data->pos_month;
+		line[2] = (char)data->pos_year;
+		line[3] = (char)data->pos_hour;
+		line[4] = (char)data->pos_minute;
+		line[5] = (char)data->pos_second;
+		line[6] = (char)data->pos_hundredth_sec;
+		line[7] = (char)data->pos_thousandth_sec;
+#ifndef BYTESWAPPED
+		int *int_ptr = (int *)&line[8];
+		*int_ptr = data->pos_latitude;
+		int_ptr = (int *)&line[12];
+		*int_ptr = data->pos_longitude;
+		int_ptr = (int *)&line[16];
+		*int_ptr = data->utm_northing;
+		int_ptr = (int *)&line[20];
+		*int_ptr = data->utm_easting;
+		int_ptr = (int *)&line[24];
+		*int_ptr = data->utm_zone_lon;
+		line[28] = data->utm_zone;
+		line[29] = data->hemisphere;
+		line[30] = data->ellipsoid;
+		line[31] = data->pos_spare;
+		short int *short_ptr = (short int *)&line[32];
+		*short_ptr = (short int)data->semi_major_axis;
+		short_ptr = (short int *)&line[34];
+		*short_ptr = (short int)data->other_quality;
+#else
+		int *int_ptr = (int *)&line[8];
+		*int_ptr = (int)mb_swap_int(data->pos_latitude);
+		int_ptr = (int *)&line[12];
+		*int_ptr = (int)mb_swap_int(data->pos_longitude);
+		int_ptr = (int *)&line[16];
+		*int_ptr = (int)mb_swap_int(data->utm_northing);
+		int_ptr = (int *)&line[20];
+		*int_ptr = (int)mb_swap_int(data->utm_easting);
+		int_ptr = (int *)&line[24];
+		*int_ptr = (int)mb_swap_int(data->utm_zone_lon);
+		line[28] = data->utm_zone;
+		line[29] = data->hemisphere;
+		line[30] = data->ellipsoid;
+		line[31] = data->pos_spare;
+		short int *short_ptr = (short int *)&line[32];
+		*short_ptr = (int)mb_swap_short(data->semi_major_axis);
+		short_ptr = (short int *)&line[34];
+		*short_ptr = (int)mb_swap_short(data->other_quality);
+#endif
+		line[ELAC_POS_SIZE] = 0x03;
+		line[ELAC_POS_SIZE + 1] = '\0';
+		line[ELAC_POS_SIZE + 2] = '\0';
+
+		/* write out data */
+		status = fwrite(line, 1, ELAC_POS_SIZE + 3, mbfp);
+		if (status != ELAC_POS_SIZE + 3) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+		else {
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+
+	char *function_name = "mbr_bchrtunb_wr_svp";
+	int status = MB_SUCCESS;
+	char line[ELAC_SVP_SIZE + 3];
+	short int label;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
+		fprintf(stderr, "dbg5       month:            %d\n", data->svp_month);
+		fprintf(stderr, "dbg5       day:              %d\n", data->svp_day);
+		fprintf(stderr, "dbg5       hour:             %d\n", data->svp_hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", data->svp_minute);
+		fprintf(stderr, "dbg5       sec:              %d\n", data->svp_second);
+		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->svp_hundredth_sec);
+		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->svp_thousandth_sec);
+		fprintf(stderr, "dbg5       svp_latitude:     %d\n", data->svp_latitude);
+		fprintf(stderr, "dbg5       svp_longitude:    %d\n", data->svp_longitude);
+		fprintf(stderr, "dbg5       svp_num:          %d\n", data->svp_num);
+		for (int i = 0; i < data->svp_num; i++)
+			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
+	}
+
+	/* write the record label */
+	label = ELAC_SVP;
+#ifdef BYTESWAPPED
+	label = (short)mb_swap_short(label);
+#endif
+	status = fwrite(&label, 1, 2, mbfp);
+	if (status != 2) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+	}
+	else
+		status = MB_SUCCESS;
+
+	/* write out the data */
+	if (status == MB_SUCCESS) {
+		/* construct record */
+		line[0] = (char)data->svp_day;
+		line[1] = (char)data->svp_month;
+		line[2] = (char)data->svp_year;
+		line[3] = (char)data->svp_hour;
+		line[4] = (char)data->svp_minute;
+		line[5] = (char)data->svp_second;
+		line[6] = (char)data->svp_hundredth_sec;
+		line[7] = (char)data->svp_thousandth_sec;
+#ifndef BYTESWAPPED
+		int *int_ptr = (int *)&line[8];
+		*int_ptr = data->svp_latitude;
+		int_ptr = (int *)&line[12];
+		*int_ptr = data->svp_longitude;
+#else
+		int *int_ptr = (int *)&line[8];
+		*int_ptr = (int)mb_swap_int(data->svp_latitude);
+		int_ptr = (int *)&line[12];
+		*int_ptr = (int)mb_swap_int(data->svp_longitude);
+#endif
+		for (int i = 0; i < data->svp_num; i++) {
+			short int *short_ptr = (short int *)&line[16 + 4 * i];
+			short int *short_ptr2 = (short int *)&line[18 + 4 * i];
+#ifndef BYTESWAPPED
+			*short_ptr = (short int)data->svp_depth[i];
+			*short_ptr2 = (short int)data->svp_vel[i];
+#else
+			*short_ptr = (short int)mb_swap_short((short int)data->svp_depth[i]);
+			*short_ptr2 = (short int)mb_swap_short((short int)data->svp_vel[i]);
+#endif
+		}
+		for (int i = data->svp_num; i < 500; i++) {
+			short int *short_ptr = (short int *)&line[16 + 4 * i];
+			short int *short_ptr2 = (short int *)&line[18 + 4 * i];
+			*short_ptr = 0;
+			*short_ptr2 = 0;
+		}
+		line[ELAC_SVP_SIZE] = 0x03;
+		line[ELAC_SVP_SIZE + 1] = '\0';
+		line[ELAC_SVP_SIZE + 2] = '\0';
+
+		/* write out data */
+		status = fwrite(line, 1, ELAC_SVP_SIZE + 3, mbfp);
+		if (status != ELAC_SVP_SIZE + 3) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+		else {
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+	char *function_name = "mbr_bchrtunb_wr_bath56";
+	int status = MB_SUCCESS;
+	char line[ELAC_BATH56_SIZE + 3];
+	char *profile;
+	char *beam;
+	short int label;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
+		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
+		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
+		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
+		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
+		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
+		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
+		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
+		for (int i = 0; i < data->profile_num; i++) {
+			fprintf(stderr, "dbg5       profile:          %d\n", i);
+			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
+			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
+			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
+			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
+			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
+			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
+			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
+			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
+			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
+			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
+			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
+			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
+			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
+			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
+			for (int j = 0; j < 8; j++) {
+				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
+				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
+				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
+				fprintf(stderr, "dbg5       tt:               %d\n", data->profile[i].tt[j]);
+				fprintf(stderr, "dbg5       angle:            %d\n", data->profile[i].angle[j]);
+				fprintf(stderr, "dbg5       quality:          %d\n", data->profile[i].quality[j]);
+				fprintf(stderr, "dbg5       amp:              %d\n", data->profile[i].amp[j]);
+			}
+			fprintf(stderr, "dbg5       \n");
+		}
+	}
+
+	/* write the record label */
+	label = ELAC_BATH56;
+#ifdef BYTESWAPPED
+	label = (short)mb_swap_short(label);
+#endif
+	status = fwrite(&label, 1, 2, mbfp);
+	if (status != 2) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+	}
+	else
+		status = MB_SUCCESS;
+
+	/* write out the data */
+	if (status == MB_SUCCESS) {
+/* construct record */
+#ifndef BYTESWAPPED
+		short int *short_ptr = (short int *)&line[0];
+		*short_ptr = (short int)data->ping_num;
+		short_ptr = (short int *)&line[2];
+		*short_ptr = (short int)data->sound_vel;
+#else
+		short int *short_ptr = (short int *)&line[0];
+		*short_ptr = (short int)mb_swap_short((short int)data->ping_num);
+		short_ptr = (short int *)&line[2];
+		*short_ptr = (short int)mb_swap_short((short int)data->sound_vel);
+#endif
+		line[4] = (char)data->mode;
+		line[5] = (char)data->pulse_length;
+		line[6] = (char)data->source_power;
+		line[7] = (char)data->receiver_gain;
+		for (int i = 0; i < data->profile_num; i++) {
+			profile = &line[8 + i * 120];
+			profile[0] = (char)data->profile[i].day;
+			profile[1] = (char)data->profile[i].month;
+			profile[2] = (char)data->profile[i].year;
+			profile[3] = (char)data->profile[i].hour;
+			profile[4] = (char)data->profile[i].minute;
+			profile[5] = (char)data->profile[i].second;
+			profile[6] = (char)data->profile[i].hundredth_sec;
+			profile[7] = (char)data->profile[i].thousandth_sec;
+#ifndef BYTESWAPPED
+			int *int_ptr = (int *)&profile[8];
+			*int_ptr = (int)data->profile[i].latitude;
+			int_ptr = (int *)&profile[12];
+			*int_ptr = (int)data->profile[i].longitude;
+			short_ptr = (short int *)&profile[16];
+			*short_ptr = (short int)data->profile[i].roll;
+			short_ptr = (short int *)&profile[18];
+			*short_ptr = (short int)data->profile[i].pitch;
+			short_ptr = (short int *)&profile[20];
+			*short_ptr = (short int)(unsigned short)data->profile[i].heading;
+			short_ptr = (short int *)&profile[22];
+			*short_ptr = (short int)data->profile[i].heave;
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				*short_ptr = (short int)data->profile[i].bath[j];
+				short_ptr = (short *)&beam[2];
+				*short_ptr = (short int)data->profile[i].bath_acrosstrack[j];
+				short_ptr = (short *)&beam[4];
+				*short_ptr = (short int)data->profile[i].bath_alongtrack[j];
+				short_ptr = (short *)&beam[6];
+				*short_ptr = (short int)data->profile[i].tt[j];
+				short_ptr = (short *)&beam[8];
+				*short_ptr = (short int)data->profile[i].angle[j];
+				beam[10] = (char)data->profile[i].quality[j];
+				beam[11] = (char)data->profile[i].amp[j];
+			}
+#else
+			int *int_ptr = (int *)&profile[8];
+			*int_ptr = (int)mb_swap_int(data->profile[i].latitude);
+			int_ptr = (int *)&profile[12];
+			*int_ptr = (int)mb_swap_int(data->profile[i].longitude);
+			short_ptr = (short int *)&profile[16];
+			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].roll);
+			short_ptr = (short int *)&profile[18];
+			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].pitch);
+			short_ptr = (short int *)&profile[20];
+			*short_ptr = (short int)mb_swap_short((short int)(unsigned short)data->profile[i].heading);
+			short_ptr = (short int *)&profile[22];
+			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].heave);
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].bath[j]);
+				short_ptr = (short *)&beam[2];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_acrosstrack[j]);
+				short_ptr = (short *)&beam[4];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_alongtrack[j]);
+				short_ptr = (short *)&beam[6];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].tt[j]);
+				short_ptr = (short *)&beam[8];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].angle[j]);
+				beam[10] = (char)data->profile[i].quality[j];
+				beam[11] = (char)data->profile[i].amp[j];
+			}
+#endif
+		}
+		line[ELAC_BATH56_SIZE] = 0x03;
+		line[ELAC_BATH56_SIZE + 1] = '\0';
+		line[ELAC_BATH56_SIZE + 2] = '\0';
+
+		/* write out data */
+		status = fwrite(line, 1, ELAC_BATH56_SIZE + 3, mbfp);
+		if (status != ELAC_BATH56_SIZE + 3) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+		else {
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+
+	char *function_name = "mbr_bchrtunb_wr_bath40";
+	int status = MB_SUCCESS;
+	char line[ELAC_BATH40_SIZE + 3];
+	char *profile;
+	char *beam;
+	short int label;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
+		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
+		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
+		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
+		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
+		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
+		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
+		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
+		for (int i = 0; i < data->profile_num; i++) {
+			fprintf(stderr, "dbg5       profile:          %d\n", i);
+			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
+			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
+			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
+			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
+			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
+			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
+			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
+			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
+			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
+			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
+			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
+			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
+			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
+			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
+			for (int j = 0; j < 8; j++) {
+				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
+				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
+				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
+				fprintf(stderr, "dbg5       tt:               %d\n", data->profile[i].tt[j]);
+				fprintf(stderr, "dbg5       angle:            %d\n", data->profile[i].angle[j]);
+				fprintf(stderr, "dbg5       quality:          %d\n", data->profile[i].quality[j]);
+				fprintf(stderr, "dbg5       amp:              %d\n", data->profile[i].amp[j]);
+			}
+			fprintf(stderr, "dbg5       \n");
+		}
+	}
+
+	/* write the record label */
+	label = ELAC_BATH40;
+#ifdef BYTESWAPPED
+	label = (short)mb_swap_short(label);
+#endif
+	status = fwrite(&label, 1, 2, mbfp);
+	if (status != 2) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+	}
+	else
+		status = MB_SUCCESS;
+
+	/* write out the data */
+	if (status == MB_SUCCESS) {
+/* construct record */
+#ifndef BYTESWAPPED
+		short int *short_ptr = (short int *)&line[0];
+		*short_ptr = (short int)data->ping_num;
+		short_ptr = (short int *)&line[2];
+		*short_ptr = (short int)data->sound_vel;
+#else
+		short int *short_ptr = (short int *)&line[0];
+		*short_ptr = (short int)mb_swap_short((short int)data->ping_num);
+		short_ptr = (short int *)&line[2];
+		*short_ptr = (short int)mb_swap_short((short int)data->sound_vel);
+#endif
+		line[4] = (char)data->mode;
+		line[5] = (char)data->pulse_length;
+		line[6] = (char)data->source_power;
+		line[7] = (char)data->receiver_gain;
+		for (int i = 0; i < data->profile_num; i++) {
+			profile = &line[8 + i * 120];
+			profile[0] = (char)data->profile[i].day;
+			profile[1] = (char)data->profile[i].month;
+			profile[2] = (char)data->profile[i].year;
+			profile[3] = (char)data->profile[i].hour;
+			profile[4] = (char)data->profile[i].minute;
+			profile[5] = (char)data->profile[i].second;
+			profile[6] = (char)data->profile[i].hundredth_sec;
+			profile[7] = (char)data->profile[i].thousandth_sec;
+#ifndef BYTESWAPPED
+			int *int_ptr = (int *)&profile[8];
+			*int_ptr = (int)data->profile[i].latitude;
+			int_ptr = (int *)&profile[12];
+			*int_ptr = (int)data->profile[i].longitude;
+			short_ptr = (short int *)&profile[16];
+			*short_ptr = (short int)data->profile[i].roll;
+			short_ptr = (short int *)&profile[18];
+			*short_ptr = (short int)data->profile[i].pitch;
+			short_ptr = (short int *)&profile[20];
+			*short_ptr = (short int)(unsigned short)data->profile[i].heading;
+			short_ptr = (short int *)&profile[22];
+			*short_ptr = (short int)data->profile[i].heave;
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				*short_ptr = (short int)data->profile[i].bath[j];
+				short_ptr = (short *)&beam[2];
+				*short_ptr = (short int)data->profile[i].bath_acrosstrack[j];
+				short_ptr = (short *)&beam[4];
+				*short_ptr = (short int)data->profile[i].bath_alongtrack[j];
+				short_ptr = (short *)&beam[6];
+				*short_ptr = (short int)data->profile[i].tt[j];
+				short_ptr = (short *)&beam[8];
+				*short_ptr = (short int)data->profile[i].angle[j];
+				beam[10] = (char)data->profile[i].quality[j];
+				beam[11] = (char)data->profile[i].amp[j];
+			}
+#else
+			int *int_ptr = (int *)&profile[8];
+			*int_ptr = (int)mb_swap_int(data->profile[i].latitude);
+			int_ptr = (int *)&profile[12];
+			*int_ptr = (int)mb_swap_int(data->profile[i].longitude);
+			short_ptr = (short int *)&profile[16];
+			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].roll);
+			short_ptr = (short int *)&profile[18];
+			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].pitch);
+			short_ptr = (short int *)&profile[20];
+			*short_ptr = (short int)mb_swap_short((short int)(unsigned short)data->profile[i].heading);
+			short_ptr = (short int *)&profile[22];
+			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].heave);
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].bath[j]);
+				short_ptr = (short *)&beam[2];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_acrosstrack[j]);
+				short_ptr = (short *)&beam[4];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_alongtrack[j]);
+				short_ptr = (short *)&beam[6];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].tt[j]);
+				short_ptr = (short *)&beam[8];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].angle[j]);
+				beam[10] = (char)data->profile[i].quality[j];
+				beam[11] = (char)data->profile[i].amp[j];
+			}
+#endif
+		}
+		line[ELAC_BATH40_SIZE] = 0x03;
+		line[ELAC_BATH40_SIZE + 1] = '\0';
+		line[ELAC_BATH40_SIZE + 2] = '\0';
+
+		/* write out data */
+		status = fwrite(line, 1, ELAC_BATH40_SIZE + 3, mbfp);
+		if (status != ELAC_BATH40_SIZE + 3) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+		else {
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
+
+	char *function_name = "mbr_bchrtunb_wr_bath32";
+	int status = MB_SUCCESS;
+	char line[ELAC_BATH32_SIZE + 3];
+	char *profile;
+	char *beam;
+	short int label;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
+		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
+		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
+		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
+		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
+		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
+		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
+		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
+		for (int i = 0; i < data->profile_num; i++) {
+			fprintf(stderr, "dbg5       profile:          %d\n", i);
+			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
+			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
+			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
+			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
+			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
+			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
+			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
+			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
+			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
+			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
+			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
+			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
+			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
+			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
+			for (int j = 0; j < 8; j++) {
+				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
+				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
+				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
+				fprintf(stderr, "dbg5       tt:               %d\n", data->profile[i].tt[j]);
+				fprintf(stderr, "dbg5       angle:            %d\n", data->profile[i].angle[j]);
+				fprintf(stderr, "dbg5       quality:          %d\n", data->profile[i].quality[j]);
+				fprintf(stderr, "dbg5       amp:              %d\n", data->profile[i].amp[j]);
+			}
+			fprintf(stderr, "dbg5       \n");
+		}
+	}
+
+	/* write the record label */
+	label = ELAC_BATH32;
+#ifdef BYTESWAPPED
+	label = (short)mb_swap_short(label);
+#endif
+	status = fwrite(&label, 1, 2, mbfp);
+	if (status != 2) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+	}
+	else
+		status = MB_SUCCESS;
+
+	/* write out the data */
+	if (status == MB_SUCCESS) {
+/* construct record */
+#ifndef BYTESWAPPED
+		short int *short_ptr = (short int *)&line[0];
+		*short_ptr = (short int)data->ping_num;
+		short_ptr = (short int *)&line[2];
+		*short_ptr = (short int)data->sound_vel;
+#else
+		short int *short_ptr = (short int *)&line[0];
+		*short_ptr = (short int)mb_swap_short((short int)data->ping_num);
+		short_ptr = (short int *)&line[2];
+		*short_ptr = (short int)mb_swap_short((short int)data->sound_vel);
+#endif
+		line[4] = (char)data->mode;
+		line[5] = (char)data->pulse_length;
+		line[6] = (char)data->source_power;
+		line[7] = (char)data->receiver_gain;
+		for (int i = 0; i < data->profile_num; i++) {
+			profile = &line[8 + i * 120];
+			profile[0] = (char)data->profile[i].day;
+			profile[1] = (char)data->profile[i].month;
+			profile[2] = (char)data->profile[i].year;
+			profile[3] = (char)data->profile[i].hour;
+			profile[4] = (char)data->profile[i].minute;
+			profile[5] = (char)data->profile[i].second;
+			profile[6] = (char)data->profile[i].hundredth_sec;
+			profile[7] = (char)data->profile[i].thousandth_sec;
+#ifndef BYTESWAPPED
+			int *int_ptr = (int *)&profile[8];
+			*int_ptr = (int)data->profile[i].latitude;
+			int_ptr = (int *)&profile[12];
+			*int_ptr = (int)data->profile[i].longitude;
+			short_ptr = (short int *)&profile[16];
+			*short_ptr = (short int)data->profile[i].roll;
+			short_ptr = (short int *)&profile[18];
+			*short_ptr = (short int)data->profile[i].pitch;
+			short_ptr = (short int *)&profile[20];
+			*short_ptr = (short int)(unsigned short)data->profile[i].heading;
+			short_ptr = (short int *)&profile[22];
+			*short_ptr = (short int)data->profile[i].heave;
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				*short_ptr = (short int)data->profile[i].bath[j];
+				short_ptr = (short *)&beam[2];
+				*short_ptr = (short int)data->profile[i].bath_acrosstrack[j];
+				short_ptr = (short *)&beam[4];
+				*short_ptr = (short int)data->profile[i].bath_alongtrack[j];
+				short_ptr = (short *)&beam[6];
+				*short_ptr = (short int)data->profile[i].tt[j];
+				short_ptr = (short *)&beam[8];
+				*short_ptr = (short int)data->profile[i].angle[j];
+				beam[10] = (char)data->profile[i].quality[j];
+				beam[11] = (char)data->profile[i].amp[j];
+			}
+#else
+			int *int_ptr = (int *)&profile[8];
+			*int_ptr = (int)mb_swap_int(data->profile[i].latitude);
+			int_ptr = (int *)&profile[12];
+			*int_ptr = (int)mb_swap_int(data->profile[i].longitude);
+			short_ptr = (short int *)&profile[16];
+			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].roll);
+			short_ptr = (short int *)&profile[18];
+			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].pitch);
+			short_ptr = (short int *)&profile[20];
+			*short_ptr = (short int)mb_swap_short((short int)(unsigned short)data->profile[i].heading);
+			short_ptr = (short int *)&profile[22];
+			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].heave);
+			for (int j = 0; j < 8; j++) {
+				beam = &profile[24 + 12 * j];
+				short_ptr = (short *)&beam[0];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].bath[j]);
+				short_ptr = (short *)&beam[2];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_acrosstrack[j]);
+				short_ptr = (short *)&beam[4];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_alongtrack[j]);
+				short_ptr = (short *)&beam[6];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].tt[j]);
+				short_ptr = (short *)&beam[8];
+				*short_ptr = (short int)mb_swap_short(data->profile[i].angle[j]);
+				beam[10] = (char)data->profile[i].quality[j];
+				beam[11] = (char)data->profile[i].amp[j];
+			}
+#endif
+		}
+		line[ELAC_BATH32_SIZE] = 0x03;
+		line[ELAC_BATH32_SIZE + 1] = '\0';
+		line[ELAC_BATH32_SIZE + 2] = '\0';
+
+		/* write out data */
+		status = fwrite(line, 1, ELAC_BATH32_SIZE + 3, mbfp);
+		if (status != ELAC_BATH32_SIZE + 3) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+		else {
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr, struct mbf_bchrtunb_struct *data, int *error) {
+
+	char *function_name = "mbr_bchrtunb_wr_data";
+	int status = MB_SUCCESS;
+	FILE *mbfp;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       data:        %p\n", (void *)data);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	mbfp = mb_io_ptr->mbfp;
+
+	if (data->kind == MB_DATA_COMMENT) {
+		status = mbr_bchrtunb_wr_comment(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_PARAMETER) {
+		status = mbr_bchrtunb_wr_parameter(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_NAV) {
+		status = mbr_bchrtunb_wr_pos(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_VELOCITY_PROFILE) {
+		status = mbr_bchrtunb_wr_svp(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_DATA && data->profile_num == 7) {
+		status = mbr_bchrtunb_wr_bath56(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_DATA && data->profile_num == 5) {
+		status = mbr_bchrtunb_wr_bath40(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_DATA && data->profile_num == 4) {
+		status = mbr_bchrtunb_wr_bath32(verbose, mbfp, data, error);
+	}
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_KIND;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
 	}
 
 	/* print output debug statements */
@@ -684,2236 +2873,6 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	return (status);
 }
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_bchrtunb_rd_data";
-	int status = MB_SUCCESS;
-	struct mbf_bchrtunb_struct *data;
-	char *data_ptr;
-	FILE *mbfp;
-	int done;
-	short int *type;
-	static char label[2];
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	mbfp = mb_io_ptr->mbfp;
-
-	/* set file position */
-	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-
-	done = MB_NO;
-	type = (short int *)label;
-	*error = MB_ERROR_NO_ERROR;
-	while (done == MB_NO) {
-		/* get next record label */
-		if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-		if (label[0] == 0x02)
-			if ((status = fread(&label[1], 1, 1, mb_io_ptr->mbfp)) != 1) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-
-/* swap bytes if necessary */
-#ifdef BYTESWAPPED
-		*type = (short int)mb_swap_short(*type);
-#endif
-
-		/* read the appropriate data records */
-		if (status == MB_FAILURE) {
-			done = MB_YES;
-		}
-		else if (*type == ELAC_COMMENT) {
-			status = mbr_bchrtunb_rd_comment(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_COMMENT;
-			}
-		}
-		else if (*type == ELAC_PARAMETER) {
-			status = mbr_bchrtunb_rd_parameter(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_PARAMETER;
-			}
-		}
-		else if (*type == ELAC_POS) {
-			status = mbr_bchrtunb_rd_pos(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_NAV;
-			}
-		}
-		else if (*type == ELAC_SVP) {
-			status = mbr_bchrtunb_rd_svp(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_VELOCITY_PROFILE;
-			}
-		}
-		else if (*type == ELAC_BATH56) {
-			status = mbr_bchrtunb_rd_bath56(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_DATA;
-			}
-		}
-		else if (*type == ELAC_BATH40) {
-			status = mbr_bchrtunb_rd_bath40(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_DATA;
-			}
-		}
-		else if (*type == ELAC_BATH32) {
-			status = mbr_bchrtunb_rd_bath32(verbose, mbfp, data, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_DATA;
-			}
-		}
-		else {
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-		}
-
-		/* bail out if there is an error */
-		if (status == MB_FAILURE)
-			done = MB_YES;
-	}
-
-	/* get file position */
-	mb_io_ptr->file_bytes = ftell(mbfp);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrtunb_rd_comment";
-	int status = MB_SUCCESS;
-	char line[ELAC_COMMENT_SIZE + 3];
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* read record into char array */
-	status = fread(line, 1, ELAC_COMMENT_SIZE + 3, mbfp);
-	if (status == ELAC_COMMENT_SIZE + 3)
-		status = MB_SUCCESS;
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-	}
-
-	/* get data */
-	if (status == MB_SUCCESS) {
-		data->kind = MB_DATA_COMMENT;
-		strncpy(data->comment, line, MBF_BCHRTUNB_COMMENT_LENGTH - 1);
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrtunb_rd_parameter";
-	int status = MB_SUCCESS;
-	char line[ELAC_PARAMETER_SIZE + 3];
-	short int *short_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* read record into char array */
-	status = fread(line, 1, ELAC_PARAMETER_SIZE + 3, mbfp);
-	if (status == ELAC_PARAMETER_SIZE + 3)
-		status = MB_SUCCESS;
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-	}
-
-	/* get data */
-	if (status == MB_SUCCESS) {
-		data->kind = MB_DATA_PARAMETER;
-		data->par_day = (int)line[0];
-		data->par_month = (int)line[1];
-		data->par_year = (int)line[2];
-		data->par_hour = (int)line[3];
-		data->par_minute = (int)line[4];
-		data->par_second = (int)line[5];
-		data->par_hundredth_sec = (int)line[6];
-		data->par_thousandth_sec = (int)line[7];
-#ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[8];
-		data->roll_offset = *short_ptr;
-		short_ptr = (short int *)&line[10];
-		data->pitch_offset = *short_ptr;
-		short_ptr = (short int *)&line[12];
-		data->heading_offset = *short_ptr;
-		short_ptr = (short int *)&line[14];
-		data->time_delay = *short_ptr;
-		short_ptr = (short int *)&line[16];
-		data->transducer_port_height = *short_ptr;
-		short_ptr = (short int *)&line[18];
-		data->transducer_starboard_height = *short_ptr;
-		short_ptr = (short int *)&line[20];
-		data->transducer_port_depth = *short_ptr;
-		short_ptr = (short int *)&line[22];
-		data->transducer_starboard_depth = *short_ptr;
-		short_ptr = (short int *)&line[24];
-		data->transducer_port_x = *short_ptr;
-		short_ptr = (short int *)&line[26];
-		data->transducer_starboard_x = *short_ptr;
-		short_ptr = (short int *)&line[28];
-		data->transducer_port_y = *short_ptr;
-		short_ptr = (short int *)&line[30];
-		data->transducer_starboard_y = *short_ptr;
-		short_ptr = (short int *)&line[32];
-		data->transducer_port_error = *short_ptr;
-		short_ptr = (short int *)&line[34];
-		data->transducer_starboard_error = *short_ptr;
-		short_ptr = (short int *)&line[36];
-		data->antenna_height = *short_ptr;
-		short_ptr = (short int *)&line[38];
-		data->antenna_x = *short_ptr;
-		short_ptr = (short int *)&line[40];
-		data->antenna_y = *short_ptr;
-		short_ptr = (short int *)&line[42];
-		data->vru_height = *short_ptr;
-		short_ptr = (short int *)&line[44];
-		data->vru_x = *short_ptr;
-		short_ptr = (short int *)&line[46];
-		data->vru_y = *short_ptr;
-		short_ptr = (short int *)&line[48];
-		data->heave_offset = *short_ptr;
-		short_ptr = (short int *)&line[50];
-		data->line_number = *short_ptr;
-		short_ptr = (short int *)&line[52];
-		data->start_or_stop = *short_ptr;
-		short_ptr = (short int *)&line[54];
-		data->transducer_serial_number = *short_ptr;
-#else
-		short_ptr = (short int *)&line[8];
-		data->roll_offset = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[10];
-		data->pitch_offset = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[12];
-		data->heading_offset = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[14];
-		data->time_delay = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[16];
-		data->transducer_port_height = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[18];
-		data->transducer_starboard_height = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[20];
-		data->transducer_port_depth = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[22];
-		data->transducer_starboard_depth = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[24];
-		data->transducer_port_x = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[26];
-		data->transducer_starboard_x = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[28];
-		data->transducer_port_y = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[30];
-		data->transducer_starboard_y = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[32];
-		data->transducer_port_error = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[34];
-		data->transducer_starboard_error = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[36];
-		data->antenna_height = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[38];
-		data->antenna_x = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[40];
-		data->antenna_y = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[42];
-		data->vru_height = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[44];
-		data->vru_x = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[46];
-		data->vru_y = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[48];
-		data->heave_offset = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[50];
-		data->line_number = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[52];
-		data->start_or_stop = (short int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[54];
-		data->transducer_serial_number = (short int)mb_swap_short(*short_ptr);
-#endif
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
-		fprintf(stderr, "dbg5       month:            %d\n", data->par_month);
-		fprintf(stderr, "dbg5       day:              %d\n", data->par_day);
-		fprintf(stderr, "dbg5       hour:             %d\n", data->par_hour);
-		fprintf(stderr, "dbg5       minute:           %d\n", data->par_minute);
-		fprintf(stderr, "dbg5       sec:              %d\n", data->par_second);
-		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->par_hundredth_sec);
-		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->par_thousandth_sec);
-		fprintf(stderr, "dbg5       roll_offset:      %d\n", data->roll_offset);
-		fprintf(stderr, "dbg5       pitch_offset:     %d\n", data->pitch_offset);
-		fprintf(stderr, "dbg5       heading_offset:   %d\n", data->heading_offset);
-		fprintf(stderr, "dbg5       time_delay:       %d\n", data->time_delay);
-		fprintf(stderr, "dbg5       transducer_port_height: %d\n", data->transducer_port_height);
-		fprintf(stderr, "dbg5       transducer_starboard_height:%d\n", data->transducer_starboard_height);
-		fprintf(stderr, "dbg5       transducer_port_depth:     %d\n", data->transducer_port_depth);
-		fprintf(stderr, "dbg5       transducer_starboard_depth:     %d\n", data->transducer_starboard_depth);
-		fprintf(stderr, "dbg5       transducer_port_x:        %d\n", data->transducer_port_x);
-		fprintf(stderr, "dbg5       transducer_starboard_x:        %d\n", data->transducer_starboard_x);
-		fprintf(stderr, "dbg5       transducer_port_y:        %d\n", data->transducer_port_y);
-		fprintf(stderr, "dbg5       transducer_starboard_y:  %d\n", data->transducer_starboard_y);
-		fprintf(stderr, "dbg5       transducer_port_error:  %d\n", data->transducer_port_error);
-		fprintf(stderr, "dbg5       transducer_starboard_error:  %d\n", data->transducer_starboard_error);
-		fprintf(stderr, "dbg5       antenna_height:            %d\n", data->antenna_height);
-		fprintf(stderr, "dbg5       antenna_x:      %d\n", data->antenna_x);
-		fprintf(stderr, "dbg5       antenna_y:    %d\n", data->antenna_y);
-		fprintf(stderr, "dbg5       vru_height:%d\n", data->vru_height);
-		fprintf(stderr, "dbg5       vru_x:%d\n", data->vru_x);
-		fprintf(stderr, "dbg5       vru_y:%d\n", data->vru_y);
-		fprintf(stderr, "dbg5       heave_offset:%d\n", data->heave_offset);
-		fprintf(stderr, "dbg5       line_number:%d\n", data->line_number);
-		fprintf(stderr, "dbg5       start_or_stop:%d\n", data->start_or_stop);
-		fprintf(stderr, "dbg5       transducer_serial_number:%d\n", data->transducer_serial_number);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrtunb_rd_pos";
-	int status = MB_SUCCESS;
-	char line[ELAC_POS_SIZE + 3];
-	short int *short_ptr;
-	int *int_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* read record into char array */
-	status = fread(line, 1, ELAC_POS_SIZE + 3, mbfp);
-	if (status == ELAC_POS_SIZE + 3)
-		status = MB_SUCCESS;
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-	}
-
-	/* get data */
-	if (status == MB_SUCCESS) {
-		data->kind = MB_DATA_NAV;
-		data->pos_day = (int)line[0];
-		data->pos_month = (int)line[1];
-		data->pos_year = (int)line[2];
-		data->pos_hour = (int)line[3];
-		data->pos_minute = (int)line[4];
-		data->pos_second = (int)line[5];
-		data->pos_hundredth_sec = (int)line[6];
-		data->pos_thousandth_sec = (int)line[7];
-#ifndef BYTESWAPPED
-		int_ptr = (int *)&line[8];
-		data->pos_latitude = *int_ptr;
-		int_ptr = (int *)&line[12];
-		data->pos_longitude = *int_ptr;
-		int_ptr = (int *)&line[16];
-		data->utm_northing = *int_ptr;
-		int_ptr = (int *)&line[20];
-		data->utm_easting = *int_ptr;
-		int_ptr = (int *)&line[24];
-		data->utm_zone_lon = *int_ptr;
-		data->utm_zone = line[28];
-		data->hemisphere = line[29];
-		data->ellipsoid = line[30];
-		data->pos_spare = line[31];
-		short_ptr = (short int *)&line[32];
-		data->semi_major_axis = (int)*short_ptr;
-		short_ptr = (short int *)&line[34];
-		data->other_quality = (int)*short_ptr;
-#else
-		int_ptr = (int *)&line[8];
-		data->pos_latitude = (int)mb_swap_int(*int_ptr);
-		int_ptr = (int *)&line[12];
-		data->pos_longitude = (int)mb_swap_int(*int_ptr);
-		int_ptr = (int *)&line[16];
-		data->utm_northing = (int)mb_swap_int(*int_ptr);
-		int_ptr = (int *)&line[20];
-		data->utm_easting = (int)mb_swap_int(*int_ptr);
-		int_ptr = (int *)&line[24];
-		data->utm_zone_lon = (int)mb_swap_int(*int_ptr);
-		data->utm_zone = line[28];
-		data->hemisphere = line[29];
-		data->ellipsoid = line[30];
-		data->pos_spare = line[31];
-		short_ptr = (short int *)&line[32];
-		data->semi_major_axis = (int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[34];
-		data->other_quality = (int)mb_swap_short(*short_ptr);
-#endif
-	}
-
-	/* KLUGE for 1996 UNB TRAINING COURSE - FLIP LONGITUDE */
-	if (data->pos_year == 96 && data->pos_month >= 6 && data->pos_month <= 8)
-		data->pos_longitude = -data->pos_longitude;
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
-		fprintf(stderr, "dbg5       month:            %d\n", data->pos_month);
-		fprintf(stderr, "dbg5       day:              %d\n", data->pos_day);
-		fprintf(stderr, "dbg5       hour:             %d\n", data->pos_hour);
-		fprintf(stderr, "dbg5       minute:           %d\n", data->pos_minute);
-		fprintf(stderr, "dbg5       sec:              %d\n", data->pos_second);
-		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->pos_hundredth_sec);
-		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->pos_thousandth_sec);
-		fprintf(stderr, "dbg5       pos_latitude:     %d\n", data->pos_latitude);
-		fprintf(stderr, "dbg5       pos_longitude:    %d\n", data->pos_longitude);
-		fprintf(stderr, "dbg5       utm_northing:     %d\n", data->utm_northing);
-		fprintf(stderr, "dbg5       utm_easting:      %d\n", data->utm_easting);
-		fprintf(stderr, "dbg5       utm_zone_lon:     %d\n", data->utm_zone_lon);
-		fprintf(stderr, "dbg5       utm_zone:         %c\n", data->utm_zone);
-		fprintf(stderr, "dbg5       hemisphere:       %c\n", data->hemisphere);
-		fprintf(stderr, "dbg5       ellipsoid:        %c\n", data->ellipsoid);
-		fprintf(stderr, "dbg5       pos_spare:        %c\n", data->pos_spare);
-		fprintf(stderr, "dbg5       semi_major_axis:  %d\n", data->semi_major_axis);
-		fprintf(stderr, "dbg5       other_quality:    %d\n", data->other_quality);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrtunb_rd_svp";
-	int status = MB_SUCCESS;
-	char line[ELAC_SVP_SIZE + 3];
-	short int *short_ptr;
-	short int *short_ptr2;
-	int *int_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* read record into char array */
-	status = fread(line, 1, ELAC_SVP_SIZE + 3, mbfp);
-	if (status == ELAC_SVP_SIZE + 3)
-		status = MB_SUCCESS;
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-	}
-
-	/* get data */
-	if (status == MB_SUCCESS) {
-		data->kind = MB_DATA_VELOCITY_PROFILE;
-		data->svp_day = (int)line[0];
-		data->svp_month = (int)line[1];
-		data->svp_year = (int)line[2];
-		data->svp_hour = (int)line[3];
-		data->svp_minute = (int)line[4];
-		data->svp_second = (int)line[5];
-		data->svp_hundredth_sec = (int)line[6];
-		data->svp_thousandth_sec = (int)line[7];
-#ifndef BYTESWAPPED
-		int_ptr = (int *)&line[8];
-		data->svp_latitude = *int_ptr;
-		int_ptr = (int *)&line[12];
-		data->svp_longitude = *int_ptr;
-#else
-		int_ptr = (int *)&line[8];
-		data->svp_latitude = (int)mb_swap_int(*int_ptr);
-		int_ptr = (int *)&line[12];
-		data->svp_latitude = (int)mb_swap_int(*int_ptr);
-#endif
-		data->svp_num = 0;
-		for (int i = 0; i < 500; i++) {
-			short_ptr = (short int *)&line[16 + 4 * i];
-			short_ptr2 = (short int *)&line[18 + 4 * i];
-#ifndef BYTESWAPPED
-			data->svp_depth[i] = *short_ptr;
-			data->svp_vel[i] = *short_ptr2;
-#else
-			data->svp_depth[i] = (short int)mb_swap_short(*short_ptr);
-			data->svp_vel[i] = (short int)mb_swap_short(*short_ptr2);
-#endif
-			if (data->svp_vel[i] > 0)
-				data->svp_num = i + 1;
-		}
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
-		fprintf(stderr, "dbg5       month:            %d\n", data->svp_month);
-		fprintf(stderr, "dbg5       day:              %d\n", data->svp_day);
-		fprintf(stderr, "dbg5       hour:             %d\n", data->svp_hour);
-		fprintf(stderr, "dbg5       minute:           %d\n", data->svp_minute);
-		fprintf(stderr, "dbg5       sec:              %d\n", data->svp_second);
-		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->svp_hundredth_sec);
-		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->svp_thousandth_sec);
-		fprintf(stderr, "dbg5       svp_latitude:     %d\n", data->svp_latitude);
-		fprintf(stderr, "dbg5       svp_longitude:    %d\n", data->svp_longitude);
-		fprintf(stderr, "dbg5       svp_num:          %d\n", data->svp_num);
-		for (int i = 0; i < data->svp_num; i++)
-			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrtunb_rd_bath56";
-	int status = MB_SUCCESS;
-	char line[ELAC_BATH56_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int *short_ptr;
-	int *int_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* read record into char array */
-	status = fread(line, 1, ELAC_BATH56_SIZE + 3, mbfp);
-	if (status == ELAC_BATH56_SIZE + 3)
-		status = MB_SUCCESS;
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-	}
-
-	/* get data */
-	if (status == MB_SUCCESS) {
-		data->kind = MB_DATA_DATA;
-#ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
-		data->ping_num = (int)*short_ptr;
-		short_ptr = (short int *)&line[2];
-		data->sound_vel = (int)*short_ptr;
-#else
-		short_ptr = (short int *)&line[0];
-		data->ping_num = (int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[2];
-		data->sound_vel = (int)mb_swap_short(*short_ptr);
-#endif
-		data->mode = (int)line[4];
-		data->pulse_length = (int)line[5];
-		data->source_power = (int)line[6];
-		data->receiver_gain = (int)line[7];
-		data->profile_num = 7;
-		data->beams_bath = 56;
-		for (int i = 0; i < data->profile_num; i++) {
-			profile = &line[8 + i * 120];
-			data->profile[i].day = (int)profile[0];
-			data->profile[i].month = (int)profile[1];
-			data->profile[i].year = (int)profile[2];
-			data->profile[i].hour = (int)profile[3];
-			data->profile[i].minute = (int)profile[4];
-			data->profile[i].second = (int)profile[5];
-			data->profile[i].hundredth_sec = (int)profile[6];
-			data->profile[i].thousandth_sec = (int)profile[7];
-#ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
-			data->profile[i].latitude = (int)*int_ptr;
-			int_ptr = (int *)&profile[12];
-			data->profile[i].longitude = (int)*int_ptr;
-			short_ptr = (short int *)&profile[16];
-			data->profile[i].roll = (int)*short_ptr;
-			short_ptr = (short int *)&profile[18];
-			data->profile[i].pitch = (int)*short_ptr;
-			short_ptr = (short int *)&profile[20];
-			data->profile[i].heading = (int)(unsigned short)*short_ptr;
-			short_ptr = (short int *)&profile[22];
-			data->profile[i].heave = (int)*short_ptr;
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				data->profile[i].bath[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[2];
-				data->profile[i].bath_acrosstrack[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[4];
-				data->profile[i].bath_alongtrack[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[6];
-				data->profile[i].tt[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[8];
-				data->profile[i].angle[j] = (short int)*short_ptr;
-				data->profile[i].quality[j] = (short int)beam[10];
-				data->profile[i].amp[j] = (short int)beam[11];
-			}
-#else
-			int_ptr = (int *)&profile[8];
-			data->profile[i].latitude = (int)mb_swap_int(*int_ptr);
-			int_ptr = (int *)&profile[12];
-			data->profile[i].longitude = (int)mb_swap_int(*int_ptr);
-			short_ptr = (short int *)&profile[16];
-			data->profile[i].roll = (int)mb_swap_short(*short_ptr);
-			short_ptr = (short int *)&profile[18];
-			data->profile[i].pitch = (int)mb_swap_short(*short_ptr);
-			short_ptr = (short int *)&profile[20];
-			data->profile[i].heading = (int)(unsigned short)mb_swap_short(*short_ptr);
-			short_ptr = (short int *)&profile[22];
-			data->profile[i].heave = (int)mb_swap_short(*short_ptr);
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				data->profile[i].bath[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[2];
-				data->profile[i].bath_acrosstrack[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[4];
-				data->profile[i].bath_alongtrack[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[6];
-				data->profile[i].tt[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[8];
-				data->profile[i].angle[j] = (short int)mb_swap_short(*short_ptr);
-				data->profile[i].quality[j] = (short int)beam[10];
-				data->profile[i].amp[j] = (short int)beam[11];
-			}
-#endif
-		}
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
-		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
-		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
-		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
-		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
-		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
-		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
-		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (int i = 0; i < data->profile_num; i++) {
-			fprintf(stderr, "dbg5       profile:          %d\n", i);
-			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
-			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
-			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
-			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
-			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
-			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
-			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
-			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
-			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
-			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
-			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
-			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
-			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
-			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (int j = 0; j < 8; j++) {
-				fprintf(stderr, "dbg5       bath[%2d][%d]:             %d\n", i, j, data->profile[i].bath[j]);
-				fprintf(stderr, "dbg5       bath_acrosstrack[%2d][%d]: %d\n", i, j, data->profile[i].bath_acrosstrack[j]);
-				fprintf(stderr, "dbg5       bath_alongtrack[%2d][%d]:  %d\n", i, j, data->profile[i].bath_alongtrack[j]);
-				fprintf(stderr, "dbg5       tt[%2d][%d]:               %d\n", i, j, data->profile[i].tt[j]);
-				fprintf(stderr, "dbg5       angle[%2d][%d]:            %d\n", i, j, data->profile[i].angle[j]);
-				fprintf(stderr, "dbg5       quality[%2d][%d]:          %d\n", i, j, data->profile[i].quality[j]);
-				fprintf(stderr, "dbg5       amp[%2d][%d]:              %d\n", i, j, data->profile[i].amp[j]);
-			}
-			fprintf(stderr, "dbg5       \n");
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrtunb_rd_bath40";
-	int status = MB_SUCCESS;
-	char line[ELAC_BATH40_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int *short_ptr;
-	int *int_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* read record into char array */
-	status = fread(line, 1, ELAC_BATH40_SIZE + 3, mbfp);
-	if (status == ELAC_BATH40_SIZE + 3)
-		status = MB_SUCCESS;
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-	}
-
-	/* get data */
-	if (status == MB_SUCCESS) {
-		data->kind = MB_DATA_DATA;
-#ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
-		data->ping_num = (int)*short_ptr;
-		short_ptr = (short int *)&line[2];
-		data->sound_vel = (int)*short_ptr;
-#else
-		short_ptr = (short int *)&line[0];
-		data->ping_num = (int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[2];
-		data->sound_vel = (int)mb_swap_short(*short_ptr);
-#endif
-		data->mode = (int)line[4];
-		data->pulse_length = (int)line[5];
-		data->source_power = (int)line[6];
-		data->receiver_gain = (int)line[7];
-		data->profile_num = 5;
-		data->beams_bath = 40;
-		for (int i = 0; i < data->profile_num; i++) {
-			profile = &line[8 + i * 120];
-			data->profile[i].day = (int)profile[0];
-			data->profile[i].month = (int)profile[1];
-			data->profile[i].year = (int)profile[2];
-			data->profile[i].hour = (int)profile[3];
-			data->profile[i].minute = (int)profile[4];
-			data->profile[i].second = (int)profile[5];
-			data->profile[i].hundredth_sec = (int)profile[6];
-			data->profile[i].thousandth_sec = (int)profile[7];
-#ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
-			data->profile[i].latitude = (int)*int_ptr;
-			int_ptr = (int *)&profile[12];
-			data->profile[i].longitude = (int)*int_ptr;
-			short_ptr = (short int *)&profile[16];
-			data->profile[i].roll = (int)*short_ptr;
-			short_ptr = (short int *)&profile[18];
-			data->profile[i].pitch = (int)*short_ptr;
-			short_ptr = (short int *)&profile[20];
-			data->profile[i].heading = (int)(unsigned short)*short_ptr;
-			short_ptr = (short int *)&profile[22];
-			data->profile[i].heave = (int)*short_ptr;
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				data->profile[i].bath[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[2];
-				data->profile[i].bath_acrosstrack[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[4];
-				data->profile[i].bath_alongtrack[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[6];
-				data->profile[i].tt[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[8];
-				data->profile[i].angle[j] = (short int)*short_ptr;
-				data->profile[i].quality[j] = (short int)beam[10];
-				data->profile[i].amp[j] = (short int)beam[11];
-			}
-#else
-			int_ptr = (int *)&profile[8];
-			data->profile[i].latitude = (int)mb_swap_int(*int_ptr);
-			int_ptr = (int *)&profile[12];
-			data->profile[i].longitude = (int)mb_swap_int(*int_ptr);
-			short_ptr = (short int *)&profile[16];
-			data->profile[i].roll = (int)mb_swap_short(*short_ptr);
-			short_ptr = (short int *)&profile[18];
-			data->profile[i].pitch = (int)mb_swap_short(*short_ptr);
-			short_ptr = (short int *)&profile[20];
-			data->profile[i].heading = (int)(unsigned short)mb_swap_short(*short_ptr);
-			short_ptr = (short int *)&profile[22];
-			data->profile[i].heave = (int)mb_swap_short(*short_ptr);
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				data->profile[i].bath[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[2];
-				data->profile[i].bath_acrosstrack[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[4];
-				data->profile[i].bath_alongtrack[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[6];
-				data->profile[i].tt[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[8];
-				data->profile[i].angle[j] = (short int)mb_swap_short(*short_ptr);
-				data->profile[i].quality[j] = (short int)beam[10];
-				data->profile[i].amp[j] = (short int)beam[11];
-			}
-#endif
-		}
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
-		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
-		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
-		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
-		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
-		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
-		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
-		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (int i = 0; i < data->profile_num; i++) {
-			fprintf(stderr, "dbg5       profile:          %d\n", i);
-			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
-			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
-			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
-			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
-			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
-			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
-			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
-			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
-			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
-			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
-			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
-			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
-			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
-			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (int j = 0; j < 8; j++) {
-				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
-				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
-				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
-				fprintf(stderr, "dbg5       tt:               %d\n", data->profile[i].tt[j]);
-				fprintf(stderr, "dbg5       angle:            %d\n", data->profile[i].angle[j]);
-				fprintf(stderr, "dbg5       quality:          %d\n", data->profile[i].quality[j]);
-				fprintf(stderr, "dbg5       amp:              %d\n", data->profile[i].amp[j]);
-			}
-			fprintf(stderr, "dbg5       \n");
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrtunb_rd_bath32";
-	int status = MB_SUCCESS;
-	char line[ELAC_BATH32_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int *short_ptr;
-	int *int_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* read record into char array */
-	status = fread(line, 1, ELAC_BATH32_SIZE + 3, mbfp);
-	if (status == ELAC_BATH32_SIZE + 3)
-		status = MB_SUCCESS;
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-	}
-
-	/* get data */
-	if (status == MB_SUCCESS) {
-		data->kind = MB_DATA_DATA;
-#ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
-		data->ping_num = (int)*short_ptr;
-		short_ptr = (short int *)&line[2];
-		data->sound_vel = (int)*short_ptr;
-#else
-		short_ptr = (short int *)&line[0];
-		data->ping_num = (int)mb_swap_short(*short_ptr);
-		short_ptr = (short int *)&line[2];
-		data->sound_vel = (int)mb_swap_short(*short_ptr);
-#endif
-		data->mode = (int)line[4];
-		data->pulse_length = (int)line[5];
-		data->source_power = (int)line[6];
-		data->receiver_gain = (int)line[7];
-		data->profile_num = 4;
-		data->beams_bath = 32;
-		for (int i = 0; i < data->profile_num; i++) {
-			profile = &line[8 + i * 120];
-			data->profile[i].day = (int)profile[0];
-			data->profile[i].month = (int)profile[1];
-			data->profile[i].year = (int)profile[2];
-			data->profile[i].hour = (int)profile[3];
-			data->profile[i].minute = (int)profile[4];
-			data->profile[i].second = (int)profile[5];
-			data->profile[i].hundredth_sec = (int)profile[6];
-			data->profile[i].thousandth_sec = (int)profile[7];
-#ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
-			data->profile[i].latitude = (int)*int_ptr;
-			int_ptr = (int *)&profile[12];
-			data->profile[i].longitude = (int)*int_ptr;
-			short_ptr = (short int *)&profile[16];
-			data->profile[i].roll = (int)*short_ptr;
-			short_ptr = (short int *)&profile[18];
-			data->profile[i].pitch = (int)*short_ptr;
-			short_ptr = (short int *)&profile[20];
-			data->profile[i].heading = (int)(unsigned short)*short_ptr;
-			short_ptr = (short int *)&profile[22];
-			data->profile[i].heave = (int)*short_ptr;
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				data->profile[i].bath[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[2];
-				data->profile[i].bath_acrosstrack[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[4];
-				data->profile[i].bath_alongtrack[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[6];
-				data->profile[i].tt[j] = (short int)*short_ptr;
-				short_ptr = (short *)&beam[8];
-				data->profile[i].angle[j] = (short int)*short_ptr;
-				data->profile[i].quality[j] = (short int)beam[10];
-				data->profile[i].amp[j] = (short int)beam[11];
-			}
-#else
-			int_ptr = (int *)&profile[8];
-			data->profile[i].latitude = (int)mb_swap_int(*int_ptr);
-			int_ptr = (int *)&profile[12];
-			data->profile[i].longitude = (int)mb_swap_int(*int_ptr);
-			short_ptr = (short int *)&profile[16];
-			data->profile[i].roll = (int)mb_swap_short(*short_ptr);
-			short_ptr = (short int *)&profile[18];
-			data->profile[i].pitch = (int)mb_swap_short(*short_ptr);
-			short_ptr = (short int *)&profile[20];
-			data->profile[i].heading = (int)(unsigned short)mb_swap_short(*short_ptr);
-			short_ptr = (short int *)&profile[22];
-			data->profile[i].heave = (int)mb_swap_short(*short_ptr);
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				data->profile[i].bath[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[2];
-				data->profile[i].bath_acrosstrack[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[4];
-				data->profile[i].bath_alongtrack[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[6];
-				data->profile[i].tt[j] = (short int)mb_swap_short(*short_ptr);
-				short_ptr = (short *)&beam[8];
-				data->profile[i].angle[j] = (short int)mb_swap_short(*short_ptr);
-				data->profile[i].quality[j] = (short int)beam[10];
-				data->profile[i].amp[j] = (short int)beam[11];
-			}
-#endif
-		}
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
-		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
-		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
-		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
-		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
-		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
-		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
-		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (int i = 0; i < data->profile_num; i++) {
-			fprintf(stderr, "dbg5       profile:          %d\n", i);
-			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
-			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
-			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
-			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
-			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
-			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
-			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
-			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
-			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
-			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
-			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
-			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
-			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
-			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (int j = 0; j < 8; j++) {
-				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
-				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
-				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
-				fprintf(stderr, "dbg5       tt:               %d\n", data->profile[i].tt[j]);
-				fprintf(stderr, "dbg5       angle:            %d\n", data->profile[i].angle[j]);
-				fprintf(stderr, "dbg5       quality:          %d\n", data->profile[i].quality[j]);
-				fprintf(stderr, "dbg5       amp:              %d\n", data->profile[i].amp[j]);
-			}
-			fprintf(stderr, "dbg5       \n");
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr, struct mbf_bchrtunb_struct *data, int *error) {
-
-	char *function_name = "mbr_bchrtunb_wr_data";
-	int status = MB_SUCCESS;
-	FILE *mbfp;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       data:        %p\n", (void *)data);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	mbfp = mb_io_ptr->mbfp;
-
-	if (data->kind == MB_DATA_COMMENT) {
-		status = mbr_bchrtunb_wr_comment(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_PARAMETER) {
-		status = mbr_bchrtunb_wr_parameter(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_NAV) {
-		status = mbr_bchrtunb_wr_pos(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_VELOCITY_PROFILE) {
-		status = mbr_bchrtunb_wr_svp(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_DATA && data->profile_num == 7) {
-		status = mbr_bchrtunb_wr_bath56(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_DATA && data->profile_num == 5) {
-		status = mbr_bchrtunb_wr_bath40(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_DATA && data->profile_num == 4) {
-		status = mbr_bchrtunb_wr_bath32(verbose, mbfp, data, error);
-	}
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_KIND;
-	}
-
-	/* print output debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
-	char *function_name = "mbr_bchrtunb_wr_comment";
-	int status = MB_SUCCESS;
-	char line[ELAC_COMMENT_SIZE + 3];
-	short int label;
-	int len;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
-	}
-
-	/* write the record label */
-	label = ELAC_COMMENT;
-#ifdef BYTESWAPPED
-	label = (short)mb_swap_short(label);
-#endif
-	status = fwrite(&label, 1, 2, mbfp);
-	if (status != 2) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-	}
-	else
-		status = MB_SUCCESS;
-
-	/* write out the data */
-	if (status == MB_SUCCESS) {
-		/* construct record */
-		len = strlen(data->comment);
-		if (len > MBSYS_ELAC_COMMENT_LENGTH)
-			len = MBSYS_ELAC_COMMENT_LENGTH;
-		for (int i = 0; i < len; i++)
-			line[i] = data->comment[i];
-		for (int i = len; i < MBSYS_ELAC_COMMENT_LENGTH; i++)
-			line[i] = '\0';
-		line[ELAC_COMMENT_SIZE] = 0x03;
-		line[ELAC_COMMENT_SIZE + 1] = '\0';
-		line[ELAC_COMMENT_SIZE + 2] = '\0';
-
-		/* write out data */
-		status = fwrite(line, 1, ELAC_COMMENT_SIZE + 3, mbfp);
-		if (status != ELAC_COMMENT_SIZE + 3) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-		}
-		else {
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
-	char *function_name = "mbr_bchrtunb_wr_parameter";
-	int status = MB_SUCCESS;
-	char line[ELAC_PARAMETER_SIZE + 3];
-	short int label;
-	short int *short_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
-		fprintf(stderr, "dbg5       month:            %d\n", data->par_month);
-		fprintf(stderr, "dbg5       day:              %d\n", data->par_day);
-		fprintf(stderr, "dbg5       hour:             %d\n", data->par_hour);
-		fprintf(stderr, "dbg5       minute:           %d\n", data->par_minute);
-		fprintf(stderr, "dbg5       sec:              %d\n", data->par_second);
-		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->par_hundredth_sec);
-		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->par_thousandth_sec);
-		fprintf(stderr, "dbg5       roll_offset:      %d\n", data->roll_offset);
-		fprintf(stderr, "dbg5       pitch_offset:     %d\n", data->pitch_offset);
-		fprintf(stderr, "dbg5       heading_offset:   %d\n", data->heading_offset);
-		fprintf(stderr, "dbg5       time_delay:       %d\n", data->time_delay);
-		fprintf(stderr, "dbg5       transducer_port_height: %d\n", data->transducer_port_height);
-		fprintf(stderr, "dbg5       transducer_starboard_height:%d\n", data->transducer_starboard_height);
-		fprintf(stderr, "dbg5       transducer_port_depth:     %d\n", data->transducer_port_depth);
-		fprintf(stderr, "dbg5       transducer_starboard_depth:     %d\n", data->transducer_starboard_depth);
-		fprintf(stderr, "dbg5       transducer_port_x:        %d\n", data->transducer_port_x);
-		fprintf(stderr, "dbg5       transducer_starboard_x:        %d\n", data->transducer_starboard_x);
-		fprintf(stderr, "dbg5       transducer_port_y:        %d\n", data->transducer_port_y);
-		fprintf(stderr, "dbg5       transducer_starboard_y:  %d\n", data->transducer_starboard_y);
-		fprintf(stderr, "dbg5       transducer_port_error:  %d\n", data->transducer_port_error);
-		fprintf(stderr, "dbg5       transducer_starboard_error:  %d\n", data->transducer_starboard_error);
-		fprintf(stderr, "dbg5       antenna_height:            %d\n", data->antenna_height);
-		fprintf(stderr, "dbg5       antenna_x:      %d\n", data->antenna_x);
-		fprintf(stderr, "dbg5       antenna_y:    %d\n", data->antenna_y);
-		fprintf(stderr, "dbg5       vru_height:%d\n", data->vru_height);
-		fprintf(stderr, "dbg5       vru_x:%d\n", data->vru_x);
-		fprintf(stderr, "dbg5       vru_y:%d\n", data->vru_y);
-		fprintf(stderr, "dbg5       heave_offset:%d\n", data->heave_offset);
-		fprintf(stderr, "dbg5       line_number:%d\n", data->line_number);
-		fprintf(stderr, "dbg5       start_or_stop:%d\n", data->start_or_stop);
-		fprintf(stderr, "dbg5       transducer_serial_number:%d\n", data->transducer_serial_number);
-	}
-
-	/* write the record label */
-	label = ELAC_PARAMETER;
-#ifdef BYTESWAPPED
-	label = (short)mb_swap_short(label);
-#endif
-	status = fwrite(&label, 1, 2, mbfp);
-	if (status != 2) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-	}
-	else
-		status = MB_SUCCESS;
-
-	/* write out the data */
-	if (status == MB_SUCCESS) {
-		/* construct record */
-		line[0] = (char)data->par_day;
-		line[1] = (char)data->par_month;
-		line[2] = (char)data->par_year;
-		line[3] = (char)data->par_hour;
-		line[4] = (char)data->par_minute;
-		line[5] = (char)data->par_second;
-		line[6] = (char)data->par_hundredth_sec;
-		line[7] = (char)data->par_thousandth_sec;
-#ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[8];
-		*short_ptr = data->roll_offset;
-		short_ptr = (short int *)&line[10];
-		*short_ptr = data->pitch_offset;
-		short_ptr = (short int *)&line[12];
-		*short_ptr = data->heading_offset;
-		short_ptr = (short int *)&line[14];
-		*short_ptr = data->time_delay;
-		short_ptr = (short int *)&line[16];
-		*short_ptr = data->transducer_port_height;
-		short_ptr = (short int *)&line[18];
-		*short_ptr = data->transducer_starboard_height;
-		short_ptr = (short int *)&line[20];
-		*short_ptr = data->transducer_port_depth;
-		short_ptr = (short int *)&line[22];
-		*short_ptr = data->transducer_starboard_depth;
-		short_ptr = (short int *)&line[24];
-		*short_ptr = data->transducer_port_x;
-		short_ptr = (short int *)&line[26];
-		*short_ptr = data->transducer_starboard_x;
-		short_ptr = (short int *)&line[28];
-		*short_ptr = data->transducer_port_y;
-		short_ptr = (short int *)&line[30];
-		*short_ptr = data->transducer_starboard_y;
-		short_ptr = (short int *)&line[32];
-		*short_ptr = data->transducer_port_error;
-		short_ptr = (short int *)&line[34];
-		*short_ptr = data->transducer_starboard_error;
-		short_ptr = (short int *)&line[36];
-		*short_ptr = data->antenna_height;
-		short_ptr = (short int *)&line[38];
-		*short_ptr = data->antenna_x;
-		short_ptr = (short int *)&line[40];
-		*short_ptr = data->antenna_y;
-		short_ptr = (short int *)&line[42];
-		*short_ptr = data->vru_height;
-		short_ptr = (short int *)&line[44];
-		*short_ptr = data->vru_x;
-		short_ptr = (short int *)&line[46];
-		*short_ptr = data->vru_y;
-		short_ptr = (short int *)&line[48];
-		*short_ptr = data->heave_offset;
-		short_ptr = (short int *)&line[50];
-		*short_ptr = data->line_number;
-		short_ptr = (short int *)&line[52];
-		*short_ptr = data->start_or_stop;
-		short_ptr = (short int *)&line[54];
-		*short_ptr = data->transducer_serial_number;
-#else
-		short_ptr = (short int *)&line[8];
-		*short_ptr = (short int)mb_swap_short(data->roll_offset);
-		short_ptr = (short int *)&line[10];
-		*short_ptr = (short int)mb_swap_short(data->pitch_offset);
-		short_ptr = (short int *)&line[12];
-		*short_ptr = (short int)mb_swap_short(data->heading_offset);
-		short_ptr = (short int *)&line[14];
-		*short_ptr = (short int)mb_swap_short(data->time_delay);
-		short_ptr = (short int *)&line[16];
-		*short_ptr = (short int)mb_swap_short(data->transducer_port_height);
-		short_ptr = (short int *)&line[18];
-		*short_ptr = (short int)mb_swap_short(data->transducer_starboard_height);
-		short_ptr = (short int *)&line[20];
-		*short_ptr = (short int)mb_swap_short(data->transducer_port_depth);
-		short_ptr = (short int *)&line[22];
-		*short_ptr = (short int)mb_swap_short(data->transducer_starboard_depth);
-		short_ptr = (short int *)&line[24];
-		*short_ptr = (short int)mb_swap_short(data->transducer_port_x);
-		short_ptr = (short int *)&line[26];
-		*short_ptr = (short int)mb_swap_short(data->transducer_starboard_x);
-		short_ptr = (short int *)&line[28];
-		*short_ptr = (short int)mb_swap_short(data->transducer_port_y);
-		short_ptr = (short int *)&line[30];
-		*short_ptr = (short int)mb_swap_short(data->transducer_starboard_y);
-		short_ptr = (short int *)&line[32];
-		*short_ptr = (short int)mb_swap_short(data->transducer_port_error);
-		short_ptr = (short int *)&line[34];
-		*short_ptr = (short int)mb_swap_short(data->transducer_starboard_error);
-		short_ptr = (short int *)&line[36];
-		*short_ptr = (short int)mb_swap_short(data->antenna_height);
-		short_ptr = (short int *)&line[38];
-		*short_ptr = (short int)mb_swap_short(data->antenna_x);
-		short_ptr = (short int *)&line[40];
-		*short_ptr = (short int)mb_swap_short(data->antenna_y);
-		short_ptr = (short int *)&line[42];
-		*short_ptr = (short int)mb_swap_short(data->vru_height);
-		short_ptr = (short int *)&line[44];
-		*short_ptr = (short int)mb_swap_short(data->vru_x);
-		short_ptr = (short int *)&line[46];
-		*short_ptr = (short int)mb_swap_short(data->vru_y);
-		short_ptr = (short int *)&line[48];
-		*short_ptr = (short int)mb_swap_short(data->heave_offset);
-		short_ptr = (short int *)&line[50];
-		*short_ptr = (short int)mb_swap_short(data->line_number);
-		short_ptr = (short int *)&line[52];
-		*short_ptr = (short int)mb_swap_short(data->start_or_stop);
-		short_ptr = (short int *)&line[54];
-		*short_ptr = (short int)mb_swap_short(data->transducer_serial_number);
-#endif
-		line[ELAC_PARAMETER_SIZE] = 0x03;
-		line[ELAC_PARAMETER_SIZE + 1] = '\0';
-		line[ELAC_PARAMETER_SIZE + 2] = '\0';
-
-		/* write out data */
-		status = fwrite(line, 1, ELAC_PARAMETER_SIZE + 3, mbfp);
-		if (status != ELAC_PARAMETER_SIZE + 3) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-		}
-		else {
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
-	char *function_name = "mbr_bchrtunb_wr_pos";
-	int status = MB_SUCCESS;
-	char line[ELAC_POS_SIZE + 3];
-	short int label;
-	short int *short_ptr;
-	int *int_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
-		fprintf(stderr, "dbg5       month:            %d\n", data->pos_month);
-		fprintf(stderr, "dbg5       day:              %d\n", data->pos_day);
-		fprintf(stderr, "dbg5       hour:             %d\n", data->pos_hour);
-		fprintf(stderr, "dbg5       minute:           %d\n", data->pos_minute);
-		fprintf(stderr, "dbg5       sec:              %d\n", data->pos_second);
-		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->pos_hundredth_sec);
-		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->pos_thousandth_sec);
-		fprintf(stderr, "dbg5       pos_latitude:     %d\n", data->pos_latitude);
-		fprintf(stderr, "dbg5       pos_longitude:    %d\n", data->pos_longitude);
-		fprintf(stderr, "dbg5       utm_northing:     %d\n", data->utm_northing);
-		fprintf(stderr, "dbg5       utm_easting:      %d\n", data->utm_easting);
-		fprintf(stderr, "dbg5       utm_zone_lon:     %d\n", data->utm_zone_lon);
-		fprintf(stderr, "dbg5       utm_zone:         %c\n", data->utm_zone);
-		fprintf(stderr, "dbg5       hemisphere:       %c\n", data->hemisphere);
-		fprintf(stderr, "dbg5       ellipsoid:        %c\n", data->ellipsoid);
-		fprintf(stderr, "dbg5       pos_spare:        %c\n", data->pos_spare);
-		fprintf(stderr, "dbg5       semi_major_axis:  %d\n", data->semi_major_axis);
-		fprintf(stderr, "dbg5       other_quality:    %d\n", data->other_quality);
-	}
-
-	/* write the record label */
-	label = ELAC_POS;
-#ifdef BYTESWAPPED
-	label = (short)mb_swap_short(label);
-#endif
-	status = fwrite(&label, 1, 2, mbfp);
-	if (status != 2) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-	}
-	else
-		status = MB_SUCCESS;
-
-	/* write out the data */
-	if (status == MB_SUCCESS) {
-		/* construct record */
-		line[0] = (char)data->pos_day;
-		line[1] = (char)data->pos_month;
-		line[2] = (char)data->pos_year;
-		line[3] = (char)data->pos_hour;
-		line[4] = (char)data->pos_minute;
-		line[5] = (char)data->pos_second;
-		line[6] = (char)data->pos_hundredth_sec;
-		line[7] = (char)data->pos_thousandth_sec;
-#ifndef BYTESWAPPED
-		int_ptr = (int *)&line[8];
-		*int_ptr = data->pos_latitude;
-		int_ptr = (int *)&line[12];
-		*int_ptr = data->pos_longitude;
-		int_ptr = (int *)&line[16];
-		*int_ptr = data->utm_northing;
-		int_ptr = (int *)&line[20];
-		*int_ptr = data->utm_easting;
-		int_ptr = (int *)&line[24];
-		*int_ptr = data->utm_zone_lon;
-		line[28] = data->utm_zone;
-		line[29] = data->hemisphere;
-		line[30] = data->ellipsoid;
-		line[31] = data->pos_spare;
-		short_ptr = (short int *)&line[32];
-		*short_ptr = (short int)data->semi_major_axis;
-		short_ptr = (short int *)&line[34];
-		*short_ptr = (short int)data->other_quality;
-#else
-		int_ptr = (int *)&line[8];
-		*int_ptr = (int)mb_swap_int(data->pos_latitude);
-		int_ptr = (int *)&line[12];
-		*int_ptr = (int)mb_swap_int(data->pos_longitude);
-		int_ptr = (int *)&line[16];
-		*int_ptr = (int)mb_swap_int(data->utm_northing);
-		int_ptr = (int *)&line[20];
-		*int_ptr = (int)mb_swap_int(data->utm_easting);
-		int_ptr = (int *)&line[24];
-		*int_ptr = (int)mb_swap_int(data->utm_zone_lon);
-		line[28] = data->utm_zone;
-		line[29] = data->hemisphere;
-		line[30] = data->ellipsoid;
-		line[31] = data->pos_spare;
-		short_ptr = (short int *)&line[32];
-		*short_ptr = (int)mb_swap_short(data->semi_major_axis);
-		short_ptr = (short int *)&line[34];
-		*short_ptr = (int)mb_swap_short(data->other_quality);
-#endif
-		line[ELAC_POS_SIZE] = 0x03;
-		line[ELAC_POS_SIZE + 1] = '\0';
-		line[ELAC_POS_SIZE + 2] = '\0';
-
-		/* write out data */
-		status = fwrite(line, 1, ELAC_POS_SIZE + 3, mbfp);
-		if (status != ELAC_POS_SIZE + 3) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-		}
-		else {
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
-	char *function_name = "mbr_bchrtunb_wr_svp";
-	int status = MB_SUCCESS;
-	char line[ELAC_SVP_SIZE + 3];
-	short int label;
-	short int *short_ptr;
-	short int *short_ptr2;
-	int *int_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
-		fprintf(stderr, "dbg5       month:            %d\n", data->svp_month);
-		fprintf(stderr, "dbg5       day:              %d\n", data->svp_day);
-		fprintf(stderr, "dbg5       hour:             %d\n", data->svp_hour);
-		fprintf(stderr, "dbg5       minute:           %d\n", data->svp_minute);
-		fprintf(stderr, "dbg5       sec:              %d\n", data->svp_second);
-		fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->svp_hundredth_sec);
-		fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->svp_thousandth_sec);
-		fprintf(stderr, "dbg5       svp_latitude:     %d\n", data->svp_latitude);
-		fprintf(stderr, "dbg5       svp_longitude:    %d\n", data->svp_longitude);
-		fprintf(stderr, "dbg5       svp_num:          %d\n", data->svp_num);
-		for (int i = 0; i < data->svp_num; i++)
-			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
-	}
-
-	/* write the record label */
-	label = ELAC_SVP;
-#ifdef BYTESWAPPED
-	label = (short)mb_swap_short(label);
-#endif
-	status = fwrite(&label, 1, 2, mbfp);
-	if (status != 2) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-	}
-	else
-		status = MB_SUCCESS;
-
-	/* write out the data */
-	if (status == MB_SUCCESS) {
-		/* construct record */
-		line[0] = (char)data->svp_day;
-		line[1] = (char)data->svp_month;
-		line[2] = (char)data->svp_year;
-		line[3] = (char)data->svp_hour;
-		line[4] = (char)data->svp_minute;
-		line[5] = (char)data->svp_second;
-		line[6] = (char)data->svp_hundredth_sec;
-		line[7] = (char)data->svp_thousandth_sec;
-#ifndef BYTESWAPPED
-		int_ptr = (int *)&line[8];
-		*int_ptr = data->svp_latitude;
-		int_ptr = (int *)&line[12];
-		*int_ptr = data->svp_longitude;
-#else
-		int_ptr = (int *)&line[8];
-		*int_ptr = (int)mb_swap_int(data->svp_latitude);
-		int_ptr = (int *)&line[12];
-		*int_ptr = (int)mb_swap_int(data->svp_longitude);
-#endif
-		for (int i = 0; i < data->svp_num; i++) {
-			short_ptr = (short int *)&line[16 + 4 * i];
-			short_ptr2 = (short int *)&line[18 + 4 * i];
-#ifndef BYTESWAPPED
-			*short_ptr = (short int)data->svp_depth[i];
-			*short_ptr2 = (short int)data->svp_vel[i];
-#else
-			*short_ptr = (short int)mb_swap_short((short int)data->svp_depth[i]);
-			*short_ptr2 = (short int)mb_swap_short((short int)data->svp_vel[i]);
-#endif
-		}
-		for (int i = data->svp_num; i < 500; i++) {
-			short_ptr = (short int *)&line[16 + 4 * i];
-			short_ptr2 = (short int *)&line[18 + 4 * i];
-			*short_ptr = 0;
-			*short_ptr2 = 0;
-		}
-		line[ELAC_SVP_SIZE] = 0x03;
-		line[ELAC_SVP_SIZE + 1] = '\0';
-		line[ELAC_SVP_SIZE + 2] = '\0';
-
-		/* write out data */
-		status = fwrite(line, 1, ELAC_SVP_SIZE + 3, mbfp);
-		if (status != ELAC_SVP_SIZE + 3) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-		}
-		else {
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrtunb_wr_bath56";
-	int status = MB_SUCCESS;
-	char line[ELAC_BATH56_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int label;
-	short int *short_ptr;
-	int *int_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
-		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
-		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
-		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
-		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
-		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
-		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
-		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (int i = 0; i < data->profile_num; i++) {
-			fprintf(stderr, "dbg5       profile:          %d\n", i);
-			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
-			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
-			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
-			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
-			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
-			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
-			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
-			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
-			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
-			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
-			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
-			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
-			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
-			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (int j = 0; j < 8; j++) {
-				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
-				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
-				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
-				fprintf(stderr, "dbg5       tt:               %d\n", data->profile[i].tt[j]);
-				fprintf(stderr, "dbg5       angle:            %d\n", data->profile[i].angle[j]);
-				fprintf(stderr, "dbg5       quality:          %d\n", data->profile[i].quality[j]);
-				fprintf(stderr, "dbg5       amp:              %d\n", data->profile[i].amp[j]);
-			}
-			fprintf(stderr, "dbg5       \n");
-		}
-	}
-
-	/* write the record label */
-	label = ELAC_BATH56;
-#ifdef BYTESWAPPED
-	label = (short)mb_swap_short(label);
-#endif
-	status = fwrite(&label, 1, 2, mbfp);
-	if (status != 2) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-	}
-	else
-		status = MB_SUCCESS;
-
-	/* write out the data */
-	if (status == MB_SUCCESS) {
-/* construct record */
-#ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
-		*short_ptr = (short int)data->ping_num;
-		short_ptr = (short int *)&line[2];
-		*short_ptr = (short int)data->sound_vel;
-#else
-		short_ptr = (short int *)&line[0];
-		*short_ptr = (short int)mb_swap_short((short int)data->ping_num);
-		short_ptr = (short int *)&line[2];
-		*short_ptr = (short int)mb_swap_short((short int)data->sound_vel);
-#endif
-		line[4] = (char)data->mode;
-		line[5] = (char)data->pulse_length;
-		line[6] = (char)data->source_power;
-		line[7] = (char)data->receiver_gain;
-		for (int i = 0; i < data->profile_num; i++) {
-			profile = &line[8 + i * 120];
-			profile[0] = (char)data->profile[i].day;
-			profile[1] = (char)data->profile[i].month;
-			profile[2] = (char)data->profile[i].year;
-			profile[3] = (char)data->profile[i].hour;
-			profile[4] = (char)data->profile[i].minute;
-			profile[5] = (char)data->profile[i].second;
-			profile[6] = (char)data->profile[i].hundredth_sec;
-			profile[7] = (char)data->profile[i].thousandth_sec;
-#ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
-			*int_ptr = (int)data->profile[i].latitude;
-			int_ptr = (int *)&profile[12];
-			*int_ptr = (int)data->profile[i].longitude;
-			short_ptr = (short int *)&profile[16];
-			*short_ptr = (short int)data->profile[i].roll;
-			short_ptr = (short int *)&profile[18];
-			*short_ptr = (short int)data->profile[i].pitch;
-			short_ptr = (short int *)&profile[20];
-			*short_ptr = (short int)(unsigned short)data->profile[i].heading;
-			short_ptr = (short int *)&profile[22];
-			*short_ptr = (short int)data->profile[i].heave;
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				*short_ptr = (short int)data->profile[i].bath[j];
-				short_ptr = (short *)&beam[2];
-				*short_ptr = (short int)data->profile[i].bath_acrosstrack[j];
-				short_ptr = (short *)&beam[4];
-				*short_ptr = (short int)data->profile[i].bath_alongtrack[j];
-				short_ptr = (short *)&beam[6];
-				*short_ptr = (short int)data->profile[i].tt[j];
-				short_ptr = (short *)&beam[8];
-				*short_ptr = (short int)data->profile[i].angle[j];
-				beam[10] = (char)data->profile[i].quality[j];
-				beam[11] = (char)data->profile[i].amp[j];
-			}
-#else
-			int_ptr = (int *)&profile[8];
-			*int_ptr = (int)mb_swap_int(data->profile[i].latitude);
-			int_ptr = (int *)&profile[12];
-			*int_ptr = (int)mb_swap_int(data->profile[i].longitude);
-			short_ptr = (short int *)&profile[16];
-			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].roll);
-			short_ptr = (short int *)&profile[18];
-			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].pitch);
-			short_ptr = (short int *)&profile[20];
-			*short_ptr = (short int)mb_swap_short((short int)(unsigned short)data->profile[i].heading);
-			short_ptr = (short int *)&profile[22];
-			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].heave);
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].bath[j]);
-				short_ptr = (short *)&beam[2];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_acrosstrack[j]);
-				short_ptr = (short *)&beam[4];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_alongtrack[j]);
-				short_ptr = (short *)&beam[6];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].tt[j]);
-				short_ptr = (short *)&beam[8];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].angle[j]);
-				beam[10] = (char)data->profile[i].quality[j];
-				beam[11] = (char)data->profile[i].amp[j];
-			}
-#endif
-		}
-		line[ELAC_BATH56_SIZE] = 0x03;
-		line[ELAC_BATH56_SIZE + 1] = '\0';
-		line[ELAC_BATH56_SIZE + 2] = '\0';
-
-		/* write out data */
-		status = fwrite(line, 1, ELAC_BATH56_SIZE + 3, mbfp);
-		if (status != ELAC_BATH56_SIZE + 3) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-		}
-		else {
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
-	char *function_name = "mbr_bchrtunb_wr_bath40";
-	int status = MB_SUCCESS;
-	char line[ELAC_BATH40_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int label;
-	short int *short_ptr;
-	int *int_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
-		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
-		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
-		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
-		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
-		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
-		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
-		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (int i = 0; i < data->profile_num; i++) {
-			fprintf(stderr, "dbg5       profile:          %d\n", i);
-			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
-			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
-			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
-			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
-			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
-			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
-			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
-			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
-			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
-			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
-			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
-			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
-			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
-			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (int j = 0; j < 8; j++) {
-				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
-				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
-				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
-				fprintf(stderr, "dbg5       tt:               %d\n", data->profile[i].tt[j]);
-				fprintf(stderr, "dbg5       angle:            %d\n", data->profile[i].angle[j]);
-				fprintf(stderr, "dbg5       quality:          %d\n", data->profile[i].quality[j]);
-				fprintf(stderr, "dbg5       amp:              %d\n", data->profile[i].amp[j]);
-			}
-			fprintf(stderr, "dbg5       \n");
-		}
-	}
-
-	/* write the record label */
-	label = ELAC_BATH40;
-#ifdef BYTESWAPPED
-	label = (short)mb_swap_short(label);
-#endif
-	status = fwrite(&label, 1, 2, mbfp);
-	if (status != 2) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-	}
-	else
-		status = MB_SUCCESS;
-
-	/* write out the data */
-	if (status == MB_SUCCESS) {
-/* construct record */
-#ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
-		*short_ptr = (short int)data->ping_num;
-		short_ptr = (short int *)&line[2];
-		*short_ptr = (short int)data->sound_vel;
-#else
-		short_ptr = (short int *)&line[0];
-		*short_ptr = (short int)mb_swap_short((short int)data->ping_num);
-		short_ptr = (short int *)&line[2];
-		*short_ptr = (short int)mb_swap_short((short int)data->sound_vel);
-#endif
-		line[4] = (char)data->mode;
-		line[5] = (char)data->pulse_length;
-		line[6] = (char)data->source_power;
-		line[7] = (char)data->receiver_gain;
-		for (int i = 0; i < data->profile_num; i++) {
-			profile = &line[8 + i * 120];
-			profile[0] = (char)data->profile[i].day;
-			profile[1] = (char)data->profile[i].month;
-			profile[2] = (char)data->profile[i].year;
-			profile[3] = (char)data->profile[i].hour;
-			profile[4] = (char)data->profile[i].minute;
-			profile[5] = (char)data->profile[i].second;
-			profile[6] = (char)data->profile[i].hundredth_sec;
-			profile[7] = (char)data->profile[i].thousandth_sec;
-#ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
-			*int_ptr = (int)data->profile[i].latitude;
-			int_ptr = (int *)&profile[12];
-			*int_ptr = (int)data->profile[i].longitude;
-			short_ptr = (short int *)&profile[16];
-			*short_ptr = (short int)data->profile[i].roll;
-			short_ptr = (short int *)&profile[18];
-			*short_ptr = (short int)data->profile[i].pitch;
-			short_ptr = (short int *)&profile[20];
-			*short_ptr = (short int)(unsigned short)data->profile[i].heading;
-			short_ptr = (short int *)&profile[22];
-			*short_ptr = (short int)data->profile[i].heave;
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				*short_ptr = (short int)data->profile[i].bath[j];
-				short_ptr = (short *)&beam[2];
-				*short_ptr = (short int)data->profile[i].bath_acrosstrack[j];
-				short_ptr = (short *)&beam[4];
-				*short_ptr = (short int)data->profile[i].bath_alongtrack[j];
-				short_ptr = (short *)&beam[6];
-				*short_ptr = (short int)data->profile[i].tt[j];
-				short_ptr = (short *)&beam[8];
-				*short_ptr = (short int)data->profile[i].angle[j];
-				beam[10] = (char)data->profile[i].quality[j];
-				beam[11] = (char)data->profile[i].amp[j];
-			}
-#else
-			int_ptr = (int *)&profile[8];
-			*int_ptr = (int)mb_swap_int(data->profile[i].latitude);
-			int_ptr = (int *)&profile[12];
-			*int_ptr = (int)mb_swap_int(data->profile[i].longitude);
-			short_ptr = (short int *)&profile[16];
-			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].roll);
-			short_ptr = (short int *)&profile[18];
-			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].pitch);
-			short_ptr = (short int *)&profile[20];
-			*short_ptr = (short int)mb_swap_short((short int)(unsigned short)data->profile[i].heading);
-			short_ptr = (short int *)&profile[22];
-			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].heave);
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].bath[j]);
-				short_ptr = (short *)&beam[2];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_acrosstrack[j]);
-				short_ptr = (short *)&beam[4];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_alongtrack[j]);
-				short_ptr = (short *)&beam[6];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].tt[j]);
-				short_ptr = (short *)&beam[8];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].angle[j]);
-				beam[10] = (char)data->profile[i].quality[j];
-				beam[11] = (char)data->profile[i].amp[j];
-			}
-#endif
-		}
-		line[ELAC_BATH40_SIZE] = 0x03;
-		line[ELAC_BATH40_SIZE + 1] = '\0';
-		line[ELAC_BATH40_SIZE + 2] = '\0';
-
-		/* write out data */
-		status = fwrite(line, 1, ELAC_BATH40_SIZE + 3, mbfp);
-		if (status != ELAC_BATH40_SIZE + 3) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-		}
-		else {
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
-	char *function_name = "mbr_bchrtunb_wr_bath32";
-	int status = MB_SUCCESS;
-	char line[ELAC_BATH32_SIZE + 3];
-	char *profile;
-	char *beam;
-	short int label;
-	short int *short_ptr;
-	int *int_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
-		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
-		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
-		fprintf(stderr, "dbg5       pulse_length:     %d\n", data->pulse_length);
-		fprintf(stderr, "dbg5       source_power:     %d\n", data->source_power);
-		fprintf(stderr, "dbg5       receiver_gain:    %d\n", data->receiver_gain);
-		fprintf(stderr, "dbg5       profile_num:      %d\n", data->profile_num);
-		fprintf(stderr, "dbg5       beams_bath:       %d\n", data->beams_bath);
-		for (int i = 0; i < data->profile_num; i++) {
-			fprintf(stderr, "dbg5       profile:          %d\n", i);
-			fprintf(stderr, "dbg5       year:             %d\n", data->profile[i].year);
-			fprintf(stderr, "dbg5       month:            %d\n", data->profile[i].month);
-			fprintf(stderr, "dbg5       day:              %d\n", data->profile[i].day);
-			fprintf(stderr, "dbg5       hour:             %d\n", data->profile[i].hour);
-			fprintf(stderr, "dbg5       minute:           %d\n", data->profile[i].minute);
-			fprintf(stderr, "dbg5       sec:              %d\n", data->profile[i].second);
-			fprintf(stderr, "dbg5       hundredth_sec:    %d\n", data->profile[i].hundredth_sec);
-			fprintf(stderr, "dbg5       thousandth_sec:   %d\n", data->profile[i].thousandth_sec);
-			fprintf(stderr, "dbg5       latitude:         %d\n", data->profile[i].latitude);
-			fprintf(stderr, "dbg5       longitude:        %d\n", data->profile[i].longitude);
-			fprintf(stderr, "dbg5       roll:             %d\n", data->profile[i].roll);
-			fprintf(stderr, "dbg5       pitch:            %d\n", data->profile[i].pitch);
-			fprintf(stderr, "dbg5       heading:          %d\n", data->profile[i].heading);
-			fprintf(stderr, "dbg5       heave:            %d\n", data->profile[i].heave);
-			for (int j = 0; j < 8; j++) {
-				fprintf(stderr, "dbg5       bath:             %d\n", data->profile[i].bath[j]);
-				fprintf(stderr, "dbg5       bath_acrosstrack: %d\n", data->profile[i].bath_acrosstrack[j]);
-				fprintf(stderr, "dbg5       bath_alongtrack:  %d\n", data->profile[i].bath_alongtrack[j]);
-				fprintf(stderr, "dbg5       tt:               %d\n", data->profile[i].tt[j]);
-				fprintf(stderr, "dbg5       angle:            %d\n", data->profile[i].angle[j]);
-				fprintf(stderr, "dbg5       quality:          %d\n", data->profile[i].quality[j]);
-				fprintf(stderr, "dbg5       amp:              %d\n", data->profile[i].amp[j]);
-			}
-			fprintf(stderr, "dbg5       \n");
-		}
-	}
-
-	/* write the record label */
-	label = ELAC_BATH32;
-#ifdef BYTESWAPPED
-	label = (short)mb_swap_short(label);
-#endif
-	status = fwrite(&label, 1, 2, mbfp);
-	if (status != 2) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_WRITE_FAIL;
-	}
-	else
-		status = MB_SUCCESS;
-
-	/* write out the data */
-	if (status == MB_SUCCESS) {
-/* construct record */
-#ifndef BYTESWAPPED
-		short_ptr = (short int *)&line[0];
-		*short_ptr = (short int)data->ping_num;
-		short_ptr = (short int *)&line[2];
-		*short_ptr = (short int)data->sound_vel;
-#else
-		short_ptr = (short int *)&line[0];
-		*short_ptr = (short int)mb_swap_short((short int)data->ping_num);
-		short_ptr = (short int *)&line[2];
-		*short_ptr = (short int)mb_swap_short((short int)data->sound_vel);
-#endif
-		line[4] = (char)data->mode;
-		line[5] = (char)data->pulse_length;
-		line[6] = (char)data->source_power;
-		line[7] = (char)data->receiver_gain;
-		for (int i = 0; i < data->profile_num; i++) {
-			profile = &line[8 + i * 120];
-			profile[0] = (char)data->profile[i].day;
-			profile[1] = (char)data->profile[i].month;
-			profile[2] = (char)data->profile[i].year;
-			profile[3] = (char)data->profile[i].hour;
-			profile[4] = (char)data->profile[i].minute;
-			profile[5] = (char)data->profile[i].second;
-			profile[6] = (char)data->profile[i].hundredth_sec;
-			profile[7] = (char)data->profile[i].thousandth_sec;
-#ifndef BYTESWAPPED
-			int_ptr = (int *)&profile[8];
-			*int_ptr = (int)data->profile[i].latitude;
-			int_ptr = (int *)&profile[12];
-			*int_ptr = (int)data->profile[i].longitude;
-			short_ptr = (short int *)&profile[16];
-			*short_ptr = (short int)data->profile[i].roll;
-			short_ptr = (short int *)&profile[18];
-			*short_ptr = (short int)data->profile[i].pitch;
-			short_ptr = (short int *)&profile[20];
-			*short_ptr = (short int)(unsigned short)data->profile[i].heading;
-			short_ptr = (short int *)&profile[22];
-			*short_ptr = (short int)data->profile[i].heave;
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				*short_ptr = (short int)data->profile[i].bath[j];
-				short_ptr = (short *)&beam[2];
-				*short_ptr = (short int)data->profile[i].bath_acrosstrack[j];
-				short_ptr = (short *)&beam[4];
-				*short_ptr = (short int)data->profile[i].bath_alongtrack[j];
-				short_ptr = (short *)&beam[6];
-				*short_ptr = (short int)data->profile[i].tt[j];
-				short_ptr = (short *)&beam[8];
-				*short_ptr = (short int)data->profile[i].angle[j];
-				beam[10] = (char)data->profile[i].quality[j];
-				beam[11] = (char)data->profile[i].amp[j];
-			}
-#else
-			int_ptr = (int *)&profile[8];
-			*int_ptr = (int)mb_swap_int(data->profile[i].latitude);
-			int_ptr = (int *)&profile[12];
-			*int_ptr = (int)mb_swap_int(data->profile[i].longitude);
-			short_ptr = (short int *)&profile[16];
-			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].roll);
-			short_ptr = (short int *)&profile[18];
-			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].pitch);
-			short_ptr = (short int *)&profile[20];
-			*short_ptr = (short int)mb_swap_short((short int)(unsigned short)data->profile[i].heading);
-			short_ptr = (short int *)&profile[22];
-			*short_ptr = (short int)mb_swap_short((short int)data->profile[i].heave);
-			for (int j = 0; j < 8; j++) {
-				beam = &profile[24 + 12 * j];
-				short_ptr = (short *)&beam[0];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].bath[j]);
-				short_ptr = (short *)&beam[2];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_acrosstrack[j]);
-				short_ptr = (short *)&beam[4];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].bath_alongtrack[j]);
-				short_ptr = (short *)&beam[6];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].tt[j]);
-				short_ptr = (short *)&beam[8];
-				*short_ptr = (short int)mb_swap_short(data->profile[i].angle[j]);
-				beam[10] = (char)data->profile[i].quality[j];
-				beam[11] = (char)data->profile[i].amp[j];
-			}
-#endif
-		}
-		line[ELAC_BATH32_SIZE] = 0x03;
-		line[ELAC_BATH32_SIZE + 1] = '\0';
-		line[ELAC_BATH32_SIZE + 2] = '\0';
-
-		/* write out data */
-		status = fwrite(line, 1, ELAC_BATH32_SIZE + 3, mbfp);
-		if (status != ELAC_BATH32_SIZE + 3) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-		}
-		else {
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-
 /*--------------------------------------------------------------------*/
 int mbr_register_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_bchrtunb";

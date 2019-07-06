@@ -35,12 +35,7 @@
 #include "mb_status.h"
 #include "mbsys_3datdepthlidar.h"
 
-#define ZERO_ALL 0
-#define ZERO_SOME 1
 #define MBF_3DDEPTHP_BUFFER_SIZE MB_COMMENT_MAXLINE
-
-int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 /*--------------------------------------------------------------------*/
 int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
@@ -198,93 +193,6 @@ int mbr_dem_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_3ddepthp";
-	int status = MB_SUCCESS;
-	struct mbsys_3datdepthlidar_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* check for non-null pointers */
-	assert(mbio_ptr != NULL);
-	assert(store_ptr != NULL);
-
-	/* get pointers to mbio descriptor and data structure */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
-
-	/* read next data from file */
-	status = mbr_3ddepthp_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* if needed calculate bathymetry */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == MB_NO) {
-		mbsys_3datdepthlidar_calculatebathymetry(verbose, mbio_ptr, store_ptr, error);
-	}
-
-	/* print out status info */
-	if (verbose > 1)
-		mbsys_3datdepthlidar_print_store(verbose, store_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_3ddepthp";
-	int status = MB_SUCCESS;
-	struct mbsys_3datdepthlidar_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* check for non-null pointers */
-	assert(mbio_ptr != NULL);
-	assert(store_ptr != NULL);
-
-	/* get pointers to mbio descriptor and data structure */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
-
-	/* write next data to file */
-	status = mbr_3ddepthp_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
 int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_3ddepthp_rd_data";
 	int status = MB_SUCCESS;
@@ -299,7 +207,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int time_i[7];
 	int done;
 	int skip;
-	int valid_id;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -429,6 +336,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		/* read the next record header */
 		read_len = (size_t)sizeof(short);
 		skip = 0;
+		int valid_id;
 		do {
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)&(store->record_id), &read_len, error);
 			if (status == MB_SUCCESS) {
@@ -1076,6 +984,56 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_3ddepthp";
+	int status = MB_SUCCESS;
+	struct mbsys_3datdepthlidar_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* check for non-null pointers */
+	assert(mbio_ptr != NULL);
+	assert(store_ptr != NULL);
+
+	/* get pointers to mbio descriptor and data structure */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
+
+	/* read next data from file */
+	status = mbr_3ddepthp_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+	/* if needed calculate bathymetry */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == MB_NO) {
+		mbsys_3datdepthlidar_calculatebathymetry(verbose, mbio_ptr, store_ptr, error);
+	}
+
+	/* print out status info */
+	if (verbose > 1)
+		mbsys_3datdepthlidar_print_store(verbose, store_ptr, error);
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_3ddepthp_wr_data";
 	int status = MB_SUCCESS;
@@ -1085,10 +1043,6 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char buffer[MBF_3DDEPTHP_BUFFER_SIZE];
 	size_t write_len;
 	size_t index;
-	unsigned short record_id;
-	unsigned short magic_number;
-	unsigned short file_version;
-	unsigned short sub_version;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1122,11 +1076,9 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* if first write then write the magic number file header */
 	if (*file_header_readwritten == MB_NO) {
-		/* write magic_number */
-		magic_number = MBF_3DDEPTHP_MAGICNUMBER;
-
 		/* encode the header data */
 		index = 0;
+		const unsigned short magic_number = MBF_3DDEPTHP_MAGICNUMBER;
 		mb_put_binary_short(MB_YES, magic_number, &buffer[index]);
 		index += 2;
 
@@ -1144,13 +1096,13 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (store->kind == MB_DATA_PARAMETER) {
 			/* encode the data */
 			index = 0;
-			record_id = MBF_3DDEPTHP_RECORD_PARAMETER;
-			file_version = 1;
-			sub_version = 1;
+			const unsigned short record_id = MBF_3DDEPTHP_RECORD_PARAMETER;
 			mb_put_binary_short(MB_YES, record_id, &buffer[index]);
 			index += 2;
+			const unsigned short file_version = 1;
 			mb_put_binary_short(MB_YES, file_version, &buffer[index]);
 			index += 2;
+			const unsigned short sub_version = 1;
 			mb_put_binary_short(MB_YES, sub_version, &buffer[index]);
 			index += 2;
 			mb_put_binary_short(MB_YES, store->scan_type, &buffer[index]);
@@ -1373,6 +1325,43 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 		}
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_3ddepthp";
+	int status = MB_SUCCESS;
+	struct mbsys_3datdepthlidar_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* check for non-null pointers */
+	assert(mbio_ptr != NULL);
+	assert(store_ptr != NULL);
+
+	/* get pointers to mbio descriptor and data structure */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
+
+	/* write next data to file */
+	status = mbr_3ddepthp_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {

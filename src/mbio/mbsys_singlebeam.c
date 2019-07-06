@@ -1078,14 +1078,6 @@ int mbsys_singlebeam_copy(int verbose, void *mbio_ptr, void *store_ptr, void *co
 int mbsys_singlebeam_pressuredepth(int verbose, double pressure, double latitude, double *depth, int *error) {
 	char *function_name = "mbsys_singlebeam_pressuredepth";
 	int status = MB_SUCCESS;
-	double phi, sinphi, sinphi2, denom, numer;
-#define C0 5.2788e-3;
-#define C1 2.36e-5;
-#define C3 1.092e-6;
-#define C4 -1.82e-15;
-#define C5 2.279e-10;
-#define C6 2.2512e-5;
-#define C7 9.72659;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1098,11 +1090,21 @@ int mbsys_singlebeam_pressuredepth(int verbose, double pressure, double latitude
 
 	/* calculate depth in m from pressure in dBars */
 	if (pressure > 0.0) {
-		phi = DTR * latitude;
-		sinphi = sin(phi);
-		sinphi2 = sinphi * sinphi;
-		denom = 9.780318 * (1.0 + (5.2788e-3 + 2.36e-5 * sinphi2) * sinphi2) + 1.092e-6 * pressure;
-		numer = (((-1.82e-15 * pressure + 2.279e-10) * pressure - 2.2512e-5) * pressure + 9.72659) * pressure;
+		const double C0 = 5.2788e-3;
+		const double C1 = 2.36e-5;
+		// TODO(schwehr): C2?
+		const double C3 = 1.092e-6;
+		const double C4 = -1.82e-15;
+		const double C5 = 2.279e-10;
+		// const double C6 = 2.2512e-5;
+		const double C7 = 9.72659;
+
+		const double phi = DTR * latitude;
+		const double sinphi = sin(phi);
+		const double sinphi2 = sinphi * sinphi;
+		const double denom = C7 * (1.0 + (C0 + C1 * sinphi2) * sinphi2) + C3 * pressure;
+		const double numer = (((C4 * pressure + C5) * pressure - C1) * pressure + C7) * pressure;
+
 		*depth = denom / numer;
 	}
 	else

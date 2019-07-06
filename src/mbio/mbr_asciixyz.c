@@ -56,10 +56,10 @@ extern int isnand(float x);
 #define check_dnan(x) ((x) != (x))
 #endif
 
-int mbr_alm_asciixyz(int verbose, void *mbio_ptr, int *error);
-int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error);
-int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+// int mbr_alm_asciixyz(int verbose, void *mbio_ptr, int *error);
+// int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error);
+// int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+// int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 /*--------------------------------------------------------------------*/
 int mbr_info_asciixyz(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
@@ -135,6 +135,315 @@ int mbr_info_asciixyz(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	return (status);
 }
+/*--------------------------------------------------------------------*/
+int mbr_alm_asciixyz(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_alm_asciixyz";
+	int status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* set initial status */
+	status = MB_SUCCESS;
+
+	/* allocate memory for data structure */
+	mb_io_ptr->structure_size = 0;
+	mb_io_ptr->data_structure_size = 0;
+	status =
+	    mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), (void **)&mb_io_ptr->store_data, error);
+
+	/* get pointer to mbio descriptor */
+	/* TODO(schwehr): Do we really want this again? */
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* set number of header records read to zero */
+	mb_io_ptr->save1 = 0;
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_dem_asciixyz";
+	int status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* deallocate memory for data descriptor */
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_asciixyz";
+	int status = MB_SUCCESS;
+	struct mbsys_singlebeam_struct *store;
+	char line[MB_COMMENT_MAXLINE + 1] = "";
+	char flag;
+	char *line_ptr;
+	int nread;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	store = (struct mbsys_singlebeam_struct *)store_ptr;
+
+	/* set file position */
+	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	/* read next record */
+	if ((line_ptr = fgets(line, MB_COMMENT_MAXLINE, mb_io_ptr->mbfp)) != NULL) {
+		mb_io_ptr->file_bytes += strlen(line);
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+	}
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+	}
+	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
+
+	/* handle the data */
+	if (status == MB_SUCCESS && (line[0] < '0' || line[0] > '9') && line[0] != ' ' && line[0] != '+' && line[0] != '-') {
+		store->kind = MB_DATA_COMMENT;
+		strncpy(store->comment, &line[1], MB_COMMENT_MAXLINE);
+	}
+	else if (status == MB_SUCCESS) {
+		store->kind = MB_DATA_DATA;
+
+		/* read data */
+		if (mb_io_ptr->format == MBF_ASCIIXYZ || mb_io_ptr->format == MBF_ASCIIXYT) {
+			nread = sscanf(line, "%lf %lf %lf %c", &store->longitude, &store->latitude, &store->bath, &flag);
+			if (nread < 3)
+				nread = sscanf(line, "%lf,%lf,%lf", &store->longitude, &store->latitude, &store->bath);
+			store->flag = MB_FLAG_NONE;
+		}
+		else {
+			nread = sscanf(line, "%lf %lf %lf %c", &store->latitude, &store->longitude, &store->bath, &flag);
+			if (nread < 3)
+				nread = sscanf(line, "%lf,%lf,%lf", &store->latitude, &store->longitude, &store->bath);
+			store->flag = MB_FLAG_NONE;
+		}
+
+		/* check for NaN value - must be skipped */
+		if (check_dnan(store->bath)) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+
+		/* else handle the good data */
+		else {
+			if (mb_io_ptr->format == MBF_ASCIIXYT || mb_io_ptr->format == MBF_ASCIIYXT)
+				store->bath = -store->bath;
+			if (nread == 3) {
+				store->flag = MB_FLAG_NONE;
+				status = MB_SUCCESS;
+				*error = MB_ERROR_NO_ERROR;
+			}
+			if (nread == 4) {
+				if (flag == 'M' || flag == 'm')
+					store->flag = MB_FLAG_MANUAL;
+				else if (flag == 'F' || flag == 'f')
+					store->flag = MB_FLAG_FILTER;
+				else if (flag == 'N' || flag == 'n')
+					store->flag = MB_FLAG_NULL;
+				else
+					store->flag = MB_FLAG_NONE;
+			}
+			store->time_d = MB_TIME_D_UNKNOWN;
+			mb_get_date(verbose, store->time_d, store->time_i);
+
+			store->heading = 0.0;
+			store->speed = 0.0;
+			store->roll = 0.0;
+			store->pitch = 0.0;
+			store->heave = 0.0;
+		}
+
+		if (status == MB_SUCCESS) {
+			/* print output debug statements */
+			if (verbose >= 4) {
+				fprintf(stderr, "\ndbg4  Data read in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "dbg4  Values,read:\n");
+				fprintf(stderr, "dbg4       time_i[0]:    %d\n", store->time_i[0]);
+				fprintf(stderr, "dbg4       time_i[1]:    %d\n", store->time_i[1]);
+				fprintf(stderr, "dbg4       time_i[2]:    %d\n", store->time_i[2]);
+				fprintf(stderr, "dbg4       time_i[3]:    %d\n", store->time_i[3]);
+				fprintf(stderr, "dbg4       time_i[4]:    %d\n", store->time_i[4]);
+				fprintf(stderr, "dbg4       time_i[5]:    %d\n", store->time_i[5]);
+				fprintf(stderr, "dbg4       time_i[6]:    %d\n", store->time_i[6]);
+				fprintf(stderr, "dbg4       time_d:       %f\n", store->time_d);
+				fprintf(stderr, "dbg4       latitude:     %f\n", store->latitude);
+				fprintf(stderr, "dbg4       longitude:    %f\n", store->longitude);
+				fprintf(stderr, "dbg4       heading:      %f\n", store->heading);
+				fprintf(stderr, "dbg4       speed:        %f\n", store->speed);
+				fprintf(stderr, "dbg4       roll:         %f\n", store->roll);
+				fprintf(stderr, "dbg4       pitch:        %f\n", store->pitch);
+				fprintf(stderr, "dbg4       heave:        %f\n", store->heave);
+				fprintf(stderr, "dbg4       error:        %d\n", *error);
+				fprintf(stderr, "dbg4       status:       %d\n", status);
+			}
+		}
+
+		else {
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+	}
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_asciixyz";
+	int status = MB_SUCCESS;
+	struct mbsys_singlebeam_struct *store;
+	char line[MB_COMMENT_MAXLINE + 1] = "";
+	char flag;
+	double depth;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_singlebeam_struct *)store_ptr;
+
+	/* handle the data */
+	if (store->kind == MB_DATA_COMMENT) {
+		line[0] = '#';
+		strncpy(&line[1], store->comment, MB_COMMENT_MAXLINE - 2);
+		const int len = strlen(line);
+		line[len] = '\n';
+		line[len + 1] = '\0';
+	}
+	else if (store->kind == MB_DATA_DATA) {
+		/* print output debug statements */
+		if (verbose >= 4) {
+			fprintf(stderr, "\ndbg4  Data to be written in MBIO function <%s>\n", function_name);
+			fprintf(stderr, "dbg4  Values,read:\n");
+			fprintf(stderr, "dbg4       latitude:     %f\n", store->latitude);
+			fprintf(stderr, "dbg4       longitude:    %f\n", store->longitude);
+			fprintf(stderr, "dbg4       bath:         %f\n", store->bath);
+			fprintf(stderr, "dbg4       flag:         %d\n", store->flag);
+			fprintf(stderr, "dbg4       error:        %d\n", *error);
+			fprintf(stderr, "dbg4       status:       %d\n", status);
+		}
+
+		/* set flag */
+		if (store->flag == MB_FLAG_NONE)
+			flag = ' ';
+		else if (store->flag == MB_FLAG_MANUAL)
+			flag = 'M';
+		else if (store->flag == MB_FLAG_FILTER)
+			flag = 'F';
+		else if (store->flag == MB_FLAG_NULL)
+			flag = 'N';
+		else
+			flag = 'M';
+
+		/* write the sounding */
+		depth = store->bath;
+		if (mb_io_ptr->format == MBF_ASCIIXYT || mb_io_ptr->format == MBF_ASCIIYXT)
+			depth = -depth;
+		if (mb_io_ptr->format == MBF_ASCIIXYZ || mb_io_ptr->format == MBF_ASCIIXYT)
+			sprintf(line, "%.6f %.6f %.2f %c\n", store->longitude, store->latitude, depth, flag);
+		else
+			sprintf(line, "%.6f %.6f %.2f %c\n", store->latitude, store->longitude, depth, flag);
+	}
+
+	if (fputs(line, mb_io_ptr->mbfp) == EOF) {
+		*error = MB_ERROR_WRITE_FAIL;
+		status = MB_FAILURE;
+	}
+	else {
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+
 /*--------------------------------------------------------------------*/
 int mbr_register_asciiyxz(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_asciiyxz";
@@ -639,316 +948,6 @@ int mbr_info_asciiyxt(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	return (status);
 }
-/*--------------------------------------------------------------------*/
-int mbr_alm_asciixyz(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_asciixyz";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
-	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = 0;
-	mb_io_ptr->data_structure_size = 0;
-	status =
-	    mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), (void **)&mb_io_ptr->store_data, error);
-
-	/* get pointer to mbio descriptor */
-	/* TODO(schwehr): Do we really want this again? */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set number of header records read to zero */
-	mb_io_ptr->save1 = 0;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_asciixyz";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_asciixyz";
-	int status = MB_SUCCESS;
-	struct mbsys_singlebeam_struct *store;
-	char line[MB_COMMENT_MAXLINE + 1] = "";
-	char flag;
-	char *line_ptr;
-	int nread;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
-
-	/* set file position */
-	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
-	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-
-	/* read next record */
-	if ((line_ptr = fgets(line, MB_COMMENT_MAXLINE, mb_io_ptr->mbfp)) != NULL) {
-		mb_io_ptr->file_bytes += strlen(line);
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-	}
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-	}
-	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
-
-	/* handle the data */
-	if (status == MB_SUCCESS && (line[0] < '0' || line[0] > '9') && line[0] != ' ' && line[0] != '+' && line[0] != '-') {
-		store->kind = MB_DATA_COMMENT;
-		strncpy(store->comment, &line[1], MB_COMMENT_MAXLINE);
-	}
-	else if (status == MB_SUCCESS) {
-		store->kind = MB_DATA_DATA;
-
-		/* read data */
-		if (mb_io_ptr->format == MBF_ASCIIXYZ || mb_io_ptr->format == MBF_ASCIIXYT) {
-			nread = sscanf(line, "%lf %lf %lf %c", &store->longitude, &store->latitude, &store->bath, &flag);
-			if (nread < 3)
-				nread = sscanf(line, "%lf,%lf,%lf", &store->longitude, &store->latitude, &store->bath);
-			store->flag = MB_FLAG_NONE;
-		}
-		else {
-			nread = sscanf(line, "%lf %lf %lf %c", &store->latitude, &store->longitude, &store->bath, &flag);
-			if (nread < 3)
-				nread = sscanf(line, "%lf,%lf,%lf", &store->latitude, &store->longitude, &store->bath);
-			store->flag = MB_FLAG_NONE;
-		}
-
-		/* check for NaN value - must be skipped */
-		if (check_dnan(store->bath)) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-		}
-
-		/* else handle the good data */
-		else {
-			if (mb_io_ptr->format == MBF_ASCIIXYT || mb_io_ptr->format == MBF_ASCIIYXT)
-				store->bath = -store->bath;
-			if (nread == 3) {
-				store->flag = MB_FLAG_NONE;
-				status = MB_SUCCESS;
-				*error = MB_ERROR_NO_ERROR;
-			}
-			if (nread == 4) {
-				if (flag == 'M' || flag == 'm')
-					store->flag = MB_FLAG_MANUAL;
-				else if (flag == 'F' || flag == 'f')
-					store->flag = MB_FLAG_FILTER;
-				else if (flag == 'N' || flag == 'n')
-					store->flag = MB_FLAG_NULL;
-				else
-					store->flag = MB_FLAG_NONE;
-			}
-			store->time_d = MB_TIME_D_UNKNOWN;
-			mb_get_date(verbose, store->time_d, store->time_i);
-
-			store->heading = 0.0;
-			store->speed = 0.0;
-			store->roll = 0.0;
-			store->pitch = 0.0;
-			store->heave = 0.0;
-		}
-
-		if (status == MB_SUCCESS) {
-			/* print output debug statements */
-			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Data read in MBIO function <%s>\n", function_name);
-				fprintf(stderr, "dbg4  Values,read:\n");
-				fprintf(stderr, "dbg4       time_i[0]:    %d\n", store->time_i[0]);
-				fprintf(stderr, "dbg4       time_i[1]:    %d\n", store->time_i[1]);
-				fprintf(stderr, "dbg4       time_i[2]:    %d\n", store->time_i[2]);
-				fprintf(stderr, "dbg4       time_i[3]:    %d\n", store->time_i[3]);
-				fprintf(stderr, "dbg4       time_i[4]:    %d\n", store->time_i[4]);
-				fprintf(stderr, "dbg4       time_i[5]:    %d\n", store->time_i[5]);
-				fprintf(stderr, "dbg4       time_i[6]:    %d\n", store->time_i[6]);
-				fprintf(stderr, "dbg4       time_d:       %f\n", store->time_d);
-				fprintf(stderr, "dbg4       latitude:     %f\n", store->latitude);
-				fprintf(stderr, "dbg4       longitude:    %f\n", store->longitude);
-				fprintf(stderr, "dbg4       heading:      %f\n", store->heading);
-				fprintf(stderr, "dbg4       speed:        %f\n", store->speed);
-				fprintf(stderr, "dbg4       roll:         %f\n", store->roll);
-				fprintf(stderr, "dbg4       pitch:        %f\n", store->pitch);
-				fprintf(stderr, "dbg4       heave:        %f\n", store->heave);
-				fprintf(stderr, "dbg4       error:        %d\n", *error);
-				fprintf(stderr, "dbg4       status:       %d\n", status);
-			}
-		}
-
-		else {
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-		}
-	}
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_asciixyz";
-	int status = MB_SUCCESS;
-	struct mbsys_singlebeam_struct *store;
-	char line[MB_COMMENT_MAXLINE + 1] = "";
-	int len;
-	char flag;
-	double depth;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
-
-	/* handle the data */
-	if (store->kind == MB_DATA_COMMENT) {
-		line[0] = '#';
-		strncpy(&line[1], store->comment, MB_COMMENT_MAXLINE - 2);
-		len = strlen(line);
-		line[len] = '\n';
-		line[len + 1] = '\0';
-	}
-	else if (store->kind == MB_DATA_DATA) {
-		/* print output debug statements */
-		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  Data to be written in MBIO function <%s>\n", function_name);
-			fprintf(stderr, "dbg4  Values,read:\n");
-			fprintf(stderr, "dbg4       latitude:     %f\n", store->latitude);
-			fprintf(stderr, "dbg4       longitude:    %f\n", store->longitude);
-			fprintf(stderr, "dbg4       bath:         %f\n", store->bath);
-			fprintf(stderr, "dbg4       flag:         %d\n", store->flag);
-			fprintf(stderr, "dbg4       error:        %d\n", *error);
-			fprintf(stderr, "dbg4       status:       %d\n", status);
-		}
-
-		/* set flag */
-		if (store->flag == MB_FLAG_NONE)
-			flag = ' ';
-		else if (store->flag == MB_FLAG_MANUAL)
-			flag = 'M';
-		else if (store->flag == MB_FLAG_FILTER)
-			flag = 'F';
-		else if (store->flag == MB_FLAG_NULL)
-			flag = 'N';
-		else
-			flag = 'M';
-
-		/* write the sounding */
-		depth = store->bath;
-		if (mb_io_ptr->format == MBF_ASCIIXYT || mb_io_ptr->format == MBF_ASCIIYXT)
-			depth = -depth;
-		if (mb_io_ptr->format == MBF_ASCIIXYZ || mb_io_ptr->format == MBF_ASCIIXYT)
-			sprintf(line, "%.6f %.6f %.2f %c\n", store->longitude, store->latitude, depth, flag);
-		else
-			sprintf(line, "%.6f %.6f %.2f %c\n", store->latitude, store->longitude, depth, flag);
-	}
-
-	if (fputs(line, mb_io_ptr->mbfp) == EOF) {
-		*error = MB_ERROR_WRITE_FAIL;
-		status = MB_FAILURE;
-	}
-	else {
-		*error = MB_ERROR_NO_ERROR;
-		status = MB_SUCCESS;
-	}
-
-	/* print output debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-
 /*--------------------------------------------------------------------*/
 int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_asciixyz";
