@@ -5144,7 +5144,7 @@ void mbnavadjust_plot(double xx, double yy, int ipen) {
       mbna_oy = y;
     }
   }
-  /*fprintf(stderr,"plot: %f %f %d\n",x,y,ipen);*/
+  //fprintf(stderr,"plot: %f %f %d\n",x,y,ipen);
   return;
 }
 /*--------------------------------------------------------------------*/

@@ -1372,9 +1372,7 @@ int main(int argc, char **argv) {
   /*-------------------------------------------------------------------*/
   /* load platform definition if specified */
   if (use_platform_file == MB_YES) {
-fprintf(stderr,"Calling mb_platform_read:%s\n", platform_file);
     status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
-fprintf(stderr,"Done with mb_platform_read status:%d error:%d\n", status,error);
     if (status == MB_FAILURE) {
       error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);

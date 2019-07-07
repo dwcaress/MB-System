@@ -1100,8 +1100,8 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
 	}
 
 	/* get min max of bathymetry */
-	int bathmin;
-	int bathmax;
+	double bathmin;
+	double bathmax;
 	int extreme_start = MB_NO;
 	for (int i = 0; i < data->npings; i++) {
 		struct ping *ping = &data->pings[i];
