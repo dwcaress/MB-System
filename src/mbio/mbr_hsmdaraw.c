@@ -38,10 +38,6 @@
 #include "mbf_hsmdaraw.h"
 #include "mbsys_hsmd.h"
 
-int mbr_zero_hsmdaraw(int verbose, char *data_ptr, int *error);
-int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_hsmdaraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -112,109 +108,6 @@ int mbr_info_hsmdaraw(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:         %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_alm_hsmdaraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hsmdaraw";
-	int status = MB_SUCCESS;
-	struct mbf_hsmdaraw_struct *data;
-	char *data_ptr;
-	double *FirstReftime; /* time from the first header */
-	int *Header_count;    /* number of header records encounterd */
-	int *Rev_count;       /* Raw Event counter */
-	int *Nav_count;       /* number of Nav records */
-	int *Angle_count;     /* etc....... */
-	int *Svp_count;
-	int *Raw_count;
-	int *MDevent_count;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
-	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_hsmdaraw_struct);
-	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsmd_struct), &mb_io_ptr->store_data, error);
-
-	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-
-	/* initialize saved values */
-	FirstReftime = &mb_io_ptr->saved1; /* time from the first header */
-	Header_count = &mb_io_ptr->save1;  /* number of header records encounterd */
-	Rev_count = &mb_io_ptr->save2;     /* Raw Event counter */
-	Nav_count = &mb_io_ptr->save3;     /* number of Nav records */
-	Angle_count = &mb_io_ptr->save4;   /* etc....... */
-	Svp_count = &mb_io_ptr->save5;
-	Raw_count = &mb_io_ptr->save6;
-	MDevent_count = &mb_io_ptr->save7;
-	*FirstReftime = 0.0; /* time from the first header */
-	*Header_count = 0;   /* number of header records encounterd */
-	*Rev_count = 0;      /* Raw Event counter */
-	*Nav_count = 0;      /* number of Nav records */
-	*Angle_count = 0;    /* etc....... */
-	*Svp_count = 0;
-	*Raw_count = 0;
-	*MDevent_count = 0;
-
-	/* initialize everything to zeros */
-	mbr_zero_hsmdaraw(verbose, data_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dem_hsmdaraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hsmdaraw";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
 	return (status);
@@ -321,14 +214,19 @@ int mbr_zero_hsmdaraw(int verbose, char *data_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hsmdaraw";
+int mbr_alm_hsmdaraw(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_alm_hsmdaraw";
 	int status = MB_SUCCESS;
 	struct mbf_hsmdaraw_struct *data;
-	struct mbsys_hsmd_struct *store;
-	int time_i[7];
-	double time_d;
-	double lon, lat, heading, speed;
+	char *data_ptr;
+	double *FirstReftime; /* time from the first header */
+	int *Header_count;    /* number of header records encounterd */
+	int *Rev_count;       /* Raw Event counter */
+	int *Nav_count;       /* number of Nav records */
+	int *Angle_count;     /* etc....... */
+	int *Svp_count;
+	int *Raw_count;
+	int *MDevent_count;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -336,143 +234,45 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointers to mbio descriptor and data structures */
+	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* set initial status */
+	status = MB_SUCCESS;
+
+	/* allocate memory for data structure */
+	mb_io_ptr->structure_size = sizeof(struct mbf_hsmdaraw_struct);
+	mb_io_ptr->data_structure_size = 0;
+	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsmd_struct), &mb_io_ptr->store_data, error);
+
+	/* get pointer to mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_hsmd_struct *)store_ptr;
+	data_ptr = (char *)data;
 
-	/* read next (record of) data from file */
-	status = mbr_hsmdaraw_rd_data(verbose, mbio_ptr, error);
+	/* initialize saved values */
+	FirstReftime = &mb_io_ptr->saved1; /* time from the first header */
+	Header_count = &mb_io_ptr->save1;  /* number of header records encounterd */
+	Rev_count = &mb_io_ptr->save2;     /* Raw Event counter */
+	Nav_count = &mb_io_ptr->save3;     /* number of Nav records */
+	Angle_count = &mb_io_ptr->save4;   /* etc....... */
+	Svp_count = &mb_io_ptr->save5;
+	Raw_count = &mb_io_ptr->save6;
+	MDevent_count = &mb_io_ptr->save7;
+	*FirstReftime = 0.0; /* time from the first header */
+	*Header_count = 0;   /* number of header records encounterd */
+	*Rev_count = 0;      /* Raw Event counter */
+	*Nav_count = 0;      /* number of Nav records */
+	*Angle_count = 0;    /* etc....... */
+	*Svp_count = 0;
+	*Raw_count = 0;
+	*MDevent_count = 0;
 
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "dbg5: In function name:\t%s\n", function_name);
-		fprintf(stderr, "dbg5:\t Returned from  mbr_hsmdaraw_rd_data()\n");
-		fprintf(stderr, "dbg5:\t Status:\t%d\n", status);
-		fprintf(stderr, "dbg5:\t data->kind:\t%d\n", data->kind);
-		fprintf(stderr, "dbg5:\t store_ptr: \t%p\n", (void *)store_ptr);
-	}
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = data->kind;
-
-	/* add nav records to list for interpolation */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_NAV) {
-		time_i[0] = data->year;
-		time_i[1] = data->month;
-		time_i[2] = data->day;
-		time_i[3] = data->hour;
-		time_i[4] = data->minute;
-		time_i[5] = data->second;
-		time_i[6] = 1000 * data->millisecond;
-		mb_get_time(verbose, time_i, &time_d);
-		lon = data->lon;
-		lat = data->lat;
-		mb_navint_add(verbose, mbio_ptr, time_d, lon, lat, error);
-	}
-
-	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA && mb_io_ptr->nfix >= 1) {
-		time_i[0] = data->year;
-		time_i[1] = data->month;
-		time_i[2] = data->day;
-		time_i[3] = data->hour;
-		time_i[4] = data->minute;
-		time_i[5] = data->second;
-		time_i[6] = 1000 * data->millisecond;
-		mb_get_time(verbose, time_i, &time_d);
-		heading = data->heading_tx;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, &lon, &lat, &speed, error);
-		data->lon = lon;
-		data->lat = lat;
-		data->speed = speed;
-	}
-
-	/* translate values to data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
-		/* type of data record */
-		store->kind = data->kind;
-
-		/* header values */
-		for (int i = 0; i < 4; i++) {
-			store->scsid[i] = data->scsid[i];
-			store->scsart[i] = data->scsart[i];
-		}
-		store->scslng = data->scslng;
-		store->scsext = data->scsext;
-		store->scsblcnt = data->scsblcnt;
-		store->scsres1 = data->scsres1;
-		store->transid = data->transid;
-		store->reftime = data->reftime;
-
-		/* event data */
-		store->datuhr = data->datuhr;
-		for (int i = 0; i < 8; i++)
-			store->mksysint[i] = data->mksysint[i];
-		for (int i = 0; i < 84; i++)
-			store->mktext[i] = data->mktext[i];
-
-		/* navigation data */
-		store->navid = data->navid;
-		store->year = data->year;
-		store->month = data->month;
-		store->day = data->day;
-		store->hour = data->hour;
-		store->minute = data->minute;
-		store->second = data->second;
-		store->secf = data->secf;
-		store->millisecond = data->millisecond;
-		store->PingTime = data->PingTime;
-		store->lon = data->lon;
-		store->lat = data->lat;
-		store->pos_sens[0] = data->pos_sens[0];
-		store->pos_sens[1] = data->pos_sens[1];
-
-		/* travel time, bathymetry and sidescan data */
-		store->ckeel = data->ckeel;
-		store->cmean = data->cmean;
-		store->Port = data->Port;
-		store->noho = data->noho;
-		store->skals = data->skals;
-		for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
-			store->spfb[i] = data->spfb[i];
-			store->depth[i] = data->depth[i];
-			store->distance[i] = data->distance[i];
-			store->angle[i] = data->angle[i];
-		}
-		store->ss_range = data->ss_range;
-		for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++) {
-			store->ss[i] = data->ss[i];
-		}
-		store->heading_tx = data->heading_tx;
-		store->roll_tx = data->roll_tx;
-		store->pitch_tx = data->pitch_tx;
-		for (int i = 0; i < 5; i++) {
-			store->heading_rx[i] = data->heading_rx[i];
-			store->pitch_rx[i] = data->pitch_rx[i];
-			store->roll_rx[i] = data->roll_rx[i];
-		}
-
-		/* MD event data */
-		store->evid = data->evid;
-		for (int i = 0; i < 84; i++)
-			store->evtext[i] = data->evtext[i];
-
-		store->num_vel = data->num_vel;
-		for (int i = 0; i < data->num_vel; i++) {
-			store->vdepth[i] = data->vdepth[i];
-			store->velocity[i] = data->velocity[i];
-		}
-
-		/* comment */
-		strncpy(store->comment, data->comment, MBSYS_HSMD_COMMENT);
-		store->heave = data->heave;
-		store->speed = data->speed;
-	}
+	/* initialize everything to zeros */
+	mbr_zero_hsmdaraw(verbose, data_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -486,12 +286,9 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hsmdaraw";
+int mbr_dem_hsmdaraw(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_dem_hsmdaraw";
 	int status = MB_SUCCESS;
-	struct mbf_hsmdaraw_struct *data;
-	char *data_ptr;
-	struct mbsys_hsmd_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -499,101 +296,14 @@ int mbr_wt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* get pointer to raw data structure */
-	data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	store = (struct mbsys_hsmd_struct *)store_ptr;
-
-	/* first translate values from data storage structure */
-	if (store != NULL) {
-		/* type of data record */
-		data->kind = store->kind;
-
-		/* header values */
-		for (int i = 0; i < 4; i++) {
-			data->scsid[i] = store->scsid[i];
-			data->scsart[i] = store->scsart[i];
-		}
-		data->scslng = store->scslng;
-		data->scsext = store->scsext;
-		data->scsblcnt = store->scsblcnt;
-		data->scsres1 = store->scsres1;
-		data->transid = store->transid;
-		data->reftime = store->reftime;
-
-		/* event data */
-		data->datuhr = store->datuhr;
-		for (int i = 0; i < 8; i++)
-			data->mksysint[i] = store->mksysint[i];
-		for (int i = 0; i < 84; i++)
-			data->mktext[i] = store->mktext[i];
-
-		/* navigation data */
-		data->navid = store->navid;
-		data->year = store->year;
-		data->month = store->month;
-		data->day = store->day;
-		data->hour = store->hour;
-		data->minute = store->minute;
-		data->second = store->second;
-		data->secf = store->secf;
-		data->millisecond = store->millisecond;
-		data->PingTime = store->PingTime;
-		data->lon = store->lon;
-		data->lat = store->lat;
-		data->pos_sens[0] = store->pos_sens[0];
-		data->pos_sens[1] = store->pos_sens[1];
-
-		/* travel time, bathymetry and sidescan data */
-		data->ckeel = store->ckeel;
-		data->cmean = store->cmean;
-		data->Port = store->Port;
-		data->noho = store->noho;
-		data->skals = store->skals;
-		for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
-			data->spfb[i] = store->spfb[i];
-			data->depth[i] = store->depth[i];
-			data->distance[i] = store->distance[i];
-			data->angle[i] = store->angle[i];
-		}
-		data->ss_range = store->ss_range;
-		for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++) {
-			data->ss[i] = store->ss[i];
-		}
-		data->heading_tx = store->heading_tx;
-		data->roll_tx = store->roll_tx;
-		data->pitch_tx = store->pitch_tx;
-		for (int i = 0; i < 5; i++) {
-			data->heading_rx[i] = store->heading_rx[i];
-			data->pitch_rx[i] = store->pitch_rx[i];
-			data->roll_rx[i] = store->roll_rx[i];
-		}
-
-		/* MD event data */
-		data->evid = store->evid;
-		for (int i = 0; i < 84; i++)
-			data->evtext[i] = store->evtext[i];
-
-		data->num_vel = store->num_vel;
-		for (int i = 0; i < store->num_vel; i++) {
-			data->vdepth[i] = store->vdepth[i];
-			data->velocity[i] = store->velocity[i];
-		}
-
-		/* comment */
-		strncpy(data->comment, store->comment, MBSYS_HSMD_COMMENT);
-		data->heave = store->heave;
-		data->speed = store->speed;
-	}
-
-	/* write next data to file */
-	status = mbr_hsmdaraw_wr_data(verbose, mbio_ptr, data_ptr, error);
+	/* deallocate memory for data descriptor */
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1373,6 +1083,171 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_hsmdaraw";
+	int status = MB_SUCCESS;
+	struct mbf_hsmdaraw_struct *data;
+	struct mbsys_hsmd_struct *store;
+	int time_i[7];
+	double time_d;
+	double lon, lat, heading, speed;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_hsmd_struct *)store_ptr;
+
+	/* read next (record of) data from file */
+	status = mbr_hsmdaraw_rd_data(verbose, mbio_ptr, error);
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "dbg5: In function name:\t%s\n", function_name);
+		fprintf(stderr, "dbg5:\t Returned from  mbr_hsmdaraw_rd_data()\n");
+		fprintf(stderr, "dbg5:\t Status:\t%d\n", status);
+		fprintf(stderr, "dbg5:\t data->kind:\t%d\n", data->kind);
+		fprintf(stderr, "dbg5:\t store_ptr: \t%p\n", (void *)store_ptr);
+	}
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = data->kind;
+
+	/* add nav records to list for interpolation */
+	if (status == MB_SUCCESS && data->kind == MB_DATA_NAV) {
+		time_i[0] = data->year;
+		time_i[1] = data->month;
+		time_i[2] = data->day;
+		time_i[3] = data->hour;
+		time_i[4] = data->minute;
+		time_i[5] = data->second;
+		time_i[6] = 1000 * data->millisecond;
+		mb_get_time(verbose, time_i, &time_d);
+		lon = data->lon;
+		lat = data->lat;
+		mb_navint_add(verbose, mbio_ptr, time_d, lon, lat, error);
+	}
+
+	/* interpolate navigation for survey pings if needed */
+	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA && mb_io_ptr->nfix >= 1) {
+		time_i[0] = data->year;
+		time_i[1] = data->month;
+		time_i[2] = data->day;
+		time_i[3] = data->hour;
+		time_i[4] = data->minute;
+		time_i[5] = data->second;
+		time_i[6] = 1000 * data->millisecond;
+		mb_get_time(verbose, time_i, &time_d);
+		heading = data->heading_tx;
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, &lon, &lat, &speed, error);
+		data->lon = lon;
+		data->lat = lat;
+		data->speed = speed;
+	}
+
+	/* translate values to data storage structure */
+	if (status == MB_SUCCESS && store != NULL) {
+		/* type of data record */
+		store->kind = data->kind;
+
+		/* header values */
+		for (int i = 0; i < 4; i++) {
+			store->scsid[i] = data->scsid[i];
+			store->scsart[i] = data->scsart[i];
+		}
+		store->scslng = data->scslng;
+		store->scsext = data->scsext;
+		store->scsblcnt = data->scsblcnt;
+		store->scsres1 = data->scsres1;
+		store->transid = data->transid;
+		store->reftime = data->reftime;
+
+		/* event data */
+		store->datuhr = data->datuhr;
+		for (int i = 0; i < 8; i++)
+			store->mksysint[i] = data->mksysint[i];
+		for (int i = 0; i < 84; i++)
+			store->mktext[i] = data->mktext[i];
+
+		/* navigation data */
+		store->navid = data->navid;
+		store->year = data->year;
+		store->month = data->month;
+		store->day = data->day;
+		store->hour = data->hour;
+		store->minute = data->minute;
+		store->second = data->second;
+		store->secf = data->secf;
+		store->millisecond = data->millisecond;
+		store->PingTime = data->PingTime;
+		store->lon = data->lon;
+		store->lat = data->lat;
+		store->pos_sens[0] = data->pos_sens[0];
+		store->pos_sens[1] = data->pos_sens[1];
+
+		/* travel time, bathymetry and sidescan data */
+		store->ckeel = data->ckeel;
+		store->cmean = data->cmean;
+		store->Port = data->Port;
+		store->noho = data->noho;
+		store->skals = data->skals;
+		for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
+			store->spfb[i] = data->spfb[i];
+			store->depth[i] = data->depth[i];
+			store->distance[i] = data->distance[i];
+			store->angle[i] = data->angle[i];
+		}
+		store->ss_range = data->ss_range;
+		for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++) {
+			store->ss[i] = data->ss[i];
+		}
+		store->heading_tx = data->heading_tx;
+		store->roll_tx = data->roll_tx;
+		store->pitch_tx = data->pitch_tx;
+		for (int i = 0; i < 5; i++) {
+			store->heading_rx[i] = data->heading_rx[i];
+			store->pitch_rx[i] = data->pitch_rx[i];
+			store->roll_rx[i] = data->roll_rx[i];
+		}
+
+		/* MD event data */
+		store->evid = data->evid;
+		for (int i = 0; i < 84; i++)
+			store->evtext[i] = data->evtext[i];
+
+		store->num_vel = data->num_vel;
+		for (int i = 0; i < data->num_vel; i++) {
+			store->vdepth[i] = data->vdepth[i];
+			store->velocity[i] = data->velocity[i];
+		}
+
+		/* comment */
+		strncpy(store->comment, data->comment, MBSYS_HSMD_COMMENT);
+		store->heave = data->heave;
+		store->speed = data->speed;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error) {
 	char *function_name = "mbr_hsmdaraw_wr_data";
 	int status = MB_SUCCESS;
@@ -1662,6 +1537,127 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		}
 		}
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_hsmdaraw";
+	int status = MB_SUCCESS;
+	struct mbf_hsmdaraw_struct *data;
+	char *data_ptr;
+	struct mbsys_hsmd_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
+	store = (struct mbsys_hsmd_struct *)store_ptr;
+
+	/* first translate values from data storage structure */
+	if (store != NULL) {
+		/* type of data record */
+		data->kind = store->kind;
+
+		/* header values */
+		for (int i = 0; i < 4; i++) {
+			data->scsid[i] = store->scsid[i];
+			data->scsart[i] = store->scsart[i];
+		}
+		data->scslng = store->scslng;
+		data->scsext = store->scsext;
+		data->scsblcnt = store->scsblcnt;
+		data->scsres1 = store->scsres1;
+		data->transid = store->transid;
+		data->reftime = store->reftime;
+
+		/* event data */
+		data->datuhr = store->datuhr;
+		for (int i = 0; i < 8; i++)
+			data->mksysint[i] = store->mksysint[i];
+		for (int i = 0; i < 84; i++)
+			data->mktext[i] = store->mktext[i];
+
+		/* navigation data */
+		data->navid = store->navid;
+		data->year = store->year;
+		data->month = store->month;
+		data->day = store->day;
+		data->hour = store->hour;
+		data->minute = store->minute;
+		data->second = store->second;
+		data->secf = store->secf;
+		data->millisecond = store->millisecond;
+		data->PingTime = store->PingTime;
+		data->lon = store->lon;
+		data->lat = store->lat;
+		data->pos_sens[0] = store->pos_sens[0];
+		data->pos_sens[1] = store->pos_sens[1];
+
+		/* travel time, bathymetry and sidescan data */
+		data->ckeel = store->ckeel;
+		data->cmean = store->cmean;
+		data->Port = store->Port;
+		data->noho = store->noho;
+		data->skals = store->skals;
+		for (int i = 0; i < MBF_HSMDARAW_BEAMS_PING; i++) {
+			data->spfb[i] = store->spfb[i];
+			data->depth[i] = store->depth[i];
+			data->distance[i] = store->distance[i];
+			data->angle[i] = store->angle[i];
+		}
+		data->ss_range = store->ss_range;
+		for (int i = 0; i < MBF_HSMDARAW_PIXELS_PING; i++) {
+			data->ss[i] = store->ss[i];
+		}
+		data->heading_tx = store->heading_tx;
+		data->roll_tx = store->roll_tx;
+		data->pitch_tx = store->pitch_tx;
+		for (int i = 0; i < 5; i++) {
+			data->heading_rx[i] = store->heading_rx[i];
+			data->pitch_rx[i] = store->pitch_rx[i];
+			data->roll_rx[i] = store->roll_rx[i];
+		}
+
+		/* MD event data */
+		data->evid = store->evid;
+		for (int i = 0; i < 84; i++)
+			data->evtext[i] = store->evtext[i];
+
+		data->num_vel = store->num_vel;
+		for (int i = 0; i < store->num_vel; i++) {
+			data->vdepth[i] = store->vdepth[i];
+			data->velocity[i] = store->velocity[i];
+		}
+
+		/* comment */
+		strncpy(data->comment, store->comment, MBSYS_HSMD_COMMENT);
+		data->heave = store->heave;
+		data->speed = store->speed;
+	}
+
+	/* write next data to file */
+	status = mbr_hsmdaraw_wr_data(verbose, mbio_ptr, data_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
