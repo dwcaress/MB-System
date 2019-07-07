@@ -1,8 +1,6 @@
 -------------------------------------------------------------------------------
 MB-SYSTEM CHANGELOG FILE:
 -------------------------------------------------------------------------------
-Version: $Id$
--------------------------------------------------------------------------------
 
 This file lists changes to the source code of the MB-System open
 source software package for the processing and display of swath sonar data.
@@ -12,9 +10,17 @@ directory structure.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -------------------------------------------------------------------------------
-Here "*" denotes source distribution release made available for ftp download.
-Releases without an "*" are discrete revisions available from the source code
-archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
+Prior to 5.7.1, the MB-System source code repository was a privately hosted
+Subversion archive. In that era, "*" denotes source distribution releases
+that were announced and made available for ftp download. Starting with 5.7.1 the
+MB-System source code repository is hosted by Github at
+    https://github.com/dwcaress/MB-System/
+and each distribution corresponds to a discrete Github release tag. Releases that
+include "beta" in the tag name are preliminary and generally not announced.
+Distributions that do not include "beta" in the tag name correspond to the major,
+announced releases.
+
+  Version 5.7.6beta1     July 6, 2019
   Version 5.7.5          June 26, 2019
   Version 5.7.5beta12    June 24, 2019
   Version 5.7.5beta11    June 16, 2019
@@ -312,6 +318,15 @@ archive at http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.7.6beta1 (July 6, 2019)
+
+MBnavadjust: Fixed bug that resulted in Naverr window contours not being
+displayed when the diference between the minimum and maximum depth of a section
+is less than one meter.
+
+Formats MBF_3DWISSLR (232) and MBF_3DWISSLP (233): working towards the code
+successfuly reading and writing the 3D at Depth WiSSL *.raa format version 1.2.
 
 -----> 5.7.5 (June 26, 2019)
 

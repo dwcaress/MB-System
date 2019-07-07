@@ -286,6 +286,16 @@
 #define MBSYS_3DDWISSL_V1S1_PRO_PULSE_HEADER_SIZE     66
 #define MBSYS_3DDWISSL_V1S1_PRO_SOUNDING_SIZE         22
 
+#define MBSYS_3DDWISSL_V1S2_PARAMETER_SIZE            23
+#define MBSYS_3DDWISSL_V1S2_CALIBRATION_SIZE          407
+#define MBSYS_3DDWISSL_V1S2_MAX_SOUNDINGS_PER_PULSE   5
+#define MBSYS_3DDWISSL_V1S2_RAW_SCAN_HEADER_SIZE      49
+#define MBSYS_3DDWISSL_V1S2_RAW_PULSE_HEADER_SIZE     20
+#define MBSYS_3DDWISSL_V1S2_RAW_SOUNDING_SIZE         6
+#define MBSYS_3DDWISSL_V1S2_PRO_SCAN_HEADER_SIZE      100
+#define MBSYS_3DDWISSL_V1S2_PRO_PULSE_HEADER_SIZE     66
+#define MBSYS_3DDWISSL_V1S2_PRO_SOUNDING_SIZE         22
+
     /* Instrument geometry for dual optical heads - the sensor reference point
      * is the midpoint on bottom of the mounting bracketry  as per the WiSSL
      * mechanical ICD. The raw data all reference ranges to the center point of the
@@ -379,10 +389,10 @@
 #define MBSYS_3DDWISSL_DEFAULT_TARGET_ALTITUDE        0.0
 #define MBSYS_3DDWISSL_LASERPULSERATE               40000.0
 
-struct mbsys_3ddwissl_calibration_struct {
+struct mbsys_3ddwissl_calibration_v1s1_struct {
     char cfg_path[ 64 ];
-    int laser_head_no;      // either 1 or 2
-    int process_for_air;        // 1 = air, else water
+    int laser_head_no;                    // either 1 or 2
+    int process_for_air;                  // 1 = air, else water
     mb_u_char temperature_compensation;
     mb_u_char emergency_shutdown;
     float ocb_temperature_limit_c;
@@ -435,10 +445,77 @@ struct mbsys_3ddwissl_calibration_struct {
     char unused[116];
 };
 
+struct mbsys_3ddwissl_calibration_v1s2_struct {
+  char cfg_path[ 64 ];
+  int laser_head_no;                    // either 1 or 2
+  int process_for_air;                  // 1 = air, else water
+  mb_u_char temperature_compensation;
+  mb_u_char emergency_shutdown;
+  float ocb_temperature_limit_c;
+  float ocb_humidity_limit;
+  float pb_temperature_limit_1_c;
+  float pb_temperature_limit_2_c;
+  float pb_humidity_limit;
+  float dig_temperature_limit_c;
+  char ocb_comm_port[ 24 ];
+  char ocb_comm_cfg [ 24 ];
+  float az_ao_deg_to_volt;
+  float az_ai_neg_v_to_deg;
+  float az_ai_pos_v_to_deg;
+  float t1_air;
+  float ff_air;
+  float t1_water_g4000;
+  float ff_water_g4000;
+  float t1_water_g3000;
+  float ff_water_g3000;
+  float t1_water_g2000;
+  float ff_water_g2000;
+  float t1_water_g1000;
+  float ff_water_g1000;
+  float t1_water_g400;
+  float ff_water_g400;
+  float t1_water_g300;
+  float ff_water_g300;
+  double temp_comp_poly2;
+  double temp_comp_poly1;
+  double temp_comp_poly;
+  float laser_start_time_sec;
+  float scanner_shift_cts;
+  float factory_scanner_lrg_deg;
+  float factory_scanner_med_deg;
+  float factory_scanner_sml_deg;
+  float factory_dig_cnt_to_volts;
+  float el_angle_fixed_deg;
+  int zda_to_pps_max_msec;
+  int zda_udp_port;
+  mb_u_char show_time_sync_errors;
+  int min_time_diff_update_msec;
+  int  ctd_tcp_port;
+  double trigger_level_volt;
+  int mf_t0_position;
+  int mf_start_proc;
+  int dig_ref_pos_t0_cnts;
+  int dummy;
+  int  t0_min_height_raw_cts;
+  double scanner_neg_polynom_0;
+  double scanner_neg_polynom_1;
+  double scanner_neg_polynom_2;
+  double scanner_neg_polynom_3;
+  double scanner_neg_polynom_4;
+  double scanner_neg_polynom_5;
+  double scanner_pos_polynom_0;
+  double scanner_pos_polynom_1;
+  double scanner_pos_polynom_2;
+  double scanner_pos_polynom_3;
+  double scanner_pos_polynom_4;
+  double scanner_pos_polynom_5;
+};
+
 struct mbsys_3ddwissl_sounding_struct {
     /* raw information */
   float range;                    /* meters from glass front */
   short amplitude;                /* peak of signal - to 1023 */
+  mb_u_char diagnostic;           /* diagnostic value - unknown meaning, >= 1.3 only */
 
   /* processed information incorporating pulse offsets and head offsets */
   mb_u_char beamflag; /* MB-System beam flag */
@@ -482,81 +559,83 @@ struct mbsys_3ddwissl_struct {
   int kind; /* MB-System record ID */
 
   /* File Header */
-    unsigned short parameter_id;    /* 0x3D47 */
-    unsigned short magic_number;    /* 0x3D08 */
+  unsigned short parameter_id;    /* 0x3D47 */
+  unsigned short magic_number;    /* 0x3D08 */
   unsigned short file_version;    /* 1 */
   unsigned short sub_version;     /* 1 = initial version from 3DatDepth, extended for MB-System */
 
-    /* Scan Information */
-    float cross_track_angle_start; /* AZ, Cross track angle start, typical (deg) */
-    float cross_track_angle_end; /* AZ, Cross track angle end, typical (deg) */
-    unsigned short pulses_per_scan; /* Pulses per cross track, scan line */
-    unsigned short soundings_per_pulse; /* soundings per pulse (line of sight, or LOS) */
+  /* Scan Information */
+  float cross_track_angle_start; /* AZ, Cross track angle start, typical (deg) */
+  float cross_track_angle_end; /* AZ, Cross track angle end, typical (deg) */
+  unsigned short pulses_per_scan; /* Pulses per cross track, scan line */
+  unsigned short soundings_per_pulse; /* soundings per pulse (line of sight, or LOS) */
   unsigned short heada_scans_per_file; /* number of heada scans in this file */
   unsigned short headb_scans_per_file; /* number of headb scans in this file */
 
-    /* WiSSL optical head positional and angular offsets */
-    double heada_offset_x_m;                    /* head A x offset (m) -0.012224004 */
-    double heada_offset_y_m;                    /* head A y offset (m) -0.120281954 */
-    double heada_offset_z_m;                    /* head A z offset (m) -0.062005210 */
-    double heada_offset_heading_deg;            /* head A heading offset (degrees) +22.08 */
-    double heada_offset_roll_deg;               /* head A roll offset (degrees) +22.08 */
-    double heada_offset_pitch_deg;              /* head A pitch offset (degrees) -4.68 */
-    double headb_offset_x_m;                    /* head B x offset (m) +0.012224004 */
-    double headb_offset_y_m;                    /* head B y offset (m) +0.120281954 */
-    double headb_offset_z_m;                    /* head B z offset (m) -0.062005210 */
-    double headb_offset_heading_deg;            /* head B heading offset (degrees) -22.08 */
-    double headb_offset_roll_deg;               /* head B roll offset (degrees) -22.08 */
-    double headb_offset_pitch_deg;              /* head B pitch offset (degrees) -5.01 */
+  /* WiSSL optical head positional and angular offsets */
+  double heada_offset_x_m;                    /* head A x offset (m) -0.012224004 */
+  double heada_offset_y_m;                    /* head A y offset (m) -0.120281954 */
+  double heada_offset_z_m;                    /* head A z offset (m) -0.062005210 */
+  double heada_offset_heading_deg;            /* head A heading offset (degrees) +22.08 */
+  double heada_offset_roll_deg;               /* head A roll offset (degrees) +22.08 */
+  double heada_offset_pitch_deg;              /* head A pitch offset (degrees) -4.68 */
+  double headb_offset_x_m;                    /* head B x offset (m) +0.012224004 */
+  double headb_offset_y_m;                    /* head B y offset (m) +0.120281954 */
+  double headb_offset_z_m;                    /* head B z offset (m) -0.062005210 */
+  double headb_offset_heading_deg;            /* head B heading offset (degrees) -22.08 */
+  double headb_offset_roll_deg;               /* head B roll offset (degrees) -22.08 */
+  double headb_offset_pitch_deg;              /* head B pitch offset (degrees) -5.01 */
 
-    /* head A calibration */
-    struct mbsys_3ddwissl_calibration_struct calibration_a;
+  /* head A calibration */
+  struct mbsys_3ddwissl_calibration_v1s1_struct calibration_v1s1_a;
+  struct mbsys_3ddwissl_calibration_v1s2_struct calibration_v1s2_a;
 
-    /* head B calibration */
-    struct mbsys_3ddwissl_calibration_struct calibration_b;
+  /* head B calibration */
+  struct mbsys_3ddwissl_calibration_v1s1_struct calibration_v1s1_b;
+  struct mbsys_3ddwissl_calibration_v1s2_struct calibration_v1s2_b;
 
   /* Scan information from raw records */
-    unsigned short record_id;       /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or 0x3D74) */
-    unsigned int scan_size;         /* bytes of scan record minus 4 (record_id + scan_size) */
-    unsigned short year;
-    mb_u_char month;
-    mb_u_char day;
-    unsigned short jday;
-    unsigned short hour;
-    mb_u_char minutes;
-    mb_u_char seconds;
-    unsigned int nanoseconds;
-    mb_u_char gain;                 /* laser power setting */
-    mb_u_char unused;               /* unused */
-    float digitizer_temperature;    /* digitizer temperature degrees C */
-    float ctd_temperature;          /* ctd temperature degrees C */
-    float ctd_salinity;             /* ctd salinity psu */
-    float ctd_pressure;             /* ctd pressure dbar */
-    float index;
-    float range_start;              /* range start processing meters */
-    float range_end;                /* range end processing meters */
-    unsigned int pulse_count;       /* pulse count for this scan */
+  unsigned short record_id;       /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or 0x3D74) */
+  unsigned int scan_size;         /* bytes of scan record minus 4 (record_id + scan_size) */
+  unsigned short year;
+  mb_u_char month;
+  mb_u_char day;
+  unsigned short jday;
+  unsigned short hour;
+  mb_u_char minutes;
+  mb_u_char seconds;
+  unsigned int nanoseconds;
+  mb_u_char gain;                 /* laser power setting */
+  mb_u_char unused;               /* unused */
+  float digitizer_temperature;    /* digitizer temperature degrees C */
+  float ctd_temperature;          /* ctd temperature degrees C */
+  float ctd_salinity;             /* ctd salinity psu */
+  float ctd_pressure;             /* ctd pressure dbar */
+  float index;
+  float range_start;              /* range start processing meters */
+  float range_end;                /* range end processing meters */
+  unsigned int pulse_count;       /* pulse count for this scan */
 
-    /* merged navigation and attitude per each scan */
-    double time_d;      /* epoch time - not in data file, calculated following reading */
-    double navlon;      /* absolute position longitude (degrees) */
-    double navlat;      /* absolute position latitude (degrees) */
-    double sensordepth; /* absolute position depth below sea surface (meters), includes any tide correction */
-    float speed;        /* lidar speed (m/s) */
-    float heading;      /* lidar heading (degrees) */
-    float roll;         /* lidar roll (degrees) */
-    float pitch;        /* lidar pitch (degrees) */
-    unsigned short validpulse_count;              /* number of valid (non-null) pulses stored in this record */
-    unsigned short validsounding_count;           /* number of valid (non-null) soundings stored in this record */
+  /* merged navigation and attitude per each scan */
+  double time_d;      /* epoch time - not in data file, calculated following reading */
+  double navlon;      /* absolute position longitude (degrees) */
+  double navlat;      /* absolute position latitude (degrees) */
+  double sensordepth; /* absolute position depth below sea surface (meters), includes any tide correction */
+  float speed;        /* lidar speed (m/s) */
+  float heading;      /* lidar heading (degrees) */
+  float roll;         /* lidar roll (degrees) */
+  float pitch;        /* lidar pitch (degrees) */
+  unsigned short validpulse_count;              /* number of valid (non-null) pulses stored in this record */
+  unsigned short validsounding_count;           /* number of valid (non-null) soundings stored in this record */
 
   unsigned int scan_count;                    /* global scan count */
-    unsigned int size_pulse_record_raw;         /* for original logged records
-                                                 * - calculated from file header values */
-    unsigned int size_pulse_record_processed;   /* for extended processed records
-                                                 * -  calculated from file header values */
-    unsigned int bathymetry_calculated;         /* flag regarding calculation of bathymetry */
+  unsigned int size_pulse_record_raw;         /* for original logged records
+                                               * - calculated from file header values */
+  unsigned int size_pulse_record_processed;   /* for extended processed records
+                                               * -  calculated from file header values */
+  unsigned int bathymetry_calculated;         /* flag regarding calculation of bathymetry */
   int num_pulses_alloc;      /* array allocated for this number of pulses */
-    struct mbsys_3ddwissl_pulse_struct *pulses;
+  struct mbsys_3ddwissl_pulse_struct *pulses;
 
   /* comment */
   unsigned short comment_len;       /* comment length in bytes */
