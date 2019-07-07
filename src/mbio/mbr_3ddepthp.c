@@ -44,9 +44,8 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_3ddepthp";
-	int status = MB_SUCCESS;
 
-	/* print input debug statements */
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -54,7 +53,6 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_3DATDEPTHLIDAR;
 	*beams_bath_max = 0;
@@ -81,7 +79,8 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 0.02;
 	*beamwidth_ltrack = 0.02;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -115,10 +114,7 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_3ddepthp";
-	int status = MB_SUCCESS;
-	int *file_header_readwritten;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -132,23 +128,20 @@ int mbr_alm_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
-	status = mbsys_3datdepthlidar_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_3datdepthlidar_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set file header read flag */
-	file_header_readwritten = (int *)&mb_io_ptr->save1;
+	int *file_header_readwritten = (int *)&mb_io_ptr->save1;
+	/* TODO(schwehr): Why is this file_header_readwritten immediately overwritten? */
 	*file_header_readwritten = MB_NO;
 
 	/* set saved bytes flag */
 	mb_io_ptr->save2 = MB_NO;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -162,9 +155,7 @@ int mbr_alm_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_3ddepthp";
-	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -179,9 +170,8 @@ int mbr_dem_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory  */
-	status = mbsys_3datdepthlidar_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_3datdepthlidar_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -195,20 +185,7 @@ int mbr_dem_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_3ddepthp_rd_data";
-	int status = MB_SUCCESS;
-	struct mbsys_3datdepthlidar_struct *store;
-	struct mbsys_3datdepthlidar_pulse_struct *pulse;
-	int *file_header_readwritten;
-	char buffer[MBF_3DDEPTHP_BUFFER_SIZE];
-	size_t read_len;
-	size_t index;
-	unsigned short magic_number = 0;
-	unsigned int *newscancheck, newscancheckvalue;
-	int time_i[7];
-	int done;
-	int skip;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -223,24 +200,27 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
+	struct mbsys_3datdepthlidar_struct *store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
 
 	/* get saved values */
-	file_header_readwritten = (int *)&mb_io_ptr->save1;
+	int *file_header_readwritten = (int *)&mb_io_ptr->save1;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* set status */
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	done = MB_NO;
+	int done = MB_NO;
+	size_t index = 0;
+	char buffer[MBF_3DDEPTHP_BUFFER_SIZE];
 
 	/* if first read then read 2 byte magic number at start of file */
 	if (*file_header_readwritten == MB_NO) {
 		/* read and check the first two bytes */
-		read_len = (size_t)2;
+		size_t read_len = (size_t)2;
 		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
+		unsigned short magic_number = 0;
 		if (status == MB_SUCCESS) {
 			index = 0;
 			mb_get_binary_short(MB_YES, (void *)&buffer[index], &(magic_number));
@@ -334,8 +314,8 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		// fprintf(stderr,"READ NEXT RECORD verions %d %d\n",store->file_version,store->sub_version);
 
 		/* read the next record header */
-		read_len = (size_t)sizeof(short);
-		skip = 0;
+		size_t read_len = (size_t)sizeof(short);
+		int skip = 0;
 		int valid_id;
 		do {
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)&(store->record_id), &read_len, error);
@@ -552,6 +532,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					// store->year,store->month,store->day,store->hour,store->minutes,store->seconds,store->nanoseconds);
 
 					/* get time_d timestamp */
+					int time_i[7];
 					time_i[0] = store->year;
 					time_i[1] = store->month;
 					time_i[2] = store->day;
@@ -577,7 +558,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 						/* if read ok then get values */
 						if (status == MB_SUCCESS) {
-							pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
+							struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 							index = 0;
 							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->range));
 							index += 4;
@@ -612,7 +593,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						}
 					}
 					for (int i = store->num_pulses; i < store->counts_per_scan; i++) {
-						pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
+						struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 						pulse->range = 0.0;
 						pulse->amplitude = 0;
 						pulse->snr = 0.0;
@@ -698,7 +679,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 						/* if read ok then get values */
 						if (status == MB_SUCCESS) {
-							pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
+							struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 							index = 0;
 							mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->range));
 							index += 4;
@@ -743,7 +724,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						}
 					}
 					for (int i = store->num_pulses; i < store->counts_per_scan; i++) {
-						pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
+						struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 						pulse->range = 0.0;
 						pulse->amplitude = 0;
 						pulse->snr = 0.0;
@@ -788,21 +769,23 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		/* read the next scan header */
 		if (mb_io_ptr->save2 == MB_NO) {
 			// fprintf(stderr,"No save, read full scan\n");
-			read_len = (size_t)MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE;
+			size_t read_len = (size_t)MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE;
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
 		}
 		else {
 			// fprintf(stderr,"Bytes saved, read rest of scan\n");
 			for (int i = 0; i < 4; i++)
 				buffer[i] = mb_io_ptr->save_label[i];
-			read_len = (size_t)(MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE - 4);
+			size_t read_len = (size_t)(MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE - 4);
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[4], &read_len, error);
 			mb_io_ptr->save2 = MB_NO;
 		}
 
+		unsigned int newscancheckvalue = 0;
+
 		/* if read ok then get values */
 		if (status == MB_SUCCESS) {
-			newscancheck = (unsigned int *)buffer;
+			unsigned int *newscancheck = (unsigned int *)buffer;
 			newscancheckvalue = *newscancheck;
 
 			store->current_scan++;
@@ -835,6 +818,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 
 			/* get time_d timestamp */
+			int time_i[7];
 			time_i[0] = store->year;
 			time_i[1] = store->month;
 			time_i[2] = store->day;
@@ -859,13 +843,13 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			done = MB_NO;
 			while (done == MB_NO) {
 				/* read the next four bytes */
-				read_len = (size_t)4;
+				size_t read_len = (size_t)4;
 				status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
 
 				/* if end of file reached handle it gracefully
 				   else check to see if the new pulse is valid or is really the start of a new scan
 				   by checking the first four bytes */
-				newscancheck = (unsigned int *)buffer;
+				unsigned int *newscancheck = (unsigned int *)buffer;
 				// fprintf(stderr,"Pulse %d header:%x  %f\n",store->num_pulses,*newscancheck, *((float *)newscancheck));
 				if (status == MB_FAILURE) {
 					done = MB_YES;
@@ -887,7 +871,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* if read ok and consistent with new pulse then get values */
 				if (status == MB_SUCCESS && done == MB_NO) {
-					pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[store->num_pulses];
+					struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[store->num_pulses];
 					index = 0;
 					mb_get_binary_float(MB_YES, (void *)&buffer[index], &(pulse->range));
 					index += 4;
@@ -926,7 +910,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 			}
 			for (int i = store->num_pulses; i < store->counts_per_scan; i++) {
-				pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
+				struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 				pulse->range = 0.0;
 				pulse->amplitude = 0;
 				pulse->snr = 0.0;
@@ -972,7 +956,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if (verbose >= 3 && status == MB_SUCCESS)
 		mbsys_3datdepthlidar_print_store(verbose, store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -986,10 +969,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_3ddepthp";
-	int status = MB_SUCCESS;
-	struct mbsys_3datdepthlidar_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1004,10 +984,10 @@ int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
+	struct mbsys_3datdepthlidar_struct *store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_3ddepthp_rd_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_3ddepthp_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* if needed calculate bathymetry */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->bathymetry_calculated == MB_NO) {
@@ -1022,7 +1002,6 @@ int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = store->kind;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1036,15 +1015,7 @@ int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_3ddepthp_wr_data";
-	int status = MB_SUCCESS;
-	struct mbsys_3datdepthlidar_struct *store;
-	struct mbsys_3datdepthlidar_pulse_struct *pulse;
-	int *file_header_readwritten;
-	char buffer[MBF_3DDEPTHP_BUFFER_SIZE];
-	size_t write_len;
-	size_t index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1059,20 +1030,23 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
+	struct mbsys_3datdepthlidar_struct *store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
 
 	/* get saved values */
-	file_header_readwritten = (int *)&mb_io_ptr->save1;
+	int *file_header_readwritten = (int *)&mb_io_ptr->save1;
 
-	/* print output debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Data record kind in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg4       kind:       %d\n", store->kind);
 	}
 
 	/* set status */
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
+	size_t index = 0;
+	size_t write_len = 0;
+
+	char buffer[MBF_3DDEPTHP_BUFFER_SIZE];
 
 	/* if first write then write the magic number file header */
 	if (*file_header_readwritten == MB_NO) {
@@ -1275,7 +1249,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (status == MB_SUCCESS) {
 				for (int i = 0; i < store->num_pulses; i++) {
 					/* encode the data */
-					pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
+					struct mbsys_3datdepthlidar_pulse_struct *pulse = (struct mbsys_3datdepthlidar_pulse_struct *)&store->pulses[i];
 					index = 0;
 					mb_put_binary_float(MB_YES, pulse->range, &buffer[index]);
 					index += 4;
@@ -1326,7 +1300,6 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1340,10 +1313,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_3ddepthp";
-	int status = MB_SUCCESS;
-	struct mbsys_3datdepthlidar_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1358,12 +1328,11 @@ int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
+	struct mbsys_3datdepthlidar_struct *store = (struct mbsys_3datdepthlidar_struct *)store_ptr;
 
 	/* write next data to file */
-	status = mbr_3ddepthp_wr_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_3ddepthp_wr_data(verbose, mbio_ptr, store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1377,9 +1346,7 @@ int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_3ddepthp";
-	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1393,7 +1360,7 @@ int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_3ddepthp(
+	const int status = mbr_info_3ddepthp(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
@@ -1423,7 +1390,6 @@ int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
