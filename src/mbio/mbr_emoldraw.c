@@ -40,32 +40,6 @@
 /* turn on debug statements here */
 /*#define MBR_EMOLDRAW_DEBUG 1*/
 
-int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type);
-int mbr_emoldraw_rd_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_rd_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_rd_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_rd_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_rd_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int swath_id, int *error);
-int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int swath_id, int first, int *more,
-                       int *error);
-int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int swath_id, int first, int *more,
-                        int *error);
-int mbr_emoldraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_emoldraw_wr_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_wr_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_wr_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_wr_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_emoldraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -215,906 +189,6 @@ int mbr_dem_emoldraw(int verbose, void *mbio_ptr, int *error) {
 
 	/* deallocate memory for data descriptor */
 	status = mbsys_simrad_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_emoldraw";
-	int status = MB_SUCCESS;
-	struct mbsys_simrad_struct *store;
-	struct mbsys_simrad_survey_struct *ping;
-	int ntime_i[7];
-	double ntime_d;
-	int ptime_i[7];
-	double ptime_d;
-	double rawspeed, pheading;
-	double plon, plat, pspeed;
-	double *pixel_size;
-	double *swath_width;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_simrad_struct *)store_ptr;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
-
-	/* read next data from file */
-	status = mbr_emoldraw_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-	/* save fix if nav data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_NAV) {
-		/* get nav time */
-		mb_fix_y2k(verbose, store->pos_year, &ntime_i[0]);
-		ntime_i[1] = store->pos_month;
-		ntime_i[2] = store->pos_day;
-		ntime_i[3] = store->pos_hour;
-		ntime_i[4] = store->pos_minute;
-		ntime_i[5] = store->pos_second;
-		ntime_i[6] = 10000 * store->pos_centisecond;
-		mb_get_time(verbose, ntime_i, &ntime_d);
-
-		/* add latest fix */
-		mb_navint_add(verbose, mbio_ptr, ntime_d, store->pos_longitude, store->pos_latitude, error);
-	}
-
-	/* handle navigation interpolation and generate sidescan */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
-		/* get ping structure */
-		ping = (struct mbsys_simrad_survey_struct *)store->ping;
-
-		/* get ping time */
-		mb_fix_y2k(verbose, store->year, &ptime_i[0]);
-		ptime_i[1] = store->month;
-		ptime_i[2] = store->day;
-		ptime_i[3] = store->hour;
-		ptime_i[4] = store->minute;
-		ptime_i[5] = store->second;
-		ptime_i[6] = 10000 * store->centisecond;
-		mb_get_time(verbose, ptime_i, &ptime_d);
-
-		/* interpolate from saved nav */
-		rawspeed = 3.6 * store->speed;
-		pheading = store->line_heading;
-		mb_navint_interp(verbose, mbio_ptr, ptime_d, pheading, rawspeed, &plon, &plat, &pspeed, error);
-
-		/* print debug statements */
-		if (verbose >= 4) {
-			fprintf(stderr, "dbg4       Interpolated Navigation:\n");
-			fprintf(stderr, "dbg4       longitude:  %f\n", plon);
-			fprintf(stderr, "dbg4       latitude:   %f\n", plat);
-			fprintf(stderr, "dbg4       speed:      %f\n", pspeed);
-		}
-
-		/* adopt interpolated navigation */
-		ping->longitude = plon;
-		ping->latitude = plat;
-
-		/* generate sidescan */
-		ping->pixel_size = 0.0;
-		ping->pixels_ss = 0;
-		status = mbsys_simrad_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_emoldraw";
-	int status = MB_SUCCESS;
-	struct mbsys_simrad_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad_struct *)store_ptr;
-
-	/* write next data to file */
-	status = mbr_emoldraw_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_emoldraw_rd_data";
-	int status = MB_SUCCESS;
-	struct mbsys_simrad_struct *store;
-	FILE *mbfp;
-	int done;
-	int *wrapper;
-	char *label;
-	int *label_save_flag;
-	short int expect;
-	short int *type;
-	short int first_type;
-	int first_ss;
-	int more_ss;
-	short int *expect_save;
-	int *expect_save_flag;
-	short int *first_type_save;
-	int *first_ss_save;
-	int *more_ss_save;
-	int *num_bathrec;
-	int *num_ssrec;
-	int *file_has_ss;
-	int read_len;
-	int skip = 0;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	mbfp = mb_io_ptr->mbfp;
-	store = (struct mbsys_simrad_struct *)store_ptr;
-
-	/* get saved values */
-	wrapper = (int *)&mb_io_ptr->save5;
-	label = (char *)mb_io_ptr->save_label;
-	type = (short int *)mb_io_ptr->save_label;
-	label_save_flag = (int *)&mb_io_ptr->save_label_flag;
-	expect_save_flag = (int *)&mb_io_ptr->save_flag;
-	expect_save = (short int *)&mb_io_ptr->save1;
-	first_type_save = (short int *)&mb_io_ptr->save2;
-	first_ss_save = (int *)&mb_io_ptr->save3;
-	more_ss_save = (int *)&mb_io_ptr->save4;
-	num_bathrec = (int *)&mb_io_ptr->save6;
-	num_ssrec = (int *)&mb_io_ptr->save7;
-	file_has_ss = (int *)&mb_io_ptr->save8;
-	if (*expect_save_flag == MB_YES) {
-		expect = *expect_save;
-		first_type = *first_type_save;
-		first_ss = *first_ss_save;
-		more_ss = *more_ss_save;
-		*expect_save_flag = MB_NO;
-	}
-	else {
-		expect = EM_NONE;
-		first_type = EM_NONE;
-		first_ss = MB_YES;
-		more_ss = MB_NO;
-	}
-
-	/* check if sidescan is to be expected */
-	if (*num_bathrec > 3 && *num_ssrec == 0)
-		*file_has_ss = MB_NO;
-	else
-		*file_has_ss = MB_YES;
-
-	/* set file position */
-	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-
-	/* loop over reading data until a record is ready for return */
-	done = MB_NO;
-	*error = MB_ERROR_NO_ERROR;
-	while (done == MB_NO) {
-		/* if no label saved get next record label */
-		if (*label_save_flag == MB_NO) {
-			/* read four byte wrapper if data stream is known
-			    to have wrappers */
-			if (*wrapper == MB_YES) {
-				if ((read_len = fread(label, 1, 4, mb_io_ptr->mbfp)) != 4) {
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-				}
-			}
-
-			/* look for label */
-			if (status == MB_SUCCESS && (read_len = fread(label, 1, 2, mb_io_ptr->mbfp)) != 2) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-
-			/* check label - if not a good label read a byte
-			    at a time until a good label is found */
-			skip = 0;
-			while (status == MB_SUCCESS && mbr_emoldraw_chk_label(verbose, mbio_ptr, *type) != MB_SUCCESS) {
-				/* get next byte */
-				label[0] = label[1];
-				if ((read_len = fread(&label[1], 1, 1, mb_io_ptr->mbfp)) != 1) {
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-				}
-				skip++;
-			}
-
-			/* set wrapper status if needed */
-			if (*wrapper < 0) {
-				if (skip == 0)
-					*wrapper = MB_NO;
-				else if (skip == 4)
-					*wrapper = MB_YES;
-			}
-		}
-
-		/* else use saved label */
-		else
-			*label_save_flag = MB_NO;
-
-/* swap bytes if necessary */
-#ifdef BYTESWAPPED
-		*type = (short int)mb_swap_short(*type);
-#endif
-
-#ifdef MBR_EMOLDRAW_DEBUG
-		fprintf(stderr, "\nstart of mbr_emoldraw_rd_data loop:\n");
-		fprintf(stderr, "done:%d\n", done);
-		fprintf(stderr, "wrapper:%d\n", *wrapper);
-		fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
-		fprintf(stderr, "num_ssrec:%d\n", *num_ssrec);
-		fprintf(stderr, "file_has_ss:%d\n", *file_has_ss);
-		fprintf(stderr, "skip:%d\n", skip);
-		fprintf(stderr, "expect:%x\n", expect);
-		fprintf(stderr, "type:%x\n", *type);
-		fprintf(stderr, "first_type:%x\n", first_type);
-		fprintf(stderr, "first_ss:%d\n", first_ss);
-		fprintf(stderr, "more_ss:%d\n", more_ss);
-#endif
-
-		/* allocate secondary data structure for
-		    survey data if needed */
-		if (status == MB_SUCCESS &&
-		    (*type == EM_12S_BATH || *type == EM_12DP_BATH || *type == EM_12DS_BATH || *type == EM_121_BATH ||
-		     *type == EM_1000_BATH || *type == EM_12S_SS || *type == EM_12DP_SS || *type == EM_12DS_SS || *type == EM_12S_SSP ||
-		     *type == EM_12DP_SSP || *type == EM_12DS_SSP) &&
-		    store->ping == NULL) {
-			status = mbsys_simrad_survey_alloc(verbose, mbio_ptr, store_ptr, error);
-		}
-
-		/* read the appropriate data records */
-		if (status == MB_FAILURE && expect == EM_NONE) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, read failure, no expect\n");
-#endif
-			done = MB_YES;
-		}
-		else if (status == MB_FAILURE && expect != EM_NONE) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, read failure, expect %x\n", expect);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-		else if (*type != EM_START && *type != EM_STOP && *type != EM_PARAMETER && *type != EM_POS && *type != EM_SVP &&
-		         *type != EM_12S_BATH && *type != EM_12DP_BATH && *type != EM_12DS_BATH && *type != EM_121_BATH &&
-		         *type != EM_1000_BATH && *type != EM_12S_SS && *type != EM_12DP_SS && *type != EM_12DS_SS &&
-		         *type != EM_12S_SSP && *type != EM_12DP_SSP && *type != EM_12DS_SSP) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, try again\n");
-#endif
-			done = MB_NO;
-		}
-		else if (*type == EM_START) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_start type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_start(verbose, mbfp, store, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				store->kind = MB_DATA_START;
-				if (expect != EM_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-					*first_ss_save = first_ss;
-					*more_ss_save = more_ss;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (*type == EM_STOP && expect != EM_NONE) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_STOP) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_stop type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_stop(verbose, mbfp, store, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				store->kind = MB_DATA_STOP;
-				if (expect != EM_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-					*first_ss_save = first_ss;
-					*more_ss_save = more_ss;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (*type == EM_PARAMETER) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_parameter type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_parameter(verbose, mbfp, store, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				store->kind = MB_DATA_COMMENT;
-				if (expect != EM_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-					*first_ss_save = first_ss;
-					*more_ss_save = more_ss;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (*type == EM_POS) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_pos type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_pos(verbose, mbfp, store, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				store->kind = MB_DATA_NAV;
-				if (expect != EM_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-					*first_ss_save = first_ss;
-					*more_ss_save = more_ss;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (*type == EM_SVP) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_svp type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_svp(verbose, mbfp, store, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				store->kind = MB_DATA_VELOCITY_PROFILE;
-				if (expect != EM_NONE) {
-					*expect_save = expect;
-					*expect_save_flag = MB_YES;
-					*first_type_save = first_type;
-					*first_ss_save = first_ss;
-					*more_ss_save = more_ss;
-				}
-				else
-					*expect_save_flag = MB_NO;
-			}
-		}
-		else if (*type == EM_12S_BATH && expect != EM_NONE && expect != EM_12S_BATH) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_12S_BATH) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_em12bath type %x\n", *type);
-#endif
-			store->sonar = MBSYS_SIMRAD_EM12S;
-			status = mbr_emoldraw_rd_em12bath(verbose, mbfp, store, EM_SWATH_CENTER, error);
-			if (status == MB_SUCCESS) {
-				(*num_bathrec)++;
-#ifdef MBR_EMOLDRAW_DEBUG
-				fprintf(stderr, "check num_bathrec:%d\n", *num_bathrec);
-#endif
-				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
-					done = MB_NO;
-					first_type = EM_12S_BATH;
-					expect = EM_12S_SS;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-			}
-		}
-		else if (*type == EM_12DP_BATH && expect != EM_NONE && expect != EM_12DP_BATH) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_12DP_BATH) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_em12bath type %x\n", *type);
-#endif
-			store->sonar = MBSYS_SIMRAD_EM12D;
-			status = mbr_emoldraw_rd_em12bath(verbose, mbfp, store, EM_SWATH_PORT, error);
-			if (status == MB_SUCCESS) {
-				(*num_bathrec)++;
-#ifdef MBR_EMOLDRAW_DEBUG
-				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
-#endif
-				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
-					done = MB_NO;
-					first_type = EM_12DP_BATH;
-					expect = EM_12DP_SS;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-			}
-		}
-		else if (*type == EM_12DS_BATH && expect != EM_NONE && expect != EM_12DS_BATH) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_12DS_BATH) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_em12bath type %x\n", *type);
-#endif
-			store->sonar = MBSYS_SIMRAD_EM12D;
-			status = mbr_emoldraw_rd_em12bath(verbose, mbfp, store, EM_SWATH_STARBOARD, error);
-			if (status == MB_SUCCESS) {
-				(*num_bathrec)++;
-#ifdef MBR_EMOLDRAW_DEBUG
-				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
-#endif
-				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
-					done = MB_NO;
-					first_type = EM_12DS_BATH;
-					expect = EM_12DS_SS;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-			}
-		}
-		else if (*type == EM_121_BATH && expect != EM_NONE && expect != EM_12S_BATH) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_121_BATH) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_em121bath type %x\n", *type);
-#endif
-			store->sonar = MBSYS_SIMRAD_EM121;
-			status = mbr_emoldraw_rd_em121bath(verbose, mbfp, store, error);
-			if (status == MB_SUCCESS) {
-				(*num_bathrec)++;
-#ifdef MBR_EMOLDRAW_DEBUG
-				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
-#endif
-				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
-					done = MB_NO;
-					first_type = EM_121_BATH;
-					expect = EM_12S_SS;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-			}
-		}
-		else if (*type == EM_1000_BATH && expect != EM_NONE && expect != EM_12S_BATH) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_1000_BATH) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_em1000bath type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_em1000bath(verbose, mbfp, store, error);
-			if (status == MB_SUCCESS) {
-				(*num_bathrec)++;
-#ifdef MBR_EMOLDRAW_DEBUG
-				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
-#endif
-				store->sonar = MBSYS_SIMRAD_EM1000;
-				store->kind = MB_DATA_DATA;
-				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
-					done = MB_NO;
-					first_type = EM_12DS_BATH;
-					expect = EM_12S_SS;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-			}
-		}
-		else if (*type == EM_12S_SS && expect != EM_NONE && expect != EM_12S_SS) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_12S_SS) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_CENTER, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
-				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12S_SS;
-					expect = EM_12S_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
-				expect = EM_12S_SS;
-				first_ss = MB_NO;
-			}
-			else if (status == MB_FAILURE) {
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12S_SS;
-					expect = EM_12S_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-		}
-		else if (*type == EM_12DP_SS && expect != EM_NONE && expect != EM_12DP_SS) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_12DP_SS) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_PORT, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
-				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12DP_SS;
-					expect = EM_12DP_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
-				expect = EM_12DP_SS;
-				first_ss = MB_NO;
-			}
-			else if (status == MB_FAILURE) {
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12DP_SS;
-					expect = EM_12DP_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-		}
-
-		else if (*type == EM_12DS_SS && expect != EM_NONE && expect != EM_12DS_SS) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_12DS_SS) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_STARBOARD, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
-				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12DS_SS;
-					expect = EM_12DS_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
-				expect = EM_12DS_SS;
-				first_ss = MB_NO;
-			}
-			else if (status == MB_FAILURE) {
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12DS_SS;
-					expect = EM_12DS_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-		}
-		else if (*type == EM_12S_SSP && expect != EM_NONE && expect != EM_12S_SS) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_12S_SSP) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_CENTER, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
-				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12S_SSP;
-					expect = EM_12S_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
-				expect = EM_12S_SS;
-				first_ss = MB_NO;
-			}
-			else if (status == MB_FAILURE) {
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12S_SSP;
-					expect = EM_12S_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-		}
-		else if (*type == EM_12DP_SSP && expect != EM_NONE && expect != EM_12DP_SS) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_12DP_SSP) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_PORT, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
-				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12DP_SSP;
-					expect = EM_12DP_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
-				expect = EM_12DP_SS;
-				first_ss = MB_NO;
-			}
-			else if (status == MB_FAILURE) {
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12DP_SSP;
-					expect = EM_12DP_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-		}
-
-		else if (*type == EM_12DS_SSP && expect != EM_NONE && expect != EM_12DS_SS) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
-#endif
-			store->kind = MB_DATA_DATA;
-			done = MB_YES;
-			expect = EM_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (*type == EM_12DS_SSP) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
-#endif
-			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_STARBOARD, first_ss, &more_ss, error);
-			if (status == MB_SUCCESS && first_ss == MB_YES)
-				(*num_ssrec)++;
-			if (status == MB_SUCCESS && more_ss == MB_NO) {
-				*file_has_ss = MB_YES;
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12DS_SSP;
-					expect = EM_12DS_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-			else if (status == MB_SUCCESS && more_ss == MB_YES) {
-				done = MB_NO;
-				expect = EM_12DS_SS;
-				first_ss = MB_NO;
-			}
-			else if (status == MB_FAILURE) {
-				if (first_type == EM_NONE) {
-					done = MB_NO;
-					first_type = EM_12DS_SSP;
-					expect = EM_12DS_BATH;
-				}
-				else {
-					done = MB_YES;
-					expect = EM_NONE;
-				}
-				first_ss = MB_YES;
-			}
-		}
-
-		/* bail out if there is an error */
-		if (status == MB_FAILURE)
-			done = MB_YES;
-
-#ifdef MBR_EMOLDRAW_DEBUG
-		fprintf(stderr, "end of mbr_emoldraw_rd_data loop:\n");
-		fprintf(stderr, "status:%d error:%d\n", status, *error);
-		fprintf(stderr, "done:%d\n", done);
-		fprintf(stderr, "expect:%x\n", expect);
-		fprintf(stderr, "type:%x\n", *type);
-#endif
-	}
-
-	/* get file position */
-	if (*label_save_flag == MB_YES)
-		mb_io_ptr->file_bytes = ftell(mbfp) - 2;
-	else if (*expect_save_flag != MB_YES)
-		mb_io_ptr->file_bytes = ftell(mbfp);
-
-/* swap label if saved and byteswapped */
-#ifdef BYTESWAPPED
-	if (*label_save_flag == MB_YES)
-		*type = (short int)mb_swap_short(*type);
-#endif
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2364,12 +1438,30 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_emoldraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_emoldraw_wr_data";
+int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_emoldraw_rd_data";
 	int status = MB_SUCCESS;
 	struct mbsys_simrad_struct *store;
-	struct mbsys_simrad_survey_struct *ping;
 	FILE *mbfp;
+	int done;
+	int *wrapper;
+	char *label;
+	int *label_save_flag;
+	short int expect;
+	short int *type;
+	short int first_type;
+	int first_ss;
+	int more_ss;
+	short int *expect_save;
+	int *expect_save_flag;
+	short int *first_type_save;
+	int *first_ss_save;
+	int *more_ss_save;
+	int *num_bathrec;
+	int *num_ssrec;
+	int *file_has_ss;
+	int read_len;
+	int skip = 0;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2382,108 +1474,821 @@ int mbr_emoldraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad_struct *)store_ptr;
-	ping = (struct mbsys_simrad_survey_struct *)store->ping;
 	mbfp = mb_io_ptr->mbfp;
+	store = (struct mbsys_simrad_struct *)store_ptr;
 
-	if (store->kind == MB_DATA_COMMENT) {
-#ifdef MBR_EMOLDRAW_DEBUG
-		fprintf(stderr, "call mbr_emoldraw_wr_parameter\n");
-#endif
-		status = mbr_emoldraw_wr_parameter(verbose, mbfp, store, error);
-	}
-	else if (store->kind == MB_DATA_START) {
-#ifdef MBR_EMOLDRAW_DEBUG
-		fprintf(stderr, "call mbr_emoldraw_wr_start\n");
-#endif
-		status = mbr_emoldraw_wr_start(verbose, mbfp, store, error);
-	}
-	else if (store->kind == MB_DATA_STOP) {
-#ifdef MBR_EMOLDRAW_DEBUG
-		fprintf(stderr, "call mbr_emoldraw_wr_stop\n");
-#endif
-		status = mbr_emoldraw_wr_stop(verbose, mbfp, store, error);
-	}
-	else if (store->kind == MB_DATA_NAV) {
-#ifdef MBR_EMOLDRAW_DEBUG
-		fprintf(stderr, "call mbr_emoldraw_wr_pos\n");
-#endif
-		status = mbr_emoldraw_wr_pos(verbose, mbfp, store, error);
-	}
-	else if (store->kind == MB_DATA_VELOCITY_PROFILE) {
-#ifdef MBR_EMOLDRAW_DEBUG
-		fprintf(stderr, "call mbr_emoldraw_wr_svp\n");
-#endif
-		status = mbr_emoldraw_wr_svp(verbose, mbfp, store, error);
-	}
-	else if (store->kind == MB_DATA_DATA && (store->sonar == MBSYS_SIMRAD_EM12S || store->sonar == MBSYS_SIMRAD_EM12D)) {
-#ifdef MBR_EMOLDRAW_DEBUG
-		fprintf(stderr, "call mbr_emoldraw_wr_em12bath\n");
-#endif
-		status = mbr_emoldraw_wr_em12bath(verbose, mbfp, store, error);
-		if (ping->ss_status == EM_SS_AMPONLY) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_wr_ss\n");
-#endif
-			status = mbr_emoldraw_wr_ss(verbose, mbfp, store, error);
-		}
-		else if (ping->ss_status == EM_SS_AMPPHASE) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_wr_ssp\n");
-#endif
-			status = mbr_emoldraw_wr_ssp(verbose, mbfp, store, error);
-		}
-	}
-	else if (store->kind == MB_DATA_DATA && (store->sonar == MBSYS_SIMRAD_EM1000)) {
-#ifdef MBR_EMOLDRAW_DEBUG
-		fprintf(stderr, "call mbr_emoldraw_wr_em1000bath\n");
-#endif
-		status = mbr_emoldraw_wr_em1000bath(verbose, mbfp, store, error);
-		if (ping->ss_status == EM_SS_AMPONLY) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_wr_ss\n");
-#endif
-			status = mbr_emoldraw_wr_ss(verbose, mbfp, store, error);
-		}
-		else if (ping->ss_status == EM_SS_AMPPHASE) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_wr_ssp\n");
-#endif
-			status = mbr_emoldraw_wr_ssp(verbose, mbfp, store, error);
-		}
-	}
-	else if (store->kind == MB_DATA_DATA && (store->sonar == MBSYS_SIMRAD_EM121)) {
-#ifdef MBR_EMOLDRAW_DEBUG
-		fprintf(stderr, "call mbr_emoldraw_wr_em121bath\n");
-#endif
-		status = mbr_emoldraw_wr_em121bath(verbose, mbfp, store, error);
-		if (ping->ss_status == EM_SS_AMPONLY) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_wr_ss\n");
-#endif
-			status = mbr_emoldraw_wr_ss(verbose, mbfp, store, error);
-		}
-		else if (ping->ss_status == EM_SS_AMPPHASE) {
-#ifdef MBR_EMOLDRAW_DEBUG
-			fprintf(stderr, "call mbr_emoldraw_wr_ssp\n");
-#endif
-			status = mbr_emoldraw_wr_ssp(verbose, mbfp, store, error);
-		}
+	/* get saved values */
+	wrapper = (int *)&mb_io_ptr->save5;
+	label = (char *)mb_io_ptr->save_label;
+	type = (short int *)mb_io_ptr->save_label;
+	label_save_flag = (int *)&mb_io_ptr->save_label_flag;
+	expect_save_flag = (int *)&mb_io_ptr->save_flag;
+	expect_save = (short int *)&mb_io_ptr->save1;
+	first_type_save = (short int *)&mb_io_ptr->save2;
+	first_ss_save = (int *)&mb_io_ptr->save3;
+	more_ss_save = (int *)&mb_io_ptr->save4;
+	num_bathrec = (int *)&mb_io_ptr->save6;
+	num_ssrec = (int *)&mb_io_ptr->save7;
+	file_has_ss = (int *)&mb_io_ptr->save8;
+	if (*expect_save_flag == MB_YES) {
+		expect = *expect_save;
+		first_type = *first_type_save;
+		first_ss = *first_ss_save;
+		more_ss = *more_ss_save;
+		*expect_save_flag = MB_NO;
 	}
 	else {
-#ifdef MBR_EMOLDRAW_DEBUG
-		fprintf(stderr, "call nothing - kind:%d sonar:%d\n", store->kind, store->sonar);
-#endif
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_KIND;
+		expect = EM_NONE;
+		first_type = EM_NONE;
+		first_ss = MB_YES;
+		more_ss = MB_NO;
 	}
 
+	/* check if sidescan is to be expected */
+	if (*num_bathrec > 3 && *num_ssrec == 0)
+		*file_has_ss = MB_NO;
+	else
+		*file_has_ss = MB_YES;
+
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	/* loop over reading data until a record is ready for return */
+	done = MB_NO;
+	*error = MB_ERROR_NO_ERROR;
+	while (done == MB_NO) {
+		/* if no label saved get next record label */
+		if (*label_save_flag == MB_NO) {
+			/* read four byte wrapper if data stream is known
+			    to have wrappers */
+			if (*wrapper == MB_YES) {
+				if ((read_len = fread(label, 1, 4, mb_io_ptr->mbfp)) != 4) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+				}
+			}
+
+			/* look for label */
+			if (status == MB_SUCCESS && (read_len = fread(label, 1, 2, mb_io_ptr->mbfp)) != 2) {
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+
+			/* check label - if not a good label read a byte
+			    at a time until a good label is found */
+			skip = 0;
+			while (status == MB_SUCCESS && mbr_emoldraw_chk_label(verbose, mbio_ptr, *type) != MB_SUCCESS) {
+				/* get next byte */
+				label[0] = label[1];
+				if ((read_len = fread(&label[1], 1, 1, mb_io_ptr->mbfp)) != 1) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+				}
+				skip++;
+			}
+
+			/* set wrapper status if needed */
+			if (*wrapper < 0) {
+				if (skip == 0)
+					*wrapper = MB_NO;
+				else if (skip == 4)
+					*wrapper = MB_YES;
+			}
+		}
+
+		/* else use saved label */
+		else
+			*label_save_flag = MB_NO;
+
+/* swap bytes if necessary */
+#ifdef BYTESWAPPED
+		*type = (short int)mb_swap_short(*type);
+#endif
+
+#ifdef MBR_EMOLDRAW_DEBUG
+		fprintf(stderr, "\nstart of mbr_emoldraw_rd_data loop:\n");
+		fprintf(stderr, "done:%d\n", done);
+		fprintf(stderr, "wrapper:%d\n", *wrapper);
+		fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
+		fprintf(stderr, "num_ssrec:%d\n", *num_ssrec);
+		fprintf(stderr, "file_has_ss:%d\n", *file_has_ss);
+		fprintf(stderr, "skip:%d\n", skip);
+		fprintf(stderr, "expect:%x\n", expect);
+		fprintf(stderr, "type:%x\n", *type);
+		fprintf(stderr, "first_type:%x\n", first_type);
+		fprintf(stderr, "first_ss:%d\n", first_ss);
+		fprintf(stderr, "more_ss:%d\n", more_ss);
+#endif
+
+		/* allocate secondary data structure for
+		    survey data if needed */
+		if (status == MB_SUCCESS &&
+		    (*type == EM_12S_BATH || *type == EM_12DP_BATH || *type == EM_12DS_BATH || *type == EM_121_BATH ||
+		     *type == EM_1000_BATH || *type == EM_12S_SS || *type == EM_12DP_SS || *type == EM_12DS_SS || *type == EM_12S_SSP ||
+		     *type == EM_12DP_SSP || *type == EM_12DS_SSP) &&
+		    store->ping == NULL) {
+			status = mbsys_simrad_survey_alloc(verbose, mbio_ptr, store_ptr, error);
+		}
+
+		/* read the appropriate data records */
+		if (status == MB_FAILURE && expect == EM_NONE) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, read failure, no expect\n");
+#endif
+			done = MB_YES;
+		}
+		else if (status == MB_FAILURE && expect != EM_NONE) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, read failure, expect %x\n", expect);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+		}
+		else if (*type != EM_START && *type != EM_STOP && *type != EM_PARAMETER && *type != EM_POS && *type != EM_SVP &&
+		         *type != EM_12S_BATH && *type != EM_12DP_BATH && *type != EM_12DS_BATH && *type != EM_121_BATH &&
+		         *type != EM_1000_BATH && *type != EM_12S_SS && *type != EM_12DP_SS && *type != EM_12DS_SS &&
+		         *type != EM_12S_SSP && *type != EM_12DP_SSP && *type != EM_12DS_SSP) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, try again\n");
+#endif
+			done = MB_NO;
+		}
+		else if (*type == EM_START) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_start type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_start(verbose, mbfp, store, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				store->kind = MB_DATA_START;
+				if (expect != EM_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					*first_ss_save = first_ss;
+					*more_ss_save = more_ss;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (*type == EM_STOP && expect != EM_NONE) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_STOP) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_stop type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_stop(verbose, mbfp, store, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				store->kind = MB_DATA_STOP;
+				if (expect != EM_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					*first_ss_save = first_ss;
+					*more_ss_save = more_ss;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (*type == EM_PARAMETER) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_parameter type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_parameter(verbose, mbfp, store, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				store->kind = MB_DATA_COMMENT;
+				if (expect != EM_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					*first_ss_save = first_ss;
+					*more_ss_save = more_ss;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (*type == EM_POS) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_pos type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_pos(verbose, mbfp, store, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				store->kind = MB_DATA_NAV;
+				if (expect != EM_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					*first_ss_save = first_ss;
+					*more_ss_save = more_ss;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (*type == EM_SVP) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_svp type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_svp(verbose, mbfp, store, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				store->kind = MB_DATA_VELOCITY_PROFILE;
+				if (expect != EM_NONE) {
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					*first_ss_save = first_ss;
+					*more_ss_save = more_ss;
+				}
+				else
+					*expect_save_flag = MB_NO;
+			}
+		}
+		else if (*type == EM_12S_BATH && expect != EM_NONE && expect != EM_12S_BATH) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_12S_BATH) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_em12bath type %x\n", *type);
+#endif
+			store->sonar = MBSYS_SIMRAD_EM12S;
+			status = mbr_emoldraw_rd_em12bath(verbose, mbfp, store, EM_SWATH_CENTER, error);
+			if (status == MB_SUCCESS) {
+				(*num_bathrec)++;
+#ifdef MBR_EMOLDRAW_DEBUG
+				fprintf(stderr, "check num_bathrec:%d\n", *num_bathrec);
+#endif
+				store->kind = MB_DATA_DATA;
+				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
+					done = MB_NO;
+					first_type = EM_12S_BATH;
+					expect = EM_12S_SS;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+			}
+		}
+		else if (*type == EM_12DP_BATH && expect != EM_NONE && expect != EM_12DP_BATH) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_12DP_BATH) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_em12bath type %x\n", *type);
+#endif
+			store->sonar = MBSYS_SIMRAD_EM12D;
+			status = mbr_emoldraw_rd_em12bath(verbose, mbfp, store, EM_SWATH_PORT, error);
+			if (status == MB_SUCCESS) {
+				(*num_bathrec)++;
+#ifdef MBR_EMOLDRAW_DEBUG
+				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
+#endif
+				store->kind = MB_DATA_DATA;
+				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
+					done = MB_NO;
+					first_type = EM_12DP_BATH;
+					expect = EM_12DP_SS;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+			}
+		}
+		else if (*type == EM_12DS_BATH && expect != EM_NONE && expect != EM_12DS_BATH) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_12DS_BATH) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_em12bath type %x\n", *type);
+#endif
+			store->sonar = MBSYS_SIMRAD_EM12D;
+			status = mbr_emoldraw_rd_em12bath(verbose, mbfp, store, EM_SWATH_STARBOARD, error);
+			if (status == MB_SUCCESS) {
+				(*num_bathrec)++;
+#ifdef MBR_EMOLDRAW_DEBUG
+				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
+#endif
+				store->kind = MB_DATA_DATA;
+				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
+					done = MB_NO;
+					first_type = EM_12DS_BATH;
+					expect = EM_12DS_SS;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+			}
+		}
+		else if (*type == EM_121_BATH && expect != EM_NONE && expect != EM_12S_BATH) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_121_BATH) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_em121bath type %x\n", *type);
+#endif
+			store->sonar = MBSYS_SIMRAD_EM121;
+			status = mbr_emoldraw_rd_em121bath(verbose, mbfp, store, error);
+			if (status == MB_SUCCESS) {
+				(*num_bathrec)++;
+#ifdef MBR_EMOLDRAW_DEBUG
+				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
+#endif
+				store->kind = MB_DATA_DATA;
+				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
+					done = MB_NO;
+					first_type = EM_121_BATH;
+					expect = EM_12S_SS;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+			}
+		}
+		else if (*type == EM_1000_BATH && expect != EM_NONE && expect != EM_12S_BATH) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_1000_BATH) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_em1000bath type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_em1000bath(verbose, mbfp, store, error);
+			if (status == MB_SUCCESS) {
+				(*num_bathrec)++;
+#ifdef MBR_EMOLDRAW_DEBUG
+				fprintf(stderr, "num_bathrec:%d\n", *num_bathrec);
+#endif
+				store->sonar = MBSYS_SIMRAD_EM1000;
+				store->kind = MB_DATA_DATA;
+				if (first_type == EM_NONE && *file_has_ss == MB_YES) {
+					done = MB_NO;
+					first_type = EM_12DS_BATH;
+					expect = EM_12S_SS;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+			}
+		}
+		else if (*type == EM_12S_SS && expect != EM_NONE && expect != EM_12S_SS) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_12S_SS) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_CENTER, first_ss, &more_ss, error);
+			if (status == MB_SUCCESS && first_ss == MB_YES)
+				(*num_ssrec)++;
+			if (status == MB_SUCCESS && more_ss == MB_NO) {
+				*file_has_ss = MB_YES;
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12S_SS;
+					expect = EM_12S_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+			else if (status == MB_SUCCESS && more_ss == MB_YES) {
+				done = MB_NO;
+				expect = EM_12S_SS;
+				first_ss = MB_NO;
+			}
+			else if (status == MB_FAILURE) {
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12S_SS;
+					expect = EM_12S_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+		}
+		else if (*type == EM_12DP_SS && expect != EM_NONE && expect != EM_12DP_SS) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_12DP_SS) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_PORT, first_ss, &more_ss, error);
+			if (status == MB_SUCCESS && first_ss == MB_YES)
+				(*num_ssrec)++;
+			if (status == MB_SUCCESS && more_ss == MB_NO) {
+				*file_has_ss = MB_YES;
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12DP_SS;
+					expect = EM_12DP_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+			else if (status == MB_SUCCESS && more_ss == MB_YES) {
+				done = MB_NO;
+				expect = EM_12DP_SS;
+				first_ss = MB_NO;
+			}
+			else if (status == MB_FAILURE) {
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12DP_SS;
+					expect = EM_12DP_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+		}
+
+		else if (*type == EM_12DS_SS && expect != EM_NONE && expect != EM_12DS_SS) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_12DS_SS) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_ss type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_ss(verbose, mbfp, store, EM_SWATH_STARBOARD, first_ss, &more_ss, error);
+			if (status == MB_SUCCESS && first_ss == MB_YES)
+				(*num_ssrec)++;
+			if (status == MB_SUCCESS && more_ss == MB_NO) {
+				*file_has_ss = MB_YES;
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12DS_SS;
+					expect = EM_12DS_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+			else if (status == MB_SUCCESS && more_ss == MB_YES) {
+				done = MB_NO;
+				expect = EM_12DS_SS;
+				first_ss = MB_NO;
+			}
+			else if (status == MB_FAILURE) {
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12DS_SS;
+					expect = EM_12DS_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+		}
+		else if (*type == EM_12S_SSP && expect != EM_NONE && expect != EM_12S_SS) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_12S_SSP) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_CENTER, first_ss, &more_ss, error);
+			if (status == MB_SUCCESS && first_ss == MB_YES)
+				(*num_ssrec)++;
+			if (status == MB_SUCCESS && more_ss == MB_NO) {
+				*file_has_ss = MB_YES;
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12S_SSP;
+					expect = EM_12S_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+			else if (status == MB_SUCCESS && more_ss == MB_YES) {
+				done = MB_NO;
+				expect = EM_12S_SS;
+				first_ss = MB_NO;
+			}
+			else if (status == MB_FAILURE) {
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12S_SSP;
+					expect = EM_12S_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+		}
+		else if (*type == EM_12DP_SSP && expect != EM_NONE && expect != EM_12DP_SS) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_12DP_SSP) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_PORT, first_ss, &more_ss, error);
+			if (status == MB_SUCCESS && first_ss == MB_YES)
+				(*num_ssrec)++;
+			if (status == MB_SUCCESS && more_ss == MB_NO) {
+				*file_has_ss = MB_YES;
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12DP_SSP;
+					expect = EM_12DP_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+			else if (status == MB_SUCCESS && more_ss == MB_YES) {
+				done = MB_NO;
+				expect = EM_12DP_SS;
+				first_ss = MB_NO;
+			}
+			else if (status == MB_FAILURE) {
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12DP_SSP;
+					expect = EM_12DP_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+		}
+
+		else if (*type == EM_12DS_SSP && expect != EM_NONE && expect != EM_12DS_SS) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call nothing, expect %x but got type %x\n", expect, *type);
+#endif
+			store->kind = MB_DATA_DATA;
+			done = MB_YES;
+			expect = EM_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (*type == EM_12DS_SSP) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_rd_ssp type %x\n", *type);
+#endif
+			status = mbr_emoldraw_rd_ssp(verbose, mbfp, store, EM_SWATH_STARBOARD, first_ss, &more_ss, error);
+			if (status == MB_SUCCESS && first_ss == MB_YES)
+				(*num_ssrec)++;
+			if (status == MB_SUCCESS && more_ss == MB_NO) {
+				*file_has_ss = MB_YES;
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12DS_SSP;
+					expect = EM_12DS_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+			else if (status == MB_SUCCESS && more_ss == MB_YES) {
+				done = MB_NO;
+				expect = EM_12DS_SS;
+				first_ss = MB_NO;
+			}
+			else if (status == MB_FAILURE) {
+				if (first_type == EM_NONE) {
+					done = MB_NO;
+					first_type = EM_12DS_SSP;
+					expect = EM_12DS_BATH;
+				}
+				else {
+					done = MB_YES;
+					expect = EM_NONE;
+				}
+				first_ss = MB_YES;
+			}
+		}
+
+		/* bail out if there is an error */
+		if (status == MB_FAILURE)
+			done = MB_YES;
+
+#ifdef MBR_EMOLDRAW_DEBUG
+		fprintf(stderr, "end of mbr_emoldraw_rd_data loop:\n");
+		fprintf(stderr, "status:%d error:%d\n", status, *error);
+		fprintf(stderr, "done:%d\n", done);
+		fprintf(stderr, "expect:%x\n", expect);
+		fprintf(stderr, "type:%x\n", *type);
+#endif
+	}
+
+	/* get file position */
+	if (*label_save_flag == MB_YES)
+		mb_io_ptr->file_bytes = ftell(mbfp) - 2;
+	else if (*expect_save_flag != MB_YES)
+		mb_io_ptr->file_bytes = ftell(mbfp);
+
+/* swap label if saved and byteswapped */
+#ifdef BYTESWAPPED
+	if (*label_save_flag == MB_YES)
+		*type = (short int)mb_swap_short(*type);
+#endif
+
 	/* print output debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_emoldraw";
+	int status = MB_SUCCESS;
+	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
+	int ntime_i[7];
+	double ntime_d;
+	int ptime_i[7];
+	double ptime_d;
+	double rawspeed, pheading;
+	double plon, plat, pspeed;
+	double *pixel_size;
+	double *swath_width;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	store = (struct mbsys_simrad_struct *)store_ptr;
+	pixel_size = (double *)&mb_io_ptr->saved1;
+	swath_width = (double *)&mb_io_ptr->saved2;
+
+	/* read next data from file */
+	status = mbr_emoldraw_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
+
+	/* save fix if nav data */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_NAV) {
+		/* get nav time */
+		mb_fix_y2k(verbose, store->pos_year, &ntime_i[0]);
+		ntime_i[1] = store->pos_month;
+		ntime_i[2] = store->pos_day;
+		ntime_i[3] = store->pos_hour;
+		ntime_i[4] = store->pos_minute;
+		ntime_i[5] = store->pos_second;
+		ntime_i[6] = 10000 * store->pos_centisecond;
+		mb_get_time(verbose, ntime_i, &ntime_d);
+
+		/* add latest fix */
+		mb_navint_add(verbose, mbio_ptr, ntime_d, store->pos_longitude, store->pos_latitude, error);
+	}
+
+	/* handle navigation interpolation and generate sidescan */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
+		/* get ping structure */
+		ping = (struct mbsys_simrad_survey_struct *)store->ping;
+
+		/* get ping time */
+		mb_fix_y2k(verbose, store->year, &ptime_i[0]);
+		ptime_i[1] = store->month;
+		ptime_i[2] = store->day;
+		ptime_i[3] = store->hour;
+		ptime_i[4] = store->minute;
+		ptime_i[5] = store->second;
+		ptime_i[6] = 10000 * store->centisecond;
+		mb_get_time(verbose, ptime_i, &ptime_d);
+
+		/* interpolate from saved nav */
+		rawspeed = 3.6 * store->speed;
+		pheading = store->line_heading;
+		mb_navint_interp(verbose, mbio_ptr, ptime_d, pheading, rawspeed, &plon, &plat, &pspeed, error);
+
+		/* print debug statements */
+		if (verbose >= 4) {
+			fprintf(stderr, "dbg4       Interpolated Navigation:\n");
+			fprintf(stderr, "dbg4       longitude:  %f\n", plon);
+			fprintf(stderr, "dbg4       latitude:   %f\n", plat);
+			fprintf(stderr, "dbg4       speed:      %f\n", pspeed);
+		}
+
+		/* adopt interpolated navigation */
+		ping->longitude = plon;
+		ping->latitude = plat;
+
+		/* generate sidescan */
+		ping->pixel_size = 0.0;
+		ping->pixels_ss = 0;
+		status = mbsys_simrad_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
 	}
 
 	/* print output debug statements */
@@ -4057,6 +3862,175 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 
 		/* end loop over datagrams */
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_emoldraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_emoldraw_wr_data";
+	int status = MB_SUCCESS;
+	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
+	FILE *mbfp;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_simrad_struct *)store_ptr;
+	ping = (struct mbsys_simrad_survey_struct *)store->ping;
+	mbfp = mb_io_ptr->mbfp;
+
+	if (store->kind == MB_DATA_COMMENT) {
+#ifdef MBR_EMOLDRAW_DEBUG
+		fprintf(stderr, "call mbr_emoldraw_wr_parameter\n");
+#endif
+		status = mbr_emoldraw_wr_parameter(verbose, mbfp, store, error);
+	}
+	else if (store->kind == MB_DATA_START) {
+#ifdef MBR_EMOLDRAW_DEBUG
+		fprintf(stderr, "call mbr_emoldraw_wr_start\n");
+#endif
+		status = mbr_emoldraw_wr_start(verbose, mbfp, store, error);
+	}
+	else if (store->kind == MB_DATA_STOP) {
+#ifdef MBR_EMOLDRAW_DEBUG
+		fprintf(stderr, "call mbr_emoldraw_wr_stop\n");
+#endif
+		status = mbr_emoldraw_wr_stop(verbose, mbfp, store, error);
+	}
+	else if (store->kind == MB_DATA_NAV) {
+#ifdef MBR_EMOLDRAW_DEBUG
+		fprintf(stderr, "call mbr_emoldraw_wr_pos\n");
+#endif
+		status = mbr_emoldraw_wr_pos(verbose, mbfp, store, error);
+	}
+	else if (store->kind == MB_DATA_VELOCITY_PROFILE) {
+#ifdef MBR_EMOLDRAW_DEBUG
+		fprintf(stderr, "call mbr_emoldraw_wr_svp\n");
+#endif
+		status = mbr_emoldraw_wr_svp(verbose, mbfp, store, error);
+	}
+	else if (store->kind == MB_DATA_DATA && (store->sonar == MBSYS_SIMRAD_EM12S || store->sonar == MBSYS_SIMRAD_EM12D)) {
+#ifdef MBR_EMOLDRAW_DEBUG
+		fprintf(stderr, "call mbr_emoldraw_wr_em12bath\n");
+#endif
+		status = mbr_emoldraw_wr_em12bath(verbose, mbfp, store, error);
+		if (ping->ss_status == EM_SS_AMPONLY) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_wr_ss\n");
+#endif
+			status = mbr_emoldraw_wr_ss(verbose, mbfp, store, error);
+		}
+		else if (ping->ss_status == EM_SS_AMPPHASE) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_wr_ssp\n");
+#endif
+			status = mbr_emoldraw_wr_ssp(verbose, mbfp, store, error);
+		}
+	}
+	else if (store->kind == MB_DATA_DATA && (store->sonar == MBSYS_SIMRAD_EM1000)) {
+#ifdef MBR_EMOLDRAW_DEBUG
+		fprintf(stderr, "call mbr_emoldraw_wr_em1000bath\n");
+#endif
+		status = mbr_emoldraw_wr_em1000bath(verbose, mbfp, store, error);
+		if (ping->ss_status == EM_SS_AMPONLY) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_wr_ss\n");
+#endif
+			status = mbr_emoldraw_wr_ss(verbose, mbfp, store, error);
+		}
+		else if (ping->ss_status == EM_SS_AMPPHASE) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_wr_ssp\n");
+#endif
+			status = mbr_emoldraw_wr_ssp(verbose, mbfp, store, error);
+		}
+	}
+	else if (store->kind == MB_DATA_DATA && (store->sonar == MBSYS_SIMRAD_EM121)) {
+#ifdef MBR_EMOLDRAW_DEBUG
+		fprintf(stderr, "call mbr_emoldraw_wr_em121bath\n");
+#endif
+		status = mbr_emoldraw_wr_em121bath(verbose, mbfp, store, error);
+		if (ping->ss_status == EM_SS_AMPONLY) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_wr_ss\n");
+#endif
+			status = mbr_emoldraw_wr_ss(verbose, mbfp, store, error);
+		}
+		else if (ping->ss_status == EM_SS_AMPPHASE) {
+#ifdef MBR_EMOLDRAW_DEBUG
+			fprintf(stderr, "call mbr_emoldraw_wr_ssp\n");
+#endif
+			status = mbr_emoldraw_wr_ssp(verbose, mbfp, store, error);
+		}
+	}
+	else {
+#ifdef MBR_EMOLDRAW_DEBUG
+		fprintf(stderr, "call nothing - kind:%d sonar:%d\n", store->kind, store->sonar);
+#endif
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_KIND;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_emoldraw";
+	int status = MB_SUCCESS;
+	struct mbsys_simrad_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_simrad_struct *)store_ptr;
+
+	/* write next data to file */
+	status = mbr_emoldraw_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
