@@ -35,10 +35,6 @@
 #include "mbf_mbarrov2.h"
 #include "mbsys_singlebeam.h"
 
-int mbr_zero_mbarrov2(int verbose, char *data_ptr, int *error);
-int mbr_mbarrov2_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_mbarrov2_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);
-
 static char header[] = "RovName,DiveNumber,DateTime24,EpochSecs,Latitude,Longitude,Pressure,Depth,Altitude,Heading,Pitch,Roll,"
                        "ShipLatitude,ShipLongitude,ShipHeading,QCFlag\n";
 
@@ -117,6 +113,63 @@ int mbr_info_mbarrov2(int verbose, int *system, int *beams_bath_max, int *beams_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_zero_mbarrov2(int verbose, char *data_ptr, int *error) {
+	char *function_name = "mbr_zero_mbarrov2";
+	int status = MB_SUCCESS;
+	struct mbf_mbarrov2_struct *data;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
+
+	/* get pointer to data descriptor */
+	data = (struct mbf_mbarrov2_struct *)data_ptr;
+
+	/* initialize everything to zeros */
+	if (data != NULL) {
+		data->kind = MB_DATA_NONE;
+		for (int i = 0; i < 8; i++)
+			data->rovname[i] = 0;
+		data->divenumber = 0;
+		data->time_d = 0.0;
+		for (int i = 0; i < 7; i++)
+			data->time_i[i] = 0;
+		data->longitude = 0.0;
+		data->latitude = 0.0;
+		data->rov_depth = 0.0;
+		data->rov_pressure = 0.0;
+		data->rov_heading = 0.0;
+		data->rov_altitude = 0.0;
+		data->rov_pitch = 0.0;
+		data->rov_roll = 0.0;
+		data->ship_longitude = 0.0;
+		data->ship_latitude = 0.0;
+		data->ship_heading = 0.0;
+		data->qc_flag = 0;
+		for (int i = 0; i < MBF_MBARROV2_MAXLINE; i++)
+			data->comment[i] = 0;
+	}
+
+	/* assume success */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_alm_mbarrov2(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_mbarrov2";
 	int status = MB_SUCCESS;
@@ -184,189 +237,6 @@ int mbr_dem_mbarrov2(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->raw_data, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_zero_mbarrov2(int verbose, char *data_ptr, int *error) {
-	char *function_name = "mbr_zero_mbarrov2";
-	int status = MB_SUCCESS;
-	struct mbf_mbarrov2_struct *data;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
-	}
-
-	/* get pointer to data descriptor */
-	data = (struct mbf_mbarrov2_struct *)data_ptr;
-
-	/* initialize everything to zeros */
-	if (data != NULL) {
-		data->kind = MB_DATA_NONE;
-		for (int i = 0; i < 8; i++)
-			data->rovname[i] = 0;
-		data->divenumber = 0;
-		data->time_d = 0.0;
-		for (int i = 0; i < 7; i++)
-			data->time_i[i] = 0;
-		data->longitude = 0.0;
-		data->latitude = 0.0;
-		data->rov_depth = 0.0;
-		data->rov_pressure = 0.0;
-		data->rov_heading = 0.0;
-		data->rov_altitude = 0.0;
-		data->rov_pitch = 0.0;
-		data->rov_roll = 0.0;
-		data->ship_longitude = 0.0;
-		data->ship_latitude = 0.0;
-		data->ship_heading = 0.0;
-		data->qc_flag = 0;
-		for (int i = 0; i < MBF_MBARROV2_MAXLINE; i++)
-			data->comment[i] = 0;
-	}
-
-	/* assume success */
-	status = MB_SUCCESS;
-	*error = MB_ERROR_NO_ERROR;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_mbarrov2";
-	int status = MB_SUCCESS;
-	struct mbf_mbarrov2_struct *data;
-	struct mbsys_singlebeam_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
-
-	/* read next data from file */
-	status = mbr_mbarrov2_rd_data(verbose, mbio_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = data->kind;
-
-	/* translate values to data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
-		store->kind = data->kind;
-		strncpy(store->survey_id, data->rovname, 4);
-		store->seismic_line = data->divenumber;
-		store->time_d = data->time_d;
-		for (int i = 0; i < 7; i++)
-			store->time_i[i] = data->time_i[i];
-		store->longitude = data->longitude;
-		store->latitude = data->latitude;
-		store->sonar_depth = data->rov_depth;
-		store->rov_pressure = data->rov_pressure;
-		store->heading = data->rov_heading;
-		store->rov_altitude = data->rov_altitude;
-		store->roll = data->rov_roll;
-		store->pitch = data->rov_pitch;
-		store->ship_longitude = data->ship_longitude;
-		store->ship_latitude = data->ship_latitude;
-		store->ship_heading = data->ship_heading;
-		store->qc_flag = data->qc_flag;
-		for (int i = 0; i < MBF_MBARROV2_MAXLINE; i++)
-			store->comment[i] = data->comment[i];
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_mbarrov2";
-	int status = MB_SUCCESS;
-	struct mbf_mbarrov2_struct *data;
-	struct mbsys_singlebeam_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
-
-	/* first translate values from data storage structure */
-	if (store != NULL) {
-		data->kind = store->kind;
-		strncpy(data->rovname, store->survey_id, 4);
-		data->rovname[4] = 0;
-		data->divenumber = store->seismic_line;
-		data->time_d = store->time_d;
-		for (int i = 0; i < 7; i++)
-			data->time_i[i] = store->time_i[i];
-		data->longitude = store->longitude;
-		data->latitude = store->latitude;
-		data->rov_depth = store->sonar_depth;
-		data->rov_pressure = store->rov_pressure;
-		data->rov_heading = store->heading;
-		data->rov_altitude = store->rov_altitude;
-		data->rov_roll = store->roll;
-		data->rov_pitch = store->pitch;
-		data->ship_longitude = store->ship_longitude;
-		data->ship_latitude = store->ship_latitude;
-		data->ship_heading = store->ship_heading;
-		data->qc_flag = store->qc_flag;
-		for (int i = 0; i < MBF_MBARROV2_MAXLINE; i++)
-			data->comment[i] = store->comment[i];
-		data->comment[MBF_MBARROV2_MAXLINE - 1] = '\0';
-	}
-
-	/* write next data to file */
-	status = mbr_mbarrov2_wr_data(verbose, mbio_ptr, (void *)data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -527,6 +397,69 @@ int mbr_mbarrov2_rd_data(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_rt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_mbarrov2";
+	int status = MB_SUCCESS;
+	struct mbf_mbarrov2_struct *data;
+	struct mbsys_singlebeam_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_singlebeam_struct *)store_ptr;
+
+	/* read next data from file */
+	status = mbr_mbarrov2_rd_data(verbose, mbio_ptr, error);
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = data->kind;
+
+	/* translate values to data storage structure */
+	if (status == MB_SUCCESS && store != NULL) {
+		store->kind = data->kind;
+		strncpy(store->survey_id, data->rovname, 4);
+		store->seismic_line = data->divenumber;
+		store->time_d = data->time_d;
+		for (int i = 0; i < 7; i++)
+			store->time_i[i] = data->time_i[i];
+		store->longitude = data->longitude;
+		store->latitude = data->latitude;
+		store->sonar_depth = data->rov_depth;
+		store->rov_pressure = data->rov_pressure;
+		store->heading = data->rov_heading;
+		store->rov_altitude = data->rov_altitude;
+		store->roll = data->rov_roll;
+		store->pitch = data->rov_pitch;
+		store->ship_longitude = data->ship_longitude;
+		store->ship_latitude = data->ship_latitude;
+		store->ship_heading = data->ship_heading;
+		store->qc_flag = data->qc_flag;
+		for (int i = 0; i < MBF_MBARROV2_MAXLINE; i++)
+			store->comment[i] = data->comment[i];
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_mbarrov2_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_mbarrov2_wr_data";
 	int status = MB_SUCCESS;
@@ -630,6 +563,69 @@ int mbr_mbarrov2_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_mbarrov2";
+	int status = MB_SUCCESS;
+	struct mbf_mbarrov2_struct *data;
+	struct mbsys_singlebeam_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_singlebeam_struct *)store_ptr;
+
+	/* first translate values from data storage structure */
+	if (store != NULL) {
+		data->kind = store->kind;
+		strncpy(data->rovname, store->survey_id, 4);
+		data->rovname[4] = 0;
+		data->divenumber = store->seismic_line;
+		data->time_d = store->time_d;
+		for (int i = 0; i < 7; i++)
+			data->time_i[i] = store->time_i[i];
+		data->longitude = store->longitude;
+		data->latitude = store->latitude;
+		data->rov_depth = store->sonar_depth;
+		data->rov_pressure = store->rov_pressure;
+		data->rov_heading = store->heading;
+		data->rov_altitude = store->rov_altitude;
+		data->rov_roll = store->roll;
+		data->rov_pitch = store->pitch;
+		data->ship_longitude = store->ship_longitude;
+		data->ship_latitude = store->ship_latitude;
+		data->ship_heading = store->ship_heading;
+		data->qc_flag = store->qc_flag;
+		for (int i = 0; i < MBF_MBARROV2_MAXLINE; i++)
+			data->comment[i] = store->comment[i];
+		data->comment[MBF_MBARROV2_MAXLINE - 1] = '\0';
+	}
+
+	/* write next data to file */
+	status = mbr_mbarrov2_wr_data(verbose, mbio_ptr, (void *)data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
