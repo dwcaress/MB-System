@@ -45,7 +45,6 @@ int mbr_info_cbat8101(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_cbat8101";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -55,7 +54,6 @@ int mbr_info_cbat8101(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_RESON;
 	*beams_bath_max = 101;
@@ -80,6 +78,8 @@ int mbr_info_cbat8101(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -115,7 +115,6 @@ int mbr_info_cbat8101(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_zero_cbat8101(int verbose, void *data_ptr, int *error) {
 	char *function_name = "mbr_zero_cbat8101";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 
 	/* print input debug statements */
@@ -238,7 +237,7 @@ int mbr_zero_cbat8101(int verbose, void *data_ptr, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
@@ -255,7 +254,6 @@ int mbr_zero_cbat8101(int verbose, void *data_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_alm_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_cbat8101";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -268,14 +266,11 @@ int mbr_alm_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_cbat8101_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson_struct), (void **)&mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson_struct), (void **)&mb_io_ptr->store_data, error);
 
 	/* initialize everything to zeros */
 	mbr_zero_cbat8101(verbose, mb_io_ptr->raw_data, error);
@@ -294,7 +289,6 @@ int mbr_alm_cbat8101(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_cbat8101";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -308,8 +302,8 @@ int mbr_dem_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -325,7 +319,6 @@ int mbr_dem_cbat8101(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
 	char *function_name = "mbr_cbat8101_rd_comment";
-	int status = MB_SUCCESS;
 	char line[RESON_COMMENT_SIZE + 3];
 
 	/* print input debug statements */
@@ -339,7 +332,7 @@ int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat81
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, RESON_COMMENT_SIZE + 3, mbfp);
+	int status = fread(line, 1, RESON_COMMENT_SIZE + 3, mbfp);
 	if (status == RESON_COMMENT_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -373,7 +366,6 @@ int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat81
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
 	char *function_name = "mbr_cbat8101_rd_parameter";
-	int status = MB_SUCCESS;
 	char line[RESON_PARAMETER_SIZE + 3];
 	short *short_ptr;
 
@@ -388,7 +380,7 @@ int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, RESON_PARAMETER_SIZE + 3, mbfp);
+	int status = fread(line, 1, RESON_PARAMETER_SIZE + 3, mbfp);
 	if (status == RESON_PARAMETER_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -530,7 +522,6 @@ int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
 	char *function_name = "mbr_cbat8101_rd_nav";
-	int status = MB_SUCCESS;
 	char line[RESON_NAV_SIZE + 3];
 	short *short_ptr;
 	int *int_ptr;
@@ -546,7 +537,7 @@ int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_s
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, RESON_NAV_SIZE + 3, mbfp);
+	int status = fread(line, 1, RESON_NAV_SIZE + 3, mbfp);
 	if (status == RESON_NAV_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -645,7 +636,6 @@ int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_s
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
 	char *function_name = "mbr_cbat8101_rd_svp";
-	int status = MB_SUCCESS;
 	char line[RESON_SVP_SIZE + 3];
 	short *short_ptr;
 	short *short_ptr2;
@@ -662,7 +652,7 @@ int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_s
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, RESON_SVP_SIZE + 3, mbfp);
+	int status = fread(line, 1, RESON_SVP_SIZE + 3, mbfp);
 	if (status == RESON_SVP_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -742,7 +732,6 @@ int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_s
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
 	char *function_name = "mbr_cbat8101_rd_svp";
-	int status = MB_SUCCESS;
 	char line[RESON_SHORT_SVP_SIZE + 3];
 	short *short_ptr;
 	short *short_ptr2;
@@ -759,7 +748,7 @@ int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, RESON_SHORT_SVP_SIZE + 3, mbfp);
+	int status = fread(line, 1, RESON_SHORT_SVP_SIZE + 3, mbfp);
 	if (status == RESON_SHORT_SVP_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -839,7 +828,6 @@ int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
 	char *function_name = "mbr_cbat8101_rd_bath";
-	int status = MB_SUCCESS;
 	char line[RESON_BATH_8101_SIZE + 3];
 	char *beamarray;
 	unsigned char *char_ptr;
@@ -857,7 +845,7 @@ int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, RESON_BATH_8101_SIZE + 3, mbfp);
+	int status = fread(line, 1, RESON_BATH_8101_SIZE + 3, mbfp);
 	if (status == RESON_BATH_8101_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -1002,7 +990,6 @@ int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
 	char *function_name = "mbr_cbat8101_rd_heading";
-	int status = MB_SUCCESS;
 	char line[RESON_HEADING_SIZE + 3];
 	short *short_ptr;
 
@@ -1017,7 +1004,7 @@ int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap, struct mbf_cbat81
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, RESON_HEADING_SIZE + 3, mbfp);
+	int status = fread(line, 1, RESON_HEADING_SIZE + 3, mbfp);
 	if (status == RESON_HEADING_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -1074,7 +1061,6 @@ int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap, struct mbf_cbat81
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
 	char *function_name = "mbr_cbat8101_rd_attitude";
-	int status = MB_SUCCESS;
 	char line[RESON_ATTITUDE_SIZE + 3];
 	short *short_ptr;
 
@@ -1089,7 +1075,7 @@ int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbf_cbat8
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, RESON_ATTITUDE_SIZE + 3, mbfp);
+	int status = fread(line, 1, RESON_ATTITUDE_SIZE + 3, mbfp);
 	if (status == RESON_ATTITUDE_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -1154,7 +1140,6 @@ int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbf_cbat8
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_cbat8101_rd_data";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -1186,7 +1171,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	done = MB_NO;
 	type = (short *)label;
 	first = MB_YES;
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	while (done == MB_NO) {
 		if (mb_io_ptr->byteswapped == MB_NO) {
@@ -1333,7 +1318,6 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_cbat8101";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 	struct mbsys_reson_struct *store;
 	int time_i[7];
@@ -1355,7 +1339,7 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_cbat8101_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_cbat8101_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -1511,7 +1495,6 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
 	char *function_name = "mbr_cbat8101_wr_comment";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_COMMENT_SIZE + 3];
 	short label;
@@ -1540,7 +1523,7 @@ int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 	label = RESON_COMMENT;
 	if (swap == MB_YES)
 		label = (short)mb_swap_short(label);
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -1588,7 +1571,6 @@ int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
 	char *function_name = "mbr_cbat8101_wr_parameter";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_PARAMETER_SIZE + 3];
 	short label;
@@ -1642,7 +1624,7 @@ int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 	label = RESON_PARAMETER;
 	if (swap == MB_YES)
 		label = (short)mb_swap_short(label);
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -1767,7 +1749,6 @@ int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
 	char *function_name = "mbr_cbat8101_wr_nav";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_NAV_SIZE + 3];
 	short label;
@@ -1816,7 +1797,7 @@ int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	if (swap == MB_YES)
 		label = (short)mb_swap_short(label);
 
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -1905,7 +1886,6 @@ int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
 	char *function_name = "mbr_cbat8101_wr_svp";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_SVP_SIZE + 3];
 	short label;
@@ -1961,7 +1941,7 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	/* write the record label */
 	if (swap == MB_YES)
 		label = (short)mb_swap_short(label);
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -2040,7 +2020,6 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
 	char *function_name = "mbr_cbat8101_wr_bath";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_BATH_8101_SIZE + 3];
 	char *beamarray;
@@ -2097,7 +2076,7 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 	label = RESON_BATH_8101;
 	if (swap == MB_YES)
 		label = (short)mb_swap_short(label);
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -2225,7 +2204,6 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
 	char *function_name = "mbr_cbat8101_wr_heading";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_HEADING_SIZE + 3];
 	short label;
@@ -2262,7 +2240,7 @@ int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 	label = RESON_HEADING;
 	if (swap == MB_YES)
 		label = (short)mb_swap_short(label);
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -2319,7 +2297,6 @@ int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
 	char *function_name = "mbr_cbat8101_wr_attitude";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_ATTITUDE_SIZE + 3];
 	short label;
@@ -2358,7 +2335,7 @@ int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, void *data_ptr, 
 	label = RESON_ATTITUDE;
 	if (swap == MB_YES)
 		label = (short)mb_swap_short(label);
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -2423,7 +2400,6 @@ int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, void *data_ptr, 
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_cbat8101_wr_data";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 	FILE *mbfp;
 
@@ -2442,6 +2418,8 @@ int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	/* get pointer to raw data structure */
 	data = (struct mbf_cbat8101_struct *)data_ptr;
 	mbfp = mb_io_ptr->mbfp;
+
+	int status = MB_SUCCESS;
 
 	if (data->kind == MB_DATA_COMMENT) {
 		status = mbr_cbat8101_wr_comment(verbose, mbfp, mb_io_ptr->byteswapped, data_ptr, error);
@@ -2489,7 +2467,6 @@ int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_cbat8101";
-	int status = MB_SUCCESS;
 	struct mbf_cbat8101_struct *data;
 	char *data_ptr;
 	struct mbsys_reson_struct *store;
@@ -2616,7 +2593,7 @@ int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write next data to file */
-	status = mbr_cbat8101_wr_data(verbose, mbio_ptr, data_ptr, error);
+	const int status = mbr_cbat8101_wr_data(verbose, mbio_ptr, data_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2633,7 +2610,6 @@ int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_cbat8101";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2646,7 +2622,7 @@ int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_cbat8101(
+	const int status = mbr_info_cbat8101(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
