@@ -44,7 +44,6 @@ int mbr_info_bchrtunb(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_bchrtunb";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -54,7 +53,6 @@ int mbr_info_bchrtunb(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_ELAC;
 	*beams_bath_max = 56;
@@ -79,6 +77,8 @@ int mbr_info_bchrtunb(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 3.0;
 	*beamwidth_ltrack = 6.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -115,7 +115,6 @@ int mbr_info_bchrtunb(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error) {
 	char *function_name = "mbr_zero_bchrtunb";
-	int status = MB_SUCCESS;
 	struct mbf_bchrtunb_struct *data;
 
 	/* print input debug statements */
@@ -242,7 +241,7 @@ int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
@@ -259,7 +258,6 @@ int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_alm_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_bchrtunb";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -272,14 +270,11 @@ int mbr_alm_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_bchrtunb_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_elac_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_elac_struct), &mb_io_ptr->store_data, error);
 
 	/* initialize everything to zeros */
 	mbr_zero_bchrtunb(verbose, mb_io_ptr->raw_data, error);
@@ -298,7 +293,6 @@ int mbr_alm_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_bchrtunb";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -312,8 +306,8 @@ int mbr_dem_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -329,7 +323,6 @@ int mbr_dem_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
 	char *function_name = "mbr_bchrtunb_rd_comment";
-	int status = MB_SUCCESS;
 	char line[ELAC_COMMENT_SIZE + 3];
 
 	/* print input debug statements */
@@ -342,7 +335,7 @@ int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, ELAC_COMMENT_SIZE + 3, mbfp);
+	int status = fread(line, 1, ELAC_COMMENT_SIZE + 3, mbfp);
 	if (status == ELAC_COMMENT_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -376,7 +369,6 @@ int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
 	char *function_name = "mbr_bchrtunb_rd_parameter";
-	int status = MB_SUCCESS;
 	char line[ELAC_PARAMETER_SIZE + 3];
 
 	/* print input debug statements */
@@ -389,7 +381,7 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, ELAC_PARAMETER_SIZE + 3, mbfp);
+	int status = fread(line, 1, ELAC_PARAMETER_SIZE + 3, mbfp);
 	if (status == ELAC_PARAMETER_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -560,7 +552,6 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
 	char *function_name = "mbr_bchrtunb_rd_pos";
-	int status = MB_SUCCESS;
 	char line[ELAC_POS_SIZE + 3];
 
 	/* print input debug statements */
@@ -573,7 +564,7 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, ELAC_POS_SIZE + 3, mbfp);
+	int status = fread(line, 1, ELAC_POS_SIZE + 3, mbfp);
 	if (status == ELAC_POS_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -675,7 +666,6 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
 	char *function_name = "mbr_bchrtunb_rd_svp";
-	int status = MB_SUCCESS;
 	char line[ELAC_SVP_SIZE + 3];
 
 	/* print input debug statements */
@@ -688,7 +678,7 @@ int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, ELAC_SVP_SIZE + 3, mbfp);
+	int status = fread(line, 1, ELAC_SVP_SIZE + 3, mbfp);
 	if (status == ELAC_SVP_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -766,7 +756,6 @@ int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
 	char *function_name = "mbr_bchrtunb_rd_bath56";
-	int status = MB_SUCCESS;
 	char line[ELAC_BATH56_SIZE + 3];
 	char *profile;
 	char *beam;
@@ -781,7 +770,7 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, ELAC_BATH56_SIZE + 3, mbfp);
+	int status = fread(line, 1, ELAC_BATH56_SIZE + 3, mbfp);
 	if (status == ELAC_BATH56_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -933,7 +922,6 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
 	char *function_name = "mbr_bchrtunb_rd_bath40";
-	int status = MB_SUCCESS;
 	char line[ELAC_BATH40_SIZE + 3];
 	char *profile;
 	char *beam;
@@ -948,7 +936,7 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, ELAC_BATH40_SIZE + 3, mbfp);
+	int status = fread(line, 1, ELAC_BATH40_SIZE + 3, mbfp);
 	if (status == ELAC_BATH40_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -1100,7 +1088,6 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
 	char *function_name = "mbr_bchrtunb_rd_bath32";
-	int status = MB_SUCCESS;
 	char line[ELAC_BATH32_SIZE + 3];
 	char *profile;
 	char *beam;
@@ -1115,7 +1102,7 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	/* read record into char array */
-	status = fread(line, 1, ELAC_BATH32_SIZE + 3, mbfp);
+	int status = fread(line, 1, ELAC_BATH32_SIZE + 3, mbfp);
 	if (status == ELAC_BATH32_SIZE + 3)
 		status = MB_SUCCESS;
 	else {
@@ -1267,7 +1254,6 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_bchrtunb_rd_data";
-	int status = MB_SUCCESS;
 	struct mbf_bchrtunb_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -1297,6 +1283,7 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 	done = MB_NO;
 	type = (short int *)label;
 	*error = MB_ERROR_NO_ERROR;
+	int status = MB_SUCCESS;
 	while (done == MB_NO) {
 		/* get next record label */
 		if ((status = fread(&label[0], 1, 1, mb_io_ptr->mbfp)) != 1) {
@@ -1394,7 +1381,6 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_bchrtunb";
-	int status = MB_SUCCESS;
 	struct mbf_bchrtunb_struct *data;
 	struct mbsys_elac_struct *store;
 	int time_i[7];
@@ -1418,7 +1404,7 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_bchrtunb_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_bchrtunb_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -1582,9 +1568,7 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
 	char *function_name = "mbr_bchrtunb_wr_comment";
-	int status = MB_SUCCESS;
 	short int label;
 
 	/* print input debug statements */
@@ -1607,7 +1591,7 @@ int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -1655,9 +1639,7 @@ int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
 	char *function_name = "mbr_bchrtunb_wr_parameter";
-	int status = MB_SUCCESS;
 	char line[ELAC_PARAMETER_SIZE + 3];
 	short int label;
 
@@ -1712,7 +1694,7 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -1859,9 +1841,7 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
 	char *function_name = "mbr_bchrtunb_wr_pos";
-	int status = MB_SUCCESS;
 	char line[ELAC_POS_SIZE + 3];
 	short int label;
 
@@ -1903,7 +1883,7 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -1990,9 +1970,7 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
 	char *function_name = "mbr_bchrtunb_wr_svp";
-	int status = MB_SUCCESS;
 	char line[ELAC_SVP_SIZE + 3];
 	short int label;
 
@@ -2028,7 +2006,7 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -2105,7 +2083,6 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
 	char *function_name = "mbr_bchrtunb_wr_bath56";
-	int status = MB_SUCCESS;
 	char line[ELAC_BATH56_SIZE + 3];
 	char *profile;
 	char *beam;
@@ -2165,7 +2142,7 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -2288,9 +2265,7 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
 	char *function_name = "mbr_bchrtunb_wr_bath40";
-	int status = MB_SUCCESS;
 	char line[ELAC_BATH40_SIZE + 3];
 	char *profile;
 	char *beam;
@@ -2350,7 +2325,7 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -2473,9 +2448,7 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-
 	char *function_name = "mbr_bchrtunb_wr_bath32";
-	int status = MB_SUCCESS;
 	char line[ELAC_BATH32_SIZE + 3];
 	char *profile;
 	char *beam;
@@ -2535,7 +2508,7 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 #ifdef BYTESWAPPED
 	label = (short)mb_swap_short(label);
 #endif
-	status = fwrite(&label, 1, 2, mbfp);
+	int status = fwrite(&label, 1, 2, mbfp);
 	if (status != 2) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -2659,9 +2632,7 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr, struct mbf_bchrtunb_struct *data, int *error) {
-
 	char *function_name = "mbr_bchrtunb_wr_data";
-	int status = MB_SUCCESS;
 	FILE *mbfp;
 
 	/* print input debug statements */
@@ -2677,6 +2648,7 @@ int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr, struct mbf_bchrtunb_struct
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	mbfp = mb_io_ptr->mbfp;
 
+	int status = MB_SUCCESS;
 	if (data->kind == MB_DATA_COMMENT) {
 		status = mbr_bchrtunb_wr_comment(verbose, mbfp, data, error);
 	}
@@ -2723,8 +2695,7 @@ int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr, struct mbf_bchrtunb_struct
 /*--------------------------------------------------------------------*/
 int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_bchrtunb";
-	int status = MB_SUCCESS;
-	
+
 	struct mbf_bchrtunb_struct *data;
 	char *data_ptr;
 	struct mbsys_elac_struct *store;
@@ -2860,7 +2831,7 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write next data to file */
-	status = mbr_bchrtunb_wr_data(verbose, mbio_ptr, data, error);
+	const int status = mbr_bchrtunb_wr_data(verbose, mbio_ptr, data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2876,7 +2847,6 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_bchrtunb";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2889,7 +2859,7 @@ int mbr_register_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_bchrtunb(
+	const int status = mbr_info_bchrtunb(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
