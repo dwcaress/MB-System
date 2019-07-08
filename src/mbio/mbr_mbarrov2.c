@@ -35,7 +35,7 @@
 #include "mbf_mbarrov2.h"
 #include "mbsys_singlebeam.h"
 
-static char header[] = "RovName,DiveNumber,DateTime24,EpochSecs,Latitude,Longitude,Pressure,Depth,Altitude,Heading,Pitch,Roll,"
+static const char header[] = "RovName,DiveNumber,DateTime24,EpochSecs,Latitude,Longitude,Pressure,Depth,Altitude,Heading,Pitch,Roll,"
                        "ShipLatitude,ShipLongitude,ShipHeading,QCFlag\n";
 
 /*--------------------------------------------------------------------*/
