@@ -37,7 +37,7 @@
 #include "mbf_mbarirov.h"
 #include "mbsys_singlebeam.h"
 
-static char header[] =
+static const char header[] =
     "Year,Day,Time,Usec,Lat,Lon,East,North,Pres,Head,Alti,Pitch,Roll,PosFlag,PresFlag,HeadFlag,AltiFlag,AttitFlag\n";
 
 /*--------------------------------------------------------------------*/
