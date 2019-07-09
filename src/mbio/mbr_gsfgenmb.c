@@ -47,7 +47,6 @@ int mbr_info_gsfgenmb(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_gsfgenmb";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -57,7 +56,6 @@ int mbr_info_gsfgenmb(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_GSF;
 	*beams_bath_max = 254;
@@ -83,6 +81,8 @@ int mbr_info_gsfgenmb(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -118,7 +118,6 @@ int mbr_info_gsfgenmb(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_gsfgenmb";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -131,14 +130,11 @@ int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_gsfgenmb_struct);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
 	memset(mb_io_ptr->raw_data, 0, mb_io_ptr->structure_size);
-	status = mbsys_gsf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	status &= mbsys_gsf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* set processing parameter output flag */
 	mb_io_ptr->save1 = MB_NO;
@@ -157,7 +153,6 @@ int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_gsfgenmb";
-	int status = MB_SUCCESS;
 	struct mbf_gsfgenmb_struct *data;
 	gsfRecords *records;
 
@@ -176,8 +171,8 @@ int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 
 	/* deallocate memory for data descriptor */
 	/*gsfFree(records);*/
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mbsys_gsf_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mbsys_gsf_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -193,7 +188,6 @@ int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_gsfgenmb";
-	int status = MB_SUCCESS;
 	struct mbf_gsfgenmb_struct *data;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -227,6 +221,8 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* read next record from file */
 	ret = gsfRead((int)mb_io_ptr->gsfid, GSF_NEXT_RECORD, dataID, records, NULL, 0);
+
+	int status = MB_SUCCESS;
 
 	/* deal with errors */
 	if (ret < 0) {
@@ -424,7 +420,6 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_gsfgenmb";
-	int status = MB_SUCCESS;
 	struct mbf_gsfgenmb_struct *data;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -454,7 +449,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_ping = &(records->mb_ping);
 
 	/* translate values to data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
+	if (store != NULL) {
 		gsfFree(records);
 		gsfCopyRecords(records, &(store->records));
 		*dataID = store->dataID;
@@ -500,6 +495,8 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				        mb_ping->across_track[i], mb_ping->along_track[i]);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* write gsf data to file */
 	if (status == MB_SUCCESS) {
 		/* if first survey ping and no processing parameters output,
@@ -541,7 +538,6 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_gsfgenmb";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -554,7 +550,7 @@ int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_gsfgenmb(
+	const int status = mbr_info_gsfgenmb(
                 verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
                 mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
                 &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

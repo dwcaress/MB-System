@@ -76,7 +76,6 @@ int mbr_info_em710raw(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_em710raw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -85,8 +84,6 @@ int mbr_info_em710raw(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
-	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SIMRAD3;
 	*beams_bath_max = 400;
@@ -112,6 +109,8 @@ int mbr_info_em710raw(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -147,7 +146,6 @@ int mbr_info_em710raw(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_em710raw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_em710raw";
-	int status = MB_SUCCESS;
 	int *databyteswapped;
 	double *pixel_size;
 	double *swath_width;
@@ -163,13 +161,10 @@ int mbr_alm_em710raw(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mbsys_simrad3_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_simrad3_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* initialize saved values */
 	databyteswapped = (int *)&mb_io_ptr->save1;
@@ -193,7 +188,6 @@ int mbr_alm_em710raw(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_em710raw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_em710raw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -207,7 +201,7 @@ int mbr_dem_em710raw(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mbsys_simrad3_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_simrad3_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -223,7 +217,6 @@ int mbr_dem_em710raw(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type, short *sonar) {
 	char *function_name = "mbr_em710raw_chk_label";
-	int status = MB_SUCCESS;
 	mb_u_char startbyte;
 	mb_u_char typebyte;
 	short *sonar_save;
@@ -346,6 +339,9 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		if (verbose >= 1)
 			fprintf(stderr, "Bad datagram type: %4.4hX %4.4hX | %d %d\n", *type, *sonar, *type, *sonar);
 	}
+
+	int status = MB_SUCCESS;
+
 	if (typegood != MB_YES || sonargood != MB_YES) {
 		status = MB_FAILURE;
 	}
@@ -376,7 +372,6 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short type, short sonar,
                            int *goodend, int *error) {
 	char *function_name = "mbr_em710raw_rd_status";
-	int status = MB_SUCCESS;
 	char line[EM3_PU_STATUS_SIZE];
 	short short_val;
 	size_t read_len;
@@ -402,7 +397,7 @@ int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 
 	/* read binary values into char array */
 	read_len = (size_t)(EM3_PU_STATUS_SIZE - 4);
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	const int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary data */
 	if (status == MB_SUCCESS) {
@@ -533,7 +528,6 @@ int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short type, short sonar,
                           int *version, int *num_sonars, int *goodend, int *error) {
 	char *function_name = "mbr_em710raw_rd_start";
-	int status = MB_SUCCESS;
 	char line[MBSYS_SIMRAD3_BUFFER_SIZE];
 	short short_val;
 	size_t read_len;
@@ -566,7 +560,7 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 
 	/* read binary values into char array */
 	read_len = (size_t)(EM3_START_HEADER_SIZE);
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary header data */
 	if (status == MB_SUCCESS) {
@@ -1140,7 +1134,6 @@ file will return error */
 int mbr_em710raw_rd_run_parameter(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar,
                                   int *goodend, int *error) {
 	char *function_name = "mbr_em710raw_rd_run_parameter";
-	int status = MB_SUCCESS;
 	char line[EM3_RUN_PARAMETER_SIZE];
 	short short_val;
 	size_t read_len;
@@ -1166,7 +1159,7 @@ int mbr_em710raw_rd_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 
 	/* read binary values into char array */
 	read_len = (size_t)(EM3_RUN_PARAMETER_SIZE - 4);
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	const int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary data */
 	if (status == MB_SUCCESS) {
@@ -1264,7 +1257,6 @@ int mbr_em710raw_rd_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 int mbr_em710raw_rd_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                           int *error) {
 	char *function_name = "mbr_em710raw_rd_clock";
-	int status = MB_SUCCESS;
 	char line[EM3_CLOCK_SIZE];
 	short short_val;
 	size_t read_len;
@@ -1290,7 +1282,7 @@ int mbr_em710raw_rd_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 
 	/* read binary values into char array */
 	read_len = (size_t)(EM3_CLOCK_SIZE - 4);
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	const int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary data */
 	if (status == MB_SUCCESS) {
@@ -1345,7 +1337,6 @@ int mbr_em710raw_rd_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 int mbr_em710raw_rd_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                          int *error) {
 	char *function_name = "mbr_em710raw_rd_tide";
-	int status = MB_SUCCESS;
 	char line[EM3_TIDE_SIZE];
 	short short_val;
 	size_t read_len;
@@ -1371,7 +1362,7 @@ int mbr_em710raw_rd_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 
 	/* read binary values into char array */
 	read_len = (size_t)(EM3_TIDE_SIZE - 4);
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	const int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary data */
 	if (status == MB_SUCCESS) {
@@ -1427,7 +1418,6 @@ int mbr_em710raw_rd_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 int mbr_em710raw_rd_height(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                            int *error) {
 	char *function_name = "mbr_em710raw_rd_height";
-	int status = MB_SUCCESS;
 	char line[EM3_HEIGHT_SIZE];
 	short short_val;
 	size_t read_len;
@@ -1453,7 +1443,7 @@ int mbr_em710raw_rd_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 
 	/* read binary values into char array */
 	read_len = (size_t)(EM3_HEIGHT_SIZE - 4);
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	const int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary data */
 	if (status == MB_SUCCESS) {
@@ -1506,7 +1496,6 @@ int mbr_em710raw_rd_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 int mbr_em710raw_rd_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                             int *error) {
 	char *function_name = "mbr_em710raw_rd_heading";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_heading_struct *heading;
 	char line[EM3_HEADING_HEADER_SIZE];
 	short short_val;
@@ -1536,7 +1525,7 @@ int mbr_em710raw_rd_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
 
 	/* read binary header values into char array */
 	read_len = (size_t)(EM3_HEADING_HEADER_SIZE);
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary header data */
 	if (status == MB_SUCCESS) {
@@ -1625,7 +1614,6 @@ int mbr_em710raw_rd_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
 int mbr_em710raw_rd_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                         int *error) {
 	char *function_name = "mbr_em710raw_rd_ssv";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_ssv_struct *ssv;
 	char line[EM3_SSV_HEADER_SIZE];
 	short short_val;
@@ -1655,7 +1643,7 @@ int mbr_em710raw_rd_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_SSV_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary header data */
 	if (status == MB_SUCCESS) {
@@ -1740,7 +1728,6 @@ int mbr_em710raw_rd_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 int mbr_em710raw_rd_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                          int *error) {
 	char *function_name = "mbr_em710raw_rd_tilt";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_tilt_struct *tilt;
 	char line[EM3_TILT_HEADER_SIZE];
 	short short_val;
@@ -1770,7 +1757,7 @@ int mbr_em710raw_rd_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_TILT_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary header data */
 	if (status == MB_SUCCESS) {
@@ -1855,7 +1842,6 @@ int mbr_em710raw_rd_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 int mbr_em710raw_rd_extraparameters(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar,
                                     int *goodend, int *error) {
 	char *function_name = "mbr_em710raw_rd_extraparameters";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_extraparameters_struct *extraparameters;
 	char line[EM3_EXTRAPARAMETERS_HEADER_SIZE];
 	short short_val;
@@ -1890,7 +1876,7 @@ int mbr_em710raw_rd_extraparameters(int verbose, void *mbio_ptr, int swap, struc
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_EXTRAPARAMETERS_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary header data */
 	if (status == MB_SUCCESS) {
@@ -2012,7 +1998,6 @@ int mbr_em710raw_rd_extraparameters(int verbose, void *mbio_ptr, int swap, struc
 int mbr_em710raw_rd_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                              int *error) {
 	char *function_name = "mbr_em710raw_rd_attitude";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_attitude_struct *attitude;
 	char line[EM3_ATTITUDE_HEADER_SIZE];
 	short short_val;
@@ -2042,7 +2027,7 @@ int mbr_em710raw_rd_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_ATTITUDE_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary header data */
 	if (status == MB_SUCCESS) {
@@ -2150,7 +2135,6 @@ int mbr_em710raw_rd_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
 int mbr_em710raw_rd_netattitude(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar,
                                 int *goodend, int *error) {
 	char *function_name = "mbr_em710raw_rd_netattitude";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_netattitude_struct *netattitude;
 	char line[MBSYS_SIMRAD3_BUFFER_SIZE];
 	short short_val;
@@ -2179,7 +2163,7 @@ int mbr_em710raw_rd_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_NETATTITUDE_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary header data */
 	if (status == MB_SUCCESS) {
@@ -2310,7 +2294,6 @@ int mbr_em710raw_rd_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 int mbr_em710raw_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                         int *error) {
 	char *function_name = "mbr_em710raw_rd_pos";
-	int status = MB_SUCCESS;
 	char line[MBSYS_SIMRAD3_COMMENT_LENGTH];
 	short short_val;
 	size_t read_len;
@@ -2338,7 +2321,7 @@ int mbr_em710raw_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_POS_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary header data */
 	if (status == MB_SUCCESS) {
@@ -2474,7 +2457,6 @@ int mbr_em710raw_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 int mbr_em710raw_rd_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                         int *error) {
 	char *function_name = "mbr_em710raw_rd_svp";
-	int status = MB_SUCCESS;
 	char line[EM3_SVP_HEADER_SIZE];
 	short short_val;
 	size_t read_len;
@@ -2500,7 +2482,7 @@ int mbr_em710raw_rd_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_SVP_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary header data */
 	if (status == MB_SUCCESS) {
@@ -2592,7 +2574,6 @@ int mbr_em710raw_rd_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 int mbr_em710raw_rd_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                          int *error) {
 	char *function_name = "mbr_em710raw_rd_svp2";
-	int status = MB_SUCCESS;
 	char line[EM3_SVP2_HEADER_SIZE];
 	short short_val;
 	size_t read_len;
@@ -2618,7 +2599,7 @@ int mbr_em710raw_rd_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_SVP2_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary header data */
 	if (status == MB_SUCCESS) {
@@ -2708,7 +2689,6 @@ int mbr_em710raw_rd_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int version,
                           int *goodend, int *error) {
 	char *function_name = "mbr_em710raw_rd_bath2";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_BATH2_HEADER_SIZE];
 	short short_val;
@@ -2743,7 +2723,7 @@ int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_BATH2_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* figure out which storage structure to use */
 	mb_get_binary_short(swap, &line[8], &short_val);
@@ -2909,7 +2889,6 @@ int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                              int *error) {
 	char *function_name = "mbr_em710raw_rd_rawbeam4";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_RAWBEAM4_HEADER_SIZE];
 	short short_val;
@@ -2938,7 +2917,7 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_RAWBEAM4_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* figure out which storage structure to use */
 	mb_get_binary_short(swap, &line[8], &short_val);
@@ -3148,7 +3127,6 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                             int *error) {
 	char *function_name = "mbr_em710raw_rd_quality";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_QUALITY_HEADER_SIZE];
 	short short_val;
@@ -3181,7 +3159,7 @@ int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_QUALITY_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* figure out which storage structure to use */
 	mb_get_binary_short(swap, &line[8], &short_val);
@@ -3311,7 +3289,6 @@ int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                         int *error) {
 	char *function_name = "mbr_em710raw_rd_ss2";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_SS2_HEADER_SIZE];
 	short short_val;
@@ -3346,7 +3323,7 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_SS2_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* figure out which storage structure to use */
 	mb_get_binary_short(swap, &line[8], &short_val);
@@ -3578,7 +3555,6 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 int mbr_em710raw_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                        int *error) {
 	char *function_name = "mbr_em710raw_rd_wc";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_watercolumn_struct *wc;
 	char line[EM3_WC_HEADER_SIZE];
 	short short_val;
@@ -3609,7 +3585,7 @@ int mbr_em710raw_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 
 	/* read binary header values into char array */
 	read_len = (size_t)EM3_WC_HEADER_SIZE;
-	status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
 
 	/* get binary header data */
 	if (status == MB_SUCCESS) {
@@ -3778,7 +3754,6 @@ int mbr_em710raw_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_em710raw_rd_data";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	FILE *mbfp;
 	int swap = -1;
@@ -3846,6 +3821,8 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			store->pings[i].png_ss_read = MB_NO;
 		}
 	}
+
+	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
 	done = MB_NO;
@@ -4351,7 +4328,6 @@ Have a nice day...\n");
 /*--------------------------------------------------------------------*/
 int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_em710raw";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_attitude_struct *attitude;
 	struct mbsys_simrad3_netattitude_struct *netattitude;
@@ -4417,7 +4393,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* read next data from file */
-	status = mbr_em710raw_rd_data(verbose, mbio_ptr, store_ptr, error);
+	int status = mbr_em710raw_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointers to data structures */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
@@ -5032,7 +5008,6 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_start";
-	int status = MB_SUCCESS;
 	char line[MBSYS_SIMRAD3_BUFFER_SIZE], *buff;
 	int buff_len;
 	size_t write_len;
@@ -5217,16 +5192,14 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 	memset(line, 0, MBSYS_SIMRAD3_BUFFER_SIZE);
 
 	/* put binary header data into buffer */
-	if (status == MB_SUCCESS) {
-		line[4] = EM3_START_BYTE;
-		line[5] = EM3_ID_START;
-		mb_put_binary_short(swap, (unsigned short)store->sonar, (void *)&line[6]);
-		mb_put_binary_int(swap, (int)store->par_date, (void *)&line[8]);
-		mb_put_binary_int(swap, (int)store->par_msec, (void *)&line[12]);
-		mb_put_binary_short(swap, (unsigned short)store->par_line_num, (void *)&line[16]);
-		mb_put_binary_short(swap, (unsigned short)store->par_serial_1, (void *)&line[18]);
-		mb_put_binary_short(swap, (unsigned short)store->par_serial_2, (void *)&line[20]);
-	}
+	line[4] = EM3_START_BYTE;
+	line[5] = EM3_ID_START;
+	mb_put_binary_short(swap, (unsigned short)store->sonar, (void *)&line[6]);
+	mb_put_binary_int(swap, (int)store->par_date, (void *)&line[8]);
+	mb_put_binary_int(swap, (int)store->par_msec, (void *)&line[12]);
+	mb_put_binary_short(swap, (unsigned short)store->par_line_num, (void *)&line[16]);
+	mb_put_binary_short(swap, (unsigned short)store->par_serial_1, (void *)&line[18]);
+	mb_put_binary_short(swap, (unsigned short)store->par_serial_2, (void *)&line[20]);
 
 	/* construct ascii parameter buffer */
 	buff = &line[22];
@@ -5604,7 +5577,7 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 
 	/* finally write out the data */
 	write_len = write_size;
-	status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
+	const int status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -5620,7 +5593,6 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_status(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_status";
-	int status = MB_SUCCESS;
 	char line[EM3_PU_STATUS_SIZE];
 	short label;
 	char *labelchar;
@@ -5695,17 +5667,15 @@ int mbr_em710raw_wr_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
 
 	/* write the record label */
-	if (status == MB_SUCCESS) {
-		labelchar = (char *)&label;
-		labelchar[0] = EM3_START_BYTE;
-		labelchar[1] = EM3_ID_PU_STATUS;
-		write_len = 2;
-		status = mb_fileio_put(verbose, mbio_ptr, (char *)&label, &write_len, error);
+	labelchar = (char *)&label;
+	labelchar[0] = EM3_START_BYTE;
+	labelchar[1] = EM3_ID_PU_STATUS;
+	write_len = 2;
+	int status = mb_fileio_put(verbose, mbio_ptr, (char *)&label, &write_len, error);
 
-		/* compute checksum */
-		uchar_ptr = (mb_u_char *)&label;
-		checksum += uchar_ptr[1];
-	}
+	/* compute checksum */
+	uchar_ptr = (mb_u_char *)&label;
+	checksum += uchar_ptr[1];
 
 	/* write the sonar id */
 	if (status == MB_SUCCESS) {
@@ -5787,7 +5757,6 @@ int mbr_em710raw_wr_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_run_parameter(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_run_parameter";
-	int status = MB_SUCCESS;
 	char line[EM3_RUN_PARAMETER_SIZE];
 	short label;
 	char *labelchar;
@@ -5846,6 +5815,7 @@ int mbr_em710raw_wr_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 	mb_put_binary_int(swap, (int)(EM3_RUN_PARAMETER_SIZE), (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -5933,7 +5903,6 @@ int mbr_em710raw_wr_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_clock";
-	int status = MB_SUCCESS;
 	char line[EM3_CLOCK_SIZE];
 	short label;
 	char *labelchar;
@@ -5975,6 +5944,7 @@ int mbr_em710raw_wr_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 	mb_put_binary_int(swap, (int)(EM3_CLOCK_SIZE), (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -6045,7 +6015,6 @@ int mbr_em710raw_wr_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_tide";
-	int status = MB_SUCCESS;
 	char line[EM3_TIDE_SIZE];
 	short label;
 	char *labelchar;
@@ -6086,7 +6055,7 @@ int mbr_em710raw_wr_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 	/* write the record size */
 	mb_put_binary_int(swap, (int)(EM3_TIDE_SIZE), (void *)&write_size);
 	write_len = 4;
-	status = mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
 
 	/* write the record label */
 	if (status == MB_SUCCESS) {
@@ -6152,7 +6121,6 @@ int mbr_em710raw_wr_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_height(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_height";
-	int status = MB_SUCCESS;
 	char line[EM3_HEIGHT_SIZE];
 	short label;
 	char *labelchar;
@@ -6193,6 +6161,7 @@ int mbr_em710raw_wr_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 	mb_put_binary_int(swap, (int)(EM3_HEIGHT_SIZE), (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -6262,7 +6231,6 @@ int mbr_em710raw_wr_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_heading";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_heading_struct *heading;
 	char line[EM3_HEADING_HEADER_SIZE];
 	short label;
@@ -6312,6 +6280,7 @@ int mbr_em710raw_wr_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
 	                  (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -6409,7 +6378,6 @@ int mbr_em710raw_wr_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_ssv";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_ssv_struct *ssv;
 	char line[EM3_SSV_HEADER_SIZE];
 	short label;
@@ -6457,6 +6425,7 @@ int mbr_em710raw_wr_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 	mb_put_binary_int(swap, (int)(EM3_SSV_HEADER_SIZE + EM3_SSV_SLICE_SIZE * ssv->ssv_ndata + 8), (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -6554,7 +6523,6 @@ int mbr_em710raw_wr_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_tilt";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_tilt_struct *tilt;
 	char line[EM3_TILT_HEADER_SIZE];
 	short label;
@@ -6602,6 +6570,7 @@ int mbr_em710raw_wr_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 	mb_put_binary_int(swap, (int)(EM3_TILT_HEADER_SIZE + EM3_TILT_SLICE_SIZE * tilt->tlt_ndata + 8), (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -6699,7 +6668,6 @@ int mbr_em710raw_wr_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_extraparameters(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_extraparameters";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_extraparameters_struct *extraparameters;
 	char line[EM3_EXTRAPARAMETERS_HEADER_SIZE];
 	short label;
@@ -6755,6 +6723,7 @@ int mbr_em710raw_wr_extraparameters(int verbose, void *mbio_ptr, int swap, struc
 	mb_put_binary_int(swap, (int)(EM3_EXTRAPARAMETERS_HEADER_SIZE + extraparameters->xtr_data_size + 8), (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -6848,7 +6817,6 @@ int mbr_em710raw_wr_extraparameters(int verbose, void *mbio_ptr, int swap, struc
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_attitude";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_attitude_struct *attitude;
 	char line[EM3_ATTITUDE_HEADER_SIZE];
 	short label;
@@ -6899,6 +6867,7 @@ int mbr_em710raw_wr_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
 	                  (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -7000,7 +6969,6 @@ int mbr_em710raw_wr_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_netattitude(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_netattitude";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_netattitude_struct *netattitude;
 	char line[EM3_NETATTITUDE_SLICE_SIZE + MBSYS_SIMRAD3_BUFFER_SIZE];
 	short label;
@@ -7065,7 +7033,7 @@ int mbr_em710raw_wr_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 	}
 	mb_put_binary_int(swap, (int)write_size, (void *)line);
 	write_len = 4;
-	status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
+	int status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
 
 	/* write the record label */
 	if (status == MB_SUCCESS) {
@@ -7167,7 +7135,6 @@ int mbr_em710raw_wr_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_pos";
-	int status = MB_SUCCESS;
 	char line[EM3_POS_HEADER_SIZE];
 	short label;
 	char *labelchar;
@@ -7216,6 +7183,7 @@ int mbr_em710raw_wr_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 	                  (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -7313,7 +7281,6 @@ int mbr_em710raw_wr_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_svp";
-	int status = MB_SUCCESS;
 	char line[EM3_SVP_HEADER_SIZE];
 	short label;
 	char *labelchar;
@@ -7360,6 +7327,7 @@ int mbr_em710raw_wr_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 	mb_put_binary_int(swap, (int)(EM3_SVP_HEADER_SIZE + EM3_SVP_SLICE_SIZE * store->svp_num + 8), (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -7460,7 +7428,6 @@ int mbr_em710raw_wr_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_svp2";
-	int status = MB_SUCCESS;
 	char line[EM3_SVP2_HEADER_SIZE];
 	short label;
 	char *labelchar;
@@ -7507,6 +7474,7 @@ int mbr_em710raw_wr_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 	mb_put_binary_int(swap, (int)(EM3_SVP2_HEADER_SIZE + EM3_SVP2_SLICE_SIZE * store->svp_num + 8), (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -7607,7 +7575,6 @@ int mbr_em710raw_wr_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_bath2";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_BATH2_HEADER_SIZE];
 	short label;
@@ -7663,6 +7630,7 @@ int mbr_em710raw_wr_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 	mb_put_binary_int(swap, (int)(EM3_BATH2_HEADER_SIZE + EM3_BATH2_BEAM_SIZE * ping->png_nbeams + 8), (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -7773,7 +7741,6 @@ int mbr_em710raw_wr_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_rawbeam4";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_RAWBEAM4_HEADER_SIZE];
 	short label;
@@ -7844,6 +7811,7 @@ int mbr_em710raw_wr_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 	                  (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -7977,7 +7945,6 @@ int mbr_em710raw_wr_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_quality";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_QUALITY_HEADER_SIZE];
 	short label;
@@ -8036,17 +8003,15 @@ int mbr_em710raw_wr_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
 
 	/* write the record label */
-	if (status == MB_SUCCESS) {
-		labelchar = (char *)&label;
-		labelchar[0] = EM3_START_BYTE;
-		labelchar[1] = EM3_ID_QUALITY;
-		write_len = 2;
-		status = mb_fileio_put(verbose, mbio_ptr, (char *)&label, &write_len, error);
+	labelchar = (char *)&label;
+	labelchar[0] = EM3_START_BYTE;
+	labelchar[1] = EM3_ID_QUALITY;
+	write_len = 2;
+	int status = mb_fileio_put(verbose, mbio_ptr, (char *)&label, &write_len, error);
 
-		/* compute checksum */
-		uchar_ptr = (mb_u_char *)&label;
-		checksum += uchar_ptr[1];
-	}
+	/* compute checksum */
+	uchar_ptr = (mb_u_char *)&label;
+	checksum += uchar_ptr[1];
 
 	if (status == MB_SUCCESS) {
 		mb_put_binary_short(swap, (short)(store->sonar), (void *)&label);
@@ -8126,7 +8091,6 @@ int mbr_em710raw_wr_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_ss2";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_SS2_HEADER_SIZE];
 	short label;
@@ -8211,17 +8175,15 @@ int mbr_em710raw_wr_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
 
 	/* write the record label */
-	if (status == MB_SUCCESS) {
-		labelchar = (char *)&label;
-		labelchar[0] = EM3_START_BYTE;
-		labelchar[1] = EM3_ID_SS2;
-		write_len = 2;
-		status = mb_fileio_put(verbose, mbio_ptr, (char *)&label, &write_len, error);
+	labelchar = (char *)&label;
+	labelchar[0] = EM3_START_BYTE;
+	labelchar[1] = EM3_ID_SS2;
+	write_len = 2;
+	int status = mb_fileio_put(verbose, mbio_ptr, (char *)&label, &write_len, error);
 
-		/* compute checksum */
-		uchar_ptr = (mb_u_char *)&label;
-		checksum += uchar_ptr[1];
-	}
+	/* compute checksum */
+	uchar_ptr = (mb_u_char *)&label;
+	checksum += uchar_ptr[1];
 
 	if (status == MB_SUCCESS) {
 		mb_put_binary_short(swap, (short)(store->sonar), (void *)&label);
@@ -8316,7 +8278,6 @@ int mbr_em710raw_wr_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
 	char *function_name = "mbr_em710raw_wr_wc";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_watercolumn_struct *wc;
 	char line[EM3_WC_HEADER_SIZE];
 	short label;
@@ -8397,6 +8358,7 @@ int mbr_em710raw_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 	mb_put_binary_int(swap, record_size, (void *)&write_size);
 	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
+	int status = MB_SUCCESS;
 	if (write_len != 4) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
@@ -8531,7 +8493,6 @@ int mbr_em710raw_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_em710raw_wr_data";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	FILE *mbfp;
@@ -8564,6 +8525,7 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* set swap flag */
 	swap = MB_YES;
 
+	int status = MB_SUCCESS;
 	if (store->kind == MB_DATA_COMMENT || store->kind == MB_DATA_START || store->kind == MB_DATA_STOP) {
 #ifdef MBR_EM710RAW_DEBUG
 		fprintf(stderr, "call mbr_em710raw_wr_start kind:%d type %x\n", store->kind, store->type);
@@ -8828,7 +8790,6 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_wt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_em710raw";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
 	/* print input debug statements */
@@ -8847,7 +8808,7 @@ int mbr_wt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* write next data to file */
-	status = mbr_em710raw_wr_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_em710raw_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -8864,7 +8825,6 @@ int mbr_wt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_em710raw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -8877,7 +8837,7 @@ int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_em710raw(
+	const int status = mbr_info_em710raw(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
