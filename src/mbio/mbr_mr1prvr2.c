@@ -37,9 +37,6 @@
 #include "mbbs.h"
 #include "mbsys_mr1v2001.h"
 
-int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_mr1prvr2(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -180,78 +177,6 @@ int mbr_dem_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 	if (store->bsbuffersize > 0 && store->bsbuffer != NULL)
 		free(store->bsbuffer);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_mr1prvr2";
-	int status = MB_SUCCESS;
-	struct mbsys_mr1v2001_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_mr1v2001_struct *)store_ptr;
-
-	/* read next data from file */
-	status = mbr_mr1prvr2_rd_data(verbose, mbio_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_mr1prvr2";
-	int status = MB_SUCCESS;
-	struct mbsys_mr1v2001_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_mr1v2001_struct *)store_ptr;
-
-	/* write next data to file */
-	status = mbr_mr1prvr2_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -554,7 +479,43 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	return (status);
 }
+/*--------------------------------------------------------------------*/
+int mbr_rt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_mr1prvr2";
+	int status = MB_SUCCESS;
+	struct mbsys_mr1v2001_struct *store;
 
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	store = (struct mbsys_mr1v2001_struct *)store_ptr;
+
+	/* read next data from file */
+	status = mbr_mr1prvr2_rd_data(verbose, mbio_ptr, error);
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
 /*--------------------------------------------------------------------*/
 int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
 	char *function_name = "mbr_mr1prvr2_wr_data";
@@ -772,6 +733,42 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 
 	return (status);
 }
+/*--------------------------------------------------------------------*/
+int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_mr1prvr2";
+	int status = MB_SUCCESS;
+	struct mbsys_mr1v2001_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_mr1v2001_struct *)store_ptr;
+
+	/* write next data to file */
+	status = mbr_mr1prvr2_wr_data(verbose, mbio_ptr, store_ptr, error);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
