@@ -41,11 +41,7 @@
 //#define MBR_RESON7KR_DEBUG2 1
 //#define MBR_RESON7KR_DEBUG3 1
 
-int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid, int *deviceid, unsigned short *enumerator,
-                            int *size);
 int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_reson7kr_chk_label(int verbose, void *mbio_ptr, short type);
-int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer, int *ping_number);
 int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *header, int *error);
 
 int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *error);
@@ -913,6 +909,361 @@ int mbr_wt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid, int *deviceid, unsigned short *enumerator,
+                            int *size) {
+  char *function_name = "mbr_reson7kr_chk_label";
+  int status = MB_SUCCESS;
+  unsigned short version;
+  unsigned short offset;
+  unsigned int sync;
+  unsigned short reserved;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:      %p\n", (void *)mbio_ptr);
+  }
+
+  /* get pointer to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get values to check */
+  mb_get_binary_short(MB_YES, &buffer[0], &version);
+  mb_get_binary_short(MB_YES, &buffer[2], &offset);
+  mb_get_binary_int(MB_YES, &buffer[4], &sync);
+  mb_get_binary_int(MB_YES, &buffer[8], size);
+  mb_get_binary_int(MB_YES, &buffer[32], recordid);
+  mb_get_binary_int(MB_YES, &buffer[36], deviceid);
+  mb_get_binary_short(MB_YES, &buffer[40], &reserved);
+  mb_get_binary_short(MB_YES, &buffer[42], enumerator);
+#ifdef MBR_RESON7KR_DEBUG3
+  fprintf(stderr, "\nChecking header in mbr_reson7kr_chk_header:\n");
+  fprintf(stderr, "Version:      %4.4hX | %d\n", version, version);
+  fprintf(stderr, "Offset:       %4.4hX | %d\n", offset, offset);
+  fprintf(stderr, "Sync:         %4.4X | %d\n", sync, sync);
+  fprintf(stderr, "Size:         %4.4X | %d\n", *size, *size);
+  fprintf(stderr, "Record id:    %4.4X | %d\n", *recordid, *recordid);
+  fprintf(stderr, "Device id:    %4.4X | %d\n", *deviceid, *deviceid);
+  fprintf(stderr, "Reserved:     %4.4hX | %d\n", reserved, reserved);
+  fprintf(stderr, "Enumerator:   %4.4hX | %d\n", *enumerator, *enumerator);
+#endif
+
+  /* reset enumerator if version 2 */
+  if (version == 2)
+    *enumerator = reserved;
+
+  /* check sync */
+  if (sync != 0x0000FFFF) {
+    status = MB_FAILURE;
+  }
+
+  /* check recordid */
+  else if (*recordid != R7KRECID_ReferencePoint && *recordid != R7KRECID_UncalibratedSensorOffset &&
+           *recordid != R7KRECID_CalibratedSensorOffset && *recordid != R7KRECID_Position &&
+           *recordid != R7KRECID_CustomAttitude && *recordid != R7KRECID_Tide && *recordid != R7KRECID_Altitude &&
+           *recordid != R7KRECID_MotionOverGround && *recordid != R7KRECID_Depth &&
+           *recordid != R7KRECID_SoundVelocityProfile && *recordid != R7KRECID_CTD && *recordid != R7KRECID_Geodesy &&
+           *recordid != R7KRECID_RollPitchHeave && *recordid != R7KRECID_Heading && *recordid != R7KRECID_SurveyLine &&
+           *recordid != R7KRECID_Navigation && *recordid != R7KRECID_Attitude && *recordid != R7KRECID_Rec1022 &&
+           *recordid != R7KRECID_FSDWsidescan && *recordid != R7KRECID_FSDWsubbottom && *recordid != R7KRECID_Bluefin &&
+           *recordid != R7KRECID_ProcessedSidescan && *recordid != R7KRECID_7kVolatileSonarSettings &&
+           *recordid != R7KRECID_7kConfiguration && *recordid != R7KRECID_7kMatchFilter &&
+           *recordid != R7KRECID_7kV2FirmwareHardwareConfiguration && *recordid != R7KRECID_7kBeamGeometry &&
+           *recordid != R7KRECID_7kCalibrationData && *recordid != R7KRECID_7kBathymetricData &&
+           *recordid != R7KRECID_7kBackscatterImageData && *recordid != R7KRECID_7kBeamData &&
+           *recordid != R7KRECID_7kVerticalDepth && *recordid != R7KRECID_7kTVGData && *recordid != R7KRECID_7kImageData &&
+           *recordid != R7KRECID_7kV2PingMotion && *recordid != R7KRECID_7kV2DetectionSetup &&
+           *recordid != R7KRECID_7kV2BeamformedData && *recordid != R7KRECID_7kV2BITEData &&
+           *recordid != R7KRECID_7kV27kCenterVersion && *recordid != R7KRECID_7kV28kWetEndVersion &&
+           *recordid != R7KRECID_7kV2Detection && *recordid != R7KRECID_7kV2RawDetection &&
+           *recordid != R7KRECID_7kV2SnippetData && *recordid != R7KRECID_7kCalibratedSnippetData &&
+           *recordid != R7KRECID_7kInstallationParameters && *recordid != R7KRECID_7kSystemEventMessage &&
+           *recordid != R7KRECID_7kDataStorageStatus && *recordid != R7KRECID_7kFileHeader && *recordid != R7KRECID_7kFileCatalog &&
+           *recordid != R7KRECID_7kTriggerSequenceSetup && *recordid != R7KRECID_7kTriggerSequenceDone &&
+           *recordid != R7KRECID_7kTimeMessage && *recordid != R7KRECID_7kRemoteControl &&
+           *recordid != R7KRECID_7kRemoteControlAcknowledge && *recordid != R7KRECID_7kRemoteControlNotAcknowledge &&
+           *recordid != R7KRECID_7kRemoteControlSonarSettings && *recordid != R7KRECID_7kReserved &&
+           *recordid != R7KRECID_7kRoll && *recordid != R7KRECID_7kPitch && *recordid != R7KRECID_7kSoundVelocity &&
+           *recordid != R7KRECID_7kAbsorptionLoss && *recordid != R7KRECID_7kSpreadingLoss &&
+             *recordid != R7KRECID_7kFiller && *recordid != R7KRECID_8100SonarData) {
+    status = MB_FAILURE;
+  }
+  else {
+    status = MB_SUCCESS;
+
+#ifdef MBR_RESON7KR_DEBUG2
+    if (verbose > 0) {
+      fprintf(stderr, "Good record id: %4.4X | %d", *recordid, *recordid);
+      if (*recordid == R7KRECID_ReferencePoint)
+        fprintf(stderr, " R7KRECID_ReferencePoint\n");
+      if (*recordid == R7KRECID_UncalibratedSensorOffset)
+        fprintf(stderr, " R7KRECID_UncalibratedSensorOffset\n");
+      if (*recordid == R7KRECID_CalibratedSensorOffset)
+        fprintf(stderr, " R7KRECID_CalibratedSensorOffset\n");
+      if (*recordid == R7KRECID_Position)
+        fprintf(stderr, " R7KRECID_Position\n");
+      if (*recordid == R7KRECID_CustomAttitude)
+        fprintf(stderr, " R7KRECID_CustomAttitude\n");
+      if (*recordid == R7KRECID_Tide)
+        fprintf(stderr, " R7KRECID_Tide\n");
+      if (*recordid == R7KRECID_Altitude)
+        fprintf(stderr, " R7KRECID_Altitude\n");
+      if (*recordid == R7KRECID_MotionOverGround)
+        fprintf(stderr, " R7KRECID_MotionOverGround\n");
+      if (*recordid == R7KRECID_Depth)
+        fprintf(stderr, " R7KRECID_Depth\n");
+      if (*recordid == R7KRECID_SoundVelocityProfile)
+        fprintf(stderr, " R7KRECID_SoundVelocityProfile\n");
+      if (*recordid == R7KRECID_CTD)
+        fprintf(stderr, " R7KRECID_CTD\n");
+      if (*recordid == R7KRECID_Geodesy)
+        fprintf(stderr, " R7KRECID_Geodesy\n");
+      if (*recordid == R7KRECID_RollPitchHeave)
+        fprintf(stderr, " R7KRECID_RollPitchHeave\n");
+      if (*recordid == R7KRECID_Heading)
+        fprintf(stderr, " R7KRECID_Heading\n");
+      if (*recordid == R7KRECID_SurveyLine)
+        fprintf(stderr, " R7KRECID_Heading\n");
+      if (*recordid == R7KRECID_Navigation)
+        fprintf(stderr, " R7KRECID_Heading\n");
+      if (*recordid == R7KRECID_Attitude)
+        fprintf(stderr, " R7KRECID_Attitude\n");
+      if (*recordid == R7KRECID_Rec1022)
+        fprintf(stderr, " R7KRECID_Rec1022\n");
+      if (*recordid == R7KRECID_FSDWsidescan)
+        fprintf(stderr, " R7KRECID_FSDWsidescan\n");
+      if (*recordid == R7KRECID_FSDWsubbottom)
+        fprintf(stderr, " R7KRECID_FSDWsubbottom\n");
+      if (*recordid == R7KRECID_Bluefin)
+        fprintf(stderr, " R7KRECID_Bluefin\n");
+      if (*recordid == R7KRECID_ProcessedSidescan)
+        fprintf(stderr, " R7KRECID_ProcessedSidescan\n");
+      if (*recordid == R7KRECID_7kVolatileSonarSettings)
+        fprintf(stderr, " R7KRECID_7kVolatileSonarSettings\n");
+      if (*recordid == R7KRECID_7kConfiguration)
+        fprintf(stderr, " R7KRECID_7kConfiguration\n");
+      if (*recordid == R7KRECID_7kMatchFilter)
+        fprintf(stderr, " R7KRECID_7kMatchFilter\n");
+      if (*recordid == R7KRECID_7kV2FirmwareHardwareConfiguration)
+        fprintf(stderr, " R7KRECID_7kV2FirmwareHardwareConfiguration\n");
+      if (*recordid == R7KRECID_7kBeamGeometry)
+        fprintf(stderr, " R7KRECID_7kBeamGeometry\n");
+      if (*recordid == R7KRECID_7kCalibrationData)
+        fprintf(stderr, " R7KRECID_7kCalibrationData\n");
+      if (*recordid == R7KRECID_7kBathymetricData)
+        fprintf(stderr, " R7KRECID_7kBathymetricData\n");
+      if (*recordid == R7KRECID_7kBackscatterImageData)
+        fprintf(stderr, " R7KRECID_7kBackscatterImageData\n");
+      if (*recordid == R7KRECID_7kBeamData)
+        fprintf(stderr, " R7KRECID_7kBeamData\n");
+      if (*recordid == R7KRECID_7kVerticalDepth)
+        fprintf(stderr, " R7KRECID_7kVerticalDepth\n");
+      if (*recordid == R7KRECID_7kTVGData)
+        fprintf(stderr, " R7KRECID_7kTVGData\n");
+      if (*recordid == R7KRECID_7kImageData)
+        fprintf(stderr, " R7KRECID_7kImageData\n");
+      if (*recordid == R7KRECID_7kV2PingMotion)
+        fprintf(stderr, " R7KRECID_7kV2PingMotion\n");
+      if (*recordid == R7KRECID_7kV2DetectionSetup)
+        fprintf(stderr, " R7KRECID_7kV2DetectionSetup\n");
+      if (*recordid == R7KRECID_7kV2BeamformedData)
+        fprintf(stderr, " R7KRECID_7kV2BeamformedData\n");
+      if (*recordid == R7KRECID_7kV2BITEData)
+        fprintf(stderr, " R7KRECID_7kV2BITEData\n");
+      if (*recordid == R7KRECID_7kV27kCenterVersion)
+        fprintf(stderr, " R7KRECID_7kV27kCenterVersion\n");
+      if (*recordid == R7KRECID_7kV28kWetEndVersion)
+        fprintf(stderr, " R7KRECID_7kV28kWetEndVersion\n");
+      if (*recordid == R7KRECID_7kV2Detection)
+        fprintf(stderr, " R7KRECID_7kV2Detection\n");
+      if (*recordid == R7KRECID_7kV2RawDetection)
+        fprintf(stderr, " R7KRECID_7kV2RawDetection\n");
+      if (*recordid == R7KRECID_7kV2SnippetData)
+        fprintf(stderr, " R7KRECID_7kV2SnippetData\n");
+      if (*recordid == R7KRECID_7kCalibratedSnippetData)
+        fprintf(stderr, " R&R7KRECID_7kCalibratedSnippetData\n");
+      if (*recordid == R7KRECID_7kInstallationParameters)
+        fprintf(stderr, " R7KRECID_7kInstallationParameters\n");
+      if (*recordid == R7KRECID_7kSystemEventMessage)
+        fprintf(stderr, "R7KRECID_7kSystemEventMessage\n");
+      if (*recordid == R7KRECID_7kDataStorageStatus)
+        fprintf(stderr, " R7KRECID_7kDataStorageStatus\n");
+      if (*recordid == R7KRECID_7kFileHeader)
+        fprintf(stderr, " R7KRECID_7kFileHeader\n");
+      if (*recordid == R7KRECID_7kFileCatalog)
+        fprintf(stderr, " R7KRECID_7kFileCatalog\n");
+      if (*recordid == R7KRECID_7kTriggerSequenceSetup)
+        fprintf(stderr, " R7KRECID_7kTriggerSequenceSetup\n");
+      if (*recordid == R7KRECID_7kTriggerSequenceDone)
+        fprintf(stderr, " R7KRECID_7kTriggerSequenceDone\n");
+      if (*recordid == R7KRECID_7kTimeMessage)
+        fprintf(stderr, " R7KRECID_7kTimeMessage\n");
+      if (*recordid == R7KRECID_7kRemoteControl)
+        fprintf(stderr, " R7KRECID_7kRemoteControl\n");
+      if (*recordid == R7KRECID_7kRemoteControlAcknowledge)
+        fprintf(stderr, " R7KRECID_7kRemoteControlAcknowledge\n");
+      if (*recordid == R7KRECID_7kRemoteControlNotAcknowledge)
+        fprintf(stderr, " R7KRECID_7kRemoteControlNotAcknowledge\n");
+      if (*recordid == R7KRECID_7kRemoteControlSonarSettings)
+        fprintf(stderr, " R7KRECID_7kRemoteControlSonarSettings\n");
+      if (*recordid == R7KRECID_7kReserved)
+        fprintf(stderr, " R7KRECID_7kReserved\n");
+      if (*recordid == R7KRECID_7kRoll)
+        fprintf(stderr, " R7KRECID_7kRoll\n");
+      if (*recordid == R7KRECID_7kPitch)
+        fprintf(stderr, " R7KRECID_7kPitch\n");
+      if (*recordid == R7KRECID_7kSoundVelocity)
+        fprintf(stderr, " R7KRECID_7kSoundVelocity\n");
+      if (*recordid == R7KRECID_7kAbsorptionLoss)
+        fprintf(stderr, " R7KRECID_7kAbsorptionLoss\n");
+      if (*recordid == R7KRECID_7kSpreadingLoss)
+        fprintf(stderr, " R7KRECID_7kSpreadingLoss\n");
+      if (*recordid == R7KRECID_7kFiller)
+        fprintf(stderr, " R7KRECID_7kFiller\n");
+      if (*recordid == R7KRECID_8100SonarData)
+        fprintf(stderr, " R7KRECID_8100SonarData\n");
+    }
+#endif
+  }
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Output arguments:\n");
+    fprintf(stderr, "dbg2       recordid:      %d\n", *recordid);
+    fprintf(stderr, "dbg2       deviceid:      %d\n", *deviceid);
+    fprintf(stderr, "dbg2       enumerator:    %d\n", *enumerator);
+    fprintf(stderr, "dbg2       size:          %d\n", *size);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:        %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer, int *ping_number) {
+  char *function_name = "mbr_reson7kr_chk_pingnumber";
+  int status = MB_SUCCESS;
+  unsigned short offset;
+  int index;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
+    fprintf(stderr, "dbg2       recordid:      %d\n", recordid);
+    fprintf(stderr, "dbg2       buffer:        %p\n", (void *)buffer);
+  }
+
+  /* get offset to data section */
+  mb_get_binary_short(MB_YES, &buffer[2], &offset);
+
+  /* check ping number if one of the ping records */
+  if (recordid == R7KRECID_7kVolatileSonarSettings) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kMatchFilter) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kBathymetricData) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kBackscatterImageData) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kBeamData) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kVerticalDepth) {
+    index = offset + 8;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kTVGData) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kImageData) {
+    index = offset + 4;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kV2PingMotion) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kV2DetectionSetup) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kV2BeamformedData) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kV2Detection) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kV2RawDetection) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kV2SnippetData) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kCalibratedSnippetData) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_7kRemoteControlSonarSettings) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else if (recordid == R7KRECID_ProcessedSidescan) {
+    index = offset + 12;
+    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+    status = MB_SUCCESS;
+  }
+  else {
+    status = MB_FAILURE;
+    *ping_number = 0;
+  }
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Output arguments:\n");
+    fprintf(stderr, "dbg2       ping_number:   %d\n", *ping_number);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:        %d\n", status);
   }
 
   return (status);
@@ -2141,361 +2492,6 @@ store->read_beam,store->read_verticaldepth,store->read_tvg,store->read_image);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid, int *deviceid, unsigned short *enumerator,
-                            int *size) {
-  char *function_name = "mbr_reson7kr_chk_label";
-  int status = MB_SUCCESS;
-  unsigned short version;
-  unsigned short offset;
-  unsigned int sync;
-  unsigned short reserved;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:      %p\n", (void *)mbio_ptr);
-  }
-
-  /* get pointer to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get values to check */
-  mb_get_binary_short(MB_YES, &buffer[0], &version);
-  mb_get_binary_short(MB_YES, &buffer[2], &offset);
-  mb_get_binary_int(MB_YES, &buffer[4], &sync);
-  mb_get_binary_int(MB_YES, &buffer[8], size);
-  mb_get_binary_int(MB_YES, &buffer[32], recordid);
-  mb_get_binary_int(MB_YES, &buffer[36], deviceid);
-  mb_get_binary_short(MB_YES, &buffer[40], &reserved);
-  mb_get_binary_short(MB_YES, &buffer[42], enumerator);
-#ifdef MBR_RESON7KR_DEBUG3
-  fprintf(stderr, "\nChecking header in mbr_reson7kr_chk_header:\n");
-  fprintf(stderr, "Version:      %4.4hX | %d\n", version, version);
-  fprintf(stderr, "Offset:       %4.4hX | %d\n", offset, offset);
-  fprintf(stderr, "Sync:         %4.4X | %d\n", sync, sync);
-  fprintf(stderr, "Size:         %4.4X | %d\n", *size, *size);
-  fprintf(stderr, "Record id:    %4.4X | %d\n", *recordid, *recordid);
-  fprintf(stderr, "Device id:    %4.4X | %d\n", *deviceid, *deviceid);
-  fprintf(stderr, "Reserved:     %4.4hX | %d\n", reserved, reserved);
-  fprintf(stderr, "Enumerator:   %4.4hX | %d\n", *enumerator, *enumerator);
-#endif
-
-  /* reset enumerator if version 2 */
-  if (version == 2)
-    *enumerator = reserved;
-
-  /* check sync */
-  if (sync != 0x0000FFFF) {
-    status = MB_FAILURE;
-  }
-
-  /* check recordid */
-  else if (*recordid != R7KRECID_ReferencePoint && *recordid != R7KRECID_UncalibratedSensorOffset &&
-           *recordid != R7KRECID_CalibratedSensorOffset && *recordid != R7KRECID_Position &&
-           *recordid != R7KRECID_CustomAttitude && *recordid != R7KRECID_Tide && *recordid != R7KRECID_Altitude &&
-           *recordid != R7KRECID_MotionOverGround && *recordid != R7KRECID_Depth &&
-           *recordid != R7KRECID_SoundVelocityProfile && *recordid != R7KRECID_CTD && *recordid != R7KRECID_Geodesy &&
-           *recordid != R7KRECID_RollPitchHeave && *recordid != R7KRECID_Heading && *recordid != R7KRECID_SurveyLine &&
-           *recordid != R7KRECID_Navigation && *recordid != R7KRECID_Attitude && *recordid != R7KRECID_Rec1022 &&
-           *recordid != R7KRECID_FSDWsidescan && *recordid != R7KRECID_FSDWsubbottom && *recordid != R7KRECID_Bluefin &&
-           *recordid != R7KRECID_ProcessedSidescan && *recordid != R7KRECID_7kVolatileSonarSettings &&
-           *recordid != R7KRECID_7kConfiguration && *recordid != R7KRECID_7kMatchFilter &&
-           *recordid != R7KRECID_7kV2FirmwareHardwareConfiguration && *recordid != R7KRECID_7kBeamGeometry &&
-           *recordid != R7KRECID_7kCalibrationData && *recordid != R7KRECID_7kBathymetricData &&
-           *recordid != R7KRECID_7kBackscatterImageData && *recordid != R7KRECID_7kBeamData &&
-           *recordid != R7KRECID_7kVerticalDepth && *recordid != R7KRECID_7kTVGData && *recordid != R7KRECID_7kImageData &&
-           *recordid != R7KRECID_7kV2PingMotion && *recordid != R7KRECID_7kV2DetectionSetup &&
-           *recordid != R7KRECID_7kV2BeamformedData && *recordid != R7KRECID_7kV2BITEData &&
-           *recordid != R7KRECID_7kV27kCenterVersion && *recordid != R7KRECID_7kV28kWetEndVersion &&
-           *recordid != R7KRECID_7kV2Detection && *recordid != R7KRECID_7kV2RawDetection &&
-           *recordid != R7KRECID_7kV2SnippetData && *recordid != R7KRECID_7kCalibratedSnippetData &&
-           *recordid != R7KRECID_7kInstallationParameters && *recordid != R7KRECID_7kSystemEventMessage &&
-           *recordid != R7KRECID_7kDataStorageStatus && *recordid != R7KRECID_7kFileHeader && *recordid != R7KRECID_7kFileCatalog &&
-           *recordid != R7KRECID_7kTriggerSequenceSetup && *recordid != R7KRECID_7kTriggerSequenceDone &&
-           *recordid != R7KRECID_7kTimeMessage && *recordid != R7KRECID_7kRemoteControl &&
-           *recordid != R7KRECID_7kRemoteControlAcknowledge && *recordid != R7KRECID_7kRemoteControlNotAcknowledge &&
-           *recordid != R7KRECID_7kRemoteControlSonarSettings && *recordid != R7KRECID_7kReserved &&
-           *recordid != R7KRECID_7kRoll && *recordid != R7KRECID_7kPitch && *recordid != R7KRECID_7kSoundVelocity &&
-           *recordid != R7KRECID_7kAbsorptionLoss && *recordid != R7KRECID_7kSpreadingLoss &&
-             *recordid != R7KRECID_7kFiller && *recordid != R7KRECID_8100SonarData) {
-    status = MB_FAILURE;
-  }
-  else {
-    status = MB_SUCCESS;
-
-#ifdef MBR_RESON7KR_DEBUG2
-    if (verbose > 0) {
-      fprintf(stderr, "Good record id: %4.4X | %d", *recordid, *recordid);
-      if (*recordid == R7KRECID_ReferencePoint)
-        fprintf(stderr, " R7KRECID_ReferencePoint\n");
-      if (*recordid == R7KRECID_UncalibratedSensorOffset)
-        fprintf(stderr, " R7KRECID_UncalibratedSensorOffset\n");
-      if (*recordid == R7KRECID_CalibratedSensorOffset)
-        fprintf(stderr, " R7KRECID_CalibratedSensorOffset\n");
-      if (*recordid == R7KRECID_Position)
-        fprintf(stderr, " R7KRECID_Position\n");
-      if (*recordid == R7KRECID_CustomAttitude)
-        fprintf(stderr, " R7KRECID_CustomAttitude\n");
-      if (*recordid == R7KRECID_Tide)
-        fprintf(stderr, " R7KRECID_Tide\n");
-      if (*recordid == R7KRECID_Altitude)
-        fprintf(stderr, " R7KRECID_Altitude\n");
-      if (*recordid == R7KRECID_MotionOverGround)
-        fprintf(stderr, " R7KRECID_MotionOverGround\n");
-      if (*recordid == R7KRECID_Depth)
-        fprintf(stderr, " R7KRECID_Depth\n");
-      if (*recordid == R7KRECID_SoundVelocityProfile)
-        fprintf(stderr, " R7KRECID_SoundVelocityProfile\n");
-      if (*recordid == R7KRECID_CTD)
-        fprintf(stderr, " R7KRECID_CTD\n");
-      if (*recordid == R7KRECID_Geodesy)
-        fprintf(stderr, " R7KRECID_Geodesy\n");
-      if (*recordid == R7KRECID_RollPitchHeave)
-        fprintf(stderr, " R7KRECID_RollPitchHeave\n");
-      if (*recordid == R7KRECID_Heading)
-        fprintf(stderr, " R7KRECID_Heading\n");
-      if (*recordid == R7KRECID_SurveyLine)
-        fprintf(stderr, " R7KRECID_Heading\n");
-      if (*recordid == R7KRECID_Navigation)
-        fprintf(stderr, " R7KRECID_Heading\n");
-      if (*recordid == R7KRECID_Attitude)
-        fprintf(stderr, " R7KRECID_Attitude\n");
-      if (*recordid == R7KRECID_Rec1022)
-        fprintf(stderr, " R7KRECID_Rec1022\n");
-      if (*recordid == R7KRECID_FSDWsidescan)
-        fprintf(stderr, " R7KRECID_FSDWsidescan\n");
-      if (*recordid == R7KRECID_FSDWsubbottom)
-        fprintf(stderr, " R7KRECID_FSDWsubbottom\n");
-      if (*recordid == R7KRECID_Bluefin)
-        fprintf(stderr, " R7KRECID_Bluefin\n");
-      if (*recordid == R7KRECID_ProcessedSidescan)
-        fprintf(stderr, " R7KRECID_ProcessedSidescan\n");
-      if (*recordid == R7KRECID_7kVolatileSonarSettings)
-        fprintf(stderr, " R7KRECID_7kVolatileSonarSettings\n");
-      if (*recordid == R7KRECID_7kConfiguration)
-        fprintf(stderr, " R7KRECID_7kConfiguration\n");
-      if (*recordid == R7KRECID_7kMatchFilter)
-        fprintf(stderr, " R7KRECID_7kMatchFilter\n");
-      if (*recordid == R7KRECID_7kV2FirmwareHardwareConfiguration)
-        fprintf(stderr, " R7KRECID_7kV2FirmwareHardwareConfiguration\n");
-      if (*recordid == R7KRECID_7kBeamGeometry)
-        fprintf(stderr, " R7KRECID_7kBeamGeometry\n");
-      if (*recordid == R7KRECID_7kCalibrationData)
-        fprintf(stderr, " R7KRECID_7kCalibrationData\n");
-      if (*recordid == R7KRECID_7kBathymetricData)
-        fprintf(stderr, " R7KRECID_7kBathymetricData\n");
-      if (*recordid == R7KRECID_7kBackscatterImageData)
-        fprintf(stderr, " R7KRECID_7kBackscatterImageData\n");
-      if (*recordid == R7KRECID_7kBeamData)
-        fprintf(stderr, " R7KRECID_7kBeamData\n");
-      if (*recordid == R7KRECID_7kVerticalDepth)
-        fprintf(stderr, " R7KRECID_7kVerticalDepth\n");
-      if (*recordid == R7KRECID_7kTVGData)
-        fprintf(stderr, " R7KRECID_7kTVGData\n");
-      if (*recordid == R7KRECID_7kImageData)
-        fprintf(stderr, " R7KRECID_7kImageData\n");
-      if (*recordid == R7KRECID_7kV2PingMotion)
-        fprintf(stderr, " R7KRECID_7kV2PingMotion\n");
-      if (*recordid == R7KRECID_7kV2DetectionSetup)
-        fprintf(stderr, " R7KRECID_7kV2DetectionSetup\n");
-      if (*recordid == R7KRECID_7kV2BeamformedData)
-        fprintf(stderr, " R7KRECID_7kV2BeamformedData\n");
-      if (*recordid == R7KRECID_7kV2BITEData)
-        fprintf(stderr, " R7KRECID_7kV2BITEData\n");
-      if (*recordid == R7KRECID_7kV27kCenterVersion)
-        fprintf(stderr, " R7KRECID_7kV27kCenterVersion\n");
-      if (*recordid == R7KRECID_7kV28kWetEndVersion)
-        fprintf(stderr, " R7KRECID_7kV28kWetEndVersion\n");
-      if (*recordid == R7KRECID_7kV2Detection)
-        fprintf(stderr, " R7KRECID_7kV2Detection\n");
-      if (*recordid == R7KRECID_7kV2RawDetection)
-        fprintf(stderr, " R7KRECID_7kV2RawDetection\n");
-      if (*recordid == R7KRECID_7kV2SnippetData)
-        fprintf(stderr, " R7KRECID_7kV2SnippetData\n");
-      if (*recordid == R7KRECID_7kCalibratedSnippetData)
-        fprintf(stderr, " R&R7KRECID_7kCalibratedSnippetData\n");
-      if (*recordid == R7KRECID_7kInstallationParameters)
-        fprintf(stderr, " R7KRECID_7kInstallationParameters\n");
-      if (*recordid == R7KRECID_7kSystemEventMessage)
-        fprintf(stderr, "R7KRECID_7kSystemEventMessage\n");
-      if (*recordid == R7KRECID_7kDataStorageStatus)
-        fprintf(stderr, " R7KRECID_7kDataStorageStatus\n");
-      if (*recordid == R7KRECID_7kFileHeader)
-        fprintf(stderr, " R7KRECID_7kFileHeader\n");
-      if (*recordid == R7KRECID_7kFileCatalog)
-        fprintf(stderr, " R7KRECID_7kFileCatalog\n");
-      if (*recordid == R7KRECID_7kTriggerSequenceSetup)
-        fprintf(stderr, " R7KRECID_7kTriggerSequenceSetup\n");
-      if (*recordid == R7KRECID_7kTriggerSequenceDone)
-        fprintf(stderr, " R7KRECID_7kTriggerSequenceDone\n");
-      if (*recordid == R7KRECID_7kTimeMessage)
-        fprintf(stderr, " R7KRECID_7kTimeMessage\n");
-      if (*recordid == R7KRECID_7kRemoteControl)
-        fprintf(stderr, " R7KRECID_7kRemoteControl\n");
-      if (*recordid == R7KRECID_7kRemoteControlAcknowledge)
-        fprintf(stderr, " R7KRECID_7kRemoteControlAcknowledge\n");
-      if (*recordid == R7KRECID_7kRemoteControlNotAcknowledge)
-        fprintf(stderr, " R7KRECID_7kRemoteControlNotAcknowledge\n");
-      if (*recordid == R7KRECID_7kRemoteControlSonarSettings)
-        fprintf(stderr, " R7KRECID_7kRemoteControlSonarSettings\n");
-      if (*recordid == R7KRECID_7kReserved)
-        fprintf(stderr, " R7KRECID_7kReserved\n");
-      if (*recordid == R7KRECID_7kRoll)
-        fprintf(stderr, " R7KRECID_7kRoll\n");
-      if (*recordid == R7KRECID_7kPitch)
-        fprintf(stderr, " R7KRECID_7kPitch\n");
-      if (*recordid == R7KRECID_7kSoundVelocity)
-        fprintf(stderr, " R7KRECID_7kSoundVelocity\n");
-      if (*recordid == R7KRECID_7kAbsorptionLoss)
-        fprintf(stderr, " R7KRECID_7kAbsorptionLoss\n");
-      if (*recordid == R7KRECID_7kSpreadingLoss)
-        fprintf(stderr, " R7KRECID_7kSpreadingLoss\n");
-      if (*recordid == R7KRECID_7kFiller)
-        fprintf(stderr, " R7KRECID_7kFiller\n");
-      if (*recordid == R7KRECID_8100SonarData)
-        fprintf(stderr, " R7KRECID_8100SonarData\n");
-    }
-#endif
-  }
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Output arguments:\n");
-    fprintf(stderr, "dbg2       recordid:      %d\n", *recordid);
-    fprintf(stderr, "dbg2       deviceid:      %d\n", *deviceid);
-    fprintf(stderr, "dbg2       enumerator:    %d\n", *enumerator);
-    fprintf(stderr, "dbg2       size:          %d\n", *size);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:        %d\n", status);
-  }
-
-  return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer, int *ping_number) {
-  char *function_name = "mbr_reson7kr_chk_pingnumber";
-  int status = MB_SUCCESS;
-  unsigned short offset;
-  int index;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
-    fprintf(stderr, "dbg2       recordid:      %d\n", recordid);
-    fprintf(stderr, "dbg2       buffer:        %p\n", (void *)buffer);
-  }
-
-  /* get offset to data section */
-  mb_get_binary_short(MB_YES, &buffer[2], &offset);
-
-  /* check ping number if one of the ping records */
-  if (recordid == R7KRECID_7kVolatileSonarSettings) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kMatchFilter) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kBathymetricData) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kBackscatterImageData) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kBeamData) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kVerticalDepth) {
-    index = offset + 8;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kTVGData) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kImageData) {
-    index = offset + 4;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kV2PingMotion) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kV2DetectionSetup) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kV2BeamformedData) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kV2Detection) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kV2RawDetection) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kV2SnippetData) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kCalibratedSnippetData) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_7kRemoteControlSonarSettings) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else if (recordid == R7KRECID_ProcessedSidescan) {
-    index = offset + 12;
-    mb_get_binary_int(MB_YES, &buffer[index], ping_number);
-    status = MB_SUCCESS;
-  }
-  else {
-    status = MB_FAILURE;
-    *ping_number = 0;
-  }
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Output arguments:\n");
-    fprintf(stderr, "dbg2       ping_number:   %d\n", *ping_number);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:        %d\n", status);
   }
 
   return (status);
