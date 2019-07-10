@@ -43,7 +43,6 @@ static const int ZERO_SOME = 1;
 /*--------------------------------------------------------------------*/
 int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hsatlraw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -56,7 +55,7 @@ int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hsatlraw(
+	const int status = mbr_info_hsatlraw(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
@@ -143,7 +142,6 @@ int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_hsatlraw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -153,7 +151,6 @@ int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_HSDS;
 	*beams_bath_max = 59;
@@ -178,6 +175,8 @@ int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -227,13 +226,10 @@ int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	int status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_hsatlraw_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status &= mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
 	status &= mbsys_hsds_alloc(verbose, mbio_ptr, (void **)(&mb_io_ptr->store_data), error);
 
 	/* get pointer to mbio descriptor */
@@ -287,7 +283,6 @@ int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
 	char *function_name = "mbr_zero_hsatlraw";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
@@ -408,7 +403,7 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
@@ -425,7 +420,6 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_hsatlraw";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 	struct mbsys_hsds_struct *store;
 	double xx, rr, zz, tt;
@@ -445,7 +439,7 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_hsds_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_hsatlraw_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_hsatlraw_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -592,7 +586,6 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_hsatlraw";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 	char *data_ptr;
 	struct mbsys_hsds_struct *store;
@@ -719,7 +712,7 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write next data to file */
-	status = mbr_hsatlraw_wr_data(verbose, mbio_ptr, data_ptr, error);
+	const int status = mbr_hsatlraw_wr_data(verbose, mbio_ptr, data_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -735,7 +728,6 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_data";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -769,6 +761,7 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
+	int status = MB_SUCCESS;
 	done = MB_NO;
 	expect = MBF_HSATLRAW_NONE;
 	while (done == MB_NO) {
@@ -911,7 +904,6 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *shift, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_label";
-	int status = MB_SUCCESS;
 	int icmp;
 
 	/* print input debug statements */
@@ -923,7 +915,7 @@ int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *s
 	}
 
 	/* read next line in file */
-	status = mbr_hsatlraw_read_line(verbose, mbfp, 0, line, error);
+	const int status = mbr_hsatlraw_read_line(verbose, mbfp, 0, line, error);
 
 	/* see if we just encountered an identifier record */
 	if (status == MB_SUCCESS) {
@@ -966,7 +958,6 @@ int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *s
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line, int *error) {
 	char *function_name = "mbr_hsatlraw_read_line";
-	int status = MB_SUCCESS;
 	int nchars;
 	int done;
 	char *result;
@@ -979,6 +970,8 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* read next good line in file */
 	done = MB_NO;
@@ -1038,7 +1031,6 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_ergnhydi";
-	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	/* print input debug statements */
@@ -1052,7 +1044,7 @@ int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
+	int status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
 	if (strlen(line) < 69 + shift) {
@@ -1111,7 +1103,6 @@ int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_ergnpara";
-	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	/* print input debug statements */
@@ -1125,7 +1116,7 @@ int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
+	int status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
 	if (strlen(line) < 84 + shift) {
@@ -1190,7 +1181,6 @@ int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_ergnposi";
-	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	/* print input debug statements */
@@ -1204,7 +1194,7 @@ int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
+	int status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
 	if (strlen(line) < 67 + shift) {
@@ -1261,7 +1251,6 @@ int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_ergneich";
-	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1276,7 +1265,7 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
+	int status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
 	if (strlen(line) < 90 + shift) {
@@ -1403,7 +1392,6 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_ergnmess";
-	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1418,7 +1406,7 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
+	int status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
 	if (status == MB_SUCCESS && (strlen(line) < 90 + shift || strlen(line) > 92 + shift)) {
@@ -1547,7 +1535,6 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_ergnslzt";
-	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1562,7 +1549,7 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
+	int status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
 	if (strlen(line) < 84 + shift) {
@@ -1662,7 +1649,6 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_ergnctds";
-	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
 	int nlines;
 	int numvals;
@@ -1678,7 +1664,7 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
+	int status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
 	if (strlen(line) < 40 + shift) {
@@ -1754,7 +1740,6 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_ergnampl";
-	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1769,7 +1754,7 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
+	int status = mbr_hsatlraw_read_line(verbose, mbfp, shift + 9, line, error);
 
 	/* make sure line is long enough */
 	if (strlen(line) < 90 + shift) {
@@ -1921,7 +1906,6 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
 	char *function_name = "mbr_hsatlraw_rd_ldeocmnt";
-	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
 	int nchars;
 
@@ -1936,7 +1920,7 @@ int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 	}
 
 	/* read comment record from file */
-	status = mbr_hsatlraw_read_line(verbose, mbfp, shift, line, error);
+	int status = mbr_hsatlraw_read_line(verbose, mbfp, shift, line, error);
 
 	/* copy comment into data structure */
 	if (status == MB_SUCCESS) {
@@ -1967,7 +1951,6 @@ int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_data";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 	FILE *mbfp;
 
@@ -1986,6 +1969,8 @@ int mbr_hsatlraw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	/* get pointer to raw data structure */
 	data = (struct mbf_hsatlraw_struct *)data_ptr;
 	mbfp = mb_io_ptr->mbfp;
+
+	int status = MB_SUCCESS;
 
 	if (data->kind == MB_DATA_RAW_LINE) {
 		status = mbr_hsatlraw_wr_rawline(verbose, mbfp, data, error);
@@ -2040,7 +2025,6 @@ int mbr_hsatlraw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_label(int verbose, FILE *mbfp, char type, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_label";
-	int status = MB_SUCCESS;
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	/* print input debug statements */
@@ -2054,7 +2038,7 @@ int mbr_hsatlraw_wr_label(int verbose, FILE *mbfp, char type, int *error) {
 
 	/* write label in file */
 	sprintf(line, "%8s\n", mbf_hsatlraw_labels[(int)type]);
-	status = mbr_hsatlraw_write_line(verbose, mbfp, line, error);
+	int status = mbr_hsatlraw_write_line(verbose, mbfp, line, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2070,7 +2054,6 @@ int mbr_hsatlraw_wr_label(int verbose, FILE *mbfp, char type, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_write_line(int verbose, FILE *mbfp, char *line, int *error) {
 	char *function_name = "mbr_hsatlraw_write_line";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2080,6 +2063,8 @@ int mbr_hsatlraw_write_line(int verbose, FILE *mbfp, char *line, int *error) {
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 		fprintf(stderr, "dbg2       line:       %s\n", line);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write next line in file */
 	if ((status = fputs(line, mbfp)) != EOF) {
@@ -2105,7 +2090,6 @@ int mbr_hsatlraw_write_line(int verbose, FILE *mbfp, char *line, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_rawline";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
@@ -2126,18 +2110,17 @@ int mbr_hsatlraw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		fprintf(stderr, "dbg5       raw line:         %s\n", data->comment);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* write out the data */
-	if (status == MB_SUCCESS) {
-		/* output the line */
-		const int count = fprintf(mbfp, "%s\n", data->comment);
-		if (count >= 0) {
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-		else {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-		}
+	const int count = fprintf(mbfp, "%s\n", data->comment);
+	if (count >= 0) {
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+	}
+	else {
+		*error = MB_ERROR_WRITE_FAIL;
+		status = MB_FAILURE;
 	}
 
 	/* print output debug statements */
@@ -2154,7 +2137,6 @@ int mbr_hsatlraw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnhydi(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_ergnhydi";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
@@ -2189,7 +2171,7 @@ int mbr_hsatlraw_wr_ergnhydi(int verbose, FILE *mbfp, void *data_ptr, int *error
 	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNHYDI, error);
+	int status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNHYDI, error);
 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
@@ -2234,7 +2216,6 @@ int mbr_hsatlraw_wr_ergnhydi(int verbose, FILE *mbfp, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnpara(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_ergnpara";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
@@ -2272,7 +2253,7 @@ int mbr_hsatlraw_wr_ergnpara(int verbose, FILE *mbfp, void *data_ptr, int *error
 	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNPARA, error);
+	int status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNPARA, error);
 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
@@ -2320,7 +2301,6 @@ int mbr_hsatlraw_wr_ergnpara(int verbose, FILE *mbfp, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnposi(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_ergnposi";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
@@ -2354,7 +2334,7 @@ int mbr_hsatlraw_wr_ergnposi(int verbose, FILE *mbfp, void *data_ptr, int *error
 	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNPOSI, error);
+	int status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNPOSI, error);
 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
@@ -2398,7 +2378,6 @@ int mbr_hsatlraw_wr_ergnposi(int verbose, FILE *mbfp, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_ergneich";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
@@ -2441,7 +2420,7 @@ int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error
 	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNEICH, error);
+	int status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNEICH, error);
 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
@@ -2515,7 +2494,6 @@ int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_ergnmess";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
@@ -2558,7 +2536,7 @@ int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error
 	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNMESS, error);
+	int status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNMESS, error);
 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
@@ -2632,7 +2610,6 @@ int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_ergnslzt";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 	int datacheck;
 
@@ -2685,6 +2662,8 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 		for (int i = 0; i < 11; i++)
 			fprintf(stderr, "dbg5         %d  %f\n", i, data->gyro[i]);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write the record label */
 	if (datacheck == MB_YES)
@@ -2752,7 +2731,6 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_ergnctds";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 	int nline, nrem;
 
@@ -2786,7 +2764,7 @@ int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error
 	}
 
 	/* write the record label */
-	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNCTDS, error);
+	int status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_ERGNCTDS, error);
 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
@@ -2846,7 +2824,6 @@ int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_ergnampl";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 	int datacheck;
 
@@ -2912,6 +2889,8 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 		for (int i = 0; i < 16; i++)
 			fprintf(stderr, "dbg5         %d  %d  %d\n", i, data->gain[i], data->echo_scale[i]);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write the record label */
 	if (datacheck == MB_YES)
@@ -3006,7 +2985,6 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ldeocmnt(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsatlraw_wr_ldeocmnt";
-	int status = MB_SUCCESS;
 	struct mbf_hsatlraw_struct *data;
 
 	/* print input debug statements */
@@ -3026,6 +3004,8 @@ int mbr_hsatlraw_wr_ldeocmnt(int verbose, FILE *mbfp, void *data_ptr, int *error
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write the record label */
 	status = mbr_hsatlraw_wr_label(verbose, mbfp, MBF_HSATLRAW_LDEOCMNT, error);

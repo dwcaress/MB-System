@@ -47,7 +47,6 @@ int mbr_info_hsds2raw(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_hsds2raw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -57,7 +56,6 @@ int mbr_info_hsds2raw(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_ATLAS;
 	*beams_bath_max = MBSYS_ATLAS_MAXBEAMS;
@@ -84,6 +82,8 @@ int mbr_info_hsds2raw(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 2.67;
 	*beamwidth_ltrack = 2.67;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -119,7 +119,6 @@ int mbr_info_hsds2raw(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsds2raw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hsds2raw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -132,13 +131,10 @@ int mbr_alm_hsds2raw(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mbsys_atlas_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_atlas_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* set name for navigation and angle files */
 	if (status == MB_SUCCESS) {
@@ -166,7 +162,6 @@ int mbr_alm_hsds2raw(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsds2raw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hsds2raw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -180,7 +175,7 @@ int mbr_dem_hsds2raw(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mbsys_atlas_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_atlas_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -196,7 +191,6 @@ int mbr_dem_hsds2raw(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_hsds2raw_rd_data";
-	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 	int xdr_status;
 	int read_status;
@@ -916,6 +910,8 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 	}
 
+	int status = MB_SUCCESS;
+
 	/* set error if required */
 	if (xdr_status == MB_NO) {
 		*error = MB_ERROR_EOF;
@@ -1319,7 +1315,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_hsds2raw";
-	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
 	/* print input debug statements */
@@ -1335,7 +1330,7 @@ int mbr_rt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* read next data from file */
-	status = mbr_hsds2raw_rd_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_hsds2raw_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointers to data structures */
 	store = (struct mbsys_atlas_struct *)store_ptr;
@@ -1358,7 +1353,6 @@ int mbr_rt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_hsds2raw_wr_data";
-	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
 	/* print input debug statements */
@@ -1385,6 +1379,8 @@ int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
 	}
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -1399,7 +1395,6 @@ int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_hsds2raw";
-	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
 	/* print input debug statements */
@@ -1416,6 +1411,8 @@ int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_atlas_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* write next data to file */
 	/* status = mbr_hsds2raw_wr_data(verbose,mbio_ptr,store_ptr,error); */
@@ -1435,7 +1432,6 @@ int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hsds2raw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1448,7 +1444,7 @@ int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hsds2raw(
+	const int status = mbr_info_hsds2raw(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
