@@ -39,29 +39,6 @@
 /* turn on debug statements here */
 /* #define MBR_WASSPENLDEBUG 1 */
 
-int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_wasspenl(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -215,473 +192,6 @@ int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 
 	/* deallocate memory for data descriptor */
 	status = mbsys_wassp_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_data";
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_genbathy_struct *genbathy;
-	struct mbsys_wassp_corbathy_struct *corbathy;
-	struct mbsys_wassp_rawsonar_struct *rawsonar;
-	struct mbsys_wassp_gen_sens_struct *gen_sens;
-	struct mbsys_wassp_nvupdate_struct *nvupdate;
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi;
-	struct mbsys_wassp_sensprop_struct *sensprop;
-	struct mbsys_wassp_sys_prop_struct *sys_prop;
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
-	struct mbsys_wassp_mcomment_struct *mcomment;
-	char **bufferptr;
-	char *buffer;
-	int *bufferalloc;
-	unsigned int syncvalue;
-	char recordid[12];
-	size_t read_len;
-	int skip;
-	unsigned int *record_size;
-	int reset_beamflags;
-	int done;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
-	corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
-	nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
-
-	bufferptr = (char **)&mb_io_ptr->saveptr1;
-	buffer = (char *)*bufferptr;
-	bufferalloc = (int *)&mb_io_ptr->save6;
-	record_size = (unsigned int *)&buffer[4];
-
-	/* set file position */
-	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-
-	/* loop over reading data until a record is ready for return */
-	done = MB_NO;
-	*error = MB_ERROR_NO_ERROR;
-	memset((void *)recordid, 0, (size_t)12);
-	while (done == MB_NO) {
-		/* read next record header into buffer */
-		read_len = (size_t)16;
-		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
-
-		/* check header - if not a good header read a byte
-		    at a time until a good header is found */
-		skip = 0;
-		mb_get_binary_int(MB_YES, buffer, &syncvalue);
-		while (status == MB_SUCCESS && syncvalue != MBSYS_WASSP_SYNC) {
-			/* get next byte */
-			for (int i = 0; i < 15; i++)
-				buffer[i] = buffer[i + 1];
-			read_len = (size_t)1;
-			status = mb_fileio_get(verbose, mbio_ptr, &buffer[15], &read_len, error);
-			mb_get_binary_int(MB_YES, buffer, &syncvalue);
-			skip++;
-		}
-
-		/* get record id string */
-		memcpy((void *)recordid, (void *)&buffer[8], (size_t)8);
-#ifdef MBR_WASSPENLDEBUG
-		fprintf(stderr, "Found sync - skip:%d record:%s\n", skip, recordid);
-#endif
-
-		/* report problem */
-		if (skip > 0 && verbose >= 0) {
-			fprintf(stderr, "\nThe MBF_WASSPENL module skipped data between identified\n"
-			                "data records. Something is broken, most probably the data...\n"
-			                "However, the data may include a data record type that we\n"
-			                "haven't seen yet, or there could be an error in the code.\n"
-			                "If skipped data are reported multiple times, \n"
-			                "we recommend you send a data sample and problem \n"
-			                "description to the MB-System team \n"
-			                "(caress@mbari.org and dale@ldeo.columbia.edu)\n"
-			                "Have a nice day...\n");
-			fprintf(stderr, "MBF_WASSPENL skipped %d bytes before record %s\n", skip, recordid);
-		}
-
-		/* allocate memory to read rest of record if necessary */
-		if (*bufferalloc < *record_size) {
-			status = mb_reallocd(verbose, __FILE__, __LINE__, *record_size, (void **)bufferptr, error);
-			if (status != MB_SUCCESS) {
-				*bufferalloc = 0;
-				done = MB_YES;
-			}
-			else {
-				*bufferalloc = *record_size;
-				buffer = (char *)*bufferptr;
-			}
-		}
-
-		/* read the rest of the record */
-		if (status == MB_SUCCESS) {
-			read_len = (size_t)(*record_size - 16);
-			status = mb_fileio_get(verbose, mbio_ptr, &buffer[16], &read_len, error);
-		}
-
-		/* if valid parse the record */
-		if (status == MB_SUCCESS) {
-			/* read GENBATHY record */
-			if (strncmp(recordid, "GENBATHY", 8) == 0) {
-				status = mbr_wasspenl_rd_genbathy(verbose, buffer, store_ptr, error);
-			}
-
-			/* read CORBATHY record */
-			else if (strncmp(recordid, "CORBATHY", 8) == 0) {
-				status = mbr_wasspenl_rd_corbathy(verbose, buffer, store_ptr, error);
-				if (status == MB_SUCCESS) {
-					if (genbathy->ping_number == corbathy->ping_number) {
-						done = MB_YES;
-
-						/* reset beam flags if necessary */
-						reset_beamflags = MB_NO;
-						for (int i = 0; i < corbathy->num_beams; i++) {
-							if (corbathy->z[i] == 0 && corbathy->empty[i] != MB_FLAG_NULL)
-								reset_beamflags = MB_YES;
-						}
-						if (reset_beamflags == MB_YES)
-							for (int i = 0; i < corbathy->num_beams; i++) {
-								const int j = corbathy->beam_index[i];
-								if (corbathy->z[i] == 0)
-									corbathy->empty[i] = MB_FLAG_NULL;
-								else if (genbathy->flags[j] & 0x01)
-									corbathy->empty[i] = MB_FLAG_NONE;
-								else
-									corbathy->empty[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
-							}
-					}
-					else {
-						status = MB_FAILURE;
-						*error = MB_ERROR_UNINTELLIGIBLE;
-						done = MB_YES;
-					}
-				}
-			}
-
-			/* read RAWSONAR record */
-			else if (strncmp(recordid, "RAWSONAR", 8) == 0) {
-				status = mbr_wasspenl_rd_rawsonar(verbose, buffer, store_ptr, error);
-				if (status == MB_SUCCESS)
-					done = MB_YES;
-			}
-
-			/* read GEN_SENS record */
-			else if (strncmp(recordid, "GEN_SENS", 8) == 0) {
-				status = mbr_wasspenl_rd_gen_sens(verbose, buffer, store_ptr, error);
-				if (status == MB_SUCCESS)
-					done = MB_YES;
-			}
-
-			/* read NVUPDATE record */
-			else if (strncmp(recordid, "NVUPDATE", 8) == 0) {
-				status = mbr_wasspenl_rd_nvupdate(verbose, buffer, store_ptr, error);
-				if (status == MB_SUCCESS)
-					done = MB_YES;
-			}
-
-			/* read WCD_NAVI record */
-			else if (strncmp(recordid, "WCD_NAVI", 8) == 0) {
-				status = mbr_wasspenl_rd_wcd_navi(verbose, buffer, store_ptr, error);
-				if (status == MB_SUCCESS)
-					done = MB_YES;
-			}
-
-			/* read SENSPROP record */
-			else if (strncmp(recordid, "SENSPROP", 8) == 0) {
-				status = mbr_wasspenl_rd_sensprop(verbose, buffer, store_ptr, error);
-				if (status == MB_SUCCESS)
-					done = MB_YES;
-			}
-
-			/* read SYS_PROP record */
-			else if (strncmp(recordid, "SYS_PROP", 8) == 0) {
-				status = mbr_wasspenl_rd_sys_prop(verbose, buffer, store_ptr, error);
-				if (status == MB_SUCCESS)
-					done = MB_YES;
-			}
-
-			/* read SYS_CFG1 record */
-			else if (strncmp(recordid, "SYS_CFG1", 8) == 0) {
-				status = mbr_wasspenl_rd_sys_cfg1(verbose, buffer, store_ptr, error);
-				if (status == MB_SUCCESS)
-					done = MB_YES;
-			}
-
-			/* read MCOMMENT_ record */
-			else if (strncmp(recordid, "MCOMMENT", 8) == 0) {
-				status = mbr_wasspenl_rd_mcomment(verbose, buffer, store_ptr, error);
-				if (status == MB_SUCCESS)
-					done = MB_YES;
-			}
-
-			/* read an unknown1 record */
-			else {
-				status = mbr_wasspenl_rd_unknown1(verbose, buffer, store_ptr, error);
-				if (status == MB_SUCCESS)
-					done = MB_YES;
-			}
-		}
-
-		/* set done if read failure */
-		else {
-			done = MB_YES;
-		}
-	}
-
-	/* get file position */
-	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_wasspenl";
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-#ifdef MBR_WASSPENLDEBUG
-	fprintf(stderr, "About to call mbr_wasspenl_rd_data...\n");
-#endif
-
-	/* read next data from file */
-	status = mbr_wasspenl_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* get pointers to data structures */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-#ifdef MBR_WASSPENLDEBUG
-	fprintf(stderr, "Done with mbr_wasspenl_rd_data: status:%d error:%d record kind:%d\n\n", status, *error, store->kind);
-#endif
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_wr_data";
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	char **bufferptr;
-	char *buffer;
-	int *bufferalloc;
-	int size;
-	size_t write_len;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-
-	/* get saved values */
-	bufferptr = (char **)&mb_io_ptr->saveptr1;
-	buffer = (char *)*bufferptr;
-	bufferalloc = (int *)&mb_io_ptr->save6;
-
-	/* write the current data record */
-
-	/* write GENBATHY record */
-	if (store->kind == MB_DATA_DATA) {
-		status = mbr_wasspenl_wr_genbathy(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-		buffer = (char *)*bufferptr;
-		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-
-		status = mbr_wasspenl_wr_corbathy(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-		buffer = (char *)*bufferptr;
-		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-
-	/* write RAWSONAR record */
-	else if (store->kind == MB_DATA_WATER_COLUMN) {
-		status = mbr_wasspenl_wr_rawsonar(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-		buffer = (char *)*bufferptr;
-		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-
-	/* write GEN_SENS record */
-	else if (store->kind == MB_DATA_GEN_SENS) {
-		status = mbr_wasspenl_wr_gen_sens(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-		buffer = (char *)*bufferptr;
-		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-
-	/* write NVUPDATE record */
-	else if (store->kind == MB_DATA_NAV) {
-		status = mbr_wasspenl_wr_nvupdate(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-		buffer = (char *)*bufferptr;
-		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-
-	/* write WCD_NAVI record */
-	else if (store->kind == MB_DATA_WC_PICKS) {
-		status = mbr_wasspenl_wr_wcd_navi(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-		buffer = (char *)*bufferptr;
-		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-
-	/* write SENSPROP record */
-	else if (store->kind == MB_DATA_SENSOR_PARAMETERS) {
-		status = mbr_wasspenl_wr_sensprop(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-		buffer = (char *)*bufferptr;
-		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-
-	/* write SYS_PROP record */
-	else if (store->kind == MB_DATA_INSTALLATION) {
-		status = mbr_wasspenl_wr_sys_prop(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-		buffer = (char *)*bufferptr;
-		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-
-	/* write SYS_CFG1 record */
-	else if (store->kind == MB_DATA_PARAMETER) {
-		status = mbr_wasspenl_wr_sys_cfg1(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-		buffer = (char *)*bufferptr;
-		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-
-	/* write MCOMMENT_ record */
-	else if (store->kind == MB_DATA_COMMENT) {
-		status = mbr_wasspenl_wr_mcomment(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-		buffer = (char *)*bufferptr;
-		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-
-	/* write unknown1 record */
-	else if (store->kind == MB_DATA_RAW_LINE) {
-		status = mbr_wasspenl_wr_sys_cfg1(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-		buffer = (char *)*bufferptr;
-		write_len = (size_t)size;
-		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-	}
-
-#ifdef MBR_WASSPENLDEBUG
-	fprintf(stderr, "WASSPENL DATA WRITTEN: type:%d status:%d error:%d\n\n", store->kind, status, *error);
-#endif
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_wasspenl";
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-
-#ifdef MBR_WASSPENLDEBUG
-	fprintf(stderr, "About to call mbr_wasspenl_wr_data record kind:%d\n", store->kind);
-#endif
-
-	/* write next data to file */
-	status = mbr_wasspenl_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-#ifdef MBR_WASSPENLDEBUG
-	fprintf(stderr, "Done with mbr_wasspenl_wr_data: status:%d error:%d\n", status, *error);
-#endif
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1716,6 +1226,297 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 			fprintf(stderr, "dbg5       unknown1->unknown1_data[%3d]:           %u\n", i, unknown1->unknown1_data[i]);
 		}
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wasspenl_rd_data";
+	int status = MB_SUCCESS;
+	struct mbsys_wassp_struct *store;
+	struct mbsys_wassp_genbathy_struct *genbathy;
+	struct mbsys_wassp_corbathy_struct *corbathy;
+	struct mbsys_wassp_rawsonar_struct *rawsonar;
+	struct mbsys_wassp_gen_sens_struct *gen_sens;
+	struct mbsys_wassp_nvupdate_struct *nvupdate;
+	struct mbsys_wassp_wcd_navi_struct *wcd_navi;
+	struct mbsys_wassp_sensprop_struct *sensprop;
+	struct mbsys_wassp_sys_prop_struct *sys_prop;
+	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
+	struct mbsys_wassp_mcomment_struct *mcomment;
+	char **bufferptr;
+	char *buffer;
+	int *bufferalloc;
+	unsigned int syncvalue;
+	char recordid[12];
+	size_t read_len;
+	int skip;
+	unsigned int *record_size;
+	int reset_beamflags;
+	int done;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_wassp_struct *)store_ptr;
+	genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
+	corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
+	rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
+	wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+
+	bufferptr = (char **)&mb_io_ptr->saveptr1;
+	buffer = (char *)*bufferptr;
+	bufferalloc = (int *)&mb_io_ptr->save6;
+	record_size = (unsigned int *)&buffer[4];
+
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	/* loop over reading data until a record is ready for return */
+	done = MB_NO;
+	*error = MB_ERROR_NO_ERROR;
+	memset((void *)recordid, 0, (size_t)12);
+	while (done == MB_NO) {
+		/* read next record header into buffer */
+		read_len = (size_t)16;
+		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
+
+		/* check header - if not a good header read a byte
+		    at a time until a good header is found */
+		skip = 0;
+		mb_get_binary_int(MB_YES, buffer, &syncvalue);
+		while (status == MB_SUCCESS && syncvalue != MBSYS_WASSP_SYNC) {
+			/* get next byte */
+			for (int i = 0; i < 15; i++)
+				buffer[i] = buffer[i + 1];
+			read_len = (size_t)1;
+			status = mb_fileio_get(verbose, mbio_ptr, &buffer[15], &read_len, error);
+			mb_get_binary_int(MB_YES, buffer, &syncvalue);
+			skip++;
+		}
+
+		/* get record id string */
+		memcpy((void *)recordid, (void *)&buffer[8], (size_t)8);
+#ifdef MBR_WASSPENLDEBUG
+		fprintf(stderr, "Found sync - skip:%d record:%s\n", skip, recordid);
+#endif
+
+		/* report problem */
+		if (skip > 0 && verbose >= 0) {
+			fprintf(stderr, "\nThe MBF_WASSPENL module skipped data between identified\n"
+			                "data records. Something is broken, most probably the data...\n"
+			                "However, the data may include a data record type that we\n"
+			                "haven't seen yet, or there could be an error in the code.\n"
+			                "If skipped data are reported multiple times, \n"
+			                "we recommend you send a data sample and problem \n"
+			                "description to the MB-System team \n"
+			                "(caress@mbari.org and dale@ldeo.columbia.edu)\n"
+			                "Have a nice day...\n");
+			fprintf(stderr, "MBF_WASSPENL skipped %d bytes before record %s\n", skip, recordid);
+		}
+
+		/* allocate memory to read rest of record if necessary */
+		if (*bufferalloc < *record_size) {
+			status = mb_reallocd(verbose, __FILE__, __LINE__, *record_size, (void **)bufferptr, error);
+			if (status != MB_SUCCESS) {
+				*bufferalloc = 0;
+				done = MB_YES;
+			}
+			else {
+				*bufferalloc = *record_size;
+				buffer = (char *)*bufferptr;
+			}
+		}
+
+		/* read the rest of the record */
+		if (status == MB_SUCCESS) {
+			read_len = (size_t)(*record_size - 16);
+			status = mb_fileio_get(verbose, mbio_ptr, &buffer[16], &read_len, error);
+		}
+
+		/* if valid parse the record */
+		if (status == MB_SUCCESS) {
+			/* read GENBATHY record */
+			if (strncmp(recordid, "GENBATHY", 8) == 0) {
+				status = mbr_wasspenl_rd_genbathy(verbose, buffer, store_ptr, error);
+			}
+
+			/* read CORBATHY record */
+			else if (strncmp(recordid, "CORBATHY", 8) == 0) {
+				status = mbr_wasspenl_rd_corbathy(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS) {
+					if (genbathy->ping_number == corbathy->ping_number) {
+						done = MB_YES;
+
+						/* reset beam flags if necessary */
+						reset_beamflags = MB_NO;
+						for (int i = 0; i < corbathy->num_beams; i++) {
+							if (corbathy->z[i] == 0 && corbathy->empty[i] != MB_FLAG_NULL)
+								reset_beamflags = MB_YES;
+						}
+						if (reset_beamflags == MB_YES)
+							for (int i = 0; i < corbathy->num_beams; i++) {
+								const int j = corbathy->beam_index[i];
+								if (corbathy->z[i] == 0)
+									corbathy->empty[i] = MB_FLAG_NULL;
+								else if (genbathy->flags[j] & 0x01)
+									corbathy->empty[i] = MB_FLAG_NONE;
+								else
+									corbathy->empty[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+							}
+					}
+					else {
+						status = MB_FAILURE;
+						*error = MB_ERROR_UNINTELLIGIBLE;
+						done = MB_YES;
+					}
+				}
+			}
+
+			/* read RAWSONAR record */
+			else if (strncmp(recordid, "RAWSONAR", 8) == 0) {
+				status = mbr_wasspenl_rd_rawsonar(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					done = MB_YES;
+			}
+
+			/* read GEN_SENS record */
+			else if (strncmp(recordid, "GEN_SENS", 8) == 0) {
+				status = mbr_wasspenl_rd_gen_sens(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					done = MB_YES;
+			}
+
+			/* read NVUPDATE record */
+			else if (strncmp(recordid, "NVUPDATE", 8) == 0) {
+				status = mbr_wasspenl_rd_nvupdate(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					done = MB_YES;
+			}
+
+			/* read WCD_NAVI record */
+			else if (strncmp(recordid, "WCD_NAVI", 8) == 0) {
+				status = mbr_wasspenl_rd_wcd_navi(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					done = MB_YES;
+			}
+
+			/* read SENSPROP record */
+			else if (strncmp(recordid, "SENSPROP", 8) == 0) {
+				status = mbr_wasspenl_rd_sensprop(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					done = MB_YES;
+			}
+
+			/* read SYS_PROP record */
+			else if (strncmp(recordid, "SYS_PROP", 8) == 0) {
+				status = mbr_wasspenl_rd_sys_prop(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					done = MB_YES;
+			}
+
+			/* read SYS_CFG1 record */
+			else if (strncmp(recordid, "SYS_CFG1", 8) == 0) {
+				status = mbr_wasspenl_rd_sys_cfg1(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					done = MB_YES;
+			}
+
+			/* read MCOMMENT_ record */
+			else if (strncmp(recordid, "MCOMMENT", 8) == 0) {
+				status = mbr_wasspenl_rd_mcomment(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					done = MB_YES;
+			}
+
+			/* read an unknown1 record */
+			else {
+				status = mbr_wasspenl_rd_unknown1(verbose, buffer, store_ptr, error);
+				if (status == MB_SUCCESS)
+					done = MB_YES;
+			}
+		}
+
+		/* set done if read failure */
+		else {
+			done = MB_YES;
+		}
+	}
+
+	/* get file position */
+	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_wasspenl";
+	int status = MB_SUCCESS;
+	struct mbsys_wassp_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+#ifdef MBR_WASSPENLDEBUG
+	fprintf(stderr, "About to call mbr_wasspenl_rd_data...\n");
+#endif
+
+	/* read next data from file */
+	status = mbr_wasspenl_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+	/* get pointers to data structures */
+	store = (struct mbsys_wassp_struct *)store_ptr;
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
+
+#ifdef MBR_WASSPENLDEBUG
+	fprintf(stderr, "Done with mbr_wasspenl_rd_data: status:%d error:%d record kind:%d\n\n", status, *error, store->kind);
+#endif
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2894,6 +2695,182 @@ int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, vo
 		/* insert the data */
 		memcpy(buffer, unknown1->unknown1_data, (size_t)unknown1->unknown1_len);
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wasspenl_wr_data";
+	int status = MB_SUCCESS;
+	struct mbsys_wassp_struct *store;
+	char **bufferptr;
+	char *buffer;
+	int *bufferalloc;
+	int size;
+	size_t write_len;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_wassp_struct *)store_ptr;
+
+	/* get saved values */
+	bufferptr = (char **)&mb_io_ptr->saveptr1;
+	buffer = (char *)*bufferptr;
+	bufferalloc = (int *)&mb_io_ptr->save6;
+
+	/* write the current data record */
+
+	/* write GENBATHY record */
+	if (store->kind == MB_DATA_DATA) {
+		status = mbr_wasspenl_wr_genbathy(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *)*bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+
+		status = mbr_wasspenl_wr_corbathy(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *)*bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	}
+
+	/* write RAWSONAR record */
+	else if (store->kind == MB_DATA_WATER_COLUMN) {
+		status = mbr_wasspenl_wr_rawsonar(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *)*bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	}
+
+	/* write GEN_SENS record */
+	else if (store->kind == MB_DATA_GEN_SENS) {
+		status = mbr_wasspenl_wr_gen_sens(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *)*bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	}
+
+	/* write NVUPDATE record */
+	else if (store->kind == MB_DATA_NAV) {
+		status = mbr_wasspenl_wr_nvupdate(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *)*bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	}
+
+	/* write WCD_NAVI record */
+	else if (store->kind == MB_DATA_WC_PICKS) {
+		status = mbr_wasspenl_wr_wcd_navi(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *)*bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	}
+
+	/* write SENSPROP record */
+	else if (store->kind == MB_DATA_SENSOR_PARAMETERS) {
+		status = mbr_wasspenl_wr_sensprop(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *)*bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	}
+
+	/* write SYS_PROP record */
+	else if (store->kind == MB_DATA_INSTALLATION) {
+		status = mbr_wasspenl_wr_sys_prop(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *)*bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	}
+
+	/* write SYS_CFG1 record */
+	else if (store->kind == MB_DATA_PARAMETER) {
+		status = mbr_wasspenl_wr_sys_cfg1(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *)*bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	}
+
+	/* write MCOMMENT_ record */
+	else if (store->kind == MB_DATA_COMMENT) {
+		status = mbr_wasspenl_wr_mcomment(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *)*bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	}
+
+	/* write unknown1 record */
+	else if (store->kind == MB_DATA_RAW_LINE) {
+		status = mbr_wasspenl_wr_sys_cfg1(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+		buffer = (char *)*bufferptr;
+		write_len = (size_t)size;
+		status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+	}
+
+#ifdef MBR_WASSPENLDEBUG
+	fprintf(stderr, "WASSPENL DATA WRITTEN: type:%d status:%d error:%d\n\n", store->kind, status, *error);
+#endif
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_wasspenl";
+	int status = MB_SUCCESS;
+	struct mbsys_wassp_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_wassp_struct *)store_ptr;
+
+#ifdef MBR_WASSPENLDEBUG
+	fprintf(stderr, "About to call mbr_wasspenl_wr_data record kind:%d\n", store->kind);
+#endif
+
+	/* write next data to file */
+	status = mbr_wasspenl_wr_data(verbose, mbio_ptr, store_ptr, error);
+
+#ifdef MBR_WASSPENLDEBUG
+	fprintf(stderr, "Done with mbr_wasspenl_wr_data: status:%d error:%d\n", status, *error);
+#endif
 
 	/* print output debug statements */
 	if (verbose >= 2) {
